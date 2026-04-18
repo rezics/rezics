@@ -1,5 +1,5 @@
-import { t } from "elysia";
 import type { Static } from "elysia";
+import { t } from "elysia";
 
 export const SlugRefSchema = t.Object({
   slug: t.String(),

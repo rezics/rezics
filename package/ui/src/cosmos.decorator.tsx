@@ -1,7 +1,6 @@
 import { ThemeProvider } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { StyledEngineProvider } from "@mui/material/styles";
-import { getTheme } from "./config/theme";
 import {
   createRootRoute,
   createRoute,
@@ -10,6 +9,7 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { getTheme } from "./config/theme";
 
 import "virtual:uno.css";
 

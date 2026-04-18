@@ -8,7 +8,7 @@ import { shelfDetailQuery } from "@rezics/api/shelf";
 import { useUpdateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
 interface ShelfEditPageProps {
@@ -43,7 +43,8 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
         },
       },
       {
-        onSuccess: () => navigate({ to: "/shelf/$shelfId", params: { shelfId } }),
+        onSuccess: () =>
+          navigate({ to: "/shelf/$shelfId", params: { shelfId } }),
       },
     );
   };

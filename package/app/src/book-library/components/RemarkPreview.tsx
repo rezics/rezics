@@ -18,7 +18,7 @@ export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
   const { t } = useTranslation();
   // Fetch posts with kind='remark' for this book
   const { data, isLoading, error } = useQuery({
-    ...postQueries.byTarget(bookId, { kind: 'remark', limit: 4 }),
+    ...postQueries.byTarget(bookId, { kind: "remark", limit: 4 }),
     enabled: !!bookId,
   });
 

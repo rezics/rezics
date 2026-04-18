@@ -75,10 +75,7 @@ export const ChapterArborist = forwardRef<
       setTreeData(chapterTree);
     }, [chapterTree]);
 
-    const Node = useMemo(
-      () => createChapterArboristNode(baseLink),
-      [baseLink],
-    );
+    const Node = useMemo(() => createChapterArboristNode(baseLink), [baseLink]);
 
     return (
       <div className="p-2" role="presentation">

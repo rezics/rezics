@@ -7,11 +7,11 @@ import {
   hasPermissionToUpdateUnit,
   slugSchema,
   translationParamsSchema,
-  unitListBodySchema,
   type UnitListQuery,
   type UnitListResponse,
   type UnitResponse,
   type UpdateUnitInput,
+  unitListBodySchema,
   unitListQuerySchema,
   unitListResponseSchema,
   unitParamsSchema,
@@ -22,7 +22,7 @@ import {
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
-import { mapUnitToDTO, mapTranslationToDTO } from "./mapper";
+import { mapTranslationToDTO, mapUnitToDTO } from "./mapper";
 import { translationService } from "./translation.service";
 import { unitService } from "./unit.service";
 
@@ -99,7 +99,10 @@ export const unitApi = new Elysia({ prefix: "/unit" })
           "Forbidden: you do not have permission to list all units",
         );
       }
-      const { units, total } = await unitService.list({ ...body, ids: body.ids?.join(",") } as UnitListQuery);
+      const { units, total } = await unitService.list({
+        ...body,
+        ids: body.ids?.join(","),
+      } as UnitListQuery);
       return { units: units.map(mapUnitToDTO), total };
     },
     {
@@ -116,15 +119,14 @@ export const unitApi = new Elysia({ prefix: "/unit" })
   )
   .put(
     "/:unitId",
-    async ({
-      params,
-      body,
-      identity,
-      set,
-    }): Promise<UnitResponse> => {
+    async ({ params, body, identity, set }): Promise<UnitResponse> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
+        !hasPermissionToUpdateUnit(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -149,14 +151,14 @@ export const unitApi = new Elysia({ prefix: "/unit" })
   )
   .delete(
     "/:unitId",
-    async ({
-      params,
-      identity,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToDeleteUnit(identity.permission, identity.unitId, target as any)
+        !hasPermissionToDeleteUnit(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -295,7 +297,11 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     async ({ params, body, identity, set }) => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
+        !hasPermissionToUpdateUnit(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -321,14 +327,14 @@ export const unitApi = new Elysia({ prefix: "/unit" })
   )
   .delete(
     "/:unitId/translations/:language",
-    async ({
-      params,
-      identity,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
+        !hasPermissionToUpdateUnit(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");

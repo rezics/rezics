@@ -1,15 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import { DEFAULT_LANGUAGE, type ChapterTreeItem } from "@rezics/contract";
+import { type ChapterTreeItem, DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { getRandomBookCover } from "./data.js";
 import { generateBookExtra, generateTranslations } from "./generators.js";
-import type {
-  CreatedEntity,
-  CreatedUnit,
-  CreatedUser,
-} from "./types.js";
+import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
 import {
   chunkedParallel,
   generateParagraph,
@@ -170,9 +166,11 @@ export async function seedChaptersForBook(
   const tree: ChapterTreeItem[] = [];
 
   // Distribute children as evenly as possible across top-level parents
-  const childCounts: number[] = Array.from({ length: topLevelCount }, (_, i) =>
-    Math.floor(totalChapters / topLevelCount) +
-    (i < totalChapters % topLevelCount ? 1 : 0),
+  const childCounts: number[] = Array.from(
+    { length: topLevelCount },
+    (_, i) =>
+      Math.floor(totalChapters / topLevelCount) +
+      (i < totalChapters % topLevelCount ? 1 : 0),
   );
 
   interface ChapterUnitRow {

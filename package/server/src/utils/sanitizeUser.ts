@@ -1,5 +1,5 @@
-import type { PublicUser } from '@rezics/contract';
-import type { Prisma, User } from '#/prisma/client';
+import type { PublicUser } from "@rezics/contract";
+import type { Prisma, User } from "#/prisma/client";
 
 /**
  * Prisma select that returns only PublicUser fields.
@@ -23,7 +23,7 @@ export const publicUserSelect = {
  * @deprecated Use `publicUserSelect` with Prisma select instead.
  */
 export function sanitizeUser(
-  u: Pick<User, 'unitId' | 'name'> & Partial<Pick<User, 'slug' | 'avatar'>>,
+  u: Pick<User, "unitId" | "name"> & Partial<Pick<User, "slug" | "avatar">>,
 ): PublicUser {
   return {
     unitId: u.unitId,

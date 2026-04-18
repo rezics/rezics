@@ -56,10 +56,7 @@ export const tagContextQuery = (unitId: string) =>
  * Query options for resolving translations for a batch of tag unit IDs in a language.
  * Shared across components that display the same tags in the same language (hero + overview).
  */
-export const tagBatchTranslationsQuery = (
-  tagUnitIds: string[],
-  lang: string,
-) =>
+export const tagBatchTranslationsQuery = (tagUnitIds: string[], lang: string) =>
   queryOptions({
     queryKey: tagKeys.translations(tagUnitIds, lang),
     queryFn: () => tagApi.batchTranslations(tagUnitIds, lang),

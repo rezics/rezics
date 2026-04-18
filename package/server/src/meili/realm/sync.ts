@@ -1,9 +1,9 @@
 import {
-  syncSingleRealm,
-  syncAllRealms,
   patchRealmMemberCount,
   patchRealmMetadata,
   patchRealmTranslations,
+  syncAllRealms,
+  syncSingleRealm,
 } from "@rezics/search";
 import { searchClient } from "../search-client";
 
@@ -33,6 +33,8 @@ export async function patchRealmMetadataToMeili(
   await patchRealmMetadata(searchClient, unitId, fields);
 }
 
-export async function patchRealmTranslationsToMeili(unitId: string): Promise<void> {
+export async function patchRealmTranslationsToMeili(
+  unitId: string,
+): Promise<void> {
   await patchRealmTranslations(searchClient, unitId);
 }

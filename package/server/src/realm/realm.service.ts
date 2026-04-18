@@ -15,9 +15,9 @@ import {
   patchContentRealmTagKeysToMeili,
 } from "@/meili/content/sync";
 import {
-  syncRealmToMeili,
-  patchRealmMetadataToMeili,
   patchRealmMemberCountToMeili,
+  patchRealmMetadataToMeili,
+  syncRealmToMeili,
 } from "@/meili/realm/sync";
 import {
   mapRealmListRowToDTO,
@@ -26,7 +26,11 @@ import {
   mapRealmToDTO,
   mapRealmUnitToDTO,
 } from "./realm.mapper";
-import { realmInclude, realmListSelect, type RealmWithRelations } from "./types";
+import {
+  type RealmWithRelations,
+  realmInclude,
+  realmListSelect,
+} from "./types";
 
 export class RealmService {
   private buildWhere(options: RealmListQuery): Prisma.RealmWhereInput {
@@ -163,9 +167,10 @@ export class RealmService {
       data: {
         isPublic: isPublic !== undefined ? isPublic : undefined,
         isOfficial: isOfficial !== undefined ? isOfficial : undefined,
-        extra: extra !== undefined
-          ? ((extra ?? undefined) as Prisma.InputJsonValue | undefined)
-          : undefined,
+        extra:
+          extra !== undefined
+            ? ((extra ?? undefined) as Prisma.InputJsonValue | undefined)
+            : undefined,
       },
       include: realmInclude,
     });
@@ -205,7 +210,9 @@ export class RealmService {
     });
 
     // Fire-and-forget partial sync to Meilisearch (memberCount changed)
-    patchRealmMemberCountToMeili(realmUnitId, updatedRealm.memberCount).catch(() => {});
+    patchRealmMemberCountToMeili(realmUnitId, updatedRealm.memberCount).catch(
+      () => {},
+    );
 
     return mapRealmMemberToDTO(member);
   }
@@ -225,10 +232,7 @@ export class RealmService {
     return mapRealmMemberToDTO(member);
   }
 
-  async removeMember(
-    realmUnitId: string,
-    userId: string,
-  ): Promise<void> {
+  async removeMember(realmUnitId: string, userId: string): Promise<void> {
     await prisma.realmMember.delete({
       where: {
         realmUnitId_userId: { realmUnitId, userId },
@@ -241,7 +245,9 @@ export class RealmService {
     });
 
     // Fire-and-forget partial sync to Meilisearch (memberCount changed)
-    patchRealmMemberCountToMeili(realmUnitId, updatedRealm.memberCount).catch(() => {});
+    patchRealmMemberCountToMeili(realmUnitId, updatedRealm.memberCount).catch(
+      () => {},
+    );
   }
 
   async getMember(
@@ -269,10 +275,7 @@ export class RealmService {
     return mapRealmUnitToDTO(row);
   }
 
-  async removeRealmUnit(
-    realmUnitId: string,
-    unitId: string,
-  ): Promise<void> {
+  async removeRealmUnit(realmUnitId: string, unitId: string): Promise<void> {
     await prisma.realmUnit.delete({
       where: {
         realmUnitId_unitId: { realmUnitId, unitId },

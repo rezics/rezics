@@ -108,9 +108,9 @@ export function ReviewEditPageContainer() {
   const { data, isLoading, isError } = useQuery(postQueries.detail(reviewId));
   const navigate = useNavigate();
   const [reviewData, setReviewData] = useState<ReviewEditState>({
-    unitId: '',
-    body: '',
-    _editTitle: '',
+    unitId: "",
+    body: "",
+    _editTitle: "",
     _editRating: 0,
     extra: {},
   });
@@ -119,8 +119,8 @@ export function ReviewEditPageContainer() {
     if (data) {
       setReviewData({
         unitId: data.unitId,
-        body: data.body ?? '',
-        _editTitle: (data.extra as any)?.title ?? '',
+        body: data.body ?? "",
+        _editTitle: (data.extra as any)?.title ?? "",
         _editRating: (data.extra as any)?.rating ?? 0,
         extra: (data.extra as Record<string, any>) ?? {},
         targetUnitId: data.targetUnitId,
@@ -151,9 +151,11 @@ export function ReviewEditPageContainer() {
 
   function handleSave() {
     if ((reviewData.body?.length ?? 0) < 200) {
-      show(t("review.validation.min_chars", {
-        defaultValue: "Reviews must be at least 200 characters",
-      }));
+      show(
+        t("review.validation.min_chars", {
+          defaultValue: "Reviews must be at least 200 characters",
+        }),
+      );
       return;
     }
 
@@ -180,7 +182,7 @@ export function ReviewEditPageContainer() {
     deletePostMutation(reviewId, {
       onSuccess: () => {
         show(t("review.messages.delete_success"));
-        navigate({ to: `/review/book/${reviewData.targetUnitId ?? ''}` });
+        navigate({ to: `/review/book/${reviewData.targetUnitId ?? ""}` });
       },
       onError: (error) => {
         show(`Review delete failed: ${error}`);

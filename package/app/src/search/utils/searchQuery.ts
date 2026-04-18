@@ -41,7 +41,9 @@ export function parseSearchParams(search: string): SearchInfo {
     keyword: p.get("keyword") ?? "",
     tags: p.get("tags")?.split(",").filter(Boolean) ?? [],
     tagIds: p.get("tagIds")?.split(",").filter(Boolean) ?? [],
-    type: typeParam?.includes(",") ? typeParam.split(",") : typeParam ?? undefined,
+    type: typeParam?.includes(",")
+      ? typeParam.split(",")
+      : (typeParam ?? undefined),
     realmId: p.get("realmId") ?? undefined,
     nsfw: p.get("nsfw") === "true",
     isLicensed: p.get("isLicensed") === "true",

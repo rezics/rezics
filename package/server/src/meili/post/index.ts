@@ -1,8 +1,8 @@
 export { searchPosts } from "./post.service";
 export {
-  syncPostToMeili,
   deletePostFromMeili,
   syncAllPostsToMeili,
   syncPostsByAuthorToMeili,
   syncPostsByTargetToMeili,
+  syncPostToMeili,
 } from "./sync";

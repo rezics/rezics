@@ -6,10 +6,7 @@ import { env } from "../env";
 
 const baseUrl = env.REACTION_BASE_URL;
 
-async function postInternal<T>(
-  path: string,
-  body: unknown,
-): Promise<T> {
+async function postInternal<T>(path: string, body: unknown): Promise<T> {
   const secret = env.REACTION_INTERNAL_SECRET;
   if (!secret) {
     throw new Error("[reaction-client] REACTION_INTERNAL_SECRET not set");
@@ -26,9 +23,7 @@ async function postInternal<T>(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(
-      `[reaction-client] ${path} failed: ${res.status} ${text}`,
-    );
+    throw new Error(`[reaction-client] ${path} failed: ${res.status} ${text}`);
   }
 
   return res.json() as Promise<T>;

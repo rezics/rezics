@@ -110,10 +110,7 @@ export const SingleReviewShow: React.FC<SingleReviewShowProps> = ({
 
       <Box sx={{ position: "relative" }}>
         <Collapse in={expanded} collapsedSize={COLLAPSED_MAX_HEIGHT}>
-          <Typography
-            variant="body1"
-            className="leading-6 whitespace-pre-wrap"
-          >
+          <Typography variant="body1" className="leading-6 whitespace-pre-wrap">
             {content}
           </Typography>
         </Collapse>

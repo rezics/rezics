@@ -1,7 +1,7 @@
-import { Button, Chip, Typography } from '@mui/material';
-import KeyIcon from '@mui/icons-material/Key';
-import type { ApiTokenDTO } from '@rezics/contract';
-import type { FC } from 'react';
+import KeyIcon from "@mui/icons-material/Key";
+import { Button, Chip, Typography } from "@mui/material";
+import type { ApiTokenDTO } from "@rezics/contract";
+import type { FC } from "react";
 
 interface TokenListItemProps {
   token: ApiTokenDTO;
@@ -10,11 +10,11 @@ interface TokenListItemProps {
 }
 
 function formatDate(date: string | Date | null | undefined): string {
-  if (!date) return 'Never';
+  if (!date) return "Never";
   return new Date(date).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 }
 
@@ -46,10 +46,15 @@ export const TokenListItem: FC<TokenListItemProps> = ({
             ))}
           </div>
         )}
-        <Typography variant="caption" color="text.secondary" className="mt-1 block">
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          className="mt-1 block"
+        >
           Created {formatDate(token.createdAt)}
           {token.expiresAt && ` \u00b7 Expires ${formatDate(token.expiresAt)}`}
-          {token.lastUsedAt && ` \u00b7 Last used ${formatDate(token.lastUsedAt)}`}
+          {token.lastUsedAt &&
+            ` \u00b7 Last used ${formatDate(token.lastUsedAt)}`}
           {token.lastIP && ` from ${token.lastIP}`}
         </Typography>
       </div>
@@ -57,11 +62,7 @@ export const TokenListItem: FC<TokenListItemProps> = ({
         <Button size="small" onClick={() => onEdit(token)}>
           Edit
         </Button>
-        <Button
-          size="small"
-          color="error"
-          onClick={() => onRevoke(token.id)}
-        >
+        <Button size="small" color="error" onClick={() => onRevoke(token.id)}>
           Revoke
         </Button>
       </div>

@@ -277,7 +277,7 @@ export class DispatchService {
         throw new Error(`Hub responded with ${res.status}`);
       } catch (err) {
         if (attempt < maxRetries - 1) {
-          const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+          const delay = 2 ** attempt * 1000; // 1s, 2s, 4s
           await new Promise((r) => setTimeout(r, delay));
         } else {
           console.error(

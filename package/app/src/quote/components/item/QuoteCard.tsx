@@ -50,7 +50,8 @@ const QuoteCard: React.FC<QuoteCardProps> = ({ quote, className }) => {
                   0 喜欢
                 </Typography>
                 <Typography variant="caption" color="text.secondary" noWrap>
-                  —— {(quote.extra as Record<string, any>)?.source || "未知出处"}
+                  ——{" "}
+                  {(quote.extra as Record<string, any>)?.source || "未知出处"}
                 </Typography>
               </Box>
             </Box>

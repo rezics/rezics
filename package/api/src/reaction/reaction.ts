@@ -2,15 +2,6 @@
  * Reaction API - Main entry point
  */
 
-// Types
-export type {
-  ReactionCreateInput,
-  ReactionDeleteQuery,
-  ReactionDTO,
-  ReactionMyResponse,
-  ReactionSummaryResponse,
-} from "./reaction.types";
-
 // API Client
 export { reactionApi } from "./reaction.api";
 // Query Keys
@@ -27,3 +18,11 @@ export {
   reactionQueries,
   reactionSummaryQuery,
 } from "./reaction.queries";
+// Types
+export type {
+  ReactionCreateInput,
+  ReactionDeleteQuery,
+  ReactionDTO,
+  ReactionMyResponse,
+  ReactionSummaryResponse,
+} from "./reaction.types";

@@ -1,5 +1,5 @@
-import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
 import { useContentSearch } from "@rezics/api/meili/meili.queries";
+import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AdvancedSearch, SearchResultList } from "@/search";
@@ -55,10 +55,7 @@ function GlobalSearchPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6">Search</h1>
-      <AdvancedSearch
-        onSearch={handleSearch}
-        initialQuery={initialQuery}
-      />
+      <AdvancedSearch onSearch={handleSearch} initialQuery={initialQuery} />
       {hasSearched && (
         <div className="mt-6">
           <SearchResultList result={data} isLoading={isLoading} />

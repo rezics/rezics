@@ -7,7 +7,7 @@
  * Users vote via TagVote.
  */
 
-export { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
 export { tagApi } from "./tag.api";
+export { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
 export { TagService, tagService } from "./tag.service";
 export type { TagWithTranslations, UnitTagWithRelations } from "./types";

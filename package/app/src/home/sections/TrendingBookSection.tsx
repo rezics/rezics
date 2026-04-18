@@ -38,7 +38,9 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   return (
     <section className={className}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold">{t("page.home.sections.trending_book.title")}</h2>
+        <h2 className="font-semibold">
+          {t("page.home.sections.trending_book.title")}
+        </h2>
         <Button
           variant="text"
           color="primary"
@@ -48,7 +50,9 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
         </Button>
       </div>
       {isLoading ? (
-        <div className="text-slate-400 text-sm">{t("page.home.sections.trending_book.loading")}</div>
+        <div className="text-slate-400 text-sm">
+          {t("page.home.sections.trending_book.loading")}
+        </div>
       ) : (
         <ResponsiveBookGridLimited bookList={bookList} />
       )}

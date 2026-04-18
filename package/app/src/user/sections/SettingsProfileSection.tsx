@@ -1,3 +1,4 @@
+import SaveIcon from "@mui/icons-material/Save";
 import {
   Alert,
   Avatar,
@@ -5,26 +6,25 @@ import {
   CircularProgress,
   TextField,
   Typography,
-} from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import { userQueries } from '@rezics/api/user/user.queries';
-import { useUpdateMeMutation } from '@rezics/api/user/user.mutations';
-import type { UpdateUser } from '@rezics/contract';
-import { RezicsMarkdownEditor } from '@rezics/ui/editor';
-import { useQuery } from '@tanstack/react-query';
-import { type FC, useEffect, useState } from 'react';
-import { SettingsSection } from '@/user/components/SettingsSection';
-import { useRequireAuth } from '@/user/pages/useAuth';
+} from "@mui/material";
+import { useUpdateMeMutation } from "@rezics/api/user/user.mutations";
+import { userQueries } from "@rezics/api/user/user.queries";
+import type { UpdateUser } from "@rezics/contract";
+import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { useQuery } from "@tanstack/react-query";
+import { type FC, useEffect, useState } from "react";
+import { SettingsSection } from "@/user/components/SettingsSection";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
 export const SettingsProfileSection: FC = () => {
   useRequireAuth();
 
   const { data: user, isLoading } = useQuery(userQueries.me());
   const [formData, setFormData] = useState<UpdateUser>({
-    name: '',
-    avatar: '',
-    bio: '',
-    description: '',
+    name: "",
+    avatar: "",
+    bio: "",
+    description: "",
   });
   const [success, setSuccess] = useState(false);
 
@@ -38,10 +38,10 @@ export const SettingsProfileSection: FC = () => {
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name ?? '',
-        avatar: user.avatar ?? '',
-        bio: user.bio ?? '',
-        description: user.description ?? '',
+        name: user.name ?? "",
+        avatar: user.avatar ?? "",
+        bio: user.bio ?? "",
+        description: user.description ?? "",
       });
     }
   }, [user]);
@@ -98,7 +98,7 @@ export const SettingsProfileSection: FC = () => {
               fullWidth
               label="Avatar URL"
               value={formData.avatar}
-              onChange={(e) => handleChange('avatar', e.target.value)}
+              onChange={(e) => handleChange("avatar", e.target.value)}
               variant="standard"
               placeholder="https://example.com/avatar.jpg"
             />
@@ -110,7 +110,7 @@ export const SettingsProfileSection: FC = () => {
             fullWidth
             label="Display Name"
             value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
+            onChange={(e) => handleChange("name", e.target.value)}
             variant="standard"
             required
           />
@@ -130,7 +130,7 @@ export const SettingsProfileSection: FC = () => {
             fullWidth
             label="Bio"
             value={formData.bio}
-            onChange={(e) => handleChange('bio', e.target.value)}
+            onChange={(e) => handleChange("bio", e.target.value)}
             variant="standard"
             multiline
             rows={2}
@@ -146,8 +146,8 @@ export const SettingsProfileSection: FC = () => {
               Description
             </Typography>
             <RezicsMarkdownEditor
-              value={formData.description ?? ''}
-              onChange={(value) => handleChange('description', value)}
+              value={formData.description ?? ""}
+              onChange={(value) => handleChange("description", value)}
             />
           </div>
         </div>

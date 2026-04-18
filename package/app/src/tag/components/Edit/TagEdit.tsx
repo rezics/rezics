@@ -1,8 +1,4 @@
-import {
-  Button,
-  CircularProgress,
-  TextField,
-} from "@mui/material";
+import { Button, CircularProgress, TextField } from "@mui/material";
 import type {
   CreateTagInput,
   UnitTagDTO,
@@ -50,7 +46,10 @@ export const TagEdit: React.FC<TagEditProps> = ({
     const translations = [{ language: DEFAULT_LANGUAGE, title: name.trim() }];
     if (isUpdate && tag) {
       const payload: UpdateTagInput = { translations };
-      await updateMutation.mutateAsync({ unitId: tag.tagUnitId, input: payload });
+      await updateMutation.mutateAsync({
+        unitId: tag.tagUnitId,
+        input: payload,
+      });
     } else {
       const payload: CreateTagInput = { translations };
       await createMutation.mutateAsync(payload);

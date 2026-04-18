@@ -39,7 +39,9 @@ export const realmApi = {
    * Supports: q, isPublic, isOfficial, userId, language, sort, start, limit
    */
   list: async (filters?: RealmFilters): Promise<RealmListResponse> => {
-    return apiFetch<RealmListResponse>(`/realm/list${buildQueryString(filters)}`);
+    return apiFetch<RealmListResponse>(
+      `/realm/list${buildQueryString(filters)}`,
+    );
   },
 
   /**
@@ -101,9 +103,7 @@ export const realmApi = {
   getMyMembership: async (
     realmUnitId: string,
   ): Promise<RealmMemberDTO | null> => {
-    return apiFetch<RealmMemberDTO | null>(
-      `/realm/${realmUnitId}/members/me`,
-    );
+    return apiFetch<RealmMemberDTO | null>(`/realm/${realmUnitId}/members/me`);
   },
 
   /**
@@ -143,13 +143,10 @@ export const realmApi = {
     userId: string,
     input: UpdateMemberRoleInput,
   ): Promise<RealmMemberDTO> => {
-    return apiFetch<RealmMemberDTO>(
-      `/realm/${realmUnitId}/members/${userId}`,
-      {
-        method: "PUT",
-        body: JSON.stringify(input),
-      },
-    );
+    return apiFetch<RealmMemberDTO>(`/realm/${realmUnitId}/members/${userId}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
   },
 
   /**

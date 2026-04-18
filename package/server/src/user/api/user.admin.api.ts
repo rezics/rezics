@@ -14,7 +14,10 @@ export const adminRoute = new Elysia()
   .get(
     "/admin",
     async ({ identity, query, status }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -40,7 +43,10 @@ export const adminRoute = new Elysia()
   .get(
     "/admin/:unitId",
     async ({ identity, params, status }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -66,7 +72,10 @@ export const adminRoute = new Elysia()
   .put(
     "/admin/:unitId",
     async ({ identity, params, body, status }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -101,7 +110,10 @@ export const adminRoute = new Elysia()
   .delete(
     "/admin/:unitId",
     async ({ identity, params, status }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);

@@ -1,4 +1,8 @@
-import type { CreateLinkInput, LinkDTO, UpdateLinkInput } from "@rezics/contract";
+import type {
+  CreateLinkInput,
+  LinkDTO,
+  UpdateLinkInput,
+} from "@rezics/contract";
 import {
   type UseMutationOptions,
   useMutation,

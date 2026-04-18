@@ -1,11 +1,5 @@
 import { ChatBubbleOutline } from "@mui/icons-material";
-import {
-  Avatar,
-  Box,
-  IconButton,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";

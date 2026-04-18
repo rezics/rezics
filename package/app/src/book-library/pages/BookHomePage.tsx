@@ -1,11 +1,11 @@
 import { Paper } from "@mui/material";
 import type React from "react";
-import { cn } from "@/shared/utils/css-util";
-import { useIsMobile } from "@/shared/utils/use-media-query";
 import { NewBookSection } from "@/home/sections/NewBookSection";
 import { QuickAccessLinks } from "@/home/sections/QuickAccessLinks";
 import { TrendingBookSection } from "@/home/sections/TrendingBookSection";
 import { TrendingQuoteSection } from "@/home/sections/TrendingQuoteSection";
+import { cn } from "@/shared/utils/css-util";
+import { useIsMobile } from "@/shared/utils/use-media-query";
 import { BookHomeHeroSection } from "../sections/BookHomeHeroSection";
 
 export const BookHomePage: React.FC = () => {

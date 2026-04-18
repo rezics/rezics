@@ -20,7 +20,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { t } from "@rezics/contract";
+
 type Static<T extends { static: unknown }> = T["static"];
+
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -146,7 +148,9 @@ const columns: ColumnDef<Static<typeof schema>>[] = [
             table.getIsAllPageRowsSelected() ||
             (table.getIsSomePageRowsSelected() && "indeterminate")
           }
-          onCheckedChange={(value: boolean | "indeterminate") => table.toggleAllPageRowsSelected(!!value)}
+          onCheckedChange={(value: boolean | "indeterminate") =>
+            table.toggleAllPageRowsSelected(!!value)
+          }
           aria-label="Select all"
         />
       </div>
@@ -155,7 +159,9 @@ const columns: ColumnDef<Static<typeof schema>>[] = [
       <div className="flex items-center justify-center">
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value: boolean | "indeterminate") => row.toggleSelected(!!value)}
+          onCheckedChange={(value: boolean | "indeterminate") =>
+            row.toggleSelected(!!value)
+          }
           aria-label="Select row"
         />
       </div>

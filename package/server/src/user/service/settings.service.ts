@@ -24,7 +24,9 @@ function validateSettings(settings: UserSettings): void {
   if (settings.realmTagPreferences) {
     for (const [, pref] of Object.entries(settings.realmTagPreferences)) {
       if (pref.realmIds && pref.realmIds.length > 50) {
-        throw new Error("realmIds array cannot exceed 50 entries per unit type");
+        throw new Error(
+          "realmIds array cannot exceed 50 entries per unit type",
+        );
       }
     }
   }

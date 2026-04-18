@@ -25,7 +25,8 @@ function buildOfficialReleaseMap(
 ): Map<string, string> {
   const map = new Map<string, string>();
   for (const tr of translations ?? []) {
-    const release = (tr as { sourceReleaseUnitId?: string | null }).sourceReleaseUnitId;
+    const release = (tr as { sourceReleaseUnitId?: string | null })
+      .sourceReleaseUnitId;
     if (tr.language && release) {
       map.set(tr.language as string, release);
     }
@@ -83,8 +84,11 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
       list.push({
         unitId: r.unitId,
         title:
-          getTranslation(r.translations, selectedLang, r.defaultLanguage ?? undefined)
-            ?.title ?? "Untitled release",
+          getTranslation(
+            r.translations,
+            selectedLang,
+            r.defaultLanguage ?? undefined,
+          )?.title ?? "Untitled release",
         language: String(lang),
         isOfficial: officialByLang.get(String(lang)) === r.unitId,
       });
@@ -99,7 +103,8 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
             selectedLang,
             bookInfo.defaultLanguage ?? undefined,
           )?.title ?? "Current",
-        language: (bookInfo.defaultLanguage as string | undefined) ?? selectedLang,
+        language:
+          (bookInfo.defaultLanguage as string | undefined) ?? selectedLang,
         isOfficial:
           officialByLang.get(
             (bookInfo.defaultLanguage as string | undefined) ?? selectedLang,

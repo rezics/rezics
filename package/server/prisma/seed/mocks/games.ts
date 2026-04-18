@@ -3,15 +3,9 @@ import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { flushAttributionsAndTags } from "./books.js";
-import {
-  PLATFORM_KEYS,
-} from "./data.js";
+import { PLATFORM_KEYS } from "./data.js";
 import { generateGameExtra, generateTranslations } from "./generators.js";
-import type {
-  CreatedEntity,
-  CreatedUnit,
-  CreatedUser,
-} from "./types.js";
+import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
 
 const CHUNK_SIZE = 10;
@@ -41,10 +35,7 @@ export async function seedGames(
     async () => {
       const author = faker.helpers.arrayElement(users);
       const translations = generateTranslations(UnitType.GAME);
-      const platforms = pickN(
-        [...PLATFORM_KEYS],
-        randomInt(1, 4),
-      );
+      const platforms = pickN([...PLATFORM_KEYS], randomInt(1, 4));
 
       const unit = await prisma.unit.create({
         data: {
@@ -52,13 +43,17 @@ export async function seedGames(
           userId: author.unitId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
           defaultLanguage: DEFAULT_LANGUAGE,
-          publishedAt: randomBoolean(0.8) ? faker.date.past({ years: 5 }) : null,
+          publishedAt: randomBoolean(0.8)
+            ? faker.date.past({ years: 5 })
+            : null,
           game: {
             create: {
               releaseDate: randomBoolean(0.7)
                 ? faker.date.past({ years: 10 })
                 : null,
-              versionLabel: randomBoolean(0.5) ? `v${randomInt(1, 5)}.${randomInt(0, 9)}` : null,
+              versionLabel: randomBoolean(0.5)
+                ? `v${randomInt(1, 5)}.${randomInt(0, 9)}`
+                : null,
               ageRatingKey: faker.helpers.arrayElement([
                 "E",
                 "T",

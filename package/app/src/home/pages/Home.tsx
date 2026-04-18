@@ -9,8 +9,8 @@ import { ActiveRealmsSection } from "../sections/ActiveRealmsSection";
 import { AnnouncementBarSection } from "../sections/AnnouncementBarSection";
 import { LibraryCardsSection } from "../sections/LibraryCardsSection";
 import { NewBookSection } from "../sections/NewBookSection";
-import { TrendingShelfSection } from "../sections/TrendingShelfSection";
 import { TrendingReviews } from "../sections/TrendingReviewsSection";
+import { TrendingShelfSection } from "../sections/TrendingShelfSection";
 
 export type HomeProps = object;
 

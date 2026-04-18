@@ -1,11 +1,8 @@
-import {
-  createSchema,
-  deleteQuerySchema,
-} from "@rezics/contract/reaction";
 import { NotificationType } from "@rezics/contract";
+import { createSchema, deleteQuerySchema } from "@rezics/contract/reaction";
 import { Elysia } from "elysia";
-import { authMacro } from "@/middleware";
 import { prisma } from "#/prisma/client";
+import { authMacro } from "@/middleware";
 import { emitNotificationEvent } from "../notify/notify-client";
 import { createReaction, removeReaction } from "./reaction-client";
 
@@ -53,7 +50,8 @@ export const reactionWriteApi = new Elysia({ prefix: "/reaction" })
       body: createSchema,
       detail: {
         summary: "Create reaction",
-        description: "Adds a reaction to a unit. Triggers a notification to the unit owner.",
+        description:
+          "Adds a reaction to a unit. Triggers a notification to the unit owner.",
         tags: ["Reactions"],
       },
     },

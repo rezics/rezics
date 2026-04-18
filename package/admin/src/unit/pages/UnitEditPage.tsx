@@ -140,9 +140,7 @@ export default function UnitEditPage() {
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Default Language:{" "}
-                  <strong>
-                    {detailQuery.data?.defaultLanguage ?? "-"}
-                  </strong>
+                  <strong>{detailQuery.data?.defaultLanguage ?? "-"}</strong>
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Created:{" "}
@@ -189,8 +187,7 @@ export default function UnitEditPage() {
                     </Box>
                   ))}
                   <Typography variant="caption" color="text.secondary">
-                    Translations are managed via the translation API
-                    endpoints.
+                    Translations are managed via the translation API endpoints.
                   </Typography>
                 </Stack>
               ) : (

@@ -96,7 +96,13 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         <Avatar
           src={user.avatar ?? undefined}
           variant="rounded"
-          sx={{ width: "100%", height: "auto", aspectRatio: "1", borderRadius: 3, fontSize: 48 }}
+          sx={{
+            width: "100%",
+            height: "auto",
+            aspectRatio: "1",
+            borderRadius: 3,
+            fontSize: 48,
+          }}
         >
           {user.name?.charAt(0).toUpperCase()}
         </Avatar>
@@ -117,7 +123,11 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         </div>
 
         {user.bio && (
-          <Typography variant="body2" color="text.secondary" className="max-w-xs">
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            className="max-w-xs"
+          >
             {user.bio}
           </Typography>
         )}
@@ -190,7 +200,11 @@ const StatLink: FC<{
       <Typography variant="body2" color="text.primary">
         {label}
       </Typography>
-      <Typography variant="body2" color="text.secondary" className="font-medium">
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        className="font-medium"
+      >
         {count ?? "—"}
       </Typography>
     </Box>

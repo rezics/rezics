@@ -1,7 +1,7 @@
+import { createQueryClient } from "@rezics/api/react-query/tsr";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect } from "react";
-import { createQueryClient } from "@rezics/api/react-query/tsr";
 
 const qc = createQueryClient();
 

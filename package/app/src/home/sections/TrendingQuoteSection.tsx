@@ -23,7 +23,10 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
   const handleMoreClick = () => {
     const first = items[0];
     if (first?.workUnitId) {
-      navigate({ to: "/quote/book/$bookId", params: { bookId: first.workUnitId } });
+      navigate({
+        to: "/quote/book/$bookId",
+        params: { bookId: first.workUnitId },
+      });
       return;
     }
     if (first?.id) {

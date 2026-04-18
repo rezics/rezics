@@ -43,7 +43,9 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
     <section className={className}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold">{t("page.home.sections.new_book.title")}</h2>
+        <h2 className="font-semibold">
+          {t("page.home.sections.new_book.title")}
+        </h2>
         <Button
           variant="text"
           color="primary"
@@ -56,16 +58,27 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
       {/* Tabs */}
       <div className="mb-4">
         <Tabs value={tab} onChange={(_, value) => setTab(value)}>
-          <Tab value="latest" label={t("page.home.sections.new_book.tab_latest_serial")} />
-          <Tab value="new" label={t("page.home.sections.new_book.tab_new_on_shelf")} />
-          <Tab value="completed" label={t("page.home.sections.new_book.tab_recently_completed")} />
+          <Tab
+            value="latest"
+            label={t("page.home.sections.new_book.tab_latest_serial")}
+          />
+          <Tab
+            value="new"
+            label={t("page.home.sections.new_book.tab_new_on_shelf")}
+          />
+          <Tab
+            value="completed"
+            label={t("page.home.sections.new_book.tab_recently_completed")}
+          />
         </Tabs>
       </div>
 
       {/* Content */}
       <div>
         {isLoading ? (
-          <div className="text-slate-400 text-sm">{t("page.home.sections.trending_book.loading")}</div>
+          <div className="text-slate-400 text-sm">
+            {t("page.home.sections.trending_book.loading")}
+          </div>
         ) : (
           <HorizontalBookCarousel bookList={bookList} />
         )}

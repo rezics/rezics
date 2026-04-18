@@ -21,8 +21,8 @@ import {
 import { Elysia, status } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
-import { getTagContext } from "./tag-context.service";
 import { tagService } from "./tag.service";
+import { getTagContext } from "./tag-context.service";
 
 export const tagApi = new Elysia({ prefix: "/tag" })
   .use(authMacro)
@@ -126,7 +126,10 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   .put(
     "/:unitId",
     async ({ params, body, identity }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -150,7 +153,10 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   .delete(
     "/:unitId",
     async ({ params, identity }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -170,7 +176,10 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   .post(
     "/attach",
     async ({ body, identity }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -191,7 +200,10 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   .post(
     "/detach",
     async ({ body, identity }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);

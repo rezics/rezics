@@ -62,8 +62,7 @@ export type NotificationListResponse =
 export const unreadCountResponseSchema = t.Object({
   count: t.Number(),
 });
-export type UnreadCountResponse =
-  (typeof unreadCountResponseSchema)["static"];
+export type UnreadCountResponse = (typeof unreadCountResponseSchema)["static"];
 
 export const markReadBodySchema = t.Object({
   type: notificationTypeSchema,

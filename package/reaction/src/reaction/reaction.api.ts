@@ -1,14 +1,9 @@
-import {
-  myQuerySchema,
-  summaryQuerySchema,
-} from "@rezics/contract/reaction";
+import { myQuerySchema, summaryQuerySchema } from "@rezics/contract/reaction";
 import { Elysia } from "elysia";
 import { authMacro } from "../macro/auth";
 import { reactionService } from "./reaction.service";
 
-function normalizeIds(
-  raw: string | string[] | undefined,
-): string[] {
+function normalizeIds(raw: string | string[] | undefined): string[] {
   if (!raw) return [];
   return Array.isArray(raw) ? raw : [raw];
 }

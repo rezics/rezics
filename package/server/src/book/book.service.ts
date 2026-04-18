@@ -12,9 +12,9 @@ import {
   type UnitVisibility,
 } from "#/prisma/client";
 import {
-  syncContentToMeili,
   deleteContentFromMeili,
   patchContentMetadataToMeili,
+  syncContentToMeili,
 } from "@/meili/content/sync";
 import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
@@ -262,8 +262,8 @@ export class BookService {
         unit: {
           update: {
             nsfw: req.nsfw ?? undefined,
-            visibility: (req.visibility as UnitVisibility | undefined) ??
-              undefined,
+            visibility:
+              (req.visibility as UnitVisibility | undefined) ?? undefined,
           },
         },
       },

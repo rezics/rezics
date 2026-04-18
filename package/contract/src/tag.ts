@@ -42,8 +42,12 @@ export const batchTagTranslationResultSchema = t.Record(
   batchTagTranslationEntrySchema,
 );
 
-export type BatchTagTranslationEntry = (typeof batchTagTranslationEntrySchema)["static"];
-export type BatchTagTranslationResult = Record<string, BatchTagTranslationEntry>;
+export type BatchTagTranslationEntry =
+  (typeof batchTagTranslationEntrySchema)["static"];
+export type BatchTagTranslationResult = Record<
+  string,
+  BatchTagTranslationEntry
+>;
 
 // ============================================================
 // TAG VOTE DTO

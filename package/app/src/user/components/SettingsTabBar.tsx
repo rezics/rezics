@@ -1,7 +1,7 @@
-import { Tab, Tabs } from '@mui/material';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
-import type { FC } from 'react';
-import { SETTINGS_NAV } from './SettingsSidebar';
+import { Tab, Tabs } from "@mui/material";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+import type { FC } from "react";
+import { SETTINGS_NAV } from "./SettingsSidebar";
 
 export const SettingsTabBar: FC = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export const SettingsTabBar: FC = () => {
       variant="scrollable"
       scrollButtons="auto"
       allowScrollButtonsMobile
-      sx={{ borderBottom: 1, borderColor: 'divider' }}
+      sx={{ borderBottom: 1, borderColor: "divider" }}
       onChange={(_e, idx) => {
         const nav = SETTINGS_NAV[idx];
         void navigate({ to: `/user/me/settings/${nav.path}` });

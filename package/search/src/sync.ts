@@ -185,10 +185,7 @@ export async function syncAllContent(client: SearchClient) {
 
 // ANCHOR: Incremental single-unit sync
 
-export async function syncSingleContent(
-  client: SearchClient,
-  unitId: string,
-) {
+export async function syncSingleContent(client: SearchClient, unitId: string) {
   const unit = await prisma.unit.findUnique({
     where: { id: unitId },
     include: contentInclude,
@@ -212,10 +209,7 @@ export async function syncSingleContent(
 
 // ANCHOR: Content partial sync functions
 
-export async function patchContentTags(
-  client: SearchClient,
-  unitId: string,
-) {
+export async function patchContentTags(client: SearchClient, unitId: string) {
   const unitTags = await prisma.unitTag.findMany({
     where: { unitId },
     include: { tag: { include: { translations: true } } },
@@ -614,10 +608,7 @@ export function buildPostDocument(post: any): PostSearchDocument {
 
 // ANCHOR: Post sync functions
 
-export async function syncSinglePost(
-  client: SearchClient,
-  unitId: string,
-) {
+export async function syncSinglePost(client: SearchClient, unitId: string) {
   const post = await prisma.post.findUnique({
     where: { unitId },
     include: {
@@ -672,10 +663,7 @@ export async function syncAllPosts(client: SearchClient) {
   return { message: "syncAllPosts success", totalSynced: total };
 }
 
-export async function syncPostsByAuthor(
-  client: SearchClient,
-  userId: string,
-) {
+export async function syncPostsByAuthor(client: SearchClient, userId: string) {
   let cursor: string | undefined;
   let total = 0;
 
@@ -780,10 +768,7 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
 
 // ANCHOR: Realm sync functions
 
-export async function syncSingleRealm(
-  client: SearchClient,
-  unitId: string,
-) {
+export async function syncSingleRealm(client: SearchClient, unitId: string) {
   const realm = await prisma.realm.findUnique({
     where: { unitId },
     include: {

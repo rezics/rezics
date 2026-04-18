@@ -4,7 +4,10 @@ import { ZoneService } from "./zone.service";
 describe("ZoneService.checkLifecycle", () => {
   const service = new ZoneService();
 
-  const makeZone = (overrides: { startsAt?: Date | null; endsAt?: Date | null }) =>
+  const makeZone = (overrides: {
+    startsAt?: Date | null;
+    endsAt?: Date | null;
+  }) =>
     ({
       startsAt: overrides.startsAt ?? null,
       endsAt: overrides.endsAt ?? null,

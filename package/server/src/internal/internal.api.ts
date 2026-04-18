@@ -1,8 +1,8 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "#/prisma/client";
+import { syncUserToMeili } from "@/meili/user/sync";
 import { env } from "../env";
 import { getDefaultRealmId } from "../infra/default-realm";
-import { syncUserToMeili } from "@/meili/user/sync";
 
 export const internalApi = new Elysia({ prefix: "/internal" })
   .onBeforeHandle(({ headers, set }) => {

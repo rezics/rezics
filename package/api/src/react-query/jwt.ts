@@ -3,8 +3,8 @@ import {
   type AuthTokenResponse,
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
-  type RezicsSessionClaims,
   normalizedTokenTransportMap,
+  type RezicsSessionClaims,
 } from "@rezics/contract";
 import { getApiConfig } from "../config";
 import { clearAuthPresence, hasAuthPresence } from "./authPresence";
@@ -110,9 +110,7 @@ function writeAuthSnapshot(
         slug: payload?.slug ?? null,
         role: payload?.role ?? null,
         isAuthenticated: !!token,
-        ...(payload?.email_verified === false
-          ? { email_verified: false }
-          : {}),
+        ...(payload?.email_verified === false ? { email_verified: false } : {}),
       },
       version: 0,
     }),
@@ -352,4 +350,3 @@ export function getRezicsSessionClaims(): RezicsSessionClaims | null {
     NormalizedTokenName.REZICS_SESSION,
   );
 }
-

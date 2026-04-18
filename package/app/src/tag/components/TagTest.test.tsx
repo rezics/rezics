@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+
 /** Local type for tag detail used in test fixtures */
 type TagDetailDTO = {
   id: string;
@@ -8,6 +9,7 @@ type TagDetailDTO = {
   content?: string;
   i18n?: any;
 };
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // MSW v2
 import { HttpResponse, http } from "msw";
@@ -238,7 +240,10 @@ const Fixture: React.FC = () => {
       </Section>
 
       <Section title="TagList">
-        <TagList tags={demoTags as any} autoSelectFirst={listCtl.autoSelectFirst} />
+        <TagList
+          tags={demoTags as any}
+          autoSelectFirst={listCtl.autoSelectFirst}
+        />
         <div className="text-xs text-gray-500 mt-2">
           点击标签切换详情；按住 Ctrl 点击在新窗口打开。
         </div>

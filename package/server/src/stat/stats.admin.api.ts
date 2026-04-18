@@ -8,7 +8,10 @@ export const statsAdminApi = new Elysia({ prefix: "/admin/stats" })
   .get(
     "/",
     async ({ identity, status }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);

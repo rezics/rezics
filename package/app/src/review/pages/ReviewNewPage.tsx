@@ -18,11 +18,7 @@ type ReviewEditState = {
   targetUnitId?: string | null;
 };
 
-export function ReviewNewPage({
-  bookUnitId,
-}: {
-  bookUnitId: string;
-}) {
+export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = new URLSearchParams(search);
   const navigate = useNavigate();
@@ -35,7 +31,8 @@ export function ReviewNewPage({
   });
   const { show } = useAlertStore();
   const { user } = useUserProfileStore();
-  const kind = searchParams.get("tab") === "remark" ? PostKind.REMARK : PostKind.REVIEW;
+  const kind =
+    searchParams.get("tab") === "remark" ? PostKind.REMARK : PostKind.REVIEW;
 
   const scoreMutation = useUpsertScoreMutation();
   const postMutation = useCreatePostMutation({

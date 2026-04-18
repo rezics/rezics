@@ -1,6 +1,6 @@
-import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
-import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import { Typography } from "@mui/material";
+import { useContentSearch } from "@rezics/api/meili/meili.queries";
+import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
 import type React from "react";
 import { useState } from "react";
 import { AdvancedSearch, SearchResultList } from "@/search";

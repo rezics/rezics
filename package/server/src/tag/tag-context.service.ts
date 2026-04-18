@@ -41,16 +41,12 @@ export async function getTagContext(unitId: string, userId?: string) {
         },
       });
 
-      const grouped = new Map<
-        string,
-        { realmName: string; tags: string[] }
-      >();
+      const grouped = new Map<string, { realmName: string; tags: string[] }>();
       for (const rtu of realmTagUnits) {
         const key = rtu.realmUnitId;
         if (!grouped.has(key)) {
           grouped.set(key, {
-            realmName:
-              rtu.realm?.translations?.[0]?.title ?? key,
+            realmName: rtu.realm?.translations?.[0]?.title ?? key,
             tags: [],
           });
         }

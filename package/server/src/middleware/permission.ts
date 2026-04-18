@@ -1,7 +1,7 @@
 import type { RezicsSessionClaims } from "@rezics/contract";
 import { Elysia, status } from "elysia";
-import { verifyRezicsSessionToken } from "@/session/jwt/jwt.service";
 import { prisma } from "#/prisma/client";
+import { verifyRezicsSessionToken } from "@/session/jwt/jwt.service";
 
 export const authMacro = new Elysia({ name: "macro/auth" }).macro(
   "requireLogin",
@@ -18,10 +18,7 @@ export const authMacro = new Elysia({ name: "macro/auth" }).macro(
 
       const claims = await verifyRezicsSessionToken(authorization);
       if (!claims) {
-        return status(
-          401,
-          "Unauthorized: Session token is invalid or expired",
-        );
+        return status(401, "Unauthorized: Session token is invalid or expired");
       }
 
       return {
@@ -35,12 +32,16 @@ export async function tryResolveIdentity(
   authorization: string | undefined,
 ): Promise<RezicsSessionClaims | null> {
   if (!authorization) return null;
-  return (await verifyRezicsSessionToken(authorization)) as RezicsSessionClaims | null;
+  return (await verifyRezicsSessionToken(
+    authorization,
+  )) as RezicsSessionClaims | null;
 }
 
 function isAdminRole(identity: RezicsSessionClaims | null): boolean {
   if (!identity) return false;
-  return identity.permission.role === "ADMIN" || identity.permission.role === "ROOT";
+  return (
+    identity.permission.role === "ADMIN" || identity.permission.role === "ROOT"
+  );
 }
 
 export { isAdminRole };

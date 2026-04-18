@@ -97,9 +97,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
           </Box>
 
           <Box className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-            <Box className="flex items-center gap-2">
-              0 观看
-            </Box>
+            <Box className="flex items-center gap-2">0 观看</Box>
 
             <Box className="flex items-center gap-2">
               <Typography

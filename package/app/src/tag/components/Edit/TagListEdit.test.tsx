@@ -8,6 +8,7 @@ type TagDetailDTO = {
   type: string | null;
   domains: string[];
 };
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useFixtureInput } from "react-cosmos/client";
@@ -91,9 +92,7 @@ export default function TagListEditFixture() {
       const { tagUnitId, unitId } = input;
       setDb((prev) => ({
         ...prev,
-        [unitId]: (prev[unitId] || []).filter(
-          (t) => t.id !== tagUnitId,
-        ),
+        [unitId]: (prev[unitId] || []).filter((t) => t.id !== tagUnitId),
       }));
       setLastAction(`detach ${tagUnitId} -/-> ${unitId}`);
       return { message: "ok" } as any;

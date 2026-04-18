@@ -74,11 +74,12 @@ describeWithDb("TranslationGroupService", () => {
   test("first attach creates a TranslationGroup with both languages", async () => {
     const a = await makePost({ defaultLanguage: "en", authorUserId: userId });
 
-    const { newUnitId, groupId } = await translationGroupService.attachTranslation(
-      a,
-      { language: "ja", body: "日本語" },
-      userId,
-    );
+    const { newUnitId, groupId } =
+      await translationGroupService.attachTranslation(
+        a,
+        { language: "ja", body: "日本語" },
+        userId,
+      );
     createdUnitIds.add(newUnitId);
 
     const group = await prisma.translationGroup.findUniqueOrThrow({

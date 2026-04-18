@@ -6,8 +6,8 @@ import { FALLBACK_LANGUAGE } from "@rezics/contract";
 import type { Prisma, UnitTranslation } from "#/prisma/client";
 import { prisma, UnitType } from "#/prisma/client";
 import { patchContentTranslationsToMeili } from "@/meili/content/sync";
-import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
 import { patchPostsTargetToMeili } from "@/meili/post/sync";
+import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
 
 /**
  * Translation Service - CRUD for UnitTranslation rows
@@ -67,9 +67,7 @@ export class TranslationService {
         description: data.description,
         extra: (data.extra ?? undefined) as Prisma.InputJsonValue | undefined,
         sourceReleaseUnitId:
-          "sourceReleaseUnitId" in data
-            ? data.sourceReleaseUnitId
-            : undefined,
+          "sourceReleaseUnitId" in data ? data.sourceReleaseUnitId : undefined,
       },
     });
 
@@ -97,10 +95,7 @@ export class TranslationService {
   /**
    * Delete a translation
    */
-  async deleteTranslation(
-    unitId: string,
-    language: string,
-  ): Promise<void> {
+  async deleteTranslation(unitId: string, language: string): Promise<void> {
     await prisma.unitTranslation.delete({
       where: { unitId_language: { unitId, language } },
     });
@@ -133,7 +128,10 @@ export class TranslationService {
     }
 
     // 3. Fall back to platform fallback language ('en')
-    if (FALLBACK_LANGUAGE !== requestedLang && FALLBACK_LANGUAGE !== defaultLang) {
+    if (
+      FALLBACK_LANGUAGE !== requestedLang &&
+      FALLBACK_LANGUAGE !== defaultLang
+    ) {
       const match = await prisma.unitTranslation.findUnique({
         where: { unitId_language: { unitId, language: FALLBACK_LANGUAGE } },
       });

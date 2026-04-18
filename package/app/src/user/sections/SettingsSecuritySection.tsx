@@ -5,17 +5,17 @@ import {
   Divider,
   TextField,
   Typography,
-} from '@mui/material';
-import { authQueries } from '@rezics/api/auth/auth.queries';
+} from "@mui/material";
 import {
-  useSetPasswordMutation,
   useRevokeSessionMutation,
-} from '@rezics/api/auth/auth.mutations';
-import { useQuery } from '@tanstack/react-query';
-import { type FC, useState } from 'react';
-import { SettingsSection } from '@/user/components/SettingsSection';
-import { SessionListItem } from '@/user/components/SessionListItem';
-import { useRequireAuth } from '@/user/pages/useAuth';
+  useSetPasswordMutation,
+} from "@rezics/api/auth/auth.mutations";
+import { authQueries } from "@rezics/api/auth/auth.queries";
+import { useQuery } from "@tanstack/react-query";
+import { type FC, useState } from "react";
+import { SessionListItem } from "@/user/components/SessionListItem";
+import { SettingsSection } from "@/user/components/SettingsSection";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
 export const SettingsSecuritySection: FC = () => {
   useRequireAuth();
@@ -26,8 +26,8 @@ export const SettingsSecuritySection: FC = () => {
   );
 
   const hasPassword = sessionState?.authSession?.hasPassword ?? false;
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [revokingToken, setRevokingToken] = useState<string | null>(null);
 
@@ -42,8 +42,8 @@ export const SettingsSecuritySection: FC = () => {
       {
         onSuccess: () => {
           setPasswordSuccess(true);
-          setNewPassword('');
-          setConfirmPassword('');
+          setNewPassword("");
+          setConfirmPassword("");
           setTimeout(() => setPasswordSuccess(false), 3000);
         },
       },
@@ -68,16 +68,16 @@ export const SettingsSecuritySection: FC = () => {
   return (
     <div>
       <SettingsSection
-        title={hasPassword ? 'Change Password' : 'Set Password'}
+        title={hasPassword ? "Change Password" : "Set Password"}
         description={
           hasPassword
-            ? 'Update your password to keep your account secure.'
-            : 'You signed up with a social provider. Set a password to also sign in with email.'
+            ? "Update your password to keep your account secure."
+            : "You signed up with a social provider. Set a password to also sign in with email."
         }
       >
         {passwordSuccess && (
           <Alert severity="success" className="mb-4">
-            Password {hasPassword ? 'changed' : 'set'} successfully.
+            Password {hasPassword ? "changed" : "set"} successfully.
           </Alert>
         )}
         {setPassword.error && (
@@ -106,21 +106,19 @@ export const SettingsSecuritySection: FC = () => {
             variant="standard"
             required
             error={passwordMismatch}
-            helperText={passwordMismatch ? 'Passwords do not match' : ''}
+            helperText={passwordMismatch ? "Passwords do not match" : ""}
           />
           <Button
             type="submit"
             variant="contained"
             size="small"
-            disabled={
-              setPassword.isPending || !newPassword || passwordMismatch
-            }
+            disabled={setPassword.isPending || !newPassword || passwordMismatch}
           >
             {setPassword.isPending
-              ? 'Saving...'
+              ? "Saving..."
               : hasPassword
-                ? 'Change Password'
-                : 'Set Password'}
+                ? "Change Password"
+                : "Set Password"}
           </Button>
         </form>
       </SettingsSection>

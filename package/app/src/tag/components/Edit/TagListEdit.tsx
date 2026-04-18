@@ -6,13 +6,13 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import type { UnitTagDTO } from "@rezics/contract";
 import {
   tagApi,
   tagQueries,
   useAttachTagMutation,
   useDetachTagMutation,
 } from "@rezics/api/tag/tag";
+import type { UnitTagDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useState } from "react";
@@ -89,7 +89,10 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
     return (
       <div className="space-y-2">
         {list.map((t) => (
-          <div key={t.tagUnitId} className="flex items-center justify-between gap-2">
+          <div
+            key={t.tagUnitId}
+            className="flex items-center justify-between gap-2"
+          >
             <SingleTagChip tag={t} />
             <div className="flex items-center gap-2">
               <Button

@@ -1,4 +1,7 @@
-import { internalDmBodySchema, internalEventBodySchema } from "@rezics/contract";
+import {
+  internalDmBodySchema,
+  internalEventBodySchema,
+} from "@rezics/contract";
 import { Elysia } from "elysia";
 import * as dmFanOut from "../dm/dm.fan-out";
 import * as dmService from "../dm/dm.service";
@@ -22,10 +25,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
       });
 
       // Fan-out to SSE if recipient is connected
-      publishSse(
-        body.recipientId,
-        mapNotificationToRawEvent(notification),
-      );
+      publishSse(body.recipientId, mapNotificationToRawEvent(notification));
 
       return { success: true, id: notification.id };
     },

@@ -1,12 +1,5 @@
-import type {
-  AttributionDTO,
-  EntityDTO,
-} from "@rezics/contract";
-import type { Language } from "@rezics/contract";
-import type {
-  AttributionWithRelations,
-  EntityWithRelations,
-} from "./types";
+import type { AttributionDTO, EntityDTO, Language } from "@rezics/contract";
+import type { AttributionWithRelations, EntityWithRelations } from "./types";
 
 export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
   return {
@@ -26,8 +19,10 @@ export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
       createdAt: tr.createdAt,
       updatedAt: tr.updatedAt,
     })),
-    createdAt: row.unit.createdAt?.toISOString?.() ?? (row.unit.createdAt as any),
-    updatedAt: row.unit.updatedAt?.toISOString?.() ?? (row.unit.updatedAt as any),
+    createdAt:
+      row.unit.createdAt?.toISOString?.() ?? (row.unit.createdAt as any),
+    updatedAt:
+      row.unit.updatedAt?.toISOString?.() ?? (row.unit.updatedAt as any),
   };
 }
 
@@ -60,8 +55,12 @@ export function mapAttributionToDTO(
             createdAt: tr.createdAt,
             updatedAt: tr.updatedAt,
           })),
-          createdAt: entityUnit.createdAt?.toISOString?.() ?? (entityUnit.createdAt as any),
-          updatedAt: entityUnit.updatedAt?.toISOString?.() ?? (entityUnit.updatedAt as any),
+          createdAt:
+            entityUnit.createdAt?.toISOString?.() ??
+            (entityUnit.createdAt as any),
+          updatedAt:
+            entityUnit.updatedAt?.toISOString?.() ??
+            (entityUnit.updatedAt as any),
         }
       : undefined,
   };

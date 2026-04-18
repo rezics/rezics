@@ -58,13 +58,10 @@ export const bookApi = {
     bookUnitId: string,
     chaptersIndex: any,
   ): Promise<ChapterIndexResponse> => {
-    return apiFetch<ChapterIndexResponse>(
-      `/book/${bookUnitId}/chapterIndex`,
-      {
-        method: "PUT",
-        body: JSON.stringify(chaptersIndex),
-      },
-    );
+    return apiFetch<ChapterIndexResponse>(`/book/${bookUnitId}/chapterIndex`, {
+      method: "PUT",
+      body: JSON.stringify(chaptersIndex),
+    });
   },
 
   /**

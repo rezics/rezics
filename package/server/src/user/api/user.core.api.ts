@@ -36,7 +36,10 @@ export const coreRoute = new Elysia()
   .post(
     "/list",
     async ({ body }) => {
-      const result = await meiliService.searchUsers({ ...body, ids: body.ids?.join(",") } as UserListQuery);
+      const result = await meiliService.searchUsers({
+        ...body,
+        ids: body.ids?.join(","),
+      } as UserListQuery);
       return {
         users: result.users.map(mapUserSearchDocToPublicProfile),
         total: result.total,
@@ -93,7 +96,13 @@ export const coreRoute = new Elysia()
   .put(
     "/:unitId",
     async ({ identity, params, body, status }) => {
-      if (!hasPermissionToUpdateUser(identity.permission, identity.unitId, params.unitId)) {
+      if (
+        !hasPermissionToUpdateUser(
+          identity.permission,
+          identity.unitId,
+          params.unitId,
+        )
+      ) {
         return status(403, "Forbidden: Cannot update other users");
       }
 
@@ -125,7 +134,10 @@ export const coreRoute = new Elysia()
   .delete(
     "/me",
     async ({ identity, status }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -150,7 +162,10 @@ export const coreRoute = new Elysia()
   .delete(
     "/:unitId",
     async ({ identity, params, status }) => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);

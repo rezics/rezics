@@ -69,10 +69,7 @@ export const unitApi = {
   /**
    * Set slug on a unit (TAG or REALM only)
    */
-  setSlug: async (
-    unitId: string,
-    slug: string,
-  ): Promise<UnitResponse> => {
+  setSlug: async (unitId: string, slug: string): Promise<UnitResponse> => {
     return apiFetch<UnitResponse>(`/unit/${unitId}/slug`, {
       method: "PUT",
       body: JSON.stringify({ slug }),

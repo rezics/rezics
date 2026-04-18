@@ -1,5 +1,9 @@
 import Button from "@mui/material/Button";
-import { useJoinRealmMutation, useLeaveRealmMutation, myRealmsQuery } from "@rezics/api/realm/realm";
+import {
+  myRealmsQuery,
+  useJoinRealmMutation,
+  useLeaveRealmMutation,
+} from "@rezics/api/realm/realm";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 

@@ -1,6 +1,6 @@
 import type { UserDTO } from "@rezics/contract";
-import type { FC } from "react";
 import { useMatch } from "@tanstack/react-router";
+import type { FC } from "react";
 import { useState } from "react";
 import { userRoute } from "@/router";
 import { useUserProfileStore } from "@/user/states";

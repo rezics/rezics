@@ -69,7 +69,11 @@ export default function UnitsPage() {
   const meiliQuery = useQuery({
     queryKey: ["meili-units", page, limit, query],
     queryFn: () =>
-      meiliContentApi.contentSearch({ keyword: query || undefined, offset: start, limit }),
+      meiliContentApi.contentSearch({
+        keyword: query || undefined,
+        offset: start,
+        limit,
+      }),
     enabled: isMeiliMode,
   });
 

@@ -59,7 +59,10 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
             setData({
               ...data,
               translations: [
-                { ...(translation || { language: "en" }), title: e.target.value },
+                {
+                  ...(translation || { language: "en" }),
+                  title: e.target.value,
+                },
               ],
             })
           }
@@ -75,7 +78,10 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
           onChange={(e) =>
             setData({
               ...data,
-              extra: { ...((data.extra as Record<string, any>) || {}), source: e.target.value },
+              extra: {
+                ...((data.extra as Record<string, any>) || {}),
+                source: e.target.value,
+              },
             })
           }
         />

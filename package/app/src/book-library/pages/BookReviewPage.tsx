@@ -40,8 +40,11 @@ export const BookReviewPage: React.FC = () => {
   if (!bookInfo) return null;
 
   const title =
-    getTranslation(bookInfo.translations, selectedLang, bookInfo.defaultLanguage ?? undefined)
-      ?.title ?? "";
+    getTranslation(
+      bookInfo.translations,
+      selectedLang,
+      bookInfo.defaultLanguage ?? undefined,
+    )?.title ?? "";
 
   const reviews =
     reviewsData?.posts

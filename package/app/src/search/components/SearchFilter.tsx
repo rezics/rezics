@@ -64,7 +64,9 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
                 backgroundColor: active ? theme.palette.secondary.main : "",
               }}
             >
-              <Typography variant="body2">{t(LABEL_KEYS[key]! as any)}</Typography>
+              <Typography variant="body2">
+                {t(LABEL_KEYS[key]! as any)}
+              </Typography>
             </Button>
           );
         })}
@@ -72,7 +74,9 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           onClick={handleClick("recommend")}
           endIcon={<ArrowDropDownIcon fontSize="small" />}
         >
-          <Typography variant="body2">{t("search.filter.recommendation")}</Typography>
+          <Typography variant="body2">
+            {t("search.filter.recommendation")}
+          </Typography>
         </Button>
 
         <Menu

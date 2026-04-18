@@ -32,9 +32,7 @@ export const FilterBar: FC<FilterBarProps> = ({
   onChange,
   className,
 }) => (
-  <div
-    className={`flex flex-wrap items-center gap-3 ${className ?? ""}`}
-  >
+  <div className={`flex flex-wrap items-center gap-3 ${className ?? ""}`}>
     {config.showSearch && (
       <TextField
         size="small"

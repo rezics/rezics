@@ -1,5 +1,5 @@
-import { t } from "elysia";
 import type { Static } from "elysia";
+import { t } from "elysia";
 import { SlugRefSchema } from "./common/slug-ref";
 
 // ANCHOR: Search Query

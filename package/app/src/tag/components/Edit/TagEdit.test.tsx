@@ -8,6 +8,7 @@ type TagDetailDTO = {
   type: string | null;
   domains: string[];
 };
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useFixtureInput } from "react-cosmos/client";

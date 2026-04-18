@@ -63,7 +63,10 @@ export async function seedScores(
   await chunkedParallel(works, CHUNK_SIZE, async (work) => {
     const scoringUsers = pickN(
       users,
-      Math.min(randomInt(Math.floor(scoresPerWork * 0.5), scoresPerWork), users.length),
+      Math.min(
+        randomInt(Math.floor(scoresPerWork * 0.5), scoresPerWork),
+        users.length,
+      ),
     );
 
     const entries: {
@@ -86,10 +89,7 @@ export async function seedScores(
         value,
         fields: undefined,
       });
-      scoreEntries.set(
-        `${user.unitId}:${work.id}:${defaultRealmId}`,
-        id,
-      );
+      scoreEntries.set(`${user.unitId}:${work.id}:${defaultRealmId}`, id);
 
       // Some users also score in the story realm with fields
       if (storyRealm && faker.datatype.boolean({ probability: 0.3 })) {
@@ -111,10 +111,7 @@ export async function seedScores(
           value: storyValue,
           fields: fields as Prisma.InputJsonValue,
         });
-        scoreEntries.set(
-          `${user.unitId}:${work.id}:${storyRealm.id}`,
-          storyId,
-        );
+        scoreEntries.set(`${user.unitId}:${work.id}:${storyRealm.id}`, storyId);
       }
     }
 
@@ -139,7 +136,10 @@ export async function seedScores(
         totalScore: number;
         totalCount: number;
         distribution: Record<string, number>;
-        fields: Record<string, { total: number; count: number; dist: Record<string, number> }>;
+        fields: Record<
+          string,
+          { total: number; count: number; dist: Record<string, number> }
+        >;
       }
     >();
 
@@ -170,19 +170,17 @@ export async function seedScores(
     }
 
     // Write aggregates
-    const aggregateData = Array.from(byRealm.entries()).map(
-      ([realm, agg]) => ({
-        unitId: work.id,
-        realm,
-        totalScore: agg.totalScore,
-        totalCount: agg.totalCount,
-        distribution: agg.distribution as Prisma.InputJsonValue,
-        fields:
-          Object.keys(agg.fields).length > 0
-            ? (agg.fields as Prisma.InputJsonValue)
-            : undefined,
-      }),
-    );
+    const aggregateData = Array.from(byRealm.entries()).map(([realm, agg]) => ({
+      unitId: work.id,
+      realm,
+      totalScore: agg.totalScore,
+      totalCount: agg.totalCount,
+      distribution: agg.distribution as Prisma.InputJsonValue,
+      fields:
+        Object.keys(agg.fields).length > 0
+          ? (agg.fields as Prisma.InputJsonValue)
+          : undefined,
+    }));
 
     if (aggregateData.length > 0) {
       await prisma.scoreAggregate.createMany({ data: aggregateData });

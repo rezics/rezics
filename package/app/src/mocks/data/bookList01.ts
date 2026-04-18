@@ -12,9 +12,7 @@ export const bookList01 = [
         description: "Mock Description 1",
       },
     ],
-    attributions: [
-      { entityId: "a1", name: "Author A", role: "author" },
-    ],
+    attributions: [{ entityId: "a1", name: "Author A", role: "author" }],
     tags: [],
     coverUrl: null,
     isbn13: null,
@@ -29,9 +27,7 @@ export const bookList01 = [
         description: "Mock Description 2",
       },
     ],
-    attributions: [
-      { entityId: "a2", name: "Author B", role: "author" },
-    ],
+    attributions: [{ entityId: "a2", name: "Author B", role: "author" }],
     tags: [],
     coverUrl: null,
     isbn13: null,

@@ -3,7 +3,12 @@
  * Direct API communication layer
  */
 
-import type { UpdateUser, UpdateUserSettings, UserDTO, UserSettings } from "@rezics/contract";
+import type {
+  UpdateUser,
+  UpdateUserSettings,
+  UserDTO,
+  UserSettings,
+} from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 
 type FollowSummaryResponse = {
@@ -121,7 +126,9 @@ export const userApi = {
 
   batch: async (
     ids: string[],
-  ): Promise<Record<string, { name: string; slug: string; avatar: string }>> => {
+  ): Promise<
+    Record<string, { name: string; slug: string; avatar: string }>
+  > => {
     return apiFetch(`/user/batch?ids=${ids.join(",")}`);
   },
 

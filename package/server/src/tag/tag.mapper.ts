@@ -11,9 +11,7 @@ function resolveLabel(
 ): string | undefined {
   if (!translations || translations.length === 0) return undefined;
   if (language) {
-    const match = translations.find(
-      (t) => t.language === language && t.title,
-    );
+    const match = translations.find((t) => t.language === language && t.title);
     if (match?.title) return match.title;
   }
   return translations.find((t) => t.title)?.title ?? undefined;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { DispatchScope, DispatchType } from "@rezics/contract";
 import type { ApiTokenScopes } from "@rezics/contract";
+import { DispatchScope, DispatchType } from "@rezics/contract";
 import { tokenService } from "@/token/token.service";
 import { DispatchService } from "./dispatch.service";
 

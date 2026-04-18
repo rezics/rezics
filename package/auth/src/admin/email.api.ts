@@ -1,13 +1,15 @@
-import { Elysia, t } from "elysia";
 import { render, templateRegistry } from "@rezics/email";
+import { Elysia, t } from "elysia";
 import { auth } from "../auth/instance";
 import { createAuthMailer, getDefaultSender } from "../notification/mailer";
 
 async function requireAdmin(request: Request): Promise<string | null> {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user) return "Unauthorized";
-  if ((session.user as Record<string, unknown>).role !== "admin" &&
-      (session.user as Record<string, unknown>).role !== "owner") {
+  if (
+    (session.user as Record<string, unknown>).role !== "admin" &&
+    (session.user as Record<string, unknown>).role !== "owner"
+  ) {
     return "Forbidden: admin access required";
   }
   return null;

@@ -1,8 +1,8 @@
+import { validateSlug } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { auth } from "../auth/instance";
 import { prisma } from "../auth/prisma";
 import { provisionUserOnServer } from "../provisioning/provision";
-import { validateSlug } from "@rezics/contract";
 
 async function getSessionUser(
   request: Request,
@@ -23,7 +23,9 @@ export const identityApi = new Elysia({ prefix: "/identity" })
       const user = await getSessionUser(request);
       if (!user) {
         set.status = 401;
-        return { error: { code: "UNAUTHORIZED", message: "Not authenticated" } };
+        return {
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        };
       }
 
       const { username, slug } = body;
@@ -125,7 +127,9 @@ export const identityApi = new Elysia({ prefix: "/identity" })
       const user = await getSessionUser(request);
       if (!user) {
         set.status = 401;
-        return { error: { code: "UNAUTHORIZED", message: "Not authenticated" } };
+        return {
+          error: { code: "UNAUTHORIZED", message: "Not authenticated" },
+        };
       }
 
       const { slug } = query;

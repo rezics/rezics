@@ -3,13 +3,13 @@ import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
-import { useState, type FC } from "react";
+import { type FC, useState } from "react";
 import FollowButton from "@/engagement/components/FollowButton";
-import { useProfileContext } from "@/user/components/ProfileLayout";
 import {
-  InnerFilterPanel,
   type ChipDefinition,
+  InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
+import { useProfileContext } from "@/user/components/ProfileLayout";
 
 export const FollowersTabSection: FC = () => {
   const { user, unitId, isCurrentUser } = useProfileContext();
@@ -19,7 +19,11 @@ export const FollowersTabSection: FC = () => {
 
   const chips: ChipDefinition[] = [
     { value: "followers", label: "Followers", count: user.followersCount ?? 0 },
-    { value: "following", label: "Following", count: user.followingsCount ?? 0 },
+    {
+      value: "following",
+      label: "Following",
+      count: user.followingsCount ?? 0,
+    },
   ];
 
   const followersQuery = useQuery({
@@ -33,7 +37,9 @@ export const FollowersTabSection: FC = () => {
   });
 
   const isLoading =
-    filter === "followers" ? followersQuery.isLoading : followingsQuery.isLoading;
+    filter === "followers"
+      ? followersQuery.isLoading
+      : followingsQuery.isLoading;
 
   const rawData: any =
     filter === "followers" ? followersQuery.data : followingsQuery.data;
@@ -55,12 +61,22 @@ export const FollowersTabSection: FC = () => {
       />
 
       {isLoading ? (
-        <Typography variant="body2" color="text.secondary" className="py-8 text-center">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          className="py-8 text-center"
+        >
           Loading...
         </Typography>
       ) : users.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" className="py-8 text-center">
-          {filter === "followers" ? "No followers yet" : "Not following anyone yet"}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          className="py-8 text-center"
+        >
+          {filter === "followers"
+            ? "No followers yet"
+            : "Not following anyone yet"}
         </Typography>
       ) : (
         <>
@@ -108,14 +124,26 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
   showFollowButton,
 }) => (
   <Box className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-    <Link to="/user/$unitId" params={{ unitId: user.unitId }} className="no-underline">
+    <Link
+      to="/user/$unitId"
+      params={{ unitId: user.unitId }}
+      className="no-underline"
+    >
       <Avatar src={user.avatar ?? undefined} sx={{ width: 40, height: 40 }}>
         {user.name?.charAt(0).toUpperCase()}
       </Avatar>
     </Link>
     <div className="flex-1 min-w-0">
-      <Link to="/user/$unitId" params={{ unitId: user.unitId }} className="no-underline">
-        <Typography variant="body2" className="font-medium" color="text.primary">
+      <Link
+        to="/user/$unitId"
+        params={{ unitId: user.unitId }}
+        className="no-underline"
+      >
+        <Typography
+          variant="body2"
+          className="font-medium"
+          color="text.primary"
+        >
           {user.name}
         </Typography>
         {user.slug && (
@@ -134,8 +162,6 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
         </Typography>
       )}
     </div>
-    {showFollowButton && (
-      <FollowButton userId={user.unitId} size="small" />
-    )}
+    {showFollowButton && <FollowButton userId={user.unitId} size="small" />}
   </Box>
 );

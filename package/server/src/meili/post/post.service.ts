@@ -1,7 +1,4 @@
-import type {
-  PostSearchOptions,
-  PostSearchResult,
-} from "@rezics/contract";
+import type { PostSearchOptions, PostSearchResult } from "@rezics/contract";
 import { searchClient } from "../search-client";
 
 export async function searchPosts(

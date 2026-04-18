@@ -155,7 +155,15 @@ export const buildMeiliUnitQuery = ({
   mapFn,
   options,
 }: any) => ({
-  queryKey: ["meili-units", kind, targetUnitId ?? null, start, limit, keyword, options?.userId ?? null],
+  queryKey: [
+    "meili-units",
+    kind,
+    targetUnitId ?? null,
+    start,
+    limit,
+    keyword,
+    options?.userId ?? null,
+  ],
   queryFn: async () => mapFn({ units: [], total: 0 }),
   enabled: options?.enabled ?? true,
   staleTime: 1000 * 60 * 5,
@@ -166,7 +174,12 @@ export const buildMeiliUnitQuery = ({
 export const meiliBookSearchQuery = (_filters?: any) =>
   queryOptions({
     queryKey: ["meili", "books", _filters],
-    queryFn: async () => ({ books: [], total: 0, processingTimeMs: 0, query: "" }),
+    queryFn: async () => ({
+      books: [],
+      total: 0,
+      processingTimeMs: 0,
+      query: "",
+    }),
     staleTime: 1000 * 60 * 2,
   });
 

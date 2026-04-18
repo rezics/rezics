@@ -46,9 +46,7 @@ async function buildAuthVerifyOptions(
   return buildTrustedAuthVerifyOptions(trustedAuth, overrides, tokenName);
 }
 
-export async function verifyAuthToken<
-  TPayload extends JWTPayload = JWTPayload,
->(
+export async function verifyAuthToken<TPayload extends JWTPayload = JWTPayload>(
   token: string | undefined,
   overrides?: Partial<VerifyOptions>,
 ): Promise<VerifiedToken<TPayload>> {

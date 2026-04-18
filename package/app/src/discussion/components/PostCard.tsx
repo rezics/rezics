@@ -10,7 +10,11 @@ interface PostCardProps {
   onReply?: (postId: string) => void;
 }
 
-export const PostCard: React.FC<PostCardProps> = ({ post, depth = 0, onReply }) => {
+export const PostCard: React.FC<PostCardProps> = ({
+  post,
+  depth = 0,
+  onReply,
+}) => {
   const dateStr = post.createdAt
     ? new Date(String(post.createdAt)).toLocaleDateString()
     : "";

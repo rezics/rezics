@@ -1,4 +1,3 @@
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import type { BookDTO } from "@rezics/contract";
 import {
   UniversalPaginator,
@@ -6,6 +5,7 @@ import {
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import type React from "react";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import type { SearchInfo } from "@/search";
 import type { BookLibSortKey } from "@/search/components/SearchFilter";
 import { BookListView } from "../components/BookList/BookListView";

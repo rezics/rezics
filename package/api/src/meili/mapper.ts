@@ -44,9 +44,15 @@ export function mapUnitToReadlistDTO(unit: any): any {
     coverUrl: metadata.coverUrl,
     creator: unit.user,
     reactionSummaries: unit.reactionSummaries,
-    books: items.filter((i: any) => i.bookUnitId).map((i: any) => ({ unitId: i.bookUnitId })),
-    reviews: items.filter((i: any) => i.reviewUnitId).map((i: any) => ({ unitId: i.reviewUnitId })),
-    order: items.map((i: any) => i.bookUnitId || i.reviewUnitId).filter(Boolean),
+    books: items
+      .filter((i: any) => i.bookUnitId)
+      .map((i: any) => ({ unitId: i.bookUnitId })),
+    reviews: items
+      .filter((i: any) => i.reviewUnitId)
+      .map((i: any) => ({ unitId: i.reviewUnitId })),
+    order: items
+      .map((i: any) => i.bookUnitId || i.reviewUnitId)
+      .filter(Boolean),
   };
 }
 
@@ -54,8 +60,12 @@ export function mapUnitToReadlistDTO(unit: any): any {
  * @deprecated Readlists replaced by shelves. Migrate to server-side shelf API.
  */
 // MOCK: readlist search result mapping stub
-export function mapReadlistSearchResultToReadlistListResponse(searchResult: any): any {
-  const readlists = (searchResult.readlists as any[] | undefined)?.map(mapUnitToReadlistDTO) ?? [];
+export function mapReadlistSearchResultToReadlistListResponse(
+  searchResult: any,
+): any {
+  const readlists =
+    (searchResult.readlists as any[] | undefined)?.map(mapUnitToReadlistDTO) ??
+    [];
   return { readlists, total: searchResult.total };
 }
 
@@ -64,6 +74,7 @@ export function mapReadlistSearchResultToReadlistListResponse(searchResult: any)
  */
 // MOCK: unit list to readlist mapping stub
 export function mapUnitListToReadlistListResponse(unitResp: any): any {
-  const readlists = (unitResp.units as any[] | undefined)?.map(mapUnitToReadlistDTO) ?? [];
+  const readlists =
+    (unitResp.units as any[] | undefined)?.map(mapUnitToReadlistDTO) ?? [];
   return { readlists, total: unitResp.total };
 }

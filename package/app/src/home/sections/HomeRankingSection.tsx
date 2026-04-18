@@ -74,11 +74,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
             <ListItem key={book.unitId} className="!py-2">
               <ListItemAvatar>
                 {coverUrl ? (
-                  <Avatar
-                    variant="rounded"
-                    src={coverUrl}
-                    alt={title}
-                  />
+                  <Avatar variant="rounded" src={coverUrl} alt={title} />
                 ) : (
                   <Avatar variant="rounded">{idx + 1}</Avatar>
                 )}

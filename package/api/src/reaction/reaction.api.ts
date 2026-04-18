@@ -93,9 +93,8 @@ export const reactionApi = {
       targetId: query.targetId,
       reaction: query.reaction,
     });
-    return apiFetch<{ deleted: boolean }>(
-      `/reaction?${qs.toString()}`,
-      { method: "DELETE" },
-    );
+    return apiFetch<{ deleted: boolean }>(`/reaction?${qs.toString()}`, {
+      method: "DELETE",
+    });
   },
 };

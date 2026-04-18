@@ -1,7 +1,7 @@
-import { t } from "elysia";
 import type { Static } from "elysia";
-import { languageSchema } from "../language";
+import { t } from "elysia";
 import { SlugRefSchema } from "../common/slug-ref";
+import { languageSchema } from "../language";
 
 // ANCHOR: Content Search Document
 
@@ -66,9 +66,7 @@ export const ContentSearchDocumentSchema = t.Object({
   ),
 });
 
-export type ContentSearchDocument = Static<
-  typeof ContentSearchDocumentSchema
->;
+export type ContentSearchDocument = Static<typeof ContentSearchDocumentSchema>;
 
 // ANCHOR: Content Search Options
 
@@ -97,9 +95,7 @@ export const ContentSearchOptionsSchema = t.Object({
   limit: t.Optional(t.Number()),
 });
 
-export type ContentSearchOptions = Static<
-  typeof ContentSearchOptionsSchema
->;
+export type ContentSearchOptions = Static<typeof ContentSearchOptionsSchema>;
 
 // ANCHOR: Content Search Result
 
@@ -110,6 +106,4 @@ export const ContentSearchResultSchema = t.Object({
   query: t.String(),
 });
 
-export type ContentSearchResult = Static<
-  typeof ContentSearchResultSchema
->;
+export type ContentSearchResult = Static<typeof ContentSearchResultSchema>;

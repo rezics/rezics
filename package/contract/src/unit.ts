@@ -293,8 +293,7 @@ export const createTranslationSchema = t.Object({
   sourceReleaseUnitId: t.Optional(t.String()),
 });
 
-export type CreateTranslationInput =
-  (typeof createTranslationSchema)["static"];
+export type CreateTranslationInput = (typeof createTranslationSchema)["static"];
 
 export const updateTranslationSchema = t.Object({
   title: t.Optional(t.Nullable(t.String())),
@@ -305,8 +304,7 @@ export const updateTranslationSchema = t.Object({
   sourceReleaseUnitId: t.Optional(t.Nullable(t.String())),
 });
 
-export type UpdateTranslationInput =
-  (typeof updateTranslationSchema)["static"];
+export type UpdateTranslationInput = (typeof updateTranslationSchema)["static"];
 
 export const translationParamsSchema = t.Object({
   unitId: t.String(),

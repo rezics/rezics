@@ -86,10 +86,7 @@ export const postRepliesQuery = (
 /**
  * Query options for getting posts within a realm
  */
-export const postsByRealmQuery = (
-  realmUnitId: string,
-  filters?: PostFilters,
-) =>
+export const postsByRealmQuery = (realmUnitId: string, filters?: PostFilters) =>
   queryOptions({
     queryKey: postKeys.byRealm(realmUnitId),
     queryFn: () => postApi.getByRealm(realmUnitId, filters),
@@ -100,9 +97,7 @@ export const postsByRealmQuery = (
 /**
  * Infinite query options for paginated post list
  */
-export const postInfiniteListQuery = (
-  filters?: Omit<PostFilters, "start">,
-) =>
+export const postInfiniteListQuery = (filters?: Omit<PostFilters, "start">) =>
   infiniteQueryOptions({
     queryKey: postKeys.list(filters),
     queryFn: ({ pageParam = 0 }) =>

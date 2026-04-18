@@ -1,4 +1,8 @@
-import type { CreateLinkInput, LinkDTO, UpdateLinkInput } from "@rezics/contract";
+import type {
+  CreateLinkInput,
+  LinkDTO,
+  UpdateLinkInput,
+} from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 
 export const linkApi = {

@@ -11,9 +11,7 @@ export function TagDomainPage() {
   const unitId =
     withTitleMatch?.params.unitId ?? baseMatch?.params.unitId ?? "";
   const title = withTitleMatch?.params.title;
-  const { data, isLoading, error } = useQuery(
-    tagQueries.list({ unitId }),
-  );
+  const { data, isLoading, error } = useQuery(tagQueries.list({ unitId }));
   if (isLoading) {
     return (
       <div className="w-11/12 mx-auto mt-10">

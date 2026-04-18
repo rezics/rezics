@@ -9,17 +9,25 @@ interface RealmContentFeedProps {
   realmId: string;
 }
 
-export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({ realmId }) => {
+export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
+  realmId,
+}) => {
   const { data } = useQuery(postQueries.byTarget(realmId));
   const posts = data?.posts ?? [];
 
   if (posts.length === 0) {
-    return <Typography variant="body2" color="text.secondary" py={2}>No content in this realm yet</Typography>;
+    return (
+      <Typography variant="body2" color="text.secondary" py={2}>
+        No content in this realm yet
+      </Typography>
+    );
   }
 
   return (
     <Box>
-      {posts.map((post) => (<PostCard key={post.unitId} post={post} />))}
+      {posts.map((post) => (
+        <PostCard key={post.unitId} post={post} />
+      ))}
     </Box>
   );
 };

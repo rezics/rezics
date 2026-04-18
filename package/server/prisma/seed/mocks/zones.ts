@@ -19,7 +19,10 @@ const ZONE_STYLING_PRESETS: Prisma.InputJsonValue[] = [
   { layout: "hero", backgroundColor: "#0f172a", textColor: "#f8fafc" },
   { layout: "grid", columns: 4 },
   { layout: "carousel", autoplay: true, interval: 5000 },
-  { layout: "banner", backgroundImageUrl: "https://picsum.photos/seed/zone/1600/400" },
+  {
+    layout: "banner",
+    backgroundImageUrl: "https://picsum.photos/seed/zone/1600/400",
+  },
   { theme: "seasonal", accentColor: "#f97316" },
   { theme: "dark", accentColor: "#6366f1" },
 ];
@@ -59,7 +62,8 @@ function buildFilters(
 
   switch (template) {
     case "featured-carousel": {
-      const picks = workIds.length > 0 ? pickN(workIds, Math.min(8, workIds.length)) : [];
+      const picks =
+        workIds.length > 0 ? pickN(workIds, Math.min(8, workIds.length)) : [];
       return { type: contentType, workIds: picks };
     }
     case "trending-grid":
@@ -70,11 +74,17 @@ function buildFilters(
       };
     case "seasonal-banner":
       return {
-        season: faker.helpers.arrayElement(["spring", "summer", "autumn", "winter"]),
+        season: faker.helpers.arrayElement([
+          "spring",
+          "summer",
+          "autumn",
+          "winter",
+        ]),
         type: contentType,
       };
     case "topic-spotlight": {
-      const picks = tagIds.length > 0 ? pickN(tagIds, Math.min(3, tagIds.length)) : [];
+      const picks =
+        tagIds.length > 0 ? pickN(tagIds, Math.min(3, tagIds.length)) : [];
       return { type: contentType, tagIds: picks };
     }
     case "new-releases":

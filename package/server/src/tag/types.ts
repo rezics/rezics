@@ -1,11 +1,6 @@
 // Types only used in server for Tag (scored UnitTag system)
 
-import type {
-  Prisma,
-  Unit,
-  UnitTag,
-  UnitTranslation,
-} from "#/prisma/client";
+import type { Prisma, Unit, UnitTag, UnitTranslation } from "#/prisma/client";
 
 /**
  * A tag Unit with its translations.

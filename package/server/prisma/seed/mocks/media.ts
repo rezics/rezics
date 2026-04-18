@@ -3,15 +3,9 @@ import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { flushAttributionsAndTags } from "./books.js";
-import {
-  MEDIA_KIND_KEYS,
-} from "./data.js";
+import { MEDIA_KIND_KEYS } from "./data.js";
 import { generateMediaExtra, generateTranslations } from "./generators.js";
-import type {
-  CreatedEntity,
-  CreatedUnit,
-  CreatedUser,
-} from "./types.js";
+import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
 
 const CHUNK_SIZE = 10;
@@ -50,7 +44,9 @@ export async function seedMedia(
           userId: author.unitId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
           defaultLanguage: DEFAULT_LANGUAGE,
-          publishedAt: randomBoolean(0.8) ? faker.date.past({ years: 5 }) : null,
+          publishedAt: randomBoolean(0.8)
+            ? faker.date.past({ years: 5 })
+            : null,
           media: {
             create: {
               kindKey,

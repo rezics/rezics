@@ -1,3 +1,4 @@
+import AddIcon from "@mui/icons-material/Add";
 import {
   Alert,
   Button,
@@ -11,25 +12,28 @@ import {
   FormControlLabel,
   TextField,
   Typography,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { tokenQueries } from '@rezics/api/token/token.queries';
+} from "@mui/material";
 import {
-  useUpdateTokenMutation,
   useRevokeTokenMutation,
-} from '@rezics/api/token/token.mutations';
-import type { ApiTokenDTO, ApiTokenScopes } from '@rezics/contract';
-import { useQuery } from '@tanstack/react-query';
-import { type FC, useState } from 'react';
-import { SettingsSection } from '@/user/components/SettingsSection';
-import { TokenListItem } from '@/user/components/TokenListItem';
-import { TokenCreateDialog } from '@/user/components/TokenCreateDialog';
-import { useRequireAuth } from '@/user/pages/useAuth';
+  useUpdateTokenMutation,
+} from "@rezics/api/token/token.mutations";
+import { tokenQueries } from "@rezics/api/token/token.queries";
+import type { ApiTokenDTO, ApiTokenScopes } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import { type FC, useState } from "react";
+import { SettingsSection } from "@/user/components/SettingsSection";
+import { TokenCreateDialog } from "@/user/components/TokenCreateDialog";
+import { TokenListItem } from "@/user/components/TokenListItem";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
 const AVAILABLE_SCOPES = [
-  { domain: 'user', perm: 'read', label: 'user:read' },
-  { domain: 'user', perm: 'write', label: 'user:write' },
-  { domain: 'dispatch', perm: 'rezics-server-session', label: 'dispatch:rezics-server-session' },
+  { domain: "user", perm: "read", label: "user:read" },
+  { domain: "user", perm: "write", label: "user:write" },
+  {
+    domain: "dispatch",
+    perm: "rezics-server-session",
+    label: "dispatch:rezics-server-session",
+  },
 ] as const;
 
 function scopesToSet(scopes?: Record<string, string[]>): Set<string> {
@@ -44,8 +48,8 @@ function scopesToSet(scopes?: Record<string, string[]>): Set<string> {
 function setToScopes(set: Set<string>): ApiTokenScopes {
   const scopes: ApiTokenScopes = {};
   for (const label of set) {
-    const [domain, ...rest] = label.split(':');
-    const perm = rest.join(':');
+    const [domain, ...rest] = label.split(":");
+    const perm = rest.join(":");
     if (!scopes[domain]) scopes[domain] = [];
     scopes[domain].push(perm);
   }
@@ -61,9 +65,9 @@ export const SettingsTokensSection: FC = () => {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editToken, setEditToken] = useState<ApiTokenDTO | null>(null);
-  const [editName, setEditName] = useState('');
+  const [editName, setEditName] = useState("");
   const [editScopes, setEditScopes] = useState<Set<string>>(new Set());
-  const [editExpiry, setEditExpiry] = useState('');
+  const [editExpiry, setEditExpiry] = useState("");
   const [revokeId, setRevokeId] = useState<string | null>(null);
 
   const tokens = data?.tokens?.filter((t) => !t.revoked) ?? [];
@@ -74,8 +78,8 @@ export const SettingsTokensSection: FC = () => {
     setEditScopes(scopesToSet(token.scopes));
     setEditExpiry(
       token.expiresAt
-        ? new Date(token.expiresAt).toISOString().split('T')[0]
-        : '',
+        ? new Date(token.expiresAt).toISOString().split("T")[0]
+        : "",
     );
   };
 
@@ -216,7 +220,7 @@ export const SettingsTokensSection: FC = () => {
             onClick={handleSaveEdit}
             disabled={!editName || updateToken.isPending}
           >
-            {updateToken.isPending ? 'Saving...' : 'Save'}
+            {updateToken.isPending ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -238,7 +242,7 @@ export const SettingsTokensSection: FC = () => {
             onClick={handleConfirmRevoke}
             disabled={revokeToken.isPending}
           >
-            {revokeToken.isPending ? 'Revoking...' : 'Revoke'}
+            {revokeToken.isPending ? "Revoking..." : "Revoke"}
           </Button>
         </DialogActions>
       </Dialog>

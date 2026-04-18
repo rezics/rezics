@@ -12,7 +12,8 @@ import type { InjectedTag } from "../models/injectedTags";
  */
 export function useInjectedTags(): InjectedTag[] | undefined {
   const state = useRouterState({
-    select: (s) => s.location.state as { injectedTags?: InjectedTag[] } | undefined,
+    select: (s) =>
+      s.location.state as { injectedTags?: InjectedTag[] } | undefined,
   });
   return useMemo(() => state?.injectedTags, [state?.injectedTags]);
 }

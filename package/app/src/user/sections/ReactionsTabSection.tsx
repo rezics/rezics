@@ -1,8 +1,8 @@
 import { Typography } from "@mui/material";
 import type { FC } from "react";
 import {
-  InnerFilterPanel,
   type ChipDefinition,
+  InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 
 // MOCK: reaction history tabs — disabled until backend endpoint is available

@@ -17,12 +17,12 @@ import { userQueries } from "@rezics/api/user/user.queries";
 import type { UpdateUser, UserDTO } from "@rezics/contract";
 import { PasswordField } from "@rezics/ui/composite/form/field/PasswordField.tsx";
 import { useQuery } from "@tanstack/react-query";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { useMatch } from "@tanstack/react-router";
 import type React from "react";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$unitId/edit";
 import { UserLoading } from "./UserState";
 
@@ -134,7 +134,11 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       <Card className="shadow-lg rounded-2xl">
         <CardHeader
           avatar={
-            <Avatar src={formData.avatar} variant="rounded" sx={{ width: 80, height: 80, borderRadius: 2 }}>
+            <Avatar
+              src={formData.avatar}
+              variant="rounded"
+              sx={{ width: 80, height: 80, borderRadius: 2 }}
+            >
               {formData.name?.charAt(0).toUpperCase()}
             </Avatar>
           }
@@ -148,7 +152,9 @@ export const UserEditPage: FC<UserEditPageProps> = ({
           <form onSubmit={handleSubmit}>
             {error && (
               <QueryErrorDisplay
-                error={error instanceof Error ? error : new Error(String(error))}
+                error={
+                  error instanceof Error ? error : new Error(String(error))
+                }
                 className="mb-4"
               />
             )}

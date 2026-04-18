@@ -1,9 +1,9 @@
-import type { BookDTO } from "@rezics/contract";
 import { userQueries } from "@rezics/api/user/user.queries";
+import type { BookDTO } from "@rezics/contract";
+import { FALLBACK_LANGUAGE } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useCallback, useMemo } from "react";
-import { FALLBACK_LANGUAGE } from "@rezics/contract";
 
 import { bookLanguageAtom } from "../states/bookDetailAtoms";
 
@@ -21,14 +21,18 @@ function resolveInitialLanguage(
     .filter(Boolean);
 
   if (available.length === 0) {
-    return (bookInfo?.defaultLanguage as unknown as string) ?? FALLBACK_LANGUAGE;
+    return (
+      (bookInfo?.defaultLanguage as unknown as string) ?? FALLBACK_LANGUAGE
+    );
   }
 
   for (const lang of preferredLanguages) {
     if (available.includes(lang)) return lang;
   }
 
-  const unitDefault = bookInfo?.defaultLanguage as unknown as string | undefined;
+  const unitDefault = bookInfo?.defaultLanguage as unknown as
+    | string
+    | undefined;
   if (unitDefault && available.includes(unitDefault)) {
     return unitDefault;
   }

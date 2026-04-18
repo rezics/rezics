@@ -4,7 +4,6 @@ import type { ChapterTreeItem } from "@rezics/contract";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import React, {
   forwardRef,
   useCallback,
@@ -15,6 +14,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useChapterListStore } from "@/book-library/states/chapterListStore";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 
 export type ChapterTreeHandle = {
   expandAll: () => void;

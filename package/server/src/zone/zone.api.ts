@@ -1,8 +1,8 @@
 import { ZoneFiltersSchema } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole } from "@/middleware";
-import { zoneService } from "./zone.service";
 import { mapZoneToDTO } from "./zone.mapper";
+import { zoneService } from "./zone.service";
 
 export const zoneApi = new Elysia({ prefix: "/zone" })
   .use(authMacro)
@@ -27,7 +27,9 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
       const lifecycleStatus = zoneService.checkLifecycle(zone);
       if (lifecycleStatus) {
         set.status = 404;
-        return { error: `Zone ${lifecycleStatus === "not_started" ? "has not started yet" : "has ended"}` };
+        return {
+          error: `Zone ${lifecycleStatus === "not_started" ? "has not started yet" : "has ended"}`,
+        };
       }
 
       return mapZoneToDTO(zone);

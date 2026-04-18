@@ -53,7 +53,10 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
               key={index}
               className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2"
             >
-              <OpenInNew sx={{ fontSize: 14 }} className="flex-shrink-0 text-muted-foreground" />
+              <OpenInNew
+                sx={{ fontSize: 14 }}
+                className="flex-shrink-0 text-muted-foreground"
+              />
               <a
                 href={url}
                 target="_blank"

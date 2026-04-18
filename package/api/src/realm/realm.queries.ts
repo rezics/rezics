@@ -41,9 +41,7 @@ export const realmSearchQuery = (query: string, filters?: RealmFilters) =>
 /**
  * Infinite query options for paginated realm list
  */
-export const realmInfiniteListQuery = (
-  filters?: Omit<RealmFilters, "start">,
-) =>
+export const realmInfiniteListQuery = (filters?: Omit<RealmFilters, "start">) =>
   infiniteQueryOptions({
     queryKey: realmKeys.list(filters),
     queryFn: ({ pageParam = 0 }) =>

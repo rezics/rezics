@@ -140,9 +140,10 @@ export class ChapterService {
     // Update the unit base fields
     const unitData: Prisma.UnitUpdateInput = {};
     if (targetUnitId !== undefined) {
-      unitData.work = targetUnitId === null
-        ? { disconnect: true }
-        : { connect: { id: targetUnitId } };
+      unitData.work =
+        targetUnitId === null
+          ? { disconnect: true }
+          : { connect: { id: targetUnitId } };
     }
     if (status) {
       unitData.status = status as UnitStatus;

@@ -94,9 +94,7 @@ async function main() {
         s.start("Resolving root user...");
         rootUserId =
           (await resolveRootUserId(authPrisma, serverPrisma)) ?? undefined;
-        s.stop(
-          rootUserId ? "Root user found." : "Root user not found.",
-        );
+        s.stop(rootUserId ? "Root user found." : "Root user not found.");
       }
 
       if (!rootUserId) {

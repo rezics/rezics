@@ -1,6 +1,6 @@
-import { Button, Chip, Typography } from '@mui/material';
-import ComputerIcon from '@mui/icons-material/Computer';
-import type { FC } from 'react';
+import ComputerIcon from "@mui/icons-material/Computer";
+import { Button, Chip, Typography } from "@mui/material";
+import type { FC } from "react";
 
 interface SessionListItemProps {
   session: {
@@ -18,15 +18,15 @@ interface SessionListItemProps {
 }
 
 function parseUserAgent(ua?: string): string {
-  if (!ua) return 'Unknown device';
+  if (!ua) return "Unknown device";
   const browser =
     ua.match(/(?:Chrome|Firefox|Safari|Edge|Opera|MSIE|Trident)[/ ]\S+/)?.[0] ??
-    '';
+    "";
   const os =
     ua.match(
       /(?:Windows NT [\d.]+|Mac OS X [\d._]+|Linux|Android [\d.]+|iOS [\d.]+)/,
-    )?.[0] ?? '';
-  if (browser || os) return [browser, os].filter(Boolean).join(' on ');
+    )?.[0] ?? "";
+  if (browser || os) return [browser, os].filter(Boolean).join(" on ");
   return ua.slice(0, 60);
 }
 
@@ -39,9 +39,9 @@ export const SessionListItem: FC<SessionListItemProps> = ({
   const userAgent = parseUserAgent(session.userAgent);
   const createdAt = session.createdAt
     ? new Date(session.createdAt).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
+        year: "numeric",
+        month: "short",
+        day: "numeric",
       })
     : null;
 
@@ -54,11 +54,16 @@ export const SessionListItem: FC<SessionListItemProps> = ({
             {userAgent}
           </Typography>
           {isCurrent && (
-            <Chip label="Current session" size="small" color="primary" variant="outlined" />
+            <Chip
+              label="Current session"
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
           )}
         </div>
         <Typography variant="caption" color="text.secondary">
-          {[session.ipAddress, createdAt].filter(Boolean).join(' \u00b7 ')}
+          {[session.ipAddress, createdAt].filter(Boolean).join(" \u00b7 ")}
         </Typography>
       </div>
       {!isCurrent && (

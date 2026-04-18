@@ -69,7 +69,10 @@ export const OtpInput: FC<OtpInputProps> = ({
   const handlePaste = useCallback(
     (e: ClipboardEvent<HTMLInputElement>) => {
       e.preventDefault();
-      const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, length);
+      const pasted = e.clipboardData
+        .getData("text")
+        .replace(/\D/g, "")
+        .slice(0, length);
       if (pasted.length > 0) {
         onChange(pasted.padEnd(length, "").slice(0, length));
         focusInput(Math.min(pasted.length, length - 1));

@@ -46,9 +46,7 @@ export class MeiliService {
     return searchPosts(options);
   }
 
-  async searchRealms(
-    options: RealmSearchOptions,
-  ): Promise<RealmSearchResult> {
+  async searchRealms(options: RealmSearchOptions): Promise<RealmSearchResult> {
     return searchRealms(options);
   }
 

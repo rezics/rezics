@@ -1,9 +1,9 @@
 import { Avatar, Chip, Paper, Tooltip, Typography } from "@mui/material";
-import { unitDetailQuery } from "@rezics/api/unit/unit";
 import {
   useAttachTranslation,
   useTranslationGroupSiblings,
 } from "@rezics/api/translation-group";
+import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";

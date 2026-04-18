@@ -14,9 +14,7 @@ import {
  * exchange endpoint has a self-healing fallback that will provision
  * the user on the next frontend-initiated exchange if this fails.
  */
-export async function eagerProvisionViaExchange(
-  userId: string,
-): Promise<void> {
+export async function eagerProvisionViaExchange(userId: string): Promise<void> {
   try {
     const { kid, alg, key } = await getAuthPrivateSigningKey();
 
@@ -28,15 +26,12 @@ export async function eagerProvisionViaExchange(
       .setExpirationTime("60s")
       .sign(key);
 
-    const response = await fetch(
-      `${env.SERVER_BASE_URL}/session/exchange`,
-      {
-        method: "POST",
-        headers: {
-          "x-auth-session-token": token,
-        },
+    const response = await fetch(`${env.SERVER_BASE_URL}/session/exchange`, {
+      method: "POST",
+      headers: {
+        "x-auth-session-token": token,
       },
-    );
+    });
 
     if (!response.ok) {
       console.error(

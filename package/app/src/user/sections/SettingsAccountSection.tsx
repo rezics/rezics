@@ -1,3 +1,4 @@
+import VerifiedIcon from "@mui/icons-material/Verified";
 import {
   Alert,
   Button,
@@ -9,21 +10,20 @@ import {
   DialogTitle,
   TextField,
   Typography,
-} from '@mui/material';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import { authQueries } from '@rezics/api/auth/auth.queries';
+} from "@mui/material";
 import {
   useChangeEmailMutation,
   useSendVerificationEmailMutation,
-} from '@rezics/api/auth/auth.mutations';
-import { useDeleteMeMutation } from '@rezics/api/user/user.mutations';
-import { useSignOutMutation } from '@rezics/api/auth/auth.mutations';
-import { userQueries } from '@rezics/api/user/user.queries';
-import { useQuery } from '@tanstack/react-query';
-import { type FC, useState } from 'react';
-import { SettingsSection } from '@/user/components/SettingsSection';
-import { DangerZone } from '@/user/components/DangerZone';
-import { useRequireAuth } from '@/user/pages/useAuth';
+  useSignOutMutation,
+} from "@rezics/api/auth/auth.mutations";
+import { authQueries } from "@rezics/api/auth/auth.queries";
+import { useDeleteMeMutation } from "@rezics/api/user/user.mutations";
+import { userQueries } from "@rezics/api/user/user.queries";
+import { useQuery } from "@tanstack/react-query";
+import { type FC, useState } from "react";
+import { DangerZone } from "@/user/components/DangerZone";
+import { SettingsSection } from "@/user/components/SettingsSection";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
 export const SettingsAccountSection: FC = () => {
   useRequireAuth();
@@ -33,10 +33,10 @@ export const SettingsAccountSection: FC = () => {
   );
   const { data: user } = useQuery(userQueries.me());
 
-  const [newEmail, setNewEmail] = useState('');
-  const [emailSuccess, setEmailSuccess] = useState('');
+  const [newEmail, setNewEmail] = useState("");
+  const [emailSuccess, setEmailSuccess] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState("");
 
   const changeEmail = useChangeEmailMutation();
   const sendVerification = useSendVerificationEmailMutation();
@@ -52,7 +52,7 @@ export const SettingsAccountSection: FC = () => {
   }
 
   const authSession = sessionState?.authSession;
-  const currentEmail = authSession?.email ?? '';
+  const currentEmail = authSession?.email ?? "";
   const isVerified = authSession?.emailVerified ?? false;
 
   const handleChangeEmail = (e: React.FormEvent) => {
@@ -62,9 +62,9 @@ export const SettingsAccountSection: FC = () => {
       {
         onSuccess: () => {
           setEmailSuccess(
-            'A verification email has been sent to your new address.',
+            "A verification email has been sent to your new address.",
           );
-          setNewEmail('');
+          setNewEmail("");
         },
       },
     );
@@ -78,7 +78,7 @@ export const SettingsAccountSection: FC = () => {
     deleteMe.mutate(undefined, {
       onSuccess: () => {
         signOut.mutate();
-        window.location.href = '/';
+        window.location.href = "/";
       },
     });
   };
@@ -87,7 +87,10 @@ export const SettingsAccountSection: FC = () => {
 
   return (
     <div>
-      <SettingsSection title="Email Address" description="Manage your email address and verification status.">
+      <SettingsSection
+        title="Email Address"
+        description="Manage your email address and verification status."
+      >
         <div className="flex items-center gap-2 mb-4">
           <Typography variant="body1">{currentEmail}</Typography>
           {isVerified ? (
@@ -99,7 +102,12 @@ export const SettingsAccountSection: FC = () => {
               variant="outlined"
             />
           ) : (
-            <Chip label="Unverified" size="small" color="warning" variant="outlined" />
+            <Chip
+              label="Unverified"
+              size="small"
+              color="warning"
+              variant="outlined"
+            />
           )}
         </div>
 
@@ -110,7 +118,7 @@ export const SettingsAccountSection: FC = () => {
             onClick={handleResendVerification}
             disabled={sendVerification.isPending}
           >
-            {sendVerification.isPending ? 'Sending...' : 'Resend Verification'}
+            {sendVerification.isPending ? "Sending..." : "Resend Verification"}
           </Button>
         )}
 
@@ -121,7 +129,10 @@ export const SettingsAccountSection: FC = () => {
         )}
       </SettingsSection>
 
-      <SettingsSection title="Change Email" description="Update your email address. A verification link will be sent to the new address.">
+      <SettingsSection
+        title="Change Email"
+        description="Update your email address. A verification link will be sent to the new address."
+      >
         {emailSuccess && (
           <Alert severity="success" className="mb-4">
             {emailSuccess}
@@ -148,7 +159,7 @@ export const SettingsAccountSection: FC = () => {
             size="small"
             disabled={changeEmail.isPending || !newEmail}
           >
-            {changeEmail.isPending ? 'Updating...' : 'Change Email'}
+            {changeEmail.isPending ? "Updating..." : "Change Email"}
           </Button>
         </form>
       </SettingsSection>
@@ -191,7 +202,7 @@ export const SettingsAccountSection: FC = () => {
               disabled={!slugMatch || deleteMe.isPending}
               onClick={handleDeleteAccount}
             >
-              {deleteMe.isPending ? 'Deleting...' : 'Delete My Account'}
+              {deleteMe.isPending ? "Deleting..." : "Delete My Account"}
             </Button>
           </DialogActions>
         </Dialog>

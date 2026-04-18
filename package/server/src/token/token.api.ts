@@ -30,10 +30,16 @@ const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
     );
 
     if (
-      !tokenService.hasScope(scopes, DispatchScope.DOMAIN, DispatchScope.SESSION)
+      !tokenService.hasScope(
+        scopes,
+        DispatchScope.DOMAIN,
+        DispatchScope.SESSION,
+      )
     ) {
       set.status = 403;
-      throw new Error("Forbidden: token lacks dispatch:rezics-server-session scope");
+      throw new Error(
+        "Forbidden: token lacks dispatch:rezics-server-session scope",
+      );
     }
 
     const user = await prisma.user.findUnique({
@@ -60,7 +66,10 @@ const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
     return { token };
   },
   {
-    headers: t.Object({ authorization: t.String() }, { additionalProperties: true }),
+    headers: t.Object(
+      { authorization: t.String() },
+      { additionalProperties: true },
+    ),
     detail: {
       summary: "Exchange API token for session JWT",
       description:

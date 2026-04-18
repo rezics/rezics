@@ -29,7 +29,10 @@ mock.module("./jwt/jwt.service", () => ({
 }));
 
 const mockVerifyBearerToken = mock(async () => ({
-  payload: { unitId: "user-1", sub: "user-1", scope: "user" } as Record<string, unknown>,
+  payload: { unitId: "user-1", sub: "user-1", scope: "user" } as Record<
+    string,
+    unknown
+  >,
   token: "raw-token",
   protectedHeader: { alg: "ES256" },
 }));
@@ -62,10 +65,13 @@ mock.module("#/prisma/client", () => ({
   },
 }));
 
-const mockProvisionFromJwt = mock(async () => ({
-  unitId: "new-user",
-  permission: null,
-}) as any);
+const mockProvisionFromJwt = mock(
+  async () =>
+    ({
+      unitId: "new-user",
+      permission: null,
+    }) as any,
+);
 
 mock.module("@/user/service/user.service", () => ({
   userService: {
@@ -178,9 +184,7 @@ describe("POST /session/exchange", () => {
   });
 
   test("expired auth token returns 401", async () => {
-    mockVerifyBearerToken.mockRejectedValueOnce(
-      new Error("Token expired"),
-    );
+    mockVerifyBearerToken.mockRejectedValueOnce(new Error("Token expired"));
 
     const { sessionApi } = await import("./session.api");
 
@@ -234,7 +238,12 @@ describe("POST /session/exchange", () => {
 
   test("unverified unprovisioned user returns 403", async () => {
     mockVerifyBearerToken.mockResolvedValueOnce({
-      payload: { unitId: "unverified-user", sub: "unverified-user", scope: "user", email_verified: false },
+      payload: {
+        unitId: "unverified-user",
+        sub: "unverified-user",
+        scope: "user",
+        email_verified: false,
+      },
       token: "raw-token",
       protectedHeader: { alg: "ES256" },
     });

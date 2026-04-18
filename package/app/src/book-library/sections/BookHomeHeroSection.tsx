@@ -27,9 +27,7 @@ export const BookHomeHeroSection: React.FC = () => {
           {t("page.book_home.hero.kicker")}
         </p>
         <h1 className="text-2xl font-semibold leading-snug">
-          <span className="text-primary">
-            {t("page.book_home.hero.title")}
-          </span>
+          <span className="text-primary">{t("page.book_home.hero.title")}</span>
         </h1>
         <p className="text-xs text-muted-foreground">
           {t("page.book_home.hero.subtitle")}
@@ -51,7 +49,9 @@ export const BookHomeHeroSection: React.FC = () => {
           placeholder={t("page.book_home.hero.search_placeholder")}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          inputProps={{ "aria-label": t("page.book_home.hero.search_placeholder") }}
+          inputProps={{
+            "aria-label": t("page.book_home.hero.search_placeholder"),
+          }}
         />
         <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
           <SearchIcon />

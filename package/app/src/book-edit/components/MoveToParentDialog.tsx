@@ -1,7 +1,7 @@
 import {
   AccountTree,
-  ExpandMore,
   ChevronRight,
+  ExpandMore,
   Search,
 } from "@mui/icons-material";
 import {
@@ -77,7 +77,8 @@ function TreeNode({
 }) {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = !!(node.children && node.children.length > 0);
-  const isSelected = selectedId !== null && String(selectedId) === String(node.id);
+  const isSelected =
+    selectedId !== null && String(selectedId) === String(node.id);
 
   return (
     <div>
@@ -89,9 +90,7 @@ function TreeNode({
           if (e.key === "Enter" || e.key === " ") onSelect(node.id);
         }}
         className={`flex items-center gap-1 py-1.5 px-2 cursor-pointer rounded-md transition-colors ${
-          isSelected
-            ? "bg-primary/10 text-primary"
-            : "hover:bg-muted/60"
+          isSelected ? "bg-primary/10 text-primary" : "hover:bg-muted/60"
         }`}
         style={{ paddingLeft: depth * 20 + 8 }}
       >
@@ -181,16 +180,28 @@ export function MoveToParentDialog({
       <DialogTitle>
         {t("book.chapter.move_dialog.title", "Move to...")}
       </DialogTitle>
-      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 1.5, pt: "8px !important", minHeight: 320 }}>
+      <DialogContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+          pt: "8px !important",
+          minHeight: 320,
+        }}
+      >
         {movingNode && (
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-            {t("book.chapter.move_dialog.moving", "Moving:")} <strong>{movingNode.title}</strong>
+            {t("book.chapter.move_dialog.moving", "Moving:")}{" "}
+            <strong>{movingNode.title}</strong>
           </Typography>
         )}
         <TextField
           size="small"
           variant="outlined"
-          placeholder={t("book.chapter.move_dialog.search_placeholder", "Search nodes...")}
+          placeholder={t(
+            "book.chapter.move_dialog.search_placeholder",
+            "Search nodes...",
+          )}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
@@ -202,7 +213,10 @@ export function MoveToParentDialog({
             ),
           }}
         />
-        <div className="flex-1 overflow-y-auto -mx-1" style={{ maxHeight: 320 }}>
+        <div
+          className="flex-1 overflow-y-auto -mx-1"
+          style={{ maxHeight: 320 }}
+        >
           {filteredTree.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground text-sm py-8">
               {t("book.chapter.move_dialog.no_results", "No matching nodes")}

@@ -103,7 +103,6 @@ describe("verifyBearerToken", () => {
 
     server.stop(true);
   });
-
 });
 
 describe("auth-local verifier wrappers", () => {

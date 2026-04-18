@@ -9,9 +9,7 @@ function ZoneSearchRoute() {
 
 export const Route = createFileRoute("/_mainLayout/zone/$slug/search")({
   component: ZoneSearchRoute,
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { keyword?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { keyword?: string } => ({
     keyword: typeof search.keyword === "string" ? search.keyword : undefined,
   }),
 });

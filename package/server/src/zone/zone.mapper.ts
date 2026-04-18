@@ -5,17 +5,13 @@ import type { ZoneWithRelations } from "./zone.service";
  * Map Prisma Zone + Unit to ZoneDTO.
  * Resolves translations using the first available translation.
  */
-export function mapZoneToDTO(
-  zone: ZoneWithRelations,
-  lang?: string,
-): ZoneDTO {
+export function mapZoneToDTO(zone: ZoneWithRelations, lang?: string): ZoneDTO {
   const translations = zone.unit?.translations ?? [];
 
   // Pick best translation: requested lang > first available
   const translation =
-    (lang
-      ? translations.find((t) => t.language === lang)
-      : undefined) ?? translations[0];
+    (lang ? translations.find((t) => t.language === lang) : undefined) ??
+    translations[0];
 
   return {
     slug: zone.unit?.slug ?? "",

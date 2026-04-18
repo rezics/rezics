@@ -50,9 +50,7 @@ export const meiliFeedbackApi = {
 // ANCHOR: Post search
 
 export const meiliPostApi = {
-  postSearch: async (
-    opts: PostSearchOptions,
-  ): Promise<PostSearchResult> => {
+  postSearch: async (opts: PostSearchOptions): Promise<PostSearchResult> => {
     return apiFetch<PostSearchResult>(`/meili/posts/search`, {
       method: "POST",
       body: JSON.stringify(opts),
@@ -63,9 +61,7 @@ export const meiliPostApi = {
 // ANCHOR: Realm search
 
 export const meiliRealmApi = {
-  realmSearch: async (
-    opts: RealmSearchOptions,
-  ): Promise<RealmSearchResult> => {
+  realmSearch: async (opts: RealmSearchOptions): Promise<RealmSearchResult> => {
     return apiFetch<RealmSearchResult>(`/meili/realms/search`, {
       method: "POST",
       body: JSON.stringify(opts),

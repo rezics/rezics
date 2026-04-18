@@ -1,19 +1,16 @@
-import type {
-  ScoreEntryDTO,
-  UpsertScoreInput,
-} from '@rezics/contract';
+import type { ScoreEntryDTO, UpsertScoreInput } from "@rezics/contract";
 import {
   type UseMutationOptions,
   useMutation,
   useQueryClient,
-} from '@tanstack/react-query';
-import { scoreApi } from './score.api';
-import { scoreKeys } from './score.keys';
+} from "@tanstack/react-query";
+import { scoreApi } from "./score.api";
+import { scoreKeys } from "./score.keys";
 
 export function useUpsertScoreMutation(
   options?: Omit<
     UseMutationOptions<ScoreEntryDTO, Error, UpsertScoreInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -38,8 +35,12 @@ export function useUpsertScoreMutation(
 
 export function useDeleteScoreMutation(
   options?: Omit<
-    UseMutationOptions<{ message: string }, Error, { id: string; unitId: string }>,
-    'mutationFn'
+    UseMutationOptions<
+      { message: string },
+      Error,
+      { id: string; unitId: string }
+    >,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();

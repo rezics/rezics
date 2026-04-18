@@ -13,10 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useCastTagVoteMutation } from "@rezics/api/tag/tag.mutations";
-import type {
-  BatchTagTranslationResult,
-  UnitTagDTO,
-} from "@rezics/contract";
+import type { BatchTagTranslationResult, UnitTagDTO } from "@rezics/contract";
 import type React from "react";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";

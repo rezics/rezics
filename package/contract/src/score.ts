@@ -1,4 +1,4 @@
-import { t } from 'elysia';
+import { t } from "elysia";
 
 // ============================================================
 // SCORE CONSTANTS
@@ -7,7 +7,10 @@ import { t } from 'elysia';
 export const SCORE_MIN = 1;
 export const SCORE_MAX = 10;
 
-export const scoreValueSchema = t.Integer({ minimum: SCORE_MIN, maximum: SCORE_MAX });
+export const scoreValueSchema = t.Integer({
+  minimum: SCORE_MIN,
+  maximum: SCORE_MAX,
+});
 
 // ============================================================
 // SCORE ENTRY DTO
@@ -24,16 +27,13 @@ export const scoreEntryDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type ScoreEntryDTO = (typeof scoreEntryDTOSchema)['static'];
+export type ScoreEntryDTO = (typeof scoreEntryDTOSchema)["static"];
 
 // ============================================================
 // SCORE AGGREGATE DTO
 // ============================================================
 
-export const scoreDistributionSchema = t.Record(
-  t.String(),
-  t.Integer(),
-);
+export const scoreDistributionSchema = t.Record(t.String(), t.Integer());
 
 export const fieldAggregateSchema = t.Object({
   total: t.Integer(),
@@ -41,7 +41,7 @@ export const fieldAggregateSchema = t.Object({
   dist: scoreDistributionSchema,
 });
 
-export type FieldAggregate = (typeof fieldAggregateSchema)['static'];
+export type FieldAggregate = (typeof fieldAggregateSchema)["static"];
 
 export const scoreAggregateDTOSchema = t.Object({
   unitId: t.String(),
@@ -53,7 +53,7 @@ export const scoreAggregateDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type ScoreAggregateDTO = (typeof scoreAggregateDTOSchema)['static'];
+export type ScoreAggregateDTO = (typeof scoreAggregateDTOSchema)["static"];
 
 // ============================================================
 // UPSERT SCORE INPUT
@@ -66,7 +66,7 @@ export const upsertScoreInputSchema = t.Object({
   fields: t.Optional(t.Record(t.String(), scoreValueSchema)),
 });
 
-export type UpsertScoreInput = (typeof upsertScoreInputSchema)['static'];
+export type UpsertScoreInput = (typeof upsertScoreInputSchema)["static"];
 
 // ============================================================
 // SCORE REALM FIELD DTO
@@ -81,16 +81,16 @@ export const scoreRealmFieldDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type ScoreRealmFieldDTO = (typeof scoreRealmFieldDTOSchema)['static'];
+export type ScoreRealmFieldDTO = (typeof scoreRealmFieldDTOSchema)["static"];
 
 // ============================================================
 // ADD REALM FIELD INPUT
 // ============================================================
 
 export const addRealmFieldInputSchema = t.Object({
-  key: t.String({ pattern: '^[a-z][a-z0-9-]*$' }),
+  key: t.String({ pattern: "^[a-z][a-z0-9-]*$" }),
   label: t.Optional(t.String()),
   sortOrder: t.Optional(t.Integer()),
 });
 
-export type AddRealmFieldInput = (typeof addRealmFieldInputSchema)['static'];
+export type AddRealmFieldInput = (typeof addRealmFieldInputSchema)["static"];

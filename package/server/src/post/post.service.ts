@@ -6,7 +6,7 @@ import type {
 import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { type PostKind, prisma, UnitStatus, UnitType } from "#/prisma/client";
-import { syncPostToMeili, patchPostFieldsToMeili } from "@/meili/post/sync";
+import { patchPostFieldsToMeili, syncPostToMeili } from "@/meili/post/sync";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 

@@ -17,20 +17,20 @@ export {
   BookBasicInfoPage as OverviewPage,
 } from "./pages/BookBasicInfoPage";
 export { BookContentPage } from "./pages/BookContentPage";
-export {
-  BookDiscussionPage,
-  BookCommunityPage,
-} from "./pages/BookDiscussionPage";
 /** Book detail layout (shared hero + data fetching). */
 export { BookDetailLayout } from "./pages/BookDetailLayout";
+export {
+  BookCommunityPage,
+  BookDiscussionPage,
+} from "./pages/BookDiscussionPage";
+/** Book library curated homepage. */
+export { BookHomePage } from "./pages/BookHomePage";
 /** Book library list page. */
 // Backward compatible aliases
 export {
   BookLibPage,
   BookLibPage as BookLibContainer,
 } from "./pages/BookLibPage";
-/** Book library curated homepage. */
-export { BookHomePage } from "./pages/BookHomePage";
 export {
   BookReviewPage,
   BookReviewPage as ReviewShelfPage,

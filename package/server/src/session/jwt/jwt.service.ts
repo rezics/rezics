@@ -1,13 +1,13 @@
+import type { RezicsSessionClaims } from "@rezics/contract";
 import {
   createLocalJWKSet,
   importJWK,
+  type JWK,
   jwtVerify,
   SignJWT,
-  type JWK,
 } from "jose";
-import type { RezicsSessionClaims } from "@rezics/contract";
-import { getJwtService } from "@/jwt/jwtServiceCache";
 import { env } from "@/env";
+import { getJwtService } from "@/jwt/jwtServiceCache";
 
 const ISSUER = "rezics-server";
 const DEFAULT_TTL_SECONDS = 900;

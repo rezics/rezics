@@ -1,7 +1,7 @@
 import { Chip, Stack, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
@@ -22,8 +22,7 @@ export const WorkReleaseNav: React.FC<WorkReleaseNavProps> = ({
     enabled: !!workUnitId,
   });
 
-  const releases =
-    data?.books?.filter((b) => b.unitId !== currentBookId) ?? [];
+  const releases = data?.books?.filter((b) => b.unitId !== currentBookId) ?? [];
 
   if (releases.length === 0) return null;
 
@@ -40,10 +39,7 @@ export const WorkReleaseNav: React.FC<WorkReleaseNavProps> = ({
             params={{ bookId: book.unitId }}
           >
             <Chip
-              label={
-                getTranslation(book.translations)?.title ??
-                "Edition"
-              }
+              label={getTranslation(book.translations)?.title ?? "Edition"}
               size="small"
               variant="outlined"
               clickable

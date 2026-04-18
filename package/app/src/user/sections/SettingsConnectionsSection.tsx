@@ -1,20 +1,20 @@
-import { CircularProgress, Divider, Typography } from '@mui/material';
-import { authQueries } from '@rezics/api/auth/auth.queries';
-import { authApi } from '@rezics/api/auth/auth.api';
-import type { AuthProvider } from '@rezics/contract';
-import { useQuery } from '@tanstack/react-query';
-import { type FC, useState } from 'react';
-import { SettingsSection } from '@/user/components/SettingsSection';
-import { ProviderCard } from '@/user/components/ProviderCard';
-import { providerIcons } from '@/user/components/providerIcons';
-import { useRequireAuth } from '@/user/pages/useAuth';
+import { CircularProgress, Divider, Typography } from "@mui/material";
+import { authApi } from "@rezics/api/auth/auth.api";
+import { authQueries } from "@rezics/api/auth/auth.queries";
+import type { AuthProvider } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import { type FC, useState } from "react";
+import { ProviderCard } from "@/user/components/ProviderCard";
+import { providerIcons } from "@/user/components/providerIcons";
+import { SettingsSection } from "@/user/components/SettingsSection";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
-const PROVIDERS: { id: AuthProvider['id']; name: string }[] = [
-  { id: 'google', name: 'Google' },
-  { id: 'github', name: 'GitHub' },
-  { id: 'microsoft', name: 'Microsoft' },
-  { id: 'twitter', name: 'X (Twitter)' },
-  { id: 'telegram', name: 'Telegram' },
+const PROVIDERS: { id: AuthProvider["id"]; name: string }[] = [
+  { id: "google", name: "Google" },
+  { id: "github", name: "GitHub" },
+  { id: "microsoft", name: "Microsoft" },
+  { id: "twitter", name: "X (Twitter)" },
+  { id: "telegram", name: "Telegram" },
 ];
 
 export const SettingsConnectionsSection: FC = () => {
@@ -23,7 +23,7 @@ export const SettingsConnectionsSection: FC = () => {
   const { data: sessionState, isLoading } = useQuery(
     authQueries.sessionState(),
   );
-  const [connecting, setConnecting] = useState<AuthProvider['id'] | null>(null);
+  const [connecting, setConnecting] = useState<AuthProvider["id"] | null>(null);
 
   if (isLoading) {
     return (
@@ -37,7 +37,7 @@ export const SettingsConnectionsSection: FC = () => {
   const connectedProviders = new Set(authSession?.providerIds ?? []);
   const primaryProvider = authSession?.primaryProviderId;
 
-  const handleConnect = async (providerId: AuthProvider['id']) => {
+  const handleConnect = async (providerId: AuthProvider["id"]) => {
     setConnecting(providerId);
     try {
       const response = await authApi.signInSocial({

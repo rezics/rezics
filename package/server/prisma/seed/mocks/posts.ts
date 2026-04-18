@@ -9,7 +9,12 @@ import {
   generateTranslations,
 } from "./generators.js";
 import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
-import { chunkedParallel, powerLaw, randomBoolean, randomInt } from "./utils.js";
+import {
+  chunkedParallel,
+  powerLaw,
+  randomBoolean,
+  randomInt,
+} from "./utils.js";
 
 const CHUNK_SIZE = 10;
 const BATCH_THRESHOLD = 20;
@@ -383,9 +388,7 @@ async function seedTreePostsForTarget(
       const depth = Math.min(parent.depth + 1, 4);
       const replyId = randomUUID();
       const sortPath = `${parent.sortPath}/${String(randomInt(0, 99999)).padStart(5, "0")}`;
-      const rootId = parent.sortPath.includes("/")
-        ? rootIds[0]
-        : parent.id;
+      const rootId = parent.sortPath.includes("/") ? rootIds[0] : parent.id;
 
       const unit = await prisma.unit.create({
         data: {
@@ -460,7 +463,12 @@ const WIKI_POST_ZH_ID = "01910000-0000-7000-8000-000000001001";
 const WIKI_POST_EN_ID = "01910000-0000-7000-8000-000000001002";
 const WIKI_POST_JA_ID = "01910000-0000-7000-8000-000000001003";
 
-const WIKI_POSTS: { id: string; language: string; title: string; body: string }[] = [
+const WIKI_POSTS: {
+  id: string;
+  language: string;
+  title: string;
+  body: string;
+}[] = [
   {
     id: WIKI_POST_ZH_ID,
     language: "zh-hant",

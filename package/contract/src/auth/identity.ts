@@ -1,13 +1,12 @@
-export {
-  identityConfirmBodySchema,
-  identityConfirmResponseSchema,
-  checkSlugQuerySchema,
-  checkSlugResponseSchema,
-} from "./self-service";
-
 export type {
-  IdentityConfirmBody,
-  IdentityConfirmResponse,
   CheckSlugQuery,
   CheckSlugResponse,
+  IdentityConfirmBody,
+  IdentityConfirmResponse,
+} from "./self-service";
+export {
+  checkSlugQuerySchema,
+  checkSlugResponseSchema,
+  identityConfirmBodySchema,
+  identityConfirmResponseSchema,
 } from "./self-service";

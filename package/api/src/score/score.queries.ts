@@ -1,6 +1,6 @@
-import { queryOptions } from '@tanstack/react-query';
-import { scoreApi } from './score.api';
-import { scoreKeys } from './score.keys';
+import { queryOptions } from "@tanstack/react-query";
+import { scoreApi } from "./score.api";
+import { scoreKeys } from "./score.keys";
 
 export const scoreAggregatesQuery = (unitId: string) =>
   queryOptions({

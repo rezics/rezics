@@ -17,11 +17,7 @@ const DefaultResultItem: React.FC<{
   item: ContentSearchDocument;
   preferredLanguage?: string;
 }> = ({ item, preferredLanguage }) => {
-  const title = resolveTitle(
-    item.titles,
-    item.languages,
-    preferredLanguage,
-  );
+  const title = resolveTitle(item.titles, item.languages, preferredLanguage);
 
   return (
     <div className="flex items-start gap-3 py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
@@ -77,7 +73,11 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
 
   return (
     <div>
-      <Typography variant="caption" color="text.secondary" className="mb-2 block">
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        className="mb-2 block"
+      >
         {result.total} results ({result.processingTimeMs}ms)
       </Typography>
       <div>

@@ -3,9 +3,9 @@ import {
   createPostSchema,
   hasPermissionToDeletePost,
   hasPermissionToUpdatePost,
-  postListBodySchema,
   type PostListResponse,
   type PostResponse,
+  postListBodySchema,
   postListQuerySchema,
   postListResponseSchema,
   postParamsSchema,
@@ -39,7 +39,9 @@ export const postApi = new Elysia({ prefix: "/post" })
       const identity = await tryResolveIdentity(headers["authorization"]);
       const admin = isAdminRole(identity);
 
-      const { posts, total } = await postService.list(query, { isAdmin: admin });
+      const { posts, total } = await postService.list(query, {
+        isAdmin: admin,
+      });
       return { posts: posts.map(mapPostToDTO), total };
     },
     {
@@ -59,7 +61,10 @@ export const postApi = new Elysia({ prefix: "/post" })
       const identity = await tryResolveIdentity(headers["authorization"]);
       const admin = isAdminRole(identity);
 
-      const { posts, total } = await postService.list({ ...body, ids: body.ids?.join(",") }, { isAdmin: admin });
+      const { posts, total } = await postService.list(
+        { ...body, ids: body.ids?.join(",") },
+        { isAdmin: admin },
+      );
       return { posts: posts.map(mapPostToDTO), total };
     },
     {
@@ -94,7 +99,13 @@ export const postApi = new Elysia({ prefix: "/post" })
     "/:unitId",
     async ({ params, body, identity, set }): Promise<PostResponse> => {
       const target = await postService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdatePost(identity.permission, identity.unitId, target.unit as any)) {
+      if (
+        !hasPermissionToUpdatePost(
+          identity.permission,
+          identity.unitId,
+          target.unit as any,
+        )
+      ) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to update this post",
@@ -118,7 +129,13 @@ export const postApi = new Elysia({ prefix: "/post" })
     "/:unitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await postService.getByUnitId(params.unitId);
-      if (!hasPermissionToDeletePost(identity.permission, identity.unitId, target.unit as any)) {
+      if (
+        !hasPermissionToDeletePost(
+          identity.permission,
+          identity.unitId,
+          target.unit as any,
+        )
+      ) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this post",

@@ -40,16 +40,14 @@ export const dmMessageListQuerySchema = t.Object({
   page: t.Optional(t.Numeric({ default: 1 })),
   limit: t.Optional(t.Numeric({ default: 50 })),
 });
-export type DmMessageListQuery =
-  (typeof dmMessageListQuerySchema)["static"];
+export type DmMessageListQuery = (typeof dmMessageListQuerySchema)["static"];
 
 export const dmMessageListBodySchema = t.Object({
   ...listPostBodyBase.properties,
   page: t.Optional(t.Numeric({ default: 1 })),
   limit: t.Optional(t.Numeric({ default: 50 })),
 });
-export type DmMessageListBody =
-  (typeof dmMessageListBodySchema)["static"];
+export type DmMessageListBody = (typeof dmMessageListBodySchema)["static"];
 
 export const dmSendBodySchema = t.Object({
   recipientId: t.String(),

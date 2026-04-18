@@ -1,18 +1,6 @@
 /** biome-ignore-all lint/correctness/noUnusedImports: <any> */
-import {
-  Faker,
-  base,
-  de,
-  en,
-  faker,
-  ja,
-  zh_CN,
-  zh_TW,
-} from "@faker-js/faker";
-import {
-  type Language,
-  LANGUAGES,
-} from "@rezics/contract";
+import { base, de, en, Faker, faker, ja, zh_CN, zh_TW } from "@faker-js/faker";
+import { LANGUAGES, type Language } from "@rezics/contract";
 import type { Prisma } from "#/prisma/generated/client.js";
 import { PostKind, UnitType } from "#/prisma/generated/client.js";
 import {

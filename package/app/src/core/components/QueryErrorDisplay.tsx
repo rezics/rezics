@@ -1,15 +1,18 @@
-import { useState } from "react";
 import Alert from "@mui/material/Alert";
 import Collapse from "@mui/material/Collapse";
 import Typography from "@mui/material/Typography";
 import { ApiError } from "@rezics/api";
+import { useState } from "react";
 
 interface QueryErrorDisplayProps {
   error: Error | null;
   className?: string;
 }
 
-export function QueryErrorDisplay({ error, className }: QueryErrorDisplayProps) {
+export function QueryErrorDisplay({
+  error,
+  className,
+}: QueryErrorDisplayProps) {
   const [detailOpen, setDetailOpen] = useState(false);
 
   if (!error) return null;

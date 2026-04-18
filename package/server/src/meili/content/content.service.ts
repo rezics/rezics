@@ -2,8 +2,8 @@ import type {
   ContentSearchOptions,
   ContentSearchResult,
 } from "@rezics/contract";
-import { searchClient } from "../search-client";
 import { resolveSlugRefs } from "../../shared/slug-ref";
+import { searchClient } from "../search-client";
 
 /**
  * Search the unified content index with typed options.
@@ -20,9 +20,7 @@ export async function searchContent(
     if (types.length === 1) {
       filter.push(`type = "${types[0]}"`);
     } else if (types.length > 1) {
-      filter.push(
-        `type IN [${types.map((t) => `"${t}"`).join(", ")}]`,
-      );
+      filter.push(`type IN [${types.map((t) => `"${t}"`).join(", ")}]`);
     }
   }
 

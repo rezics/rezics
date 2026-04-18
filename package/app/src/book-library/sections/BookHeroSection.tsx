@@ -1,6 +1,6 @@
 import { Rating } from "@mui/material";
-import type { BookDTO } from "@rezics/contract";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
+import type { BookDTO } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -49,7 +49,10 @@ export const BookHeroSection: React.FC<{
 }> = ({ bookInfo, rating }) => {
   const { t } = useTranslation();
   const { bookId } = useParams({ strict: false }) as { bookId?: string };
-  const [selectedLang] = useBookLanguage(bookId ?? bookInfo?.unitId ?? "", bookInfo);
+  const [selectedLang] = useBookLanguage(
+    bookId ?? bookInfo?.unitId ?? "",
+    bookInfo,
+  );
 
   const selectedTranslation = getTranslation(
     bookInfo?.translations,
@@ -58,9 +61,21 @@ export const BookHeroSection: React.FC<{
   );
   const title = selectedTranslation?.title ?? "";
   const coverUrl = getBookCoverUrl(bookInfo);
-  const author = getEntityTranslation(bookInfo?.attributions, "author", selectedLang);
-  const publisher = getEntityTranslation(bookInfo?.attributions, "publisher", selectedLang);
-  const producer = getEntityTranslation(bookInfo?.attributions, "producer", selectedLang);
+  const author = getEntityTranslation(
+    bookInfo?.attributions,
+    "author",
+    selectedLang,
+  );
+  const publisher = getEntityTranslation(
+    bookInfo?.attributions,
+    "publisher",
+    selectedLang,
+  );
+  const producer = getEntityTranslation(
+    bookInfo?.attributions,
+    "producer",
+    selectedLang,
+  );
 
   const bookUnitId = bookInfo?.unitId ?? "";
   const { data: tagsData } = useQuery(tagQueries.forUnit(bookUnitId));
@@ -91,9 +106,7 @@ export const BookHeroSection: React.FC<{
 
           {/* Book Info */}
           <div className="col-span-8 md:col-span-6 text-white flex flex-col gap-3">
-            <h1 className="text-2xl font-bold break-words">
-              {title}
-            </h1>
+            <h1 className="text-2xl font-bold break-words">{title}</h1>
 
             <div className="space-y-1">
               {author?.name && (
@@ -116,7 +129,7 @@ export const BookHeroSection: React.FC<{
                 {t("book.fields.text_length")}：{bookInfo?.textLength ?? 0}
               </p>
               <p>
-                {t("book.fields.isbn")}：{bookInfo?.isbn13 ?? ''}
+                {t("book.fields.isbn")}：{bookInfo?.isbn13 ?? ""}
               </p>
             </div>
 

@@ -22,9 +22,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   const { t } = useTranslation();
   const resolvedTitle = title ?? t("page.home.sections.tag_explore");
 
-  const { data, isLoading, error } = useQuery(
-    tagQueries.list({ limit }),
-  );
+  const { data, isLoading, error } = useQuery(tagQueries.list({ limit }));
   const tagUnitIds = useMemo(
     () => (data?.tags ?? []).slice(0, maxTags).map((t) => t.tagUnitId),
     [data, maxTags],
@@ -55,11 +53,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
           const label = translations?.[id]?.name ?? id;
           const slug = translations?.[id]?.slug ?? "";
           return (
-            <Link
-              key={id}
-              to="/book"
-              search={{ tags: slug || label }}
-            >
+            <Link key={id} to="/book" search={{ tags: slug || label }}>
               <Chip label={label} clickable variant="outlined" />
             </Link>
           );

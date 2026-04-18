@@ -21,7 +21,8 @@ export const notificationApi = new Elysia({ prefix: "/notification" })
       query: notificationListQuerySchema,
       detail: {
         summary: "List notifications",
-        description: "Returns a paginated list of notifications for the authenticated user.",
+        description:
+          "Returns a paginated list of notifications for the authenticated user.",
         tags: ["Notifications"],
         security: [{ bearerAuth: [] }],
       },
@@ -78,7 +79,8 @@ export const notificationApi = new Elysia({ prefix: "/notification" })
       body: markReadBodySchema,
       detail: {
         summary: "Mark notification as read",
-        description: "Marks a specific notification as read by type, entity type, and entity ID.",
+        description:
+          "Marks a specific notification as read by type, entity type, and entity ID.",
         tags: ["Notifications"],
         security: [{ bearerAuth: [] }],
       },
@@ -94,7 +96,8 @@ export const notificationApi = new Elysia({ prefix: "/notification" })
       requireUser: true,
       detail: {
         summary: "Mark all as read",
-        description: "Marks all notifications as read for the authenticated user.",
+        description:
+          "Marks all notifications as read for the authenticated user.",
         tags: ["Notifications"],
         security: [{ bearerAuth: [] }],
       },
@@ -118,7 +121,8 @@ export const notificationApi = new Elysia({ prefix: "/notification" })
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "Delete notification",
-        description: "Deletes a notification by ID. Returns 404 if not found or not owned by the user.",
+        description:
+          "Deletes a notification by ID. Returns 404 if not found or not owned by the user.",
         tags: ["Notifications"],
         security: [{ bearerAuth: [] }],
       },

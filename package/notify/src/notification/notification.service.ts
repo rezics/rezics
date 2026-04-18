@@ -76,9 +76,7 @@ export async function getUnreadCount(recipientId: string): Promise<number> {
   const aggregatableTypes = [...AGGREGATABLE_TYPES] as NotificationType[];
 
   // Count distinct aggregated groups with at least one unread
-  const aggregatedResult = await prisma.$queryRawUnsafe<
-    { count: bigint }[]
-  >(
+  const aggregatedResult = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
     `
     SELECT count(*) AS count FROM (
       SELECT 1
@@ -111,7 +109,13 @@ export async function markAsRead(
   entityId: string,
 ) {
   await prisma.notification.updateMany({
-    where: { recipientId, type: type as any, entityType, entityId, read: false },
+    where: {
+      recipientId,
+      type: type as any,
+      entityType,
+      entityId,
+      read: false,
+    },
     data: { read: true, readAt: new Date() },
   });
 }

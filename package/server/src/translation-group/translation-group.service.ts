@@ -295,7 +295,11 @@ export class TranslationGroupService {
    */
   async onUnitDeleted(
     tx: Prisma.TransactionClient,
-    deletedUnit: { id: string; translationGroupId: string | null; defaultLanguage: string | null },
+    deletedUnit: {
+      id: string;
+      translationGroupId: string | null;
+      defaultLanguage: string | null;
+    },
   ): Promise<void> {
     if (!deletedUnit.translationGroupId) return;
 

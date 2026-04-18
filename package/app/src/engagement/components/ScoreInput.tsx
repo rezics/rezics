@@ -32,11 +32,7 @@ export const ScoreInput: React.FC<ScoreInputProps> = ({
         sx={{ flexWrap: "wrap", gap: 0.5 }}
       >
         {scores.map((s) => (
-          <ToggleButton
-            key={s}
-            value={s}
-            sx={{ minWidth: 36, px: 1 }}
-          >
+          <ToggleButton key={s} value={s} sx={{ minWidth: 36, px: 1 }}>
             {s}
           </ToggleButton>
         ))}

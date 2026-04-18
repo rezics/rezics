@@ -8,7 +8,8 @@ export function mapLinkToDTO(row: LinkWithRelations): LinkDTO {
     siteName: row.siteName ?? undefined,
     faviconUrl: row.faviconUrl ?? undefined,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    translations: (row.unit?.translations ?? []) as unknown as UnitTranslationDTO[],
+    translations: (row.unit?.translations ??
+      []) as unknown as UnitTranslationDTO[],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

@@ -12,9 +12,9 @@ import {
   type UnitVisibility,
 } from "#/prisma/client";
 import {
-  syncContentToMeili,
   deleteContentFromMeili,
   patchContentMetadataToMeili,
+  syncContentToMeili,
 } from "@/meili/content/sync";
 import { cleanupReactions } from "@/reaction/reaction-client";
 import type { UnitWithRelations } from "./types";
@@ -251,15 +251,13 @@ export class UnitService {
       where: { id: unitId },
       data: {
         status: (input.status as UnitStatus | undefined) ?? undefined,
-        visibility: (input.visibility as UnitVisibility | undefined) ??
-          undefined,
+        visibility:
+          (input.visibility as UnitVisibility | undefined) ?? undefined,
         nsfw: input.nsfw ?? undefined,
         defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? undefined,
         workUnitId: input.workUnitId,
-        extra: (input.extra ?? undefined) as
-          | Prisma.InputJsonValue
-          | undefined,
+        extra: (input.extra ?? undefined) as Prisma.InputJsonValue | undefined,
         publishedAt: input.publishedAt
           ? new Date(input.publishedAt as any)
           : input.publishedAt === null
@@ -271,8 +269,10 @@ export class UnitService {
 
     const patchFields: Record<string, any> = {};
     if (input.nsfw !== undefined) patchFields.nsfw = input.nsfw;
-    if (input.visibility !== undefined) patchFields.visibility = input.visibility;
-    if (input.defaultLanguage !== undefined) patchFields.defaultLanguage = input.defaultLanguage;
+    if (input.visibility !== undefined)
+      patchFields.visibility = input.visibility;
+    if (input.defaultLanguage !== undefined)
+      patchFields.defaultLanguage = input.defaultLanguage;
     if (input.publishedAt !== undefined) {
       patchFields.publishedAt = input.publishedAt
         ? new Date(input.publishedAt as any).toISOString()

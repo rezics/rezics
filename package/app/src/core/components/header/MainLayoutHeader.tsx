@@ -20,90 +20,92 @@ interface HeaderProps {
   disableDrawerToggle?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = React.memo(({
-  isDragging = false,
-  layoutType = "type-b",
-  disableDrawerToggle = false,
-}) => {
-  const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
-  const drawerWidth = useLayoutStore((s) => s.drawerWidth);
-  const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
-  const theme = useTheme();
-  const isMobile = useIsMobile();
-  const themeMode = useAppStore((state) => state.theme);
+export const Header: React.FC<HeaderProps> = React.memo(
+  ({
+    isDragging = false,
+    layoutType = "type-b",
+    disableDrawerToggle = false,
+  }) => {
+    const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
+    const drawerWidth = useLayoutStore((s) => s.drawerWidth);
+    const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
+    const theme = useTheme();
+    const isMobile = useIsMobile();
+    const themeMode = useAppStore((state) => state.theme);
 
-  const isDark = useMemo(() => themeMode === "dark", [themeMode]);
-  const isHomePage = useRouterState({
-    select: (s) => s.location.pathname === "/",
-  });
+    const isDark = useMemo(() => themeMode === "dark", [themeMode]);
+    const isHomePage = useRouterState({
+      select: (s) => s.location.pathname === "/",
+    });
 
-  const handleDrawerToggle = () => {
-    if (!disableDrawerToggle) toggleSidebar();
-  };
+    const handleDrawerToggle = () => {
+      if (!disableDrawerToggle) toggleSidebar();
+    };
 
-  const auth = useAuth();
+    const auth = useAuth();
 
-  const authSection = (() => {
-    if (auth.readyForApp && auth.user) return <AuthenticatedSection />;
-    if (auth.authenticated && !auth.registrationComplete)
-      return <PendingVerificationSection />;
-    return <UnauthenticatedSection />;
-  })();
+    const authSection = (() => {
+      if (auth.readyForApp && auth.user) return <AuthenticatedSection />;
+      if (auth.authenticated && !auth.registrationComplete)
+        return <PendingVerificationSection />;
+      return <UnauthenticatedSection />;
+    })();
 
-  return (
-    <AppBar
-      position="fixed"
-      elevation={0}
-      sx={{
-        backgroundColor: "background.paper",
-        zIndex: theme.zIndex.drawer + 1,
-        ml: layoutType === "type-a" && sidebarOpen ? drawerWidth : 0,
-        width:
-          layoutType === "type-a" && sidebarOpen
-            ? `calc(100% - ${drawerWidth}px)`
-            : "100%",
-        transition: theme.transitions.create(["margin", "width"], {
-          easing: theme.transitions.easing.easeOut,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-      }}
-      className={cn(
-        isDragging && "rounded-tl-2xl rounded-bl-2xl",
-        "pointer-events-auto",
-        "border-b",
-        isDark ? "border-gray-800" : "border-gray-200",
-      )}
-    >
-      <Toolbar className="px-2 gap-2">
-        <DrawerToggler
-          handleDrawerToggleInner={handleDrawerToggle}
-          layoutType={layoutType}
-          sidebarOpen={sidebarOpen}
-        />
+    return (
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          backgroundColor: "background.paper",
+          zIndex: theme.zIndex.drawer + 1,
+          ml: layoutType === "type-a" && sidebarOpen ? drawerWidth : 0,
+          width:
+            layoutType === "type-a" && sidebarOpen
+              ? `calc(100% - ${drawerWidth}px)`
+              : "100%",
+          transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+        }}
+        className={cn(
+          isDragging && "rounded-tl-2xl rounded-bl-2xl",
+          "pointer-events-auto",
+          "border-b",
+          isDark ? "border-gray-800" : "border-gray-200",
+        )}
+      >
+        <Toolbar className="px-2 gap-2">
+          <DrawerToggler
+            handleDrawerToggleInner={handleDrawerToggle}
+            layoutType={layoutType}
+            sidebarOpen={sidebarOpen}
+          />
 
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          {!isHomePage && (
-            <Avatar sx={{ bgcolor: "transparent" }} variant="rounded">
-              <img src="/logo.svg" alt="logo" />
-            </Avatar>
-          )}
-          <Typography
-            variant="h1"
-            className="text-3xl font-bold"
-            sx={{ color: "primary.main" }}
-          >
-            REZICS
-          </Typography>
-        </Link>
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            {!isHomePage && (
+              <Avatar sx={{ bgcolor: "transparent" }} variant="rounded">
+                <img src="/logo.svg" alt="logo" />
+              </Avatar>
+            )}
+            <Typography
+              variant="h1"
+              className="text-3xl font-bold"
+              sx={{ color: "primary.main" }}
+            >
+              REZICS
+            </Typography>
+          </Link>
 
-        <div className="flex-1 min-w-0 flex justify-center">
-          {!isMobile && isHomePage && (
-            <HomeSearch className="w-full max-w-md" />
-          )}
-        </div>
+          <div className="flex-1 min-w-0 flex justify-center">
+            {!isMobile && isHomePage && (
+              <HomeSearch className="w-full max-w-md" />
+            )}
+          </div>
 
-        {authSection}
-      </Toolbar>
-    </AppBar>
-  );
-});
+          {authSection}
+        </Toolbar>
+      </AppBar>
+    );
+  },
+);

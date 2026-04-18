@@ -2,7 +2,10 @@ import type { CreateFeedbackInput, FeedbackListQuery } from "@rezics/contract";
 import { parseIdsCsv } from "@rezics/contract";
 import type { Feedback, Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
-import { syncFeedbackToMeili, patchFeedbackResolutionToMeili } from "@/meili/feedback/sync";
+import {
+  patchFeedbackResolutionToMeili,
+  syncFeedbackToMeili,
+} from "@/meili/feedback/sync";
 
 export class FeedbackService {
   async create(

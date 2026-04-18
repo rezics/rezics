@@ -38,5 +38,7 @@ export const env = createEnv({
 
 /** Parsed set of allowed reaction types for validation. */
 export const allowedReactionTypes = new Set(
-  env.REACTION_TYPES.split(",").map((t) => t.trim()).filter(Boolean),
+  env.REACTION_TYPES.split(",")
+    .map((t) => t.trim())
+    .filter(Boolean),
 );

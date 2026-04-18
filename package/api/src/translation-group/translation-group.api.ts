@@ -6,12 +6,8 @@ import type {
 import { apiFetch } from "../react-query/http";
 
 export const translationGroupApi = {
-  listSiblings: (
-    unitId: string,
-  ): Promise<TranslationGroupSiblingsResponse> =>
-    apiFetch<TranslationGroupSiblingsResponse>(
-      `/unit/${unitId}/translations`,
-    ),
+  listSiblings: (unitId: string): Promise<TranslationGroupSiblingsResponse> =>
+    apiFetch<TranslationGroupSiblingsResponse>(`/unit/${unitId}/translations`),
 
   attach: (
     unitId: string,

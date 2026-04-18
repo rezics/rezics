@@ -1,5 +1,5 @@
-import { Section, Text } from '@react-email/components';
-import { EmailLayout } from '../components/EmailLayout';
+import { Section, Text } from "@react-email/components";
+import { EmailLayout } from "../components/EmailLayout";
 
 export interface VerificationCodeProps {
   code: string;
@@ -7,7 +7,7 @@ export interface VerificationCodeProps {
 }
 
 export function VerificationCode({ code, userName }: VerificationCodeProps) {
-  const greeting = userName || 'there';
+  const greeting = userName || "there";
 
   return (
     <EmailLayout preview={`Your verification code is ${code}`}>
@@ -29,42 +29,42 @@ export function VerificationCode({ code, userName }: VerificationCodeProps) {
 }
 
 const contentStyle: React.CSSProperties = {
-  padding: '0 0 24px',
+  padding: "0 0 24px",
 };
 
 const greetingStyle: React.CSSProperties = {
-  fontSize: '16px',
-  color: '#111827',
-  margin: '0 0 12px',
+  fontSize: "16px",
+  color: "#111827",
+  margin: "0 0 12px",
 };
 
 const bodyTextStyle: React.CSSProperties = {
-  fontSize: '14px',
-  color: '#374151',
-  lineHeight: '1.6',
-  margin: '0 0 24px',
+  fontSize: "14px",
+  color: "#374151",
+  lineHeight: "1.6",
+  margin: "0 0 24px",
 };
 
 const codeContainerStyle: React.CSSProperties = {
-  textAlign: 'center',
-  padding: '24px 0',
-  margin: '0 0 24px',
-  backgroundColor: '#f3f4f6',
-  borderRadius: '8px',
+  textAlign: "center",
+  padding: "24px 0",
+  margin: "0 0 24px",
+  backgroundColor: "#f3f4f6",
+  borderRadius: "8px",
 };
 
 const codeStyle: React.CSSProperties = {
-  fontSize: '36px',
+  fontSize: "36px",
   fontWeight: 700,
   fontFamily: '"SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace',
-  letterSpacing: '0.3em',
-  color: '#111827',
-  margin: '0',
+  letterSpacing: "0.3em",
+  color: "#111827",
+  margin: "0",
 };
 
 const expiryStyle: React.CSSProperties = {
-  fontSize: '13px',
-  color: '#6b7280',
-  lineHeight: '1.5',
-  margin: '0',
+  fontSize: "13px",
+  color: "#6b7280",
+  lineHeight: "1.5",
+  margin: "0",
 };

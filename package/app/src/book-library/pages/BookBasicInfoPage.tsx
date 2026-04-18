@@ -8,9 +8,9 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { getTranslation } from "@/shared/utils/translation-helpers";
 import { WorkReleaseNav } from "@/i18n/components/WorkReleaseNav";
 import { RemarkInlineForm } from "@/remark/components/RemarkInlineForm";
+import { getTranslation } from "@/shared/utils/translation-helpers";
 import { TagInteraction } from "@/tag/components/TagInteraction";
 import { BookDescription } from "../components/BookDescription";
 import { MetadataPanel } from "../components/BookDetail/MetadataPanel";
@@ -44,8 +44,11 @@ export const BookBasicInfoPage: React.FC = () => {
   if (!bookInfo) return null;
 
   const description =
-    getTranslation(bookInfo.translations, selectedLang, bookInfo.defaultLanguage ?? undefined)
-      ?.description ?? "";
+    getTranslation(
+      bookInfo.translations,
+      selectedLang,
+      bookInfo.defaultLanguage ?? undefined,
+    )?.description ?? "";
 
   const sidebar = (
     <Stack spacing={3}>

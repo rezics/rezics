@@ -1,7 +1,4 @@
-import type {
-  AttributionDTO,
-  EntityDTO,
-} from "@rezics/contract";
+import type { AttributionDTO, EntityDTO } from "@rezics/contract";
 import {
   BasicAdminPermission,
   createEntitySchema,
@@ -19,17 +16,14 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   // --- Entity routes ---
   .get(
     "/entities",
-    async ({
-      query,
-    }): Promise<{ entities: EntityDTO[]; total: number }> => {
+    async ({ query }): Promise<{ entities: EntityDTO[]; total: number }> => {
       return attributionService.listEntities(query as any);
     },
     {
       query: entityListQuerySchema,
       detail: {
         summary: "List entities",
-        description:
-          "List entities with filtering by kind and search query",
+        description: "List entities with filtering by kind and search query",
         tags: ["Attribution"],
       },
     },

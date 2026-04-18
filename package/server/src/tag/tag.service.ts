@@ -108,7 +108,10 @@ export class TagService {
   /**
    * Update a tag's translations (upsert each provided translation).
    */
-  async update(unitId: string, input: UpdateTagInput): Promise<TagWithTranslations> {
+  async update(
+    unitId: string,
+    input: UpdateTagInput,
+  ): Promise<TagWithTranslations> {
     if (input.translations && input.translations.length > 0) {
       await Promise.all(
         input.translations.map((t) =>
@@ -223,7 +226,9 @@ export class TagService {
   async batchTranslations(
     tagUnitIds: string[],
     language: string,
-  ): Promise<Record<string, { name: string; slug: string; description: string }>> {
+  ): Promise<
+    Record<string, { name: string; slug: string; description: string }>
+  > {
     if (tagUnitIds.length === 0) return {};
 
     const tagUnits = await prisma.unit.findMany({
@@ -231,16 +236,23 @@ export class TagService {
       include: { translations: true },
     });
 
-    const result: Record<string, { name: string; slug: string; description: string }> = {};
+    const result: Record<
+      string,
+      { name: string; slug: string; description: string }
+    > = {};
 
     for (const tag of tagUnits) {
       const translations = tag.translations ?? [];
-      const requested = translations.find((t) => t.language === language && t.title);
+      const requested = translations.find(
+        (t) => t.language === language && t.title,
+      );
       const defaultLang = tag.defaultLanguage;
       const byDefault = defaultLang
         ? translations.find((t) => t.language === defaultLang && t.title)
         : undefined;
-      const byFallback = translations.find((t) => t.language === FALLBACK_LANGUAGE && t.title);
+      const byFallback = translations.find(
+        (t) => t.language === FALLBACK_LANGUAGE && t.title,
+      );
       const first = translations.find((t) => t.title);
       const pick = requested ?? byDefault ?? byFallback ?? first;
 

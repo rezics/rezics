@@ -1,7 +1,7 @@
 import { useTheme } from "@mui/material/styles";
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 

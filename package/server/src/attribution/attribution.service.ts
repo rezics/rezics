@@ -10,10 +10,7 @@ import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { patchContentCreditsToMeili } from "@/meili/content/sync";
-import {
-  mapAttributionToDTO,
-  mapEntityToDTO,
-} from "./attribution.mapper";
+import { mapAttributionToDTO, mapEntityToDTO } from "./attribution.mapper";
 import { attributionInclude, entityInclude } from "./types";
 
 export class AttributionService {

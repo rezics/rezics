@@ -97,8 +97,7 @@ export const linkAttributionSchema = t.Object({
   sortOrder: t.Optional(t.Number()),
 });
 
-export type LinkAttributionInput =
-  (typeof linkAttributionSchema)["static"];
+export type LinkAttributionInput = (typeof linkAttributionSchema)["static"];
 
 // ============================================================
 // ATTRIBUTION BRIEF (inline for BookDTO etc.)

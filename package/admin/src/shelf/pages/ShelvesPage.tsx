@@ -1,8 +1,4 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-} from "@mui/material";
+import { Card, CardContent, Typography } from "@mui/material";
 import { Page } from "@/core/layouts/Page";
 
 // MOCK: shelf list page - backend API integration pending

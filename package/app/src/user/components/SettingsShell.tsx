@@ -1,8 +1,8 @@
-import { Box, Typography } from '@mui/material';
-import { Outlet } from '@tanstack/react-router';
-import type { FC } from 'react';
-import { SettingsSidebar } from './SettingsSidebar';
-import { SettingsTabBar } from './SettingsTabBar';
+import { Box, Typography } from "@mui/material";
+import { Outlet } from "@tanstack/react-router";
+import type { FC } from "react";
+import { SettingsSidebar } from "./SettingsSidebar";
+import { SettingsTabBar } from "./SettingsTabBar";
 
 export const SettingsShell: FC = () => {
   return (

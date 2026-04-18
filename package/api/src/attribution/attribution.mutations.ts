@@ -30,10 +30,7 @@ export function useCreateEntityMutation(
       queryClient.invalidateQueries({
         queryKey: attributionKeys.entityLists(),
       });
-      queryClient.setQueryData(
-        attributionKeys.entityDetail(data.unitId),
-        data,
-      );
+      queryClient.setQueryData(attributionKeys.entityDetail(data.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });

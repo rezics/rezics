@@ -1,4 +1,8 @@
-import type { CreateLinkInput, LinkDTO, UpdateLinkInput } from "@rezics/contract";
+import type {
+  CreateLinkInput,
+  LinkDTO,
+  UpdateLinkInput,
+} from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType, UnitVisibility } from "#/prisma/client";
 import { mapLinkToDTO } from "./link.mapper";

@@ -214,8 +214,7 @@ export const updateMemberRoleSchema = t.Object({
   roleKey: t.String(),
 });
 
-export type UpdateMemberRoleInput =
-  (typeof updateMemberRoleSchema)["static"];
+export type UpdateMemberRoleInput = (typeof updateMemberRoleSchema)["static"];
 
 export const realmMemberParamsSchema = t.Object({
   realmUnitId: t.String(),

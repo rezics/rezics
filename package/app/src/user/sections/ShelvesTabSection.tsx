@@ -3,13 +3,13 @@ import { shelfQueries } from "@rezics/api/shelf/shelf.queries";
 import type { ShelfDTO } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState, type FC } from "react";
-import { useProfileContext } from "@/user/components/ProfileLayout";
-import {
-  InnerFilterPanel,
-  type ChipDefinition,
-} from "@/user/components/InnerFilterPanel";
+import { type FC, useMemo, useState } from "react";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
+import {
+  type ChipDefinition,
+  InnerFilterPanel,
+} from "@/user/components/InnerFilterPanel";
+import { useProfileContext } from "@/user/components/ProfileLayout";
 
 const SORT_OPTIONS = [
   { value: "createdAt:desc", label: "Newest" },
@@ -59,9 +59,7 @@ export const ShelvesTabSection: FC = () => {
   const filterConfig: FilterBarConfig = {
     showSearch: true,
     searchPlaceholder: "Search shelves...",
-    dropdowns: [
-      { key: "sort", label: "Sort", options: SORT_OPTIONS },
-    ],
+    dropdowns: [{ key: "sort", label: "Sort", options: SORT_OPTIONS }],
   };
 
   return (
@@ -81,11 +79,19 @@ export const ShelvesTabSection: FC = () => {
       </InnerFilterPanel>
 
       {isLoading ? (
-        <Typography variant="body2" color="text.secondary" className="py-8 text-center">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          className="py-8 text-center"
+        >
           Loading...
         </Typography>
       ) : filtered.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" className="py-8 text-center">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          className="py-8 text-center"
+        >
           {filters.q ? "No shelves match your search" : "No shelves yet"}
         </Typography>
       ) : (
@@ -100,8 +106,7 @@ export const ShelvesTabSection: FC = () => {
 };
 
 const ShelfCard: FC<{ shelf: ShelfDTO }> = ({ shelf }) => {
-  const title =
-    shelf.translations?.[0]?.title ?? "Untitled Shelf";
+  const title = shelf.translations?.[0]?.title ?? "Untitled Shelf";
   const itemCount = shelf.items?.length ?? 0;
 
   return (
@@ -118,7 +123,11 @@ const ShelfCard: FC<{ shelf: ShelfDTO }> = ({ shelf }) => {
             className="w-full h-24 object-cover rounded mb-2"
           />
         )}
-        <Typography variant="body2" className="font-medium line-clamp-2" color="text.primary">
+        <Typography
+          variant="body2"
+          className="font-medium line-clamp-2"
+          color="text.primary"
+        >
           {title}
         </Typography>
         <div className="flex items-center justify-between mt-auto pt-2">

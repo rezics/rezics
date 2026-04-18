@@ -1,5 +1,5 @@
-import { type FC, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { type FC, useEffect } from "react";
 
 /**
  * @deprecated Replaced by CompleteRegistrationPage.

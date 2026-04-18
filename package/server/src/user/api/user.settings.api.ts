@@ -2,10 +2,7 @@ import type { UserSettings } from "@rezics/contract";
 import { updateUserSettingsSchema } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { authMacro } from "@/middleware";
-import {
-  getSettings,
-  updateSettings,
-} from "../service/settings.service";
+import { getSettings, updateSettings } from "../service/settings.service";
 
 export const settingsRoute = new Elysia()
   .use(authMacro)
@@ -18,7 +15,8 @@ export const settingsRoute = new Elysia()
       requireLogin: true,
       detail: {
         summary: "Get user settings",
-        description: "Get current user's settings (realm-tag preferences, language preferences)",
+        description:
+          "Get current user's settings (realm-tag preferences, language preferences)",
         tags: ["Users"],
       },
     },

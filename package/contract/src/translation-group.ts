@@ -15,8 +15,7 @@ export const attachTranslationSchema = t.Object({
   body: t.Optional(t.Nullable(t.String())),
 });
 
-export type AttachTranslationInput =
-  (typeof attachTranslationSchema)["static"];
+export type AttachTranslationInput = (typeof attachTranslationSchema)["static"];
 
 export const translationGroupSiblingSchema = t.Object({
   unitId: t.String(),

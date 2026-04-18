@@ -1,6 +1,6 @@
 import {
-  type RezicsSessionClaims,
   NormalizedTokenName,
+  type RezicsSessionClaims,
   TokenTransportHeader,
 } from "@rezics/contract";
 import { createJwtVerifier, JwtAlgorithm } from "@rezics/jwt";

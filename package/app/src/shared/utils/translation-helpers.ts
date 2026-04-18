@@ -6,11 +6,8 @@
  * These helpers resolve the best match for a given language.
  */
 
-import type {
-  BookDTO,
-  UnitTranslationDTO,
-} from '@rezics/contract';
-import { FALLBACK_LANGUAGE } from '@rezics/contract';
+import type { BookDTO, UnitTranslationDTO } from "@rezics/contract";
+import { FALLBACK_LANGUAGE } from "@rezics/contract";
 
 /**
  * Get the user's preferred languages from settings.
@@ -50,7 +47,9 @@ export function getTranslation(
 
   // 2. Fallback to unit's default language
   if (unitDefaultLanguage) {
-    const unitDefault = translations.find((t) => t.language === unitDefaultLanguage);
+    const unitDefault = translations.find(
+      (t) => t.language === unitDefaultLanguage,
+    );
     if (unitDefault) return unitDefault;
   }
 
@@ -69,9 +68,12 @@ export function getBookTitle(
   book: BookDTO | null | undefined,
   language?: string,
 ): string {
-  if (!book) return '';
-  const tr = getTranslation(book.translations, language ?? book.defaultLanguage ?? undefined);
-  return tr?.title ?? '';
+  if (!book) return "";
+  const tr = getTranslation(
+    book.translations,
+    language ?? book.defaultLanguage ?? undefined,
+  );
+  return tr?.title ?? "";
 }
 
 /**
@@ -81,9 +83,12 @@ export function getBookDescription(
   book: BookDTO | null | undefined,
   language?: string,
 ): string {
-  if (!book) return '';
-  const tr = getTranslation(book.translations, language ?? book.defaultLanguage ?? undefined);
-  return tr?.description ?? '';
+  if (!book) return "";
+  const tr = getTranslation(
+    book.translations,
+    language ?? book.defaultLanguage ?? undefined,
+  );
+  return tr?.description ?? "";
 }
 
 /**
@@ -93,9 +98,12 @@ export function getBookSummary(
   book: BookDTO | null | undefined,
   language?: string,
 ): string {
-  if (!book) return '';
-  const tr = getTranslation(book.translations, language ?? book.defaultLanguage ?? undefined);
-  return tr?.summary ?? '';
+  if (!book) return "";
+  const tr = getTranslation(
+    book.translations,
+    language ?? book.defaultLanguage ?? undefined,
+  );
+  return tr?.summary ?? "";
 }
 
 /**
@@ -105,22 +113,23 @@ export function getBookSubtitle(
   book: BookDTO | null | undefined,
   language?: string,
 ): string {
-  if (!book) return '';
-  const tr = getTranslation(book.translations, language ?? book.defaultLanguage ?? undefined);
-  return tr?.subtitle ?? '';
+  if (!book) return "";
+  const tr = getTranslation(
+    book.translations,
+    language ?? book.defaultLanguage ?? undefined,
+  );
+  return tr?.subtitle ?? "";
 }
 
 // Fallback cover placeholder image
 const MOCK_COVER_PLACEHOLDER =
-  'https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg';
+  "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg";
 
 /**
  * Resolve a cover URL from a BookDTO.
  * Returns coverUrl directly when available; falls back to a MOCK placeholder.
  */
-export function getBookCoverUrl(
-  book: BookDTO | null | undefined,
-): string {
+export function getBookCoverUrl(book: BookDTO | null | undefined): string {
   if (!book) return MOCK_COVER_PLACEHOLDER;
   return book.coverUrl ?? MOCK_COVER_PLACEHOLDER;
 }
@@ -129,7 +138,7 @@ export function getBookCoverUrl(
  * Filter attributions by role (e.g. 'author', 'translator', 'publisher').
  */
 export function getAttributionsByRole(
-  attributions: BookDTO['attributions'],
+  attributions: BookDTO["attributions"],
   role: string,
 ): Array<{ entityId: string; name: string; role: string; sortOrder?: number }> {
   if (!attributions) return [];
@@ -151,7 +160,7 @@ export type EntityTranslation = {
  * `name` so callers don't need to handle the missing-entity case.
  */
 export function getEntityTranslation(
-  attributions: BookDTO['attributions'],
+  attributions: BookDTO["attributions"],
   role: string,
   language?: string,
 ): EntityTranslation | undefined {
@@ -177,8 +186,8 @@ export function getEntityTranslation(
  * Returns the first attribution with role 'author', or the first attribution.
  */
 export function getBookAuthorName(book: BookDTO | null | undefined): string {
-  if (!book?.attributions?.length) return '';
-  const authors = getAttributionsByRole(book.attributions, 'author');
+  if (!book?.attributions?.length) return "";
+  const authors = getAttributionsByRole(book.attributions, "author");
   if (authors.length > 0) return authors[0].name;
   // Fallback to first attribution
   return book.attributions[0].name;
@@ -188,9 +197,8 @@ export function getBookAuthorName(book: BookDTO | null | undefined): string {
  * Get the primary publisher name from a BookDTO.
  */
 export function getBookPublisherName(book: BookDTO | null | undefined): string {
-  if (!book?.attributions?.length) return '';
-  const publishers = getAttributionsByRole(book.attributions, 'publisher');
+  if (!book?.attributions?.length) return "";
+  const publishers = getAttributionsByRole(book.attributions, "publisher");
   if (publishers.length > 0) return publishers[0].name;
-  return '';
+  return "";
 }
-

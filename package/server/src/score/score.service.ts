@@ -1,5 +1,5 @@
-import type { Prisma } from '#/prisma/client';
-import { prisma } from '#/prisma/client';
+import type { Prisma } from "#/prisma/client";
+import { prisma } from "#/prisma/client";
 import {
   applyDistributionDelta,
   applyFieldsDelta,
@@ -7,8 +7,8 @@ import {
   emptyDistribution,
   validateFields,
   validateScore,
-} from './score.mapper';
-import type { Distribution, FieldsAggregate } from './score.types';
+} from "./score.mapper";
+import type { Distribution, FieldsAggregate } from "./score.types";
 
 const FIELD_KEY_PATTERN = /^[a-z][a-z0-9-]*$/;
 
@@ -25,7 +25,9 @@ export class ScoreService {
     fields?: Record<string, number>,
   ) {
     if (!validateScore(value)) {
-      throw new Error(`Score value must be an integer between 1 and 10, got ${value}`);
+      throw new Error(
+        `Score value must be an integer between 1 and 10, got ${value}`,
+      );
     }
 
     // Validate fields against realm field registry
@@ -36,11 +38,13 @@ export class ScoreService {
       });
       const allowedKeys = new Set(realmFields.map((f) => f.key));
       if (allowedKeys.size === 0) {
-        throw new Error('Fields submitted for a realm with no registered fields');
+        throw new Error(
+          "Fields submitted for a realm with no registered fields",
+        );
       }
       const { valid, invalidKeys } = validateFields(fields, allowedKeys);
       if (!valid) {
-        throw new Error(`Invalid field keys: ${invalidKeys.join(', ')}`);
+        throw new Error(`Invalid field keys: ${invalidKeys.join(", ")}`);
       }
     }
 
@@ -51,15 +55,33 @@ export class ScoreService {
 
       const oldValue = existing?.value ?? null;
       const oldFields = (existing?.fields as Record<string, number>) ?? null;
-      const newFields = fields && Object.keys(fields).length > 0 ? fields : null;
+      const newFields =
+        fields && Object.keys(fields).length > 0 ? fields : null;
 
       const entry = await tx.scoreEntry.upsert({
         where: { userId_unitId_realm: { userId, unitId, realm } },
-        create: { userId, unitId, realm, value, fields: newFields as Prisma.InputJsonValue ?? undefined },
-        update: { value, fields: newFields as Prisma.InputJsonValue ?? undefined },
+        create: {
+          userId,
+          unitId,
+          realm,
+          value,
+          fields: (newFields as Prisma.InputJsonValue) ?? undefined,
+        },
+        update: {
+          value,
+          fields: (newFields as Prisma.InputJsonValue) ?? undefined,
+        },
       });
 
-      await this.updateAggregate(tx, unitId, realm, oldValue, value, oldFields, newFields);
+      await this.updateAggregate(
+        tx,
+        unitId,
+        realm,
+        oldValue,
+        value,
+        oldFields,
+        newFields,
+      );
 
       return entry;
     });
@@ -80,7 +102,7 @@ export class ScoreService {
       if (linkedPosts.length > 0 && !isAdmin) {
         const blockingIds = linkedPosts.map((p) => p.unitId);
         throw Object.assign(
-          new Error('Cannot delete score with linked reviews'),
+          new Error("Cannot delete score with linked reviews"),
           { status: 409, blockingIds },
         );
       }
@@ -97,7 +119,15 @@ export class ScoreService {
       await tx.scoreEntry.delete({ where: { id } });
 
       const oldFields = (entry.fields as Record<string, number>) ?? null;
-      await this.updateAggregate(tx, entry.unitId, entry.realm, entry.value, null, oldFields, null);
+      await this.updateAggregate(
+        tx,
+        entry.unitId,
+        entry.realm,
+        entry.value,
+        null,
+        oldFields,
+        null,
+      );
 
       return entry;
     });
@@ -142,12 +172,16 @@ export class ScoreService {
         realm,
         ...computed,
         distribution: computed.distribution as Prisma.InputJsonValue,
-        fields: (computed.fields ?? undefined) as Prisma.InputJsonValue | undefined,
+        fields: (computed.fields ?? undefined) as
+          | Prisma.InputJsonValue
+          | undefined,
       },
       update: {
         ...computed,
         distribution: computed.distribution as Prisma.InputJsonValue,
-        fields: (computed.fields ?? undefined) as Prisma.InputJsonValue | undefined,
+        fields: (computed.fields ?? undefined) as
+          | Prisma.InputJsonValue
+          | undefined,
       },
     });
   }
@@ -159,13 +193,20 @@ export class ScoreService {
   async listRealmFields(realmId: string) {
     return prisma.scoreRealmField.findMany({
       where: { realm: realmId },
-      orderBy: { sortOrder: 'asc' },
+      orderBy: { sortOrder: "asc" },
     });
   }
 
-  async addRealmField(realmId: string, key: string, label?: string, sortOrder?: number) {
+  async addRealmField(
+    realmId: string,
+    key: string,
+    label?: string,
+    sortOrder?: number,
+  ) {
     if (!FIELD_KEY_PATTERN.test(key)) {
-      throw new Error(`Invalid field key format: "${key}". Must match pattern: ${FIELD_KEY_PATTERN}`);
+      throw new Error(
+        `Invalid field key format: "${key}". Must match pattern: ${FIELD_KEY_PATTERN}`,
+      );
     }
 
     return prisma.scoreRealmField.create({
@@ -184,7 +225,9 @@ export class ScoreService {
     });
 
     if (!existing) {
-      throw Object.assign(new Error(`Field "${key}" not found for realm`), { status: 404 });
+      throw Object.assign(new Error(`Field "${key}" not found for realm`), {
+        status: 404,
+      });
     }
 
     return prisma.scoreRealmField.delete({
@@ -213,7 +256,9 @@ export class ScoreService {
     if (newValue === null && existing) {
       const nextCount = existing.totalCount - 1;
       if (nextCount <= 0) {
-        await tx.scoreAggregate.delete({ where: { unitId_realm: { unitId, realm } } });
+        await tx.scoreAggregate.delete({
+          where: { unitId_realm: { unitId, realm } },
+        });
         return;
       }
 

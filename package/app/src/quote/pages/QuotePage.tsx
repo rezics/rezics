@@ -64,7 +64,9 @@ export const QuotePage: React.FC = () => {
       <div className="space-y-4">
         <div>
           <div className="flex items-center">
-            <h2 className="text-2xl font-bold">{Quote.translations?.[0]?.title}</h2>
+            <h2 className="text-2xl font-bold">
+              {Quote.translations?.[0]?.title}
+            </h2>
 
             <div className="ml-auto">
               <MiniAdminActionBar
@@ -146,7 +148,10 @@ export const QuotePage: React.FC = () => {
           </IconButton>
         </div>
 
-        <InlinePostForm targetUnitId={unitId || ""} placeholder="Write a reply..." />
+        <InlinePostForm
+          targetUnitId={unitId || ""}
+          placeholder="Write a reply..."
+        />
         <ThreadView rootPostUnitId={unitId || ""} />
         {/* 供评论区占位符 */}
         <div className="mb-[200px]" />

@@ -1,10 +1,13 @@
-import { useCallback } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import {
+  collectionStatusQuery,
+  useToggleFavoriteMutation,
+} from "@rezics/api/shelf";
 import { useQuery } from "@tanstack/react-query";
-import { collectionStatusQuery, useToggleFavoriteMutation } from "@rezics/api/shelf";
+import { useCallback } from "react";
 
 interface FavoriteButtonProps {
   unitId: string;

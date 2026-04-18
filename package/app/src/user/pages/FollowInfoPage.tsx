@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -22,6 +21,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { useUserProfileStore } from "@/user/states";
 
 type SimpleUser = Omit<UserDTO, "email">;

@@ -120,7 +120,10 @@ export const ChapterTreeEditor = forwardRef<
 >(({ chapterTree, bookUnitId, onDownloadJSON }, ref) => {
   const treeRef = useRef<TreeApi<Chapter> | null>(null);
   const [treeData, setTreeData] = useState<Chapter[]>([]);
-  const [treeSize, setTreeSize] = useState({ width: 0, height: MIN_TREE_HEIGHT });
+  const [treeSize, setTreeSize] = useState({
+    width: 0,
+    height: MIN_TREE_HEIGHT,
+  });
   const treeAreaRef = useRef<HTMLDivElement | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 

@@ -124,8 +124,7 @@ export const identityConfirmBodySchema = t.Object({
   username: t.String({ minLength: 1 }),
   slug: t.String({ minLength: 1 }),
 });
-export type IdentityConfirmBody =
-  (typeof identityConfirmBodySchema)["static"];
+export type IdentityConfirmBody = (typeof identityConfirmBodySchema)["static"];
 
 export const identityConfirmResponseSchema = t.Object({
   ok: t.Boolean(),

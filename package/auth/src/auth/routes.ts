@@ -2,12 +2,12 @@ import {
   oauthProviderAuthServerMetadata,
   oauthProviderOpenIdConfigMetadata,
 } from "@better-auth/oauth-provider";
+import { provisionUserOnServer } from "../provisioning/provision";
+import { verifyTurnstileToken } from "../utils/turnstileUtils";
 import {
   buildAuthPresenceClearCookie,
   buildAuthPresenceSetCookie,
 } from "./auth-presence";
-import { provisionUserOnServer } from "../provisioning/provision";
-import { verifyTurnstileToken } from "../utils/turnstileUtils";
 import { AuthPolicyError } from "./errors";
 import { auth } from "./instance";
 import { prisma } from "./prisma";
@@ -109,7 +109,11 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
 
   const response = await auth.handler(request);
 
-  if (response.ok && (isVerifyEmailPath(pathname) || pathname.includes("/email-otp/verify-email"))) {
+  if (
+    response.ok &&
+    (isVerifyEmailPath(pathname) ||
+      pathname.includes("/email-otp/verify-email"))
+  ) {
     try {
       const cloned = response.clone();
       const body = (await cloned.json()) as {
@@ -131,7 +135,10 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
       }
     } catch (error) {
       // Best-effort: exchange fallback will handle if this fails
-      console.error("[verify-email] Provisioning after verification failed:", error);
+      console.error(
+        "[verify-email] Provisioning after verification failed:",
+        error,
+      );
     }
   }
 

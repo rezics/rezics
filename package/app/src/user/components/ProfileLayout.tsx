@@ -1,9 +1,9 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import { useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useContext, type FC } from "react";
+import { useParams } from "@tanstack/react-router";
+import { createContext, type FC, useContext } from "react";
 import { useUserProfileStore } from "@/user/states";
 import { ProfileBasicInfo } from "./ProfileBasicInfo";
 import { ProfileShell } from "./ProfileShell";

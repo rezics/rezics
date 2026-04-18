@@ -140,16 +140,15 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllFeedbacksMutation =
-    meiliAdminMutations.useDeleteAllFeedbacks({
-      onSuccess: (res) => {
-        setMessage({
-          type: "success",
-          text: res.message || "All feedbacks deleted from Meili",
-        });
-      },
-      onError: (err) => setMessage({ type: "error", text: err.message }),
-    });
+  const deleteAllFeedbacksMutation = meiliAdminMutations.useDeleteAllFeedbacks({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text: res.message || "All feedbacks deleted from Meili",
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
 
   const deleteAllUsersMutation = meiliAdminMutations.useDeleteAllUsers({
     onSuccess: (res) => {
@@ -185,9 +184,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text:
-          res.message ||
-          "All indexes deleted. Run Init to recreate.",
+        text: res.message || "All indexes deleted. Run Init to recreate.",
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -523,8 +520,8 @@ export function MeiliPage() {
                   className="block mb-2"
                 >
                   Deletes all indexes entirely (content, feedbacks, users,
-                  posts, realms). All settings and documents are lost. You
-                  must re-run Init to recreate indexes.
+                  posts, realms). All settings and documents are lost. You must
+                  re-run Init to recreate indexes.
                 </Typography>
                 <Button
                   variant="outlined"
@@ -552,10 +549,9 @@ export function MeiliPage() {
             <DialogTitle>Reset Everything?</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                This will permanently delete all Meilisearch indexes
-                (content, feedbacks, users, posts, realms) including their
-                settings and documents. You will need to re-run Init to
-                recreate them.
+                This will permanently delete all Meilisearch indexes (content,
+                feedbacks, users, posts, realms) including their settings and
+                documents. You will need to re-run Init to recreate them.
               </DialogContentText>
               <DialogContentText sx={{ mt: 2 }}>
                 Type <strong>RESET</strong> to confirm.

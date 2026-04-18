@@ -99,9 +99,7 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
   const emailVerified = sessionData.user.emailVerified;
   const registrationComplete = identitySet && emailVerified;
   const canAcquireMemberToken = registrationComplete;
-  const readinessStatus = registrationComplete
-    ? "ready"
-    : "needs-registration";
+  const readinessStatus = registrationComplete ? "ready" : "needs-registration";
 
   return Response.json({
     ...sessionData,

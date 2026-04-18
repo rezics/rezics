@@ -7,14 +7,14 @@ import {
   Typography,
 } from "@mui/material";
 import type { BookDTO } from "@rezics/contract";
-import React from "react";
+import type React from "react";
 import { useTranslation } from "react-i18next";
 import {
-  getBookTitle,
-  getBookDescription,
   getBookAuthorName,
-  getBookPublisherName,
   getBookCoverUrl,
+  getBookDescription,
+  getBookPublisherName,
+  getBookTitle,
 } from "@/shared/utils/translation-helpers";
 
 /**
@@ -80,16 +80,18 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 
   // Resolve current display values from translations or override fields
   const currentTitle = value?._editTitle ?? getBookTitle(value as BookDTO);
-  const currentIsbn = value?.isbn13 ?? '';
-  const currentCoverUrl = value?.coverUrl ?? '';
-  const currentPageCount = value?.pageCount ?? '';
-  const currentTextLength = value?.textLength ?? '';
+  const currentIsbn = value?.isbn13 ?? "";
+  const currentCoverUrl = value?.coverUrl ?? "";
+  const currentPageCount = value?.pageCount ?? "";
+  const currentTextLength = value?.textLength ?? "";
 
   return (
     <div className="flex flex-col gap-5">
       {/* Title (from translations) */}
       <div className="space-y-1">
-        <Typography variant="body2" component="label" htmlFor="book-title">{t("book.fields.title")}</Typography>
+        <Typography variant="body2" component="label" htmlFor="book-title">
+          {t("book.fields.title")}
+        </Typography>
         <input
           id="book-title"
           value={currentTitle}
@@ -102,7 +104,9 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       {/* ISBN-13 + Cover URL */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Typography variant="body2" component="label" htmlFor="book-isbn">{t("book.fields.isbn")}</Typography>
+          <Typography variant="body2" component="label" htmlFor="book-isbn">
+            {t("book.fields.isbn")}
+          </Typography>
           <input
             id="book-isbn"
             value={currentIsbn}
@@ -112,7 +116,9 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           />
         </div>
         <div className="space-y-1">
-          <Typography variant="body2" component="label" htmlFor="book-cover">{t("book.fields.cover_url")}</Typography>
+          <Typography variant="body2" component="label" htmlFor="book-cover">
+            {t("book.fields.cover_url")}
+          </Typography>
           <input
             id="book-cover"
             value={currentCoverUrl}
@@ -127,23 +133,43 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       {/* Page Count + Text Length */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Typography variant="body2" component="label" htmlFor="book-pagecount">{t("book.fields.page_count" as any)}</Typography>
+          <Typography
+            variant="body2"
+            component="label"
+            htmlFor="book-pagecount"
+          >
+            {t("book.fields.page_count" as any)}
+          </Typography>
           <input
             id="book-pagecount"
             type="number"
             value={currentPageCount}
-            onChange={(e) => onChange?.({ pageCount: e.target.value ? Number(e.target.value) : undefined })}
+            onChange={(e) =>
+              onChange?.({
+                pageCount: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
             disabled={disabled}
             className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>
         <div className="space-y-1">
-          <Typography variant="body2" component="label" htmlFor="book-textlength">{t("book.fields.text_length")}</Typography>
+          <Typography
+            variant="body2"
+            component="label"
+            htmlFor="book-textlength"
+          >
+            {t("book.fields.text_length")}
+          </Typography>
           <input
             id="book-textlength"
             type="number"
             value={currentTextLength}
-            onChange={(e) => onChange?.({ textLength: e.target.value ? Number(e.target.value) : undefined })}
+            onChange={(e) =>
+              onChange?.({
+                textLength: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
             disabled={disabled}
             className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />

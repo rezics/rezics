@@ -25,13 +25,19 @@ import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate } from "@tanstack/react-router";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import type { TFunction } from "i18next";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { getBookDescription, getBookTitle } from "@/shared/utils/translation-helpers";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import {
+  getBookDescription,
+  getBookTitle,
+} from "@/shared/utils/translation-helpers";
 import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
-import { BookMetadataEditor, type BookMetadataValue } from "../components/Metadata/BookMetadataEditor";
+import {
+  BookMetadataEditor,
+  type BookMetadataValue,
+} from "../components/Metadata/BookMetadataEditor";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));
@@ -67,9 +73,7 @@ const UpdateBookDialog: React.FC<{
         </Alert>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>
-          {t("common.close")}
-        </Button>
+        <Button onClick={onClose}>{t("common.close")}</Button>
       </DialogActions>
     </Dialog>
   );
@@ -100,8 +104,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   });
   const [metadataState, setMetadataState] =
     React.useState<BookMetadataValue | null>(null);
-  const [descriptionOverride, setDescriptionOverride] =
-    React.useState<string | null>(null);
+  const [descriptionOverride, setDescriptionOverride] = React.useState<
+    string | null
+  >(null);
   const [updateBookErrorOpen, setUpdateBookErrorOpen] = React.useState(false);
   const [dialogState, setDialogState] =
     React.useState<UpdateBookDialogState>(null);
@@ -205,14 +210,24 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     }
   }
 
-  if (isLoading) return <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">{t("common.loading")}</div>;
+  if (isLoading)
+    return (
+      <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">
+        {t("common.loading")}
+      </div>
+    );
   if (error)
     return (
       <div className="mt-10 mx-auto max-w-3xl px-4">
         <QueryErrorDisplay error={error} />
       </div>
     );
-  if (!data && !newBook) return <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">{t("common.no_data")}</div>;
+  if (!data && !newBook)
+    return (
+      <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">
+        {t("common.no_data")}
+      </div>
+    );
 
   const resolvedPageTitle = pageTitle ?? t("page.book_edit.info.title");
 
@@ -230,10 +245,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {t("common.back")}
             </Button>
           )}
-          <Button
-            variant="contained"
-            onClick={() => handleSubmit()}
-          >
+          <Button variant="contained" onClick={() => handleSubmit()}>
             {t("common.submit")}
           </Button>
         </div>
@@ -249,7 +261,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <BookMetadataEditor
             value={metadata}
             onChange={(value) => {
-              setMetadataState((prev) => ({ ...(prev ?? data ?? {}), ...value }));
+              setMetadataState((prev) => ({
+                ...(prev ?? data ?? {}),
+                ...value,
+              }));
             }}
           />
         </section>

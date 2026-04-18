@@ -1,5 +1,5 @@
-import { Divider, Typography } from '@mui/material';
-import type { FC, ReactNode } from 'react';
+import { Divider, Typography } from "@mui/material";
+import type { FC, ReactNode } from "react";
 
 interface SettingsSectionProps {
   title: string;

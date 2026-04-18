@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { LANGUAGES } from "@rezics/contract";
-import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import type { PrismaClient } from "#/prisma/generated/client.js";
+import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { generateTranslations, getFaker } from "./generators.js";
 import type { CreatedEntity } from "./types.js";
 import { randomBoolean } from "./utils.js";
@@ -156,10 +156,16 @@ export async function seedPeople(
 ): Promise<CreatedEntity[]> {
   console.log(`[Seed] Seeding ${total} person entities...`);
 
-  const rows = Array.from({ length: total }, () => buildEntityRow("person", 0.05));
+  const rows = Array.from({ length: total }, () =>
+    buildEntityRow("person", 0.05),
+  );
   await batchInsertEntities(prisma, rows, "person");
 
-  return rows.map((r) => ({ unitId: r.id, name: r.primaryName, kind: "person" }));
+  return rows.map((r) => ({
+    unitId: r.id,
+    name: r.primaryName,
+    kind: "person",
+  }));
 }
 
 /**

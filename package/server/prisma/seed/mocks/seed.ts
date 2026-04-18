@@ -82,7 +82,12 @@ async function main() {
 
   // ── STEP 5: Realms (needed by scores) ─────────────
   done = stepTimer("Step 5: Realms");
-  const realms = await seedRealms(prisma, DEFAULT_COUNTS.realms, users, allWorkIds);
+  const realms = await seedRealms(
+    prisma,
+    DEFAULT_COUNTS.realms,
+    users,
+    allWorkIds,
+  );
   console.log(`[Seed]   ${realms.length} realms`);
   done();
 
@@ -118,7 +123,9 @@ async function main() {
     allWorkIds,
     reviewPosts,
   );
-  console.log(`[Seed]   ${shelves.length} shelves (${reviewPosts.length} review posts available)`);
+  console.log(
+    `[Seed]   ${shelves.length} shelves (${reviewPosts.length} review posts available)`,
+  );
   done();
 
   // ── STEP 9: Chapters (power-law per book) ─────────

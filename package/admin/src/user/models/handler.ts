@@ -6,12 +6,12 @@ import {
   exchangeForSessionToken,
   parseJwt,
 } from "@rezics/api/react-query/jwt";
-import { userKeys } from "@rezics/api/user/user.keys";
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
 } from "@rezics/api/states";
+import { userKeys } from "@rezics/api/user/user.keys";
 import { qc } from "@/app/providers/reactQueryUtil";
 
 /**

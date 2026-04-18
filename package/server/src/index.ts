@@ -1,24 +1,27 @@
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
+import { Prisma } from "#/prisma/client";
 import { attributionApi } from "./attribution";
-import { dispatchApi } from "./dispatch";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
+import { dispatchApi } from "./dispatch";
 import { echoKvApi } from "./echokv";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
-import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
-import { meiliApi } from "./meili";
-import { postApi } from "./post";
+import { initDefaultRealmCache } from "./infra/default-realm";
 import { internalApi } from "./internal/internal.api";
+import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
+import { linkApi } from "./link";
+import { meiliApi } from "./meili";
+import { dmServerApi } from "./notify/dm.api";
+import { userBatchApi } from "./notify/user-batch.api";
+import { postApi } from "./post";
 import { reactionWriteApi } from "./reaction";
 import { realmApi } from "./realm";
 import { scoreApi } from "./score/score.api";
-import { collectionApi, shelfApi } from "./shelf";
-import { linkApi } from "./link";
-import { zoneApi } from "./zone/zone.api";
 import { sessionApi } from "./session";
+import { collectionApi, shelfApi } from "./shelf";
 import { statsAdminApi } from "./stat";
 import { tagApi } from "./tag";
 import { tokenApi } from "./token";
@@ -26,14 +29,10 @@ import { translationGroupApi } from "./translation-group";
 import { unitApi } from "./unit";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
-import { dmServerApi } from "./notify/dm.api";
-import { userBatchApi } from "./notify/user-batch.api";
-import { Prisma } from "#/prisma/client";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
-
-import { initDefaultRealmCache } from "./infra/default-realm";
+import { zoneApi } from "./zone/zone.api";
 import "dotenv/config";
 
 const { isProd, isDev } = getProdState();
@@ -112,9 +111,7 @@ app
   .onError(({ code, error, set }) => {
     if (error instanceof AppError) {
       set.status = error.statusCode;
-    } else if (
-      error instanceof Prisma.PrismaClientKnownRequestError
-    ) {
+    } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
       const prismaStatusMap: Record<string, number> = {
         P2025: 404,
         P2002: 409,

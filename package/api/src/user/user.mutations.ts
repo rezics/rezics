@@ -1,4 +1,9 @@
-import type { UpdateUser, UpdateUserSettings, UserDTO, UserSettings } from "@rezics/contract";
+import type {
+  UpdateUser,
+  UpdateUserSettings,
+  UserDTO,
+  UserSettings,
+} from "@rezics/contract";
 import {
   type UseMutationOptions,
   useMutation,

@@ -41,9 +41,7 @@ function extractTitle(book: BookDTO): string {
 function formatCredits(book: BookDTO): string {
   const parts: string[] = [];
   if (book.personCredits?.length) {
-    parts.push(
-      ...book.personCredits.map((c) => `${c.name} (${c.roleKey})`),
-    );
+    parts.push(...book.personCredits.map((c) => `${c.name} (${c.roleKey})`));
   }
   if (book.orgCredits?.length) {
     parts.push(...book.orgCredits.map((c) => `${c.name} (${c.roleKey})`));
@@ -83,7 +81,12 @@ export default function BooksPage() {
   const meiliQuery = useQuery({
     queryKey: ["meili-books", page, limit, query],
     queryFn: () =>
-      meiliContentApi.contentSearch({ keyword: query || undefined, type: "BOOK", offset: start, limit }),
+      meiliContentApi.contentSearch({
+        keyword: query || undefined,
+        type: "BOOK",
+        offset: start,
+        limit,
+      }),
     enabled: isMeiliMode,
   });
 

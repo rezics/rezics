@@ -1,5 +1,5 @@
 import { ListItemText, Menu, MenuItem } from "@mui/material";
-import { LANGUAGES, LANGUAGE_META } from "@rezics/contract";
+import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

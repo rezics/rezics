@@ -1,13 +1,10 @@
 import { Alert, Box, Tab, Tabs } from "@mui/material";
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import { meiliBookSearchQuery } from "@rezics/api/meili/meili.queries";
+import {
+  contentSearchQueryOptions,
+  meiliBookSearchQuery,
+} from "@rezics/api/meili/meili.queries";
 import { reactionApi } from "@rezics/api/reaction/reaction.api";
-import type {
-  BookDTO,
-  PostDTO,
-  ShelfDTO,
-  UnitDTO,
-} from "@rezics/contract";
+import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
 import { UnitType } from "@rezics/contract";
 import {
   UniversalPaginator,
@@ -17,9 +14,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
 import { BookListView } from "@/book-library/components/BookList/BookListView";
 import { QuoteExcerptListContainer } from "@/review/components/QuoteExcerptList.tsx";
-import { ShelfCard } from "@/shelf/components/ShelfCard";
 import { ReviewList } from "@/review/components/ReviewList.tsx";
 import { TextSearchInputWithIcon } from "@/search/components/TextSearchInputWithIcon.tsx";
+import { ShelfCard } from "@/shelf/components/ShelfCard";
 
 export interface UserUnitsPageProps {
   userId: string;
@@ -90,14 +87,18 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   const shelfTargetIds = useMemo(
     () =>
-      (shelfDataRaw?.items ?? [])
-        .map((r) => r.id)
-        .filter(Boolean) as string[],
+      (shelfDataRaw?.items ?? []).map((r) => r.id).filter(Boolean) as string[],
     [shelfDataRaw],
   );
 
   const { data: shelfReactionBatch } = useQuery({
-    queryKey: ["reaction-summary-batch", "user", userId, "shelves", shelfTargetIds],
+    queryKey: [
+      "reaction-summary-batch",
+      "user",
+      userId,
+      "shelves",
+      shelfTargetIds,
+    ],
     queryFn: () => reactionApi.summary(shelfTargetIds),
     enabled: shelfTargetIds.length > 0,
     staleTime: 1000 * 60 * 2,
@@ -358,9 +359,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       >
         {(currentPageItems: (ShelfDTO | PostDTO | UnitDTO | BookDTO)[]) => {
           if (tab === "shelf") {
-            return (
-              <ShelfListView shelves={currentPageItems as ShelfDTO[]} />
-            );
+            return <ShelfListView shelves={currentPageItems as ShelfDTO[]} />;
           }
           if (tab === "review" || tab === "remark") {
             return <ReviewList reviews={currentPageItems as PostDTO[]} />;

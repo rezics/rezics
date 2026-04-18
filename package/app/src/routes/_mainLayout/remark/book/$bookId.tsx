@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { createFileRoute } from "@tanstack/react-router";
 import { RemarkList } from "@/remark/components/RemarkList";
 
 export const Route = createFileRoute("/_mainLayout/remark/book/$bookId")({

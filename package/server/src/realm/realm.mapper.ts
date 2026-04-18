@@ -18,7 +18,8 @@ export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
     isOfficial: row.isOfficial,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    translations: (row.unit?.translations ?? []) as unknown as UnitTranslationDTO[],
+    translations: (row.unit?.translations ??
+      []) as unknown as UnitTranslationDTO[],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -34,7 +35,8 @@ export function mapRealmListRowToDTO(row: RealmListSelected): RealmDTO {
     isOfficial: row.isOfficial,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    translations: (row.unit?.translations ?? []) as unknown as UnitTranslationDTO[],
+    translations: (row.unit?.translations ??
+      []) as unknown as UnitTranslationDTO[],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

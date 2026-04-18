@@ -124,7 +124,10 @@ export const env = createEnv({
      */
 
     AUTH_INVITATION_FROM_EMAIL: v.fallback(v.string(), "noreply@rezics.com"),
-    AUTH_PASSWORD_RESET_FROM_EMAIL: v.fallback(v.string(), "noreply@rezics.com"),
+    AUTH_PASSWORD_RESET_FROM_EMAIL: v.fallback(
+      v.string(),
+      "noreply@rezics.com",
+    ),
     AUTH_VERIFICATION_FROM_EMAIL: v.fallback(v.string(), "noreply@rezics.com"),
 
     /*

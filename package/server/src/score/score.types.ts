@@ -1,4 +1,8 @@
-import type { ScoreAggregate, ScoreEntry, ScoreRealmField } from '#/prisma/client';
+import type {
+  ScoreAggregate,
+  ScoreEntry,
+  ScoreRealmField,
+} from "#/prisma/client";
 
 export type { ScoreAggregate, ScoreEntry, ScoreRealmField };
 

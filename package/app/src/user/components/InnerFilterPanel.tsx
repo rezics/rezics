@@ -28,7 +28,9 @@ export const InnerFilterPanel: FC<InnerFilterPanelProps> = ({
       {chips.map((chip) => (
         <Chip
           key={chip.value}
-          label={chip.count != null ? `${chip.label} (${chip.count})` : chip.label}
+          label={
+            chip.count != null ? `${chip.label} (${chip.count})` : chip.label
+          }
           variant={activeValue === chip.value ? "filled" : "outlined"}
           color={activeValue === chip.value ? "primary" : "default"}
           onClick={chip.disabled ? undefined : () => onChipChange(chip.value)}

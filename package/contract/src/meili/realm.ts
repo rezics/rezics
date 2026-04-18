@@ -1,5 +1,5 @@
-import { t } from "elysia";
 import type { Static } from "elysia";
+import { t } from "elysia";
 import { languageSchema } from "../language";
 
 // ANCHOR: Realm Search Document

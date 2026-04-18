@@ -7,15 +7,12 @@ import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
-import { useProfileContext } from "@/user/components/ProfileLayout";
+import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
-  InnerFilterPanel,
   type ChipDefinition,
+  InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
-import {
-  FilterBar,
-  type FilterBarConfig,
-} from "@/user/components/FilterBar";
+import { useProfileContext } from "@/user/components/ProfileLayout";
 
 const KIND_CHIPS: ChipDefinition[] = [
   { value: "REVIEW", label: "Reviews" },
@@ -97,11 +94,19 @@ export const ContentTabSection: FC = () => {
       </InnerFilterPanel>
 
       {isLoading ? (
-        <Typography variant="body2" color="text.secondary" className="py-8 text-center">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          className="py-8 text-center"
+        >
           Loading...
         </Typography>
       ) : posts.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" className="py-8 text-center">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          className="py-8 text-center"
+        >
           {filters.q
             ? "No results match your search"
             : `No ${kind.toLowerCase()}s yet`}
@@ -147,7 +152,9 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
   const targetTitle = post.targetTitles?.[0];
   const date = new Date(post.createdAt).toLocaleDateString();
   const scoreDisplay =
-    post.scoreValue != null ? `${"★".repeat(Math.round(post.scoreValue / 2))}${"☆".repeat(5 - Math.round(post.scoreValue / 2))}` : null;
+    post.scoreValue != null
+      ? `${"★".repeat(Math.round(post.scoreValue / 2))}${"☆".repeat(5 - Math.round(post.scoreValue / 2))}`
+      : null;
 
   return (
     <Box className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">

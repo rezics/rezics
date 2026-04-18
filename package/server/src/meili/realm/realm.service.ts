@@ -1,7 +1,4 @@
-import type {
-  RealmSearchOptions,
-  RealmSearchResult,
-} from "@rezics/contract";
+import type { RealmSearchOptions, RealmSearchResult } from "@rezics/contract";
 import { searchClient } from "../search-client";
 
 export async function searchRealms(

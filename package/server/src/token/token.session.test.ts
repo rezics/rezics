@@ -1,6 +1,6 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test";
-import { DispatchScope } from "@rezics/contract";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { ApiTokenScopes } from "@rezics/contract";
+import { DispatchScope } from "@rezics/contract";
 import { tokenService } from "./token.service";
 
 /**
@@ -21,7 +21,11 @@ describe("token session - scope check", () => {
       [DispatchScope.DOMAIN]: [DispatchScope.SESSION],
     };
     expect(
-      tokenService.hasScope(scopes, DispatchScope.DOMAIN, DispatchScope.SESSION),
+      tokenService.hasScope(
+        scopes,
+        DispatchScope.DOMAIN,
+        DispatchScope.SESSION,
+      ),
     ).toBe(true);
   });
 
@@ -30,7 +34,11 @@ describe("token session - scope check", () => {
       [DispatchScope.DOMAIN]: ["*"],
     };
     expect(
-      tokenService.hasScope(scopes, DispatchScope.DOMAIN, DispatchScope.SESSION),
+      tokenService.hasScope(
+        scopes,
+        DispatchScope.DOMAIN,
+        DispatchScope.SESSION,
+      ),
     ).toBe(true);
   });
 
@@ -39,7 +47,11 @@ describe("token session - scope check", () => {
       book: ["read", "write"],
     };
     expect(
-      tokenService.hasScope(scopes, DispatchScope.DOMAIN, DispatchScope.SESSION),
+      tokenService.hasScope(
+        scopes,
+        DispatchScope.DOMAIN,
+        DispatchScope.SESSION,
+      ),
     ).toBe(false);
   });
 
@@ -48,7 +60,11 @@ describe("token session - scope check", () => {
       [DispatchScope.DOMAIN]: [DispatchScope.UNIT_UPDATE],
     };
     expect(
-      tokenService.hasScope(scopes, DispatchScope.DOMAIN, DispatchScope.SESSION),
+      tokenService.hasScope(
+        scopes,
+        DispatchScope.DOMAIN,
+        DispatchScope.SESSION,
+      ),
     ).toBe(false);
   });
 

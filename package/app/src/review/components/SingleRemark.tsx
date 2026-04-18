@@ -28,7 +28,7 @@ export function MetaInfoBadge({
   const rating = (review.extra as any)?.rating as number | undefined;
   const dateStr = review.createdAt
     ? new Date(String(review.createdAt)).toLocaleDateString()
-    : '';
+    : "";
 
   return (
     <Tooltip title="阅读完整评测" placement="top-start">
@@ -113,7 +113,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
           {/* Row 2: Review Content (body replaces content) */}
           <div>
             <CollapsibleByLineTextContainer
-              content={review.body ?? ''}
+              content={review.body ?? ""}
               maxLines={4}
             />
           </div>
@@ -121,8 +121,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
           {/* Row 3: Reactions */}
           <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
             <div className="flex items-center">
-              <div className="flex items-center space-x-1">
-              </div>
+              <div className="flex items-center space-x-1"></div>
               <div className="text-xs flex items-center gap-2">
                 <span>{reactionSummaries?.likes ?? 0} 人支持</span>
               </div>
@@ -130,9 +129,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
             <Tooltip title="回复数">
               <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">
                 <ChatBubbleOutlineIcon style={{ fontSize: "1rem" }} />
-                <span className="text-xs">
-                  {review.replyCount ?? 0}{" "}
-                </span>
+                <span className="text-xs">{review.replyCount ?? 0} </span>
               </div>
             </Tooltip>
           </div>

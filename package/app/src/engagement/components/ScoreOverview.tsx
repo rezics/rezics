@@ -18,7 +18,8 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
 }) => {
   const { data: aggregates } = useQuery(scoreQueries.aggregates(unitId));
 
-  const aggregate = aggregates?.find((a) => a.realm === realm) ?? aggregates?.[0];
+  const aggregate =
+    aggregates?.find((a) => a.realm === realm) ?? aggregates?.[0];
 
   if (!aggregate) {
     return (
@@ -29,14 +30,9 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
   }
 
   const average =
-    aggregate.totalCount > 0
-      ? aggregate.totalScore / aggregate.totalCount
-      : 0;
+    aggregate.totalCount > 0 ? aggregate.totalScore / aggregate.totalCount : 0;
   const distribution = aggregate.distribution ?? {};
-  const maxCount = Math.max(
-    ...Object.values(distribution).map(Number),
-    1,
-  );
+  const maxCount = Math.max(...Object.values(distribution).map(Number), 1);
 
   return (
     <Stack direction="row" spacing={3} alignItems="center">
@@ -54,12 +50,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
           const count = Number(distribution[String(score)] ?? 0);
           const percent = (count / maxCount) * 100;
           return (
-            <Stack
-              key={score}
-              direction="row"
-              spacing={1}
-              alignItems="center"
-            >
+            <Stack key={score} direction="row" spacing={1} alignItems="center">
               <Typography
                 variant="caption"
                 color="text.secondary"

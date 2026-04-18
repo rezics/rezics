@@ -1,9 +1,9 @@
-import { Button, Chip, Typography } from '@mui/material';
-import type { AuthProvider } from '@rezics/contract';
-import type { ComponentType, FC } from 'react';
+import { Button, Chip, Typography } from "@mui/material";
+import type { AuthProvider } from "@rezics/contract";
+import type { ComponentType, FC } from "react";
 
 interface ProviderCardProps {
-  providerId: AuthProvider['id'];
+  providerId: AuthProvider["id"];
   name: string;
   icon: ComponentType<{ size?: number; className?: string }>;
   connected: boolean;
@@ -36,7 +36,12 @@ export const ProviderCard: FC<ProviderCardProps> = ({
           />
         )}
         {isPrimary && (
-          <Chip label="Primary" size="small" color="primary" variant="outlined" />
+          <Chip
+            label="Primary"
+            size="small"
+            color="primary"
+            variant="outlined"
+          />
         )}
       </div>
     </div>

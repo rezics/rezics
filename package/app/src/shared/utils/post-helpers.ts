@@ -1,5 +1,5 @@
 import { postApi } from "@rezics/api/post/post";
-import type { PostDTO, CreatePostInput } from "@rezics/contract";
+import type { CreatePostInput, PostDTO } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
 
 /**

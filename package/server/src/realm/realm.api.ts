@@ -31,7 +31,9 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   .get(
     "/me",
     async ({ identity }): Promise<RealmListResponse> => {
-      const { realms, total } = await realmService.listByMember(identity.unitId);
+      const { realms, total } = await realmService.listByMember(
+        identity.unitId,
+      );
       return { realms, total };
     },
     {
@@ -63,9 +65,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       const identity = await tryResolveIdentity(headers["authorization"]);
       const admin = isAdminRole(identity);
 
-      const effectiveQuery = admin
-        ? query
-        : { ...query, isPublic: true };
+      const effectiveQuery = admin ? query : { ...query, isPublic: true };
 
       const { realms, total } = await realmService.list(effectiveQuery as any);
       return { realms, total };
@@ -87,9 +87,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       const admin = isAdminRole(identity);
 
       const query = { ...body, ids: body.ids?.join(",") };
-      const effectiveQuery = admin
-        ? query
-        : { ...query, isPublic: true };
+      const effectiveQuery = admin ? query : { ...query, isPublic: true };
 
       const { realms, total } = await realmService.list(effectiveQuery as any);
       return { realms, total };
@@ -121,15 +119,14 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .put(
     "/:unitId",
-    async ({
-      params,
-      body,
-      identity,
-      set,
-    }): Promise<RealmDTO> => {
+    async ({ params, body, identity, set }): Promise<RealmDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
+        !hasPermissionToUpdateUnit(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
       ) {
         set.status = 403;
         throw new Error(
@@ -151,14 +148,14 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .delete(
     "/:unitId",
-    async ({
-      params,
-      identity,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
+        !hasPermissionToUpdateUnit(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
       ) {
         set.status = 403;
         throw new Error(
@@ -217,12 +214,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .put(
     "/:unitId/members/:userId",
-    async ({
-      params,
-      body,
-      identity,
-      set,
-    }): Promise<RealmMemberDTO> => {
+    async ({ params, body, identity, set }): Promise<RealmMemberDTO> => {
       // Moderator+ can update member roles
       const actorMember = await realmService.getMember(
         params.unitId,
@@ -257,11 +249,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .delete(
     "/:unitId/members/:userId",
-    async ({
-      params,
-      identity,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const isSelf = params.userId === identity.unitId;
       if (!isSelf) {
         // Only moderator+ or admin can remove others
@@ -296,15 +284,14 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   // --- Content feed routes ---
   .post(
     "/:unitId/content",
-    async ({
-      params,
-      body,
-      identity,
-      set,
-    }): Promise<RealmUnitDTO> => {
+    async ({ params, body, identity, set }): Promise<RealmUnitDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
+        !hasPermissionToUpdateUnit(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
       ) {
         set.status = 403;
         throw new Error(
@@ -326,24 +313,21 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .delete(
     "/:unitId/content/:contentUnitId",
-    async ({
-      params,
-      identity,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
+        !hasPermissionToUpdateUnit(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
       ) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to remove content from this realm",
         );
       }
-      await realmService.removeRealmUnit(
-        params.unitId,
-        params.contentUnitId,
-      );
+      await realmService.removeRealmUnit(params.unitId, params.contentUnitId);
       return { message: "Content removed from realm" };
     },
     {
@@ -362,12 +346,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   // --- Realm tag unit routes ---
   .post(
     "/:unitId/tags",
-    async ({
-      params,
-      body,
-      identity,
-      set,
-    }): Promise<RealmTagUnitDTO> => {
+    async ({ params, body, identity, set }): Promise<RealmTagUnitDTO> => {
       // Moderator+ can manage tags
       const actorMember = await realmService.getMember(
         params.unitId,
@@ -403,11 +382,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .delete(
     "/:unitId/tags/:tagUnitId/:contentUnitId",
-    async ({
-      params,
-      identity,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const actorMember = await realmService.getMember(
         params.unitId,
         identity.unitId,
@@ -438,8 +413,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       }),
       detail: {
         summary: "Remove realm-tag-unit",
-        description:
-          "Remove a realm-tag-unit link (no cascade on removal)",
+        description: "Remove a realm-tag-unit link (no cascade on removal)",
         tags: ["Realms"],
       },
     },

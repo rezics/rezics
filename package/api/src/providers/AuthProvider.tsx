@@ -88,9 +88,7 @@ export function AuthProvider() {
         ? getTokenExpMs(NormalizedTokenName.AUTH_SESSION)
         : null;
       const authNeedsRefresh =
-        !authToken ||
-        !authExpMs ||
-        authExpMs - REFRESH_BUFFER_MS <= Date.now();
+        !authToken || !authExpMs || authExpMs - REFRESH_BUFFER_MS <= Date.now();
 
       if (authNeedsRefresh) {
         if (!authToken && !hasAuthPresence()) {
@@ -214,10 +212,7 @@ export function AuthProvider() {
       if (event.newValue !== null) {
         scheduleRefresh();
       } else {
-        if (
-          !getToken(NormalizedTokenName.AUTH_SESSION) &&
-          !hasAuthPresence()
-        ) {
+        if (!getToken(NormalizedTokenName.AUTH_SESSION) && !hasAuthPresence()) {
           handleAuthSessionExpired();
         }
       }
@@ -232,8 +227,10 @@ export function AuthProvider() {
       const now = Date.now();
 
       if (
-        (!sessionExpMs || sessionExpMs - REFRESH_BUFFER_MS <= now) ||
-        (!authExpMs || authExpMs - REFRESH_BUFFER_MS <= now)
+        !sessionExpMs ||
+        sessionExpMs - REFRESH_BUFFER_MS <= now ||
+        !authExpMs ||
+        authExpMs - REFRESH_BUFFER_MS <= now
       ) {
         scheduleRefresh();
       }

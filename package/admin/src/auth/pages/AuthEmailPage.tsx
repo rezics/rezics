@@ -203,7 +203,12 @@ export default function AuthEmailPage() {
         >
           <Typography
             variant="subtitle2"
-            sx={{ p: 1, bgcolor: "grey.100", borderBottom: "1px solid", borderColor: "divider" }}
+            sx={{
+              p: 1,
+              bgcolor: "grey.100",
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
           >
             Preview
           </Typography>
@@ -230,10 +235,7 @@ export default function AuthEmailPage() {
   );
 }
 
-function getDefaultValue(
-  key: string,
-  _schema: { type: string },
-): string {
+function getDefaultValue(key: string, _schema: { type: string }): string {
   const defaults: Record<string, string> = {
     code: "482901",
     userName: "Test User",

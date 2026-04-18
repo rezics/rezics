@@ -1,3 +1,5 @@
+import CheckIcon from "@mui/icons-material/Check";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {
   Alert,
   Button,
@@ -10,17 +12,19 @@ import {
   IconButton,
   TextField,
   Typography,
-} from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckIcon from '@mui/icons-material/Check';
-import { useCreateTokenMutation } from '@rezics/api/token/token.mutations';
-import type { ApiTokenScopes } from '@rezics/contract';
-import { type FC, useState } from 'react';
+} from "@mui/material";
+import { useCreateTokenMutation } from "@rezics/api/token/token.mutations";
+import type { ApiTokenScopes } from "@rezics/contract";
+import { type FC, useState } from "react";
 
 const AVAILABLE_SCOPES = [
-  { domain: 'user', perm: 'read', label: 'user:read' },
-  { domain: 'user', perm: 'write', label: 'user:write' },
-  { domain: 'dispatch', perm: 'rezics-server-session', label: 'dispatch:rezics-server-session' },
+  { domain: "user", perm: "read", label: "user:read" },
+  { domain: "user", perm: "write", label: "user:write" },
+  {
+    domain: "dispatch",
+    perm: "rezics-server-session",
+    label: "dispatch:rezics-server-session",
+  },
 ] as const;
 
 interface TokenCreateDialogProps {
@@ -32,9 +36,9 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
   open,
   onClose,
 }) => {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set());
-  const [expiresAt, setExpiresAt] = useState('');
+  const [expiresAt, setExpiresAt] = useState("");
   const [rawToken, setRawToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -80,9 +84,9 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
   };
 
   const handleClose = () => {
-    setName('');
+    setName("");
     setSelectedScopes(new Set());
-    setExpiresAt('');
+    setExpiresAt("");
     setRawToken(null);
     setCopied(false);
     createToken.reset();
@@ -174,7 +178,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
           onClick={handleCreate}
           disabled={!name || createToken.isPending}
         >
-          {createToken.isPending ? 'Creating...' : 'Generate Token'}
+          {createToken.isPending ? "Creating..." : "Generate Token"}
         </Button>
       </DialogActions>
     </Dialog>

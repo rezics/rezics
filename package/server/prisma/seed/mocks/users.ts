@@ -49,5 +49,9 @@ export async function seedUsers(
 
   await prisma.user.createMany({ data: userData });
 
-  return userData.map((u) => ({ unitId: u.unitId, name: u.name, slug: u.slug }));
+  return userData.map((u) => ({
+    unitId: u.unitId,
+    name: u.name,
+    slug: u.slug,
+  }));
 }

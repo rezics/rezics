@@ -33,9 +33,7 @@ const SORT_OPTIONS = [
   { value: "publishedAt", label: "Publication Date" },
 ];
 
-function preAppliedToChips(
-  filters?: ZoneFilters,
-): AppliedFilter[] {
+function preAppliedToChips(filters?: ZoneFilters): AppliedFilter[] {
   if (!filters) return [];
   const chips: AppliedFilter[] = [];
 
@@ -109,7 +107,10 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
     const newTypes = checked
       ? [...currentTypes, type]
       : currentTypes.filter((t) => t !== type);
-    const newQuery = { ...query, type: newTypes.length > 0 ? newTypes : undefined };
+    const newQuery = {
+      ...query,
+      type: newTypes.length > 0 ? newTypes : undefined,
+    };
     setQuery(newQuery);
     setSearchInput(serializeSearchString(newQuery));
   };
@@ -202,7 +203,10 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
               size="small"
               checked={query.nsfw ?? false}
               onChange={(e) => {
-                const newQuery = { ...query, nsfw: e.target.checked || undefined };
+                const newQuery = {
+                  ...query,
+                  nsfw: e.target.checked || undefined,
+                };
                 setQuery(newQuery);
                 setSearchInput(serializeSearchString(newQuery));
               }}
@@ -238,7 +242,10 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
         fullWidth
         size="small"
         label={t("search.input.tags_label", "Tags")}
-        placeholder={t("search.input.tags_hint", "Enter tag slugs separated by comma")}
+        placeholder={t(
+          "search.input.tags_hint",
+          "Enter tag slugs separated by comma",
+        )}
         value={query.tags?.map((t) => t.slug).join(", ") ?? ""}
         onChange={(e) => {
           const slugs = e.target.value
@@ -247,7 +254,8 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
             .filter(Boolean);
           const newQuery = {
             ...query,
-            tags: slugs.length > 0 ? slugs.map((slug) => ({ slug })) : undefined,
+            tags:
+              slugs.length > 0 ? slugs.map((slug) => ({ slug })) : undefined,
           };
           setQuery(newQuery);
         }}

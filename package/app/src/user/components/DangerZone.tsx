@@ -1,5 +1,5 @@
-import { Typography } from '@mui/material';
-import type { FC, ReactNode } from 'react';
+import { Typography } from "@mui/material";
+import type { FC, ReactNode } from "react";
 
 interface DangerZoneProps {
   title?: string;
@@ -8,7 +8,7 @@ interface DangerZoneProps {
 }
 
 export const DangerZone: FC<DangerZoneProps> = ({
-  title = 'Danger Zone',
+  title = "Danger Zone",
   description,
   children,
 }) => (
