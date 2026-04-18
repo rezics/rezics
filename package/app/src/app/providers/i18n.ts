@@ -20,6 +20,7 @@ export function initI18n() {
       },
       lng: "zh-hant",
       fallbackLng: "en",
+      lowerCaseLng: true,
       interpolation: {
         escapeValue: false,
       },
