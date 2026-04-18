@@ -15,17 +15,25 @@ export const shelfExtraSchema = t.Object({
 export type ShelfExtra = (typeof shelfExtraSchema)["static"];
 
 // ============================================================
-// SHELF ITEM REVIEW DTO
+// SHELF ITEM KIND
 // ============================================================
 
-export const shelfItemReviewDTOSchema = t.Object({
-  shelfUnitId: t.String(),
-  itemUnitId: t.String(),
-  reviewUnitId: t.String(),
-  addedAt: t.Optional(t.Union([t.String(), t.Date()])),
-});
+export const shelfItemKindSchema = t.Union([
+  t.Literal("book"),
+  t.Literal("review"),
+  t.Literal("quote"),
+  t.Literal("post"),
+  t.Literal("chapter"),
+  t.Literal("tag"),
+  t.Literal("realm"),
+  t.Literal("image"),
+  t.Literal("video"),
+  t.Literal("media"),
+  t.Literal("game"),
+  t.Literal("link"),
+]);
 
-export type ShelfItemReviewDTO = (typeof shelfItemReviewDTOSchema)["static"];
+export type ShelfItemKind = (typeof shelfItemKindSchema)["static"];
 
 // ============================================================
 // SHELF ITEM DTO
@@ -33,23 +41,13 @@ export type ShelfItemReviewDTO = (typeof shelfItemReviewDTOSchema)["static"];
 
 export const shelfItemDTOSchema = t.Object({
   shelfUnitId: t.String(),
-  itemUnitId: t.String(),
-  sortOrder: t.Number(),
-  keywords: t.Array(t.String()),
-  label: t.Optional(t.Nullable(t.String())),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  itemRef: t.String(),
+  kind: shelfItemKindSchema,
+  position: t.String(),
+  reviewIds: t.Array(t.String()),
+  tagIds: t.Array(t.String()),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
-  // Expanded relations (optional, populated by detail queries)
-  reviews: t.Optional(t.Array(shelfItemReviewDTOSchema)),
-  item: t.Optional(
-    t.Object({
-      id: t.String(),
-      type: t.String(),
-      translations: t.Optional(t.Array(unitTranslationDTOSchema)),
-      extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
-    }),
-  ),
 });
 
 export type ShelfItemDTO = (typeof shelfItemDTOSchema)["static"];
@@ -124,7 +122,7 @@ export const shelfListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
-  containsItemUnitId: t.Optional(t.String()),
+  containsItemRef: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
@@ -148,7 +146,7 @@ export const shelfListBodySchema = t.Object({
   ...listPostBodyBase.properties,
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
-  containsItemUnitId: t.Optional(t.String()),
+  containsItemRef: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
@@ -229,51 +227,55 @@ export type UpdateShelfInput = (typeof updateShelfSchema)["static"];
 // ============================================================
 
 export const addShelfItemSchema = t.Object({
-  itemUnitId: t.String(),
-  sortOrder: t.Optional(t.Number()),
-  keywords: t.Optional(t.Array(t.String())),
-  label: t.Optional(t.String()),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  itemRef: t.String(),
+  kind: shelfItemKindSchema,
+  tagIds: t.Optional(t.Array(t.String())),
+  reviewIds: t.Optional(t.Array(t.String())),
 });
 
 export type AddShelfItemInput = (typeof addShelfItemSchema)["static"];
 
 export const updateShelfItemSchema = t.Object({
-  sortOrder: t.Optional(t.Number()),
-  keywords: t.Optional(t.Array(t.String())),
-  label: t.Optional(t.Nullable(t.String())),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  addReviewIds: t.Optional(t.Array(t.String())),
+  removeReviewIds: t.Optional(t.Array(t.String())),
+  tagIds: t.Optional(t.Array(t.String())),
 });
 
 export type UpdateShelfItemInput = (typeof updateShelfItemSchema)["static"];
 
 export const shelfItemParamsSchema = t.Object({
   shelfUnitId: t.String(),
-  itemUnitId: t.String(),
+  itemRef: t.String(),
 });
 
 export type ShelfItemParams = (typeof shelfItemParamsSchema)["static"];
 
 export const shelfItemsQuerySchema = t.Object({
-  filter: t.Optional(t.Union([t.Literal("all"), t.Literal("created"), t.Literal("collected")])),
-  keyword: t.Optional(t.String()),
-  sort: t.Optional(t.Union([t.Literal("newest"), t.Literal("oldest"), t.Literal("manual")])),
   cursor: t.Optional(t.String()),
   limit: paginationLimitSchema,
 });
 
 export type ShelfItemsQuery = (typeof shelfItemsQuerySchema)["static"];
 
-export const reorderShelfItemsSchema = t.Object({
-  items: t.Array(
-    t.Object({
-      itemUnitId: t.String(),
-      sortOrder: t.Number(),
-    }),
-  ),
+export const reorderShelfItemSchema = t.Object({
+  beforeItemRef: t.Optional(t.String()),
+  afterItemRef: t.Optional(t.String()),
 });
 
-export type ReorderShelfItemsInput = (typeof reorderShelfItemsSchema)["static"];
+export type ReorderShelfItemInput = (typeof reorderShelfItemSchema)["static"];
+
+export const setShelfItemTagsSchema = t.Object({
+  tagIds: t.Array(t.String()),
+});
+
+export type SetShelfItemTagsInput = (typeof setShelfItemTagsSchema)["static"];
+
+export const cleanupShelfOrphansSchema = t.Object({
+  orphanItemRefs: t.Array(t.String()),
+});
+
+export type CleanupShelfOrphansInput =
+  (typeof cleanupShelfOrphansSchema)["static"];
 
 // ============================================================
 // COLLECTION API
@@ -282,7 +284,6 @@ export type ReorderShelfItemsInput = (typeof reorderShelfItemsSchema)["static"];
 export const collectInputSchema = t.Object({
   targetId: t.String(),
   shelfIds: t.Array(t.String()),
-  keywords: t.Optional(t.Array(t.String())),
   independent: t.Optional(t.Boolean()),
 });
 

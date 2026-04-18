@@ -138,10 +138,6 @@ model Unit {
   rootPosts       Post[] @relation("PostRoot")
   parentPosts     Post[] @relation("PostParent")
 
-  // Shelf item relations
-  shelfItemsContaining ShelfItem[]       @relation("ShelfItemUnit")
-  shelfItemReviews     ShelfItemReview[] @relation("ShelfItemReviewUnit")
-
   @@unique([translationGroupId, defaultLanguage])
   @@index([type, status, createdAt])
   @@index([workUnitId])
@@ -386,37 +382,22 @@ model Shelf {
 
 model ShelfItem {
   shelfUnitId String   @db.Uuid
-  itemUnitId  String   @db.Uuid
-  sortOrder   Int      @default(0)
-  keywords    String[] @default([])
-
-  label String?
-
-  extra Json?
+  itemRef     String   @db.Uuid
+  kind        String   @db.VarChar(32)
+  position    String   @db.VarChar(64)
+  reviewIds   String[] @default([]) @db.Uuid
+  tagIds      String[] @default([]) @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  shelf   Shelf             @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
-  item    Unit              @relation("ShelfItemUnit", fields: [itemUnitId], references: [id], onDelete: Cascade)
-  reviews ShelfItemReview[]
+  shelf Shelf @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
 
-  @@id([shelfUnitId, itemUnitId])
-  @@index([itemUnitId])
-  @@index([shelfUnitId, sortOrder])
-}
-
-model ShelfItemReview {
-  shelfUnitId  String   @db.Uuid
-  itemUnitId   String   @db.Uuid
-  reviewUnitId String   @db.Uuid
-  addedAt      DateTime @default(now())
-
-  shelfItem ShelfItem @relation(fields: [shelfUnitId, itemUnitId], references: [shelfUnitId, itemUnitId], onDelete: Cascade)
-  review    Unit      @relation("ShelfItemReviewUnit", fields: [reviewUnitId], references: [id], onDelete: Cascade)
-
-  @@id([shelfUnitId, itemUnitId, reviewUnitId])
-  @@index([reviewUnitId])
+  @@id([shelfUnitId, itemRef])
+  @@index([itemRef])
+  @@index([shelfUnitId, position])
+  @@index([reviewIds], type: Gin)
+  @@index([tagIds], type: Gin)
 }
 
 // ============================================================
@@ -578,7 +559,6 @@ model User {
   description     String?
   joinDate        DateTime?
   permission      Json?
-  keywords        String[]  @default([])
   followersCount  Int       @default(0)
   followingsCount Int       @default(0)
   settings        Json?
