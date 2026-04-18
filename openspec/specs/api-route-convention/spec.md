@@ -35,26 +35,34 @@ Endpoints that return a collection or support batch-by-id hydration SHALL use a 
 - **THEN** the route either handles it as create or returns 404 — it SHALL NOT double-purpose as a list/batch endpoint
 
 ### Requirement: `ids` field on every list query
-Every list-query schema in `@rezics/contract` SHALL include an optional `ids: string[]` field with `maxItems: 200`, sourced from a shared `listQueryBase` mixin. The field SHALL be mirrored identically between GET (CSV string in querystring, split server-side) and POST (array in JSON body). When `ids` is provided, it SHALL compose with other filters via intersection.
+Every list-query schema in `@rezics/contract` SHALL include an optional `ids` field sourced from one of two shared mixins that mirror the HTTP transport: GET querystring schemas spread `...listGetQueryBase.properties` (where `ids` is a CSV `string`, split server-side via the shared `parseIdsCsv` helper), and POST body schemas spread `...listPostBodyBase.properties` (where `ids` is a native `string[]` with `maxItems: 200`). The GET CSV and POST array SHALL represent the same logical value — every resource that exposes `GET /list` SHALL also expose `POST /list`, and both SHALL accept the same id set and return the same response shape. When `ids` is provided, it SHALL compose with other filters via intersection.
 
-#### Scenario: List schema spreads listQueryBase
-- **WHEN** a developer defines `postListQuerySchema = t.Object({ ...listQueryBase.properties, kind: t.Optional(...) })`
-- **THEN** `ids` is automatically present on the schema
+#### Scenario: GET schema spreads listGetQueryBase
+- **WHEN** a developer defines `postListQuerySchema = t.Object({ ...listGetQueryBase.properties, kind: t.Optional(...) })`
+- **THEN** `ids` is present as an optional CSV string field
 
-#### Scenario: GET with ids CSV
+#### Scenario: POST body schema spreads listPostBodyBase
+- **WHEN** a developer defines `postListBodySchema = t.Object({ ...listPostBodyBase.properties, kind: t.Optional(...) })`
+- **THEN** `ids` is present as an optional `string[]` with `maxItems: 200`
+
+#### Scenario: GET handler splits CSV via shared helper
 - **WHEN** a client sends `GET /user/brief/list?ids=a,b,c`
-- **THEN** the server parses the CSV, deduplicates and trims whitespace, and returns briefs for existing ids
+- **THEN** the handler calls `parseIdsCsv(query.ids)` which returns `["a","b","c"]` after trimming and deduplicating empty entries
 
 #### Scenario: POST with ids array
 - **WHEN** a client sends `POST /user/brief/list` with body `{ "ids": ["a","b","c"] }`
-- **THEN** the server returns the same shape as the equivalent GET
+- **THEN** the handler reads `body.ids` directly as a validated `string[]`
 
 #### Scenario: ids composes with other filters
 - **WHEN** a client sends `POST /post/list` with body `{ "ids": ["p1","p2","p3"], "kind": "REVIEW" }`
 - **THEN** the response contains only posts whose unitId is in the ids set AND whose kind is REVIEW
 
-#### Scenario: ids over cap is rejected
-- **WHEN** a client sends a list request with `ids.length > 200`
+#### Scenario: GET ids CSV over cap is rejected
+- **WHEN** a client sends `GET /post/list?ids=<201 comma-separated ids>`
+- **THEN** `parseIdsCsv` throws and the route returns 400
+
+#### Scenario: POST ids array over cap is rejected
+- **WHEN** a client sends `POST /post/list` with body containing `ids.length > 200`
 - **THEN** the server returns 400 (schema validation error)
 
 ### Requirement: Single-item and sub-resource path shape
@@ -73,7 +81,7 @@ Single-item reads SHALL use `GET /{resource}/:unitId`. Mutations SHALL use `PUT 
 - **THEN** the server returns the single `ShelfItemDTO` or 404
 
 ### Requirement: When to choose GET versus POST for list
-GET SHALL be preferred for cacheability when all filters fit comfortably in a URL (under ~2 KB) and when `ids.length <= 30`. POST SHALL be preferred when `ids.length > 30`, when filters contain nested objects (e.g., cursor objects, sort objects), or when the total serialized querystring would exceed ~2 KB. The `listQueryBase` mixin SHALL carry a JSDoc comment documenting this guidance.
+GET SHALL be preferred for cacheability when all filters fit comfortably in a URL (under ~2 KB) and when `ids.length <= 30`. POST SHALL be preferred when `ids.length > 30`, when filters contain nested objects (e.g., cursor objects, sort objects), or when the total serialized querystring would exceed ~2 KB. The `listGetQueryBase` and `listPostBodyBase` mixins SHALL each carry JSDoc documenting this guidance and the CSV-vs-array transport distinction.
 
 #### Scenario: Small hydration uses GET
 - **WHEN** a frontend hydrates 10 actor briefs on a notification page
