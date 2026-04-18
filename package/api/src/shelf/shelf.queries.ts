@@ -1,6 +1,6 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { collectionApi, shelfApi, userKeywordsApi } from "./shelf.api";
-import { collectionKeys, shelfKeys, userKeywordKeys } from "./shelf.keys";
+import { collectionApi, shelfApi } from "./shelf.api";
+import { collectionKeys, shelfKeys } from "./shelf.keys";
 import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
 
 export const shelfListQuery = (filters?: ShelfFilters) =>
@@ -34,15 +34,13 @@ export const userShelvesQuery = () =>
 
 export const shelfItemsQuery = (unitId: string, query?: ShelfItemsQuery) =>
   queryOptions({
-    queryKey: shelfKeys.itemsFiltered(unitId, query),
+    queryKey: shelfKeys.itemsPage(unitId, query),
     queryFn: () => shelfApi.listItems(unitId, query),
     enabled: !!unitId,
     staleTime: 1000 * 60 * 2,
   });
 
-export const shelfInfiniteListQuery = (
-  filters?: Omit<ShelfFilters, "start">,
-) =>
+export const shelfInfiniteListQuery = (filters?: Omit<ShelfFilters, "start">) =>
   infiniteQueryOptions({
     queryKey: shelfKeys.list(filters),
     queryFn: ({ pageParam = 0 }) =>
@@ -65,13 +63,6 @@ export const collectionStatusQuery = (targetId: string) =>
     staleTime: 1000 * 60 * 1,
   });
 
-export const userKeywordsQuery = () =>
-  queryOptions({
-    queryKey: userKeywordKeys.mine(),
-    queryFn: () => userKeywordsApi.get(),
-    staleTime: 1000 * 60 * 5,
-  });
-
 export const shelfQueries = {
   list: shelfListQuery,
   detail: shelfDetailQuery,
@@ -83,8 +74,4 @@ export const shelfQueries = {
 
 export const collectionQueries = {
   status: collectionStatusQuery,
-};
-
-export const userKeywordQueries = {
-  mine: userKeywordsQuery,
 };

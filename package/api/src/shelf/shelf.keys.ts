@@ -9,7 +9,7 @@ export const shelfKeys = {
   byUser: (userId: string) => [...shelfKeys.all(), "user", userId] as const,
   mine: () => [...shelfKeys.all(), "mine"] as const,
   items: (unitId: string) => [...shelfKeys.all(), "items", unitId] as const,
-  itemsFiltered: (unitId: string, query?: ShelfItemsQuery) =>
+  itemsPage: (unitId: string, query?: ShelfItemsQuery) =>
     [...shelfKeys.items(unitId), query] as const,
 } as const;
 
@@ -17,9 +17,4 @@ export const collectionKeys = {
   all: () => ["collection"] as const,
   status: (targetId: string) =>
     [...collectionKeys.all(), "status", targetId] as const,
-} as const;
-
-export const userKeywordKeys = {
-  all: () => ["userKeywords"] as const,
-  mine: () => [...userKeywordKeys.all(), "mine"] as const,
 } as const;

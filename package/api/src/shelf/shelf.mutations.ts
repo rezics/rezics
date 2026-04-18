@@ -1,9 +1,11 @@
 import type {
   AddShelfItemInput,
+  CleanupShelfOrphansInput,
   CollectInput,
   CollectResponse,
   CreateShelfInput,
-  ReorderShelfItemsInput,
+  ReorderShelfItemInput,
+  SetShelfItemTagsInput,
   ShelfItemDTO,
   ShelfResponse,
   ToggleFavoriteResponse,
@@ -15,8 +17,8 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { collectionApi, shelfApi, userKeywordsApi } from "./shelf.api";
-import { collectionKeys, shelfKeys, userKeywordKeys } from "./shelf.keys";
+import { collectionApi, shelfApi } from "./shelf.api";
+import { collectionKeys, shelfKeys } from "./shelf.keys";
 
 export function useCreateShelfMutation(
   options?: Omit<
@@ -113,7 +115,7 @@ export function useUpdateShelfItemMutation(
       Error,
       {
         shelfUnitId: string;
-        itemUnitId: string;
+        itemRef: string;
         input: UpdateShelfItemInput;
       }
     >,
@@ -122,8 +124,8 @@ export function useUpdateShelfItemMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, itemUnitId, input }) =>
-      shelfApi.updateItem(shelfUnitId, itemUnitId, input),
+    mutationFn: ({ shelfUnitId, itemRef, input }) =>
+      shelfApi.updateItem(shelfUnitId, itemRef, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
@@ -137,20 +139,24 @@ export function useUpdateShelfItemMutation(
   });
 }
 
-export function useReorderShelfItemsMutation(
+export function useReorderShelfItemMutation(
   options?: Omit<
     UseMutationOptions<
-      { message: string },
+      ShelfItemDTO,
       Error,
-      { shelfUnitId: string; input: ReorderShelfItemsInput }
+      {
+        shelfUnitId: string;
+        itemRef: string;
+        input: ReorderShelfItemInput;
+      }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, input }) =>
-      shelfApi.reorderItems(shelfUnitId, input),
+    mutationFn: ({ shelfUnitId, itemRef, input }) =>
+      shelfApi.reorderItem(shelfUnitId, itemRef, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
@@ -169,15 +175,42 @@ export function useRemoveShelfItemMutation(
     UseMutationOptions<
       { message: string },
       Error,
-      { shelfUnitId: string; itemUnitId: string }
+      { shelfUnitId: string; itemRef: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, itemUnitId }) =>
-      shelfApi.removeItem(shelfUnitId, itemUnitId),
+    mutationFn: ({ shelfUnitId, itemRef }) =>
+      shelfApi.removeItem(shelfUnitId, itemRef),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: shelfKeys.detail(variables.shelfUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: shelfKeys.items(variables.shelfUnitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useAttachReviewMutation(
+  options?: Omit<
+    UseMutationOptions<
+      ShelfItemDTO,
+      Error,
+      { shelfUnitId: string; itemRef: string; reviewUnitId: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ shelfUnitId, itemRef, reviewUnitId }) =>
+      shelfApi.attachReview(shelfUnitId, itemRef, reviewUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
@@ -194,17 +227,75 @@ export function useRemoveShelfItemMutation(
 export function useDetachReviewMutation(
   options?: Omit<
     UseMutationOptions<
-      { message: string },
+      ShelfItemDTO,
       Error,
-      { shelfUnitId: string; itemUnitId: string; reviewUnitId: string }
+      { shelfUnitId: string; itemRef: string; reviewUnitId: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, itemUnitId, reviewUnitId }) =>
-      shelfApi.detachReview(shelfUnitId, itemUnitId, reviewUnitId),
+    mutationFn: ({ shelfUnitId, itemRef, reviewUnitId }) =>
+      shelfApi.detachReview(shelfUnitId, itemRef, reviewUnitId),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: shelfKeys.detail(variables.shelfUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: shelfKeys.items(variables.shelfUnitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useSetShelfItemTagsMutation(
+  options?: Omit<
+    UseMutationOptions<
+      ShelfItemDTO,
+      Error,
+      {
+        shelfUnitId: string;
+        itemRef: string;
+        input: SetShelfItemTagsInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ shelfUnitId, itemRef, input }) =>
+      shelfApi.setItemTags(shelfUnitId, itemRef, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: shelfKeys.detail(variables.shelfUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: shelfKeys.items(variables.shelfUnitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useCleanupOrphansMutation(
+  options?: Omit<
+    UseMutationOptions<
+      { deleted: number },
+      Error,
+      { shelfUnitId: string; input: CleanupShelfOrphansInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ shelfUnitId, input }) =>
+      shelfApi.cleanupOrphans(shelfUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
@@ -235,7 +326,6 @@ export function useCollectMutation(
         queryKey: collectionKeys.status(variables.targetId),
       });
       queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
-      queryClient.invalidateQueries({ queryKey: userKeywordKeys.mine() });
       for (const shelfId of data.savedTo) {
         queryClient.invalidateQueries({
           queryKey: shelfKeys.detail(shelfId),
@@ -269,45 +359,21 @@ export function useToggleFavoriteMutation(
   });
 }
 
-// User keywords mutations
-
-export function useUpdateKeywordsMutation(
-  options?: Omit<
-    UseMutationOptions<
-      string[],
-      Error,
-      { add?: string[]; remove?: string[] }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input) => userKeywordsApi.update(input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.setQueryData(userKeywordKeys.mine(), data);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
 export const shelfMutations = {
   useCreate: useCreateShelfMutation,
   useUpdate: useUpdateShelfMutation,
   useDelete: useDeleteShelfMutation,
   useAddItem: useAddShelfItemMutation,
   useUpdateItem: useUpdateShelfItemMutation,
-  useReorderItems: useReorderShelfItemsMutation,
+  useReorderItem: useReorderShelfItemMutation,
   useRemoveItem: useRemoveShelfItemMutation,
+  useAttachReview: useAttachReviewMutation,
   useDetachReview: useDetachReviewMutation,
+  useSetItemTags: useSetShelfItemTagsMutation,
+  useCleanupOrphans: useCleanupOrphansMutation,
 };
 
 export const collectionMutations = {
   useCollect: useCollectMutation,
   useToggleFavorite: useToggleFavoriteMutation,
-};
-
-export const userKeywordMutations = {
-  useUpdate: useUpdateKeywordsMutation,
 };

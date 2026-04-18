@@ -1,10 +1,12 @@
 import type {
   AddShelfItemInput,
+  CleanupShelfOrphansInput,
   CollectInput,
-  CollectResponse,
   CollectionStatusResponse,
+  CollectResponse,
   CreateShelfInput,
-  ReorderShelfItemsInput,
+  ReorderShelfItemInput,
+  SetShelfItemTagsInput,
   ShelfDetailDTO,
   ShelfItemDTO,
   ShelfListResponse,
@@ -20,7 +22,9 @@ import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
 
 export const shelfApi = {
   list: async (filters?: ShelfFilters): Promise<ShelfListResponse> => {
-    return apiFetch<ShelfListResponse>(`/shelf/list${buildQueryString(filters)}`);
+    return apiFetch<ShelfListResponse>(
+      `/shelf/list${buildQueryString(filters)}`,
+    );
   },
 
   get: async (unitId: string): Promise<ShelfDetailDTO> => {
@@ -68,9 +72,7 @@ export const shelfApi = {
     shelfUnitId: string,
     query?: ShelfItemsQuery,
   ): Promise<{ items: ShelfItemDTO[]; hasMore: boolean }> => {
-    return apiFetch(
-      `/shelf/${shelfUnitId}/items${buildQueryString(query)}`,
-    );
+    return apiFetch(`/shelf/${shelfUnitId}/items${buildQueryString(query)}`);
   },
 
   addItem: async (
@@ -85,11 +87,22 @@ export const shelfApi = {
 
   updateItem: async (
     shelfUnitId: string,
-    itemUnitId: string,
+    itemRef: string,
     input: UpdateShelfItemInput,
   ): Promise<ShelfItemDTO> => {
+    return apiFetch<ShelfItemDTO>(`/shelf/${shelfUnitId}/items/${itemRef}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  reorderItem: async (
+    shelfUnitId: string,
+    itemRef: string,
+    input: ReorderShelfItemInput,
+  ): Promise<ShelfItemDTO> => {
     return apiFetch<ShelfItemDTO>(
-      `/shelf/${shelfUnitId}/items/${itemUnitId}`,
+      `/shelf/${shelfUnitId}/items/${itemRef}/position`,
       {
         method: "PATCH",
         body: JSON.stringify(input),
@@ -97,35 +110,63 @@ export const shelfApi = {
     );
   },
 
-  reorderItems: async (
-    shelfUnitId: string,
-    input: ReorderShelfItemsInput,
-  ): Promise<{ message: string }> => {
-    return apiFetch(`/shelf/${shelfUnitId}/items/reorder`, {
-      method: "PUT",
-      body: JSON.stringify(input),
-    });
-  },
-
   removeItem: async (
     shelfUnitId: string,
-    itemUnitId: string,
+    itemRef: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/shelf/${shelfUnitId}/items/${itemUnitId}`,
+      `/shelf/${shelfUnitId}/items/${itemRef}`,
       { method: "DELETE" },
+    );
+  },
+
+  attachReview: async (
+    shelfUnitId: string,
+    itemRef: string,
+    reviewUnitId: string,
+  ): Promise<ShelfItemDTO> => {
+    return apiFetch<ShelfItemDTO>(
+      `/shelf/${shelfUnitId}/items/${itemRef}/reviews`,
+      {
+        method: "POST",
+        body: JSON.stringify({ reviewUnitId }),
+      },
     );
   },
 
   detachReview: async (
     shelfUnitId: string,
-    itemUnitId: string,
+    itemRef: string,
     reviewUnitId: string,
-  ): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(
-      `/shelf/${shelfUnitId}/items/${itemUnitId}/reviews/${reviewUnitId}`,
+  ): Promise<ShelfItemDTO> => {
+    return apiFetch<ShelfItemDTO>(
+      `/shelf/${shelfUnitId}/items/${itemRef}/reviews/${reviewUnitId}`,
       { method: "DELETE" },
     );
+  },
+
+  setItemTags: async (
+    shelfUnitId: string,
+    itemRef: string,
+    input: SetShelfItemTagsInput,
+  ): Promise<ShelfItemDTO> => {
+    return apiFetch<ShelfItemDTO>(
+      `/shelf/${shelfUnitId}/items/${itemRef}/tags`,
+      {
+        method: "PUT",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  cleanupOrphans: async (
+    shelfUnitId: string,
+    input: CleanupShelfOrphansInput,
+  ): Promise<{ deleted: number }> => {
+    return apiFetch<{ deleted: number }>(`/shelf/${shelfUnitId}/cleanup`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
   },
 };
 
@@ -137,9 +178,7 @@ export const collectionApi = {
     });
   },
 
-  toggleFavorite: async (
-    targetId: string,
-  ): Promise<ToggleFavoriteResponse> => {
+  toggleFavorite: async (targetId: string): Promise<ToggleFavoriteResponse> => {
     return apiFetch<ToggleFavoriteResponse>("/collect/toggle-favorite", {
       method: "POST",
       body: JSON.stringify({ targetId }),
@@ -147,24 +186,6 @@ export const collectionApi = {
   },
 
   status: async (targetId: string): Promise<CollectionStatusResponse> => {
-    return apiFetch<CollectionStatusResponse>(
-      `/collect/status/${targetId}`,
-    );
-  },
-};
-
-export const userKeywordsApi = {
-  get: async (): Promise<string[]> => {
-    return apiFetch<string[]>("/user/me/keywords");
-  },
-
-  update: async (input: {
-    add?: string[];
-    remove?: string[];
-  }): Promise<string[]> => {
-    return apiFetch<string[]>("/user/me/keywords", {
-      method: "PATCH",
-      body: JSON.stringify(input),
-    });
+    return apiFetch<CollectionStatusResponse>(`/collect/status/${targetId}`);
   },
 };

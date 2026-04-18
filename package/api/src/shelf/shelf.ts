@@ -1,25 +1,26 @@
 // API Clients
-export { collectionApi, shelfApi, userKeywordsApi } from "./shelf.api";
+export { collectionApi, shelfApi } from "./shelf.api";
 
 // Query Keys
-export { collectionKeys, shelfKeys, userKeywordKeys } from "./shelf.keys";
+export { collectionKeys, shelfKeys } from "./shelf.keys";
 
 // Mutation Hooks
 export {
   collectionMutations,
   shelfMutations,
   useAddShelfItemMutation,
+  useAttachReviewMutation,
+  useCleanupOrphansMutation,
   useCollectMutation,
   useCreateShelfMutation,
   useDeleteShelfMutation,
   useDetachReviewMutation,
   useRemoveShelfItemMutation,
-  useReorderShelfItemsMutation,
+  useReorderShelfItemMutation,
+  useSetShelfItemTagsMutation,
   useToggleFavoriteMutation,
-  useUpdateKeywordsMutation,
   useUpdateShelfItemMutation,
   useUpdateShelfMutation,
-  userKeywordMutations,
 } from "./shelf.mutations";
 
 // Query Configurations
@@ -32,29 +33,28 @@ export {
   shelfListQuery,
   shelfQueries,
   shelvesByUserQuery,
-  userKeywordQueries,
-  userKeywordsQuery,
   userShelvesQuery,
 } from "./shelf.queries";
-
 // Types
 export type {
   AddShelfItemInput,
+  CleanupShelfOrphansInput,
   CollectInput,
-  CollectResponse,
   CollectionStatusResponse,
+  CollectResponse,
   CreateShelfInput,
-  ReorderShelfItemsInput,
+  ReorderShelfItemInput,
+  SetShelfItemTagsInput,
   ShelfDetailDTO,
   ShelfDTO,
   ShelfFilters,
   ShelfFormData,
   ShelfItemDTO,
-  ShelfItemReviewDTO,
+  ShelfItemKind,
   ShelfItemsQuery,
   ShelfListResponse,
   ShelfResponse,
-  ShelfSortOption,
+  ShelfSortMode,
   ShelfSummaryDTO,
   ShelfView,
   ToggleFavoriteInput,
@@ -62,3 +62,6 @@ export type {
   UpdateShelfInput,
   UpdateShelfItemInput,
 } from "./shelf.types";
+export type { ShelfHydrationResult } from "./useShelfHydration";
+// Hydration hook
+export { useShelfHydration } from "./useShelfHydration";

@@ -1,14 +1,16 @@
 import type {
   AddShelfItemInput,
+  CleanupShelfOrphansInput,
   CollectInput,
-  CollectResponse,
   CollectionStatusResponse,
+  CollectResponse,
   CreateShelfInput,
-  ReorderShelfItemsInput,
+  ReorderShelfItemInput,
+  SetShelfItemTagsInput,
   ShelfDetailDTO,
   ShelfDTO,
   ShelfItemDTO,
-  ShelfItemReviewDTO,
+  ShelfItemKind,
   ShelfItemsQuery,
   ShelfListQuery,
   ShelfListResponse,
@@ -22,15 +24,17 @@ import type {
 
 export type {
   AddShelfItemInput,
+  CleanupShelfOrphansInput,
   CollectInput,
-  CollectResponse,
   CollectionStatusResponse,
+  CollectResponse,
   CreateShelfInput,
-  ReorderShelfItemsInput,
+  ReorderShelfItemInput,
+  SetShelfItemTagsInput,
   ShelfDetailDTO,
   ShelfDTO,
   ShelfItemDTO,
-  ShelfItemReviewDTO,
+  ShelfItemKind,
   ShelfItemsQuery,
   ShelfListQuery,
   ShelfListResponse,
@@ -44,5 +48,6 @@ export type {
 
 export type ShelfFormData = CreateShelfInput;
 export type ShelfFilters = Partial<ShelfListQuery>;
-export type ShelfSortOption = "createdAt" | "updatedAt";
 export type ShelfView = "grid" | "list" | "review";
+
+export type ShelfSortMode = "manual" | "time" | "title";
