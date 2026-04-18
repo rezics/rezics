@@ -1,7 +1,7 @@
 import type { Prisma } from "#/prisma/client";
 import { publicUserSelect } from "@/utils/sanitizeUser";
 
-// Prisma include for shelf detail (with items + reviews)
+// Prisma include for shelf detail (with items in position order; no Unit expand)
 export const shelfInclude = {
   unit: {
     include: {
@@ -11,16 +11,7 @@ export const shelfInclude = {
     },
   },
   items: {
-    orderBy: { sortOrder: "asc" as const },
-    include: {
-      item: {
-        include: {
-          user: { select: publicUserSelect },
-          translations: true,
-        },
-      },
-      reviews: true,
-    },
+    orderBy: { position: "asc" as const },
   },
 } satisfies Prisma.ShelfInclude;
 
@@ -54,16 +45,8 @@ export type ShelfListSelected = Prisma.ShelfGetPayload<{
   select: typeof shelfListSelect;
 }>;
 
-// Include for shelf items listing with pagination
-export const shelfItemInclude = {
-  item: {
-    include: {
-      user: { select: publicUserSelect },
-      translations: true,
-    },
-  },
-  reviews: true,
-} satisfies Prisma.ShelfItemInclude;
+// Shelf items are returned as thin rows — no Unit join, no junction table.
+export const shelfItemInclude = {} satisfies Prisma.ShelfItemInclude;
 
 export type ShelfItemWithRelations = Prisma.ShelfItemGetPayload<{
   include: typeof shelfItemInclude;

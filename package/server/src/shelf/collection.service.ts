@@ -1,12 +1,30 @@
 import type {
   CollectInput,
-  CollectResponse,
   CollectionStatusResponse,
+  CollectResponse,
+  ShelfItemKind,
   ToggleFavoriteResponse,
 } from "@rezics/contract";
-import { prisma, PostKind, UnitStatus, UnitType, UnitVisibility } from "#/prisma/client";
+import {
+  PostKind,
+  prisma,
+  UnitStatus,
+  UnitType,
+  UnitVisibility,
+} from "#/prisma/client";
+import { generateBetween } from "./fractional-index";
+import { mapUnitToKind } from "./shelf.service";
 
 const FAVORITES_KIND_KEY = "favorites";
+
+interface ResolvedTarget {
+  /** Unit id of the shelf slot (the target work, or the target itself). */
+  itemRef: string;
+  /** Kind discriminator for the slot. */
+  kind: ShelfItemKind;
+  /** If the original targetId is a review post, its unit id; else undefined. */
+  reviewUnitId?: string;
+}
 
 export class CollectionService {
   /**
@@ -23,7 +41,6 @@ export class CollectionService {
 
     if (existing) return existing.unitId;
 
-    // Lazy create
     const unit = await prisma.unit.create({
       data: {
         userId,
@@ -44,155 +61,116 @@ export class CollectionService {
   }
 
   /**
-   * Resolve a review to its target work.
-   * Returns { targetUnitId, isReview } or null for non-review posts.
+   * Resolve the collect target to a slot itemRef + kind.
+   *
+   * - If `targetId` is a REVIEW post with a `targetUnitId`, the slot is the
+   *   target work (the book the review is about) and the review's own unit id
+   *   is threaded back so it can be appended to `ShelfItem.reviewIds`.
+   * - Otherwise the target is used directly.
    */
-  private async resolveReviewTarget(
+  private async resolveTarget(
     targetId: string,
-  ): Promise<{ targetUnitId: string; reviewUnitId: string } | null> {
-    const post = await prisma.post.findUnique({
-      where: { unitId: targetId },
-      select: { kind: true, targetUnitId: true },
+    independent: boolean,
+  ): Promise<ResolvedTarget> {
+    const unit = await prisma.unit.findUniqueOrThrow({
+      where: { id: targetId },
+      select: {
+        type: true,
+        post: { select: { kind: true, targetUnitId: true } },
+      },
     });
 
-    if (post?.kind === PostKind.REVIEW && post.targetUnitId) {
-      return { targetUnitId: post.targetUnitId, reviewUnitId: targetId };
+    if (
+      !independent &&
+      unit.type === UnitType.POST &&
+      unit.post?.kind === PostKind.REVIEW &&
+      unit.post?.targetUnitId
+    ) {
+      // Slot the review against its target work; record review for reviewIds append.
+      const target = await prisma.unit.findUniqueOrThrow({
+        where: { id: unit.post.targetUnitId },
+        select: { type: true, post: { select: { kind: true } } },
+      });
+      return {
+        itemRef: unit.post.targetUnitId,
+        kind: mapUnitToKind(target.type, target.post?.kind ?? null),
+        reviewUnitId: targetId,
+      };
     }
 
-    return null;
+    return {
+      itemRef: targetId,
+      kind: mapUnitToKind(unit.type, unit.post?.kind ?? null),
+    };
   }
 
   /**
    * Collect a unit to multiple shelves.
    */
-  async collect(
-    userId: string,
-    input: CollectInput,
-  ): Promise<CollectResponse> {
-    const { targetId, shelfIds, keywords = [], independent = false } = input;
+  async collect(userId: string, input: CollectInput): Promise<CollectResponse> {
+    const { targetId, shelfIds, independent = false } = input;
 
-    const reviewTarget =
-      !independent ? await this.resolveReviewTarget(targetId) : null;
+    const resolved = await this.resolveTarget(targetId, independent);
 
     const savedTo: string[] = [];
     let isNew = false;
 
     await prisma.$transaction(async (tx) => {
       for (const shelfId of shelfIds) {
-        // Verify the shelf belongs to the user
         const shelf = await tx.shelf.findFirst({
           where: { unitId: shelfId, unit: { userId } },
         });
         if (!shelf) continue;
 
-        if (reviewTarget && !independent) {
-          // Review collection: upsert target work, attach review
-          const existing = await tx.shelfItem.findUnique({
-            where: {
-              shelfUnitId_itemUnitId: {
-                shelfUnitId: shelfId,
-                itemUnitId: reviewTarget.targetUnitId,
-              },
-            },
-          });
-
-          if (existing) {
-            // Merge keywords
-            if (keywords.length > 0) {
-              const merged = [
-                ...new Set([...existing.keywords, ...keywords]),
-              ];
-              await tx.shelfItem.update({
-                where: {
-                  shelfUnitId_itemUnitId: {
-                    shelfUnitId: shelfId,
-                    itemUnitId: reviewTarget.targetUnitId,
-                  },
-                },
-                data: { keywords: merged },
-              });
-            }
-          } else {
-            await tx.shelfItem.create({
-              data: {
-                shelfUnitId: shelfId,
-                itemUnitId: reviewTarget.targetUnitId,
-                keywords,
-              },
-            });
-            isNew = true;
-          }
-
-          // Attach review via ShelfItemReview
-          await tx.shelfItemReview.upsert({
-            where: {
-              shelfUnitId_itemUnitId_reviewUnitId: {
-                shelfUnitId: shelfId,
-                itemUnitId: reviewTarget.targetUnitId,
-                reviewUnitId: reviewTarget.reviewUnitId,
-              },
-            },
-            create: {
+        const existing = await tx.shelfItem.findUnique({
+          where: {
+            shelfUnitId_itemRef: {
               shelfUnitId: shelfId,
-              itemUnitId: reviewTarget.targetUnitId,
-              reviewUnitId: reviewTarget.reviewUnitId,
+              itemRef: resolved.itemRef,
             },
-            update: {},
-          });
-        } else {
-          // Regular unit collection
-          const existing = await tx.shelfItem.findUnique({
-            where: {
-              shelfUnitId_itemUnitId: {
-                shelfUnitId: shelfId,
-                itemUnitId: targetId,
-              },
-            },
-          });
+          },
+        });
 
-          if (existing) {
-            if (keywords.length > 0) {
-              const merged = [
-                ...new Set([...existing.keywords, ...keywords]),
-              ];
-              await tx.shelfItem.update({
-                where: {
-                  shelfUnitId_itemUnitId: {
-                    shelfUnitId: shelfId,
-                    itemUnitId: targetId,
-                  },
+        if (existing) {
+          if (
+            resolved.reviewUnitId &&
+            !existing.reviewIds.includes(resolved.reviewUnitId)
+          ) {
+            await tx.shelfItem.update({
+              where: {
+                shelfUnitId_itemRef: {
+                  shelfUnitId: shelfId,
+                  itemRef: resolved.itemRef,
                 },
-                data: { keywords: merged },
-              });
-            }
-          } else {
-            await tx.shelfItem.create({
+              },
               data: {
-                shelfUnitId: shelfId,
-                itemUnitId: targetId,
-                keywords,
+                reviewIds: {
+                  set: [...existing.reviewIds, resolved.reviewUnitId],
+                },
               },
             });
-            isNew = true;
           }
+        } else {
+          const last = await tx.shelfItem.findFirst({
+            where: { shelfUnitId: shelfId },
+            orderBy: { position: "desc" },
+            select: { position: true },
+          });
+          const position = generateBetween(last?.position, undefined);
+          await tx.shelfItem.create({
+            data: {
+              shelfUnitId: shelfId,
+              itemRef: resolved.itemRef,
+              kind: resolved.kind,
+              position,
+              reviewIds: resolved.reviewUnitId ? [resolved.reviewUnitId] : [],
+              tagIds: [],
+            },
+          });
+          isNew = true;
         }
 
         savedTo.push(shelfId);
-      }
-
-      // Merge keywords into User.keywords
-      if (keywords.length > 0) {
-        const user = await tx.user.findUniqueOrThrow({
-          where: { unitId: userId },
-          select: { keywords: true },
-        });
-        const merged = [...new Set([...user.keywords, ...keywords])];
-        if (merged.length <= 500) {
-          await tx.user.update({
-            where: { unitId: userId },
-            data: { keywords: merged },
-          });
-        }
       }
     });
 
@@ -207,49 +185,46 @@ export class CollectionService {
     targetId: string,
   ): Promise<ToggleFavoriteResponse> {
     const favShelfId = await this.getFavoritesShelfId(userId);
-    const reviewTarget = await this.resolveReviewTarget(targetId);
-    const itemUnitId = reviewTarget?.targetUnitId ?? targetId;
+    const resolved = await this.resolveTarget(targetId, false);
 
     const existing = await prisma.shelfItem.findUnique({
       where: {
-        shelfUnitId_itemUnitId: {
+        shelfUnitId_itemRef: {
           shelfUnitId: favShelfId,
-          itemUnitId,
+          itemRef: resolved.itemRef,
         },
       },
     });
 
     if (existing) {
-      // Unfavorite: remove item (cascades ShelfItemReviews)
       await prisma.shelfItem.delete({
         where: {
-          shelfUnitId_itemUnitId: {
+          shelfUnitId_itemRef: {
             shelfUnitId: favShelfId,
-            itemUnitId,
+            itemRef: resolved.itemRef,
           },
         },
       });
       return { isFavorited: false };
     }
 
-    // Favorite: create item
+    const last = await prisma.shelfItem.findFirst({
+      where: { shelfUnitId: favShelfId },
+      orderBy: { position: "desc" },
+      select: { position: true },
+    });
+    const position = generateBetween(last?.position, undefined);
+
     await prisma.shelfItem.create({
       data: {
         shelfUnitId: favShelfId,
-        itemUnitId,
+        itemRef: resolved.itemRef,
+        kind: resolved.kind,
+        position,
+        reviewIds: resolved.reviewUnitId ? [resolved.reviewUnitId] : [],
+        tagIds: [],
       },
     });
-
-    // If it's a review, attach via ShelfItemReview
-    if (reviewTarget) {
-      await prisma.shelfItemReview.create({
-        data: {
-          shelfUnitId: favShelfId,
-          itemUnitId,
-          reviewUnitId: reviewTarget.reviewUnitId,
-        },
-      });
-    }
 
     return { isFavorited: true };
   }
@@ -261,18 +236,18 @@ export class CollectionService {
     userId: string,
     targetId: string,
   ): Promise<CollectionStatusResponse> {
-    const reviewTarget = await this.resolveReviewTarget(targetId);
-    const itemUnitId = reviewTarget?.targetUnitId ?? targetId;
-
+    const resolved = await this.resolveTarget(targetId, false);
+    const itemRef = resolved.itemRef;
     const favShelfId = await this.getFavoritesShelfId(userId);
 
     const shelfItems = await prisma.shelfItem.findMany({
       where: {
-        itemUnitId,
+        itemRef,
         shelf: { unit: { userId } },
       },
       select: {
         shelfUnitId: true,
+        reviewIds: true,
         shelf: {
           select: {
             unit: {
@@ -288,8 +263,15 @@ export class CollectionService {
       },
     });
 
-    const isFavorited = shelfItems.some((si) => si.shelfUnitId === favShelfId);
-    const shelves = shelfItems.map((si) => ({
+    // If original target is a review, the status should reflect whether the
+    // review specifically is attached.
+    const reviewGate = resolved.reviewUnitId;
+    const filtered = reviewGate
+      ? shelfItems.filter((si) => si.reviewIds.includes(reviewGate))
+      : shelfItems;
+
+    const isFavorited = filtered.some((si) => si.shelfUnitId === favShelfId);
+    const shelves = filtered.map((si) => ({
       id: si.shelfUnitId,
       title: si.shelf?.unit?.translations?.[0]?.title ?? null,
     }));

@@ -1,16 +1,18 @@
 import type {
-  ShelfDTO,
   ShelfDetailDTO,
+  ShelfDTO,
   ShelfItemDTO,
   ShelfListResponse,
   ShelfSummaryDTO,
 } from "@rezics/contract";
 import {
   addShelfItemSchema,
+  cleanupShelfOrphansSchema,
   createShelfSchema,
   hasPermissionToDeleteShelf,
   hasPermissionToUpdateShelf,
-  reorderShelfItemsSchema,
+  reorderShelfItemSchema,
+  setShelfItemTagsSchema,
   shelfItemsQuerySchema,
   shelfListBodySchema,
   shelfListQuerySchema,
@@ -22,6 +24,17 @@ import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { shelfService } from "./shelf.service";
+
+const itemParamsSchema = t.Object({
+  unitId: t.String(),
+  itemRef: t.String(),
+});
+
+const reviewDetachParamsSchema = t.Object({
+  unitId: t.String(),
+  itemRef: t.String(),
+  reviewUnitId: t.String(),
+});
 
 export const shelfApi = new Elysia({ prefix: "/shelf" })
   .use(authMacro)
@@ -73,7 +86,10 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   .post(
     "/list",
     async ({ body }): Promise<ShelfListResponse> => {
-      const { shelves, total } = await shelfService.list({ ...body, ids: body.ids?.join(",") } as any);
+      const { shelves, total } = await shelfService.list({
+        ...body,
+        ids: body.ids?.join(","),
+      } as any);
       return { shelves, total };
     },
     {
@@ -109,7 +125,13 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         set.status = 404;
         throw new Error(`Shelf not found: ${params.unitId}`);
       }
-      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to update this shelf",
@@ -132,7 +154,13 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     "/:unitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToDeleteShelf(identity.permission, identity.unitId, target as any)) {
+      if (
+        !hasPermissionToDeleteShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this shelf",
@@ -154,12 +182,8 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   // --- Shelf item routes ---
   .get(
     "/:unitId/items",
-    async ({ params, query, identity }) => {
-      return shelfService.getShelfItems(
-        params.unitId,
-        identity.unitId,
-        query as any,
-      );
+    async ({ params, query }) => {
+      return shelfService.getShelfItems(params.unitId, query);
     },
     {
       requireLogin: true,
@@ -168,7 +192,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       detail: {
         summary: "List shelf items",
         description:
-          "List items in a shelf with filtering by keyword, created/collected, and pagination",
+          "List items in a shelf in position order with cursor pagination",
         tags: ["Shelves"],
       },
     },
@@ -177,7 +201,13 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     "/:unitId/items",
     async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to modify this shelf",
@@ -197,106 +227,218 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     },
   )
   .patch(
-    "/:unitId/items/:itemUnitId",
+    "/:unitId/items/:itemRef",
     async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to modify this shelf",
         );
       }
-      return shelfService.updateItem(
+      return shelfService.updateItem(params.unitId, params.itemRef, body);
+    },
+    {
+      requireLogin: true,
+      params: itemParamsSchema,
+      body: updateShelfItemSchema,
+      detail: {
+        summary: "Update shelf item",
+        description: "Update a shelf item's review attachments and tag ids",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .patch(
+    "/:unitId/items/:itemRef/position",
+    async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
+      const target = await unitService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to modify this shelf",
+        );
+      }
+      return shelfService.reorderItem(params.unitId, params.itemRef, body);
+    },
+    {
+      requireLogin: true,
+      params: itemParamsSchema,
+      body: reorderShelfItemSchema,
+      detail: {
+        summary: "Reorder shelf item",
+        description:
+          "Move a shelf item between neighbor refs; server computes a fractional-index position",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .delete(
+    "/:unitId/items/:itemRef",
+    async ({ params, identity, set }): Promise<{ message: string }> => {
+      const target = await unitService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to modify this shelf",
+        );
+      }
+      await shelfService.removeItem(params.unitId, params.itemRef);
+      return { message: "Item removed from shelf" };
+    },
+    {
+      requireLogin: true,
+      params: itemParamsSchema,
+      detail: {
+        summary: "Remove item from shelf",
+        description: "Remove an item from a shelf",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/items/:itemRef/reviews",
+    async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
+      const target = await unitService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to modify this shelf",
+        );
+      }
+      return shelfService.attachReview(
         params.unitId,
-        params.itemUnitId,
-        body,
+        params.itemRef,
+        body.reviewUnitId,
       );
     },
     {
       requireLogin: true,
-      params: t.Object({ unitId: t.String(), itemUnitId: t.String() }),
-      body: updateShelfItemSchema,
+      params: itemParamsSchema,
+      body: t.Object({ reviewUnitId: t.String() }),
       detail: {
-        summary: "Update shelf item",
-        description: "Update an item within a shelf (keywords, label, sortOrder)",
+        summary: "Attach review to shelf item",
+        description:
+          "Append a review's unit id to a shelf item's reviewIds (creates the slot if needed)",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .delete(
+    "/:unitId/items/:itemRef/reviews/:reviewUnitId",
+    async ({ params, identity, set }): Promise<ShelfItemDTO> => {
+      const target = await unitService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to modify this shelf",
+        );
+      }
+      return shelfService.detachReview(
+        params.unitId,
+        params.itemRef,
+        params.reviewUnitId,
+      );
+    },
+    {
+      requireLogin: true,
+      params: reviewDetachParamsSchema,
+      detail: {
+        summary: "Detach review from shelf item",
+        description: "Remove a single review attachment from a shelf item",
         tags: ["Shelves"],
       },
     },
   )
   .put(
-    "/:unitId/items/reorder",
-    async ({ params, body, identity, set }): Promise<{ message: string }> => {
+    "/:unitId/items/:itemRef/tags",
+    async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to modify this shelf",
         );
       }
-      await shelfService.reorderItems(params.unitId, body);
-      return { message: "Items reordered" };
+      return shelfService.setItemTags(
+        params.unitId,
+        params.itemRef,
+        body.tagIds,
+      );
+    },
+    {
+      requireLogin: true,
+      params: itemParamsSchema,
+      body: setShelfItemTagsSchema,
+      detail: {
+        summary: "Set shelf item tags",
+        description: "Replace the tagIds array on a shelf item",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/cleanup",
+    async ({ params, body, identity, set }): Promise<{ deleted: number }> => {
+      const target = await unitService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.unitId,
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to modify this shelf",
+        );
+      }
+      return shelfService.cleanupOrphans(params.unitId, body.orphanItemRefs);
     },
     {
       requireLogin: true,
       params: shelfParamsSchema,
-      body: reorderShelfItemsSchema,
+      body: cleanupShelfOrphansSchema,
       detail: {
-        summary: "Reorder shelf items",
-        description: "Batch update sort order for items in a shelf",
-        tags: ["Shelves"],
-      },
-    },
-  )
-  .delete(
-    "/:unitId/items/:itemUnitId",
-    async ({ params, identity, set }): Promise<{ message: string }> => {
-      const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to modify this shelf",
-        );
-      }
-      await shelfService.removeItem(params.unitId, params.itemUnitId);
-      return { message: "Item removed from shelf" };
-    },
-    {
-      requireLogin: true,
-      params: t.Object({ unitId: t.String(), itemUnitId: t.String() }),
-      detail: {
-        summary: "Remove item from shelf",
-        description: "Remove an item from a shelf (cascades ShelfItemReviews)",
-        tags: ["Shelves"],
-      },
-    },
-  )
-  .delete(
-    "/:unitId/items/:itemUnitId/reviews/:reviewUnitId",
-    async ({ params, identity, set }): Promise<{ message: string }> => {
-      const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to modify this shelf",
-        );
-      }
-      await shelfService.detachReview(
-        params.unitId,
-        params.itemUnitId,
-        params.reviewUnitId,
-      );
-      return { message: "Review detached from shelf item" };
-    },
-    {
-      requireLogin: true,
-      params: t.Object({
-        unitId: t.String(),
-        itemUnitId: t.String(),
-        reviewUnitId: t.String(),
-      }),
-      detail: {
-        summary: "Detach review from shelf item",
-        description: "Remove a single review attachment from a shelf item",
+        summary: "Cleanup orphan shelf items",
+        description:
+          "Delete shelf items whose target units no longer exist (author-driven)",
         tags: ["Shelves"],
       },
     },

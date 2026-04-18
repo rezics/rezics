@@ -1,10 +1,9 @@
 import type {
-  ShelfDTO,
   ShelfDetailDTO,
+  ShelfDTO,
   ShelfItemDTO,
-  ShelfItemReviewDTO,
+  ShelfItemKind,
   ShelfSummaryDTO,
-  UnitTranslationDTO,
 } from "@rezics/contract";
 import type {
   ShelfItemWithRelations,
@@ -12,38 +11,16 @@ import type {
   ShelfWithRelations,
 } from "./types";
 
-export function mapShelfItemReviewToDTO(
-  review: ShelfItemWithRelations["reviews"][number],
-): ShelfItemReviewDTO {
-  return {
-    shelfUnitId: review.shelfUnitId,
-    itemUnitId: review.itemUnitId,
-    reviewUnitId: review.reviewUnitId,
-    addedAt: review.addedAt,
-  };
-}
-
-export function mapShelfItemToDTO(
-  item: ShelfItemWithRelations,
-): ShelfItemDTO {
+export function mapShelfItemToDTO(item: ShelfItemWithRelations): ShelfItemDTO {
   return {
     shelfUnitId: item.shelfUnitId,
-    itemUnitId: item.itemUnitId,
-    sortOrder: item.sortOrder,
-    keywords: item.keywords,
-    label: item.label ?? undefined,
-    extra: (item.extra as Record<string, unknown>) ?? undefined,
+    itemRef: item.itemRef,
+    kind: item.kind as ShelfItemKind,
+    position: item.position,
+    reviewIds: item.reviewIds,
+    tagIds: item.tagIds,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
-    reviews: (item.reviews ?? []).map(mapShelfItemReviewToDTO),
-    item: item.item
-      ? {
-          id: item.item.id,
-          type: item.item.type,
-          translations: (item.item.translations ?? []) as unknown as UnitTranslationDTO[],
-          extra: (item.item.extra as Record<string, unknown>) ?? undefined,
-        }
-      : undefined,
   };
 }
 
@@ -55,14 +32,18 @@ export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
     kindKey: row.kindKey ?? undefined,
     coverUrl: row.coverUrl ?? undefined,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    translations: (row.unit?.translations ?? []) as unknown as ShelfDTO["translations"],
+    translations: (row.unit?.translations ??
+      []) as unknown as ShelfDTO["translations"],
     items: (row.items ?? []).map((i) => mapShelfItemToDTO(i as any)),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
 }
 
-export function mapShelfDetailToDTO(row: ShelfWithRelations, itemCount: number): ShelfDetailDTO {
+export function mapShelfDetailToDTO(
+  row: ShelfWithRelations,
+  itemCount: number,
+): ShelfDetailDTO {
   return {
     ...mapShelfToDTO(row),
     itemCount,
@@ -81,7 +62,8 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
     kindKey: row.kindKey ?? undefined,
     coverUrl: row.coverUrl ?? undefined,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    translations: (row.unit?.translations ?? []) as unknown as ShelfDTO["translations"],
+    translations: (row.unit?.translations ??
+      []) as unknown as ShelfDTO["translations"],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

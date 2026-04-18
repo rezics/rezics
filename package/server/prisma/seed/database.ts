@@ -18,8 +18,12 @@ const SEED_PERMISSION_ROLES = [
 export interface InfraSnapshot {
   users: Awaited<ReturnType<PrismaClient["user"]["findMany"]>>;
   units: Awaited<ReturnType<PrismaClient["unit"]["findMany"]>>;
-  translations: Awaited<ReturnType<PrismaClient["unitTranslation"]["findMany"]>>;
-  supportLanguages: Awaited<ReturnType<PrismaClient["unitSupportLanguage"]["findMany"]>>;
+  translations: Awaited<
+    ReturnType<PrismaClient["unitTranslation"]["findMany"]>
+  >;
+  supportLanguages: Awaited<
+    ReturnType<PrismaClient["unitSupportLanguage"]["findMany"]>
+  >;
   unitTags: Awaited<ReturnType<PrismaClient["unitTag"]["findMany"]>>;
   realms: Awaited<ReturnType<PrismaClient["realm"]["findMany"]>>;
   realmMembers: Awaited<ReturnType<PrismaClient["realmMember"]["findMany"]>>;
@@ -139,7 +143,6 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.apiToken.deleteMany(),
     prisma.feedback.deleteMany(),
     prisma.tagVote.deleteMany(),
-    prisma.shelfItemReview.deleteMany(),
     prisma.follow.deleteMany(),
     prisma.attribution.deleteMany(),
     prisma.scoreRealmField.deleteMany(),
@@ -147,9 +150,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   ]);
 
   // Group 2: Aggregate / junction leaves
-  await Promise.all([
-    prisma.realmTagUnit.deleteMany(),
-  ]);
+  await Promise.all([prisma.realmTagUnit.deleteMany()]);
 
   // Group 3: Realm + shelf + tag junction
   await Promise.all([
@@ -188,16 +189,10 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   await prisma.unit.deleteMany();
 
   // Group 8: Identity + entity
-  await Promise.all([
-    prisma.user.deleteMany(),
-    prisma.entity.deleteMany(),
-  ]);
+  await Promise.all([prisma.user.deleteMany(), prisma.entity.deleteMany()]);
 
   // Group 9: Platform misc
-  await Promise.all([
-    prisma.echoKV.deleteMany(),
-    prisma.jwks.deleteMany(),
-  ]);
+  await Promise.all([prisma.echoKV.deleteMany(), prisma.jwks.deleteMany()]);
   await prisma.jwtService.deleteMany();
 
   console.log("[Reset] Database reset complete.");

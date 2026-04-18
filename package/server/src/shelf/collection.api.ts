@@ -1,6 +1,6 @@
 import type {
-  CollectResponse,
   CollectionStatusResponse,
+  CollectResponse,
   ToggleFavoriteResponse,
 } from "@rezics/contract";
 import {
@@ -24,7 +24,7 @@ export const collectionApi = new Elysia({ prefix: "/collect" })
       detail: {
         summary: "Collect a unit",
         description:
-          "Save a unit to multiple shelves with optional keywords. Reviews auto-collect the target work.",
+          "Save a unit to multiple shelves. Reviews auto-collect the target work (review id is appended to the slot's reviewIds).",
         tags: ["Collection"],
       },
     },
@@ -32,10 +32,7 @@ export const collectionApi = new Elysia({ prefix: "/collect" })
   .post(
     "/toggle-favorite",
     async ({ body, identity }): Promise<ToggleFavoriteResponse> => {
-      return collectionService.toggleFavorite(
-        identity.unitId,
-        body.targetId,
-      );
+      return collectionService.toggleFavorite(identity.unitId, body.targetId);
     },
     {
       requireLogin: true,
