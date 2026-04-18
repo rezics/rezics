@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "./language";
-import { listGetQueryBase } from "./list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
@@ -143,6 +143,30 @@ export const shelfListQuerySchema = t.Object({
 });
 
 export type ShelfListQuery = (typeof shelfListQuerySchema)["static"];
+
+export const shelfListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  userId: t.Optional(t.String()),
+  kindKey: t.Optional(t.String()),
+  containsItemUnitId: t.Optional(t.String()),
+  language: t.Optional(languageSchema),
+  sort: t.Optional(
+    t.Object({
+      field: t.Optional(t.String()),
+      order: t.Optional(t.String()),
+    }),
+  ),
+  start: t.Optional(t.Number()),
+  cursor: t.Optional(
+    t.Object({
+      unitId: t.Optional(t.String()),
+      createdAt: t.Optional(t.String()),
+    }),
+  ),
+  limit: paginationLimitSchema,
+});
+
+export type ShelfListBody = (typeof shelfListBodySchema)["static"];
 
 export const shelfListResponseSchema = t.Object({
   shelves: t.Array(shelfDTOSchema),

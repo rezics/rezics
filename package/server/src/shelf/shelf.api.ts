@@ -12,6 +12,7 @@ import {
   hasPermissionToUpdateShelf,
   reorderShelfItemsSchema,
   shelfItemsQuerySchema,
+  shelfListBodySchema,
   shelfListQuerySchema,
   shelfParamsSchema,
   updateShelfItemSchema,
@@ -65,6 +66,22 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       detail: {
         summary: "List shelves",
         description: "List shelves with filtering and pagination",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .post(
+    "/list",
+    async ({ body }): Promise<ShelfListResponse> => {
+      const { shelves, total } = await shelfService.list({ ...body, ids: body.ids?.join(",") } as any);
+      return { shelves, total };
+    },
+    {
+      body: shelfListBodySchema,
+      detail: {
+        summary: "List shelves (POST)",
+        description:
+          "List shelves via POST body. Use when ids exceed URL length or filters contain nested objects.",
         tags: ["Shelves"],
       },
     },

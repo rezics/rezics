@@ -2,6 +2,7 @@ import {
   BasicAdminPermission,
   createFeedbackSchema,
   type FeedbackDTO,
+  feedbackListBodySchema,
   type FeedbackListResponse,
   feedbackListQuerySchema,
 } from "@rezics/contract";
@@ -107,6 +108,29 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
         summary: "List feedbacks (admin)",
         description:
           "Admin-only endpoint to list feedbacks with rich filters and pagination.",
+        tags: ["Feedback", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/list",
+    async ({ body, identity, set }): Promise<FeedbackListResponse> => {
+      if (!BasicAdminPermission(identity.permission)) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to list all feedbacks",
+        );
+      }
+      const result = await feedbackService.list({ ...body, ids: body.ids?.join(",") } as any);
+      return { ...result, items: result.items.map(mapFeedbackToDTO) };
+    },
+    {
+      requireLogin: true,
+      body: feedbackListBodySchema,
+      detail: {
+        summary: "List feedbacks (admin, POST)",
+        description:
+          "Admin-only POST list endpoint. Use when ids exceed URL length or filters contain nested objects.",
         tags: ["Feedback", "Admin"],
       },
     },

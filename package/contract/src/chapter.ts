@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { listGetQueryBase } from "./list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
@@ -70,6 +70,33 @@ export const chapterListQuerySchema = t.Object({
 });
 
 export type ChapterListQuery = (typeof chapterListQuerySchema)["static"];
+
+export const chapterListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  q: t.Optional(t.String()),
+  userId: t.Optional(t.String()),
+  status: t.Optional(t.String()),
+  targetUnitId: t.Optional(t.String()),
+  targetUnitIds: t.Optional(t.String()),
+  createdAtFrom: t.Optional(t.String()),
+  createdAtTo: t.Optional(t.String()),
+  sort: t.Optional(
+    t.Object({
+      type: t.Optional(t.String()),
+      order: t.Optional(t.String()),
+    }),
+  ),
+  start: t.Optional(t.Number()),
+  cursor: t.Optional(
+    t.Object({
+      unitId: t.Optional(t.String()),
+      createdAt: t.Optional(t.String()),
+    }),
+  ),
+  limit: paginationLimitSchema,
+});
+
+export type ChapterListBody = (typeof chapterListBodySchema)["static"];
 
 export const chapterListResponseSchema = t.Object({
   items: t.Array(chapterListItemSchema),

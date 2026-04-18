@@ -3,6 +3,7 @@ import {
   createPostSchema,
   hasPermissionToDeletePost,
   hasPermissionToUpdatePost,
+  postListBodySchema,
   type PostListResponse,
   type PostResponse,
   postListQuerySchema,
@@ -48,6 +49,26 @@ export const postApi = new Elysia({ prefix: "/post" })
         summary: "List posts",
         description:
           "List posts with filters and pagination. Public callers see only published posts; admins have full access.",
+        tags: ["Posts"],
+      },
+    },
+  )
+  .post(
+    "/list",
+    async ({ headers, body }): Promise<PostListResponse> => {
+      const identity = await tryResolveIdentity(headers["authorization"]);
+      const admin = isAdminRole(identity);
+
+      const { posts, total } = await postService.list({ ...body, ids: body.ids?.join(",") }, { isAdmin: admin });
+      return { posts: posts.map(mapPostToDTO), total };
+    },
+    {
+      body: postListBodySchema,
+      response: postListResponseSchema,
+      detail: {
+        summary: "List posts (POST)",
+        description:
+          "List posts via POST body. Use when ids exceed URL length or filters contain nested objects.",
         tags: ["Posts"],
       },
     },

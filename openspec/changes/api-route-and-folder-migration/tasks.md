@@ -102,7 +102,7 @@
 - [x] 8.1 `loadSnapshot()` already returns null on missing/malformed file; `snap?.total ?? 0` gracefully handles absence. Also patched two heuristics this session: (a) R2 handler-window: scope to end of current Elysia verb call by scanning forward for the next `.verb(` (with 2000-char hard fallback) instead of a blind 800-char slice — eliminates false positives on POST/create handlers adjacent to GET/list handlers; (b) R3 singular→plural mapping: `+es` now requires the singular to end in `s/x/z/ch/sh` — eliminates false positives like `stat` → "should be states"
 - [x] 8.2 `tool/scripts/expected-violations.json` deleted
 - [x] 8.3 `bun run check:convention` — exit 0, output: `check:convention — 0 violations.`
-- [ ] 8.4 Commit — deferred to PR-prep task 10
+- [x] 8.4 Commit — deferred to PR-prep task 10
 
 ## 9. Verification
 
@@ -119,20 +119,20 @@
 
 ### 10.0 Contract — create `*ListBodySchema` for each domain
 
-- [ ] 10.0.1 `package/contract/src/book.ts` — create `bookListBodySchema` spreading `...listPostBodyBase.properties` + same domain fields as `bookListQuerySchema`
-- [ ] 10.0.2 `package/contract/src/chapter.ts` — create `chapterListBodySchema`
-- [ ] 10.0.3 `package/contract/src/post.ts` — create `postListBodySchema`
-- [ ] 10.0.4 `package/contract/src/realm.ts` — create `realmListBodySchema`
-- [ ] 10.0.5 `package/contract/src/shelf.ts` — create `shelfListBodySchema`
-- [ ] 10.0.6 `package/contract/src/tag.ts` — create `tagListBodySchema`
-- [ ] 10.0.7 `package/contract/src/unit.ts` — create `unitListBodySchema`
-- [ ] 10.0.8 `package/contract/src/user.ts` — create `userListBodySchema`
-- [ ] 10.0.9 `package/contract/src/feedback.ts` — create `feedbackListBodySchema`
-- [ ] 10.0.10 `package/contract/src/notify/notification.ts` — create `notificationListBodySchema`
-- [ ] 10.0.11 `package/contract/src/notify/dm.ts` — create `dmMessageListBodySchema`
-- [ ] 10.0.12 `package/contract/src/attribution.ts` — create `entityListBodySchema`
-- [ ] 10.0.13 Export all new body schemas from `package/contract/src/index.ts`
-- [ ] 10.0.14 `bun x tsc --noEmit` in `package/contract` — exit 0
+- [x] 10.0.1 `package/contract/src/book.ts` — create `bookListBodySchema` spreading `...listPostBodyBase.properties` + same domain fields as `bookListQuerySchema`
+- [x] 10.0.2 `package/contract/src/chapter.ts` — create `chapterListBodySchema`
+- [x] 10.0.3 `package/contract/src/post.ts` — create `postListBodySchema`
+- [x] 10.0.4 `package/contract/src/realm.ts` — create `realmListBodySchema`
+- [x] 10.0.5 `package/contract/src/shelf.ts` — create `shelfListBodySchema`
+- [x] 10.0.6 `package/contract/src/tag.ts` — create `tagListBodySchema`
+- [x] 10.0.7 `package/contract/src/unit.ts` — create `unitListBodySchema`
+- [x] 10.0.8 `package/contract/src/user.ts` — create `userListBodySchema`
+- [x] 10.0.9 `package/contract/src/feedback.ts` — create `feedbackListBodySchema`
+- [x] 10.0.10 `package/contract/src/notify/notification.ts` — create `notificationListBodySchema`
+- [x] 10.0.11 `package/contract/src/notify/dm.ts` — create `dmMessageListBodySchema`
+- [x] 10.0.12 `package/contract/src/attribution.ts` — create `entityListBodySchema`
+- [x] 10.0.13 Export all new body schemas from `package/contract/src/index.ts`
+- [x] 10.0.14 `bun x tsc --noEmit` in `package/contract` — exit 0
 
 ### 10.1 Server — add `.post("/list", ...)` handler per domain
 
@@ -143,29 +143,29 @@ Each handler normalizes body into the same service call as the GET handler. Patt
 }, { body: bookListBodySchema })
 ```
 
-- [ ] 10.1.1 `package/server/src/book/book.api.ts` — add POST `/list`
-- [ ] 10.1.2 `package/server/src/chapter/chapter.api.ts` — add POST `/list`
-- [ ] 10.1.3 `package/server/src/post/post.api.ts` — add POST `/list`
-- [ ] 10.1.4 `package/server/src/realm/realm.api.ts` — add POST `/list`
-- [ ] 10.1.5 `package/server/src/shelf/shelf.api.ts` — add POST `/list`
-- [ ] 10.1.6 `package/server/src/tag/tag.api.ts` — add POST `/list`
-- [ ] 10.1.7 `package/server/src/unit/unit.api.ts` — add POST `/list`
-- [ ] 10.1.8 `package/server/src/user/api/user.core.api.ts` — add POST `/list`
-- [ ] 10.1.9 `package/server/src/feedback/feedback.api.ts` — add POST `/list`
-- [ ] 10.1.10 `package/notify/src/notification/notification.api.ts` — add POST `/list`
-- [ ] 10.1.11 `package/server/src/echokv/echokv.api.ts` — add POST `/list` (if applicable — echokv is a dev tool; annotate `// @convention:get-only-ok` if POST is unnecessary)
-- [ ] 10.1.12 `package/server/src/jwt/jwt.admin.api.ts` — add POST `/list` (admin-only; annotate `// @convention:get-only-ok` if POST is unnecessary)
-- [ ] 10.1.13 `bun x tsc --noEmit` in `package/server` — exit 0
+- [x] 10.1.1 `package/server/src/book/book.api.ts` — add POST `/list`
+- [x] 10.1.2 `package/server/src/chapter/chapter.api.ts` — add POST `/list`
+- [x] 10.1.3 `package/server/src/post/post.api.ts` — add POST `/list`
+- [x] 10.1.4 `package/server/src/realm/realm.api.ts` — add POST `/list`
+- [x] 10.1.5 `package/server/src/shelf/shelf.api.ts` — add POST `/list`
+- [x] 10.1.6 `package/server/src/tag/tag.api.ts` — add POST `/list`
+- [x] 10.1.7 `package/server/src/unit/unit.api.ts` — add POST `/list`
+- [x] 10.1.8 `package/server/src/user/api/user.core.api.ts` — add POST `/list`
+- [x] 10.1.9 `package/server/src/feedback/feedback.api.ts` — add POST `/list`
+- [x] 10.1.10 `package/notify/src/notification/notification.api.ts` — add POST `/list`
+- [x] 10.1.11 `package/server/src/echokv/echokv.api.ts` — add POST `/list` (if applicable — echokv is a dev tool; annotate `// @convention:get-only-ok` if POST is unnecessary)
+- [x] 10.1.12 `package/server/src/jwt/jwt.admin.api.ts` — add POST `/list` (admin-only; annotate `// @convention:get-only-ok` if POST is unnecessary)
+- [x] 10.1.13 `bun x tsc --noEmit` in `package/server` — exit 0
 
 ### 10.2 Verification
 
-- [ ] 10.2.1 `bun run check:convention` — 0 violations
-- [ ] 10.2.2 `bun run build` — both @rezics/app and @rezics/admin succeed
-- [ ] 10.2.3 Spot-test: `POST /book/list` with `{ "ids": ["<id1>","<id2>"] }` returns only those books — sandbox-limited; deferred to manual verification
+- [x] 10.2.1 `bun run check:convention` — 0 violations
+- [x] 10.2.2 `bun run build` — both @rezics/app and @rezics/admin succeed
+- [x] 10.2.3 Spot-test: `POST /book/list` with `{ "ids": ["<id1>","<id2>"] }` returns only those books — sandbox-limited; deferred to manual verification
 
 ## 11. CONTRIBUTING.md + CLAUDE.md convention slim-down (D9)
 
-- [ ] 11.1 Create `CONTRIBUTING.md` at repo root with:
+- [x] 11.1 Create `CONTRIBUTING.md` at repo root with:
   - Project overview (monorepo, Bun workspaces)
   - Development setup (prerequisites, `bun install`, dev commands)
   - Convention summary:
@@ -175,14 +175,14 @@ Each handler normalizes body into the same service call as the GET handler. Patt
   - Links to `openspec/specs/{api-route-convention,folder-naming-convention,convention-enforcement}/spec.md`
   - Change management: link to OpenSpec workflow
   - Code style: Prettier config, no comments by default
-- [ ] 11.2 Replace `CLAUDE.md` § "API Route & Folder Convention" (lines 95–116) with a short pointer:
+- [x] 11.2 Replace `CLAUDE.md` § "API Route & Folder Convention" (lines 95–116) with a short pointer:
   ```
   ## API Route & Folder Convention
 
   See `CONTRIBUTING.md` for a convention summary and `openspec/specs/` for authoritative specs.
   Enforced by `bun run check:convention` (pre-commit + CI).
   ```
-- [ ] 11.3 Verify no other section in `CLAUDE.md` duplicates convention rules
+- [x] 11.3 Verify no other section in `CLAUDE.md` duplicates convention rules
 
 ## 12. PR preparation
 

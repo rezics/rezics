@@ -1,4 +1,5 @@
 import {
+  chapterListBodySchema,
   chapterListQuerySchema,
   chapterListResponseSchema,
   chapterParamsSchema,
@@ -84,6 +85,36 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
         summary: "List chapters",
         description:
           "List chapter units with advanced filters (search, tags, status, targetUnitId, user, time range) and pagination",
+        tags: ["Chapters"],
+      },
+    },
+  )
+  .post(
+    "/list",
+    async ({ identity, body, status }) => {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
+      const { items, total } = await chapterService.list({ ...body, ids: body.ids?.join(",") });
+      return {
+        items: items.map(mapUnitToChapterListItemDTO),
+        total,
+      };
+    },
+    {
+      requireLogin: true,
+      body: chapterListBodySchema,
+      response: {
+        200: chapterListResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "List chapters (POST)",
+        description:
+          "List chapters via POST body. Use when ids exceed URL length or filters contain nested objects.",
         tags: ["Chapters"],
       },
     },

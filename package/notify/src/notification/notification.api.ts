@@ -1,5 +1,6 @@
 import {
   markReadBodySchema,
+  notificationListBodySchema,
   notificationListQuerySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -21,6 +22,25 @@ export const notificationApi = new Elysia({ prefix: "/notification" })
       detail: {
         summary: "List notifications",
         description: "Returns a paginated list of notifications for the authenticated user.",
+        tags: ["Notifications"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/list",
+    async ({ userId, body }) => {
+      const page = Number(body.page ?? 1);
+      const limit = Number(body.limit ?? 20);
+      return notificationService.getNotifications(userId, page, limit);
+    },
+    {
+      requireUser: true,
+      body: notificationListBodySchema,
+      detail: {
+        summary: "List notifications (POST)",
+        description:
+          "List notifications via POST body. Use when ids exceed URL length.",
         tags: ["Notifications"],
         security: [{ bearerAuth: [] }],
       },

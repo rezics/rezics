@@ -13,6 +13,7 @@ import {
   castTagVoteSchema,
   createTagSchema,
   detachTagSchema,
+  tagListBodySchema,
   tagListQuerySchema,
   tagParamsSchema,
   updateTagSchema,
@@ -43,6 +44,28 @@ export const tagApi = new Elysia({ prefix: "/tag" })
         summary: "List tags",
         description:
           "List tag Units with optional name search and language filter",
+        tags: ["Tags"],
+      },
+    },
+  )
+
+  // POST /list - list tags via POST body
+  .post(
+    "/list",
+    async ({ body }) => {
+      const q = { ...body, ids: body.ids?.join(",") } as TagListQuery;
+      const { tags, total } = await tagService.list(q);
+      return {
+        tags: tags.map((t) => mapTagUnitToDTO(t, q.language)),
+        total,
+      };
+    },
+    {
+      body: tagListBodySchema,
+      detail: {
+        summary: "List tags (POST)",
+        description:
+          "List tags via POST body. Use when ids exceed URL length or filters contain nested objects.",
         tags: ["Tags"],
       },
     },

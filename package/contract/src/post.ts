@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { listGetQueryBase } from "./list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema } from "./unit";
 
@@ -101,6 +101,35 @@ export const postListQuerySchema = t.Object({
 });
 
 export type PostListQuery = (typeof postListQuerySchema)["static"];
+
+export const postListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  targetUnitId: t.Optional(t.String()),
+  realmUnitId: t.Optional(t.String()),
+  rootPostUnitId: t.Optional(t.String()),
+  parentPostUnitId: t.Optional(t.String()),
+  authorUserId: t.Optional(t.String()),
+  kind: t.Optional(t.String()),
+  mode: t.Optional(t.String()),
+  maxDepth: t.Optional(t.Number()),
+  sort: t.Optional(
+    t.Object({
+      field: t.Optional(t.String()),
+      order: t.Optional(t.String()),
+    }),
+  ),
+  start: t.Optional(t.Number()),
+  cursor: t.Optional(
+    t.Object({
+      unitId: t.Optional(t.String()),
+      createdAt: t.Optional(t.String()),
+      sortPath: t.Optional(t.String()),
+    }),
+  ),
+  limit: paginationLimitSchema,
+});
+
+export type PostListBody = (typeof postListBodySchema)["static"];
 
 export const postListResponseSchema = t.Object({
   posts: t.Array(postDTOSchema),

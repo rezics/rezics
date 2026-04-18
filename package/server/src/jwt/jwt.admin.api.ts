@@ -10,6 +10,7 @@ import { jwtServiceAdminService } from "./jwt.admin.service";
 
 export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .use(authMacro)
+  // @convention:get-only-ok — root-only admin tool, no batch-id use case
   .get(
     "/list",
     async ({ identity, status }) => {

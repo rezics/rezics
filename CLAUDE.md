@@ -94,26 +94,8 @@ Validated at runtime using `@t3-oss/env-core` + Valibot. Environment dependencie
 
 ## API Route & Folder Convention
 
-Canonical conventions for `@rezics/server` routes and repository folders. Full specs live under `openspec/specs/`; violations are blocked by `bun run check:convention` (pre-commit + CI).
-
-**Routes** (`api-route-convention`):
-- Resource prefixes are **singular**: `/book`, `/user`, `/post` — not `/books`, `/users`, `/posts`.
-- Collection / batch access uses the `/list` suffix: `GET /{resource}/list?ids=a,b,c` (small, cacheable CSV) and `POST /{resource}/list` (large ids or nested filters).
-- Every `*ListQuerySchema` spreads `listGetQueryBase.properties` from `@rezics/contract` to pick up the shared `ids: string` (CSV) field; batch POST bodies use `listPostBodyBase` (array, `maxItems: 200`). Services call `parseIdsCsv(query.ids)` and intersect the resulting `id[]` with other where-clause filters.
-- `@rezics/auth` is out of scope (better-auth governed).
-- Baseline snapshot retired 2026-04-17 after the `api-route-and-folder-migration` change landed; `check:convention` now expects zero violations.
-
-**Folders** (`folder-naming-convention`) — β dual-track:
-- Domain / feature folders are **singular** (`book/`, `user/`, `translation-group/`).
-- Container folders are **plural** from a fixed allowlist: `hooks`, `utils`, `components`, `pages`, `sections`, `states`, `models`, `types`, `routes`, `handlers`, `providers`, `plugins`, `styles`, `helpers`, `constants`, `fixtures`, `mocks`, `layouts`, `assets`, `docs`, `templates`. Anything else is singular.
-- Allowlist changes require a spec amendment.
-
-**Enforcement** (`convention-enforcement`):
-- `bun run check:convention` scans routes and folders; exits non-zero on violations.
-- Pre-commit hook runs it in `--staged` mode.
-- CI runs it before tests. No per-site suppression — only spec amendments.
-
-Specs: `openspec/specs/{api-route-convention,folder-naming-convention,convention-enforcement}/spec.md`.
+See `CONTRIBUTING.md` for a convention summary and `openspec/specs/` for authoritative specs.
+Enforced by `bun run check:convention` (pre-commit + CI).
 
 ## Change Management
 

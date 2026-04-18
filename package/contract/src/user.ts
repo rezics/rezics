@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { listGetQueryBase } from "./list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
@@ -39,6 +39,17 @@ export const userListQuerySchema = t.Object({
 });
 
 export type UserListQuery = (typeof userListQuerySchema)["static"];
+
+export const userListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  q: t.Optional(t.String()),
+  email: t.Optional(t.String()),
+  slug: t.Optional(t.String()),
+  page: t.Optional(t.Numeric()),
+  limit: paginationLimitSchema,
+});
+
+export type UserListBody = (typeof userListBodySchema)["static"];
 
 export const userParamsSchema = t.Object({
   unitId: t.String(),

@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { listGetQueryBase } from "../list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 
 export const NotificationType = {
   LIKE: "LIKE",
@@ -79,3 +79,11 @@ export const notificationListQuerySchema = t.Object({
 });
 export type NotificationListQuery =
   (typeof notificationListQuerySchema)["static"];
+
+export const notificationListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  page: t.Optional(t.Numeric({ default: 1 })),
+  limit: t.Optional(t.Numeric({ default: 20 })),
+});
+export type NotificationListBody =
+  (typeof notificationListBodySchema)["static"];

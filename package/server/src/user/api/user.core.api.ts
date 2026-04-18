@@ -2,6 +2,7 @@ import type { UpdateUser, UserListQuery } from "@rezics/contract";
 import {
   hasPermissionToUpdateUser,
   updateUserSchema,
+  userListBodySchema,
   userListQuerySchema,
   userParamsSchema,
 } from "@rezics/contract";
@@ -28,6 +29,25 @@ export const coreRoute = new Elysia()
       detail: {
         summary: "Get all users",
         description: "Get all users with filters and pagination",
+        tags: ["Users"],
+      },
+    },
+  )
+  .post(
+    "/list",
+    async ({ body }) => {
+      const result = await meiliService.searchUsers({ ...body, ids: body.ids?.join(",") } as UserListQuery);
+      return {
+        users: result.users.map(mapUserSearchDocToPublicProfile),
+        total: result.total,
+      };
+    },
+    {
+      body: userListBodySchema,
+      detail: {
+        summary: "Get all users (POST)",
+        description:
+          "Get all users via POST body. Use when ids exceed URL length or filters contain nested objects.",
         tags: ["Users"],
       },
     },

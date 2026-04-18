@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { listGetQueryBase } from "./list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
@@ -74,6 +74,18 @@ export const tagListQuerySchema = t.Object({
 });
 
 export type TagListQuery = (typeof tagListQuerySchema)["static"];
+
+export const tagListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  q: t.Optional(t.String()),
+  language: t.Optional(t.String()),
+  unitId: t.Optional(t.String()),
+  minScore: t.Optional(t.Number()),
+  page: t.Optional(t.Numeric()),
+  limit: paginationLimitSchema,
+});
+
+export type TagListBody = (typeof tagListBodySchema)["static"];
 
 export const tagParamsSchema = t.Object({
   unitId: t.String(),

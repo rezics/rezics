@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "./language";
-import { listGetQueryBase } from "./list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
@@ -131,6 +131,24 @@ export const realmListQuerySchema = t.Object({
 });
 
 export type RealmListQuery = (typeof realmListQuerySchema)["static"];
+
+export const realmListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  isPublic: t.Optional(t.Boolean()),
+  isOfficial: t.Optional(t.Boolean()),
+  userId: t.Optional(t.String()),
+  language: t.Optional(languageSchema),
+  sort: t.Optional(
+    t.Object({
+      field: t.Optional(t.String()),
+      order: t.Optional(t.String()),
+    }),
+  ),
+  start: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
+});
+
+export type RealmListBody = (typeof realmListBodySchema)["static"];
 
 export const realmListResponseSchema = t.Object({
   realms: t.Array(realmDTOSchema),

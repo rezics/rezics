@@ -10,6 +10,7 @@ import type {
 
 export const echoKvApi = new Elysia({ prefix: "/echokv" })
   .use(authMacro)
+  // @convention:get-only-ok — dev tool, no batch-id use case
   .get(
     "/list",
     async ({ query }): Promise<EchoKVKeyListResponse> => {

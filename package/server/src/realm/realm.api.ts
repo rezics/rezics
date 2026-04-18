@@ -12,6 +12,7 @@ import {
   createRealmSchema,
   hasPermissionToUpdateUnit,
   joinRealmSchema,
+  realmListBodySchema,
   realmListQuerySchema,
   realmParamsSchema,
   updateMemberRoleSchema,
@@ -75,6 +76,30 @@ export const realmApi = new Elysia({ prefix: "/realm" })
         summary: "List realms",
         description:
           "List realms with filtering and pagination. Public callers see only public realms; admins have full access.",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .post(
+    "/list",
+    async ({ headers, body }): Promise<RealmListResponse> => {
+      const identity = await tryResolveIdentity(headers["authorization"]);
+      const admin = isAdminRole(identity);
+
+      const query = { ...body, ids: body.ids?.join(",") };
+      const effectiveQuery = admin
+        ? query
+        : { ...query, isPublic: true };
+
+      const { realms, total } = await realmService.list(effectiveQuery as any);
+      return { realms, total };
+    },
+    {
+      body: realmListBodySchema,
+      detail: {
+        summary: "List realms (POST)",
+        description:
+          "List realms via POST body. Use when ids exceed URL length or filters contain nested objects.",
         tags: ["Realms"],
       },
     },

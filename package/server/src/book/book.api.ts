@@ -5,6 +5,7 @@ import type {
   ScoreAggregateDTO,
 } from "@rezics/contract";
 import {
+  bookListBodySchema,
   bookListQuerySchema,
   bookParamsSchema,
   createBookSchema,
@@ -106,6 +107,30 @@ export const bookApi = new Elysia({ prefix: "/book" })
         summary: "List books",
         description:
           "List books with filters and pagination. Public callers see only published/public books; admins have full filter access.",
+        tags: ["Books"],
+      },
+    },
+  )
+  .post(
+    "/list",
+    async ({ headers, body }): Promise<BookListResponse> => {
+      const identity = await tryResolveIdentity(headers["authorization"]);
+      const admin = isAdminRole(identity);
+
+      const query = { ...body, ids: body.ids?.join(",") };
+      const effectiveQuery = admin
+        ? query
+        : { ...query, status: "PUBLISHED", visibility: "PUBLIC" };
+
+      const { books, total } = await bookService.list(effectiveQuery);
+      return { books: books.map(mapBookToDTO), total };
+    },
+    {
+      body: bookListBodySchema,
+      detail: {
+        summary: "List books (POST)",
+        description:
+          "List books via POST body. Use when ids exceed URL length or filters contain nested objects.",
         tags: ["Books"],
       },
     },

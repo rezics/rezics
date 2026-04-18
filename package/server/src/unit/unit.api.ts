@@ -7,6 +7,7 @@ import {
   hasPermissionToUpdateUnit,
   slugSchema,
   translationParamsSchema,
+  unitListBodySchema,
   type UnitListQuery,
   type UnitListResponse,
   type UnitResponse,
@@ -85,6 +86,30 @@ export const unitApi = new Elysia({ prefix: "/unit" })
         summary: "List units",
         description:
           "List Units with search, filtering by type/status/visibility/language/user, and pagination with cursor or offset.",
+        tags: ["Units"],
+      },
+    },
+  )
+  .post(
+    "/list",
+    async ({ body, identity, set }): Promise<UnitListResponse> => {
+      if (!BasicAdminPermission(identity.permission)) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to list all units",
+        );
+      }
+      const { units, total } = await unitService.list({ ...body, ids: body.ids?.join(",") } as UnitListQuery);
+      return { units: units.map(mapUnitToDTO), total };
+    },
+    {
+      requireLogin: true,
+      body: unitListBodySchema,
+      response: unitListResponseSchema,
+      detail: {
+        summary: "List units (POST)",
+        description:
+          "List units via POST body. Use when ids exceed URL length or filters contain nested objects.",
         tags: ["Units"],
       },
     },

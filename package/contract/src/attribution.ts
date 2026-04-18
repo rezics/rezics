@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { listGetQueryBase } from "./list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -61,6 +61,16 @@ export const entityListQuerySchema = t.Object({
 });
 
 export type EntityListQuery = (typeof entityListQuerySchema)["static"];
+
+export const entityListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  kind: t.Optional(t.String()),
+  q: t.Optional(t.String()),
+  page: t.Optional(t.Numeric()),
+  limit: t.Optional(t.Numeric()),
+});
+
+export type EntityListBody = (typeof entityListBodySchema)["static"];
 
 // ============================================================
 // ATTRIBUTION DTO

@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { listGetQueryBase } from "./list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import {
   paginationLimitSchema,
   type OffsetPaginated,
@@ -91,6 +91,21 @@ export const feedbackListQuerySchema = t.Object({
   createdAtFrom: t.Optional(t.String()),
   createdAtTo: t.Optional(t.String()),
 });
+
+export const feedbackListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  offset: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
+  q: t.Optional(t.String()),
+  userId: t.Optional(t.String()),
+  unitId: t.Optional(t.String()),
+  type: t.Optional(feedbackTypeSchema),
+  resolved: t.Optional(t.Boolean()),
+  createdAtFrom: t.Optional(t.String()),
+  createdAtTo: t.Optional(t.String()),
+});
+
+export type FeedbackListBody = (typeof feedbackListBodySchema)["static"];
 
 export type FeedbackListResponse = OffsetPaginated<FeedbackDTO>;
 

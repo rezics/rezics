@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import { attributionBriefSchema } from "./attribution";
 import { languageSchema } from "./language";
-import { listGetQueryBase } from "./list-query-base";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
@@ -88,6 +88,35 @@ export const bookListQuerySchema = t.Object({
 });
 
 export type BookListQuery = (typeof bookListQuerySchema)["static"];
+
+export const bookListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  nsfw: t.Optional(t.Boolean()),
+  language: t.Optional(languageSchema),
+  tagUnitIds: t.Optional(t.String()),
+  entityId: t.Optional(t.String()),
+  userId: t.Optional(t.String()),
+  isbn13: t.Optional(t.String()),
+  workUnitId: t.Optional(t.String()),
+  visibility: t.Optional(t.String()),
+  status: t.Optional(t.String()),
+  sort: t.Optional(
+    t.Object({
+      type: t.Optional(t.String()),
+      order: t.Optional(t.String()),
+    }),
+  ),
+  start: t.Optional(t.Number()),
+  cursor: t.Optional(
+    t.Object({
+      unitId: t.Optional(t.String()),
+      createdAt: t.Optional(t.String()),
+    }),
+  ),
+  limit: paginationLimitSchema,
+});
+
+export type BookListBody = (typeof bookListBodySchema)["static"];
 
 export const bookListResponseSchema = t.Object({
   books: t.Array(bookDTOSchema),
