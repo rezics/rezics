@@ -2,7 +2,9 @@ import { ChatBubbleOutline } from "@mui/icons-material";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import { IconButton, Typography } from "@mui/material";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
+import type { ExcerptSource } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
+import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -16,11 +18,11 @@ import {
   MiniAdminActionBar,
 } from "@/engagement/components/MiniActionBar";
 import { ReactionStatistics } from "@/engagement/components/ReactionStatistics";
-import { quoteRoute } from "@/router";
+import { excerptRoute } from "@/router";
 import { parseReactionSummaries } from "@/shared/utils/reaction-summaries-parser";
 
-export const QuotePage: React.FC = () => {
-  const { unitId } = quoteRoute.useParams();
+export const ExcerptPage: React.FC = () => {
+  const { unitId } = excerptRoute.useParams();
   const { t } = useTranslation();
   const commentRef = useRef<HTMLDivElement>(null);
   const handleGoToComments = () => {
@@ -38,7 +40,7 @@ export const QuotePage: React.FC = () => {
   };
 
   const {
-    data: Quote,
+    data: excerpt,
     isLoading,
     error: _error,
   } = useQuery(unitQueries.detail(unitId || ""));
@@ -47,10 +49,10 @@ export const QuotePage: React.FC = () => {
     return <div className="text-center py-10">{t("common.loading")}</div>;
   }
 
-  if (!Quote?.id) {
+  if (!excerpt?.id) {
     return (
       <div className="text-center py-10 text-red-500">
-        {t("quote.not_found")}
+        {t("excerpt.not_found")}
       </div>
     );
   }
@@ -65,29 +67,26 @@ export const QuotePage: React.FC = () => {
         <div>
           <div className="flex items-center">
             <h2 className="text-2xl font-bold">
-              {Quote.translations?.[0]?.title}
+              {excerpt.translations?.[0]?.title}
             </h2>
 
             <div className="ml-auto">
               <MiniAdminActionBar
-                editionURL={`/quote/${unitId}/edit`}
-                userUnitId={Quote.user?.unitId}
+                editionURL={`/excerpt/${unitId}/edit`}
+                userUnitId={excerpt.user?.unitId}
               />
             </div>
           </div>
-
-          {/* 新 API 暂无 description 字段 */}
-          {/* <p className="text-gray-600">{(bookList as any).description}</p> */}
         </div>
         <div className="flex justify-between items-center">
-          {Quote.user && (
+          {excerpt.user && (
             <div className="flex items-center gap-3">
               <LazyLoadImage
-                src={Quote.user.avatar || ""}
+                src={excerpt.user.avatar || ""}
                 alt="creator avatar"
                 className="w-10 h-10 rounded-full shadow"
               />
-              <p className="text-sm">{Quote.user.name}</p>
+              <p className="text-sm">{excerpt.user.name}</p>
             </div>
           )}
           <div className="flex items-center gap-2">
@@ -109,33 +108,28 @@ export const QuotePage: React.FC = () => {
           }}
         />
         <div className="flex-1 mt-2">
-          {Quote.translations?.[0]?.description && (
-            <MarkdownContent content={Quote.translations[0].description} />
+          {excerpt.translations?.[0]?.description && (
+            <MarkdownContent content={excerpt.translations[0].description} />
           )}
         </div>
       </div>
 
-      {/* Book List */}
-      {/* 新 API 暂不直接返回 books 列表，这里占位或从 metadata.items 进一步查询渲染 */}
-      {/* <div className="grid grid-cols-1 gap-4 mt-6"> ... </div> */}
-
-      {/* Likes & Comments */}
-
       <div className="flex items-center justify-between mt-3">
         <div className="flex gap-1">
           <ReactionStatistics
-            reactionSummaries={parseReactionSummaries(Quote.reactionSummaries)}
+            reactionSummaries={parseReactionSummaries(
+              excerpt.reactionSummaries,
+            )}
           />
           <Typography variant="caption" color="text.secondary">
             {stats?.date}
           </Typography>
         </div>
-        <Typography variant="caption" color="text.disabled">
-          —— {(Quote.extra as Record<string, any>)?.source}
-        </Typography>
+        <ExcerptSourceLine
+          source={(excerpt.extra as Record<string, any>)?.source}
+        />
       </div>
 
-      {/* 评论区 */}
       <div ref={commentRef} className="mt-8">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
@@ -153,11 +147,30 @@ export const QuotePage: React.FC = () => {
           placeholder="Write a reply..."
         />
         <ThreadView rootPostUnitId={unitId || ""} />
-        {/* 供评论区占位符 */}
         <div className="mb-[200px]" />
       </div>
     </div>
   );
 };
 
-export default QuotePage;
+function ExcerptSourceLine({ source }: { source?: ExcerptSource | string }) {
+  if (!source) return null;
+  if (typeof source === "string") {
+    return (
+      <Typography variant="caption" color="text.disabled">
+        —— {source}
+      </Typography>
+    );
+  }
+  const href = source.mode === "unit" ? `/unit/${source.unitId}` : source.url;
+  return (
+    <Typography variant="caption" color="text.disabled">
+      ——{" "}
+      <SafeLink href={href} className="underline">
+        {source.title}
+      </SafeLink>
+    </Typography>
+  );
+}
+
+export default ExcerptPage;

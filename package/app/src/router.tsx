@@ -38,9 +38,9 @@ declare module "@tanstack/react-router" {
 //
 // This file re-exports them under the historical names used across the app.
 
-export { Route as quoteRoute } from "@/routes/_mainLayout/quote/$unitId";
-export { Route as quoteEditRoute } from "@/routes/_mainLayout/quote/$unitId/edit";
-export { Route as quoteByBookRoute } from "@/routes/_mainLayout/quote/book/$bookId";
+export { Route as excerptRoute } from "@/routes/_mainLayout/excerpt/$unitId";
+export { Route as excerptEditRoute } from "@/routes/_mainLayout/excerpt/$unitId/edit";
+export { Route as excerptByBookRoute } from "@/routes/_mainLayout/excerpt/book/$bookId";
 
 export { Route as remarkRoute } from "@/routes/_mainLayout/remark/$reviewId";
 export { Route as reviewRoute } from "@/routes/_mainLayout/review/$reviewId";
@@ -52,7 +52,7 @@ export { Route as tagBookFullDomainRoute } from "@/routes/_mainLayout/tag/book/$
 export { Route as tagBookFullRoute } from "@/routes/_mainLayout/tag/book/$bookId/tag/route";
 export { Route as tagDomainRoute } from "@/routes/_mainLayout/tag/domain/$unitId/route";
 export { Route as tagDomainTitleRoute } from "@/routes/_mainLayout/tag/domain/$unitId/title/$title";
-export { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
+export { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId/view";
 export { Route as userRoute } from "@/routes/_mainLayout/user/$unitId";
 export { Route as userEditRoute } from "@/routes/_mainLayout/user/$unitId/edit";
 export { Route as bookEditChapterRoute } from "@/routes/book_/$bookId/edit/$chapterId";

@@ -1,4 +1,5 @@
-export const mockQuotes = [
+// MOCK: static excerpts for landing/preview layouts until backend support lands
+export const mockExcerpts = [
   {
     id: "1",
     content:
@@ -21,7 +22,7 @@ export const mockQuotes = [
   },
 ];
 
-interface Quote {
+interface Excerpt {
   id: string;
   content: string;
   created_at: string;

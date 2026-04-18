@@ -144,10 +144,10 @@ export default {
           more: "More \u2192",
           loading: "Loading...",
         },
-        trending_quote: {
-          title: "Trending Quotes",
+        trending_excerpt: {
+          title: "Trending Excerpts",
           more: "More \u2192",
-          empty: "No quotes yet",
+          empty: "No excerpts yet",
         },
         active_realms: {
           title: "Active Realms",
@@ -386,7 +386,7 @@ export default {
     unknown_author: "Unknown author",
     toc: "Contents",
     remark: "Remark",
-    quote_excerpts: "Excerpts",
+    excerpts: "Excerpts",
     reviews_of_book: "Reviews for {{title}}",
     info_panel: {
       title: "Book info",
@@ -533,20 +533,20 @@ export default {
     },
   },
 
-  // Quote
-  quote: {
-    title: "Quotes",
+  // Excerpt
+  excerpt: {
+    title: "Excerpts",
     subtitle:
       "A brushstroke stirs wind and rain; a poem moves gods and ghosts to tears.",
-    not_found: "Quote not found",
-    excerpts_title: "Quote Excerpts",
+    not_found: "Excerpt not found",
+    excerpts_title: "Excerpts",
+    updated_success: "Excerpt updated successfully",
     form: {
       title: "Title",
       source: "Source",
     },
-    updated_success: "Quote updated successfully",
     messages: {
-      update_failed: "Update quote failed: {{error}}",
+      update_failed: "Update excerpt failed: {{error}}",
     },
   },
 

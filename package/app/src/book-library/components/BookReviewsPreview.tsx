@@ -1,5 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
-import type { PostDTO } from "@rezics/contract";
+import { type PostDTO, PostKind } from "@rezics/contract";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -30,7 +30,10 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
 
   // Fetch posts with kind='review' for this book
   const { data } = useQuery({
-    ...postQueries.byTarget(bookId, { kind: "review", limit: reviewNumber }),
+    ...postQueries.byTarget(bookId, {
+      kind: PostKind.REVIEW,
+      limit: reviewNumber,
+    }),
     enabled: !!bookId,
   });
 

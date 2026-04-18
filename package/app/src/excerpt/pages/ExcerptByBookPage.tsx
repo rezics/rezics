@@ -1,22 +1,22 @@
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useTranslation } from "react-i18next";
-import { QuoteExcerptListContainer } from "@/review/components/QuoteExcerptList";
-import { quoteByBookRoute } from "@/router";
+import { ExcerptListContainer } from "@/review/components/ExcerptList";
+import { excerptByBookRoute } from "@/router";
 import UnitsPage from "@/unit/pages/UnitsPage";
-import { QuoteNewPage } from "./QuoteNewPage";
+import { ExcerptNewPage } from "./ExcerptNewPage";
 
-export function QuoteByBookPage() {
-  const { bookId } = quoteByBookRoute.useParams();
+export function ExcerptByBookPage() {
+  const { bookId } = excerptByBookRoute.useParams();
   const { t } = useTranslation();
   return (
     <div className="mt-10 mx-auto max-w-4xl w-11/12">
       <ArrowForwardIcon size={16}>
-        <AccentBarWithText text={t("quote.excerpts_title")} />
+        <AccentBarWithText text={t("excerpt.excerpts_title")} />
       </ArrowForwardIcon>
-      <QuoteNewPage bookUnitId={bookId || ""} />
+      <ExcerptNewPage bookUnitId={bookId || ""} />
       <UnitsPage type="QUOTE" targetUnitId={bookId || ""} mode="single">
-        {(units: any[]) => <QuoteExcerptListContainer data={{ units }} />}
+        {(units: any[]) => <ExcerptListContainer data={{ units }} />}
       </UnitsPage>
     </div>
   );

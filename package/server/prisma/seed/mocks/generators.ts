@@ -228,7 +228,7 @@ export function generatePostBody(kind: PostKind): string {
   switch (kind) {
     case PostKind.REVIEW:
       return generateParagraph(5, 15);
-    case PostKind.QUOTE:
+    case PostKind.EXCERPT:
       return faker.lorem.sentences({ min: 1, max: 3 });
     case PostKind.REMARK:
       return generateParagraph(1, 3);
@@ -245,7 +245,7 @@ export function generatePostExtra(
   switch (kind) {
     case PostKind.REVIEW:
       return { rating: Math.round(randomFloat(1, 5) * 10) / 10 };
-    case PostKind.QUOTE:
+    case PostKind.EXCERPT:
       return { source: faker.lorem.sentence() };
     case PostKind.REMARK:
       return { rating: Math.round(randomFloat(1, 5) * 10) / 10 };

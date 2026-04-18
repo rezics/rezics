@@ -13,7 +13,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
 import { BookListView } from "@/book-library/components/BookList/BookListView";
-import { QuoteExcerptListContainer } from "@/review/components/QuoteExcerptList.tsx";
+import { ExcerptListContainer } from "@/review/components/ExcerptList.tsx";
 import { ReviewList } from "@/review/components/ReviewList.tsx";
 import { TextSearchInputWithIcon } from "@/search/components/TextSearchInputWithIcon.tsx";
 import { ShelfCard } from "@/shelf/components/ShelfCard";
@@ -32,7 +32,7 @@ const ShelfListView: React.FC<{ shelves: ShelfDTO[] }> = ({ shelves }) => {
   );
 };
 
-type TabKey = "shelf" | "review" | "remark" | "quote" | "book";
+type TabKey = "shelf" | "review" | "remark" | "excerpt" | "book";
 
 const EXTERNAL_PAGE_SIZE = 50;
 
@@ -68,7 +68,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const [startReview, setStartReview] = useState<number>(0);
   const [startBook, setStartBook] = useState<number>(0);
   const [startRemark, setStartRemark] = useState<number>(0);
-  const [startQuote, setStartQuote] = useState<number>(0);
+  const [startExcerpt, setStartExcerpt] = useState<number>(0);
 
   // ======= Shelves =======
 
@@ -190,24 +190,24 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const totalReviews: number =
     (tab === "review" ? reviewData?.total : remarkData?.total) ?? 0;
 
-  // ======= Quotes =======
+  // ======= Excerpts =======
 
   const {
-    data: quoteData,
-    isLoading: isLoadingQuote,
-    error: errorQuote,
+    data: excerptData,
+    isLoading: isLoadingExcerpt,
+    error: errorExcerpt,
   } = useQuery(
     contentSearchQueryOptions({
       type: UnitType.QUOTE,
       keyword: keyword || undefined,
-      offset: startQuote,
+      offset: startExcerpt,
       limit: EXTERNAL_PAGE_SIZE,
     }),
   );
 
-  const quoteUnits: UnitDTO[] = useMemo(
-    () => (quoteData?.items ?? []) as unknown as UnitDTO[],
-    [quoteData],
+  const excerptUnits: UnitDTO[] = useMemo(
+    () => (excerptData?.items ?? []) as unknown as UnitDTO[],
+    [excerptData],
   );
 
   // ======= Pagination control =======
@@ -223,8 +223,8 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         setStartRemark(start);
       } else if (tab === "book") {
         setStartBook(start);
-      } else if (tab === "quote") {
-        setStartQuote(start);
+      } else if (tab === "excerpt") {
+        setStartExcerpt(start);
       }
     },
     [tab],
@@ -304,10 +304,10 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     totalItems = bookData?.total ?? 0;
     activeError = errorBook as Error | null;
   } else {
-    isLoading = isLoadingQuote;
-    items = quoteUnits;
-    totalItems = quoteData?.total ?? 0;
-    activeError = errorQuote as Error | null;
+    isLoading = isLoadingExcerpt;
+    items = excerptUnits;
+    totalItems = excerptData?.total ?? 0;
+    activeError = errorExcerpt as Error | null;
   }
 
   return (
@@ -330,7 +330,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
             <Tab label="REVIEW" value="review" />
             <Tab label="BOOK" value="book" />
             <Tab label="REMARK" value="remark" />
-            <Tab label="QUOTE" value="quote" />
+            <Tab label="EXCERPT" value="excerpt" />
           </Tabs>
         </Box>
       </div>
@@ -367,9 +367,9 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
           if (tab === "book") {
             return <BookListView books={currentPageItems as BookDTO[]} />;
           }
-          if (tab === "quote") {
+          if (tab === "excerpt") {
             return (
-              <QuoteExcerptListContainer
+              <ExcerptListContainer
                 data={{
                   units: currentPageItems as UnitDTO[],
                   total: totalItems,

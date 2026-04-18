@@ -5,21 +5,23 @@ import type { UnitFormData } from "@rezics/api/unit/unit.types";
 import { CooldownButton } from "@rezics/ui/composite/button/CooldownButton.tsx";
 import { useState } from "react";
 import { useUserProfileStore } from "@/user/states";
-import { QuoteEditPage } from "./QuoteEditPage";
+import { ExcerptEditPage } from "./ExcerptEditPage";
 
-export function QuoteNewPage({ bookUnitId }: { bookUnitId: string }) {
-  const [quoteData, setQuoteData] = useState<UnitFormData>({} as UnitFormData);
+export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
+  const [excerptData, setExcerptData] = useState<UnitFormData>(
+    {} as UnitFormData,
+  );
   const { show } = useAlertStore();
   const { user } = useUserProfileStore();
 
   const { mutate, isPending } = useCreateUnitMutation({
     onSuccess: (data) => {
-      show("Quote created successfully");
-      console.log("create quote success", data);
+      show("Excerpt created successfully");
+      console.log("create excerpt success", data);
     },
     onError: (error) => {
-      show(`Create quote failed: ${error}`);
-      console.error("create quote failed", error);
+      show(`Create excerpt failed: ${error}`);
+      console.error("create excerpt failed", error);
     },
   });
 
@@ -29,14 +31,11 @@ export function QuoteNewPage({ bookUnitId }: { bookUnitId: string }) {
       show("Please login first");
       return;
     }
-    const translation = quoteData.translations?.[0];
+    const translation = excerptData.translations?.[0];
     mutate({
       userId,
       type: "QUOTE",
-      extra: {
-        ...((quoteData.extra as Record<string, any>) || {}),
-        source: (quoteData.extra as Record<string, any>)?.source || "",
-      },
+      extra: (excerptData.extra as Record<string, any>) || undefined,
       workUnitId: bookUnitId,
       translations: [
         {
@@ -51,7 +50,7 @@ export function QuoteNewPage({ bookUnitId }: { bookUnitId: string }) {
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">New Quote</h1>
+        <h1 className="text-xl font-semibold">New Excerpt</h1>
         <TextField
           label="Book Unit ID"
           variant="filled"
@@ -59,7 +58,12 @@ export function QuoteNewPage({ bookUnitId }: { bookUnitId: string }) {
           value={bookUnitId}
           disabled
         />
-        <QuoteEditPage unitId={""} data={quoteData} setData={setQuoteData} />
+        <ExcerptEditPage
+          unitId={""}
+          data={excerptData}
+          setData={setExcerptData}
+          targetUnitId={bookUnitId}
+        />
         <div className="flex justify-end gap-2">
           <CooldownButton
             cooldownMs={10000}

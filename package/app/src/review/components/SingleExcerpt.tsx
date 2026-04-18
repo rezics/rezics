@@ -1,6 +1,8 @@
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Avatar, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import type { ExcerptSource } from "@rezics/contract";
+import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 
@@ -8,7 +10,7 @@ import { CollapsibleByLineTextContainer } from "@rezics/ui/primitive/typography/
 import type React from "react";
 import { useTranslation } from "react-i18next";
 
-export type SingleQuoteExcerptShowProps = {
+export type SingleExcerptShowProps = {
   author: {
     unitId: string;
     name: string;
@@ -20,11 +22,11 @@ export type SingleQuoteExcerptShowProps = {
     likes: number;
     date: string;
   };
-  source: string;
+  source: ExcerptSource | string;
   originalLink: string;
 };
 
-export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
+export const SingleExcerptShow: React.FC<SingleExcerptShowProps> = ({
   author,
   content,
   stats,
@@ -110,7 +112,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
               </Typography>
             </div>
             <Typography variant="caption" color="text.disabled">
-              —— {source}
+              —— <SingleExcerptSource source={source} />
             </Typography>
           </div>
         </div>
@@ -119,10 +121,21 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
   );
 };
 
-export type SingleQuoteExcerptContainerProps = any;
-export const SingleQuoteExcerptContainer: React.FC<
-  SingleQuoteExcerptContainerProps
+function SingleExcerptSource({ source }: { source: ExcerptSource | string }) {
+  if (!source) return null;
+  if (typeof source === "string") return <>{source}</>;
+  const href = source.mode === "unit" ? `/unit/${source.unitId}` : source.url;
+  return (
+    <SafeLink href={href} className="underline">
+      {source.title}
+    </SafeLink>
+  );
+}
+
+export type SingleExcerptContainerProps = any;
+export const SingleExcerptContainer: React.FC<
+  SingleExcerptContainerProps
 > = () => {
-  const res = {} as SingleQuoteExcerptShowProps;
-  return <SingleQuoteExcerptShow {...res} />;
+  const res = {} as SingleExcerptShowProps;
+  return <SingleExcerptShow {...res} />;
 };

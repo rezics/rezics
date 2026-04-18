@@ -38,7 +38,7 @@ export async function seedPostsForWorks(
 
   await chunkedParallel(works, CHUNK_SIZE, async (work) => {
     const reviewCount = powerLaw(0, 50, 1.8);
-    const quoteCount = powerLaw(0, 15, 2.0);
+    const excerptCount = powerLaw(0, 15, 2.0);
     const remarkCount = powerLaw(0, 10, 2.0);
     const treeCount = powerLaw(0, 120, 1.8);
 
@@ -52,14 +52,14 @@ export async function seedPostsForWorks(
     );
     allPosts.push(...reviews);
 
-    const quotes = await seedPostKindForTarget(
+    const excerpts = await seedPostKindForTarget(
       prisma,
-      PostKind.QUOTE,
+      PostKind.EXCERPT,
       work.id,
       users,
-      quoteCount,
+      excerptCount,
     );
-    allPosts.push(...quotes);
+    allPosts.push(...excerpts);
 
     const remarks = await seedPostKindForTarget(
       prisma,

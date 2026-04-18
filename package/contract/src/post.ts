@@ -10,18 +10,37 @@ import { publicUserSchema } from "./unit";
 export const PostKind = {
   REVIEW: "REVIEW",
   REMARK: "REMARK",
-  QUOTE: "QUOTE",
+  EXCERPT: "EXCERPT",
   POST: "POST",
 } as const;
 
 export type PostKind = (typeof PostKind)[keyof typeof PostKind];
 
-const postKindLiterals = t.Union([
+export const postKindLiterals = t.Union([
   t.Literal("REVIEW"),
   t.Literal("REMARK"),
-  t.Literal("QUOTE"),
+  t.Literal("EXCERPT"),
   t.Literal("POST"),
 ]);
+
+// ============================================================
+// EXCERPT SOURCE SCHEMA
+// ============================================================
+
+export const excerptSourceSchema = t.Union([
+  t.Object({
+    mode: t.Literal("unit"),
+    unitId: t.String(),
+    title: t.String({ minLength: 1, maxLength: 200 }),
+  }),
+  t.Object({
+    mode: t.Literal("url"),
+    url: t.String({ maxLength: 2048 }),
+    title: t.String({ minLength: 1, maxLength: 200 }),
+  }),
+]);
+
+export type ExcerptSource = (typeof excerptSourceSchema)["static"];
 
 // ============================================================
 // POST EXTRA SCHEMA
@@ -36,6 +55,7 @@ export const postExtraSchema = t.Object({
       title: t.String(),
     }),
   ),
+  source: t.Optional(excerptSourceSchema),
 });
 
 export type PostExtra = (typeof postExtraSchema)["static"];
@@ -80,7 +100,7 @@ export const postListQuerySchema = t.Object({
   rootPostUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
-  kind: t.Optional(t.String()),
+  kind: t.Optional(postKindLiterals),
   mode: t.Optional(t.String()),
   maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
@@ -109,7 +129,7 @@ export const postListBodySchema = t.Object({
   rootPostUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
-  kind: t.Optional(t.String()),
+  kind: t.Optional(postKindLiterals),
   mode: t.Optional(t.String()),
   maxDepth: t.Optional(t.Number()),
   sort: t.Optional(

@@ -98,9 +98,9 @@ export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
   return { items, total, isLoading, error };
 }
 
-// Quotes are not in the content index (type QUOTE not indexed)
-// MOCK: returns empty results until a quote search mechanism is implemented
-export function useHomeQuotes(
+// Excerpts are not in the content index (type QUOTE not indexed)
+// MOCK: returns empty results until an excerpt search mechanism is implemented
+export function useHomeExcerpts(
   _limit = 6,
 ): SimpleQueryState<import("@rezics/contract").UnitDTO> {
   const items = useMemo<import("@rezics/contract").UnitDTO[]>(() => [], []);

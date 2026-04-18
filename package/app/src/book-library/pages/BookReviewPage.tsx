@@ -31,7 +31,7 @@ export const BookReviewPage: React.FC = () => {
 
   const { data: reviewsData } = useQuery({
     ...postQueries.byTarget(bookId, {
-      kind: "review",
+      kind: PostKind.REVIEW,
       limit: REVIEW_PREVIEW_LIMIT,
     }),
     enabled: Boolean(bookId),

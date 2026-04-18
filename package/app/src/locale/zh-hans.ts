@@ -110,7 +110,7 @@ export default {
           more: "更多 \u2192",
           loading: "載入中...",
         },
-        trending_quote: {
+        trending_excerpt: {
           title: "熱門摘錄",
           more: "更多 \u2192",
           empty: "暫無摘錄",

@@ -4,22 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { QuoteExcerptListContainer } from "@/review/components/QuoteExcerptList.tsx";
+import { ExcerptListContainer } from "@/review/components/ExcerptList.tsx";
 
-/** Props for QuoteExcerptPreview component. */
-export type QuoteExcerptPreviewProps = {
-  /** Book or target unit ID. */
+export type ExcerptPreviewProps = {
   id: string;
-  /** Number of quotes to display. */
-  quoteNumber?: number;
+  excerptNumber?: number;
 };
 
-/**
- * Quote Excerpt Preview - Displays a preview of quotes for a book.
- */
-export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
+export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
   id,
-  quoteNumber = 3,
+  excerptNumber = 3,
 }) => {
   const { t } = useTranslation();
   const { data, isLoading, error } = useQuery(
@@ -28,7 +22,7 @@ export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
       start: 0,
       targetUnitId: id,
       keyword: "",
-      limit: quoteNumber,
+      limit: excerptNumber,
       mapFn: (unitResp: any) => unitResp,
       options: { enabled: !!id },
     }),
@@ -39,9 +33,9 @@ export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
 
   return (
     <div>
-      <QuoteExcerptListContainer
+      <ExcerptListContainer
         data={{
-          units: data?.units?.slice(0, quoteNumber) || [],
+          units: data?.units?.slice(0, excerptNumber) || [],
           total: data?.total,
         }}
       />
@@ -49,5 +43,4 @@ export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
   );
 };
 
-// Legacy export for backward compatibility
-export { QuoteExcerptPreview as QuoteExcerptPreviewContainer };
+export { ExcerptPreview as ExcerptPreviewContainer };

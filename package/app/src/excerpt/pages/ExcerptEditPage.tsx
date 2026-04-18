@@ -3,42 +3,48 @@ import { TextField } from "@mui/material";
 import { useUpdateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
+import type { ExcerptSource } from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { quoteEditRoute } from "@/router";
+import { excerptEditRoute } from "@/router";
+import { ExcerptSourcePicker } from "../components/source/ExcerptSourcePicker";
 
-interface QuoteEditPageProps {
+interface ExcerptEditPageProps {
   unitId: string;
   data: UnitFormData;
   setData: (data: UnitFormData) => void;
+  targetUnitId?: string;
 }
 
-export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
+export function ExcerptEditPage({
+  unitId,
+  data,
+  setData,
+  targetUnitId,
+}: ExcerptEditPageProps) {
   const { t } = useTranslation();
   const { show } = useAlertStore();
   const translation = data.translations?.[0];
-  const source = useMemo(
-    () => (data.extra as Record<string, any>)?.source || "",
-    [data.extra],
-  );
+  const extra = (data.extra as Record<string, any>) ?? {};
+  const source = extra.source as ExcerptSource | undefined;
 
-  const { mutate, isPending } = useUpdateUnitMutation({
-    onSuccess: (data) => {
-      show(t("quote.updated_success"));
-      console.log("update quote success", data);
+  const { mutate } = useUpdateUnitMutation({
+    onSuccess: (result) => {
+      show(t("excerpt.updated_success"));
+      console.log("update excerpt success", result);
     },
     onError: (error) => {
-      show(t("quote.messages.update_failed", { error: String(error) }));
-      console.error("update quote failed", error);
+      show(t("excerpt.messages.update_failed", { error: String(error) }));
+      console.error("update excerpt failed", error);
     },
   });
 
   function handleSave() {
     mutate({
-      unitId: unitId,
+      unitId,
       input: {
         extra: data.extra ?? undefined,
         status: data.status || undefined,
@@ -47,12 +53,22 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
     // TODO: update translation (title, description) via translation API
   }
 
+  function handleSourceChange(next: ExcerptSource | undefined) {
+    setData({
+      ...data,
+      extra: {
+        ...extra,
+        source: next,
+      },
+    });
+  }
+
   return (
     <div className="flex flex-col gap-4 mt-2">
       <div className="flex flex-col gap-2">
         <TextField
-          id="quote-title"
-          label={t("quote.form.title")}
+          id="excerpt-title"
+          label={t("excerpt.form.title")}
           variant="standard"
           value={translation?.title || ""}
           onChange={(e) =>
@@ -69,23 +85,11 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <TextField
-          id="quote-source"
-          label={t("quote.form.source")}
-          variant="standard"
-          value={source}
-          onChange={(e) =>
-            setData({
-              ...data,
-              extra: {
-                ...((data.extra as Record<string, any>) || {}),
-                source: e.target.value,
-              },
-            })
-          }
-        />
-      </div>
+      <ExcerptSourcePicker
+        value={source}
+        onChange={handleSourceChange}
+        targetUnitId={targetUnitId}
+      />
 
       <div className="flex-1 min-h-[300px]">
         <RezicsMarkdownEditor
@@ -106,18 +110,20 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
   );
 }
 
-export function QuoteEditPageContainer() {
-  const { unitId } = quoteEditRoute.useParams();
+export function ExcerptEditPageContainer() {
+  const { unitId } = excerptEditRoute.useParams();
   const {
     data: unitData,
     isLoading,
     error,
   } = useQuery(unitQueries.detail(unitId));
-  const [quoteData, setQuoteData] = useState<UnitFormData>({} as UnitFormData);
+  const [excerptData, setExcerptData] = useState<UnitFormData>(
+    {} as UnitFormData,
+  );
 
   useEffect(() => {
     if (unitData) {
-      setQuoteData({
+      setExcerptData({
         type: unitData.type || "",
         status: unitData.status || "",
         extra: unitData.extra ?? undefined,
@@ -141,7 +147,12 @@ export function QuoteEditPageContainer() {
 
   return (
     <div className="max-w-4xl mx-auto mt-4">
-      <QuoteEditPage unitId={unitId} data={quoteData} setData={setQuoteData} />
+      <ExcerptEditPage
+        unitId={unitId}
+        data={excerptData}
+        setData={setExcerptData}
+        targetUnitId={unitData?.workUnitId ?? undefined}
+      />
     </div>
   );
 }

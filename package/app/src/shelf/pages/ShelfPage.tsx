@@ -10,11 +10,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import { bookKeys } from "@rezics/api/book/book.keys";
 import { postKeys } from "@rezics/api/post/post.keys";
-import type {
-  ShelfItemDTO,
-  ShelfSortMode,
-  ShelfView,
-} from "@rezics/api/shelf";
+import type { ShelfItemDTO, ShelfSortMode, ShelfView } from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
   shelfItemsQuery,

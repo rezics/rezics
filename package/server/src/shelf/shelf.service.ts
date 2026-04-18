@@ -532,7 +532,7 @@ export function mapUnitToKind(
 ): ShelfItemKind {
   if (type === UnitType.POST) {
     if (postKind === PostKind.REVIEW) return "review";
-    if (postKind === PostKind.QUOTE) return "quote";
+    if (postKind === PostKind.EXCERPT) return "quote";
     return "post";
   }
   switch (type) {

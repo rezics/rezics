@@ -17,7 +17,7 @@ import { useProfileContext } from "@/user/components/ProfileLayout";
 const KIND_CHIPS: ChipDefinition[] = [
   { value: "REVIEW", label: "Reviews" },
   { value: "REMARK", label: "Remarks" },
-  { value: "QUOTE", label: "Quotes" },
+  { value: "EXCERPT", label: "Excerpts" },
   { value: "POST", label: "Posts" },
 ];
 

@@ -3,34 +3,34 @@ import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { HorizontalQuoteCarousel } from "@/quote/components/list/HorizontalQuoteCarousel";
-import { useHomeQuotes } from "./hooks/hooks";
+import { HorizontalExcerptCarousel } from "@/excerpt/components/list/HorizontalExcerptCarousel";
+import { useHomeExcerpts } from "./hooks/hooks";
 
-export type TrendingQuoteSectionProps = {
+export type TrendingExcerptSectionProps = {
   title?: string;
   limit?: number;
 };
 
-export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
+export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
   title,
   limit = 8,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const resolvedTitle = title ?? t("page.home.sections.trending_quote.title");
-  const { items, isLoading, error } = useHomeQuotes(limit);
+  const resolvedTitle = title ?? t("page.home.sections.trending_excerpt.title");
+  const { items, isLoading, error } = useHomeExcerpts(limit);
 
   const handleMoreClick = () => {
     const first = items[0];
     if (first?.workUnitId) {
       navigate({
-        to: "/quote/book/$bookId",
+        to: "/excerpt/book/$bookId",
         params: { bookId: first.workUnitId },
       });
       return;
     }
     if (first?.id) {
-      navigate({ to: "/quote/$unitId", params: { unitId: first.id } });
+      navigate({ to: "/excerpt/$unitId", params: { unitId: first.id } });
       return;
     }
     navigate({ to: "/review" });
@@ -52,7 +52,7 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
         <Button variant="text" color="primary" onClick={handleMoreClick}>
-          {t("page.home.sections.trending_quote.more")}
+          {t("page.home.sections.trending_excerpt.more")}
         </Button>
       </div>
 
@@ -60,15 +60,15 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
 
       {!isLoading && !items.length && (
         <Typography variant="body2" color="text.secondary">
-          {t("page.home.sections.trending_quote.empty")}
+          {t("page.home.sections.trending_excerpt.empty")}
         </Typography>
       )}
 
       <div>
-        <HorizontalQuoteCarousel quoteList={items} />
+        <HorizontalExcerptCarousel excerptList={items} />
       </div>
     </div>
   );
 };
 
-export default TrendingQuoteSection;
+export default TrendingExcerptSection;

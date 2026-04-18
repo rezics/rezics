@@ -7,17 +7,17 @@ import {
   CarouselPrevious,
 } from "@rezics/ui/shadcn/carousel.tsx";
 import type * as React from "react";
-import QuoteCard from "../item/QuoteCard";
+import ExcerptCard from "../item/ExcerptCard";
 
-export interface HorizontalQuoteCarouselProps {
-  quoteList: UnitDTO[];
+export interface HorizontalExcerptCarouselProps {
+  excerptList: UnitDTO[];
   className?: string;
 }
 
-export const HorizontalQuoteCarousel: React.FC<
-  HorizontalQuoteCarouselProps
-> = ({ quoteList, className }) => {
-  if (!quoteList.length) {
+export const HorizontalExcerptCarousel: React.FC<
+  HorizontalExcerptCarouselProps
+> = ({ excerptList, className }) => {
+  if (!excerptList.length) {
     return null;
   }
 
@@ -30,12 +30,12 @@ export const HorizontalQuoteCarousel: React.FC<
       }}
     >
       <CarouselContent className="-ml-4">
-        {quoteList.map((item) => (
+        {excerptList.map((item) => (
           <CarouselItem
             key={item.id}
             className="pl-4 basis-[100%] lg:basis-[50%] xl:basis-[40%]"
           >
-            <QuoteCard quote={item} />
+            <ExcerptCard excerpt={item} />
           </CarouselItem>
         ))}
       </CarouselContent>
@@ -46,4 +46,4 @@ export const HorizontalQuoteCarousel: React.FC<
   );
 };
 
-export default HorizontalQuoteCarousel;
+export default HorizontalExcerptCarousel;

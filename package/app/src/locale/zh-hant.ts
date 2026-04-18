@@ -133,7 +133,7 @@ export default {
           more: "更多 \u2192",
           loading: "加载中...",
         },
-        trending_quote: {
+        trending_excerpt: {
           title: "热门摘录",
           more: "更多 \u2192",
           empty: "暂无摘录",
@@ -392,7 +392,7 @@ export default {
     unknown_author: "未知作者",
     toc: "目录",
     remark: "短评",
-    quote_excerpts: "原文摘录",
+    excerpts: "原文摘录",
     reviews_of_book: "{{title}}的书评",
     info_panel: {
       title: "书籍信息",
@@ -522,17 +522,17 @@ export default {
     },
   },
 
-  // Quote
-  quote: {
-    title: "言",
+  // Excerpt
+  excerpt: {
+    title: "摘录",
     subtitle: "笔落惊风雨，诗成泣鬼神",
     not_found: "未找到摘录",
     excerpts_title: "原文摘录",
+    updated_success: "摘录更新成功",
     form: {
       title: "标题",
       source: "来源",
     },
-    updated_success: "摘录更新成功",
     messages: {
       update_failed: "更新摘录失败：{{error}}",
     },

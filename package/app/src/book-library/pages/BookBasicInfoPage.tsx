@@ -14,7 +14,7 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import { TagInteraction } from "@/tag/components/TagInteraction";
 import { BookDescription } from "../components/BookDescription";
 import { MetadataPanel } from "../components/BookDetail/MetadataPanel";
-import { QuoteExcerptPreview } from "../components/QuoteExcerptPreview";
+import { ExcerptPreview } from "../components/ExcerptPreview";
 import { RemarkPreview } from "../components/RemarkPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
 import { BookDetailShell } from "../sections/BookDetailSection";
@@ -93,11 +93,11 @@ export const BookBasicInfoPage: React.FC = () => {
         <Divider />
 
         <div>
-          <ArrowForwardIcon size={16} to={`/quote/book/${bookInfo.unitId}`}>
-            <AccentBarWithText text={t("book.quote_excerpts")} />
+          <ArrowForwardIcon size={16} to={`/excerpt/book/${bookInfo.unitId}`}>
+            <AccentBarWithText text={t("book.excerpts")} />
           </ArrowForwardIcon>
         </div>
-        <QuoteExcerptPreview id={bookInfo.unitId || ""} />
+        <ExcerptPreview id={bookInfo.unitId || ""} />
 
         <Divider />
 

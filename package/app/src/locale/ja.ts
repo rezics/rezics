@@ -118,10 +118,10 @@ export default {
           more: "More \u2192", // TODO: translate
           loading: "Loading...", // TODO: translate
         },
-        trending_quote: {
-          title: "Trending Quotes", // TODO: translate
+        trending_excerpt: {
+          title: "Trending Excerpts", // TODO: translate
           more: "More \u2192", // TODO: translate
-          empty: "No quotes yet", // TODO: translate
+          empty: "No excerpts yet", // TODO: translate
         },
         active_realms: {
           title: "Active Realms", // TODO: translate

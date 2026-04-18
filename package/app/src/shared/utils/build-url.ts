@@ -7,9 +7,13 @@ export function buildUnitUrl(unit: UnitDTO): string {
     case "POST":
       return `/review/${unit.id}`;
     case "QUOTE":
-      return `/quote/${unit.id}`;
+      return `/excerpt/${unit.id}`;
     case "SHELF":
       return `/shelf/${unit.id}`;
+    case "TAG":
+      return `/tag/${unit.id}`;
+    case "REALM":
+      return `/realm/${unit.id}`;
     default:
       return `/unit/${unit.id}`;
   }

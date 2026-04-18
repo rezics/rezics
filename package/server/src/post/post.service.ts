@@ -33,7 +33,7 @@ export class PostService {
     if (query.rootPostUnitId) where.rootPostUnitId = query.rootPostUnitId;
     if (query.parentPostUnitId) where.parentPostUnitId = query.parentPostUnitId;
     if (query.authorUserId) where.authorUserId = query.authorUserId;
-    if (query.kind) where.kind = query.kind as PostKind;
+    if (query.kind) where.kind = query.kind;
 
     if (typeof query.maxDepth === "number") {
       where.depth = { lte: query.maxDepth };

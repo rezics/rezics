@@ -5,6 +5,6 @@ const UnitPage = lazyRouteComponent(
   "UnitPage",
 );
 
-export const Route = createFileRoute("/_mainLayout/unit/$unitId")({
+export const Route = createFileRoute("/_mainLayout/unit/$unitId/view")({
   component: UnitPage,
 });

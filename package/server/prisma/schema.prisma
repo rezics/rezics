@@ -50,9 +50,10 @@ enum PostKind {
    */
   REVIEW
   /**
-   * Quoting content, such as well-written sentences from books or touching lines from games.
+   * A user-highlighted passage from the work named by `targetUnitId`
+   * (e.g., memorable sentences from books or lines from games).
    */
-  QUOTE
+  EXCERPT
   /**
    * Casual and unrestricted user remark.
    * No word limit

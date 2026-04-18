@@ -1,5 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
-import type { PostDTO } from "@rezics/contract";
+import { type PostDTO, PostKind } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -18,7 +18,7 @@ export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
   const { t } = useTranslation();
   // Fetch posts with kind='remark' for this book
   const { data, isLoading, error } = useQuery({
-    ...postQueries.byTarget(bookId, { kind: "remark", limit: 4 }),
+    ...postQueries.byTarget(bookId, { kind: PostKind.REMARK, limit: 4 }),
     enabled: !!bookId,
   });
 
