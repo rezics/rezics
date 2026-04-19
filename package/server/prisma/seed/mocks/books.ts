@@ -5,7 +5,12 @@ import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { getRandomBookCover } from "./data.js";
 import { generateBookExtra, generateTranslations } from "./generators.js";
-import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
+import type {
+  ChapterCounts,
+  CreatedEntity,
+  CreatedUnit,
+  CreatedUser,
+} from "./types.js";
 import {
   chunkedParallel,
   generateParagraph,
@@ -157,9 +162,10 @@ export async function seedChaptersForBook(
   // biome-ignore lint/correctness/noUnusedFunctionParameters: <bookUnitId>
   bookUnitId: string,
   bookUserId: string,
+  chapterCfg: ChapterCounts,
 ): Promise<ChapterTreeItem[]> {
-  // Power-law: most books small, rare mega-books with 500+ chapters
-  const totalChapters = powerLaw(5, 1200, 2.0);
+  // Power-law: most books small, rare mega-books at upper bound.
+  const totalChapters = powerLaw(chapterCfg.min, chapterCfg.max, 2.0);
   const topLevelCount = Math.max(1, Math.min(6, Math.ceil(totalChapters / 40)));
   const useBatch = totalChapters > CHAPTER_BATCH_THRESHOLD;
 
@@ -211,11 +217,20 @@ export async function seedChaptersForBook(
     });
   }
 
+  // Tree is always fully built; Units are only materialized for a random
+  // subset. The rest live as JSON nodes in BookIndex and can be lazily
+  // promoted to a Unit at runtime when something needs to attach to them
+  // (review target, comment, attribution claim, etc.).
   const allRows = [...parentRows, ...childRows];
+  const materializedRows = allRows.filter(
+    () => Math.random() < chapterCfg.unitProbability,
+  );
+
+  if (materializedRows.length === 0) return tree;
 
   if (useBatch) {
-    for (let i = 0; i < allRows.length; i += CHAPTER_BATCH_SIZE) {
-      const chunk = allRows.slice(i, i + CHAPTER_BATCH_SIZE);
+    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
       await prisma.unit.createMany({
         data: chunk.map((r) => ({
           id: r.id,
@@ -226,8 +241,8 @@ export async function seedChaptersForBook(
         })),
       });
     }
-    for (let i = 0; i < allRows.length; i += CHAPTER_BATCH_SIZE) {
-      const chunk = allRows.slice(i, i + CHAPTER_BATCH_SIZE);
+    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
       await prisma.unitTranslation.createMany({
         data: chunk.map((r) => ({
           unitId: r.id,
@@ -237,8 +252,8 @@ export async function seedChaptersForBook(
         })),
       });
     }
-    for (let i = 0; i < allRows.length; i += CHAPTER_BATCH_SIZE) {
-      const chunk = allRows.slice(i, i + CHAPTER_BATCH_SIZE);
+    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
       await prisma.unitSupportLanguage.createMany({
         data: chunk.map((r) => ({
           unitId: r.id,
@@ -249,7 +264,7 @@ export async function seedChaptersForBook(
       });
     }
   } else {
-    await chunkedParallel(allRows, CHUNK_SIZE, async (row) => {
+    await chunkedParallel(materializedRows, CHUNK_SIZE, async (row) => {
       await prisma.unit.create({
         data: {
           id: row.id,

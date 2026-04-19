@@ -9,7 +9,7 @@ import {
   seedChaptersForBook,
   updateChapterIndex,
 } from "#/prisma/seed/mocks/books";
-import { DEFAULT_COUNTS } from "#/prisma/seed/mocks/config";
+import { DEFAULT_COUNTS, PROFILE } from "#/prisma/seed/mocks/config";
 import { seedEchoKV } from "#/prisma/seed/mocks/echokv";
 import { seedEngagement } from "#/prisma/seed/mocks/engagement";
 import { seedGames } from "#/prisma/seed/mocks/games";
@@ -37,6 +37,7 @@ function stepTimer(label: string) {
 async function main() {
   console.time("seed:total");
   console.log("[Seed] Starting database seeding...");
+  console.log(`[Seed] Profile: ${PROFILE}`);
   console.log("[Seed] Counts:", DEFAULT_COUNTS);
 
   // ── STEP 1: Reset ─────────────────────────────────
@@ -99,7 +100,13 @@ async function main() {
 
   // ── STEP 7: Posts (power-law per work) ────────────
   done = stepTimer("Step 7: Posts");
-  const posts = await seedPostsForWorks(prisma, allWorks, users, scoreEntries);
+  const posts = await seedPostsForWorks(
+    prisma,
+    allWorks,
+    users,
+    DEFAULT_COUNTS.postsPerWork,
+    scoreEntries,
+  );
   console.log(`[Seed]   ${posts.length} posts`);
   done();
 
@@ -143,7 +150,12 @@ async function main() {
     const userId = bookUnitMap.get(book.id);
     if (!userId) return;
 
-    const chapterTree = await seedChaptersForBook(prisma, book.id, userId);
+    const chapterTree = await seedChaptersForBook(
+      prisma,
+      book.id,
+      userId,
+      DEFAULT_COUNTS.chapter,
+    );
     await updateChapterIndex(
       prisma,
       book.id,
@@ -163,7 +175,7 @@ async function main() {
   ];
   await seedEngagement(prisma, users, allUnitIds, {
     followsPerUser: DEFAULT_COUNTS.followsPerUser,
-    bookmarksPerUser: DEFAULT_COUNTS.bookmarksPerUser,
+    favoriteItemsPerUser: DEFAULT_COUNTS.favoriteItemsPerUser,
   });
   done();
 

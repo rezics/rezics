@@ -22,6 +22,19 @@ export interface CreatedPost extends CreatedUnit {
   targetUnitId?: string;
 }
 
+export interface PostsPerWorkCounts {
+  reviewMax: number;
+  excerptMax: number;
+  remarkMax: number;
+  treeMax: number;
+}
+
+export interface ChapterCounts {
+  min: number;
+  max: number;
+  unitProbability: number;
+}
+
 export interface SeedCounts {
   users: number;
   tags: number;
@@ -34,5 +47,7 @@ export interface SeedCounts {
   personEntities: number;
   organizationEntities: number;
   followsPerUser: number;
-  bookmarksPerUser: number;
+  favoriteItemsPerUser: number;
+  postsPerWork: PostsPerWorkCounts;
+  chapter: ChapterCounts;
 }

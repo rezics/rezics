@@ -8,7 +8,12 @@ import {
   generatePostExtra,
   generateTranslations,
 } from "./generators.js";
-import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
+import type {
+  CreatedPost,
+  CreatedUnit,
+  CreatedUser,
+  PostsPerWorkCounts,
+} from "./types.js";
 import {
   chunkedParallel,
   powerLaw,
@@ -29,6 +34,7 @@ export async function seedPostsForWorks(
   prisma: PrismaClient,
   works: CreatedUnit[],
   users: CreatedUser[],
+  caps: PostsPerWorkCounts,
   scoreEntries?: Map<string, string>,
 ): Promise<CreatedPost[]> {
   console.log(
@@ -37,10 +43,10 @@ export async function seedPostsForWorks(
   const allPosts: CreatedPost[] = [];
 
   await chunkedParallel(works, CHUNK_SIZE, async (work) => {
-    const reviewCount = powerLaw(0, 50, 1.8);
-    const excerptCount = powerLaw(0, 15, 2.0);
-    const remarkCount = powerLaw(0, 10, 2.0);
-    const treeCount = powerLaw(0, 120, 1.8);
+    const reviewCount = powerLaw(0, caps.reviewMax, 1.8);
+    const excerptCount = powerLaw(0, caps.excerptMax, 2.0);
+    const remarkCount = powerLaw(0, caps.remarkMax, 2.0);
+    const treeCount = powerLaw(0, caps.treeMax, 1.8);
 
     const reviews = await seedPostKindForTarget(
       prisma,

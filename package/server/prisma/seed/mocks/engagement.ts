@@ -18,14 +18,14 @@ export async function seedEngagement(
   prisma: PrismaClient,
   users: CreatedUser[],
   allUnitIds: string[],
-  counts: { followsPerUser: number; bookmarksPerUser: number },
+  counts: { followsPerUser: number; favoriteItemsPerUser: number },
 ): Promise<void> {
   console.log(
     `[Seed] Seeding engagement for ${allUnitIds.length} units, ${users.length} users...`,
   );
 
   await Promise.all([
-    seedFavorites(prisma, users, allUnitIds, counts.bookmarksPerUser),
+    seedFavorites(prisma, users, allUnitIds, counts.favoriteItemsPerUser),
     seedFollows(prisma, users, counts.followsPerUser),
   ]);
 }
