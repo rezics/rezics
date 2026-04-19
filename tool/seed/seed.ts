@@ -10,14 +10,15 @@ type SeedTarget = "users" | "infra";
 async function main() {
   p.intro("Rezics Seed");
 
-  const targets = await p.multiselect<
-    { value: SeedTarget; label: string; hint: string }[],
-    SeedTarget
-  >({
+  const targets = await p.multiselect<SeedTarget>({
     message: "What would you like to seed?",
     options: [
       { value: "users", label: "Users", hint: "root, admin, user, blocked" },
-      { value: "infra", label: "Infrastructure", hint: "seed tags, default realm" },
+      {
+        value: "infra",
+        label: "Infrastructure",
+        hint: "seed tags, default realm",
+      },
     ],
   });
 
@@ -31,11 +32,11 @@ async function main() {
     process.exit(0);
   }
 
-  const seedUsers = targets.includes("users");
-  const seedInfra = targets.includes("infra");
+  const shouldSeedUsers = targets.includes("users");
+  const shouldSeedInfra = targets.includes("infra");
 
   let overwrite = false;
-  if (seedUsers) {
+  if (shouldSeedUsers) {
     const confirmOverwrite = await p.confirm({
       message:
         "Overwrite existing seed users? This will delete and re-create all 4 seed users.",
@@ -56,7 +57,7 @@ async function main() {
   try {
     let rootUserId: string | undefined;
 
-    if (seedUsers) {
+    if (shouldSeedUsers) {
       const s = p.spinner();
       s.start(overwrite ? "Seeding users (overwrite)..." : "Seeding users...");
 
@@ -84,7 +85,7 @@ async function main() {
       p.log.warn("Store these passwords securely.");
     }
 
-    if (seedInfra) {
+    if (shouldSeedInfra) {
       if (!rootUserId) {
         const s = p.spinner();
         s.start("Resolving root user...");

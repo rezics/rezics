@@ -3,8 +3,8 @@ import type { PrismaClient } from "#/prisma/generated/client";
 import { seedDefaultRealm } from "./seed-default-realm";
 import { seedContentTypeTags } from "./seed-tags";
 
-export { seedContentTypeTags } from "./seed-tags";
 export { seedDefaultRealm } from "./seed-default-realm";
+export { seedContentTypeTags } from "./seed-tags";
 
 export interface SeedInfraResult {
   tagMap: Record<SeedTagName, string>;
