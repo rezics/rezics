@@ -15,7 +15,7 @@ import {
 import { userApi } from "@rezics/api/user/user.api";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UpdateUser, UserDTO } from "@rezics/contract";
-import { PasswordField } from "@rezics/ui/composite/form/field/PasswordField.tsx";
+import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useMatch } from "@tanstack/react-router";
 import type React from "react";

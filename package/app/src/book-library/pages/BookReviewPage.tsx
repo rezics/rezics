@@ -9,7 +9,7 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { ScoreOverview } from "@/engagement/components/ScoreOverview";
-import { ReviewList } from "@/review/components/ReviewList";
+import { ReviewList } from "@/review/components/list/ReviewList";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { ShelfByBookPreview } from "../components/ShelfByBookPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";

@@ -7,16 +7,7 @@ import { PostKind } from "@rezics/contract";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { useUserProfileStore } from "@/user/states";
-import { ReviewEditPage } from "./ReviewEditPage";
-
-type ReviewEditState = {
-  unitId: string;
-  body: string;
-  _editTitle: string;
-  _editRating: number;
-  extra: Record<string, any>;
-  targetUnitId?: string | null;
-};
+import { ReviewForm, type ReviewEditState } from "@/review/forms/ReviewForm";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const search = useRouterState({ select: (s) => s.location.search ?? "" });
@@ -92,7 +83,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
           value={bookUnitId}
           disabled
         />
-        <ReviewEditPage
+        <ReviewForm
           data={reviewData}
           setData={setReviewData}
           onSubmit={handleSave}

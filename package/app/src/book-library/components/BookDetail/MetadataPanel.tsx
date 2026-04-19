@@ -1,4 +1,11 @@
-import { Box, Divider, IconButton, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Divider,
+  IconButton,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { EditOutlined } from "@mui/icons-material";
 import { useCanEdit } from "@rezics/api/hooks";
 import type { BookDTO } from "@rezics/contract";
@@ -23,15 +30,16 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "book", ownerUnit: bookInfo });
 
-  const editButton = canEdit && bookInfo?.unitId ? (
-    <IconButton
-      size="small"
-      aria-label={t("common.edit")}
-      onClick={() => navigate({ to: `/book/${bookInfo.unitId}/edit` })}
-    >
-      <EditOutlined fontSize="small" />
-    </IconButton>
-  ) : null;
+  const editButton =
+    canEdit && bookInfo?.unitId ? (
+      <IconButton
+        size="small"
+        aria-label={t("common.edit")}
+        onClick={() => navigate({ to: `/book/${bookInfo.unitId}/edit` })}
+      >
+        <EditOutlined fontSize="small" />
+      </IconButton>
+    ) : null;
 
   const items = (
     <Stack spacing={1}>

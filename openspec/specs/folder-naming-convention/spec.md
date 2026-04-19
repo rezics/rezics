@@ -16,7 +16,7 @@ All folders representing a domain, feature, sub-feature, or bounded context SHAL
 - **THEN** the convention check passes because the head noun is singular
 
 ### Requirement: Container folders use plural from a fixed allowlist
-Folders that contain multiple same-kind files SHALL use plural names drawn from a fixed allowlist. The allowlist is: `hooks`, `utils`, `components`, `pages`, `sections`, `states`, `models`, `types`, `routes`, `handlers`, `providers`, `plugins`, `styles`, `helpers`, `constants`, `fixtures`, `mocks`, `layouts`, `assets`, `docs`, `templates`. Folders outside this allowlist SHALL be singular per the preceding requirement.
+Folders that contain multiple same-kind files SHALL use plural names drawn from a fixed allowlist. The allowlist is: `hooks`, `utils`, `components`, `pages`, `sections`, `states`, `models`, `types`, `routes`, `handlers`, `providers`, `plugins`, `styles`, `helpers`, `constants`, `fixtures`, `mocks`, `layouts`, `assets`, `docs`, `templates`, `parts`, `forms`. Folders outside this allowlist SHALL be singular per the preceding requirement.
 
 #### Scenario: Allowlisted plural container passes
 - **WHEN** a developer creates `package/app/src/book-library/hooks/`

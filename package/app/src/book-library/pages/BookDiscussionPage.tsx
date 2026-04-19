@@ -5,9 +5,7 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { useState } from "react";
-import { InlinePostForm } from "@/discussion/components/InlinePostForm";
-import { ReplyDrawer } from "@/discussion/components/ReplyDrawer";
-import { ThreadList } from "@/discussion/components/ThreadList";
+import { InlinePostForm, PostListSection, ReplyDrawer } from "@/post";
 import { BookDetailShell } from "../sections/BookDetailSection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 
@@ -48,7 +46,7 @@ export const BookCommunityPage: React.FC = () => {
 
         <Divider />
 
-        <ThreadList targetUnitId={bookId} onReply={setReplyTo} />
+        <PostListSection targetUnitId={bookId} onReply={setReplyTo} />
 
         {replyTo && (
           <ReplyDrawer

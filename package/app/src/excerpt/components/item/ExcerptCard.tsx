@@ -1,11 +1,11 @@
 import FormatQuoteRoundedIcon from "@mui/icons-material/FormatQuoteRounded";
 import {
+  Avatar,
   Box,
   Card,
   CardActionArea,
   CardContent,
   Typography,
-  useTheme,
 } from "@mui/material";
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
@@ -17,8 +17,10 @@ export interface ExcerptCardProps {
   className?: string;
 }
 
-const ExcerptCard: React.FC<ExcerptCardProps> = ({ excerpt, className }) => {
-  const theme = useTheme();
+export const ExcerptCard: React.FC<ExcerptCardProps> = ({
+  excerpt,
+  className,
+}) => {
   const navigate = useNavigate();
 
   const handleOpenExcerpt = () => {
@@ -26,23 +28,41 @@ const ExcerptCard: React.FC<ExcerptCardProps> = ({ excerpt, className }) => {
     navigate({ to: "/excerpt/$unitId", params: { unitId: excerpt.id } });
   };
 
+  const source = (excerpt.extra as Record<string, unknown> | null)?.source as
+    | ExcerptSource
+    | string
+    | undefined;
+  const description = excerpt.translations?.[0]?.description ?? "暂无摘录内容";
+
   return (
     <Card elevation={0} className={cn("w-full transition-all mb-1", className)}>
       <CardActionArea onClick={handleOpenExcerpt} disabled={!excerpt.id}>
         <CardContent>
           <Box className="flex items-start gap-2">
             <FormatQuoteRoundedIcon
-              sx={{ color: theme.palette.text.secondary, mt: 0.4 }}
+              sx={{ color: "text.secondary", mt: 0.4 }}
               fontSize="small"
             />
 
             <Box className="min-w-0 flex-1">
+              {excerpt.user && (
+                <Box className="flex items-center gap-2 mb-1">
+                  <Avatar
+                    src={excerpt.user.avatar ?? ""}
+                    sx={{ width: 20, height: 20 }}
+                    variant="rounded"
+                  />
+                  <Typography variant="caption" fontWeight={600}>
+                    {excerpt.user.name ?? ""}
+                  </Typography>
+                </Box>
+              )}
               <Typography
                 variant="body2"
                 color="text.primary"
                 className="line-clamp-3 leading-7"
               >
-                {excerpt.translations?.[0]?.description || "暂无摘录内容"}
+                {description}
               </Typography>
 
               <Box className="mt-3 flex items-center justify-between gap-2">
@@ -50,10 +70,7 @@ const ExcerptCard: React.FC<ExcerptCardProps> = ({ excerpt, className }) => {
                   0 喜欢
                 </Typography>
                 <Typography variant="caption" color="text.secondary" noWrap>
-                  ——{" "}
-                  <ExcerptCardSource
-                    source={(excerpt.extra as Record<string, any>)?.source}
-                  />
+                  —— <ExcerptCardSource source={source} />
                 </Typography>
               </Box>
             </Box>

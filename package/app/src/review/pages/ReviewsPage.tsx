@@ -6,7 +6,7 @@ import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ReviewList } from "@/review/components/ReviewList.tsx";
+import { ReviewList } from "@/review/components/list/ReviewList";
 import { TextSearchInput } from "@/search/components/TextSearchInput";
 
 function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {

@@ -1,7 +1,7 @@
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useTranslation } from "react-i18next";
-import { ExcerptListContainer } from "@/review/components/ExcerptList";
+import { ExcerptList } from "@/excerpt";
 import { excerptByBookRoute } from "@/router";
 import UnitsPage from "@/unit/pages/UnitsPage";
 import { ExcerptNewPage } from "./ExcerptNewPage";
@@ -16,7 +16,7 @@ export function ExcerptByBookPage() {
       </ArrowForwardIcon>
       <ExcerptNewPage bookUnitId={bookId || ""} />
       <UnitsPage type="QUOTE" targetUnitId={bookId || ""} mode="single">
-        {(units: any[]) => <ExcerptListContainer data={{ units }} />}
+        {(units: any[]) => <ExcerptList units={units} />}
       </UnitsPage>
     </div>
   );

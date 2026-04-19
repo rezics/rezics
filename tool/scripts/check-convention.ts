@@ -52,6 +52,8 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "assets",
   "docs",
   "templates",
+  "parts",
+  "forms",
 ]);
 
 const ROUTE_PREFIX_ALLOWLIST = new Set([

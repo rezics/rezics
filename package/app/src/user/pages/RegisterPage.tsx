@@ -2,7 +2,7 @@ import { Dialog, DialogContent } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { PasswordField } from "@rezics/ui/composite/form/field/PasswordField.tsx";
+import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { type FC, useState } from "react";

@@ -9,7 +9,7 @@ import { useAtomValue } from "jotai";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { WorkReleaseNav } from "@/i18n/components/WorkReleaseNav";
-import { RemarkInlineForm } from "@/remark/components/RemarkInlineForm";
+import { RemarkInlineForm } from "@/remark";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { TagInteraction } from "@/tag/components/TagInteraction";
 import { BookDescription } from "../components/BookDescription";

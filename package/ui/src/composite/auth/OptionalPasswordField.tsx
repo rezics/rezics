@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import type { FC } from "react";
-import { PasswordField } from "../form/field/PasswordField";
+import { PasswordField } from "../forms/field/PasswordField";
 
 interface OptionalPasswordFieldProps {
   value: string;

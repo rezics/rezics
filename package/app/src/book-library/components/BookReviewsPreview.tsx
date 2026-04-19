@@ -5,7 +5,7 @@ import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWith
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { ReviewList } from "@/review/components/ReviewList.tsx";
+import { ReviewList } from "@/review/components/list/ReviewList";
 
 /** Props for BookReviews component. */
 interface BookReviewsProps {

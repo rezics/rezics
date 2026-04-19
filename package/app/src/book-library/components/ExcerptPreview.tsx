@@ -1,10 +1,10 @@
 import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
-import { UnitType } from "@rezics/contract";
+import { type UnitDTO, UnitType } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { ExcerptListContainer } from "@/review/components/ExcerptList.tsx";
+import { ExcerptList } from "@/excerpt";
 
 export type ExcerptPreviewProps = {
   id: string;
@@ -31,16 +31,8 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
   if (isLoading) return <div>{t("common.loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
-  return (
-    <div>
-      <ExcerptListContainer
-        data={{
-          units: data?.units?.slice(0, excerptNumber) || [],
-          total: data?.total,
-        }}
-      />
-    </div>
-  );
+  const units: UnitDTO[] = data?.units?.slice(0, excerptNumber) ?? [];
+  return <ExcerptList units={units} />;
 };
 
 export { ExcerptPreview as ExcerptPreviewContainer };

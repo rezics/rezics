@@ -13,8 +13,8 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
 import { BookListView } from "@/book-library/components/BookList/BookListView";
-import { ExcerptListContainer } from "@/review/components/ExcerptList.tsx";
-import { ReviewList } from "@/review/components/ReviewList.tsx";
+import { ExcerptList } from "@/excerpt";
+import { ReviewList } from "@/review/components/list/ReviewList";
 import { TextSearchInputWithIcon } from "@/search/components/TextSearchInputWithIcon.tsx";
 import { ShelfCard } from "@/shelf/components/ShelfCard";
 
@@ -368,14 +368,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
             return <BookListView books={currentPageItems as BookDTO[]} />;
           }
           if (tab === "excerpt") {
-            return (
-              <ExcerptListContainer
-                data={{
-                  units: currentPageItems as UnitDTO[],
-                  total: totalItems,
-                }}
-              />
-            );
+            return <ExcerptList units={currentPageItems as UnitDTO[]} />;
           }
           return null;
         }}

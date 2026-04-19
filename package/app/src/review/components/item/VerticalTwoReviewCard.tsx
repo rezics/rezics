@@ -1,7 +1,7 @@
 import { Divider } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import type React from "react";
-import ReviewCard from "./ReviewCard";
+import { ReviewCard } from "./ReviewCard";
 
 interface VerticalTwoReviewCardProps {
   review1: PostDTO;

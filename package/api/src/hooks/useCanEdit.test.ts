@@ -30,23 +30,13 @@ describe("computeCanEdit", () => {
 
   test("BLOCKED role → false even for own content", () => {
     expect(
-      computeCanEdit(
-        permission("BLOCKED"),
-        "owner-unit-id",
-        "book",
-        ownedUnit,
-      ),
+      computeCanEdit(permission("BLOCKED"), "owner-unit-id", "book", ownedUnit),
     ).toBe(false);
   });
 
   test("ADMIN role → true regardless of owner", () => {
     expect(
-      computeCanEdit(
-        permission("ADMIN"),
-        "some-other-unit",
-        "book",
-        ownedUnit,
-      ),
+      computeCanEdit(permission("ADMIN"), "some-other-unit", "book", ownedUnit),
     ).toBe(true);
   });
 
@@ -58,12 +48,7 @@ describe("computeCanEdit", () => {
 
   test("USER owning the content → true", () => {
     expect(
-      computeCanEdit(
-        permission("USER"),
-        "owner-unit-id",
-        "chapter",
-        ownedUnit,
-      ),
+      computeCanEdit(permission("USER"), "owner-unit-id", "chapter", ownedUnit),
     ).toBe(true);
   });
 

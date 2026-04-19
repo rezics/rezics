@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import { postQueries } from "@rezics/api/post/post";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { PostCard } from "@/discussion/components/PostCard";
+import { PostCard } from "@/post";
 
 interface RealmContentFeedProps {
   realmId: string;

@@ -6,7 +6,7 @@ import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
 import { UnitType } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ReviewList } from "@/review/components/ReviewList";
+import { ReviewList } from "@/review/components/list/ReviewList";
 import { TextSearchInputWithIcon } from "@/search/components/TextSearchInputWithIcon";
 
 export function ReviewSearchPage() {
