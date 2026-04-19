@@ -4,6 +4,7 @@
 
 ## Section 2
 - [ ] 還是考慮遷移到 paraglide-js
+- [ ] 權限模型還是不正確，jwt 驗證通過之後，還需要查數據庫校驗啊
 - [ ] book content index 並不需要章節存在，所以如果沒有 unitId 前端應該給交互，可以創建 chapter
 - [ ] post 不需要 translation 直接使用 unit translation 只不過他專門索引 不同 trans 的 release id, 就是 翻譯是 不同 unit 維護
 - [ ] UnitTranslation  sourceReleaseUnitId  我覺得這個名詞不夠準確，因爲這描述了 work，但是他可以提供 wiki 的功能

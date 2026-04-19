@@ -32,6 +32,7 @@ export const BookHeroReactionBar: React.FC<{
         editionURL={`/book/${bookInfo?.unitId}/edit`}
         textColor={color}
         userUnitId={bookInfo?.user?.unitId}
+        resource="book"
       />
       <MiniActionBar
         hideReply={true}

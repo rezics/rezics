@@ -65,10 +65,7 @@ export const BookBasicInfoPage: React.FC = () => {
   return (
     <BookDetailShell bookInfo={bookInfo} sidebar={sidebar}>
       <Stack spacing={4}>
-        <BookDescription
-          description={description}
-          bookId={bookInfo.unitId || ""}
-        />
+        <BookDescription description={description} book={bookInfo} />
 
         <Box className="lg:hidden">
           <MetadataPanel bookInfo={bookInfo} variant="inline" />
@@ -84,6 +81,7 @@ export const BookBasicInfoPage: React.FC = () => {
                   tags={unitTags}
                   translations={tagTranslations ?? {}}
                   bookUnitId={bookInfo.unitId ?? bookId}
+                  bookUnit={bookInfo}
                 />
               </Box>
             </div>

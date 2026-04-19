@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { useCanEdit } from "@rezics/api/hooks";
 import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButtonFloatRight.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useNavigate } from "@tanstack/react-router";
@@ -6,29 +7,22 @@ import type React from "react";
 import { useTranslation } from "react-i18next";
 import type { BookDescriptionProps } from "./types";
 
-/**
- * Direct component for rendering a book description.
- * - Displays a localized title bar and the description text.
- * - Optional edit button routes to edit page or calls `onEdit`.
- */
 export const BookDescription: React.FC<BookDescriptionProps> = ({
   description,
   onEdit,
-  bookId,
-  showEditButton,
+  book,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const canEdit = Boolean(onEdit || bookId);
-  const shouldShowEdit = showEditButton ?? canEdit;
+  const canEdit = useCanEdit({ resource: "book", ownerUnit: book });
 
   const handleEdit = () => {
     if (onEdit) {
       onEdit();
       return;
     }
-    if (bookId) {
-      navigate({ to: `/book/${bookId}/edit` });
+    if (book?.unitId) {
+      navigate({ to: `/book/${book.unitId}/edit` });
     }
   };
 
@@ -37,7 +31,7 @@ export const BookDescription: React.FC<BookDescriptionProps> = ({
       <Box>
         <div className="flex mb-4">
           <AccentBarWithText text={t("book.description")} />
-          {shouldShowEdit && (
+          {canEdit && (
             <EditButtonFloatRightShow
               onClick={handleEdit}
               text={t("common.edit")}

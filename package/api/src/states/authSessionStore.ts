@@ -3,7 +3,11 @@ import {
   clearAuthPresence,
   hasAuthPresence,
 } from "@rezics/api/react-query/authPresence";
-import { getToken, parseJwt } from "@rezics/api/react-query/jwt";
+import {
+  getRezicsSessionClaims,
+  getToken,
+  parseJwt,
+} from "@rezics/api/react-query/jwt";
 import type {
   AuthSession,
   AuthUser,
@@ -35,6 +39,11 @@ export type AuthSessionStoreState = {
    * `null` when the user has no valid session token (unauthenticated).
    */
   permission: Permission | null;
+  /**
+   * Main server actor unitId, derived from the `rezics-session-token` claims.
+   * `null` when the user has no valid session token (unauthenticated).
+   */
+  unitId: string | null;
   identitySet: boolean;
   registrationComplete: boolean;
   error: string | null;
@@ -44,11 +53,16 @@ export type AuthSessionStoreState = {
   reset: () => void;
 };
 
-function derivePermission(): Permission | null {
-  const sessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
-  if (!sessionToken) return null;
-  const payload = parseJwt(sessionToken);
-  return payload?.permission ?? null;
+function deriveSessionClaims(): {
+  permission: Permission | null;
+  unitId: string | null;
+} {
+  const claims = getRezicsSessionClaims();
+  if (!claims) return { permission: null, unitId: null };
+  return {
+    permission: claims.permission ?? null,
+    unitId: typeof claims.unitId === "string" ? claims.unitId : null,
+  };
 }
 
 function deriveState(
@@ -59,7 +73,7 @@ function deriveState(
   const identitySet = Boolean(snapshot?.authSession?.identitySet);
   const emailVerified = Boolean(snapshot?.authSession?.emailVerified);
   const registrationComplete = identitySet && emailVerified;
-  const permission = derivePermission();
+  const { permission, unitId } = deriveSessionClaims();
 
   return {
     status,
@@ -67,6 +81,7 @@ function deriveState(
     user: snapshot?.user ?? null,
     authSession: snapshot?.authSession ?? null,
     permission,
+    unitId,
     identitySet,
     registrationComplete,
     error,

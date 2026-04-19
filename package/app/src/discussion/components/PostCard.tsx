@@ -1,8 +1,13 @@
-import { Avatar, Box, Typography } from "@mui/material";
+import { EditOutlined } from "@mui/icons-material";
+import { Avatar, Box, IconButton, Typography } from "@mui/material";
+import { useCanEdit } from "@rezics/api/hooks";
 import type { PostDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import type React from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { PostEditDialog } from "./PostEditDialog";
 
 interface PostCardProps {
   post: PostDTO;
@@ -15,9 +20,15 @@ export const PostCard: React.FC<PostCardProps> = ({
   depth = 0,
   onReply,
 }) => {
+  const { t } = useTranslation();
   const dateStr = post.createdAt
     ? new Date(String(post.createdAt)).toLocaleDateString()
     : "";
+  const canEdit = useCanEdit({
+    resource: "post",
+    ownerUnit: { user: post.author },
+  });
+  const [editing, setEditing] = useState(false);
 
   return (
     <Box
@@ -41,6 +52,16 @@ export const PostCard: React.FC<PostCardProps> = ({
             <Typography variant="caption" color="text.secondary">
               {dateStr}
             </Typography>
+            {canEdit && (
+              <IconButton
+                size="small"
+                aria-label={t("common.edit")}
+                onClick={() => setEditing(true)}
+                sx={{ ml: "auto" }}
+              >
+                <EditOutlined fontSize="small" />
+              </IconButton>
+            )}
           </Box>
 
           <MarkdownContent
@@ -65,6 +86,13 @@ export const PostCard: React.FC<PostCardProps> = ({
           </Box>
         </Box>
       </Box>
+      {editing && (
+        <PostEditDialog
+          post={post}
+          open={editing}
+          onClose={() => setEditing(false)}
+        />
+      )}
     </Box>
   );
 };

@@ -2,6 +2,8 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 
 import { Comment, Edit, FavoriteBorder, LibraryAdd } from "@mui/icons-material";
 import { IconButton, Tooltip } from "@mui/material";
+import { useCanEdit } from "@rezics/api/hooks";
+import type { EditableResource } from "@rezics/api/hooks";
 import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
@@ -15,26 +17,28 @@ import { useTranslation } from "react-i18next";
 import { CollectionModal } from "@/collection/components/CollectionModal";
 import { FavoriteButton } from "@/collection/components/FavoriteButton";
 import { useCollectionModal } from "@/collection/hooks/useCollectionModal";
-import { useUserProfileStore } from "@/user/states";
 
 interface MiniAdminActionBarProps {
   editionURL: string;
   textColor?: string;
   userUnitId?: string;
+  resource?: EditableResource;
 }
 
 export function MiniAdminActionBar({
   editionURL,
   textColor,
   userUnitId,
+  resource = "post",
 }: MiniAdminActionBarProps) {
   const { t } = useTranslation();
-  const user = useUserProfileStore((state) => state.user);
-  const isAdmin = user?.permission?.role.includes("ADMIN");
-  const isOwner = user?.unitId === userUnitId;
+  const canEdit = useCanEdit({
+    resource,
+    ownerUnit: userUnitId ? { user: { unitId: userUnitId } } : undefined,
+  });
   const navigate = useNavigate();
 
-  if (!isAdmin && !isOwner) {
+  if (!canEdit) {
     return null;
   }
   return (

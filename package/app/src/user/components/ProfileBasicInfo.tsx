@@ -1,5 +1,7 @@
+import { EditOutlined } from "@mui/icons-material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
+import { useCanEdit } from "@rezics/api/hooks";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { UserDTO } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -18,6 +20,10 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
   isCurrentUser,
   unitId,
 }) => {
+  const canEdit = useCanEdit({
+    resource: "unit",
+    ownerUnit: { user: { unitId: user.unitId } },
+  });
   const shelvesCountQuery = useQuery({
     ...contentSearchQueryOptions({
       type: ["SHELF"],
@@ -53,9 +59,18 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           {user.name?.charAt(0).toUpperCase()}
         </Avatar>
         <div className="flex-1 min-w-0">
-          <Typography variant="h6" className="font-semibold">
-            {user.name}
-          </Typography>
+          <div className="flex items-center gap-1">
+            <Typography variant="h6" className="font-semibold">
+              {user.name}
+            </Typography>
+            {canEdit && (
+              <Link to="/user/$unitId/edit" params={{ unitId }}>
+                <IconButton size="small" aria-label="Edit profile">
+                  <EditOutlined fontSize="small" />
+                </IconButton>
+              </Link>
+            )}
+          </div>
           {user.slug && (
             <Typography variant="body2" color="text.secondary">
               @{user.slug}
@@ -143,8 +158,12 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         </div>
 
         <div className="w-full">
-          {isCurrentUser ? (
-            <Link to="/user/me/setting/profile" className="block">
+          {canEdit ? (
+            <Link
+              to="/user/$unitId/edit"
+              params={{ unitId }}
+              className="block"
+            >
               <Button variant="outlined" size="small" fullWidth>
                 Edit profile
               </Button>

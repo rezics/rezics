@@ -1,4 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import ThumbDownOutlinedIcon from "@mui/icons-material/ThumbDownOutlined";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
@@ -12,8 +13,14 @@ import {
   Popper,
   Typography,
 } from "@mui/material";
+import { useCanEdit } from "@rezics/api/hooks";
 import { useCastTagVoteMutation } from "@rezics/api/tag/tag.mutations";
-import type { BatchTagTranslationResult, UnitTagDTO } from "@rezics/contract";
+import type {
+  BatchTagTranslationResult,
+  BookDTO,
+  UnitTagDTO,
+} from "@rezics/contract";
+import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,6 +31,8 @@ export type TagInteractionProps = {
   tags: UnitTagDTO[];
   translations: BatchTagTranslationResult;
   bookUnitId: string;
+  /** The parent book; drives the edit-permission check. */
+  bookUnit?: BookDTO;
   className?: string;
 };
 
@@ -42,12 +51,15 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   tags,
   translations,
   bookUnitId,
+  bookUnit,
   className,
 }) => {
   const { t } = useTranslation();
   const [state, dispatch] = useTagInteractionReducer();
   const navigateToTagSearch = useNavigateToTagSearch();
   const voteMutation = useCastTagVoteMutation();
+  const navigate = useNavigate();
+  const canEditTags = useCanEdit({ resource: "tag", ownerUnit: bookUnit });
 
   const labelOf = useCallback(
     (tagUnitId: string) => translations[tagUnitId]?.name || tagUnitId,
@@ -195,7 +207,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
                 </Button>
               </div>
 
-              <div className="mt-3">
+              <div className="mt-3 flex flex-col gap-2">
                 <Button
                   size="small"
                   fullWidth
@@ -205,6 +217,19 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
                 >
                   {t("tag.search_this", "Search this tag")}
                 </Button>
+                {canEditTags && (
+                  <Button
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<EditOutlinedIcon fontSize="small" />}
+                    onClick={() =>
+                      navigate({ to: `/book/${bookUnitId}/edit/tag` })
+                    }
+                  >
+                    {t("common.edit")}
+                  </Button>
+                )}
               </div>
             </Paper>
           </ClickAwayListener>
