@@ -88,25 +88,50 @@ export async function seedShelves(
       const selectedWorks = pickN(workIds, itemCount);
 
       let prevPos: string | undefined;
-      const shelfItems = selectedWorks.map((workId) => {
+      const shelfItemRows: Array<{
+        shelfUnitId: string;
+        itemRef: string;
+        kind: string;
+        position: string;
+      }> = [];
+      const shelfUnitRows: Array<{
+        shelfUnitId: string;
+        itemRef: string;
+        unitId: string;
+        role: string;
+      }> = [];
+
+      for (const workId of selectedWorks) {
         const position = generateBetween(prevPos, undefined);
         prevPos = position;
-        const review =
-          reviewPosts.length > 0 && randomBoolean(0.3)
-            ? reviewPosts.find((p) => p.targetUnitId === workId)
-            : null;
-        return {
+        shelfItemRows.push({
           shelfUnitId: unit.id,
           itemRef: workId,
           kind: "book",
           position,
-          reviewIds: review ? [review.id] : [],
-          tagIds: [] as string[],
-        };
-      });
+        });
+        shelfUnitRows.push({
+          shelfUnitId: unit.id,
+          itemRef: workId,
+          unitId: workId,
+          role: "primary",
+        });
+        if (reviewPosts.length > 0 && randomBoolean(0.3)) {
+          const review = reviewPosts.find((p) => p.targetUnitId === workId);
+          if (review) {
+            shelfUnitRows.push({
+              shelfUnitId: unit.id,
+              itemRef: workId,
+              unitId: review.id,
+              role: "review",
+            });
+          }
+        }
+      }
 
-      if (shelfItems.length > 0) {
-        await prisma.shelfItem.createMany({ data: shelfItems });
+      if (shelfItemRows.length > 0) {
+        await prisma.shelfItem.createMany({ data: shelfItemRows });
+        await prisma.shelfUnit.createMany({ data: shelfUnitRows });
       }
 
       return unit;

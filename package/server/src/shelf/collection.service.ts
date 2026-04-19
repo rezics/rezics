@@ -65,7 +65,7 @@ export class CollectionService {
    *
    * - If `targetId` is a REVIEW post with a `targetUnitId`, the slot is the
    *   target work (the book the review is about) and the review's own unit id
-   *   is threaded back so it can be appended to `ShelfItem.reviewIds`.
+   *   is threaded back so it can be written as a role='review' ShelfUnit row.
    * - Otherwise the target is used directly.
    */
   private async resolveTarget(
@@ -86,7 +86,6 @@ export class CollectionService {
       unit.post?.kind === PostKind.REVIEW &&
       unit.post?.targetUnitId
     ) {
-      // Slot the review against its target work; record review for reviewIds append.
       const target = await prisma.unit.findUniqueOrThrow({
         where: { id: unit.post.targetUnitId },
         select: { type: true, post: { select: { kind: true } } },
@@ -131,26 +130,7 @@ export class CollectionService {
           },
         });
 
-        if (existing) {
-          if (
-            resolved.reviewUnitId &&
-            !existing.reviewIds.includes(resolved.reviewUnitId)
-          ) {
-            await tx.shelfItem.update({
-              where: {
-                shelfUnitId_itemRef: {
-                  shelfUnitId: shelfId,
-                  itemRef: resolved.itemRef,
-                },
-              },
-              data: {
-                reviewIds: {
-                  set: [...existing.reviewIds, resolved.reviewUnitId],
-                },
-              },
-            });
-          }
-        } else {
+        if (!existing) {
           const last = await tx.shelfItem.findFirst({
             where: { shelfUnitId: shelfId },
             orderBy: { position: "desc" },
@@ -163,11 +143,37 @@ export class CollectionService {
               itemRef: resolved.itemRef,
               kind: resolved.kind,
               position,
-              reviewIds: resolved.reviewUnitId ? [resolved.reviewUnitId] : [],
-              tagIds: [],
+            },
+          });
+          await tx.shelfUnit.create({
+            data: {
+              shelfUnitId: shelfId,
+              itemRef: resolved.itemRef,
+              unitId: resolved.itemRef,
+              role: "primary",
             },
           });
           isNew = true;
+        }
+
+        if (resolved.reviewUnitId) {
+          await tx.shelfUnit.upsert({
+            where: {
+              shelfUnitId_itemRef_unitId_role: {
+                shelfUnitId: shelfId,
+                itemRef: resolved.itemRef,
+                unitId: resolved.reviewUnitId,
+                role: "review",
+              },
+            },
+            create: {
+              shelfUnitId: shelfId,
+              itemRef: resolved.itemRef,
+              unitId: resolved.reviewUnitId,
+              role: "review",
+            },
+            update: {},
+          });
         }
 
         savedTo.push(shelfId);
@@ -215,15 +221,33 @@ export class CollectionService {
     });
     const position = generateBetween(last?.position, undefined);
 
-    await prisma.shelfItem.create({
-      data: {
-        shelfUnitId: favShelfId,
-        itemRef: resolved.itemRef,
-        kind: resolved.kind,
-        position,
-        reviewIds: resolved.reviewUnitId ? [resolved.reviewUnitId] : [],
-        tagIds: [],
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.shelfItem.create({
+        data: {
+          shelfUnitId: favShelfId,
+          itemRef: resolved.itemRef,
+          kind: resolved.kind,
+          position,
+        },
+      });
+      await tx.shelfUnit.create({
+        data: {
+          shelfUnitId: favShelfId,
+          itemRef: resolved.itemRef,
+          unitId: resolved.itemRef,
+          role: "primary",
+        },
+      });
+      if (resolved.reviewUnitId) {
+        await tx.shelfUnit.create({
+          data: {
+            shelfUnitId: favShelfId,
+            itemRef: resolved.itemRef,
+            unitId: resolved.reviewUnitId,
+            role: "review",
+          },
+        });
+      }
     });
 
     return { isFavorited: true };
@@ -237,17 +261,21 @@ export class CollectionService {
     targetId: string,
   ): Promise<CollectionStatusResponse> {
     const resolved = await this.resolveTarget(targetId, false);
-    const itemRef = resolved.itemRef;
     const favShelfId = await this.getFavoritesShelfId(userId);
 
-    const shelfItems = await prisma.shelfItem.findMany({
+    // If original target is a review, status reflects whether the review
+    // specifically is attached. Otherwise, status reflects primary slot presence.
+    const lookupUnitId = resolved.reviewUnitId ?? resolved.itemRef;
+    const lookupRole = resolved.reviewUnitId ? "review" : "primary";
+
+    const rows = await prisma.shelfUnit.findMany({
       where: {
-        itemRef,
+        unitId: lookupUnitId,
+        role: lookupRole,
         shelf: { unit: { userId } },
       },
       select: {
         shelfUnitId: true,
-        reviewIds: true,
         shelf: {
           select: {
             unit: {
@@ -263,17 +291,10 @@ export class CollectionService {
       },
     });
 
-    // If original target is a review, the status should reflect whether the
-    // review specifically is attached.
-    const reviewGate = resolved.reviewUnitId;
-    const filtered = reviewGate
-      ? shelfItems.filter((si) => si.reviewIds.includes(reviewGate))
-      : shelfItems;
-
-    const isFavorited = filtered.some((si) => si.shelfUnitId === favShelfId);
-    const shelves = filtered.map((si) => ({
-      id: si.shelfUnitId,
-      title: si.shelf?.unit?.translations?.[0]?.title ?? null,
+    const isFavorited = rows.some((r) => r.shelfUnitId === favShelfId);
+    const shelves = rows.map((r) => ({
+      id: r.shelfUnitId,
+      title: r.shelf?.unit?.translations?.[0]?.title ?? null,
     }));
 
     return { isFavorited, shelves };

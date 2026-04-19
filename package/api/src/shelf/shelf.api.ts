@@ -14,7 +14,6 @@ import type {
   ShelfSummaryDTO,
   ToggleFavoriteResponse,
   UpdateShelfInput,
-  UpdateShelfItemInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
@@ -81,17 +80,6 @@ export const shelfApi = {
   ): Promise<ShelfItemDTO> => {
     return apiFetch<ShelfItemDTO>(`/shelf/${shelfUnitId}/items`, {
       method: "POST",
-      body: JSON.stringify(input),
-    });
-  },
-
-  updateItem: async (
-    shelfUnitId: string,
-    itemRef: string,
-    input: UpdateShelfItemInput,
-  ): Promise<ShelfItemDTO> => {
-    return apiFetch<ShelfItemDTO>(`/shelf/${shelfUnitId}/items/${itemRef}`, {
-      method: "PATCH",
       body: JSON.stringify(input),
     });
   },

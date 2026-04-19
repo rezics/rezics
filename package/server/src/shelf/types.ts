@@ -45,9 +45,6 @@ export type ShelfListSelected = Prisma.ShelfGetPayload<{
   select: typeof shelfListSelect;
 }>;
 
-// Shelf items are returned as thin rows — no Unit join, no junction table.
-export const shelfItemInclude = {} satisfies Prisma.ShelfItemInclude;
-
-export type ShelfItemWithRelations = Prisma.ShelfItemGetPayload<{
-  include: typeof shelfItemInclude;
-}>;
+// ShelfItem rows are returned as thin rows — no Unit join, no attachment expand.
+// Attachments (reviewIds / tagIds) are fetched separately via ShelfUnit projection.
+export type ShelfItemRow = Prisma.ShelfItemGetPayload<{}>;

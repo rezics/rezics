@@ -21,7 +21,7 @@ import { tagKeys } from "@rezics/api/tag/tag.keys";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
-import { ShelfItemCard } from "../components/ShelfItemCard";
+import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 
 interface ShelfPageProps {
   unitId: string;
@@ -189,7 +189,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 (item) => !hydration.orphanItemRefs.includes(item.itemRef),
               )
               .map((item) => (
-                <ShelfItemCard
+                <ShelfItemRenderer
                   key={item.itemRef}
                   item={item}
                   title={getHydratedTitle(item)}

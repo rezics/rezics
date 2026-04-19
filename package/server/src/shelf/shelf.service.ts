@@ -10,7 +10,6 @@ import type {
   ShelfListQuery,
   ShelfSummaryDTO,
   UpdateShelfInput,
-  UpdateShelfItemInput,
 } from "@rezics/contract";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
@@ -27,6 +26,7 @@ import {
   rebalance,
 } from "./fractional-index";
 import {
+  buildShelfItemProjection,
   mapShelfDetailToDTO,
   mapShelfItemToDTO,
   mapShelfListRowToDTO,
@@ -280,7 +280,6 @@ export class ShelfService {
   ): Promise<ShelfItemDTO> {
     const kind = req.kind ?? (await this.deriveKind(req.itemRef));
 
-    // Find the current max position in this shelf for append.
     const last = await prisma.shelfItem.findFirst({
       where: { shelfUnitId },
       orderBy: { position: "desc" },
@@ -289,59 +288,80 @@ export class ShelfService {
 
     const position = generateBetween(last?.position, undefined);
 
-    const item = await prisma.shelfItem.upsert({
-      where: {
-        shelfUnitId_itemRef: { shelfUnitId, itemRef: req.itemRef },
-      },
-      create: {
-        shelfUnitId,
-        itemRef: req.itemRef,
-        kind,
-        position,
-        reviewIds: req.reviewIds ?? [],
-        tagIds: req.tagIds ?? [],
-      },
-      update: {
-        // On re-add (already present), only extend arrays.
-        reviewIds: req.reviewIds
-          ? { set: Array.from(new Set([...(req.reviewIds ?? [])])) }
-          : undefined,
-        tagIds: req.tagIds !== undefined ? { set: req.tagIds } : undefined,
-      },
+    const item = await prisma.$transaction(async (tx) => {
+      const slot = await tx.shelfItem.upsert({
+        where: {
+          shelfUnitId_itemRef: { shelfUnitId, itemRef: req.itemRef },
+        },
+        create: { shelfUnitId, itemRef: req.itemRef, kind, position },
+        update: {},
+      });
+
+      await tx.shelfUnit.upsert({
+        where: {
+          shelfUnitId_itemRef_unitId_role: {
+            shelfUnitId,
+            itemRef: req.itemRef,
+            unitId: req.itemRef,
+            role: "primary",
+          },
+        },
+        create: {
+          shelfUnitId,
+          itemRef: req.itemRef,
+          unitId: req.itemRef,
+          role: "primary",
+        },
+        update: {},
+      });
+
+      for (const reviewId of req.reviewIds ?? []) {
+        await tx.shelfUnit.upsert({
+          where: {
+            shelfUnitId_itemRef_unitId_role: {
+              shelfUnitId,
+              itemRef: req.itemRef,
+              unitId: reviewId,
+              role: "review",
+            },
+          },
+          create: {
+            shelfUnitId,
+            itemRef: req.itemRef,
+            unitId: reviewId,
+            role: "review",
+          },
+          update: {},
+        });
+      }
+
+      for (const tagId of req.tagIds ?? []) {
+        await tx.shelfUnit.upsert({
+          where: {
+            shelfUnitId_itemRef_unitId_role: {
+              shelfUnitId,
+              itemRef: req.itemRef,
+              unitId: tagId,
+              role: "tag",
+            },
+          },
+          create: {
+            shelfUnitId,
+            itemRef: req.itemRef,
+            unitId: tagId,
+            role: "tag",
+          },
+          update: {},
+        });
+      }
+
+      return slot;
     });
 
-    return mapShelfItemToDTO(item);
-  }
-
-  async updateItem(
-    shelfUnitId: string,
-    itemRef: string,
-    req: UpdateShelfItemInput,
-  ): Promise<ShelfItemDTO> {
-    const existing = await prisma.shelfItem.findUniqueOrThrow({
-      where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-      select: { reviewIds: true },
-    });
-
-    let reviewIds: string[] | undefined;
-    if (req.addReviewIds?.length || req.removeReviewIds?.length) {
-      const remove = new Set(req.removeReviewIds ?? []);
-      const merged = new Set(
-        existing.reviewIds.filter((id) => !remove.has(id)),
-      );
-      for (const id of req.addReviewIds ?? []) merged.add(id);
-      reviewIds = Array.from(merged);
-    }
-
-    const item = await prisma.shelfItem.update({
-      where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-      data: {
-        reviewIds: reviewIds !== undefined ? { set: reviewIds } : undefined,
-        tagIds: req.tagIds !== undefined ? { set: req.tagIds } : undefined,
-      },
-    });
-
-    return mapShelfItemToDTO(item);
+    const projection = await buildShelfItemProjection(shelfUnitId, [
+      req.itemRef,
+    ]);
+    return mapShelfItemToDTO(item, projection.get(req.itemRef));
   }
 
   async removeItem(shelfUnitId: string, itemRef: string): Promise<void> {
@@ -396,7 +416,8 @@ export class ShelfService {
       data: { position: candidate },
     });
 
-    return mapShelfItemToDTO(item);
+    const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
+    return mapShelfItemToDTO(item, projection.get(itemRef));
   }
 
   private async rebalanceWindow(
@@ -405,7 +426,6 @@ export class ShelfService {
     beforeItemRef: string | undefined,
     afterItemRef: string | undefined,
   ): Promise<ShelfItemDTO> {
-    // Read the full shelf (capped by REBALANCE_WINDOW) and redistribute positions evenly.
     const rows = await prisma.shelfItem.findMany({
       where: { shelfUnitId },
       orderBy: { position: "asc" },
@@ -413,7 +433,6 @@ export class ShelfService {
       select: { itemRef: true },
     });
 
-    // Remove the moving item then insert it between before/after in the sequence.
     const refs = rows.map((r) => r.itemRef).filter((r) => r !== movedItemRef);
     let insertAt = refs.length;
     if (beforeItemRef) {
@@ -442,7 +461,10 @@ export class ShelfService {
     const moved = await prisma.shelfItem.findUniqueOrThrow({
       where: { shelfUnitId_itemRef: { shelfUnitId, itemRef: movedItemRef } },
     });
-    return mapShelfItemToDTO(moved);
+    const projection = await buildShelfItemProjection(shelfUnitId, [
+      movedItemRef,
+    ]);
+    return mapShelfItemToDTO(moved, projection.get(movedItemRef));
   }
 
   async getShelfItems(
@@ -468,10 +490,18 @@ export class ShelfService {
     const hasMore = items.length > limit;
     const page = hasMore ? items.slice(0, limit) : items;
 
-    return { items: page.map(mapShelfItemToDTO), hasMore };
+    const projection = await buildShelfItemProjection(
+      shelfUnitId,
+      page.map((p) => p.itemRef),
+    );
+
+    return {
+      items: page.map((p) => mapShelfItemToDTO(p, projection.get(p.itemRef))),
+      hasMore,
+    };
   }
 
-  // --- Review attachment (reviewIds array mutations) ---
+  // --- ShelfUnit role attachments ---
 
   async attachReview(
     shelfUnitId: string,
@@ -479,41 +509,51 @@ export class ShelfService {
     reviewUnitId: string,
     fallbackKind?: ShelfItemKind,
   ): Promise<ShelfItemDTO> {
-    const existing = await prisma.shelfItem.findUnique({
-      where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-    });
-
-    if (existing) {
-      if (existing.reviewIds.includes(reviewUnitId)) {
-        return mapShelfItemToDTO(existing);
-      }
-      const updated = await prisma.shelfItem.update({
+    const item = await prisma.$transaction(async (tx) => {
+      const existing = await tx.shelfItem.findUnique({
         where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-        data: { reviewIds: { set: [...existing.reviewIds, reviewUnitId] } },
       });
-      return mapShelfItemToDTO(updated);
-    }
 
-    // Create the slot first (kind derived, appended at end).
-    const kind = fallbackKind ?? (await this.deriveKind(itemRef));
-    const last = await prisma.shelfItem.findFirst({
-      where: { shelfUnitId },
-      orderBy: { position: "desc" },
-      select: { position: true },
-    });
-    const position = generateBetween(last?.position, undefined);
+      let slot = existing;
+      if (!existing) {
+        const kind = fallbackKind ?? (await this.deriveKind(itemRef));
+        const last = await tx.shelfItem.findFirst({
+          where: { shelfUnitId },
+          orderBy: { position: "desc" },
+          select: { position: true },
+        });
+        const position = generateBetween(last?.position, undefined);
+        slot = await tx.shelfItem.create({
+          data: { shelfUnitId, itemRef, kind, position },
+        });
+        await tx.shelfUnit.create({
+          data: { shelfUnitId, itemRef, unitId: itemRef, role: "primary" },
+        });
+      }
 
-    const created = await prisma.shelfItem.create({
-      data: {
-        shelfUnitId,
-        itemRef,
-        kind,
-        position,
-        reviewIds: [reviewUnitId],
-        tagIds: [],
-      },
+      await tx.shelfUnit.upsert({
+        where: {
+          shelfUnitId_itemRef_unitId_role: {
+            shelfUnitId,
+            itemRef,
+            unitId: reviewUnitId,
+            role: "review",
+          },
+        },
+        create: {
+          shelfUnitId,
+          itemRef,
+          unitId: reviewUnitId,
+          role: "review",
+        },
+        update: {},
+      });
+
+      return slot!;
     });
-    return mapShelfItemToDTO(created);
+
+    const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
+    return mapShelfItemToDTO(item, projection.get(itemRef));
   }
 
   async detachReview(
@@ -521,15 +561,15 @@ export class ShelfService {
     itemRef: string,
     reviewUnitId: string,
   ): Promise<ShelfItemDTO> {
-    const existing = await prisma.shelfItem.findUniqueOrThrow({
+    await prisma.shelfUnit.deleteMany({
+      where: { shelfUnitId, itemRef, unitId: reviewUnitId, role: "review" },
+    });
+
+    const item = await prisma.shelfItem.findUniqueOrThrow({
       where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
     });
-    const next = existing.reviewIds.filter((id) => id !== reviewUnitId);
-    const updated = await prisma.shelfItem.update({
-      where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-      data: { reviewIds: { set: next } },
-    });
-    return mapShelfItemToDTO(updated);
+    const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
+    return mapShelfItemToDTO(item, projection.get(itemRef));
   }
 
   async setItemTags(
@@ -537,11 +577,40 @@ export class ShelfService {
     itemRef: string,
     tagIds: string[],
   ): Promise<ShelfItemDTO> {
-    const updated = await prisma.shelfItem.update({
-      where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-      data: { tagIds: { set: tagIds } },
+    const item = await prisma.$transaction(async (tx) => {
+      const existing = await tx.shelfUnit.findMany({
+        where: { shelfUnitId, itemRef, role: "tag" },
+        select: { unitId: true },
+      });
+      const existingSet = new Set(existing.map((e) => e.unitId));
+      const nextSet = new Set(tagIds);
+
+      const toAdd = [...nextSet].filter((id) => !existingSet.has(id));
+      const toRemove = [...existingSet].filter((id) => !nextSet.has(id));
+
+      if (toRemove.length > 0) {
+        await tx.shelfUnit.deleteMany({
+          where: {
+            shelfUnitId,
+            itemRef,
+            role: "tag",
+            unitId: { in: toRemove },
+          },
+        });
+      }
+      for (const unitId of toAdd) {
+        await tx.shelfUnit.create({
+          data: { shelfUnitId, itemRef, unitId, role: "tag" },
+        });
+      }
+
+      return tx.shelfItem.findUniqueOrThrow({
+        where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
+      });
     });
-    return mapShelfItemToDTO(updated);
+
+    const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
+    return mapShelfItemToDTO(item, projection.get(itemRef));
   }
 
   async cleanupOrphans(

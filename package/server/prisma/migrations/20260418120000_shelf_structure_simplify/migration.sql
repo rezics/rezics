@@ -1,12 +1,14 @@
 -- Shelf structure simplification migration.
 --
 -- This migration:
---   1. Adds the new ShelfItem columns (itemRef, kind, position, reviewIds, tagIds)
+--   1. Adds the new ShelfItem columns (itemRef, kind, position)
 --   2. Backfills them from existing data
---   3. Drops old columns (itemUnitId, sortOrder, keywords, label, extra) and the
+--   3. Creates the new ShelfUnit junction table with role-discriminated rows
+--   4. Backfills ShelfUnit primary / review / tag rows from legacy state
+--   5. Drops old columns (itemUnitId, sortOrder, keywords, label, extra) and the
 --      ShelfItem -> Unit FK
---   4. Drops the ShelfItemReview junction table (data moves into ShelfItem.reviewIds)
---   5. Drops User.keywords
+--   6. Drops the ShelfItemReview junction table (rows moved into ShelfUnit)
+--   7. Drops User.keywords
 
 -- DropForeignKey
 ALTER TABLE "ShelfItemReview" DROP CONSTRAINT IF EXISTS "ShelfItemReview_shelfUnitId_itemUnitId_fkey";
@@ -21,9 +23,7 @@ DROP INDEX IF EXISTS "ShelfItem_shelfUnitId_sortOrder_idx";
 ALTER TABLE "ShelfItem"
   ADD COLUMN "itemRef"   UUID,
   ADD COLUMN "kind"      VARCHAR(32),
-  ADD COLUMN "position"  VARCHAR(64),
-  ADD COLUMN "reviewIds" UUID[] NOT NULL DEFAULT ARRAY[]::UUID[],
-  ADD COLUMN "tagIds"    UUID[] NOT NULL DEFAULT ARRAY[]::UUID[];
+  ADD COLUMN "position"  VARCHAR(64);
 
 -- Backfill itemRef = itemUnitId
 UPDATE "ShelfItem" SET "itemRef" = "itemUnitId";
@@ -31,8 +31,9 @@ UPDATE "ShelfItem" SET "itemRef" = "itemUnitId";
 -- Backfill kind from Unit + Post
 UPDATE "ShelfItem" si
 SET "kind" = CASE
-  WHEN u."type" = 'POST' AND p."kind" = 'REVIEW' THEN 'review'
-  WHEN u."type" = 'POST' AND p."kind" = 'QUOTE'  THEN 'quote'
+  WHEN u."type" = 'POST' AND p."kind" = 'REVIEW'  THEN 'review'
+  WHEN u."type" = 'POST' AND p."kind" = 'EXCERPT' THEN 'quote'
+  WHEN u."type" = 'POST' AND p."kind" = 'CHAPTER' THEN 'chapter'
   WHEN u."type" = 'POST'                          THEN 'post'
   WHEN u."type" = 'BOOK'                          THEN 'book'
   WHEN u."type" = 'TAG'                           THEN 'tag'
@@ -66,28 +67,6 @@ FROM ranked r
 WHERE si."shelfUnitId" = r."shelfUnitId"
   AND si."itemUnitId"  = r."itemUnitId";
 
--- Backfill reviewIds from ShelfItemReview rows
-UPDATE "ShelfItem" si
-SET "reviewIds" = COALESCE(agg.ids, ARRAY[]::UUID[])
-FROM (
-  SELECT "shelfUnitId", "itemUnitId", ARRAY_AGG("reviewUnitId") AS ids
-  FROM "ShelfItemReview"
-  GROUP BY "shelfUnitId", "itemUnitId"
-) agg
-WHERE si."shelfUnitId" = agg."shelfUnitId"
-  AND si."itemUnitId"  = agg."itemUnitId";
-
--- Backfill tagIds: resolve each legacy keywords string to a Tag unit via title match (English).
--- Unresolved entries are dropped silently.
-UPDATE "ShelfItem" si
-SET "tagIds" = COALESCE((
-  SELECT ARRAY_AGG(DISTINCT u."id")
-  FROM "Unit" u
-  JOIN "UnitTranslation" t ON t."unitId" = u."id"
-  WHERE u."type" = 'TAG'
-    AND t."title" = ANY(si."keywords")
-), ARRAY[]::UUID[]);
-
 -- NOT NULL constraints on newly-backfilled columns
 ALTER TABLE "ShelfItem"
   ALTER COLUMN "itemRef"  SET NOT NULL,
@@ -98,7 +77,68 @@ ALTER TABLE "ShelfItem"
 ALTER TABLE "ShelfItem" DROP CONSTRAINT "ShelfItem_pkey";
 ALTER TABLE "ShelfItem" ADD  CONSTRAINT "ShelfItem_pkey" PRIMARY KEY ("shelfUnitId", "itemRef");
 
--- Drop old ShelfItem columns
+-- New ShelfItem index (sole index; reverse lookups live on ShelfUnit)
+CREATE INDEX "ShelfItem_shelfUnitId_position_idx" ON "ShelfItem"("shelfUnitId", "position");
+
+-- CreateTable ShelfUnit (shelf↔unit m:m junction, role-discriminated)
+CREATE TABLE "ShelfUnit" (
+    "shelfUnitId" UUID NOT NULL,
+    "itemRef"     UUID NOT NULL,
+    "unitId"      UUID NOT NULL,
+    "role"        VARCHAR(32) NOT NULL,
+
+    CONSTRAINT "ShelfUnit_pkey" PRIMARY KEY ("shelfUnitId", "itemRef", "unitId", "role")
+);
+
+CREATE INDEX "ShelfUnit_unitId_idx"               ON "ShelfUnit"("unitId");
+CREATE INDEX "ShelfUnit_unitId_role_idx"          ON "ShelfUnit"("unitId", "role");
+CREATE INDEX "ShelfUnit_shelfUnitId_role_idx"     ON "ShelfUnit"("shelfUnitId", "role");
+
+ALTER TABLE "ShelfUnit"
+  ADD CONSTRAINT "ShelfUnit_shelfUnitId_fkey"
+  FOREIGN KEY ("shelfUnitId") REFERENCES "Shelf"("unitId")
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "ShelfUnit"
+  ADD CONSTRAINT "ShelfUnit_shelfUnitId_itemRef_fkey"
+  FOREIGN KEY ("shelfUnitId", "itemRef") REFERENCES "ShelfItem"("shelfUnitId", "itemRef")
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "ShelfUnit"
+  ADD CONSTRAINT "ShelfUnit_unitId_fkey"
+  FOREIGN KEY ("unitId") REFERENCES "Unit"("id")
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Backfill ShelfUnit primary rows: one per ShelfItem, unitId = itemRef.
+-- Skip rows whose itemRef has no Unit (orphans) to satisfy the FK.
+INSERT INTO "ShelfUnit" ("shelfUnitId", "itemRef", "unitId", "role")
+SELECT si."shelfUnitId", si."itemRef", si."itemRef", 'primary'
+FROM "ShelfItem" si
+WHERE EXISTS (SELECT 1 FROM "Unit" u WHERE u."id" = si."itemRef")
+ON CONFLICT DO NOTHING;
+
+-- Backfill ShelfUnit review rows from the legacy ShelfItemReview table.
+-- Requires the parent ShelfItem row exists; skip orphan review entries.
+INSERT INTO "ShelfUnit" ("shelfUnitId", "itemRef", "unitId", "role")
+SELECT r."shelfUnitId", r."itemUnitId", r."reviewUnitId", 'review'
+FROM "ShelfItemReview" r
+WHERE EXISTS (
+        SELECT 1 FROM "ShelfItem" si
+        WHERE si."shelfUnitId" = r."shelfUnitId" AND si."itemRef" = r."itemUnitId")
+  AND EXISTS (SELECT 1 FROM "Unit" u WHERE u."id" = r."reviewUnitId")
+ON CONFLICT DO NOTHING;
+
+-- Backfill ShelfUnit tag rows by resolving legacy keywords strings to Tag units.
+-- Unresolved keyword strings are dropped silently.
+INSERT INTO "ShelfUnit" ("shelfUnitId", "itemRef", "unitId", "role")
+SELECT DISTINCT si."shelfUnitId", si."itemRef", u."id", 'tag'
+FROM "ShelfItem" si
+JOIN "UnitTranslation" t ON t."title" = ANY(si."keywords")
+JOIN "Unit" u ON u."id" = t."unitId" AND u."type" = 'TAG'
+WHERE si."keywords" IS NOT NULL AND array_length(si."keywords", 1) > 0
+ON CONFLICT DO NOTHING;
+
+-- Drop old ShelfItem columns and legacy table
 ALTER TABLE "ShelfItem"
   DROP COLUMN "itemUnitId",
   DROP COLUMN "sortOrder",
@@ -106,14 +146,7 @@ ALTER TABLE "ShelfItem"
   DROP COLUMN "label",
   DROP COLUMN "extra";
 
--- New indexes
-CREATE INDEX "ShelfItem_itemRef_idx"           ON "ShelfItem"("itemRef");
-CREATE INDEX "ShelfItem_shelfUnitId_position_idx" ON "ShelfItem"("shelfUnitId", "position");
-CREATE INDEX "ShelfItem_reviewIds_idx"          ON "ShelfItem" USING GIN ("reviewIds");
-CREATE INDEX "ShelfItem_tagIds_idx"             ON "ShelfItem" USING GIN ("tagIds");
-
--- Drop ShelfItemReview table
 DROP TABLE "ShelfItemReview";
 
 -- Drop User.keywords
-ALTER TABLE "User" DROP COLUMN "keywords";
+ALTER TABLE "User" DROP COLUMN IF EXISTS "keywords";

@@ -10,7 +10,6 @@ import type {
   ShelfResponse,
   ToggleFavoriteResponse,
   UpdateShelfInput,
-  UpdateShelfItemInput,
 } from "@rezics/contract";
 import {
   type UseMutationOptions,
@@ -95,37 +94,6 @@ export function useAddShelfItemMutation(
   return useMutation({
     mutationFn: ({ shelfUnitId, input }) =>
       shelfApi.addItem(shelfUnitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.detail(variables.shelfUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.items(variables.shelfUnitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useUpdateShelfItemMutation(
-  options?: Omit<
-    UseMutationOptions<
-      ShelfItemDTO,
-      Error,
-      {
-        shelfUnitId: string;
-        itemRef: string;
-        input: UpdateShelfItemInput;
-      }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ shelfUnitId, itemRef, input }) =>
-      shelfApi.updateItem(shelfUnitId, itemRef, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
@@ -364,7 +332,6 @@ export const shelfMutations = {
   useUpdate: useUpdateShelfMutation,
   useDelete: useDeleteShelfMutation,
   useAddItem: useAddShelfItemMutation,
-  useUpdateItem: useUpdateShelfItemMutation,
   useReorderItem: useReorderShelfItemMutation,
   useRemoveItem: useRemoveShelfItemMutation,
   useAttachReview: useAttachReviewMutation,

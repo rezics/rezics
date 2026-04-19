@@ -19,7 +19,6 @@ import type {
   ToggleFavoriteInput,
   ToggleFavoriteResponse,
   UpdateShelfInput,
-  UpdateShelfItemInput,
 } from "@rezics/contract";
 
 export type {
@@ -43,7 +42,6 @@ export type {
   ToggleFavoriteInput,
   ToggleFavoriteResponse,
   UpdateShelfInput,
-  UpdateShelfItemInput,
 };
 
 export type ShelfFormData = CreateShelfInput;

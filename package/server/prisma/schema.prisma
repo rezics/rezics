@@ -145,6 +145,9 @@ model Unit {
   rootPosts       Post[] @relation("PostRoot")
   parentPosts     Post[] @relation("PostParent")
 
+  // Shelf↔unit junction membership (primary/review/tag)
+  shelfUnits ShelfUnit[]
+
   @@unique([translationGroupId, defaultLanguage])
   @@index([type, status, createdAt])
   @@index([workUnitId])
@@ -380,27 +383,40 @@ model Shelf {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  items ShelfItem[]
+  items      ShelfItem[]
+  shelfUnits ShelfUnit[]
 }
 
 model ShelfItem {
-  shelfUnitId String   @db.Uuid
-  itemRef     String   @db.Uuid
-  kind        String   @db.VarChar(32)
-  position    String   @db.VarChar(64) // Fractional Indexing
-  reviewIds   String[] @default([]) @db.Uuid
-  tagIds      String[] @default([]) @db.Uuid
+  shelfUnitId String @db.Uuid
+  itemRef     String @db.Uuid
+  kind        String @db.VarChar(32)
+  position    String @db.VarChar(64) // Fractional Indexing
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  shelf Shelf @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
+  shelf      Shelf       @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
+  shelfUnits ShelfUnit[]
 
   @@id([shelfUnitId, itemRef])
-  @@index([itemRef])
   @@index([shelfUnitId, position])
-  @@index([reviewIds], type: Gin)
-  @@index([tagIds], type: Gin)
+}
+
+model ShelfUnit {
+  shelfUnitId String @db.Uuid
+  itemRef     String @db.Uuid
+  unitId      String @db.Uuid
+  role        String @db.VarChar(32)
+
+  shelf Shelf     @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
+  slot  ShelfItem @relation(fields: [shelfUnitId, itemRef], references: [shelfUnitId, itemRef], onDelete: Cascade)
+  unit  Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@id([shelfUnitId, itemRef, unitId, role])
+  @@index([unitId])
+  @@index([unitId, role])
+  @@index([shelfUnitId, role])
 }
 
 // ============================================================

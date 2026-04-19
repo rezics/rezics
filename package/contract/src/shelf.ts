@@ -36,9 +36,36 @@ export const shelfItemKindSchema = t.Union([
 export type ShelfItemKind = (typeof shelfItemKindSchema)["static"];
 
 // ============================================================
+// SHELF UNIT ROLE
+// ============================================================
+
+export const shelfUnitRoleSchema = t.Union([
+  t.Literal("primary"),
+  t.Literal("review"),
+  t.Literal("tag"),
+]);
+
+export type ShelfUnitRole = (typeof shelfUnitRoleSchema)["static"];
+
+// ============================================================
+// SHELF UNIT DTO (junction row)
+// ============================================================
+
+export const shelfUnitDTOSchema = t.Object({
+  shelfUnitId: t.String(),
+  itemRef: t.String(),
+  unitId: t.String(),
+  role: shelfUnitRoleSchema,
+});
+
+export type ShelfUnitDTO = (typeof shelfUnitDTOSchema)["static"];
+
+// ============================================================
 // SHELF ITEM DTO
 // ============================================================
 
+// `reviewIds` / `tagIds` are server-projected from ShelfUnit rows for read
+// convenience; authoritative storage is the ShelfUnit junction table.
 export const shelfItemDTOSchema = t.Object({
   shelfUnitId: t.String(),
   itemRef: t.String(),
@@ -235,14 +262,6 @@ export const addShelfItemSchema = t.Object({
 
 export type AddShelfItemInput = (typeof addShelfItemSchema)["static"];
 
-export const updateShelfItemSchema = t.Object({
-  addReviewIds: t.Optional(t.Array(t.String())),
-  removeReviewIds: t.Optional(t.Array(t.String())),
-  tagIds: t.Optional(t.Array(t.String())),
-});
-
-export type UpdateShelfItemInput = (typeof updateShelfItemSchema)["static"];
-
 export const shelfItemParamsSchema = t.Object({
   shelfUnitId: t.String(),
   itemRef: t.String(),
@@ -263,6 +282,18 @@ export const reorderShelfItemSchema = t.Object({
 });
 
 export type ReorderShelfItemInput = (typeof reorderShelfItemSchema)["static"];
+
+export const attachReviewSchema = t.Object({
+  reviewUnitId: t.String(),
+});
+
+export type AttachReviewInput = (typeof attachReviewSchema)["static"];
+
+export const detachReviewSchema = t.Object({
+  reviewUnitId: t.String(),
+});
+
+export type DetachReviewInput = (typeof detachReviewSchema)["static"];
 
 export const setShelfItemTagsSchema = t.Object({
   tagIds: t.Array(t.String()),

@@ -19,7 +19,6 @@ export {
   useReorderShelfItemMutation,
   useSetShelfItemTagsMutation,
   useToggleFavoriteMutation,
-  useUpdateShelfItemMutation,
   useUpdateShelfMutation,
 } from "./shelf.mutations";
 
@@ -60,7 +59,6 @@ export type {
   ToggleFavoriteInput,
   ToggleFavoriteResponse,
   UpdateShelfInput,
-  UpdateShelfItemInput,
 } from "./shelf.types";
 export type { ShelfHydrationResult } from "./useShelfHydration";
 // Hydration hook

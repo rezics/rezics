@@ -4,10 +4,12 @@ import type {
   ShelfItemDTO,
   ShelfItemKind,
   ShelfSummaryDTO,
+  ShelfUnitRole,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
+import { prisma } from "#/prisma/client";
 import type {
-  ShelfItemWithRelations,
+  ShelfItemRow,
   ShelfListSelected,
   ShelfWithRelations,
 } from "./types";
@@ -37,14 +39,56 @@ function pickShelfCoverUrl(
   return undefined;
 }
 
-export function mapShelfItemToDTO(item: ShelfItemWithRelations): ShelfItemDTO {
+export type ShelfItemProjection = {
+  reviewIds: string[];
+  tagIds: string[];
+};
+
+/**
+ * Fetch ShelfUnit rows for a page of slots and group by (itemRef, role) into
+ * per-slot `reviewIds` / `tagIds` arrays. Returns a Map keyed by itemRef so
+ * `mapShelfItemToDTO` can attach the projection.
+ */
+export async function buildShelfItemProjection(
+  shelfUnitId: string,
+  itemRefs: string[],
+): Promise<Map<string, ShelfItemProjection>> {
+  const out = new Map<string, ShelfItemProjection>();
+  if (itemRefs.length === 0) return out;
+
+  const rows = await prisma.shelfUnit.findMany({
+    where: {
+      shelfUnitId,
+      itemRef: { in: itemRefs },
+      role: { in: ["review", "tag"] },
+    },
+    select: { itemRef: true, unitId: true, role: true },
+  });
+
+  for (const ref of itemRefs) out.set(ref, { reviewIds: [], tagIds: [] });
+
+  for (const row of rows) {
+    const bucket = out.get(row.itemRef);
+    if (!bucket) continue;
+    const role = row.role as ShelfUnitRole;
+    if (role === "review") bucket.reviewIds.push(row.unitId);
+    else if (role === "tag") bucket.tagIds.push(row.unitId);
+  }
+
+  return out;
+}
+
+export function mapShelfItemToDTO(
+  item: ShelfItemRow,
+  projection?: ShelfItemProjection,
+): ShelfItemDTO {
   return {
     shelfUnitId: item.shelfUnitId,
     itemRef: item.itemRef,
     kind: item.kind as ShelfItemKind,
     position: item.position,
-    reviewIds: item.reviewIds,
-    tagIds: item.tagIds,
+    reviewIds: projection?.reviewIds ?? [],
+    tagIds: projection?.tagIds ?? [],
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
   };
@@ -63,7 +107,7 @@ export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: (row.unit?.translations ??
       []) as unknown as ShelfDTO["translations"],
-    items: (row.items ?? []).map((i) => mapShelfItemToDTO(i as any)),
+    items: (row.items ?? []).map((i) => mapShelfItemToDTO(i as ShelfItemRow)),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

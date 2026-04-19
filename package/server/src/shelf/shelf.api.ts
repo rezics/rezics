@@ -7,6 +7,7 @@ import type {
 } from "@rezics/contract";
 import {
   addShelfItemSchema,
+  attachReviewSchema,
   cleanupShelfOrphansSchema,
   createShelfSchema,
   hasPermissionToDeleteShelf,
@@ -17,7 +18,6 @@ import {
   shelfListBodySchema,
   shelfListQuerySchema,
   shelfParamsSchema,
-  updateShelfItemSchema,
   updateShelfSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -227,35 +227,6 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     },
   )
   .patch(
-    "/:unitId/items/:itemRef",
-    async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
-      const target = await unitService.getByUnitId(params.unitId);
-      if (
-        !hasPermissionToUpdateShelf(
-          identity.permission,
-          identity.unitId,
-          target as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to modify this shelf",
-        );
-      }
-      return shelfService.updateItem(params.unitId, params.itemRef, body);
-    },
-    {
-      requireLogin: true,
-      params: itemParamsSchema,
-      body: updateShelfItemSchema,
-      detail: {
-        summary: "Update shelf item",
-        description: "Update a shelf item's review attachments and tag ids",
-        tags: ["Shelves"],
-      },
-    },
-  )
-  .patch(
     "/:unitId/items/:itemRef/position",
     async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
@@ -339,11 +310,11 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     {
       requireLogin: true,
       params: itemParamsSchema,
-      body: t.Object({ reviewUnitId: t.String() }),
+      body: attachReviewSchema,
       detail: {
         summary: "Attach review to shelf item",
         description:
-          "Append a review's unit id to a shelf item's reviewIds (creates the slot if needed)",
+          "Insert a role='review' ShelfUnit row bound to the slot (creates the slot if needed)",
         tags: ["Shelves"],
       },
     },
