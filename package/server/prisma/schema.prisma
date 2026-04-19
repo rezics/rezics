@@ -89,6 +89,7 @@ model Unit {
   publishedAt DateTime?
 
   // Self-relation: work/release
+  // Work and Release are parallel entities. Work (a) is the version selected by Rezics. UnitTranslation caches translations derived from the Release version, while the actual content still comes from the Release(chapters, etc.). A Release can also produce translated Releases. Work should still point to Work (a).
   work     Unit?  @relation("WorkRelease", fields: [workUnitId], references: [id], onDelete: SetNull)
   releases Unit[] @relation("WorkRelease")
 
