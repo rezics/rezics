@@ -1,12 +1,8 @@
 import "dotenv/config";
 import * as p from "@clack/prompts";
+import { seedInfra } from "../../package/server/prisma/seed/infra";
 import { env } from "./env";
 import { createAuthPrisma, createServerPrisma } from "./lib/create-prisma";
-import {
-  seedContentTypeTags,
-  seedDefaultRealm,
-  seedInfraEchoKV,
-} from "./lib/seed-infra";
 import { resolveRootUserId, seedAllUsers } from "./lib/seed-users";
 
 type SeedTarget = "users" | "infra";
@@ -21,7 +17,7 @@ async function main() {
     message: "What would you like to seed?",
     options: [
       { value: "users", label: "Users", hint: "root, admin, user, blocked" },
-      { value: "infra", label: "Infrastructure", hint: "tags, realm, EchoKV" },
+      { value: "infra", label: "Infrastructure", hint: "seed tags, default realm" },
     ],
   });
 
@@ -108,9 +104,7 @@ async function main() {
       const s = p.spinner();
       s.start("Seeding infrastructure...");
 
-      const tagMap = await seedContentTypeTags(serverPrisma);
-      const realmId = await seedDefaultRealm(serverPrisma, rootUserId);
-      await seedInfraEchoKV(serverPrisma, tagMap, realmId);
+      await seedInfra(serverPrisma, rootUserId);
 
       s.stop("Infrastructure seeded.");
     }

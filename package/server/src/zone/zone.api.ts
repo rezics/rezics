@@ -7,6 +7,44 @@ import { zoneService } from "./zone.service";
 export const zoneApi = new Elysia({ prefix: "/zone" })
   .use(authMacro)
 
+  // Public: Get zone by slug (typed endpoint — 404 if not a zone)
+  .get(
+    "/by-slug/:slug",
+    async ({ params, set }) => {
+      const zone = await zoneService.getBySlug(params.slug);
+      if (!zone) {
+        set.status = 404;
+        return { error: { code: "NOT_FOUND", message: "Zone not found" } };
+      }
+
+      if (zone.unit?.visibility === "PRIVATE") {
+        set.status = 404;
+        return { error: { code: "NOT_FOUND", message: "Zone not found" } };
+      }
+
+      const lifecycleStatus = zoneService.checkLifecycle(zone);
+      if (lifecycleStatus) {
+        set.status = 404;
+        return {
+          error: {
+            code: "NOT_FOUND",
+            message: `Zone ${lifecycleStatus === "not_started" ? "has not started yet" : "has ended"}`,
+          },
+        };
+      }
+
+      return mapZoneToDTO(zone);
+    },
+    {
+      params: t.Object({ slug: t.String({ minLength: 1 }) }),
+      detail: {
+        summary: "Get zone by slug (typed)",
+        description: "Look up a zone by its slug (404 if slug resolves to a non-zone unit)",
+        tags: ["Zones"],
+      },
+    },
+  )
+
   // Public: Get zone by slug
   .get(
     "/:slug",

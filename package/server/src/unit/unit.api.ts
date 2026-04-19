@@ -201,13 +201,17 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     async ({ params, body, identity, set }) => {
       const target = await unitService.getByUnitId(params.unitId);
 
-      // Type-gate: only TAG and REALM
-      if (target.type !== "TAG" && target.type !== "REALM") {
+      // Type-gate: only TAG, REALM, and ZONE
+      if (
+        target.type !== "TAG" &&
+        target.type !== "REALM" &&
+        target.type !== "ZONE"
+      ) {
         set.status = 400;
         return {
           error: {
             code: "INVALID_UNIT_TYPE",
-            message: "Slugs are only supported for TAG and REALM units",
+            message: "Slugs are only supported for TAG, REALM, and ZONE units",
           },
         };
       }
@@ -268,7 +272,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
       detail: {
         summary: "Set unit slug",
         description:
-          "Set or update the slug on a TAG or REALM unit. Write-once for non-admins.",
+          "Set or update the slug on a TAG, REALM, or ZONE unit. Write-once for non-admins.",
         tags: ["Units"],
       },
     },

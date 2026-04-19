@@ -18,8 +18,9 @@ import {
   tagParamsSchema,
   updateTagSchema,
 } from "@rezics/contract";
-import { Elysia, status } from "elysia";
+import { Elysia, status, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
+import { unitService } from "@/unit/unit.service";
 import { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
 import { tagService } from "./tag.service";
 import { getTagContext } from "./tag-context.service";
@@ -87,6 +88,28 @@ export const tagApi = new Elysia({ prefix: "/tag" })
         summary: "Batch tag translations",
         description:
           "Resolve translated name/slug/description for an array of tag unit IDs in the requested language.",
+        tags: ["Tags"],
+      },
+    },
+  )
+
+  // GET /by-slug/:slug - get tag by slug (404 if slug resolves to a non-tag)
+  .get(
+    "/by-slug/:slug",
+    async ({ params, set }) => {
+      const unit = await unitService.getBySlug(params.slug);
+      if (!unit || unit.type !== "TAG") {
+        set.status = 404;
+        return { error: { code: "NOT_FOUND", message: "Tag not found" } };
+      }
+      const tag = await tagService.getByUnitId(unit.id);
+      return mapTagUnitToDTO(tag);
+    },
+    {
+      params: t.Object({ slug: t.String({ minLength: 1 }) }),
+      detail: {
+        summary: "Get tag by slug",
+        description: "Look up a tag by its slug (404 if slug resolves to a non-tag unit)",
         tags: ["Tags"],
       },
     },

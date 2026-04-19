@@ -12,7 +12,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { echoKvGetQuery } from "@rezics/api/echokv";
+import { getSeedTagId } from "@rezics/api/infra/bootstrap";
 import type {
   CollectionStatusResponse,
   ShelfSummaryDTO,
@@ -22,7 +22,6 @@ import {
   SEED_TAG_TITLES,
   type SeedTagName,
 } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 
 interface CollectionModalProps {
@@ -52,11 +51,6 @@ export function CollectionModal({
   const [filterTag, setFilterTag] = useState<SeedTagName | null>(null);
   const [independent, setIndependent] = useState(false);
 
-  const { data: seedTagsData } = useQuery(echoKvGetQuery("infra:seed_tags"));
-  const seedTagIds = seedTagsData?.value as
-    | Record<SeedTagName, string>
-    | undefined;
-
   // Initialize selected shelves from status
   useMemo(() => {
     if (status?.shelves) {
@@ -66,10 +60,10 @@ export function CollectionModal({
 
   const filteredShelves = useMemo(() => {
     if (!filterTag) return shelves;
-    const tagId = seedTagIds?.[filterTag];
+    const tagId = getSeedTagId(filterTag);
     if (!tagId) return shelves;
     return shelves.filter((s) => s.tags?.some((t) => t.tagUnitId === tagId));
-  }, [shelves, filterTag, seedTagIds]);
+  }, [shelves, filterTag]);
 
   const toggleShelf = useCallback((shelfId: string) => {
     setSelectedShelves((prev) => {

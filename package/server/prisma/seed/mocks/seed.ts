@@ -23,6 +23,7 @@ import {
 import { DEFAULT_COUNTS, PROFILE } from "#/prisma/seed/mocks/config";
 import { seedEchoKV } from "#/prisma/seed/mocks/echokv";
 import { seedEngagement } from "#/prisma/seed/mocks/engagement";
+import { seedInfra } from "#/prisma/seed/infra";
 import { seedGames } from "#/prisma/seed/mocks/games";
 import { seedMedia } from "#/prisma/seed/mocks/media";
 import {
@@ -68,14 +69,26 @@ async function main() {
   );
   done();
 
-  // ── STEP 3: Tags ──────────────────────────────────
-  done = stepTimer("Step 3: Tags");
+  // ── STEP 3: Infra (content-type tags + default realm) ────
+  done = stepTimer("Step 3: Infra");
+  const admin = await prisma.user.findUnique({
+    where: { slug: "admin" },
+    select: { unitId: true },
+  });
+  if (!admin) {
+    throw new Error("[Seed] admin user not found — seed users first");
+  }
+  await seedInfra(prisma, admin.unitId);
+  done();
+
+  // ── STEP 4: Random tags ───────────────────────────
+  done = stepTimer("Step 4: Tags");
   const tags = await seedTags(prisma, DEFAULT_COUNTS.tags, users);
   console.log(`[Seed]   ${tags.length} random tags`);
   done();
 
-  // ── STEP 4: Works (parallel) ──────────────────────
-  done = stepTimer("Step 4: Books + Games + Media");
+  // ── STEP 5: Works (parallel) ──────────────────────
+  done = stepTimer("Step 5: Books + Games + Media");
   const [books, games, mediaItems] = await Promise.all([
     seedBooks(prisma, DEFAULT_COUNTS.books, users, people, organizations, tags),
     seedGames(prisma, DEFAULT_COUNTS.games, users, people, organizations, tags),
@@ -92,8 +105,8 @@ async function main() {
   );
   done();
 
-  // ── STEP 5: Realms (needed by scores) ─────────────
-  done = stepTimer("Step 5: Realms");
+  // ── STEP 6: Realms (needed by scores) ─────────────
+  done = stepTimer("Step 6: Realms");
   const realms = await seedRealms(
     prisma,
     DEFAULT_COUNTS.realms,
@@ -103,14 +116,14 @@ async function main() {
   console.log(`[Seed]   ${realms.length} realms`);
   done();
 
-  // ── STEP 6: Scores (needs realms + works) ─────────
-  done = stepTimer("Step 6: Scores");
+  // ── STEP 7: Scores (needs realms + works) ─────────
+  done = stepTimer("Step 7: Scores");
   const { scoreEntries } = await seedScores(prisma, allWorks, users, realms, 5);
   console.log(`[Seed]   ${scoreEntries.size} score entries`);
   done();
 
-  // ── STEP 7: Posts (power-law per work) ────────────
-  done = stepTimer("Step 7: Posts");
+  // ── STEP 8: Posts (power-law per work) ────────────
+  done = stepTimer("Step 8: Posts");
   const posts = await seedPostsForWorks(
     prisma,
     allWorks,
@@ -121,8 +134,8 @@ async function main() {
   console.log(`[Seed]   ${posts.length} posts`);
   done();
 
-  // ── STEP 7b: Wiki translation groups ──────────────
-  done = stepTimer("Step 7b: Wiki translation groups");
+  // ── STEP 8b: Wiki translation groups ──────────────
+  done = stepTimer("Step 8b: Wiki translation groups");
   const wikiGroup = await seedWikiTranslationGroups(prisma, users);
   if (wikiGroup) {
     console.log(
@@ -131,8 +144,8 @@ async function main() {
   }
   done();
 
-  // ── STEP 8: Shelves (needs review posts) ──────────
-  done = stepTimer("Step 8: Shelves");
+  // ── STEP 9: Shelves (needs review posts) ──────────
+  done = stepTimer("Step 9: Shelves");
   const reviewPosts = posts.filter((p) => p.kind === PostKind.REVIEW);
   const shelves = await seedShelves(
     prisma,
@@ -146,8 +159,8 @@ async function main() {
   );
   done();
 
-  // ── STEP 9: Chapters (power-law per book) ─────────
-  done = stepTimer("Step 9: Chapters + BookIndex");
+  // ── STEP 10: Chapters (power-law per book) ─────────
+  done = stepTimer("Step 10: Chapters + BookIndex");
   const bookUnitMap = new Map<string, string>();
   for (const book of books) {
     const unit = await prisma.unit.findUnique({
@@ -175,8 +188,8 @@ async function main() {
   });
   done();
 
-  // ── STEP 10: Engagement ────────────────────────────
-  done = stepTimer("Step 10: Engagement");
+  // ── STEP 11: Engagement ────────────────────────────
+  done = stepTimer("Step 11: Engagement");
   // Favorites shelf primarily holds works + reviewable posts; restrict to
   // kinds that the frontend actually renders in a shelf row.
   const allEngagementUnits: typeof allWorks = [
@@ -189,8 +202,8 @@ async function main() {
   });
   done();
 
-  // ── STEP 11: Zones (needs works + tags) ───────────
-  done = stepTimer("Step 11: Zones");
+  // ── STEP 12: Zones (needs works + tags) ───────────
+  done = stepTimer("Step 12: Zones");
   const zones = await seedZones(
     prisma,
     DEFAULT_COUNTS.zones,
@@ -200,8 +213,8 @@ async function main() {
   console.log(`[Seed]   ${zones.length} zones`);
   done();
 
-  // ── STEP 12: EchoKV ────────────────────────────────
-  done = stepTimer("Step 12: EchoKV");
+  // ── STEP 13: EchoKV ────────────────────────────────
+  done = stepTimer("Step 13: EchoKV");
   await seedEchoKV(prisma);
   done();
 

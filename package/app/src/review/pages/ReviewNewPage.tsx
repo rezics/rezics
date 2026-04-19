@@ -1,6 +1,6 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { TextField } from "@mui/material";
-import { getDefaultRealmId } from "@rezics/api/infra/default-realm";
+import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { PostKind } from "@rezics/contract";

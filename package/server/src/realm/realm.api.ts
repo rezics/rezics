@@ -46,6 +46,25 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     },
   )
   .get(
+    "/by-slug/:slug",
+    async ({ params, set }): Promise<RealmDTO | { error: { code: string; message: string } }> => {
+      const unit = await unitService.getBySlug(params.slug);
+      if (!unit || unit.type !== "REALM") {
+        set.status = 404;
+        return { error: { code: "NOT_FOUND", message: "Realm not found" } };
+      }
+      return realmService.getByUnitId(unit.id);
+    },
+    {
+      params: t.Object({ slug: t.String({ minLength: 1 }) }),
+      detail: {
+        summary: "Get realm by slug",
+        description: "Look up a realm by its slug (404 if slug resolves to a non-realm unit)",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .get(
     "/:unitId",
     async ({ params }): Promise<RealmDTO> => {
       return realmService.getByUnitId(params.unitId);

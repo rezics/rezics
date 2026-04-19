@@ -16,4 +16,12 @@ export const SEED_TAG_TITLES: Record<SeedTagName, string> = {
   link: "Link",
 };
 
+export const SEED_TAG_SLUGS: Record<SeedTagName, string> = {
+  book: "book",
+  game: "game",
+  media: "media",
+  post: "post",
+  link: "link",
+};
+
 export const SEED_TAG_SCORE = 1000;

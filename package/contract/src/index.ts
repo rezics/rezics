@@ -8,6 +8,7 @@ export * from "./chapter";
 export * from "./common";
 export * from "./dispatch";
 export * from "./feedback";
+export * from "./infra";
 export * from "./jwt-service";
 export * from "./language";
 export * from "./link";

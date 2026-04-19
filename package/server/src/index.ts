@@ -10,6 +10,8 @@ import { echoKvApi } from "./echokv";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
 import { initDefaultRealmCache } from "./infra/default-realm";
+import { infraApi } from "./infra/infra.api";
+import { initSeedTagsCache } from "./infra/seed-tags";
 import { internalApi } from "./internal/internal.api";
 import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
 import { linkApi } from "./link";
@@ -170,6 +172,7 @@ app
   .use(userBriefApi)
   .use(meiliApi)
   .use(unitApi)
+  .use(infraApi)
   .use(tagApi)
   .use(translationGroupApi)
   .use(scoreApi)
@@ -188,7 +191,7 @@ app
   .get("/", () => "Hello Elysia")
   .get("/health", () => ({ status: "ok" }));
 
-await initDefaultRealmCache();
+await Promise.all([initDefaultRealmCache(), initSeedTagsCache()]);
 
 app.listen(port);
 
