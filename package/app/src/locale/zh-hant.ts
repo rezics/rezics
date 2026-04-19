@@ -312,8 +312,7 @@ export default {
       verify_email_fallback: "你的電子郵件地址",
       verify_widget_loading: "正在載入驗證元件…",
       verify_turnstile_passed: "驗證通過。",
-      verify_widget_required:
-        "驗證元件完成載入前，暫時無法重新傳送驗證郵件。",
+      verify_widget_required: "驗證元件完成載入前，暫時無法重新傳送驗證郵件。",
       verify_guest_notice:
         "在完成電子郵件驗證前，你仍可瀏覽訪客可見頁面，但成員專屬功能會繼續保持鎖定。",
       verify_refresh: "重新整理狀態",
@@ -402,8 +401,7 @@ export default {
     },
     tooltips: {
       nsfw: "當書籍名稱或封面包含裸露、色情等敏感內容時，請勾選此選項",
-      licensed:
-        "當書籍已取得版權許可時，如您是版權所有者，請勾選此選項",
+      licensed: "當書籍已取得版權許可時，如您是版權所有者，請勾選此選項",
     },
     edit_sections: {
       metadata: "詮釋資料",

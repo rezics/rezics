@@ -10,7 +10,8 @@ export const realmBySlugKeys = {
 export function realmBySlugQuery(slug: string) {
   return queryOptions({
     queryKey: realmBySlugKeys.bySlug(slug),
-    queryFn: () => apiFetch<RealmDTO>(`/realm/by-slug/${encodeURIComponent(slug)}`),
+    queryFn: () =>
+      apiFetch<RealmDTO>(`/realm/by-slug/${encodeURIComponent(slug)}`),
     enabled: !!slug,
     staleTime: 1000 * 60 * 10,
   });

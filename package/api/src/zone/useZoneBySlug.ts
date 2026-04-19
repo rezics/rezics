@@ -10,7 +10,8 @@ export const zoneBySlugKeys = {
 export function zoneBySlugQuery(slug: string) {
   return queryOptions({
     queryKey: zoneBySlugKeys.bySlug(slug),
-    queryFn: () => apiFetch<ZoneDTO>(`/zone/by-slug/${encodeURIComponent(slug)}`),
+    queryFn: () =>
+      apiFetch<ZoneDTO>(`/zone/by-slug/${encodeURIComponent(slug)}`),
     enabled: !!slug,
     staleTime: 1000 * 60 * 10,
   });

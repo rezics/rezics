@@ -5,12 +5,7 @@ import type {
 } from "@rezics/contract";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import {
-  PostKind,
-  prisma,
-  UnitStatus,
-  UnitType,
-} from "#/prisma/client";
+import { PostKind, prisma, UnitStatus, UnitType } from "#/prisma/client";
 import type { ChapterPostWithRelations } from "./types";
 import { chapterPostInclude } from "./types";
 
@@ -225,15 +220,20 @@ export class ChapterService {
         });
         const language =
           existing?.language ??
-          (await tx.unit.findUniqueOrThrow({
-            where: { id: unitId },
-            select: { defaultLanguage: true },
-          })).defaultLanguage ??
+          (
+            await tx.unit.findUniqueOrThrow({
+              where: { id: unitId },
+              select: { defaultLanguage: true },
+            })
+          ).defaultLanguage ??
           "en";
 
         const nextExtra =
           coverUrl !== undefined
-            ? (withCoverUrl(existing?.extra, coverUrl ?? undefined) as Prisma.InputJsonValue)
+            ? (withCoverUrl(
+                existing?.extra,
+                coverUrl ?? undefined,
+              ) as Prisma.InputJsonValue)
             : undefined;
 
         if (existing) {

@@ -47,7 +47,10 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .get(
     "/by-slug/:slug",
-    async ({ params, set }): Promise<RealmDTO | { error: { code: string; message: string } }> => {
+    async ({
+      params,
+      set,
+    }): Promise<RealmDTO | { error: { code: string; message: string } }> => {
       const unit = await unitService.getBySlug(params.slug);
       if (!unit || unit.type !== "REALM") {
         set.status = 404;
@@ -59,7 +62,8 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       params: t.Object({ slug: t.String({ minLength: 1 }) }),
       detail: {
         summary: "Get realm by slug",
-        description: "Look up a realm by its slug (404 if slug resolves to a non-realm unit)",
+        description:
+          "Look up a realm by its slug (404 if slug resolves to a non-realm unit)",
         tags: ["Realms"],
       },
     },

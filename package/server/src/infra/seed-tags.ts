@@ -36,7 +36,9 @@ export async function initSeedTagsCache(): Promise<void> {
     }
   }
 
-  console.log(`[infra] seed tag IDs cached: ${cache.size}/${SEED_TAG_NAMES.length}`);
+  console.log(
+    `[infra] seed tag IDs cached: ${cache.size}/${SEED_TAG_NAMES.length}`,
+  );
 }
 
 /** Return the cached unitId for the given seed tag name, or `null` if unavailable. */

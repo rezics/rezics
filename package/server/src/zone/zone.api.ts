@@ -39,7 +39,8 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
       params: t.Object({ slug: t.String({ minLength: 1 }) }),
       detail: {
         summary: "Get zone by slug (typed)",
-        description: "Look up a zone by its slug (404 if slug resolves to a non-zone unit)",
+        description:
+          "Look up a zone by its slug (404 if slug resolves to a non-zone unit)",
         tags: ["Zones"],
       },
     },

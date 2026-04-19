@@ -71,10 +71,7 @@ export const DEFAULT_COUNTS: SeedCounts = {
     ),
   },
   chapter: {
-    min: envInt(
-      "SEED_CHAPTERS_PER_BOOK_MIN",
-      profileDefault("chapterMin", 5),
-    ),
+    min: envInt("SEED_CHAPTERS_PER_BOOK_MIN", profileDefault("chapterMin", 5)),
     max: envInt(
       "SEED_CHAPTERS_PER_BOOK_MAX",
       profileDefault("chapterMax", 1200),

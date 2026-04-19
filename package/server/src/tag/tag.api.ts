@@ -109,7 +109,8 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       params: t.Object({ slug: t.String({ minLength: 1 }) }),
       detail: {
         summary: "Get tag by slug",
-        description: "Look up a tag by its slug (404 if slug resolves to a non-tag unit)",
+        description:
+          "Look up a tag by its slug (404 if slug resolves to a non-tag unit)",
         tags: ["Tags"],
       },
     },

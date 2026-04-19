@@ -5,9 +5,11 @@ import { Box, Tooltip, Typography } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
-import { CollapsibleByLineTextContainer } from "@rezics/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx";
+import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
+import { Collapsible } from "@rezics/ui/primitive/typography/collapsible/Collapsible.tsx";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   parseReactionSummaries,
   type ReactionSummaryDTO,
@@ -72,6 +74,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
   onLike,
   onDislike,
 }) => {
+  const { t } = useTranslation();
   const _handleLike = () => {
     onLike?.(review.unitId);
   };
@@ -112,10 +115,13 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
 
           {/* Row 2: Review Content (body replaces content) */}
           <div>
-            <CollapsibleByLineTextContainer
-              content={review.body ?? ""}
+            <Collapsible
               maxLines={4}
-            />
+              showMoreLabel={t("common.expand")}
+              showLessLabel={t("common.collapse")}
+            >
+              <MarkdownContent content={review.body ?? ""} />
+            </Collapsible>
           </div>
 
           {/* Row 3: Reactions */}

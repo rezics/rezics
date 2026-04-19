@@ -6,7 +6,8 @@ import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 
-import { CollapsibleByLineTextContainer } from "@rezics/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx";
+import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
+import { Collapsible } from "@rezics/ui/primitive/typography/collapsible/Collapsible.tsx";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -92,7 +93,13 @@ export const SingleExcerptShow: React.FC<SingleExcerptShowProps> = ({
             color="text.primary"
             sx={{ lineHeight: 1.6 }}
           >
-            <CollapsibleByLineTextContainer content={content} />
+            <Collapsible
+              maxLines={4}
+              showMoreLabel={t("common.expand")}
+              showLessLabel={t("common.collapse")}
+            >
+              <MarkdownContent content={content} />
+            </Collapsible>
           </Typography>
 
           <div className="flex items-center justify-between mt-3">

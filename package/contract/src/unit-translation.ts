@@ -22,9 +22,7 @@ export type UnitTranslationExtra =
  * Read a typed `coverUrl` from a possibly-untyped `extra` JSON value.
  * Returns `undefined` when the value is missing or the wrong shape.
  */
-export function readCoverUrlFromExtra(
-  extra: unknown,
-): string | undefined {
+export function readCoverUrlFromExtra(extra: unknown): string | undefined {
   if (!extra || typeof extra !== "object") return undefined;
   const value = (extra as Record<string, unknown>).coverUrl;
   return typeof value === "string" ? value : undefined;

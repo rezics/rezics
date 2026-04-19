@@ -10,7 +10,8 @@ export const tagBySlugKeys = {
 export function tagBySlugQuery(slug: string) {
   return queryOptions({
     queryKey: tagBySlugKeys.bySlug(slug),
-    queryFn: () => apiFetch<UnitTagDTO>(`/tag/by-slug/${encodeURIComponent(slug)}`),
+    queryFn: () =>
+      apiFetch<UnitTagDTO>(`/tag/by-slug/${encodeURIComponent(slug)}`),
     enabled: !!slug,
     staleTime: 1000 * 60 * 10,
   });
