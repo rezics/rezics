@@ -72,9 +72,9 @@ The `package/server/src/chapter/` domain SHALL remain as an API surface for chap
 
 ### Requirement: kindKey classifies post purpose
 
-Every Post SHALL have a `kindKey` field that classifies its purpose. Valid values are `discussion`, `review`, `remark`, `quote`, and `post`. The `kindKey` determines the content form of the post. A Post with `kindKey = "review"` is a Review. A Post with `kindKey = "remark"` is a short-form Remark. Structural role (top-level vs reply) is determined by threading fields (`parentPostUnitId`, `rootPostUnitId`, `depth`, `sortPath`), not by `kindKey`. A reply is any Post with `parentPostUnitId` set, regardless of its `kindKey` value.
+Every Post SHALL have a `kindKey` field that classifies its purpose. Valid values are `discussion`, `review`, `remark`, `excerpt`, and `post`. The `kindKey` determines the content form of the post. A Post with `kindKey = "review"` is a Review. A Post with `kindKey = "remark"` is a short-form Remark. A Post with `kindKey = "excerpt"` is an Excerpt — a user-highlighted passage from the work named by `targetUnitId`. Structural role (top-level vs reply) is determined by threading fields (`parentPostUnitId`, `rootPostUnitId`, `depth`, `sortPath`), not by `kindKey`. A reply is any Post with `parentPostUnitId` set, regardless of its `kindKey` value.
 
-The value `comment` SHALL NOT be used for new posts. The `comment` kind is removed from the PostKind enum. Existing database rows with `kind = 'COMMENT'` remain as historical data but the application SHALL NOT create new posts with this value.
+The value `comment` SHALL NOT be used for new posts. The value `quote` SHALL NOT be used for new posts — it is renamed to `excerpt`. The `comment` and `quote` kinds are removed from the PostKind enum.
 
 #### Scenario: Create a review post
 
@@ -86,6 +86,11 @@ The value `comment` SHALL NOT be used for new posts. The `comment` kind is remov
 
 - WHEN a user creates a Post with `kindKey = "discussion"` and `targetUnitId = "book-1"`
 - THEN the Post SHALL be classified as a discussion about "book-1"
+
+#### Scenario: Create an excerpt post
+
+- WHEN a user creates a Post with `kindKey = "excerpt"` and `targetUnitId = "book-1"`
+- THEN the Post SHALL be classified as an Excerpt of "book-1"
 
 #### Scenario: Create a reply to an existing post
 
@@ -100,11 +105,94 @@ The value `comment` SHALL NOT be used for new posts. The `comment` kind is remov
 - THEN the system SHALL reject the request with a validation error
 - AND no Post record SHALL be created
 
+#### Scenario: Reject post creation with kindKey "quote"
+
+- WHEN a client attempts to create a Post with `kindKey = "quote"`
+- THEN the system SHALL reject the request with a validation error
+- AND no Post record SHALL be created
+
 #### Scenario: Valid kindKey values
 
 - WHEN the system validates a Post's `kindKey` field
-- THEN the only accepted values SHALL be `discussion`, `review`, `remark`, `quote`, and `post`
-- AND the value `comment` SHALL NOT be accepted
+- THEN the only accepted values SHALL be `discussion`, `review`, `remark`, `excerpt`, and `post`
+- AND the values `comment` and `quote` SHALL NOT be accepted
+
+### Requirement: Excerpt source on `extra.source`
+
+The shared `postExtraSchema` SHALL grow an optional `source` field whose value is a discriminated union over a `mode` field with two cases:
+
+```ts
+{ mode: 'unit'; unitId: string; title: string }   // 1 ≤ title.length ≤ 200
+{ mode: 'url';  url:    string; title: string }   // url.length ≤ 2048
+```
+
+The field SHALL be optional on every PostKind. By convention only Excerpt posts use it; other kinds SHALL ignore it on render. The contract SHALL NOT enforce a domain restriction on `url` — any well-formed URL string SHALL pass validation. Render-time classification (rezics vs external) is a frontend concern handled by the `<Link>` primitive (see `outbound-link-protection`).
+
+`source.unitId` (when used) MAY point at any unit. The backend SHALL NOT enforce that it descends from the post's `targetUnitId`.
+
+`source.title` is a snapshot — what the author wrote at post time. The contract SHALL NOT auto-update or validate the title against the linked unit's display name.
+
+#### Scenario: Excerpt with unit-mode source
+
+- WHEN a user creates an Excerpt with `extra.source = { mode: 'unit', unitId: 'chapter-1', title: '《指環王》第三章，第一節' }`
+- THEN the source SHALL pass validation and persist as-is
+
+#### Scenario: Excerpt with url-mode rezics source
+
+- WHEN a user creates an Excerpt with `extra.source = { mode: 'url', url: 'https://book.rezics.com/shelf/abc', title: 'My Reading List' }`
+- THEN the source SHALL pass validation
+
+#### Scenario: Excerpt with url-mode external source
+
+- WHEN a user creates an Excerpt with `extra.source = { mode: 'url', url: 'https://example.com/article', title: 'External essay' }`
+- THEN the source SHALL pass validation (no rezics-domain restriction)
+
+#### Scenario: Excerpt without source
+
+- WHEN a user creates an Excerpt without an `extra.source` field
+- THEN the Post SHALL persist normally and SHALL render without a source link
+
+#### Scenario: Source title length validation
+
+- WHEN a client submits a source with `title` longer than 200 characters
+- THEN the request SHALL fail schema validation
+
+#### Scenario: Source url length validation
+
+- WHEN a client submits a source with `url` longer than 2048 characters
+- THEN the request SHALL fail schema validation
+
+#### Scenario: Cross-work citation accepted
+
+- GIVEN an Excerpt with `targetUnitId = 'book-A'`
+- WHEN the source is `{ mode: 'unit', unitId: 'chapter-of-book-B', title: '...' }`
+- THEN the source SHALL pass validation (no ancestry check)
+
+#### Scenario: Source title is a snapshot
+
+- GIVEN an Excerpt with `extra.source = { mode: 'unit', unitId: 'chapter-1', title: 'Original Title' }`
+- WHEN the linked unit's display name is later changed
+- THEN the Post's `extra.source.title` SHALL remain `'Original Title'` — the contract SHALL NOT update it
+
+### Requirement: Source rendering routes through the Link primitive
+
+Frontend renderers that display `extra.source` SHALL emit `<Link>` (from `@rezics/ui`, defined by the `outbound-link-protection` capability) for both modes:
+- `mode: 'unit'` → `<Link href={'/unit/' + source.unitId}>{source.title}</Link>` (the unit resolver picks the typed destination at click time).
+- `mode: 'url'` → `<Link href={source.url}>{source.title}</Link>` (classification + external-link modal handled by the primitive).
+
+Renderers SHALL NOT emit raw `<a>` tags for source rendering. The R5 convention rule enforces this at the repo level.
+
+#### Scenario: Unit-mode source renders via resolver
+
+- GIVEN an Excerpt with `extra.source = { mode: 'unit', unitId: 'u-1', title: 'Chapter 3' }`
+- WHEN the post body is rendered
+- THEN the source link is `<Link href="/unit/u-1">Chapter 3</Link>` and clicking it goes through the unit resolver
+
+#### Scenario: External url-mode source triggers modal
+
+- GIVEN an Excerpt with `extra.source = { mode: 'url', url: 'https://example.com/article', title: 'External essay' }`
+- WHEN the rendered source link is left-clicked
+- THEN the global external-link modal opens (per the `outbound-link-protection` spec)
 
 ## REMOVED Requirements
 
@@ -130,4 +218,33 @@ The value `comment` SHALL NOT be used for new posts. The `comment` kind is remov
 
 - WHEN inspecting the PostKind enum definition in Prisma schema and contract types
 - THEN the value `COMMENT` SHALL NOT be present
-- AND the valid enum values SHALL be `REVIEW`, `REMARK`, `QUOTE`, `POST`
+- AND the valid enum values SHALL be `REVIEW`, `REMARK`, `EXCERPT`, `POST`
+
+### Requirement: PostKind.QUOTE enum value
+
+**Reason**: The `QUOTE` value foregrounds attribution to a speaker, but the library uses this kind for users highlighting memorable passages from books and game dialogue. The work and its author are already linked via `targetUnitId`; the post is about the fragment itself. "Excerpt" is the intent-correct name.
+
+**Migration**: The Prisma `PostKind` enum value `QUOTE` is renamed to `EXCERPT`. A one-shot data migration `UPDATE Post SET kind = 'EXCERPT' WHERE kind = 'QUOTE'` updates existing rows. The contract type union, `buildUrl` cases, route tree (`/quote/...` → `/excerpt/...`), app directory (`package/app/src/quote/` → `package/app/src/excerpt/`), components (`QuoteCard` → `ExcerptCard`, etc.), hybrid `QuoteExcerpt*` names (collapse to `Excerpt*`), i18n keys (`quote.*` → `excerpt.*`), Meili index filter literals, and seed/mock data all migrate in the same change. There is no `/quote/...` → `/excerpt/...` redirect alias — the rename is a clean break.
+
+#### Scenario: QUOTE removed from PostKind enum
+
+- WHEN inspecting the PostKind enum definition in Prisma schema and contract types
+- THEN the value `QUOTE` SHALL NOT be present
+- AND the valid enum values SHALL be `REVIEW`, `REMARK`, `EXCERPT`, `POST`
+
+#### Scenario: No QUOTE rows after migration
+
+- WHEN querying the Post table after the migration runs
+- THEN no row SHALL have `kind = 'QUOTE'`
+- AND every row that previously had `kind = 'QUOTE'` SHALL now have `kind = 'EXCERPT'`
+
+#### Scenario: No `/quote/...` routes after rename
+
+- WHEN inspecting the router source
+- THEN no route paths SHALL begin with `/quote/`
+- AND any prior `/quote/$unitId` route SHALL exist at `/excerpt/$unitId`
+
+#### Scenario: No hybrid Quote* names remain
+
+- WHEN scanning the frontend source
+- THEN no exported component, hook, or directory name SHALL contain `Quote` (the prior `QuoteExcerpt*` and `Quote*` names are renamed to `Excerpt*`)
