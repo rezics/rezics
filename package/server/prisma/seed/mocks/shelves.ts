@@ -6,7 +6,14 @@ import { generateBetween } from "@/shelf/fractional-index";
 import { getRandomShelfCover, SHELF_KIND_KEYS } from "./data.js";
 import { generateTranslations } from "./generators.js";
 import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
-import { chunkedParallel, pickN, powerLaw, randomBoolean } from "./utils.js";
+import {
+  chunkedParallel,
+  pickN,
+  powerLaw,
+  randomBoolean,
+  randomInt,
+  unitTypeToShelfKind,
+} from "./utils.js";
 
 const CHUNK_SIZE = 10;
 
@@ -18,10 +25,10 @@ export async function seedShelves(
   prisma: PrismaClient,
   total: number,
   users: CreatedUser[],
-  workIds: string[],
+  works: CreatedUnit[],
   reviewPosts: CreatedPost[],
 ): Promise<CreatedUnit[]> {
-  if (workIds.length < 3) {
+  if (works.length < 3) {
     console.warn(
       "[Seed] Not enough works to seed shelves (need >= 3). Skipping.",
     );
@@ -29,6 +36,15 @@ export async function seedShelves(
   }
 
   console.log(`[Seed] Seeding ${total} shelves...`);
+
+  // Index reviews by targetUnitId so we can attach multiple reviews per slot.
+  const reviewsByTarget = new Map<string, CreatedPost[]>();
+  for (const r of reviewPosts) {
+    if (!r.targetUnitId) continue;
+    const bucket = reviewsByTarget.get(r.targetUnitId);
+    if (bucket) bucket.push(r);
+    else reviewsByTarget.set(r.targetUnitId, [r]);
+  }
 
   return chunkedParallel(
     Array.from({ length: total }),
@@ -84,8 +100,8 @@ export async function seedShelves(
         select: { id: true, type: true },
       });
 
-      const itemCount = Math.min(powerLaw(3, 150, 1.5), workIds.length);
-      const selectedWorks = pickN(workIds, itemCount);
+      const itemCount = Math.min(powerLaw(3, 150, 1.5), works.length);
+      const selectedWorks = pickN(works, itemCount);
 
       let prevPos: string | undefined;
       const shelfItemRows: Array<{
@@ -101,37 +117,48 @@ export async function seedShelves(
         role: string;
       }> = [];
 
-      for (const workId of selectedWorks) {
+      for (const work of selectedWorks) {
         const position = generateBetween(prevPos, undefined);
         prevPos = position;
         shelfItemRows.push({
           shelfUnitId: unit.id,
-          itemRef: workId,
-          kind: "book",
+          itemRef: work.id,
+          kind: unitTypeToShelfKind(work.type),
           position,
         });
         shelfUnitRows.push({
           shelfUnitId: unit.id,
-          itemRef: workId,
-          unitId: workId,
+          itemRef: work.id,
+          unitId: work.id,
           role: "primary",
         });
-        if (reviewPosts.length > 0 && randomBoolean(0.3)) {
-          const review = reviewPosts.find((p) => p.targetUnitId === workId);
-          if (review) {
-            shelfUnitRows.push({
-              shelfUnitId: unit.id,
-              itemRef: workId,
-              unitId: review.id,
-              role: "review",
-            });
+
+        // Attach multiple reviews per slot when available (showcase book→many-review).
+        const candidateReviews = reviewsByTarget.get(work.id);
+        if (candidateReviews && candidateReviews.length > 0) {
+          const attachCount = Math.min(
+            randomInt(1, 3),
+            candidateReviews.length,
+          );
+          if (randomBoolean(0.6)) {
+            for (const review of pickN(candidateReviews, attachCount)) {
+              shelfUnitRows.push({
+                shelfUnitId: unit.id,
+                itemRef: work.id,
+                unitId: review.id,
+                role: "review",
+              });
+            }
           }
         }
       }
 
       if (shelfItemRows.length > 0) {
         await prisma.shelfItem.createMany({ data: shelfItemRows });
-        await prisma.shelfUnit.createMany({ data: shelfUnitRows });
+        await prisma.shelfUnit.createMany({
+          data: shelfUnitRows,
+          skipDuplicates: true,
+        });
       }
 
       return unit;

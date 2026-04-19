@@ -1,6 +1,17 @@
 import "dotenv/config";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
+
+process.on("unhandledRejection", (reason) => {
+  console.error("[Error] Unhandled rejection:", reason);
+  if (reason instanceof Error && reason.stack) console.error(reason.stack);
+  process.exit(1);
+});
+process.on("uncaughtException", (err) => {
+  console.error("[Error] Uncaught exception:", err);
+  if (err instanceof Error && err.stack) console.error(err.stack);
+  process.exit(1);
+});
 import { PostKind } from "#/prisma/generated/client.js";
 import { resetDatabase } from "#/prisma/seed/database";
 import { seedOrganizations, seedPeople } from "#/prisma/seed/mocks/attribution";
@@ -127,7 +138,7 @@ async function main() {
     prisma,
     DEFAULT_COUNTS.shelves,
     users,
-    allWorkIds,
+    allWorks,
     reviewPosts,
   );
   console.log(
@@ -166,14 +177,13 @@ async function main() {
 
   // ── STEP 10: Engagement ────────────────────────────
   done = stepTimer("Step 10: Engagement");
-  const allUnitIds = [
-    ...allWorkIds,
-    ...posts.map((p) => p.id),
-    ...shelves.map((s) => s.id),
-    ...realms.map((r) => r.id),
-    ...tags.map((t) => t.id),
+  // Favorites shelf primarily holds works + reviewable posts; restrict to
+  // kinds that the frontend actually renders in a shelf row.
+  const allEngagementUnits: typeof allWorks = [
+    ...allWorks,
+    ...posts.map((p) => ({ id: p.id, type: p.type })),
   ];
-  await seedEngagement(prisma, users, allUnitIds, {
+  await seedEngagement(prisma, users, allEngagementUnits, {
     followsPerUser: DEFAULT_COUNTS.followsPerUser,
     favoriteItemsPerUser: DEFAULT_COUNTS.favoriteItemsPerUser,
   });
@@ -209,7 +219,13 @@ async function main() {
     shelves: shelves.length,
     realms: realms.length,
     zones: zones.length,
-    totalUnits: allUnitIds.length + zones.length,
+    totalUnits:
+      allWorks.length +
+      posts.length +
+      shelves.length +
+      realms.length +
+      tags.length +
+      zones.length,
   });
   console.timeEnd("seed:total");
 }

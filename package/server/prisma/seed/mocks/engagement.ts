@@ -7,8 +7,8 @@ import {
   UnitVisibility,
 } from "#/prisma/generated/client.js";
 import { generateBetween } from "@/shelf/fractional-index";
-import type { CreatedUser } from "./types.js";
-import { pickN, randomInt } from "./utils.js";
+import type { CreatedUnit, CreatedUser } from "./types.js";
+import { pickN, randomInt, unitTypeToShelfKind } from "./utils.js";
 
 /**
  * Seed all engagement data: reaction summaries, favorites, follows.
@@ -17,26 +17,35 @@ import { pickN, randomInt } from "./utils.js";
 export async function seedEngagement(
   prisma: PrismaClient,
   users: CreatedUser[],
-  allUnitIds: string[],
+  allUnits: CreatedUnit[],
   counts: { followsPerUser: number; favoriteItemsPerUser: number },
 ): Promise<void> {
   console.log(
-    `[Seed] Seeding engagement for ${allUnitIds.length} units, ${users.length} users...`,
+    `[Seed] Seeding engagement for ${allUnits.length} units, ${users.length} users...`,
   );
 
-  await Promise.all([
-    seedFavorites(prisma, users, allUnitIds, counts.favoriteItemsPerUser),
-    seedFollows(prisma, users, counts.followsPerUser),
-  ]);
+  try {
+    await seedFavorites(prisma, users, allUnits, counts.favoriteItemsPerUser);
+  } catch (err) {
+    console.error("[Error] seedFavorites failed:", err);
+    throw err;
+  }
+  try {
+    await seedFollows(prisma, users, counts.followsPerUser);
+  } catch (err) {
+    console.error("[Error] seedFollows failed:", err);
+    throw err;
+  }
 }
 
 /**
  * Create a Favorites shelf for each user and add random items.
+ * Dual-writes ShelfItem + ShelfUnit(role='primary') per slot.
  */
 async function seedFavorites(
   prisma: PrismaClient,
   users: CreatedUser[],
-  unitIds: string[],
+  units: CreatedUnit[],
   perUser: number,
 ): Promise<void> {
   console.log(`[Seed]   Seeding favorites shelves...`);
@@ -45,7 +54,7 @@ async function seedFavorites(
     const favCount = randomInt(0, perUser);
     if (favCount === 0) continue;
 
-    const targets = pickN(unitIds, Math.min(favCount, unitIds.length));
+    const targets = pickN(units, Math.min(favCount, units.length));
     const shelfId = randomUUID();
 
     await prisma.unit.create({
@@ -64,27 +73,39 @@ async function seedFavorites(
     });
 
     const seen = new Set<string>();
-    const unique = targets.filter((targetId) => {
-      if (seen.has(targetId)) return false;
-      seen.add(targetId);
+    const unique = targets.filter((t) => {
+      if (seen.has(t.id)) return false;
+      seen.add(t.id);
       return true;
     });
+
     let prevPos: string | undefined;
-    const items = unique.map((targetId) => {
+    const shelfItemRows = unique.map((target) => {
       const position = generateBetween(prevPos, undefined);
       prevPos = position;
       return {
         shelfUnitId: shelfId,
-        itemRef: targetId,
-        kind: "book",
+        itemRef: target.id,
+        kind: unitTypeToShelfKind(target.type),
         position,
-        reviewIds: [] as string[],
-        tagIds: [] as string[],
       };
     });
+    const shelfUnitRows = unique.map((target) => ({
+      shelfUnitId: shelfId,
+      itemRef: target.id,
+      unitId: target.id,
+      role: "primary",
+    }));
 
-    if (items.length > 0) {
-      await prisma.shelfItem.createMany({ data: items, skipDuplicates: true });
+    if (shelfItemRows.length > 0) {
+      await prisma.shelfItem.createMany({
+        data: shelfItemRows,
+        skipDuplicates: true,
+      });
+      await prisma.shelfUnit.createMany({
+        data: shelfUnitRows,
+        skipDuplicates: true,
+      });
     }
   }
 }
@@ -142,26 +163,25 @@ async function seedFollows(
     );
   }
 
-  const userUpdates: Promise<unknown>[] = [];
-  for (const user of users) {
+  const usersToUpdate = users.filter((user) => {
     const fc = followerCounts.get(user.unitId);
     const gc = followingCounts.get(user.unitId);
-    if (fc || gc) {
-      userUpdates.push(
+    return Boolean(fc || gc);
+  });
+
+  const UPDATE_BATCH = 50;
+  for (let i = 0; i < usersToUpdate.length; i += UPDATE_BATCH) {
+    const slice = usersToUpdate.slice(i, i + UPDATE_BATCH);
+    await Promise.all(
+      slice.map((user) =>
         prisma.user.update({
           where: { unitId: user.unitId },
           data: {
-            followersCount: fc ?? 0,
-            followingsCount: gc ?? 0,
+            followersCount: followerCounts.get(user.unitId) ?? 0,
+            followingsCount: followingCounts.get(user.unitId) ?? 0,
           },
         }),
-      );
-    }
-  }
-
-  // Batch the updates
-  const UPDATE_BATCH = 50;
-  for (let i = 0; i < userUpdates.length; i += UPDATE_BATCH) {
-    await Promise.all(userUpdates.slice(i, i + UPDATE_BATCH));
+      ),
+    );
   }
 }
