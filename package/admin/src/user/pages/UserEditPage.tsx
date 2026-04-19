@@ -74,7 +74,7 @@ export default function UserEditPage() {
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
             <Button
               component={Link}
-              to="/users"
+              to="/user"
               startIcon={<ArrowBackIcon />}
               variant="text"
             >

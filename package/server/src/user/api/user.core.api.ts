@@ -78,6 +78,7 @@ export const coreRoute = new Elysia()
         name: body.name,
         avatar: body.avatar,
         bio: body.bio,
+        description: body.description,
       };
 
       const user = await userService.update(identity.unitId, userReq);

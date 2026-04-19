@@ -39,7 +39,7 @@ function extractUnitTitle(unit: UnitDTO): string {
 
 export default function UnitsPage() {
   const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({ to: "/units/meili" }));
+  const isMeiliMode = Boolean(matchRoute({ to: "/unit/meili" }));
 
   const [q, setQ] = React.useState("");
   const [query, setQuery] = React.useState("");
@@ -153,7 +153,7 @@ export default function UnitsPage() {
           <Button
             size="small"
             component={Link}
-            to={`/units/${u.id}`}
+            to={`/unit/${u.id}`}
             variant="outlined"
           >
             Edit
@@ -185,7 +185,7 @@ export default function UnitsPage() {
               variant="contained"
               startIcon={<AddIcon />}
               component={Link}
-              to="/units/create"
+              to="/unit/create"
               sx={{ whiteSpace: "nowrap" }}
             >
               Create
@@ -242,7 +242,7 @@ export default function UnitsPage() {
                 variant="contained"
                 startIcon={<AddIcon />}
                 component={Link}
-                to="/units/create"
+                to="/unit/create"
                 sx={{ whiteSpace: "nowrap" }}
               >
                 Create

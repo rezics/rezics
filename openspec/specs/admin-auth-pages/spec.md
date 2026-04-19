@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Admin login page uses auth server
-The login page at `/login` (`package/admin/src/user/page/LoginPage.tsx`) SHALL use `useSignInMutation()` from `@rezics/api/auth/auth.mutations`. On successful sign-in, it SHALL read the freshly persisted JWT via `getToken()`/`parseJwt()`, verify the payload role is `admin` or `owner`, hydrate `useAuthStore`, then navigate to the redirect target.
+The login page at `/login` (`package/admin/src/user/pages/LoginPage.tsx`) SHALL use `useSignInMutation()` from `@rezics/api/auth/auth.mutations`. On successful sign-in, it SHALL read the freshly persisted JWT via `getToken()`/`parseJwt()`, verify the payload role is `admin` or `owner`, hydrate `useAuthStore`, then navigate to the redirect target.
 
 #### Scenario: Admin signs in successfully
 - **WHEN** an admin user enters valid email and password and submits the login form
@@ -29,7 +29,7 @@ The admin route guard in `package/admin/src/routes/_admin.tsx` SHALL authorize a
 - **THEN** the guard SHALL allow access and render the admin layout
 
 ### Requirement: Auth users management page
-The admin dashboard SHALL include a page at `/_admin/auth/users` that displays a paginated table of all auth server users. The page component SHALL be at `package/admin/src/auth/page/AuthUsersPage.tsx`.
+The admin dashboard SHALL include a page at `/_admin/auth/users` that displays a paginated table of all auth server users. The page component SHALL be at `package/admin/src/auth/pages/AuthUsersPage.tsx`.
 
 #### Scenario: Page displays user list
 - **WHEN** an admin navigates to `/auth/users`
@@ -52,7 +52,7 @@ The admin dashboard SHALL include a page at `/_admin/auth/users` that displays a
 - **THEN** `authApi.adminRemoveUser({ userId })` SHALL be called and the user list SHALL refresh
 
 ### Requirement: Auth sessions management page
-The admin dashboard SHALL include a page at `/_admin/auth/sessions` that displays session data. The page component SHALL be at `package/admin/src/auth/page/AuthSessionsPage.tsx`.
+The admin dashboard SHALL include a page at `/_admin/auth/sessions` that displays session data. The page component SHALL be at `package/admin/src/auth/pages/AuthSessionsPage.tsx`.
 
 #### Scenario: Page displays current session list
 - **WHEN** an admin navigates to `/auth/sessions`

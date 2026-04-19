@@ -43,7 +43,7 @@ export default function UserCreatePage() {
       avatar: avatar.trim() || undefined,
       bio: bio.trim() || undefined,
     } as any);
-    await navigate({ to: `/users/${user.unitId}`, replace: true });
+    await navigate({ to: `/user/${user.unitId}`, replace: true });
   }
 
   return (
@@ -53,7 +53,7 @@ export default function UserCreatePage() {
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
             <Button
               component={Link}
-              to="/users"
+              to="/user"
               startIcon={<ArrowBackIcon />}
               variant="text"
             >

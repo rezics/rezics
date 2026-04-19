@@ -96,7 +96,7 @@ export default function UnitEditPage() {
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
             <Button
               component={Link}
-              to="/units"
+              to="/unit"
               startIcon={<ArrowBackIcon />}
               variant="text"
             >

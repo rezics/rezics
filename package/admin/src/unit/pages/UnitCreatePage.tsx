@@ -64,7 +64,7 @@ export default function UnitCreatePage() {
       defaultLanguage: defaultLanguage.trim() || undefined,
       translations,
     } as any);
-    await navigate({ to: `/units/${(unit as any).id}`, replace: true });
+    await navigate({ to: `/unit/${(unit as any).id}`, replace: true });
   }
 
   return (
@@ -74,7 +74,7 @@ export default function UnitCreatePage() {
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
             <Button
               component={Link}
-              to="/units"
+              to="/unit"
               startIcon={<ArrowBackIcon />}
               variant="text"
             >

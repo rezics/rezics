@@ -100,7 +100,7 @@ export function AdminNav({
     let selected = isActivePath(pathname, item.to);
 
     // Avoid the "List" item being selected when a more specific sibling route is active.
-    // Example: `/users` matches `/users/create` by prefix, but only `Create` should be selected.
+    // Example: `/user` matches `/user/create` by prefix, but only `Create` should be selected.
     if (selected && siblings?.length) {
       const hasMoreSpecificActiveSibling = siblings.some(
         (s) =>

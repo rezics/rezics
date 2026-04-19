@@ -35,7 +35,7 @@ function fmtDate(v?: string | Date) {
 
 export default function UserListPage() {
   const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({ to: "/users/meili" }));
+  const isMeiliMode = Boolean(matchRoute({ to: "/user/meili" }));
 
   const [q, setQ] = React.useState("");
   const [query, setQuery] = React.useState("");
@@ -140,7 +140,7 @@ export default function UserListPage() {
           <Button
             size="small"
             component={Link}
-            to={`/users/${u.unitId}`}
+            to={`/user/${u.unitId}`}
             variant="outlined"
           >
             Edit
@@ -195,7 +195,7 @@ export default function UserListPage() {
               variant="contained"
               startIcon={<AddIcon />}
               component={Link}
-              to="/users/create"
+              to="/user/create"
               sx={{ whiteSpace: "nowrap" }}
             >
               Create

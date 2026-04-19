@@ -172,7 +172,7 @@ export default function BooksPage() {
           <Button
             size="small"
             component={Link}
-            to={`/units/${b.unitId}`}
+            to={`/unit/${b.unitId}`}
             variant="outlined"
           >
             Edit Unit
