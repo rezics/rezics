@@ -5,8 +5,29 @@ import type {
   RealmSearchDocument,
   UserSearchDocument,
 } from "@rezics/contract";
+import { readCoverUrlFromExtra } from "@rezics/contract";
 import { prisma, UnitType } from "@rezics/server";
 import type { SearchClient } from "./client";
+
+function pickCoverUrlFromTranslations(
+  defaultLanguage: string | null | undefined,
+  translations: readonly { language: string; extra: unknown }[] | undefined,
+): string | null {
+  const list = translations ?? [];
+  if (list.length === 0) return null;
+  const ordered = [
+    defaultLanguage
+      ? list.find((t) => t.language === defaultLanguage)
+      : undefined,
+    list.find((t) => t.language === "en"),
+    ...list,
+  ];
+  for (const tr of ordered) {
+    const url = readCoverUrlFromExtra(tr?.extra);
+    if (url) return url;
+  }
+  return null;
+}
 
 const BATCH_SIZE = 5000;
 
@@ -93,7 +114,10 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   // Type extension fields
   const ext = unit.book ?? unit.game ?? unit.media ?? null;
   const isLicensed = ext?.isLicensed ?? false;
-  const coverUrl = ext?.coverUrl ?? null;
+  const coverUrl = pickCoverUrlFromTranslations(
+    unit.defaultLanguage,
+    translations,
+  );
 
   // Link-specific fields
   const linkUrl = unit.link?.url ?? null;
@@ -377,12 +401,10 @@ export async function patchPostsTarget(
     const translations: any[] = targetUnit.translations ?? [];
     targetTitles = translations.map((t: any) => t.title).filter(Boolean);
     targetType = targetUnit.type ?? null;
-    const ext =
-      (targetUnit as any).book ??
-      (targetUnit as any).game ??
-      (targetUnit as any).media ??
-      null;
-    targetCoverUrl = ext?.coverUrl ?? null;
+    targetCoverUrl = pickCoverUrlFromTranslations(
+      (targetUnit as any).defaultLanguage,
+      translations,
+    );
   }
 
   let cursor: string | undefined;
@@ -562,8 +584,10 @@ export function buildPostDocument(post: any): PostSearchDocument {
     const translations: any[] = targetUnit.translations ?? [];
     targetTitles = translations.map((t: any) => t.title).filter(Boolean);
     targetType = targetUnit.type ?? null;
-    const ext = targetUnit.book ?? targetUnit.game ?? targetUnit.media ?? null;
-    targetCoverUrl = ext?.coverUrl ?? null;
+    targetCoverUrl = pickCoverUrlFromTranslations(
+      (targetUnit as any).defaultLanguage,
+      translations,
+    );
   }
 
   return {

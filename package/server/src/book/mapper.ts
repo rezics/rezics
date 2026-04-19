@@ -1,5 +1,24 @@
 import type { BookDTO, Language, UnitTranslationDTO } from "@rezics/contract";
+import { readCoverUrlFromExtra } from "@rezics/contract";
 import type { BookWithRelations } from "./types";
+
+function pickCoverUrl(book: BookWithRelations): string | undefined {
+  const translations = book.unit.translations ?? [];
+  if (translations.length === 0) return undefined;
+  const defaultLang = book.unit.defaultLanguage;
+  const ordered = [
+    defaultLang
+      ? translations.find((t) => t.language === defaultLang)
+      : undefined,
+    translations.find((t) => t.language === "en"),
+    ...translations,
+  ];
+  for (const tr of ordered) {
+    const url = readCoverUrlFromExtra(tr?.extra);
+    if (url) return url;
+  }
+  return undefined;
+}
 
 /**
  * Map UnitTranslation to DTO (local helper)
@@ -45,7 +64,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     textLength: book.textLength,
     formatKey: book.formatKey ?? undefined,
     isLicensed: book.isLicensed,
-    coverUrl: book.coverUrl ?? undefined,
+    coverUrl: pickCoverUrl(book),
     extra: (book.extra as Record<string, unknown>) ?? undefined,
 
     // Translation layer

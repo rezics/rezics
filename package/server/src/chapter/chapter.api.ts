@@ -14,8 +14,8 @@ import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { chapterService } from "./chapter.service";
 import {
-  mapUnitToChapterDetailDTO,
-  mapUnitToChapterListItemDTO,
+  mapChapterPostToDetailDTO,
+  mapChapterPostToListItemDTO,
 } from "./mapper";
 
 export const chapterApi = new Elysia({ prefix: "/chapter" })
@@ -23,8 +23,8 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
   .get(
     "/:unitId",
     async ({ params }) => {
-      const unit = await chapterService.getByUnitId(params.unitId);
-      return mapUnitToChapterDetailDTO(unit);
+      const post = await chapterService.getByUnitId(params.unitId);
+      return mapChapterPostToDetailDTO(post);
     },
     {
       params: chapterParamsSchema,
@@ -39,14 +39,15 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
   .post(
     "/",
     async ({ body, identity }) => {
-      const unit = await chapterService.create({
+      const post = await chapterService.create({
         userId: identity.unitId,
         title: body.title,
         content: body.content,
         targetUnitId: body.targetUnitId,
+        coverUrl: body.coverUrl,
         status: body.status,
       });
-      return mapUnitToChapterDetailDTO(unit);
+      return mapChapterPostToDetailDTO(post);
     },
     {
       requireLogin: true,
@@ -73,7 +74,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
 
       const { items, total } = await chapterService.list(query);
       return {
-        items: items.map(mapUnitToChapterListItemDTO),
+        items: items.map(mapChapterPostToListItemDTO),
         total,
       };
     },
@@ -109,7 +110,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
         ids: body.ids?.join(","),
       });
       return {
-        items: items.map(mapUnitToChapterListItemDTO),
+        items: items.map(mapChapterPostToListItemDTO),
         total,
       };
     },
@@ -146,8 +147,8 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
         set.status = 403;
         throw new Error("Forbidden: you do not have permission to update");
       }
-      const unit = await chapterService.update(params.unitId, body);
-      return mapUnitToChapterDetailDTO(unit);
+      const post = await chapterService.update(params.unitId, body);
+      return mapChapterPostToDetailDTO(post);
     },
     {
       requireLogin: true,

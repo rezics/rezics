@@ -21,7 +21,6 @@ enum UnitType {
   TAG
   REALM
   SHELF
-  CHAPTER
   IMAGE
   VIDEO
   QUOTE
@@ -60,6 +59,12 @@ enum PostKind {
    */
   REMARK
   POST
+  /**
+   * A chapter of the book named by `targetUnitId` (a Unit of type=BOOK).
+   * Body lives in `Post.body`; cover (optional) lives in
+   * `UnitTranslation.extra.coverUrl`. Order is governed by `BookIndex.index`.
+   */
+  CHAPTER
 }
 
 // ============================================================
@@ -217,7 +222,6 @@ model Book {
   textLength      Int       @default(0)
   formatKey       String?   @db.VarChar(32)
   isLicensed      Boolean   @default(false)
-  coverUrl        String?
 
   extra Json?
 
@@ -251,7 +255,6 @@ model Game {
   versionLabel String?
   ageRatingKey String?   @db.VarChar(32)
   isLicensed   Boolean   @default(false)
-  coverUrl     String?
 
   extra Json?
 
@@ -286,7 +289,6 @@ model Media {
   episodeCount   Int?
   seasonCount    Int?
   isLicensed     Boolean   @default(false)
-  coverUrl       String?
 
   extra Json?
 
@@ -372,9 +374,8 @@ model Shelf {
   unitId String @id @db.Uuid
   unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
-  kindKey  String? @db.VarChar(64)
-  coverUrl String?
-  extra    Json?
+  kindKey String? @db.VarChar(64)
+  extra   Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

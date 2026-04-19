@@ -5,7 +5,13 @@ import type {
 } from "@rezics/contract";
 import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import { type PostKind, prisma, UnitStatus, UnitType } from "#/prisma/client";
+import {
+  type PostKind,
+  PostKind as PostKindEnum,
+  prisma,
+  UnitStatus,
+  UnitType,
+} from "#/prisma/client";
 import { patchPostFieldsToMeili, syncPostToMeili } from "@/meili/post/sync";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
@@ -100,6 +106,23 @@ export class PostService {
       scoreEntryId,
       extra,
     } = input;
+
+    if (kind === PostKindEnum.CHAPTER) {
+      if (!targetUnitId) {
+        throw new Error(
+          "Post(kind=CHAPTER) requires targetUnitId pointing to a Unit(type=BOOK)",
+        );
+      }
+      const target = await prisma.unit.findUnique({
+        where: { id: targetUnitId },
+        select: { type: true },
+      });
+      if (!target || target.type !== UnitType.BOOK) {
+        throw new Error(
+          `Post(kind=CHAPTER) targetUnitId must reference a Unit(type=BOOK); got ${target?.type ?? "missing"}`,
+        );
+      }
+    }
 
     let depth = 0;
     let rootPostUnitId: string | undefined;

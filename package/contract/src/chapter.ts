@@ -4,7 +4,10 @@ import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
 // CHAPTER CONTRACTS
-// Chapters are Unit(type=CHAPTER). BookIndex stores the chapter tree as JSON.
+// Chapter = Unit(type=POST) + Post(kind=CHAPTER, targetUnitId=<book>).
+// Body lives in Post.body. Title lives in UnitTranslation.title.
+// Cover (optional) lives in UnitTranslation.extra.coverUrl
+// (see unitTranslationExtraSchema). BookIndex JSON stores chapter order.
 // ============================================================
 
 export const chapterListItemSchema = t.Object({
@@ -12,6 +15,7 @@ export const chapterListItemSchema = t.Object({
   title: t.String(),
   noContent: t.Boolean(),
   userId: t.Optional(t.String()),
+  coverUrl: t.Optional(t.Nullable(t.String())),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -23,6 +27,8 @@ export const chapterDetailSchema = t.Object({
   title: t.String(),
   content: t.Optional(t.String()),
   userId: t.Optional(t.String()),
+  targetUnitId: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(t.String())),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -112,7 +118,10 @@ export const createChapterSchema = t.Object({
   userId: t.String(),
   title: t.String(),
   content: t.Optional(t.String()),
-  targetUnitId: t.Optional(t.String()),
+  // The parent book unit id (Post.targetUnitId after persistence).
+  // MUST resolve to a Unit(type=BOOK) — server rejects otherwise.
+  targetUnitId: t.String(),
+  coverUrl: t.Optional(t.String()),
   status: t.Optional(t.String()),
 });
 
@@ -122,6 +131,7 @@ export const updateChapterSchema = t.Object({
   title: t.Optional(t.String()),
   content: t.Optional(t.String()),
   targetUnitId: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(t.String())),
   status: t.Optional(t.String()),
 });
 

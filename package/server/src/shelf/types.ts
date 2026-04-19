@@ -23,7 +23,6 @@ export type ShelfWithRelations = Prisma.ShelfGetPayload<{
 export const shelfListSelect = {
   unitId: true,
   kindKey: true,
-  coverUrl: true,
   extra: true,
   createdAt: true,
   updatedAt: true,
@@ -31,6 +30,7 @@ export const shelfListSelect = {
     select: {
       id: true,
       userId: true,
+      defaultLanguage: true,
       createdAt: true,
       updatedAt: true,
       user: { select: { unitId: true, slug: true, name: true, avatar: true } },

@@ -3,7 +3,7 @@ import type {
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
-import { parseIdsCsv } from "@rezics/contract";
+import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
   prisma,
@@ -187,6 +187,36 @@ export class BookService {
    * Create new book (Unit + Book extension + translations in one transaction)
    */
   async create(req: CreateBookInput): Promise<BookWithRelations> {
+    const language = req.defaultLanguage ?? "en";
+    const providedTranslations = req.translations ?? [];
+    const hasDefault = providedTranslations.some(
+      (tr) => tr.language === language,
+    );
+    const ensuredTranslations = hasDefault
+      ? providedTranslations
+      : req.coverUrl !== undefined
+        ? [...providedTranslations, { language }]
+        : providedTranslations;
+
+    const translationData = ensuredTranslations.map((tr) => {
+      const baseExtra = (tr.extra ?? undefined) as
+        | Record<string, unknown>
+        | undefined;
+      const nextExtra =
+        req.coverUrl !== undefined && tr.language === language
+          ? withCoverUrl(baseExtra, req.coverUrl ?? undefined)
+          : baseExtra;
+      return {
+        language: tr.language,
+        title: tr.title ?? undefined,
+        subtitle: tr.subtitle ?? undefined,
+        summary: tr.summary ?? undefined,
+        description: tr.description ?? undefined,
+        extra: (nextExtra ?? null) as Prisma.InputJsonValue,
+        sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+      };
+    });
+
     const book = await prisma.book.create({
       data: {
         unit: {
@@ -199,20 +229,9 @@ export class BookService {
             defaultLanguage: req.defaultLanguage ?? undefined,
             nsfw: req.nsfw ?? false,
             extra: undefined,
-            translations:
-              req.translations && req.translations.length > 0
-                ? {
-                    create: req.translations.map((tr) => ({
-                      language: tr.language,
-                      title: tr.title ?? undefined,
-                      subtitle: tr.subtitle ?? undefined,
-                      summary: tr.summary ?? undefined,
-                      description: tr.description ?? undefined,
-                      extra: (tr.extra ?? null) as Prisma.InputJsonValue,
-                      sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
-                    })),
-                  }
-                : undefined,
+            translations: translationData.length
+              ? { create: translationData }
+              : undefined,
           },
         },
         isbn13: req.isbn13 ?? undefined,
@@ -223,7 +242,6 @@ export class BookService {
         textLength: req.textLength ?? 0,
         formatKey: req.formatKey ?? undefined,
         isLicensed: req.isLicensed ?? false,
-        coverUrl: req.coverUrl ?? undefined,
         extra: (req.extra ?? null) as Prisma.InputJsonValue,
         chapterIndex: {
           create: { index: {} as Prisma.InputJsonValue },
@@ -244,6 +262,27 @@ export class BookService {
     unitId: string,
     req: UpdateBookInput,
   ): Promise<BookWithRelations> {
+    if (req.coverUrl !== undefined) {
+      const unit = await prisma.unit.findUniqueOrThrow({
+        where: { id: unitId },
+        select: { defaultLanguage: true },
+      });
+      const language = unit.defaultLanguage ?? "en";
+      const existing = await prisma.unitTranslation.findUnique({
+        where: { unitId_language: { unitId, language } },
+        select: { extra: true },
+      });
+      const nextExtra = withCoverUrl(
+        existing?.extra ?? undefined,
+        req.coverUrl ?? undefined,
+      ) as Prisma.InputJsonValue;
+      await prisma.unitTranslation.upsert({
+        where: { unitId_language: { unitId, language } },
+        create: { unitId, language, extra: nextExtra },
+        update: { extra: nextExtra },
+      });
+    }
+
     const book = await prisma.book.update({
       where: { unitId },
       data: {
@@ -257,7 +296,6 @@ export class BookService {
         textLength: req.textLength ?? undefined,
         formatKey: req.formatKey,
         isLicensed: req.isLicensed ?? undefined,
-        coverUrl: req.coverUrl,
         extra: (req.extra ?? undefined) as Prisma.InputJsonValue | undefined,
         unit: {
           update: {

@@ -3,8 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
-import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
-import { UnitType } from "@rezics/contract";
+import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { useEffect, useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
@@ -44,7 +43,7 @@ export function CreateChapterDialog({
     }
   }, [open]);
 
-  const createMutation = useCreateUnitMutation({
+  const createMutation = useCreateChapterMutation({
     onError: (error) => {
       show(
         `创建章节失败: ${
@@ -75,15 +74,13 @@ export function CreateChapterDialog({
     try {
       const result = await createMutation.mutateAsync({
         userId,
-        type: UnitType.CHAPTER,
         title,
         content,
-        metadata: {},
         targetUnitId: bookUnitId,
-      } as any);
+      });
 
       const newNode: Chapter = {
-        id: (result as any).id,
+        id: result.unitId,
         title,
       };
 

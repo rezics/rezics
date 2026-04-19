@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client.js";
+import { DEFAULT_LANGUAGE, withCoverUrl } from "@rezics/contract";
+import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { generateBetween } from "@/shelf/fractional-index";
 import { getRandomShelfCover, SHELF_KIND_KEYS } from "./data.js";
@@ -37,6 +37,7 @@ export async function seedShelves(
       const author = faker.helpers.arrayElement(users);
       const translations = generateTranslations(UnitType.SHELF);
       const kindKey = faker.helpers.arrayElement([...SHELF_KIND_KEYS]);
+      const coverUrl = randomBoolean(0.7) ? getRandomShelfCover() : null;
 
       const extra = randomBoolean(0.3)
         ? {
@@ -58,7 +59,6 @@ export async function seedShelves(
           shelf: {
             create: {
               kindKey,
-              coverUrl: randomBoolean(0.7) ? getRandomShelfCover() : null,
               extra: extra ?? undefined,
             },
           },
@@ -67,6 +67,10 @@ export async function seedShelves(
               language: t.language,
               title: t.title,
               description: t.description,
+              extra:
+                coverUrl && t.language === DEFAULT_LANGUAGE
+                  ? (withCoverUrl(undefined, coverUrl) as Prisma.InputJsonValue)
+                  : undefined,
             })),
           },
           supportLanguages: {

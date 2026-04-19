@@ -12,7 +12,7 @@ import type {
   UpdateShelfInput,
   UpdateShelfItemInput,
 } from "@rezics/contract";
-import { parseIdsCsv } from "@rezics/contract";
+import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
   PostKind,
@@ -128,9 +128,9 @@ export class ShelfService {
       translations,
     } = req;
 
-    const translationData = translations?.length
+    const baseTranslations = translations?.length
       ? translations
-      : title
+      : title || coverUrl !== undefined
         ? [
             {
               language: "en" as const,
@@ -142,6 +142,24 @@ export class ShelfService {
           ]
         : [];
 
+    const defaultLanguage = baseTranslations[0]?.language ?? "en";
+    const translationData = baseTranslations.map((tr) => {
+      const nextExtra =
+        coverUrl !== undefined && tr.language === defaultLanguage
+          ? withCoverUrl(undefined, coverUrl ?? undefined)
+          : undefined;
+      return {
+        language: tr.language,
+        title: tr.title,
+        subtitle: tr.subtitle,
+        summary: tr.summary,
+        description: tr.description,
+        ...(nextExtra !== undefined
+          ? { extra: nextExtra as Prisma.InputJsonValue }
+          : {}),
+      };
+    });
+
     const unit = await prisma.unit.create({
       data: {
         userId,
@@ -149,17 +167,7 @@ export class ShelfService {
         status: UnitStatus.PUBLISHED,
         visibility: (visibility as UnitVisibility) ?? UnitVisibility.PUBLIC,
         ...(translationData.length
-          ? {
-              translations: {
-                create: translationData.map((tr) => ({
-                  language: tr.language,
-                  title: tr.title,
-                  subtitle: tr.subtitle,
-                  summary: tr.summary,
-                  description: tr.description,
-                })),
-              },
-            }
+          ? { translations: { create: translationData } }
           : {}),
         ...(tagIds?.length
           ? {
@@ -179,7 +187,6 @@ export class ShelfService {
       data: {
         unitId: unit.id,
         kindKey: kindKey ?? undefined,
-        coverUrl: coverUrl ?? undefined,
         extra: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
       },
       include: shelfInclude,
@@ -198,11 +205,35 @@ export class ShelfService {
       });
     }
 
-    if (title !== undefined) {
+    if (title !== undefined || coverUrl !== undefined) {
+      const unit = await prisma.unit.findUniqueOrThrow({
+        where: { id: unitId },
+        select: { defaultLanguage: true },
+      });
+      const language = unit.defaultLanguage ?? "en";
+      const existing = await prisma.unitTranslation.findUnique({
+        where: { unitId_language: { unitId, language } },
+        select: { extra: true },
+      });
+      const nextExtra =
+        coverUrl !== undefined
+          ? (withCoverUrl(
+              existing?.extra ?? undefined,
+              coverUrl ?? undefined,
+            ) as Prisma.InputJsonValue)
+          : undefined;
       await prisma.unitTranslation.upsert({
-        where: { unitId_language: { unitId, language: "en" } },
-        update: { title },
-        create: { unitId, language: "en", title },
+        where: { unitId_language: { unitId, language } },
+        create: {
+          unitId,
+          language,
+          title: title ?? undefined,
+          ...(nextExtra !== undefined ? { extra: nextExtra } : {}),
+        },
+        update: {
+          ...(title !== undefined ? { title } : {}),
+          ...(nextExtra !== undefined ? { extra: nextExtra } : {}),
+        },
       });
     }
 
@@ -210,7 +241,6 @@ export class ShelfService {
       where: { unitId },
       data: {
         kindKey: kindKey !== undefined ? kindKey : undefined,
-        coverUrl: coverUrl !== undefined ? coverUrl : undefined,
         extra:
           extra !== undefined
             ? ((extra ?? undefined) as Prisma.InputJsonValue | undefined)
@@ -531,6 +561,7 @@ export function mapUnitToKind(
   postKind: PostKind | null,
 ): ShelfItemKind {
   if (type === UnitType.POST) {
+    if (postKind === PostKind.CHAPTER) return "chapter";
     if (postKind === PostKind.REVIEW) return "review";
     if (postKind === PostKind.EXCERPT) return "quote";
     return "post";
@@ -552,8 +583,6 @@ export function mapUnitToKind(
       return "image";
     case UnitType.VIDEO:
       return "video";
-    case UnitType.CHAPTER:
-      return "chapter";
     default:
       return type.toString().toLowerCase() as ShelfItemKind;
   }

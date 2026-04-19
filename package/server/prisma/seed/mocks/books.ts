@@ -1,8 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import { type ChapterTreeItem, DEFAULT_LANGUAGE } from "@rezics/contract";
+import {
+  type ChapterTreeItem,
+  DEFAULT_LANGUAGE,
+  withCoverUrl,
+} from "@rezics/contract";
 import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
-import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import { PostKind, UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { getRandomBookCover } from "./data.js";
 import { generateBookExtra, generateTranslations } from "./generators.js";
 import type {
@@ -49,6 +53,7 @@ export async function seedBooks(
     async () => {
       const author = faker.helpers.arrayElement(users);
       const translations = generateTranslations(UnitType.BOOK);
+      const coverUrl = getRandomBookCover();
 
       const unit = await prisma.unit.create({
         data: {
@@ -72,7 +77,6 @@ export async function seedBooks(
                 "hardcover",
                 "ebook",
               ]),
-              coverUrl: getRandomBookCover(),
               extra: generateBookExtra(),
               chapterIndex: {
                 create: { index: {} as Prisma.InputJsonValue },
@@ -86,6 +90,10 @@ export async function seedBooks(
               subtitle: t.subtitle,
               summary: t.summary,
               description: t.description,
+              extra:
+                t.language === DEFAULT_LANGUAGE
+                  ? (withCoverUrl(undefined, coverUrl) as Prisma.InputJsonValue)
+                  : undefined,
             })),
           },
           supportLanguages: {
@@ -152,14 +160,15 @@ export { flushAttributionsAndTags };
 
 /**
  * Create chapters for a book and return a nested tree structure.
- * Chapters are Unit(type=CHAPTER) + UnitTranslation. The tree is stored in BookIndex.
+ * Chapters are Unit(type=POST) + Post(kind=CHAPTER, targetUnitId=<book>).
+ * Title lives in UnitTranslation.title; body lives in Post.body.
+ * The tree is stored in BookIndex.
  */
 const CHAPTER_BATCH_THRESHOLD = 50;
 const CHAPTER_BATCH_SIZE = 500;
 
 export async function seedChaptersForBook(
   prisma: PrismaClient,
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: <bookUnitId>
   bookUnitId: string,
   bookUserId: string,
   chapterCfg: ChapterCounts,
@@ -182,7 +191,7 @@ export async function seedChaptersForBook(
   interface ChapterUnitRow {
     id: string;
     title: string;
-    description?: string;
+    body?: string;
   }
   const parentRows: ChapterUnitRow[] = [];
   const childRows: ChapterUnitRow[] = [];
@@ -204,7 +213,7 @@ export async function seedChaptersForBook(
       childRows.push({
         id,
         title: childTitle,
-        description: noContent ? undefined : generateParagraph(1, 3),
+        body: noContent ? undefined : generateParagraph(1, 3),
       });
       children.push({ id, title: childTitle, noContent });
     }
@@ -235,7 +244,7 @@ export async function seedChaptersForBook(
         data: chunk.map((r) => ({
           id: r.id,
           userId: bookUserId,
-          type: UnitType.CHAPTER,
+          type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: DEFAULT_LANGUAGE,
         })),
@@ -248,7 +257,6 @@ export async function seedChaptersForBook(
           unitId: r.id,
           language: DEFAULT_LANGUAGE,
           title: r.title,
-          description: r.description,
         })),
       });
     }
@@ -263,24 +271,47 @@ export async function seedChaptersForBook(
         })),
       });
     }
+    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
+      await prisma.post.createMany({
+        data: chunk.map((r) => ({
+          unitId: r.id,
+          authorUserId: bookUserId,
+          targetUnitId: bookUnitId,
+          kind: PostKind.CHAPTER,
+          body: r.body ?? "",
+          rootPostUnitId: r.id,
+          depth: 0,
+        })),
+      });
+    }
   } else {
     await chunkedParallel(materializedRows, CHUNK_SIZE, async (row) => {
       await prisma.unit.create({
         data: {
           id: row.id,
           userId: bookUserId,
-          type: UnitType.CHAPTER,
+          type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: DEFAULT_LANGUAGE,
           translations: {
             create: {
               language: DEFAULT_LANGUAGE,
               title: row.title,
-              description: row.description,
             },
           },
           supportLanguages: {
             create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+          },
+          post: {
+            create: {
+              authorUserId: bookUserId,
+              targetUnitId: bookUnitId,
+              kind: PostKind.CHAPTER,
+              body: row.body ?? "",
+              rootPostUnitId: row.id,
+              depth: 0,
+            },
           },
         },
       });

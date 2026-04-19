@@ -1,8 +1,34 @@
 import type { DispatchResult } from "@rezics/contract";
-import { DispatchType } from "@rezics/contract";
+import { DispatchType, withCoverUrl } from "@rezics/contract";
+import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { env } from "@/env";
 import type { DispatchConfig } from "./dispatch.types";
+
+async function persistCoverUrlToTranslation(
+  unitId: string,
+  coverUrl: string | null | undefined,
+): Promise<void> {
+  if (coverUrl === undefined) return;
+  const unit = await prisma.unit.findUniqueOrThrow({
+    where: { id: unitId },
+    select: { defaultLanguage: true },
+  });
+  const language = unit.defaultLanguage ?? "en";
+  const existing = await prisma.unitTranslation.findUnique({
+    where: { unitId_language: { unitId, language } },
+    select: { extra: true },
+  });
+  const nextExtra = withCoverUrl(
+    existing?.extra ?? undefined,
+    coverUrl ?? undefined,
+  ) as Prisma.InputJsonValue;
+  await prisma.unitTranslation.upsert({
+    where: { unitId_language: { unitId, language } },
+    create: { unitId, language, extra: nextExtra },
+    update: { extra: nextExtra },
+  });
+}
 
 export class DispatchService {
   getConfig(): DispatchConfig | null {
@@ -48,9 +74,6 @@ export class DispatchService {
           ...(data.textLength !== undefined && {
             textLength: data.textLength as number,
           }),
-          ...(data.coverUrl !== undefined && {
-            coverUrl: data.coverUrl as string,
-          }),
           ...(data.isLicensed !== undefined && {
             isLicensed: data.isLicensed as boolean,
           }),
@@ -63,6 +86,10 @@ export class DispatchService {
           ...(data.extra !== undefined && { extra: data.extra as any }),
         },
       });
+      await persistCoverUrlToTranslation(
+        result.unitId,
+        data.coverUrl as string | null | undefined,
+      );
       return { unitId: result.unitId };
     }
 
@@ -80,9 +107,6 @@ export class DispatchService {
             ...(data.textLength !== undefined && {
               textLength: data.textLength as number,
             }),
-            ...(data.coverUrl !== undefined && {
-              coverUrl: data.coverUrl as string,
-            }),
             ...(data.isLicensed !== undefined && {
               isLicensed: data.isLicensed as boolean,
             }),
@@ -97,6 +121,10 @@ export class DispatchService {
         },
       },
     });
+    await persistCoverUrlToTranslation(
+      unit.id,
+      data.coverUrl as string | null | undefined,
+    );
     return { unitId: unit.id };
   }
 
@@ -122,12 +150,13 @@ export class DispatchService {
           ...(data.isLicensed !== undefined && {
             isLicensed: data.isLicensed as boolean,
           }),
-          ...(data.coverUrl !== undefined && {
-            coverUrl: data.coverUrl as string,
-          }),
           ...(data.extra !== undefined && { extra: data.extra as any }),
         },
       });
+      await persistCoverUrlToTranslation(
+        result.unitId,
+        data.coverUrl as string | null | undefined,
+      );
       return { unitId: result.unitId };
     }
 
@@ -150,14 +179,15 @@ export class DispatchService {
             ...(data.isLicensed !== undefined && {
               isLicensed: data.isLicensed as boolean,
             }),
-            ...(data.coverUrl !== undefined && {
-              coverUrl: data.coverUrl as string,
-            }),
             ...(data.extra !== undefined && { extra: data.extra as any }),
           },
         },
       },
     });
+    await persistCoverUrlToTranslation(
+      unit.id,
+      data.coverUrl as string | null | undefined,
+    );
     return { unitId: unit.id };
   }
 
@@ -189,12 +219,13 @@ export class DispatchService {
           ...(data.isLicensed !== undefined && {
             isLicensed: data.isLicensed as boolean,
           }),
-          ...(data.coverUrl !== undefined && {
-            coverUrl: data.coverUrl as string,
-          }),
           ...(data.extra !== undefined && { extra: data.extra as any }),
         },
       });
+      await persistCoverUrlToTranslation(
+        result.unitId,
+        data.coverUrl as string | null | undefined,
+      );
       return { unitId: result.unitId };
     }
 
@@ -225,14 +256,15 @@ export class DispatchService {
             ...(data.isLicensed !== undefined && {
               isLicensed: data.isLicensed as boolean,
             }),
-            ...(data.coverUrl !== undefined && {
-              coverUrl: data.coverUrl as string,
-            }),
             ...(data.extra !== undefined && { extra: data.extra as any }),
           },
         },
       },
     });
+    await persistCoverUrlToTranslation(
+      unit.id,
+      data.coverUrl as string | null | undefined,
+    );
     return { unitId: unit.id };
   }
 

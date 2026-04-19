@@ -1,30 +1,49 @@
 import type { ChapterDetailDTO, ChapterListItemDTO } from "@rezics/contract";
-import type { ChapterUnitWithRelations } from "./types";
+import { readCoverUrlFromExtra } from "@rezics/contract";
+import type { ChapterPostWithRelations } from "./types";
 
-export function mapUnitToChapterListItemDTO(
-  u: ChapterUnitWithRelations,
+function pickTranslation(
+  post: ChapterPostWithRelations,
+): ChapterPostWithRelations["unit"]["translations"][number] | undefined {
+  const translations = post.unit.translations ?? [];
+  if (translations.length === 0) return undefined;
+  const defaultLang = post.unit.defaultLanguage;
+  return (
+    (defaultLang
+      ? translations.find((t) => t.language === defaultLang)
+      : undefined) ??
+    translations.find((t) => t.language === "en") ??
+    translations[0]
+  );
+}
+
+export function mapChapterPostToListItemDTO(
+  post: ChapterPostWithRelations,
 ): ChapterListItemDTO {
-  const translation = u.translations?.[0];
+  const translation = pickTranslation(post);
   return {
-    unitId: u.id,
+    unitId: post.unitId,
     title: translation?.title ?? "",
-    noContent: !translation?.description,
-    userId: u.userId ?? undefined,
-    createdAt: u.createdAt,
-    updatedAt: u.updatedAt,
+    noContent: !post.body,
+    userId: post.authorUserId,
+    coverUrl: readCoverUrlFromExtra(translation?.extra) ?? null,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
   };
 }
 
-export function mapUnitToChapterDetailDTO(
-  u: ChapterUnitWithRelations,
+export function mapChapterPostToDetailDTO(
+  post: ChapterPostWithRelations,
 ): ChapterDetailDTO {
-  const translation = u.translations?.[0];
+  const translation = pickTranslation(post);
   return {
-    unitId: u.id,
+    unitId: post.unitId,
     title: translation?.title ?? "",
-    content: translation?.description ?? undefined,
-    userId: u.userId ?? undefined,
-    createdAt: u.createdAt,
-    updatedAt: u.updatedAt,
+    content: post.body ?? undefined,
+    userId: post.authorUserId,
+    targetUnitId: post.targetUnitId ?? null,
+    coverUrl: readCoverUrlFromExtra(translation?.extra) ?? null,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
   };
 }

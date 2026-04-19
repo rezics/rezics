@@ -64,7 +64,7 @@ function pickFromCorpus(
 
   // Map UnitType to text pool type
   const poolType =
-    type === UnitType.TAG || type === UnitType.POST || type === UnitType.CHAPTER
+    type === UnitType.TAG || type === UnitType.POST
       ? "BOOK"
       : type === UnitType.LINK
         ? "BOOK"
@@ -124,13 +124,6 @@ function pickFromCorpus(
       return {
         title,
         description: f.helpers.arrayElement([...summaries]),
-      };
-    case UnitType.CHAPTER:
-      return {
-        title,
-        description: randomBoolean(0.2)
-          ? f.helpers.arrayElement([...summaries])
-          : undefined,
       };
     case UnitType.POST:
       return {
@@ -234,6 +227,8 @@ export function generatePostBody(kind: PostKind): string {
       return generateParagraph(1, 3);
     case PostKind.POST:
       return generateParagraph(2, 8);
+    case PostKind.CHAPTER:
+      return generateParagraph(8, 25);
   }
 }
 

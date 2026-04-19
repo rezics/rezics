@@ -29,6 +29,7 @@ export * from "./tag";
 export * from "./token";
 export * from "./translation-group";
 export * from "./unit";
+export * from "./unit-translation";
 export * from "./upload";
 export * from "./user";
 export * from "./utils/url";

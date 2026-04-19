@@ -5,11 +5,37 @@ import type {
   ShelfItemKind,
   ShelfSummaryDTO,
 } from "@rezics/contract";
+import { readCoverUrlFromExtra } from "@rezics/contract";
 import type {
   ShelfItemWithRelations,
   ShelfListSelected,
   ShelfWithRelations,
 } from "./types";
+
+type ShelfTranslationLike = {
+  language: string;
+  extra: unknown;
+};
+
+function pickShelfCoverUrl(
+  defaultLanguage: string | null | undefined,
+  translations: readonly ShelfTranslationLike[] | undefined,
+): string | undefined {
+  const list = translations ?? [];
+  if (list.length === 0) return undefined;
+  const ordered = [
+    defaultLanguage
+      ? list.find((t) => t.language === defaultLanguage)
+      : undefined,
+    list.find((t) => t.language === "en"),
+    ...list,
+  ];
+  for (const tr of ordered) {
+    const url = readCoverUrlFromExtra(tr?.extra);
+    if (url) return url;
+  }
+  return undefined;
+}
 
 export function mapShelfItemToDTO(item: ShelfItemWithRelations): ShelfItemDTO {
   return {
@@ -30,7 +56,10 @@ export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
     userId: row.unit?.userId ?? undefined,
     user: row.unit?.user ?? undefined,
     kindKey: row.kindKey ?? undefined,
-    coverUrl: row.coverUrl ?? undefined,
+    coverUrl: pickShelfCoverUrl(
+      row.unit?.defaultLanguage,
+      row.unit?.translations,
+    ),
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: (row.unit?.translations ??
       []) as unknown as ShelfDTO["translations"],
@@ -60,7 +89,10 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
     userId: row.unit?.userId ?? undefined,
     user: row.unit?.user ?? undefined,
     kindKey: row.kindKey ?? undefined,
-    coverUrl: row.coverUrl ?? undefined,
+    coverUrl: pickShelfCoverUrl(
+      row.unit?.defaultLanguage,
+      row.unit?.translations,
+    ),
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: (row.unit?.translations ??
       []) as unknown as ShelfDTO["translations"],
@@ -75,7 +107,10 @@ export function mapShelfSummaryToDTO(row: ShelfListSelected): ShelfSummaryDTO {
     unitId: row.unitId,
     userId: row.unit?.userId ?? undefined,
     kindKey: row.kindKey ?? undefined,
-    coverUrl: row.coverUrl ?? undefined,
+    coverUrl: pickShelfCoverUrl(
+      row.unit?.defaultLanguage,
+      row.unit?.translations,
+    ),
     title,
     itemCount: row._count?.items ?? 0,
     tags: row.unit?.unitTags?.map((t) => ({

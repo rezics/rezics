@@ -12,6 +12,7 @@ export const PostKind = {
   REMARK: "REMARK",
   EXCERPT: "EXCERPT",
   POST: "POST",
+  CHAPTER: "CHAPTER",
 } as const;
 
 export type PostKind = (typeof PostKind)[keyof typeof PostKind];
@@ -21,6 +22,7 @@ export const postKindLiterals = t.Union([
   t.Literal("REMARK"),
   t.Literal("EXCERPT"),
   t.Literal("POST"),
+  t.Literal("CHAPTER"),
 ]);
 
 // ============================================================

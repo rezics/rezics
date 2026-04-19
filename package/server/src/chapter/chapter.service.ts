@@ -3,51 +3,70 @@ import type {
   CreateChapterInput,
   UpdateChapterInput,
 } from "@rezics/contract";
-import { parseIdsCsv } from "@rezics/contract";
+import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import { prisma, UnitStatus, UnitType } from "#/prisma/client";
-import type { ChapterUnitWithRelations } from "./types";
-import { chapterUnitInclude } from "./types";
+import {
+  PostKind,
+  prisma,
+  UnitStatus,
+  UnitType,
+} from "#/prisma/client";
+import type { ChapterPostWithRelations } from "./types";
+import { chapterPostInclude } from "./types";
 
+/**
+ * Thin wrapper over Post(kind=CHAPTER) — see chapter-as-post-and-cover-relocation.
+ *
+ * Storage:
+ *   - Chapter title       -> UnitTranslation.title
+ *   - Chapter cover URL   -> UnitTranslation.extra.coverUrl (typed)
+ *   - Chapter body        -> Post.body
+ *   - Chapter parent book -> Post.targetUnitId (must reference Unit(type=BOOK))
+ *   - Chapter ordering    -> BookIndex.index (out of scope of this service)
+ */
 export class ChapterService {
-  private buildWhereClause(options: ChapterListQuery): Prisma.UnitWhereInput {
-    const andWhere: Prisma.UnitWhereInput[] = [];
+  private buildWhereClause(options: ChapterListQuery): Prisma.PostWhereInput {
+    const andWhere: Prisma.PostWhereInput[] = [{ kind: PostKind.CHAPTER }];
 
-    // Search in title via translations
+    // Search title via Unit.translations (and body)
     if (options.q?.trim()) {
       andWhere.push({
-        translations: {
-          some: {
-            OR: [
-              { title: { contains: options.q, mode: "insensitive" } },
-              { description: { contains: options.q } },
-            ],
+        OR: [
+          {
+            unit: {
+              translations: {
+                some: { title: { contains: options.q, mode: "insensitive" } },
+              },
+            },
           },
-        },
+          { body: { contains: options.q, mode: "insensitive" } },
+        ],
       });
     }
 
-    // Filter by user ID
+    // Filter by chapter author
     if (options.userId?.trim()) {
-      andWhere.push({ userId: options.userId });
+      andWhere.push({ authorUserId: options.userId });
     }
 
-    // Filter by status (CSV allowed)
+    // Filter by Unit.status (CSV allowed)
     const statuses = (options.status ?? "")
       .split(",")
-      .map((s: string) => s.trim())
+      .map((s) => s.trim())
       .filter(Boolean) as (keyof typeof UnitStatus)[];
     if (statuses.length > 0) {
-      andWhere.push({ status: { in: statuses as unknown as UnitStatus[] } });
+      andWhere.push({
+        unit: { status: { in: statuses as unknown as UnitStatus[] } },
+      });
     }
 
-    // Filter by target unit (book). Allow CSV
+    // Filter by parent book (targetUnitId). CSV allowed.
     const targetList = (options.targetUnitIds ?? options.targetUnitId ?? "")
       .split(",")
-      .map((s: string) => s.trim())
+      .map((s) => s.trim())
       .filter(Boolean);
     if (targetList.length > 0) {
-      andWhere.push({ workUnitId: { in: targetList } });
+      andWhere.push({ targetUnitId: { in: targetList } });
     }
 
     // Date range
@@ -62,27 +81,23 @@ export class ChapterService {
       });
     }
 
-    // Always restrict to CHAPTER
-    andWhere.push({ type: UnitType.CHAPTER });
-
     // Intersect with explicit unit id list (from listGetQueryBase)
     const idList = parseIdsCsv(options.ids);
     if (idList && idList.length > 0) {
-      andWhere.push({ id: { in: idList } });
+      andWhere.push({ unitId: { in: idList } });
     }
 
-    return andWhere.length > 0 ? { AND: andWhere } : { type: UnitType.CHAPTER };
+    return { AND: andWhere };
   }
 
   async list(options: ChapterListQuery = {}): Promise<{
-    items: ChapterUnitWithRelations[];
+    items: ChapterPostWithRelations[];
     total: number;
   }> {
     const cursor = options.cursor;
     const hasCursor = cursor?.unitId && cursor?.createdAt;
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
-    const calculateSkip = () => (hasCursor ? 1 : (options.start ?? 0));
-    const skipNum = calculateSkip();
+    const skipNum = hasCursor ? 1 : (options.start ?? 0);
     const where = this.buildWhereClause(options);
 
     const sortType =
@@ -90,94 +105,161 @@ export class ChapterService {
     const sortOrder = options.sort?.order === "asc" ? "asc" : "desc";
 
     const [items, total] = await Promise.all([
-      prisma.unit.findMany({
+      prisma.post.findMany({
         where,
         orderBy: { [sortType]: sortOrder },
         skip: skipNum,
-        cursor: hasCursor ? { id: cursor!.unitId! } : undefined,
+        cursor: hasCursor ? { unitId: cursor!.unitId! } : undefined,
         take: limitNum,
-        include: chapterUnitInclude,
+        include: chapterPostInclude,
       }),
-      prisma.unit.count({ where }),
+      prisma.post.count({ where }),
     ]);
 
     return { items, total };
   }
 
-  async getByUnitId(unitId: string): Promise<ChapterUnitWithRelations> {
-    return prisma.unit.findUniqueOrThrow({
-      where: { id: unitId },
-      include: chapterUnitInclude,
+  async getByUnitId(unitId: string): Promise<ChapterPostWithRelations> {
+    return prisma.post.findUniqueOrThrow({
+      where: { unitId },
+      include: chapterPostInclude,
     });
   }
 
-  async create(req: CreateChapterInput): Promise<ChapterUnitWithRelations> {
-    const { userId, title, content, targetUnitId, status } = req;
-    return prisma.unit.create({
-      data: {
-        userId,
-        type: UnitType.CHAPTER,
-        status: (status as UnitStatus) || UnitStatus.PUBLISHED,
-        workUnitId: targetUnitId || undefined,
-        translations: {
-          create: {
-            language: "en",
-            title,
-            description: content || undefined,
+  async create(req: CreateChapterInput): Promise<ChapterPostWithRelations> {
+    const { userId, title, content, targetUnitId, coverUrl, status } = req;
+
+    const target = await prisma.unit.findUnique({
+      where: { id: targetUnitId },
+      select: { id: true, type: true, defaultLanguage: true },
+    });
+    if (!target || target.type !== UnitType.BOOK) {
+      throw new Error(
+        `Chapter targetUnitId must reference a Unit(type=BOOK); got ${target?.type ?? "missing"}`,
+      );
+    }
+
+    const language = target.defaultLanguage ?? "en";
+    const extraJson =
+      coverUrl !== undefined
+        ? (withCoverUrl(undefined, coverUrl) as Prisma.InputJsonValue)
+        : undefined;
+
+    return prisma.$transaction(async (tx) => {
+      const unit = await tx.unit.create({
+        data: {
+          userId,
+          type: UnitType.POST,
+          status: (status as UnitStatus) || UnitStatus.PUBLISHED,
+          defaultLanguage: language,
+          translations: {
+            create: {
+              language,
+              title,
+              extra: extraJson,
+            },
           },
         },
-      },
-      include: chapterUnitInclude,
+      });
+
+      await tx.post.create({
+        data: {
+          unitId: unit.id,
+          authorUserId: userId,
+          targetUnitId,
+          kind: PostKind.CHAPTER,
+          body: content ?? "",
+          rootPostUnitId: unit.id,
+          depth: 0,
+        },
+      });
+
+      return tx.post.findUniqueOrThrow({
+        where: { unitId: unit.id },
+        include: chapterPostInclude,
+      });
     });
   }
 
   async update(
     unitId: string,
     req: UpdateChapterInput,
-  ): Promise<ChapterUnitWithRelations> {
-    const { title, content, targetUnitId, status } = req;
+  ): Promise<ChapterPostWithRelations> {
+    const { title, content, targetUnitId, coverUrl, status } = req;
 
-    // Update the unit base fields
-    const unitData: Prisma.UnitUpdateInput = {};
-    if (targetUnitId !== undefined) {
-      unitData.work =
-        targetUnitId === null
-          ? { disconnect: true }
-          : { connect: { id: targetUnitId } };
-    }
-    if (status) {
-      unitData.status = status as UnitStatus;
-    }
-
-    // Update the translation if title or content changed
-    if (title !== undefined || content !== undefined) {
-      const existing = await prisma.unitTranslation.findFirst({
-        where: { unitId },
+    if (targetUnitId !== undefined && targetUnitId !== null) {
+      const target = await prisma.unit.findUnique({
+        where: { id: targetUnitId },
+        select: { type: true },
       });
-      if (existing) {
-        await prisma.unitTranslation.update({
-          where: { unitId_language: { unitId, language: existing.language } },
-          data: {
-            ...(title !== undefined ? { title } : {}),
-            ...(content !== undefined ? { description: content } : {}),
-          },
-        });
-      } else {
-        await prisma.unitTranslation.create({
-          data: {
-            unitId,
-            language: "en",
-            title: title ?? "",
-            description: content ?? undefined,
-          },
-        });
+      if (!target || target.type !== UnitType.BOOK) {
+        throw new Error(
+          `Chapter targetUnitId must reference a Unit(type=BOOK); got ${target?.type ?? "missing"}`,
+        );
       }
     }
 
-    return prisma.unit.update({
-      where: { id: unitId },
-      data: unitData,
-      include: chapterUnitInclude,
+    return prisma.$transaction(async (tx) => {
+      const postPatch: Prisma.PostUpdateInput = {};
+      if (content !== undefined) postPatch.body = content;
+      if (targetUnitId !== undefined) {
+        postPatch.targetUnit =
+          targetUnitId === null
+            ? { disconnect: true }
+            : { connect: { id: targetUnitId } };
+      }
+      if (Object.keys(postPatch).length > 0) {
+        await tx.post.update({ where: { unitId }, data: postPatch });
+      }
+
+      if (status) {
+        await tx.unit.update({
+          where: { id: unitId },
+          data: { status: status as UnitStatus },
+        });
+      }
+
+      if (title !== undefined || coverUrl !== undefined) {
+        const existing = await tx.unitTranslation.findFirst({
+          where: { unitId },
+        });
+        const language =
+          existing?.language ??
+          (await tx.unit.findUniqueOrThrow({
+            where: { id: unitId },
+            select: { defaultLanguage: true },
+          })).defaultLanguage ??
+          "en";
+
+        const nextExtra =
+          coverUrl !== undefined
+            ? (withCoverUrl(existing?.extra, coverUrl ?? undefined) as Prisma.InputJsonValue)
+            : undefined;
+
+        if (existing) {
+          await tx.unitTranslation.update({
+            where: { unitId_language: { unitId, language: existing.language } },
+            data: {
+              ...(title !== undefined ? { title } : {}),
+              ...(nextExtra !== undefined ? { extra: nextExtra } : {}),
+            },
+          });
+        } else {
+          await tx.unitTranslation.create({
+            data: {
+              unitId,
+              language,
+              title: title ?? "",
+              extra: nextExtra,
+            },
+          });
+        }
+      }
+
+      return tx.post.findUniqueOrThrow({
+        where: { unitId },
+        include: chapterPostInclude,
+      });
     });
   }
 
@@ -186,8 +268,8 @@ export class ChapterService {
   }
 
   async exists(unitId: string): Promise<boolean> {
-    const count = await prisma.unit.count({
-      where: { id: unitId, type: UnitType.CHAPTER },
+    const count = await prisma.post.count({
+      where: { unitId, kind: PostKind.CHAPTER },
     });
     return count > 0;
   }
