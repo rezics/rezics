@@ -50,20 +50,27 @@ The GamePlatform model SHALL store platform associations for a Game via a juncti
 
 ### Requirement: Game stores only language-neutral facts
 
-The Game extension table SHALL contain only language-neutral metadata. Title, subtitle, summary, and description SHALL be stored in `UnitTranslation`. Author, developer, publisher, and other attribution SHALL be stored in `PersonCredit` and `OrgCredit` with appropriate `roleKey` values (e.g., `"developer"`, `"publisher"`, `"designer"`, `"composer"`). Tags SHALL be stored in `UnitTag`. Cover images SHALL be referenced by `coverAssetUnitId` pointing to an IMAGE unit.
+The Game extension table SHALL contain only language-neutral metadata. Title, subtitle, summary, and description SHALL be stored in `UnitTranslation`. Author, developer, publisher, and other attribution SHALL be stored in `PersonCredit` and `OrgCredit` with appropriate `roleKey` values (e.g., `"developer"`, `"publisher"`, `"designer"`, `"composer"`). Tags SHALL be stored in `UnitTag`. **Cover images SHALL be stored in `UnitTranslation.extra.coverUrl`** via the `unitTranslationExtraSchema` defined in the `unit-translation` capability. The Game table SHALL NOT hold a `coverUrl` column or `coverAssetUnitId` reference.
 
 #### Scenario: Game schema excludes language-dependent and attribution fields
 
 - GIVEN the Game model in the Prisma schema
 - WHEN inspecting its fields
-- THEN it SHALL NOT contain fields named `title`, `subtitle`, `description`, `language`, `coverUrl`, `tags`, `developer`, or `publisher`
-- AND the only fields present SHALL be `unitId`, `releaseDate`, `versionLabel`, `ageRatingKey`, `isLicensed`, `coverAssetUnitId`, `extra`, `createdAt`, and `updatedAt`
+- THEN it SHALL NOT contain fields named `title`, `subtitle`, `description`, `language`, `coverUrl`, `coverAssetUnitId`, `tags`, `developer`, or `publisher`
+- AND the only fields present SHALL be `unitId`, `releaseDate`, `versionLabel`, `ageRatingKey`, `isLicensed`, `extra`, `createdAt`, and `updatedAt`
 
 #### Scenario: Game display text retrieved from UnitTranslation
 
 - GIVEN a Game with `unitId = "unit-1"` and a `UnitTranslation` record with `unitId = "unit-1"`, `language = "ja"`, `title = "ゼルダの伝説"`
 - WHEN a client requests the game's display information in Japanese
 - THEN the system SHALL return the title from `UnitTranslation` and the language-neutral facts from the Game record
+
+#### Scenario: Game cover URL retrieved from UnitTranslation.extra
+
+- GIVEN a Game with `unitId = "unit-1"` and a `UnitTranslation` with `language = "ja"` and `extra = { coverUrl: "https://example.com/boxart-jp.jpg" }`
+- WHEN a client requests the game's display information in Japanese
+- THEN the returned DTO SHALL expose `coverUrl = "https://example.com/boxart-jp.jpg"` resolved from the translation's `extra` field
+- AND no `coverUrl` column SHALL be read from the Game table
 
 ### Requirement: Work/release support for Game
 
@@ -92,13 +99,14 @@ Game units SHALL support the work/release model via `Unit.workUnitId`, using the
 
 ### Requirement: Game metadata fields
 
-The Game model SHALL include the following metadata fields: `releaseDate` (DateTime, nullable) for the game's release date, `versionLabel` (String, nullable) for version identifiers (e.g., `"1.0"`, `"Definitive Edition"`), `ageRatingKey` (VarChar(32), nullable) for age rating classification keys (e.g., `"esrb_e"`, `"cero_b"`, `"pegi_12"`), `isLicensed` (Boolean, default false) indicating official licensing status, `coverAssetUnitId` (UUID, nullable) referencing an IMAGE unit for the cover art, and `extra` (Json, nullable) for extensible metadata.
+The Game model SHALL include the following metadata fields: `releaseDate` (DateTime, nullable) for the game's release date, `versionLabel` (String, nullable) for version identifiers (e.g., `"1.0"`, `"Definitive Edition"`), `ageRatingKey` (VarChar(32), nullable) for age rating classification keys (e.g., `"esrb_e"`, `"cero_b"`, `"pegi_12"`), `isLicensed` (Boolean, default false) indicating official licensing status, and `extra` (Json, nullable) for extensible metadata. The cover URL is NOT a column on Game; it is stored in `UnitTranslation.extra.coverUrl`.
 
 #### Scenario: Create a game with full metadata
 
 - GIVEN a Unit with `id = "unit-1"` and `type = GAME`
-- WHEN the system creates a Game with `unitId = "unit-1"`, `releaseDate = 2024-03-15`, `versionLabel = "1.2.0"`, `ageRatingKey = "esrb_t"`, `isLicensed = true`, `coverAssetUnitId = "img-1"`
+- WHEN the system creates a Game with `unitId = "unit-1"`, `releaseDate = 2024-03-15`, `versionLabel = "1.2.0"`, `ageRatingKey = "esrb_t"`, `isLicensed = true`
 - THEN the Game record SHALL persist all provided field values
+- AND no cover-related column SHALL exist or be written on the Game table
 
 #### Scenario: Extra JSON stores extensible metadata
 
@@ -111,4 +119,4 @@ The Game model SHALL include the following metadata fields: `releaseDate` (DateT
 
 - WHEN a Game record is created with only `unitId` specified
 - THEN `isLicensed` SHALL default to `false`
-- AND `releaseDate`, `versionLabel`, `ageRatingKey`, `coverAssetUnitId`, and `extra` SHALL default to null
+- AND `releaseDate`, `versionLabel`, `ageRatingKey`, and `extra` SHALL default to null

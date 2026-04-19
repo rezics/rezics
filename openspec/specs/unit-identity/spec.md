@@ -2,7 +2,9 @@
 
 ### Requirement: Unit creation requires a valid UnitType
 
-Every Unit record SHALL be created with a `type` from the `UnitType` enum (`BOOK`, `GAME`, `MEDIA`, `POST`, `TAG`, `REALM`, `SHELF`, `CHAPTER`, `IMAGE`, `VIDEO`, `QUOTE`). The `type` field is immutable after creation.
+Every Unit record SHALL be created with a `type` from the `UnitType` enum (`BOOK`, `GAME`, `MEDIA`, `POST`, `TAG`, `REALM`, `SHELF`, `IMAGE`, `VIDEO`, `QUOTE`, `LINK`, `ENTITY`, `ZONE`). The `type` field is immutable after creation.
+
+`CHAPTER` is NOT a member of `UnitType`. Chapter content is represented as `Unit(type=POST)` paired with a `Post` row whose `kind = CHAPTER`; see the `post-kind-contract` and `type-extension-post` capabilities.
 
 #### Scenario: Create a unit with a valid type
 
@@ -14,6 +16,12 @@ Every Unit record SHALL be created with a `type` from the `UnitType` enum (`BOOK
 #### Scenario: Reject unit creation with invalid type
 
 - WHEN a caller attempts to create a Unit with a type value not in the `UnitType` enum
+- THEN the system SHALL reject the request with a validation error
+- AND no Unit record SHALL be created
+
+#### Scenario: CHAPTER is not a valid UnitType
+
+- WHEN a caller attempts to create a Unit with `type = CHAPTER`
 - THEN the system SHALL reject the request with a validation error
 - AND no Unit record SHALL be created
 

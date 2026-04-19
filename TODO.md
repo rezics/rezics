@@ -1,9 +1,6 @@
 ## Section 1
-- [x] zone-and-unified-search
-- [x] universal-markdown-and-user-brief
-- [x] book-detail-restructure
-- [x] tag-interaction-system
-- [ ] seed-restructure-and-scale
+- [ ] EXCERPT 前端 單 url 解析的話，如何在有兩個unitId 的時候正確定位，比如 章節定位到章節？
+- [ ] 後端如果可行的化，最好同時返回slug，比如 book info page tag 查詢的時候，最好同時返回 slug，然後前端先渲染 slug，再用unit 去查 tags，這樣好歹比 顯示 unitIds 好看
 
 ## Section 2
 - [ ] 還是考慮遷移到 paraglide-js

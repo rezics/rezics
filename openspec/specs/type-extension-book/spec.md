@@ -26,14 +26,14 @@ A Book record SHALL exist as a 1:1 extension of a Unit with `type = BOOK`. The B
 
 ### Requirement: Book MUST NOT contain title, description, language, coverUrl, tags, author, press, or producer fields
 
-The Book extension table SHALL store only language-neutral facts. Title, subtitle, summary, and description SHALL be stored in `UnitTranslation`. Language information SHALL be stored in `UnitSupportLanguage`. Author, press, and producer attribution SHALL be stored in `PersonCredit` and `OrgCredit`. Tags SHALL be stored in `UnitTag`. Cover images SHALL be referenced by `coverAssetUnitId` pointing to an IMAGE unit, not stored as a URL string.
+The Book extension table SHALL store only language-neutral facts. Title, subtitle, summary, and description SHALL be stored in `UnitTranslation`. Language information SHALL be stored in `UnitSupportLanguage`. Author, press, and producer attribution SHALL be stored in `PersonCredit` and `OrgCredit`. Tags SHALL be stored in `UnitTag`. **Cover images SHALL be stored in `UnitTranslation.extra.coverUrl` via the `unitTranslationExtraSchema` defined in the `unit-translation` capability.** The Book table SHALL NOT hold a `coverUrl` column or any IMAGE-unit reference for covers.
 
 #### Scenario: Book schema excludes language-dependent and attribution fields
 
 - GIVEN the Book model in the Prisma schema
 - WHEN inspecting its fields
-- THEN it SHALL NOT contain fields named `title`, `subtitle`, `description`, `language`, `coverUrl`, `tags`, `author`, `press`, or `producer`
-- AND the only fields present SHALL be `unitId`, `isbn13`, `publicationDate`, `pageCount`, `textLength`, `formatKey`, `isLicensed`, `coverAssetUnitId`, `extra`, `createdAt`, and `updatedAt`
+- THEN it SHALL NOT contain fields named `title`, `subtitle`, `description`, `language`, `coverUrl`, `coverAssetUnitId`, `tags`, `author`, `press`, or `producer`
+- AND the only fields present SHALL be `unitId`, `isbn13`, `publicationDate`, `pageCount`, `textLength`, `formatKey`, `isLicensed`, `extra`, `createdAt`, and `updatedAt`
 
 #### Scenario: Book display text retrieved from UnitTranslation
 
@@ -41,6 +41,13 @@ The Book extension table SHALL store only language-neutral facts. Title, subtitl
 - WHEN a client requests the book's display information in English
 - THEN the system SHALL return the title from `UnitTranslation` and the language-neutral facts from the Book record
 - AND no title SHALL be read from or written to the Book table
+
+#### Scenario: Book cover URL retrieved from UnitTranslation.extra
+
+- GIVEN a Book with `unitId = "unit-1"` and a `UnitTranslation` with `language = "en"` and `extra = { coverUrl: "https://example.com/cover.jpg" }`
+- WHEN a client requests the book's display information in English
+- THEN the returned DTO SHALL expose `coverUrl = "https://example.com/cover.jpg"` resolved from the translation's `extra` field
+- AND no `coverUrl` column SHALL be read from the Book table
 
 ### Requirement: ISBN lookup
 
@@ -81,28 +88,6 @@ The BookIndex model SHALL store a JSON-based chapter table of contents for a Boo
 - GIVEN a Book with `unitId = "unit-1"` and an associated BookIndex
 - WHEN the Book record is deleted
 - THEN the associated BookIndex record SHALL also be deleted via cascade
-
-### Requirement: coverAssetUnitId references an IMAGE unit
-
-The Book model's `coverAssetUnitId` field SHALL reference a Unit with `type = IMAGE`. This field is optional and nullable. The system SHALL validate that the referenced Unit exists and has `type = IMAGE` when the field is set.
-
-#### Scenario: Set a valid cover image reference
-
-- GIVEN a Book with `unitId = "unit-1"` and a Unit with `id = "img-1"` and `type = IMAGE`
-- WHEN the owner sets `coverAssetUnitId = "img-1"` on the Book
-- THEN the Book record SHALL persist `coverAssetUnitId = "img-1"`
-
-#### Scenario: Reject invalid cover asset reference
-
-- GIVEN a Book with `unitId = "unit-1"` and a Unit with `id = "unit-2"` and `type = BOOK`
-- WHEN the owner attempts to set `coverAssetUnitId = "unit-2"` on the Book
-- THEN the system SHALL reject the update with a validation error
-- AND the Book's `coverAssetUnitId` SHALL remain unchanged
-
-#### Scenario: Cover asset is optional
-
-- WHEN a Book record is created without specifying `coverAssetUnitId`
-- THEN the Book SHALL be created with `coverAssetUnitId = null`
 
 ### Requirement: Migration from old Book model
 
