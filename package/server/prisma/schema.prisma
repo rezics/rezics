@@ -387,7 +387,7 @@ model ShelfItem {
   shelfUnitId String   @db.Uuid
   itemRef     String   @db.Uuid
   kind        String   @db.VarChar(32)
-  position    String   @db.VarChar(64)
+  position    String   @db.VarChar(64) // Fractional Indexing
   reviewIds   String[] @default([]) @db.Uuid
   tagIds      String[] @default([]) @db.Uuid
 

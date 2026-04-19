@@ -1,17 +1,16 @@
 ## ADDED Requirements
 
-### Requirement: Frontend groups shelf items by kind for batch hydration
+### Requirement: Frontend groups shelf items by kind-to-endpoint for batch hydration
 
-The frontend SHALL group the returned `ShelfItem[]` by `kind` and issue one batch list API call per kind to hydrate item data. The grouping SHALL use existing list endpoints with an `{ ids: [...] }` payload.
+The frontend SHALL group the returned `ShelfItem[]` by the list endpoint associated with each slot's `kind` and issue one batch list API call per distinct endpoint to hydrate item data. The grouping SHALL use existing list endpoints with an `{ ids: [...] }` payload. Kinds that map to the same endpoint (e.g. `review`, `quote`, `post` all use `/post/list`) SHALL be merged into a single call.
 
-#### Scenario: Shelf with mixed kinds
+#### Scenario: Shelf with mixed kinds that share endpoints
 
 - **WHEN** a shelf page contains items with kinds `[book, book, review, tag, book, post]`
-- **THEN** the frontend SHALL issue at most 4 parallel API calls:
-  - `POST /book/list` with book ids
-  - `POST /post/list` with review ids
-  - `POST /tag/list` with tag ids
-  - `POST /post/list` with post ids
+- **THEN** the frontend SHALL issue exactly 3 parallel API calls:
+  - `POST /book/list` with the three book ids
+  - `POST /post/list` with the review and post ids combined
+  - `POST /tag/list` with the tag id
 
 #### Scenario: Shelf with single kind
 
@@ -23,6 +22,16 @@ The frontend SHALL group the returned `ShelfItem[]` by `kind` and issue one batc
 - **WHEN** a shelf page contains items of a kind for which no list endpoint exists
 - **THEN** the frontend SHALL render those items using a generic fallback card based on `kind` and `itemRef`
 - **AND** SHALL NOT issue a list call for that kind
+
+### Requirement: Attachments hydrate through the same pipeline
+
+The per-slot `reviewIds: string[]` and `tagIds: string[]` arrays returned by the shelf items endpoint (projected from `ShelfUnit`) are unit ids. The frontend SHALL hydrate them through the same kind-grouped batch-list pipeline used for primary slots, rather than through a dedicated attachment-fetch path.
+
+#### Scenario: Reviews and tags join the same batch
+
+- **WHEN** a shelf page has book slots whose `reviewIds` reference Post units and `tagIds` reference Tag units
+- **THEN** the review unit ids SHALL be folded into the `/post/list` batch alongside any primary `review`/`post`/`quote` kinds
+- **AND** the tag unit ids SHALL be folded into the `/tag/list` batch alongside any primary `tag` kinds
 
 ### Requirement: Cache seeding from batch hydration
 
@@ -67,19 +76,20 @@ The frontend SHALL provide three sort modes for shelf items: `manual` (default â
 
 ### Requirement: Orphan detection and author-triggered cleanup
 
-The frontend SHALL detect orphaned ShelfItems (rows whose `itemRef` fails hydration) and hide them from the rendered list. On the author's next save action of any kind (add, remove, reorder, retag), the frontend SHALL include the list of orphaned `itemRef` values in the request, and the backend SHALL delete those ShelfItem rows.
+The frontend SHALL detect orphaned slots (rows whose primary `itemRef` fails hydration, typically because the referenced Unit was deleted externally) and hide them from the rendered list. On the author's next save action of any kind (add, remove, reorder, attach review, detach review, set tags), the frontend SHALL include the list of orphaned `itemRef` values in the request, and the backend SHALL delete those `ShelfItem` rows â€” the cascade to `ShelfUnit` handles the rest.
 
-#### Scenario: Hydration failure hides orphaned item
+#### Scenario: Hydration failure hides orphaned slot
 
-- **WHEN** a ShelfItem with `itemRef = X` fails to hydrate (404 from the list endpoint)
-- **THEN** the frontend SHALL hide that item from the rendered list
+- **WHEN** a slot with `itemRef = X` fails to hydrate (no entry returned by the list endpoint for kind)
+- **THEN** the frontend SHALL hide that slot from the rendered list
 - **AND** SHALL NOT show an error message
 
 #### Scenario: Author save triggers orphan cleanup
 
 - **WHEN** the shelf author saves any change while two orphaned itemRefs are tracked
 - **THEN** the save request SHALL include both orphaned `itemRef` values
-- **AND** the backend SHALL delete the corresponding ShelfItem rows in the same transaction as the save
+- **AND** the backend SHALL delete the corresponding `ShelfItem` rows in the same transaction as the save
+- **AND** cascading FKs SHALL delete the orphaned `ShelfUnit` rows bound to those slots
 
 #### Scenario: Non-author viewer does not trigger cleanup
 
