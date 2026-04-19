@@ -4,9 +4,9 @@
 - [x] 1.2 Create `SettingsSidebar` component at `package/app/src/user/component/SettingsSidebar.tsx` — vertical nav list with section links (Profile, Account, Security, Connected Accounts, API Tokens, Preferences). Active link highlighted based on current route.
 - [x] 1.3 Create `SettingsTabBar` component at `package/app/src/user/component/SettingsTabBar.tsx` — mobile-only MUI Tabs (scrollable) for section navigation.
 - [x] 1.4 Create layout route `package/app/src/routes/_mainLayout/user/me/settings/route.tsx` — renders SettingsShell, applies auth guard in `beforeLoad`.
-- [x] 1.5 Create index route `package/app/src/routes/_mainLayout/user/me/settings/index.tsx` — redirects to `/user/me/settings/profile`.
+- [x] 1.5 Create index route `package/app/src/routes/_mainLayout/user/me/settings/index.tsx` — redirects to `/user/me/setting/profile`.
 - [x] 1.6 Create section routes: `profile.tsx`, `account.tsx`, `security.tsx`, `connections.tsx`, `tokens.tsx`, `preferences.tsx` under `package/app/src/routes/_mainLayout/user/me/settings/`.
-- [x] 1.7 Update `/user/me/edit` route to redirect to `/user/me/settings/profile`.
+- [x] 1.7 Update `/user/me/edit` route to redirect to `/user/me/setting/profile`.
 
 ## 2. Shared Settings Components
 
@@ -54,7 +54,7 @@
 ## 9. Cleanup and Validation
 
 - [x] 9.1 Remove `UserEditPage.tsx` and `UserEditPage2.tsx` from `package/app/src/user/page/`. (Note: only UserEditPage2.tsx removed — UserEditPage.tsx is still used by admin $unitId/edit route)
-- [x] 9.2 Update all internal links referencing `/user/me/edit` to point to `/user/me/settings/profile`. (Profile headers already pointed to settings; edit route redirects to settings)
+- [x] 9.2 Update all internal links referencing `/user/me/edit` to point to `/user/me/setting/profile`. (Profile headers already pointed to settings; edit route redirects to settings)
 - [x] 9.3 Verify build passes: `bun run app:dev` starts without errors. (Type check passes for all new files; pre-existing errors unrelated)
 - [ ] 9.4 Test each settings section: verify form submission, loading states, success/error feedback, and data persistence across page reloads.
 - [ ] 9.5 Test auth guard: verify unauthenticated users are redirected to login.

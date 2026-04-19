@@ -96,11 +96,11 @@ The `/user/me` route becomes a redirect to `/user/<currentUserUnitId>`.
 
 **Filter bar config per inner tab:**
 
-| Filter | Reviews | Remarks | Quotes | Posts |
-|--------|---------|---------|--------|-------|
-| Search | body text | body text | body text | body text |
-| Status | DRAFT/PUBLISHED/ARCHIVED | same | same | same |
-| Sort | createdAt, replyCount | createdAt, replyCount | createdAt | createdAt, replyCount |
+| Filter | Reviews                  | Remarks               | Quotes    | Posts                 |
+| ------ | ------------------------ | --------------------- | --------- | --------------------- |
+| Search | body text                | body text             | body text | body text             |
+| Status | DRAFT/PUBLISHED/ARCHIVED | same                  | same      | same                  |
+| Sort   | createdAt, replyCount    | createdAt, replyCount | createdAt | createdAt, replyCount |
 
 **FilterBar component** is generic and reusable — it accepts a config object defining which filters to show and their options.
 
@@ -143,7 +143,7 @@ user/
 
 ## Risks / Trade-offs
 
-**[Route migration breaks existing links]** → Add redirect routes from old paths (`/user/me/follow` → `/user/<id>/followers?filter=followers`, `/user/me/edit` → `/user/<id>/settings/profile` via settings-page change). Keep redirects for at least one release cycle.
+**[Route migration breaks existing links]** → Add redirect routes from old paths (`/user/me/follow` → `/user/<id>/followers?filter=followers`, `/user/me/edit` → `/user/<id>/setting/profile` via settings-page change). Keep redirects for at least one release cycle.
 
 **[Overview data requires multiple queries]** → Stats, keywords, realms, and recent activity each need a separate query. Use `React.Suspense` boundaries per section so the page loads progressively. The queries are lightweight (counts and small lists).
 
@@ -151,4 +151,4 @@ user/
 
 **[L2 chip state in URL search params]** → May cause URL noise. Mitigated by using sensible defaults (omit param when default is selected) and `replaceState` navigation to avoid polluting browser history.
 
-**[Deleting UserEditPage before settings-page is implemented]** → Keep UserEditPage temporarily; mark as deprecated. Remove only after settings-page change lands. The profile page "Edit profile" button should link to `/user/me/settings/profile` — if settings-page isn't implemented yet, link to the legacy edit route with a TODO comment.
+**[Deleting UserEditPage before settings-page is implemented]** → Keep UserEditPage temporarily; mark as deprecated. Remove only after settings-page change lands. The profile page "Edit profile" button should link to `/user/me/setting/profile` — if settings-page isn't implemented yet, link to the legacy edit route with a TODO comment.

@@ -9,7 +9,7 @@ export const SettingsTabBar: FC = () => {
   const pathname = location.pathname;
 
   const activeIdx = SETTINGS_NAV.findIndex((nav) =>
-    pathname.startsWith(`/user/me/settings/${nav.path}`),
+    pathname.startsWith(`/user/me/setting/${nav.path}`),
   );
 
   return (
@@ -21,7 +21,7 @@ export const SettingsTabBar: FC = () => {
       sx={{ borderBottom: 1, borderColor: "divider" }}
       onChange={(_e, idx) => {
         const nav = SETTINGS_NAV[idx];
-        void navigate({ to: `/user/me/settings/${nav.path}` });
+        void navigate({ to: `/user/me/setting/${nav.path}` });
       }}
     >
       {SETTINGS_NAV.map((nav) => (

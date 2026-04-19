@@ -30,7 +30,7 @@ export const SettingsSidebar: FC = () => {
   return (
     <List disablePadding>
       {SETTINGS_NAV.map(({ label, path, icon: Icon }) => {
-        const fullPath = `/user/me/settings/${path}`;
+        const fullPath = `/user/me/setting/${path}`;
         const isActive = pathname.startsWith(fullPath);
 
         return (

@@ -39,7 +39,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
       {/* Mobile: compact horizontal layout */}
       <div className="relative flex items-start gap-4 py-4 px-4 md:hidden">
         {isCurrentUser && (
-          <Link to="/user/me/settings" className="absolute top-3 right-3">
+          <Link to="/user/me/setting" className="absolute top-3 right-3">
             <IconButton size="small">
               <SettingsIcon fontSize="small" />
             </IconButton>
@@ -144,7 +144,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
 
         <div className="w-full">
           {isCurrentUser ? (
-            <Link to="/user/me/settings/profile" className="block">
+            <Link to="/user/me/setting/profile" className="block">
               <Button variant="outlined" size="small" fullWidth>
                 Edit profile
               </Button>

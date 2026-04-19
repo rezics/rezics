@@ -12,7 +12,7 @@ The app currently has no dedicated settings page. Profile editing is done via `U
 - **Add API Tokens section** — list tokens, create new token (name, scopes, expiry), edit token metadata, revoke tokens, show raw token on creation (one-time display).
 - **Add Preferences section** — language preferences, realm tag preferences, keyword vocabulary management (add/remove keywords).
 - **Remove `UserEditPage.tsx` and `UserEditPage2.tsx`** — replaced by settings profile section.
-- **Wire "Edit profile" button** on the profile page (from `profile-page-redesign` change) to `/user/me/settings/profile`.
+- **Wire "Edit profile" button** on the profile page (from `profile-page-redesign` change) to `/user/me/setting/profile`.
 
 ## Capabilities
 
@@ -32,7 +32,7 @@ _(none — all backend APIs already exist; this change adds frontend UI only)_
 
 - **Affected packages**: `package/app` (primary — all settings UI), `package/api` (no changes — all mutations and queries already exist: `userMutations`, `authMutations`, `tokenMutations`, `userQueries`, `authQueries`, `tokenQueries`)
 - **Components removed**: `UserEditPage.tsx`, `UserEditPage2.tsx` — fully replaced by settings sections.
-- **New routes**: `/user/me/settings`, `/user/me/settings/profile`, `/user/me/settings/account`, `/user/me/settings/security`, `/user/me/settings/connections`, `/user/me/settings/tokens`, `/user/me/settings/preferences`.
-- **Dependency on `profile-page-redesign`**: The "Edit profile" and gear icon buttons on the profile page should link to `/user/me/settings/profile`. If profile-page-redesign is not yet landed, the settings page still works as a standalone route.
+- **New routes**: `/user/me/settings`, `/user/me/setting/profile`, `/user/me/settings/account`, `/user/me/settings/security`, `/user/me/settings/connections`, `/user/me/settings/tokens`, `/user/me/settings/preferences`.
+- **Dependency on `profile-page-redesign`**: The "Edit profile" and gear icon buttons on the profile page should link to `/user/me/setting/profile`. If profile-page-redesign is not yet landed, the settings page still works as a standalone route.
 - **No backend changes required** — all functionality uses existing API endpoints.
-- **Backward compatibility**: `/user/me/edit` should redirect to `/user/me/settings/profile`.
+- **Backward compatibility**: `/user/me/edit` should redirect to `/user/me/setting/profile`.
