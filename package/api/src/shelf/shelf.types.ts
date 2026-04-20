@@ -46,6 +46,6 @@ export type {
 
 export type ShelfFormData = CreateShelfInput;
 export type ShelfFilters = Partial<ShelfListQuery>;
-export type ShelfView = "grid" | "list" | "review";
+export type ShelfView = "nested" | "flat" | "masonry";
 
 export type ShelfSortMode = "manual" | "time" | "title";

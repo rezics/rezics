@@ -1,18 +1,16 @@
-import GridViewIcon from "@mui/icons-material/GridView";
-import ListIcon from "@mui/icons-material/List";
-import RateReviewIcon from "@mui/icons-material/RateReview";
+import ViewAgendaIcon from "@mui/icons-material/ViewAgenda";
+import ViewListIcon from "@mui/icons-material/ViewList";
+import ViewQuiltIcon from "@mui/icons-material/ViewQuilt";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import Stack from "@mui/material/Stack";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
-import type {
-  EnrichedShelfItem,
-  ShelfSortMode,
-  ShelfView,
-} from "@rezics/api/shelf";
+import type { ShelfSortMode, ShelfView } from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
   shelfItemsQuery,
@@ -23,27 +21,40 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
-import { titleOf } from "./titleOf";
+import { deriveShelfStream } from "../models/shelfStream";
 
 interface ShelfPageProps {
   unitId: string;
 }
 
-const titleCollator = new Intl.Collator(undefined, {
-  numeric: true,
-  sensitivity: "base",
-});
+const LEGACY_VIEW_MODE_MAP: Record<string, ShelfView> = {
+  review: "nested",
+  list: "flat",
+  grid: "masonry",
+  nested: "nested",
+  flat: "flat",
+  masonry: "masonry",
+};
 
-const GRID_COLUMNS_SX = {
-  xs: "repeat(2, 1fr)",
-  sm: "repeat(3, 1fr)",
-  md: "repeat(4, 1fr)",
-  lg: "repeat(5, 1fr)",
+function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
+  if (typeof raw !== "string") return undefined;
+  return LEGACY_VIEW_MODE_MAP[raw];
+}
+
+// MOCK: masonry layout uses CSS column-count as a placeholder until the real
+// masonry primitive lands. The column breaks are browser-driven and not
+// height-balanced; the emitted stream and the enum value are real.
+const MASONRY_COLUMNS_SX = {
+  xs: 2,
+  sm: 3,
+  md: 4,
+  lg: 5,
 } as const;
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
-  const [viewMode, setViewMode] = useState<ShelfView>("grid");
+  const [viewMode, setViewMode] = useState<ShelfView>("nested");
   const [sortMode, setSortMode] = useState<ShelfSortMode>("manual");
+  const [sortPrimeOnly, setSortPrimeOnly] = useState<boolean>(true);
 
   const detailQuery = useQuery(shelfDetailQuery(unitId));
   const itemsQuery = useQuery(shelfItemsQuery(unitId));
@@ -52,9 +63,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const items = itemsQuery.data?.items ?? [];
   const title = shelf?.translations?.[0]?.title ?? "Shelf";
 
-  const savedViewMode = (shelf?.extra as any)?.viewMode as
-    | ShelfView
-    | undefined;
+  const savedViewMode = normalizePersistedViewMode(
+    (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
+  );
   const effectiveViewMode = savedViewMode ?? viewMode;
 
   const hydration = useHydratedShelfItems(items);
@@ -62,34 +73,35 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const isOwner = !!currentUser && currentUser.unitId === shelf?.userId;
   const cleanupMutation = useCleanupOrphansMutation();
 
-  const sortedEnriched = useMemo<EnrichedShelfItem[]>(() => {
-    const arr = [...hydration.enriched];
-    if (sortMode === "manual") {
-      arr.sort((a, b) => (a.item.position < b.item.position ? -1 : 1));
-    } else if (sortMode === "time") {
-      arr.sort((a, b) => {
-        const aT = a.item.createdAt
-          ? new Date(a.item.createdAt).getTime()
-          : 0;
-        const bT = b.item.createdAt
-          ? new Date(b.item.createdAt).getTime()
-          : 0;
-        return bT - aT;
-      });
-    } else if (sortMode === "title") {
-      arr.sort((a, b) =>
-        titleCollator.compare(
-          titleOf(a.item, a.primary),
-          titleOf(b.item, b.primary),
-        ),
-      );
-    }
-    return arr;
-  }, [hydration.enriched, sortMode]);
-
-  const visibleEnriched = sortedEnriched.filter(
-    (e) => !hydration.orphanItemRefs.includes(e.item.itemRef),
+  const orphanRefs = useMemo(
+    () => new Set(hydration.orphanItemRefs),
+    [hydration.orphanItemRefs],
   );
+
+  const stream = useMemo(
+    () =>
+      deriveShelfStream(
+        hydration.enriched,
+        effectiveViewMode,
+        sortMode,
+        sortPrimeOnly,
+      ),
+    [hydration.enriched, effectiveViewMode, sortMode, sortPrimeOnly],
+  );
+
+  const visibleStream = useMemo(
+    () =>
+      stream.filter((e) =>
+        e.kind === "prime"
+          ? !orphanRefs.has(e.enriched.item.itemRef)
+          : !orphanRefs.has(e.parentItemRef),
+      ),
+    [stream, orphanRefs],
+  );
+
+  const showSortScopeToggle =
+    (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
+    sortMode !== "manual";
 
   if (detailQuery.isLoading) {
     return (
@@ -118,20 +130,20 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               size="small"
               onChange={(_, v) => v && setViewMode(v)}
             >
-              <ToggleButton value="review">
-                <RateReviewIcon fontSize="small" />
+              <ToggleButton value="nested">
+                <ViewAgendaIcon fontSize="small" />
               </ToggleButton>
-              <ToggleButton value="list">
-                <ListIcon fontSize="small" />
+              <ToggleButton value="flat">
+                <ViewListIcon fontSize="small" />
               </ToggleButton>
-              <ToggleButton value="grid">
-                <GridViewIcon fontSize="small" />
+              <ToggleButton value="masonry">
+                <ViewQuiltIcon fontSize="small" />
               </ToggleButton>
             </ToggleButtonGroup>
           </Stack>
         </Stack>
 
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
           <Typography variant="body2" color="text.secondary">
             Sort
           </Typography>
@@ -145,6 +157,18 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
             <ToggleButton value="time">Time</ToggleButton>
             <ToggleButton value="title">Title</ToggleButton>
           </ToggleButtonGroup>
+          {showSortScopeToggle && (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={sortPrimeOnly}
+                  onChange={(_, checked) => setSortPrimeOnly(checked)}
+                />
+              }
+              label="Sort prime only"
+            />
+          )}
           {hydration.orphanItemRefs.length > 0 && (
             <>
               <Typography variant="caption" color="warning.main">
@@ -174,32 +198,44 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           <Box display="flex" justifyContent="center" py={4}>
             <CircularProgress size={20} />
           </Box>
-        ) : visibleEnriched.length === 0 ? (
+        ) : visibleStream.length === 0 ? (
           <Typography color="text.secondary" textAlign="center" py={4}>
             No items in this shelf
           </Typography>
-        ) : effectiveViewMode === "grid" ? (
+        ) : effectiveViewMode === "masonry" ? (
           <Box
             sx={{
-              display: "grid",
-              gap: 2,
-              gridTemplateColumns: GRID_COLUMNS_SX,
+              columnCount: MASONRY_COLUMNS_SX,
+              columnGap: 2,
+              "& > *": {
+                breakInside: "avoid",
+                mb: 2,
+                display: "block",
+              },
             }}
           >
-            {visibleEnriched.map((enriched) => (
+            {visibleStream.map((entry) => (
               <ShelfItemRenderer
-                key={enriched.item.itemRef}
-                enriched={enriched}
+                key={
+                  entry.kind === "prime"
+                    ? `p:${entry.enriched.item.itemRef}`
+                    : `r:${entry.parentItemRef}:${entry.review.unitId}`
+                }
+                entry={entry}
                 viewMode={effectiveViewMode}
               />
             ))}
           </Box>
         ) : (
           <Stack spacing={1}>
-            {visibleEnriched.map((enriched) => (
+            {visibleStream.map((entry) => (
               <ShelfItemRenderer
-                key={enriched.item.itemRef}
-                enriched={enriched}
+                key={
+                  entry.kind === "prime"
+                    ? `p:${entry.enriched.item.itemRef}`
+                    : `r:${entry.parentItemRef}:${entry.review.unitId}`
+                }
+                entry={entry}
                 viewMode={effectiveViewMode}
               />
             ))}

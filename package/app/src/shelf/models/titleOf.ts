@@ -5,10 +5,6 @@ interface TagLike {
   label?: string;
 }
 
-/**
- * Pure sort-only helper: derive a title string for a shelf item from the
- * cached DTO. The rendering path does not consume this helper.
- */
 export function titleOf(item: ShelfItemDTO, cached: unknown): string {
   switch (item.kind) {
     case "book": {
