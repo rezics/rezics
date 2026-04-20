@@ -19,7 +19,8 @@ import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { TextSearchInputWithIcon } from "@/search/components/TextSearchInputWithIcon.tsx";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { buildUnitUrl } from "@/shared/utils/build-url";
 
 type Unit = UnitDTO;
@@ -109,15 +110,23 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   const { t } = useTranslation();
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
-  const search = useRouterState({ select: (s) => s.location.search ?? "" });
-  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
+  const routerSearch = useRouterState({
+    select: (s) => s.location.search ?? "",
+  });
+  const searchParams = useMemo(
+    () => new URLSearchParams(routerSearch),
+    [routerSearch],
+  );
 
   const isSingle = mode === "single";
 
   const EXTERNAL_PAGE_SIZE = 50;
 
+  const search = useSearchQuery({});
+  const keyword = search.query.keyword ?? "";
+  const keywordBind = search.bind("keyword");
+
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [keyword, setKeyword] = useState<string>("");
   const [tab, setTab] = useState<string>(types[0] ?? "");
   const [startMap, setStartMap] = useState<Record<string, number>>({});
 
@@ -225,11 +234,9 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
         setCurrentPage={setCurrentPage}
         sortControl={
           <div className="mb-4">
-            <TextSearchInputWithIcon
-              onSearch={(info) => {
-                setKeyword(info ?? "");
-              }}
-              defaultValue={{ keyword: keyword ?? "" }}
+            <KeywordInput
+              value={keywordBind.value ?? ""}
+              onChange={(v) => keywordBind.onChange(v)}
               placeholder={t("units.search_placeholder")}
             />
             {!isSingle && (

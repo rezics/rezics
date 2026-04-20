@@ -15,7 +15,8 @@ import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
 import { BookListView } from "@/book-library/components/BookList/BookListView";
 import { ExcerptList } from "@/excerpt";
 import { ReviewList } from "@/review/components/list/ReviewList";
-import { TextSearchInputWithIcon } from "@/search/components/TextSearchInputWithIcon.tsx";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { ShelfCard } from "@/shelf/components/ShelfCard";
 
 export interface UserUnitsPageProps {
@@ -62,7 +63,9 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   const [tab, setTab] = useState<TabKey>("shelf");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [keyword, setKeyword] = useState<string>("");
+  const search = useSearchQuery({});
+  const keyword = search.query.keyword ?? "";
+  const keywordBind = search.bind("keyword");
 
   const [startShelf, setStartShelf] = useState<number>(0);
   const [startReview, setStartReview] = useState<number>(0);
@@ -313,11 +316,9 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   return (
     <div className="mx-auto p-2 mt-4">
       <div className="mb-4">
-        <TextSearchInputWithIcon
-          onSearch={(info) => {
-            setKeyword(info ?? "");
-          }}
-          defaultValue={{ keyword: keyword ?? "" }}
+        <KeywordInput
+          value={keywordBind.value ?? ""}
+          onChange={(v) => keywordBind.onChange(v)}
           placeholder="Search user's content"
         />
         <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 2, mb: 2 }}>

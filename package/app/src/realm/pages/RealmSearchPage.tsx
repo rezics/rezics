@@ -3,8 +3,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
 import type { RealmDTO, RealmSearchDocument } from "@rezics/contract";
-import { useState } from "react";
-import { TextSearchInputWithIcon } from "@/search/components/TextSearchInputWithIcon";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { RealmCard } from "../components/RealmCard";
 
 function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
@@ -27,7 +27,9 @@ function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
 }
 
 export function RealmSearchPage() {
-  const [keyword, setKeyword] = useState("");
+  const search = useSearchQuery({});
+  const keyword = search.query.keyword ?? "";
+  const keywordBind = search.bind("keyword");
 
   const { data, isLoading } = useRealmSearchQuery({
     keyword: keyword || undefined,
@@ -42,9 +44,9 @@ export function RealmSearchPage() {
         Search Realms
       </Typography>
       <Box mb={3}>
-        <TextSearchInputWithIcon
-          onSearch={(info) => setKeyword(info ?? "")}
-          defaultValue={{ keyword }}
+        <KeywordInput
+          value={keywordBind.value ?? ""}
+          onChange={(v) => keywordBind.onChange(v)}
           placeholder="Search realms..."
         />
       </Box>

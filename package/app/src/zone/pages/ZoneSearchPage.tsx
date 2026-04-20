@@ -2,9 +2,9 @@ import { Typography } from "@mui/material";
 import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
 import type React from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AdvancedSearch, SearchResultList } from "@/search";
-import { searchQueryToOptions } from "@/search/models/searchQueryToOptions";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { useZone } from "../hooks/useZone";
 
 export type ZoneSearchPageProps = {
@@ -17,6 +17,26 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   initialKeyword,
 }) => {
   const { zone, isLoading: zoneLoading } = useZone(slug);
+
+  const implicitInitial = useMemo<SearchQuery>(() => {
+    if (!zone?.filters) return {};
+    const z = zone.filters;
+    const out: SearchQuery = {};
+    const types = Array.isArray(z.type) ? z.type : z.type ? [z.type] : [];
+    if (types.length) out.type = types;
+    if (z.tags?.length) out.tags = z.tags;
+    if (z.realmId) out.realm = { slug: z.realmId };
+    if (z.languages?.length) out.languages = z.languages;
+    if (z.nsfw !== undefined) out.nsfw = z.nsfw;
+    if (z.isLicensed !== undefined) out.isLicensed = z.isLicensed;
+    return out;
+  }, [zone]);
+
+  const search = useSearchQuery({
+    initial: initialKeyword ? { keyword: initialKeyword } : {},
+    implicitInitial,
+  });
+
   const [searchOpts, setSearchOpts] = useState<ContentSearchOptions>({});
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -40,9 +60,8 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
     );
   }
 
-  const handleSearch = (query: SearchQuery) => {
-    const opts = searchQueryToOptions(query, zone.filters);
-    setSearchOpts(opts);
+  const handleSubmit = () => {
+    setSearchOpts(search.toOptions());
     setHasSearched(true);
   };
 
@@ -52,9 +71,11 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
         Search in {zone.name}
       </Typography>
       <AdvancedSearch
-        preAppliedFilters={zone.filters}
-        onSearch={handleSearch}
-        initialQuery={initialKeyword ? { keyword: initialKeyword } : undefined}
+        query={search.query}
+        bind={search.bind}
+        patch={search.patch}
+        implicit={search.implicit}
+        onSubmit={handleSubmit}
       />
       {hasSearched && (
         <div className="mt-6">

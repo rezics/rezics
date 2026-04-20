@@ -24,6 +24,27 @@ export async function searchContent(
     }
   }
 
+  // Post kind filter (only meaningful when type includes POST)
+  if (opts.postKind?.length) {
+    if (opts.postKind.length === 1) {
+      filter.push(`postKind = "${opts.postKind[0]}"`);
+    } else {
+      filter.push(
+        `postKind IN [${opts.postKind.map((k) => `"${k}"`).join(", ")}]`,
+      );
+    }
+  }
+
+  // Text length range (books with textLength field on the content index)
+  if (opts.textLength) {
+    if (typeof opts.textLength.min === "number") {
+      filter.push(`textLength >= ${opts.textLength.min}`);
+    }
+    if (typeof opts.textLength.max === "number") {
+      filter.push(`textLength <= ${opts.textLength.max}`);
+    }
+  }
+
   // Global tag filter — tags (SlugRef[]) takes precedence over tagIds
   if (opts.tags?.length) {
     const resolvedTagIds = await resolveSlugRefs(opts.tags);

@@ -7,12 +7,15 @@ import { UnitType } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
-import { TextSearchInputWithIcon } from "@/search/components/TextSearchInputWithIcon";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 
 export function ReviewSearchPage() {
-  const [keyword, setKeyword] = useState("");
+  const search = useSearchQuery({});
   const [start, setStart] = useState(0);
   const limit = 20;
+  const keyword = search.query.keyword ?? "";
+  const keywordBind = search.bind("keyword");
 
   const { data, isLoading } = useQuery(
     buildMeiliUnitQuery({
@@ -34,12 +37,10 @@ export function ReviewSearchPage() {
       </Typography>
 
       <Box mb={3}>
-        <TextSearchInputWithIcon
-          onSearch={(info) => {
-            setKeyword(info ?? "");
-            setStart(0);
-          }}
-          defaultValue={{ keyword }}
+        <KeywordInput
+          value={keywordBind.value ?? ""}
+          onChange={(v) => keywordBind.onChange(v)}
+          onSubmit={() => setStart(0)}
           placeholder="Search reviews..."
         />
       </Box>

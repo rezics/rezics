@@ -1,3 +1,4 @@
+import type { SearchQuery } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import { buildSearchPath } from "../utils/searchQuery";
 
@@ -8,16 +9,8 @@ export function useHomeSearchNavigate() {
     navigateByKeyword: (keyword: string) => {
       navigate({ to: buildSearchPath({ keyword }) });
     },
-    navigateBySearchInfo: (value: {
-      keyword?: string;
-      tags?: string[];
-      tagIds?: string[];
-      type?: string | string[];
-      realmId?: string;
-      nsfw?: boolean;
-      isLicensed?: boolean;
-    }) => {
-      navigate({ to: buildSearchPath(value) });
+    navigateByQuery: (query: SearchQuery) => {
+      navigate({ to: buildSearchPath(query) });
     },
   };
 }

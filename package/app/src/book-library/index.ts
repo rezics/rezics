@@ -67,11 +67,9 @@ export {
   type BookListViewItemProps,
   type BookListViewProps,
 } from "./components/BookList/BookListView";
-// Backward compatible aliases
 export {
-  BookSearchInput,
-  BookSearchInput as BookSearchContainer,
-  type BookSearchInputProps,
+  BookSearch,
+  type BookSearchProps,
 } from "./components/BookSearch/BookSearch";
 export {
   ChapterLeaf,

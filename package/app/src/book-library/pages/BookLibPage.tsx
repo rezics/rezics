@@ -1,14 +1,18 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import { type ContentSearchDocument, DEFAULT_LANGUAGE } from "@rezics/contract";
+import {
+  type ContentSearchDocument,
+  DEFAULT_LANGUAGE,
+  type SearchQuery,
+} from "@rezics/contract";
 import type { UniversalPaginatorHandle } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { SearchInfo } from "@/search";
 import type { BookLibSortKey } from "@/search/components/SearchFilter";
 import { useInjectedTags } from "@/search/hooks/useInjectedTags";
-import type { InjectedTag } from "@/search/models/injectedTags";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { parseSearchString } from "@/search/models/searchQuery";
 
 import { BookLibSectionRef } from "../sections/BookLibSection";
 
@@ -25,31 +29,37 @@ export const BookLibPage: React.FC = () => {
     tags?: string;
     keyword?: string;
   };
-  const [selectedTags, setSelectedTags] = useState<InjectedTag[]>(() => {
-    if (injectedTags && injectedTags.length > 0) return injectedTags;
-    const slugs = urlSearch.tags?.split(",").filter(Boolean) ?? [];
-    return slugs.map((slug) => ({ slug, unitId: slug, name: slug }));
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: seed is intentionally frozen at mount; subsequent URL/tag changes go through user patches.
+  const initial = useMemo<SearchQuery>(() => {
+    const urlSlugs = urlSearch.tags?.split(",").filter(Boolean) ?? [];
+    const seededTags = injectedTags?.length
+      ? injectedTags.map((t) => ({ slug: t.slug ?? "", unitId: t.unitId }))
+      : urlSlugs.map((slug) => ({ slug }));
+    return {
+      keyword: urlSearch.keyword ?? undefined,
+      tags: seededTags.length ? seededTags : undefined,
+    };
+  }, []);
+
+  const search = useSearchQuery({
+    initial,
+    implicitInitial: { type: ["BOOK"] },
+    middleware: parseSearchString,
   });
-  const tagIds = useMemo(
-    () => selectedTags.map((t) => t.unitId),
-    [selectedTags],
-  );
-  const removeSelectedTag = (unitId: string) =>
-    setSelectedTags((prev) => prev.filter((t) => t.unitId !== unitId));
-  const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
-    keyword: urlSearch.keyword ?? "",
-    nsfw: false,
-    isLicensed: undefined,
-  });
+
   const [start, setStart] = useState<number>(0);
+  const [searchOpts, setSearchOpts] = useState(() => search.toOptions());
+
+  const onSearchSubmit = () => {
+    setSearchOpts(search.toOptions());
+    setStart(0);
+    ref.current?.resetPaginationPageNumber();
+  };
 
   const { data, isLoading, error } = useQuery(
     contentSearchQueryOptions({
-      keyword: currentQuery.keyword || undefined,
-      type: "BOOK",
-      tagIds: tagIds.length ? tagIds : undefined,
-      nsfw: currentQuery.nsfw ?? false,
-      isLicensed: currentQuery.isLicensed,
+      ...searchOpts,
       offset: start,
       limit: EXTERNAL_PAGE_SIZE,
     }),
@@ -63,11 +73,7 @@ export const BookLibPage: React.FC = () => {
   async function handlePreRequestData(page: number) {
     const fetchedData = await queryClient.fetchQuery(
       contentSearchQueryOptions({
-        keyword: currentQuery.keyword || undefined,
-        type: "BOOK",
-        tagIds: tagIds.length ? tagIds : undefined,
-        nsfw: currentQuery.nsfw ?? false,
-        isLicensed: currentQuery.isLicensed,
+        ...searchOpts,
         offset: (page - 1) * EXTERNAL_PAGE_SIZE,
         limit: EXTERNAL_PAGE_SIZE,
       }),
@@ -135,10 +141,8 @@ export const BookLibPage: React.FC = () => {
       totalItems={totalItems}
       isLoading={isLoading}
       error={error}
-      currentQuery={currentQuery}
-      setCurrentQuery={setCurrentQuery}
-      selectedTags={selectedTags}
-      onRemoveSelectedTag={removeSelectedTag}
+      search={search}
+      onSearchSubmit={onSearchSubmit}
       sortConfig={sortConfig}
       handleNeedMoreData={handleNeedMoreData}
       handlePreRequestData={handlePreRequestData}

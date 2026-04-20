@@ -5,18 +5,22 @@ import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { TextSearchInputWithIcon } from "@/search/components/TextSearchInputWithIcon";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { ShelfCard } from "../components/ShelfCard";
 
 export function ShelfSearchPage() {
-  const [keyword, setKeyword] = useState("");
+  const search = useSearchQuery({
+    implicitInitial: { type: ["SHELF"] },
+  });
   const [offset, setOffset] = useState(0);
   const limit = 20;
+  const keywordBind = search.bind("keyword");
+  const searchOpts = search.toOptions();
 
   const { data, isLoading } = useQuery(
     contentSearchQueryOptions({
-      type: "SHELF",
-      keyword: keyword || undefined,
+      ...searchOpts,
       offset,
       limit,
     }),
@@ -34,12 +38,10 @@ export function ShelfSearchPage() {
       </Typography>
 
       <Box mb={3}>
-        <TextSearchInputWithIcon
-          onSearch={(info) => {
-            setKeyword(info ?? "");
-            setOffset(0);
-          }}
-          defaultValue={{ keyword }}
+        <KeywordInput
+          value={keywordBind.value ?? ""}
+          onChange={(v) => keywordBind.onChange(v)}
+          onSubmit={() => setOffset(0)}
           placeholder="Search shelves..."
         />
       </Box>

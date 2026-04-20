@@ -1,77 +1,128 @@
-import type { ContentSearchOptions } from "@rezics/contract";
+import TuneIcon from "@mui/icons-material/Tune";
+import { IconButton } from "@mui/material";
+import type { SearchQuery } from "@rezics/contract";
 import type React from "react";
-import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type SearchInfo, SearchInput, toContentSearchOptions } from "@/search";
+import {
+  AppliedFilterChips,
+  KeywordInput,
+  LicensedToggle,
+  NsfwToggle,
+  TagGroupSuggestions,
+  TagPicker,
+  WordCountRangeInput,
+} from "@/search/components/primitive";
+import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
 
-/** Available sort types for book search. */
-export type BookSortType =
-  | "relevance"
-  | "createdAt"
-  | "updatedAt"
-  | "favorites"
-  | "wordCount"
-  | "monthlyVotes"
-  | "recommendation"
-  | "custom";
-
-/** Props for BookSearchInput component. */
-export type BookSearchInputProps = {
-  /** Callback when search is triggered. */
-  onSearch: (options: ContentSearchOptions) => void;
-  /** Default search values. */
-  defaultValue?: SearchInfo;
-  /** Whether to hide the word count filter. */
-  hiddenWordCountFilter?: boolean;
+export type BookSearchProps = {
+  query: UseSearchQueryReturn["query"];
+  bind: UseSearchQueryReturn["bind"];
+  patch: UseSearchQueryReturn["patch"];
+  implicit: UseSearchQueryReturn["implicit"];
+  onSubmit: () => void;
+  onToggleAdvanced?: () => void;
+  middleware?: UseSearchQueryReturn["middleware"];
+  tagGroups?: Record<string, string[]>;
+  showWordCount?: boolean;
+  keywordPlaceholder?: string;
 };
 
-/**
- * Book Search Input - Search bar with filters for book library.
- *
- * Provides keyword search, tag filtering, and other search options.
- */
-export const BookSearchInput: React.FC<BookSearchInputProps> = ({
-  onSearch,
-  defaultValue,
-  hiddenWordCountFilter = false,
+const DEFAULT_TAG_GROUPS: Record<string, string[]> = {
+  presetTags: [
+    "fiction",
+    "nonfiction",
+    "mystery",
+    "romance",
+    "history",
+    "science",
+    "fantasy",
+    "philosophy",
+  ],
+};
+
+export const BookSearch: React.FC<BookSearchProps> = ({
+  query,
+  bind,
+  patch,
+  implicit,
+  onSubmit,
+  onToggleAdvanced,
+  middleware,
+  tagGroups = DEFAULT_TAG_GROUPS,
+  showWordCount = true,
+  keywordPlaceholder,
 }) => {
   const { t } = useTranslation();
-  const [sort, _setSort] = useState<{
-    type?: BookSortType;
-    order?: "asc" | "desc";
-  }>({ order: "desc" });
+  const keyword = bind("keyword");
+  const tags = bind("tags");
+  const nsfw = bind("nsfw");
+  const isLicensed = bind("isLicensed");
+  const textLength = bind("textLength");
 
-  const tagGroups = useMemo(() => ({}), []);
-
-  const handleSearch = (info: SearchInfo) => {
-    const options = toContentSearchOptions(info);
-
-    if (sort.type && sort.type !== "relevance") {
-      const sortField =
-        sort.type === "createdAt" || sort.type === "updatedAt"
-          ? sort.type
-          : "createdAt";
-      options.sort = {
-        field: sortField,
-        order: sort.order,
-      };
-    }
-
-    onSearch(options);
-  };
+  const rendered: (keyof SearchQuery)[] = [
+    "keyword",
+    "tags",
+    "nsfw",
+    "isLicensed",
+  ];
+  if (showWordCount) rendered.push("textLength");
 
   return (
-    <div>
-      <div id="book-search-input">
-        <SearchInput
-          onSearch={handleSearch}
-          placeholder={t("placeholders.search_books")}
-          tagGroups={tagGroups}
-          defaultValue={defaultValue}
-          hiddenWordCountFilter={hiddenWordCountFilter}
-        />
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <KeywordInput
+            value={keyword.value ?? ""}
+            onChange={(v) => keyword.onChange(v)}
+            onPatch={(p) => patch(p)}
+            onSubmit={onSubmit}
+            middleware={middleware}
+            placeholder={keywordPlaceholder ?? t("placeholders.search_books")}
+          />
+        </div>
+        {onToggleAdvanced && (
+          <IconButton onClick={onToggleAdvanced} aria-label="advanced search">
+            <TuneIcon />
+          </IconButton>
+        )}
       </div>
-      <div className="mt-4" />
+
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <TagPicker
+            value={tags.value ?? []}
+            onChange={(v) => tags.onChange(v.length ? v : undefined)}
+            label={t("search.input.tags_label")}
+            placeholder={t("search.input.tags_hint")}
+          />
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {showWordCount && (
+            <WordCountRangeInput
+              value={textLength.value}
+              onChange={textLength.onChange}
+              label={t("search.input.word_count_label")}
+            />
+          )}
+          <NsfwToggle value={nsfw.value} onChange={nsfw.onChange} />
+          <LicensedToggle
+            value={isLicensed.value}
+            onChange={isLicensed.onChange}
+          />
+        </div>
+      </div>
+
+      <AppliedFilterChips
+        query={query}
+        hide={implicit}
+        rendered={rendered}
+        onRemove={patch}
+      />
+
+      <TagGroupSuggestions
+        groups={tagGroups}
+        onAddTag={(slug) => patch({ tags: [{ slug }] })}
+      />
     </div>
   );
 };

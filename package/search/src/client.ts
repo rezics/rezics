@@ -45,6 +45,7 @@ export class SearchClient {
       ],
       filterableAttributes: [
         "type",
+        "postKind",
         "tagIds",
         "realmIds",
         "realmTagKeys",
@@ -52,6 +53,7 @@ export class SearchClient {
         "nsfw",
         "visibility",
         "isLicensed",
+        "textLength",
       ],
       sortableAttributes: ["createdAt", "updatedAt", "publishedAt"],
     });

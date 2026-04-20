@@ -4,7 +4,19 @@ import type {
   ContentSearchResult,
 } from "@rezics/contract";
 import type React from "react";
-import { resolveTitle } from "../models/searchInfo";
+
+function resolveTitle(
+  titles: string[],
+  languages: string[],
+  preferredLanguage?: string,
+): string {
+  if (!titles.length) return "";
+  if (preferredLanguage) {
+    const idx = languages.indexOf(preferredLanguage);
+    if (idx >= 0 && titles[idx]) return titles[idx];
+  }
+  return titles[0] ?? "";
+}
 
 export type SearchResultListProps = {
   result?: ContentSearchResult;

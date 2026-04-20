@@ -1,32 +1,36 @@
-import type { ContentSearchOptions } from "@rezics/contract";
-import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { BookSearchInput } from "@/book-library/components/BookSearch/BookSearch";
+import { BookSearch } from "@/book-library/components/BookSearch/BookSearch";
+import { useHomeSearchNavigate } from "@/search/hooks/useHomeSearchNavigate";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { parseSearchString } from "@/search/models/searchQuery";
 
 export type HomeSearchBarProps = object;
 
 /**
  * HomeSearchBar
- * Wraps the BookSearchContainer; on submit, navigate to /search.
+ * Wraps the BookSearch composer; on submit, navigate to /search with the
+ * user's structured query encoded in the URL.
  */
 export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
-  const navigate = useNavigate();
-  function handleSearch(options: ContentSearchOptions) {
-    const params = new URLSearchParams();
-    if (options.keyword) params.set("keyword", options.keyword);
-    if (options.nsfw) params.set("nsfw", "true");
-    if (options.isLicensed) params.set("isLicensed", "true");
-    if (options.type) {
-      const types = Array.isArray(options.type)
-        ? options.type.join(",")
-        : options.type;
-      params.set("type", types);
-    }
-    const query = params.toString();
-    navigate({ to: query ? `/search?${query}` : "/search" });
-  }
+  const { navigateByQuery } = useHomeSearchNavigate();
+  const search = useSearchQuery({
+    middleware: parseSearchString,
+  });
+
+  const handleSubmit = () => {
+    navigateByQuery(search.query);
+  };
+
   return (
-    <BookSearchInput onSearch={handleSearch} hiddenWordCountFilter={true} />
+    <BookSearch
+      query={search.query}
+      bind={search.bind}
+      patch={search.patch}
+      implicit={search.implicit}
+      middleware={search.middleware}
+      onSubmit={handleSubmit}
+      showWordCount={false}
+    />
   );
 };
 

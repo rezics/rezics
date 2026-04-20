@@ -62,6 +62,7 @@ const contentInclude = {
   media: true,
   shelf: true,
   link: true,
+  post: true,
 } as const;
 
 /**
@@ -123,6 +124,10 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const linkUrl = unit.link?.url ?? null;
   const linkSiteName = unit.link?.siteName ?? null;
 
+  // Post kind + book textLength for search filters
+  const postKind = unit.post?.kind ?? null;
+  const textLength = unit.book?.textLength ?? null;
+
   return {
     id: unit.id,
     type: unit.type,
@@ -140,6 +145,8 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     nsfw: unit.nsfw ?? false,
     visibility: unit.visibility ?? "PUBLIC",
     isLicensed,
+    postKind,
+    textLength,
     createdAt:
       unit.createdAt instanceof Date
         ? unit.createdAt.toISOString()

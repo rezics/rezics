@@ -1,6 +1,7 @@
 import { Typography } from "@mui/material";
 import type React from "react";
-import { BasicSearch } from "@/search";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import type { ZoneTemplateProps } from "./types";
 
 /**
@@ -12,6 +13,8 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
   zone,
   onSearch,
 }) => {
+  const search = useSearchQuery({});
+  const keywordBind = search.bind("keyword");
   const bgImage = (zone.styling as Record<string, unknown> | null)?.bgImage as
     | string
     | undefined;
@@ -44,9 +47,10 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
 
       {/* Search */}
       <div className="mb-8">
-        <BasicSearch
-          preAppliedFilters={zone.filters}
-          onSearch={(keyword) => onSearch?.(keyword)}
+        <KeywordInput
+          value={keywordBind.value ?? ""}
+          onChange={(v) => keywordBind.onChange(v)}
+          onSubmit={() => onSearch?.(search.query.keyword ?? "")}
           placeholder={`Search books in ${zone.name}...`}
         />
       </div>

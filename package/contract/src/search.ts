@@ -1,18 +1,28 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { SlugRefSchema } from "./common/slug-ref";
+import { postKindLiterals } from "./post";
 
 // ANCHOR: Search Query
+
+export const TextLengthRangeSchema = t.Object({
+  min: t.Optional(t.Number()),
+  max: t.Optional(t.Number()),
+});
+
+export type TextLengthRange = Static<typeof TextLengthRangeSchema>;
 
 export const SearchQuerySchema = t.Object({
   keyword: t.Optional(t.String()),
   tags: t.Optional(t.Array(SlugRefSchema)),
   type: t.Optional(t.Array(t.String())),
+  postKind: t.Optional(t.Array(postKindLiterals)),
   languages: t.Optional(t.Array(t.String())),
   nsfw: t.Optional(t.Boolean()),
   isLicensed: t.Optional(t.Boolean()),
   realm: t.Optional(SlugRefSchema),
   sort: t.Optional(t.String()),
+  textLength: t.Optional(TextLengthRangeSchema),
 });
 
 export type SearchQuery = Static<typeof SearchQuerySchema>;

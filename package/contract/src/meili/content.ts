@@ -2,6 +2,7 @@ import type { Static } from "elysia";
 import { t } from "elysia";
 import { SlugRefSchema } from "../common/slug-ref";
 import { languageSchema } from "../language";
+import { postKindLiterals } from "../post";
 
 // ANCHOR: Content Search Document
 
@@ -38,6 +39,12 @@ export const ContentSearchDocumentSchema = t.Object({
   visibility: t.String(),
   isLicensed: t.Boolean(),
 
+  // Filterable: post kind (null for non-POST units)
+  postKind: t.Union([postKindLiterals, t.Null()]),
+
+  // Filterable: text length (null for non-book units)
+  textLength: t.Union([t.Number(), t.Null()]),
+
   // Sortable
   createdAt: t.String(),
   updatedAt: t.String(),
@@ -73,6 +80,7 @@ export type ContentSearchDocument = Static<typeof ContentSearchDocumentSchema>;
 export const ContentSearchOptionsSchema = t.Object({
   keyword: t.Optional(t.String()),
   type: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+  postKind: t.Optional(t.Array(postKindLiterals)),
   tags: t.Optional(t.Array(SlugRefSchema)),
   tagIds: t.Optional(t.Array(t.String())),
   realmId: t.Optional(t.String()),
@@ -80,6 +88,12 @@ export const ContentSearchOptionsSchema = t.Object({
   languages: t.Optional(t.Array(t.String())),
   nsfw: t.Optional(t.Boolean()),
   isLicensed: t.Optional(t.Boolean()),
+  textLength: t.Optional(
+    t.Object({
+      min: t.Optional(t.Number()),
+      max: t.Optional(t.Number()),
+    }),
+  ),
   sort: t.Optional(
     t.Object({
       field: t.Union([

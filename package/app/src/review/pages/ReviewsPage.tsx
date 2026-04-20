@@ -7,7 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
-import { TextSearchInput } from "@/search/components/TextSearchInput";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 
 function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
   return {
@@ -51,7 +52,9 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
   const [start, setStart] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [tab, setTab] = useState<"review" | "remark">("review");
-  const [keyword, setKeyword] = useState<string>("");
+  const search = useSearchQuery({});
+  const keyword = search.query.keyword ?? "";
+  const keywordBind = search.bind("keyword");
 
   const kind = tab === "review" ? "REVIEW" : "REMARK";
 
@@ -141,11 +144,10 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
         setCurrentPage={setCurrentPage}
         sortControl={
           <div>
-            <TextSearchInput
-              onSearch={(info) => {
-                setKeyword(info ?? "");
-              }}
-              defaultValue={{ keyword: keyword ?? "" }}
+            <KeywordInput
+              value={keywordBind.value ?? ""}
+              onChange={(v) => keywordBind.onChange(v)}
+              onSubmit={() => setStart(0)}
               placeholder="Search reviews"
             />
             <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 2, mb: 2 }}>
