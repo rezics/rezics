@@ -5,6 +5,7 @@
 - [ ] https://better-auth.com/docs/infrastructure/plugins/dashboard
 - [ ] 年齡分級機制調整
 - [ ]  meilisearch 需要調整，支持專門的 tag，realm-tag 索引系統 
+- [ ]  post?.extra?.title 是錯誤的嗎？post 需要有一個支持的語言用以進行語言篩查，所以title要不直接基於translation?代價高嗎？
 
 ## Section 2
 - [ ] 還是考慮遷移到 paraglide-js
