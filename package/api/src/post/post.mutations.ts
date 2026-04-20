@@ -36,14 +36,14 @@ export function useCreatePostMutation(
       // Invalidate target-specific queries if post is attached to a unit
       if (variables.targetUnitId) {
         queryClient.invalidateQueries({
-          queryKey: postKeys.byTarget(variables.targetUnitId),
+          queryKey: postKeys.byTargets(variables.targetUnitId),
         });
       }
 
       // Invalidate thread/reply queries if this is a reply
       if (variables.parentPostUnitId) {
         queryClient.invalidateQueries({
-          queryKey: postKeys.replies(variables.parentPostUnitId),
+          queryKey: postKeys.allReplies(variables.parentPostUnitId),
         });
       }
 

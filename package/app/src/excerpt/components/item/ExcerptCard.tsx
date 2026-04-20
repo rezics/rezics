@@ -10,6 +10,7 @@ import {
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/shared/utils/css-util";
 
 export interface ExcerptCardProps {
@@ -21,6 +22,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
   excerpt,
   className,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleOpenExcerpt = () => {
@@ -32,7 +34,9 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
     | ExcerptSource
     | string
     | undefined;
-  const description = excerpt.translations?.[0]?.description ?? "暂无摘录内容";
+  const description =
+    excerpt.translations?.[0]?.description ??
+    t("excerpt.card.description.fallback");
 
   return (
     <Card elevation={0} className={cn("w-full transition-all mb-1", className)}>
@@ -66,8 +70,9 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
               </Typography>
 
               <Box className="mt-3 flex items-center justify-between gap-2">
+                {/* MOCK: like count placeholder until reactions are wired in */}
                 <Typography variant="caption" noWrap>
-                  0 喜欢
+                  {t("excerpt.card.likes_count", { count: 0 })}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" noWrap>
                   —— <ExcerptCardSource source={source} />
@@ -82,7 +87,8 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
 };
 
 function ExcerptCardSource({ source }: { source?: ExcerptSource | string }) {
-  if (!source) return <>未知出处</>;
+  const { t } = useTranslation();
+  if (!source) return <>{t("excerpt.card.source.unknown")}</>;
   if (typeof source === "string") return <>{source}</>;
   return <>{source.title}</>;
 }

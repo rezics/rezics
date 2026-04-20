@@ -3,7 +3,7 @@ import {
   contentSearchQueryOptions,
   meiliBookSearchQuery,
 } from "@rezics/api/meili/meili.queries";
-import { reactionApi } from "@rezics/api/reaction/reaction.api";
+import { useBatchReactionSummary } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
 import { UnitType } from "@rezics/contract";
 import {
@@ -94,18 +94,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     [shelfDataRaw],
   );
 
-  const { data: shelfReactionBatch } = useQuery({
-    queryKey: [
-      "reaction-summary-batch",
-      "user",
-      userId,
-      "shelves",
-      shelfTargetIds,
-    ],
-    queryFn: () => reactionApi.summary(shelfTargetIds),
-    enabled: shelfTargetIds.length > 0,
-    staleTime: 1000 * 60 * 2,
-  });
+  const { data: shelfReactionBatch } = useBatchReactionSummary(shelfTargetIds);
 
   const shelves = useMemo(
     () =>
@@ -173,12 +162,8 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     [activeReviewLikeData],
   );
 
-  const { data: reviewReactionBatch } = useQuery({
-    queryKey: ["reaction-summary-batch", "user", userId, tab, reviewTargetIds],
-    queryFn: () => reactionApi.summary(reviewTargetIds),
-    enabled: reviewTargetIds.length > 0,
-    staleTime: 1000 * 60 * 2,
-  });
+  const { data: reviewReactionBatch } =
+    useBatchReactionSummary(reviewTargetIds);
 
   const reviews = useMemo(
     () =>

@@ -3,7 +3,9 @@ import type {
   ContentSearchDocument,
   ContentSearchResult,
 } from "@rezics/contract";
+import { EmptyState } from "@rezics/ui";
 import type React from "react";
+import { useTranslation } from "react-i18next";
 
 function resolveTitle(
   titles: string[],
@@ -67,20 +69,18 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
   preferredLanguage,
   renderItem,
 }) => {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <div className="py-8 text-center">
-        <Typography color="text.secondary">Loading...</Typography>
+        <Typography color="text.secondary">{t("common.loading")}</Typography>
       </div>
     );
   }
 
   if (!result || result.items.length === 0) {
-    return (
-      <div className="py-8 text-center">
-        <Typography color="text.secondary">No results found</Typography>
-      </div>
-    );
+    return <EmptyState title={t("search.empty.title")} />;
   }
 
   return (

@@ -4,9 +4,11 @@ import {
   usePostSearchQuery,
 } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
+import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,
@@ -28,6 +30,7 @@ const SORT_OPTIONS = [
 ];
 
 export const ContentTabSection: FC = () => {
+  const { t } = useTranslation();
   const { unitId } = useProfileContext();
   const [kind, setKind] = useState("REVIEW");
   const [filters, setFilters] = useState<Record<string, string>>({
@@ -99,18 +102,14 @@ export const ContentTabSection: FC = () => {
           color="text.secondary"
           className="py-8 text-center"
         >
-          Loading...
+          {t("common.loading")}
         </Typography>
       ) : posts.length === 0 ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="py-8 text-center"
-        >
-          {filters.q
-            ? "No results match your search"
-            : `No ${kind.toLowerCase()}s yet`}
-        </Typography>
+        <EmptyState
+          title={
+            filters.q ? t("search.empty.title") : t("common.no_data")
+          }
+        />
       ) : (
         <>
           <div className="flex flex-col gap-2">

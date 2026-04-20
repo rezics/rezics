@@ -4,7 +4,7 @@
 
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { postApi } from "./post.api";
-import { postKeys } from "./post.keys";
+import { type PostByTargetFilters, postKeys } from "./post.keys";
 import type { PostFilters } from "./post.types";
 
 /**
@@ -32,10 +32,10 @@ export const postDetailQuery = (unitId: string) =>
  */
 export const postsByTargetQuery = (
   targetUnitId: string,
-  filters?: PostFilters,
+  filters?: PostByTargetFilters,
 ) =>
   queryOptions({
-    queryKey: postKeys.byTarget(targetUnitId),
+    queryKey: postKeys.byTarget(targetUnitId, filters),
     queryFn: () => postApi.getByTarget(targetUnitId, filters),
     enabled: !!targetUnitId,
     staleTime: 1000 * 60 * 2, // 2 minutes
@@ -49,7 +49,7 @@ export const postsByAuthorQuery = (
   filters?: PostFilters,
 ) =>
   queryOptions({
-    queryKey: postKeys.byAuthor(authorUserId),
+    queryKey: postKeys.byAuthor(authorUserId, filters),
     queryFn: () => postApi.getByAuthor(authorUserId, filters),
     enabled: !!authorUserId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -63,7 +63,7 @@ export const postThreadQuery = (
   filters?: PostFilters,
 ) =>
   queryOptions({
-    queryKey: postKeys.thread(rootPostUnitId),
+    queryKey: postKeys.thread(rootPostUnitId, filters),
     queryFn: () => postApi.getThread(rootPostUnitId, filters),
     enabled: !!rootPostUnitId,
     staleTime: 1000 * 60 * 2, // 2 minutes
@@ -77,7 +77,7 @@ export const postRepliesQuery = (
   filters?: PostFilters,
 ) =>
   queryOptions({
-    queryKey: postKeys.replies(parentPostUnitId),
+    queryKey: postKeys.replies(parentPostUnitId, filters),
     queryFn: () => postApi.getReplies(parentPostUnitId, filters),
     enabled: !!parentPostUnitId,
     staleTime: 1000 * 60 * 2, // 2 minutes
@@ -88,7 +88,7 @@ export const postRepliesQuery = (
  */
 export const postsByRealmQuery = (realmUnitId: string, filters?: PostFilters) =>
   queryOptions({
-    queryKey: postKeys.byRealm(realmUnitId),
+    queryKey: postKeys.byRealm(realmUnitId, filters),
     queryFn: () => postApi.getByRealm(realmUnitId, filters),
     enabled: !!realmUnitId,
     staleTime: 1000 * 60 * 2, // 2 minutes

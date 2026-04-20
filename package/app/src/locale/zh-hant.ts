@@ -468,6 +468,9 @@ export default {
         philosophy: "哲學",
       },
     },
+    empty: {
+      title: "未找到結果",
+    },
   },
 
   // Shelf
@@ -497,6 +500,11 @@ export default {
     public: "公開",
     official: "官方",
     no_realms: "未找到任何領域",
+    content: {
+      empty: {
+        title: "此領域目前還沒有內容",
+      },
+    },
   },
 
   // Review
@@ -520,6 +528,25 @@ export default {
       rating_range_error: "評分必須在 0 到 10 之間",
       failed_load: "載入書評失敗。",
     },
+    list: {
+      empty: {
+        title: "目前還沒有書評",
+      },
+    },
+    search: {
+      empty: {
+        title: "未找到相關書評",
+      },
+    },
+  },
+
+  // Remark
+  remark: {
+    list: {
+      empty: {
+        title: "目前還沒有短評",
+      },
+    },
   },
 
   // Excerpt
@@ -535,6 +562,20 @@ export default {
     },
     messages: {
       update_failed: "更新摘錄失敗：{{error}}",
+    },
+    list: {
+      empty: {
+        title: "目前還沒有摘錄",
+      },
+    },
+    card: {
+      description: {
+        fallback: "暫無摘錄內容",
+      },
+      source: {
+        unknown: "未知出處",
+      },
+      likes_count: "{{count}} 喜歡",
     },
   },
 

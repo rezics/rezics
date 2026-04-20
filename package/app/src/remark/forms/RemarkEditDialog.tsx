@@ -5,15 +5,15 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Rating,
   Stack,
   TextField,
 } from "@mui/material";
 import { useUpdatePostMutation } from "@rezics/api/post/post";
-import type { PostDTO } from "@rezics/contract";
+import { type PostDTO, SCORE_MAX } from "@rezics/contract";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScoreInput } from "@/engagement/components/ScoreInput";
 
 interface RemarkEditDialogProps {
   remark: PostDTO;
@@ -60,7 +60,12 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
       <DialogContent>
         <Box pt={1}>
           <Stack spacing={2}>
-            <ScoreInput value={score} onChange={setScore} />
+            <Rating
+              max={SCORE_MAX}
+              precision={1}
+              value={score}
+              onChange={(_, v) => setScore(v)}
+            />
             <TextField
               value={text}
               onChange={(e) => setText(e.target.value)}

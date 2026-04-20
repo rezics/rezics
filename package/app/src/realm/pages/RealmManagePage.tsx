@@ -8,6 +8,7 @@ import { useServerPermission } from "@rezics/api/hooks";
 import {
   myRealmMembershipQuery,
   realmDetailQuery,
+  realmKeys,
   useUpdateRealmMutation,
 } from "@rezics/api/realm/realm";
 import { unitApi } from "@rezics/api/unit/unit";
@@ -68,7 +69,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
 
       // Invalidate realm detail to pick up updated translations
       await queryClient.invalidateQueries({
-        queryKey: ["realms", "detail", realmId],
+        queryKey: realmKeys.detail(realmId),
       });
 
       navigate({ to: "/realm/$realmId", params: { realmId } });

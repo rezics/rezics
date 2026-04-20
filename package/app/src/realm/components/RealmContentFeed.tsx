@@ -1,8 +1,9 @@
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { postQueries } from "@rezics/api/post/post";
+import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import { PostCard } from "@/post";
 
 interface RealmContentFeedProps {
@@ -12,15 +13,12 @@ interface RealmContentFeedProps {
 export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   realmId,
 }) => {
+  const { t } = useTranslation();
   const { data } = useQuery(postQueries.byTarget(realmId));
   const posts = data?.posts ?? [];
 
   if (posts.length === 0) {
-    return (
-      <Typography variant="body2" color="text.secondary" py={2}>
-        No content in this realm yet
-      </Typography>
-    );
+    return <EmptyState title={t("realm.content.empty.title")} />;
   }
 
   return (

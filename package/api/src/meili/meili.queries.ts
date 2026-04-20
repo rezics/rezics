@@ -9,6 +9,7 @@ import type {
   FeedbackType,
   PostSearchOptions,
   RealmSearchOptions,
+  UserListQuery,
 } from "@rezics/contract";
 import {
   queryOptions,
@@ -20,6 +21,7 @@ import {
   meiliFeedbackApi,
   meiliPostApi,
   meiliRealmApi,
+  meiliUserApi,
 } from "./meili.api";
 
 // ANCHOR: Content search
@@ -33,6 +35,19 @@ export const contentSearchQueryOptions = (opts: ContentSearchOptions) =>
 
 export function useContentSearch(opts: ContentSearchOptions) {
   return useQuery(contentSearchQueryOptions(opts));
+}
+
+// ANCHOR: User search
+
+export const userSearchQueryOptions = (opts: UserListQuery) =>
+  queryOptions({
+    queryKey: ["meili", "users", opts],
+    queryFn: () => meiliUserApi.userSearch(opts),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export function useUserSearchQuery(opts: UserListQuery) {
+  return useQuery(userSearchQueryOptions(opts));
 }
 
 // ANCHOR: Feedback search

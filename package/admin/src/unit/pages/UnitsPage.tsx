@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { meiliContentApi } from "@rezics/api/meili/meili.api";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -67,13 +67,11 @@ export default function UnitsPage() {
   });
 
   const meiliQuery = useQuery({
-    queryKey: ["meili-units", page, limit, query],
-    queryFn: () =>
-      meiliContentApi.contentSearch({
-        keyword: query || undefined,
-        offset: start,
-        limit,
-      }),
+    ...contentSearchQueryOptions({
+      keyword: query || undefined,
+      offset: start,
+      limit,
+    }),
     enabled: isMeiliMode,
   });
 

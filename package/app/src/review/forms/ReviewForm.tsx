@@ -1,6 +1,6 @@
-import { TextField } from "@mui/material";
+import { Rating, TextField } from "@mui/material";
+import { SCORE_MAX } from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
-import { RatingWithInput } from "@rezics/ui/primitive/control/rating/Rating.tsx";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -45,11 +45,13 @@ export function ReviewForm({
 
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium">{t("review.form.rating")}</span>
-        <RatingWithInput
+        <Rating
           value={data._editRating || 0}
-          onChange={(value) => setData({ ...data, _editRating: value ?? 0 })}
-          max={10}
-          precision={0.5}
+          onChange={(_, value) =>
+            setData({ ...data, _editRating: value ?? 0 })
+          }
+          max={SCORE_MAX}
+          precision={1}
           size="large"
           name="score-rating-10"
         />

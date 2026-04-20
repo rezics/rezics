@@ -1,11 +1,10 @@
-import { meiliContentApi } from "@rezics/api/meili/meili.api";
+import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import {
   type BookDTO,
   type ContentSearchDocument,
   DEFAULT_LANGUAGE,
   type ShelfDTO,
 } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 export type SimpleQueryState<T> = {
@@ -16,15 +15,10 @@ export type SimpleQueryState<T> = {
 };
 
 export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["home", "content", "books", { limit }],
-    queryFn: () =>
-      meiliContentApi.contentSearch({
-        type: "BOOK",
-        limit,
-        sort: { field: "createdAt", order: "desc" },
-      }),
-    staleTime: 1000 * 60,
+  const { data, isLoading, error } = useContentSearch({
+    type: "BOOK",
+    limit,
+    sort: { field: "createdAt", order: "desc" },
   });
 
   const items = useMemo<BookDTO[]>(() => {
@@ -60,15 +54,10 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
 
 // Shelves from content search - returns shelf-type content docs
 export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["home", "content", "shelves", { limit }],
-    queryFn: () =>
-      meiliContentApi.contentSearch({
-        type: "SHELF",
-        limit,
-        sort: { field: "createdAt", order: "desc" },
-      }),
-    staleTime: 1000 * 60,
+  const { data, isLoading, error } = useContentSearch({
+    type: "SHELF",
+    limit,
+    sort: { field: "createdAt", order: "desc" },
   });
 
   const items = useMemo<ShelfDTO[]>(() => {

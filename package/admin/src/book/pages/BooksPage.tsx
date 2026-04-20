@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { type BookDTO, bookQueries } from "@rezics/api/book/book";
-import { meiliContentApi } from "@rezics/api/meili/meili.api";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
@@ -79,14 +79,12 @@ export default function BooksPage() {
   });
 
   const meiliQuery = useQuery({
-    queryKey: ["meili-books", page, limit, query],
-    queryFn: () =>
-      meiliContentApi.contentSearch({
-        keyword: query || undefined,
-        type: "BOOK",
-        offset: start,
-        limit,
-      }),
+    ...contentSearchQueryOptions({
+      keyword: query || undefined,
+      type: "BOOK",
+      offset: start,
+      limit,
+    }),
     enabled: isMeiliMode,
   });
 

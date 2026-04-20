@@ -28,10 +28,10 @@ export function useCreateReactionMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.summary(variables.targetId),
+        queryKey: reactionKeys.summaries(),
       });
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.my(variables.targetId),
+        queryKey: reactionKeys.mine(),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -51,10 +51,10 @@ export function useDeleteReactionMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.summary(variables.targetId),
+        queryKey: reactionKeys.summaries(),
       });
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.my(variables.targetId),
+        queryKey: reactionKeys.mine(),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

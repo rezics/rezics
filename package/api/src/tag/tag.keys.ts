@@ -15,6 +15,10 @@ export const tagKeys = {
   details: () => [...tagKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...tagKeys.details(), unitId] as const,
 
+  // search
+  searches: () => [...tagKeys.all(), "search"] as const,
+  search: (q: string) => [...tagKeys.searches(), q] as const,
+
   // tags for a specific unit (scored associations)
   forUnit: (unitId: string) => [...tagKeys.all(), "forUnit", unitId] as const,
 

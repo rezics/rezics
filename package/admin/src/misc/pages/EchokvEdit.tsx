@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { echoKvApi } from "@rezics/api/echokv/echokv";
+import { echoKvApi, echoKvKeyListQuery } from "@rezics/api/echokv/echokv";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -28,11 +28,9 @@ export const EchokvEditPage: React.FC = () => {
   const [_saving, setSaving] = useState(false);
   const [editorValue, setEditorValue] = useState("{}");
 
-  const { data: keyList, isLoading: keyListLoading } = useQuery({
-    queryKey: ["echokv-keys", searchKey],
-    queryFn: () => echoKvApi.listKeys(searchKey),
-    staleTime: 1000 * 60,
-  });
+  const { data: keyList, isLoading: keyListLoading } = useQuery(
+    echoKvKeyListQuery(searchKey),
+  );
 
   const handleLoad = async () => {
     if (!currentKey.trim()) return showAlert("请输入 key");

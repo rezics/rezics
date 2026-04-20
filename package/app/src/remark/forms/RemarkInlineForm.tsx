@@ -1,14 +1,14 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Rating from "@mui/material/Rating";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
-import { PostKind } from "@rezics/contract";
+import { PostKind, SCORE_MAX } from "@rezics/contract";
 import type React from "react";
 import { useState } from "react";
-import { ScoreInput } from "@/engagement/components/ScoreInput";
 
 interface RemarkInlineFormProps {
   bookUnitId: string;
@@ -58,7 +58,12 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
   return (
     <Box>
       <Stack spacing={2}>
-        <ScoreInput value={score} onChange={setScore} />
+        <Rating
+          max={SCORE_MAX}
+          precision={1}
+          value={score}
+          onChange={(_, v) => setScore(v)}
+        />
         <TextField
           placeholder="Write a short remark..."
           value={text}

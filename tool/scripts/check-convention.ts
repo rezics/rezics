@@ -7,6 +7,8 @@
  * - R2  api-route-convention     — list/collection endpoints use /list suffix
  * - R3  folder-naming-convention — domain/feature folders are singular
  * - R4  folder-naming-convention — container folders are plural from allowlist
+ * - R5  outbound-link-protection — no raw <a href> outside SafeLink
+ * - R6  tanstack-query-keys       — no inline `queryKey: [` outside api key/query/mutation files
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -109,7 +111,7 @@ const EXEMPT_PACKAGES = new Set(["auth"]);
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Rule = "R1" | "R2" | "R3" | "R4" | "R5";
+type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6";
 
 interface Violation {
   rule: Rule;
@@ -124,6 +126,7 @@ const SPEC_LINK: Record<Rule, string> = {
   R3: "openspec/specs/folder-naming-convention/spec.md",
   R4: "openspec/specs/folder-naming-convention/spec.md",
   R5: "openspec/specs/outbound-link-protection/spec.md",
+  R6: "openspec/specs/tanstack-query-keys/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -386,6 +389,50 @@ function scanRawAnchors(tsxFiles: string[]): Violation[] {
   return violations;
 }
 
+// ─── R6: inline queryKey scanning ───────────────────────────────────────────
+
+const INLINE_QUERY_KEY_PATTERN = /queryKey\s*:\s*\[/g;
+
+function isR6TargetFile(absPath: string): boolean {
+  const relPath = relative(REPO_ROOT, absPath);
+  if (!/^package\/(app|admin|ui)\//.test(relPath)) return false;
+  if (!/\.(ts|tsx)$/.test(relPath)) return false;
+  if (/\.test\.tsx?$/.test(relPath)) return false;
+  return true;
+}
+
+function scanInlineQueryKeys(candidateFiles: string[]): Violation[] {
+  const violations: Violation[] = [];
+
+  for (const filePath of candidateFiles) {
+    if (!isR6TargetFile(filePath)) continue;
+
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+
+    const relPath = relative(REPO_ROOT, filePath);
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      if (INLINE_QUERY_KEY_PATTERN.test(lines[i])) {
+        violations.push({
+          rule: "R6",
+          path: `${relPath}:${i + 1}`,
+          message:
+            "Inline `queryKey: [` — move this key into a per-domain factory in package/api/src/<domain>/<domain>.keys.ts and consume it via a queryOptions / useQuery wrapper.",
+          spec: SPEC_LINK.R6,
+        });
+      }
+      INLINE_QUERY_KEY_PATTERN.lastIndex = 0;
+    }
+  }
+
+  return violations;
+}
+
 // ─── Git staged-file helpers ────────────────────────────────────────────────
 
 function getStagedFilePaths(): string[] {
@@ -422,7 +469,14 @@ function loadSnapshot(): ViolationSnapshot | null {
 }
 
 function buildSnapshot(violations: Violation[]): ViolationSnapshot {
-  const byRule: Record<Rule, number> = { R1: 0, R2: 0, R3: 0, R4: 0, R5: 0 };
+  const byRule: Record<Rule, number> = {
+    R1: 0,
+    R2: 0,
+    R3: 0,
+    R4: 0,
+    R5: 0,
+    R6: 0,
+  };
   const keys: string[] = [];
   for (const violation of violations) {
     byRule[violation.rule]++;
@@ -455,6 +509,7 @@ function main() {
   const routeFiles: string[] = [];
   const folderPaths: string[] = [];
   const tsxFiles: string[] = [];
+  const tsAndTsxFiles: string[] = [];
 
   if (isStagedMode) {
     const stagedPaths = getStagedFilePaths();
@@ -468,6 +523,9 @@ function main() {
       }
       if (/\.tsx$/.test(filePath) && !isExemptPath(filePath)) {
         tsxFiles.push(filePath);
+      }
+      if (/\.(ts|tsx)$/.test(filePath) && !isExemptPath(filePath)) {
+        tsAndTsxFiles.push(filePath);
       }
     }
     const affectedDirs = new Set<string>();
@@ -488,20 +546,27 @@ function main() {
     for (const filePath of walkFilesByExtension(packagesRoot, /\.tsx$/)) {
       tsxFiles.push(filePath);
     }
+    for (const filePath of walkFilesByExtension(
+      packagesRoot,
+      /\.(ts|tsx)$/,
+    )) {
+      tsAndTsxFiles.push(filePath);
+    }
   }
 
   const violations = [
     ...scanRoutes(routeFiles),
     ...scanFolders(folderPaths),
     ...scanRawAnchors(tsxFiles),
+    ...scanInlineQueryKeys(tsAndTsxFiles),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5 } = currentSnapshot.byRule;
+    const { R1, R2, R3, R4, R5, R6 } = currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6})`,
     );
     process.exit(0);
   }
@@ -518,11 +583,13 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5 } = currentSnapshot.byRule;
+  const { R1, R2, R3, R4, R5, R6 } = currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
-  console.log(`  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}`);
+  console.log(
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}`,
+  );
 
   if (newViolations.length > 0) {
     console.log(

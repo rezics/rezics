@@ -7,7 +7,6 @@ import {
   ToggleButtonGroup,
 } from "@mui/material";
 import {
-  tagApi,
   tagQueries,
   useAttachTagMutation,
   useDetachTagMutation,
@@ -53,14 +52,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
     data: searchData,
     isLoading: isSearching,
     error: searchError,
-  } = useQuery<{
-    tags: UnitTagDTO[];
-    total: number;
-  }>({
-    queryKey: ["tags", "search", searchTerm],
-    enabled: searchTerm.length > 0,
-    queryFn: () => tagApi.list({ q: searchTerm, limit: 20 }),
-  });
+  } = useQuery(tagQueries.search(searchTerm));
 
   const searchResults: UnitTagDTO[] = useMemo(
     () =>

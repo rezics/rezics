@@ -1,3 +1,7 @@
+> Normative rules for query-key discipline live in
+> [`openspec/specs/tanstack-query-keys/spec.md`](../../../openspec/specs/tanstack-query-keys/spec.md).
+> Enforced by R6 of `bun run check:convention`.
+
 好问题。这玩意儿看着像“黑魔法”，其实是 TypeScript 的泛型 + `queryOptions` 的类型设计在后面做了很多工，确保 key、queryFn、select、error 等类型能沿着 `queryOptions(...)` 一路被推断和记录，用在 `useQuery(...)`、`getQueryData(...)` 等 API 上都类型安全。下面我详细拆解 `ReturnType<typeof userKeys.byId>` 的作用，以及为什么要这么写。
 
 ---

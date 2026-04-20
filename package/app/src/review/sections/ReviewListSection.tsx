@@ -1,6 +1,6 @@
-import { Typography } from "@mui/material";
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -27,11 +27,7 @@ export const ReviewListSection: React.FC<ReviewListSectionProps> = ({
 
   const reviews = data?.posts ?? [];
   if (reviews.length === 0) {
-    return (
-      <Typography variant="body2" color="text.secondary" py={2}>
-        No reviews yet.
-      </Typography>
-    );
+    return <EmptyState title={t("review.list.empty.title")} />;
   }
 
   return <ReviewList reviews={reviews} />;

@@ -1,4 +1,4 @@
-import { tagApi, tagQueries } from "@rezics/api/tag/tag";
+import { tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
@@ -18,11 +18,7 @@ export function TagByBookPage() {
 
   const tagIds = listData?.tags?.map((t) => t.tagUnitId) ?? [];
   const detailsResults = useQueries({
-    queries: tagIds.map((id) => ({
-      queryKey: ["tag", "detail", id],
-      queryFn: () => tagApi.get(id),
-      staleTime: 1000 * 60 * 10,
-    })),
+    queries: tagIds.map((id) => tagQueries.detail(id)),
   });
 
   const _details: UnitTagDTO[] = detailsResults
@@ -82,11 +78,7 @@ export function TagByBookFullPage() {
 
   const tagIds = listData?.tags?.map((t) => t.tagUnitId) ?? [];
   const detailsResults = useQueries({
-    queries: tagIds.map((id) => ({
-      queryKey: ["tag", "detail", id],
-      queryFn: () => tagApi.get(id),
-      staleTime: 1000 * 60 * 10,
-    })),
+    queries: tagIds.map((id) => tagQueries.detail(id)),
   });
 
   const details: UnitTagDTO[] = detailsResults

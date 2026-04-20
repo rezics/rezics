@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { meiliUserApi } from "@rezics/api/meili/meili.api";
+import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 
@@ -59,13 +59,11 @@ export default function UserListPage() {
   });
 
   const meiliQuery = useQuery({
-    queryKey: ["meili-users", page, limit, query],
-    queryFn: () =>
-      meiliUserApi.userSearch({
-        q: query || undefined,
-        page: page + 1,
-        limit,
-      }),
+    ...userSearchQueryOptions({
+      q: query || undefined,
+      page: page + 1,
+      limit,
+    }),
     enabled: isMeiliMode,
   });
 

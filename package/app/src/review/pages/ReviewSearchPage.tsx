@@ -4,13 +4,16 @@ import Typography from "@mui/material/Typography";
 import { mapUnitListToReviewListResponse } from "@rezics/api/meili/meili.api";
 import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
 import { UnitType } from "@rezics/contract";
+import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 
 export function ReviewSearchPage() {
+  const { t } = useTranslation();
   const search = useSearchQuery({});
   const [start, setStart] = useState(0);
   const limit = 20;
@@ -50,9 +53,7 @@ export function ReviewSearchPage() {
           <CircularProgress />
         </Box>
       ) : reviews.length === 0 ? (
-        <Typography color="text.secondary" textAlign="center" py={4}>
-          No reviews found
-        </Typography>
+        <EmptyState title={t("review.search.empty.title")} />
       ) : (
         <ReviewList reviews={reviews} />
       )}

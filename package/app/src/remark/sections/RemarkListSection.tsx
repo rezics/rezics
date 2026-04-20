@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
@@ -26,13 +25,5 @@ export const RemarkListSection: React.FC<RemarkListSectionProps> = ({
   if (error) return <QueryErrorDisplay error={error} />;
 
   const posts = data?.posts ?? [];
-  if (posts.length === 0) {
-    return (
-      <Typography variant="body2" color="text.secondary" py={2}>
-        No remarks yet.
-      </Typography>
-    );
-  }
-
   return <RemarkList posts={posts} />;
 };

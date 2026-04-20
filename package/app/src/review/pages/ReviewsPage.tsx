@@ -1,9 +1,8 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
-import { reactionApi } from "@rezics/api/reaction/reaction.api";
+import { useBatchReactionSummary } from "@rezics/api/reaction/reaction";
 import type { PostDTO, PostSearchDocument } from "@rezics/contract";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
-import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
@@ -76,12 +75,8 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
     [baseReviews],
   );
 
-  const { data: reactionSummaryBatch } = useQuery({
-    queryKey: ["reaction-summary-batch", tab, bookUnitId, currentTargetIds],
-    queryFn: () => reactionApi.summary(currentTargetIds as string[]),
-    enabled: currentTargetIds.length > 0,
-    staleTime: 1000 * 60 * 2,
-  });
+  const { data: reactionSummaryBatch } =
+    useBatchReactionSummary(currentTargetIds);
 
   const [reviews, setReviews] = useState<Review[]>([]);
 

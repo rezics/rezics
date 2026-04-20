@@ -14,9 +14,11 @@ export {
 } from "./reaction.mutations";
 // Query Configurations
 export {
+  batchReactionSummaryQuery,
   reactionMyQuery,
   reactionQueries,
   reactionSummaryQuery,
+  useBatchReactionSummary,
 } from "./reaction.queries";
 // Types
 export type {

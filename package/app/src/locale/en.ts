@@ -479,6 +479,9 @@ export default {
         philosophy: "Philosophy",
       },
     },
+    empty: {
+      title: "No results found",
+    },
   },
 
   // Shelf
@@ -508,6 +511,11 @@ export default {
     public: "Public",
     official: "Official",
     no_realms: "No realms found",
+    content: {
+      empty: {
+        title: "No content in this realm yet",
+      },
+    },
   },
 
   // Review
@@ -531,6 +539,25 @@ export default {
       rating_range_error: "Rating must be between 0 and 10",
       failed_load: "Failed to load review.",
     },
+    list: {
+      empty: {
+        title: "No reviews yet",
+      },
+    },
+    search: {
+      empty: {
+        title: "No reviews found",
+      },
+    },
+  },
+
+  // Remark
+  remark: {
+    list: {
+      empty: {
+        title: "No remarks yet",
+      },
+    },
   },
 
   // Excerpt
@@ -547,6 +574,20 @@ export default {
     },
     messages: {
       update_failed: "Update excerpt failed: {{error}}",
+    },
+    list: {
+      empty: {
+        title: "No excerpts yet",
+      },
+    },
+    card: {
+      description: {
+        fallback: "No excerpt content",
+      },
+      source: {
+        unknown: "Unknown source",
+      },
+      likes_count: "{{count}} likes",
     },
   },
 
