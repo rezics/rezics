@@ -4,6 +4,7 @@
 - [ ] 章節數量，加入 book info
 - [ ] https://better-auth.com/docs/infrastructure/plugins/dashboard
 - [ ] 年齡分級機制調整
+- [ ]  meilisearch 需要調整，支持專門的 tag，realm-tag 索引系統 
 
 ## Section 2
 - [ ] 還是考慮遷移到 paraglide-js
