@@ -22,6 +22,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
+import { titleOf } from "./titleOf";
 
 interface ShelfPageProps {
   unitId: string;
@@ -31,6 +32,26 @@ const titleCollator = new Intl.Collator(undefined, {
   numeric: true,
   sensitivity: "base",
 });
+
+type DetailKey =
+  | ReturnType<typeof bookKeys.detail>
+  | ReturnType<typeof postKeys.detail>
+  | ReturnType<typeof tagKeys.detail>;
+
+function detailKeyFor(item: ShelfItemDTO): DetailKey | undefined {
+  switch (item.kind) {
+    case "book":
+      return bookKeys.detail(item.itemRef);
+    case "review":
+    case "quote":
+    case "post":
+      return postKeys.detail(item.itemRef);
+    case "tag":
+      return tagKeys.detail(item.itemRef);
+    default:
+      return undefined;
+  }
+}
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
   const [viewMode, setViewMode] = useState<ShelfView>("grid");
@@ -54,26 +75,6 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const isOwner = !!currentUser && currentUser.unitId === shelf?.userId;
   const cleanupMutation = useCleanupOrphansMutation();
 
-  const getHydratedTitle = (item: ShelfItemDTO): string | undefined => {
-    if (item.kind === "book") {
-      const book = queryClient.getQueryData<any>(bookKeys.detail(item.itemRef));
-      return book?.translations?.[0]?.title;
-    }
-    if (
-      item.kind === "review" ||
-      item.kind === "quote" ||
-      item.kind === "post"
-    ) {
-      const post = queryClient.getQueryData<any>(postKeys.detail(item.itemRef));
-      return post?.translations?.[0]?.title ?? post?.title;
-    }
-    if (item.kind === "tag") {
-      const tag = queryClient.getQueryData<any>(tagKeys.detail(item.itemRef));
-      return tag?.translations?.[0]?.title ?? tag?.label;
-    }
-    return undefined;
-  };
-
   const sortedItems = useMemo(() => {
     const arr = [...items];
     if (sortMode === "manual") {
@@ -85,15 +86,16 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
         return bT - aT;
       });
     } else if (sortMode === "title") {
-      arr.sort((a, b) =>
-        titleCollator.compare(
-          getHydratedTitle(a) ?? a.itemRef,
-          getHydratedTitle(b) ?? b.itemRef,
-        ),
-      );
+      arr.sort((a, b) => {
+        const aKey = detailKeyFor(a);
+        const bKey = detailKeyFor(b);
+        const aCached = aKey ? queryClient.getQueryData(aKey) : undefined;
+        const bCached = bKey ? queryClient.getQueryData(bKey) : undefined;
+        return titleCollator.compare(titleOf(a, aCached), titleOf(b, bCached));
+      });
     }
     return arr;
-  }, [items, sortMode, hydration.buckets]);
+  }, [items, sortMode, hydration.buckets, queryClient]);
 
   if (detailQuery.isLoading) {
     return (
@@ -192,7 +194,6 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 <ShelfItemRenderer
                   key={item.itemRef}
                   item={item}
-                  title={getHydratedTitle(item)}
                   viewMode={effectiveViewMode}
                 />
               ))}
