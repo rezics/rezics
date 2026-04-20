@@ -8,17 +8,18 @@ import Stack from "@mui/material/Stack";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
-import { bookKeys } from "@rezics/api/book/book.keys";
-import { postKeys } from "@rezics/api/post/post.keys";
-import type { ShelfItemDTO, ShelfSortMode, ShelfView } from "@rezics/api/shelf";
+import type {
+  EnrichedShelfItem,
+  ShelfSortMode,
+  ShelfView,
+} from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
   shelfItemsQuery,
   useCleanupOrphansMutation,
-  useShelfHydration,
+  useHydratedShelfItems,
 } from "@rezics/api/shelf";
-import { tagKeys } from "@rezics/api/tag/tag.keys";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
@@ -33,25 +34,12 @@ const titleCollator = new Intl.Collator(undefined, {
   sensitivity: "base",
 });
 
-type DetailKey =
-  | ReturnType<typeof bookKeys.detail>
-  | ReturnType<typeof postKeys.detail>
-  | ReturnType<typeof tagKeys.detail>;
-
-function detailKeyFor(item: ShelfItemDTO): DetailKey | undefined {
-  switch (item.kind) {
-    case "book":
-      return bookKeys.detail(item.itemRef);
-    case "review":
-    case "quote":
-    case "post":
-      return postKeys.detail(item.itemRef);
-    case "tag":
-      return tagKeys.detail(item.itemRef);
-    default:
-      return undefined;
-  }
-}
+const GRID_COLUMNS_SX = {
+  xs: "repeat(2, 1fr)",
+  sm: "repeat(3, 1fr)",
+  md: "repeat(4, 1fr)",
+  lg: "repeat(5, 1fr)",
+} as const;
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
   const [viewMode, setViewMode] = useState<ShelfView>("grid");
@@ -69,33 +57,39 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     | undefined;
   const effectiveViewMode = savedViewMode ?? viewMode;
 
-  const hydration = useShelfHydration(items);
-  const queryClient = useQueryClient();
+  const hydration = useHydratedShelfItems(items);
   const currentUser = useUserProfileStore((s) => s.user);
   const isOwner = !!currentUser && currentUser.unitId === shelf?.userId;
   const cleanupMutation = useCleanupOrphansMutation();
 
-  const sortedItems = useMemo(() => {
-    const arr = [...items];
+  const sortedEnriched = useMemo<EnrichedShelfItem[]>(() => {
+    const arr = [...hydration.enriched];
     if (sortMode === "manual") {
-      arr.sort((a, b) => (a.position < b.position ? -1 : 1));
+      arr.sort((a, b) => (a.item.position < b.item.position ? -1 : 1));
     } else if (sortMode === "time") {
       arr.sort((a, b) => {
-        const aT = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const bT = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        const aT = a.item.createdAt
+          ? new Date(a.item.createdAt).getTime()
+          : 0;
+        const bT = b.item.createdAt
+          ? new Date(b.item.createdAt).getTime()
+          : 0;
         return bT - aT;
       });
     } else if (sortMode === "title") {
-      arr.sort((a, b) => {
-        const aKey = detailKeyFor(a);
-        const bKey = detailKeyFor(b);
-        const aCached = aKey ? queryClient.getQueryData(aKey) : undefined;
-        const bCached = bKey ? queryClient.getQueryData(bKey) : undefined;
-        return titleCollator.compare(titleOf(a, aCached), titleOf(b, bCached));
-      });
+      arr.sort((a, b) =>
+        titleCollator.compare(
+          titleOf(a.item, a.primary),
+          titleOf(b.item, b.primary),
+        ),
+      );
     }
     return arr;
-  }, [items, sortMode, hydration.buckets, queryClient]);
+  }, [hydration.enriched, sortMode]);
+
+  const visibleEnriched = sortedEnriched.filter(
+    (e) => !hydration.orphanItemRefs.includes(e.item.itemRef),
+  );
 
   if (detailQuery.isLoading) {
     return (
@@ -124,14 +118,14 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               size="small"
               onChange={(_, v) => v && setViewMode(v)}
             >
-              <ToggleButton value="grid">
-                <GridViewIcon fontSize="small" />
+              <ToggleButton value="review">
+                <RateReviewIcon fontSize="small" />
               </ToggleButton>
               <ToggleButton value="list">
                 <ListIcon fontSize="small" />
               </ToggleButton>
-              <ToggleButton value="review">
-                <RateReviewIcon fontSize="small" />
+              <ToggleButton value="grid">
+                <GridViewIcon fontSize="small" />
               </ToggleButton>
             </ToggleButtonGroup>
           </Stack>
@@ -180,23 +174,35 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           <Box display="flex" justifyContent="center" py={4}>
             <CircularProgress size={20} />
           </Box>
-        ) : sortedItems.length === 0 ? (
+        ) : visibleEnriched.length === 0 ? (
           <Typography color="text.secondary" textAlign="center" py={4}>
             No items in this shelf
           </Typography>
+        ) : effectiveViewMode === "grid" ? (
+          <Box
+            sx={{
+              display: "grid",
+              gap: 2,
+              gridTemplateColumns: GRID_COLUMNS_SX,
+            }}
+          >
+            {visibleEnriched.map((enriched) => (
+              <ShelfItemRenderer
+                key={enriched.item.itemRef}
+                enriched={enriched}
+                viewMode={effectiveViewMode}
+              />
+            ))}
+          </Box>
         ) : (
           <Stack spacing={1}>
-            {sortedItems
-              .filter(
-                (item) => !hydration.orphanItemRefs.includes(item.itemRef),
-              )
-              .map((item) => (
-                <ShelfItemRenderer
-                  key={item.itemRef}
-                  item={item}
-                  viewMode={effectiveViewMode}
-                />
-              ))}
+            {visibleEnriched.map((enriched) => (
+              <ShelfItemRenderer
+                key={enriched.item.itemRef}
+                enriched={enriched}
+                viewMode={effectiveViewMode}
+              />
+            ))}
           </Stack>
         )}
       </Stack>

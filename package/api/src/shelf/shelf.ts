@@ -60,6 +60,15 @@ export type {
   ToggleFavoriteResponse,
   UpdateShelfInput,
 } from "./shelf.types";
-export type { ShelfHydrationResult } from "./useShelfHydration";
+export type {
+  EnrichedShelfItem,
+  HydratedShelfItemsResult,
+  ShelfHydrationResult,
+  ShelfPrimaryDTO,
+  TagListEntryDTO,
+} from "./useShelfHydration";
 // Hydration hook
-export { useShelfHydration } from "./useShelfHydration";
+export {
+  useHydratedShelfItems,
+  useShelfHydration,
+} from "./useShelfHydration";

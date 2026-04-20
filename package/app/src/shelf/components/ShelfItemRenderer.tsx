@@ -1,10 +1,11 @@
 import Stack from "@mui/material/Stack";
-import { bookKeys } from "@rezics/api/book/book.keys";
-import { postKeys } from "@rezics/api/post/post.keys";
-import type { ShelfItemDTO, ShelfView } from "@rezics/api/shelf";
-import { tagKeys } from "@rezics/api/tag/tag.keys";
+import type {
+  EnrichedShelfItem,
+  ShelfView,
+  TagListEntryDTO,
+} from "@rezics/api/shelf";
 import type { BookDTO, PostDTO, UnitDTO, UnitTagDTO } from "@rezics/contract";
-import { useQueryClient } from "@tanstack/react-query";
+import { HorizontalBookCard } from "@/book-library/components/item/HorizontalBookCard";
 import { BookCard } from "@/book-library/components/item/VerticalBookCard";
 import { ExcerptCard } from "@/excerpt/components/item/ExcerptCard";
 import { PostCard } from "@/post";
@@ -14,80 +15,81 @@ import { SingleTagChip } from "@/tag/components/TagList";
 import { ShelfItemCard } from "./ShelfItemCard";
 
 interface ShelfItemRendererProps {
-  item: ShelfItemDTO;
+  enriched: EnrichedShelfItem;
   viewMode: ShelfView;
 }
 
-export function ShelfItemRenderer({ item, viewMode }: ShelfItemRendererProps) {
-  const queryClient = useQueryClient();
+export function ShelfItemRenderer({
+  enriched,
+  viewMode,
+}: ShelfItemRendererProps) {
+  const { item, primary, attachedReviews } = enriched;
 
   const renderPrimary = () => {
     switch (item.kind) {
       case "book": {
-        const book = queryClient.getQueryData<BookDTO>(
-          bookKeys.detail(item.itemRef),
-        );
+        const book = primary as BookDTO | undefined;
         if (!book) return null;
         const title = book.translations?.[0]?.title ?? item.itemRef;
         const description = book.translations?.[0]?.description ?? undefined;
+        const author = getBookAuthorName(book) || undefined;
+        const coverUrl = book.coverUrl ?? "";
+        const href = `/book/${item.itemRef}`;
+        if (viewMode === "grid") {
+          return (
+            <BookCard
+              title={title}
+              author={author}
+              description={description}
+              coverUrl={coverUrl}
+              href={href}
+            />
+          );
+        }
         return (
-          <BookCard
+          <HorizontalBookCard
             title={title}
-            author={getBookAuthorName(book) || undefined}
-            description={description ?? undefined}
-            coverUrl={book.coverUrl ?? ""}
-            href={`/book/${item.itemRef}`}
+            author={author}
+            description={description}
+            coverUrl={coverUrl}
+            href={href}
           />
         );
       }
       case "review": {
-        const post = queryClient.getQueryData<PostDTO>(
-          postKeys.detail(item.itemRef),
-        );
+        const post = primary as PostDTO | undefined;
         if (!post) return null;
         return <ReviewCard review={post} />;
       }
       case "quote": {
-        const post = queryClient.getQueryData<PostDTO>(
-          postKeys.detail(item.itemRef),
-        );
+        const post = primary as PostDTO | undefined;
         if (!post) return null;
         return <ExcerptCard excerpt={post as unknown as UnitDTO} />;
       }
       case "post": {
-        const post = queryClient.getQueryData<PostDTO>(
-          postKeys.detail(item.itemRef),
-        );
+        const post = primary as PostDTO | undefined;
         if (!post) return null;
         return <PostCard post={post} />;
       }
       case "tag": {
-        const tag = queryClient.getQueryData<UnitTagDTO>(
-          tagKeys.detail(item.itemRef),
-        );
+        const tag = primary as TagListEntryDTO | undefined;
         if (!tag) return null;
-        return <SingleTagChip tag={tag} />;
+        return <SingleTagChip tag={tag as unknown as UnitTagDTO} />;
       }
       default:
         return <ShelfItemCard item={item} />;
     }
   };
 
-  const primary = renderPrimary();
+  const rendered = renderPrimary();
 
-  if (viewMode !== "review" || item.reviewIds.length === 0) {
-    return primary;
+  if (viewMode !== "review" || attachedReviews.length === 0) {
+    return rendered;
   }
-
-  const attachedReviews = item.reviewIds
-    .map((id) => queryClient.getQueryData<PostDTO>(postKeys.detail(id)))
-    .filter((p): p is PostDTO => p != null);
-
-  if (attachedReviews.length === 0) return primary;
 
   return (
     <Stack spacing={1}>
-      {primary}
+      {rendered}
       {attachedReviews.map((review) => (
         <ReviewCard key={review.unitId} review={review} />
       ))}

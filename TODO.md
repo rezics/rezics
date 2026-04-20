@@ -6,6 +6,7 @@
 - [ ] 年齡分級機制調整
 - [ ]  meilisearch 需要調整，支持專門的 tag，realm-tag 索引系統 
 - [ ]  post?.extra?.title 是錯誤的嗎？post 需要有一個支持的語言用以進行語言篩查，所以title要不直接基於translation?代價高嗎？
+- [ ]  幾個模式是錯誤的啊，grid 模式要換成瀑布流， list 模式實際上是平鋪， review 是默認模式，shelf item 的 review 默認應該分 tab 展示，所以纔會有平鋪，這才是邏輯。瀑布流則是平鋪模式下的衍生。
 
 ## Section 2
 - [ ] 還是考慮遷移到 paraglide-js

@@ -75,6 +75,21 @@ export interface ShelfHydrationResult {
   isLoading: boolean;
 }
 
+export type ShelfPrimaryDTO = BookDTO | PostDTO | TagListEntryDTO;
+
+export interface EnrichedShelfItem {
+  item: ShelfItemDTO;
+  primary: ShelfPrimaryDTO | undefined;
+  attachedReviews: PostDTO[];
+  attachedTags: TagListEntryDTO[];
+}
+
+export interface HydratedShelfItemsResult {
+  enriched: EnrichedShelfItem[];
+  orphanItemRefs: string[];
+  isLoading: boolean;
+}
+
 type FetchedBucketData<B extends HydrationBucket> = B extends "book"
   ? BookDTO[]
   : B extends "post"
@@ -228,4 +243,52 @@ export function useShelfHydration(items: ShelfItemDTO[]): ShelfHydrationResult {
   const isLoading = buckets.some((b) => b.isLoading);
 
   return { buckets, orphanItemRefs, isLoading };
+}
+
+/**
+ * Wraps `useShelfHydration` and maps bucket results into per-item enriched
+ * shapes: each item gets its primary DTO and its attached review/tag DTOs
+ * resolved from the same batch. Consumers render purely from this shape
+ * and never read the query cache directly.
+ */
+export function useHydratedShelfItems(
+  items: ShelfItemDTO[],
+): HydratedShelfItemsResult {
+  const { buckets, orphanItemRefs, isLoading } = useShelfHydration(items);
+
+  const enriched = useMemo<EnrichedShelfItem[]>(() => {
+    const bookMap = new Map<string, BookDTO>();
+    const postMap = new Map<string, PostDTO>();
+    const tagMap = new Map<string, TagListEntryDTO>();
+
+    for (const b of buckets) {
+      if (!b.data) continue;
+      if (b.bucket === "book") {
+        for (const dto of b.data) bookMap.set(dto.unitId, dto);
+      } else if (b.bucket === "post") {
+        for (const dto of b.data) postMap.set(dto.unitId, dto);
+      } else {
+        for (const dto of b.data) tagMap.set(dto.unitId, dto);
+      }
+    }
+
+    return items.map((item) => {
+      const primaryBucket = KIND_TO_BUCKET[item.kind];
+      let primary: ShelfPrimaryDTO | undefined;
+      if (primaryBucket === "book") primary = bookMap.get(item.itemRef);
+      else if (primaryBucket === "post") primary = postMap.get(item.itemRef);
+      else if (primaryBucket === "tag") primary = tagMap.get(item.itemRef);
+
+      const attachedReviews = item.reviewIds
+        .map((id) => postMap.get(id))
+        .filter((p): p is PostDTO => p != null);
+      const attachedTags = item.tagIds
+        .map((id) => tagMap.get(id))
+        .filter((t): t is TagListEntryDTO => t != null);
+
+      return { item, primary, attachedReviews, attachedTags };
+    });
+  }, [items, buckets]);
+
+  return { enriched, orphanItemRefs, isLoading };
 }
