@@ -12,6 +12,7 @@
 - [ ] 還是考慮遷移到 paraglide-js
 - [ ] 權限模型還是不正確，jwt 驗證通過之後，還需要查數據庫校驗啊
 - [ ] 編輯器也有問題，回覆了也無法成功
+- [ ] tanstack query 能不能通過中間件讓list查詢能夠做到全部支持的id級別的緩存，意思就是比如 book list query1 查詢了 id1,id2,id3. query2 查詢 id2,id3,id4. 然後 能夠自動復用 query1 的 id2, id3 的結果，我需要網絡調查，以及如果不支持，看看要怎麼實現一個通用的支持
 - [ ] You could consider tools that empower authors to engage with feedback and improve their work. For example, a dashboard where authors can track reviews, filter critiques by themes (e.g., plot, style, pacing), or highlight top feedback. You might also add revision tools or prompts based on reader suggestions, and perhaps even a feature for authors to respond or engage with reviewers—fostering a strong feedback loop. Tools that make feedback actionable will keep both authors and reviewers engaged!
 - [ ] 专注于做 local lib
 - [ ] 用戶 提交 slug 限制
