@@ -24,6 +24,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import type { InjectedTag } from "@/search/models/injectedTags";
 import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
 import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
 
@@ -33,6 +34,8 @@ export type TagInteractionProps = {
   bookUnitId: string;
   /** The parent book; drives the edit-permission check. */
   bookUnit?: BookDTO;
+  /** Override the search navigation target. Defaults to global `/search`. */
+  onSearchTags?: (tags: InjectedTag[]) => void;
   className?: string;
 };
 
@@ -52,11 +55,13 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   translations,
   bookUnitId,
   bookUnit,
+  onSearchTags,
   className,
 }) => {
   const { t } = useTranslation();
   const [state, dispatch] = useTagInteractionReducer();
-  const navigateToTagSearch = useNavigateToTagSearch();
+  const defaultNavigate = useNavigateToTagSearch();
+  const navigateToTagSearch = onSearchTags ?? defaultNavigate;
   const voteMutation = useCastTagVoteMutation();
   const navigate = useNavigate();
   const canEditTags = useCanEdit({ resource: "tag", ownerUnit: bookUnit });
@@ -66,7 +71,8 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
     [translations],
   );
   const slugOf = useCallback(
-    (tagUnitId: string) => translations[tagUnitId]?.slug ?? "",
+    (tagUnitId: string): string | undefined =>
+      translations[tagUnitId]?.slug || undefined,
     [translations],
   );
 
@@ -91,18 +97,18 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   };
 
   const handleSearchSingle = (tagUnitId: string) => {
-    const slug = slugOf(tagUnitId);
-    if (!slug) return;
     navigateToTagSearch([
-      { slug, unitId: tagUnitId, name: labelOf(tagUnitId) },
+      { slug: slugOf(tagUnitId), unitId: tagUnitId, name: labelOf(tagUnitId) },
     ]);
   };
 
   const handleSearchMulti = () => {
     if (state.kind !== "multi-select") return;
-    const items = state.selected
-      .map((id) => ({ slug: slugOf(id), unitId: id, name: labelOf(id) }))
-      .filter((item) => item.slug);
+    const items = state.selected.map((id) => ({
+      slug: slugOf(id),
+      unitId: id,
+      name: labelOf(id),
+    }));
     if (items.length === 0) return;
     navigateToTagSearch(items);
   };

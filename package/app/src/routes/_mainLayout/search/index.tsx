@@ -21,7 +21,7 @@ function GlobalSearchPage() {
       return {
         ...parsed,
         tags: injectedTags.map((tag) => ({
-          slug: tag.slug,
+          slug: tag.slug ?? "",
           unitId: tag.unitId,
         })),
       };

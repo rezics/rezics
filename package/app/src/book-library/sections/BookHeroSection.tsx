@@ -10,7 +10,7 @@ import {
   MiniActionBar,
   MiniAdminActionBar,
 } from "@/engagement/components/MiniActionBar.tsx";
-import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
+import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import {
   getBookCoverUrl,
   getEntityTranslation,
@@ -85,7 +85,7 @@ export const BookHeroSection: React.FC<{
   const { data: translations } = useQuery(
     tagQueries.batchTranslations(tagUnitIds, selectedLang),
   );
-  const navigateToTagSearch = useNavigateToTagSearch();
+  const navigateToTagSearch = useNavigateToBookTagSearch();
 
   return (
     <div
@@ -139,13 +139,12 @@ export const BookHeroSection: React.FC<{
               {unitTags.map((tag) => {
                 const tr = translations?.[tag.tagUnitId];
                 const label = tr?.name || tag.tagUnitId;
-                const slug = tr?.slug ?? "";
+                const slug = tr?.slug || undefined;
                 return (
                   <button
                     key={tag.tagUnitId}
                     type="button"
                     onClick={() =>
-                      slug &&
                       navigateToTagSearch([
                         { slug, unitId: tag.tagUnitId, name: label },
                       ])

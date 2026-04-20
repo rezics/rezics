@@ -19,8 +19,11 @@ export function useNavigateToTagSearch() {
   const navigate = useNavigate();
   return useCallback(
     (tags: InjectedTag[]) => {
+      const slugged = tags.filter((t): t is InjectedTag & { slug: string } =>
+        Boolean(t.slug),
+      );
       const query: SearchQuery = {
-        tags: tags.map((t) => ({ slug: t.slug })),
+        tags: slugged.map((t) => ({ slug: t.slug })),
       };
       const q = serializeSearchString(query);
       navigate({

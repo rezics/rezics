@@ -10,6 +10,7 @@ import type React from "react";
 import { useTranslation } from "react-i18next";
 import { WorkReleaseNav } from "@/i18n/components/WorkReleaseNav";
 import { RemarkInlineForm } from "@/remark";
+import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { TagInteraction } from "@/tag/components/TagInteraction";
 import { BookDescription } from "../components/BookDescription";
@@ -30,6 +31,7 @@ export const BookBasicInfoPage: React.FC = () => {
 
   const { t } = useTranslation();
   const [selectedLang] = useBookLanguage(bookId, bookInfo);
+  const navigateToBookTagSearch = useNavigateToBookTagSearch();
 
   const { data: tagsData } = useQuery({
     ...tagQueries.forUnit(bookId),
@@ -82,6 +84,7 @@ export const BookBasicInfoPage: React.FC = () => {
                   translations={tagTranslations ?? {}}
                   bookUnitId={bookInfo.unitId ?? bookId}
                   bookUnit={bookInfo}
+                  onSearchTags={navigateToBookTagSearch}
                 />
               </Box>
             </div>

@@ -2,10 +2,13 @@ import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { type ContentSearchDocument, DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { UniversalPaginatorHandle } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SearchInfo } from "@/search";
 import type { BookLibSortKey } from "@/search/components/SearchFilter";
+import { useInjectedTags } from "@/search/hooks/useInjectedTags";
+import type { InjectedTag } from "@/search/models/injectedTags";
 
 import { BookLibSectionRef } from "../sections/BookLibSection";
 
@@ -17,9 +20,24 @@ import { BookLibSectionRef } from "../sections/BookLibSection";
 export const BookLibPage: React.FC = () => {
   const ref = useRef<UniversalPaginatorHandle>(null);
   const EXTERNAL_PAGE_SIZE = 100;
+  const injectedTags = useInjectedTags();
+  const urlSearch = useSearch({ strict: false }) as {
+    tags?: string;
+    keyword?: string;
+  };
+  const [selectedTags, setSelectedTags] = useState<InjectedTag[]>(() => {
+    if (injectedTags && injectedTags.length > 0) return injectedTags;
+    const slugs = urlSearch.tags?.split(",").filter(Boolean) ?? [];
+    return slugs.map((slug) => ({ slug, unitId: slug, name: slug }));
+  });
+  const tagIds = useMemo(
+    () => selectedTags.map((t) => t.unitId),
+    [selectedTags],
+  );
+  const removeSelectedTag = (unitId: string) =>
+    setSelectedTags((prev) => prev.filter((t) => t.unitId !== unitId));
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
-    keyword: "",
-    tags: [],
+    keyword: urlSearch.keyword ?? "",
     nsfw: false,
     isLicensed: undefined,
   });
@@ -29,6 +47,7 @@ export const BookLibPage: React.FC = () => {
     contentSearchQueryOptions({
       keyword: currentQuery.keyword || undefined,
       type: "BOOK",
+      tagIds: tagIds.length ? tagIds : undefined,
       nsfw: currentQuery.nsfw ?? false,
       isLicensed: currentQuery.isLicensed,
       offset: start,
@@ -46,6 +65,7 @@ export const BookLibPage: React.FC = () => {
       contentSearchQueryOptions({
         keyword: currentQuery.keyword || undefined,
         type: "BOOK",
+        tagIds: tagIds.length ? tagIds : undefined,
         nsfw: currentQuery.nsfw ?? false,
         isLicensed: currentQuery.isLicensed,
         offset: (page - 1) * EXTERNAL_PAGE_SIZE,
@@ -117,6 +137,8 @@ export const BookLibPage: React.FC = () => {
       error={error}
       currentQuery={currentQuery}
       setCurrentQuery={setCurrentQuery}
+      selectedTags={selectedTags}
+      onRemoveSelectedTag={removeSelectedTag}
       sortConfig={sortConfig}
       handleNeedMoreData={handleNeedMoreData}
       handlePreRequestData={handlePreRequestData}

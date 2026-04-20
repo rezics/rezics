@@ -3,7 +3,7 @@
  * so the search page can render chips without re-querying the API.
  */
 export interface InjectedTag {
-  slug: string;
+  slug?: string;
   unitId: string;
   name: string;
 }

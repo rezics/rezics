@@ -1,10 +1,21 @@
 ## Section 1
 - [ ] EXCERPT 前端 單 url 解析的話，如何在有兩個unitId 的時候正確定位，比如 章節定位到章節？
 - [ ] 後端如果可行的化，最好同時返回slug，比如 book info page tag 查詢的時候，最好同時返回 slug，然後前端先渲染 slug，再用unit 去查 tags，這樣好歹比 顯示 unitIds 好看
+- [ ] 章節數量，加入 book info
+- [ ] https://better-auth.com/docs/infrastructure/plugins/dashboard
+- [ ] 年齡分級機制調整
 
 ## Section 2
 - [ ] 還是考慮遷移到 paraglide-js
 - [ ] 權限模型還是不正確，jwt 驗證通過之後，還需要查數據庫校驗啊
+- [ ] 編輯器也有問題，回覆了也無法成功
+- [ ] You could consider tools that empower authors to engage with feedback and improve their work. For example, a dashboard where authors can track reviews, filter critiques by themes (e.g., plot, style, pacing), or highlight top feedback. You might also add revision tools or prompts based on reader suggestions, and perhaps even a feature for authors to respond or engage with reviewers—fostering a strong feedback loop. Tools that make feedback actionable will keep both authors and reviewers engaged!
+- [ ] 专注于做 local lib
+- [ ] 用戶 提交 slug 限制
+- [ ] 目前需要限制普通用戶 創建 realm,比如最多十個
+- [ ] 短鏈 like /r/xxx
+- [ ] unit-users 複數 user unit 協作
+- [ ] 似乎有的時候會彈出完成註冊，校驗完成註冊的接口 應該不能用來覆蓋 slug
 - [ ] book content index 並不需要章節存在，所以如果沒有 unitId 前端應該給交互，可以創建 chapter
 - [ ] post 不需要 translation 直接使用 unit translation 只不過他專門索引 不同 trans 的 release id, 就是 翻譯是 不同 unit 維護
 - [ ] UnitTranslation  sourceReleaseUnitId  我覺得這個名詞不夠準確，因爲這描述了 work，但是他可以提供 wiki 的功能

@@ -8,6 +8,8 @@ import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import type { SearchInfo } from "@/search";
 import type { BookLibSortKey } from "@/search/components/SearchFilter";
+import type { InjectedTag } from "@/search/models/injectedTags";
+import { SelectedTagChips } from "@/tag/components/SelectedTagChips";
 import { BookListView } from "../components/BookList/BookListView";
 import { BookSearchInput } from "../components/BookSearch/BookSearch";
 
@@ -41,6 +43,10 @@ export type BookLibSectionProps = {
   setCurrentQuery: React.Dispatch<React.SetStateAction<SearchInfo>>;
   /** Current search query. */
   currentQuery: SearchInfo;
+  /** Tag filter chips applied from navigation state. */
+  selectedTags: InjectedTag[];
+  /** Remove one tag from the filter. */
+  onRemoveSelectedTag: (unitId: string) => void;
 };
 
 /**
@@ -62,6 +68,8 @@ export const BookLibSection = (
     EXTERNAL_PAGE_SIZE,
     setCurrentQuery,
     currentQuery,
+    selectedTags,
+    onRemoveSelectedTag,
   }: BookLibSectionProps,
   ref: React.Ref<UniversalPaginatorHandle>,
 ) => {
@@ -77,6 +85,10 @@ export const BookLibSection = (
   if (error) {
     return (
       <div className="mx-auto max-w-7xl p-4">
+        <SelectedTagChips
+          tags={selectedTags}
+          onRemove={onRemoveSelectedTag}
+        />
         <BookSearchInput onSearch={() => {}} />
         <QueryErrorDisplay error={error} className="my-4" />
       </div>
@@ -98,17 +110,22 @@ export const BookLibSection = (
         preRequestData={handlePreRequestData}
         isLoading={isLoading && books.length === 0}
         sortControl={
-          <BookSearchInput
-            onSearch={(info) => {
-              setCurrentQuery({
-                keyword: info.keyword ?? "",
-                tagIds: info.tagIds ?? [],
-                nsfw: info.nsfw ?? false,
-                isLicensed: info.isLicensed ?? undefined,
-              });
-            }}
-            defaultValue={currentQuery}
-          />
+          <div className="flex flex-col gap-2">
+            <SelectedTagChips
+              tags={selectedTags}
+              onRemove={onRemoveSelectedTag}
+            />
+            <BookSearchInput
+              onSearch={(info) => {
+                setCurrentQuery({
+                  keyword: info.keyword ?? "",
+                  nsfw: info.nsfw ?? false,
+                  isLicensed: info.isLicensed ?? undefined,
+                });
+              }}
+              defaultValue={currentQuery}
+            />
+          </div>
         }
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
