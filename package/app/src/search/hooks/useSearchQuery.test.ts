@@ -9,15 +9,26 @@ import {
 } from "./useSearchQuery";
 
 describe("unionTags", () => {
-  it("dedupes by slug, preserving first occurrence", () => {
+  it("dedupes by slug and fills missing fields from later occurrence", () => {
     const result = unionTags(
       [{ slug: "a" }, { slug: "b" }],
       [{ slug: "b", unitId: "u1" }, { slug: "c" }],
     );
     expect(result).toEqual([
       { slug: "a" },
-      { slug: "b" },
+      { slug: "b", unitId: "u1" },
       { slug: "c" },
+    ]);
+  });
+
+  it("dedupes by unitId when slug is missing", () => {
+    const result = unionTags(
+      [{ unitId: "u1", name: "First" }],
+      [{ unitId: "u1", slug: "first" }, { unitId: "u2" }],
+    );
+    expect(result).toEqual([
+      { unitId: "u1", name: "First", slug: "first" },
+      { unitId: "u2" },
     ]);
   });
 

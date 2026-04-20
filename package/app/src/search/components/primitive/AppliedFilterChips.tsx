@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import { Chip, Stack } from "@mui/material";
-import type { SearchQuery, SlugRef } from "@rezics/contract";
+import type { SearchQuery, TagRef } from "@rezics/contract";
 import type React from "react";
 
 export type { ChipDescriptor as AppliedFilterChipDescriptor };
@@ -18,9 +18,17 @@ type ChipDescriptor = {
   remove?: Partial<SearchQuery>;
 };
 
-function hideTags(all: SlugRef[], hidden: SlugRef[]): SlugRef[] {
-  const hiddenSlugs = new Set(hidden.map((t) => t.slug));
-  return all.filter((t) => !hiddenSlugs.has(t.slug));
+const tagIdentity = (t: TagRef): string => t.unitId ?? t.slug ?? "";
+
+const tagLabel = (t: TagRef): string =>
+  t.name ?? t.slug ?? t.unitId ?? "";
+
+function hideTags(all: TagRef[], hidden: TagRef[]): TagRef[] {
+  const hiddenIds = new Set(hidden.map(tagIdentity).filter(Boolean));
+  return all.filter((t) => {
+    const id = tagIdentity(t);
+    return !id || !hiddenIds.has(id);
+  });
 }
 
 function hideStrings(all: string[], hidden: string[]): string[] {
@@ -54,11 +62,12 @@ function buildChips(
   if (query.tags && !rendered.has("tags")) {
     const visibleTags = hideTags(query.tags, hide.tags ?? []);
     for (const tag of visibleTags) {
+      const id = tagIdentity(tag);
       out.push({
-        key: `tag:${tag.slug}`,
-        label: `#${tag.slug}`,
+        key: `tag:${id}`,
+        label: `#${tagLabel(tag)}`,
         remove: {
-          tags: (query.tags ?? []).filter((t) => t.slug !== tag.slug),
+          tags: (query.tags ?? []).filter((t) => tagIdentity(t) !== id),
         },
       });
     }

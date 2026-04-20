@@ -1,20 +1,21 @@
 import { Autocomplete, Chip, TextField } from "@mui/material";
-import type { SlugRef } from "@rezics/contract";
+import type { TagRef } from "@rezics/contract";
 import type React from "react";
 import { useState } from "react";
 import { useTagSuggest } from "../../hooks/useTagSuggest";
 
 export type TagPickerProps = {
-  value: SlugRef[];
-  onChange: (tags: SlugRef[]) => void;
+  value: TagRef[];
+  onChange: (tags: TagRef[]) => void;
   label?: string;
   placeholder?: string;
   size?: "small" | "medium";
 };
 
-// TODO(meili-tag-index): when the tag index ships, `useTagSuggest` will
-// hit Meilisearch with slug-prefix match and return { slug, unitId, name }
-// hits. No change needed here — TagPicker already maps them via suggestion.slug.
+const tagIdentity = (t: TagRef): string => t.unitId ?? t.slug ?? "";
+
+const tagLabel = (t: TagRef): string =>
+  t.name ?? t.slug ?? t.unitId ?? "";
 
 export const TagPicker: React.FC<TagPickerProps> = ({
   value,
@@ -32,8 +33,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       .map((s) => s.trim())
       .filter(Boolean);
     if (tokens.length === 0) return;
-    const seen = new Set(value.map((t) => t.slug));
-    const added: SlugRef[] = [];
+    const seen = new Set(value.map(tagIdentity));
+    const added: TagRef[] = [];
     for (const slug of tokens) {
       if (!seen.has(slug)) {
         seen.add(slug);
@@ -66,27 +67,33 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         }
       }}
       isOptionEqualToValue={(opt, val) => {
-        const optSlug = typeof opt === "string" ? opt : opt.slug;
-        const valSlug = typeof val === "string" ? val : val.slug;
-        return optSlug === valSlug;
+        const optId = typeof opt === "string" ? opt : tagIdentity(opt);
+        const valId = typeof val === "string" ? val : tagIdentity(val);
+        return optId === valId;
       }}
       getOptionLabel={(opt) => {
         if (typeof opt === "string") return opt;
-        const name = (opt as { name?: string }).name;
-        return name ?? opt.slug;
+        return tagLabel(opt);
       }}
       onChange={(_e, newValue) => {
-        const next: SlugRef[] = [];
+        const next: TagRef[] = [];
         const seen = new Set<string>();
         for (const item of newValue) {
-          const slug = typeof item === "string" ? item.trim() : item.slug;
-          if (!slug || seen.has(slug)) continue;
-          seen.add(slug);
-          next.push(
-            typeof item === "string"
-              ? { slug }
-              : { slug, unitId: item.unitId },
-          );
+          if (typeof item === "string") {
+            const slug = item.trim();
+            if (!slug || seen.has(slug)) continue;
+            seen.add(slug);
+            next.push({ slug });
+            continue;
+          }
+          const id = tagIdentity(item);
+          if (!id || seen.has(id)) continue;
+          seen.add(id);
+          next.push({
+            ...(item.unitId ? { unitId: item.unitId } : {}),
+            ...(item.slug ? { slug: item.slug } : {}),
+            ...(item.name ? { name: item.name } : {}),
+          });
         }
         onChange(next);
       }}
@@ -96,8 +103,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           return (
             <Chip
               {...props}
-              key={tag.slug}
-              label={tag.slug}
+              key={tagIdentity(tag) || `idx-${index}`}
+              label={tagLabel(tag)}
               size={size}
               variant="outlined"
             />

@@ -7,10 +7,10 @@ import { serializeSearchString } from "../models/searchQuery";
 /**
  * Navigate to the global search page with pre-resolved tag data.
  *
- * The URL uses `[slug]` syntax in the `q` param (canonical, shareable).
- * Pre-resolved objects are passed through router state as `injectedTags`
- * so the search page can render tag chips and execute the query without
- * a round-trip to resolve slugs.
+ * The URL `q` param only encodes tags that have a slug (canonical, shareable).
+ * The full resolved list — including unitId-only and name-bearing entries —
+ * rides in router state as `injectedTags` so chips render immediately without
+ * a round-trip to resolve names/slugs.
  *
  * On shared/refreshed URLs the injected state is absent; the search page
  * falls back to URL-based slug resolution.
@@ -19,16 +19,16 @@ export function useNavigateToTagSearch() {
   const navigate = useNavigate();
   return useCallback(
     (tags: InjectedTag[]) => {
-      const slugged = tags.filter((t): t is InjectedTag & { slug: string } =>
-        Boolean(t.slug),
+      const sluggableTags = tags.filter(
+        (t): t is InjectedTag & { slug: string } => Boolean(t.slug),
       );
-      const query: SearchQuery = {
-        tags: slugged.map((t) => ({ slug: t.slug })),
+      const urlQuery: SearchQuery = {
+        tags: sluggableTags.map((t) => ({ slug: t.slug })),
       };
-      const q = serializeSearchString(query);
+      const q = serializeSearchString(urlQuery);
       navigate({
         to: "/search",
-        search: { q },
+        search: q ? { q } : {},
         state: { injectedTags: tags } as never,
       });
     },

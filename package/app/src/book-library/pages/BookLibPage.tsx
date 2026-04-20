@@ -34,7 +34,11 @@ export const BookLibPage: React.FC = () => {
   const initial = useMemo<SearchQuery>(() => {
     const urlSlugs = urlSearch.tags?.split(",").filter(Boolean) ?? [];
     const seededTags = injectedTags?.length
-      ? injectedTags.map((t) => ({ slug: t.slug ?? "", unitId: t.unitId }))
+      ? injectedTags.map((t) => ({
+          ...(t.slug ? { slug: t.slug } : {}),
+          ...(t.unitId ? { unitId: t.unitId } : {}),
+          ...(t.name ? { name: t.name } : {}),
+        }))
       : urlSlugs.map((slug) => ({ slug }));
     return {
       keyword: urlSearch.keyword ?? undefined,

@@ -27,7 +27,16 @@ export function toContentSearchOptions(
   }
 
   if (query.tags?.length) {
-    opts.tags = query.tags;
+    const normalized = query.tags
+      .map((tag) =>
+        tag.unitId
+          ? { unitId: tag.unitId }
+          : tag.slug
+            ? { slug: tag.slug }
+            : null,
+      )
+      .filter((t): t is { unitId: string } | { slug: string } => t !== null);
+    if (normalized.length) opts.tags = normalized;
   }
 
   if (query.realm?.slug) {

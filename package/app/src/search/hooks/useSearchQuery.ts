@@ -1,7 +1,7 @@
 import type {
   ContentSearchOptions,
   SearchQuery,
-  SlugRef,
+  TagRef,
 } from "@rezics/contract";
 import { useCallback, useMemo, useState } from "react";
 import { toContentSearchOptions } from "../models/toContentSearchOptions";
@@ -35,12 +35,27 @@ export interface UseSearchQueryReturn {
   middleware?: QueryMiddleware;
 }
 
-export function unionTags(a: SlugRef[], b: SlugRef[]): SlugRef[] {
-  const seen = new Set<string>();
-  const out: SlugRef[] = [];
+function tagsEqual(a: TagRef, b: TagRef): boolean {
+  if (a.unitId && b.unitId) return a.unitId === b.unitId;
+  if (a.slug && b.slug) return a.slug === b.slug;
+  return false;
+}
+
+function mergeTag(prev: TagRef, next: TagRef): TagRef {
+  const merged: TagRef = { ...prev };
+  if (!merged.unitId && next.unitId) merged.unitId = next.unitId;
+  if (!merged.slug && next.slug) merged.slug = next.slug;
+  if (!merged.name && next.name) merged.name = next.name;
+  return merged;
+}
+
+export function unionTags(a: TagRef[], b: TagRef[]): TagRef[] {
+  const out: TagRef[] = [];
   for (const tag of [...a, ...b]) {
-    if (!seen.has(tag.slug)) {
-      seen.add(tag.slug);
+    const existing = out.findIndex((t) => tagsEqual(t, tag));
+    if (existing >= 0) {
+      out[existing] = mergeTag(out[existing]!, tag);
+    } else {
       out.push(tag);
     }
   }

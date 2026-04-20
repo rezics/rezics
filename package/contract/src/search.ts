@@ -1,6 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { SlugRefSchema } from "./common/slug-ref";
+import { TagRefSchema } from "./common/tag-ref";
 import { postKindLiterals } from "./post";
 
 // ANCHOR: Search Query
@@ -14,7 +15,7 @@ export type TextLengthRange = Static<typeof TextLengthRangeSchema>;
 
 export const SearchQuerySchema = t.Object({
   keyword: t.Optional(t.String()),
-  tags: t.Optional(t.Array(SlugRefSchema)),
+  tags: t.Optional(t.Array(TagRefSchema)),
   type: t.Optional(t.Array(t.String())),
   postKind: t.Optional(t.Array(postKindLiterals)),
   languages: t.Optional(t.Array(t.String())),

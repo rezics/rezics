@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { SlugRefSchema } from "../common/slug-ref";
+import { TagRefSchema } from "../common/tag-ref";
 import { languageSchema } from "../language";
 import { postKindLiterals } from "../post";
 
@@ -81,7 +81,7 @@ export const ContentSearchOptionsSchema = t.Object({
   keyword: t.Optional(t.String()),
   type: t.Optional(t.Union([t.String(), t.Array(t.String())])),
   postKind: t.Optional(t.Array(postKindLiterals)),
-  tags: t.Optional(t.Array(SlugRefSchema)),
+  tags: t.Optional(t.Array(TagRefSchema)),
   tagIds: t.Optional(t.Array(t.String())),
   realmId: t.Optional(t.String()),
   realmTagIds: t.Optional(t.Array(t.String())),

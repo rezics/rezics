@@ -21,8 +21,9 @@ function GlobalSearchPage() {
       return {
         ...parsed,
         tags: injectedTags.map((tag) => ({
-          slug: tag.slug ?? "",
-          unitId: tag.unitId,
+          ...(tag.slug ? { slug: tag.slug } : {}),
+          ...(tag.unitId ? { unitId: tag.unitId } : {}),
+          ...(tag.name ? { name: tag.name } : {}),
         })),
       };
     }
