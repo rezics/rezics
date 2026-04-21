@@ -399,6 +399,7 @@ export default {
       press: "Publisher",
       producer: "Producer",
       text_length: "Text length",
+      rating: "Content rating",
     },
     placeholders: {
       search_author: "Search authors...",
@@ -406,11 +407,12 @@ export default {
       search_producer: "Search producers...",
     },
     flags: {
-      nsfw: "NSFW",
+      rating: "Content rating",
       licensed: "Licensed",
     },
     tooltips: {
-      nsfw: "Please check this option if the book title or cover contains nudity, pornography, or other sensitive content.",
+      rating:
+        "Choose the content rating. GENERAL is default; R_15, R_18, and R_18G require caller opt-in.",
       licensed:
         "Please check this option if the book has been licensed (e.g. you are the copyright holder).",
     },
@@ -423,6 +425,22 @@ export default {
       double_click_rename: "Double-click rename",
       rename_help:
         "Renaming chapters here only affects the table-of-contents display and will not update the actual chapter title. To rename the chapter title, go to the chapter editor page; after changing the title there, the table of contents will update automatically.",
+      edit_dialog: {
+        title: "Edit Chapter",
+        status: "Publish Status",
+      },
+      status: {
+        draft: "Draft",
+        published: "Published",
+        archived: "Archived",
+      },
+      bulk_rating: {
+        title: "Set rating for selected",
+        description:
+          "This will override the rating on {{count}} selected chapters.",
+      },
+      resync_overrides: "Resync index overrides",
+      select_mode: "Select chapters",
     },
     author_info: {
       author_line: "Author: {{name}}",
@@ -444,8 +462,13 @@ export default {
       search_books: "Search books",
     },
     tooltips: {
-      nsfw: "Whether to search for content that is not suitable for work",
+      rating: "Narrow search results by content rating",
+      ratingOptIn: "Enable this rating in settings",
+      ratingSignIn: "Sign in and opt in to enable this rating",
       licensed: "Whether to search for content that has been licensed",
+    },
+    filters: {
+      rating: "Rating",
     },
     pagination: {
       tips: "Tips: The page number does not represent the total number of data, please click the last page to try to load more",
@@ -634,6 +657,7 @@ export default {
     create: "Create",
     continue: "Continue",
     update: "Update",
+    apply: "Apply",
     search: "Search",
     expand: "Expand",
     collapse: "Collapse",
@@ -695,5 +719,34 @@ export default {
     search: "Search",
     close: "Close",
     open_drawer: "Open drawer",
+  },
+
+  // Content rating tiers (used via t(`rating.tier.${tier}`))
+  rating: {
+    tier: {
+      GENERAL: "General",
+      R_15: "R-15",
+      R_18: "R-18",
+      R_18G: "R-18G",
+    },
+  },
+
+  settings: {
+    content_rating: {
+      section_title: "Content rating",
+      section_description:
+        "Baseline ratings are always on. Opt in to age-restricted tiers to see them in search and listings.",
+      always_on: "Always on",
+      saved: "Preferences saved.",
+      description: {
+        R_18: "Adult content.",
+        R_18G: "Explicit adult content.",
+      },
+      opt_in_modal: {
+        title: "Confirm age-restricted content",
+        body: "By enabling {{rating}} you confirm you are of legal age in your jurisdiction and consent to viewing this content.",
+        confirm: "I confirm",
+      },
+    },
   },
 };

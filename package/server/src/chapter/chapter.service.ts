@@ -5,7 +5,13 @@ import type {
 } from "@rezics/contract";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import { PostKind, prisma, UnitStatus, UnitType } from "#/prisma/client";
+import {
+  type ContentRating,
+  PostKind,
+  prisma,
+  UnitStatus,
+  UnitType,
+} from "#/prisma/client";
 import type { ChapterPostWithRelations } from "./types";
 import { chapterPostInclude } from "./types";
 
@@ -122,7 +128,8 @@ export class ChapterService {
   }
 
   async create(req: CreateChapterInput): Promise<ChapterPostWithRelations> {
-    const { userId, title, content, targetUnitId, coverUrl, status } = req;
+    const { userId, title, content, targetUnitId, coverUrl, status, rating } =
+      req;
 
     const target = await prisma.unit.findUnique({
       where: { id: targetUnitId },
@@ -147,6 +154,7 @@ export class ChapterService {
           type: UnitType.POST,
           status: (status as UnitStatus) || UnitStatus.PUBLISHED,
           defaultLanguage: language,
+          rating: (rating as ContentRating | undefined) ?? undefined,
           translations: {
             create: {
               language,
@@ -180,7 +188,7 @@ export class ChapterService {
     unitId: string,
     req: UpdateChapterInput,
   ): Promise<ChapterPostWithRelations> {
-    const { title, content, targetUnitId, coverUrl, status } = req;
+    const { title, content, targetUnitId, coverUrl, status, rating } = req;
 
     if (targetUnitId !== undefined && targetUnitId !== null) {
       const target = await prisma.unit.findUnique({
@@ -207,10 +215,15 @@ export class ChapterService {
         await tx.post.update({ where: { unitId }, data: postPatch });
       }
 
-      if (status) {
+      if (status || rating !== undefined) {
         await tx.unit.update({
           where: { id: unitId },
-          data: { status: status as UnitStatus },
+          data: {
+            ...(status ? { status: status as UnitStatus } : {}),
+            ...(rating !== undefined
+              ? { rating: rating as ContentRating }
+              : {}),
+          },
         });
       }
 

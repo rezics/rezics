@@ -1,6 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { SlugRefSchema } from "./common/slug-ref";
+import { contentRatingSchema } from "./unit";
 
 // ANCHOR: Zone Filters
 
@@ -8,7 +9,7 @@ export const ZoneFiltersSchema = t.Object({
   type: t.Optional(t.Union([t.String(), t.Array(t.String())])),
   tags: t.Optional(t.Array(SlugRefSchema)),
   realmId: t.Optional(t.String()),
-  nsfw: t.Optional(t.Boolean()),
+  ratings: t.Optional(t.Array(contentRatingSchema)),
   isLicensed: t.Optional(t.Boolean()),
   languages: t.Optional(t.Array(t.String())),
 });

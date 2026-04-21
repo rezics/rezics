@@ -6,6 +6,7 @@ import { AdvancedSearch, SearchResultList } from "@/search";
 import { useInjectedTags } from "@/search/hooks/useInjectedTags";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { parseSearchString } from "@/search/models/searchQuery";
+import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 
 type SearchRouteParams = {
   q?: string;
@@ -30,8 +31,15 @@ function GlobalSearchPage() {
     return parsed;
   }, [q, injectedTags]);
 
+  const { allowed } = useAllowedRatings();
+  const implicitInitial = useMemo<SearchQuery>(
+    () => ({ ratings: allowed }),
+    [allowed],
+  );
+
   const search = useSearchQuery({
     initial: initialQuery,
+    implicitInitial,
     middleware: parseSearchString,
   });
 

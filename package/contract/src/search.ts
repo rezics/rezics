@@ -3,6 +3,7 @@ import { t } from "elysia";
 import { SlugRefSchema } from "./common/slug-ref";
 import { TagRefSchema } from "./common/tag-ref";
 import { postKindLiterals } from "./post";
+import { contentRatingSchema } from "./unit";
 
 // ANCHOR: Search Query
 
@@ -19,7 +20,7 @@ export const SearchQuerySchema = t.Object({
   type: t.Optional(t.Array(t.String())),
   postKind: t.Optional(t.Array(postKindLiterals)),
   languages: t.Optional(t.Array(t.String())),
-  nsfw: t.Optional(t.Boolean()),
+  ratings: t.Optional(t.Array(contentRatingSchema)),
   isLicensed: t.Optional(t.Boolean()),
   realm: t.Optional(SlugRefSchema),
   sort: t.Optional(t.String()),

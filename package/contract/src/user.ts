@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
+import type { ContentRating } from "./unit";
 
 // ============================================================
 // USER DTO (UserType removed — no AUTHOR/PRESS/PRODUCER)
@@ -103,11 +104,30 @@ export const realmTagPreferenceSchema = t.Object({
   maxDisplay: t.Number(),
 });
 
+export const contentPreferenceSchema = t.Object({
+  /**
+   * Age-rating opt-ins. Only R_18 / R_18G are valid values — GENERAL and R_15
+   * are always-on baseline and MUST NOT appear here.
+   */
+  optedInRatings: t.Optional(
+    t.Array(t.Union([t.Literal("R_18"), t.Literal("R_18G")])),
+  ),
+});
+
+export type ContentPreference = (typeof contentPreferenceSchema)["static"];
+
+/** Ratings a user may opt into; GENERAL/R_15 are always on. */
+export const OPT_IN_RATINGS: readonly ContentRating[] = ["R_18", "R_18G"];
+
+/** Always-on baseline ratings available to every caller, signed in or not. */
+export const BASELINE_RATINGS: readonly ContentRating[] = ["GENERAL", "R_15"];
+
 export const userSettingsSchema = t.Object({
   realmTagPreferences: t.Optional(
     t.Record(t.String(), realmTagPreferenceSchema),
   ),
   preferredLanguages: t.Optional(t.Array(t.String())),
+  content: t.Optional(contentPreferenceSchema),
 });
 
 export type UserSettings = (typeof userSettingsSchema)["static"];

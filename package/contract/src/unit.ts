@@ -61,6 +61,26 @@ export const unitVisibilitySchema = t.Union([
 ]);
 
 // ============================================================
+// CONTENT RATING
+// ============================================================
+
+export const ContentRating = {
+  GENERAL: "GENERAL",
+  R_15: "R_15",
+  R_18: "R_18",
+  R_18G: "R_18G",
+} as const;
+
+export type ContentRating = (typeof ContentRating)[keyof typeof ContentRating];
+
+export const contentRatingSchema = t.Union([
+  t.Literal("GENERAL"),
+  t.Literal("R_15"),
+  t.Literal("R_18"),
+  t.Literal("R_18G"),
+]);
+
+// ============================================================
 // PUBLIC USER (shared across contracts)
 // ============================================================
 
@@ -122,7 +142,7 @@ export const baseUnitSchema = t.Object({
   translationGroupId: t.Optional(t.Nullable(t.String())),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -157,7 +177,7 @@ export const unitListQuerySchema = t.Object({
   userIds: t.Optional(t.String()),
   workUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   createdAtFrom: t.Optional(t.String()),
   createdAtTo: t.Optional(t.String()),
   publishedAtFrom: t.Optional(t.String()),
@@ -193,7 +213,7 @@ export const unitListBodySchema = t.Object({
   userIds: t.Optional(t.String()),
   workUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   createdAtFrom: t.Optional(t.String()),
   createdAtTo: t.Optional(t.String()),
   publishedAtFrom: t.Optional(t.String()),
@@ -244,7 +264,7 @@ export const createUnitSchema = t.Object({
   isLanguageNeutral: t.Optional(t.Boolean()),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   publishedAt: t.Optional(t.Union([t.String(), t.Date()])),
   translations: t.Optional(
@@ -267,7 +287,7 @@ export type CreateUnitInput = (typeof createUnitSchema)["static"];
 export const updateUnitSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),
   workUnitId: t.Optional(t.Nullable(t.String())),

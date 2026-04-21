@@ -40,7 +40,7 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
             ]
           : []),
       coverUrl: doc.coverUrl,
-      nsfw: doc.nsfw,
+      rating: doc.rating,
       isLicensed: doc.isLicensed,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,

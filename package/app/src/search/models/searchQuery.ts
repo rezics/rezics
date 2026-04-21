@@ -1,4 +1,18 @@
-import type { SearchQuery } from "@rezics/contract";
+import type { ContentRating, SearchQuery } from "@rezics/contract";
+
+const RATING_TOKENS: Record<string, ContentRating> = {
+  general: "GENERAL",
+  g: "GENERAL",
+  r15: "R_15",
+  r_15: "R_15",
+  "r-15": "R_15",
+  r18: "R_18",
+  r_18: "R_18",
+  "r-18": "R_18",
+  r18g: "R_18G",
+  r_18g: "R_18G",
+  "r-18g": "R_18G",
+};
 
 const TAG_REGEX = /\[([^\]]+)\]/g;
 const FILTER_REGEX = /(\w+):("[^"]*"|\S+)/g;
@@ -10,7 +24,7 @@ const FILTER_REGEX = /(\w+):("[^"]*"|\S+)/g;
  *   [slug]          → tag filter
  *   type:value      → content type
  *   lang:value      → language
- *   nsfw:yes|no     → NSFW toggle
+ *   rating:tier     → rating tier (GENERAL, R_15, R_18, R_18G; repeatable)
  *   licensed:yes|no → licensed toggle
  *   in:slug         → realm scope
  *   sort:value      → sort order
@@ -47,9 +61,13 @@ export function parseSearchString(input: string): SearchQuery {
       case "lang":
         result.languages = [...(result.languages ?? []), rawValue];
         break;
-      case "nsfw":
-        result.nsfw = rawValue === "yes" || rawValue === "true";
+      case "rating": {
+        const tier = RATING_TOKENS[rawValue.toLowerCase()];
+        if (tier) {
+          result.ratings = [...(result.ratings ?? []), tier];
+        }
         break;
+      }
       case "licensed":
         result.isLicensed = rawValue === "yes" || rawValue === "true";
         break;
@@ -97,8 +115,10 @@ export function serializeSearchString(query: SearchQuery): string {
     }
   }
 
-  if (query.nsfw !== undefined) {
-    parts.push(`nsfw:${query.nsfw ? "yes" : "no"}`);
+  if (query.ratings?.length) {
+    for (const tier of query.ratings) {
+      parts.push(`rating:${tier}`);
+    }
   }
 
   if (query.isLicensed !== undefined) {

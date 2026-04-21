@@ -1,7 +1,7 @@
 import { Tab, Tabs } from "@mui/material";
 import { bookChapterIndexQuery } from "@rezics/api/book/book";
 import { bookQueries } from "@rezics/api/book/book.queries";
-import type { ChapterTreeItem } from "@rezics/contract";
+import type { ChapterTreeItem, ContentRating } from "@rezics/contract";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
@@ -20,11 +20,13 @@ export const BookEditChapterListPage: React.FC = () => {
   const [tab, setTab] = useState(0);
 
   const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
+  const { data: bookData } = useQuery(bookQueries.detail(bookId));
 
   const chapterTree: ChapterTreeItem[] = useMemo(
     () => data?.index ?? [],
     [data],
   );
+  const bookRating = (bookData?.rating ?? "GENERAL") as ContentRating;
 
   async function downloadJSON() {
     const chapterIndex = await queryClient.ensureQueryData(
@@ -71,6 +73,7 @@ export const BookEditChapterListPage: React.FC = () => {
           ref={editorRef}
           chapterTree={chapterTree}
           bookUnitId={bookId}
+          bookRating={bookRating}
           onDownloadJSON={downloadJSON}
         />
       )}

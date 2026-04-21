@@ -21,7 +21,7 @@ import type { BookFilters } from "./book.types";
 export const bookApi = {
   /**
    * List books with optional filters
-   * Supports: q, nsfw, language, tagUnitIds, personId, organizationId,
+   * Supports: q, rating, language, tagUnitIds, personId, organizationId,
    * userId, isbn13, workUnitId, visibility, status, sort, start, cursor, limit
    */
   list: async (filters?: BookFilters): Promise<BookListResponse> => {

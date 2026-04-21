@@ -320,11 +320,11 @@ export default {
       search_producer: "搜索出品方...",
     },
     flags: {
-      nsfw: "NSFW",
+      rating: "內容分級",
       licensed: "版权",
     },
     tooltips: {
-      nsfw: "当书籍名称或封面包含裸露、色情等敏感内容时，请勾选此选项",
+      rating: "選擇內容分級：GENERAL 為預設，R_15、R_18、R_18G 需使用者同意",
       licensed: "当书籍已获得版权许可时，如您是版权所有者，请勾选此选项",
     },
     edit_sections: {
@@ -357,7 +357,7 @@ export default {
       search_books: "搜索图书",
     },
     tooltips: {
-      nsfw: "是否搜索工作场所不宜内容",
+      rating: "依內容分級篩選搜尋結果",
       licensed: "是否搜索已获得版权许可的内容",
     },
     pagination: {

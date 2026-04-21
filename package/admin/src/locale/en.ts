@@ -294,11 +294,12 @@ export default {
       search_producer: "Search producers...",
     },
     flags: {
-      nsfw: "NSFW",
+      rating: "Content rating",
       licensed: "Licensed",
     },
     tooltips: {
-      nsfw: "Please check this option if the book title or cover contains nudity, pornography, or other sensitive content.",
+      rating:
+        "Choose the content rating. GENERAL is default; R_15, R_18, and R_18G require caller opt-in.",
       licensed:
         "Please check this option if the book has been licensed (e.g. you are the copyright holder).",
     },
@@ -332,7 +333,7 @@ export default {
       search_books: "Search books",
     },
     tooltips: {
-      nsfw: "Whether to search for content that is not suitable for work",
+      rating: "Narrow search results by content rating",
       licensed: "Whether to search for content that has been licensed",
     },
     pagination: {

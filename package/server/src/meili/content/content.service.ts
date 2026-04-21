@@ -81,11 +81,13 @@ export async function searchContent(
     }
   }
 
-  // NSFW filter (default: exclude nsfw)
-  if (opts.nsfw === true) {
-    filter.push("nsfw = true");
-  } else {
-    filter.push("nsfw = false");
+  // Rating filter — set-based (ratings: ContentRating[]). When the caller
+  // passes an empty array or omits the field, no rating constraint is applied
+  // here; upstream callers are expected to have already intersected the
+  // request with the session's allowed rating set.
+  if (opts.ratings?.length) {
+    const ratingList = opts.ratings.map((r) => `"${r}"`).join(", ");
+    filter.push(`rating IN [${ratingList}]`);
   }
 
   // Licensed filter

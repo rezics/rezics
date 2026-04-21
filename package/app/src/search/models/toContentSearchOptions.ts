@@ -47,7 +47,9 @@ export function toContentSearchOptions(
     opts.languages = [...new Set(query.languages)];
   }
 
-  opts.nsfw = query.nsfw ?? false;
+  if (query.ratings?.length) {
+    opts.ratings = query.ratings;
+  }
 
   if (query.isLicensed !== undefined) {
     opts.isLicensed = query.isLicensed;

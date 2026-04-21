@@ -3,7 +3,12 @@ import { attributionBriefSchema } from "./attribution";
 import { languageSchema } from "./language";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
-import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
+import {
+  type ContentRating,
+  contentRatingSchema,
+  publicUserSchema,
+  unitTranslationDTOSchema,
+} from "./unit";
 
 // ============================================================
 // BOOK EXTRA SCHEMA
@@ -26,7 +31,7 @@ export const bookDTOSchema = t.Object({
   workUnitId: t.Optional(t.Nullable(t.String())),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
 
@@ -62,7 +67,7 @@ export type BookDTO = (typeof bookDTOSchema)["static"];
 
 export const bookListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   language: t.Optional(languageSchema),
   tagUnitIds: t.Optional(t.String()),
   entityId: t.Optional(t.String()),
@@ -91,7 +96,7 @@ export type BookListQuery = (typeof bookListQuerySchema)["static"];
 
 export const bookListBodySchema = t.Object({
   ...listPostBodyBase.properties,
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   language: t.Optional(languageSchema),
   tagUnitIds: t.Optional(t.String()),
   entityId: t.Optional(t.String()),
@@ -152,7 +157,7 @@ export const createBookSchema = t.Object({
   formatKey: t.Optional(t.String()),
   isLicensed: t.Optional(t.Boolean()),
   coverUrl: t.Optional(t.String()),
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   visibility: t.Optional(t.String()),
   workUnitId: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -181,7 +186,7 @@ export const updateBookSchema = t.Object({
   formatKey: t.Optional(t.Nullable(t.String())),
   isLicensed: t.Optional(t.Boolean()),
   coverUrl: t.Optional(t.Nullable(t.String())),
-  nsfw: t.Optional(t.Boolean()),
+  rating: t.Optional(contentRatingSchema),
   visibility: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });
@@ -198,6 +203,7 @@ export const bookIndexNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
       id: t.String(),
       title: t.String(),
       noContent: t.Boolean(),
+      rating: t.Optional(contentRatingSchema),
       children: t.Optional(t.Array(self)),
     }),
 );
@@ -206,6 +212,7 @@ export interface ChapterTreeItem {
   id: string;
   title: string;
   noContent: boolean;
+  rating?: ContentRating;
   children?: ChapterTreeItem[];
 }
 

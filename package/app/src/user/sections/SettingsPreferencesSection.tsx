@@ -32,6 +32,7 @@ import { userQueries } from "@rezics/api/user/user.queries";
 import { useQuery } from "@tanstack/react-query";
 import { GripVerticalIcon, XIcon } from "lucide-react";
 import { type FC, useState } from "react";
+import { ContentRatingPreferences } from "@/user/components/ContentRatingPreferences";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
@@ -242,6 +243,13 @@ export const SettingsPreferencesSection: FC = () => {
             </Button>
           </Stack>
         )}
+      </SettingsSection>
+
+      <SettingsSection
+        title="Content rating"
+        description="Baseline ratings are always on. Opt in to age-restricted tiers to see them in search and listings."
+      >
+        <ContentRatingPreferences />
       </SettingsSection>
 
       <SettingsSection

@@ -1,6 +1,9 @@
 import {
   Add,
+  CheckBox as CheckBoxIcon,
+  Label as LabelIcon,
   Search,
+  Sync as SyncIcon,
   SwapVert,
   UnfoldLess,
   UnfoldMore,
@@ -16,6 +19,11 @@ interface ChapterTreeEditorToolbarProps {
   onNewChapter: () => void;
   isSortingMode: boolean;
   onToggleSortingMode: () => void;
+  isSelectionMode: boolean;
+  onToggleSelectionMode: () => void;
+  selectedCount: number;
+  onBulkSetRating: () => void;
+  onResyncOverrides: () => void;
 }
 
 export const ChapterTreeEditorToolbar: React.FC<
@@ -28,6 +36,11 @@ export const ChapterTreeEditorToolbar: React.FC<
   onNewChapter,
   isSortingMode,
   onToggleSortingMode,
+  isSelectionMode,
+  onToggleSelectionMode,
+  selectedCount,
+  onBulkSetRating,
+  onResyncOverrides,
 }) => {
   return (
     <div className="flex items-center gap-2 pb-3">
@@ -68,6 +81,46 @@ export const ChapterTreeEditorToolbar: React.FC<
           }}
         >
           <SwapVert fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip
+        title={isSelectionMode ? "Exit Selection Mode" : "Select Chapters"}
+      >
+        <IconButton
+          size="small"
+          onClick={onToggleSelectionMode}
+          sx={{
+            bgcolor: isSelectionMode ? "action.selected" : "transparent",
+            color: isSelectionMode ? "primary.main" : undefined,
+          }}
+        >
+          <CheckBoxIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+      {isSelectionMode && (
+        <Tooltip title="Set rating for selected">
+          <span>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<LabelIcon fontSize="small" />}
+              onClick={onBulkSetRating}
+              disabled={selectedCount === 0}
+              sx={{ height: 32 }}
+            >
+              <span className="hidden sm:inline">
+                Rate {selectedCount > 0 ? `(${selectedCount})` : ""}
+              </span>
+            </Button>
+          </span>
+        </Tooltip>
+      )}
+
+      <Tooltip title="Resync index overrides">
+        <IconButton size="small" onClick={onResyncOverrides}>
+          <SyncIcon fontSize="small" />
         </IconButton>
       </Tooltip>
 

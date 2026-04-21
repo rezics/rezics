@@ -7,12 +7,13 @@ import {
   AppliedFilterChips,
   KeywordInput,
   LicensedToggle,
-  NsfwToggle,
+  RatingFilterChips,
   TagGroupSuggestions,
   TagPicker,
   WordCountRangeInput,
 } from "@/search/components/primitive";
 import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
+import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 
 export type BookSearchProps = {
   query: UseSearchQueryReturn["query"];
@@ -55,14 +56,15 @@ export const BookSearch: React.FC<BookSearchProps> = ({
   const { t } = useTranslation();
   const keyword = bind("keyword");
   const tags = bind("tags");
-  const nsfw = bind("nsfw");
+  const ratings = bind("ratings");
   const isLicensed = bind("isLicensed");
   const textLength = bind("textLength");
+  const { allowed, isAuthenticated } = useAllowedRatings();
 
   const rendered: (keyof SearchQuery)[] = [
     "keyword",
     "tags",
-    "nsfw",
+    "ratings",
     "isLicensed",
   ];
   if (showWordCount) rendered.push("textLength");
@@ -104,7 +106,12 @@ export const BookSearch: React.FC<BookSearchProps> = ({
               label={t("search.input.word_count_label")}
             />
           )}
-          <NsfwToggle value={nsfw.value} onChange={nsfw.onChange} />
+          <RatingFilterChips
+            value={ratings.value}
+            onChange={ratings.onChange}
+            allowed={allowed}
+            isAuthenticated={isAuthenticated}
+          />
           <LicensedToggle
             value={isLicensed.value}
             onChange={isLicensed.onChange}

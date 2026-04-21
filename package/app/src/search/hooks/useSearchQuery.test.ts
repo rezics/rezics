@@ -74,20 +74,20 @@ describe("mergeAppend", () => {
 
   it("overwrites scalar fields", () => {
     const prev: SearchQuery = {
-      nsfw: true,
+      ratings: ["GENERAL"],
       isLicensed: false,
       sort: "createdAt",
       textLength: { min: 100 },
       realm: { slug: "r1" },
     };
     const next = mergeAppend(prev, {
-      nsfw: false,
+      ratings: ["R_18"],
       isLicensed: true,
       sort: "relevance",
       textLength: { max: 500 },
       realm: { slug: "r2" },
     });
-    expect(next.nsfw).toBe(false);
+    expect(next.ratings).toEqual(["R_18"]);
     expect(next.isLicensed).toBe(true);
     expect(next.sort).toBe("relevance");
     expect(next.textLength).toEqual({ max: 500 });
@@ -96,10 +96,10 @@ describe("mergeAppend", () => {
 
   it("preserves prev fields not in patch", () => {
     const prev: SearchQuery = { keyword: "k", tags: [{ slug: "a" }] };
-    const next = mergeAppend(prev, { nsfw: true });
+    const next = mergeAppend(prev, { ratings: ["R_18"] });
     expect(next.keyword).toBe("k");
     expect(next.tags).toEqual([{ slug: "a" }]);
-    expect(next.nsfw).toBe(true);
+    expect(next.ratings).toEqual(["R_18"]);
   });
 });
 
@@ -131,10 +131,10 @@ describe("mergeEffective", () => {
 
   it("user scalar overrides implicit", () => {
     const eff = mergeEffective(
-      { nsfw: false, sort: "createdAt" },
-      { nsfw: true },
+      { ratings: ["GENERAL"], sort: "createdAt" },
+      { ratings: ["R_18"] },
     );
-    expect(eff.nsfw).toBe(true);
+    expect(eff.ratings).toEqual(["R_18"]);
     expect(eff.sort).toBe("createdAt");
   });
 

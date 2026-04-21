@@ -17,7 +17,7 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     translationGroupId: unit.translationGroupId ?? undefined,
     status: unit.status,
     visibility: unit.visibility,
-    nsfw: unit.nsfw,
+    rating: unit.rating,
     extra: (unit.extra as Record<string, unknown>) ?? undefined,
     createdAt: unit.createdAt,
     updatedAt: unit.updatedAt,

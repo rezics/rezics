@@ -53,7 +53,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     workUnitId: unit.workUnitId ?? undefined,
     status: unit.status,
     visibility: unit.visibility,
-    nsfw: unit.nsfw,
+    rating: unit.rating,
     defaultLanguage: (unit.defaultLanguage as Language) ?? undefined,
     isLanguageNeutral: unit.isLanguageNeutral,
 

@@ -22,7 +22,7 @@ export const unitApi = {
   /**
    * List units with optional filters
    * Supports: q, type, types, excludeTypes, status, statuses, visibility,
-   * userId, userIds, workUnitId, language, nsfw, date ranges, sort, pagination
+   * userId, userIds, workUnitId, language, rating, date ranges, sort, pagination
    */
   list: async (filters?: UnitFilters): Promise<UnitListResponse> => {
     return apiFetch<UnitListResponse>(`/unit/list${buildQueryString(filters)}`);

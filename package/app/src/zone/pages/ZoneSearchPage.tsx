@@ -5,6 +5,7 @@ import type React from "react";
 import { useMemo, useState } from "react";
 import { AdvancedSearch, SearchResultList } from "@/search";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 import { useZone } from "../hooks/useZone";
 
 export type ZoneSearchPageProps = {
@@ -17,20 +18,23 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   initialKeyword,
 }) => {
   const { zone, isLoading: zoneLoading } = useZone(slug);
+  const { allowed } = useAllowedRatings();
 
   const implicitInitial = useMemo<SearchQuery>(() => {
-    if (!zone?.filters) return {};
+    const out: SearchQuery = { ratings: allowed };
+    if (!zone?.filters) return out;
     const z = zone.filters;
-    const out: SearchQuery = {};
     const types = Array.isArray(z.type) ? z.type : z.type ? [z.type] : [];
     if (types.length) out.type = types;
     if (z.tags?.length) out.tags = z.tags;
     if (z.realmId) out.realm = { slug: z.realmId };
     if (z.languages?.length) out.languages = z.languages;
-    if (z.nsfw !== undefined) out.nsfw = z.nsfw;
+    if (z.ratings?.length) {
+      out.ratings = z.ratings.filter((r) => allowed.includes(r));
+    }
     if (z.isLicensed !== undefined) out.isLicensed = z.isLicensed;
     return out;
-  }, [zone]);
+  }, [zone, allowed]);
 
   const search = useSearchQuery({
     initial: initialKeyword ? { keyword: initialKeyword } : {},

@@ -163,7 +163,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       pageCount: metadataState?.pageCount,
       textLength: metadataState?.textLength,
       formatKey: metadataState?.formatKey,
-      nsfw: metadataState?.nsfw,
+      rating: metadataState?.rating,
       isLicensed: metadataState?.isLicensed,
       extra: metadataState?.extra,
     };
@@ -174,7 +174,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       pageCount: metadataState?.pageCount ?? undefined,
       textLength: metadataState?.textLength,
       formatKey: metadataState?.formatKey ?? undefined,
-      nsfw: metadataState?.nsfw,
+      rating: metadataState?.rating,
       isLicensed: metadataState?.isLicensed,
       extra: metadataState?.extra,
       defaultLanguage: DEFAULT_LANGUAGE,

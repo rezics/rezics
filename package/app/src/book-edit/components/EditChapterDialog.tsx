@@ -10,6 +10,8 @@ import {
   Select,
   TextField,
 } from "@mui/material";
+import type { ContentRating } from "@rezics/contract";
+import { RatingSelector } from "@rezics/ui";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Chapter } from "./ChapterTreeEditor";
@@ -22,7 +24,11 @@ interface EditChapterDialogProps {
   open: boolean;
   onClose: () => void;
   chapter: Chapter | null;
-  onSave: (update: { title: string; status: PublishStatus }) => void;
+  onSave: (update: {
+    title: string;
+    status: PublishStatus;
+    rating: ContentRating;
+  }) => void;
 }
 
 export function EditChapterDialog({
@@ -34,18 +40,20 @@ export function EditChapterDialog({
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<PublishStatus>("DRAFT");
+  const [rating, setRating] = useState<ContentRating>("GENERAL");
 
   useEffect(() => {
     if (open && chapter) {
       setTitle(chapter.title);
       // Mock: read status from chapter metadata if available, default DRAFT
       setStatus((chapter as any).status ?? "DRAFT");
+      setRating(chapter.rating ?? "GENERAL");
     }
   }, [open, chapter]);
 
   const handleSave = () => {
     if (!title.trim()) return;
-    onSave({ title: title.trim(), status });
+    onSave({ title: title.trim(), status, rating });
     onClose();
   };
 
@@ -86,6 +94,7 @@ export function EditChapterDialog({
             ))}
           </Select>
         </FormControl>
+        <RatingSelector value={rating} onChange={setRating} />
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose}>{t("common.cancel", "Cancel")}</Button>

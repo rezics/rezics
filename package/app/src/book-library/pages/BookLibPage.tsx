@@ -13,6 +13,7 @@ import type { BookLibSortKey } from "@/search/components/SearchFilter";
 import { useInjectedTags } from "@/search/hooks/useInjectedTags";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { parseSearchString } from "@/search/models/searchQuery";
+import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 
 import { BookLibSectionRef } from "../sections/BookLibSection";
 
@@ -46,9 +47,15 @@ export const BookLibPage: React.FC = () => {
     };
   }, []);
 
+  const { allowed } = useAllowedRatings();
+  const implicitInitial = useMemo<SearchQuery>(
+    () => ({ type: ["BOOK"], ratings: allowed }),
+    [allowed],
+  );
+
   const search = useSearchQuery({
     initial,
-    implicitInitial: { type: ["BOOK"] },
+    implicitInitial,
     middleware: parseSearchString,
   });
 
@@ -112,7 +119,7 @@ export const BookLibPage: React.FC = () => {
         coverUrl: item.coverUrl,
         creditNames: item.creditNames,
         type: item.type,
-        nsfw: item.nsfw,
+        rating: item.rating,
         isLicensed: item.isLicensed,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,

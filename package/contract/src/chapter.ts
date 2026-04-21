@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
+import { contentRatingSchema } from "./unit";
 
 // ============================================================
 // CHAPTER CONTRACTS
@@ -29,6 +30,7 @@ export const chapterDetailSchema = t.Object({
   userId: t.Optional(t.String()),
   targetUnitId: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
+  rating: t.Optional(contentRatingSchema),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -123,6 +125,7 @@ export const createChapterSchema = t.Object({
   targetUnitId: t.String(),
   coverUrl: t.Optional(t.String()),
   status: t.Optional(t.String()),
+  rating: t.Optional(contentRatingSchema),
 });
 
 export type CreateChapterInput = (typeof createChapterSchema)["static"];
@@ -133,6 +136,7 @@ export const updateChapterSchema = t.Object({
   targetUnitId: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   status: t.Optional(t.String()),
+  rating: t.Optional(contentRatingSchema),
 });
 
 export type UpdateChapterInput = (typeof updateChapterSchema)["static"];

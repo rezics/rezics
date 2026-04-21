@@ -389,6 +389,7 @@ export default {
       press: "出版社",
       producer: "出品方",
       text_length: "字數",
+      rating: "內容分級",
     },
     placeholders: {
       search_author: "搜尋作者...",
@@ -396,11 +397,11 @@ export default {
       search_producer: "搜尋出品方...",
     },
     flags: {
-      nsfw: "NSFW",
+      rating: "內容分級",
       licensed: "版權",
     },
     tooltips: {
-      nsfw: "當書籍名稱或封面包含裸露、色情等敏感內容時，請勾選此選項",
+      rating: "選擇內容分級：GENERAL 為預設，R_15、R_18、R_18G 需使用者同意",
       licensed: "當書籍已取得版權許可時，如您是版權所有者，請勾選此選項",
     },
     edit_sections: {
@@ -412,6 +413,21 @@ export default {
       double_click_rename: "雙擊重新命名",
       rename_help:
         "修改此處的章節名稱僅影響目錄結構顯示，不會更新實際章節標題。若需修改章節標題，請前往章節編輯頁面，在那裡修改標題後會自動更新目錄結構。",
+      edit_dialog: {
+        title: "編輯章節",
+        status: "發布狀態",
+      },
+      status: {
+        draft: "草稿",
+        published: "已發布",
+        archived: "已封存",
+      },
+      bulk_rating: {
+        title: "設定所選章節分級",
+        description: "此操作將覆寫 {{count}} 個所選章節的分級。",
+      },
+      resync_overrides: "重新同步索引覆寫",
+      select_mode: "選擇章節",
     },
     author_info: {
       author_line: "作者：{{name}}",
@@ -433,8 +449,13 @@ export default {
       search_books: "搜尋圖書",
     },
     tooltips: {
-      nsfw: "是否搜尋工作場所不宜內容",
+      rating: "依內容分級篩選搜尋結果",
+      ratingOptIn: "請於設定啟用此分級",
+      ratingSignIn: "登入並於設定同意後可啟用此分級",
       licensed: "是否搜尋已取得版權許可的內容",
+    },
+    filters: {
+      rating: "分級",
     },
     pagination: {
       tips: "提示：資料頁數並不代表總資料量，請點擊最後一頁來嘗試載入更多資料",
@@ -622,6 +643,7 @@ export default {
     create: "建立",
     continue: "繼續",
     update: "更新",
+    apply: "套用",
     search: "搜尋",
     expand: "展開",
     collapse: "摺疊",
@@ -683,5 +705,34 @@ export default {
     search: "搜尋",
     close: "關閉",
     open_drawer: "開啟側邊欄",
+  },
+
+  // 內容分級（透過 t(`rating.tier.${tier}`) 讀取）
+  rating: {
+    tier: {
+      GENERAL: "一般",
+      R_15: "R-15",
+      R_18: "R-18",
+      R_18G: "R-18G",
+    },
+  },
+
+  settings: {
+    content_rating: {
+      section_title: "內容分級",
+      section_description:
+        "基本分級永遠啟用。如需在搜尋與列表中顯示年齡限制內容，請於下方同意啟用。",
+      always_on: "一律啟用",
+      saved: "偏好已儲存。",
+      description: {
+        R_18: "成人內容。",
+        R_18G: "露骨成人內容。",
+      },
+      opt_in_modal: {
+        title: "確認啟用年齡限制內容",
+        body: "啟用 {{rating}} 即表示您已達所在地法定年齡，並同意瀏覽此類內容。",
+        confirm: "我確認",
+      },
+    },
   },
 };

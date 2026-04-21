@@ -128,16 +128,18 @@ function buildChips(
     });
   }
 
-  if (
-    query.nsfw !== undefined &&
-    !rendered.has("nsfw") &&
-    hide.nsfw === undefined
-  ) {
-    out.push({
-      key: `nsfw:${query.nsfw}`,
-      label: `NSFW: ${query.nsfw ? "Yes" : "No"}`,
-      remove: { nsfw: undefined },
-    });
+  if (query.ratings?.length && !rendered.has("ratings")) {
+    const hiddenRatings = new Set(hide.ratings ?? []);
+    for (const tier of query.ratings) {
+      if (hiddenRatings.has(tier)) continue;
+      out.push({
+        key: `rating:${tier}`,
+        label: `Rating: ${tier}`,
+        remove: {
+          ratings: query.ratings.filter((r) => r !== tier),
+        },
+      });
+    }
   }
 
   if (

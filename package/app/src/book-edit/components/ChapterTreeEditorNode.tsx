@@ -4,7 +4,9 @@ import {
   MoreVert,
   Visibility,
 } from "@mui/icons-material";
-import { Card, CardContent, Chip, IconButton } from "@mui/material";
+import { Card, CardContent, Checkbox, Chip, IconButton } from "@mui/material";
+import type { ContentRating } from "@rezics/contract";
+import { RatingBadge } from "@rezics/ui";
 import type React from "react";
 import type { NodeRendererProps, TreeApi } from "react-arborist";
 import { useLongPress } from "../hooks/useLongPress";
@@ -63,16 +65,35 @@ function mockViewCount(id: string | number): number {
   return (hashCode(String(id)) % 5000) + 10;
 }
 
+/** Options for the node renderer factory. */
+export interface ChapterTreeEditorNodeOptions {
+  setContextMenu: React.Dispatch<
+    React.SetStateAction<ChapterContextMenuState>
+  >;
+  treeRef: React.RefObject<TreeApi<Chapter> | null>;
+  onEditChapter: (node: Chapter) => void;
+  onNavigateToChapter: (node: Chapter) => void;
+  isSortingMode: boolean;
+  bookRating?: ContentRating;
+  isSelectionMode: boolean;
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string) => void;
+}
+
 /**
  * Factory that returns a Node renderer bound to editor state setters.
  */
-export const createChapterTreeEditorNode = (
-  setContextMenu: React.Dispatch<React.SetStateAction<ChapterContextMenuState>>,
-  treeRef: React.RefObject<TreeApi<Chapter> | null>,
-  onEditChapter: (node: Chapter) => void,
-  onNavigateToChapter: (node: Chapter) => void,
-  isSortingMode: boolean,
-) => {
+export const createChapterTreeEditorNode = ({
+  setContextMenu,
+  treeRef,
+  onEditChapter,
+  onNavigateToChapter,
+  isSortingMode,
+  bookRating,
+  isSelectionMode,
+  selectedIds,
+  onToggleSelect,
+}: ChapterTreeEditorNodeOptions) => {
   return function ChapterTreeEditorNode({
     node,
     style,
@@ -170,8 +191,15 @@ export const createChapterTreeEditorNode = (
     // MOCK: publish status and view count
     const status = mockPublishStatus(node.id);
     const views = mockViewCount(node.id);
+    const effectiveRating = node.data.rating ?? bookRating;
+    const isOverride = node.data.rating !== undefined;
+    const isChecked = selectedIds.has(String(node.id));
 
     const handleLeafClick = () => {
+      if (isSelectionMode) {
+        onToggleSelect(String(node.id));
+        return;
+      }
       if (!isSortingMode) {
         onNavigateToChapter(node.data);
       }
@@ -203,10 +231,20 @@ export const createChapterTreeEditorNode = (
             height: "calc(100% - 2px)",
             mt: "1px",
             "&:hover": { boxShadow: 3 },
+            ...(isChecked ? { outline: "2px solid", outlineColor: "primary.main" } : {}),
           }}
         >
           <CardContent sx={{ py: 1.5, px: 2, "&:last-child": { pb: 1.5 } }}>
             <div className="flex items-start justify-between gap-2">
+              {isSelectionMode && (
+                <Checkbox
+                  size="small"
+                  checked={isChecked}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={() => onToggleSelect(String(node.id))}
+                  sx={{ p: 0.5, mt: -0.5 }}
+                />
+              )}
               <div className="min-w-0 flex-1">
                 {/* Title row */}
                 <div className="flex items-center gap-1.5">
@@ -218,6 +256,13 @@ export const createChapterTreeEditorNode = (
                   <span className="font-medium text-sm truncate">
                     {node.data.title}
                   </span>
+                  {effectiveRating && (
+                    <RatingBadge
+                      rating={effectiveRating}
+                      size="small"
+                      variant={isOverride ? "filled" : "outlined"}
+                    />
+                  )}
                 </div>
 
                 {/* Status & date line */}

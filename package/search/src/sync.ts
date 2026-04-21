@@ -142,7 +142,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     realmIds,
     realmTagKeys,
     languages,
-    nsfw: unit.nsfw ?? false,
+    rating: unit.rating ?? "GENERAL",
     visibility: unit.visibility ?? "PUBLIC",
     isLicensed,
     postKind,

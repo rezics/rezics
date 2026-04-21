@@ -50,7 +50,7 @@ export class SearchClient {
         "realmIds",
         "realmTagKeys",
         "languages",
-        "nsfw",
+        "rating",
         "visibility",
         "isLicensed",
         "textLength",

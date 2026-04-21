@@ -1,4 +1,20 @@
-import type { SearchQuery, SlugRef } from "@rezics/contract";
+import type { ContentRating, SearchQuery, SlugRef } from "@rezics/contract";
+
+const RATING_VALUES: readonly ContentRating[] = [
+  "GENERAL",
+  "R_15",
+  "R_18",
+  "R_18G",
+];
+
+function parseRatings(raw: string | null): ContentRating[] {
+  if (!raw) return [];
+  const set = new Set(RATING_VALUES);
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s): s is ContentRating => set.has(s as ContentRating));
+}
 
 function parseTags(raw: string | null): SlugRef[] {
   if (!raw) return [];
@@ -35,8 +51,8 @@ export function buildSearchPath(query: SearchQuery, base = "/search"): string {
   if (query.realm?.slug) {
     params.set("in", query.realm.slug);
   }
-  if (query.nsfw) {
-    params.set("nsfw", "true");
+  if (query.ratings?.length) {
+    params.set("ratings", query.ratings.join(","));
   }
   if (query.isLicensed !== undefined) {
     params.set("isLicensed", String(query.isLicensed));
@@ -79,7 +95,8 @@ export function parseSearchParams(search: string): SearchQuery {
   const realmSlug = p.get("in");
   if (realmSlug) query.realm = { slug: realmSlug };
 
-  if (p.get("nsfw") === "true") query.nsfw = true;
+  const ratings = parseRatings(p.get("ratings"));
+  if (ratings.length) query.ratings = ratings;
 
   const isLicensed = p.get("isLicensed");
   if (isLicensed === "true") query.isLicensed = true;

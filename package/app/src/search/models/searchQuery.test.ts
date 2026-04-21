@@ -33,13 +33,13 @@ describe("parseSearchString", () => {
 
   test("parses all filter types", () => {
     const result = parseSearchString(
-      "[tag1] type:book lang:ja nsfw:yes licensed:no in:my-realm sort:newest hello",
+      "[tag1] type:book lang:ja rating:R_18 licensed:no in:my-realm sort:newest hello",
     );
     expect(result).toEqual({
       tags: [{ slug: "tag1" }],
       type: ["book"],
       languages: ["ja"],
-      nsfw: true,
+      ratings: ["R_18"],
       isLicensed: false,
       realm: { slug: "my-realm" },
       sort: "newest",

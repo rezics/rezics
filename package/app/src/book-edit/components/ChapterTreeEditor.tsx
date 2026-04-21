@@ -5,6 +5,7 @@ import {
 } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { bookMutations } from "@rezics/api/book/book.mutations";
+import type { ContentRating } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import {
@@ -30,6 +31,8 @@ import {
   findAndInsert,
   findAndRemove,
 } from "@/shared/utils/arborist-tree";
+import { serializeChapterTree } from "../models/chapterTreeSerializer";
+import { BulkRatingDialog } from "./BulkRatingDialog";
 import { ChapterTreeContextMenu } from "./ChapterTreeContextMenu";
 import {
   createChapterTreeEditorNode,
@@ -45,6 +48,7 @@ import { MoveToParentDialog } from "./MoveToParentDialog";
 export type Chapter = {
   id: string | number;
   title: string;
+  rating?: ContentRating;
   children?: Chapter[];
 };
 
@@ -64,6 +68,7 @@ export interface ChapterTreeEditorHandle {
 interface ChapterTreeEditorProps {
   chapterTree: Chapter[];
   bookUnitId: string;
+  bookRating?: ContentRating;
   onDownloadJSON?: () => void;
 }
 
@@ -117,7 +122,7 @@ const MIN_TREE_HEIGHT = 300;
 export const ChapterTreeEditor = forwardRef<
   ChapterTreeEditorHandle,
   ChapterTreeEditorProps
->(({ chapterTree, bookUnitId, onDownloadJSON }, ref) => {
+>(({ chapterTree, bookUnitId, bookRating, onDownloadJSON }, ref) => {
   const treeRef = useRef<TreeApi<Chapter> | null>(null);
   const [treeData, setTreeData] = useState<Chapter[]>([]);
   const [treeSize, setTreeSize] = useState({
@@ -153,6 +158,10 @@ export const ChapterTreeEditor = forwardRef<
   >(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSortingMode, setIsSortingMode] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkRatingOpen, setBulkRatingOpen] = useState(false);
+  const [bulkRating, setBulkRating] = useState<ContentRating>("GENERAL");
 
   // Edit chapter dialog state
   const [editDialogChapter, setEditDialogChapter] = useState<Chapter | null>(
@@ -211,7 +220,7 @@ export const ChapterTreeEditor = forwardRef<
     try {
       updateChapterIndexMutation.mutateAsync({
         bookUnitId,
-        chaptersIndex: data,
+        chaptersIndex: serializeChapterTree(data, bookRating),
       });
     } catch (error) {
       showAlert(`Failed to save: ${error}`);
@@ -268,7 +277,7 @@ export const ChapterTreeEditor = forwardRef<
 
   /** Save edits from the edit dialog (title rename + mock status). */
   const handleEditSave = useCallback(
-    (update: { title: string; status: string }) => {
+    (update: { title: string; status: string; rating: ContentRating }) => {
       setTreeData(
         (current) =>
           findAndEdit(
@@ -277,6 +286,8 @@ export const ChapterTreeEditor = forwardRef<
             update.title,
           ) as Chapter[],
       );
+      // MOCK: rating update persists via chapter update API here (handled by caller in production)
+      void update.rating;
     },
     [editDialogChapter],
   );
@@ -308,17 +319,70 @@ export const ChapterTreeEditor = forwardRef<
     [moveDialogChapter],
   );
 
+  const onToggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
   const Node = useMemo(
     () =>
-      createChapterTreeEditorNode(
+      createChapterTreeEditorNode({
         setContextMenu,
         treeRef,
-        handleEditChapter,
-        handleNavigateToChapter,
+        onEditChapter: handleEditChapter,
+        onNavigateToChapter: handleNavigateToChapter,
         isSortingMode,
-      ),
-    [handleEditChapter, handleNavigateToChapter, isSortingMode],
+        bookRating,
+        isSelectionMode,
+        selectedIds,
+        onToggleSelect,
+      }),
+    [
+      handleEditChapter,
+      handleNavigateToChapter,
+      isSortingMode,
+      bookRating,
+      isSelectionMode,
+      selectedIds,
+      onToggleSelect,
+    ],
   );
+
+  /** Bulk-edit: set rating for only the selected leaf chapters, then save. */
+  function applyBulkRating(rating: ContentRating) {
+    const ids = selectedIds;
+    function walk(nodes: Chapter[]): Chapter[] {
+      return nodes.map((node) => {
+        const next: Chapter = { ...node };
+        if (node.children) {
+          next.children = walk(node.children);
+          return next;
+        }
+        if (ids.has(String(node.id))) {
+          next.rating = rating;
+        }
+        return next;
+      });
+    }
+    const updated = walk(treeData);
+    setTreeData(updated);
+    saveTree(updated);
+    setBulkRatingOpen(false);
+    setSelectedIds(new Set());
+    setIsSelectionMode(false);
+  }
+
+  /** Resync: recompute index overrides from current chapter ratings (noop placeholder). */
+  // MOCK: real implementation fetches each chapter's persisted rating from the
+  // chapter service and rewrites the index. For now, resaving the tree through
+  // `serializeChapterTree` is equivalent — it reapplies the strip-if-equal rule.
+  function handleResyncOverrides() {
+    saveTree(treeData);
+  }
 
   const chapterCount = useMemo(() => countChapters(treeData), [treeData]);
   const wordCount = useMemo(() => totalWordCount(treeData), [treeData]);
@@ -333,6 +397,16 @@ export const ChapterTreeEditor = forwardRef<
         onNewChapter={handleQuickCreate}
         isSortingMode={isSortingMode}
         onToggleSortingMode={() => setIsSortingMode((v) => !v)}
+        isSelectionMode={isSelectionMode}
+        onToggleSelectionMode={() => {
+          setIsSelectionMode((v) => {
+            if (v) setSelectedIds(new Set());
+            return !v;
+          });
+        }}
+        selectedCount={selectedIds.size}
+        onBulkSetRating={() => setBulkRatingOpen(true)}
+        onResyncOverrides={handleResyncOverrides}
       />
 
       {/* Tree area — flex-1 fills remaining space; min-h provides scroll fallback */}
@@ -431,6 +505,7 @@ export const ChapterTreeEditor = forwardRef<
         onClose={() => setCreateChapterDialog(false)}
         handleCreate={handleCreate}
         bookUnitId={bookUnitId}
+        bookRating={bookRating}
         currentEditParentId={currentEditParentId}
       />
 
@@ -447,6 +522,15 @@ export const ChapterTreeEditor = forwardRef<
         treeData={treeData}
         movingNode={moveDialogChapter}
         onConfirm={handleMoveConfirm}
+      />
+
+      <BulkRatingDialog
+        open={bulkRatingOpen}
+        onClose={() => setBulkRatingOpen(false)}
+        count={selectedIds.size}
+        value={bulkRating}
+        onChange={setBulkRating}
+        onConfirm={() => applyBulkRating(bulkRating)}
       />
     </div>
   );

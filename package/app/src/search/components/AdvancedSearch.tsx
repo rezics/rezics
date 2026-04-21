@@ -3,13 +3,14 @@ import { IconButton } from "@mui/material";
 import type { SearchQuery } from "@rezics/contract";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 import type { UseSearchQueryReturn } from "../hooks/useSearchQuery";
 import {
   ContentTypeCheckboxes,
   KeywordInput,
   LicensedToggle,
-  NsfwToggle,
   PostKindCheckboxes,
+  RatingFilterChips,
   SortSelect,
   TagPicker,
   WordCountRangeInput,
@@ -40,9 +41,10 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
   const type = bind("type");
   const postKind = bind("postKind");
   const sort = bind("sort");
-  const nsfw = bind("nsfw");
+  const ratings = bind("ratings");
   const isLicensed = bind("isLicensed");
   const textLength = bind("textLength");
+  const { allowed, isAuthenticated } = useAllowedRatings();
 
   return (
     <div className="flex flex-col gap-4">
@@ -86,8 +88,13 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
           onChange={textLength.onChange}
           label={t("search.filters.wordCount", "Word Count")}
         />
+        <RatingFilterChips
+          value={ratings.value}
+          onChange={ratings.onChange}
+          allowed={allowed}
+          isAuthenticated={isAuthenticated}
+        />
         <div className="flex items-center gap-2 mt-5">
-          <NsfwToggle value={nsfw.value} onChange={nsfw.onChange} />
           <LicensedToggle
             value={isLicensed.value}
             onChange={isLicensed.onChange}

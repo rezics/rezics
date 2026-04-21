@@ -1,4 +1,5 @@
 import type { UserSettings } from "@rezics/contract";
+import { OPT_IN_RATINGS } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 
 function deepMerge(target: any, source: any): any {
@@ -28,6 +29,15 @@ function validateSettings(settings: UserSettings): void {
           "realmIds array cannot exceed 50 entries per unit type",
         );
       }
+    }
+  }
+  const optedIn = settings.content?.optedInRatings;
+  if (optedIn) {
+    const invalid = optedIn.filter((r) => !OPT_IN_RATINGS.includes(r as any));
+    if (invalid.length > 0) {
+      throw new Error(
+        `content.optedInRatings contains invalid values: ${invalid.join(", ")}. Only R_18 and R_18G are opt-in tiers.`,
+      );
     }
   }
 }

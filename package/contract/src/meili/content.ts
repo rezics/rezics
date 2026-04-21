@@ -3,6 +3,7 @@ import { t } from "elysia";
 import { TagRefSchema } from "../common/tag-ref";
 import { languageSchema } from "../language";
 import { postKindLiterals } from "../post";
+import { contentRatingSchema } from "../unit";
 
 // ANCHOR: Content Search Document
 
@@ -35,7 +36,7 @@ export const ContentSearchDocumentSchema = t.Object({
 
   // Filterable: metadata
   languages: t.Array(t.String()),
-  nsfw: t.Boolean(),
+  rating: contentRatingSchema,
   visibility: t.String(),
   isLicensed: t.Boolean(),
 
@@ -86,7 +87,7 @@ export const ContentSearchOptionsSchema = t.Object({
   realmId: t.Optional(t.String()),
   realmTagIds: t.Optional(t.Array(t.String())),
   languages: t.Optional(t.Array(t.String())),
-  nsfw: t.Optional(t.Boolean()),
+  ratings: t.Optional(t.Array(contentRatingSchema)),
   isLicensed: t.Optional(t.Boolean()),
   textLength: t.Optional(
     t.Object({

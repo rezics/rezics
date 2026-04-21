@@ -4,6 +4,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
+import type { ContentRating } from "@rezics/contract";
+import { RatingSelector } from "@rezics/ui";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { useEffect, useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
@@ -13,6 +15,7 @@ interface CreateChapterDialogProps {
   open: boolean;
   onClose: () => void;
   bookUnitId: string;
+  bookRating?: ContentRating;
   currentEditParentId: string | number | null;
   handleCreate: ({
     parentId,
@@ -28,6 +31,7 @@ export function CreateChapterDialog({
   onClose,
   handleCreate,
   bookUnitId,
+  bookRating,
   currentEditParentId,
 }: CreateChapterDialogProps) {
   const { user } = useUserProfileStore();
@@ -35,13 +39,15 @@ export function CreateChapterDialog({
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [rating, setRating] = useState<ContentRating>(bookRating ?? "GENERAL");
 
   useEffect(() => {
     if (open) {
       setTitle("");
       setContent("");
+      setRating(bookRating ?? "GENERAL");
     }
-  }, [open]);
+  }, [open, bookRating]);
 
   const createMutation = useCreateChapterMutation({
     onError: (error) => {
@@ -77,11 +83,13 @@ export function CreateChapterDialog({
         title,
         content,
         targetUnitId: bookUnitId,
+        rating,
       });
 
       const newNode: Chapter = {
         id: result.unitId,
         title,
+        rating,
       };
 
       handleCreate({
@@ -109,6 +117,9 @@ export function CreateChapterDialog({
             error={!title.trim()}
             helperText={!title.trim() ? "必填" : " "}
           />
+          <div className="max-w-xs">
+            <RatingSelector value={rating} onChange={setRating} />
+          </div>
           <div className="min-h-[300px]">
             <RezicsMarkdownEditor
               value={content}

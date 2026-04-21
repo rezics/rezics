@@ -6,7 +6,8 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import type { BookDTO } from "@rezics/contract";
+import type { BookDTO, ContentRating } from "@rezics/contract";
+import { RatingSelector } from "@rezics/ui";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -182,44 +183,29 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         Credits (author, publisher, producer) are managed via the admin panel.
       </div>
 
-      {/* Flags */}
-      <div className="flex flex-wrap gap-6">
-        <FlagWithTooltip
-          label={t("book.flags.licensed")}
-          tooltip={t("book.tooltips.licensed")}
-          checked={value?.isLicensed ?? false}
-          onCheckedChange={(checked) => onChange?.({ isLicensed: !!checked })}
-          disabled={disabled}
-        />
-        <FlagWithTooltip
-          label={t("book.flags.nsfw")}
-          tooltip={t("book.tooltips.nsfw")}
-          checked={value?.nsfw ?? false}
-          onCheckedChange={(checked) => onChange?.({ nsfw: !!checked })}
-          disabled={disabled}
-        />
+      {/* Rating + Flags */}
+      <div className="flex flex-col gap-4">
+        <div className="max-w-xs">
+          <RatingSelector
+            value={(value?.rating as ContentRating | undefined) ?? "GENERAL"}
+            onChange={(rating) => onChange?.({ rating })}
+            label={t("book.fields.rating", "Content rating")}
+            disabled={disabled}
+          />
+        </div>
+        <div className="flex flex-wrap gap-6">
+          <FlagWithTooltip
+            label={t("book.flags.licensed")}
+            tooltip={t("book.tooltips.licensed")}
+            checked={value?.isLicensed ?? false}
+            onCheckedChange={(checked) => onChange?.({ isLicensed: !!checked })}
+            disabled={disabled}
+          />
+        </div>
       </div>
     </div>
   );
 };
-
-/**
- * Standalone flag info components for search and other features.
- */
-export function NSFWInfo({ tooltipTitle }: { tooltipTitle?: string }) {
-  const { t } = useTranslation();
-  return (
-    <div className="flex items-center gap-1">
-      <span>{t("book.flags.nsfw")}</span>
-      <Tooltip title={tooltipTitle ?? t("book.tooltips.nsfw")}>
-        <InfoOutlined
-          sx={{ fontSize: 16 }}
-          className="text-muted-foreground cursor-help"
-        />
-      </Tooltip>
-    </div>
-  );
-}
 
 export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
   const { t } = useTranslation();

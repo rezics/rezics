@@ -42,6 +42,13 @@ enum UnitVisibility {
   PRIVATE
 }
 
+enum ContentRating {
+  GENERAL
+  R_15
+  R_18
+  R_18G
+}
+
 enum PostKind {
   /**
    * Long-form review with rating.
@@ -85,7 +92,7 @@ model Unit {
 
   status     UnitStatus     @default(DRAFT)
   visibility UnitVisibility @default(PUBLIC)
-  nsfw       Boolean        @default(false)
+  rating     ContentRating  @default(GENERAL)
 
   extra Json?
 

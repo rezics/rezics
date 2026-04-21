@@ -27,13 +27,13 @@ describe("buildAppliedFilterChips", () => {
     expect(chips.find((c) => c.key === "tag:a")).toBeDefined();
   });
 
-  it("renders nsfw & licensed & sort chips when not hidden or rendered", () => {
+  it("renders rating & licensed & sort chips when not hidden or rendered", () => {
     const chips = buildAppliedFilterChips({
-      nsfw: true,
+      ratings: ["R_18"],
       isLicensed: false,
       sort: "createdAt",
     });
-    expect(chips.find((c) => c.key.startsWith("nsfw"))).toBeDefined();
+    expect(chips.find((c) => c.key === "rating:R_18")).toBeDefined();
     expect(chips.find((c) => c.key.startsWith("licensed"))).toBeDefined();
     expect(chips.find((c) => c.key.startsWith("sort"))).toBeDefined();
   });

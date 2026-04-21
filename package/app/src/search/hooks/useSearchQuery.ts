@@ -93,7 +93,7 @@ export function mergeAppend(
     next.languages = unionStrings(prev.languages ?? [], patch.languages);
   }
 
-  if (patch.nsfw !== undefined) next.nsfw = patch.nsfw;
+  if (patch.ratings !== undefined) next.ratings = patch.ratings;
   if (patch.isLicensed !== undefined) next.isLicensed = patch.isLicensed;
   if (patch.sort !== undefined) next.sort = patch.sort;
   if (patch.textLength !== undefined) next.textLength = patch.textLength;
@@ -139,7 +139,7 @@ export function mergeEffective(
   );
   if (out.languages.length === 0) delete out.languages;
 
-  if (user.nsfw !== undefined) out.nsfw = user.nsfw;
+  if (user.ratings !== undefined) out.ratings = user.ratings;
   if (user.isLicensed !== undefined) out.isLicensed = user.isLicensed;
   if (user.sort !== undefined) out.sort = user.sort;
   if (user.textLength !== undefined) out.textLength = user.textLength;

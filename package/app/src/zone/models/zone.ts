@@ -21,7 +21,7 @@ export function mergeZoneFilters(
     languages: [
       ...new Set([...(base.languages ?? []), ...(user.languages ?? [])]),
     ],
-    nsfw: user.nsfw ?? base.nsfw ?? false,
+    ratings: user.ratings ?? base.ratings,
     isLicensed:
       user.isLicensed !== undefined ? user.isLicensed : base.isLicensed,
     keyword: user.keyword,

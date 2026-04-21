@@ -6,6 +6,7 @@ import type {
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
+  type ContentRating,
   prisma,
   UnitStatus,
   UnitType,
@@ -30,11 +31,9 @@ export class BookService {
   private buildWhereClause(options: BookListQuery): Prisma.BookWhereInput {
     const andWhere: Prisma.BookWhereInput[] = [];
 
-    // NSFW filter - by default, only return non-NSFW content
-    if (options.nsfw === true) {
-      andWhere.push({ unit: { nsfw: true } });
-    } else {
-      andWhere.push({ unit: { nsfw: false } });
+    // Rating filter — if specified, narrow by single rating value.
+    if (options.rating) {
+      andWhere.push({ unit: { rating: options.rating as ContentRating } });
     }
 
     // Filter by ISBN13
@@ -227,7 +226,7 @@ export class BookService {
             visibility: (req.visibility as UnitVisibility) ?? undefined,
             workUnitId: req.workUnitId ?? undefined,
             defaultLanguage: req.defaultLanguage ?? undefined,
-            nsfw: req.nsfw ?? false,
+            rating: (req.rating as ContentRating | undefined) ?? undefined,
             extra: undefined,
             translations: translationData.length
               ? { create: translationData }
@@ -299,7 +298,7 @@ export class BookService {
         extra: (req.extra ?? undefined) as Prisma.InputJsonValue | undefined,
         unit: {
           update: {
-            nsfw: req.nsfw ?? undefined,
+            rating: (req.rating as ContentRating | undefined) ?? undefined,
             visibility:
               (req.visibility as UnitVisibility | undefined) ?? undefined,
           },
@@ -311,7 +310,7 @@ export class BookService {
     const patchFields: Record<string, any> = {};
     if (req.isLicensed !== undefined) patchFields.isLicensed = req.isLicensed;
     if (req.coverUrl !== undefined) patchFields.coverUrl = req.coverUrl;
-    if (req.nsfw !== undefined) patchFields.nsfw = req.nsfw;
+    if (req.rating !== undefined) patchFields.rating = req.rating;
     if (req.visibility !== undefined) patchFields.visibility = req.visibility;
     await patchContentMetadataToMeili(unitId, patchFields);
 

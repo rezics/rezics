@@ -43,6 +43,7 @@ export function mapChapterPostToDetailDTO(
     userId: post.authorUserId,
     targetUnitId: post.targetUnitId ?? null,
     coverUrl: readCoverUrlFromExtra(translation?.extra) ?? null,
+    rating: post.unit.rating,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
   };

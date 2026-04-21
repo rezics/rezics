@@ -6,6 +6,7 @@ import type {
 import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
+  type ContentRating,
   prisma,
   UnitStatus,
   type UnitType,
@@ -31,7 +32,7 @@ type UnitResult<TInclude extends MaybeInclude> = Prisma.UnitGetPayload<{
  * Compose a Prisma where clause for Unit list queries.
  *
  * Searches UnitTranslation for text queries (title/description).
- * Filters by visibility, workUnitId, language, nsfw, type, status, userId.
+ * Filters by visibility, workUnitId, language, rating, type, status, userId.
  */
 export function buildUnitWhereClause(
   options: UnitListQuery,
@@ -104,11 +105,9 @@ export function buildUnitWhereClause(
     });
   }
 
-  // NSFW filter
-  if (options.nsfw === true) {
-    andWhere.push({ nsfw: true });
-  } else if (options.nsfw === false) {
-    andWhere.push({ nsfw: false });
+  // Rating filter
+  if (options.rating) {
+    andWhere.push({ rating: options.rating as ContentRating });
   }
 
   // Date ranges
@@ -216,7 +215,7 @@ export class UnitService {
         workUnitId: input.workUnitId ?? undefined,
         defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? false,
-        nsfw: input.nsfw ?? false,
+        rating: (input.rating as ContentRating | undefined) ?? undefined,
         extra: (input.extra ?? null) as Prisma.InputJsonValue,
         publishedAt: input.publishedAt
           ? new Date(input.publishedAt as any)
@@ -253,7 +252,7 @@ export class UnitService {
         status: (input.status as UnitStatus | undefined) ?? undefined,
         visibility:
           (input.visibility as UnitVisibility | undefined) ?? undefined,
-        nsfw: input.nsfw ?? undefined,
+        rating: (input.rating as ContentRating | undefined) ?? undefined,
         defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? undefined,
         workUnitId: input.workUnitId,
@@ -268,7 +267,7 @@ export class UnitService {
     });
 
     const patchFields: Record<string, any> = {};
-    if (input.nsfw !== undefined) patchFields.nsfw = input.nsfw;
+    if (input.rating !== undefined) patchFields.rating = input.rating;
     if (input.visibility !== undefined)
       patchFields.visibility = input.visibility;
     if (input.defaultLanguage !== undefined)
