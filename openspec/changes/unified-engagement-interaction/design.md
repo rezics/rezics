@@ -115,11 +115,17 @@ Every card becomes a clickable navigation target with a single `onClick` on the 
 
 Rationale: the alternative — nested `<CardActionArea>` regions with exclusions — is error-prone and does not generalise to future interactive leaves (e.g. user avatars). A single outer `onClick` is easier to reason about and trivially extended by adding `stopPropagation` at new leaves.
 
-### D8: ShelfAction opens a shared `ShelfPickerModal`; `useCollectMutation` is the backing call
+### D8: ShelfAction reuses the existing `CollectionModal`
 
-`ShelfPickerModal` lists the user's shelves (from `shelfKeys.mine()`), allows multi-select, and on submit calls `useCollectMutation({ targetId, shelfIds })`. It pre-selects shelves the target is already in (derived from the collection-status query). The modal is a standalone component under `engagement/components/` and is not bound to any content type.
+The codebase already ships a working multi-shelf picker at `package/app/src/collection/components/CollectionModal.tsx` driven by `useCollectionModal` (`package/app/src/collection/hooks/useCollectionModal.ts`). It lists the user's shelves via `userShelvesQuery`, seeds initial selection from `collectionStatusQuery`, and dispatches `useCollectMutation` on save. It also ships a content-type filter-chip row and a "review-as-independent-unit" toggle.
 
-`useCollectMutation` already invalidates `shelfKeys.mine()` and each affected `shelfKeys.detail` / `shelfKeys.items`, so no extra cache wiring is needed.
+`ShelfAction` (new, under `engagement/components/`) is a thin button atom that drives `useCollectionModal(targetId)`: it renders the button, calls `handleOpen` on click, and renders the existing `CollectionModal` as the popup. No second modal component is introduced.
+
+`collection/` itself is not modified by this change. The only cross-feature import is `ShelfAction` importing `CollectionModal` + `useCollectionModal` from `@/collection/*`.
+
+Alternatives considered:
+- **Build a fresh `ShelfPickerModal` under `engagement/`**: rejected — duplicates working code and creates two parallel shelf-add flows. The existing `collection/` feature already handles the multi-select case cleanly.
+- **Move `CollectionModal` into `engagement/`**: rejected — `collection/` is out of scope for this change, and relocating touches `FavoriteButton` neighbours unnecessarily.
 
 ### D9: ShelfPage mounts the thread stack as a new top-level section
 

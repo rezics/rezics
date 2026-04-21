@@ -1,258 +1,173 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
-import {
-  ChatBubbleOutline,
-  DeleteOutlined,
-  EditOutlined,
-  EmojiEvents,
-  LibraryAdd,
-  OpenInNew,
-  SentimentSatisfiedAlt,
-} from "@mui/icons-material";
-import ThumbDownAltOutlinedIcon from "@mui/icons-material/ThumbDownAltOutlined";
-import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
-import { IconButton, Tooltip } from "@mui/material";
-import {
-  useCreateReactionMutation,
-  useDeleteReactionMutation,
-} from "@rezics/api/reaction/reaction.mutations";
+import { Stack } from "@mui/material";
 import type React from "react";
-import { useEffect, useState } from "react";
-import { CollectionModal } from "@/collection/components/CollectionModal";
-import { FavoriteButton } from "@/collection/components/FavoriteButton";
-import { useCollectionModal } from "@/collection/hooks/useCollectionModal";
-import { ReactionBarToolBox } from "./reactionBarToolBox";
+import { parseReactionSummaries } from "@/shared/utils/reaction-summaries-parser";
+import type { Action, ActionPolicy, EngagementSize } from "../types";
+import { OverflowMenu } from "./OverflowMenu";
+import { ReplyAction } from "./ReplyAction";
+import { ShareAction } from "./ShareAction";
+import { ShelfAction } from "./ShelfAction";
+import { VoteGroup } from "./VoteGroup";
 
-async function copyCurrentUrl(url?: string) {
-  const theUrl = url || window.location.href;
-  try {
-    await navigator.clipboard.writeText(theUrl);
-    console.log("URL copied to clipboard");
-  } catch (err) {
-    console.error("Copy failed:", err);
-  }
-}
-
-export type ReactionAdminBarProps = {
-  className?: string;
-  size?: "small" | "medium" | "large";
-  fontSize?: string;
-  onEdit: () => void;
-  onDelete: () => void;
+export type ReactionBarPost = {
+  unitId: string;
+  reactionSummaries?: unknown[];
+  replyCount?: number;
+  userReactions?: string[];
 };
 
-export function ReactionAdminBar({
-  className,
-  size = "large",
-  fontSize = "1.5rem",
-  onEdit,
-  onDelete,
-}: ReactionAdminBarProps) {
-  return (
-    <div className={`flex items-center ${className}`}>
-      <IconButton
-        size={size}
-        sx={{ fontSize }}
-        onClick={onEdit}
-        className="ml-2"
-      >
-        <EditOutlined fontSize="inherit" />
-      </IconButton>
-
-      <IconButton
-        size={size}
-        sx={{ fontSize }}
-        onClick={onDelete}
-        className="ml-2"
-      >
-        <DeleteOutlined fontSize="inherit" />
-      </IconButton>
-    </div>
-  );
-}
+export type ReactionBarPolicy = {
+  /** Builds the absolute-or-relative URL used by the Share popover. */
+  getShareHref: (post: ReactionBarPost) => string;
+  /** Optional hint so `ShelfAction` can render the review-specific dual-mode UI. */
+  isReview?: boolean;
+  /** Optional title forwarded to the Web Share API. */
+  getShareTitle?: (post: ReactionBarPost) => string | undefined;
+};
 
 export type ReactionBarProps = {
-  onReply?: () => void;
-  unitId?: string;
+  post: ReactionBarPost;
+  policy: ReactionBarPolicy;
+  /** Explicit action list — overrides `actionPolicy.actions` when provided. */
+  actions?: Action[];
+  /** Explicit overflow list — overrides `actionPolicy.overflow` when provided. */
+  overflow?: Action[];
+  /** Alternative to `actions` + `overflow` when the caller already has a policy object. */
+  actionPolicy?: ActionPolicy;
+  size?: EngagementSize;
+  /** Reply-click handler. Fires on main-bar reply and on overflow-menu reply. */
+  onReplyInvoke?: () => void;
+  /** Render mode for the Reply atom. `"count"` shows number when > 0, `"label"` always shows "Reply". */
+  replyMode?: "count" | "label";
   className?: string;
-  size?: "small" | "medium" | "large";
-  fontSize?: string;
-  itemUrl?: string;
-  hideLike?: boolean;
-  hideDislike?: boolean;
-  hideReply?: boolean;
-  hideBookmark?: boolean;
-  hideShare?: boolean;
-  currentUserReactions?: string[];
 };
 
-export const ReactionBar: React.FC<ReactionBarProps> = ({
-  onReply,
-  unitId,
-  className,
-  size = "large",
-  fontSize = "1.5rem",
-  itemUrl,
-  hideLike = false,
-  hideDislike = false,
-  hideReply = false,
-  hideBookmark = false,
-  hideShare = false,
-  currentUserReactions,
-}) => {
-  const handleReply = () => {
-    onReply?.();
-  };
-
-  const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
-  const { show: showAlert } = useAlertStore();
-
-  const collection = useCollectionModal(unitId ?? "");
-
-  const [userReactions, setUserReactions] = useState<string[]>(
-    currentUserReactions ?? [],
+function deriveVoteState(post: ReactionBarPost): {
+  score: number;
+  userVote: "like" | "dislike" | null;
+} {
+  const { likes = 0, dislikes = 0 } = parseReactionSummaries(
+    (post.reactionSummaries ?? []) as any[],
   );
+  const userReactions = post.userReactions ?? [];
+  const userVote: "like" | "dislike" | null = userReactions.includes("like")
+    ? "like"
+    : userReactions.includes("dislike")
+      ? "dislike"
+      : null;
+  return { score: (likes ?? 0) - (dislikes ?? 0), userVote };
+}
 
-  useEffect(() => {
-    setUserReactions(currentUserReactions ?? []);
-  }, [currentUserReactions]);
+function resolvePolicy(
+  actions: Action[] | undefined,
+  overflow: Action[] | undefined,
+  actionPolicy: ActionPolicy | undefined,
+): { visible: Action[]; hidden: Action[] } {
+  const rawActions = actions ?? actionPolicy?.actions ?? [];
+  const rawOverflow = overflow ?? actionPolicy?.overflow ?? [];
+  const visibleSet = new Set(rawActions);
+  const hidden = rawOverflow.filter((token) => !visibleSet.has(token));
+  return { visible: rawActions, hidden };
+}
 
-  const createReactionMutation = useCreateReactionMutation({
-    onSuccess: () => {
-      showAlert("Reaction updated successfully");
-    },
-  });
+export const ReactionBar: React.FC<ReactionBarProps> = ({
+  post,
+  policy,
+  actions,
+  overflow,
+  actionPolicy,
+  size = "md",
+  onReplyInvoke,
+  replyMode = "count",
+  className,
+}) => {
+  const { visible, hidden } = resolvePolicy(actions, overflow, actionPolicy);
+  const { score, userVote } = deriveVoteState(post);
+  const shareHref = policy.getShareHref(post);
+  const shareTitle = policy.getShareTitle?.(post);
 
-  const deleteReactionMutation = useDeleteReactionMutation({
-    onSuccess: () => {
-      showAlert("Reaction updated successfully");
-    },
-  });
-
-  const hasLike = userReactions.includes("like");
-  const hasDislike = userReactions.includes("dislike");
-
-  const handleToggleReaction = (reaction: "like" | "dislike") => {
-    if (!unitId) return;
-
-    const hasReaction = userReactions.includes(reaction);
-
-    if (hasReaction) {
-      deleteReactionMutation.mutate({ targetId: unitId, reaction });
-      setUserReactions((prev) => prev.filter((r) => r !== reaction));
-    } else {
-      createReactionMutation.mutate({ targetId: unitId, reaction });
-      setUserReactions((prev) => [...prev, reaction]);
+  const handleOverflowInvoke = (token: Action) => {
+    switch (token) {
+      case "reply":
+        onReplyInvoke?.();
+        break;
+      default:
+        // share / shelf require their popover roots; if they appear in
+        // overflow without dedicated menu renderers, surface them by moving
+        // the token to `actions` at the call site.
+        break;
     }
   };
 
+  const spacing = size === "sm" ? 0.25 : size === "lg" ? 1 : 0.5;
+
+  const handleBarClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+  };
+
   return (
-    <div className={`flex items-start w-full max-w-2xl mx-auto ${className}`}>
-      <div className="flex justify-between items-center flex-1">
-        {!hideLike && (
-          <div>
-            <IconButton
-              size={size}
-              sx={{ fontSize }}
-              onClick={() => handleToggleReaction("like")}
-            >
-              <ThumbUpAltOutlinedIcon
-                fontSize="inherit"
-                color={hasLike ? "primary" : "inherit"}
+    <Stack
+      direction="row"
+      alignItems="center"
+      spacing={spacing}
+      className={className}
+      onClick={handleBarClick}
+      sx={{ flexWrap: "wrap" }}
+    >
+      {visible.map((token) => {
+        switch (token) {
+          case "vote":
+            return (
+              <VoteGroup
+                key="vote"
+                targetUnitId={post.unitId}
+                initialScore={score}
+                initialUserVote={userVote}
+                size={size}
               />
-            </IconButton>
-          </div>
-        )}
-        {!hideDislike && (
-          <div>
-            <IconButton
-              size={size}
-              sx={{ fontSize }}
-              onClick={() => handleToggleReaction("dislike")}
-            >
-              <ThumbDownAltOutlinedIcon
-                fontSize="inherit"
-                color={hasDislike ? "error" : "inherit"}
+            );
+          case "reply":
+            return (
+              <ReplyAction
+                key="reply"
+                size={size}
+                replyCount={post.replyCount ?? 0}
+                mode={replyMode}
+                onInvoke={onReplyInvoke}
               />
-            </IconButton>
-          </div>
-        )}
-
-        {!hideReply && (
-          <div>
-            <IconButton size={size} sx={{ fontSize }} onClick={handleReply}>
-              <ChatBubbleOutline fontSize="inherit" />
-            </IconButton>
-          </div>
-        )}
-
-        {!hideBookmark && unitId && (
-          <>
-            <FavoriteButton unitId={unitId} size={size} />
-            <div>
-              <Tooltip title="Collect">
-                <IconButton
-                  size={size}
-                  sx={{ fontSize }}
-                  onClick={collection.handleOpen}
-                >
-                  <LibraryAdd fontSize="inherit" />
-                </IconButton>
-              </Tooltip>
-            </div>
-            <CollectionModal
-              open={collection.open}
-              onClose={collection.handleClose}
-              onCollect={collection.handleCollect}
-              shelves={collection.shelves}
-              status={collection.status}
-              isCollecting={collection.isCollecting}
-              isLoading={collection.isLoading}
-            />
-          </>
-        )}
-
-        {!hideShare && (
-          <div>
-            <IconButton
-              size={size}
-              sx={{ fontSize }}
-              onClick={() => {
-                showAlert("Link copied to clipboard");
-                const origin = window?.location?.origin;
-                const theUrl = origin + itemUrl;
-                copyCurrentUrl(theUrl);
-                setIsToolBoxOpen(true);
-              }}
-            >
-              <OpenInNew fontSize="inherit" />
-            </IconButton>
-          </div>
-        )}
-        <ReactionBarToolBox
-          open={isToolBoxOpen}
-          onClose={() => {
-            setIsToolBoxOpen(false);
-          }}
-          itemUrl={itemUrl}
+            );
+          case "share":
+            return (
+              <ShareAction
+                key="share"
+                size={size}
+                href={shareHref}
+                title={shareTitle}
+              />
+            );
+          case "shelf":
+            return (
+              <ShelfAction
+                key="shelf"
+                targetUnitId={post.unitId}
+                size={size}
+                isReview={policy.isReview}
+              />
+            );
+          case "more":
+          case "funny":
+          case "award":
+            return null;
+          default:
+            return null;
+        }
+      })}
+      {hidden.length > 0 && (
+        <OverflowMenu
+          items={hidden}
+          size={size}
+          onInvoke={handleOverflowInvoke}
         />
-      </div>
-    </div>
+      )}
+    </Stack>
   );
 };
-
-export function AwardReactionBar() {
-  return (
-    <div>
-      <Tooltip title="Funny">
-        <IconButton size="medium">
-          <SentimentSatisfiedAlt style={{ fontSize: "1rem" }} />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Award">
-        <IconButton size="medium">
-          <EmojiEvents style={{ fontSize: "1rem" }} />
-        </IconButton>
-      </Tooltip>
-    </div>
-  );
-}
