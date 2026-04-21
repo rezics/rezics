@@ -1,16 +1,14 @@
-import { ChatBubbleOutline } from "@mui/icons-material";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useCanEdit } from "@rezics/api/hooks";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { ReactionStatistics } from "@/engagement/components/ReactionStatistics";
-import { InlinePostForm, PostTreeSection } from "@/post";
-import { parseReactionSummaries } from "@/shared/utils/reaction-summaries-parser";
+import { PostTreeSection } from "@/post";
+import { ReplyComposer } from "@/post/forms/ReplyComposer";
+import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { ExcerptDetail } from "../components/detail/ExcerptDetail";
 
 interface ExcerptDetailSectionProps {
@@ -21,7 +19,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   unitId,
 }) => {
   const { t } = useTranslation();
-  const commentRef = useRef<HTMLDivElement>(null);
+  const composerRef = useFocusReplyFromQuery();
   const { data: excerpt, isLoading } = useQuery(unitQueries.detail(unitId));
   const canEdit = useCanEdit({
     resource: "unit",
@@ -39,11 +37,8 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
 
   const title = excerpt.translations?.[0]?.title;
 
-  const handleGoToComments = () => {
-    commentRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+  const handleReplyInvoke = () => {
+    composerRef.current?.focus();
   };
 
   return (
@@ -63,25 +58,20 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
         )}
       </Box>
 
-      <ExcerptDetail excerpt={excerpt} />
+      <ExcerptDetail excerpt={excerpt} onReplyInvoke={handleReplyInvoke} />
 
-      <Box className="flex items-center justify-between">
-        <ReactionStatistics
-          reactionSummaries={parseReactionSummaries(excerpt.reactionSummaries)}
-        />
-        <IconButton size="small" onClick={handleGoToComments}>
-          <ChatBubbleOutline fontSize="small" />
-        </IconButton>
-      </Box>
-
-      <Box ref={commentRef} className="mt-4 flex flex-col gap-3">
+      <Box className="mt-4 flex flex-col gap-3">
         <Box className="flex items-center gap-2">
           <AccentBar />
           <Typography variant="h6" fontWeight={700}>
             {t("review.comments")}
           </Typography>
         </Box>
-        <InlinePostForm targetUnitId={unitId} placeholder="Write a reply..." />
+        <ReplyComposer
+          ref={composerRef}
+          mode="progressive"
+          targetUnitId={unitId}
+        />
         <PostTreeSection rootPostUnitId={unitId} />
       </Box>
     </Box>

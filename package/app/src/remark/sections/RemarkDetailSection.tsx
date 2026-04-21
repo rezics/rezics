@@ -5,6 +5,8 @@ import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { ReplyComposer } from "@/post/forms/ReplyComposer";
+import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "@/post/sections/PostTreeSection";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
 
@@ -16,6 +18,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   remarkId,
 }) => {
   const { t } = useTranslation();
+  const composerRef = useFocusReplyFromQuery();
   const { data: remark, isLoading } = useQuery(postQueries.detail(remarkId));
   const canEdit = useCanEdit({
     resource: "post",
@@ -24,6 +27,10 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
 
   if (isLoading) return <div>{t("common.loading")}</div>;
   if (!remark) return <div>{t("common.no_data")}</div>;
+
+  const handleReplyInvoke = () => {
+    composerRef.current?.focus();
+  };
 
   return (
     <Box className="flex flex-col gap-6">
@@ -34,7 +41,12 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
           </MUILink>
         </Box>
       )}
-      <RemarkDetail remark={remark} />
+      <RemarkDetail remark={remark} onReplyInvoke={handleReplyInvoke} />
+      <ReplyComposer
+        ref={composerRef}
+        mode="progressive"
+        targetUnitId={remark.unitId}
+      />
       <PostTreeSection rootPostUnitId={remark.unitId} />
     </Box>
   );

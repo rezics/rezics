@@ -4,15 +4,23 @@ import { Box, Typography } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import type React from "react";
+import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
-import { PostReactionFooter } from "@/post/components/parts/PostReactionFooter";
+import {
+  remarkDetailActions,
+  remarkPolicy,
+} from "../../models/remarkPolicy";
 
 interface RemarkDetailProps {
   remark: PostDTO;
+  onReplyInvoke?: () => void;
 }
 
-export const RemarkDetail: React.FC<RemarkDetailProps> = ({ remark }) => {
+export const RemarkDetail: React.FC<RemarkDetailProps> = ({
+  remark,
+  onReplyInvoke,
+}) => {
   const rating = (remark.extra as { rating?: number } | null)?.rating;
   const isRecommended = !!(rating && rating >= 3);
   const bookUnitId = remark.targetUnitId;
@@ -42,7 +50,13 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({ remark }) => {
         </Box>
       )}
       <PostBodyMarkdown body={remark.body ?? ""} />
-      <PostReactionFooter post={remark} />
+      <ReactionBar
+        size="lg"
+        post={remark}
+        policy={remarkPolicy}
+        actions={remarkDetailActions}
+        onReplyInvoke={onReplyInvoke}
+      />
     </Box>
   );
 };

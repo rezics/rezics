@@ -1,9 +1,15 @@
 import { Box } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
+import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { ReactionBar } from "@/engagement";
+import {
+  postCardActions,
+  postCardOverflow,
+  postPolicy,
+} from "../../models/postPolicy";
 import { PostAuthorHeader } from "../parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "../parts/PostBodyMarkdown";
-import { PostReactionFooter } from "../parts/PostReactionFooter";
 
 interface PostCardProps {
   post: PostDTO;
@@ -11,11 +17,39 @@ interface PostCardProps {
 }
 
 export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
+  const navigate = useNavigate();
+  const rootPostUnitId =
+    (post as unknown as { rootPostUnitId?: string }).rootPostUnitId ??
+    post.unitId;
+
+  const handleCardClick = () => {
+    if (onOpen) {
+      onOpen();
+      return;
+    }
+    navigate({
+      to: "/post/$rootPostUnitId",
+      params: { rootPostUnitId },
+    });
+  };
+
+  const handleReplyInvoke = () => {
+    if (onOpen) {
+      onOpen();
+      return;
+    }
+    navigate({
+      to: "/post/$rootPostUnitId",
+      params: { rootPostUnitId },
+      search: { focus: "reply" },
+    });
+  };
+
   return (
     <Box
       className="py-3 border-b border-gray-200 dark:border-gray-700"
-      onClick={onOpen}
-      sx={onOpen ? { cursor: "pointer" } : undefined}
+      onClick={handleCardClick}
+      sx={{ cursor: "pointer" }}
     >
       <Box className="flex flex-col gap-2">
         <PostAuthorHeader post={post} />
@@ -24,7 +58,14 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
           clamp={{ maxLines: 4 }}
           className="text-sm"
         />
-        <PostReactionFooter post={post} />
+        <ReactionBar
+          size="md"
+          post={post}
+          policy={postPolicy}
+          actions={postCardActions}
+          overflow={postCardOverflow}
+          onReplyInvoke={handleReplyInvoke}
+        />
       </Box>
     </Box>
   );

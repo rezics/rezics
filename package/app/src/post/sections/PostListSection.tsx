@@ -13,14 +13,12 @@ interface PostListSectionProps {
   targetUnitId: string;
   kind?: PostKind;
   limit?: number;
-  onReply?: (postId: string) => void;
 }
 
 export const PostListSection: React.FC<PostListSectionProps> = ({
   targetUnitId,
   kind,
   limit = 20,
-  onReply: _onReply,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();

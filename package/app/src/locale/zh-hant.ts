@@ -484,6 +484,15 @@ export default {
     a11y: {
       book_review: "書評",
     },
+    discussion: {
+      composer: {
+        placeholder: "展開討論",
+      },
+      empty: {
+        title: "目前還沒有討論",
+      },
+      signInPrompt: "登入以加入討論",
+    },
   },
 
   // Realm

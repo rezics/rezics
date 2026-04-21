@@ -1,9 +1,14 @@
 import { Box } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import type React from "react";
+import { ReactionBar } from "@/engagement";
+import {
+  postPolicy,
+  postReplyRowActions,
+  postReplyRowOverflow,
+} from "../../models/postPolicy";
 import { PostAuthorHeader } from "../parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "../parts/PostBodyMarkdown";
-import { PostReactionFooter } from "../parts/PostReactionFooter";
 import { CollapseToggle } from "../parts/CollapseToggle";
 import { ThreadingHoverProvider } from "../parts/ThreadingContext";
 import { ThreadingRail } from "../parts/ThreadingRail";
@@ -66,7 +71,14 @@ export const PostReply: React.FC<PostReplyProps> = ({
                   clamp={{ maxLines: 4 }}
                   className="text-sm"
                 />
-                <PostReactionFooter post={post} onReply={onReply} />
+                <ReactionBar
+                  size="sm"
+                  post={post}
+                  policy={postPolicy}
+                  actions={postReplyRowActions}
+                  overflow={postReplyRowOverflow}
+                  onReplyInvoke={onReply}
+                />
                 {replyComposerSlot}
               </>
             )}

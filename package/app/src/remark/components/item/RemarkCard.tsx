@@ -3,10 +3,15 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import { Tooltip, Typography, Box } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
-import { PostReactionFooter } from "@/post/components/parts/PostReactionFooter";
+import {
+  remarkCardActions,
+  remarkPolicy,
+} from "../../models/remarkPolicy";
 
 interface RemarkRatingBadgeProps {
   remark: PostDTO;
@@ -25,6 +30,7 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
         to="/remark/$reviewId"
         params={{ reviewId: remark.unitId }}
         className="flex items-center gap-1"
+        onClick={(e) => e.stopPropagation()}
         sx={{
           textDecoration: "none",
           color: "inherit",
@@ -52,8 +58,28 @@ interface RemarkCardProps {
 }
 
 export const RemarkCard: React.FC<RemarkCardProps> = ({ remark }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    if (!remark.unitId) return;
+    navigate({ to: "/remark/$reviewId", params: { reviewId: remark.unitId } });
+  };
+
+  const handleReplyInvoke = () => {
+    if (!remark.unitId) return;
+    navigate({
+      to: "/remark/$reviewId",
+      params: { reviewId: remark.unitId },
+      search: { focus: "reply" },
+    });
+  };
+
   return (
-    <Box className="py-4 border-b border-gray-200 dark:border-gray-700">
+    <Box
+      className="py-4 border-b border-gray-200 dark:border-gray-700"
+      onClick={handleCardClick}
+      sx={remark.unitId ? { cursor: "pointer" } : undefined}
+    >
       <Box className="flex flex-col gap-2">
         <Box className="flex items-center gap-2">
           <PostAuthorHeader post={remark} />
@@ -62,7 +88,13 @@ export const RemarkCard: React.FC<RemarkCardProps> = ({ remark }) => {
           </Box>
         </Box>
         <PostBodyMarkdown body={remark.body ?? ""} clamp={{ maxLines: 4 }} />
-        <PostReactionFooter post={remark} />
+        <ReactionBar
+          size="md"
+          post={remark}
+          policy={remarkPolicy}
+          actions={remarkCardActions}
+          onReplyInvoke={handleReplyInvoke}
+        />
       </Box>
     </Box>
   );

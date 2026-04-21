@@ -5,15 +5,23 @@ import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
-import { ReactionStatistics } from "@/engagement/components/ReactionStatistics";
-import { parseReactionSummaries } from "@/shared/utils/reaction-summaries-parser";
+import { ReactionBar } from "@/engagement";
+import {
+  reviewDetailActions,
+  reviewPolicy,
+} from "../../models/reviewPolicy";
 
 interface ReviewDetailProps {
   review: PostDTO;
   book?: BookDTO | null;
+  onReplyInvoke?: () => void;
 }
 
-export const ReviewDetail: React.FC<ReviewDetailProps> = ({ review, book }) => {
+export const ReviewDetail: React.FC<ReviewDetailProps> = ({
+  review,
+  book,
+  onReplyInvoke,
+}) => {
   const { t } = useTranslation();
   const rating = (review.extra as { rating?: number } | null)?.rating;
   const title = (review.extra as { title?: string } | null)?.title;
@@ -40,6 +48,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({ review, book }) => {
         <Avatar
           src={review.author?.avatar ?? ""}
           sx={{ width: 56, height: 56, borderRadius: 1 }}
+          onClick={(e) => e.stopPropagation()}
         />
         <Box className="flex-1">
           <Tooltip
@@ -67,8 +76,12 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({ review, book }) => {
         <MarkdownContent content={review.body ?? ""} />
       </Box>
 
-      <ReactionStatistics
-        reactionSummaries={parseReactionSummaries(review.reactionSummaries)}
+      <ReactionBar
+        size="lg"
+        post={review}
+        policy={reviewPolicy}
+        actions={reviewDetailActions}
+        onReplyInvoke={onReplyInvoke}
       />
     </Box>
   );

@@ -4,8 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
-import { useState } from "react";
-import { InlinePostForm, PostListSection, ReplyDrawer } from "@/post";
+import { PostListSection, ReplyComposer } from "@/post";
 import { BookDetailShell } from "../sections/BookDetailSection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 
@@ -31,7 +30,6 @@ export const BookCommunityPage: React.FC = () => {
     enabled: Boolean(bookId),
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
-  const [replyTo, setReplyTo] = useState<string | null>(null);
 
   if (!bookInfo) return null;
 
@@ -42,19 +40,11 @@ export const BookCommunityPage: React.FC = () => {
           <CommunitySidebar />
         </Box>
 
-        <InlinePostForm targetUnitId={bookId} />
+        <ReplyComposer mode="progressive" targetUnitId={bookId} />
 
         <Divider />
 
-        <PostListSection targetUnitId={bookId} onReply={setReplyTo} />
-
-        {replyTo && (
-          <ReplyDrawer
-            parentPostUnitId={replyTo}
-            isOpen={!!replyTo}
-            onClose={() => setReplyTo(null)}
-          />
-        )}
+        <PostListSection targetUnitId={bookId} />
       </Stack>
     </BookDetailShell>
   );

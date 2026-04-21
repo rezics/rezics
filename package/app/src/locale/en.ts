@@ -495,6 +495,15 @@ export default {
     a11y: {
       book_review: "Book review",
     },
+    discussion: {
+      composer: {
+        placeholder: "Start a discussion",
+      },
+      empty: {
+        title: "No discussions yet",
+      },
+      signInPrompt: "Sign in to join the discussion",
+    },
   },
 
   // Realm

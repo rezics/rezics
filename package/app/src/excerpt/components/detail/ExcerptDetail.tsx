@@ -6,12 +6,21 @@ import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import type React from "react";
+import { ReactionBar, type ReactionBarPost } from "@/engagement";
+import {
+  excerptDetailActions,
+  excerptPolicy,
+} from "../../models/excerptPolicy";
 
 interface ExcerptDetailProps {
   excerpt: UnitDTO;
+  onReplyInvoke?: () => void;
 }
 
-export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({ excerpt }) => {
+export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
+  excerpt,
+  onReplyInvoke,
+}) => {
   const description = excerpt.translations?.[0]?.description ?? "";
   const source = (excerpt.extra as Record<string, unknown> | null)?.source as
     | ExcerptSource
@@ -20,6 +29,13 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({ excerpt }) => {
   const dateStr = excerpt.createdAt
     ? new Date(String(excerpt.createdAt)).toLocaleDateString()
     : "";
+
+  const reactionPost: ReactionBarPost = {
+    unitId: excerpt.id,
+    reactionSummaries: (excerpt as unknown as { reactionSummaries?: unknown[] })
+      .reactionSummaries,
+    replyCount: (excerpt as unknown as { replyCount?: number }).replyCount,
+  };
 
   return (
     <Box className="flex flex-col gap-4">
@@ -57,6 +73,14 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({ excerpt }) => {
       </Box>
 
       <ExcerptSourceLine source={source} />
+
+      <ReactionBar
+        size="lg"
+        post={reactionPost}
+        policy={excerptPolicy}
+        actions={excerptDetailActions}
+        onReplyInvoke={onReplyInvoke}
+      />
     </Box>
   );
 };

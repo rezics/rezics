@@ -1,5 +1,4 @@
-import { ChatBubbleOutline } from "@mui/icons-material";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
@@ -7,10 +6,12 @@ import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { InlinePostForm, PostTreeSection } from "@/post";
+import { PostTreeSection } from "@/post";
+import { ReplyComposer, type ReplyComposerHandle } from "@/post/forms/ReplyComposer";
+import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { ReviewDetail } from "../components/detail/ReviewDetail";
 
 interface ReviewDetailSectionProps {
@@ -22,7 +23,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
 }) => {
   const { t } = useTranslation();
   const commentRef = useRef<HTMLDivElement>(null);
-  const [showReplyForm, setShowReplyForm] = useState(false);
+  const composerRef = useFocusReplyFromQuery();
 
   const {
     data: review,
@@ -44,11 +45,8 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
   if (error) return <QueryErrorDisplay error={error} />;
   if (!review) return <div>{t("common.no_data")}</div>;
 
-  const handleGoToComments = () => {
-    commentRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+  const handleReplyInvoke = () => {
+    composerRef.current?.focus();
   };
 
   return (
@@ -61,31 +59,25 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
         </Box>
       )}
 
-      <ReviewDetail review={review} book={book} />
+      <ReviewDetail
+        review={review}
+        book={book}
+        onReplyInvoke={handleReplyInvoke}
+      />
 
       <Box ref={commentRef} className="mt-4 flex flex-col gap-3">
-        <Box className="flex items-center justify-between">
-          <Box className="flex items-center gap-2">
-            <AccentBar />
-            <Typography variant="h6" fontWeight={700}>
-              {t("review.comments")}
-            </Typography>
-          </Box>
-          <IconButton
-            size="small"
-            onClick={() => setShowReplyForm(!showReplyForm)}
-          >
-            <ChatBubbleOutline fontSize="small" />
-          </IconButton>
+        <Box className="flex items-center gap-2">
+          <AccentBar />
+          <Typography variant="h6" fontWeight={700}>
+            {t("review.comments")}
+          </Typography>
         </Box>
 
-        {showReplyForm && (
-          <InlinePostForm
-            targetUnitId={review.unitId}
-            placeholder="Write a reply..."
-            onSuccess={() => setShowReplyForm(false)}
-          />
-        )}
+        <ReplyComposer
+          ref={composerRef}
+          mode="progressive"
+          targetUnitId={review.unitId}
+        />
 
         <PostTreeSection rootPostUnitId={review.unitId} />
       </Box>

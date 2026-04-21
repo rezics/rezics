@@ -22,6 +22,7 @@ import { useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import { deriveShelfStream } from "../models/shelfStream";
+import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
 
 interface ShelfPageProps {
   unitId: string;
@@ -241,6 +242,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
             ))}
           </Stack>
         )}
+
+        {shelf?.unitId && <ShelfDiscussionSection shelfUnitId={shelf.unitId} />}
       </Stack>
     </Box>
   );

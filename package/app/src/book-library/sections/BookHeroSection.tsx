@@ -6,10 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  MiniActionBar,
-  MiniAdminActionBar,
-} from "@/engagement/components/MiniActionBar.tsx";
+import { ReactionBar, type ReactionBarPost } from "@/engagement";
+import { MiniAdminActionBar } from "@/engagement/components/MiniAdminActionBar.tsx";
+import { bookHeroActions, bookPolicy } from "@/book-library/models/bookPolicy";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import {
   getBookCoverUrl,
@@ -26,6 +25,12 @@ export const BookHeroReactionBar: React.FC<{
   className?: string;
 }> = ({ bookInfo, className }) => {
   const color = "text-white";
+  const reactionPost: ReactionBarPost = {
+    unitId: bookInfo?.unitId ?? "",
+    reactionSummaries: (
+      bookInfo as unknown as { reactionSummaries?: unknown[] }
+    ).reactionSummaries,
+  };
   return (
     <div className={className}>
       <MiniAdminActionBar
@@ -34,12 +39,14 @@ export const BookHeroReactionBar: React.FC<{
         userUnitId={bookInfo?.user?.unitId}
         resource="book"
       />
-      <MiniActionBar
-        hideReply={true}
-        className={className ?? ""}
-        textColor={color}
-        unitId={bookInfo?.unitId}
-      />
+      {bookInfo?.unitId && (
+        <ReactionBar
+          size="md"
+          post={reactionPost}
+          policy={bookPolicy}
+          actions={bookHeroActions}
+        />
+      )}
     </div>
   );
 };

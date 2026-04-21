@@ -19,7 +19,10 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
     : "";
 
   return (
-    <Box className="flex items-center gap-2">
+    <Box
+      className="flex items-center gap-2"
+      onClick={(e) => e.stopPropagation()}
+    >
       <Link to="/user/$unitId" params={{ unitId: post.author?.unitId ?? "" }}>
         <Avatar
           src={post.author?.avatar ?? ""}
