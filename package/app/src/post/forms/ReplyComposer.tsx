@@ -3,7 +3,14 @@ import { useCreatePostMutation } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import type React from "react";
-import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export type ReplyComposerMode = "progressive" | "expanded";
 
@@ -49,6 +56,11 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
     const triggerRef = useRef<HTMLDivElement>(null);
     const shouldRetainOnBlur = useBlurRetain(body);
     const mutation = useCreatePostMutation();
+
+    const resize = useMemo(
+      () => ({ height: 150, minHeight: 100, maxHeight: 400 }),
+      [],
+    );
 
     useImperativeHandle(
       ref,
@@ -126,8 +138,7 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
         <RezicsMarkdownEditor
           value={body}
           onChange={setBody}
-          preview={false}
-          resize={{ height: 150, minHeight: 100, maxHeight: 400 }}
+          resize={resize}
         />
         <Stack direction="row" spacing={1} justifyContent="flex-end">
           <Button
