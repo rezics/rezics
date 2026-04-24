@@ -10,7 +10,7 @@ Every Unit record SHALL be created with a `type` from the `UnitType` enum (`BOOK
 
 - GIVEN an authenticated user with userId "user-1"
 - WHEN the system creates a new Unit with `type = BOOK`
-- THEN the Unit record SHALL be persisted with `type = BOOK`, `status = DRAFT`, `visibility = PRIVATE`, `nsfw = false`, `userId = "user-1"`, and auto-generated timestamps
+- THEN the Unit record SHALL be persisted with `type = BOOK`, `status = DRAFT`, `visibility = PRIVATE`, `rating = GENERAL`, `userId = "user-1"`, and auto-generated timestamps
 - AND the Unit SHALL have no `title` or `content` columns
 
 #### Scenario: Reject unit creation with invalid type
@@ -86,21 +86,31 @@ A Unit's `visibility` field SHALL be one of `PUBLIC`, `UNLISTED`, or `PRIVATE`. 
 - THEN the system SHALL deny access
 - AND when the owner "user-1" accesses the Unit, it SHALL be returned normally
 
-### Requirement: NSFW flagging
+### Requirement: Content rating field
 
-A Unit SHALL have a boolean `nsfw` field defaulting to `false`. The owner MAY set `nsfw = true` to indicate the unit contains sensitive content. Systems that display units MUST respect the `nsfw` flag for content filtering.
+A Unit SHALL have a `rating: ContentRating` field defaulting to `GENERAL` on creation. Valid values are `GENERAL`, `R_15`, `R_18`, and `R_18G` (see the `content-rating` capability). The owner MAY update the field at any time. Systems that display or list Units SHALL respect the rating when applying discovery filters.
 
-#### Scenario: Flag a unit as NSFW
+The system SHALL NOT derive or enforce the Unit's rating from any related entity. In particular, it SHALL NOT enforce that a Book's `rating` is greater than or equal to the `rating` of any chapter Unit that targets the Book. The rating represents the maintainer's declared classification of the Unit at the catalog layer; fine-grained chapter-level rating information is expressed on each chapter Unit independently.
 
-- GIVEN a Unit with `nsfw = false`
-- WHEN the owner sets `nsfw = true`
-- THEN the Unit record SHALL persist `nsfw = true`
-- AND content filtering systems SHALL treat this unit as sensitive
+#### Scenario: Set a Unit's rating
 
-#### Scenario: Default NSFW value on creation
+- GIVEN a Unit with `rating = GENERAL`
+- WHEN the owner updates the rating to `R_15`
+- THEN the Unit record SHALL persist `rating = R_15`
+- AND discovery filters SHALL evaluate the Unit against the new rating value
 
-- WHEN a new Unit is created without specifying the `nsfw` field
-- THEN the Unit SHALL be created with `nsfw = false`
+#### Scenario: Default rating on creation
+
+- WHEN a new Unit is created without specifying the `rating` field
+- THEN the Unit SHALL be created with `rating = GENERAL`
+
+#### Scenario: Chapter rating independent of Book rating
+
+- GIVEN a Book Unit with `rating = R_15` and a chapter Unit with `rating = R_18` targeting it
+- WHEN the maintainer updates the Book's rating to `GENERAL`
+- THEN the Book's rating SHALL be persisted as `GENERAL`
+- AND the chapter's rating SHALL remain `R_18`
+- AND the system SHALL NOT emit a validation error for the combination
 
 ### Requirement: Unit deletion is a soft-delete via DELETED status
 
