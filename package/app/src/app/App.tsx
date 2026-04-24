@@ -15,6 +15,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { type ReactNode, StrictMode, useEffect, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
+import { Toaster } from "sonner";
 import { router } from "@/router";
 import { WindowAlert } from "./components/WindowAlert";
 import { PersistentSettingsLoader } from "./providers/PersistentSettingsLoader";
@@ -68,6 +69,7 @@ function AppProviders({ children }: { children: ReactNode }) {
                   <AuthProvider />
                   <WindowAlert />
                   <ExternalLinkModal />
+                  <Toaster position="bottom-right" richColors />
                   {children}
                 </AppInit>
               </ReactQueryProvider>

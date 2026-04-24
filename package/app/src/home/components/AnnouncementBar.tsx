@@ -1,6 +1,6 @@
 import CampaignRoundedIcon from "@mui/icons-material/CampaignRounded";
 import PushPinRoundedIcon from "@mui/icons-material/PushPinRounded";
-import { Box, Chip, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
@@ -9,7 +9,6 @@ export interface Announcement {
   id: string;
   title: string;
   content: string;
-  tag?: string;
   date: string;
   pin?: boolean;
   link?: string;
@@ -57,7 +56,6 @@ export function AnnouncementBar({
         borderRadius: 2,
       }}
     >
-      {/* icon */}
       <CampaignRoundedIcon
         sx={{
           mr: 1.5,
@@ -66,7 +64,6 @@ export function AnnouncementBar({
         }}
       />
 
-      {/* 内容区域 */}
       <div className="relative flex-1 overflow-hidden h-[28px] flex items-center">
         {items.map((item, i) => {
           const isActive = i === index;
@@ -88,17 +85,6 @@ export function AnnouncementBar({
               {item.pin && (
                 <PushPinRoundedIcon
                   sx={{ fontSize: 14, color: theme.palette.warning.main }}
-                />
-              )}
-
-              {item.tag && (
-                <Chip
-                  size="small"
-                  label={item.tag}
-                  sx={{
-                    height: 20,
-                    fontSize: 11,
-                  }}
                 />
               )}
 

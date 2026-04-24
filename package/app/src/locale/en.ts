@@ -78,19 +78,15 @@ export default {
           beta_experimental: "Beta · Experimental features",
         },
       },
+      carousel: {
+        alert: {
+          parse_failed: "Carousel data parsing failed: {{error}}",
+        },
+      },
       noticeboard: {
         caption: "Notice",
         title: "Noticeboard",
         empty: "No notices",
-        alert: {
-          parse_failed: "Noticeboard data parsing failed: {{error}}",
-        },
-        tag: {
-          notice: "Notice",
-          announcement: "Announcement",
-          event: "Event",
-          update: "Update",
-        },
         time: {
           just_now: "Just now",
           hours_ago_one: "{{count}} hour ago",
@@ -677,6 +673,9 @@ export default {
     unknown_error: "Unknown error",
     expand_all: "Expand all",
     collapse_all: "Collapse all",
+    retry: "Retry",
+    dismiss: "Dismiss",
+    saving: "Saving...",
   },
 
   // Form & Editor
@@ -746,6 +745,81 @@ export default {
         title: "Confirm age-restricted content",
         body: "By enabling {{rating}} you confirm you are of legal age in your jurisdiction and consent to viewing this content.",
         confirm: "I confirm",
+      },
+    },
+  },
+
+  pinboard: {
+    empty: {
+      title: "No entries yet",
+      description: "When entries are added they will appear here.",
+    },
+    error: {
+      title: "Failed to load",
+      description: "Please try again in a moment.",
+    },
+    entry: {
+      untitled: "Untitled",
+      stale: "Stale",
+      language: "Language: {{lang}}",
+    },
+    pinned: {
+      region: "Pinned posts",
+      heading: "Pinned",
+    },
+    reorder: {
+      list: "Reorderable pinboard entries",
+      drag_handle: "Drag handle for {{title}}",
+      conflict:
+        "The list changed since you started dragging. The latest order has been loaded.",
+      error: "Reorder failed: {{error}}",
+    },
+    stale: {
+      title: "Some pinned entries no longer exist",
+      description_one: "{{count}} entry is stale.",
+      description_other: "{{count}} entries are stale.",
+      description: "{{count}} entries are stale.",
+      cleanup: "Clean up",
+      cleanup_done: "Stale entries cleaned up.",
+      cleanup_partial: "{{failed}} of {{total}} stale entries failed to clean up.",
+    },
+    admin: {
+      title: "Pinboards",
+      tabs_aria: "Pinboard types",
+      tabs: {
+        announcement: "Announcements",
+        pinned: "Pinned",
+      },
+      create: "New entry",
+      delete_title: "Delete entry",
+      delete_description:
+        "This will remove \"{{title}}\" from the pinboard. This action cannot be undone.",
+      delete_done: "Entry deleted.",
+      delete_failed: "Delete failed: {{error}}",
+    },
+    editor: {
+      title_create: "Create entry",
+      title_edit: "Edit entry",
+      language_tabs_aria: "Translation languages",
+      default_language: "Default language",
+      add_language: "Add language",
+      remove_language: "Remove {{lang}}",
+      no_active_language: "Select a language to edit.",
+      saved: "Saved.",
+      created: "Created.",
+      discard_title: "Discard changes?",
+      discard_description:
+        "You have unsaved changes. Leaving will discard them.",
+      discard_confirm: "Discard",
+      fields: {
+        title: "Title",
+        subtitle: "Subtitle",
+        summary: "Summary",
+        body: "Body",
+      },
+      errors: {
+        missing_default_title: "Title is required for the default language.",
+        save_failed: "Save failed: {{error}}",
       },
     },
   },

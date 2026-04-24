@@ -14,6 +14,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { PinnedFeedSection } from "@/pinboard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { JoinButton } from "../components/JoinButton";
 import { RealmContentFeed } from "../components/RealmContentFeed";
@@ -106,7 +107,12 @@ export function RealmPage({ realmId }: RealmPageProps) {
         <Tab label="Members" value="members" />
       </Tabs>
 
-      {tab === "feed" && <RealmContentFeed realmId={realmId} />}
+      {tab === "feed" && (
+        <Stack spacing={2}>
+          <PinnedFeedSection realmUnitId={realmId} />
+          <RealmContentFeed realmId={realmId} />
+        </Stack>
+      )}
       {tab === "tags" && <RealmTagManager realmId={realmId} />}
       {tab === "members" && <RealmMemberList realmId={realmId} />}
     </Box>

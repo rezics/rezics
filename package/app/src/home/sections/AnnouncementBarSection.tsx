@@ -1,23 +1,28 @@
 import { Skeleton } from "@mui/material";
-import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
-import { parseEchoKVResponse } from "@rezics/api/echokv/util";
-import { useQuery } from "@tanstack/react-query";
-import {
-  type Announcement,
-  AnnouncementBar,
-} from "../components/AnnouncementBar";
+import { AnnouncementFeedSection } from "@/pinboard";
+import { AnnouncementBar } from "../components/AnnouncementBar";
 
 export const AnnouncementBarSection = () => {
-  const { data, isLoading } = useQuery(echoKvGetQuery("home_notice"));
-
-  if (isLoading) return <Skeleton variant="rectangular" height={40} />;
-
-  if (!data || !Array.isArray(data)) return;
-
   return (
-    <AnnouncementBar
-      announcements={parseEchoKVResponse(data) as Announcement[]}
-      max={4}
-    />
+    <AnnouncementFeedSection
+      loadingFallback={<Skeleton variant="rectangular" height={40} />}
+    >
+      {(items) => {
+        if (items.length === 0) return null;
+        return (
+          <AnnouncementBar
+            announcements={items.map((item) => ({
+              id: item.id,
+              title: item.title,
+              content: item.content || item.title,
+              date: item.date,
+              pin: item.pin,
+              link: item.link,
+            }))}
+            max={4}
+          />
+        );
+      }}
+    </AnnouncementFeedSection>
   );
 };

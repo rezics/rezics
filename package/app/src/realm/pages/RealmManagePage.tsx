@@ -5,6 +5,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useServerPermission } from "@rezics/api/hooks";
+import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import {
   myRealmMembershipQuery,
   realmDetailQuery,
@@ -16,6 +17,7 @@ import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { PinboardAdminSection } from "@/pinboard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { canManageRealm } from "../models/canManageRealm";
 
@@ -90,6 +92,8 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
     return null;
   }
 
+  const isDefaultRealm = realmId === getDefaultRealmId();
+
   return (
     <Box maxWidth="md" mx="auto" px={2} py={3}>
       <Typography variant="h5" fontWeight={600} mb={3}>
@@ -111,6 +115,10 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
           multiline
           rows={4}
           variant="standard"
+        />
+        <PinboardAdminSection
+          realmUnitId={realmId}
+          isDefaultRealm={isDefaultRealm}
         />
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           <Button

@@ -76,19 +76,15 @@ export default {
           beta_experimental: "Beta · 實驗功能",
         },
       },
+      carousel: {
+        alert: {
+          parse_failed: "輪播圖資料解析失敗：{{error}}",
+        },
+      },
       noticeboard: {
         caption: "通知",
         title: "公告板",
         empty: "暫無公告",
-        alert: {
-          parse_failed: "公告板資料解析失敗：{{error}}",
-        },
-        tag: {
-          notice: "通知",
-          announcement: "公告",
-          event: "活動",
-          update: "更新",
-        },
         time: {
           just_now: "剛剛",
           hours_ago_one: "{{count}} 小時前",

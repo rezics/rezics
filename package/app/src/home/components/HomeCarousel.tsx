@@ -117,7 +117,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
       setProducts(parseEchoKVResponse<CarouselProduct[]>(data) ?? []);
     } catch (error) {
       showAlert(
-        t("page.home.noticeboard.alert.parse_failed", {
+        t("page.home.carousel.alert.parse_failed", {
           error: String(error),
         }),
       );

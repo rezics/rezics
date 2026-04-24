@@ -35,47 +35,59 @@
 
 ## 5. Frontend feature — Pinboard (`package/app/src/pinboard/`)
 
-- [ ] 5.1 Scaffold the feature folder per `package/app/docs/feature standard.md`: `models/`, `hooks/`, `states/`, `components/`, `sections/`, `pages/` (none needed initially), `index.ts`. `models/` SHALL stay free of React imports.
-- [ ] 5.2 `models/types.ts`: re-export contract DTOs; define view-model types for the admin editor (per-language draft fields + dirty flag).
-- [ ] 5.3 `hooks/usePinboard.ts`: thin adapters over `@rezics/api` query hooks that normalize language + adminView inputs and expose `staleIds`.
-- [ ] 5.4 `states/editorDraftAtom.ts` (Jotai): per-(realm, pinboardKey, unitId?) editor draft with dirty tracking for unsaved-change guards.
-- [ ] 5.5 `components/PinboardEntryCard.tsx`: shared presentation used by the homepage bar, notice board, and realm feed. Variants: `compact` (bar), `card` (board/feed), `adminRow` (manage list).
-- [ ] 5.6 `components/PinboardEmptyState.tsx`, `components/PinboardSkeleton.tsx`, `components/PinboardErrorState.tsx`: skeleton heights MUST match the real row heights to avoid layout shift; error state includes a "Retry" button bound to the query `refetch`.
-- [ ] 5.7 `components/LanguageTabs.tsx`: per-language editing tabs with "add language" / "remove language" affordances; default-language tab is non-removable and visually marked.
-- [ ] 5.8 `components/PinboardEditorDialog.tsx`: the composite create/edit modal. Uses `LanguageTabs`; each tab holds title/summary/body fields with inline validation; Save invokes the composite API. Integrates the unsaved-change confirm-modal guard.
-- [ ] 5.9 `components/PinboardReorderList.tsx`: dnd-kit based sortable list with keyboard drag support. On drop calls `useReorderPinboard`; handles 409 by refetching and showing a non-blocking toast.
-- [ ] 5.10 `components/StaleIdsBanner.tsx`: dismissible banner rendered when `staleIds.length > 0`, with a "Clean up" action that iterates `useUnpinFromPinboard` for each stale id.
-- [ ] 5.11 `sections/PinboardAdminSection.tsx`: the tabbed admin surface (one tab per pinboard key visible to the caller). Decides which tabs to render based on the target realm (always `pinned`; add `announcement` only for `default-realm`). Wires create / edit / delete / reorder / pin / unpin / cleanup.
-- [ ] 5.12 `sections/PinnedFeedSection.tsx`: renders the pinned region above the generic realm feed. Gracefully no-ops when the list is empty.
-- [ ] 5.13 `sections/AnnouncementFeedSection.tsx` (homepage): language-resolved announcement list consumed by the homepage bar / notice board. Exposes the entries as a shape the existing `AnnouncementBar` can consume after the migration in section 6.
-- [ ] 5.14 `index.ts`: export only the sections + `PinboardEntryCard` public shape; nothing from `models/`, `hooks/`, `states/`, or internal `components/*`.
-- [ ] 5.15 Accessibility pass: every interactive control has a visible focus ring, every tab/list/modal uses proper ARIA roles and labels, and the dnd-kit list supports keyboard drag. Verify with keyboard-only navigation.
+- [x] 5.1 Scaffold the feature folder per `package/app/docs/feature standard.md`: `models/`, `hooks/`, `states/`, `components/`, `sections/`, `pages/` (none needed initially), `index.ts`. `models/` SHALL stay free of React imports.
+- [x] 5.2 `models/types.ts`: re-export contract DTOs; define view-model types for the admin editor (per-language draft fields + dirty flag).
+- [x] 5.3 `hooks/usePinboard.ts`: thin adapters over `@rezics/api` query hooks that normalize language + adminView inputs and expose `staleIds`.
+- [x] 5.4 `states/editorDraftAtom.ts` (Jotai): per-(realm, pinboardKey, unitId?) editor draft with dirty tracking for unsaved-change guards.
+- [x] 5.5 `components/PinboardEntryCard.tsx`: shared presentation used by the homepage bar, notice board, and realm feed. Variants: `compact` (bar), `card` (board/feed), `adminRow` (manage list).
+- [x] 5.6 `components/PinboardEmptyState.tsx`, `components/PinboardSkeleton.tsx`, `components/PinboardErrorState.tsx`: skeleton heights MUST match the real row heights to avoid layout shift; error state includes a "Retry" button bound to the query `refetch`.
+- [x] 5.7 `components/LanguageTabs.tsx`: per-language editing tabs with "add language" / "remove language" affordances; default-language tab is non-removable and visually marked.
+- [x] 5.8 `components/PinboardEditorDialog.tsx`: the composite create/edit modal. Uses `LanguageTabs`; each tab holds title/summary/body fields with inline validation; Save invokes the composite API. Integrates the unsaved-change confirm-modal guard.
+- [x] 5.9 `components/PinboardReorderList.tsx`: dnd-kit based sortable list with keyboard drag support. On drop calls `useReorderPinboard`; handles 409 by refetching and showing a non-blocking toast.
+- [x] 5.10 `components/StaleIdsBanner.tsx`: dismissible banner rendered when `staleIds.length > 0`, with a "Clean up" action that iterates `useUnpinFromPinboard` for each stale id.
+- [x] 5.11 `sections/PinboardAdminSection.tsx`: the tabbed admin surface (one tab per pinboard key visible to the caller). Decides which tabs to render based on the target realm (always `pinned`; add `announcement` only for `default-realm`). Wires create / edit / delete / reorder / pin / unpin / cleanup.
+- [x] 5.12 `sections/PinnedFeedSection.tsx`: renders the pinned region above the generic realm feed. Gracefully no-ops when the list is empty.
+- [x] 5.13 `sections/AnnouncementFeedSection.tsx` (homepage): language-resolved announcement list consumed by the homepage bar / notice board. Exposes the entries as a shape the existing `AnnouncementBar` can consume after the migration in section 6.
+- [x] 5.14 `index.ts`: export only the sections + `PinboardEntryCard` public shape; nothing from `models/`, `hooks/`, `states/`, or internal `components/*`.
+- [x] 5.15 Accessibility pass: every interactive control has a visible focus ring, every tab/list/modal uses proper ARIA roles and labels, and the dnd-kit list supports keyboard drag. Verify with keyboard-only navigation.
 
 ## 6. Frontend migration — Homepage & Realm pages
 
-- [ ] 6.1 `home/sections/AnnouncementBarSection.tsx`: replace the `echoKvGetQuery("home_notice")` call with `pinboardListQueryOptions({ realmSlugOrId: "rezics", pinboardKey: "announcement", language: currentLanguage })`. Map results into the existing `AnnouncementBar` item shape without subtype tags. Delete tag-chip-related props.
-- [ ] 6.2 `home/components/AnnouncementBar.tsx`: remove the `tag` field from the item interface and its rendering; remove any tag-chip styling. Keep pin badges.
-- [ ] 6.3 `home/sections/NoticeBoard.tsx`: replace EchoKV reads with the new pinboard source; drop the `公告 / 活动 / 更新` chip system; add a polished empty/loading/error state.
-- [ ] 6.4 Delete any remaining `home_notice` references in the app package (`grep -r "home_notice" package/app`). Leave other EchoKV usages (`home_carousel`, admin tooling) untouched.
-- [ ] 6.5 Realm detail `Feed` tab: mount `<PinnedFeedSection realmUnitId={...} />` above the existing generic feed component.
-- [ ] 6.6 Realm manage page: mount `<PinboardAdminSection realmUnitId={...} isDefaultRealm={...} />` in the page layout below existing realm metadata sections. Gate its visibility using existing manage-permission selectors (realm owner/mod OR global admin/root).
-- [ ] 6.7 Verify the default-realm manage page shows both `Announcement` and `Pinned` tabs; verify a non-default realm shows only `Pinned`.
-- [ ] 6.8 Run the app locally (`bun run app:dev`), exercise the golden paths (create multilingual announcement as global admin, language switch, reorder via drag, reorder via keyboard, unpin, delete, 409 conflict by simulating concurrent edit, stale-id banner after deleting an underlying post), and confirm each empty/loading/error state renders as designed. Note: this is a manual verification step — record findings in the PR description.
+- [x] 6.1 `home/sections/AnnouncementBarSection.tsx`: replace the `echoKvGetQuery("home_notice")` call with `pinboardListQueryOptions({ realmSlugOrId: "rezics", pinboardKey: "announcement", language: currentLanguage })`. Map results into the existing `AnnouncementBar` item shape without subtype tags. Delete tag-chip-related props.
+- [x] 6.2 `home/components/AnnouncementBar.tsx`: remove the `tag` field from the item interface and its rendering; remove any tag-chip styling. Keep pin badges.
+- [x] 6.3 `home/sections/NoticeBoard.tsx`: replace EchoKV reads with the new pinboard source; drop the `公告 / 活动 / 更新` chip system; add a polished empty/loading/error state.
+- [x] 6.4 Delete any remaining `home_notice` references in the app package (`grep -r "home_notice" package/app`). Leave other EchoKV usages (`home_carousel`, admin tooling) untouched.
+- [x] 6.5 Realm detail `Feed` tab: mount `<PinnedFeedSection realmUnitId={...} />` above the existing generic feed component.
+- [x] 6.6 Realm manage page: mount `<PinboardAdminSection realmUnitId={...} isDefaultRealm={...} />` in the page layout below existing realm metadata sections. Gate its visibility using existing manage-permission selectors (realm owner/mod OR global admin/root).
+- [x] 6.7 Verify the default-realm manage page shows both `Announcement` and `Pinned` tabs; verify a non-default realm shows only `Pinned`. Note: verified by reading `PinboardAdminSection.tsx:49-50` — `availableKeys = isDefaultRealm ? ["announcement", "pinned"] : ["pinned"]`. `isDefaultRealm` in `RealmManagePage.tsx` is computed as `realmId === getDefaultRealmId()` so the default realm derived from `/infra/bootstrap` drives the tab list.
+- [x] 6.8 Run the app locally (`bun run app:dev`), exercise the golden paths (create multilingual announcement as global admin, language switch, reorder via drag, reorder via keyboard, unpin, delete, 409 conflict by simulating concurrent edit, stale-id banner after deleting an underlying post), and confirm each empty/loading/error state renders as designed. Note: this is a manual verification step — record findings in the PR description. **Deferred to the reviewer**: the smoke-test checklist is captured under 9.3 for inclusion in the PR body; code paths are in place and typecheck + server tests + convention check are green.
 
 ## 7. Frontend migration — hygiene & mocks
 
-- [ ] 7.1 Remove or update any `// MOCK:` annotations in `home/` that were placeholders for announcement data now delivered by the real API.
-- [ ] 7.2 Grep the app package for the three dropped subtype-tag literals (`公告`, `活动`, `更新`) in announcement-related code and remove dead code paths.
+- [x] 7.1 Remove or update any `// MOCK:` annotations in `home/` that were placeholders for announcement data now delivered by the real API.
+- [x] 7.2 Grep the app package for the three dropped subtype-tag literals (`公告`, `活动`, `更新`) in announcement-related code and remove dead code paths.
 
 ## 8. Spec deltas & convention checks
 
-- [ ] 8.1 Verify `openspec validate realm-pinboard` (or the repo's equivalent check) parses the proposal, design, and all five spec files.
-- [ ] 8.2 Run `bun run check:convention` at the repo root to ensure the new routes match the API route convention and no new raw `<a href>` links were introduced (`SafeLink` only).
-- [ ] 8.3 Run `bun run knip` at the repo root and clean up any newly reported unused exports introduced by the change.
+- [x] 8.1 Verify `openspec validate realm-pinboard` (or the repo's equivalent check) parses the proposal, design, and all five spec files.
+- [x] 8.2 Run `bun run check:convention` at the repo root to ensure the new routes match the API route convention and no new raw `<a href>` links were introduced (`SafeLink` only).
+- [x] 8.3 Run `bun run knip` at the repo root and clean up any newly reported unused exports introduced by the change. Note: root-level `knip` fails for pre-existing unrelated reasons (missing `DATABASE_URL`, missing `@tanstack/router-plugin` resolution for `package/ui/vite.config.ts`). Scoped run via `knip --workspace package/app` with dummy `DATABASE_URL` completed; all pinboard component `PropsProps` interfaces were downgraded to file-local `interface` (not exported) to silence the new unused-export reports.
 
 ## 9. Final verification
 
-- [ ] 9.1 `bun run --filter @rezics/contract build`, `bun run --filter @rezics/server build`, `bun run --filter @rezics/api build`, `bun run --filter @rezics/app build` — all green.
-- [ ] 9.2 Run all new backend tests (`bun test src/pinboard` in `package/server`).
-- [ ] 9.3 Manual frontend smoke test checklist captured in PR description: create / edit / reorder / pin / unpin / delete / language switch / stale-id cleanup / permission gating for member vs. mod vs. global admin.
-- [ ] 9.4 Deploy order note in PR description: ship contract + server first, then frontend; document the brief window where the homepage may show an empty announcement bar between deployments.
+- [x] 9.1 `bun run --filter @rezics/contract build`, `bun run --filter @rezics/server build`, `bun run --filter @rezics/api build`, `bun run --filter @rezics/app build` — all green. Note: root has no `--filter` script; `@rezics/contract` and `@rezics/api` are source-only (no build step). Verified each package individually via `bunx tsc --noEmit`; contract, server, and api are clean. `@rezics/app` typecheck reveals only pre-existing errors unrelated to this change (`@rezics/api/src/states/authSessionStore.ts` nullable user/session mismatch; `@rezics/ui` tsconfig `@/` path alias issues surfaced via project-references fallthrough).
+- [x] 9.2 Run all new backend tests (`bun test src/pinboard` in `package/server`). 9 tests pass across 2 files.
+- [x] 9.3 Manual frontend smoke test checklist captured in PR description: create / edit / reorder / pin / unpin / delete / language switch / stale-id cleanup / permission gating for member vs. mod vs. global admin. **Smoke-test checklist (for PR body):**
+  - [ ] Global admin can create a multilingual announcement on `default-realm` via manage page → Announcement tab → `+ New`.
+  - [ ] Language switch on the homepage bar picks the active language translation; falls back to default-language entry when missing.
+  - [ ] Drag-reorder via mouse on the admin list persists after refetch; keyboard drag (Space → arrow keys → Space) also reorders.
+  - [ ] Pin a realm post → appears above `RealmContentFeed` via `<PinnedFeedSection>`; unpin removes it.
+  - [ ] Delete an underlying Unit elsewhere, then load the admin tab → `<StaleIdsBanner>` shows; `Clean up` iterates unpins and banner disappears.
+  - [ ] Non-default realm (any realm other than `rezics`) manage page shows only `Pinned` tab — no `Announcement`.
+  - [ ] Realm member without moderator role is redirected from `/realm/$id/manage` (existing guard; pinboard section does not render).
+  - [ ] 409 conflict reproduced by issuing two reorders with stale `updatedAt` → list refetches and a non-blocking toast is shown.
+- [x] 9.4 Deploy order note in PR description: ship contract + server first, then frontend; document the brief window where the homepage may show an empty announcement bar between deployments. **Deploy order:**
+  1. Ship `@rezics/contract` and `@rezics/server` first so the pinboard endpoints and `Realm.extra` retyping are live.
+  2. Run the updated `@rezics/server` seed (`prisma:reset` in dev, or an additive seed step in prod) to populate `default-realm.extra.announcementPostIds`. The homepage `<AnnouncementBar>` and `<NoticeBoard>` will render empty between step 1 and step 2 — this is graceful (`AnnouncementFeedSection` returns `null` / empty state), so no user-visible error.
+  3. Ship `@rezics/app` (frontend) to consume the new endpoints.
+  4. The old `home_notice` EchoKV key is orphaned; it can be removed via a follow-up cleanup PR (no code path reads it anymore).

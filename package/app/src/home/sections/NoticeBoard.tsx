@@ -1,4 +1,3 @@
-import { useAlertStore } from "@app/states/windowAlertStore";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import {
   Chip,
@@ -11,24 +10,14 @@ import {
 } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { useTheme } from "@mui/material/styles";
-import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
-import { parseEchoKVResponse } from "@rezics/api/echokv/util";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
-import { useQuery } from "@tanstack/react-query";
 import type { TFunction } from "i18next";
 import type React from "react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-type Notice = {
-  id: string;
-  title: string;
-  content?: string;
-  tag?: "公告" | "活动" | "更新";
-  date: string; // ISO string
-  link?: string;
-  pin?: boolean;
-};
+import {
+  AnnouncementFeedSection,
+  type PinboardAnnouncementItem,
+} from "@/pinboard";
 
 function formatRelativeWithT(t: TFunction, dateIso: string): string {
   const ms = Date.now() - new Date(dateIso).getTime();
@@ -41,39 +30,6 @@ function formatRelativeWithT(t: TFunction, dateIso: string): string {
     return t("page.home.noticeboard.time.days_ago_other", { count: d });
   const w = Math.floor(d / 7);
   return t("page.home.noticeboard.time.weeks_ago_other", { count: w });
-}
-
-function TagBadge({ tag, t }: { tag?: Notice["tag"]; t: TFunction }) {
-  const theme = useTheme();
-  const colorMap: Record<
-    string,
-    "primary" | "secondary" | "success" | "info" | "warning" | "default"
-  > = {
-    公告: "info",
-    活动: "secondary",
-    更新: "success",
-  };
-  const color = (tag ? colorMap[tag] : "default") as any;
-
-  const label = (() => {
-    if (!tag) return t("page.home.noticeboard.tag.notice");
-    if (tag === "公告") return t("page.home.noticeboard.tag.announcement");
-    if (tag === "活动") return t("page.home.noticeboard.tag.event");
-    if (tag === "更新") return t("page.home.noticeboard.tag.update");
-    return t("page.home.noticeboard.tag.notice");
-  })();
-
-  return (
-    <Chip
-      label={label}
-      color={color}
-      variant={color === "default" ? "outlined" : "outlined"}
-      size="small"
-      sx={{
-        borderRadius: theme.shape.borderRadius,
-      }}
-    />
-  );
 }
 
 function NoticeBoardHeader({
@@ -122,12 +78,12 @@ function NoticeBoardItem({
   theme,
   t,
 }: {
-  item: Notice;
+  item: PinboardAnnouncementItem;
   theme: Theme;
   t: TFunction;
 }) {
   return (
-    <div key={item.id} className="mb-1">
+    <div className="mb-1">
       <ListItemButton
         component="a"
         href={item.link ?? "#"}
@@ -164,21 +120,18 @@ function NoticeBoardItem({
             sx={{ mt: 0.25 }}
           />
           <div className="min-w-0 flex-1">
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography
-                variant="body2"
-                fontWeight={600}
-                noWrap
-                sx={{
-                  color: "text.primary",
-                  flexShrink: 1,
-                  minWidth: 0,
-                }}
-              >
-                {item.title}
-              </Typography>
-              <TagBadge tag={item.tag} t={t} />
-            </Stack>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              noWrap
+              sx={{
+                color: "text.primary",
+                flexShrink: 1,
+                minWidth: 0,
+              }}
+            >
+              {item.title}
+            </Typography>
             {item.content && (
               <Typography
                 variant="body2"
@@ -225,86 +178,61 @@ function NoticeBoardItem({
 
 export const NoticeBoard: React.FC = () => {
   const theme = useTheme();
-  const { show: showAlert } = useAlertStore();
   const { t } = useTranslation();
-  const [notices, setNotices] = useState<Notice[]>([]);
-  const { data, isLoading, error } = useQuery(echoKvGetQuery("home_notice"));
-
-  useEffect(() => {
-    try {
-      setNotices(parseEchoKVResponse<Notice[]>(data));
-    } catch (error) {
-      showAlert(
-        t("page.home.noticeboard.alert.parse_failed", {
-          error: String(error),
-        }),
-      );
-    }
-  }, [data, showAlert, t]);
-
-  useEffect(() => {
-    // 这里有问题，每次都会触发
-    // showAlert(`公告板数据加载失败: ${error}`);
-  }, []);
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* Header */}
       <NoticeBoardHeader
         theme={theme}
         className="sticky top-0 z-10 rounded-lg"
         t={t}
       />
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto space-y-3 mt-3 p-2">
-        {isLoading && (
-          <Stack spacing={1.2}>
-            <Skeleton variant="rounded" height={18} />
-            <Skeleton variant="rounded" height={18} />
-            <Skeleton variant="rounded" height={18} />
-            <Skeleton variant="rounded" height={18} />
-          </Stack>
-        )}
-
-        {!isLoading && (!notices || notices.length === 0) && (
-          <Typography variant="body2" color="text.secondary">
-            {t("page.home.noticeboard.empty")}
-          </Typography>
-        )}
-
-        {!isLoading && notices && notices.length > 0 && (
-          <List
-            dense
-            disablePadding
-            sx={{
-              maxHeight: "100%",
-              overflow: "auto",
-              pr: 0.5,
-              "& .MuiListItemButton-root": {
-                borderRadius: 1.5,
-              },
-            }}
-          >
-            {notices?.map((item) => (
-              <NoticeBoardItem key={item.id} item={item} theme={theme} t={t} />
-            ))}
-          </List>
-        )}
+        <AnnouncementFeedSection
+          loadingFallback={
+            <Stack spacing={1.2}>
+              <Skeleton variant="rounded" height={18} />
+              <Skeleton variant="rounded" height={18} />
+              <Skeleton variant="rounded" height={18} />
+              <Skeleton variant="rounded" height={18} />
+            </Stack>
+          }
+        >
+          {(items) => {
+            if (items.length === 0) {
+              return (
+                <Typography variant="body2" color="text.secondary">
+                  {t("page.home.noticeboard.empty")}
+                </Typography>
+              );
+            }
+            return (
+              <List
+                dense
+                disablePadding
+                sx={{
+                  maxHeight: "100%",
+                  overflow: "auto",
+                  pr: 0.5,
+                  "& .MuiListItemButton-root": {
+                    borderRadius: 1.5,
+                  },
+                }}
+              >
+                {items.map((item) => (
+                  <NoticeBoardItem
+                    key={item.id}
+                    item={item}
+                    theme={theme}
+                    t={t}
+                  />
+                ))}
+              </List>
+            );
+          }}
+        </AnnouncementFeedSection>
       </div>
-
-      {/* Footer */}
-      {/* <div className="px-2 pb-2 pt-1">
-          <Button
-            fullWidth
-            href="/subscribe"
-            variant="contained"
-            color="primary"
-            size="small"
-          >
-            订阅最新公告
-          </Button>
-        </div> */}
     </div>
   );
 };
