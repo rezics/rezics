@@ -85,11 +85,11 @@
         "zustand": "5.0.7",
       },
       "devDependencies": {
-        "@types/react": "^19.2.14",
-        "@types/react-dom": "^19.2.3",
         "bun-types": "latest",
       },
       "peerDependencies": {
+        "@types/react": "^19.2.14",
+        "@types/react-dom": "^19.2.3",
         "react": "^19",
       },
     },
