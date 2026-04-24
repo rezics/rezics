@@ -50,6 +50,30 @@ export const DEFAULT_REALM = {
 export type DefaultRealmDefinition = typeof DEFAULT_REALM;
 
 // ============================================================
+// REALM EXTRA (typed JSON payload)
+// ============================================================
+
+/**
+ * Typed shape of `Realm.extra`. Every recognized key is optional and
+ * additional keys are tolerated (permissive) to avoid breaking older
+ * rows; only the listed fields are consumed by the app.
+ *
+ * - `announcementPostIds` — ordered list of unit ids on the announcement pinboard.
+ * - `pinnedPostIds` — ordered list of unit ids on the realm feed pinboard.
+ * - `filterTagIds` — reserved for a future change; read-only shape for now.
+ */
+export const realmExtraSchema = t.Object(
+  {
+    announcementPostIds: t.Optional(t.Array(t.String())),
+    pinnedPostIds: t.Optional(t.Array(t.String())),
+    filterTagIds: t.Optional(t.Array(t.String())),
+  },
+  { additionalProperties: true },
+);
+
+export type RealmExtra = (typeof realmExtraSchema)["static"];
+
+// ============================================================
 // REALM DTO
 // ============================================================
 
@@ -61,7 +85,7 @@ export const realmDTOSchema = t.Object({
   isPublic: t.Boolean(),
   isOfficial: t.Boolean(),
   memberCount: t.Number(),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  extra: t.Optional(t.Nullable(realmExtraSchema)),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   reactionSummaries: t.Optional(t.Any()),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -176,7 +200,7 @@ export type RealmResponse = (typeof realmResponseSchema)["static"];
 
 export const createRealmSchema = t.Object({
   isPublic: t.Optional(t.Boolean()),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  extra: t.Optional(t.Nullable(realmExtraSchema)),
   translations: t.Optional(
     t.Array(
       t.Object({
@@ -195,7 +219,7 @@ export type CreateRealmInput = (typeof createRealmSchema)["static"];
 export const updateRealmSchema = t.Object({
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  extra: t.Optional(t.Nullable(realmExtraSchema)),
 });
 
 export type UpdateRealmInput = (typeof updateRealmSchema)["static"];

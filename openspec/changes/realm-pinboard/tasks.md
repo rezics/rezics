@@ -1,37 +1,37 @@
 ## 1. Contract (`package/contract`)
 
-- [ ] 1.1 Create `src/pinboard.ts`: export `PINBOARD_KEYS = ["announcement", "pinned"] as const`, `pinboardKeySchema` Typebox union, DTO schemas for `PinboardEntryDTO` (list-level) and `PinboardEntryDetailDTO` (detail-level), request schemas (`createPinboardEntryBody`, `updatePinboardEntryBody`, `pinBody`, `reorderBody`, common `pinboardPathParams`), and response schemas for all endpoints.
-- [ ] 1.2 In `src/realm.ts`: add `realmExtraSchema` with `announcementPostIds?`, `pinnedPostIds?`, `filterTagIds?` (all `t.Optional(t.Array(t.String()))`), permissive to unknown keys; wire it into `realmDTOSchema.extra` replacing the previous `t.Any()` typing.
-- [ ] 1.3 Export `pinboard.ts` from `src/index.ts` alongside realm exports; re-export `PINBOARD_KEYS`, `PinboardKey`, and DTO types.
-- [ ] 1.4 Run `bun run --filter @rezics/contract build` and fix any downstream type errors exposed by the `Realm.extra` retyping (casts become unnecessary — remove them).
+- [x] 1.1 Create `src/pinboard.ts`: export `PINBOARD_KEYS = ["announcement", "pinned"] as const`, `pinboardKeySchema` Typebox union, DTO schemas for `PinboardEntryDTO` (list-level) and `PinboardEntryDetailDTO` (detail-level), request schemas (`createPinboardEntryBody`, `updatePinboardEntryBody`, `pinBody`, `reorderBody`, common `pinboardPathParams`), and response schemas for all endpoints.
+- [x] 1.2 In `src/realm.ts`: add `realmExtraSchema` with `announcementPostIds?`, `pinnedPostIds?`, `filterTagIds?` (all `t.Optional(t.Array(t.String()))`), permissive to unknown keys; wire it into `realmDTOSchema.extra` replacing the previous `t.Any()` typing.
+- [x] 1.3 Export `pinboard.ts` from `src/index.ts` alongside realm exports; re-export `PINBOARD_KEYS`, `PinboardKey`, and DTO types.
+- [x] 1.4 Run `bun run --filter @rezics/contract build` and fix any downstream type errors exposed by the `Realm.extra` retyping (casts become unnecessary — remove them).
 
 ## 2. Server — Pinboard service + API (`package/server/src/pinboard/`)
 
-- [ ] 2.1 Scaffold `pinboard/` with `pinboard.api.ts`, `pinboard.service.ts`, `pinboard.mapper.ts`, `pinboard.types.ts`, and `index.ts`. Mount `pinboardApi` in `src/index.ts`.
-- [ ] 2.2 Implement `readList({ realmUnitId, pinboardKey, language, adminView })`: load `Realm.extra`, fetch referenced units with translations in one query, filter soft-deleted/missing, resolve per-entry language using the existing fallback rules (mirroring `TranslationService.resolveTranslation`), return live entries + `staleIds` only for `adminView`.
-- [ ] 2.3 Implement `readDetail({ realmUnitId, pinboardKey, unitId, language })`: verify id is in the pinboard, resolve sibling via TranslationGroup supportedLanguages + fallback, return body + supportedLanguages.
-- [ ] 2.4 Implement `createPinboardEntry` as one Prisma `$transaction`: create root Unit+Post+UnitTranslation, create TranslationGroup + siblings only when multilingual, `SELECT ... FOR UPDATE` on `Realm`, append to `extra.<pinboardKey>PostIds`. Leave a `// TODO(pinboard-occ):` comment on the locking site.
-- [ ] 2.5 Implement `updatePinboardEntry` as one Prisma `$transaction`: upsert UnitTranslation rows, update sibling Post.body where supplied, add/remove sibling languages, enforce default-language protection, keep `TranslationGroup.supportedLanguages` in sync (reusing `translationGroupService.onUnitDeleted(tx, ...)` for sibling soft-deletes).
-- [ ] 2.6 Implement `deletePinboardEntry` as one Prisma `$transaction`: soft-delete root + siblings, remove id from `extra.<pinboardKey>PostIds`, delete empty TranslationGroup.
-- [ ] 2.7 Implement `pinToPinboard`, `unpinFromPinboard`, `reorderPinboard` with row-level locking on `Realm`; reorder rejects non-permutation with 409.
-- [ ] 2.8 Implement permission guard (`requirePinboardWriter`) that accepts realm owner/moderator or global admin/root; apply to every write route. Reuse existing `authMacro`, role helpers, and `RealmMember` lookup.
-- [ ] 2.9 Define Elysia routes in `pinboard.api.ts`: `GET /realms/:realmUnitId/pinboards/:pinboardKey`, `GET /realms/:realmUnitId/pinboards/:pinboardKey/:unitId`, `POST /realms/:realmUnitId/pinboards/:pinboardKey`, `PATCH /realms/:realmUnitId/pinboards/:pinboardKey/:unitId`, `DELETE /realms/:realmUnitId/pinboards/:pinboardKey/:unitId`, `POST /realms/:realmUnitId/pinboards/:pinboardKey/:unitId/pin`, `POST /realms/:realmUnitId/pinboards/:pinboardKey/:unitId/unpin`, `POST /realms/:realmUnitId/pinboards/:pinboardKey/reorder`.
-- [ ] 2.10 Add Meilisearch sync hooks: after composite writes, call the existing `patchPostsTargetToMeili(unitId)` / `syncPostToMeili(unitId)` helpers fire-and-forget for the affected unit ids; do not block the tx.
-- [ ] 2.11 Add unit tests in `src/pinboard/__tests__/`: stale-id filtering, language fallback, unique append semantics, reorder-permutation rejection, default-language protection, soft-delete removing id from extra, permission denial paths.
-- [ ] 2.12 Run `bun run --filter @rezics/server build` and the pinboard test file (`bun test src/pinboard`). Verify `bun run check:convention` still passes for added routes.
+- [x] 2.1 Scaffold `pinboard/` with `pinboard.api.ts`, `pinboard.service.ts`, `pinboard.mapper.ts`, `pinboard.types.ts`, and `index.ts`. Mount `pinboardApi` in `src/index.ts`.
+- [x] 2.2 Implement `readList({ realmUnitId, pinboardKey, language, adminView })`: load `Realm.extra`, fetch referenced units with translations in one query, filter soft-deleted/missing, resolve per-entry language using the existing fallback rules (mirroring `TranslationService.resolveTranslation`), return live entries + `staleIds` only for `adminView`.
+- [x] 2.3 Implement `readDetail({ realmUnitId, pinboardKey, unitId, language })`: verify id is in the pinboard, resolve sibling via TranslationGroup supportedLanguages + fallback, return body + supportedLanguages.
+- [x] 2.4 Implement `createPinboardEntry` as one Prisma `$transaction`: create root Unit+Post+UnitTranslation, create TranslationGroup + siblings only when multilingual, `SELECT ... FOR UPDATE` on `Realm`, append to `extra.<pinboardKey>PostIds`. Leave a `// TODO(pinboard-occ):` comment on the locking site.
+- [x] 2.5 Implement `updatePinboardEntry` as one Prisma `$transaction`: upsert UnitTranslation rows, update sibling Post.body where supplied, add/remove sibling languages, enforce default-language protection, keep `TranslationGroup.supportedLanguages` in sync (reusing `translationGroupService.onUnitDeleted(tx, ...)` for sibling soft-deletes).
+- [x] 2.6 Implement `deletePinboardEntry` as one Prisma `$transaction`: soft-delete root + siblings, remove id from `extra.<pinboardKey>PostIds`, delete empty TranslationGroup.
+- [x] 2.7 Implement `pinToPinboard`, `unpinFromPinboard`, `reorderPinboard` with row-level locking on `Realm`; reorder rejects non-permutation with 409.
+- [x] 2.8 Implement permission guard (`requirePinboardWriter`) that accepts realm owner/moderator or global admin/root; apply to every write route. Reuse existing `authMacro`, role helpers, and `RealmMember` lookup.
+- [x] 2.9 Define Elysia routes in `pinboard.api.ts`: `GET /realms/:realmUnitId/pinboards/:pinboardKey`, `GET /realms/:realmUnitId/pinboards/:pinboardKey/:unitId`, `POST /realms/:realmUnitId/pinboards/:pinboardKey`, `PATCH /realms/:realmUnitId/pinboards/:pinboardKey/:unitId`, `DELETE /realms/:realmUnitId/pinboards/:pinboardKey/:unitId`, `POST /realms/:realmUnitId/pinboards/:pinboardKey/:unitId/pin`, `POST /realms/:realmUnitId/pinboards/:pinboardKey/:unitId/unpin`, `POST /realms/:realmUnitId/pinboards/:pinboardKey/reorder`.
+- [x] 2.10 Add Meilisearch sync hooks: after composite writes, call the existing `patchPostsTargetToMeili(unitId)` / `syncPostToMeili(unitId)` helpers fire-and-forget for the affected unit ids; do not block the tx.
+- [x] 2.11 Add unit tests in `src/pinboard/__tests__/`: stale-id filtering, language fallback, unique append semantics, reorder-permutation rejection, default-language protection, soft-delete removing id from extra, permission denial paths.
+- [x] 2.12 Run `bun run --filter @rezics/server build` and the pinboard test file (`bun test src/pinboard`). Verify `bun run check:convention` still passes for added routes.
 
 ## 3. Server — Seed (`package/server/prisma/seed`)
 
-- [ ] 3.1 Remove the EchoKV `home_notice` seed fixture (keep other EchoKV fixtures).
-- [ ] 3.2 Add a seed step that, after `default-realm` is bootstrapped, creates 2–3 sample multilingual announcements via the pinboard service (using the root user as author) and appends them to `default-realm.extra.announcementPostIds`. Include at least one entry with `zh-Hans + en + ja` and one single-language entry to exercise both paths.
-- [ ] 3.3 Run `bun run --filter @rezics/server prisma:reset` (or equivalent dev-only reset) locally and confirm the homepage renders non-empty announcements after the reseed.
+- [x] 3.1 Remove the EchoKV `home_notice` seed fixture (keep other EchoKV fixtures).
+- [x] 3.2 Add a seed step that, after `default-realm` is bootstrapped, creates 2–3 sample multilingual announcements via the pinboard service (using the root user as author) and appends them to `default-realm.extra.announcementPostIds`. Include at least one entry with `zh-Hans + en + ja` and one single-language entry to exercise both paths.
+- [ ] 3.3 Run `bun run --filter @rezics/server prisma:reset` (or equivalent dev-only reset) locally and confirm the homepage renders non-empty announcements after the reseed. **Deferred**: cannot be meaningfully verified until Section 6 (homepage migration) lands — homepage currently reads `home_notice` EchoKV, which is no longer seeded. Seed code path compiles and typechecks; live reset to be run by the engineer doing Section 6.
 
 ## 4. Frontend API (`package/api/src/pinboard/`)
 
-- [ ] 4.1 Scaffold `pinboard/` with `query-options.ts` and `hooks.ts`. Export via the package entry point.
-- [ ] 4.2 Add `pinboardListQueryOptions({ realmSlugOrId, pinboardKey, language, adminView })` and `pinboardDetailQueryOptions({ ..., unitId })` using the shared fetcher and TanStack Query key conventions in this repo.
-- [ ] 4.3 Add mutation hooks: `useCreatePinboardEntry`, `useUpdatePinboardEntry`, `useDeletePinboardEntry`, `usePinToPinboard`, `useUnpinFromPinboard`, `useReorderPinboard`. Each SHALL invalidate the relevant list/detail query on success and support optimistic updates for reorder/pin/unpin with rollback on error.
-- [ ] 4.4 Run `bun run --filter @rezics/api build`.
+- [x] 4.1 Scaffold `pinboard/` with `query-options.ts` and `hooks.ts`. Export via the package entry point. Note: followed the existing `<module>.api.ts` / `<module>.keys.ts` / `<module>.queries.ts` / `<module>.mutations.ts` / `<module>.ts` convention used by every other module in `@rezics/api` rather than inventing a new one.
+- [x] 4.2 Add `pinboardListQueryOptions({ realmSlugOrId, pinboardKey, language, adminView })` and `pinboardDetailQueryOptions({ ..., unitId })` using the shared fetcher and TanStack Query key conventions in this repo.
+- [x] 4.3 Add mutation hooks: `useCreatePinboardEntry`, `useUpdatePinboardEntry`, `useDeletePinboardEntry`, `usePinToPinboard`, `useUnpinFromPinboard`, `useReorderPinboard`. Each SHALL invalidate the relevant list/detail query on success and support optimistic updates for reorder/pin/unpin with rollback on error.
+- [x] 4.4 Run `bun run --filter @rezics/api build`. Note: `@rezics/api` is source-only (no build script, same as `@rezics/contract`); verified via `bunx tsc --noEmit` — no pinboard typecheck errors.
 
 ## 5. Frontend feature — Pinboard (`package/app/src/pinboard/`)
 

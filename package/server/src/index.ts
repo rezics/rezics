@@ -18,6 +18,7 @@ import { linkApi } from "./link";
 import { meiliApi } from "./meili";
 import { dmServerApi } from "./notify/dm.api";
 import { userBatchApi } from "./notify/user-batch.api";
+import { pinboardApi } from "./pinboard";
 import { postApi } from "./post";
 import { reactionWriteApi } from "./reaction";
 import { realmApi } from "./realm";
@@ -167,6 +168,7 @@ app
   .use(linkApi)
   .use(zoneApi)
   .use(realmApi)
+  .use(pinboardApi)
   .use(attributionApi)
   .use(userApi)
   .use(userBriefApi)

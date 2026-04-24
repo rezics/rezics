@@ -1,20 +1,9 @@
 import { prisma } from "#/prisma/client";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { products } from "./data/home/homeCarousel";
-import { generateNoticeboardData } from "./data/home/noticeboard";
 import { generateQuickTags } from "./data/home/quick-tags";
 
 export const seedEchoKV = async (prisma: PrismaClient) => {
-  await prisma.echoKV.upsert({
-    where: { key: "home_notice" },
-    create: {
-      key: "home_notice",
-      value: JSON.stringify(generateNoticeboardData(100)),
-    },
-    update: {
-      value: JSON.stringify(generateNoticeboardData(100)),
-    },
-  });
   await prisma.echoKV.upsert({
     where: { key: "book_search_tag_group_quick" },
     create: {

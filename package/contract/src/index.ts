@@ -17,6 +17,7 @@ export * from "./meili";
 export * from "./notify";
 export * from "./pagination";
 export * from "./permission";
+export * from "./pinboard";
 export * from "./post";
 export * from "./reaction/index";
 export * from "./realm";

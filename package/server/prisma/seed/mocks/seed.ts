@@ -26,6 +26,7 @@ import { seedEngagement } from "#/prisma/seed/mocks/engagement";
 import { seedInfra } from "#/prisma/seed/infra";
 import { seedGames } from "#/prisma/seed/mocks/games";
 import { seedMedia } from "#/prisma/seed/mocks/media";
+import { seedPinboardSamples } from "#/prisma/seed/mocks/pinboard";
 import {
   seedPostsForWorks,
   seedWikiTranslationGroups,
@@ -78,7 +79,12 @@ async function main() {
   if (!admin) {
     throw new Error("[Seed] admin user not found — seed users first");
   }
-  await seedInfra(prisma, admin.unitId);
+  const { defaultRealmId } = await seedInfra(prisma, admin.unitId);
+  done();
+
+  // ── STEP 3b: Pinboard announcement samples ────────
+  done = stepTimer("Step 3b: Pinboard samples");
+  await seedPinboardSamples(prisma, defaultRealmId, admin.unitId);
   done();
 
   // ── STEP 4: Random tags ───────────────────────────
