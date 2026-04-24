@@ -8,6 +8,9 @@ CREATE TYPE "UnitStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED', 'DELETED');
 CREATE TYPE "UnitVisibility" AS ENUM ('PUBLIC', 'UNLISTED', 'PRIVATE');
 
 -- CreateEnum
+CREATE TYPE "ContentRating" AS ENUM ('GENERAL', 'R_15', 'R_18', 'R_18G');
+
+-- CreateEnum
 CREATE TYPE "PostKind" AS ENUM ('REVIEW', 'EXCERPT', 'REMARK', 'POST', 'CHAPTER');
 
 -- CreateEnum
@@ -24,7 +27,7 @@ CREATE TABLE "Unit" (
     "isLanguageNeutral" BOOLEAN NOT NULL DEFAULT false,
     "status" "UnitStatus" NOT NULL DEFAULT 'DRAFT',
     "visibility" "UnitVisibility" NOT NULL DEFAULT 'PUBLIC',
-    "nsfw" BOOLEAN NOT NULL DEFAULT false,
+    "rating" "ContentRating" NOT NULL DEFAULT 'GENERAL',
     "extra" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
