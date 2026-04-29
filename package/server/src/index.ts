@@ -18,10 +18,14 @@ import { linkApi } from "./link";
 import { meiliApi } from "./meili";
 import { dmServerApi } from "./notify/dm.api";
 import { userBatchApi } from "./notify/user-batch.api";
-import { pinboardApi } from "./pinboard";
 import { postApi } from "./post";
 import { reactionWriteApi } from "./reaction";
-import { realmApi, realmTagUnitApi, realmTagVoteApi } from "./realm";
+import {
+  realmApi,
+  realmExtraApi,
+  realmTagUnitApi,
+  realmTagVoteApi,
+} from "./realm";
 import { scoreApi } from "./score/score.api";
 import { sessionApi } from "./session";
 import { collectionApi, shelfApi } from "./shelf";
@@ -29,7 +33,12 @@ import { statsAdminApi } from "./stat";
 import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";
 import { tokenApi } from "./token";
 import { translationGroupApi } from "./translation-group";
-import { unitApi } from "./unit";
+import {
+  translationSourceApi,
+  unitApi,
+  workLinkApi,
+  workLinkClaimApi,
+} from "./unit";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
 import { AppError } from "./utils/errors";
@@ -168,14 +177,17 @@ app
   .use(linkApi)
   .use(zoneApi)
   .use(realmApi)
+  .use(realmExtraApi)
   .use(realmTagUnitApi)
   .use(realmTagVoteApi)
-  .use(pinboardApi)
   .use(attributionApi)
   .use(userApi)
   .use(userBriefApi)
   .use(meiliApi)
   .use(unitApi)
+  .use(workLinkApi)
+  .use(workLinkClaimApi)
+  .use(translationSourceApi)
   .use(infraApi)
   .use(tagApi)
   .use(unitTagApi)

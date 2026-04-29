@@ -1,3 +1,4 @@
+export { realmExtraApi } from "./realm-extra.api";
 export { realmTagUnitApi, realmTagVoteApi } from "./realm-tag-unit.api";
 export { mapRealmTagVoteToDTO } from "./realm-tag-vote.mapper";
 export { realmApi } from "./realm.api";

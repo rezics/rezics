@@ -23,39 +23,39 @@
 
 ## 4. Server: unit authority & work-link
 
-- [ ] 4.1 Create `package/server/src/unit/authority.ts` exporting `hasAuthorityOver(caller, unit): Promise<boolean>` per spec `unit-authority`. Use a single indexed JOIN against `RealmUnit` × realm role tables; cache admin role on the access token.
+- [x] 4.1 Create `package/server/src/unit/authority.ts` exporting `hasAuthorityOver(caller, unit): Promise<boolean>` per spec `unit-authority`. Use a single indexed JOIN against `RealmUnit` × realm role tables; cache admin role on the access token.
 - [ ] 4.2 Add unit tests at `package/server/src/unit/authority.test.ts` covering all four scenarios from the `unit-authority` spec (owner, admin, realm-mod, stranger) plus the null-owner case.
-- [ ] 4.3 Implement `PATCH /units/:releaseId/work-link` in `package/server/src/unit/unit.api.ts` (or a new `work-link.api.ts` mounted by it). Implement the D5 decision tree: release-side authority required; null clears link and cascades pending claims to `WITHDRAWN`; type/nesting validation; immediate set when caller has work-side authority OR `workUnit.type ∈ WIKI_TYPES`; otherwise create `WorkLinkClaim(PENDING)`.
-- [ ] 4.4 Move the work-link logic into a new `package/server/src/unit/work-link.service.ts` so the API handler stays thin.
+- [x] 4.3 Implement `PATCH /units/:releaseId/work-link` in `package/server/src/unit/unit.api.ts` (or a new `work-link.api.ts` mounted by it). Implement the D5 decision tree: release-side authority required; null clears link and cascades pending claims to `WITHDRAWN`; type/nesting validation; immediate set when caller has work-side authority OR `workUnit.type ∈ WIKI_TYPES`; otherwise create `WorkLinkClaim(PENDING)`.
+- [x] 4.4 Move the work-link logic into a new `package/server/src/unit/work-link.service.ts` so the API handler stays thin.
 - [ ] 4.5 Add server tests for `PATCH /units/:releaseId/work-link` covering: immediate link by owner, immediate link by realm mod, wiki short-circuit (BOOK/GAME/MEDIA), pending claim creation for POST, unlink cascading PENDING claims to WITHDRAWN, type-mismatch 400, nesting 400, missing release-side authority 403.
 
 ## 5. Server: WorkLinkClaim endpoints
 
-- [ ] 5.1 Add `package/server/src/unit/work-link-claim.service.ts` with `approve`, `reject`, `withdraw`, `listByWork`, and `dedupeOrCreate` operations per spec `work-link-claim`.
-- [ ] 5.2 Add `package/server/src/unit/work-link-claim.api.ts` mounting `GET /units/:workUnitId/work-link-claims`, `POST /work-link-claims/:claimId/approve`, `POST /work-link-claims/:claimId/reject`, `DELETE /work-link-claims/:claimId`. Wire authorization via `hasAuthorityOver`.
-- [ ] 5.3 Mount the new claim API in `package/server/src/index.ts`.
-- [ ] 5.4 Implement read-time filtering of claims for soft-deleted release Units (`status = DELETED`) per spec scenario "Soft-deleted unit hides claims at read time".
+- [x] 5.1 Add `package/server/src/unit/work-link-claim.service.ts` with `approve`, `reject`, `withdraw`, `listByWork`, and `dedupeOrCreate` operations per spec `work-link-claim`.
+- [x] 5.2 Add `package/server/src/unit/work-link-claim.api.ts` mounting `GET /units/:workUnitId/work-link-claims`, `POST /work-link-claims/:claimId/approve`, `POST /work-link-claims/:claimId/reject`, `DELETE /work-link-claims/:claimId`. Wire authorization via `hasAuthorityOver`.
+- [x] 5.3 Mount the new claim API in `package/server/src/index.ts`.
+- [x] 5.4 Implement read-time filtering of claims for soft-deleted release Units (`status = DELETED`) per spec scenario "Soft-deleted unit hides claims at read time".
 - [ ] 5.5 Add server tests covering: approve happy path (sets `Unit.workUnitId`, marks claim APPROVED, fires notify), approve non-pending → 409, reject sets `rejectReason`, reject leaves `workUnitId` unchanged, withdraw allowed by claimer, withdraw rejected for third party (403), inbox listing ordered by `createdAt desc`, inbox 403 for stranger, hard-delete cascade, soft-delete read-time filter.
 
 ## 6. Server: UnitTranslation source endpoint
 
-- [ ] 6.1 Add `PATCH /units/:workId/translations/:lang/source` in `package/server/src/unit/translation.api.ts` (or analogous existing module) per spec `unit-translation`. Validate workId is a work (no `workUnitId`), validate `sourceReleaseUnitId` references a release of that work, require `hasAuthorityOver(caller, workUnit)`. Upsert `UnitTranslation` row.
+- [x] 6.1 Add `PATCH /units/:workId/translations/:lang/source` in `package/server/src/unit/translation.api.ts` (or analogous existing module) per spec `unit-translation`. Validate workId is a work (no `workUnitId`), validate `sourceReleaseUnitId` references a release of that work, require `hasAuthorityOver(caller, workUnit)`. Upsert `UnitTranslation` row.
 - [ ] 6.2 Add server tests: cross-work source rejected (400), unauthorized caller (403), upsert creates row when none exists, update leaves `title/subtitle/summary/description` untouched.
 
 ## 7. Server: Realm extra primitives
 
-- [ ] 7.1 Add `package/server/src/realm/realm-extra.api.ts` exposing `POST /realms/:realmId/extra/:key/append`, `POST /realms/:realmId/extra/:key/reorder`, `DELETE /realms/:realmId/extra/:key/:unitId` per spec `realm-extra-pinboard-keys`. Authorize via realm-moderator role OR `hasAuthorityOver(caller, realmUnit)`.
-- [ ] 7.2 Implement transactional `SELECT ... FOR UPDATE` row lock on the realm row inside each handler to serialize concurrent writes.
-- [ ] 7.3 Implement read-time stale-ID filtering in the realm read endpoint (or a shared `realm-extra.service.ts`): drop IDs with no Unit, `status = DELETED`, or not visible to the caller. Preserve stored array unchanged.
-- [ ] 7.4 Provide an admin-side variant returning the unfiltered list with stale markers so moderators can clean up entries.
-- [ ] 7.5 Mount the new realm-extra API in `package/server/src/index.ts`.
+- [x] 7.1 Add `package/server/src/realm/realm-extra.api.ts` exposing `POST /realms/:realmId/extra/:key/append`, `POST /realms/:realmId/extra/:key/reorder`, `DELETE /realms/:realmId/extra/:key/:unitId` per spec `realm-extra-pinboard-keys`. Authorize via realm-moderator role OR `hasAuthorityOver(caller, realmUnit)`.
+- [x] 7.2 Implement transactional `SELECT ... FOR UPDATE` row lock on the realm row inside each handler to serialize concurrent writes.
+- [x] 7.3 Implement read-time stale-ID filtering in the realm read endpoint (or a shared `realm-extra.service.ts`): drop IDs with no Unit, `status = DELETED`, or not visible to the caller. Preserve stored array unchanged.
+- [x] 7.4 Provide an admin-side variant returning the unfiltered list with stale markers so moderators can clean up entries.
+- [x] 7.5 Mount the new realm-extra API in `package/server/src/index.ts`.
 - [ ] 7.6 Add server tests: append idempotent, reorder permutation accepted, reorder non-permutation rejected (400), concurrent appends serialize, deleted unit filtered for non-admin, admin view shows stale entries.
 
 ## 8. Server: pinboard backend deletion
 
-- [ ] 8.1 Delete `package/server/src/pinboard/` directory.
-- [ ] 8.2 Remove the pinboard mount from `package/server/src/index.ts`.
-- [ ] 8.3 Run `rg "pinboard" package/server/src` to confirm no dangling references remain.
+- [x] 8.1 Delete `package/server/src/pinboard/` directory.
+- [x] 8.2 Remove the pinboard mount from `package/server/src/index.ts`.
+- [x] 8.3 Run `rg "pinboard" package/server/src` to confirm no dangling references remain.
 
 ## 9. Notify package extension
 
