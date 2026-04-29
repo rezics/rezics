@@ -68,9 +68,9 @@
 
 ## 10. API package: hooks
 
-- [ ] 10.1 In `package/api/`, add query/mutation hooks for `PATCH /units/:releaseId/work-link`, claim approve/reject/withdraw, claim inbox, translation-source patch.
-- [ ] 10.2 In `package/api/`, add hooks for the realm-extra append/reorder/remove endpoints and the realm-extra read endpoint with stale filtering.
-- [ ] 10.3 Type-check `@rezics/api` (`bun run --filter @rezics/api typecheck` or equivalent).
+- [x] 10.1 In `package/api/`, add query/mutation hooks for `PATCH /units/:releaseId/work-link`, claim approve/reject/withdraw, claim inbox, translation-source patch.
+- [x] 10.2 In `package/api/`, add hooks for the realm-extra append/reorder/remove endpoints and the realm-extra read endpoint with stale filtering.
+- [x] 10.3 Type-check `@rezics/api` (`bun run --filter @rezics/api typecheck` or equivalent). (Verified via `bunx tsc --noEmit`; only pre-existing errors and the still-present `pinboard/*` directory remain — those will be removed in Phase G.)
 
 ## 11. UI: extract translation components to @rezics/ui
 
