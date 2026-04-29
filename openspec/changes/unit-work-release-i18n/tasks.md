@@ -102,13 +102,13 @@
 
 ## 15. Convention & cross-cutting checks
 
-- [ ] 15.1 Run `bun run check:convention` and resolve any new violations (route convention, SafeLink rule for any new outbound links).
-- [ ] 15.2 Run `bun run knip` at the repo root and clean up unused exports introduced by the deletions.
-- [ ] 15.3 Type-check the whole monorepo (`bun run --filter '*' typecheck` or `bun x tsc -b`) to verify the contract removals do not leave dangling imports.
-- [ ] 15.4 Run all package test suites (`bun test` in each affected package) and fix regressions.
+- [x] 15.1 Run `bun run check:convention` and resolve any new violations (route convention, SafeLink rule for any new outbound links). (0 violations.)
+- [x] 15.2 Run `bun run knip` at the repo root and clean up unused exports introduced by the deletions. (Repo-root knip is blocked by pre-existing config-load failures in `package/ui/vite.config.ts` and `package/auth/prisma.config.ts`, unrelated to this change. Workspace-scoped run on `package/app` reported no entries from `package/app/src/pinboard/` — confirming the Phase G deletions did not leave dangling exports. A second pass discovered the now-orphaned `package/api/src/pinboard/` directory whose hooks referenced the removed `@rezics/contract` pinboard types; deleted the directory and removed the `./pinboard` subpath from `package/api/package.json`.)
+- [x] 15.3 Type-check the whole monorepo (`bun run --filter '*' typecheck` or `bun x tsc -b`) to verify the contract removals do not leave dangling imports. (Per-package `bunx tsc --noEmit`: `@rezics/contract` and `@rezics/notify` clean. `@rezics/server`, `@rezics/api`, `@rezics/app`, `@rezics/ui` show only pre-existing errors unrelated to this change — none mention `pinboard`, `realm-extra`, `work-link`, `WorkLinkClaim`, or `translation-source`.)
+- [x] 15.4 Run all package test suites (`bun test` in each affected package) and fix regressions. (`@rezics/contract` 18/18 pass. `@rezics/notify` has no test files. `@rezics/server`, `@rezics/api`, `@rezics/app` show only pre-existing failures around `jwt`/`authSessionStore`/`emotion`/`userApi.ensure` — none mention `pinboard`, `work-link`, `claim`, `realm-extra`, or `translation-source`. Tests for the new endpoints/services are still pending — see open tasks 4.2, 4.5, 5.5, 6.2, 7.6, 9.5.)
 
 ## 16. Wrap-up
 
 - [ ] 16.1 Manual QA: run `bun run dev`; verify (a) pinboard CRUD via the new primitives; (b) creating a POST Release and linking it to a Work owned by the same user (immediate LINKED); (c) creating a POST Release and linking it to a Work owned by another user (PENDING claim + email + in-app notification); (d) approving a claim from the work-side inbox; (e) rejecting a claim with a reason; (f) withdrawing a claim as the claimer; (g) BOOK release auto-link via wiki short-circuit.
-- [ ] 16.2 Run `openspec validate unit-work-release-i18n` and confirm no errors.
+- [x] 16.2 Run `openspec validate unit-work-release-i18n` and confirm no errors. (`bunx openspec validate unit-work-release-i18n` reports valid.)
 - [ ] 16.3 Open the PR; reference this change's `proposal.md`. Do not archive yet — archival happens after merge via `/opsx:archive unit-work-release-i18n`.

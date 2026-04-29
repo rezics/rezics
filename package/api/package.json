@@ -10,10 +10,6 @@
       "types": "./src/shelf/index.ts",
       "default": "./src/shelf/index.ts"
     },
-    "./pinboard": {
-      "types": "./src/pinboard/index.ts",
-      "default": "./src/pinboard/index.ts"
-    },
     "./echokv": {
       "types": "./src/echokv/echokv.ts",
       "default": "./src/echokv/echokv.ts"
