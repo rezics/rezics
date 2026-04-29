@@ -5,8 +5,11 @@
 import type {
   AddRealmTagUnitInput,
   AddRealmUnitInput,
+  CastRealmTagVoteInput,
   CreateRealmInput,
+  CreateRealmTagUnitInput,
   JoinRealmInput,
+  PatchRealmTagUnitInput,
   RealmMemberDTO,
   RealmResponse,
   RealmTagUnitDTO,
@@ -19,6 +22,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { tagKeys } from "../tag/tag.keys";
 import { realmApi } from "./realm.api";
 import { realmKeys } from "./realm.keys";
 
@@ -327,6 +331,124 @@ export function useRemoveRealmTagUnitMutation(
   });
 }
 
+// ---- New realm-tag endpoints (creation-as-vote, pin/position, vote) ----
+
+/**
+ * Create a RealmTagUnit (creation-as-vote, any realm member).
+ * POST /realm-tag-units
+ */
+export function useCreateRealmTagUnitMutation(
+  options?: Omit<
+    UseMutationOptions<RealmTagUnitDTO, Error, CreateRealmTagUnitInput>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateRealmTagUnitInput) =>
+      realmApi.createRealmTagUnit(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagUnits(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
+ * Pin/unpin or reposition a RealmTagUnit (admin or realm owner).
+ * PATCH /realm-tag-units/:realmUnitId/:unitId/:tagUnitId
+ */
+export function usePatchRealmTagUnitMutation(
+  options?: Omit<
+    UseMutationOptions<
+      RealmTagUnitDTO,
+      Error,
+      {
+        realmUnitId: string;
+        unitId: string;
+        tagUnitId: string;
+        input: PatchRealmTagUnitInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, unitId, tagUnitId, input }) =>
+      realmApi.patchRealmTagUnit(realmUnitId, unitId, tagUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagUnits(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
+ * Delete a RealmTagUnit (admin or realm owner).
+ * DELETE /realm-tag-units/:realmUnitId/:unitId/:tagUnitId
+ */
+export function useDeleteRealmTagUnitMutation(
+  options?: Omit<
+    UseMutationOptions<
+      { message: string },
+      Error,
+      { realmUnitId: string; unitId: string; tagUnitId: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, unitId, tagUnitId }) =>
+      realmApi.deleteRealmTagUnit(realmUnitId, unitId, tagUnitId),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagUnits(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
+ * Cast a RealmTagVote (membership-checked, retained on member exit).
+ * POST /realm-tag-votes
+ */
+export function useCastRealmTagVoteMutation(
+  options?: Omit<
+    UseMutationOptions<{ message: string }, Error, CastRealmTagVoteInput>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CastRealmTagVoteInput) =>
+      realmApi.castRealmTagVote(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.tagUnits(variables.realmUnitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 /**
  * Combined mutations export
  */
@@ -342,4 +464,8 @@ export const realmMutations = {
   useRemoveUnit: useRemoveRealmUnitMutation,
   useAddTagUnit: useAddRealmTagUnitMutation,
   useRemoveTagUnit: useRemoveRealmTagUnitMutation,
+  useCreateRealmTagUnit: useCreateRealmTagUnitMutation,
+  usePatchRealmTagUnit: usePatchRealmTagUnitMutation,
+  useDeleteRealmTagUnit: useDeleteRealmTagUnitMutation,
+  useCastRealmTagVote: useCastRealmTagVoteMutation,
 };

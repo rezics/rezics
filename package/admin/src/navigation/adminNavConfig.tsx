@@ -9,6 +9,7 @@ import ManageSearchOutlinedIcon from "@mui/icons-material/ManageSearchOutlined";
 import PeopleIcon from "@mui/icons-material/People";
 import SettingsIcon from "@mui/icons-material/Settings";
 import StorageOutlinedIcon from "@mui/icons-material/StorageOutlined";
+import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import type React from "react";
 
@@ -118,6 +119,19 @@ export const adminNav = {
           label: "List",
           icon: <ForumIcon fontSize="small" />,
           to: "/realm",
+        },
+      ],
+    },
+    {
+      id: "tag",
+      label: "Tags",
+      icon: <StyleOutlinedIcon fontSize="small" />,
+      children: [
+        {
+          id: "tag.low-score",
+          label: "Low-score",
+          icon: <StyleOutlinedIcon fontSize="small" />,
+          to: "/tag/low-score",
         },
       ],
     },

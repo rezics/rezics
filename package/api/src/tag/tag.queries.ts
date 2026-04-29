@@ -2,6 +2,7 @@
  * React Query configurations for Tag queries
  */
 
+import type { LowScoreTagsQuery } from "@rezics/contract";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { tagApi } from "./tag.api";
 import { tagKeys } from "./tag.keys";
@@ -95,6 +96,16 @@ export const tagInfiniteListQuery = (filters?: Omit<TagFilters, "page">) =>
   });
 
 /**
+ * Admin discovery: low-score tag rows (UnitTag or RealmTagUnit by scope).
+ */
+export const lowScoreTagsQuery = (query?: LowScoreTagsQuery) =>
+  queryOptions({
+    queryKey: tagKeys.lowScore(query),
+    queryFn: () => tagApi.listLowScoreTags(query),
+    staleTime: 1000 * 30,
+  });
+
+/**
  * Combined query options export
  */
 export const tagQueries = {
@@ -105,4 +116,5 @@ export const tagQueries = {
   context: tagContextQuery,
   batchTranslations: tagBatchTranslationsQuery,
   infiniteList: tagInfiniteListQuery,
+  lowScore: lowScoreTagsQuery,
 };

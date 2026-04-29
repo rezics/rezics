@@ -21,10 +21,14 @@ export {
   realmMutations,
   useAddRealmTagUnitMutation,
   useAddRealmUnitMutation,
+  useCastRealmTagVoteMutation,
   useCreateRealmMutation,
+  useCreateRealmTagUnitMutation,
   useDeleteRealmMutation,
+  useDeleteRealmTagUnitMutation,
   useJoinRealmMutation,
   useLeaveRealmMutation,
+  usePatchRealmTagUnitMutation,
   useRemoveMemberMutation,
   useRemoveRealmTagUnitMutation,
   useRemoveRealmUnitMutation,
@@ -61,3 +65,11 @@ export type {
   UpdateMemberRoleInput,
   UpdateRealmInput,
 } from "./realm.types";
+
+// Re-export contract types used by new realm-tag mutations
+export type {
+  CastRealmTagVoteInput,
+  CreateRealmTagUnitInput,
+  PatchRealmTagUnitInput,
+  RealmTagVoteDTO,
+} from "@rezics/contract";

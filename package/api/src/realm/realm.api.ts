@@ -9,8 +9,11 @@
 import type {
   AddRealmTagUnitInput,
   AddRealmUnitInput,
+  CastRealmTagVoteInput,
   CreateRealmInput,
+  CreateRealmTagUnitInput,
   JoinRealmInput,
+  PatchRealmTagUnitInput,
   RealmListResponse,
   RealmMemberDTO,
   RealmResponse,
@@ -223,5 +226,71 @@ export const realmApi = {
         method: "DELETE",
       },
     );
+  },
+
+  // ---- New realm-tag endpoints (creation-as-vote, pin/position, vote) ----
+
+  /**
+   * Create a RealmTagUnit (creation-as-vote, any realm member).
+   * POST /realm-tag-units
+   */
+  createRealmTagUnit: async (
+    input: CreateRealmTagUnitInput,
+  ): Promise<RealmTagUnitDTO> => {
+    return apiFetch<RealmTagUnitDTO>(`/realm-tag-units`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  /**
+   * Pin/unpin or reposition a RealmTagUnit (admin or realm owner).
+   * PATCH /realm-tag-units/:realmUnitId/:unitId/:tagUnitId
+   */
+  patchRealmTagUnit: async (
+    realmUnitId: string,
+    unitId: string,
+    tagUnitId: string,
+    input: PatchRealmTagUnitInput,
+  ): Promise<RealmTagUnitDTO> => {
+    return apiFetch<RealmTagUnitDTO>(
+      `/realm-tag-units/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
+        unitId,
+      )}/${encodeURIComponent(tagUnitId)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  /**
+   * Delete a RealmTagUnit (admin or realm owner).
+   * DELETE /realm-tag-units/:realmUnitId/:unitId/:tagUnitId
+   */
+  deleteRealmTagUnit: async (
+    realmUnitId: string,
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/realm-tag-units/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
+        unitId,
+      )}/${encodeURIComponent(tagUnitId)}`,
+      { method: "DELETE" },
+    );
+  },
+
+  /**
+   * Cast a RealmTagVote (membership-checked, retained when member leaves).
+   * POST /realm-tag-votes
+   */
+  castRealmTagVote: async (
+    input: CastRealmTagVoteInput,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/realm-tag-votes`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
   },
 };

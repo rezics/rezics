@@ -27,6 +27,7 @@ import { Route as AdminUserUnitIdRouteImport } from './routes/_admin/user/$unitI
 import { Route as AdminUnitMeiliRouteImport } from './routes/_admin/unit/meili'
 import { Route as AdminUnitCreateRouteImport } from './routes/_admin/unit/create'
 import { Route as AdminUnitUnitIdRouteImport } from './routes/_admin/unit/$unitId'
+import { Route as AdminTagLowScoreRouteImport } from './routes/_admin/tag/low-score'
 import { Route as AdminMiscEchokvRouteImport } from './routes/_admin/misc/echokv'
 import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
@@ -124,6 +125,11 @@ const AdminUnitUnitIdRoute = AdminUnitUnitIdRouteImport.update({
   path: '/unit/$unitId',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTagLowScoreRoute = AdminTagLowScoreRouteImport.update({
+  id: '/tag/low-score',
+  path: '/tag/low-score',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMiscEchokvRoute = AdminMiscEchokvRouteImport.update({
   id: '/misc/echokv',
   path: '/misc/echokv',
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
+  '/tag/low-score': typeof AdminTagLowScoreRoute
   '/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/unit/create': typeof AdminUnitCreateRoute
   '/unit/meili': typeof AdminUnitMeiliRoute
@@ -200,6 +207,7 @@ export interface FileRoutesByTo {
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
+  '/tag/low-score': typeof AdminTagLowScoreRoute
   '/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/unit/create': typeof AdminUnitCreateRoute
   '/unit/meili': typeof AdminUnitMeiliRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/_admin/auth/users': typeof AdminAuthUsersRoute
   '/_admin/book/meili': typeof AdminBookMeiliRoute
   '/_admin/misc/echokv': typeof AdminMiscEchokvRoute
+  '/_admin/tag/low-score': typeof AdminTagLowScoreRoute
   '/_admin/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/_admin/unit/create': typeof AdminUnitCreateRoute
   '/_admin/unit/meili': typeof AdminUnitMeiliRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/auth/users'
     | '/book/meili'
     | '/misc/echokv'
+    | '/tag/low-score'
     | '/unit/$unitId'
     | '/unit/create'
     | '/unit/meili'
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/auth/users'
     | '/book/meili'
     | '/misc/echokv'
+    | '/tag/low-score'
     | '/unit/$unitId'
     | '/unit/create'
     | '/unit/meili'
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/_admin/auth/users'
     | '/_admin/book/meili'
     | '/_admin/misc/echokv'
+    | '/_admin/tag/low-score'
     | '/_admin/unit/$unitId'
     | '/_admin/unit/create'
     | '/_admin/unit/meili'
@@ -455,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUnitUnitIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/tag/low-score': {
+      id: '/_admin/tag/low-score'
+      path: '/tag/low-score'
+      fullPath: '/tag/low-score'
+      preLoaderRoute: typeof AdminTagLowScoreRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/misc/echokv': {
       id: '/_admin/misc/echokv'
       path: '/misc/echokv'
@@ -520,6 +539,7 @@ interface AdminRouteChildren {
   AdminAuthUsersRoute: typeof AdminAuthUsersRoute
   AdminBookMeiliRoute: typeof AdminBookMeiliRoute
   AdminMiscEchokvRoute: typeof AdminMiscEchokvRoute
+  AdminTagLowScoreRoute: typeof AdminTagLowScoreRoute
   AdminUnitUnitIdRoute: typeof AdminUnitUnitIdRoute
   AdminUnitCreateRoute: typeof AdminUnitCreateRoute
   AdminUnitMeiliRoute: typeof AdminUnitMeiliRoute
@@ -546,6 +566,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAuthUsersRoute: AdminAuthUsersRoute,
   AdminBookMeiliRoute: AdminBookMeiliRoute,
   AdminMiscEchokvRoute: AdminMiscEchokvRoute,
+  AdminTagLowScoreRoute: AdminTagLowScoreRoute,
   AdminUnitUnitIdRoute: AdminUnitUnitIdRoute,
   AdminUnitCreateRoute: AdminUnitCreateRoute,
   AdminUnitMeiliRoute: AdminUnitMeiliRoute,

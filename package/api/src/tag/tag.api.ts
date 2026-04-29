@@ -10,7 +10,11 @@ import type {
   BatchTagTranslationResult,
   CastTagVoteInput,
   CreateTagInput,
+  CreateUnitTagInput,
   DetachTagInput,
+  LowScoreTagsQuery,
+  LowScoreTagsResponse,
+  PatchUnitTagInput,
   TagVoteDTO,
   UnitTagDTO,
   UpdateTagInput,
@@ -145,6 +149,65 @@ export const tagApi = {
     const params = buildQueryString({ unitIds: tagUnitIds.join(","), lang });
     return apiFetch<BatchTagTranslationResult>(
       `/tag/batch-translations${params}`,
+    );
+  },
+
+  /**
+   * Create a UnitTag (creation-as-vote, idempotent per user).
+   * POST /unit-tags
+   */
+  createUnitTag: async (input: CreateUnitTagInput): Promise<UnitTagDTO> => {
+    return apiFetch<UnitTagDTO>(`/unit-tags`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  /**
+   * Pin/unpin or reposition a UnitTag (admin or unit owner).
+   * PATCH /unit-tags/:unitId/:tagUnitId
+   */
+  patchUnitTag: async (
+    unitId: string,
+    tagUnitId: string,
+    input: PatchUnitTagInput,
+  ): Promise<UnitTagDTO> => {
+    return apiFetch<UnitTagDTO>(
+      `/unit-tags/${encodeURIComponent(unitId)}/${encodeURIComponent(
+        tagUnitId,
+      )}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  /**
+   * Delete a UnitTag (admin or unit owner).
+   * DELETE /unit-tags/:unitId/:tagUnitId
+   */
+  deleteUnitTag: async (
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/unit-tags/${encodeURIComponent(unitId)}/${encodeURIComponent(
+        tagUnitId,
+      )}`,
+      { method: "DELETE" },
+    );
+  },
+
+  /**
+   * Admin discovery: list UnitTag/RealmTagUnit rows at or below a score threshold.
+   * GET /admin/low-score-tags
+   */
+  listLowScoreTags: async (
+    query?: LowScoreTagsQuery,
+  ): Promise<LowScoreTagsResponse> => {
+    return apiFetch<LowScoreTagsResponse>(
+      `/admin/low-score-tags${buildQueryString(query)}`,
     );
   },
 };

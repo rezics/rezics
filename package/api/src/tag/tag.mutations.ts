@@ -6,7 +6,9 @@ import type {
   AttachTagInput,
   CastTagVoteInput,
   CreateTagInput,
+  CreateUnitTagInput,
   DetachTagInput,
+  PatchUnitTagInput,
   TagVoteDTO,
   UnitTagDTO,
   UpdateTagInput,
@@ -169,6 +171,93 @@ export function useCastTagVoteMutation(
   });
 }
 
+// ---- New endpoints (creation-as-vote, pin/position, delete) ----
+
+/**
+ * Create a UnitTag (creation-as-vote, idempotent per user).
+ * POST /unit-tags
+ */
+export function useCreateUnitTagMutation(
+  options?: Omit<
+    UseMutationOptions<UnitTagDTO, Error, CreateUnitTagInput>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateUnitTagInput) => tagApi.createUnitTag(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.forUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
+ * Pin/unpin or reposition a UnitTag (admin or unit owner).
+ * PATCH /unit-tags/:unitId/:tagUnitId
+ */
+export function usePatchUnitTagMutation(
+  options?: Omit<
+    UseMutationOptions<
+      UnitTagDTO,
+      Error,
+      { unitId: string; tagUnitId: string; input: PatchUnitTagInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unitId, tagUnitId, input }) =>
+      tagApi.patchUnitTag(unitId, tagUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.forUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
+ * Delete a UnitTag (admin or unit owner).
+ * DELETE /unit-tags/:unitId/:tagUnitId
+ */
+export function useDeleteUnitTagMutation(
+  options?: Omit<
+    UseMutationOptions<
+      { message: string },
+      Error,
+      { unitId: string; tagUnitId: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unitId, tagUnitId }) =>
+      tagApi.deleteUnitTag(unitId, tagUnitId),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.forUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({ queryKey: tagKeys.lowScore() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 /**
  * Combined mutations export
  */
@@ -179,4 +268,7 @@ export const tagMutations = {
   useAttach: useAttachTagMutation,
   useDetach: useDetachTagMutation,
   useVote: useCastTagVoteMutation,
+  useCreateUnitTag: useCreateUnitTagMutation,
+  usePatchUnitTag: usePatchUnitTagMutation,
+  useDeleteUnitTag: useDeleteUnitTagMutation,
 };

@@ -36,4 +36,8 @@ export const tagKeys = {
 
   // votes
   votes: () => [...tagKeys.all(), "votes"] as const,
+
+  // admin: low-score tag discovery
+  lowScore: (params?: unknown) =>
+    [...tagKeys.all(), "lowScore", params] as const,
 } as const;

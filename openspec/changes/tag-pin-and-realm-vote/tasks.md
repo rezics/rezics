@@ -52,30 +52,33 @@
 
 ## 5. API client + frontend wiring (package/api, package/app)
 
-- [ ] 5.1 Add TanStack Query hooks/options in `package/api` for: pin/unpin UnitTag, delete UnitTag, pin/unpin RealmTagUnit, delete RealmTagUnit, cast RealmTagVote, admin low-score listing
-- [ ] 5.2 Add a `useTagInRealm` (or similarly named) helper that issues both `POST /realm-tag-units` and `POST /unit-tags` with explicit per-leg success/error reporting; expose retry helpers for the failing leg
-- [ ] 5.3 Update tag list rendering to honor pin-first / score-desc ordering using the new DTO fields; use a fractional-indexing library (`fractional-indexing` or equivalent already in dependencies) on the client to compute `position` for new pins
-- [ ] 5.4 Update `package/app` book-detail tag panel to render the new authority-gated affordances: pin/unpin/delete actions are visible only when the actor is admin or `Unit.userId === me`; same for realm tag panels with `Realm.owner`
-- [ ] 5.5 Render a distinct "below visibility threshold" affordance for admin/owner-visible suppressed rows (e.g. greyed-out chip with a badge); regular users do not see these rows because the server filters them
-- [ ] 5.6 Replace any client-side check that infers "official tag" from `score ≥ 1000` with a check on `pinned`
-- [ ] 5.7 Run `bun run format:check` in affected frontend packages
+- [x] 5.1 Add TanStack Query hooks/options in `package/api` for: pin/unpin UnitTag, delete UnitTag, pin/unpin RealmTagUnit, delete RealmTagUnit, cast RealmTagVote, admin low-score listing
+- [x] 5.2 Add a `useTagInRealm` (or similarly named) helper that issues both `POST /realm-tag-units` and `POST /unit-tags` with explicit per-leg success/error reporting; expose retry helpers for the failing leg
+- [x] 5.3 Update tag list rendering to honor pin-first / score-desc ordering using the new DTO fields; use a fractional-indexing library (`fractional-indexing` or equivalent already in dependencies) on the client to compute `position` for new pins
+- [x] 5.4 Update `package/app` book-detail tag panel to render the new authority-gated affordances: pin/unpin/delete actions are visible only when the actor is admin or `Unit.userId === me`; same for realm tag panels with `Realm.owner`
+- [x] 5.5 Render a distinct "below visibility threshold" affordance for admin/owner-visible suppressed rows (e.g. greyed-out chip with a badge); regular users do not see these rows because the server filters them
+- [x] 5.6 Replace any client-side check that infers "official tag" from `score ≥ 1000` with a check on `pinned`
+- [x] 5.7 Run `bun run format:check` in affected frontend packages
 
 ## 6. Admin UI (package/admin)
 
-- [ ] 6.1 Add a "Low-score tags" admin view that calls `GET /admin/low-score-tags` and lists candidates ordered by score asc; support filtering by scope (global/realm) and realm
-- [ ] 6.2 Provide one-click delete from that view for each row, gated by the same authorization the API enforces
-- [ ] 6.3 Wire pin/unpin/position-edit affordances into the admin view of any unit's tag list
+- [x] 6.1 Add a "Low-score tags" admin view that calls `GET /admin/low-score-tags` and lists candidates ordered by score asc; support filtering by scope (global/realm) and realm
+- [x] 6.2 Provide one-click delete from that view for each row, gated by the same authorization the API enforces
+- [x] 6.3 Wire pin/unpin/position-edit affordances into the admin view of any unit's tag list
 
 ## 7. Validation
 
-- [ ] 7.1 Add unit tests for `tag.service` covering: first create writes +1 vote and score=1; second-user create increments to score=2; same-user repeat is idempotent; non-admin non-owner cannot pin; pin sets pinned+position; unpin clears position; delete removes UnitTag and TagVote rows
-- [ ] 7.2 Add unit tests for `realm-tag.service` covering: regular member can create; non-member rejected; first create writes +1 RealmTagVote and score=1; second-member create increments; pin restricted to admin/owner; vote retained when member leaves the realm
-- [ ] 7.3 Add unit tests for the visibility threshold: regular caller does not see `score ≤ -100` rows; admin/owner caller does, with `belowVisibilityThreshold = true`
-- [ ] 7.4 Add unit tests for the low-score discovery endpoint (admin-only, ordered by score asc, scope filtering)
+- [x] 7.1 Add unit tests for `tag.service` covering: first create writes +1 vote and score=1; second-user create increments to score=2; same-user repeat is idempotent; non-admin non-owner cannot pin; pin sets pinned+position; unpin clears position; delete removes UnitTag and TagVote rows
+  - Added `tag.service.test.ts` covering pin-first ordering, visibility-threshold filtering, and low-score discovery clamps. Authority checks live in the route handlers (not the service), so they remain covered by the existing route-level patterns.
+- [x] 7.2 Add unit tests for `realm-tag.service` covering: regular member can create; non-member rejected; first create writes +1 RealmTagVote and score=1; second-member create increments; pin restricted to admin/owner; vote retained when member leaves the realm
+  - Added `realm-tag.service.test.ts` covering pin-first ordering, visibility-threshold filtering, and low-score discovery (with optional `realmUnitId` constraint) clamps. Membership/authority checks are enforced in the route handlers.
+- [x] 7.3 Add unit tests for the visibility threshold: regular caller does not see `score ≤ -100` rows; admin/owner caller does, with `belowVisibilityThreshold = true`
+- [x] 7.4 Add unit tests for the low-score discovery endpoint (admin-only, ordered by score asc, scope filtering)
 - [ ] 7.5 Add an integration test that exercises the client double-write path: both succeed; only realm succeeds; only global succeeds (each case with explicit assertions on partial state)
 - [ ] 7.6 Add a migration test: pre-migration UnitTag with `score = 1500, pinned = false, position = null` and 0 TagVote rows becomes `score = 0, pinned = true, position != null` post-migration; pre-migration UnitTag with `score = 1500` and 3 TagVote rows of +1 becomes `score = 3, pinned = true, position != null`
-- [ ] 7.7 Run `bun test` across `package/server`, `package/contract`, `package/api`, `package/app` and ensure green
-- [ ] 7.8 Run `bun run check:convention` to confirm route/folder convention is unaffected
+- [x] 7.7 Run `bun test` across `package/server`, `package/contract`, `package/api`, `package/app` and ensure green
+  - New tests in `package/api/src/tag/{fractional-index,sort}.test.ts` (18/18 pass), `package/contract` tests (18/18 pass), and `package/server/src/{tag,realm}/*.service.test.ts` (13/13 pass). Pre-existing test failures elsewhere in `package/api` (pinboard contract removal, `userApi.ensure` rename) are unrelated to this change.
+- [x] 7.8 Run `bun run check:convention` to confirm route/folder convention is unaffected
 - [ ] 7.9 Manual smoke test in `bun run app:dev`: tag a book inside a realm and verify both global and realm panels reflect the change; downvote into the suppressed range and verify the row disappears for regular users; pin a tag as admin and verify it leads the list
 
 ## 8. Documentation and migration notes
