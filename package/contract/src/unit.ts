@@ -47,6 +47,21 @@ export const unitTypeSchema = t.Union([
   t.Literal("LINK"),
 ]);
 
+/**
+ * Unit types where cross-user contribution to a Work's Releases is permitted
+ * without an explicit work-side approval step. Used by the work-link service
+ * to short-circuit the WorkLinkClaim flow for catalog-style content.
+ */
+export const WIKI_TYPES = ["BOOK", "GAME", "MEDIA"] as const;
+
+export type WikiType = (typeof WIKI_TYPES)[number];
+
+export const wikiTypeSchema = t.Union([
+  t.Literal("BOOK"),
+  t.Literal("GAME"),
+  t.Literal("MEDIA"),
+]);
+
 export const unitStatusSchema = t.Union([
   t.Literal("DRAFT"),
   t.Literal("PUBLISHED"),

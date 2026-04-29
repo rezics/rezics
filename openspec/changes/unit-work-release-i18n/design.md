@@ -210,6 +210,16 @@ The English text of those comments is **also** added as locale entries under `re
 
 ## Open Questions
 
-- Should `MEDIA` be in `WIKI_TYPES`? The user explicitly named `BOOK` and `GAME`. Default proposed: include `MEDIA` (catalog-like, encourages contribution). Confirm during apply if needed.
-- Should withdrawing `realm-pinboard` happen as a manual step (`openspec change withdraw realm-pinboard`) or as a preflight task in this change's `tasks.md`? Default: list as a task so it's auditable.
+- Should `MEDIA` be in `WIKI_TYPES`? The user explicitly named `BOOK` and `GAME`. Default proposed: include `MEDIA` (catalog-like, encourages contribution). **Resolved during apply: yes, MEDIA is included.**
+- Should withdrawing `realm-pinboard` happen as a manual step (`openspec change withdraw realm-pinboard`) or as a preflight task in this change's `tasks.md`? Default: list as a task so it's auditable. **Resolved: withdrawn before apply (commit `64bebcc2`).**
 - Notify package's current capabilities — should be inventoried during apply to know exactly what extension is needed (new email transport vs. new fan-out helper).
+
+## Notify package inventory (recorded during apply, task 1.2)
+
+`@rezics/notify` is an Elysia HTTP service with modules `dm/`, `notification/`, `stream/`, `internal/`. The `internal/internal.api.ts` exposes a `POST /internal/event` endpoint that other services call to create a `Notification` row + SSE fan-out. **It has no email transport** — no nodemailer/resend/sendgrid dependency, no `mailer.ts`, no SMTP env vars.
+
+`@rezics/email` is render-only (React Email components + a `render()` helper that produces `{html, text}` from a template + props). It has no transport.
+
+The only SMTP sender in the repo is `@rezics/auth/src/notification/mailer.ts` (nodemailer pool, scoped to auth flows: invitations / password reset / verification). It reads `SMTP_HOST/PORT/USER/PASSWORD/SECURE/USER_NAME` from the auth env.
+
+**Implication for tasks 9.x**: We add an SMTP transport directly to `@rezics/notify` (reusing the nodemailer pattern + the same SMTP env vars) and use `@rezics/email`'s `render()` for templating. No promotion of auth's mailer is required for this change; if shared SMTP becomes a recurring need later, extracting the transport into `@rezics/email` is a follow-up. The `notifySystemAndEmail` helper lives at `package/notify/src/internal/notify-system-email.ts` (or analogous), and is invoked by server callers via the existing `POST /internal/event`-style internal endpoint plus a new `POST /internal/notify-system-email` (TBD during phase C).

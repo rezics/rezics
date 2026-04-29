@@ -49,6 +49,13 @@ enum ContentRating {
   R_18G
 }
 
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
 enum PostKind {
   /**
    * Long-form review with rating.
@@ -104,6 +111,10 @@ model Unit {
   // Work and Release are parallel entities. Work (a) is the version selected by Rezics. UnitTranslation caches translations derived from the Release version, while the actual content still comes from the Release(chapters, etc.). A Release can also produce translated Releases. Work should still point to Work (a).
   work     Unit?  @relation("WorkRelease", fields: [workUnitId], references: [id], onDelete: SetNull)
   releases Unit[] @relation("WorkRelease")
+
+  // Cross-user work-release claim flow (see WorkLinkClaim).
+  releaseClaims WorkLinkClaim[] @relation("WorkLinkClaimRelease")
+  workClaims    WorkLinkClaim[] @relation("WorkLinkClaimWork")
 
   // Owner/creator
   user User? @relation("UnitForUser", fields: [userId], references: [unitId])
@@ -216,6 +227,31 @@ model UnitSupportLanguage {
 
   @@id([unitId, language])
   @@index([language, unitId])
+}
+
+// ============================================================
+// WORK-LINK CLAIM (cross-user work/release linkage approval)
+// ============================================================
+
+model WorkLinkClaim {
+  id             String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  releaseUnitId  String       @db.Uuid
+  workUnitId     String       @db.Uuid
+  claimerUserId  String       @db.Uuid
+  status         ClaimStatus  @default(PENDING)
+  rejectReason   String?
+  createdAt      DateTime     @default(now())
+  resolvedAt     DateTime?
+  resolvedBy     String?      @db.Uuid
+
+  releaseUnit Unit  @relation("WorkLinkClaimRelease", fields: [releaseUnitId], references: [id], onDelete: Cascade)
+  workUnit    Unit  @relation("WorkLinkClaimWork", fields: [workUnitId], references: [id], onDelete: Cascade)
+  claimer     User  @relation("WorkLinkClaimClaimer", fields: [claimerUserId], references: [unitId])
+  resolver    User? @relation("WorkLinkClaimResolver", fields: [resolvedBy], references: [unitId])
+
+  @@index([workUnitId, status])
+  @@index([claimerUserId, status])
+  @@index([releaseUnitId, status])
 }
 
 // ============================================================
@@ -596,6 +632,9 @@ model User {
   followings Follow[]   @relation("UserFollowings")
   units      Unit[]     @relation("UnitForUser")
   apiTokens  ApiToken[]
+
+  workLinkClaimsAsClaimer  WorkLinkClaim[] @relation("WorkLinkClaimClaimer")
+  workLinkClaimsAsResolver WorkLinkClaim[] @relation("WorkLinkClaimResolver")
 }
 
 // ============================================================

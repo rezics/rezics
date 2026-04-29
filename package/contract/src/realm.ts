@@ -2,6 +2,7 @@ import { t } from "elysia";
 import { languageSchema } from "./language";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
+import { realmExtraSchema } from "./realm/realm-extra";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -52,26 +53,6 @@ export type DefaultRealmDefinition = typeof DEFAULT_REALM;
 // ============================================================
 // REALM EXTRA (typed JSON payload)
 // ============================================================
-
-/**
- * Typed shape of `Realm.extra`. Every recognized key is optional and
- * additional keys are tolerated (permissive) to avoid breaking older
- * rows; only the listed fields are consumed by the app.
- *
- * - `announcementPostIds` — ordered list of unit ids on the announcement pinboard.
- * - `pinnedPostIds` — ordered list of unit ids on the realm feed pinboard.
- * - `filterTagIds` — reserved for a future change; read-only shape for now.
- */
-export const realmExtraSchema = t.Object(
-  {
-    announcementPostIds: t.Optional(t.Array(t.String())),
-    pinnedPostIds: t.Optional(t.Array(t.String())),
-    filterTagIds: t.Optional(t.Array(t.String())),
-  },
-  { additionalProperties: true },
-);
-
-export type RealmExtra = (typeof realmExtraSchema)["static"];
 
 // ============================================================
 // REALM DTO

@@ -1,25 +1,25 @@
 ## 1. Preflight
 
-- [ ] 1.1 Withdraw the in-progress `realm-pinboard` change (run `openspec change withdraw realm-pinboard` or equivalent) and confirm `openspec/changes/realm-pinboard/` is removed; the supersession is recorded in this change's design.md (D12).
-- [ ] 1.2 Inventory current `@rezics/notify` capabilities by reading `package/notify/src/` to confirm whether email transport already exists; record findings in a short note inside this change's `design.md` "Open Questions" section before extending.
-- [ ] 1.3 Confirm with reviewer that `MEDIA` is included in `WIKI_TYPES` (see Open Questions in design.md). Default: yes.
+- [x] 1.1 Withdraw the in-progress `realm-pinboard` change (run `openspec change withdraw realm-pinboard` or equivalent) and confirm `openspec/changes/realm-pinboard/` is removed; the supersession is recorded in this change's design.md (D12).
+- [x] 1.2 Inventory current `@rezics/notify` capabilities by reading `package/notify/src/` to confirm whether email transport already exists; record findings in a short note inside this change's `design.md` "Open Questions" section before extending.
+- [x] 1.3 Confirm with reviewer that `MEDIA` is included in `WIKI_TYPES` (see Open Questions in design.md). Default: yes.
 
 ## 2. Database & Prisma
 
-- [ ] 2.1 In `package/server/prisma/schema.prisma`, add `enum ClaimStatus { PENDING APPROVED REJECTED WITHDRAWN }`.
-- [ ] 2.2 In `package/server/prisma/schema.prisma`, add the `WorkLinkClaim` model with fields `id`, `releaseUnitId`, `workUnitId`, `claimerUserId`, `status` (`ClaimStatus`), `rejectReason?`, `createdAt`, `resolvedAt?`, `resolvedBy?`; foreign keys to `Unit` (cascade) and `User`; compound indexes `(workUnitId, status)` and `(claimerUserId, status)`.
-- [ ] 2.3 Run `bun run prisma:migrate` to generate and apply the migration; commit the new migration directory under `package/server/prisma/migrations/`.
-- [ ] 2.4 Run `bun run prisma:generate` and verify the new types are surfaced.
+- [x] 2.1 In `package/server/prisma/schema.prisma`, add `enum ClaimStatus { PENDING APPROVED REJECTED WITHDRAWN }`.
+- [x] 2.2 In `package/server/prisma/schema.prisma`, add the `WorkLinkClaim` model with fields `id`, `releaseUnitId`, `workUnitId`, `claimerUserId`, `status` (`ClaimStatus`), `rejectReason?`, `createdAt`, `resolvedAt?`, `resolvedBy?`; foreign keys to `Unit` (cascade) and `User`; compound indexes `(workUnitId, status)` and `(claimerUserId, status)`.
+- [ ] 2.3 Run `bun run prisma:migrate` to generate and apply the migration; commit the new migration directory under `package/server/prisma/migrations/`. **Deferred to user — working tree contains an untracked migration `20260429120000_tag_pin_and_realm_vote/` for another in-progress openspec change; running `prisma migrate dev` here would entangle the two. User should run after coordinating with that change.**
+- [x] 2.4 Run `bun run prisma:generate` and verify the new types are surfaced.
 
 ## 3. Contract additions
 
-- [ ] 3.1 In `package/contract/src/`, export `WIKI_TYPES = ['BOOK', 'GAME', 'MEDIA'] as const` and a matching `WikiType` union; co-locate with the existing Unit type schema.
-- [ ] 3.2 Add `package/contract/src/realm/realm-extra.ts` defining `RealmExtraSchema` Typebox object: optional `pinboard?: string[]`, optional `announcement?: string[]`, with `additionalProperties: true`. Carry JSDoc comments on each well-known key (English text destined for locale duplication per spec `realm-extra-pinboard-keys`).
-- [ ] 3.3 Add `package/contract/src/unit/work-link.ts` defining the `PATCH /units/:releaseId/work-link` request/response contracts (input: `{ workUnitId: string | null }`; response: `{ status: 'LINKED' | 'PENDING' | 'UNLINKED'; claimId?: string; autoApproved?: boolean }`).
-- [ ] 3.4 Add `package/contract/src/unit/work-link-claim.ts` defining the `WorkLinkClaim` shape, list/approve/reject/withdraw endpoint contracts, and the `ClaimStatus` enum mirror.
-- [ ] 3.5 Add `package/contract/src/unit/translation-source.ts` defining the `PATCH /units/:workId/translations/:lang/source` contract (`{ sourceReleaseUnitId: string | null }`).
-- [ ] 3.6 Delete `package/contract/src/pinboard.ts` and remove all its re-exports from `package/contract/src/index.ts`.
-- [ ] 3.7 Re-export new contracts from `package/contract/src/index.ts`; run `bun run --filter @rezics/contract build` (or equivalent type-check) to verify.
+- [x] 3.1 In `package/contract/src/`, export `WIKI_TYPES = ['BOOK', 'GAME', 'MEDIA'] as const` and a matching `WikiType` union; co-locate with the existing Unit type schema.
+- [x] 3.2 Add `package/contract/src/realm/realm-extra.ts` defining `RealmExtraSchema` Typebox object: optional `pinboard?: string[]`, optional `announcement?: string[]`, with `additionalProperties: true`. Carry JSDoc comments on each well-known key (English text destined for locale duplication per spec `realm-extra-pinboard-keys`).
+- [x] 3.3 Add `package/contract/src/unit/work-link.ts` defining the `PATCH /units/:releaseId/work-link` request/response contracts (input: `{ workUnitId: string | null }`; response: `{ status: 'LINKED' | 'PENDING' | 'UNLINKED'; claimId?: string; autoApproved?: boolean }`).
+- [x] 3.4 Add `package/contract/src/unit/work-link-claim.ts` defining the `WorkLinkClaim` shape, list/approve/reject/withdraw endpoint contracts, and the `ClaimStatus` enum mirror.
+- [x] 3.5 Add `package/contract/src/unit/translation-source.ts` defining the `PATCH /units/:workId/translations/:lang/source` contract (`{ sourceReleaseUnitId: string | null }`).
+- [x] 3.6 Delete `package/contract/src/pinboard.ts` and remove all its re-exports from `package/contract/src/index.ts`.
+- [x] 3.7 Re-export new contracts from `package/contract/src/index.ts`; run `bun run --filter @rezics/contract build` (or equivalent type-check) to verify. (Verified via `bunx tsc --noEmit`; only a pre-existing `unitTagDTOSchema` error from the unrelated `tag-pin-and-realm-vote` working-tree change remains.)
 
 ## 4. Server: unit authority & work-link
 
