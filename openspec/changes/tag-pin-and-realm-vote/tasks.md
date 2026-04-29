@@ -83,6 +83,9 @@
 
 ## 8. Documentation and migration notes
 
-- [ ] 8.1 Update any developer docs under `package/app/docs/` or root-level CONTRIBUTING that reference the legacy "score ≥ 1000 means official" convention
-- [ ] 8.2 Add a short migration note in the change directory describing what consumers must change (switch from score-threshold to `pinned` checks; expect new fields in DTOs)
-- [ ] 8.3 Verify `bun run knip` does not report new unused exports introduced by this change
+- [x] 8.1 Update any developer docs under `package/app/docs/` or root-level CONTRIBUTING that reference the legacy "score ≥ 1000 means official" convention
+  - No-op: grep across `package/app/docs/` and `CONTRIBUTING.md` returned no matches for the legacy `score >= 1000` / "official tag" convention. The only stale references are in archived OpenSpec change directories and the live spec deltas under `openspec/specs/` which are rewritten by `/opsx:archive`.
+- [x] 8.2 Add a short migration note in the change directory describing what consumers must change (switch from score-threshold to `pinned` checks; expect new fields in DTOs)
+  - Added `MIGRATION.md` covering: new DTO fields, code-change diff for "official tag" detection, endpoint-mapping table, visibility threshold rules, double-write helper usage, backfill safety statement, full authority matrix.
+- [x] 8.3 Verify `bun run knip` does not report new unused exports introduced by this change
+  - `bun run knip` is blocked by a pre-existing infra issue (`package/auth/prisma.config.ts` requires `DATABASE_URL` at config-load time). Verified manually with `grep` — all new exports (`useCreateUnitTagMutation`, `usePatchUnitTagMutation`, `useDeleteUnitTagMutation`, `useCreateRealmTagUnitMutation`, `usePatchRealmTagUnitMutation`, `useDeleteRealmTagUnitMutation`, `useCastRealmTagVoteMutation`, `lowScoreTagsQuery`, `positionForNewTopPin`/`positionForNewBottomPin`, `sortTagsByPinThenScore`, `useTagInRealm`) have at least one consumer across `package/app`, `package/admin`, or `package/api`.
