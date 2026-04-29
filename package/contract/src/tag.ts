@@ -11,11 +11,40 @@ export const unitTagDTOSchema = t.Object({
   tagUnitId: t.String(),
   score: t.Number(),
   voteCount: t.Number(),
+  pinned: t.Boolean(),
+  position: t.Optional(t.Nullable(t.String())),
+  belowVisibilityThreshold: t.Optional(t.Boolean()),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
 export type UnitTagDTO = (typeof unitTagDTOSchema)["static"];
+
+// ============================================================
+// UNIT TAG MUTATIONS (pin / position / delete / create-as-vote)
+// ============================================================
+
+export const createUnitTagSchema = t.Object({
+  unitId: t.String(),
+  tagUnitId: t.String(),
+});
+
+export type CreateUnitTagInput = (typeof createUnitTagSchema)["static"];
+
+/** Body for PATCH /unit-tags/:unitId/:tagUnitId */
+export const patchUnitTagSchema = t.Object({
+  pinned: t.Optional(t.Boolean()),
+  position: t.Optional(t.Nullable(t.String())),
+});
+
+export type PatchUnitTagInput = (typeof patchUnitTagSchema)["static"];
+
+export const unitTagPathParamsSchema = t.Object({
+  unitId: t.String(),
+  tagUnitId: t.String(),
+});
+
+export type UnitTagPathParams = (typeof unitTagPathParamsSchema)["static"];
 
 // ============================================================
 // BATCH TAG TRANSLATION

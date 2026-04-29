@@ -60,11 +60,22 @@ export function mapRealmUnitToDTO(row: RealmUnit): RealmUnitDTO {
   };
 }
 
-export function mapRealmTagUnitToDTO(row: RealmTagUnit): RealmTagUnitDTO {
+export function mapRealmTagUnitToDTO(
+  row: RealmTagUnit,
+  options?: { belowVisibilityThreshold?: boolean },
+): RealmTagUnitDTO {
   return {
     realmUnitId: row.realmUnitId,
     tagUnitId: row.tagUnitId,
     unitId: row.unitId,
+    score: row.score,
+    voteCount: row.voteCount,
+    pinned: row.pinned,
+    position: row.position ?? null,
+    ...(options?.belowVisibilityThreshold
+      ? { belowVisibilityThreshold: true }
+      : {}),
     createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }

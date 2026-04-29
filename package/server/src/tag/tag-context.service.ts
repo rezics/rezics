@@ -1,10 +1,23 @@
 import { prisma } from "#/prisma/client";
+import { VISIBILITY_THRESHOLD } from "./tag.service";
 
-export async function getTagContext(unitId: string, userId?: string) {
-  // Get global tags for this unit
+export async function getTagContext(
+  unitId: string,
+  userId?: string,
+  options?: { includeBelowThreshold?: boolean },
+) {
+  // Get global tags for this unit, pin-first then score-desc.
+  // Regular callers do not see rows at/below the visibility threshold.
   const unitTags = await prisma.unitTag.findMany({
-    where: { unitId },
-    orderBy: { score: "desc" },
+    where: options?.includeBelowThreshold
+      ? { unitId }
+      : { unitId, score: { gt: VISIBILITY_THRESHOLD } },
+    orderBy: [
+      { pinned: "desc" },
+      { position: "asc" },
+      { score: "desc" },
+      { tagUnitId: "asc" },
+    ],
     include: {
       tag: { include: { translations: true } },
     },
@@ -13,6 +26,8 @@ export async function getTagContext(unitId: string, userId?: string) {
   const tags = unitTags.map((ut) => ({
     tagUnitId: ut.tagUnitId,
     score: ut.score,
+    pinned: ut.pinned,
+    position: ut.position,
     label: ut.tag?.translations?.[0]?.title ?? ut.tagUnitId,
   }));
 

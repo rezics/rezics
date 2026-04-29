@@ -9,5 +9,10 @@
 
 export { tagApi } from "./tag.api";
 export { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
-export { TagService, tagService } from "./tag.service";
+export { TagService, tagService, VISIBILITY_THRESHOLD } from "./tag.service";
 export type { TagWithTranslations, UnitTagWithRelations } from "./types";
+export {
+  lowScoreTagsAdminApi,
+  tagVoteApi,
+  unitTagApi,
+} from "./unit-tag.api";

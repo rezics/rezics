@@ -8,8 +8,11 @@ import type {
   UpdateRealmInput,
 } from "@rezics/contract";
 import { parseIdsCsv, validateSlug } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
+import type { Prisma, RealmTagUnit } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+
+/** Score at or below this threshold hides a RealmTagUnit from regular users. */
+export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
 import {
   patchContentRealmIdsToMeili,
   patchContentRealmTagKeysToMeili,
@@ -285,25 +288,258 @@ export class RealmService {
   }
 
   // --- Realm tag units ---
+  //
+  // RealmTagUnit and UnitTag are now independent layers. Creating a
+  // RealmTagUnit no longer cascades to UnitTag — the client is expected to
+  // double-write when the user wants both layers updated. Score and pin
+  // state on RealmTagUnit are driven by RealmTagVote, the realm-scoped
+  // analogue of TagVote.
 
+  /**
+   * Create a RealmTagUnit with creation-as-vote semantics.
+   *
+   * The caller MUST be a member of the realm; the route enforces the
+   * membership check and passes through the actor's userId.
+   *
+   * - First call: writes the RealmTagUnit (score=1, voteCount=1) and a +1
+   *   RealmTagVote.
+   * - Subsequent distinct-member calls: insert a RealmTagVote and recompute.
+   * - Idempotent for the same user: existing RealmTagVote left untouched.
+   */
+  async createRealmTagUnit(
+    userId: string,
+    realmUnitId: string,
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<RealmTagUnit> {
+    const row = await prisma.$transaction(async (tx) => {
+      const existing = await tx.realmTagVote.findUnique({
+        where: {
+          realmUnitId_userId_unitId_tagUnitId: {
+            realmUnitId,
+            userId,
+            unitId,
+            tagUnitId,
+          },
+        },
+      });
+
+      if (!existing) {
+        await tx.realmTagVote.create({
+          data: { realmUnitId, userId, unitId, tagUnitId, value: 1 },
+        });
+      }
+
+      const agg = await tx.realmTagVote.aggregate({
+        where: { realmUnitId, unitId, tagUnitId },
+        _sum: { value: true },
+        _count: { value: true },
+      });
+
+      return tx.realmTagUnit.upsert({
+        where: {
+          realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
+        },
+        update: {
+          score: agg._sum.value ?? 0,
+          voteCount: agg._count.value ?? 0,
+        },
+        create: {
+          realmUnitId,
+          tagUnitId,
+          unitId,
+          score: agg._sum.value ?? 0,
+          voteCount: agg._count.value ?? 0,
+        },
+      });
+    });
+
+    await patchContentRealmTagKeysToMeili(unitId);
+    return row;
+  }
+
+  /**
+   * Set pin/position on a RealmTagUnit. The route enforces admin OR
+   * `Realm.owner` authorization.
+   */
+  async setRealmTagUnitPin(
+    realmUnitId: string,
+    unitId: string,
+    tagUnitId: string,
+    input: { pinned?: boolean; position?: string | null },
+  ): Promise<RealmTagUnit> {
+    const data: { pinned?: boolean; position?: string | null } = {};
+    if (input.pinned !== undefined) {
+      data.pinned = input.pinned;
+      if (input.pinned === false) data.position = null;
+    }
+    if (input.position !== undefined) data.position = input.position;
+
+    const updated = await prisma.realmTagUnit.update({
+      where: {
+        realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
+      },
+      data,
+    });
+    await patchContentRealmTagKeysToMeili(unitId);
+    return updated;
+  }
+
+  /**
+   * Delete a RealmTagUnit and the underlying RealmTagVote rows for that triple.
+   * Does NOT cascade to UnitTag.
+   */
+  async deleteRealmTagUnit(
+    realmUnitId: string,
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      await tx.realmTagVote.deleteMany({
+        where: { realmUnitId, unitId, tagUnitId },
+      });
+      await tx.realmTagUnit.delete({
+        where: {
+          realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
+        },
+      });
+    });
+    await patchContentRealmTagKeysToMeili(unitId);
+  }
+
+  /**
+   * Cast a RealmTagVote upsert and recompute the parent RealmTagUnit's
+   * `score` and `voteCount`. Membership check is enforced by the route at
+   * write time; votes are retained even if the member later leaves.
+   */
+  async castRealmTagVote(
+    userId: string,
+    realmUnitId: string,
+    unitId: string,
+    tagUnitId: string,
+    value: number,
+  ): Promise<void> {
+    const clamped = value > 0 ? 1 : -1;
+
+    await prisma.$transaction(async (tx) => {
+      await tx.realmTagVote.upsert({
+        where: {
+          realmUnitId_userId_unitId_tagUnitId: {
+            realmUnitId,
+            userId,
+            unitId,
+            tagUnitId,
+          },
+        },
+        update: { value: clamped },
+        create: { realmUnitId, userId, unitId, tagUnitId, value: clamped },
+      });
+
+      const agg = await tx.realmTagVote.aggregate({
+        where: { realmUnitId, unitId, tagUnitId },
+        _sum: { value: true },
+        _count: { value: true },
+      });
+
+      await tx.realmTagUnit.update({
+        where: {
+          realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
+        },
+        data: {
+          score: agg._sum.value ?? 0,
+          voteCount: agg._count.value ?? 0,
+        },
+      });
+    });
+
+    await patchContentRealmTagKeysToMeili(unitId);
+  }
+
+  /**
+   * List RealmTagUnit rows for a given (realm, unit), ordered pin-first
+   * then score-desc. Regular callers do not see rows below the visibility
+   * threshold; privileged callers (admin / realm owner) see them so the
+   * route can flag them.
+   */
+  async listRealmTagsForUnit(
+    realmUnitId: string,
+    unitId: string,
+    options?: { includeBelowThreshold?: boolean },
+  ): Promise<RealmTagUnit[]> {
+    const where: Prisma.RealmTagUnitWhereInput = options?.includeBelowThreshold
+      ? { realmUnitId, unitId }
+      : {
+          realmUnitId,
+          unitId,
+          score: { gt: REALM_TAG_VISIBILITY_THRESHOLD },
+        };
+
+    return prisma.realmTagUnit.findMany({
+      where,
+      orderBy: [
+        { pinned: "desc" },
+        { position: "asc" },
+        { score: "desc" },
+        { tagUnitId: "asc" },
+      ],
+    });
+  }
+
+  /**
+   * Admin-only discovery: list RealmTagUnit rows at or below the given
+   * score threshold, optionally constrained to a single realm. Ordered
+   * ascending so the worst offenders surface first.
+   */
+  async listLowScoreRealmTagUnits(
+    threshold: number,
+    limit: number,
+    realmUnitId?: string,
+  ): Promise<RealmTagUnit[]> {
+    return prisma.realmTagUnit.findMany({
+      where: {
+        score: { lte: threshold },
+        ...(realmUnitId ? { realmUnitId } : {}),
+      },
+      orderBy: [
+        { score: "asc" },
+        { realmUnitId: "asc" },
+        { unitId: "asc" },
+        { tagUnitId: "asc" },
+      ],
+      take: Math.max(1, Math.min(limit, 200)),
+    });
+  }
+
+  // --- Legacy realm-tag-unit aliases (kept for the existing `/realm/:unitId/tags` route) ---
+
+  /**
+   * @deprecated Use {@link createRealmTagUnit} via `POST /realm-tag-units`.
+   * The old cascade-to-UnitTag path was removed; this now writes only the
+   * RealmTagUnit row with no global side-effects.
+   */
   async addRealmTagUnit(
     realmUnitId: string,
     tagUnitId: string,
     unitId: string,
+    actorUserId?: string,
   ): Promise<RealmTagUnitDTO> {
-    const row = await prisma.realmTagUnit.create({
-      data: { realmUnitId, tagUnitId, unitId },
-    });
+    if (actorUserId) {
+      const row = await this.createRealmTagUnit(
+        actorUserId,
+        realmUnitId,
+        unitId,
+        tagUnitId,
+      );
+      return mapRealmTagUnitToDTO(row);
+    }
 
-    // Cascade: increment score on UnitTag
-    await prisma.unitTag.upsert({
+    const row = await prisma.realmTagUnit.upsert({
       where: {
-        unitId_tagUnitId: { unitId, tagUnitId },
+        realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
       },
-      update: { score: { increment: 1 } },
-      create: { unitId, tagUnitId, score: 1 },
+      update: {},
+      create: { realmUnitId, tagUnitId, unitId, score: 0, voteCount: 0 },
     });
-
     await patchContentRealmTagKeysToMeili(unitId);
     return mapRealmTagUnitToDTO(row);
   }
@@ -313,12 +549,7 @@ export class RealmService {
     tagUnitId: string,
     unitId: string,
   ): Promise<void> {
-    await prisma.realmTagUnit.delete({
-      where: {
-        realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
-      },
-    });
-    await patchContentRealmTagKeysToMeili(unitId);
+    await this.deleteRealmTagUnit(realmUnitId, unitId, tagUnitId);
   }
   async listByMember(
     userId: string,

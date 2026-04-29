@@ -1,54 +1,54 @@
 ## 1. Schema and migration (package/server/prisma)
 
-- [ ] 1.1 Add `pinned: Boolean @default(false)` and `position: String?` columns to `UnitTag` in `package/server/prisma/schema.prisma`
-- [ ] 1.2 Add `score: Int @default(0)`, `voteCount: Int @default(0)`, `pinned: Boolean @default(false)`, `position: String?`, `createdAt`, and `updatedAt` columns to `RealmTagUnit` in `package/server/prisma/schema.prisma`
-- [ ] 1.3 Add new `RealmTagVote` model with composite primary key `(realmUnitId, userId, unitId, tagUnitId)`, `value: Int`, `createdAt`, and the appropriate relations to `Realm`, `User`, `Unit (unit)`, `Unit (tag)`
-- [ ] 1.4 Generate the migration with `bun run prisma:migrate` and verify the SQL is purely additive (new columns, new table, no destructive changes)
-- [ ] 1.5 Add an index on `(unitId, pinned, position)` and `(unitId, score)` for `UnitTag`; on `(realmUnitId, unitId, pinned, position)` and `(realmUnitId, unitId, score)` for `RealmTagUnit`; and the obvious lookup indexes on `RealmTagVote`
-- [ ] 1.6 Write a one-time backfill script: for each `UnitTag` with `score >= 1000`, set `pinned = true`, assign `position` deterministically (e.g. by `fractional-indexing` from a low base, ordered by descending legacy score), then reset `score = SUM(TagVote.value)` and `voteCount = COUNT(TagVote)` for that pair. Run as part of the migration deploy, idempotent.
-- [ ] 1.7 Update the seed installer (`package/server/prisma/seed*` or equivalent) to create seed-tag UnitTag rows with `pinned = true` and a low deterministic `position` instead of `score = 1000`
-- [ ] 1.8 Run `bun run prisma:generate` and verify the client compiles in `package/server`
+- [x] 1.1 Add `pinned: Boolean @default(false)` and `position: String?` columns to `UnitTag` in `package/server/prisma/schema.prisma`
+- [x] 1.2 Add `score: Int @default(0)`, `voteCount: Int @default(0)`, `pinned: Boolean @default(false)`, `position: String?`, `createdAt`, and `updatedAt` columns to `RealmTagUnit` in `package/server/prisma/schema.prisma`
+- [x] 1.3 Add new `RealmTagVote` model with composite primary key `(realmUnitId, userId, unitId, tagUnitId)`, `value: Int`, `createdAt`, and the appropriate relations to `Realm`, `User`, `Unit (unit)`, `Unit (tag)`
+- [x] 1.4 Generate the migration with `bun run prisma:migrate` and verify the SQL is purely additive (new columns, new table, no destructive changes)
+- [x] 1.5 Add an index on `(unitId, pinned, position)` and `(unitId, score)` for `UnitTag`; on `(realmUnitId, unitId, pinned, position)` and `(realmUnitId, unitId, score)` for `RealmTagUnit`; and the obvious lookup indexes on `RealmTagVote`
+- [x] 1.6 Write a one-time backfill script: for each `UnitTag` with `score >= 1000`, set `pinned = true`, assign `position` deterministically (e.g. by `fractional-indexing` from a low base, ordered by descending legacy score), then reset `score = SUM(TagVote.value)` and `voteCount = COUNT(TagVote)` for that pair. Run as part of the migration deploy, idempotent.
+- [x] 1.7 Update the seed installer (`package/server/prisma/seed*` or equivalent) to create seed-tag UnitTag rows with `pinned = true` and a low deterministic `position` instead of `score = 1000`
+- [x] 1.8 Run `bun run prisma:generate` and verify the client compiles in `package/server`
 
 ## 2. Server: domain types, mappers, services (package/server)
 
-- [ ] 2.1 Update `tag.types.ts` and `tag.mapper.ts` to include `pinned` and `position` on `UnitTagDTO`
-- [ ] 2.2 Update or create `realm-tag.types.ts` / `realm-tag.mapper.ts` to expose `score`, `voteCount`, `pinned`, `position` on `RealmTagUnitDTO`
-- [ ] 2.3 Add `realm-tag-vote.types.ts` / `realm-tag-vote.mapper.ts` for `RealmTagVoteDTO`
-- [ ] 2.4 Implement `tag.service.createUnitTag(userId, unitId, tagUnitId)` with creation-as-vote semantics: idempotent on existing TagVote by same user; create UnitTag (score=1, voteCount=1) plus first TagVote on first call; insert TagVote (+1) and increment UnitTag on subsequent distinct-user calls
-- [ ] 2.5 Implement `tag.service.setUnitTagPin(actorId, unitId, tagUnitId, { pinned, position })` with authorization: platform admin OR `Unit.userId`. Reject if `Unit.userId IS NULL` and actor is not admin.
-- [ ] 2.6 Implement `tag.service.deleteUnitTag(actorId, unitId, tagUnitId)` with the same authorization as 2.5; cascade-delete the corresponding `TagVote` rows
-- [ ] 2.7 Implement `tag.service.castTagVote(userId, unitId, tagUnitId, value)` upsert on composite PK; recompute and persist `UnitTag.score` and `voteCount` from `Σ TagVote.value` and `count(TagVote)` (or apply the delta atomically)
-- [ ] 2.8 Implement `realm-tag.service.createRealmTagUnit(userId, realmUnitId, unitId, tagUnitId)` mirroring 2.4 with realm-membership precondition checked at write time and writing/incrementing via `RealmTagVote`
-- [ ] 2.9 Implement `realm-tag.service.setRealmTagUnitPin(actorId, realmUnitId, unitId, tagUnitId, { pinned, position })` with authorization: platform admin OR `Realm.owner`. Reject realm moderators and regular members.
-- [ ] 2.10 Implement `realm-tag.service.deleteRealmTagUnit(actorId, realmUnitId, unitId, tagUnitId)` with the same authorization as 2.9; cascade-delete the corresponding `RealmTagVote` rows
-- [ ] 2.11 Implement `realm-tag.service.castRealmTagVote(userId, realmUnitId, unitId, tagUnitId, value)` with realm-membership check at write time; upsert on composite PK; update denormalized `score`/`voteCount`
-- [ ] 2.12 Implement `realm-tag.service.removeRealmTagUnitCascade` is **not** added — verify no existing service code couples `RealmTagUnit` create/delete to `UnitTag` mutations and remove any such code paths
-- [ ] 2.13 Update list/read services for unit tag context to apply pin-first then score-desc ordering, and to apply the `score ≤ -100` regular-user suppression with the `belowVisibilityThreshold` flag for admin/owner callers
-- [ ] 2.14 Implement low-score discovery service for both UnitTag and RealmTagUnit (admin-only; supports `threshold` and optional `realmUnitId` filter; orders by score asc)
+- [x] 2.1 Update `tag.types.ts` and `tag.mapper.ts` to include `pinned` and `position` on `UnitTagDTO`
+- [x] 2.2 Update or create `realm-tag.types.ts` / `realm-tag.mapper.ts` to expose `score`, `voteCount`, `pinned`, `position` on `RealmTagUnitDTO`
+- [x] 2.3 Add `realm-tag-vote.types.ts` / `realm-tag-vote.mapper.ts` for `RealmTagVoteDTO`
+- [x] 2.4 Implement `tag.service.createUnitTag(userId, unitId, tagUnitId)` with creation-as-vote semantics: idempotent on existing TagVote by same user; create UnitTag (score=1, voteCount=1) plus first TagVote on first call; insert TagVote (+1) and increment UnitTag on subsequent distinct-user calls
+- [x] 2.5 Implement `tag.service.setUnitTagPin(actorId, unitId, tagUnitId, { pinned, position })` with authorization: platform admin OR `Unit.userId`. Reject if `Unit.userId IS NULL` and actor is not admin.
+- [x] 2.6 Implement `tag.service.deleteUnitTag(actorId, unitId, tagUnitId)` with the same authorization as 2.5; cascade-delete the corresponding `TagVote` rows
+- [x] 2.7 Implement `tag.service.castTagVote(userId, unitId, tagUnitId, value)` upsert on composite PK; recompute and persist `UnitTag.score` and `voteCount` from `Σ TagVote.value` and `count(TagVote)` (or apply the delta atomically)
+- [x] 2.8 Implement `realm-tag.service.createRealmTagUnit(userId, realmUnitId, unitId, tagUnitId)` mirroring 2.4 with realm-membership precondition checked at write time and writing/incrementing via `RealmTagVote`
+- [x] 2.9 Implement `realm-tag.service.setRealmTagUnitPin(actorId, realmUnitId, unitId, tagUnitId, { pinned, position })` with authorization: platform admin OR `Realm.owner`. Reject realm moderators and regular members.
+- [x] 2.10 Implement `realm-tag.service.deleteRealmTagUnit(actorId, realmUnitId, unitId, tagUnitId)` with the same authorization as 2.9; cascade-delete the corresponding `RealmTagVote` rows
+- [x] 2.11 Implement `realm-tag.service.castRealmTagVote(userId, realmUnitId, unitId, tagUnitId, value)` with realm-membership check at write time; upsert on composite PK; update denormalized `score`/`voteCount`
+- [x] 2.12 Implement `realm-tag.service.removeRealmTagUnitCascade` is **not** added — verify no existing service code couples `RealmTagUnit` create/delete to `UnitTag` mutations and remove any such code paths
+- [x] 2.13 Update list/read services for unit tag context to apply pin-first then score-desc ordering, and to apply the `score ≤ -100` regular-user suppression with the `belowVisibilityThreshold` flag for admin/owner callers
+- [x] 2.14 Implement low-score discovery service for both UnitTag and RealmTagUnit (admin-only; supports `threshold` and optional `realmUnitId` filter; orders by score asc)
 
 ## 3. Server: API routes (package/server)
 
-- [ ] 3.1 Update `POST /unit-tags` route to use the new creation-as-vote service; reflect new DTO shape in response
-- [ ] 3.2 Update / add `POST /tag-votes` route as a separate vote action with the same authority semantics
-- [ ] 3.3 Add `PATCH /unit-tags/:unitId/:tagUnitId` route for pin/position mutations; enforce authorization in the route handler
-- [ ] 3.4 Add `DELETE /unit-tags/:unitId/:tagUnitId` route with the same authorization
-- [ ] 3.5 Update `POST /realm-tag-units` route to permit any realm member (not only mod/owner); apply realm-membership check; return new DTO
-- [ ] 3.6 Add `POST /realm-tag-votes` route for explicit RealmTagVote casts (membership-checked)
-- [ ] 3.7 Add `PATCH /realm-tag-units/:realmUnitId/:unitId/:tagUnitId` route for pin/position mutations; enforce admin OR `Realm.owner`
-- [ ] 3.8 Add `DELETE /realm-tag-units/:realmUnitId/:unitId/:tagUnitId` route with the same authorization
-- [ ] 3.9 Add `GET /admin/low-score-tags` admin-only listing endpoint supporting both global (UnitTag) and realm (RealmTagUnit) scopes via a `scope` query param
-- [ ] 3.10 Update `GET /tags/for-unit/:unitId/context` (and any related listing endpoint) to apply pin-first ordering and `score ≤ -100` regular-user suppression
-- [ ] 3.11 Update OpenAPI / contract derivation so the new shapes propagate to `@rezics/contract`
+- [x] 3.1 Update `POST /unit-tags` route to use the new creation-as-vote service; reflect new DTO shape in response
+- [x] 3.2 Update / add `POST /tag-votes` route as a separate vote action with the same authority semantics
+- [x] 3.3 Add `PATCH /unit-tags/:unitId/:tagUnitId` route for pin/position mutations; enforce authorization in the route handler
+- [x] 3.4 Add `DELETE /unit-tags/:unitId/:tagUnitId` route with the same authorization
+- [x] 3.5 Update `POST /realm-tag-units` route to permit any realm member (not only mod/owner); apply realm-membership check; return new DTO
+- [x] 3.6 Add `POST /realm-tag-votes` route for explicit RealmTagVote casts (membership-checked)
+- [x] 3.7 Add `PATCH /realm-tag-units/:realmUnitId/:unitId/:tagUnitId` route for pin/position mutations; enforce admin OR `Realm.owner`
+- [x] 3.8 Add `DELETE /realm-tag-units/:realmUnitId/:unitId/:tagUnitId` route with the same authorization
+- [x] 3.9 Add `GET /admin/low-score-tags` admin-only listing endpoint supporting both global (UnitTag) and realm (RealmTagUnit) scopes via a `scope` query param
+- [x] 3.10 Update `GET /tags/for-unit/:unitId/context` (and any related listing endpoint) to apply pin-first ordering and `score ≤ -100` regular-user suppression
+- [x] 3.11 Update OpenAPI / contract derivation so the new shapes propagate to `@rezics/contract`
 
 ## 4. Contracts (package/contract)
 
-- [ ] 4.1 Add `pinned`, `position` fields to `UnitTagDTO` Typebox schema
-- [ ] 4.2 Add `score`, `voteCount`, `pinned`, `position` fields to `RealmTagUnitDTO` Typebox schema
-- [ ] 4.3 Add `RealmTagVoteDTO` Typebox schema
-- [ ] 4.4 Add request bodies for new pin/delete/cast endpoints (`PatchUnitTagBody`, `PatchRealmTagUnitBody`, `CastRealmTagVoteBody`, etc.)
-- [ ] 4.5 Add response shape for `GET /admin/low-score-tags`
-- [ ] 4.6 Run `bun test` in `package/contract` and confirm Typebox validation passes
-- [ ] 4.7 Verify cross-package imports use the file suffix (per repo convention) for any new shared types
+- [x] 4.1 Add `pinned`, `position` fields to `UnitTagDTO` Typebox schema
+- [x] 4.2 Add `score`, `voteCount`, `pinned`, `position` fields to `RealmTagUnitDTO` Typebox schema
+- [x] 4.3 Add `RealmTagVoteDTO` Typebox schema
+- [x] 4.4 Add request bodies for new pin/delete/cast endpoints (`PatchUnitTagBody`, `PatchRealmTagUnitBody`, `CastRealmTagVoteBody`, etc.)
+- [x] 4.5 Add response shape for `GET /admin/low-score-tags`
+- [x] 4.6 Run `bun test` in `package/contract` and confirm Typebox validation passes
+- [x] 4.7 Verify cross-package imports use the file suffix (per repo convention) for any new shared types
 
 ## 5. API client + frontend wiring (package/api, package/app)
 

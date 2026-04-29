@@ -6,10 +6,14 @@ import type {
   UpdateTagInput,
 } from "@rezics/contract";
 import { FALLBACK_LANGUAGE, parseIdsCsv, validateSlug } from "@rezics/contract";
+import type { UnitTag } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { patchContentTagsToMeili } from "@/meili/content/sync";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
 import { tagUnitInclude, unitTagInclude } from "./types";
+
+/** Score at or below this threshold hides a UnitTag from regular users. */
+export const VISIBILITY_THRESHOLD = -100;
 
 export class TagService {
   /**
@@ -137,32 +141,117 @@ export class TagService {
   }
 
   /**
-   * Attach a tag to a unit via UnitTag junction (upsert with initial score=1).
+   * Create a UnitTag with creation-as-vote semantics.
+   *
+   * - First call: writes the UnitTag (score=1, voteCount=1) and a +1 TagVote.
+   * - Subsequent distinct-user calls: insert a TagVote and recompute score/voteCount.
+   * - Idempotent for the same user: existing TagVote is left untouched.
    */
-  async attachToUnit(tagUnitId: string, unitId: string): Promise<void> {
-    await prisma.unitTag.upsert({
-      where: {
-        unitId_tagUnitId: { unitId, tagUnitId },
-      },
-      update: {},
-      create: {
-        unitId,
-        tagUnitId,
-        score: 1,
-        voteCount: 0,
-      },
+  async createUnitTag(
+    userId: string,
+    unitId: string,
+    tagUnitId: string,
+  ): Promise<UnitTag> {
+    const result = await prisma.$transaction(async (tx) => {
+      const existingVote = await tx.tagVote.findUnique({
+        where: {
+          userId_unitId_tagUnitId: { userId, unitId, tagUnitId },
+        },
+      });
+
+      if (!existingVote) {
+        await tx.tagVote.create({
+          data: { userId, unitId, tagUnitId, value: 1 },
+        });
+      }
+
+      const agg = await tx.tagVote.aggregate({
+        where: { unitId, tagUnitId },
+        _sum: { value: true },
+        _count: { value: true },
+      });
+
+      return tx.unitTag.upsert({
+        where: { unitId_tagUnitId: { unitId, tagUnitId } },
+        update: {
+          score: agg._sum.value ?? 0,
+          voteCount: agg._count.value ?? 0,
+        },
+        create: {
+          unitId,
+          tagUnitId,
+          score: agg._sum.value ?? 0,
+          voteCount: agg._count.value ?? 0,
+        },
+      });
+    });
+
+    await patchContentTagsToMeili(unitId);
+    return result;
+  }
+
+  /**
+   * Set pin/position on a UnitTag. Authorization is enforced by the route.
+   * `position` may be null to clear it; `pinned=false` clears `position` too.
+   */
+  async setUnitTagPin(
+    unitId: string,
+    tagUnitId: string,
+    input: { pinned?: boolean; position?: string | null },
+  ): Promise<UnitTag> {
+    const data: { pinned?: boolean; position?: string | null } = {};
+    if (input.pinned !== undefined) {
+      data.pinned = input.pinned;
+      if (input.pinned === false) data.position = null;
+    }
+    if (input.position !== undefined) data.position = input.position;
+
+    const updated = await prisma.unitTag.update({
+      where: { unitId_tagUnitId: { unitId, tagUnitId } },
+      data,
+    });
+    await patchContentTagsToMeili(unitId);
+    return updated;
+  }
+
+  /**
+   * Delete a UnitTag and the underlying TagVote rows for that pair.
+   */
+  async deleteUnitTag(unitId: string, tagUnitId: string): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      await tx.tagVote.deleteMany({ where: { unitId, tagUnitId } });
+      await tx.unitTag.delete({
+        where: { unitId_tagUnitId: { unitId, tagUnitId } },
+      });
     });
     await patchContentTagsToMeili(unitId);
   }
 
   /**
    * Detach a tag from a unit by deleting the UnitTag row.
+   * Kept for the legacy admin "detach" route; prefer {@link deleteUnitTag}.
    */
   async detachFromUnit(tagUnitId: string, unitId: string): Promise<void> {
-    await prisma.unitTag.delete({
-      where: {
-        unitId_tagUnitId: { unitId, tagUnitId },
-      },
+    await this.deleteUnitTag(unitId, tagUnitId);
+  }
+
+  /**
+   * Backwards-compatible alias used by the legacy admin "attach" route.
+   * Records the attach as the actor's vote, matching {@link createUnitTag}.
+   */
+  async attachToUnit(
+    tagUnitId: string,
+    unitId: string,
+    actorUserId?: string,
+  ): Promise<void> {
+    if (actorUserId) {
+      await this.createUnitTag(actorUserId, unitId, tagUnitId);
+      return;
+    }
+    await prisma.unitTag.upsert({
+      where: { unitId_tagUnitId: { unitId, tagUnitId } },
+      update: {},
+      create: { unitId, tagUnitId, score: 0, voteCount: 0 },
     });
     await patchContentTagsToMeili(unitId);
   }
@@ -207,16 +296,46 @@ export class TagService {
   }
 
   /**
-   * Get all UnitTag rows for a given unit.
-   * Display labels are resolved separately via the batch translation query.
+   * Get UnitTag rows for a given unit, ordered pin-first then score-desc.
+   *
+   * Regular callers do not see rows with `score <= VISIBILITY_THRESHOLD`.
+   * Privileged callers (platform admin / unit owner) see them so the route
+   * can flag them with `belowVisibilityThreshold`.
    */
-  async getTagsForUnit(unitId: string): Promise<UnitTagWithRelations[]> {
+  async getTagsForUnit(
+    unitId: string,
+    options?: { includeBelowThreshold?: boolean },
+  ): Promise<UnitTagWithRelations[]> {
+    const where = options?.includeBelowThreshold
+      ? { unitId }
+      : { unitId, score: { gt: VISIBILITY_THRESHOLD } };
+
     const unitTags = await prisma.unitTag.findMany({
-      where: { unitId },
-      orderBy: { score: "desc" },
+      where,
+      orderBy: [
+        { pinned: "desc" },
+        { position: "asc" },
+        { score: "desc" },
+        { tagUnitId: "asc" },
+      ],
       include: unitTagInclude,
     });
     return unitTags as UnitTagWithRelations[];
+  }
+
+  /**
+   * Admin-only discovery: list UnitTag rows at or below the given score
+   * threshold, ordered ascending so the worst offenders surface first.
+   */
+  async listLowScoreUnitTags(
+    threshold: number,
+    limit: number,
+  ): Promise<UnitTag[]> {
+    return prisma.unitTag.findMany({
+      where: { score: { lte: threshold } },
+      orderBy: [{ score: "asc" }, { unitId: "asc" }, { tagUnitId: "asc" }],
+      take: Math.max(1, Math.min(limit, 200)),
+    });
   }
 
   /**

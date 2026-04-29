@@ -370,25 +370,27 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   .post(
     "/:unitId/tags",
     async ({ params, body, identity, set }): Promise<RealmTagUnitDTO> => {
-      // Moderator+ can manage tags
-      const actorMember = await realmService.getMember(
-        params.unitId,
-        identity.unitId,
-      );
-      if (
-        !actorMember ||
-        (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-          !BasicAdminPermission(identity.permission))
-      ) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to manage realm tags",
+      // Any realm member may add a tag inside a realm; creation acts as a
+      // vote. Pin/delete is restricted to admin/realm-owner via the
+      // separate `/realm-tag-units` route.
+      const isAdmin = BasicAdminPermission(identity.permission);
+      if (!isAdmin) {
+        const actorMember = await realmService.getMember(
+          params.unitId,
+          identity.unitId,
         );
+        if (!actorMember) {
+          set.status = 403;
+          throw new Error(
+            "Forbidden: only realm members may add tags inside a realm",
+          );
+        }
       }
       return realmService.addRealmTagUnit(
         params.unitId,
         body.tagUnitId,
         body.unitId,
+        identity.unitId,
       );
     },
     {
@@ -398,7 +400,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       detail: {
         summary: "Add realm-tag-unit",
         description:
-          "Add a realm-tag-unit link (moderator+ only, cascades score to UnitTag)",
+          "Add a realm-tag-unit link. Membership-checked; creation acts as a +1 RealmTagVote. Pin/delete uses /realm-tag-units.",
         tags: ["Realms"],
       },
     },
@@ -406,19 +408,15 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   .delete(
     "/:unitId/tags/:tagUnitId/:contentUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
-      const actorMember = await realmService.getMember(
-        params.unitId,
-        identity.unitId,
-      );
-      if (
-        !actorMember ||
-        (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-          !BasicAdminPermission(identity.permission))
-      ) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to manage realm tags",
-        );
+      // Pin/delete is restricted to platform admin or `Realm.owner`.
+      if (!BasicAdminPermission(identity.permission)) {
+        const realmUnit = await unitService.getByUnitId(params.unitId);
+        if (!realmUnit?.userId || realmUnit.userId !== identity.unitId) {
+          set.status = 403;
+          throw new Error(
+            "Forbidden: only platform admin or realm owner may delete realm tags",
+          );
+        }
       }
       await realmService.removeRealmTagUnit(
         params.unitId,

@@ -24,4 +24,16 @@ export const SEED_TAG_SLUGS: Record<SeedTagName, string> = {
   link: "link",
 };
 
-export const SEED_TAG_SCORE = 1000;
+/**
+ * Deterministic fractional-indexing-style position keys for seed-installed
+ * UnitTag rows. Prefixed with `!` so they sort lexicographically before any
+ * base62 key produced by the `fractional-indexing` library (which starts at
+ * digits/letters). Order across seeds is fixed by SEED_TAG_NAMES.
+ */
+export const SEED_TAG_POSITIONS: Record<SeedTagName, string> = {
+  book: "!a0",
+  game: "!a1",
+  media: "!a2",
+  post: "!a3",
+  link: "!a4",
+};

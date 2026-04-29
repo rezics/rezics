@@ -19,13 +19,23 @@ function resolveLabel(
 
 /**
  * Map a UnitTag junction row to the contract DTO.
+ * Set `belowVisibilityThreshold` when surfacing rows below the regular-user
+ * suppression threshold to admin/owner callers.
  */
-export function mapUnitTagToDTO(unitTag: UnitTagWithRelations): UnitTagDTO {
+export function mapUnitTagToDTO(
+  unitTag: UnitTagWithRelations,
+  options?: { belowVisibilityThreshold?: boolean },
+): UnitTagDTO {
   return {
     unitId: unitTag.unitId,
     tagUnitId: unitTag.tagUnitId,
     score: unitTag.score,
     voteCount: unitTag.voteCount,
+    pinned: unitTag.pinned,
+    position: unitTag.position ?? null,
+    ...(options?.belowVisibilityThreshold
+      ? { belowVisibilityThreshold: true }
+      : {}),
     createdAt: unitTag.createdAt.toISOString(),
     updatedAt: unitTag.updatedAt.toISOString(),
   };

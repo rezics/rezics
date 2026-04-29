@@ -3,6 +3,7 @@ import { languageSchema } from "./language";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { realmExtraSchema } from "./realm/realm-extra";
+import { unitTagDTOSchema } from "./tag";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -110,10 +111,102 @@ export const realmTagUnitDTOSchema = t.Object({
   realmUnitId: t.String(),
   tagUnitId: t.String(),
   unitId: t.String(),
+  score: t.Number(),
+  voteCount: t.Number(),
+  pinned: t.Boolean(),
+  position: t.Optional(t.Nullable(t.String())),
+  belowVisibilityThreshold: t.Optional(t.Boolean()),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
 export type RealmTagUnitDTO = (typeof realmTagUnitDTOSchema)["static"];
+
+// ============================================================
+// REALM TAG VOTE DTO
+// ============================================================
+
+export const realmTagVoteDTOSchema = t.Object({
+  realmUnitId: t.String(),
+  userId: t.String(),
+  unitId: t.String(),
+  tagUnitId: t.String(),
+  value: t.Number(),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type RealmTagVoteDTO = (typeof realmTagVoteDTOSchema)["static"];
+
+// ============================================================
+// REALM TAG UNIT MUTATIONS (pin / position / cast / create)
+// ============================================================
+
+export const createRealmTagUnitSchema = t.Object({
+  realmUnitId: t.String(),
+  unitId: t.String(),
+  tagUnitId: t.String(),
+});
+
+export type CreateRealmTagUnitInput =
+  (typeof createRealmTagUnitSchema)["static"];
+
+/** Body for PATCH /realm-tag-units/:realmUnitId/:unitId/:tagUnitId */
+export const patchRealmTagUnitSchema = t.Object({
+  pinned: t.Optional(t.Boolean()),
+  position: t.Optional(t.Nullable(t.String())),
+});
+
+export type PatchRealmTagUnitInput =
+  (typeof patchRealmTagUnitSchema)["static"];
+
+export const realmTagUnitPathParamsSchema = t.Object({
+  realmUnitId: t.String(),
+  unitId: t.String(),
+  tagUnitId: t.String(),
+});
+
+export type RealmTagUnitPathParams =
+  (typeof realmTagUnitPathParamsSchema)["static"];
+
+export const castRealmTagVoteSchema = t.Object({
+  realmUnitId: t.String(),
+  unitId: t.String(),
+  tagUnitId: t.String(),
+  value: t.Number(),
+});
+
+export type CastRealmTagVoteInput =
+  (typeof castRealmTagVoteSchema)["static"];
+
+// ============================================================
+// ADMIN: LOW-SCORE TAG DISCOVERY
+// ============================================================
+
+export const lowScoreTagsScopeSchema = t.Union([
+  t.Literal("global"),
+  t.Literal("realm"),
+]);
+
+export type LowScoreTagsScope = (typeof lowScoreTagsScopeSchema)["static"];
+
+export const lowScoreTagsQuerySchema = t.Object({
+  scope: t.Optional(lowScoreTagsScopeSchema),
+  threshold: t.Optional(t.Numeric()),
+  realmUnitId: t.Optional(t.String()),
+  limit: t.Optional(t.Numeric()),
+});
+
+export type LowScoreTagsQuery = (typeof lowScoreTagsQuerySchema)["static"];
+
+export const lowScoreTagsResponseSchema = t.Object({
+  scope: lowScoreTagsScopeSchema,
+  threshold: t.Number(),
+  unitTags: t.Optional(t.Array(unitTagDTOSchema)),
+  realmTagUnits: t.Optional(t.Array(realmTagUnitDTOSchema)),
+});
+
+export type LowScoreTagsResponse =
+  (typeof lowScoreTagsResponseSchema)["static"];
 
 // ============================================================
 // REALM LIST/QUERY

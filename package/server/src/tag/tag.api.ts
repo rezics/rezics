@@ -9,6 +9,7 @@ import type {
 } from "@rezics/contract";
 import {
   attachTagSchema,
+  BasicAdminPermission,
   batchTagTranslationQuerySchema,
   castTagVoteSchema,
   createTagSchema,
@@ -19,10 +20,14 @@ import {
   updateTagSchema,
 } from "@rezics/contract";
 import { Elysia, status, t } from "elysia";
-import { authMacro, verifyAdminFromDb } from "@/middleware";
+import {
+  authMacro,
+  tryResolveIdentity,
+  verifyAdminFromDb,
+} from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
-import { tagService } from "./tag.service";
+import { tagService, VISIBILITY_THRESHOLD } from "./tag.service";
 import { getTagContext } from "./tag-context.service";
 
 export const tagApi = new Elysia({ prefix: "/tag" })
@@ -196,7 +201,8 @@ export const tagApi = new Elysia({ prefix: "/tag" })
     },
   )
 
-  // POST /attach - attach tag to unit (admin)
+  // POST /attach - attach tag to unit (admin); records the attach as the
+  // admin actor's +1 vote so score derivation stays uniform.
   .post(
     "/attach",
     async ({ body, identity }) => {
@@ -210,7 +216,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const { tagUnitId, unitId } = body as AttachTagInput;
-      await tagService.attachToUnit(tagUnitId, unitId);
+      await tagService.attachToUnit(tagUnitId, unitId, identity.unitId);
       return { message: "Tag attached successfully" };
     },
     {
@@ -262,15 +268,22 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   // GET /for-unit/:unitId/context - get tag context for a unit
   .get(
     "/for-unit/:unitId/context",
-    async ({ params }) => {
-      return getTagContext(params.unitId);
+    async ({ headers, params }) => {
+      const identity = await tryResolveIdentity(headers["authorization"]);
+      const unit = await unitService.getByUnitId(params.unitId);
+      const isPrivileged =
+        (identity && BasicAdminPermission(identity.permission)) ||
+        (identity?.unitId != null && unit?.userId === identity.unitId);
+      return getTagContext(params.unitId, identity?.unitId ?? undefined, {
+        includeBelowThreshold: isPrivileged,
+      });
     },
     {
       params: tagParamsSchema,
       detail: {
         summary: "Get tag context for a unit",
         description:
-          "Get global tags and realm-specific tag highlights for a unit",
+          "Pin-first/score-desc ordering. Rows with score ≤ -100 are hidden from regular callers and surfaced (with a flag) to admins / unit owner.",
         tags: ["Tags"],
       },
     },
@@ -279,17 +292,31 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   // GET /for-unit/:unitId - get tags for a specific unit
   .get(
     "/for-unit/:unitId",
-    async ({ params }): Promise<{ tags: UnitTagDTO[] }> => {
-      const unitTags = await tagService.getTagsForUnit(params.unitId);
+    async ({ headers, params }): Promise<{ tags: UnitTagDTO[] }> => {
+      const identity = await tryResolveIdentity(headers["authorization"]);
+      const unit = await unitService.getByUnitId(params.unitId);
+      const isPrivileged =
+        (identity && BasicAdminPermission(identity.permission)) ||
+        (identity?.unitId != null && unit?.userId === identity.unitId);
+
+      const unitTags = await tagService.getTagsForUnit(params.unitId, {
+        includeBelowThreshold: isPrivileged,
+      });
       return {
-        tags: unitTags.map((ut) => mapUnitTagToDTO(ut)),
+        tags: unitTags.map((ut) =>
+          mapUnitTagToDTO(ut, {
+            belowVisibilityThreshold:
+              isPrivileged && ut.score <= VISIBILITY_THRESHOLD,
+          }),
+        ),
       };
     },
     {
       params: tagParamsSchema,
       detail: {
         summary: "Get tags for a unit",
-        description: "Get all scored tags attached to a specific unit",
+        description:
+          "Pin-first/score-desc ordering. Rows with score ≤ -100 are hidden from regular callers and surfaced (with a flag) to admins / unit owner.",
         tags: ["Tags"],
       },
     },

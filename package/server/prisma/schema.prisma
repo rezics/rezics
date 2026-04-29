@@ -145,11 +145,14 @@ model Unit {
   tagVotesAsTag  TagVote[] @relation("TagVoteTag")
 
   // Realm organization
-  realmContent    RealmUnit[]    @relation("RealmContent")
-  inRealms        RealmUnit[]    @relation("UnitInRealm")
-  realmTagAsRealm RealmTagUnit[] @relation("RealmTagRealm")
-  realmTagAsTag   RealmTagUnit[] @relation("RealmTagTag")
-  realmTagAsUnit  RealmTagUnit[] @relation("RealmTagUnit")
+  realmContent        RealmUnit[]    @relation("RealmContent")
+  inRealms            RealmUnit[]    @relation("UnitInRealm")
+  realmTagAsRealm     RealmTagUnit[] @relation("RealmTagRealm")
+  realmTagAsTag       RealmTagUnit[] @relation("RealmTagTag")
+  realmTagAsUnit      RealmTagUnit[] @relation("RealmTagUnit")
+  realmTagVoteAsRealm RealmTagVote[] @relation("RealmTagVoteRealm")
+  realmTagVoteAsTag   RealmTagVote[] @relation("RealmTagVoteTag")
+  realmTagVoteAsUnit  RealmTagVote[] @relation("RealmTagVoteUnit")
 
   // Attribution
   attributions Attribution[] @relation("AttributedUnit")
@@ -515,10 +518,16 @@ model RealmUnit {
 }
 
 model RealmTagUnit {
-  realmUnitId String   @db.Uuid
-  tagUnitId   String   @db.Uuid
-  unitId      String   @db.Uuid
-  createdAt   DateTime @default(now())
+  realmUnitId String  @db.Uuid
+  tagUnitId   String  @db.Uuid
+  unitId      String  @db.Uuid
+  score       Int     @default(0)
+  voteCount   Int     @default(0)
+  pinned      Boolean @default(false)
+  position    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   realm Unit @relation("RealmTagRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
   tag   Unit @relation("RealmTagTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
@@ -528,6 +537,26 @@ model RealmTagUnit {
   @@index([realmUnitId, unitId])
   @@index([unitId, realmUnitId])
   @@index([tagUnitId, realmUnitId])
+  @@index([realmUnitId, unitId, pinned, position])
+  @@index([realmUnitId, unitId, score])
+}
+
+model RealmTagVote {
+  realmUnitId String @db.Uuid
+  userId      String @db.Uuid
+  unitId      String @db.Uuid
+  tagUnitId   String @db.Uuid
+  value       Int
+
+  createdAt DateTime @default(now())
+
+  realm Unit @relation("RealmTagVoteRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
+  unit  Unit @relation("RealmTagVoteUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  tag   Unit @relation("RealmTagVoteTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+
+  @@id([realmUnitId, userId, unitId, tagUnitId])
+  @@index([realmUnitId, unitId, tagUnitId])
+  @@index([userId])
 }
 
 // ============================================================
@@ -538,8 +567,10 @@ model UnitTag {
   unitId    String @db.Uuid
   tagUnitId String @db.Uuid
 
-  score     Int @default(0)
-  voteCount Int @default(0)
+  score     Int     @default(0)
+  voteCount Int     @default(0)
+  pinned    Boolean @default(false)
+  position  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -550,6 +581,7 @@ model UnitTag {
   @@id([unitId, tagUnitId])
   @@index([unitId, score])
   @@index([tagUnitId, score])
+  @@index([unitId, pinned, position])
 }
 
 model TagVote {

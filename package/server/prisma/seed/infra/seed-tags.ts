@@ -2,7 +2,7 @@ import {
   DEFAULT_LANGUAGE,
   FALLBACK_LANGUAGE,
   SEED_TAG_NAMES,
-  SEED_TAG_SCORE,
+  SEED_TAG_POSITIONS,
   SEED_TAG_SLUGS,
   SEED_TAG_TITLES,
   type SeedTagName,
@@ -71,16 +71,20 @@ export async function seedContentTypeTags(
       );
     }
 
+    const position = SEED_TAG_POSITIONS[name];
+
     await prisma.unitTag.upsert({
       where: {
         unitId_tagUnitId: { unitId: tagMap[name], tagUnitId: tagMap[name] },
       },
-      update: { score: SEED_TAG_SCORE },
+      update: { pinned: true, position },
       create: {
         unitId: tagMap[name],
         tagUnitId: tagMap[name],
-        score: SEED_TAG_SCORE,
+        score: 0,
         voteCount: 0,
+        pinned: true,
+        position,
       },
     });
   }

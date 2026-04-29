@@ -21,12 +21,12 @@ import { userBatchApi } from "./notify/user-batch.api";
 import { pinboardApi } from "./pinboard";
 import { postApi } from "./post";
 import { reactionWriteApi } from "./reaction";
-import { realmApi } from "./realm";
+import { realmApi, realmTagUnitApi, realmTagVoteApi } from "./realm";
 import { scoreApi } from "./score/score.api";
 import { sessionApi } from "./session";
 import { collectionApi, shelfApi } from "./shelf";
 import { statsAdminApi } from "./stat";
-import { tagApi } from "./tag";
+import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";
 import { tokenApi } from "./token";
 import { translationGroupApi } from "./translation-group";
 import { unitApi } from "./unit";
@@ -168,6 +168,8 @@ app
   .use(linkApi)
   .use(zoneApi)
   .use(realmApi)
+  .use(realmTagUnitApi)
+  .use(realmTagVoteApi)
   .use(pinboardApi)
   .use(attributionApi)
   .use(userApi)
@@ -176,6 +178,9 @@ app
   .use(unitApi)
   .use(infraApi)
   .use(tagApi)
+  .use(unitTagApi)
+  .use(tagVoteApi)
+  .use(lowScoreTagsAdminApi)
   .use(translationGroupApi)
   .use(scoreApi)
   .use(internalApi)
