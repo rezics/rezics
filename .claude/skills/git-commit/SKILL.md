@@ -96,6 +96,8 @@ Follow the format:
 
 **Scope** (optional): a short noun indicating the area, e.g. `feat(auth):`, `fix(api):`.
 
+**Never** append any co-authorship, attribution, or AI-generated trailer to the commit message, regardless of the tool or environment.
+
 ### Step 7 — Present message and ask: commit or modify?
 
 After generating the commit message, always display it in a code block, then ask:
