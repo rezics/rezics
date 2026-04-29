@@ -544,6 +544,54 @@ export default {
         title: "No content in this realm yet",
       },
     },
+    extra: {
+      pinboard: {
+        note: "Ordered list of Unit IDs pinned within the realm. Surfaced on the realm page above the feed; entries are usually POST Releases of Work entries authored by the realm's contributors.",
+      },
+      announcement: {
+        note: "Ordered list of Unit IDs reserved for special pages like the homepage announcement bar. Not for general forum notifications; reserved for special pages like the homepage announcement bar.",
+      },
+    },
+  },
+
+  notify: {
+    kinds: {
+      work_link_claim_pending: "Work-link claim pending review",
+      work_link_claim_approved: "Work-link claim approved",
+      work_link_claim_rejected: "Work-link claim rejected",
+    },
+  },
+
+  work_link_claim: {
+    inbox: {
+      title: "Pending claims",
+      empty: "No claims awaiting review.",
+      release: "Release",
+      claimer: "Claimer",
+      submitted_at: "Submitted",
+      reason: "Reason",
+      review: "Review",
+      approve: "Approve",
+      reject: "Reject",
+      withdraw: "Withdraw",
+    },
+    modal: {
+      approve_title: "Approve claim",
+      approve_description:
+        "This will link the release to your work and notify the claimer.",
+      reject_title: "Reject claim",
+      reject_description:
+        "Provide a brief reason. The claimer will be notified.",
+      reject_reason_label: "Reason",
+      reject_reason_placeholder: "Optional — explain why this claim is rejected",
+      withdraw_title: "Withdraw claim",
+      withdraw_description:
+        "This will remove your pending claim. You can submit again later.",
+      approve_done: "Claim approved.",
+      reject_done: "Claim rejected.",
+      withdraw_done: "Claim withdrawn.",
+      action_failed: "Action failed: {{error}}",
+    },
   },
 
   // Review

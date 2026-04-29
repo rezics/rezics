@@ -246,4 +246,55 @@ export default {
     close: "Schließen",
     open_drawer: "Schublade öffnen",
   },
+
+  realm: {
+    extra: {
+      pinboard: {
+        note: "Geordnete Liste von Unit-IDs, die im Realm angeheftet sind. Wird auf der Realm-Seite über dem Feed angezeigt; die Einträge sind in der Regel POST-Releases von Work-Einträgen, die von Mitwirkenden des Realms verfasst wurden.",
+      },
+      announcement: {
+        note: "Geordnete Liste von Unit-IDs, die für besondere Seiten wie die Ankündigungsleiste der Startseite reserviert sind. Nicht für allgemeine Forum-Benachrichtigungen; reserviert für besondere Seiten wie die Ankündigungsleiste der Startseite.",
+      },
+    },
+  },
+
+  notify: {
+    kinds: {
+      work_link_claim_pending: "Werkverknüpfungsanfrage zur Prüfung",
+      work_link_claim_approved: "Werkverknüpfungsanfrage genehmigt",
+      work_link_claim_rejected: "Werkverknüpfungsanfrage abgelehnt",
+    },
+  },
+
+  work_link_claim: {
+    inbox: {
+      title: "Offene Anfragen",
+      empty: "Keine Anfragen zur Prüfung.",
+      release: "Release",
+      claimer: "Antragsteller",
+      submitted_at: "Eingereicht",
+      reason: "Begründung",
+      review: "Prüfen",
+      approve: "Genehmigen",
+      reject: "Ablehnen",
+      withdraw: "Zurückziehen",
+    },
+    modal: {
+      approve_title: "Anfrage genehmigen",
+      approve_description:
+        "Damit wird das Release mit deinem Werk verknüpft und der Antragsteller benachrichtigt.",
+      reject_title: "Anfrage ablehnen",
+      reject_description:
+        "Bitte gib eine kurze Begründung an. Der Antragsteller wird benachrichtigt.",
+      reject_reason_label: "Begründung",
+      reject_reason_placeholder: "Optional — Grund für die Ablehnung",
+      withdraw_title: "Anfrage zurückziehen",
+      withdraw_description:
+        "Damit wird deine ausstehende Anfrage entfernt. Du kannst sie später erneut einreichen.",
+      approve_done: "Anfrage genehmigt.",
+      reject_done: "Anfrage abgelehnt.",
+      withdraw_done: "Anfrage zurückgezogen.",
+      action_failed: "Aktion fehlgeschlagen: {{error}}",
+    },
+  },
 };

@@ -238,4 +238,52 @@ export default {
     close: "關閉",
     open_drawer: "打開側邊欄",
   },
+
+  realm: {
+    extra: {
+      pinboard: {
+        note: "领域置顶的 Unit ID 有序列表。显示在领域页的动态之上；通常是由领域贡献者撰写的 Work 条目的 POST Release。",
+      },
+      announcement: {
+        note: "为首页公告栏等特殊页面保留的 Unit ID 有序列表。并非一般论坛通知；仅保留给首页公告栏等特殊页面使用。",
+      },
+    },
+  },
+
+  notify: {
+    kinds: {
+      work_link_claim_pending: "作品关联请求待审核",
+      work_link_claim_approved: "作品关联请求已通过",
+      work_link_claim_rejected: "作品关联请求已拒绝",
+    },
+  },
+
+  work_link_claim: {
+    inbox: {
+      title: "待审核的关联请求",
+      empty: "暂无待审核的请求。",
+      release: "Release",
+      claimer: "申请人",
+      submitted_at: "提交时间",
+      reason: "理由",
+      review: "审核",
+      approve: "通过",
+      reject: "拒绝",
+      withdraw: "撤回",
+    },
+    modal: {
+      approve_title: "通过请求",
+      approve_description: "此操作会将该 Release 关联到你的作品，并通知申请人。",
+      reject_title: "拒绝请求",
+      reject_description: "请填写简短理由，申请人将收到通知。",
+      reject_reason_label: "理由",
+      reject_reason_placeholder: "选填——说明拒绝的原因",
+      withdraw_title: "撤回请求",
+      withdraw_description: "此操作会撤回你当前的请求，之后仍可重新提交。",
+      approve_done: "请求已通过。",
+      reject_done: "请求已拒绝。",
+      withdraw_done: "请求已撤回。",
+      action_failed: "操作失败：{{error}}",
+    },
+  },
 };

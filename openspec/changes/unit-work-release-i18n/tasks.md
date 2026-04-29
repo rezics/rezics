@@ -91,13 +91,13 @@
 
 ## 13. App: locale entries
 
-- [ ] 13.1 Add `realm.extra.pinboard.note` and `realm.extra.announcement.note` entries to each of `package/app/src/locale/{en,zh-hans,zh-hant,ja,de}.ts`. The English value SHALL match the JSDoc verbatim per spec.
-- [ ] 13.2 Add the three new notify kind labels (`WORK_LINK_CLAIM_PENDING/APPROVED/REJECTED`) to all five locale files.
-- [ ] 13.3 Add UI strings for the WorkLinkClaim inbox + claim approval modal in all five locale files.
+- [x] 13.1 Add `realm.extra.pinboard.note` and `realm.extra.announcement.note` entries to each of `package/app/src/locale/{en,zh-hans,zh-hant,ja,de}.ts`. The English value SHALL match the JSDoc verbatim per spec.
+- [x] 13.2 Add the three new notify kind labels (`WORK_LINK_CLAIM_PENDING/APPROVED/REJECTED`) to all five locale files.
+- [x] 13.3 Add UI strings for the WorkLinkClaim inbox + claim approval modal in all five locale files.
 
 ## 14. Seed data
 
-- [ ] 14.1 Update or replace `package/server/prisma/seed/mocks/pinboard.ts` to populate the new shape: write to `Realm.extra.pinboard` directly, ensuring the referenced Units exist and carry `UnitTranslation.sourceReleaseUnitId` values.
+- [x] 14.1 Update or replace `package/server/prisma/seed/mocks/pinboard.ts` to populate the new shape: write to `Realm.extra.pinboard` directly, ensuring the referenced Units exist and carry `UnitTranslation.sourceReleaseUnitId` values.
 - [ ] 14.2 Run `bun run --filter @rezics/server prisma:seed` (or equivalent) and verify the realm admin page renders pinboard entries via the new primitives.
 
 ## 15. Convention & cross-cutting checks

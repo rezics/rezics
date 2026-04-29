@@ -246,4 +246,53 @@ export default {
     close: "閉じる",
     open_drawer: "ドロワーを開く",
   },
+
+  realm: {
+    extra: {
+      pinboard: {
+        note: "領域内でピン留めされた Unit ID の順序付きリスト。フィードの上部に表示され、通常は領域の貢献者が作成した Work エントリの POST Release です。",
+      },
+      announcement: {
+        note: "ホームページのアナウンスバーなど特別なページのために予約された Unit ID の順序付きリスト。一般的なフォーラム通知ではなく、ホームページのアナウンスバーのような特別なページ専用です。",
+      },
+    },
+  },
+
+  notify: {
+    kinds: {
+      work_link_claim_pending: "ワークリンク申請が確認待ちです",
+      work_link_claim_approved: "ワークリンク申請が承認されました",
+      work_link_claim_rejected: "ワークリンク申請が却下されました",
+    },
+  },
+
+  work_link_claim: {
+    inbox: {
+      title: "確認待ちの申請",
+      empty: "確認待ちの申請はありません。",
+      release: "Release",
+      claimer: "申請者",
+      submitted_at: "送信日時",
+      reason: "理由",
+      review: "確認",
+      approve: "承認",
+      reject: "却下",
+      withdraw: "取り下げ",
+    },
+    modal: {
+      approve_title: "申請を承認",
+      approve_description:
+        "この Release をあなたの作品に紐づけ、申請者に通知します。",
+      reject_title: "申請を却下",
+      reject_description: "簡単な理由を記入してください。申請者に通知されます。",
+      reject_reason_label: "理由",
+      reject_reason_placeholder: "任意 — 却下の理由",
+      withdraw_title: "申請を取り下げる",
+      withdraw_description: "現在の申請を取り下げます。後で再送信することもできます。",
+      approve_done: "申請を承認しました。",
+      reject_done: "申請を却下しました。",
+      withdraw_done: "申請を取り下げました。",
+      action_failed: "操作に失敗しました：{{error}}",
+    },
+  },
 };

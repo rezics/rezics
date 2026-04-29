@@ -8,6 +8,7 @@ import { seedEchoKV } from "./echokv.js";
 import { seedEngagement } from "./engagement.js";
 import { seedGames } from "./games.js";
 import { seedMedia } from "./media.js";
+import { seedPinboard } from "./pinboard.js";
 import { seedPostsForWorks, seedWikiTranslationGroups } from "./posts.js";
 import { seedRealms } from "./realms.js";
 import { seedScores } from "./scores.js";
@@ -118,6 +119,10 @@ export async function runMockSeed(
       `[Seed]   1 wiki translation group with ${wikiGroup.postIds.length} parallel posts`,
     );
   }
+  done();
+
+  done = stepTimer("Step 8c: Pinboard");
+  await seedPinboard(ctx, realms, posts);
   done();
 
   done = stepTimer("Step 9: Shelves");

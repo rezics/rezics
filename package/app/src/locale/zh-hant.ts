@@ -531,6 +531,51 @@ export default {
         title: "此領域目前還沒有內容",
       },
     },
+    extra: {
+      pinboard: {
+        note: "領域置頂的 Unit ID 有序列表。顯示於領域頁的動態之上；通常為由領域貢獻者撰寫的 Work 條目的 POST Release。",
+      },
+      announcement: {
+        note: "為首頁公告欄等特殊頁面保留的 Unit ID 有序列表。並非一般論壇通知；僅保留給首頁公告欄等特殊頁面使用。",
+      },
+    },
+  },
+
+  notify: {
+    kinds: {
+      work_link_claim_pending: "作品關聯申請待審核",
+      work_link_claim_approved: "作品關聯申請已通過",
+      work_link_claim_rejected: "作品關聯申請已拒絕",
+    },
+  },
+
+  work_link_claim: {
+    inbox: {
+      title: "待審核的關聯申請",
+      empty: "目前沒有需要審核的申請。",
+      release: "Release",
+      claimer: "申請人",
+      submitted_at: "提交時間",
+      reason: "理由",
+      review: "審核",
+      approve: "通過",
+      reject: "拒絕",
+      withdraw: "撤回",
+    },
+    modal: {
+      approve_title: "通過申請",
+      approve_description: "此操作將把此 Release 關聯至你的作品，並通知申請人。",
+      reject_title: "拒絕申請",
+      reject_description: "請填寫簡短理由，申請人將收到通知。",
+      reject_reason_label: "理由",
+      reject_reason_placeholder: "選填——說明拒絕的原因",
+      withdraw_title: "撤回申請",
+      withdraw_description: "此操作將撤回你目前的申請，之後仍可重新提交。",
+      approve_done: "申請已通過。",
+      reject_done: "申請已拒絕。",
+      withdraw_done: "申請已撤回。",
+      action_failed: "操作失敗：{{error}}",
+    },
   },
 
   // Review
