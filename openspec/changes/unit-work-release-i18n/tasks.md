@@ -74,13 +74,13 @@
 
 ## 11. UI: extract translation components to @rezics/ui
 
-- [ ] 11.1 Move `package/app/src/i18n/components/TranslationEditor.tsx` into `package/ui/src/translation/TranslationEditor.tsx`. Adjust imports to remove any `@rezics/api` direct imports — accept handlers/data via props.
-- [ ] 11.2 Move `package/app/src/i18n/components/TranslationTabs.tsx` into `package/ui/src/translation/TranslationTabs.tsx`.
-- [ ] 11.3 Move `package/app/src/i18n/components/WorkReleaseNav.tsx` into `package/ui/src/translation/WorkReleaseNav.tsx`. Replace its `bookQueries` import with a prop interface `releases: Array<{ unitId: string; translation?: { title?: string; ...} }>` (or a render-prop).
-- [ ] 11.4 Re-export the three components from `package/ui/src/index.ts`.
-- [ ] 11.5 Update existing consumers (book editor, book library, etc.) to import from `@rezics/ui` instead of `@rezics/app/src/i18n/components`. Use `rg "from ['\"].*i18n/components" package/app/src` to find call sites.
-- [ ] 11.6 Delete `package/app/src/i18n/components/` (or the three migrated files specifically) and run a project-wide build to surface any missed imports.
-- [ ] 11.7 Add a small `deriveTitleSummary(body: string): { title?: string; summary?: string }` helper in `package/ui/src/translation/derive.ts` for reuse across editors per design D8.
+- [x] 11.1 Move `package/app/src/i18n/components/TranslationEditor.tsx` into `package/ui/src/translation/TranslationEditor.tsx`. Adjust imports to remove any `@rezics/api` direct imports — accept handlers/data via props.
+- [x] 11.2 Move `package/app/src/i18n/components/TranslationTabs.tsx` into `package/ui/src/translation/TranslationTabs.tsx`.
+- [x] 11.3 Move `package/app/src/i18n/components/WorkReleaseNav.tsx` into `package/ui/src/translation/WorkReleaseNav.tsx`. Replace its `bookQueries` import with a prop interface `releases: Array<{ unitId: string; title?: string }>` plus a `renderLink` render-prop (typed routing stays in the consuming app).
+- [x] 11.4 Re-export the three components from `package/ui/src/index.ts`.
+- [x] 11.5 Update existing consumers (book editor, book library, etc.) to import from `@rezics/ui` instead of `@rezics/app/src/i18n/components`. Use `rg "from ['\"].*i18n/components" package/app/src` to find call sites. (Only `BookBasicInfoPage.tsx` consumed `WorkReleaseNav`; updated to use the new render-prop and a local `BookWorkReleaseNav` wrapper that owns the `bookQueries` fetch.)
+- [x] 11.6 Delete `package/app/src/i18n/components/` (or the three migrated files specifically) and run a project-wide build to surface any missed imports.
+- [x] 11.7 Add a small `deriveTitleSummary(body: string): { title?: string; summary?: string }` helper in `package/ui/src/translation/derive.ts` for reuse across editors per design D8.
 
 ## 12. App: pinboard rewrite
 

@@ -10,3 +10,4 @@ export {
 } from "./config/dynamicTheme";
 export { getDynamicTheme, getTheme } from "./config/theme";
 export * from "./link";
+export * from "./translation";

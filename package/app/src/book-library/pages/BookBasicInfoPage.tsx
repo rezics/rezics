@@ -3,12 +3,13 @@ import { bookQueries } from "@rezics/api/book/book";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { WorkReleaseNav } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { WorkReleaseNav } from "@/i18n/components/WorkReleaseNav";
 import { RemarkInlineForm } from "@/remark";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -20,6 +21,46 @@ import { RemarkPreview } from "../components/RemarkPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
 import { BookDetailShell } from "../sections/BookDetailSection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
+
+interface BookWorkReleaseNavProps {
+  workUnitId: string;
+  currentUnitId: string;
+}
+
+const BookWorkReleaseNav: React.FC<BookWorkReleaseNavProps> = ({
+  workUnitId,
+  currentUnitId,
+}) => {
+  const { t } = useTranslation();
+  const { data } = useQuery({
+    ...bookQueries.list({ workUnitId, limit: 10 }),
+    enabled: Boolean(workUnitId),
+  });
+
+  const releases =
+    data?.books?.map((b) => ({
+      unitId: b.unitId,
+      title: getTranslation(b.translations)?.title ?? undefined,
+    })) ?? [];
+
+  return (
+    <WorkReleaseNav
+      releases={releases}
+      currentUnitId={currentUnitId}
+      heading={t("book.otherEditions", "Other Editions")}
+      emptyLabel={t("book.editionFallback", "Edition")}
+      renderLink={(release, children) => (
+        <Link
+          key={release.unitId}
+          to="/book/$bookId"
+          params={{ bookId: release.unitId }}
+        >
+          {children}
+        </Link>
+      )}
+    />
+  );
+};
 
 export const BookBasicInfoPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
@@ -56,9 +97,9 @@ export const BookBasicInfoPage: React.FC = () => {
     <Stack spacing={3}>
       <MetadataPanel bookInfo={bookInfo} />
       {bookInfo.workUnitId && (
-        <WorkReleaseNav
+        <BookWorkReleaseNav
           workUnitId={bookInfo.workUnitId}
-          currentBookId={bookInfo.unitId}
+          currentUnitId={bookInfo.unitId}
         />
       )}
     </Stack>
@@ -125,9 +166,9 @@ export const BookBasicInfoPage: React.FC = () => {
 
         {bookInfo.workUnitId && (
           <Box className="lg:hidden">
-            <WorkReleaseNav
+            <BookWorkReleaseNav
               workUnitId={bookInfo.workUnitId}
-              currentBookId={bookInfo.unitId}
+              currentUnitId={bookInfo.unitId}
             />
           </Box>
         )}

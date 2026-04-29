@@ -3,7 +3,7 @@ import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type React from "react";
 import { useState } from "react";
 
-interface Translation {
+export interface TranslationEditorEntry {
   language: string;
   title?: string;
   subtitle?: string;
@@ -12,8 +12,8 @@ interface Translation {
 }
 
 interface TranslationEditorProps {
-  translations: Translation[];
-  onChange: (translations: Translation[]) => void;
+  translations: TranslationEditorEntry[];
+  onChange: (translations: TranslationEditorEntry[]) => void;
 }
 
 export const TranslationEditor: React.FC<TranslationEditorProps> = ({
@@ -30,7 +30,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
     language: activeTab,
   };
 
-  const updateField = (field: keyof Translation, value: string) => {
+  const updateField = (field: keyof TranslationEditorEntry, value: string) => {
     const updated = translations.map((t) =>
       t.language === activeTab ? { ...t, [field]: value } : t,
     );
