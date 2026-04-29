@@ -1,4 +1,5 @@
 {
+  "includeCoAuthoredBy": false,
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
