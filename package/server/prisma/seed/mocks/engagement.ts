@@ -1,63 +1,60 @@
 import { randomUUID } from "node:crypto";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client.js";
 import {
   UnitStatus,
   UnitType,
   UnitVisibility,
-} from "#/prisma/generated/client.js";
+} from "../../generated/client.js";
 import { generateBetween } from "@/shelf/fractional-index";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
-import { pickN, randomInt, unitTypeToShelfKind } from "./utils.js";
+import { pickN, unitTypeToShelfKind } from "./utils.js";
 
-/**
- * Seed all engagement data: reaction summaries, favorites, follows.
- * Substeps run in parallel.
- */
+interface EngagementPlan {
+  followsPerUser: CountSpec;
+  favoriteItemsPerUser: CountSpec;
+}
+
 export async function seedEngagement(
-  prisma: PrismaClient,
+  ctx: SeedCtx,
+  plan: EngagementPlan,
   users: CreatedUser[],
   allUnits: CreatedUnit[],
-  counts: { followsPerUser: number; favoriteItemsPerUser: number },
 ): Promise<void> {
   console.log(
     `[Seed] Seeding engagement for ${allUnits.length} units, ${users.length} users...`,
   );
 
   try {
-    await seedFavorites(prisma, users, allUnits, counts.favoriteItemsPerUser);
+    await seedFavorites(ctx, plan.favoriteItemsPerUser, users, allUnits);
   } catch (err) {
     console.error("[Error] seedFavorites failed:", err);
     throw err;
   }
   try {
-    await seedFollows(prisma, users, counts.followsPerUser);
+    await seedFollows(ctx, plan.followsPerUser, users);
   } catch (err) {
     console.error("[Error] seedFollows failed:", err);
     throw err;
   }
 }
 
-/**
- * Create a Favorites shelf for each user and add random items.
- * Dual-writes ShelfItem + ShelfUnit(role='primary') per slot.
- */
 async function seedFavorites(
-  prisma: PrismaClient,
+  ctx: SeedCtx,
+  spec: CountSpec,
   users: CreatedUser[],
   units: CreatedUnit[],
-  perUser: number,
 ): Promise<void> {
   console.log(`[Seed]   Seeding favorites shelves...`);
 
   for (const user of users) {
-    const favCount = randomInt(0, perUser);
+    const favCount = ctx.draw(spec);
     if (favCount === 0) continue;
 
     const targets = pickN(units, Math.min(favCount, units.length));
     const shelfId = randomUUID();
 
-    await prisma.unit.create({
+    await ctx.prisma.unit.create({
       data: {
         id: shelfId,
         type: UnitType.SHELF,
@@ -98,11 +95,11 @@ async function seedFavorites(
     }));
 
     if (shelfItemRows.length > 0) {
-      await prisma.shelfItem.createMany({
+      await ctx.prisma.shelfItem.createMany({
         data: shelfItemRows,
         skipDuplicates: true,
       });
-      await prisma.shelfUnit.createMany({
+      await ctx.prisma.shelfUnit.createMany({
         data: shelfUnitRows,
         skipDuplicates: true,
       });
@@ -110,13 +107,10 @@ async function seedFavorites(
   }
 }
 
-/**
- * Create Follow rows (random user→user pairs).
- */
 async function seedFollows(
-  prisma: PrismaClient,
+  ctx: SeedCtx,
+  spec: CountSpec,
   users: CreatedUser[],
-  perUser: number,
 ): Promise<void> {
   console.log(`[Seed]   Seeding follows...`);
 
@@ -124,7 +118,7 @@ async function seedFollows(
   const data: { id: string; followerId: string; followingId: string }[] = [];
 
   for (const user of users) {
-    const followCount = randomInt(0, perUser);
+    const followCount = ctx.draw(spec);
     const targets = pickN(
       users.filter((u) => u.unitId !== user.unitId),
       Math.min(followCount, users.length - 1),
@@ -143,13 +137,12 @@ async function seedFollows(
 
   const BATCH_SIZE = 5000;
   for (let i = 0; i < data.length; i += BATCH_SIZE) {
-    await prisma.follow.createMany({
+    await ctx.prisma.follow.createMany({
       data: data.slice(i, i + BATCH_SIZE),
       skipDuplicates: true,
     });
   }
 
-  // Update follower/following counts
   const followerCounts = new Map<string, number>();
   const followingCounts = new Map<string, number>();
   for (const f of data) {
@@ -174,7 +167,7 @@ async function seedFollows(
     const slice = usersToUpdate.slice(i, i + UPDATE_BATCH);
     await Promise.all(
       slice.map((user) =>
-        prisma.user.update({
+        ctx.prisma.user.update({
           where: { unitId: user.unitId },
           data: {
             followersCount: followerCounts.get(user.unitId) ?? 0,

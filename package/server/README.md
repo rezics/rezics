@@ -54,38 +54,21 @@ bun run db:migrate       # Run custom migrations
 
 ## Mock Seed
 
-`bun run seed:mock` resets the server DB and populates it with deterministic mock data. All counts are env-configurable.
+`bun run seed:mock` resets the server DB and populates it with deterministic mock data drawn from the `realistic` preset.
 
 ```bash
-bun run seed:mock                                       # default profile
-SEED_PROFILE=fast bun run seed:mock                     # small fixture, quick iteration
-SEED_PROFILE=fast SEED_BOOKS=200 bun run seed:mock      # profile + per-knob override
-SEED_CHAPTER_UNIT_PROBABILITY=0 bun run seed:mock       # tree-only chapters (no CHAPTER Units)
+bun run seed:mock          # realistic preset (defaults)
+bun run seed:mock:fast     # smaller, quick iteration fixture
 ```
 
-### Knobs
+For interactive preset selection, plan tweaks via `$EDITOR`, and the full preset list, run the unified CLI directly:
 
-| Env variable                       | Default | Fast | Controls                                    |
-| ---------------------------------- | ------- | ---- | ------------------------------------------- |
-| `SEED_PROFILE`                     | —       | —    | `default` or `fast`                         |
-| `SEED_USERS`                       | 200     | 30   | total users                                 |
-| `SEED_TAGS`                        | 400     | 50   | total tags                                  |
-| `SEED_BOOKS` / `_GAMES` / `_MEDIA` | 1000    | 50   | works per kind                              |
-| `SEED_SHELVES`                     | 500     | 30   | random user shelves                         |
-| `SEED_REALMS` / `_ZONES`           | 20 / 40 | same | realms / zones                              |
-| `SEED_PERSON_ENTITIES`             | 800     | same | person attribution entities                 |
-| `SEED_ORGANIZATION_ENTITIES`       | 200     | same | organization attribution entities           |
-| `SEED_FOLLOWS_PER_USER`            | 5       | same | per-user follow picks                       |
-| `SEED_FAVORITE_ITEMS_PER_USER`     | 8       | same | items in each user's Favorites shelf        |
-| `SEED_REVIEWS_PER_WORK_MAX`        | 50      | 5    | power-law upper bound for reviews / work    |
-| `SEED_EXCERPTS_PER_WORK_MAX`       | 15      | 3    | power-law upper bound for excerpts / work   |
-| `SEED_REMARKS_PER_WORK_MAX`        | 10      | 3    | power-law upper bound for remarks / work    |
-| `SEED_TREE_POSTS_PER_WORK_MAX`     | 120     | 10   | power-law upper bound for thread posts      |
-| `SEED_CHAPTERS_PER_BOOK_MIN`       | 5       | 3    | chapter tree lower bound per book           |
-| `SEED_CHAPTERS_PER_BOOK_MAX`       | 1200    | 30   | chapter tree upper bound per book           |
-| `SEED_CHAPTER_UNIT_PROBABILITY`    | 0.1     | 0.1  | chance a chapter node is materialized as a Unit (rest live only in BookIndex tree JSON) |
+```bash
+bun run tool/seed/seed.ts                          # interactive
+bun run tool/seed/seed.ts --preset=minimal --no-interactive
+```
 
-Per-knob env vars always override the profile. Config source: `prisma/seed/mocks/config.ts`.
+Available presets: `realistic`, `fast`, `minimal`, `post-tree-focus`. Plan parameters (counts, alphas, mode) live in `tool/seed/presets/*.ts`.
 
 ## Tech Stack
 

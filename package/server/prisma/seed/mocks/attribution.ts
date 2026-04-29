@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { LANGUAGES } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client.js";
-import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import type { PrismaClient } from "../../generated/client.js";
+import { UnitStatus, UnitType } from "../../generated/client.js";
 import { generateTranslations, getFaker } from "./generators.js";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity } from "./types.js";
 import { randomBoolean } from "./utils.js";
 
@@ -46,20 +47,13 @@ function localeName(lang: string, kind: EntityKind): string {
   return kind === "person" ? f.person.fullName() : f.company.name();
 }
 
-/**
- * Build an entity row: pick primary locale, generate multilingual translations,
- * override each translation's title with a locale-appropriate faker name.
- */
 function buildEntityRow(kind: EntityKind, verifiedRate: number): EntitySeedRow {
   const primaryLang = pickRandomLocale();
   const primaryName = localeName(primaryLang, kind);
 
   const baseTranslations = generateTranslations(UnitType.ENTITY);
-  // Ensure the primary language matches our picked locale — map the default
-  // zh-hant entry to the picked primary locale if different.
   const translations = baseTranslations.map((tr, i) => {
     const language = i === 0 ? primaryLang : tr.language;
-    // Avoid duplicate languages (e.g. primary is EN and entry 2 was also EN).
     return {
       language,
       title: i === 0 ? primaryName : localeName(language, kind),
@@ -67,7 +61,6 @@ function buildEntityRow(kind: EntityKind, verifiedRate: number): EntitySeedRow {
     };
   });
 
-  // Deduplicate by language (keep first occurrence)
   const seen = new Set<string>();
   const dedup = translations.filter((t) => {
     if (seen.has(t.language)) return false;
@@ -89,7 +82,6 @@ async function batchInsertEntities(
   rows: EntitySeedRow[],
   kind: EntityKind,
 ): Promise<void> {
-  // Phase 1: Unit rows
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
     await prisma.unit.createMany({
@@ -102,7 +94,6 @@ async function batchInsertEntities(
     });
   }
 
-  // Phase 2: Entity extensions
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
     await prisma.entity.createMany({
@@ -114,7 +105,6 @@ async function batchInsertEntities(
     });
   }
 
-  // Phase 3: UnitTranslation rows
   const allTranslations = rows.flatMap((r) =>
     r.translations.map((tr) => ({
       unitId: r.id,
@@ -129,7 +119,6 @@ async function batchInsertEntities(
     });
   }
 
-  // Phase 4: UnitSupportLanguage rows
   const allSupport = rows.flatMap((r) =>
     r.translations.map((tr, i) => ({
       unitId: r.id,
@@ -145,21 +134,17 @@ async function batchInsertEntities(
   }
 }
 
-/**
- * Seed person entities via two-phase batch createMany.
- * Each entity gets multilingual translations with locale-appropriate names
- * and descriptions from the summary corpus. ~5% verified.
- */
 export async function seedPeople(
-  prisma: PrismaClient,
-  total: number,
+  ctx: SeedCtx,
+  spec: CountSpec,
 ): Promise<CreatedEntity[]> {
+  const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} person entities...`);
 
   const rows = Array.from({ length: total }, () =>
     buildEntityRow("person", 0.05),
   );
-  await batchInsertEntities(prisma, rows, "person");
+  await batchInsertEntities(ctx.prisma, rows, "person");
 
   return rows.map((r) => ({
     unitId: r.id,
@@ -168,20 +153,17 @@ export async function seedPeople(
   }));
 }
 
-/**
- * Seed organization entities via two-phase batch createMany.
- * ~10% verified.
- */
 export async function seedOrganizations(
-  prisma: PrismaClient,
-  total: number,
+  ctx: SeedCtx,
+  spec: CountSpec,
 ): Promise<CreatedEntity[]> {
+  const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} organization entities...`);
 
   const rows = Array.from({ length: total }, () =>
     buildEntityRow("organization", 0.1),
   );
-  await batchInsertEntities(prisma, rows, "organization");
+  await batchInsertEntities(ctx.prisma, rows, "organization");
 
   return rows.map((r) => ({
     unitId: r.id,

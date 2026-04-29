@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
+import type { Prisma } from "#/prisma/generated/client.js";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomInt } from "./utils.js";
 
@@ -15,40 +16,30 @@ const STORY_REALM_FIELDS = [
 ];
 
 interface ScoreResult {
-  scoreEntries: Map<string, string>; // `${userId}:${unitId}:${realm}` -> scoreEntryId
+  scoreEntries: Map<string, string>;
 }
 
-/**
- * Seed scores for works. Creates ScoreEntry + ScoreAggregate rows.
- * Returns a map of (userId:unitId:realm) -> scoreEntryId for linking posts.
- */
 export async function seedScores(
-  prisma: PrismaClient,
+  ctx: SeedCtx,
+  scoresSpec: CountSpec,
   works: CreatedUnit[],
   users: CreatedUser[],
   realms: CreatedUnit[],
-  scoresPerWork: number,
 ): Promise<ScoreResult> {
-  console.log(
-    `[Seed] Seeding scores for ${works.length} works (~${scoresPerWork} per work)...`,
-  );
+  console.log(`[Seed] Seeding scores for ${works.length} works...`);
 
   const scoreEntries = new Map<string, string>();
 
-  // Pick a default realm (first realm or create a sentinel)
   const defaultRealm = realms[0];
   if (!defaultRealm) {
     console.log("[Seed]   No realms available, skipping scores.");
     return { scoreEntries };
   }
   const defaultRealmId = defaultRealm.id;
-
-  // Pick a "story" realm for field-level scoring (second realm if available)
   const storyRealm = realms.length > 1 ? realms[1] : null;
 
-  // Seed realm fields for the story realm
   if (storyRealm) {
-    await prisma.scoreRealmField.createMany({
+    await ctx.prisma.scoreRealmField.createMany({
       data: STORY_REALM_FIELDS.map((f) => ({
         realm: storyRealm.id,
         ...f,
@@ -59,15 +50,9 @@ export async function seedScores(
     );
   }
 
-  // For each work, create score entries from random users
   await chunkedParallel(works, CHUNK_SIZE, async (work) => {
-    const scoringUsers = pickN(
-      users,
-      Math.min(
-        randomInt(Math.floor(scoresPerWork * 0.5), scoresPerWork),
-        users.length,
-      ),
-    );
+    const targetCount = ctx.draw(scoresSpec);
+    const scoringUsers = pickN(users, Math.min(targetCount, users.length));
 
     const entries: {
       id: string;
@@ -91,7 +76,6 @@ export async function seedScores(
       });
       scoreEntries.set(`${user.unitId}:${work.id}:${defaultRealmId}`, id);
 
-      // Some users also score in the story realm with fields
       if (storyRealm && faker.datatype.boolean({ probability: 0.3 })) {
         const storyId = randomUUID();
         const storyValue = randomInt(1, 10);
@@ -115,9 +99,8 @@ export async function seedScores(
       }
     }
 
-    // Batch create entries
     if (entries.length > 0) {
-      await prisma.scoreEntry.createMany({
+      await ctx.prisma.scoreEntry.createMany({
         data: entries.map((e) => ({
           id: e.id,
           userId: e.userId,
@@ -129,7 +112,6 @@ export async function seedScores(
       });
     }
 
-    // Build aggregates per realm for this work
     const byRealm = new Map<
       string,
       {
@@ -169,7 +151,6 @@ export async function seedScores(
       }
     }
 
-    // Write aggregates
     const aggregateData = Array.from(byRealm.entries()).map(([realm, agg]) => ({
       unitId: work.id,
       realm,
@@ -183,7 +164,7 @@ export async function seedScores(
     }));
 
     if (aggregateData.length > 0) {
-      await prisma.scoreAggregate.createMany({ data: aggregateData });
+      await ctx.prisma.scoreAggregate.createMany({ data: aggregateData });
     }
   });
 

@@ -8,18 +8,15 @@ import {
   generatePostExtra,
   generateTranslations,
 } from "./generators.js";
+import type { SeedCtx } from "./strategy.js";
 import type {
   CreatedPost,
   CreatedUnit,
   CreatedUser,
-  PostsPerWorkCounts,
+  PostsPerWorkPlan,
+  TreeShapePlan,
 } from "./types.js";
-import {
-  chunkedParallel,
-  powerLaw,
-  randomBoolean,
-  randomInt,
-} from "./utils.js";
+import { chunkedParallel, randomBoolean } from "./utils.js";
 
 const CHUNK_SIZE = 10;
 const BATCH_THRESHOLD = 20;
@@ -27,29 +24,29 @@ const BATCH_SIZE = 500;
 
 /**
  * Seed posts for all work units (books, games, media).
- * Per-work counts drawn from a power-law distribution so most works get
- * minimal engagement while a few get extreme engagement.
+ * Per-work counts are drawn from the active CountProvider, so under realistic
+ * mode they follow a power-law distribution and under fixed mode they hit the
+ * configured target verbatim.
  */
 export async function seedPostsForWorks(
-  prisma: PrismaClient,
+  ctx: SeedCtx,
+  postsPerWork: PostsPerWorkPlan,
+  treeShape: TreeShapePlan,
   works: CreatedUnit[],
   users: CreatedUser[],
-  caps: PostsPerWorkCounts,
   scoreEntries?: Map<string, string>,
 ): Promise<CreatedPost[]> {
-  console.log(
-    `[Seed] Seeding posts for ${works.length} works (power-law distribution)...`,
-  );
+  console.log(`[Seed] Seeding posts for ${works.length} works...`);
   const allPosts: CreatedPost[] = [];
 
   await chunkedParallel(works, CHUNK_SIZE, async (work) => {
-    const reviewCount = powerLaw(0, caps.reviewMax, 1.8);
-    const excerptCount = powerLaw(0, caps.excerptMax, 2.0);
-    const remarkCount = powerLaw(0, caps.remarkMax, 2.0);
-    const treeCount = powerLaw(0, caps.treeMax, 1.8);
+    const reviewCount = ctx.draw(postsPerWork.review);
+    const excerptCount = ctx.draw(postsPerWork.excerpt);
+    const remarkCount = ctx.draw(postsPerWork.remark);
+    const treeCount = ctx.draw(postsPerWork.tree);
 
     const reviews = await seedPostKindForTarget(
-      prisma,
+      ctx.prisma,
       PostKind.REVIEW,
       work.id,
       users,
@@ -59,7 +56,7 @@ export async function seedPostsForWorks(
     allPosts.push(...reviews);
 
     const excerpts = await seedPostKindForTarget(
-      prisma,
+      ctx.prisma,
       PostKind.EXCERPT,
       work.id,
       users,
@@ -68,7 +65,7 @@ export async function seedPostsForWorks(
     allPosts.push(...excerpts);
 
     const remarks = await seedPostKindForTarget(
-      prisma,
+      ctx.prisma,
       PostKind.REMARK,
       work.id,
       users,
@@ -78,7 +75,8 @@ export async function seedPostsForWorks(
     allPosts.push(...remarks);
 
     const treePosts = await seedTreePostsForTarget(
-      prisma,
+      ctx,
+      treeShape,
       work.id,
       users,
       treeCount,
@@ -89,10 +87,6 @@ export async function seedPostsForWorks(
   return allPosts;
 }
 
-/**
- * Create N posts of a given kind targeting a unit.
- * Uses batch createMany for high-engagement works (> BATCH_THRESHOLD).
- */
 async function seedPostKindForTarget(
   prisma: PrismaClient,
   kind: PostKind,
@@ -178,10 +172,6 @@ async function seedPostKindForTarget(
   return posts;
 }
 
-/**
- * Batch variant for high-engagement works.
- * Generates all rows in memory, then inserts via createMany across tables.
- */
 async function seedPostKindBatch(
   prisma: PrismaClient,
   kind: PostKind,
@@ -233,7 +223,6 @@ async function seedPostKindBatch(
     };
   });
 
-  // Unit
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
     await prisma.unit.createMany({
@@ -248,7 +237,6 @@ async function seedPostKindBatch(
     });
   }
 
-  // Post
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const chunk = rows.slice(i, i + BATCH_SIZE);
     await prisma.post.createMany({
@@ -265,7 +253,6 @@ async function seedPostKindBatch(
     });
   }
 
-  // Translations (reviews only)
   if (needsTitle) {
     const allTranslations = rows.flatMap((r) =>
       r.translations.map((t) => ({
@@ -281,7 +268,6 @@ async function seedPostKindBatch(
     }
   }
 
-  // Support languages
   const allSupport = rows.flatMap((r) =>
     needsTitle && r.translations.length > 0
       ? r.translations.map((t, i) => ({
@@ -314,19 +300,28 @@ async function seedPostKindBatch(
 }
 
 /**
- * Create tree posts (threaded) for a target unit.
- * Two-pass: root posts first, then replies.
+ * Tree shape is drawn from the plan via ctx.draw on every CountSpec slot:
+ *   roots:     how many root posts to create (clamped to total)
+ *   depth:     maximum depth a reply may reach
+ *   branching: per-parent direct-child target when allocating replies
+ *
+ * Under fixed mode every draw resolves to the spec's `target`, producing a
+ * deterministic tree. Under realistic mode the same call sites recover the
+ * pre-change "mostly shallow, occasionally deep" distribution.
  */
 async function seedTreePostsForTarget(
-  prisma: PrismaClient,
+  ctx: SeedCtx,
+  treeShape: TreeShapePlan,
   targetUnitId: string,
   users: CreatedUser[],
   total: number,
 ): Promise<CreatedPost[]> {
   if (total === 0) return [];
 
-  const rootCount = Math.max(1, Math.floor(total * 0.4));
+  const drawnRoots = ctx.draw(treeShape.roots);
+  const rootCount = Math.max(1, Math.min(total, drawnRoots));
   const replyCount = total - rootCount;
+  const maxDepth = ctx.draw(treeShape.depth);
   const posts: CreatedPost[] = [];
 
   // Pass 1: Root posts
@@ -340,7 +335,7 @@ async function seedTreePostsForTarget(
       const id = randomUUID();
       const sortPath = String(index).padStart(5, "0");
 
-      const unit = await prisma.unit.create({
+      const unit = await ctx.prisma.unit.create({
         data: {
           id,
           type: UnitType.POST,
@@ -377,79 +372,109 @@ async function seedTreePostsForTarget(
 
   if (rootIds.length === 0 || replyCount === 0) return posts;
 
-  // Pass 2: Replies
-  const replyParents: { id: string; sortPath: string; depth: number }[] =
-    rootIds.map((id, i) => ({
-      id,
-      sortPath: String(i).padStart(5, "0"),
-      depth: 0,
-    }));
+  interface ParentSlot {
+    id: string;
+    sortPath: string;
+    depth: number;
+    rootId: string;
+    childCount: number;
+  }
 
-  await chunkedParallel(
-    Array.from({ length: replyCount }),
-    CHUNK_SIZE,
-    async () => {
-      const author = faker.helpers.arrayElement(users);
-      const parent = faker.helpers.arrayElement(replyParents);
-      const depth = Math.min(parent.depth + 1, 4);
-      const replyId = randomUUID();
-      const sortPath = `${parent.sortPath}/${String(randomInt(0, 99999)).padStart(5, "0")}`;
-      const rootId = parent.sortPath.includes("/") ? rootIds[0] : parent.id;
+  const replyParents: ParentSlot[] = rootIds.map((id, i) => ({
+    id,
+    sortPath: String(i).padStart(5, "0"),
+    depth: 0,
+    rootId: id,
+    childCount: 0,
+  }));
 
-      const unit = await prisma.unit.create({
-        data: {
-          id: replyId,
-          type: UnitType.POST,
-          userId: author.unitId,
-          status: UnitStatus.PUBLISHED,
-          defaultLanguage: DEFAULT_LANGUAGE,
-          publishedAt: faker.date.past({ years: 1 }),
-          post: {
-            create: {
-              authorUserId: author.unitId,
-              targetUnitId,
-              rootPostUnitId: rootId,
-              parentPostUnitId: parent.id,
-              kind: PostKind.POST,
-              body: generatePostBody(PostKind.POST),
-              depth,
-              sortPath,
-            },
-          },
-          supportLanguages: {
-            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+  const eligibleParents = (): ParentSlot[] =>
+    replyParents.filter((p) => p.depth < maxDepth);
+
+  const pickParent = (): ParentSlot | undefined => {
+    const candidates = eligibleParents();
+    if (candidates.length === 0) return undefined;
+    // Prefer parents that haven't yet reached their drawn branching cap so
+    // that fixed-mode trees produce the exact configured shape, while still
+    // accepting any eligible parent as a fallback.
+    const underBranching = candidates.filter((p) => {
+      const cap = ctx.draw(treeShape.branching);
+      return p.childCount < cap;
+    });
+    const pool = underBranching.length > 0 ? underBranching : candidates;
+    return faker.helpers.arrayElement(pool);
+  };
+
+  let createdReplies = 0;
+  while (createdReplies < replyCount) {
+    const parent = pickParent();
+    if (!parent) break;
+
+    const author = faker.helpers.arrayElement(users);
+    const replyId = randomUUID();
+    const sortPath = `${parent.sortPath}/${String(parent.childCount).padStart(
+      5,
+      "0",
+    )}`;
+
+    const unit = await ctx.prisma.unit.create({
+      data: {
+        id: replyId,
+        type: UnitType.POST,
+        userId: author.unitId,
+        status: UnitStatus.PUBLISHED,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: faker.date.past({ years: 1 }),
+        post: {
+          create: {
+            authorUserId: author.unitId,
+            targetUnitId,
+            rootPostUnitId: parent.rootId,
+            parentPostUnitId: parent.id,
+            kind: PostKind.POST,
+            body: generatePostBody(PostKind.POST),
+            depth: parent.depth + 1,
+            sortPath,
           },
         },
-        select: { id: true, type: true },
-      });
+        supportLanguages: {
+          create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+        },
+      },
+      select: { id: true, type: true },
+    });
 
-      replyParents.push({ id: replyId, sortPath, depth });
-      posts.push({
-        ...unit,
-        kind: PostKind.POST,
-        targetUnitId,
-      });
-    },
-  );
+    parent.childCount++;
+    replyParents.push({
+      id: replyId,
+      sortPath,
+      depth: parent.depth + 1,
+      rootId: parent.rootId,
+      childCount: 0,
+    });
+    posts.push({
+      ...unit,
+      kind: PostKind.POST,
+      targetUnitId,
+    });
+    createdReplies++;
+  }
 
   // Update reply counts on root posts
   const replyCounts = new Map<string, { total: number; direct: number }>();
-  for (const parent of replyParents) {
-    if (parent.depth === 0) continue;
-    const rootSortPath = parent.sortPath.split("/")[0] ?? "0";
-    const rootIndex = Number.parseInt(rootSortPath, 10);
-    const rootId = rootIds[rootIndex] ?? rootIds[0] ?? parent.id;
-    const counts = replyCounts.get(rootId) ?? { total: 0, direct: 0 };
+  for (const node of replyParents) {
+    if (node.depth === 0) continue;
+    const counts = replyCounts.get(node.rootId) ?? { total: 0, direct: 0 };
     counts.total++;
-    if (parent.depth === 1) counts.direct++;
-    replyCounts.set(rootId, counts);
+    if (node.depth === 1) counts.direct++;
+    replyCounts.set(node.rootId, counts);
   }
 
   await chunkedParallel(
     Array.from(replyCounts.entries()),
     CHUNK_SIZE,
     async ([rootId, counts]) => {
-      await prisma.post.update({
+      await ctx.prisma.post.update({
         where: { unitId: rootId },
         data: {
           replyCount: counts.total,
@@ -498,10 +523,6 @@ const WIKI_POSTS: {
   },
 ];
 
-/**
- * Seed at least one parallel-translation wiki POST group (zh-hant / en / ja).
- * Idempotent: skipped if the well-known group id already exists.
- */
 export async function seedWikiTranslationGroups(
   prisma: PrismaClient,
   users: CreatedUser[],

@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { UnitType } from "#/prisma/generated/client.js";
+import { UnitType } from "../../generated/client.js";
 
 export function unitTypeToShelfKind(type: UnitType): string {
   switch (type) {

@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { generateTranslations } from "./generators.js";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 
 /**
@@ -11,10 +11,11 @@ import type { CreatedUnit, CreatedUser } from "./types.js";
  * Uses two-phase createMany for maximum throughput.
  */
 export async function seedTags(
-  prisma: PrismaClient,
-  total: number,
+  ctx: SeedCtx,
+  spec: CountSpec,
   users: CreatedUser[],
 ): Promise<CreatedUnit[]> {
+  const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} tags...`);
 
   const tags = Array.from({ length: total }, () => {
@@ -25,7 +26,7 @@ export async function seedTags(
   });
 
   // Phase 1: Create Unit rows
-  await prisma.unit.createMany({
+  await ctx.prisma.unit.createMany({
     data: tags.map((t) => ({
       id: t.id,
       type: UnitType.TAG,
@@ -38,7 +39,7 @@ export async function seedTags(
   });
 
   // Phase 2: Create UnitTranslation rows (all languages)
-  await prisma.unitTranslation.createMany({
+  await ctx.prisma.unitTranslation.createMany({
     data: tags.flatMap((t) =>
       t.translations.map((tr) => ({
         unitId: t.id,
@@ -50,7 +51,7 @@ export async function seedTags(
   });
 
   // Phase 3: Create UnitSupportLanguage rows
-  await prisma.unitSupportLanguage.createMany({
+  await ctx.prisma.unitSupportLanguage.createMany({
     data: tags.flatMap((t) =>
       t.translations.map((tr, i) => ({
         unitId: t.id,

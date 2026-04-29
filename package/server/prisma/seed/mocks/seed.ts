@@ -1,6 +1,18 @@
 import "dotenv/config";
-import type { Prisma } from "#/prisma/client";
+import { readFileSync } from "node:fs";
+import * as v from "valibot";
 import { prisma } from "#/prisma/client";
+import { realistic } from "../../../../../tool/seed/presets/realistic";
+import { fast } from "../../../../../tool/seed/presets/fast";
+import { minimal } from "../../../../../tool/seed/presets/minimal";
+import { postTreeFocus } from "../../../../../tool/seed/presets/post-tree-focus";
+import { runMockSeed } from "./orchestrator.js";
+import { makeSeedCtx } from "./strategy.js";
+import {
+  SeedPlanSchema,
+  type SeedPlan,
+  type SeedPreset,
+} from "./types.js";
 
 process.on("unhandledRejection", (reason) => {
   console.error("[Error] Unhandled rejection:", reason);
@@ -12,241 +24,45 @@ process.on("uncaughtException", (err) => {
   if (err instanceof Error && err.stack) console.error(err.stack);
   process.exit(1);
 });
-import { PostKind } from "#/prisma/generated/client.js";
-import { resetDatabase } from "#/prisma/seed/database";
-import { seedOrganizations, seedPeople } from "#/prisma/seed/mocks/attribution";
-import {
-  seedBooks,
-  seedChaptersForBook,
-  updateChapterIndex,
-} from "#/prisma/seed/mocks/books";
-import { DEFAULT_COUNTS, PROFILE } from "#/prisma/seed/mocks/config";
-import { seedEchoKV } from "#/prisma/seed/mocks/echokv";
-import { seedEngagement } from "#/prisma/seed/mocks/engagement";
-import { seedInfra } from "#/prisma/seed/infra";
-import { seedGames } from "#/prisma/seed/mocks/games";
-import { seedMedia } from "#/prisma/seed/mocks/media";
-import { seedPinboardSamples } from "#/prisma/seed/mocks/pinboard";
-import {
-  seedPostsForWorks,
-  seedWikiTranslationGroups,
-} from "#/prisma/seed/mocks/posts";
-import { seedRealms } from "#/prisma/seed/mocks/realms";
-import { seedScores } from "#/prisma/seed/mocks/scores";
-import { seedShelves } from "#/prisma/seed/mocks/shelves";
-import { seedTags } from "#/prisma/seed/mocks/tags";
-import { seedUsers } from "#/prisma/seed/mocks/users";
-import { chunkedParallel } from "#/prisma/seed/mocks/utils";
-import { seedZones } from "#/prisma/seed/mocks/zones";
 
-function stepTimer(label: string) {
-  const start = performance.now();
-  return () => {
-    const ms = (performance.now() - start).toFixed(0);
-    console.log(`[Seed] ${label} done (${ms}ms)`);
-  };
+const PRESETS: Record<string, SeedPreset> = {
+  realistic,
+  fast,
+  minimal,
+  "post-tree-focus": postTreeFocus,
+};
+
+function parseArgs(): { preset: string; planFile?: string } {
+  let preset = "realistic";
+  let planFile: string | undefined;
+  for (const arg of process.argv.slice(2)) {
+    if (arg.startsWith("--preset=")) preset = arg.slice("--preset=".length);
+    else if (arg.startsWith("--plan-file="))
+      planFile = arg.slice("--plan-file=".length);
+  }
+  return { preset, planFile };
+}
+
+function resolvePlan(preset: SeedPreset, planFile?: string): SeedPlan {
+  if (!planFile) return preset.plan;
+  const raw = readFileSync(planFile, "utf8");
+  const parsed = JSON.parse(raw);
+  return v.parse(SeedPlanSchema, parsed);
 }
 
 async function main() {
-  console.time("seed:total");
-  console.log("[Seed] Starting database seeding...");
-  console.log(`[Seed] Profile: ${PROFILE}`);
-  console.log("[Seed] Counts:", DEFAULT_COUNTS);
-
-  // ── STEP 1: Reset ─────────────────────────────────
-  let done = stepTimer("Step 1: Reset");
-  await resetDatabase(prisma);
-  done();
-
-  // ── STEP 2: Users + Entities (parallel) ───────────
-  done = stepTimer("Step 2: Users + People + Organizations");
-  const users = await seedUsers(prisma, DEFAULT_COUNTS.users);
-  const [people, organizations] = await Promise.all([
-    seedPeople(prisma, DEFAULT_COUNTS.personEntities),
-    seedOrganizations(prisma, DEFAULT_COUNTS.organizationEntities),
-  ]);
-  console.log(
-    `[Seed]   ${users.length} users, ${people.length} person entities, ${organizations.length} organization entities`,
-  );
-  done();
-
-  // ── STEP 3: Infra (content-type tags + default realm) ────
-  done = stepTimer("Step 3: Infra");
-  const admin = await prisma.user.findUnique({
-    where: { slug: "admin" },
-    select: { unitId: true },
-  });
-  if (!admin) {
-    throw new Error("[Seed] admin user not found — seed users first");
-  }
-  const { defaultRealmId } = await seedInfra(prisma, admin.unitId);
-  done();
-
-  // ── STEP 3b: Pinboard announcement samples ────────
-  done = stepTimer("Step 3b: Pinboard samples");
-  await seedPinboardSamples(prisma, defaultRealmId, admin.unitId);
-  done();
-
-  // ── STEP 4: Random tags ───────────────────────────
-  done = stepTimer("Step 4: Tags");
-  const tags = await seedTags(prisma, DEFAULT_COUNTS.tags, users);
-  console.log(`[Seed]   ${tags.length} random tags`);
-  done();
-
-  // ── STEP 5: Works (parallel) ──────────────────────
-  done = stepTimer("Step 5: Books + Games + Media");
-  const [books, games, mediaItems] = await Promise.all([
-    seedBooks(prisma, DEFAULT_COUNTS.books, users, people, organizations, tags),
-    seedGames(prisma, DEFAULT_COUNTS.games, users, people, organizations, tags),
-    seedMedia(prisma, DEFAULT_COUNTS.media, users, people, organizations, tags),
-  ]);
-  const allWorkIds = [
-    ...books.map((b) => b.id),
-    ...games.map((g) => g.id),
-    ...mediaItems.map((m) => m.id),
-  ];
-  const allWorks = [...books, ...games, ...mediaItems];
-  console.log(
-    `[Seed]   ${books.length} books, ${games.length} games, ${mediaItems.length} media`,
-  );
-  done();
-
-  // ── STEP 6: Realms (needed by scores) ─────────────
-  done = stepTimer("Step 6: Realms");
-  const realms = await seedRealms(
-    prisma,
-    DEFAULT_COUNTS.realms,
-    users,
-    allWorkIds,
-  );
-  console.log(`[Seed]   ${realms.length} realms`);
-  done();
-
-  // ── STEP 7: Scores (needs realms + works) ─────────
-  done = stepTimer("Step 7: Scores");
-  const { scoreEntries } = await seedScores(prisma, allWorks, users, realms, 5);
-  console.log(`[Seed]   ${scoreEntries.size} score entries`);
-  done();
-
-  // ── STEP 8: Posts (power-law per work) ────────────
-  done = stepTimer("Step 8: Posts");
-  const posts = await seedPostsForWorks(
-    prisma,
-    allWorks,
-    users,
-    DEFAULT_COUNTS.postsPerWork,
-    scoreEntries,
-  );
-  console.log(`[Seed]   ${posts.length} posts`);
-  done();
-
-  // ── STEP 8b: Wiki translation groups ──────────────
-  done = stepTimer("Step 8b: Wiki translation groups");
-  const wikiGroup = await seedWikiTranslationGroups(prisma, users);
-  if (wikiGroup) {
-    console.log(
-      `[Seed]   1 wiki translation group with ${wikiGroup.postIds.length} parallel posts`,
+  const { preset: presetName, planFile } = parseArgs();
+  const preset = PRESETS[presetName];
+  if (!preset) {
+    console.error(
+      `[Seed] Unknown preset "${presetName}". Available: ${Object.keys(PRESETS).join(", ")}.`,
     );
-  }
-  done();
-
-  // ── STEP 9: Shelves (needs review posts) ──────────
-  done = stepTimer("Step 9: Shelves");
-  const reviewPosts = posts.filter((p) => p.kind === PostKind.REVIEW);
-  const shelves = await seedShelves(
-    prisma,
-    DEFAULT_COUNTS.shelves,
-    users,
-    allWorks,
-    reviewPosts,
-  );
-  console.log(
-    `[Seed]   ${shelves.length} shelves (${reviewPosts.length} review posts available)`,
-  );
-  done();
-
-  // ── STEP 10: Chapters (power-law per book) ─────────
-  done = stepTimer("Step 10: Chapters + BookIndex");
-  const bookUnitMap = new Map<string, string>();
-  for (const book of books) {
-    const unit = await prisma.unit.findUnique({
-      where: { id: book.id },
-      select: { userId: true },
-    });
-    if (unit?.userId) bookUnitMap.set(book.id, unit.userId);
+    process.exit(2);
   }
 
-  await chunkedParallel(books, 5, async (book) => {
-    const userId = bookUnitMap.get(book.id);
-    if (!userId) return;
-
-    const chapterTree = await seedChaptersForBook(
-      prisma,
-      book.id,
-      userId,
-      DEFAULT_COUNTS.chapter,
-    );
-    await updateChapterIndex(
-      prisma,
-      book.id,
-      chapterTree as unknown as Prisma.InputJsonValue,
-    );
-  });
-  done();
-
-  // ── STEP 11: Engagement ────────────────────────────
-  done = stepTimer("Step 11: Engagement");
-  // Favorites shelf primarily holds works + reviewable posts; restrict to
-  // kinds that the frontend actually renders in a shelf row.
-  const allEngagementUnits: typeof allWorks = [
-    ...allWorks,
-    ...posts.map((p) => ({ id: p.id, type: p.type })),
-  ];
-  await seedEngagement(prisma, users, allEngagementUnits, {
-    followsPerUser: DEFAULT_COUNTS.followsPerUser,
-    favoriteItemsPerUser: DEFAULT_COUNTS.favoriteItemsPerUser,
-  });
-  done();
-
-  // ── STEP 12: Zones (needs works + tags) ───────────
-  done = stepTimer("Step 12: Zones");
-  const zones = await seedZones(
-    prisma,
-    DEFAULT_COUNTS.zones,
-    allWorkIds,
-    tags.map((t) => t.id),
-  );
-  console.log(`[Seed]   ${zones.length} zones`);
-  done();
-
-  // ── STEP 13: EchoKV ────────────────────────────────
-  done = stepTimer("Step 13: EchoKV");
-  await seedEchoKV(prisma);
-  done();
-
-  // ── Summary ───────────────────────────────────────
-  console.log("[Seed] Complete!", {
-    users: users.length,
-    personEntities: people.length,
-    organizationEntities: organizations.length,
-    tags: tags.length,
-    books: books.length,
-    games: games.length,
-    media: mediaItems.length,
-    posts: posts.length,
-    reviewPosts: reviewPosts.length,
-    shelves: shelves.length,
-    realms: realms.length,
-    zones: zones.length,
-    totalUnits:
-      allWorks.length +
-      posts.length +
-      shelves.length +
-      realms.length +
-      tags.length +
-      zones.length,
-  });
-  console.timeEnd("seed:total");
+  const plan = resolvePlan(preset, planFile);
+  const ctx = makeSeedCtx(prisma, preset.mode);
+  await runMockSeed(ctx, plan);
 }
 
 main()

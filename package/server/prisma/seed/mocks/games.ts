@@ -1,10 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
-import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import type { Prisma } from "../../generated/client.js";
+import { UnitStatus, UnitType } from "../../generated/client.js";
 import { flushAttributionsAndTags } from "./books.js";
 import { PLATFORM_KEYS } from "./data.js";
 import { generateGameExtra, generateTranslations } from "./generators.js";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
 
@@ -13,17 +14,15 @@ const CHUNK_SIZE = 10;
 const GAME_PERSON_ROLES = ["director", "composer", "designer"];
 const GAME_ORG_ROLES = ["developer", "publisher"];
 
-/**
- * Seed games using chunked Promise.all.
- */
 export async function seedGames(
-  prisma: PrismaClient,
-  total: number,
+  ctx: SeedCtx,
+  spec: CountSpec,
   users: CreatedUser[],
   people: CreatedEntity[],
   organizations: CreatedEntity[],
   tags: CreatedUnit[],
 ): Promise<CreatedUnit[]> {
+  const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} games...`);
 
   const allAttributions: Prisma.AttributionCreateManyInput[] = [];
@@ -37,7 +36,7 @@ export async function seedGames(
       const translations = generateTranslations(UnitType.GAME);
       const platforms = pickN([...PLATFORM_KEYS], randomInt(1, 4));
 
-      const unit = await prisma.unit.create({
+      const unit = await ctx.prisma.unit.create({
         data: {
           type: UnitType.GAME,
           userId: author.unitId,
@@ -115,6 +114,6 @@ export async function seedGames(
     },
   );
 
-  await flushAttributionsAndTags(prisma, allAttributions, allTagLinks);
+  await flushAttributionsAndTags(ctx.prisma, allAttributions, allTagLinks);
   return created;
 }

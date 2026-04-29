@@ -1,10 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
-import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import type { Prisma } from "../../generated/client.js";
+import { UnitStatus, UnitType } from "../../generated/client.js";
 import { flushAttributionsAndTags } from "./books.js";
 import { MEDIA_KIND_KEYS } from "./data.js";
 import { generateMediaExtra, generateTranslations } from "./generators.js";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
 
@@ -13,17 +14,15 @@ const CHUNK_SIZE = 10;
 const MEDIA_PERSON_ROLES = ["director", "actor", "composer", "narrator"];
 const MEDIA_ORG_ROLES = ["studio", "distributor"];
 
-/**
- * Seed media using chunked Promise.all.
- */
 export async function seedMedia(
-  prisma: PrismaClient,
-  total: number,
+  ctx: SeedCtx,
+  spec: CountSpec,
   users: CreatedUser[],
   people: CreatedEntity[],
   organizations: CreatedEntity[],
   tags: CreatedUnit[],
 ): Promise<CreatedUnit[]> {
+  const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} media...`);
 
   const allAttributions: Prisma.AttributionCreateManyInput[] = [];
@@ -38,7 +37,7 @@ export async function seedMedia(
       const kindKey = faker.helpers.arrayElement([...MEDIA_KIND_KEYS]);
       const isTV = kindKey === "TV_SERIES" || kindKey === "ANIME";
 
-      const unit = await prisma.unit.create({
+      const unit = await ctx.prisma.unit.create({
         data: {
           type: UnitType.MEDIA,
           userId: author.unitId,
@@ -102,6 +101,6 @@ export async function seedMedia(
     },
   );
 
-  await flushAttributionsAndTags(prisma, allAttributions, allTagLinks);
+  await flushAttributionsAndTags(ctx.prisma, allAttributions, allTagLinks);
   return created;
 }

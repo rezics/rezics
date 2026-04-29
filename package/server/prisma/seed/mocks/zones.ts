@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
+import type { Prisma } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { generateTranslations } from "./generators.js";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit } from "./types.js";
 import { pickN, randomBoolean } from "./utils.js";
 
@@ -96,20 +97,18 @@ function buildFilters(
   }
 }
 
-/**
- * Seed Zone units with varied templates, filters, styling, and temporal states.
- */
 export async function seedZones(
-  prisma: PrismaClient,
-  total: number,
+  ctx: SeedCtx,
+  spec: CountSpec,
   workIds: string[],
   tagIds: string[],
 ): Promise<CreatedUnit[]> {
+  const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} zones...`);
 
   const results: CreatedUnit[] = [];
 
-  // Ensure every template appears at least once
+  // Ensure every template appears at least once when total >= templates count
   const templateSchedule: (typeof ZONE_TEMPLATES)[number][] = [];
   for (let i = 0; i < total; i++) {
     if (i < ZONE_TEMPLATES.length) {
@@ -129,7 +128,7 @@ export async function seedZones(
     const filters = buildFilters(template, workIds, tagIds);
 
     const id = randomUUID();
-    await prisma.unit.create({
+    await ctx.prisma.unit.create({
       data: {
         id,
         type: UnitType.ZONE,

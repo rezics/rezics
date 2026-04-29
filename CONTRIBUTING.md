@@ -52,6 +52,40 @@ bun run check:convention   # Scans routes and folders; exits non-zero on violati
 - `openspec/specs/folder-naming-convention/spec.md`
 - `openspec/specs/convention-enforcement/spec.md`
 
+## Seeding
+
+The unified seed CLI lives at `tool/seed/seed.ts` and covers users, infrastructure, and mock data.
+
+```bash
+# Fully interactive (multi-select users / infrastructure / mock data)
+bun run tool/seed/seed.ts
+
+# Mock data only, named preset, no prompts
+bun run seed:mock                 # alias for --preset=realistic --no-interactive
+bun run seed:mock:fast            # alias for --preset=fast --no-interactive
+bun run tool/seed/seed.ts --preset=minimal --no-interactive
+```
+
+**Presets** (`tool/seed/presets/`):
+
+| Preset           | Mode      | Use                                                    |
+| ---------------- | --------- | ------------------------------------------------------ |
+| `realistic`      | realistic | Default — power-law distributed counts, prod-ish shape |
+| `fast`           | realistic | Smaller envelope for quick iteration                   |
+| `minimal`        | fixed     | Tiny deterministic dataset for unit-style scenarios    |
+| `post-tree-focus`| fixed     | One work per type, deterministic post tree shape       |
+
+**Plan tweaking.** When running interactively, after picking a preset you can tweak the `SeedPlan` in `$VISUAL`/`$EDITOR` (notepad on Windows, vi otherwise). The plan is dumped as JSON in `node_modules/.cache/rezics-seed/edit-*/plan.json`, validated against `SeedPlanSchema` on save, and re-prompted on parse errors. Stale edit dirs older than one hour are swept on every CLI start.
+
+**Modes.** A `Mode` (`realistic | fixed | uniform`) is set once per preset and threaded through `SeedCtx`; each `CountSpec = { min?, max, target?, alpha? }` is interpreted by `ctx.draw(spec)`:
+- `realistic` → `powerLaw(min ?? 0, max, alpha ?? 1.5)`
+- `fixed` → clamp(`target ?? floor((min+max)/2)`, min, max)
+- `uniform` → `randInt(min ?? 0, max)`
+
+Seeders never read counts directly — all count decisions go through `ctx.draw(...)`. R7 (`bun run check:convention`) blocks new `powerLaw` imports outside `strategy.ts`/`utils.ts`.
+
+The retired `SEED_*` env vars (e.g. `SEED_PROFILE=fast`) no longer have any effect — replace with `--preset=<name>`.
+
 ## Change Management
 
 This project uses **OpenSpec** for non-trivial changes. See `CLAUDE.md` for workflow commands.

@@ -9,6 +9,7 @@
  * - R4  folder-naming-convention — container folders are plural from allowlist
  * - R5  outbound-link-protection — no raw <a href> outside SafeLink
  * - R6  tanstack-query-keys       — no inline `queryKey: [` outside api key/query/mutation files
+ * - R7  seed-power-law-isolation  — only strategy.ts/utils.ts may import powerLaw in mocks/
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -111,7 +112,7 @@ const EXEMPT_PACKAGES = new Set(["auth"]);
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6";
+type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7";
 
 interface Violation {
   rule: Rule;
@@ -127,6 +128,7 @@ const SPEC_LINK: Record<Rule, string> = {
   R4: "openspec/specs/folder-naming-convention/spec.md",
   R5: "openspec/specs/outbound-link-protection/spec.md",
   R6: "openspec/specs/tanstack-query-keys/spec.md",
+  R7: "openspec/changes/seed-unified-plan-modes/specs/seed-power-law-distribution/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -433,6 +435,55 @@ function scanInlineQueryKeys(candidateFiles: string[]): Violation[] {
   return violations;
 }
 
+// ─── R7: powerLaw isolation in mocks/ ───────────────────────────────────────
+
+const R7_MOCKS_DIR = "package/server/prisma/seed/mocks";
+const R7_FILE_ALLOWLIST = new Set([
+  `${R7_MOCKS_DIR}/strategy.ts`,
+  `${R7_MOCKS_DIR}/utils.ts`,
+]);
+const POWER_LAW_IMPORT_PATTERN =
+  /^\s*import\s+(?:[^"';]+?\bpowerLaw\b[^"';]*?)\s+from\s+["'][^"']+["']/;
+
+function isR7TargetFile(absPath: string): boolean {
+  const relPath = relative(REPO_ROOT, absPath).replace(/\\/g, "/");
+  if (!relPath.startsWith(`${R7_MOCKS_DIR}/`)) return false;
+  if (!/\.ts$/.test(relPath)) return false;
+  if (R7_FILE_ALLOWLIST.has(relPath)) return false;
+  return true;
+}
+
+function scanPowerLawImports(candidateFiles: string[]): Violation[] {
+  const violations: Violation[] = [];
+
+  for (const filePath of candidateFiles) {
+    if (!isR7TargetFile(filePath)) continue;
+
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+
+    const relPath = relative(REPO_ROOT, filePath).replace(/\\/g, "/");
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      if (POWER_LAW_IMPORT_PATTERN.test(lines[i])) {
+        violations.push({
+          rule: "R7",
+          path: `${relPath}:${i + 1}`,
+          message:
+            "Direct `powerLaw` import outside strategy.ts/utils.ts — count decisions must go through `ctx.draw(...)`.",
+          spec: SPEC_LINK.R7,
+        });
+      }
+    }
+  }
+
+  return violations;
+}
+
 // ─── Git staged-file helpers ────────────────────────────────────────────────
 
 function getStagedFilePaths(): string[] {
@@ -476,6 +527,7 @@ function buildSnapshot(violations: Violation[]): ViolationSnapshot {
     R4: 0,
     R5: 0,
     R6: 0,
+    R7: 0,
   };
   const keys: string[] = [];
   for (const violation of violations) {
@@ -559,14 +611,15 @@ function main() {
     ...scanFolders(folderPaths),
     ...scanRawAnchors(tsxFiles),
     ...scanInlineQueryKeys(tsAndTsxFiles),
+    ...scanPowerLawImports(tsAndTsxFiles),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5, R6 } = currentSnapshot.byRule;
+    const { R1, R2, R3, R4, R5, R6, R7 } = currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7})`,
     );
     process.exit(0);
   }
@@ -583,12 +636,12 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5, R6 } = currentSnapshot.byRule;
+  const { R1, R2, R3, R4, R5, R6, R7 } = currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
   console.log(
-    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}`,
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}`,
   );
 
   if (newViolations.length > 0) {

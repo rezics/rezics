@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import type { PrismaClient } from "#/prisma/generated/client.js";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUser } from "./types.js";
 import { createUsernameGenerator, generateParagraph } from "./utils.js";
 
@@ -12,15 +12,16 @@ function generateSlug(name: string): string {
  * Seed users via createMany. Admin is created first, then bulk insert.
  */
 export async function seedUsers(
-  prisma: PrismaClient,
-  total: number,
+  ctx: SeedCtx,
+  spec: CountSpec,
 ): Promise<CreatedUser[]> {
+  const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} users...`);
   const nextUsername = createUsernameGenerator();
 
   // Admin user (separate — has permission JSON)
   const adminId = randomUUID();
-  await prisma.user.create({
+  await ctx.prisma.user.create({
     data: {
       unitId: adminId,
       slug: "admin",
@@ -47,7 +48,7 @@ export async function seedUsers(
     };
   });
 
-  await prisma.user.createMany({ data: userData });
+  await ctx.prisma.user.createMany({ data: userData });
 
   return userData.map((u) => ({
     unitId: u.unitId,

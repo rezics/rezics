@@ -128,6 +128,18 @@ function mockViewCount(id: string | number): number {
 }
 ```
 
+## Database Seeding
+
+The unified seed CLI lives at `tool/seed/seed.ts`. Use named **presets** (`realistic`, `fast`, `minimal`, `post-tree-focus`) instead of `SEED_*` env vars (retired):
+
+```bash
+bun run seed:mock           # realistic preset, no prompts
+bun run seed:mock:fast      # fast preset, no prompts
+bun run tool/seed/seed.ts   # interactive: pick users / infrastructure / mock
+```
+
+All count decisions in `package/server/prisma/seed/mocks/` go through `ctx.draw(plan.<spec>)` — never call `powerLaw`/`randomInt` directly for counts. R7 (`check:convention`) enforces this. See `CONTRIBUTING.md` for the preset list and `$EDITOR` tweak flow.
+
 ## Global Instructions
 
 - Prefer reading local files and fetching docs over answering from memory

@@ -1,15 +1,15 @@
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE, withCoverUrl } from "@rezics/contract";
-import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
+import type { Prisma } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { generateBetween } from "@/shelf/fractional-index";
 import { getRandomShelfCover, SHELF_KIND_KEYS } from "./data.js";
 import { generateTranslations } from "./generators.js";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
 import {
   chunkedParallel,
   pickN,
-  powerLaw,
   randomBoolean,
   randomInt,
   unitTypeToShelfKind,
@@ -17,13 +17,18 @@ import {
 
 const CHUNK_SIZE = 10;
 
+interface ShelvesPlan {
+  shelves: CountSpec;
+  shelfItemCount: CountSpec;
+}
+
 /**
  * Seed shelves (replaces ReadList).
  * Each shelf = Unit(type=SHELF) + Shelf extension + UnitTranslation + ShelfItems.
  */
 export async function seedShelves(
-  prisma: PrismaClient,
-  total: number,
+  ctx: SeedCtx,
+  plan: ShelvesPlan,
   users: CreatedUser[],
   works: CreatedUnit[],
   reviewPosts: CreatedPost[],
@@ -35,9 +40,9 @@ export async function seedShelves(
     return [];
   }
 
+  const total = ctx.draw(plan.shelves);
   console.log(`[Seed] Seeding ${total} shelves...`);
 
-  // Index reviews by targetUnitId so we can attach multiple reviews per slot.
   const reviewsByTarget = new Map<string, CreatedPost[]>();
   for (const r of reviewPosts) {
     if (!r.targetUnitId) continue;
@@ -63,7 +68,7 @@ export async function seedShelves(
           }
         : null;
 
-      const unit = await prisma.unit.create({
+      const unit = await ctx.prisma.unit.create({
         data: {
           type: UnitType.SHELF,
           userId: author.unitId,
@@ -100,7 +105,7 @@ export async function seedShelves(
         select: { id: true, type: true },
       });
 
-      const itemCount = Math.min(powerLaw(3, 150, 1.5), works.length);
+      const itemCount = Math.min(ctx.draw(plan.shelfItemCount), works.length);
       const selectedWorks = pickN(works, itemCount);
 
       let prevPos: string | undefined;
@@ -133,7 +138,6 @@ export async function seedShelves(
           role: "primary",
         });
 
-        // Attach multiple reviews per slot when available (showcase book→many-review).
         const candidateReviews = reviewsByTarget.get(work.id);
         if (candidateReviews && candidateReviews.length > 0) {
           const attachCount = Math.min(
@@ -154,8 +158,8 @@ export async function seedShelves(
       }
 
       if (shelfItemRows.length > 0) {
-        await prisma.shelfItem.createMany({ data: shelfItemRows });
-        await prisma.shelfUnit.createMany({
+        await ctx.prisma.shelfItem.createMany({ data: shelfItemRows });
+        await ctx.prisma.shelfUnit.createMany({
           data: shelfUnitRows,
           skipDuplicates: true,
         });

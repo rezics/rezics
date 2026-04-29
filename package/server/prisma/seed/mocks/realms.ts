@@ -1,24 +1,21 @@
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { REALM_ROLE_KEYS } from "./data.js";
 import { generateTranslations } from "./generators.js";
+import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
 
 const CHUNK_SIZE = 10;
 
-/**
- * Seed realms.
- * Each realm = Unit(type=REALM) + Realm extension + UnitTranslation + RealmMembers + RealmUnits.
- */
 export async function seedRealms(
-  prisma: PrismaClient,
-  total: number,
+  ctx: SeedCtx,
+  spec: CountSpec,
   users: CreatedUser[],
   workIds: string[],
 ): Promise<CreatedUnit[]> {
+  const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} realms...`);
 
   return chunkedParallel(
@@ -29,7 +26,7 @@ export async function seedRealms(
       const translations = generateTranslations(UnitType.REALM);
       const isPublic = randomBoolean(0.8);
 
-      const unit = await prisma.unit.create({
+      const unit = await ctx.prisma.unit.create({
         data: {
           type: UnitType.REALM,
           userId: owner.unitId,
@@ -60,7 +57,6 @@ export async function seedRealms(
         select: { id: true, type: true },
       });
 
-      // Add members (owner + random members)
       const memberCount = randomInt(3, 20);
       const memberUsers = pickN(
         users.filter((u) => u.unitId !== owner.unitId),
@@ -82,19 +78,17 @@ export async function seedRealms(
         })),
       ];
 
-      await prisma.realmMember.createMany({ data: members });
+      await ctx.prisma.realmMember.createMany({ data: members });
 
-      // Update member count
-      await prisma.realm.update({
+      await ctx.prisma.realm.update({
         where: { unitId: unit.id },
         data: { memberCount: members.length },
       });
 
-      // Add some works to the realm
       if (workIds.length > 0) {
         const realmWorkCount = randomInt(2, Math.min(15, workIds.length));
         const selectedWorks = pickN(workIds, realmWorkCount);
-        await prisma.realmUnit.createMany({
+        await ctx.prisma.realmUnit.createMany({
           data: selectedWorks.map((workId) => ({
             realmUnitId: unit.id,
             unitId: workId,
