@@ -84,9 +84,9 @@
 
 ## 12. App: pinboard rewrite
 
-- [ ] 12.1 Rewrite `package/app/src/pinboard/` as a thin contract-driven section: editor reads/writes `Realm.extra.pinboard` via the realm-extra hooks; per-Unit editing uses the moved `TranslationEditor` + `WorkReleaseNav` from `@rezics/ui`.
-- [ ] 12.2 Compose the announcement editor on the same primitives, gated by realm-mod authority.
-- [ ] 12.3 Update the realm admin route to consume the new pinboard section; remove any imports of the old pinboard contract.
+- [x] 12.1 Rewrite `package/app/src/pinboard/` as a thin contract-driven section: editor reads/writes `Realm.extra.pinboard` via the realm-extra hooks; per-Unit editing uses the moved `TranslationEditor` + `WorkReleaseNav` from `@rezics/ui`.
+- [x] 12.2 Compose the announcement editor on the same primitives, gated by realm-mod authority.
+- [x] 12.3 Update the realm admin route to consume the new pinboard section; remove any imports of the old pinboard contract.
 - [ ] 12.4 Smoke-test in dev (`bun run app:dev`): create a pinboard entry, reorder it, remove it, soft-delete the underlying Unit and confirm read-time filtering.
 
 ## 13. App: locale entries

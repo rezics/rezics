@@ -12,45 +12,53 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import { useDeletePinboardEntry } from "@rezics/api/pinboard";
-import type { PinboardKey } from "@rezics/contract";
-import { useCallback, useMemo, useState } from "react";
+import {
+  useAppendRealmExtraMutation,
+  useRemoveRealmExtraMutation,
+} from "@rezics/api/realm/realm-extra.mutations";
+import { unitApi } from "@rezics/api/unit/unit";
+import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
+import {
+  DEFAULT_LANGUAGE,
+  type Language,
+  normalizeLanguage,
+  type RealmExtraListKey,
+} from "@rezics/contract";
+import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { PinboardEditorDialog } from "../components/PinboardEditorDialog";
 import { PinboardEmptyState } from "../components/PinboardEmptyState";
 import { PinboardErrorState } from "../components/PinboardErrorState";
 import { PinboardReorderList } from "../components/PinboardReorderList";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { StaleIdsBanner } from "../components/StaleIdsBanner";
-import { usePinboardDetail, usePinboardList } from "../hooks/usePinboard";
-import type {
-  PinboardEditorTranslationDraft,
-  PinboardEntryDTO,
-} from "../models/types";
+import { usePinboardList } from "../hooks/usePinboard";
+import type { PinboardEntryView, PinboardListKey } from "../models/types";
 
 export interface PinboardAdminSectionProps {
   realmUnitId: string;
-  /** When true, the `announcement` tab is included alongside `pinned`. */
+  /** When true, the `announcement` tab is included alongside `pinboard`. */
   isDefaultRealm?: boolean;
 }
 
 /**
- * Tabbed admin surface. Shows one tab per pinboard key available to the
- * caller (`pinned` always; `announcement` only on the default realm).
- * Each tab renders the reorder/edit list, stale banner, create button,
- * and delegates to the editor dialog.
+ * Tabbed admin surface. Shows one tab per Realm.extra list key available to
+ * the caller (`pinboard` always; `announcement` only on the default realm).
+ * Each tab renders the reorder/edit list, stale banner, create button, and
+ * delegates to the editor dialog.
  */
 export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
   realmUnitId,
   isDefaultRealm,
 }) => {
   const { t } = useTranslation();
-  const availableKeys = useMemo<PinboardKey[]>(
-    () => (isDefaultRealm ? ["announcement", "pinned"] : ["pinned"]),
+  const availableKeys = useMemo<PinboardListKey[]>(
+    () => (isDefaultRealm ? ["announcement", "pinboard"] : ["pinboard"]),
     [isDefaultRealm],
   );
-  const [activeKey, setActiveKey] = useState<PinboardKey>(availableKeys[0]);
+  const [activeKey, setActiveKey] = useState<PinboardListKey>(availableKeys[0]);
 
   return (
     <Box>
@@ -60,7 +68,7 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
       {availableKeys.length > 1 ? (
         <Tabs
           value={activeKey}
-          onChange={(_, v) => setActiveKey(v as PinboardKey)}
+          onChange={(_, v) => setActiveKey(v as RealmExtraListKey)}
           sx={{ mb: 2 }}
           aria-label={t("pinboard.admin.tabs_aria")}
         >
@@ -84,7 +92,7 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
 
 interface PinboardAdminBoardProps {
   realmUnitId: string;
-  pinboardKey: PinboardKey;
+  pinboardKey: PinboardListKey;
 }
 
 const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
@@ -100,19 +108,22 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
     });
 
   const [editorOpen, setEditorOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<PinboardEntryDTO | null>(
+  const [editingEntry, setEditingEntry] = useState<PinboardEntryView | null>(
     null,
   );
-  const [pendingDelete, setPendingDelete] = useState<PinboardEntryDTO | null>(
-    null,
-  );
+  const [pendingRemove, setPendingRemove] =
+    useState<PinboardEntryView | null>(null);
+  const [removing, setRemoving] = useState(false);
+
+  const append = useAppendRealmExtraMutation();
+  const removeMut = useRemoveRealmExtraMutation();
 
   const openCreate = useCallback(() => {
     setEditingEntry(null);
     setEditorOpen(true);
   }, []);
 
-  const openEdit = useCallback((entry: PinboardEntryDTO) => {
+  const openEdit = useCallback((entry: PinboardEntryView) => {
     setEditingEntry(entry);
     setEditorOpen(true);
   }, []);
@@ -122,26 +133,75 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
     setEditingEntry(null);
   }, []);
 
-  const deleteMut = useDeletePinboardEntry();
-
-  const confirmDelete = useCallback(async () => {
-    if (!pendingDelete) return;
+  const confirmRemove = useCallback(async () => {
+    if (!pendingRemove) return;
+    setRemoving(true);
     try {
-      await deleteMut.mutateAsync({
-        realmUnitId,
-        pinboardKey,
-        unitId: pendingDelete.unitId,
+      await removeMut.mutateAsync({
+        realmId: realmUnitId,
+        key: pinboardKey,
+        unitId: pendingRemove.unitId,
       });
       toast.success(t("pinboard.admin.delete_done"));
-      setPendingDelete(null);
+      setPendingRemove(null);
     } catch (err) {
       toast.error(
         t("pinboard.admin.delete_failed", {
           error: err instanceof Error ? err.message : String(err),
         }),
       );
+    } finally {
+      setRemoving(false);
     }
-  }, [deleteMut, pendingDelete, realmUnitId, pinboardKey, t]);
+  }, [removeMut, pendingRemove, realmUnitId, pinboardKey, t]);
+
+  const handleCreate = useCallback(
+    async (translations: TranslationEditorEntry[]) => {
+      const created = await unitApi.create({
+        type: "POST",
+        defaultLanguage: toLanguage(translations[0]?.language) ?? DEFAULT_LANGUAGE,
+        translations: translations.flatMap((tr) => {
+          const language = toLanguage(tr.language);
+          if (!language) return [];
+          return [
+            {
+              language,
+              title: tr.title,
+              subtitle: tr.subtitle,
+              summary: tr.summary,
+              description: tr.description,
+            },
+          ];
+        }),
+      });
+      await append.mutateAsync({
+        realmId: realmUnitId,
+        key: pinboardKey,
+        unitId: created.id,
+      });
+      toast.success(t("pinboard.editor.created"));
+      refetch();
+    },
+    [append, realmUnitId, pinboardKey, refetch, t],
+  );
+
+  const handleEditSave = useCallback(
+    async (unitId: string, translations: TranslationEditorEntry[]) => {
+      for (const tr of translations) {
+        const language = toLanguage(tr.language);
+        if (!language) continue;
+        await unitApi.upsertTranslation(unitId, language, {
+          title: tr.title,
+          subtitle: tr.subtitle,
+          summary: tr.summary,
+          description: tr.description,
+        });
+      }
+      toast.success(t("pinboard.editor.saved"));
+      refetch();
+    },
+    [refetch, t],
+  );
 
   return (
     <Stack spacing={2}>
@@ -180,23 +240,30 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
           entries={entries}
           staleIds={staleIds}
           onEdit={openEdit}
-          onDelete={(entry) => setPendingDelete(entry)}
+          onDelete={(entry) => setPendingRemove(entry)}
           onConflict={() => refetch()}
         />
       )}
 
       {editorOpen ? (
-        <EditorLoader
-          realmUnitId={realmUnitId}
-          pinboardKey={pinboardKey}
-          entry={editingEntry}
+        <PinboardEntryEditorDialog
+          open
           onClose={closeEditor}
+          entry={editingEntry}
+          onCreate={async (translations) => {
+            await handleCreate(translations);
+            closeEditor();
+          }}
+          onEdit={async (unitId, translations) => {
+            await handleEditSave(unitId, translations);
+            closeEditor();
+          }}
         />
       ) : null}
 
       <Dialog
-        open={pendingDelete !== null}
-        onClose={() => setPendingDelete(null)}
+        open={pendingRemove !== null}
+        onClose={() => setPendingRemove(null)}
         aria-labelledby="pinboard-delete-title"
       >
         <DialogTitle id="pinboard-delete-title">
@@ -205,19 +272,15 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
         <DialogContent>
           <DialogContentText>
             {t("pinboard.admin.delete_description", {
-              title: pendingDelete?.title ?? "",
+              title: pendingRemove?.title ?? "",
             })}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPendingDelete(null)}>
+          <Button onClick={() => setPendingRemove(null)}>
             {t("common.cancel")}
           </Button>
-          <Button
-            color="error"
-            onClick={confirmDelete}
-            disabled={deleteMut.isPending}
-          >
+          <Button color="error" onClick={confirmRemove} disabled={removing}>
             {t("common.delete")}
           </Button>
         </DialogActions>
@@ -226,84 +289,109 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   );
 };
 
-interface EditorLoaderProps {
-  realmUnitId: string;
-  pinboardKey: PinboardKey;
-  entry: PinboardEntryDTO | null;
+interface PinboardEntryEditorDialogProps {
+  open: boolean;
   onClose: () => void;
+  entry: PinboardEntryView | null;
+  onCreate: (translations: TranslationEditorEntry[]) => Promise<void>;
+  onEdit: (
+    unitId: string,
+    translations: TranslationEditorEntry[],
+  ) => Promise<void>;
 }
 
 /**
- * Thin wrapper that fetches the full detail (which includes body + all
- * supported languages) for the edit case so the dialog can populate
- * every translation tab. Create case skips the fetch.
+ * Editor dialog for create/edit. On edit, fetches the underlying Unit so all
+ * existing translations populate `TranslationEditor`. On create, starts with
+ * a single empty translation in the default language.
  */
-const EditorLoader: React.FC<EditorLoaderProps> = ({
-  realmUnitId,
-  pinboardKey,
-  entry,
+const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
+  open,
   onClose,
+  entry,
+  onCreate,
+  onEdit,
 }) => {
-  // For edit: load the detail in the entry's default language first
-  // to expose the full body; additional languages will be fetched on
-  // demand if needed (MVP treats the dialog as single-load for now).
-  const detail = usePinboardDetail({
-    realmUnitId,
-    pinboardKey,
-    unitId: entry?.unitId ?? "",
-    language: entry?.defaultLanguage ?? entry?.language,
-    enabled: entry !== null,
+  const { t } = useTranslation();
+  const isEdit = entry !== null;
+  const detailQuery = useQuery({
+    ...unitDetailQuery(entry?.unitId ?? ""),
+    enabled: isEdit && Boolean(entry?.unitId),
   });
 
-  if (!entry) {
-    return (
-      <PinboardEditorDialog
-        open
-        onClose={onClose}
-        realmUnitId={realmUnitId}
-        pinboardKey={pinboardKey}
-      />
-    );
-  }
+  const initial = useMemo<TranslationEditorEntry[]>(() => {
+    if (isEdit && detailQuery.data) {
+      return (detailQuery.data.translations ?? []).map((tr) => ({
+        language: tr.language,
+        title: tr.title ?? "",
+        subtitle: tr.subtitle ?? "",
+        summary: tr.summary ?? "",
+        description: tr.description ?? "",
+      }));
+    }
+    return [{ language: DEFAULT_LANGUAGE }];
+  }, [isEdit, detailQuery.data]);
 
-  if (detail.isLoading) return null;
+  const [drafts, setDrafts] = useState<TranslationEditorEntry[]>(initial);
+  const [saving, setSaving] = useState(false);
 
-  const detailEntry = detail.entry;
-  const defaultLanguage =
-    detailEntry?.defaultLanguage ?? entry.defaultLanguage ?? entry.language;
-  const translations: PinboardEditorTranslationDraft[] = detailEntry
-    ? [
-        {
-          language: detailEntry.language,
-          title: detailEntry.title ?? "",
-          subtitle: detailEntry.subtitle ?? "",
-          summary: detailEntry.summary ?? "",
-          description: detailEntry.description ?? "",
-          body: detailEntry.body ?? "",
-        },
-      ]
-    : [
-        {
-          language: entry.language,
-          title: entry.title ?? "",
-          subtitle: "",
-          summary: entry.summary ?? "",
-          description: "",
-          body: "",
-        },
-      ];
+  // Sync drafts when initial changes (e.g., detail loads)
+  useEffect(() => {
+    setDrafts(initial);
+  }, [initial]);
+
+  const handleSave = useCallback(async () => {
+    setSaving(true);
+    try {
+      if (isEdit && entry) {
+        await onEdit(entry.unitId, drafts);
+      } else {
+        await onCreate(drafts);
+      }
+    } catch (err) {
+      toast.error(
+        t("pinboard.editor.errors.save_failed", {
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
+    } finally {
+      setSaving(false);
+    }
+  }, [isEdit, entry, drafts, onCreate, onEdit, t]);
 
   return (
-    <PinboardEditorDialog
-      open
+    <Dialog
+      open={open}
       onClose={onClose}
-      realmUnitId={realmUnitId}
-      pinboardKey={pinboardKey}
-      initial={{
-        unitId: entry.unitId,
-        defaultLanguage: defaultLanguage ?? entry.language,
-        translations,
-      }}
-    />
+      fullWidth
+      maxWidth="md"
+      aria-labelledby="pinboard-editor-title"
+    >
+      <DialogTitle id="pinboard-editor-title">
+        {isEdit
+          ? t("pinboard.editor.title_edit")
+          : t("pinboard.editor.title_create")}
+      </DialogTitle>
+      <DialogContent>
+        {isEdit && detailQuery.isLoading ? (
+          <PinboardSkeleton rows={3} rowHeight={48} />
+        ) : (
+          <TranslationEditor translations={drafts} onChange={setDrafts} />
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} disabled={saving}>
+          {t("common.cancel")}
+        </Button>
+        <Button variant="contained" onClick={handleSave} disabled={saving}>
+          {t("common.save")}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
+
+function toLanguage(code: string | undefined): Language | null {
+  if (!code) return null;
+  return normalizeLanguage(code);
+}

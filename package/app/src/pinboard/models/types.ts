@@ -1,56 +1,33 @@
 /**
  * Pinboard view-model types.
  *
- * Pure types only — no React imports. Re-exports contract DTOs and
- * defines the editor draft shape used by the admin dialog + Jotai atom.
+ * Pure types only — no React imports. Phase G aligns this module with the
+ * new contract: a Realm.extra ordered list of Unit IDs is the source of
+ * truth, and per-Unit titles/summaries are resolved at read time from the
+ * Unit's translations.
  */
 
-import type {
-  CreatePinboardEntryBody,
-  PinBody,
-  PinboardEntryDTO,
-  PinboardEntryDetailDTO,
-  PinboardKey,
-  PinboardListResponse,
-  PinboardTranslationInput,
-  ReorderBody,
-  UpdatePinboardEntryBody,
-} from "@rezics/contract";
-
-export type {
-  CreatePinboardEntryBody,
-  PinBody,
-  PinboardEntryDTO,
-  PinboardEntryDetailDTO,
-  PinboardKey,
-  PinboardListResponse,
-  PinboardTranslationInput,
-  ReorderBody,
-  UpdatePinboardEntryBody,
-};
+import type { RealmExtraListKey } from "@rezics/contract";
 
 /**
- * One editor form slice for a single language.
+ * Well-known Realm.extra list keys this feature renders. Aliased to the
+ * contract's `RealmExtraListKey` so downstream switches stay exhaustive.
  */
-export interface PinboardEditorTranslationDraft {
+export type PinboardListKey = RealmExtraListKey;
+
+/**
+ * Resolved entry passed to the presentation layer. Derived at read time from
+ * the underlying Unit + its active translation.
+ */
+export interface PinboardEntryView {
+  unitId: string;
   language: string;
-  title: string;
-  subtitle: string;
-  summary: string;
-  description: string;
-  body: string;
-}
-
-/**
- * Full editor draft state. Tracks dirty + which translations are
- * currently loaded versus queued for removal.
- */
-export interface PinboardEditorDraft {
-  unitId: string | null;
-  pinboardKey: PinboardKey;
-  realmUnitId: string;
-  defaultLanguage: string;
-  translations: PinboardEditorTranslationDraft[];
-  removedLanguages: string[];
-  dirty: boolean;
+  title?: string;
+  subtitle?: string;
+  summary?: string;
+  description?: string;
+  body?: string;
+  defaultLanguage?: string;
+  updatedAt?: string;
+  createdAt?: string;
 }

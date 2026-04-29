@@ -13,16 +13,16 @@ import {
 } from "@mui/material";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import type { PinboardEntryDTO } from "../models/types";
+import type { PinboardEntryView } from "../models/types";
 
 export type PinboardEntryCardVariant = "compact" | "card" | "adminRow";
 
 export interface PinboardEntryCardProps {
-  entry: PinboardEntryDTO;
+  entry: PinboardEntryView;
   variant?: PinboardEntryCardVariant;
   href?: string;
-  onEdit?: (entry: PinboardEntryDTO) => void;
-  onDelete?: (entry: PinboardEntryDTO) => void;
+  onEdit?: (entry: PinboardEntryView) => void;
+  onDelete?: (entry: PinboardEntryView) => void;
   /**
    * Rendered at the leading edge of the adminRow variant; intended for
    * dnd-kit drag handle wiring (listeners/attributes).
@@ -32,11 +32,6 @@ export interface PinboardEntryCardProps {
   stale?: boolean;
 }
 
-/**
- * Presentation-only card for a pinboard entry. The three variants share
- * fields but change layout density. Interaction (edit/delete) is
- * surfaced only on `adminRow`.
- */
 export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
   entry,
   variant = "card",
@@ -171,7 +166,6 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
     );
   }
 
-  // Default "card" variant — used by realm feed pinned section.
   return (
     <Box
       component={href ? "a" : "div"}
@@ -184,7 +178,10 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
         borderRadius: 2,
         border: `1px solid ${theme.palette.divider}`,
         bgcolor: theme.palette.background.paper,
-        transition: theme.transitions.create(["border-color", "background-color"]),
+        transition: theme.transitions.create([
+          "border-color",
+          "background-color",
+        ]),
         "&:hover": href
           ? { borderColor: theme.palette.primary.light }
           : undefined,

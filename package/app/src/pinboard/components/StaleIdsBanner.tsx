@@ -1,24 +1,18 @@
 import CleaningServicesRoundedIcon from "@mui/icons-material/CleaningServicesRounded";
 import { Alert, AlertTitle, Button, Stack } from "@mui/material";
-import { useUnpinFromPinboard } from "@rezics/api/pinboard";
-import type { PinboardKey } from "@rezics/contract";
+import { useRemoveRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import type { PinboardListKey } from "../models/types";
 
 interface StaleIdsBannerProps {
   realmUnitId: string;
-  pinboardKey: PinboardKey;
+  pinboardKey: PinboardListKey;
   staleIds: string[];
   onCleaned?: () => void;
 }
 
-/**
- * Dismissible warning rendered when the server reports stale pinboard
- * ids (entries whose underlying Unit was soft-deleted or vanished).
- * "Clean up" iterates `unpin` for each stale id; partial failures show
- * a toast and the banner remains for the survivors.
- */
 export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
   realmUnitId,
   pinboardKey,
@@ -28,7 +22,7 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
   const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
   const [working, setWorking] = useState(false);
-  const unpin = useUnpinFromPinboard();
+  const remove = useRemoveRealmExtraMutation();
 
   if (dismissed || staleIds.length === 0) return null;
 
@@ -37,7 +31,11 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
     let failed = 0;
     for (const unitId of staleIds) {
       try {
-        await unpin.mutateAsync({ realmUnitId, pinboardKey, unitId });
+        await remove.mutateAsync({
+          realmId: realmUnitId,
+          key: pinboardKey,
+          unitId,
+        });
       } catch {
         failed += 1;
       }

@@ -18,19 +18,18 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import DragIndicatorRoundedIcon from "@mui/icons-material/DragIndicatorRounded";
 import { IconButton, Stack } from "@mui/material";
-import { useReorderPinboard } from "@rezics/api/pinboard";
-import type { PinboardKey } from "@rezics/contract";
+import { useReorderRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import type { PinboardEntryDTO } from "../models/types";
+import type { PinboardEntryView, PinboardListKey } from "../models/types";
 import { PinboardEntryCard } from "./PinboardEntryCard";
 
 interface SortableRowProps {
-  entry: PinboardEntryDTO;
+  entry: PinboardEntryView;
   stale?: boolean;
-  onEdit?: (entry: PinboardEntryDTO) => void;
-  onDelete?: (entry: PinboardEntryDTO) => void;
+  onEdit?: (entry: PinboardEntryView) => void;
+  onDelete?: (entry: PinboardEntryView) => void;
 }
 
 function SortableRow({ entry, stale, onEdit, onDelete }: SortableRowProps) {
@@ -78,21 +77,15 @@ function SortableRow({ entry, stale, onEdit, onDelete }: SortableRowProps) {
 
 interface PinboardReorderListProps {
   realmUnitId: string;
-  pinboardKey: PinboardKey;
-  entries: PinboardEntryDTO[];
+  pinboardKey: PinboardListKey;
+  entries: PinboardEntryView[];
   staleIds?: string[];
-  onEdit?: (entry: PinboardEntryDTO) => void;
-  onDelete?: (entry: PinboardEntryDTO) => void;
-  /** Called with the refetch fn after a 409 so the parent can re-sync. */
+  onEdit?: (entry: PinboardEntryView) => void;
+  onDelete?: (entry: PinboardEntryView) => void;
+  /** Called after a 409 so the parent can re-sync. */
   onConflict?: () => void;
 }
 
-/**
- * dnd-kit sortable list for pinboard admin. Supports pointer + keyboard
- * drag (arrow keys via `sortableKeyboardCoordinates`). 409 responses
- * trigger a non-blocking toast; the upstream query invalidation restores
- * the authoritative order.
- */
 export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
   realmUnitId,
   pinboardKey,
@@ -105,7 +98,7 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
   const { t } = useTranslation();
   const [working, setWorking] = useState<string[] | null>(null);
   const ids = useMemo(
-    () => (working ?? entries.map((e) => e.unitId)),
+    () => working ?? entries.map((e) => e.unitId),
     [entries, working],
   );
   const staleSet = useMemo(() => new Set(staleIds ?? []), [staleIds]);
@@ -114,7 +107,7 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
     [entries],
   );
 
-  const reorder = useReorderPinboard();
+  const reorder = useReorderRealmExtraMutation();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -133,9 +126,9 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
     setWorking(next);
     reorder.mutate(
       {
-        realmUnitId,
-        pinboardKey,
-        input: { orderedUnitIds: next },
+        realmId: realmUnitId,
+        key: pinboardKey,
+        unitIds: next,
       },
       {
         onError: (err) => {
@@ -144,9 +137,7 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
             toast.error(t("pinboard.reorder.conflict"));
             onConflict?.();
           } else {
-            toast.error(
-              t("pinboard.reorder.error", { error: message }),
-            );
+            toast.error(t("pinboard.reorder.error", { error: message }));
           }
           setWorking(null);
         },

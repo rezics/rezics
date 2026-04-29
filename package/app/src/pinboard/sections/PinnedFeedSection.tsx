@@ -24,7 +24,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   const { t } = useTranslation();
   const { entries, isLoading, isError, refetch } = usePinboardList({
     realmUnitId,
-    pinboardKey: "pinned",
+    pinboardKey: "pinboard",
   });
 
   if (isLoading) {

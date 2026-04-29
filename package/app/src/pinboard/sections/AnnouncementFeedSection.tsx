@@ -2,7 +2,7 @@ import { Skeleton } from "@mui/material";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import type React from "react";
 import { usePinboardList } from "../hooks/usePinboard";
-import type { PinboardEntryDTO } from "../models/types";
+import type { PinboardEntryView } from "../models/types";
 
 export interface PinboardAnnouncementItem {
   id: string;
@@ -28,7 +28,7 @@ export interface AnnouncementFeedSectionProps {
 }
 
 function toItem(
-  entry: PinboardEntryDTO,
+  entry: PinboardEntryView,
   linkFor?: (unitId: string) => string,
 ): PinboardAnnouncementItem {
   return {
@@ -36,16 +36,7 @@ function toItem(
     unitId: entry.unitId,
     title: entry.title ?? "",
     content: entry.summary ?? "",
-    date:
-      typeof entry.updatedAt === "string"
-        ? entry.updatedAt
-        : entry.updatedAt instanceof Date
-          ? entry.updatedAt.toISOString()
-          : typeof entry.createdAt === "string"
-            ? entry.createdAt
-            : entry.createdAt instanceof Date
-              ? entry.createdAt.toISOString()
-              : new Date().toISOString(),
+    date: entry.updatedAt ?? entry.createdAt ?? new Date().toISOString(),
     pin: true,
     link: linkFor?.(entry.unitId),
   };

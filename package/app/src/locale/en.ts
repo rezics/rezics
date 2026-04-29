@@ -788,7 +788,7 @@ export default {
       tabs_aria: "Pinboard types",
       tabs: {
         announcement: "Announcements",
-        pinned: "Pinned",
+        pinboard: "Pinboard",
       },
       create: "New entry",
       delete_title: "Delete entry",

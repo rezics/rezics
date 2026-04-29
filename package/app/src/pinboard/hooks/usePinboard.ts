@@ -1,78 +1,120 @@
 /**
- * Thin adapters over `@rezics/api` pinboard hooks.
+ * Pinboard read hooks.
  *
- * Responsibilities:
- * - Resolve the current UI language from i18next and pass it to the fetcher.
- * - Pass `adminView` through so callers don't have to think about the flag.
- * - Expose `staleIds` from the list response for cleanup flows.
+ * Composes two layers:
+ *   1. `realmExtraReadQuery` / `realmExtraAdminReadQuery` returns the ordered
+ *      Unit-ID list stored under `Realm.extra.<key>` (with stale filtering
+ *      applied for the public read).
+ *   2. `unitDetailQuery` is fetched per ID so we can derive title/summary
+ *      from the Unit's translations.
  */
 
 import {
-  pinboardDetailQueryOptions,
-  pinboardListQueryOptions,
-} from "@rezics/api/pinboard";
-import type { PinboardKey } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
+  realmExtraAdminReadQuery,
+  realmExtraReadQuery,
+} from "@rezics/api/realm/realm-extra.queries";
+import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { getTranslation } from "@/shared/utils/translation-helpers";
+import type { PinboardEntryView, PinboardListKey } from "../models/types";
 
 export interface UsePinboardListInput {
   realmUnitId: string;
-  pinboardKey: PinboardKey;
+  pinboardKey: PinboardListKey;
   language?: string;
   adminView?: boolean;
   enabled?: boolean;
 }
 
-export function usePinboardList(input: UsePinboardListInput) {
-  const { i18n } = useTranslation();
-  const language = input.language ?? i18n.language;
-  const query = useQuery({
-    ...pinboardListQueryOptions({
-      realmUnitId: input.realmUnitId,
-      pinboardKey: input.pinboardKey,
-      language,
-      adminView: input.adminView,
-    }),
-    enabled: input.enabled ?? true,
-  });
-
-  return {
-    entries: query.data?.entries ?? [],
-    staleIds: query.data?.staleIds ?? [],
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
-    isFetching: query.isFetching,
-  };
+export interface UsePinboardListResult {
+  entries: PinboardEntryView[];
+  staleIds: string[];
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+  refetch: () => void;
+  isFetching: boolean;
 }
 
-export interface UsePinboardDetailInput {
-  realmUnitId: string;
-  pinboardKey: PinboardKey;
-  unitId: string;
-  language?: string;
-  enabled?: boolean;
-}
-
-export function usePinboardDetail(input: UsePinboardDetailInput) {
+export function usePinboardList(
+  input: UsePinboardListInput,
+): UsePinboardListResult {
   const { i18n } = useTranslation();
   const language = input.language ?? i18n.language;
-  const query = useQuery({
-    ...pinboardDetailQueryOptions({
-      realmUnitId: input.realmUnitId,
-      pinboardKey: input.pinboardKey,
-      unitId: input.unitId,
-      language,
-    }),
-    enabled: input.enabled ?? true,
+
+  const adminView = input.adminView === true;
+  const enabled = input.enabled ?? true;
+
+  const adminQuery = useQuery({
+    ...realmExtraAdminReadQuery(input.realmUnitId, input.pinboardKey),
+    enabled: enabled && adminView && Boolean(input.realmUnitId),
+  });
+  const publicQuery = useQuery({
+    ...realmExtraReadQuery(input.realmUnitId, input.pinboardKey),
+    enabled: enabled && !adminView && Boolean(input.realmUnitId),
   });
 
+  const list = adminView ? adminQuery : publicQuery;
+  const unitIds = list.data?.unitIds ?? [];
+  const staleIds = adminView ? (adminQuery.data?.staleIds ?? []) : [];
+
+  const unitQueries = useQueries({
+    queries: unitIds.map((id) => ({
+      ...unitDetailQuery(id),
+      enabled: enabled && Boolean(id),
+    })),
+  });
+
+  const entries = useMemo<PinboardEntryView[]>(() => {
+    return unitIds.flatMap((_unitId, index) => {
+      const q = unitQueries[index];
+      const unit = q?.data;
+      if (!unit) return [];
+      const tr = getTranslation(
+        unit.translations,
+        language,
+        unit.defaultLanguage ?? undefined,
+      );
+      return [
+        {
+          unitId: unit.id,
+          language: tr?.language ?? unit.defaultLanguage ?? language,
+          title: tr?.title ?? undefined,
+          subtitle: tr?.subtitle ?? undefined,
+          summary: tr?.summary ?? undefined,
+          description: tr?.description ?? undefined,
+          defaultLanguage: unit.defaultLanguage ?? undefined,
+          updatedAt:
+            typeof unit.updatedAt === "string"
+              ? unit.updatedAt
+              : unit.updatedAt instanceof Date
+                ? unit.updatedAt.toISOString()
+                : undefined,
+          createdAt:
+            typeof unit.createdAt === "string"
+              ? unit.createdAt
+              : unit.createdAt instanceof Date
+                ? unit.createdAt.toISOString()
+                : undefined,
+        },
+      ];
+    });
+  }, [unitIds, unitQueries, language]);
+
+  const unitsLoading = unitQueries.some((q) => q.isLoading);
+
   return {
-    entry: query.data,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
+    entries,
+    staleIds,
+    isLoading: list.isLoading || (unitIds.length > 0 && unitsLoading),
+    isError: list.isError || unitQueries.some((q) => q.isError),
+    error: list.error ?? unitQueries.find((q) => q.error)?.error,
+    refetch: () => {
+      void list.refetch();
+      unitQueries.forEach((q) => void q.refetch());
+    },
+    isFetching: list.isFetching || unitQueries.some((q) => q.isFetching),
   };
 }
