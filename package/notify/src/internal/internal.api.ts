@@ -1,6 +1,8 @@
 import {
   internalDmBodySchema,
   internalEventBodySchema,
+  systemEmailBodySchema,
+  systemEmailResponseSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import * as dmFanOut from "../dm/dm.fan-out";
@@ -9,6 +11,7 @@ import { internalGuard } from "../macro/internal";
 import { mapNotificationToRawEvent } from "../notification/notification.mapper";
 import { createNotification } from "../notification/notification.service";
 import { publish as publishSse } from "../stream/fan-out";
+import { notifySystemAndEmail } from "../system-email/system-email.service";
 
 export const internalApi = new Elysia({ prefix: "/internal" })
   .use(internalGuard)
@@ -72,6 +75,24 @@ export const internalApi = new Elysia({ prefix: "/internal" })
         summary: "Send DM (internal)",
         description:
           "Creates or upserts a conversation and inserts a message. Fans out to the recipient's WebSocket connections.",
+        tags: ["Internal"],
+        security: [{ internalSecret: [] }],
+      },
+    },
+  )
+  .post(
+    "/system-email",
+    async ({ body }) => {
+      const result = await notifySystemAndEmail(body);
+      return result;
+    },
+    {
+      body: systemEmailBodySchema,
+      response: systemEmailResponseSchema,
+      detail: {
+        summary: "Fan out system + email notification",
+        description:
+          "Persists an in-app system notification and enqueues a templated email to the recipient. Returns even when the email channel fails. Spec: notify-system-email.",
         tags: ["Internal"],
         security: [{ internalSecret: [] }],
       },

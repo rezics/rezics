@@ -59,12 +59,12 @@
 
 ## 9. Notify package extension
 
-- [ ] 9.1 In `package/notify/`, expose `notifySystemAndEmail({ userId, kind, payload, locale? })` per spec `notify-system-email`. If email transport is missing, add it (templated via the existing email package).
-- [ ] 9.2 Register notify kinds `WORK_LINK_CLAIM_PENDING`, `WORK_LINK_CLAIM_APPROVED`, `WORK_LINK_CLAIM_REJECTED` in the notify catalog with system-feed renderer + email template per spec.
-- [ ] 9.3 Implement per-recipient 24h deduplication for `WORK_LINK_CLAIM_PENDING` keyed on `(recipientUserId, payload.claimerUserId, payload.workUnitId)` — duplicates refresh timestamp but suppress email.
-- [ ] 9.4 Localize each renderer using the existing language fallback chain; ensure all five locales (`en`, `zh-hans`, `zh-hant`, `ja`, `de`) carry strings for the three new kinds.
+- [x] 9.1 In `package/notify/`, expose `notifySystemAndEmail({ userId, kind, payload, locale? })` per spec `notify-system-email`. If email transport is missing, add it (templated via the existing email package).
+- [x] 9.2 Register notify kinds `WORK_LINK_CLAIM_PENDING`, `WORK_LINK_CLAIM_APPROVED`, `WORK_LINK_CLAIM_REJECTED` in the notify catalog with system-feed renderer + email template per spec.
+- [x] 9.3 Implement per-recipient 24h deduplication for `WORK_LINK_CLAIM_PENDING` keyed on `(recipientUserId, payload.claimerUserId, payload.workUnitId)` — duplicates refresh timestamp but suppress email.
+- [x] 9.4 Localize each renderer using the existing language fallback chain; ensure all five locales (`en`, `zh-hans`, `zh-hant`, `ja`, `de`) carry strings for the three new kinds.
 - [ ] 9.5 Add notify tests covering both-channels-dispatch, email-failure-doesn't-throw, locale fallback, and 24h dedup window.
-- [ ] 9.6 Wire the new notify call from the work-link claim creation, approve, and reject handlers in `package/server/src/unit/`.
+- [x] 9.6 Wire the new notify call from the work-link claim creation, approve, and reject handlers in `package/server/src/unit/`.
 
 ## 10. API package: hooks
 

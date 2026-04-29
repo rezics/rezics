@@ -1,6 +1,11 @@
-import { type WikiType, WIKI_TYPES } from "@rezics/contract";
+import {
+  SystemEmailKind,
+  type WikiType,
+  WIKI_TYPES,
+} from "@rezics/contract";
 import type { RezicsSessionClaims } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
+import { notifySystemAndEmail } from "../notify/notify-client";
 import { hasAuthorityOver } from "./authority";
 
 export interface WorkLinkResult {
@@ -137,5 +142,19 @@ export async function applyWorkLink(
     },
     select: { id: true },
   });
+
+  if (workUnit.userId) {
+    void notifySystemAndEmail({
+      userId: workUnit.userId,
+      kind: SystemEmailKind.WORK_LINK_CLAIM_PENDING,
+      payload: {
+        claimId: claim.id,
+        claimerUserId: caller.unitId,
+        workUnitId,
+        releaseUnitId: releaseId,
+      },
+    });
+  }
+
   return { status: "PENDING", claimId: claim.id };
 }

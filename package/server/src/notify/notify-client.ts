@@ -1,4 +1,8 @@
-import type { InternalDmBody, InternalEventBody } from "@rezics/contract";
+import type {
+  InternalDmBody,
+  InternalEventBody,
+  SystemEmailBody,
+} from "@rezics/contract";
 import { env } from "../env";
 
 const baseUrl = env.NOTIFY_BASE_URL;
@@ -38,4 +42,10 @@ export async function emitNotificationEvent(event: InternalEventBody) {
 
 export async function sendDm(dm: InternalDmBody) {
   return postInternal("/internal/dm", dm);
+}
+
+export async function notifySystemAndEmail(
+  body: SystemEmailBody & { primaryEmail?: string | null },
+) {
+  return postInternal("/internal/system-email", body);
 }

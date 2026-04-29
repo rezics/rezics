@@ -1,9 +1,11 @@
-import type {
-  RezicsSessionClaims,
-  WorkLinkClaimDTO,
+import {
+  type RezicsSessionClaims,
+  SystemEmailKind,
+  type WorkLinkClaimDTO,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
+import { notifySystemAndEmail } from "../notify/notify-client";
 import { hasAuthorityOver } from "./authority";
 
 export class WorkLinkClaimError extends Error {
@@ -177,6 +179,17 @@ export async function approve(
       select: claimSelect,
     }),
   ]);
+
+  void notifySystemAndEmail({
+    userId: claim.claimerUserId,
+    kind: SystemEmailKind.WORK_LINK_CLAIM_APPROVED,
+    payload: {
+      claimId: claim.id,
+      workUnitId: claim.workUnitId,
+      releaseUnitId: claim.releaseUnitId,
+    },
+  });
+
   return toDTO(updated);
 }
 
@@ -218,6 +231,18 @@ export async function reject(
     },
     select: claimSelect,
   });
+
+  void notifySystemAndEmail({
+    userId: claim.claimerUserId,
+    kind: SystemEmailKind.WORK_LINK_CLAIM_REJECTED,
+    payload: {
+      claimId: claim.id,
+      workUnitId: claim.workUnitId,
+      releaseUnitId: claim.releaseUnitId,
+      ...(reason ? { rejectReason: reason } : {}),
+    },
+  });
+
   return toDTO(updated);
 }
 

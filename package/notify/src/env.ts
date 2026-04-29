@@ -28,6 +28,17 @@ export const env = createEnv({
 
     /** Server HTTP listen port. */
     PORT: v.optional(v.string()),
+
+    /**
+     * SMTP host. When unset, the email transport is a no-op stub that logs
+     * the rendered message instead of delivering — useful in dev/CI.
+     */
+    SMTP_HOST: v.optional(v.string()),
+    SMTP_PORT: v.optional(v.string()),
+    SMTP_USER: v.optional(v.string()),
+    SMTP_PASSWORD: v.optional(v.string()),
+    SMTP_FROM: v.optional(v.string()),
+    SMTP_SECURE: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
