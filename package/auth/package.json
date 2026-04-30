@@ -42,7 +42,7 @@
     "prisma-json-types-generator": "^4.1.1"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^6"
   },
   "dependencies": {
     "@better-auth/oauth-provider": "^1.5.3",
