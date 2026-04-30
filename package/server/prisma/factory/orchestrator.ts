@@ -28,7 +28,7 @@ function stepTimer(label: string) {
   };
 }
 
-export async function runMockSeed(
+export async function runFactorySeed(
   ctx: SeedCtx,
   plan: SeedPlan,
 ): Promise<void> {

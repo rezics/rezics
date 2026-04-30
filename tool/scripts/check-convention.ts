@@ -9,7 +9,7 @@
  * - R4  folder-naming-convention — container folders are plural from allowlist
  * - R5  outbound-link-protection — no raw <a href> outside SafeLink
  * - R6  tanstack-query-keys       — no inline `queryKey: [` outside api key/query/mutation files
- * - R7  seed-power-law-isolation  — only strategy.ts/utils.ts may import powerLaw in mock/
+ * - R7  seed-power-law-isolation  — only strategy.ts/utils.ts may import powerLaw in factory/
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -435,19 +435,19 @@ function scanInlineQueryKeys(candidateFiles: string[]): Violation[] {
   return violations;
 }
 
-// ─── R7: powerLaw isolation in mock/ ───────────────────────────────────────
+// ─── R7: powerLaw isolation in factory/ ────────────────────────────────────
 
-const R7_MOCKS_DIR = "package/server/prisma/mock";
+const R7_FACTORY_DIR = "package/server/prisma/factory";
 const R7_FILE_ALLOWLIST = new Set([
-  `${R7_MOCKS_DIR}/strategy.ts`,
-  `${R7_MOCKS_DIR}/utils.ts`,
+  `${R7_FACTORY_DIR}/strategy.ts`,
+  `${R7_FACTORY_DIR}/utils.ts`,
 ]);
 const POWER_LAW_IMPORT_PATTERN =
   /^\s*import\s+(?:[^"';]+?\bpowerLaw\b[^"';]*?)\s+from\s+["'][^"']+["']/;
 
 function isR7TargetFile(absPath: string): boolean {
   const relPath = relative(REPO_ROOT, absPath).replace(/\\/g, "/");
-  if (!relPath.startsWith(`${R7_MOCKS_DIR}/`)) return false;
+  if (!relPath.startsWith(`${R7_FACTORY_DIR}/`)) return false;
   if (!/\.ts$/.test(relPath)) return false;
   if (R7_FILE_ALLOWLIST.has(relPath)) return false;
   return true;

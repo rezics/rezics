@@ -1,6 +1,6 @@
-import { type RunMockOptions, runMock } from "./index";
+import { type RunFactoryOptions, runFactory } from "./index";
 
-export interface MockCliFlags {
+export interface FactoryCliFlags {
   preset?: string;
   planFile?: string;
   only?: string;
@@ -8,8 +8,8 @@ export interface MockCliFlags {
   unknown: string[];
 }
 
-export function parseMockArgs(argv: string[]): MockCliFlags {
-  const flags: MockCliFlags = { noInteractive: false, unknown: [] };
+export function parseFactoryArgs(argv: string[]): FactoryCliFlags {
+  const flags: FactoryCliFlags = { noInteractive: false, unknown: [] };
   for (const arg of argv) {
     if (arg === "--no-interactive") {
       flags.noInteractive = true;
@@ -26,14 +26,14 @@ export function parseMockArgs(argv: string[]): MockCliFlags {
   return flags;
 }
 
-export async function runMockCommand(argv: string[]): Promise<void> {
-  const flags = parseMockArgs(argv);
+export async function runFactoryCommand(argv: string[]): Promise<void> {
+  const flags = parseFactoryArgs(argv);
 
   if (flags.unknown.length > 0) {
     console.warn(`Ignoring unknown flag(s): ${flags.unknown.join(", ")}`);
   }
 
-  const opts: RunMockOptions = {
+  const opts: RunFactoryOptions = {
     presetName: flags.preset,
     planFile: flags.planFile,
     noInteractive: flags.noInteractive,
@@ -47,5 +47,5 @@ export async function runMockCommand(argv: string[]): Promise<void> {
     opts.only = flags.only;
   }
 
-  await runMock(opts);
+  await runFactory(opts);
 }

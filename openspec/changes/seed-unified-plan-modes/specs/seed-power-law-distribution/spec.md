@@ -22,7 +22,7 @@ The seed system SHALL provide a `powerLaw(min: number, max: number, alpha: numbe
 
 #### Scenario: Seeder call sites do not import powerLaw directly
 
-- **WHEN** any file under `package/server/prisma/seed/mocks/` except the `CountProvider` implementation and the utils module is inspected
+- **WHEN** any file under `package/server/prisma/factory/` except the `CountProvider` implementation and the utils module is inspected
 - **THEN** it SHALL NOT import `powerLaw`
 - **AND** its count decisions SHALL go through `ctx.draw(...)`
 

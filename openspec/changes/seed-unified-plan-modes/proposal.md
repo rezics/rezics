@@ -2,9 +2,9 @@
 
 The seed system today is split across two disjoint entry points and bakes distribution assumptions into the generators themselves, which blocks targeted API debugging.
 
-- `tool/seed/seed.ts` is an interactive Clack CLI but only covers `users` + `infra`.
-- `package/server/prisma/seed/mocks/seed.ts` is a non-interactive 13-step orchestrator that produces realistic, power-law-distributed mock data but is configured solely via `SEED_*` env vars.
-- Call sites in `mocks/posts.ts`, `mocks/books.ts`, and `mocks/shelves.ts` hardcode `powerLaw(...)` with fixed parameters, plus tree-shape constants (`rootRatio = 0.4`, `depthCap = 4`, random branching). There is no way to request "every book has exactly 5 chapters" or "one book with a tree of known shape" for debugging the post-tree API, the engagement aggregator, or any other behavior whose inputs must be predictable.
+- The unified seed CLI (`bun run seed`, entry: `package/utils/bin/cli.ts`) is an interactive Clack CLI but only covers `users` + `infra`.
+- `package/server/prisma/factory/orchestrator.ts` is a non-interactive 13-step orchestrator that produces realistic, power-law-distributed factory data but is configured solely via `SEED_*` env vars.
+- Call sites in `factory/posts.ts`, `factory/books.ts`, and `factory/shelves.ts` hardcode `powerLaw(...)` with fixed parameters, plus tree-shape constants (`rootRatio = 0.4`, `depthCap = 4`, random branching). There is no way to request "every book has exactly 5 chapters" or "one book with a tree of known shape" for debugging the post-tree API, the engagement aggregator, or any other behavior whose inputs must be predictable.
 
 We want a single seed CLI where mode selection (realistic / fixed / uniform) drives how counts are drawn from one unified plan, preset bundles make common shapes one-click, and interactive tweaking uses `$EDITOR` so users keep all the editing affordances (find, fold, multi-cursor) they already have in their editor of choice.
 
@@ -15,14 +15,14 @@ We want a single seed CLI where mode selection (realistic / fixed / uniform) dri
   - `realistic` → `powerLaw(spec.min ?? 0, spec.max, spec.alpha ?? default)`
   - `fixed` → `spec.target ?? round((min+max)/2)`, clamped to `[min, max]`
   - `uniform` → `randInt(spec.min ?? 0, spec.max)`
-- **Add** preset bundles as plain TypeScript objects of type `{ mode: Mode; plan: SeedPlan }` under `tool/seed/presets/`. First release ships `realistic`, `deterministic`, `post-tree-focus`, `minimal`.
+- **Add** preset bundles as plain TypeScript objects of type `{ mode: Mode; plan: SeedPlan }` under `package/utils/src/factory/presets/`. First release ships `realistic`, `deterministic`, `post-tree-focus`, `minimal`.
 - **Add** interactive plan tweaking via `$EDITOR`:
   - Write the resolved plan to a uniquely-named temp file under `node_modules/.cache/rezics-seed/edit-<uuid>/plan.json`.
   - Spawn `$VISUAL || $EDITOR || platform default` on the file and wait for exit.
   - Parse the file back through a Valibot schema; on failure, surface the path + message and offer to re-edit.
   - Clean up the temp dir in `try/finally` and on `SIGINT`/`SIGTERM`. Stale directories from prior crashed runs are swept on next launch.
-- **Add** a unified `tool/seed/seed.ts` menu: top-level select for `users` / `infra` / `mock`; under `mock`, pick a preset and optionally enter the `$EDITOR` tweak step before confirming and running.
-- **Refactor** `package/server/prisma/seed/mocks/*` so every seeder function is agnostic of mode. Functions receive a `SeedCtx` carrying the bound `CountProvider`, and read parameters from their own slice of the plan. `mocks/seed.ts` becomes a thin caller of a new `runMockSeed(ctx, plan)` orchestrator (invoked by `bun run seed:mock` with the realistic preset so the existing npm script keeps working).
+- **Add** a unified seed CLI menu (`bun run seed`): top-level select for `users` / `infra` / `factory`; under `factory`, pick a preset and optionally enter the `$EDITOR` tweak step before confirming and running.
+- **Refactor** `package/server/prisma/factory/*` so every seeder function is agnostic of mode. Functions receive a `SeedCtx` carrying the bound `CountProvider`, and read parameters from their own slice of the plan. The factory orchestrator exposes a `runFactorySeed(ctx, plan)` entry point (invoked by `bun run seed:factory` with the realistic preset so the existing npm script keeps working).
 - **BREAKING** Remove the per-call-site `powerLaw(...)` calls with hardcoded literals. All distribution parameters flow through the plan. The `SEED_*` env var surface is dropped in favor of preset files and `$EDITOR`. Users who relied on `SEED_BOOKS=50` or `SEED_PROFILE=fast` now either select the `minimal` preset or use `--preset=<name>` on the CLI.
 
 ## Capabilities
@@ -41,18 +41,18 @@ We want a single seed CLI where mode selection (realistic / fixed / uniform) dri
 
 **Affected packages**
 
-- `tool/seed`: new `presets/` directory, new `lib/interactive-plan.ts` (editor spawn + validate + cleanup), new `lib/seed-mock.ts` (caller of `runMockSeed`), rewritten `seed.ts` top-level menu. New dev dependency likely needed: `valibot` (already in repo).
-- `package/server/prisma/seed/mocks`: new `strategy.ts` (CountSpec / Mode / CountProvider), new `orchestrator.ts` (the `runMockSeed` function extracted from today's `seed.ts`), rewritten `types.ts` and `config.ts`, updated `posts.ts`, `books.ts`, `shelves.ts`, and any other seeder that currently calls `powerLaw` / `randomInt` for count decisions.
-- `package/server/package.json`: `seed:mock` script now delegates to orchestrator with the realistic preset; `SEED_PROFILE=fast` flag removed.
+- `package/utils/src/factory`: new `presets/` directory, new `interactive.ts` (editor spawn + validate + cleanup), new `command.ts` (CLI dispatch invoking `runFactorySeed`), rewritten top-level menu in `package/utils/src/cli/runner.ts`. New dev dependency likely needed: `valibot` (already in repo).
+- `package/server/prisma/factory`: new `strategy.ts` (CountSpec / Mode / CountProvider), `orchestrator.ts` exposes `runFactorySeed`, rewritten `types.ts` and `config.ts`, updated `posts.ts`, `books.ts`, `shelves.ts`, and any other seeder that currently calls `powerLaw` / `randomInt` for count decisions.
+- `package/server/package.json`: `seed:factory` script now delegates to orchestrator with the realistic preset; `SEED_PROFILE=fast` flag removed.
 - `openspec/specs`: three new capability specs + one modified (`seed-power-law-distribution`).
 
 **No DB migration.** Schema is unchanged; this is purely a seed-layer refactor.
 
 **Backward compatibility**
 
-- `bun run seed:mock` still exists and produces equivalent realistic data to today.
+- `bun run seed:factory` still exists and produces equivalent realistic data to today.
 - **Not preserved**: `SEED_*` env vars (`SEED_USERS`, `SEED_BOOKS`, `SEED_PROFILE=fast`, …). Users migrate to preset selection. Acceptable because env-driven seeding is a developer tool with no production usage.
-- `tool/seed/seed.ts` users/infra menu is preserved; a new `mock` top-level option is added alongside.
+- The unified seed CLI's users/infra menu is preserved; a new `factory` top-level option is added alongside.
 
 **Temp-file hygiene**
 

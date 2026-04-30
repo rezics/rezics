@@ -130,15 +130,19 @@ function mockViewCount(id: string | number): number {
 
 ## Database Seeding
 
-The unified seed CLI lives at `tool/seed/seed.ts`. Use named **presets** (`realistic`, `fast`, `minimal`, `post-tree-focus`) instead of `SEED_*` env vars (retired):
+The unified seed CLI is `bun run seed` (entry: `package/utils/bin/cli.ts`). Use named **presets** (`realistic`, `fast`, `minimal`, `post-tree-focus`) instead of `SEED_*` env vars (retired):
 
 ```bash
-bun run seed:mock           # realistic preset, no prompts
-bun run seed:mock:fast      # fast preset, no prompts
-bun run tool/seed/seed.ts   # interactive: pick users / infrastructure / mock
+bun run seed:factory        # realistic preset, no prompts
+bun run seed:factory:fast   # fast preset, no prompts
+bun run seed                # interactive: pick users / infrastructure / factory
 ```
 
-All count decisions in `package/server/prisma/seed/mocks/` go through `ctx.draw(plan.<spec>)` — never call `powerLaw`/`randomInt` directly for counts. R7 (`check:convention`) enforces this. See `CONTRIBUTING.md` for the preset list and `$EDITOR` tweak flow.
+**Two seed concepts:**
+- **`prisma/seed/`** — production-required infra (default realm, content type tags, root user, meilisearch init). Idempotent, safe to run anywhere.
+- **`prisma/factory/`** — dev/demo synthetic data (books, posts, shelves, users, etc.). Generator framework with presets. Never run in production.
+
+All count decisions in `package/server/prisma/factory/` go through `ctx.draw(plan.<spec>)` — never call `powerLaw`/`randomInt` directly for counts. R7 (`check:convention`) enforces this. See `CONTRIBUTING.md` for the preset list and `$EDITOR` tweak flow.
 
 ## Global Instructions
 

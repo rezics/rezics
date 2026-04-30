@@ -2,7 +2,7 @@
 
 ### Requirement: CLI offers an interactive tweak step after preset selection
 
-The unified seed CLI (`tool/seed/seed.ts`) SHALL offer an interactive tweak step after the user selects a preset and before seeding begins. The tweak step SHALL be entered on an explicit user confirmation (Clack `confirm` or equivalent) and SHALL be skippable so users who want the preset unchanged can proceed directly.
+The unified seed CLI (`bun run seed`, entry: `package/utils/bin/cli.ts`) SHALL offer an interactive tweak step after the user selects the `factory` target and a preset, before seeding begins. The tweak step SHALL be entered on an explicit user confirmation (Clack `confirm` or equivalent) and SHALL be skippable so users who want the preset unchanged can proceed directly.
 
 #### Scenario: User declines tweak and proceeds
 

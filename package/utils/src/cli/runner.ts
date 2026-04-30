@@ -1,10 +1,10 @@
 import * as p from "@clack/prompts";
 import { runDbCommand } from "../db/command";
-import { runMockCommand } from "../mock/command";
+import { runFactoryCommand } from "../factory/command";
 import { runSeedCommand } from "../seed/command";
 import { sweepStaleEditDirs } from "../lib/startup-sweep";
 
-type DefaultTarget = "users" | "infra" | "mock";
+type DefaultTarget = "users" | "infra" | "factory";
 
 export async function runCli(argv: string[]): Promise<void> {
   sweepStaleEditDirs();
@@ -18,9 +18,9 @@ export async function runCli(argv: string[]): Promise<void> {
     return;
   }
 
-  if (first === "mock") {
-    p.intro("Rezics Mock");
-    await runMockCommand(rest);
+  if (first === "factory") {
+    p.intro("Rezics Factory");
+    await runFactoryCommand(rest);
     p.outro("Done!");
     return;
   }
@@ -30,14 +30,14 @@ export async function runCli(argv: string[]): Promise<void> {
     return;
   }
 
-  // Default interactive flow — multiselect across users / infra / mock.
+  // Default interactive flow — multiselect across users / infra / factory.
   // Preserves the original `bun run seed` behavior.
   const flagPreset = argv.find((a) => a.startsWith("--preset="));
   const flagNoInteractive = argv.includes("--no-interactive");
 
   if (flagPreset || flagNoInteractive) {
     p.intro("Rezics Seed");
-    await runMockCommand(argv);
+    await runFactoryCommand(argv);
     p.outro("Done!");
     return;
   }
@@ -53,7 +53,11 @@ export async function runCli(argv: string[]): Promise<void> {
         label: "Infrastructure",
         hint: "seed tags, default realm",
       },
-      { value: "mock", label: "Mock data", hint: "books, posts, shelves, …" },
+      {
+        value: "factory",
+        label: "Factory data",
+        hint: "books, posts, shelves, …",
+      },
     ],
   });
 
@@ -68,7 +72,7 @@ export async function runCli(argv: string[]): Promise<void> {
 
   const wantUsers = targets.includes("users");
   const wantInfra = targets.includes("infra");
-  const wantMock = targets.includes("mock");
+  const wantFactory = targets.includes("factory");
 
   let overwriteUsers = false;
   if (wantUsers) {
@@ -93,8 +97,8 @@ export async function runCli(argv: string[]): Promise<void> {
     });
   }
 
-  if (wantMock) {
-    await runMockCommand([]);
+  if (wantFactory) {
+    await runFactoryCommand([]);
   }
 
   p.outro("Done!");

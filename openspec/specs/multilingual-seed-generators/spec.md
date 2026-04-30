@@ -23,7 +23,7 @@ The `generateTranslations(type: UnitType)` function SHALL return an array of tra
 
 ### Requirement: Curated text corpus for titles and summaries
 
-Titles and summaries for each language SHALL be drawn from curated text pools stored in `seed/mock/data/text/<lang>.ts`. Each pool SHALL contain realistic text in the target language's script (Chinese characters for zh-hant/zh-hans, Japanese for ja, German for de, English for en). The generator SHALL pick randomly from the pool.
+Titles and summaries for each language SHALL be drawn from curated text pools stored in `package/server/prisma/factory/data/text/<lang>.ts`. Each pool SHALL contain realistic text in the target language's script (Chinese characters for zh-hant/zh-hans, Japanese for ja, German for de, English for en). The generator SHALL pick randomly from the pool.
 
 #### Scenario: zh-hant title uses Chinese characters
 

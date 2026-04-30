@@ -1,4 +1,4 @@
-import type { SeedPreset } from "@rezics/server/prisma/mock";
+import type { SeedPreset } from "@rezics/server/prisma/factory";
 import { fast } from "./fast";
 import { minimal } from "./minimal";
 import { postTreeFocus } from "./post-tree-focus";

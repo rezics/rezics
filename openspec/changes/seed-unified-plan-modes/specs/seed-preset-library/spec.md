@@ -2,11 +2,11 @@
 
 ### Requirement: Preset bundle shape
 
-The seed system SHALL define `SeedPreset` as `{ mode: Mode; plan: SeedPlan }`. Every preset SHALL be a single value of this type, declared in its own file under `tool/seed/presets/<name>.ts` and exported as the module's default or as a named export matching the file stem.
+The seed system SHALL define `SeedPreset` as `{ mode: Mode; plan: SeedPlan }`. Every preset SHALL be a single value of this type, declared in its own file under `package/utils/src/factory/presets/<name>.ts` and exported as the module's default or as a named export matching the file stem.
 
 #### Scenario: Preset files export a SeedPreset value
 
-- **WHEN** any file under `tool/seed/presets/` (excluding `index.ts`) is inspected
+- **WHEN** any file under `package/utils/src/factory/presets/` (excluding `index.ts`) is inspected
 - **THEN** it SHALL export exactly one `SeedPreset` value
 - **AND** the value SHALL type-check against `{ mode: Mode; plan: SeedPlan }`
 
@@ -17,7 +17,7 @@ The seed system SHALL define `SeedPreset` as `{ mode: Mode; plan: SeedPlan }`. E
 
 ### Requirement: First-release preset set
 
-The seed system SHALL ship the following presets in the first release, each in its own file under `tool/seed/presets/`:
+The seed system SHALL ship the following presets in the first release, each in its own file under `package/utils/src/factory/presets/`:
 
 - `realistic` — `mode: 'realistic'`, with a plan whose counts reproduce the pre-change seed output envelope (users, books, games, media, etc. at today's `DEFAULT_COUNTS` values; `postsPerWork` and `chapter` at today's power-law parameters).
 - `fast` — `mode: 'realistic'`, with the plan scaled down to match today's `SEED_PROFILE=fast` overrides (30 users, 50 works per type, etc.).
@@ -26,42 +26,42 @@ The seed system SHALL ship the following presets in the first release, each in i
 
 #### Scenario: Realistic preset reproduces current output shape
 
-- **WHEN** `tool/seed/seed.ts` is invoked with `--preset=realistic --no-interactive`
+- **WHEN** `bun run seed factory --preset=realistic --no-interactive` is invoked
 - **AND** the database is reset beforehand
-- **THEN** the final counts of users, books, games, media, tags, realms, and shelves SHALL match the counts produced by `bun run seed:mock` immediately prior to this change
+- **THEN** the final counts of users, books, games, media, tags, realms, and shelves SHALL match the counts produced by `bun run seed:factory` immediately prior to this change
 - **AND** per-work review / excerpt / remark / tree post counts SHALL follow the same power-law distribution
 
 #### Scenario: Post-tree-focus preset is deterministic
 
-- **WHEN** `tool/seed/seed.ts --preset=post-tree-focus --no-interactive` is run twice against a freshly reset database
+- **WHEN** `bun run seed factory --preset=post-tree-focus --no-interactive` is run twice against a freshly reset database
 - **THEN** both runs SHALL produce the same number of books, the same number of reviews per book, and trees with the same `roots`, `depth`, and `branching` counts
 - **AND** the tree shape SHALL match the values declared in `post-tree-focus.plan.treeShape`
 
 #### Scenario: Minimal preset completes quickly
 
-- **WHEN** `tool/seed/seed.ts --preset=minimal --no-interactive` is run on a freshly reset database
+- **WHEN** `bun run seed factory --preset=minimal --no-interactive` is run on a freshly reset database
 - **THEN** the orchestration SHALL complete all 13 steps without error
 - **AND** the total row count across seeded Prisma models SHALL be strictly smaller than the `fast` preset's output
 
 ### Requirement: Preset registry for CLI discovery
 
-The seed system SHALL provide `tool/seed/presets/index.ts` that exports a record keyed by preset name. The interactive CLI SHALL use this registry to populate its preset-selection menu, and the `--preset=<name>` flag SHALL resolve against this registry.
+The seed system SHALL provide `package/utils/src/factory/presets/index.ts` that exports a record keyed by preset name. The interactive CLI SHALL use this registry to populate its preset-selection menu, and the `--preset=<name>` flag SHALL resolve against this registry.
 
 #### Scenario: Adding a preset requires no CLI edit
 
-- **WHEN** a new file `tool/seed/presets/<name>.ts` is added and re-exported from `tool/seed/presets/index.ts`
-- **THEN** the interactive CLI preset-selection list SHALL include `<name>` without any edit to `tool/seed/seed.ts`
+- **WHEN** a new file `package/utils/src/factory/presets/<name>.ts` is added and re-exported from `package/utils/src/factory/presets/index.ts`
+- **THEN** the interactive CLI preset-selection list SHALL include `<name>` without any edit to the CLI runner
 
 #### Scenario: Unknown preset name fails loudly
 
-- **WHEN** `tool/seed/seed.ts --preset=nonexistent --no-interactive` is run
+- **WHEN** `bun run seed factory --preset=nonexistent --no-interactive` is run
 - **THEN** the CLI SHALL print an error listing the available preset names
 - **AND** SHALL exit with a non-zero status
 - **AND** SHALL NOT begin seeding
 
 ### Requirement: Preset plan is frozen at load time
 
-When a preset is loaded, its `plan` SHALL be deep-frozen (or shape-validated and treated as immutable) by the loader before being passed to `runMockSeed`. The interactive `$EDITOR` tweak step SHALL operate on a deep clone, never on the preset value itself. The preset's `mode` SHALL NOT be modifiable by the tweak step.
+When a preset is loaded, its `plan` SHALL be deep-frozen (or shape-validated and treated as immutable) by the loader before being passed to `runFactorySeed`. The interactive `$EDITOR` tweak step SHALL operate on a deep clone, never on the preset value itself. The preset's `mode` SHALL NOT be modifiable by the tweak step.
 
 #### Scenario: Tweak step does not mutate the preset module
 

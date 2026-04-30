@@ -2,18 +2,18 @@ import { readFileSync } from "node:fs";
 import * as p from "@clack/prompts";
 import {
   makeSeedCtx,
-  runMockSeed,
+  runFactorySeed,
   type SeedPlan,
   SeedPlanSchema,
   type SeedPreset,
-} from "@rezics/server/prisma/mock";
+} from "@rezics/server/prisma/factory";
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
 import { createServerPrisma } from "../lib/prisma-factory";
 import { tweakPlan } from "./interactive";
 import { getPreset, listPresetNames, PRESETS } from "./presets";
 
-export interface RunMockOptions {
+export interface RunFactoryOptions {
   presetName?: string;
   planFile?: string;
   noInteractive?: boolean;
@@ -36,7 +36,7 @@ async function selectPresetInteractively(): Promise<{
   preset: SeedPreset;
 }> {
   const choice = await p.select<string>({
-    message: "Pick a mock seed preset.",
+    message: "Pick a factory seed preset.",
     options: listPresetNames().map((name) => {
       const preset = PRESETS[name]!;
       return {
@@ -92,7 +92,7 @@ function summarizePlan(plan: SeedPlan): string {
 async function confirmRun(plan: SeedPlan, mode: string): Promise<void> {
   p.log.info(`Mode: ${mode}\n  ${summarizePlan(plan)}`);
   const ok = await p.confirm({
-    message: "Reset DB and run mock seed with this plan?",
+    message: "Reset DB and run factory seed with this plan?",
     initialValue: true,
   });
   if (p.isCancel(ok) || !ok) {
@@ -111,14 +111,14 @@ async function runEchoKvOnly(): Promise<void> {
   const env = getEnv();
   const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
   try {
-    const { seedEchoKV } = await import("@rezics/server/prisma/mock/echokv");
+    const { seedEchoKV } = await import("@rezics/server/prisma/factory/echokv");
     await seedEchoKV(prisma);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-export async function runMock(opts: RunMockOptions): Promise<void> {
+export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   if (opts.only === "echokv") {
     await runEchoKvOnly();
     return;
@@ -156,7 +156,7 @@ export async function runMock(opts: RunMockOptions): Promise<void> {
   const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
   try {
     const ctx = makeSeedCtx(prisma, preset.mode);
-    await runMockSeed(ctx, plan);
+    await runFactorySeed(ctx, plan);
   } finally {
     await prisma.$disconnect();
   }

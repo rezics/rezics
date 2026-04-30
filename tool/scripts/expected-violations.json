@@ -1,10 +1,10 @@
 {
   "_note": "TEMPORARY BASELINE. This snapshot exists only to block NEW violations from accumulating while a migration is in progress. Delete this file once the migration lands.",
-  "total": 9,
+  "total": 8,
   "byRule": {
     "R1": 5,
     "R2": 0,
-    "R3": 1,
+    "R3": 0,
     "R4": 2,
     "R5": 1,
     "R6": 0,
@@ -16,9 +16,8 @@
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/admin/low-score-tags\"",
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/tag-votes\"",
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/unit-tags\"",
-    "R3  package/utils/src/mock",
     "R4  package/notify/src/kinds",
-    "R4  package/utils/src/mock/presets",
+    "R4  package/utils/src/factory/presets",
     "R5  package/preview/src/components/BookShareDocument.tsx:97"
   ]
 }

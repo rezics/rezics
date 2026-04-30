@@ -2,7 +2,7 @@
 
 ### Requirement: Unified SeedPlan type
 
-The seed system SHALL expose a single `SeedPlan` type that every mock seeder reads its count parameters from. Every numeric count in `SeedPlan` (entity totals, per-work post counts, chapter counts, tree shape fields, follows-per-user, favorite-items-per-user, and any future count knob) SHALL be typed as a `CountSpec`. No mock seeder function SHALL accept count parameters outside of `SeedPlan`.
+The seed system SHALL expose a single `SeedPlan` type that every factory seeder reads its count parameters from. Every numeric count in `SeedPlan` (entity totals, per-work post counts, chapter counts, tree shape fields, follows-per-user, favorite-items-per-user, and any future count knob) SHALL be typed as a `CountSpec`. No factory seeder function SHALL accept count parameters outside of `SeedPlan`.
 
 #### Scenario: Every count field is a CountSpec
 
@@ -12,7 +12,7 @@ The seed system SHALL expose a single `SeedPlan` type that every mock seeder rea
 
 #### Scenario: Seeder functions take SeedPlan slices
 
-- **WHEN** any function in `package/server/prisma/seed/mocks/*` that seeds entities is inspected
+- **WHEN** any function in `package/server/prisma/factory/*` that seeds entities is inspected
 - **THEN** its count-related parameters SHALL come from a `SeedPlan` slice passed via `SeedCtx`
 - **AND** it SHALL NOT call `powerLaw(...)` or `randomInt(...)` directly for count decisions
 - **AND** it SHALL obtain every count via `ctx.draw(spec)` where `spec` is a `CountSpec` read from the plan
@@ -92,7 +92,7 @@ The seed system SHALL define a `SeedCtx` type carrying at minimum the active `Pr
 
 #### Scenario: Orchestrator instantiates ctx once
 
-- **WHEN** `runMockSeed(ctx, plan)` executes
+- **WHEN** `runFactorySeed(ctx, plan)` executes
 - **THEN** the same `ctx` instance SHALL be threaded through every downstream seeder call
 - **AND** `ctx.draw` SHALL refer to the same `CountProvider` instance throughout the run
 
@@ -104,7 +104,7 @@ The seed system SHALL define a `SeedCtx` type carrying at minimum the active `Pr
 
 ### Requirement: Tree shape is folded into the plan and the mode
 
-The seed system SHALL represent post-tree shape under `plan.treeShape` with three `CountSpec` fields: `roots`, `depth`, and `branching`. `seedTreePostsForTarget` SHALL draw each of these via `ctx.draw(...)`. No constants for root ratio, depth cap, or branching SHALL remain hardcoded in `mocks/posts.ts`.
+The seed system SHALL represent post-tree shape under `plan.treeShape` with three `CountSpec` fields: `roots`, `depth`, and `branching`. `seedTreePostsForTarget` SHALL draw each of these via `ctx.draw(...)`. No constants for root ratio, depth cap, or branching SHALL remain hardcoded in `factory/posts.ts`.
 
 #### Scenario: Fixed mode produces exact tree shape
 
@@ -121,6 +121,6 @@ The seed system SHALL represent post-tree shape under `plan.treeShape` with thre
 
 #### Scenario: No hardcoded shape constants remain
 
-- **WHEN** `mocks/posts.ts` is inspected
+- **WHEN** `factory/posts.ts` is inspected
 - **THEN** it SHALL NOT contain a hardcoded `rootRatio`, `depthCap`, or branching literal
 - **AND** all such decisions SHALL read from `plan.treeShape` via `ctx.draw(...)`

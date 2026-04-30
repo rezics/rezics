@@ -1,4 +1,4 @@
-import type { SeedPreset } from "@rezics/server/prisma/mock";
+import type { SeedPreset } from "@rezics/server/prisma/factory";
 
 // Post-tree debugging preset.
 //

@@ -7,7 +7,7 @@
     "deploy": "cd tool && bun run deploy",
     "check:runtime-env": "node tool/scripts/check-no-runtime-env.mjs",
     "seed": "bun run package/utils/bin/cli.ts",
-    "mock": "bun run package/utils/bin/cli.ts mock",
+    "factory": "bun run package/utils/bin/cli.ts factory",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "format:check": "biome format .",

@@ -54,19 +54,23 @@ bun run check:convention   # Scans routes and folders; exits non-zero on violati
 
 ## Seeding
 
-The unified seed CLI lives at `tool/seed/seed.ts` and covers users, infrastructure, and mock data.
+The unified CLI is `bun run seed` (entry: `package/utils/bin/cli.ts`). It covers users, infrastructure, and factory (synthetic dev) data.
+
+**Two seed concepts**, kept separate for safety:
+- **`package/server/prisma/seed/`** — production-required infra: default realm, content type tags, root user, meilisearch init. Idempotent.
+- **`package/server/prisma/factory/`** — dev/demo synthetic data generators (books, posts, shelves, users, …) with presets and a `SeedPlan` framework. Never run in production.
 
 ```bash
-# Fully interactive (multi-select users / infrastructure / mock data)
-bun run tool/seed/seed.ts
+# Fully interactive (multi-select users / infrastructure / factory)
+bun run seed
 
-# Mock data only, named preset, no prompts
-bun run seed:mock                 # alias for --preset=realistic --no-interactive
-bun run seed:mock:fast            # alias for --preset=fast --no-interactive
-bun run tool/seed/seed.ts --preset=minimal --no-interactive
+# Factory data only, named preset, no prompts
+bun run seed:factory              # alias for --preset=realistic --no-interactive
+bun run seed:factory:fast         # alias for --preset=fast --no-interactive
+bun run seed --preset=minimal --no-interactive
 ```
 
-**Presets** (`tool/seed/presets/`):
+**Presets** (`package/utils/src/factory/presets/`):
 
 | Preset           | Mode      | Use                                                    |
 | ---------------- | --------- | ------------------------------------------------------ |

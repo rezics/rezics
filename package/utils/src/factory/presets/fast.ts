@@ -1,4 +1,4 @@
-import type { SeedPreset } from "@rezics/server/prisma/mock";
+import type { SeedPreset } from "@rezics/server/prisma/factory";
 
 export const fast: SeedPreset = {
   mode: "realistic",

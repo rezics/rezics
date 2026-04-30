@@ -70,16 +70,16 @@ The following exports SHALL be preserved: `SEED_TAG_NAMES`, `SeedTagName`, `SEED
 
 A shared module at `package/server/prisma/seed/infra/` SHALL encapsulate all infrastructure seeding logic (content-type tags, default realm, and any future infra content).
 
-Both `tool/seed/seed.ts` (cross-database orchestrator) and `package/server/prisma/seed/mocks/seed.ts` (mock-data seeder) SHALL invoke this shared module rather than maintaining independent implementations.
+Both the cross-database seed CLI (`bun run seed`, entry: `package/utils/bin/cli.ts` → `seed/index.ts`) and the factory orchestrator (`package/server/prisma/factory/orchestrator.ts`) SHALL invoke this shared module rather than maintaining independent implementations.
 
 The module SHALL export a single entry point (e.g., `seedInfra(prisma, rootUserId)`) that performs all infra seeding steps in the correct order.
 
-The mock seed orchestrator (`seed.ts`) SHALL execute steps in the following order to ensure data dependencies are satisfied:
+The factory orchestrator (`runFactorySeed`) SHALL execute steps in the following order to ensure data dependencies are satisfied:
 
 1. Reset
 2. Users + Entities (parallel)
 3. Infra (content-type tags + default realm) via shared module
-4. Random mock Tags (non-infra)
+4. Random factory Tags (non-infra)
 5. Works — Books, Games, Media (parallel)
 6. Scores (needs realms + works)
 7. Posts (needs works, users, scores)
@@ -88,14 +88,14 @@ The mock seed orchestrator (`seed.ts`) SHALL execute steps in the following orde
 10. Engagement (needs all unit IDs)
 11. Zones (needs works, tags)
 
-#### Scenario: Mock seed uses shared infra module
+#### Scenario: Factory seed uses shared infra module
 
-- **WHEN** the mock seed script runs
+- **WHEN** the factory seed runs (`bun run seed:factory`)
 - **THEN** it calls `package/server/prisma/seed/infra/` instead of its own tag creation logic
 
 #### Scenario: Cross-seed uses shared infra module
 
-- **WHEN** the cross-seed script (`tool/seed/seed.ts`) runs
+- **WHEN** the cross-seed flow runs (`bun run seed`)
 - **THEN** it imports and invokes `package/server/prisma/seed/infra/` after user seeding
 
 #### Scenario: Old seed-infra module is removed

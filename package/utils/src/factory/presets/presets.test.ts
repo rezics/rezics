@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   type SeedPreset,
   SeedPresetSchema,
-} from "@rezics/server/prisma/mock";
+} from "@rezics/server/prisma/factory";
 import * as v from "valibot";
 import { PRESETS } from "./index";
 

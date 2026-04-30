@@ -2,9 +2,9 @@
 
 Today the seed layer is two disconnected programs.
 
-`tool/seed/seed.ts` uses `@clack/prompts` to run a small interactive flow for the `users` and `infra` sub-seeds. It is the only place we ask the operator anything.
+The unified seed CLI (`bun run seed`, entry: `package/utils/bin/cli.ts`) uses `@clack/prompts` to run a small interactive flow for the `users` and `infra` sub-seeds. It is the only place we ask the operator anything.
 
-`package/server/prisma/seed/mocks/seed.ts` is a batch script launched as `bun run seed:mock`. It performs a 13-step orchestration (reset → users/entities → infra → tags → works → realms → scores → posts → shelves → chapters → engagement → zones → echokv). Counts come from `DEFAULT_COUNTS` in `mocks/config.ts`, which read `SEED_*` env vars and a `SEED_PROFILE=fast` switch. Individual seeders then call the generic primitives `powerLaw(min, max, alpha)` and `randomInt(min, max)` directly in-line, with literal parameters:
+`package/server/prisma/factory/orchestrator.ts` is a batch script launched as `bun run seed:factory`. It performs a 13-step orchestration (reset → users/entities → infra → tags → works → realms → scores → posts → shelves → chapters → engagement → zones → echokv). Counts come from `DEFAULT_COUNTS` in `factory/config.ts`, which read `SEED_*` env vars and a `SEED_PROFILE=fast` switch. Individual seeders then call the generic primitives `powerLaw(min, max, alpha)` and `randomInt(min, max)` directly in-line, with literal parameters:
 
 - `seedPostsForWorks` → `powerLaw(0, caps.reviewMax, 1.8)`, `powerLaw(0, caps.excerptMax, 2.0)`, …
 - `seedChaptersForBook` → `powerLaw(min, max, …)`
@@ -16,8 +16,8 @@ Constraints:
 
 - Bun + TypeScript ESM throughout; no Node-only build.
 - Windows is a first-class dev platform (CLI must not depend on `/tmp` or POSIX-only editor discovery).
-- `@clack/prompts@0.11` is already in `tool/` and has no tree/form widget — the unified CLI stays Clack-based for menus, and tree editing is delegated to the user's `$EDITOR`.
-- `valibot` is already used by `@t3-oss/env-core` in `tool/seed/env.ts`; reuse it for plan validation instead of adding `zod`.
+- `@clack/prompts@0.11` is already in `package/utils/` and has no tree/form widget — the unified CLI stays Clack-based for menus, and tree editing is delegated to the user's `$EDITOR`.
+- `valibot` is already used by `@t3-oss/env-core` in the seed CLI's env module; reuse it for plan validation instead of adding `zod`.
 
 ## Goals / Non-Goals
 
@@ -27,7 +27,7 @@ Constraints:
 - A single `Mode` switch (`realistic | fixed | uniform`) that determines how counts are drawn from that plan. No mode-specific call sites inside seeders.
 - Presets are plain `{ mode, plan }` TypeScript records. Adding a preset is one new file.
 - Interactive tweaking uses `$EDITOR` on a validated JSON file. No custom TUI.
-- `bun run seed:mock` keeps working with the same realistic output envelope it produces today.
+- `bun run seed:factory` keeps working with the same realistic output envelope it produces today.
 - Temp files for the editor flow never leak outside `node_modules/.cache/` and never survive a crashed run past the next launch.
 
 **Non-Goals:**
@@ -79,7 +79,7 @@ The orchestrator instantiates a `CountProvider` once from `preset.mode` and thre
 
 ### Decision 4: Presets are TypeScript objects, not YAML/JSON files
 
-Presets live at `tool/seed/presets/<name>.ts` and export a `{ mode, plan }` object of type `SeedPreset`. A `presets/index.ts` re-exports them as a keyed record for CLI discovery.
+Presets live at `package/utils/src/factory/presets/<name>.ts` and export a `{ mode, plan }` object of type `SeedPreset`. A `presets/index.ts` re-exports them as a keyed record for CLI discovery.
 
 **Why:** authors get type-checking and JSDoc at write-time, cross-preset references (a preset that extends another) stay ergonomic, and it keeps the preset file shape symmetric with everything else in the TS monorepo. The `$EDITOR` handoff still uses JSON, but that JSON is produced by serializing the resolved preset at run-time — the preset source of truth is TypeScript.
 
@@ -102,21 +102,21 @@ Flow:
 
 **Why not `os.tmpdir()`:** the user explicitly does not want temp files dropped outside the project.
 
-**Why not a dedicated `tool/seed/.cache/`:** would require a second `.gitignore` entry and invites accidental staging via `git add tool/` without the trailing slash being remembered.
+**Why not a dedicated `package/utils/.cache/`:** would require a second `.gitignore` entry and invites accidental staging via `git add package/utils/` without the trailing slash being remembered.
 
 **Startup sweep:** on every seed CLI entry, remove any `rezics-seed/edit-*/` subdirs older than 1 hour. Bounds unbounded growth from prior crashes without deleting directories that a currently-running editor might hold open.
 
 **Editor resolution order:** `$VISUAL` → `$EDITOR` → platform default (`notepad` on win32, `vi` on darwin/linux). If none of these resolve to an executable on `PATH`, surface a Clack error with the env var names and abort.
 
-### Decision 6: `runMockSeed(ctx, plan)` replaces the current `main` in `mocks/seed.ts`
+### Decision 6: `runFactorySeed(ctx, plan)` replaces the previous orchestrator main entry
 
-The 13-step orchestration moves verbatim into `mocks/orchestrator.ts` as `runMockSeed(ctx, plan)`. `mocks/seed.ts` becomes:
+The 13-step orchestration lives in `package/server/prisma/factory/orchestrator.ts` as `runFactorySeed(ctx, plan)`. The CLI dispatch becomes:
 
 ```ts
-// backwards-compatible entry for `bun run seed:mock`
+// backwards-compatible entry for `bun run seed:factory`
 const { mode, plan } = loadPreset('realistic');
 const ctx = makeSeedCtx(prisma, mode);
-await runMockSeed(ctx, plan);
+await runFactorySeed(ctx, plan);
 ```
 
 This keeps the existing npm script working without behavioral change, and centralizes all future orchestration edits in one reusable function.
@@ -125,7 +125,7 @@ This keeps the existing npm script working without behavioral change, and centra
 
 The existing `SEED_BOOKS=50`, `SEED_PROFILE=fast`, etc. surface is retired. Replacement:
 
-- Preset selection via CLI or `--preset=<name>` flag on `tool/seed/seed.ts`.
+- Preset selection via the unified seed CLI or `--preset=<name>` flag on `bun run seed factory`.
 - One-off count overrides via the `$EDITOR` tweak step.
 - For CI, new flag `--preset=<name> --no-interactive` skips the editor entirely.
 
@@ -133,7 +133,7 @@ The existing `SEED_BOOKS=50`, `SEED_PROFILE=fast`, etc. surface is retired. Repl
 
 ## Risks / Trade-offs
 
-- **[Risk] Refactor blast radius is the entire mocks directory.** → Mitigation: keep the seeder function bodies identical up to the swap from `powerLaw(lit, lit, lit)` to `ctx.draw(plan.x.y)`. Validate equivalence by running `seed:mock` under the realistic preset and diffing row counts per table against a pre-change baseline.
+- **[Risk] Refactor blast radius is the entire factory directory.** → Mitigation: keep the seeder function bodies identical up to the swap from `powerLaw(lit, lit, lit)` to `ctx.draw(plan.x.y)`. Validate equivalence by running `seed:factory` under the realistic preset and diffing row counts per table against a pre-change baseline.
 - **[Risk] `faker`-driven content still varies run-to-run even under `fixed` mode.** → Mitigation: document explicitly in the preset and spec. Users who need byte-for-byte reproducibility can wait for the deferred seeded-RNG change.
 - **[Risk] `$EDITOR` spawn fails on CI (no TTY, no editor installed).** → Mitigation: `--no-interactive` flag bypasses the tweak step entirely; CI uses `--preset=<name> --no-interactive`.
 - **[Risk] Windows `notepad` blocks until the user explicitly saves and closes, which differs from `vi`/`code`.** → Accepted. The flow waits for editor exit in all cases.
@@ -145,12 +145,12 @@ The existing `SEED_BOOKS=50`, `SEED_PROFILE=fast`, etc. surface is retired. Repl
 ## Migration Plan
 
 1. Land the `seed-plan-modes` types and `CountProvider` first (pure additions; no call sites changed).
-2. Land `mocks/orchestrator.ts` with the extracted 13-step function still calling the old primitives — compile green, no behavior change yet.
+2. Land `factory/orchestrator.ts` with the extracted 13-step function still calling the old primitives — compile green, no behavior change yet.
 3. Convert each seeder file from hardcoded literals to `ctx.draw(plan.…)` in its own commit, one per file, so bisect remains useful if distributions shift.
 4. Delete `DEFAULT_COUNTS` env-var reading from `config.ts`; replace with the realistic preset export.
-5. Land `tool/seed/presets/*` and the `$EDITOR` interactive module.
-6. Rewrite `tool/seed/seed.ts` top-level menu to add the `mock` branch.
-7. Update `package/server/package.json` scripts: `seed:mock` delegates to the new entry with `--preset=realistic --no-interactive`.
+5. Land `package/utils/src/factory/presets/*` and the `$EDITOR` interactive module.
+6. Rewrite the top-level CLI menu in `package/utils/src/cli/runner.ts` to add the `factory` branch.
+7. Update `package/server/package.json` scripts: `seed:factory` delegates to the new entry with `--preset=realistic --no-interactive`.
 8. Drop `SEED_PROFILE=fast` references from docs and CI.
 
 **Rollback:** each step is a clean revert; the cutover point is step 3, after which the old `powerLaw(lit, lit, lit)` call sites are gone. Prior commits remain usable.
