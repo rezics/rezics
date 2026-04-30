@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "cd tool && bun run dev-script/dev.ts",
     "prisma:regenerate": "cd tool && bun run dev-script/prisma-regenerate.ts",
+    "prisma:migrate": "cd tool && bun run dev-script/prisma-migrate.ts",
     "deploy": "cd tool && bun run deploy",
     "check:runtime-env": "node tool/scripts/check-no-runtime-env.mjs",
     "seed": "bun run package/utils/bin/cli.ts",
