@@ -11,6 +11,18 @@
     "./*": {
       "types": "./src/*.ts",
       "default": "./src/*.ts"
+    },
+    "./prisma/seed": {
+      "types": "./prisma/seed/index.ts",
+      "default": "./prisma/seed/index.ts"
+    },
+    "./prisma/mock": {
+      "types": "./prisma/mock/index.ts",
+      "default": "./prisma/mock/index.ts"
+    },
+    "./prisma/*": {
+      "types": "./prisma/*.ts",
+      "default": "./prisma/*.ts"
     }
   },
   "scripts": {
@@ -22,12 +34,12 @@
     "prisma:migrate": "bunx prisma migrate dev",
     "prisma:deploy": "bunx prisma migrate deploy && bun run prisma:generate",
     "prisma:studio": "bunx prisma studio",
-    "seed:mock": "bun run ../../tool/seed/seed.ts --preset=realistic --no-interactive",
-    "seed:mock:fast": "bun run ../../tool/seed/seed.ts --preset=fast --no-interactive",
-    "seed:mock:echokv": "bun run prisma/seed/mocks/echokv.ts",
-    "seed:database-reset": "bun run prisma/seed/utils/database-reset.ts",
-    "seed:database-reset:all": "bun run prisma/seed/utils/database-reset.ts --all",
-    "seed:init-meili-search": "bun run prisma/seed/utils/init-meili-search.ts"
+    "seed:mock": "bun run ../../package/utils/bin/cli.ts mock --preset=realistic --no-interactive",
+    "seed:mock:fast": "bun run ../../package/utils/bin/cli.ts mock --preset=fast --no-interactive",
+    "seed:mock:echokv": "bun run ../../package/utils/bin/cli.ts mock --only=echokv --no-interactive",
+    "seed:database-reset": "bun run ../../package/utils/bin/cli.ts db reset",
+    "seed:database-reset:all": "bun run ../../package/utils/bin/cli.ts db reset --all",
+    "seed:init-meili-search": "bun run ../../package/utils/bin/cli.ts db init-meili"
   },
   "devDependencies": {
     "@types/bun": "^1.3.0",

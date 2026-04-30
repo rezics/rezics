@@ -12,6 +12,14 @@
       "types": "./src/*.ts",
       "default": "./src/*.ts"
     },
+    "./prisma/seed": {
+      "types": "./prisma/seed/index.ts",
+      "default": "./prisma/seed/index.ts"
+    },
+    "./prisma/*": {
+      "types": "./prisma/*.ts",
+      "default": "./prisma/*.ts"
+    },
     "./jwt": {
       "types": "./src/jwt/export.ts",
       "default": "./src/jwt/export.ts"

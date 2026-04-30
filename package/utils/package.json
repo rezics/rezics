@@ -1,0 +1,36 @@
+{
+  "name": "@rezics/utils",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "cli": "bun run bin/cli.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@rezics/auth": "workspace:*",
+    "@rezics/server": "workspace:*",
+    "@t3-oss/env-core": "^0.13.10",
+    "dotenv": "^17.2.3",
+    "valibot": "^1.2.0"
+  }
+}

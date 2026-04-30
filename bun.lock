@@ -508,6 +508,25 @@
         "unocss-preset-shadcn": "^1.0.1",
       },
     },
+    "package/utils": {
+      "name": "@rezics/utils",
+      "version": "0.0.1",
+      "dependencies": {
+        "@clack/prompts": "^0.11.0",
+        "@prisma/adapter-pg": "^7.7.0",
+        "@rezics/auth": "workspace:*",
+        "@rezics/server": "workspace:*",
+        "@t3-oss/env-core": "^0.13.10",
+        "dotenv": "^17.2.3",
+        "valibot": "^1.2.0",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.0",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
   },
   "packages": {
     "@algolia/abtesting": ["@algolia/abtesting@1.16.0", "", { "dependencies": { "@algolia/client-common": "5.50.0", "@algolia/requester-browser-xhr": "5.50.0", "@algolia/requester-fetch": "5.50.0", "@algolia/requester-node-http": "5.50.0" } }, "sha512-alHFZ68/i9qLC/muEB07VQ9r7cB8AvCcGX6dVQi2PNHhc/ZQRmmFAv8KK1ay4UiseGSFr7f0nXBKsZ/jRg7e4g=="],
@@ -1389,6 +1408,8 @@
     "@rezics/shared": ["@rezics/shared@workspace:package/shared"],
 
     "@rezics/ui": ["@rezics/ui@workspace:package/ui"],
+
+    "@rezics/utils": ["@rezics/utils@workspace:package/utils"],
 
     "@rolldown/binding-android-arm64": ["@rolldown/binding-android-arm64@1.0.0-rc.12", "", { "os": "android", "cpu": "arm64" }, "sha512-pv1y2Fv0JybcykuiiD3qBOBdz6RteYojRFY1d+b95WVuzx211CRh+ytI/+9iVyWQ6koTh5dawe4S/yRfOFjgaA=="],
 

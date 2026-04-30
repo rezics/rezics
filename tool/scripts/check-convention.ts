@@ -9,7 +9,7 @@
  * - R4  folder-naming-convention — container folders are plural from allowlist
  * - R5  outbound-link-protection — no raw <a href> outside SafeLink
  * - R6  tanstack-query-keys       — no inline `queryKey: [` outside api key/query/mutation files
- * - R7  seed-power-law-isolation  — only strategy.ts/utils.ts may import powerLaw in mocks/
+ * - R7  seed-power-law-isolation  — only strategy.ts/utils.ts may import powerLaw in mock/
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -435,9 +435,9 @@ function scanInlineQueryKeys(candidateFiles: string[]): Violation[] {
   return violations;
 }
 
-// ─── R7: powerLaw isolation in mocks/ ───────────────────────────────────────
+// ─── R7: powerLaw isolation in mock/ ───────────────────────────────────────
 
-const R7_MOCKS_DIR = "package/server/prisma/seed/mocks";
+const R7_MOCKS_DIR = "package/server/prisma/mock";
 const R7_FILE_ALLOWLIST = new Set([
   `${R7_MOCKS_DIR}/strategy.ts`,
   `${R7_MOCKS_DIR}/utils.ts`,
