@@ -17,24 +17,24 @@ Sections separate via `space-8` (48px) vertical padding. No card wrap, no border
 
 <Compare>
   <Do caption="Borderless, whitespace-separated">
-    <div style={{ fontFamily: "var(--rzc-font-sans)" }}>
-      <div style={{ padding: "32px 0", borderBottom: "1px solid var(--rzc-color-border-whisper)" }}>
-        <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, color: "var(--rzc-color-text-primary)" }}>Recent Books</div>
+    <div style={{ fontFamily: "var(--rezics-font-sans)" }}>
+      <div style={{ padding: "32px 0", borderBottom: "1px solid var(--rezics-color-border-whisper)" }}>
+        <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, color: "var(--rezics-color-text-primary)" }}>Recent Books</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
           {[0, 1, 2].map((i) => (
-            <div key={i} style={{ aspectRatio: "2/3", background: "var(--rzc-color-surface-subtle)", borderRadius: "var(--rzc-radius-md)" }} />
+            <div key={i} style={{ aspectRatio: "2/3", background: "var(--rezics-color-surface-subtle)", borderRadius: "var(--rezics-radius-md)" }} />
           ))}
         </div>
       </div>
       <div style={{ padding: "32px 0" }}>
-        <div style={{ fontSize: 18, fontWeight: 500, color: "var(--rzc-color-text-primary)" }}>Reading Lists</div>
+        <div style={{ fontSize: 18, fontWeight: 500, color: "var(--rezics-color-text-primary)" }}>Reading Lists</div>
       </div>
     </div>
   </Do>
   <Dont caption="Bordered card chrome around sections">
     <div
       style={{
-        fontFamily: "var(--rzc-font-sans)",
+        fontFamily: "var(--rezics-font-sans)",
         padding: 16,
         marginBottom: 12,
         border: "1px solid #ddd",
@@ -79,18 +79,18 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 
 <Compare>
   <Do caption="Minimal chrome, content-led">
-    <div style={{ fontFamily: "var(--rzc-font-sans)", maxWidth: 160 }}>
-      <div style={{ aspectRatio: "2/3", background: "var(--rzc-color-surface-subtle)", borderRadius: "var(--rzc-radius-sm)" }} />
+    <div style={{ fontFamily: "var(--rezics-font-sans)", maxWidth: 160 }}>
+      <div style={{ aspectRatio: "2/3", background: "var(--rezics-color-surface-subtle)", borderRadius: "var(--rezics-radius-sm)" }} />
       <div style={{ paddingTop: 12 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--rzc-color-text-primary)" }}>蛇之名</div>
-        <div style={{ fontSize: 13, color: "var(--rzc-color-text-secondary)", marginTop: 2 }}>Le Guin</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--rezics-color-text-primary)" }}>蛇之名</div>
+        <div style={{ fontSize: 13, color: "var(--rezics-color-text-secondary)", marginTop: 2 }}>Le Guin</div>
       </div>
     </div>
   </Do>
   <Dont caption="Heavy card with border + shadow">
     <div
       style={{
-        fontFamily: "var(--rzc-font-sans)",
+        fontFamily: "var(--rezics-font-sans)",
         maxWidth: 180,
         padding: 12,
         border: "1px solid #e0e0e0",
@@ -119,7 +119,7 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 </Card>
 
 // Do — list-row with whisper divider
-<Stack divider={<Divider sx={{ borderColor: 'var(--rzc-color-border-whisper)' }} />}>
+<Stack divider={<Divider sx={{ borderColor: 'var(--rezics-color-border-whisper)' }} />}>
   {posts.map((p) => <Box key={p.id} sx={{ py: 3 }}>{/* row */}</Box>)}
 </Stack>
 ```
@@ -135,13 +135,13 @@ Image, title, author — that's the card. The cover art carries the visual weigh
     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
       <button
         style={{
-          fontFamily: "var(--rzc-font-sans)",
+          fontFamily: "var(--rezics-font-sans)",
           fontSize: 14,
           fontWeight: 500,
           padding: "8px 16px",
-          borderRadius: "var(--rzc-radius-md)",
-          background: "var(--rzc-color-brand-fill)",
-          color: "var(--rzc-color-text-on-brand)",
+          borderRadius: "var(--rezics-radius-md)",
+          background: "var(--rezics-color-brand-fill)",
+          color: "var(--rezics-color-text-on-brand)",
           border: "none",
           cursor: "pointer",
         }}
@@ -150,14 +150,14 @@ Image, title, author — that's the card. The cover art carries the visual weigh
       </button>
       <button
         style={{
-          fontFamily: "var(--rzc-font-sans)",
+          fontFamily: "var(--rezics-font-sans)",
           fontSize: 14,
           fontWeight: 500,
           padding: "8px 16px",
-          borderRadius: "var(--rzc-radius-md)",
+          borderRadius: "var(--rezics-radius-md)",
           background: "transparent",
-          color: "var(--rzc-color-text-brand)",
-          border: "1px solid var(--rzc-color-text-brand)",
+          color: "var(--rezics-color-text-brand)",
+          border: "1px solid var(--rezics-color-text-brand)",
           cursor: "pointer",
         }}
       >
@@ -165,13 +165,13 @@ Image, title, author — that's the card. The cover art carries the visual weigh
       </button>
       <button
         style={{
-          fontFamily: "var(--rzc-font-sans)",
+          fontFamily: "var(--rezics-font-sans)",
           fontSize: 14,
           fontWeight: 500,
           padding: "8px 16px",
-          borderRadius: "var(--rzc-radius-md)",
+          borderRadius: "var(--rezics-radius-md)",
           background: "transparent",
-          color: "var(--rzc-color-text-brand)",
+          color: "var(--rezics-color-text-brand)",
           border: "none",
           cursor: "pointer",
         }}
@@ -214,26 +214,26 @@ Standard variant for the app side, outlined for admin / dense forms. If MUI does
 
 <Compare>
   <Do caption="MUI TextField, standard variant">
-    <div style={{ fontFamily: "var(--rzc-font-sans)", maxWidth: 280 }}>
-      <div style={{ fontSize: 12, color: "var(--rzc-color-text-secondary)", marginBottom: 4 }}>Email</div>
+    <div style={{ fontFamily: "var(--rezics-font-sans)", maxWidth: 280 }}>
+      <div style={{ fontSize: 12, color: "var(--rezics-color-text-secondary)", marginBottom: 4 }}>Email</div>
       <input
         defaultValue="reader@rezics.io"
         style={{
           width: "100%",
-          fontFamily: "var(--rzc-font-sans)",
+          fontFamily: "var(--rezics-font-sans)",
           fontSize: 16,
           padding: "4px 0 8px",
           background: "transparent",
           border: "none",
-          borderBottom: "1px solid var(--rzc-color-border-defined)",
+          borderBottom: "1px solid var(--rezics-color-border-defined)",
           outline: "none",
-          color: "var(--rzc-color-text-primary)",
+          color: "var(--rezics-color-text-primary)",
         }}
       />
     </div>
   </Do>
   <Dont caption="Hand-rolled input">
-    <div style={{ fontFamily: "var(--rzc-font-sans)", maxWidth: 280 }}>
+    <div style={{ fontFamily: "var(--rezics-font-sans)", maxWidth: 280 }}>
       <input
         placeholder="Email"
         style={{
@@ -307,15 +307,15 @@ Tokens flow from `tokens.ts` → MUI palette + CSS vars + UnoCSS theme. All four
   <Do caption="Token-driven, mode-aware">
     <div
       style={{
-        fontFamily: "var(--rzc-font-sans)",
-        background: "var(--rzc-color-surface-base)",
-        color: "var(--rzc-color-text-primary)",
+        fontFamily: "var(--rezics-font-sans)",
+        background: "var(--rezics-color-surface-base)",
+        color: "var(--rezics-color-text-primary)",
         padding: 16,
-        borderRadius: "var(--rzc-radius-md)",
+        borderRadius: "var(--rezics-radius-md)",
       }}
     >
       <div style={{ fontWeight: 500 }}>Catalog header</div>
-      <div style={{ color: "var(--rzc-color-text-brand)", marginTop: 4, fontSize: 13 }}>
+      <div style={{ color: "var(--rezics-color-text-brand)", marginTop: 4, fontSize: 13 }}>
         轮回红 brand label (text-brand)
       </div>
     </div>
@@ -323,7 +323,7 @@ Tokens flow from `tokens.ts` → MUI palette + CSS vars + UnoCSS theme. All four
   <Dont caption="Hex literals + brand-fill as text">
     <div
       style={{
-        fontFamily: "var(--rzc-font-sans)",
+        fontFamily: "var(--rezics-font-sans)",
         background: "#faf9f5",
         color: "#1d1d1f",
         padding: 16,
@@ -342,7 +342,7 @@ Tokens flow from `tokens.ts` → MUI palette + CSS vars + UnoCSS theme. All four
 // Do
 <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }} />
 <div className="bg-surface text-text-primary p-4 rounded-md" />
-<div style={{ background: 'var(--rzc-color-surface-base)' }} />
+<div style={{ background: 'var(--rezics-color-surface-base)' }} />
 
 // Don't
 <Box sx={{ bgcolor: '#f5f4ed', color: '#1d1d1f' }} />
@@ -351,7 +351,7 @@ Tokens flow from `tokens.ts` → MUI palette + CSS vars + UnoCSS theme. All four
 // Don't — #f4606c as text fails AA
 <Typography sx={{ color: '#f4606c' }}>Brand label</Typography>
 // Do — auto-resolves to AA-safe text-brand (#C4433A light / #fa7882 dark)
-<Typography sx={{ color: 'var(--rzc-color-text-brand)' }}>Brand label</Typography>
+<Typography sx={{ color: 'var(--rezics-color-text-brand)' }}>Brand label</Typography>
 ```
 
 ---
@@ -362,14 +362,14 @@ Theme defines all variants with the correct `clamp()` size, weight, and line-hei
 
 <Compare>
   <Do caption="MUI variants, default weights">
-    <div style={{ color: "var(--rzc-color-text-primary)" }}>
-      <div style={{ fontFamily: "var(--rzc-font-sans)", fontSize: "clamp(28px, 1.75rem + 0.8vw, 36px)", fontWeight: 600, lineHeight: 1.3 }}>
+    <div style={{ color: "var(--rezics-color-text-primary)" }}>
+      <div style={{ fontFamily: "var(--rezics-font-sans)", fontSize: "clamp(28px, 1.75rem + 0.8vw, 36px)", fontWeight: 600, lineHeight: 1.3 }}>
         Recent Reviews
       </div>
-      <div style={{ fontFamily: "var(--rzc-font-sans)", fontSize: "clamp(14px, 0.875rem + 0.2vw, 16px)", lineHeight: 1.55, marginTop: 12 }}>
+      <div style={{ fontFamily: "var(--rezics-font-sans)", fontSize: "clamp(14px, 0.875rem + 0.2vw, 16px)", lineHeight: 1.55, marginTop: 12 }}>
         Lorem ipsum dolor sit amet — body text rendered at base size.
       </div>
-      <div style={{ fontFamily: "var(--rzc-font-sans)", fontSize: 12, color: "var(--rzc-color-text-secondary)", marginTop: 8 }}>
+      <div style={{ fontFamily: "var(--rezics-font-sans)", fontSize: 12, color: "var(--rezics-color-text-secondary)", marginTop: 8 }}>
         3 days ago
       </div>
     </div>
@@ -393,7 +393,7 @@ Theme defines all variants with the correct `clamp()` size, weight, and line-hei
 <Typography variant="caption" color="text.secondary">3 days ago</Typography>
 
 // Do — serif for the reader
-<Box sx={{ fontFamily: 'var(--rzc-font-serif)', lineHeight: 1.6 }}>
+<Box sx={{ fontFamily: 'var(--rezics-font-serif)', lineHeight: 1.6 }}>
   {chapterContent}
 </Box>
 
@@ -468,7 +468,7 @@ Admin is operations and management — dense tables, terse copy. The app side is
 
 <Compare>
   <Do caption="Admin — dense table row (~40px)">
-    <div style={{ fontFamily: "var(--rzc-font-sans)", fontSize: 13, border: "1px solid var(--rzc-color-border-whisper)", borderRadius: "var(--rzc-radius-sm)" }}>
+    <div style={{ fontFamily: "var(--rezics-font-sans)", fontSize: 13, border: "1px solid var(--rezics-color-border-whisper)", borderRadius: "var(--rezics-radius-sm)" }}>
       {[
         { name: "Le Guin", email: "ursula@earthsea.org" },
         { name: "Borges", email: "jorge@biblioteca.ar" },
@@ -481,25 +481,25 @@ Admin is operations and management — dense tables, terse copy. The app side is
             gridTemplateColumns: "1fr 1.5fr",
             gap: 16,
             padding: "10px 16px",
-            borderTop: "1px solid var(--rzc-color-border-whisper)",
-            color: "var(--rzc-color-text-primary)",
+            borderTop: "1px solid var(--rezics-color-border-whisper)",
+            color: "var(--rezics-color-text-primary)",
           }}
         >
           <span>{u.name}</span>
-          <span style={{ color: "var(--rzc-color-text-secondary)" }}>{u.email}</span>
+          <span style={{ color: "var(--rezics-color-text-secondary)" }}>{u.email}</span>
         </div>
       ))}
     </div>
   </Do>
   <Do caption="App — generous browsing rhythm">
-    <div style={{ fontFamily: "var(--rzc-font-sans)" }}>
+    <div style={{ fontFamily: "var(--rezics-font-sans)" }}>
       <div style={{ padding: "32px 0" }}>
-        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--rzc-color-text-primary)" }}>Recent Books</div>
+        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--rezics-color-text-primary)" }}>Recent Books</div>
         <div style={{ height: 8 }} />
-        <div style={{ fontSize: 13, color: "var(--rzc-color-text-secondary)" }}>Browse the latest additions to the catalog.</div>
+        <div style={{ fontSize: 13, color: "var(--rezics-color-text-secondary)" }}>Browse the latest additions to the catalog.</div>
       </div>
-      <div style={{ padding: "32px 0", borderTop: "1px solid var(--rzc-color-border-whisper)" }}>
-        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--rzc-color-text-primary)" }}>Reading Lists</div>
+      <div style={{ padding: "32px 0", borderTop: "1px solid var(--rezics-color-border-whisper)" }}>
+        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--rezics-color-text-primary)" }}>Reading Lists</div>
       </div>
     </div>
   </Do>

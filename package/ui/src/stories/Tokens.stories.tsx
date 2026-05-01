@@ -24,10 +24,10 @@ export const Surfaces: Story = {
       <Stack direction="row" spacing={2}>
         {(
           [
-            ["canvas", "var(--rzc-color-surface-canvas)"],
-            ["base", "var(--rzc-color-surface-base)"],
-            ["raised", "var(--rzc-color-surface-raised)"],
-            ["sunken", "var(--rzc-color-surface-sunken)"],
+            ["canvas", "var(--rezics-color-surface-canvas)"],
+            ["base", "var(--rezics-color-surface-base)"],
+            ["raised", "var(--rezics-color-surface-raised)"],
+            ["sunken", "var(--rezics-color-surface-sunken)"],
           ] as const
         ).map(([name, value]) => (
           <Box
@@ -36,7 +36,7 @@ export const Surfaces: Story = {
               p: 3,
               minWidth: 140,
               bgcolor: value,
-              border: "1px solid var(--rzc-color-border-whisper)",
+              border: "1px solid var(--rezics-color-border-whisper)",
               borderRadius: 1,
             }}
           >
@@ -94,13 +94,13 @@ export const Brand: Story = {
             width: 64,
             height: 64,
             borderRadius: 1,
-            bgcolor: "var(--rzc-color-brand-fill)",
+            bgcolor: "var(--rezics-color-brand-fill)",
           }}
         />
         <Stack>
           <Typography
             variant="body1"
-            sx={{ color: "var(--rzc-color-text-brand)" }}
+            sx={{ color: "var(--rezics-color-text-brand)" }}
             fontWeight={500}
           >
             Brand-text token (AA-safe)

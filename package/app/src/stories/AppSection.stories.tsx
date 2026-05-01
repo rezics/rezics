@@ -42,7 +42,7 @@ function BookCard({ title, author }: { title: string; author: string }) {
           aspectRatio: "2/3",
           borderRadius: 1,
           background:
-            "linear-gradient(135deg, var(--rzc-color-surface-raised), var(--rzc-color-surface-sunken))",
+            "linear-gradient(135deg, var(--rezics-color-surface-raised), var(--rezics-color-surface-sunken))",
         }}
       />
       <Box sx={{ pt: 1.5 }}>

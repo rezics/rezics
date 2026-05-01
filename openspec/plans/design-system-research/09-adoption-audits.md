@@ -132,9 +132,9 @@ This artifact aggregates the 5 per-package audits run by sub-agents (read-only, 
 
 **Fixed in this phase**
 
-- `Folio.tsx`: replaced ✕/☰ emoji-as-icons with `<CloseIcon>`/`<MenuIcon>` from `@mui/icons-material` (Hard Never #3); added accessible `aria-label`. Replaced 2 `rgba(128, 128, 128, 0.2)` borders with `var(--rzc-color-border-whisper)`.
-- `toc/TocPanel.tsx`: replaced ▶/▼ disclosure-triangle emoji with a CSS triangle that rotates on collapse-state via `transform: rotate(90deg)` (uses `currentColor` so it inherits theme). Replaced `rgba(128, 128, 128, 0.2)` separator with `var(--rzc-color-border-whisper)`.
-- `plugins/txt/TxtSettings.tsx`: replaced ★ active-rule emoji with `<CheckCircleIcon>` (`var(--rzc-color-success-fill)`); replaced ✕ remove emoji with `<CloseIcon>` + `aria-label`. Replaced `#22c55e` (success) with `var(--rzc-color-success-fill)`, `#ef4444` (error) with `var(--rzc-color-error-fill)`, `#888` ("no rules" muted text) with `var(--rzc-color-text-tertiary)`. Replaced 4 `rgba(128, 128, 128, 0.05–0.3)` rule-background/separators with `var(--rzc-color-surface-subtle)` / `var(--rzc-color-surface-sunken)` / `var(--rzc-color-border-defined)`.
+- `Folio.tsx`: replaced ✕/☰ emoji-as-icons with `<CloseIcon>`/`<MenuIcon>` from `@mui/icons-material` (Hard Never #3); added accessible `aria-label`. Replaced 2 `rgba(128, 128, 128, 0.2)` borders with `var(--rezics-color-border-whisper)`.
+- `toc/TocPanel.tsx`: replaced ▶/▼ disclosure-triangle emoji with a CSS triangle that rotates on collapse-state via `transform: rotate(90deg)` (uses `currentColor` so it inherits theme). Replaced `rgba(128, 128, 128, 0.2)` separator with `var(--rezics-color-border-whisper)`.
+- `plugins/txt/TxtSettings.tsx`: replaced ★ active-rule emoji with `<CheckCircleIcon>` (`var(--rezics-color-success-fill)`); replaced ✕ remove emoji with `<CloseIcon>` + `aria-label`. Replaced `#22c55e` (success) with `var(--rezics-color-success-fill)`, `#ef4444` (error) with `var(--rezics-color-error-fill)`, `#888` ("no rules" muted text) with `var(--rezics-color-text-tertiary)`. Replaced 4 `rgba(128, 128, 128, 0.05–0.3)` rule-background/separators with `var(--rezics-color-surface-subtle)` / `var(--rezics-color-surface-sunken)` / `var(--rezics-color-border-defined)`.
 
 **Deferred (defensible / lower priority)**
 

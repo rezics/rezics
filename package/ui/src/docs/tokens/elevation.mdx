@@ -11,10 +11,10 @@ This keeps the parchment-archive feel — the page is calm, layers are quiet, an
 
 <Unstyled>
   <Grid cols={2}>
-    <ElevationSample name="shadow-1" cssVar="--rzc-shadow-1" />
-    <ElevationSample name="shadow-2" cssVar="--rzc-shadow-2" />
-    <ElevationSample name="shadow-3" cssVar="--rzc-shadow-3" />
-    <ElevationSample name="shadow-modal" cssVar="--rzc-shadow-modal" />
+    <ElevationSample name="shadow-1" cssVar="--rezics-shadow-1" />
+    <ElevationSample name="shadow-2" cssVar="--rezics-shadow-2" />
+    <ElevationSample name="shadow-3" cssVar="--rezics-shadow-3" />
+    <ElevationSample name="shadow-modal" cssVar="--rezics-shadow-modal" />
   </Grid>
 </Unstyled>
 
@@ -23,10 +23,10 @@ This keeps the parchment-archive feel — the page is calm, layers are quiet, an
 | Tier | Token | Use |
 | --- | --- | --- |
 | flat (default) | none | Cards, panels, sections — separate via `border-whisper` |
-| 1 | `--rzc-shadow-1` | Sticky bars, hover-lift micro affordance |
-| 2 | `--rzc-shadow-2` | Dropdowns, popovers |
-| 3 | `--rzc-shadow-3` | Floating action menus |
-| modal | `--rzc-shadow-modal` | Modals, dialogs, full overlays |
+| 1 | `--rezics-shadow-1` | Sticky bars, hover-lift micro affordance |
+| 2 | `--rezics-shadow-2` | Dropdowns, popovers |
+| 3 | `--rezics-shadow-3` | Floating action menus |
+| modal | `--rezics-shadow-modal` | Modals, dialogs, full overlays |
 
 Dark mode shadows scale up opacity (×5) so they stay perceptible against deeper canvas tones.
 
@@ -34,9 +34,9 @@ Dark mode shadows scale up opacity (×5) so they stay perceptible against deeper
 
 ```tsx
 <Box sx={{
-  borderRadius: "var(--rzc-radius-lg)",
-  background: "var(--rzc-color-surface-elevated)",
-  boxShadow: "var(--rzc-shadow-modal)",
+  borderRadius: "var(--rezics-radius-lg)",
+  background: "var(--rezics-color-surface-elevated)",
+  boxShadow: "var(--rezics-shadow-modal)",
 }}>
 ```
 

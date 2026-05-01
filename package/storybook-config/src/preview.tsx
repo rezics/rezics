@@ -48,8 +48,8 @@ function resolveCanvasStyle(canvas: CanvasOption): React.CSSProperties | null {
   return {
     minHeight: "100vh",
     padding,
-    background: "var(--rzc-color-surface-canvas)",
-    color: "var(--rzc-color-text-primary)",
+    background: "var(--rezics-color-surface-canvas)",
+    color: "var(--rezics-color-text-primary)",
   };
 }
 

@@ -89,7 +89,7 @@ export function TocPanel() {
           display: "flex",
           gap: "8px",
           padding: "8px 12px",
-          borderBottom: "1px solid var(--rzc-color-border-whisper)",
+          borderBottom: "1px solid var(--rezics-color-border-whisper)",
         }}
       >
         <button

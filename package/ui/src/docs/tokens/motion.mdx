@@ -10,10 +10,10 @@ Four-step duration scale, three-easing-curve set. Source: `package/ui/src/config
 ## Duration
 
 <Unstyled>
-  <MotionSample name="fast" cssVar="--rzc-motion-fast" duration="120ms" />
-  <MotionSample name="base" cssVar="--rzc-motion-base" duration="200ms" />
-  <MotionSample name="slow" cssVar="--rzc-motion-slow" duration="350ms" />
-  <MotionSample name="page" cssVar="--rzc-motion-page" duration="500ms" easing="var(--rzc-ease-in-out)" />
+  <MotionSample name="fast" cssVar="--rezics-motion-fast" duration="120ms" />
+  <MotionSample name="base" cssVar="--rezics-motion-base" duration="200ms" />
+  <MotionSample name="slow" cssVar="--rezics-motion-slow" duration="350ms" />
+  <MotionSample name="page" cssVar="--rezics-motion-page" duration="500ms" easing="var(--rezics-ease-in-out)" />
 </Unstyled>
 
 | Token | Value | Use |
@@ -36,16 +36,16 @@ Four-step duration scale, three-easing-curve set. Source: `package/ui/src/config
 For tactile press affordance on buttons / interactive cards:
 
 ```css
-.button { transform: var(--rzc-press-resting); transition: transform var(--rzc-motion-fast) var(--rzc-ease-spring); }
-.button:active { transform: var(--rzc-press-active); /* scale(0.98) */ }
+.button { transform: var(--rezics-press-resting); transition: transform var(--rezics-motion-fast) var(--rezics-ease-spring); }
+.button:active { transform: var(--rezics-press-active); /* scale(0.98) */ }
 ```
 
 ## Usage
 
 ```tsx
 <Box sx={{
-  transition: "background var(--rzc-motion-fast) var(--rzc-ease-out)",
-  "&:hover": { background: "var(--rzc-color-surface-subtle)" },
+  transition: "background var(--rezics-motion-fast) var(--rezics-ease-out)",
+  "&:hover": { background: "var(--rezics-color-surface-subtle)" },
 }}>
 ```
 

@@ -102,7 +102,7 @@ Borders are the primary depth mechanism (not shadows).
 | `border-focus`   | `#f4606c` (brand-fill) | `#fa7882` (brand-text-dark) | `:focus-visible` ring                                           |
 | `border-error`   | `#cf2d56`              | `#e34c75`                   | Form validation error                                           |
 
-**Focus ring spec**: `outline: 2px solid var(--rzc-border-focus); outline-offset: 2px;` — uses brand color in both modes for instant brand recognition during keyboard navigation.
+**Focus ring spec**: `outline: 2px solid var(--rezics-border-focus); outline-offset: 2px;` — uses brand color in both modes for instant brand recognition during keyboard navigation.
 
 ---
 
@@ -125,7 +125,7 @@ Each logical family uses two `@font-face` declarations sharing the same `font-fa
 ```css
 /* Inter — Latin only */
 @font-face {
-  font-family: 'rzc-sans';
+  font-family: 'rezics-sans';
   src: url('/fonts/inter-variable.woff2') format('woff2-variations');
   font-weight: 100 900;
   font-display: swap;
@@ -143,7 +143,7 @@ Each logical family uses two `@font-face` declarations sharing the same `font-fa
 
 /* Source Han Sans — CJK + CJK-relevant punctuation. Default = TC. */
 @font-face {
-  font-family: 'rzc-sans';
+  font-family: 'rezics-sans';
   src: url('/fonts/source-han-sans-tc.woff2') format('woff2');
   font-weight: 100 900;
   font-display: swap;
@@ -165,7 +165,7 @@ Each logical family uses two `@font-face` declarations sharing the same `font-fa
 }
 ```
 
-Same pattern for `rzc-serif` (Source Serif 4 + Source Han Serif) and `rzc-mono` (CaskaydiaMono + Sarasa Mono TC).
+Same pattern for `rezics-serif` (Source Serif 4 + Source Han Serif) and `rezics-mono` (CaskaydiaMono + Sarasa Mono TC).
 
 ### 3.3 `:lang()` regional CJK switching
 
@@ -173,23 +173,23 @@ The `@font-face` above defaults the CJK family to TC. When content carries `lang
 
 ```css
 :root {
-  --rzc-font-sans-cjk: 'Source Han Sans TC';
-  --rzc-font-serif-cjk: 'Source Han Serif TC';
+  --rezics-font-sans-cjk: 'Source Han Sans TC';
+  --rezics-font-serif-cjk: 'Source Han Serif TC';
 }
 :lang(zh-Hans), :lang(zh-CN) {
-  --rzc-font-sans-cjk: 'Source Han Sans SC';
-  --rzc-font-serif-cjk: 'Source Han Serif SC';
+  --rezics-font-sans-cjk: 'Source Han Sans SC';
+  --rezics-font-serif-cjk: 'Source Han Serif SC';
 }
 :lang(ja) {
-  --rzc-font-sans-cjk: 'Source Han Sans JP';
-  --rzc-font-serif-cjk: 'Source Han Serif JP';
+  --rezics-font-sans-cjk: 'Source Han Sans JP';
+  --rezics-font-serif-cjk: 'Source Han Serif JP';
 }
 :lang(ko) {
-  --rzc-font-sans-cjk: 'Source Han Sans KR';
-  --rzc-font-serif-cjk: 'Source Han Serif KR';
+  --rezics-font-sans-cjk: 'Source Han Sans KR';
+  --rezics-font-serif-cjk: 'Source Han Serif KR';
 }
 body {
-  font-family: 'Inter', var(--rzc-font-sans-cjk), system-ui, sans-serif;
+  font-family: 'Inter', var(--rezics-font-sans-cjk), system-ui, sans-serif;
 }
 ```
 
@@ -341,10 +341,10 @@ Most surfaces have no shadow. Containment via `border-whisper` (1px at 8% opacit
 ONLY for dialogs, command palette, context menus, popovers over chapters.
 
 ```css
---rzc-shadow-1: 0 1px 2px rgba(0,0,0,0.04);
---rzc-shadow-2: 0 2px 4px rgba(0,0,0,0.04), 0 4px 8px rgba(0,0,0,0.04);
---rzc-shadow-3: 0 4px 8px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.04), 0 16px 32px rgba(0,0,0,0.06);
---rzc-shadow-modal:
+--rezics-shadow-1: 0 1px 2px rgba(0,0,0,0.04);
+--rezics-shadow-2: 0 2px 4px rgba(0,0,0,0.04), 0 4px 8px rgba(0,0,0,0.04);
+--rezics-shadow-3: 0 4px 8px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.04), 0 16px 32px rgba(0,0,0,0.06);
+--rezics-shadow-modal:
   0 1px 2px rgba(0,0,0,0.03),
   0 4px 8px rgba(0,0,0,0.04),
   0 8px 16px rgba(0,0,0,0.04),
@@ -395,13 +395,13 @@ export default defineConfig({
   theme: {
     colors: {
       brand: {
-        DEFAULT: 'var(--rzc-color-brand-fill)',
-        text: 'var(--rzc-color-text-brand)',
+        DEFAULT: 'var(--rezics-color-brand-fill)',
+        text: 'var(--rezics-color-text-brand)',
       },
       surface: {
-        DEFAULT: 'var(--rzc-color-surface-canvas)',
-        base: 'var(--rzc-color-surface-base)',
-        elevated: 'var(--rzc-color-surface-elevated)',
+        DEFAULT: 'var(--rezics-color-surface-canvas)',
+        base: 'var(--rezics-color-surface-base)',
+        elevated: 'var(--rezics-color-surface-elevated)',
       },
       // ...
     },
@@ -417,30 +417,30 @@ This means `<div class="bg-surface text-primary">` and MUI's `<Paper>` consume t
 
 ## 9. CSS Custom Properties — naming scheme
 
-Tokens compile to CSS variables with the prefix `--rzc-` (REZICS) and dot-notation flattened to dashes:
+Tokens compile to CSS variables with the prefix `--rezics-` (REZICS) and dot-notation flattened to dashes:
 
 ```css
 :root {
   /* Light mode (default) */
-  --rzc-color-surface-canvas: #f5f4ed;
-  --rzc-color-surface-base:   #faf9f5;
-  --rzc-color-text-primary:   #1d1d1f;
-  --rzc-color-text-brand:     #C4433A;
-  --rzc-color-brand-fill:     #f4606c;
-  --rzc-color-success-text:   #157352;
+  --rezics-color-surface-canvas: #f5f4ed;
+  --rezics-color-surface-base:   #faf9f5;
+  --rezics-color-text-primary:   #1d1d1f;
+  --rezics-color-text-brand:     #C4433A;
+  --rezics-color-brand-fill:     #f4606c;
+  --rezics-color-success-text:   #157352;
   /* ... */
-  --rzc-space-2: 8px;
-  --rzc-radius-md: 8px;
-  --rzc-motion-base: 200ms;
+  --rezics-space-2: 8px;
+  --rezics-radius-md: 8px;
+  --rezics-motion-base: 200ms;
 }
 
 [data-theme="dark"] {
-  --rzc-color-surface-canvas: #1a1a18;
-  --rzc-color-surface-base:   #26251e;
-  --rzc-color-text-primary:   #f0eee6;
-  --rzc-color-text-brand:     #fa7882;
+  --rezics-color-surface-canvas: #1a1a18;
+  --rezics-color-surface-base:   #26251e;
+  --rezics-color-text-primary:   #f0eee6;
+  --rezics-color-text-brand:     #fa7882;
   /* brand-fill stays #f4606c — it's a fill, not text */
-  --rzc-color-success-text:   #3da884;
+  --rezics-color-success-text:   #3da884;
   /* ... */
 }
 ```

@@ -118,114 +118,114 @@
 
 :root {
   /* Surfaces */
-  --rzc-color-surface-canvas: #f5f4ed;
-  --rzc-color-surface-base: #faf9f5;
-  --rzc-color-surface-elevated: #ffffff;
-  --rzc-color-surface-subtle: #ebeae5;
-  --rzc-color-surface-sunken: #e6e5e0;
+  --rezics-color-surface-canvas: #f5f4ed;
+  --rezics-color-surface-base: #faf9f5;
+  --rezics-color-surface-elevated: #ffffff;
+  --rezics-color-surface-subtle: #ebeae5;
+  --rezics-color-surface-sunken: #e6e5e0;
 
   /* Text */
-  --rzc-color-text-primary: #1d1d1f;
-  --rzc-color-text-secondary: #6e6e73;
-  --rzc-color-text-tertiary: #86868b;
-  --rzc-color-text-disabled: #c7c7cc;
-  --rzc-color-text-on-brand: #ffffff;
-  --rzc-color-text-brand: #c4433a;
+  --rezics-color-text-primary: #1d1d1f;
+  --rezics-color-text-secondary: #6e6e73;
+  --rezics-color-text-tertiary: #86868b;
+  --rezics-color-text-disabled: #c7c7cc;
+  --rezics-color-text-on-brand: #ffffff;
+  --rezics-color-text-brand: #c4433a;
 
   /* Brand fill (mode-invariant) */
-  --rzc-color-brand-fill: #f4606c;
-  --rzc-color-brand-fill-hover: #e85666;
-  --rzc-color-brand-fill-active: #d94c5c;
+  --rezics-color-brand-fill: #f4606c;
+  --rezics-color-brand-fill-hover: #e85666;
+  --rezics-color-brand-fill-active: #d94c5c;
 
   /* Semantic — fill (UI element) */
-  --rzc-color-success-fill: #1f8a65;
-  --rzc-color-warning-fill: #b8732e;
-  --rzc-color-error-fill: #cf2d56;
-  --rzc-color-info-fill: #3898ec;
+  --rezics-color-success-fill: #1f8a65;
+  --rezics-color-warning-fill: #b8732e;
+  --rezics-color-error-fill: #cf2d56;
+  --rezics-color-info-fill: #3898ec;
 
   /* Semantic — text (AA-body verified) */
-  --rzc-color-success-text: #157352;
-  --rzc-color-warning-text: #8a5520;
-  --rzc-color-error-text: #cf2d56;
-  --rzc-color-info-text: #1565c0;
+  --rezics-color-success-text: #157352;
+  --rezics-color-warning-text: #8a5520;
+  --rezics-color-error-text: #cf2d56;
+  --rezics-color-info-text: #1565c0;
 
   /* Borders */
-  --rzc-color-border-whisper: rgba(0, 0, 0, 0.08);
-  --rzc-color-border-defined: #d2d2d7;
-  --rzc-color-border-strong: #86868b;
-  --rzc-color-border-focus: #f4606c;
-  --rzc-color-border-error: #cf2d56;
+  --rezics-color-border-whisper: rgba(0, 0, 0, 0.08);
+  --rezics-color-border-defined: #d2d2d7;
+  --rezics-color-border-strong: #86868b;
+  --rezics-color-border-focus: #f4606c;
+  --rezics-color-border-error: #cf2d56;
 
   /* Spacing (8px base) */
-  --rzc-space-0: 0;
-  --rzc-space-px: 1px;
-  --rzc-space-0_5: 2px;
-  --rzc-space-1: 4px;
-  --rzc-space-2: 8px;
-  --rzc-space-3: 12px;
-  --rzc-space-4: 16px;
-  --rzc-space-5: 24px;
-  --rzc-space-6: 32px;
-  --rzc-space-8: 48px;
-  --rzc-space-10: 64px;
-  --rzc-space-12: 96px;
-  --rzc-space-16: 128px;
+  --rezics-space-0: 0;
+  --rezics-space-px: 1px;
+  --rezics-space-0_5: 2px;
+  --rezics-space-1: 4px;
+  --rezics-space-2: 8px;
+  --rezics-space-3: 12px;
+  --rezics-space-4: 16px;
+  --rezics-space-5: 24px;
+  --rezics-space-6: 32px;
+  --rezics-space-8: 48px;
+  --rezics-space-10: 64px;
+  --rezics-space-12: 96px;
+  --rezics-space-16: 128px;
 
   /* Radius */
-  --rzc-radius-xs: 4px;
-  --rzc-radius-sm: 6px;
-  --rzc-radius-md: 8px;
-  --rzc-radius-lg: 12px;
-  --rzc-radius-xl: 16px;
-  --rzc-radius-2xl: 24px;
-  --rzc-radius-pill: 9999px;
-  --rzc-radius-full: 50%;
+  --rezics-radius-xs: 4px;
+  --rezics-radius-sm: 6px;
+  --rezics-radius-md: 8px;
+  --rezics-radius-lg: 12px;
+  --rezics-radius-xl: 16px;
+  --rezics-radius-2xl: 24px;
+  --rezics-radius-pill: 9999px;
+  --rezics-radius-full: 50%;
 
   /* Motion — duration */
-  --rzc-motion-fast: 120ms;
-  --rzc-motion-base: 200ms;
-  --rzc-motion-slow: 350ms;
-  --rzc-motion-page: 500ms;
+  --rezics-motion-fast: 120ms;
+  --rezics-motion-base: 200ms;
+  --rezics-motion-slow: 350ms;
+  --rezics-motion-page: 500ms;
 
   /* Motion — easing */
-  --rzc-ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --rzc-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --rzc-ease-spring: cubic-bezier(0.4, 1.4, 0.5, 1);
+  --rezics-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --rezics-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --rezics-ease-spring: cubic-bezier(0.4, 1.4, 0.5, 1);
 
   /* Shadows (light) — borderless default; modal-tier only */
-  --rzc-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --rzc-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.04);
-  --rzc-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04),
+  --rezics-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --rezics-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --rezics-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04),
     0 16px 32px rgba(0, 0, 0, 0.06);
-  --rzc-shadow-modal: 0 1px 2px rgba(0, 0, 0, 0.03),
+  --rezics-shadow-modal: 0 1px 2px rgba(0, 0, 0, 0.03),
     0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04),
     0 16px 32px rgba(0, 0, 0, 0.06);
 
   /* Font families — see typography.ts; CJK var defaults to TC, swapped via :lang() */
-  --rzc-font-sans-cjk: "Source Han Sans TC", "Noto Sans TC";
-  --rzc-font-serif-cjk: "Source Han Serif TC", "Noto Serif TC";
-  --rzc-font-sans:
-    "Inter", "rzc-sans", var(--rzc-font-sans-cjk), system-ui, -apple-system,
+  --rezics-font-sans-cjk: "Source Han Sans TC", "Noto Sans TC";
+  --rezics-font-serif-cjk: "Source Han Serif TC", "Noto Serif TC";
+  --rezics-font-sans:
+    "Inter", "rezics-sans", var(--rezics-font-sans-cjk), system-ui, -apple-system,
     "Segoe UI", sans-serif;
-  --rzc-font-serif:
-    "Source Serif 4", "rzc-serif", var(--rzc-font-serif-cjk), Georgia, serif;
-  --rzc-font-mono:
-    "CaskaydiaMono Nerd Font", "Cascadia Code", "rzc-mono", "Sarasa Mono TC",
+  --rezics-font-serif:
+    "Source Serif 4", "rezics-serif", var(--rezics-font-serif-cjk), Georgia, serif;
+  --rezics-font-mono:
+    "CaskaydiaMono Nerd Font", "Cascadia Code", "rezics-mono", "Sarasa Mono TC",
     ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 /* Per-language CJK routing */
 :lang(zh-Hans), :lang(zh-CN) {
-  --rzc-font-sans-cjk: "Source Han Sans SC", "Noto Sans SC";
-  --rzc-font-serif-cjk: "Source Han Serif SC", "Noto Serif SC";
+  --rezics-font-sans-cjk: "Source Han Sans SC", "Noto Sans SC";
+  --rezics-font-serif-cjk: "Source Han Serif SC", "Noto Serif SC";
 }
 :lang(ja) {
-  --rzc-font-sans-cjk: "Source Han Sans JP", "Noto Sans JP";
-  --rzc-font-serif-cjk: "Source Han Serif JP", "Noto Serif JP";
+  --rezics-font-sans-cjk: "Source Han Sans JP", "Noto Sans JP";
+  --rezics-font-serif-cjk: "Source Han Serif JP", "Noto Serif JP";
 }
 :lang(ko) {
-  --rzc-font-sans-cjk: "Source Han Sans KR", "Noto Sans KR";
-  --rzc-font-serif-cjk: "Source Han Serif KR", "Noto Serif KR";
+  --rezics-font-sans-cjk: "Source Han Sans KR", "Noto Sans KR";
+  --rezics-font-serif-cjk: "Source Han Serif KR", "Noto Serif KR";
 }
 
 /* Dark mode — canonical: <html data-theme="dark">.
@@ -233,39 +233,39 @@
 [data-theme="dark"],
 html.dark {
   /* Surfaces */
-  --rzc-color-surface-canvas: #1a1a18;
-  --rzc-color-surface-base: #26251e;
-  --rzc-color-surface-elevated: #30302e;
-  --rzc-color-surface-subtle: #1f1e1c;
-  --rzc-color-surface-sunken: #141413;
+  --rezics-color-surface-canvas: #1a1a18;
+  --rezics-color-surface-base: #26251e;
+  --rezics-color-surface-elevated: #30302e;
+  --rezics-color-surface-subtle: #1f1e1c;
+  --rezics-color-surface-sunken: #141413;
 
   /* Text */
-  --rzc-color-text-primary: #f0eee6;
-  --rzc-color-text-secondary: #a39e98;
-  --rzc-color-text-tertiary: #6e6c66;
-  --rzc-color-text-disabled: #48484a;
-  --rzc-color-text-on-brand: #ffffff;
-  --rzc-color-text-brand: #fa7882;
+  --rezics-color-text-primary: #f0eee6;
+  --rezics-color-text-secondary: #a39e98;
+  --rezics-color-text-tertiary: #6e6c66;
+  --rezics-color-text-disabled: #48484a;
+  --rezics-color-text-on-brand: #ffffff;
+  --rezics-color-text-brand: #fa7882;
 
   /* Semantic — text (dark variants) */
-  --rzc-color-success-text: #3da884;
-  --rzc-color-warning-text: #d8943e;
-  --rzc-color-error-text: #e34c75;
-  --rzc-color-info-text: #5aa9f0;
+  --rezics-color-success-text: #3da884;
+  --rezics-color-warning-text: #d8943e;
+  --rezics-color-error-text: #e34c75;
+  --rezics-color-info-text: #5aa9f0;
 
   /* Borders */
-  --rzc-color-border-whisper: rgba(255, 255, 255, 0.1);
-  --rzc-color-border-defined: #3a3937;
-  --rzc-color-border-strong: #5a5856;
-  --rzc-color-border-focus: #fa7882;
-  --rzc-color-border-error: #e34c75;
+  --rezics-color-border-whisper: rgba(255, 255, 255, 0.1);
+  --rezics-color-border-defined: #3a3937;
+  --rezics-color-border-strong: #5a5856;
+  --rezics-color-border-focus: #fa7882;
+  --rezics-color-border-error: #e34c75;
 
   /* Shadows scale up opacity in dark mode */
-  --rzc-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --rzc-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.24);
-  --rzc-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.24),
+  --rezics-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --rezics-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.24);
+  --rezics-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.24),
     0 8px 16px rgba(0, 0, 0, 0.28), 0 16px 32px rgba(0, 0, 0, 0.36);
-  --rzc-shadow-modal: 0 1px 2px rgba(0, 0, 0, 0.2),
+  --rezics-shadow-modal: 0 1px 2px rgba(0, 0, 0, 0.2),
     0 4px 8px rgba(0, 0, 0, 0.28), 0 8px 16px rgba(0, 0, 0, 0.32),
     0 16px 32px rgba(0, 0, 0, 0.4);
 }

@@ -15,11 +15,11 @@ Layered backgrounds, light → dark in stack order. Default canvas is parchment-
 
 <Unstyled>
   <Grid cols={5}>
-    <Swatch name="canvas" cssVar="--rzc-color-surface-canvas" value="var(--rzc-color-surface-canvas)" description="Page background" />
-    <Swatch name="base" cssVar="--rzc-color-surface-base" value="var(--rzc-color-surface-base)" description="Default cards / panels" />
-    <Swatch name="elevated" cssVar="--rzc-color-surface-elevated" value="var(--rzc-color-surface-elevated)" description="Modal / popover tier" />
-    <Swatch name="subtle" cssVar="--rzc-color-surface-subtle" value="var(--rzc-color-surface-subtle)" description="Inset wells, hover states" />
-    <Swatch name="sunken" cssVar="--rzc-color-surface-sunken" value="var(--rzc-color-surface-sunken)" description="Deepest depression, code blocks" />
+    <Swatch name="canvas" cssVar="--rezics-color-surface-canvas" value="var(--rezics-color-surface-canvas)" description="Page background" />
+    <Swatch name="base" cssVar="--rezics-color-surface-base" value="var(--rezics-color-surface-base)" description="Default cards / panels" />
+    <Swatch name="elevated" cssVar="--rezics-color-surface-elevated" value="var(--rezics-color-surface-elevated)" description="Modal / popover tier" />
+    <Swatch name="subtle" cssVar="--rezics-color-surface-subtle" value="var(--rezics-color-surface-subtle)" description="Inset wells, hover states" />
+    <Swatch name="sunken" cssVar="--rezics-color-surface-sunken" value="var(--rezics-color-surface-sunken)" description="Deepest depression, code blocks" />
   </Grid>
 </Unstyled>
 
@@ -27,12 +27,12 @@ Layered backgrounds, light → dark in stack order. Default canvas is parchment-
 
 <Unstyled>
   <Grid cols={3}>
-    <Swatch name="primary" cssVar="--rzc-color-text-primary" value="var(--rzc-color-text-primary)" description="Body, headings" invertText height={48} />
-    <Swatch name="secondary" cssVar="--rzc-color-text-secondary" value="var(--rzc-color-text-secondary)" description="Supporting text, captions" invertText height={48} />
-    <Swatch name="tertiary" cssVar="--rzc-color-text-tertiary" value="var(--rzc-color-text-tertiary)" description="Hints, metadata" invertText height={48} />
-    <Swatch name="disabled" cssVar="--rzc-color-text-disabled" value="var(--rzc-color-text-disabled)" description="Inactive controls" height={48} />
-    <Swatch name="onBrand" cssVar="--rzc-color-text-on-brand" value="var(--rzc-color-text-on-brand)" description="Text on brand-fill bg" height={48} />
-    <Swatch name="brand" cssVar="--rzc-color-text-brand" value="var(--rzc-color-text-brand)" description="AA-safe brand-tinted text" invertText height={48} />
+    <Swatch name="primary" cssVar="--rezics-color-text-primary" value="var(--rezics-color-text-primary)" description="Body, headings" invertText height={48} />
+    <Swatch name="secondary" cssVar="--rezics-color-text-secondary" value="var(--rezics-color-text-secondary)" description="Supporting text, captions" invertText height={48} />
+    <Swatch name="tertiary" cssVar="--rezics-color-text-tertiary" value="var(--rezics-color-text-tertiary)" description="Hints, metadata" invertText height={48} />
+    <Swatch name="disabled" cssVar="--rezics-color-text-disabled" value="var(--rezics-color-text-disabled)" description="Inactive controls" height={48} />
+    <Swatch name="onBrand" cssVar="--rezics-color-text-on-brand" value="var(--rezics-color-text-on-brand)" description="Text on brand-fill bg" height={48} />
+    <Swatch name="brand" cssVar="--rezics-color-text-brand" value="var(--rezics-color-text-brand)" description="AA-safe brand-tinted text" invertText height={48} />
   </Grid>
 </Unstyled>
 
@@ -42,22 +42,22 @@ Mode-invariant brand fill. Body/text variants auto-resolve to AA-safe darker (li
 
 <Unstyled>
   <Grid cols={3}>
-    <Swatch name="fill" cssVar="--rzc-color-brand-fill" value="var(--rzc-color-brand-fill)" description="Primary actions, brand mark" invertText />
-    <Swatch name="fillHover" cssVar="--rzc-color-brand-fill-hover" value="var(--rzc-color-brand-fill-hover)" description="Hover state" invertText />
-    <Swatch name="fillActive" cssVar="--rzc-color-brand-fill-active" value="var(--rzc-color-brand-fill-active)" description="Press / active" invertText />
+    <Swatch name="fill" cssVar="--rezics-color-brand-fill" value="var(--rezics-color-brand-fill)" description="Primary actions, brand mark" invertText />
+    <Swatch name="fillHover" cssVar="--rezics-color-brand-fill-hover" value="var(--rezics-color-brand-fill-hover)" description="Hover state" invertText />
+    <Swatch name="fillActive" cssVar="--rezics-color-brand-fill-active" value="var(--rezics-color-brand-fill-active)" description="Press / active" invertText />
   </Grid>
 </Unstyled>
 
 ## Semantic
 
-Fill (UI element) and text (AA-body verified) variants per state. Light/dark text variants are exposed as `--rzc-color-{state}-text` and swap automatically by mode.
+Fill (UI element) and text (AA-body verified) variants per state. Light/dark text variants are exposed as `--rezics-color-{state}-text` and swap automatically by mode.
 
 <Unstyled>
   <Grid cols={4}>
-    <Swatch name="success" cssVar="--rzc-color-success-fill" value="var(--rzc-color-success-fill)" description="Confirmed, saved" invertText />
-    <Swatch name="warning" cssVar="--rzc-color-warning-fill" value="var(--rzc-color-warning-fill)" description="Cautionary, deprecated" invertText />
-    <Swatch name="error" cssVar="--rzc-color-error-fill" value="var(--rzc-color-error-fill)" description="Destructive, validation" invertText />
-    <Swatch name="info" cssVar="--rzc-color-info-fill" value="var(--rzc-color-info-fill)" description="Neutral information" invertText />
+    <Swatch name="success" cssVar="--rezics-color-success-fill" value="var(--rezics-color-success-fill)" description="Confirmed, saved" invertText />
+    <Swatch name="warning" cssVar="--rezics-color-warning-fill" value="var(--rezics-color-warning-fill)" description="Cautionary, deprecated" invertText />
+    <Swatch name="error" cssVar="--rezics-color-error-fill" value="var(--rezics-color-error-fill)" description="Destructive, validation" invertText />
+    <Swatch name="info" cssVar="--rezics-color-info-fill" value="var(--rezics-color-info-fill)" description="Neutral information" invertText />
   </Grid>
 </Unstyled>
 
@@ -67,11 +67,11 @@ Whisper is the workhorse — used for borderless-feel section separation. Define
 
 <Unstyled>
   <Grid cols={5}>
-    <Swatch name="whisper" cssVar="--rzc-color-border-whisper" value="var(--rzc-color-border-whisper)" description="Hairline / section divider" height={48} />
-    <Swatch name="defined" cssVar="--rzc-color-border-defined" value="var(--rzc-color-border-defined)" description="Inputs, cards" height={48} />
-    <Swatch name="strong" cssVar="--rzc-color-border-strong" value="var(--rzc-color-border-strong)" description="Emphasized boundaries" height={48} />
-    <Swatch name="focus" cssVar="--rzc-color-border-focus" value="var(--rzc-color-border-focus)" description="Keyboard focus ring" invertText height={48} />
-    <Swatch name="error" cssVar="--rzc-color-border-error" value="var(--rzc-color-border-error)" description="Invalid input" invertText height={48} />
+    <Swatch name="whisper" cssVar="--rezics-color-border-whisper" value="var(--rezics-color-border-whisper)" description="Hairline / section divider" height={48} />
+    <Swatch name="defined" cssVar="--rezics-color-border-defined" value="var(--rezics-color-border-defined)" description="Inputs, cards" height={48} />
+    <Swatch name="strong" cssVar="--rezics-color-border-strong" value="var(--rezics-color-border-strong)" description="Emphasized boundaries" height={48} />
+    <Swatch name="focus" cssVar="--rezics-color-border-focus" value="var(--rezics-color-border-focus)" description="Keyboard focus ring" invertText height={48} />
+    <Swatch name="error" cssVar="--rezics-color-border-error" value="var(--rezics-color-border-error)" description="Invalid input" invertText height={48} />
   </Grid>
 </Unstyled>
 
@@ -79,13 +79,13 @@ Whisper is the workhorse — used for borderless-feel section separation. Define
 
 ```tsx
 // MUI sx
-<Box sx={{ bgcolor: "var(--rzc-color-surface-elevated)", color: "var(--rzc-color-text-primary)" }}>
+<Box sx={{ bgcolor: "var(--rezics-color-surface-elevated)", color: "var(--rezics-color-text-primary)" }}>
 
 // UnoCSS (presetWind4 + theme tokens)
 <div className="bg-surface-base text-primary border-b border-whisper">
 
 // Raw CSS
-.card { background: var(--rzc-color-surface-base); }
+.card { background: var(--rezics-color-surface-base); }
 ```
 
 Never hardcode `#1d1d1f` or `#f4606c` — always go through tokens so light/dark and AA-safe variants resolve correctly.

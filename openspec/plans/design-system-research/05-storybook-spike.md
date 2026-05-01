@@ -21,7 +21,7 @@
 | Runtime    | Bun (native)    |
 | TS         | 5.x             |
 | MUI        | 7.x with `cssVariables: true` |
-| UnoCSS     | preset-wind4 (with `--rzc-*` token backing from Phase 3) |
+| UnoCSS     | preset-wind4 (with `--rezics-*` token backing from Phase 3) |
 
 ---
 
