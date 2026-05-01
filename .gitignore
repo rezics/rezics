@@ -1,6 +1,21 @@
 # Claude Code
 .claude/worktrees/
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/agents
+# Sandbox decoy files (bind-mounted into project to mask home dotfiles; recreate every session).
+# Remove the corresponding line if the project legitimately needs one of these committed
+# (e.g. real `.gitmodules` for submodules, or a project-scoped `.mcp.json`).
+.bash_profile
+.bashrc
+.gitconfig
+.gitmodules
+.idea
+.mcp.json
+.profile
+.ripgreprc
+.zprofile
+.zshrc
 
 # Dependencies
 node_modules/

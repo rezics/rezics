@@ -1,0 +1,48 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
+import { Grid, RadiusSample } from "./_gallery";
+
+<Meta title="Foundation/Tokens/Radius" />
+
+# Radius
+
+`md` (8px) is the MUI `shape.borderRadius` default and the rezics workhorse. Source: `package/ui/src/config/tokens/radius.ts`.
+
+<Unstyled>
+  <Grid cols={4}>
+    <RadiusSample name="xs" value="4px" />
+    <RadiusSample name="sm" value="6px" />
+    <RadiusSample name="md" value="8px" />
+    <RadiusSample name="lg" value="12px" />
+    <RadiusSample name="xl" value="16px" />
+    <RadiusSample name="2xl" value="24px" />
+    <RadiusSample name="pill" value="9999px" />
+    <RadiusSample name="full" value="50%" />
+  </Grid>
+</Unstyled>
+
+## Mapping
+
+| Element | Token |
+| --- | --- |
+| Inputs, badges, chips | `xs`–`sm` |
+| Buttons, tags | `sm` |
+| Cards, panels, default | `md` |
+| Modals, large surfaces | `lg`–`xl` |
+| Hero / feature sections | `2xl` |
+| Pill buttons, status pills | `pill` |
+| Avatars, circular badges | `full` |
+
+## Usage
+
+```tsx
+// CSS variable (always)
+<Box sx={{ borderRadius: "var(--rzc-radius-md)" }}>
+
+// MUI shape default (already wired to md / 8px)
+<Card>  // borderRadius: 8 by default
+
+// UnoCSS
+<div className="rounded-md">  // 8px through theme
+```
+
+Avoid mixing radii within a single composition — if the parent card is `md`, child elements should be `xs` or `sm`, never larger than the parent.

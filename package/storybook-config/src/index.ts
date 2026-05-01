@@ -60,8 +60,11 @@ export function baseStorybookConfig(
   const { framework, typescript, core, ...rest } = overrides;
 
   return {
-    stories: ["../src/**/*.stories.@(ts|tsx|mdx)"],
-    addons: [],
+    stories: [
+      "../src/**/*.mdx",
+      "../src/**/*.stories.@(ts|tsx|mdx)",
+    ],
+    addons: ["@storybook/addon-docs"],
     ...rest,
     framework: {
       name: "@storybook/react-vite",

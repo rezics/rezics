@@ -1,0 +1,52 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
+import { MotionSample } from "./_gallery";
+
+<Meta title="Foundation/Tokens/Motion" />
+
+# Motion
+
+Four-step duration scale, three-easing-curve set. Source: `package/ui/src/config/tokens/motion.ts`. All transitions respect `prefers-reduced-motion: reduce` (`layers.css` strips animation-duration and transition-duration to `0ms`).
+
+## Duration
+
+<Unstyled>
+  <MotionSample name="fast" cssVar="--rzc-motion-fast" duration="120ms" />
+  <MotionSample name="base" cssVar="--rzc-motion-base" duration="200ms" />
+  <MotionSample name="slow" cssVar="--rzc-motion-slow" duration="350ms" />
+  <MotionSample name="page" cssVar="--rzc-motion-page" duration="500ms" easing="var(--rzc-ease-in-out)" />
+</Unstyled>
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `fast` | 120ms | Hover, focus ring, micro-interactions |
+| `base` | 200ms | Default UI transitions |
+| `slow` | 350ms | Drawers, sheets, expand/collapse |
+| `page` | 500ms | Route transitions (rare) |
+
+## Easing
+
+| Token | Curve | Use |
+| --- | --- | --- |
+| `out` | `cubic-bezier(0, 0, 0.2, 1)` | Enter, reveal — ease into rest |
+| `inOut` | `cubic-bezier(0.4, 0, 0.2, 1)` | Position changes, reflow |
+| `spring` | `cubic-bezier(0.4, 1.4, 0.5, 1)` | Press, satisfying click |
+
+## Press scale
+
+For tactile press affordance on buttons / interactive cards:
+
+```css
+.button { transform: var(--rzc-press-resting); transition: transform var(--rzc-motion-fast) var(--rzc-ease-spring); }
+.button:active { transform: var(--rzc-press-active); /* scale(0.98) */ }
+```
+
+## Usage
+
+```tsx
+<Box sx={{
+  transition: "background var(--rzc-motion-fast) var(--rzc-ease-out)",
+  "&:hover": { background: "var(--rzc-color-surface-subtle)" },
+}}>
+```
+
+Respect reduced-motion automatically — every token-based transition is wiped to instant by the global `@media (prefers-reduced-motion: reduce)` rule. Don't hand-roll `transition-duration` outside the scale; you'll bypass the wipe.

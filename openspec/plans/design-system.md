@@ -160,10 +160,12 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 ### Phase 7 — Token Galleries & Design Docs (MDX)
 
-- [ ] **T7.1** Author `package/ui/src/docs/tokens/colors.mdx` rendering all color tokens as swatches.
-- [ ] **T7.2** Author `package/ui/src/docs/tokens/typography.mdx` rendering type scale.
-- [ ] **T7.3** Author `package/ui/src/docs/tokens/spacing.mdx` rendering spacing scale.
-- [ ] **T7.4** Author `package/ui/src/docs/tokens/radius.mdx`, `elevation.mdx`, `motion.mdx`.
+- [x] **T7.1** Author `package/ui/src/docs/tokens/colors.mdx` rendering all color tokens as swatches.
+- [x] **T7.2** Author `package/ui/src/docs/tokens/typography.mdx` rendering type scale.
+- [x] **T7.3** Author `package/ui/src/docs/tokens/spacing.mdx` rendering spacing scale.
+- [x] **T7.4** Author `package/ui/src/docs/tokens/radius.mdx`, `elevation.mdx`, `motion.mdx`.
+
+  **T7.1–T7.4 completed.** Six MDX galleries under `package/ui/src/docs/tokens/` (`colors`, `typography`, `spacing`, `radius`, `elevation`, `motion`) plus a shared `_gallery.tsx` helper module (Grid, Swatch, Row, SpacingRuler, RadiusSample, ElevationSample, TypeSample, MotionSample). Wired by adding `@storybook/addon-docs` to `baseStorybookConfig` (Storybook 10 split docs out of core; this is now a peer-dep of `@rezics/storybook-config`) and extending the stories pattern to include `../src/**/*.mdx`. Each gallery imports `Meta` from `@storybook/addon-docs/blocks` to set its title under `Foundation/Tokens/{Name}`; built `index.json` confirms all six docs entries plus a clean folio build.
 - [ ] **T7.5** Author `package/ui/src/docs/voice.mdx` — design language for human readers (mirrors skill voice.md).
 - [ ] **T7.6** Author `package/ui/src/docs/patterns.mdx` — do/don't gallery.
 

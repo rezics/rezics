@@ -1,0 +1,43 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
+import { Grid, ElevationSample } from "./_gallery";
+
+<Meta title="Foundation/Tokens/Elevation" />
+
+# Elevation
+
+**Default policy is borderless.** Surfaces separate via whisper borders or surface-color shifts, *not* shadows. Shadows are reserved for the modal tier and a small set of true float-above-canvas surfaces. Source: `package/ui/src/config/tokens/elevation.ts`.
+
+This keeps the parchment-archive feel — the page is calm, layers are quiet, and elevation is something you only feel when it really means *I am temporarily on top*.
+
+<Unstyled>
+  <Grid cols={2}>
+    <ElevationSample name="shadow-1" cssVar="--rzc-shadow-1" />
+    <ElevationSample name="shadow-2" cssVar="--rzc-shadow-2" />
+    <ElevationSample name="shadow-3" cssVar="--rzc-shadow-3" />
+    <ElevationSample name="shadow-modal" cssVar="--rzc-shadow-modal" />
+  </Grid>
+</Unstyled>
+
+## When to use what
+
+| Tier | Token | Use |
+| --- | --- | --- |
+| flat (default) | none | Cards, panels, sections — separate via `border-whisper` |
+| 1 | `--rzc-shadow-1` | Sticky bars, hover-lift micro affordance |
+| 2 | `--rzc-shadow-2` | Dropdowns, popovers |
+| 3 | `--rzc-shadow-3` | Floating action menus |
+| modal | `--rzc-shadow-modal` | Modals, dialogs, full overlays |
+
+Dark mode shadows scale up opacity (×5) so they stay perceptible against deeper canvas tones.
+
+## Usage
+
+```tsx
+<Box sx={{
+  borderRadius: "var(--rzc-radius-lg)",
+  background: "var(--rzc-color-surface-elevated)",
+  boxShadow: "var(--rzc-shadow-modal)",
+}}>
+```
+
+Don't reach for `shadow-2` to "make a card stand out" — that's what surface tokens (`base` vs `elevated`) and whisper borders are for. Shadows for hierarchy is a Material-2 reflex; rezics is closer to Material-3 + Apple in temperament.

@@ -1,0 +1,52 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
+import { SpacingRuler } from "./_gallery";
+
+<Meta title="Foundation/Tokens/Spacing" />
+
+# Spacing
+
+8px base scale. `theme.spacing(1) === 8px` in MUI; tokens align 1-to-1. Source: `package/ui/src/config/tokens/spacing.ts`.
+
+Use multiples of the scale; never raw pixel values. The scale is intentionally coarse — if you need a value between two steps, that's a signal to reconsider the layout.
+
+<Unstyled>
+  <SpacingRuler name="0" value="0" />
+  <SpacingRuler name="px" value="1px" />
+  <SpacingRuler name="0.5" value="2px" />
+  <SpacingRuler name="1" value="4px" />
+  <SpacingRuler name="2" value="8px" />
+  <SpacingRuler name="3" value="12px" />
+  <SpacingRuler name="4" value="16px" />
+  <SpacingRuler name="5" value="24px" />
+  <SpacingRuler name="6" value="32px" />
+  <SpacingRuler name="8" value="48px" />
+  <SpacingRuler name="10" value="64px" />
+  <SpacingRuler name="12" value="96px" />
+  <SpacingRuler name="16" value="128px" />
+</Unstyled>
+
+## Common patterns
+
+| Use | Token |
+| --- | --- |
+| Inline icon-to-label gap | `2` (8px) |
+| Form field row gap | `3` (12px) |
+| Card padding | `4` (16px) |
+| Section gap | `5`–`6` (24–32px) |
+| Page-level vertical rhythm | `8`–`12` (48–96px) |
+
+## Usage
+
+```tsx
+// MUI sx — pass numeric step (auto × theme.spacing == 8px)
+<Stack spacing={3} sx={{ p: 4 }}>
+<Box sx={{ mt: 5, gap: 2 }}>
+
+// CSS variables
+.row { padding: var(--rzc-space-4); gap: var(--rzc-space-2); }
+
+// UnoCSS (shadcn preset uses 4-based scale; rezics theme overrides to 8-based)
+<div className="p-4 gap-2">  // 16px / 8px
+```
+
+Don't introduce off-grid values. If 12px feels right but the next step (24px) feels too big, the spacing rhythm of the surrounding section is probably wrong, not the scale.
