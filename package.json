@@ -16,10 +16,10 @@
     "check:convention": "bun run tool/scripts/check-convention.ts",
     "knip": "knip",
     "storybook:host": "storybook dev -p 6006 --no-open",
-    "storybook:all": "concurrently -k -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run storybook:host\" \"bun --cwd package/ui run storybook\" \"bun --cwd package/editor run storybook\" \"bun --cwd package/folio run storybook\" \"bun --cwd package/admin run storybook\" \"bun --cwd package/app run storybook\"",
+    "storybook:all": "concurrently -k -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run storybook:host\" \"bun --filter='@rezics/ui' run storybook\" \"bun --filter='@rezics/editor' run storybook\" \"bun --filter='@rezics/folio' run storybook\" \"bun --filter='@rezics/admin' run storybook\" \"bun --filter='@rezics/app' run storybook\"",
     "storybook": "bun run storybook:all",
     "build-storybook:host": "storybook build -o storybook-static",
-    "build-storybook:all": "concurrently -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run build-storybook:host\" \"bun --cwd package/ui run build-storybook\" \"bun --cwd package/editor run build-storybook\" \"bun --cwd package/folio run build-storybook\" \"bun --cwd package/admin run build-storybook\" \"bun --cwd package/app run build-storybook\"",
+    "build-storybook:all": "concurrently -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run build-storybook:host\" \"bun --filter='@rezics/ui' run build-storybook\" \"bun --filter='@rezics/editor' run build-storybook\" \"bun --filter='@rezics/folio' run build-storybook\" \"bun --filter='@rezics/admin' run build-storybook\" \"bun --filter='@rezics/app' run build-storybook\"",
     "build-storybook": "bun run build-storybook:all",
     "postinstall": "lefthook install || true"
   },
@@ -36,7 +36,8 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "storybook": "^10.3.6",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "vite-tsconfig-paths": "^6.1.1"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",

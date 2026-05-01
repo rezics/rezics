@@ -140,3 +140,50 @@ Chrome's hardcoded "unsafe ports" list rejects the X11 port `:6000` with `ERR_UN
 | 6011 | `@rezics/app` | main app pages / sections |
 
 Five publishable surfaces, each with its own Storybook so the package can ship standalone; the host just composes them via `refs`.
+
+---
+
+## Gotcha — Bun `--cwd` orchestration trap
+
+In Bun **1.3.11**, the global `--cwd` flag only accepts the `=` form. Running `bun --cwd package/ui run storybook` (space-separated) is parsed as `bun run --cwd package/ui storybook`, which `bun run` rejects (it has no `--cwd` flag) — bun prints the `bun run` help and exits non-zero. Under `concurrently -k`, that silent sibling failure tears down the host too, so the user sees `:6006` "exit silently" and concludes "dev composition is broken".
+
+It is not Storybook v10, not `refs`, not Vite — it's the Bun script.
+
+**Fix.** Use the workspace-native filter form in root scripts:
+
+```jsonc
+"storybook:all": "concurrently -k -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run storybook:host\" \"bun --filter='@rezics/ui' run storybook\" ..."
+```
+
+`bun --filter='<pkg>' run <script>` resolves the workspace package and runs the script in its directory. Verified: all 6 instances boot to "Storybook ready!" concurrently, host serves at `:6006` with all 5 refs in the sidebar; `bun run build-storybook` produces 6 dists with exit 0.
+
+**Cosmetic.** Bun's filter resolver emits `▲ unable to find package.json for @rezics/api` (and similar for `email`, `server`) on each filter invocation. Those packages do exist with valid `package.json`s — this looks like a Bun workspace-lookup quirk unrelated to the storybook setup. Harmless; left in place.
+
+---
+
+## Gotcha — cross-package `@/` alias resolution
+
+Every workspace package defines `@/* → ./src/*` in its own `tsconfig.json`. That is intentional and *correct* for the monorepo: at publish time each package compiles independently, so `@/` is resolved away in the dist.
+
+But while developing without a build step, when one package's storybook (e.g. `@rezics/app`) renders a story that imports `@rezics/ui` source containing `import { Button } from "@/shadcn/button"`, the storybook's Vite must resolve `@/` against **`@rezics/ui`'s** tsconfig, not the consumer's. The minimal `.storybook/vite.config.ts` we initially wrote knows nothing about either. Result: `Failed to resolve "@/shadcn/button" from package/ui/src/link/ExternalLinkModal.tsx`.
+
+Note that the consumer's own application Vite config doesn't hit this because it runs `resolve: { tsconfigPaths: true }`, which Vite 8 supports natively — but Storybook builds its own Vite instance and that flag isn't set.
+
+**Fix.** Add `vite-tsconfig-paths` plugin to every storybook's vite config. With no `projects` argument it crawls from the workspace root, picks up every package's tsconfig, and matches each source file to its nearest tsconfig — so `@/` inside `package/ui/src/...` resolves via ui's tsconfig, while `@/` inside `package/app/src/...` resolves via app's. The aliases coexist because resolution is anchored to the source file's location.
+
+```ts
+// e.g. package/app/.storybook/vite.config.ts
+import tsconfigPaths from "vite-tsconfig-paths";
+
+export default defineConfig({
+  plugins: [
+    tsconfigPaths({ ignoreConfigErrors: true }),
+    UnoCSS(),
+    react(),
+  ],
+});
+```
+
+`ignoreConfigErrors: true` silences `TSConfckParseError` warnings that fire on broken `extends:"../tsconfig.json"` references inside `node_modules` (Bun's install cache holds a number of `@aws-crypto/*` packages that ship malformed tsconfigs). The errors are advisory and don't break resolution.
+
+Verified: all 6 instances boot, all `iframe.html` endpoints return 200, admin and app stories that pull in `@rezics/ui` (which uses `@/shadcn/*` and `@/shared/lib/utils`) compile and render with no resolution errors.
