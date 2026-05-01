@@ -116,8 +116,8 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 ### Phase 5 — Storybook Spike (go/no-go)
 
-- [x] **T5.1** Verify Storybook 9 + Vite 8 + React 19 compatibility matrix (release notes / GitHub issues).
-  - **Done**: Pivoted to Storybook **10.3.6** (current latest). Spike doc at `openspec/plans/design-system-research/05-storybook-spike.md`. Compat green: vite ^5–^8, react ^16.8–^19.
+- [x] **T5.1** Verify Storybook **10** + Vite 8 + React 19 compatibility matrix (release notes / GitHub issues).
+  - **Done**: Storybook **10.3.6** (current latest). Spike doc at `openspec/plans/design-system-research/05-storybook-spike.md`. Compat green: vite ^5–^8, react ^16.8–^19.
 - [x] **T5.2** Add minimal `package/ui/.storybook/{main.ts,preview.tsx}` + 1 demo story.
   - **Done**: `package/ui/.storybook/` with isolated `vite.config.ts` (avoids the broken `tanstackRouter` plugin in `package/ui/vite.config.ts`). Demo story `Tokens.stories.tsx` (Surfaces / Buttons / Typography / Brand). `react-dom@^19.2.4` added to package deps.
 - [x] **T5.3** Wire UnoCSS preset + MUI ThemeProvider in `preview.tsx`.
@@ -132,14 +132,25 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 ### Phase 6 — Storybook Build-Out
 
+**Topology**: 5 publishable surfaces each own their Storybook so they can ship standalone; the root host on `:6006` composes them via `refs`. Chrome blocks `:6000` (`ERR_UNSAFE_PORT` — X11), `:6566`, `:6665–6669`, and `:6697` — the assignments below avoid those. Storybook's own default is `:6006`.
+
+| Port | Instance | Owner |
+| ---- | -------- | ----- |
+| 6006 | host | root `.storybook/` (aggregator) |
+| 6007 | `@rezics/ui` | foundation, tokens, primitives — done in Phase 5 |
+| 6008 | `@rezics/editor` | CodeMirror — done in Phase 5 |
+| 6009 | `@rezics/folio` | reader (txt / epub) |
+| 6010 | `@rezics/admin` | admin app |
+| 6011 | `@rezics/app` | main app |
+
 - [ ] **T6.1** Extract shared config to `package/storybook-config/`.
   - **Accept**: `main-base.ts`, `preview-base.tsx` exported; ui + editor refactored to consume.
-- [ ] **T6.2** Add Storybook to `@rezics/app` (port 6003).
-- [ ] **T6.3** Add Storybook to `@rezics/folio` (port 6004).
-- [ ] **T6.4** Add Storybook to `@rezics/admin` (port 6005).
+- [ ] **T6.2** Add Storybook to `@rezics/folio` (port 6009).
+- [ ] **T6.3** Add Storybook to `@rezics/admin` (port 6010).
+- [ ] **T6.4** Add Storybook to `@rezics/app` (port 6011).
 - [ ] **T6.5** Update root `.storybook/main.ts` refs to include all 5 packages.
 - [ ] **T6.6** Add root scripts: `bun storybook` (concurrently runs all + host) and `bun storybook:build` (builds all + host).
-- [ ] **T6.7** Document port convention in `CONTRIBUTING.md`.
+- [ ] **T6.7** Document port convention in `CONTRIBUTING.md` (incl. the Chrome unsafe-ports note).
 
 ### Phase 7 — Token Galleries & Design Docs (MDX)
 
@@ -172,7 +183,7 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 ## 5. Open Decisions
 
-- **D1** — Storybook 9 + Vite 8 + React 19 compatibility. Resolved by T5.1 spike.
+- **D1** — Storybook **10** + Vite 8 + React 19 compatibility. Resolved by T5.1 spike (Storybook 10.3.6 covers our stack natively).
 - **D2** — Whether to publish skill / tokens to npm for external rezics repos. **Deferred** until external repos exist.
 - **D3** — Visual regression CI (Chromatic). **Deferred** to v2.
 - **D4** — Whether `@rezics/storybook-config` should live in `package/` or be a standalone tool. **Default**: `package/storybook-config/` (workspace-internal).
@@ -183,7 +194,7 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 | Risk | Likelihood | Mitigation |
 | --- | --- | --- |
-| Storybook 9 + Vite 8 + UnoCSS incompatibility | Medium | Phase 5 spike before any migration; fallback = stay on Cosmos and add MDX docs in `package/app` route. |
+| Storybook 10 + Vite 8 + UnoCSS incompatibility | Resolved | Phase 5 spike confirmed Storybook 10.3.6 builds clean against our stack. Fallback (stay on Cosmos + MDX route) was not needed. |
 | open-design's 72 systems are wrapped in non-machine-readable formats | Medium | Sub-agent reports back at T2.1; if blocked, fall back to manual sampling of top 5 candidate brands. |
 | Token migration breaks existing visual surfaces | Medium-High | Smoke-test in T3.11; full audits gated to Phase 9 (post-Storybook). |
 | Multi-Storybook concurrent dev too slow | Low | Document selective `bun -F <pkg> storybook` usage; only host needs all running. |

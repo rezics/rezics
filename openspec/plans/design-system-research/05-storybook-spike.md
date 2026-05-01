@@ -73,7 +73,7 @@ Storybook's CLI is a Node-targeted package. Bun runs Node-API CLIs without issue
 
 ## What this spike does NOT decide
 
-- **Port assignments** (`6000` host / `6001` ui / `6002` editor) — proposed by plan, will be set in T5.2/T5.4/T5.5.
+- **Port assignments** — settled mid-spike: Chrome blocks `:6000` (`ERR_UNSAFE_PORT`, X11 reserved). We standardized on Storybook's default `:6006` for the host and `:6007+` for the per-package instances. See "Port assignments" below.
 - **Whether to keep Cosmos** — Phase 8 covers retirement; this spike doesn't pre-empt that decision.
 - **Story file conventions** (`*.stories.tsx` vs MDX) — Phase 6 standardization.
 - **Theme decorator wiring** — concrete shape lands in T5.3 (UnoCSS virtual import + MUI `ThemeProvider`).
@@ -123,3 +123,20 @@ The package declared `react` but not `react-dom` (it relied on transitive resolu
 - `package/ui/.storybook/preview.tsx` — MUI ThemeProvider + UnoCSS virtual import + light/dark toolbar toggle
 - `package/ui/src/stories/Tokens.stories.tsx` — Surfaces / Buttons / Typography / Brand demo
 - `package/ui/package.json` — added `storybook`, `@storybook/react-vite`, `react-dom` deps + `storybook` / `build-storybook` scripts
+
+---
+
+## Port assignments (Chrome-safe)
+
+Chrome's hardcoded "unsafe ports" list rejects the X11 port `:6000` with `ERR_UNSAFE_PORT` and likewise refuses `:6566`, `:6665–6669`, `:6697`. The Storybook default of `:6006` is safe and we use it for the host. Per-package instances climb from `:6007`:
+
+| Port | Instance | Owner |
+| ---- | -------- | ----- |
+| 6006 | host (root `.storybook/`) | aggregator with `refs` |
+| 6007 | `@rezics/ui` | foundation tokens, primitives |
+| 6008 | `@rezics/editor` | CodeMirror markdown / json |
+| 6009 | `@rezics/folio` | reader (txt / epub plugins) |
+| 6010 | `@rezics/admin` | admin app pages / tables |
+| 6011 | `@rezics/app` | main app pages / sections |
+
+Five publishable surfaces, each with its own Storybook so the package can ship standalone; the host just composes them via `refs`.

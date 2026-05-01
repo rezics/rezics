@@ -13,12 +13,12 @@ const config: StorybookConfig = {
   refs: {
     ui: {
       title: "UI · Foundation",
-      url: "http://localhost:6001",
+      url: "http://localhost:6007",
       expanded: true,
     },
     editor: {
       title: "Editor · CodeMirror",
-      url: "http://localhost:6002",
+      url: "http://localhost:6008",
       expanded: true,
     },
   },

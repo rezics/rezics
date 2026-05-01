@@ -15,7 +15,7 @@
     "test": "bun test",
     "dev": "vite build --watch",
     "cosmos": "cosmos",
-    "storybook": "storybook dev -p 6002 --no-open",
+    "storybook": "storybook dev -p 6008 --no-open",
     "build-storybook": "storybook build -o storybook-static"
   },
   "dependencies": {

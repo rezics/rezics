@@ -15,7 +15,7 @@
     "check": "biome check --write .",
     "check:convention": "bun run tool/scripts/check-convention.ts",
     "knip": "knip",
-    "storybook": "storybook dev -p 6000 --no-open",
+    "storybook": "storybook dev -p 6006 --no-open",
     "build-storybook": "storybook build -o storybook-static",
     "postinstall": "lefthook install || true"
   },
