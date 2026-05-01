@@ -10,6 +10,8 @@ dist/
 out/
 *.tgz
 *.exe
+storybook-static/
+**/storybook-static/
 
 # Prisma generated clients
 **/prisma/generated/

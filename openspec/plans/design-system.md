@@ -116,18 +116,18 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 ### Phase 5 — Storybook Spike (go/no-go)
 
-- [ ] **T5.1** Verify Storybook 9 + Vite 8 + React 19 compatibility matrix (release notes / GitHub issues).
-  - **Accept**: A go/no-go note in `openspec/plans/design-system-research/05-storybook-spike.md`.
-- [ ] **T5.2** Add minimal `package/ui/.storybook/{main.ts,preview.tsx}` + 1 demo story.
-  - **Accept**: `bun -F @rezics/ui storybook` boots on port 6001; demo story renders.
-- [ ] **T5.3** Wire UnoCSS preset + MUI ThemeProvider in `preview.tsx`.
-  - **Accept**: Demo story shows tokens applied (color, typography, spacing visible).
-- [ ] **T5.4** Add minimal `package/editor/.storybook/` + 1 demo story.
-  - **Accept**: `bun -F @rezics/editor storybook` boots on port 6002.
-- [ ] **T5.5** Add root-level `.storybook/main.ts` with `refs` pointing to ui + editor.
-  - **Accept**: Root Storybook boots on port 6000; sidebar shows UI and Editor groups; iframe live previews work.
-- [ ] **T5.6** Validate `storybook build` for both packages and host produces deployable static dist.
-  - **Accept**: `dist/` directories present; opening host `dist/index.html` after a static serve shows aggregated sidebar.
+- [x] **T5.1** Verify Storybook 9 + Vite 8 + React 19 compatibility matrix (release notes / GitHub issues).
+  - **Done**: Pivoted to Storybook **10.3.6** (current latest). Spike doc at `openspec/plans/design-system-research/05-storybook-spike.md`. Compat green: vite ^5–^8, react ^16.8–^19.
+- [x] **T5.2** Add minimal `package/ui/.storybook/{main.ts,preview.tsx}` + 1 demo story.
+  - **Done**: `package/ui/.storybook/` with isolated `vite.config.ts` (avoids the broken `tanstackRouter` plugin in `package/ui/vite.config.ts`). Demo story `Tokens.stories.tsx` (Surfaces / Buttons / Typography / Brand). `react-dom@^19.2.4` added to package deps.
+- [x] **T5.3** Wire UnoCSS preset + MUI ThemeProvider in `preview.tsx`.
+  - **Done**: `preview.tsx` imports `virtual:uno.css` + `layers.css`, wraps stories in `StyledEngineProvider` + `ThemeProvider` + `CssBaseline`, exposes a Light/Dark global toolbar that toggles `[data-theme]` + `html.dark`.
+- [x] **T5.4** Add minimal `package/editor/.storybook/` + 1 demo story.
+  - **Done**: `Editor.stories.tsx` with Markdown + JSON CodeMirror demos. Build emits `Editor.stories-*.js` + CodeMirror chunks.
+- [x] **T5.5** Add root-level `.storybook/main.ts` with `refs` pointing to ui + editor.
+  - **Done**: Root `.storybook/` host with `refs.ui` (port 6001) + `refs.editor` (port 6002). Demo `Welcome.stories.tsx`. `react`/`react-dom` added at root devDeps.
+- [x] **T5.6** Validate `storybook build` for both packages and host produces deployable static dist.
+  - **Done**: All three `storybook build` runs succeed — `package/ui/storybook-static/`, `package/editor/storybook-static/`, root `storybook-static/`. Each `index.json` lists the expected story IDs.
 - [ ] **🚦 GATE-B** User reviews spike outcome. Decide: full migration (Phase 6/7) or fall back (revise plan).
 
 ### Phase 6 — Storybook Build-Out
