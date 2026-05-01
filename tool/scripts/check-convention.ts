@@ -60,6 +60,7 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "forms",
   "kinds",
   "presets",
+  "stories",
 ]);
 
 // Singular domain folder names that are permitted even when their plural form
