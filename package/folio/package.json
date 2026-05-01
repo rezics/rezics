@@ -12,7 +12,6 @@
   "scripts": {
     "test": "bun test",
     "dev": "bun run --watch src/index.ts",
-    "cosmos": "cosmos",
     "storybook": "storybook dev -p 6009 --no-open",
     "build-storybook": "storybook build -o storybook-static"
   },
@@ -35,8 +34,6 @@
     "@vitejs/plugin-react": "^5.1.4",
     "bun-types": "latest",
     "unocss": "^66.5.10",
-    "react-cosmos": "^7.2.0",
-    "react-cosmos-plugin-vite": "^7.2.0",
     "storybook": "^10.3.6"
   }
 }

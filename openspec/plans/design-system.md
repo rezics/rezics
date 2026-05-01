@@ -173,12 +173,20 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 ### Phase 8 — Cosmos Retirement
 
-- [ ] **T8.1** Inventory existing Cosmos fixtures across `package/ui` (and any other package using Cosmos).
+- [x] **T8.1** Inventory existing Cosmos fixtures across `package/ui` (and any other package using Cosmos).
   - **Accept**: `openspec/plans/design-system-research/08-cosmos-fixture-inventory.md`.
-- [ ] **T8.2** Migrate each fixture to a Storybook story (mechanical).
+
+  **Done.** 41 fixtures across 4 packages: `@rezics/ui` (8, on `.test.tsx`), `@rezics/app` (19), `@rezics/editor` (9), `@rezics/folio` (5). `@rezics/admin` has scripts + devDeps but zero fixtures — pure deletion. Inventory flags a **suffix conflict in `@rezics/ui`**: `cosmos.config.json` set `fixtureFileSuffix: "test"`, so the 12 `.test.tsx` files split into 8 cosmos fixtures (rename to `.stories.tsx`) and 4 real `bun:test` files (keep `.test.tsx`). Inventory also notes T8.3/T8.4's current wording only covers `package/ui` — actual delete scope is 4 cosmos.config.json files (ui/app/editor/folio), 2 cosmos.decorator.tsx files (ui/app), 2 vite.cosmos.config.ts files (editor/folio), and devDeps in 5 packages. Tighten at GATE-C.
+- [x] **T8.2** Migrate each fixture to a Storybook story (mechanical).
   - **Accept**: Per-package PRs; each fixture has a story counterpart.
-- [ ] **T8.3** Remove `react-cosmos`, `react-cosmos-plugin-vite` from `package/ui/package.json`.
-- [ ] **T8.4** Delete `cosmos.config.json`, `cosmos.decorator.tsx`.
+
+  **Done.** Migrated 41 fixtures → stories across 4 packages: ui (8), folio (5), editor (9), app (19 — 17 stories + 2 commented-out fixtures dropped). Cosmos `useFixtureInput`/`useFixtureSelect` mapped to Storybook `args` + `argTypes` (radio/range/boolean/text controls). Multi-fixture default-export-as-object converted to multiple named `StoryObj` exports per CSF file. App preview adds `QueryClientProvider` decorator (mirrors deleted `cosmos.decorator.tsx`). All 5 package storybooks build clean.
+- [x] **T8.3** Remove `react-cosmos`, `react-cosmos-plugin-vite` from `package/ui/package.json`.
+
+  **Done.** Stripped `react-cosmos` + `react-cosmos-plugin-vite` devDeps and `cosmos`/`cosmos-export` npm scripts from all 5 packages (ui, app, editor, folio, admin). `bun install` resyncs the lockfile cleanly.
+- [x] **T8.4** Delete `cosmos.config.json`, `cosmos.decorator.tsx`.
+
+  **Done.** Deleted 4× `cosmos.config.json` (ui/app/editor/folio), 2× `cosmos.decorator.tsx` (ui/app), 2× `vite.cosmos.config.ts` (editor/folio), and the leftover cosmos-only `package/ui/src/main.tsx` entry. `rg "react-cosmos|useFixtureInput|useFixtureSelect"` returns zero source-code matches (only docs/spec history).
 - [ ] **🚦 GATE-C** Final user check: Storybook covers everything Cosmos did before deletion.
 
 ### Phase 9 — Adoption Audits (per package)

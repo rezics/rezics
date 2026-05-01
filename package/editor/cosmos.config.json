@@ -1,9 +1,0 @@
-{
-  "$schema": "http://json.schemastore.org/cosmos-config",
-  "plugins": ["react-cosmos-plugin-vite"],
-  "fixtureFileSuffix": "fixture",
-  "vite": {
-    "configPath": "vite.cosmos.config.ts"
-  },
-  "port": 5184
-}
