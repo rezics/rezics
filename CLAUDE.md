@@ -101,6 +101,10 @@ Enforced by `bun run check:convention` (pre-commit + PR merge gate).
 
 All JSX links must use `<SafeLink href={url}>` from `@rezics/ui` instead of raw `<a href>`. This classifies URLs and routes external links through a confirmation modal. See `openspec/specs/outbound-link-protection/spec.md` for the full spec. Enforced by R5 in `bun run check:convention`.
 
+## UI Work
+
+Any UI work (JSX, MUI sx, UnoCSS classes, theme tokens, colors, typography, spacing, component selection) is governed by the **rezics-design** skill. Load it before generating or reviewing UI. Source-of-truth tokens live in `package/ui/src/config/tokens/`; canonical brief is `openspec/plans/design-system-research/briefs/01-foundation-v1.md`. Don't duplicate design rules outside the skill — point to it.
+
 ## Change Management
 
 This project uses **OpenSpec** for non-trivial changes:

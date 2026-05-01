@@ -107,14 +107,12 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 ### Phase 4 — Author Claude Skill
 
-- [ ] **T4.1** Create `.claude/skills/rezics-design/SKILL.md` (entry: trigger conditions, top-level rules summary).
-  - **Accept**: Skill loads when Claude is asked to build/modify UI; lists do/don't summary; references sub-files.
-- [ ] **T4.2** Create `.claude/skills/rezics-design/voice.md` — design language description (mood, density, tone).
-- [ ] **T4.3** Create `.claude/skills/rezics-design/tokens.md` — token reference cheatsheet, names + when to use.
-- [ ] **T4.4** Create `.claude/skills/rezics-design/patterns.md` — concrete do/don't with code snippets, including known don'ts (emoji icons, bordered section cards, raw `<a href>`).
-- [ ] **T4.5** Create `.claude/skills/rezics-design/mui-vs-shadcn.md` — decision tree for component selection.
-- [ ] **T4.6** Add `## UI Work` section to `CLAUDE.md` pointing to the skill and Storybook host.
-  - **Accept**: New section is < 10 lines; no design rules duplicated (only pointers).
+- [x] **T4.1** Create `.claude/skills/rezics-design/SKILL.md` (frontmatter trigger, top-level rules, decision quickstart, hard never-list, sub-file pointers).
+- [x] **T4.2** Create `voice.md` — mood (parchment archive), tone-per-surface table, reference systems, litmus test.
+- [x] **T4.3** Create `tokens.md` — full cheatsheet for surfaces / text / brand / semantic / borders / spacing / radius / motion / elevation / typography + common-mistakes table.
+- [x] **T4.4** Create `patterns.md` — 12 do/don't sections with code snippets covering layout, cards, buttons, inputs, links, icons, color usage, typography, spacing, mode handling, mock convention, admin/app density.
+- [x] **T4.5** Create `mui-vs-shadcn.md` — selection table (MUI primary, shadcn supplement, custom last), decision flows for modal/form/empty-state, cross-cutting rules.
+- [x] **T4.6** Add `## UI Work` section to `CLAUDE.md` (4-line pointer, no rule duplication).
 
 ### Phase 5 — Storybook Spike (go/no-go)
 
