@@ -2,15 +2,13 @@ import {
   type RealmExtraAdminReadResponse,
   realmExtraAdminReadResponseSchema,
   realmExtraAppendBodySchema,
-  realmExtraEntryPathParamsSchema,
-  realmExtraListPathParamsSchema,
   type RealmExtraOkResponse,
   realmExtraOkResponseSchema,
   type RealmExtraReadResponse,
   realmExtraReadResponseSchema,
   realmExtraReorderBodySchema,
 } from "@rezics/contract";
-import { Elysia, status } from "elysia";
+import { Elysia, status, t } from "elysia";
 import { authMacro, tryResolveIdentity } from "@/middleware";
 import {
   appendToList,
@@ -20,6 +18,18 @@ import {
   removeFromList,
   reorderList,
 } from "./realm-extra.service";
+
+// Param names match `realmApi`'s `:unitId` — memoirist rejects mismatched names at the same trie position.
+const listParamsSchema = t.Object({
+  unitId: t.String(),
+  key: t.String(),
+});
+
+const entryParamsSchema = t.Object({
+  unitId: t.String(),
+  key: t.String(),
+  contentUnitId: t.String(),
+});
 
 function handleError(error: unknown): never {
   if (error instanceof RealmExtraError) {
@@ -34,14 +44,14 @@ function handleError(error: unknown): never {
 export const realmExtraApi = new Elysia()
   .use(authMacro)
   .get(
-    "/realm/:realmId/extra/:key",
+    "/realm/:unitId/extra/:key",
     async ({ params, headers }): Promise<RealmExtraReadResponse> => {
       const identity = await tryResolveIdentity(headers["authorization"]);
-      const unitIds = await readListPublic(identity, params.realmId, params.key);
-      return { realmId: params.realmId, key: params.key, unitIds };
+      const unitIds = await readListPublic(identity, params.unitId, params.key);
+      return { realmId: params.unitId, key: params.key, unitIds };
     },
     {
-      params: realmExtraListPathParamsSchema,
+      params: listParamsSchema,
       response: realmExtraReadResponseSchema,
       detail: {
         summary: "Read a Realm.extra list (public, stale-filtered)",
@@ -50,16 +60,16 @@ export const realmExtraApi = new Elysia()
     },
   )
   .get(
-    "/realm/:realmId/extra/:key/admin",
+    "/realm/:unitId/extra/:key/admin",
     async ({ params, identity }): Promise<RealmExtraAdminReadResponse> => {
       try {
         const { unitIds, staleIds } = await readListAdmin(
           identity,
-          params.realmId,
+          params.unitId,
           params.key,
         );
         return {
-          realmId: params.realmId,
+          realmId: params.unitId,
           key: params.key,
           unitIds,
           staleIds,
@@ -70,7 +80,7 @@ export const realmExtraApi = new Elysia()
     },
     {
       requireLogin: true,
-      params: realmExtraListPathParamsSchema,
+      params: listParamsSchema,
       response: realmExtraAdminReadResponseSchema,
       detail: {
         summary: "Read a Realm.extra list (admin, includes stale entries)",
@@ -79,12 +89,12 @@ export const realmExtraApi = new Elysia()
     },
   )
   .post(
-    "/realm/:realmId/extra/:key/append",
+    "/realm/:unitId/extra/:key/append",
     async ({ params, body, identity }): Promise<RealmExtraOkResponse> => {
       try {
         const { unitIds } = await appendToList(
           identity,
-          params.realmId,
+          params.unitId,
           params.key,
           body.unitId,
         );
@@ -95,7 +105,7 @@ export const realmExtraApi = new Elysia()
     },
     {
       requireLogin: true,
-      params: realmExtraListPathParamsSchema,
+      params: listParamsSchema,
       body: realmExtraAppendBodySchema,
       response: realmExtraOkResponseSchema,
       detail: {
@@ -105,12 +115,12 @@ export const realmExtraApi = new Elysia()
     },
   )
   .post(
-    "/realm/:realmId/extra/:key/reorder",
+    "/realm/:unitId/extra/:key/reorder",
     async ({ params, body, identity }): Promise<RealmExtraOkResponse> => {
       try {
         const { unitIds } = await reorderList(
           identity,
-          params.realmId,
+          params.unitId,
           params.key,
           body.unitIds,
         );
@@ -121,7 +131,7 @@ export const realmExtraApi = new Elysia()
     },
     {
       requireLogin: true,
-      params: realmExtraListPathParamsSchema,
+      params: listParamsSchema,
       body: realmExtraReorderBodySchema,
       response: realmExtraOkResponseSchema,
       detail: {
@@ -131,14 +141,14 @@ export const realmExtraApi = new Elysia()
     },
   )
   .delete(
-    "/realm/:realmId/extra/:key/:unitId",
+    "/realm/:unitId/extra/:key/:contentUnitId",
     async ({ params, identity }): Promise<RealmExtraOkResponse> => {
       try {
         const { unitIds } = await removeFromList(
           identity,
-          params.realmId,
-          params.key,
           params.unitId,
+          params.key,
+          params.contentUnitId,
         );
         return { ok: true, unitIds };
       } catch (error) {
@@ -147,7 +157,7 @@ export const realmExtraApi = new Elysia()
     },
     {
       requireLogin: true,
-      params: realmExtraEntryPathParamsSchema,
+      params: entryParamsSchema,
       response: realmExtraOkResponseSchema,
       detail: {
         summary: "Remove a unit from a Realm.extra list",
