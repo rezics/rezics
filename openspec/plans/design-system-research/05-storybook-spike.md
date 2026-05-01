@@ -216,32 +216,81 @@ Verified: `bun run storybook` produces ~12 lines of output total, banner prints 
 
 ---
 
-## Gotcha — Storybook 10.3.6 missing CORS header on `/project.json` (ref composition)
+## Gotcha — Storybook 10.3.6 CORS issues on ref composition
 
-When the host (`:6006`) loads a `refs` entry pointing at another Storybook (e.g. `http://localhost:6010`), the manager fetches:
+When the host (`:6006`) loads a `refs` entry pointing at another Storybook (e.g. `http://localhost:6010`), the manager fetches **four** endpoints with `credentials: "include"`:
 
-- `GET <ref>/index.json` — the story manifest
-- `GET <ref>/project.json` — instance metadata (Storybook version, framework, etc.)
+- `GET <ref>/index.json` — story manifest (current v10 path)
+- `GET <ref>/project.json` — instance metadata (current v10 path)
+- `GET <ref>/stories.json` — legacy v6 manifest (probed for backwards-compat)
+- `GET <ref>/metadata.json` — legacy pre-v6 metadata (probed in `.catch`)
 
-In Storybook **10.3.6** (`node_modules/storybook/dist/core-server/index.js`), the `/index.json` handler sets `Access-Control-Allow-Origin: *` (line 4680) but the `/project.json` handler does not (line 5688). The browser's CORS preflight rejects the second request and the manager surfaces a generic *"Loading of ref failed — it's possible a CORS error happened"* in the sidebar.
+The legacy fetches are intentional: `manager-api/index.js`'s `checkRef` succeeds if either `index.json` or `stories.json` responds, and `metadata.json` is `.catch`ed. Functionally fine — but the way upstream emits headers breaks the browser console.
 
-It is not our config; it is a 2-line oversight in upstream `useStorybookMetadata`.
+### Issue 1 — `/project.json` missing CORS headers (and `/index.json` incompatible with credentials)
 
-**Fix.** Patch via `bun patch storybook`. The patch (`patches/storybook@10.3.6.patch`) adds the missing `setHeader` calls so `/project.json` mirrors `/index.json`'s CORS posture:
+In Storybook **10.3.6** (`node_modules/storybook/dist/core-server/index.js`):
+- `/index.json` sets `Access-Control-Allow-Origin: *` (line 4680) — but the manager fetches with `credentials: "include"`, and `*` is **invalid** when credentials are sent. The browser silently drops the response.
+- `/project.json` sets no CORS headers at all (line 5688) — outright rejected.
+
+**Fix.** Patch via `bun patch storybook` (`patches/storybook@10.3.6.patch`). Both handlers now echo the request origin and add `Access-Control-Allow-Credentials: true` + `Vary: Origin`:
 
 ```diff
+   app.use("/index.json", async (req, res) => {
+-    res.setHeader("Access-Control-Allow-Origin", "*"), res.setHeader(
++    res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*"),
++    res.setHeader("Access-Control-Allow-Credentials", "true"),
++    res.setHeader("Vary", "Origin"),
++    res.setHeader(
+       "Access-Control-Allow-Headers",
+       "Origin, X-Requested-With, Content-Type, Accept"
+     ), res.end(JSON.stringify(index));
+   });
+
    app.use("/project.json", async (req, res) => {
-     let storybookMetadata = await getStorybookMetadata(configDir);
 -    res.setHeader("Content-Type", "application/json"), res.write(JSON.stringify(storybookMetadata)), res.end();
 +    res.setHeader("Content-Type", "application/json"),
-+      res.setHeader("Access-Control-Allow-Origin", "*"),
-+      res.setHeader("Access-Control-Allow-Headers",
-+        "Origin, X-Requested-With, Content-Type, Accept"),
-+      res.write(JSON.stringify(storybookMetadata)),
-+      res.end();
++      res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*"),
++      res.setHeader("Access-Control-Allow-Credentials", "true"),
++      res.setHeader("Vary", "Origin"),
++      res.write(JSON.stringify(storybookMetadata)), res.end();
    });
 ```
 
-Bun applies the patch automatically on every `bun install`. Verified: `curl -I -H "Origin: http://localhost:6006" http://localhost:6010/project.json` now returns `Access-Control-Allow-Origin: *`.
+### Issue 2 — `/stories.json` and `/metadata.json` 404 without CORS headers
 
-**Drop the patch when upstream fixes it.** When Storybook ships >10.3.6 with this resolved, remove `patches/storybook@10.3.6.patch` and the `patchedDependencies` entry. Worth filing an upstream bug at https://github.com/storybookjs/storybook so this doesn't linger.
+Core-server v10 emits no handler for the legacy paths, so they fall through to Vite's catchall 404 — which sets no CORS headers. The browser raises a console-visible CORS error before the 404 is observable. The error is cosmetic (refs still load via `index.json`) but it floods the console.
+
+**Fix.** Vite plugin in `package/storybook-config/src/index.ts` (`corsLegacyEndpointsPlugin`) intercepts both paths in dev mode and returns a CORS-correct 404. The manager's `handleRequest` treats 404 as `indexError`, falls back to `index.json`, and the network panel shows a gray 404 with no JS-level error.
+
+```ts
+const STORYBOOK_LEGACY_ENDPOINTS = new Set(["/stories.json", "/metadata.json"]);
+
+function corsLegacyEndpointsPlugin(): Plugin {
+  return {
+    name: "rezics-storybook-cors-legacy-endpoints",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const path = (req.url ?? "").split("?")[0];
+        if (!STORYBOOK_LEGACY_ENDPOINTS.has(path)) { next(); return; }
+        const origin = req.headers.origin;
+        if (typeof origin === "string") {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+          res.setHeader("Vary", "Origin");
+        }
+        res.setHeader("Content-Type", "application/json");
+        res.statusCode = 404;
+        res.end(JSON.stringify({
+          error: "endpoint removed in storybook 10",
+          replacement: path === "/stories.json" ? "/index.json" : "/project.json",
+        }));
+      });
+    },
+  };
+}
+```
+
+Bun applies the patch automatically on every `bun install`. Verified: `curl -I -H "Origin: http://localhost:6006" http://localhost:6010/project.json` returns `Access-Control-Allow-Origin: http://localhost:6006` + `Access-Control-Allow-Credentials: true`.
+
+**Drop the patch when upstream fixes it.** When Storybook ships >10.3.6 with credentials-compatible CORS, remove `patches/storybook@10.3.6.patch` and the `patchedDependencies` entry. The legacy-endpoint plugin can also be removed if upstream stops probing v6 paths. Worth filing an upstream bug at https://github.com/storybookjs/storybook so this doesn't linger.
