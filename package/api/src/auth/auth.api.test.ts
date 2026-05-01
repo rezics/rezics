@@ -69,49 +69,6 @@ describe("authApi", () => {
     });
   });
 
-  test("reads auth context tokens from the auth service", async () => {
-    const { setToken } = await import("../react-query/jwt");
-    setToken(authToken, NormalizedTokenName.AUTH_SESSION);
-
-    fetchMock.mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          token: "context-token",
-          claims: {
-            id: "user-1",
-            sub: "user-1",
-            unitId: "user-1",
-            slug: "reader",
-            name: "Reader",
-            avatar: null,
-            emailVerified: false,
-            verificationStatus: "pending",
-          },
-        }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      ),
-    );
-
-    const { authApi } = await import("./auth.api");
-    const response = await authApi.getContextToken();
-
-    expect(response.token).toBe("context-token");
-    expect(response.claims.slug).toBe("reader");
-
-    const [url] = fetchMock.mock.calls[0]!;
-    expect(url).toBe("http://auth.example/api/auth/context-token");
-    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
-  });
-
   test("reads normalized auth session state from the auth service", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(

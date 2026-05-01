@@ -1,4 +1,4 @@
-import { swagger } from "@elysiajs/swagger";
+import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { bookApi } from "./book/book.api";
 import { env } from "./env";
@@ -29,12 +29,12 @@ const app = new Elysia()
   .use(bookApi);
 
 if (isDev) {
-  app.use(swagger());
+  app.use(openapi({ exclude: { staticFile: false } }));
 }
 
 app.listen(env.SERVER_PORT);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
-  `\n🔗 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/swagger`,
+  `\n🔗 Openapi UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
 );

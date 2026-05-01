@@ -18,6 +18,6 @@
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/unit-tags\"",
     "R4  package/notify/src/kinds",
     "R4  package/utils/src/factory/presets",
-    "R5  package/preview/src/components/BookShareDocument.tsx:97"
+    "R5  package/preview/src/components/BookShareDocument.tsx:107"
   ]
 }

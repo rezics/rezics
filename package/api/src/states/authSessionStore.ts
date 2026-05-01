@@ -20,10 +20,11 @@ import { devtools } from "zustand/middleware";
 
 export type AuthSessionHydrationStatus = "idle" | "loading" | "ready" | "error";
 
-type AuthSessionSnapshot = Pick<
-  GetSessionStateResponse,
-  "session" | "user" | "authSession"
->;
+type AuthSessionSnapshot = {
+  session: GetSessionStateResponse["session"] | null;
+  user: GetSessionStateResponse["user"] | null;
+  authSession: GetSessionStateResponse["authSession"];
+};
 
 export type AuthSessionStoreState = {
   status: AuthSessionHydrationStatus;
@@ -147,7 +148,12 @@ export async function hydrateAuthSessionState(options?: {
 
     const sessionState: AuthSessionSnapshot = {
       session: payload
-        ? { id: payload.sub ?? "", token: authToken!, expiresAt: "" }
+        ? {
+            id: payload.sub ?? "",
+            userId: payload.sub ?? payload.id ?? "",
+            token: authToken!,
+            expiresAt: "",
+          }
         : null,
       user: payload
         ? {

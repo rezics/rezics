@@ -80,12 +80,14 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@tanstack/router-plugin": "^1.167.12",
     "@types/markdown-it": "^14.1.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/react-lazy-load-image-component": "^1.6.5",
     "@unocss/preset-wind4": "^66.5.10",
     "@unocss/transformer-directives": "^66.5.10",
+    "@visulima/vite-overlay": "^1.3.7",
     "bun-types": "latest",
     "react-cosmos": "^7.1.1",
     "react-cosmos-plugin-vite": "^7.1.1",

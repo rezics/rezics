@@ -66,20 +66,4 @@ describe("jwt token storage", () => {
     });
   });
 
-  test("AUTH_CONTEXT is not persisted but can be parsed from raw token", async () => {
-    const jwt = await import("./jwt");
-
-    const contextToken = createToken({
-      id: "user-1",
-      slug: "reader",
-      name: "Reader",
-      verificationStatus: "pending",
-    });
-
-    expect(jwt.getAuthContextClaims(contextToken)).toMatchObject({
-      id: "user-1",
-      verificationStatus: "pending",
-    });
-    expect(jwt.getAuthContextClaims()).toBeNull();
-  });
 });

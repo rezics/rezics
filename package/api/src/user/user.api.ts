@@ -47,6 +47,23 @@ export const userApi = {
   },
 
   /**
+   * Admin: create user.
+   */
+  // MOCK: backend admin-create-user endpoint not yet implemented; replace POST body once contract lands
+  adminCreate: async (input: {
+    email: string;
+    password: string;
+    slug: string;
+    avatar?: string;
+    bio?: string;
+  }): Promise<UserDTO> => {
+    return apiFetch(`/user/admin`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  /**
    * Admin: update user.
    */
   adminUpdate: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {

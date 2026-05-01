@@ -27,6 +27,33 @@ export function useUpdateMeMutation(
   });
 }
 
+type AdminCreateUserInput = {
+  email: string;
+  password: string;
+  slug: string;
+  avatar?: string;
+  bio?: string;
+};
+
+// MOCK: pairs with userApi.adminCreate; remove the MOCK marker once backend endpoint exists
+export function useAdminCreateUserMutation(
+  options?: Omit<
+    UseMutationOptions<UserDTO, Error, AdminCreateUserInput>,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: AdminCreateUserInput) => userApi.adminCreate(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      qc.setQueryData(userKeys.adminDetail(data.unitId), data);
+      qc.invalidateQueries({ queryKey: userKeys.adminLists() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export function useAdminUpdateUserMutation(
   options?: Omit<
     UseMutationOptions<UserDTO, Error, { unitId: string; input: UpdateUser }>,
@@ -149,6 +176,7 @@ export function useUpdateSettingsMutation(
 
 export const userMutations = {
   useUpdateMe: useUpdateMeMutation,
+  useAdminCreate: useAdminCreateUserMutation,
   useAdminUpdate: useAdminUpdateUserMutation,
   useDeleteMe: useDeleteMeMutation,
   useFollow: useFollowMutation,

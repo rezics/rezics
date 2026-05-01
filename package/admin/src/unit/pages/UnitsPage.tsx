@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
+import type { UnitListResponse } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
@@ -77,7 +78,9 @@ export default function UnitsPage() {
 
   const normalQuery = trimmedQuery.length > 0 ? searchQuery : listQuery;
   const data = isMeiliMode ? meiliQuery.data : normalQuery.data;
-  const units = (isMeiliMode ? (data as any)?.items : data?.units) ?? [];
+  const units = isMeiliMode
+    ? ((data as any)?.items ?? [])
+    : ((data as UnitListResponse | undefined)?.units ?? []);
   const total = data?.total;
 
   const columns = React.useMemo(() => {

@@ -4,7 +4,9 @@ process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
 
-const findManyMock = mock(() => Promise.resolve([]));
+const findManyMock = mock((_args?: unknown) =>
+  Promise.resolve([] as unknown[]),
+);
 mock.module("#/prisma/client", () => ({
   prisma: {
     unitTag: { findMany: findManyMock },

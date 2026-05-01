@@ -100,7 +100,7 @@ describe("jose verifier", () => {
       audience: "rezics",
       jwks: { keys: [key.publicJwk] },
       algorithm: JwtAlgorithm.ES256,
-      tokenName: NormalizedTokenName.AUTH_CONTEXT,
+      tokenName: NormalizedTokenName.AUTH_SESSION,
       requiredScope: undefined,
     });
 

@@ -31,17 +31,27 @@ function clampDescription(desc: string, maxLen = 140): string {
   return `${s.slice(0, maxLen - 1)}…`;
 }
 
+function pickTranslation(book: BookDTO) {
+  const translations = book.translations ?? [];
+  if (!translations.length) return undefined;
+  return (
+    translations.find((t) => t.language === book.defaultLanguage) ??
+    translations[0]
+  );
+}
+
 export function BookShareDocument({
   book,
   canonicalUrl,
   origin,
 }: BookShareDocumentProps) {
-  const title = book.title || "Book";
+  const translation = pickTranslation(book);
+  const title = translation?.title || "Book";
   const description = clampDescription(
-    book.description || "Open to view details.",
+    translation?.description || translation?.summary || "Open to view details.",
     160,
   );
-  const imageUrl = toAbsoluteUrl(book.coverUrl, origin);
+  const imageUrl = toAbsoluteUrl(book.coverUrl ?? undefined, origin);
 
   const styles = getBookShareStyles();
 

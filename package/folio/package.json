@@ -22,7 +22,8 @@
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18",
-    "@rezics/editor": "workspace:*"
+    "@rezics/editor": "workspace:*",
+    "@rezics/ui": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",

@@ -29,7 +29,7 @@ export default function UserCreatePage() {
   const [error, setError] = React.useState<string | null>(null);
 
   const createMutation = userMutations.useAdminCreate({
-    onError: (err) =>
+    onError: (err: unknown) =>
       setError(err instanceof Error ? err.message : "Create failed"),
   });
 
@@ -42,7 +42,7 @@ export default function UserCreatePage() {
       slug: slug.trim(),
       avatar: avatar.trim() || undefined,
       bio: bio.trim() || undefined,
-    } as any);
+    });
     await navigate({ to: `/user/${user.unitId}`, replace: true });
   }
 

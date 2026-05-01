@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { type BookDTO, bookQueries } from "@rezics/api/book/book";
+import type { BookListResponse } from "@rezics/contract";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -37,16 +38,11 @@ function extractTitle(book: BookDTO): string {
   return primary?.title || "(no title)";
 }
 
-/** Format person/org credits into a readable string. */
+/** Format attribution credits into a readable string. */
 function formatCredits(book: BookDTO): string {
-  const parts: string[] = [];
-  if (book.personCredits?.length) {
-    parts.push(...book.personCredits.map((c) => `${c.name} (${c.roleKey})`));
-  }
-  if (book.orgCredits?.length) {
-    parts.push(...book.orgCredits.map((c) => `${c.name} (${c.roleKey})`));
-  }
-  return parts.length ? parts.join(", ") : "-";
+  const attributions = book.attributions ?? [];
+  if (!attributions.length) return "-";
+  return attributions.map((c) => `${c.name} (${c.role})`).join(", ");
 }
 
 export default function BooksPage() {
@@ -90,7 +86,9 @@ export default function BooksPage() {
 
   const normalQuery = trimmedQuery.length > 0 ? searchQuery : listQuery;
   const data = isMeiliMode ? meiliQuery.data : normalQuery.data;
-  const books = (isMeiliMode ? (data as any)?.items : data?.books) ?? [];
+  const books = isMeiliMode
+    ? ((data as any)?.items ?? [])
+    : ((data as BookListResponse | undefined)?.books ?? []);
   const total = data?.total;
 
   const columns = React.useMemo(() => {
