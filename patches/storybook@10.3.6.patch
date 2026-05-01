@@ -1,13 +1,25 @@
+diff --git a/node_modules/storybook/.bun-tag-1515047aaab6c4e2 b/.bun-tag-1515047aaab6c4e2
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/dist/core-server/index.js b/dist/core-server/index.js
-index 8ac44a995f5cf06c1199adf2dc2afec0423a4a74..5724edfae3beee8024b533c554fbf01136494a39 100644
+index 8ac44a995f5cf06c1199adf2dc2afec0423a4a74..62e65b6d1a34e0e6048c026225ff5cf6069bc64d 100644
 --- a/dist/core-server/index.js
 +++ b/dist/core-server/index.js
+@@ -4677,7 +4677,7 @@ function registerIndexJsonRoute({
+   }), app.use("/index.json", async (req, res) => {
+     try {
+       let index = await (await storyIndexGeneratorPromise).getIndex();
+-      res.setHeader("Content-Type", "application/json"), res.setHeader("Access-Control-Allow-Origin", "*"), res.setHeader(
++      res.setHeader("Content-Type", "application/json"), res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*"), res.setHeader("Access-Control-Allow-Credentials", "true"), res.setHeader("Vary", "Origin"), res.setHeader(
+         "Access-Control-Allow-Headers",
+         "Origin, X-Requested-With, Content-Type, Accept"
+       ), res.end(JSON.stringify(index));
 @@ -5687,7 +5687,10 @@ async function extractStorybookMetadata(outputFile, configDir) {
  function useStorybookMetadata(app, configDir) {
    app.use("/project.json", async (req, res) => {
      let storybookMetadata = await getStorybookMetadata(configDir);
 -    res.setHeader("Content-Type", "application/json"), res.write(JSON.stringify(storybookMetadata)), res.end();
-+    res.setHeader("Content-Type", "application/json"), res.setHeader("Access-Control-Allow-Origin", "*"), res.setHeader(
++    res.setHeader("Content-Type", "application/json"), res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*"), res.setHeader("Access-Control-Allow-Credentials", "true"), res.setHeader("Vary", "Origin"), res.setHeader(
 +      "Access-Control-Allow-Headers",
 +      "Origin, X-Requested-With, Content-Type, Accept"
 +    ), res.write(JSON.stringify(storybookMetadata)), res.end();
