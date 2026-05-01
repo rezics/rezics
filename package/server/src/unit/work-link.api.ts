@@ -1,19 +1,20 @@
-import {
-  workLinkBodySchema,
-  workLinkPathParamsSchema,
-  type WorkLinkResponse,
-} from "@rezics/contract";
-import { Elysia, status } from "elysia";
+import { workLinkBodySchema, type WorkLinkResponse } from "@rezics/contract";
+import { Elysia, status, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { applyWorkLink, WorkLinkError } from "./work-link.service";
+
+// Param name `unitId` matches `unitApi`'s — memoirist requires param names to agree at the same trie position.
+const releasePathParamsSchema = t.Object({
+  unitId: t.String(),
+});
 
 export const workLinkApi = new Elysia({ prefix: "/unit" })
   .use(authMacro)
   .patch(
-    "/:releaseId/work-link",
+    "/:unitId/work-link",
     async ({ params, body, identity }): Promise<WorkLinkResponse> => {
       try {
-        return await applyWorkLink(identity, params.releaseId, body.workUnitId);
+        return await applyWorkLink(identity, params.unitId, body.workUnitId);
       } catch (error) {
         if (error instanceof WorkLinkError) {
           throw status(error.httpStatus, {
@@ -26,12 +27,12 @@ export const workLinkApi = new Elysia({ prefix: "/unit" })
     },
     {
       requireLogin: true,
-      params: workLinkPathParamsSchema,
+      params: releasePathParamsSchema,
       body: workLinkBodySchema,
       detail: {
         summary: "Set or clear the work link of a release Unit",
         description:
-          "PATCH /unit/:releaseId/work-link — when the caller has authority over both sides (or the work is a wiki type), links immediately; otherwise creates a PENDING WorkLinkClaim. Pass `workUnitId: null` to unlink and withdraw any pending claims.",
+          "PATCH /unit/:unitId/work-link — `:unitId` is a release Unit. When the caller has authority over both sides (or the work is a wiki type), links immediately; otherwise creates a PENDING WorkLinkClaim. Pass `workUnitId: null` to unlink and withdraw any pending claims.",
         tags: ["Units", "WorkLink"],
       },
     },

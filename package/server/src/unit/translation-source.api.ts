@@ -1,25 +1,31 @@
 import {
+  languageSchema,
   type TranslationSourceResponse,
   translationSourceBodySchema,
-  translationSourcePathParamsSchema,
   translationSourceResponseSchema,
 } from "@rezics/contract";
-import { Elysia, status } from "elysia";
+import { Elysia, status, t } from "elysia";
 import { authMacro } from "@/middleware";
 import {
   setTranslationSource,
   TranslationSourceError,
 } from "./translation-source.service";
 
+// Param name `unitId` matches `unitApi`'s — memoirist requires param names to agree at the same trie position.
+const workTranslationPathParamsSchema = t.Object({
+  unitId: t.String(),
+  lang: languageSchema,
+});
+
 export const translationSourceApi = new Elysia({ prefix: "/unit" })
   .use(authMacro)
   .patch(
-    "/:workId/translations/:lang/source",
+    "/:unitId/translations/:lang/source",
     async ({ params, body, identity }): Promise<TranslationSourceResponse> => {
       try {
         return await setTranslationSource(
           identity,
-          params.workId,
+          params.unitId,
           params.lang,
           body.sourceReleaseUnitId,
         );
@@ -35,13 +41,13 @@ export const translationSourceApi = new Elysia({ prefix: "/unit" })
     },
     {
       requireLogin: true,
-      params: translationSourcePathParamsSchema,
+      params: workTranslationPathParamsSchema,
       body: translationSourceBodySchema,
       response: translationSourceResponseSchema,
       detail: {
         summary: "Set or clear the translation source for a work",
         description:
-          "PATCH /unit/:workId/translations/:lang/source — sets `UnitTranslation.sourceReleaseUnitId` for the given (workId, lang). Validates that the source is a release of this work and that the caller has authority. Existing translation fields are not touched.",
+          "PATCH /unit/:unitId/translations/:lang/source — `:unitId` is a work Unit. Sets `UnitTranslation.sourceReleaseUnitId` for the given (workUnitId, lang). Validates that the source is a release of this work and that the caller has authority. Existing translation fields are not touched.",
         tags: ["Units", "Translations"],
       },
     },

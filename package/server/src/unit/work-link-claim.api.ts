@@ -2,12 +2,11 @@ import {
   type WorkLinkClaimListResponse,
   type WorkLinkClaimResponse,
   workLinkClaimActionPathParamsSchema,
-  workLinkClaimListPathParamsSchema,
   workLinkClaimListQuerySchema,
   workLinkClaimListResponseSchema,
   workLinkClaimRejectBodySchema,
 } from "@rezics/contract";
-import { Elysia, status } from "elysia";
+import { Elysia, status, t } from "elysia";
 import { authMacro } from "@/middleware";
 import {
   approve,
@@ -16,6 +15,11 @@ import {
   withdraw,
   WorkLinkClaimError,
 } from "./work-link-claim.service";
+
+// Param name `unitId` matches `unitApi`'s — memoirist requires param names to agree at the same trie position.
+const workListPathParamsSchema = t.Object({
+  unitId: t.String(),
+});
 
 function handleError(error: unknown): never {
   if (error instanceof WorkLinkClaimError) {
@@ -30,14 +34,14 @@ function handleError(error: unknown): never {
 export const workLinkClaimApi = new Elysia()
   .use(authMacro)
   .get(
-    "/unit/:workUnitId/work-link-claims",
+    "/unit/:unitId/work-link-claims",
     async ({
       params,
       query,
       identity,
     }): Promise<WorkLinkClaimListResponse> => {
       try {
-        const claims = await listByWork(identity, params.workUnitId, query.status);
+        const claims = await listByWork(identity, params.unitId, query.status);
         return { claims };
       } catch (error) {
         handleError(error);
@@ -45,13 +49,13 @@ export const workLinkClaimApi = new Elysia()
     },
     {
       requireLogin: true,
-      params: workLinkClaimListPathParamsSchema,
+      params: workListPathParamsSchema,
       query: workLinkClaimListQuerySchema,
       response: workLinkClaimListResponseSchema,
       detail: {
         summary: "List work-link claims for a Work (inbox)",
         description:
-          "Lists pending/all claims targeting a Work Unit. Caller must have authority over the work. Soft-deleted releases are filtered.",
+          "Lists pending/all claims targeting a Work Unit (`:unitId` is the work's Unit ID). Caller must have authority over the work. Soft-deleted releases are filtered.",
         tags: ["Units", "WorkLink"],
       },
     },
