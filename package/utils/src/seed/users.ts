@@ -1,4 +1,7 @@
-import { seedAuthUser, type SeedAuthUserResult } from "@rezics/auth/prisma/seed";
+import {
+  type SeedAuthUserResult,
+  seedAuthUser,
+} from "@rezics/auth/prisma/seed";
 import type {
   AuthPrismaClient,
   ServerPrismaClient,
