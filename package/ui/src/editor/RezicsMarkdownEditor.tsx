@@ -167,7 +167,7 @@ export function RezicsMarkdownEditor({
             sx={{
               textTransform: "none",
               fontSize: "0.9rem",
-              lineHeight: 1,
+              lineHeight: 1.3,
               px: 1,
               "& .MuiButton-startIcon": {
                 "& svg": {

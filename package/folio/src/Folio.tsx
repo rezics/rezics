@@ -1,3 +1,5 @@
+import CloseIcon from "@mui/icons-material/Close";
+import MenuIcon from "@mui/icons-material/Menu";
 import { useCallback, useRef, useState } from "react";
 import { FolioProvider, useFolio } from "./context";
 import { useFolioGesture } from "./gesture/useFolioGesture";
@@ -83,7 +85,7 @@ function FolioInner({
           style={{
             width: "280px",
             flexShrink: 0,
-            borderRight: "1px solid rgba(128, 128, 128, 0.2)",
+            borderRight: "1px solid var(--rzc-color-border-whisper)",
             ...themeVars,
           }}
         >
@@ -109,15 +111,27 @@ function FolioInner({
               alignItems: "center",
               gap: "8px",
               padding: "8px 12px",
-              borderBottom: "1px solid rgba(128, 128, 128, 0.2)",
+              borderBottom: "1px solid var(--rzc-color-border-whisper)",
             }}
           >
             <button
               type="button"
               onClick={() => setShowToc((v) => !v)}
-              style={{ cursor: "pointer", fontSize: "14px" }}
+              style={{
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                background: "transparent",
+                border: "none",
+                padding: "4px",
+              }}
+              aria-label={showToc ? "Close table of contents" : "Open table of contents"}
             >
-              {showToc ? "✕" : "☰"}
+              {showToc ? (
+                <CloseIcon fontSize="small" />
+              ) : (
+                <MenuIcon fontSize="small" />
+              )}
             </button>
             <PanelSlot slot="Toolbar" onTreeChange={onTreeChange} />
           </div>
@@ -146,7 +160,7 @@ function FolioInner({
             className="folio-controls"
             style={{
               padding: "8px 12px",
-              borderTop: "1px solid rgba(128, 128, 128, 0.2)",
+              borderTop: "1px solid var(--rzc-color-border-whisper)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

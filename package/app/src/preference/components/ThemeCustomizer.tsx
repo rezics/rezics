@@ -28,6 +28,8 @@ import type React from "react";
 import { useState } from "react";
 import { useAppStore } from "@/app/states/appStore";
 
+const BRAND_DEFAULT_COLOR = "#f4606c";
+
 interface ThemeCustomizerProps {
   open: boolean;
   onClose: () => void;
@@ -45,7 +47,9 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
     (state: any) => state.setUseDynamicTheme,
   );
 
-  const [selectedColor, setSelectedColor] = useState(customColor || "#f4606c");
+  const [selectedColor, setSelectedColor] = useState(
+    customColor || BRAND_DEFAULT_COLOR,
+  );
   const [customHex, setCustomHex] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
@@ -97,8 +101,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   };
 
   const handleReset = () => {
-    setSelectedColor("#f4606c");
-    setCustomColor("#f4606c");
+    setSelectedColor(BRAND_DEFAULT_COLOR);
+    setCustomColor(BRAND_DEFAULT_COLOR);
     setCustomHex("");
     setUseDynamicTheme(false);
     setImageFile(null);

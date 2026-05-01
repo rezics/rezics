@@ -187,15 +187,22 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 - [x] **T8.4** Delete `cosmos.config.json`, `cosmos.decorator.tsx`.
 
   **Done.** Deleted 4× `cosmos.config.json` (ui/app/editor/folio), 2× `cosmos.decorator.tsx` (ui/app), 2× `vite.cosmos.config.ts` (editor/folio), and the leftover cosmos-only `package/ui/src/main.tsx` entry. `rg "react-cosmos|useFixtureInput|useFixtureSelect"` returns zero source-code matches (only docs/spec history).
-- [ ] **🚦 GATE-C** Final user check: Storybook covers everything Cosmos did before deletion.
+- [x] **🚦 GATE-C** Final user check: Storybook covers everything Cosmos did before deletion.
 
 ### Phase 9 — Adoption Audits (per package)
 
-- [ ] **T9.1** Audit `@rezics/app` against tokens; open PR replacing hardcoded values.
-- [ ] **T9.2** Audit `@rezics/admin`.
-- [ ] **T9.3** Audit `@rezics/editor`.
-- [ ] **T9.4** Audit `@rezics/folio`.
-- [ ] **T9.5** Audit `@rezics/ui` internal components.
+Aggregated audit artifact: `openspec/plans/design-system-research/09-adoption-audits.md` (per-package severity, counts, top offenders, fixed vs deferred). All Hard-Never violations addressed; defensible items (MUI sx pixel numerics, CodeMirror API contracts, reader-theme runtime parameters) and large refactors (editor markdown CSS prose palette) deferred to dedicated PRs.
+
+- [x] **T9.1** Audit `@rezics/app` against tokens; open PR replacing hardcoded values.
+  **Done.** 43 violations found (Small severity). Fixed: `preference/components/ThemeCustomizer.tsx` — extracted `BRAND_DEFAULT_COLOR = "#f4606c"` constant, replaces 3 inline brand-color literals (Hard Never #1: brand color must not be a text/literal scatter). Deferred: 26 MUI icon `fontSize` numerics (defensible — MUI's pixel-based icon-sizing API), 5 `lineHeight` numerics (none below 1.30 floor).
+- [x] **T9.2** Audit `@rezics/admin`.
+  **Done.** 25 violations found (Small severity), all defensible: 1 webkit autofill hex (vendor pseudo-element override), `fontSize: 13` on monospace table cell (admin-density rule #12), MUI theme-spacing multiples (resolve through `theme.spacing()`), pixel column widths (MUI sx convention). No fixes applied.
+- [x] **T9.3** Audit `@rezics/editor`.
+  **Done.** ~95 hex literals found (Medium severity); 54 are CodeMirror highlight literals (acceptable per CodeMirror API contract). The 41 chrome literals (`MarkdownEditor.css` 44× GitHub Primer-flavored markdown prose palette, `toolbar.css`/`panel/index.ts` toolbar chrome) warrant a dedicated PR with visual review — entangled with rendered-markdown reading surface. Stub fixture emoji are content (test data), not chrome. No fixes in this phase.
+- [x] **T9.4** Audit `@rezics/folio`.
+  **Done.** ~50 chrome violations (Medium severity). Fixed: `Folio.tsx` — replaced ✕/☰ emoji with `<CloseIcon>`/`<MenuIcon>` + `aria-label` (Hard Never #3); replaced 2× `rgba(128, 128, 128, 0.2)` with `var(--rzc-color-border-whisper)`. `toc/TocPanel.tsx` — replaced ▶/▼ disclosure emoji with rotating CSS triangle using `currentColor`; replaced rgba separator with `border-whisper`. `plugins/txt/TxtSettings.tsx` — replaced ★/✕ emoji with `<CheckCircleIcon>`/`<CloseIcon>`; replaced `#22c55e` ×2 → `success-fill`, `#ef4444` → `error-fill`, `#888` → `text-tertiary`, 4 rgba grays → `surface-subtle`/`surface-sunken`/`border-defined`. Deferred: reader-theme `light/dark/sepia` palette (runtime book-reader parameters, not chrome), content-zone padding in renderers (deliberate text margins).
+- [x] **T9.5** Audit `@rezics/ui` internal components.
+  **Done.** 23 violations across 13 files (Small-to-Medium severity), **0 hex literals**. Fixed: `composite/navigation/ArrowForwardIcon.tsx` `lineHeight: "1"` → `1.3` and `editor/RezicsMarkdownEditor.tsx` `lineHeight: 1` → `1.3` (both Hard Never #6: line-height ≥ 1.30). Deferred: 16 MUI primitive pixel dimensions (avatar/icon/modal sizing, anchor positioning) — would require either a UnoCSS rewrite or a new `iconSize`/`avatarSize` token scale, which is an additive design proposal, not a fix.
 
 ---
 

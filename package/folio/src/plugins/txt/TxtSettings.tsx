@@ -1,3 +1,5 @@
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CloseIcon from "@mui/icons-material/Close";
 import { useCallback, useMemo, useState } from "react";
 import type { PanelProps } from "../../types";
 import type { TxtSplitResult } from "./split";
@@ -111,7 +113,12 @@ function TxtSettingsInner({
       <div style={{ marginBottom: "12px" }}>
         <div style={{ fontWeight: 600, marginBottom: "4px" }}>Split Rules</div>
         {rules.length === 0 && (
-          <div style={{ color: "#888", fontSize: "12px" }}>
+          <div
+            style={{
+              color: "var(--rzc-color-text-tertiary)",
+              fontSize: "12px",
+            }}
+          >
             No custom rules. Using defaults.
           </div>
         )}
@@ -124,7 +131,7 @@ function TxtSettingsInner({
               alignItems: "center",
               gap: "8px",
               padding: "4px 8px",
-              background: "rgba(128, 128, 128, 0.1)",
+              background: "var(--rzc-color-surface-subtle)",
               borderRadius: "4px",
               marginBottom: "4px",
               fontFamily: "monospace",
@@ -132,24 +139,39 @@ function TxtSettingsInner({
             }}
           >
             <span
-              style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}
+              style={{
+                flex: 1,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
             >
               /{rule}/
               {splitInfo.ruleUsed === rule && (
-                <span style={{ color: "#22c55e", marginLeft: "4px" }}>★</span>
+                <CheckCircleIcon
+                  fontSize="small"
+                  sx={{ color: "var(--rzc-color-success-fill)" }}
+                  aria-label="active rule"
+                />
               )}
             </span>
             <button
               type="button"
               onClick={() => removeRule(i)}
+              aria-label="Remove rule"
               style={{
                 cursor: "pointer",
                 fontSize: "12px",
                 border: "none",
                 background: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                padding: 0,
               }}
             >
-              ✕
+              <CloseIcon fontSize="small" />
             </button>
           </div>
         ))}
@@ -169,7 +191,7 @@ function TxtSettingsInner({
               padding: "6px 8px",
               fontFamily: "monospace",
               fontSize: "12px",
-              border: "1px solid rgba(128, 128, 128, 0.3)",
+              border: "1px solid var(--rzc-color-border-defined)",
               borderRadius: "4px",
               background: "transparent",
               color: "inherit",
@@ -185,13 +207,19 @@ function TxtSettingsInner({
           </button>
         </div>
         {testError && (
-          <div style={{ color: "#ef4444", fontSize: "11px", marginTop: "4px" }}>
+          <div
+            style={{
+              color: "var(--rzc-color-error-fill)",
+              fontSize: "11px",
+              marginTop: "4px",
+            }}
+          >
             {testError}
           </div>
         )}
         {testPreview && (
           <div style={{ fontSize: "12px", marginTop: "4px" }}>
-            <span style={{ color: "#22c55e" }}>
+            <span style={{ color: "var(--rzc-color-success-fill)" }}>
               {testPreview.count} matches found
             </span>
             {testPreview.samples.length > 0 && (
@@ -199,7 +227,7 @@ function TxtSettingsInner({
                 style={{
                   marginTop: "4px",
                   padding: "4px 8px",
-                  background: "rgba(128, 128, 128, 0.1)",
+                  background: "var(--rzc-color-surface-subtle)",
                   borderRadius: "4px",
                   fontFamily: "monospace",
                   fontSize: "11px",
@@ -220,7 +248,7 @@ function TxtSettingsInner({
       <div
         style={{
           padding: "8px",
-          background: "rgba(128, 128, 128, 0.05)",
+          background: "var(--rzc-color-surface-sunken)",
           borderRadius: "4px",
           fontSize: "12px",
           marginBottom: "8px",

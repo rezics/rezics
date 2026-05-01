@@ -89,7 +89,7 @@ export function TocPanel() {
           display: "flex",
           gap: "8px",
           padding: "8px 12px",
-          borderBottom: "1px solid rgba(128, 128, 128, 0.2)",
+          borderBottom: "1px solid var(--rzc-color-border-whisper)",
         }}
       >
         <button
@@ -135,9 +135,19 @@ export function TocPanel() {
                   font: "inherit",
                 }}
               >
-                <span style={{ fontSize: "10px" }}>
-                  {isCollapsed ? "▶" : "▼"}
-                </span>
+                <span
+                  aria-hidden
+                  style={{
+                    display: "inline-block",
+                    width: 0,
+                    height: 0,
+                    borderTop: "4px solid transparent",
+                    borderBottom: "4px solid transparent",
+                    borderLeft: "5px solid currentColor",
+                    transform: isCollapsed ? undefined : "rotate(90deg)",
+                    transition: "transform 120ms ease-out",
+                  }}
+                />
                 {entry.node.title}
               </button>
             );

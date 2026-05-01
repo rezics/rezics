@@ -12,8 +12,8 @@ const LinkWithIcon = styled(Box)(({ theme }) => ({
   "& .arrow-icon": {
     fontWeight: 900,
     marginLeft: "0.125rem",
-    lineHeight: "1",
-    fontSize: "24px", // 让 size 从 props 控制
+    lineHeight: 1.3,
+    fontSize: "24px",
     color: "var(--color-on-base)",
     transition:
       "color var(--default-transition-duration) var(--ease-out), transform var(--default-transition-duration) var(--ease-out)",
