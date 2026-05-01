@@ -53,6 +53,7 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "mocks",
   "layouts",
   "assets",
+  "tokens",
   "docs",
   "templates",
   "parts",
@@ -376,7 +377,7 @@ function scanRawAnchors(tsxFiles: string[]): Violation[] {
 
     const lines = content.split("\n");
     for (let i = 0; i < lines.length; i++) {
-      if (RAW_ANCHOR_PATTERN.test(lines[i])) {
+      if (RAW_ANCHOR_PATTERN.test(lines[i]!)) {
         violations.push({
           rule: "R5",
           path: `${relPath}:${i + 1}`,
@@ -419,7 +420,7 @@ function scanInlineQueryKeys(candidateFiles: string[]): Violation[] {
     const relPath = relative(REPO_ROOT, filePath);
     const lines = content.split("\n");
     for (let i = 0; i < lines.length; i++) {
-      if (INLINE_QUERY_KEY_PATTERN.test(lines[i])) {
+      if (INLINE_QUERY_KEY_PATTERN.test(lines[i]!)) {
         violations.push({
           rule: "R6",
           path: `${relPath}:${i + 1}`,
@@ -469,7 +470,7 @@ function scanPowerLawImports(candidateFiles: string[]): Violation[] {
     const relPath = relative(REPO_ROOT, filePath).replace(/\\/g, "/");
     const lines = content.split("\n");
     for (let i = 0; i < lines.length; i++) {
-      if (POWER_LAW_IMPORT_PATTERN.test(lines[i])) {
+      if (POWER_LAW_IMPORT_PATTERN.test(lines[i]!)) {
         violations.push({
           rule: "R7",
           path: `${relPath}:${i + 1}`,
@@ -598,10 +599,7 @@ function main() {
     for (const filePath of walkFilesByExtension(packagesRoot, /\.tsx$/)) {
       tsxFiles.push(filePath);
     }
-    for (const filePath of walkFilesByExtension(
-      packagesRoot,
-      /\.(ts|tsx)$/,
-    )) {
+    for (const filePath of walkFilesByExtension(packagesRoot, /\.(ts|tsx)$/)) {
       tsAndTsxFiles.push(filePath);
     }
   }
