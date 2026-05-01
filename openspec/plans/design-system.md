@@ -1,0 +1,216 @@
+# Design System — Implementation Plan
+
+**Status**: Active plan
+**Date**: 2026-05-01
+**Scope**: Establish a unified, AI- and human-consumable design system for rezics, codified across `@rezics/ui` tokens, a Claude Code skill, and a multi-package Storybook documentation site.
+
+---
+
+## 1. Context & Motivation
+
+Rezics is functionally mature but visually inconsistent. There is no single source of truth for design language — color palettes, typography scale, spacing, density, motion, and pattern usage are decided ad-hoc per surface. This produces:
+
+- **Drift across surfaces** (`@rezics/app`, `@rezics/admin`, `@rezics/editor`, `@rezics/folio`).
+- **No reference for AI agents** generating UI; every session reinvents taste.
+- **No reference for human designers/developers** beyond reading existing components.
+- **Tribal preferences** (Apple-inspired, MUI-first, borderless, no-emoji-icons) that live only in chat memory, not in artifacts.
+
+The fix is not "more components." Rezics already has `@rezics/ui` with primitive / composite / shadcn layers, MUI 7, Radix, UnoCSS, and React Cosmos. The fix is **codifying the design language** so that all surfaces and all future contributors (human and AI) draw from the same well.
+
+This plan uses `nexu-io/open-design` (a local AI-design tool that bundles 72 reference design systems from brands like Linear, Stripe, Apple, Notion) **as a study source**, not as a runtime dependency. We extract patterns from its bundled reference systems, calibrate to rezics's existing aesthetic preferences, and codify the result.
+
+---
+
+## 2. Architecture
+
+**Single source of truth: code.**
+- `package/ui/src/config/tokens/*.ts` — color, typography, spacing, radius, elevation, motion.
+- `package/ui/src/config/mui-theme.ts` — MUI theme derived from tokens.
+- `package/ui/src/config/uno-config.ts` — UnoCSS preset wired to tokens.
+- `package/ui/src/shared/style/layers.css` — CSS custom properties.
+
+**Three projections of that truth:**
+
+| Projection | Audience | Artifact |
+| --- | --- | --- |
+| **AI** | Claude Code agents | `.claude/skills/rezics-design/` skill |
+| **Human (interactive)** | Designers, developers | Storybook composition site |
+| **Human (in-editor)** | Developers writing code | `CLAUDE.md` UI Conventions anchor pointing to skill |
+
+**Storybook Composition (multi-package + independent):**
+- One Storybook per UI-producing package: `ui`, `app`, `editor`, `folio`, `admin` (5 total).
+- Each runs standalone (`bun -F @rezics/<pkg> storybook`) — supports independent publishing of `editor`/`folio`/etc.
+- A root-level host Storybook aggregates all five via `refs` for a single unified site.
+- Shared decorators / framework config extracted to `package/storybook-config/` to avoid 5× duplication.
+
+**OpenSpec is not used** for design system authoring. Specs are repo contracts validated by `check:convention`; design is reference knowledge consumed on demand.
+
+**Reference material** is cloned outside the repo:
+- `../example/open-design` (sibling to rezics, not git-tracked, not committed). Used only during Phase 2 analysis.
+
+---
+
+## 3. Goals & Non-Goals
+
+### 3.1 In scope
+- Design tokens (color, typography, spacing, radius, elevation, motion) as TypeScript constants.
+- MUI theme + UnoCSS preset derived from tokens.
+- `.claude/skills/rezics-design/` skill encoding design rules, voice, MUI-vs-shadcn boundaries, do/don't patterns.
+- Storybook composition site replacing React Cosmos.
+- Token galleries (color swatches, type scale, spacing scale) as MDX stories.
+- Migration of existing components to use new tokens / theme.
+
+### 3.2 Out of scope (v1)
+- Figma library / design tool exports.
+- Cross-repo distribution (npm publish of skill or tokens). Defer until external rezics repos materialize.
+- Visual regression CI (Chromatic, Percy). Defer.
+- Internationalization of design language docs (skill is English; cosmetic strings are not).
+
+---
+
+## 4. Phases & Tasks
+
+Each task has an ID, an action, and acceptance criteria. Mark complete only when the criteria are demonstrably met.
+
+### Phase 1 — Setup & Bootstrap
+
+- [ ] **T1.1** Clone `nexu-io/open-design` to `../example/open-design`.
+  - **Accept**: `../example/open-design/.git` exists; `README.md` readable; clone is shallow (`--depth=1`) to save space.
+- [ ] **T1.2** Survey open-design top-level structure to locate the 72 design systems' definitions.
+  - **Accept**: Path to design-system inventory recorded in `openspec/plans/design-system-research/00-inventory.md`.
+- [ ] **T1.3** Create research scratch directory.
+  - **Accept**: `openspec/plans/design-system-research/` exists with `README.md` noting transient status.
+
+### Phase 2 — Analyze open-design (semi-auto, with review gate)
+
+- [ ] **T2.1** Sub-agent extracts token shape across all 72 systems (color scale depth, type ramp size, spacing units, radius scale, motion curves).
+  - **Accept**: `02-token-shape-survey.md` summarizes statistical commonalities (e.g., "85% use 11-step color scales").
+- [ ] **T2.2** Sub-agent shortlists 3–5 reference systems matching rezics preferences (Apple-inspired, MUI-first, borderless, content-dense, no emoji icons).
+  - **Accept**: `03-reference-shortlist.md` names candidates with one-paragraph rationale each + a token snapshot per candidate.
+- [ ] **T2.3** Author **rezics design direction brief**.
+  - **Accept**: `04-rezics-direction-brief.md` covers brand attributes, primary palette concept, typography family direction, density, motion personality, dark/light strategy.
+- [ ] **🚦 GATE-A** User reviews `04-rezics-direction-brief.md` and approves direction (or requests revisions).
+
+### Phase 3 — Codify Design Tokens
+
+- [ ] **T3.1** Author `package/ui/src/config/tokens/colors.ts` (semantic + scale).
+  - **Accept**: Exports light + dark mode token maps; types check; consumed by smoke-test component.
+- [ ] **T3.2** Author `package/ui/src/config/tokens/typography.ts` (families, scale, weights, line-heights, tracking).
+  - **Accept**: Same as above.
+- [ ] **T3.3** Author `package/ui/src/config/tokens/spacing.ts` (base unit + scale).
+- [ ] **T3.4** Author `package/ui/src/config/tokens/radius.ts`.
+- [ ] **T3.5** Author `package/ui/src/config/tokens/elevation.ts` (shadows).
+- [ ] **T3.6** Author `package/ui/src/config/tokens/motion.ts` (durations, easings).
+- [ ] **T3.7** Aggregate barrel: `package/ui/src/config/tokens/index.ts`.
+- [ ] **T3.8** Author `package/ui/src/config/mui-theme.ts` deriving MUI `createTheme()` from tokens (light + dark variants).
+  - **Accept**: A demo component using `useTheme()` renders with token-derived palette.
+- [ ] **T3.9** Wire tokens into `package/ui/src/config/uno-config.ts` (custom theme extension).
+  - **Accept**: An UnoCSS class like `bg-brand-primary` resolves to a token color.
+- [ ] **T3.10** Inject CSS custom properties via `package/ui/src/shared/style/layers.css`.
+  - **Accept**: `--rezics-color-bg` etc. resolvable in browser devtools.
+- [ ] **T3.11** Smoke-test theme in `@rezics/app` dev server.
+  - **Accept**: App boots; existing pages do not visually regress catastrophically (allowed: cosmetic drift to be addressed in Phase 8).
+
+### Phase 4 — Author Claude Skill
+
+- [ ] **T4.1** Create `.claude/skills/rezics-design/SKILL.md` (entry: trigger conditions, top-level rules summary).
+  - **Accept**: Skill loads when Claude is asked to build/modify UI; lists do/don't summary; references sub-files.
+- [ ] **T4.2** Create `.claude/skills/rezics-design/voice.md` — design language description (mood, density, tone).
+- [ ] **T4.3** Create `.claude/skills/rezics-design/tokens.md` — token reference cheatsheet, names + when to use.
+- [ ] **T4.4** Create `.claude/skills/rezics-design/patterns.md` — concrete do/don't with code snippets, including known don'ts (emoji icons, bordered section cards, raw `<a href>`).
+- [ ] **T4.5** Create `.claude/skills/rezics-design/mui-vs-shadcn.md` — decision tree for component selection.
+- [ ] **T4.6** Add `## UI Work` section to `CLAUDE.md` pointing to the skill and Storybook host.
+  - **Accept**: New section is < 10 lines; no design rules duplicated (only pointers).
+
+### Phase 5 — Storybook Spike (go/no-go)
+
+- [ ] **T5.1** Verify Storybook 9 + Vite 8 + React 19 compatibility matrix (release notes / GitHub issues).
+  - **Accept**: A go/no-go note in `openspec/plans/design-system-research/05-storybook-spike.md`.
+- [ ] **T5.2** Add minimal `package/ui/.storybook/{main.ts,preview.tsx}` + 1 demo story.
+  - **Accept**: `bun -F @rezics/ui storybook` boots on port 6001; demo story renders.
+- [ ] **T5.3** Wire UnoCSS preset + MUI ThemeProvider in `preview.tsx`.
+  - **Accept**: Demo story shows tokens applied (color, typography, spacing visible).
+- [ ] **T5.4** Add minimal `package/editor/.storybook/` + 1 demo story.
+  - **Accept**: `bun -F @rezics/editor storybook` boots on port 6002.
+- [ ] **T5.5** Add root-level `.storybook/main.ts` with `refs` pointing to ui + editor.
+  - **Accept**: Root Storybook boots on port 6000; sidebar shows UI and Editor groups; iframe live previews work.
+- [ ] **T5.6** Validate `storybook build` for both packages and host produces deployable static dist.
+  - **Accept**: `dist/` directories present; opening host `dist/index.html` after a static serve shows aggregated sidebar.
+- [ ] **🚦 GATE-B** User reviews spike outcome. Decide: full migration (Phase 6/7) or fall back (revise plan).
+
+### Phase 6 — Storybook Build-Out
+
+- [ ] **T6.1** Extract shared config to `package/storybook-config/`.
+  - **Accept**: `main-base.ts`, `preview-base.tsx` exported; ui + editor refactored to consume.
+- [ ] **T6.2** Add Storybook to `@rezics/app` (port 6003).
+- [ ] **T6.3** Add Storybook to `@rezics/folio` (port 6004).
+- [ ] **T6.4** Add Storybook to `@rezics/admin` (port 6005).
+- [ ] **T6.5** Update root `.storybook/main.ts` refs to include all 5 packages.
+- [ ] **T6.6** Add root scripts: `bun storybook` (concurrently runs all + host) and `bun storybook:build` (builds all + host).
+- [ ] **T6.7** Document port convention in `CONTRIBUTING.md`.
+
+### Phase 7 — Token Galleries & Design Docs (MDX)
+
+- [ ] **T7.1** Author `package/ui/src/docs/tokens/colors.mdx` rendering all color tokens as swatches.
+- [ ] **T7.2** Author `package/ui/src/docs/tokens/typography.mdx` rendering type scale.
+- [ ] **T7.3** Author `package/ui/src/docs/tokens/spacing.mdx` rendering spacing scale.
+- [ ] **T7.4** Author `package/ui/src/docs/tokens/radius.mdx`, `elevation.mdx`, `motion.mdx`.
+- [ ] **T7.5** Author `package/ui/src/docs/voice.mdx` — design language for human readers (mirrors skill voice.md).
+- [ ] **T7.6** Author `package/ui/src/docs/patterns.mdx` — do/don't gallery.
+
+### Phase 8 — Cosmos Retirement
+
+- [ ] **T8.1** Inventory existing Cosmos fixtures across `package/ui` (and any other package using Cosmos).
+  - **Accept**: `openspec/plans/design-system-research/08-cosmos-fixture-inventory.md`.
+- [ ] **T8.2** Migrate each fixture to a Storybook story (mechanical).
+  - **Accept**: Per-package PRs; each fixture has a story counterpart.
+- [ ] **T8.3** Remove `react-cosmos`, `react-cosmos-plugin-vite` from `package/ui/package.json`.
+- [ ] **T8.4** Delete `cosmos.config.json`, `cosmos.decorator.tsx`.
+- [ ] **🚦 GATE-C** Final user check: Storybook covers everything Cosmos did before deletion.
+
+### Phase 9 — Adoption Audits (per package)
+
+- [ ] **T9.1** Audit `@rezics/app` against tokens; open PR replacing hardcoded values.
+- [ ] **T9.2** Audit `@rezics/admin`.
+- [ ] **T9.3** Audit `@rezics/editor`.
+- [ ] **T9.4** Audit `@rezics/folio`.
+- [ ] **T9.5** Audit `@rezics/ui` internal components.
+
+---
+
+## 5. Open Decisions
+
+- **D1** — Storybook 9 + Vite 8 + React 19 compatibility. Resolved by T5.1 spike.
+- **D2** — Whether to publish skill / tokens to npm for external rezics repos. **Deferred** until external repos exist.
+- **D3** — Visual regression CI (Chromatic). **Deferred** to v2.
+- **D4** — Whether `@rezics/storybook-config` should live in `package/` or be a standalone tool. **Default**: `package/storybook-config/` (workspace-internal).
+
+---
+
+## 6. Risks
+
+| Risk | Likelihood | Mitigation |
+| --- | --- | --- |
+| Storybook 9 + Vite 8 + UnoCSS incompatibility | Medium | Phase 5 spike before any migration; fallback = stay on Cosmos and add MDX docs in `package/app` route. |
+| open-design's 72 systems are wrapped in non-machine-readable formats | Medium | Sub-agent reports back at T2.1; if blocked, fall back to manual sampling of top 5 candidate brands. |
+| Token migration breaks existing visual surfaces | Medium-High | Smoke-test in T3.11; full audits gated to Phase 9 (post-Storybook). |
+| Multi-Storybook concurrent dev too slow | Low | Document selective `bun -F <pkg> storybook` usage; only host needs all running. |
+| Skill drift over time without enforcement | Medium | Cosmos has no enforcement either; mitigation = quarterly review (`/loop` audit agent), not this plan. |
+
+---
+
+## 7. References
+
+- `nexu-io/open-design` — https://github.com/nexu-io/open-design
+- Existing UI package: `package/ui/`
+- Existing convention specs: `openspec/specs/api-route-conventions/`, `openspec/specs/outbound-link-protection/`
+- Existing user feedback memories (in `~/.claude/projects/.../memory/`): admin role, UI library priority, UI design style, MOCK convention.
+
+---
+
+## 8. Workflow Reminders
+
+- This is a **task-heavy plan**, not a complex one. Progress is measured by ticked boxes.
+- Three review gates require user approval; do not skip them.
+- Research outputs in `openspec/plans/design-system-research/` are transient — may be deleted after the plan completes.
+- Each phase can be executed in a separate session; this plan is the durable handoff.
