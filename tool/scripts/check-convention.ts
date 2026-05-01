@@ -58,7 +58,15 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "templates",
   "parts",
   "forms",
+  "kinds",
+  "presets",
 ]);
+
+// Singular domain folder names that are permitted even when their plural form
+// is on PLURAL_CONTAINER_ALLOWLIST, because the two carry distinct semantics.
+// Example: `token/` is the JWT/auth-token domain; `tokens/` is the design-token
+// container. Both must coexist.
+const SINGULAR_DOMAIN_EXCEPTIONS = new Set(["token"]);
 
 const ROUTE_PREFIX_ALLOWLIST = new Set([
   "stats",
@@ -330,6 +338,7 @@ function scanFolders(directoryPaths: string[]): Violation[] {
 
     const folderName = basename(dirPath);
     if (PLURAL_CONTAINER_ALLOWLIST.has(folderName)) continue;
+    if (SINGULAR_DOMAIN_EXCEPTIONS.has(folderName)) continue;
 
     if (isLikelyPlural(folderName)) {
       violations.push({

@@ -16,7 +16,7 @@ All folders representing a domain, feature, sub-feature, or bounded context SHAL
 - **THEN** the convention check passes because the head noun is singular
 
 ### Requirement: Container folders use plural from a fixed allowlist
-Folders that contain multiple same-kind files SHALL use plural names drawn from a fixed allowlist. The allowlist is: `hooks`, `utils`, `components`, `pages`, `sections`, `states`, `models`, `types`, `routes`, `handlers`, `providers`, `plugins`, `styles`, `helpers`, `constants`, `fixtures`, `mocks`, `layouts`, `assets`, `docs`, `templates`, `parts`, `forms`. Folders outside this allowlist SHALL be singular per the preceding requirement.
+Folders that contain multiple same-kind files SHALL use plural names drawn from a fixed allowlist. The allowlist is: `hooks`, `utils`, `components`, `pages`, `sections`, `states`, `models`, `types`, `routes`, `handlers`, `providers`, `plugins`, `styles`, `helpers`, `constants`, `fixtures`, `mocks`, `layouts`, `assets`, `tokens`, `docs`, `templates`, `parts`, `forms`, `kinds`, `presets`. Folders outside this allowlist SHALL be singular per the preceding requirement.
 
 #### Scenario: Allowlisted plural container passes
 - **WHEN** a developer creates `package/app/src/book-library/hooks/`
@@ -33,6 +33,18 @@ Folders that contain multiple same-kind files SHALL use plural names drawn from 
 #### Scenario: `util` vs `utils`
 - **WHEN** a developer creates `package/app/src/search/util/`
 - **THEN** the convention check fails and requires renaming to `utils/`
+
+### Requirement: Singular domain names with semantically distinct plural containers are permitted
+A small allowlist of singular domain folder names SHALL be permitted even when their plural form is on the plural-container allowlist, because the two names carry distinct semantics (one is a domain/feature folder; the other is a container of same-kind files). The current singular-domain exception set is: `token`. Adding to this set requires a spec amendment, just like adding to the plural-container allowlist.
+
+#### Scenario: `token` domain folder coexists with `tokens` container
+- **WHEN** a developer creates `package/server/src/token/` containing `token.api.ts`, `token.service.ts`, etc. (the JWT/auth-token domain)
+- **AND** the codebase also has `package/ui/src/config/tokens/` (the design-token container)
+- **THEN** both pass the convention check, because `token` is on the singular-domain exception list and `tokens` is on the plural-container allowlist
+
+#### Scenario: Other singulars are not auto-exempted
+- **WHEN** a developer creates `package/app/src/hook/` (singular form of allowlisted `hooks`)
+- **THEN** the convention check fails per the preceding requirement; `hook` is not on the singular-domain exception list, so it must be renamed to `hooks/`
 
 ### Requirement: Generated and vendored folders are exempt
 Folders produced by code generators or vendored from third-party sources SHALL be exempt from this spec. The exemption set is: `**/prisma/generated/**`, `**/node_modules/**`, `**/dist/**`, `**/build/**`, `**/.output/**`, `**/.next/**`, `**/.vite/**`, `**/coverage/**`.
