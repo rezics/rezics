@@ -1,13 +1,3 @@
-import react from "@vitejs/plugin-react";
-import UnoCSS from "unocss/vite";
-import { defineConfig } from "vite";
+import { baseStorybookViteConfig } from "@rezics/storybook-config";
 
-export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
-  plugins: [UnoCSS(), react()],
-  define: {
-    "process.env": {},
-  },
-});
+export default baseStorybookViteConfig();

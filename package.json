@@ -1,6 +1,7 @@
 {
   "name": "rezics-book-library",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "cd tool && bun run dev-script/dev.ts",
     "prisma:regenerate": "cd tool && bun run dev-script/prisma-regenerate.ts",
@@ -30,6 +31,7 @@
   ],
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
+    "@rezics/storybook-config": "workspace:*",
     "@storybook/react-vite": "^10.3.6",
     "babel-plugin-react-compiler": "^1.0.0",
     "concurrently": "^9",

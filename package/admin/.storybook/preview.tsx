@@ -1,54 +1,18 @@
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { StyledEngineProvider } from "@mui/material/styles";
+import {
+  basePreviewParameters,
+  themeGlobalTypes,
+  withRezicsTheme,
+} from "@rezics/storybook-config/preview";
 import { getTheme } from "@rezics/ui";
-import type { Decorator, Preview } from "@storybook/react-vite";
-import { useEffect } from "react";
+import type { Preview } from "@storybook/react-vite";
 
 import "virtual:uno.css";
-
-type ThemeMode = "light" | "dark";
-
-const withRezicsTheme: Decorator = (Story, context) => {
-  const mode = (context.globals.themeMode ?? "light") as ThemeMode;
-  const theme = getTheme(mode);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.dataset.theme = mode;
-    root.classList.toggle("dark", mode === "dark");
-  }, [mode]);
-
-  return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Story />
-      </ThemeProvider>
-    </StyledEngineProvider>
-  );
-};
+import "@rezics/ui/shared/styles/layers.css";
 
 const preview: Preview = {
-  globalTypes: {
-    themeMode: {
-      name: "Mode",
-      description: "Theme mode (light/dark)",
-      defaultValue: "light",
-      toolbar: {
-        icon: "circlehollow",
-        items: [
-          { value: "light", title: "Light", icon: "sun" },
-          { value: "dark", title: "Dark", icon: "moon" },
-        ],
-        dynamicTitle: true,
-      },
-    },
-  },
-  decorators: [withRezicsTheme],
-  parameters: {
-    layout: "padded",
-    controls: { expanded: true },
-  },
+  globalTypes: themeGlobalTypes,
+  decorators: [withRezicsTheme(getTheme, { canvas: "none" })],
+  parameters: basePreviewParameters,
 };
 
 export default preview;

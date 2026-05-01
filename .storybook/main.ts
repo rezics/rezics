@@ -1,15 +1,7 @@
-import type { StorybookConfig } from "@storybook/react-vite";
+import { baseStorybookConfig } from "@rezics/storybook-config";
 
-const config: StorybookConfig = {
+export default baseStorybookConfig({
   stories: ["../.storybook-stories/**/*.stories.@(ts|tsx|mdx)"],
-  framework: {
-    name: "@storybook/react-vite",
-    options: {
-      builder: {
-        viteConfigPath: ".storybook/vite.config.ts",
-      },
-    },
-  },
   refs: {
     ui: {
       title: "UI · Foundation",
@@ -37,14 +29,4 @@ const config: StorybookConfig = {
       expanded: false,
     },
   },
-  addons: [],
-  core: {
-    disableTelemetry: true,
-  },
-  typescript: {
-    check: false,
-    reactDocgen: false,
-  },
-};
-
-export default config;
+});

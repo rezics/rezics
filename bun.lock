@@ -12,6 +12,7 @@
       },
       "devDependencies": {
         "@biomejs/biome": "^2.4.10",
+        "@rezics/storybook-config": "workspace:*",
         "@storybook/react-vite": "^10.3.6",
         "babel-plugin-react-compiler": "^1.0.0",
         "concurrently": "^9",
@@ -36,6 +37,7 @@
         "@rezics/api": "workspace:*",
         "@rezics/contract": "workspace:*",
         "@rezics/email": "workspace:*",
+        "@rezics/storybook-config": "workspace:*",
         "@rezics/ui": "workspace:*",
         "@tanstack/query-broadcast-client-experimental": "^5.96.2",
         "@tanstack/query-sync-storage-persister": "^5.96.2",
@@ -130,6 +132,7 @@
         "@rezics/contract": "workspace:*",
         "@rezics/editor": "workspace:*",
         "@rezics/icons": "^0.1.2",
+        "@rezics/storybook-config": "workspace:*",
         "@rezics/ui": "workspace:*",
         "@tabler/icons-react": "^3.40.0",
         "@tanstack/query-broadcast-client-experimental": "^5.96.2",
@@ -267,6 +270,7 @@
         "@lezer/highlight": "^1.2.3",
         "@lezer/markdown": "^1.6.3",
         "@rezics/contract": "workspace:*",
+        "@rezics/storybook-config": "workspace:*",
         "highlight.js": "^11.11.1",
         "lucide-react": "^0.474.0",
         "markdown-it": "^14.1.1",
@@ -306,6 +310,7 @@
       "name": "@rezics/folio",
       "version": "0.1.0",
       "dependencies": {
+        "@rezics/storybook-config": "workspace:*",
         "@use-gesture/react": "^10.3.1",
         "fast-xml-parser": "^5.2.3",
         "fflate": "^0.8.2",
@@ -319,6 +324,7 @@
         "react-cosmos": "^7.2.0",
         "react-cosmos-plugin-vite": "^7.2.0",
         "storybook": "^10.3.6",
+        "unocss": "^66.5.10",
       },
       "peerDependencies": {
         "@rezics/editor": "workspace:*",
@@ -457,6 +463,32 @@
         "@types/bun": "^1.3.11",
       },
     },
+    "package/storybook-config": {
+      "name": "@rezics/storybook-config",
+      "version": "1.0.0",
+      "devDependencies": {
+        "@mui/material": "7.3.1",
+        "@storybook/react-vite": "^10.3.6",
+        "@types/react": "^19.2.14",
+        "@vitejs/plugin-react": "^5.1.4",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4",
+        "unocss": "^66.5.10",
+        "vite": "^8.0.10",
+      },
+      "peerDependencies": {
+        "@mui/material": "^7",
+        "@storybook/react-vite": "^10",
+        "@vitejs/plugin-react": "^5 || ^6",
+        "react": "^19",
+        "react-dom": "^19",
+        "unocss": "^66",
+        "vite": "^8",
+      },
+      "optionalPeers": [
+        "unocss",
+      ],
+    },
     "package/ui": {
       "name": "@rezics/ui",
       "version": "1.0.50",
@@ -488,6 +520,7 @@
         "@rezics/contract": "workspace:*",
         "@rezics/editor": "workspace:*",
         "@rezics/server": "workspace:*",
+        "@rezics/storybook-config": "workspace:*",
         "@tanstack/react-router": "^1.168.10",
         "@tanstack/react-table": "^8.21.3",
         "browser-image-compression": "^2.0.2",
@@ -1434,6 +1467,8 @@
     "@rezics/server": ["@rezics/server@workspace:package/server"],
 
     "@rezics/shared": ["@rezics/shared@workspace:package/shared"],
+
+    "@rezics/storybook-config": ["@rezics/storybook-config@workspace:package/storybook-config"],
 
     "@rezics/ui": ["@rezics/ui@workspace:package/ui"],
 

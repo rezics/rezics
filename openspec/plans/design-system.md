@@ -143,8 +143,8 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 | 6010 | `@rezics/admin` | admin app |
 | 6011 | `@rezics/app` | main app |
 
-- [ ] **T6.1** Extract shared config to `package/storybook-config/`.
-  - **Accept**: `main-base.ts`, `preview-base.tsx` exported; ui + editor refactored to consume.
+- [x] **T6.1** Extract shared config to `package/storybook-config/`.
+  - **Done**: New workspace package `@rezics/storybook-config` with two entrypoints — `.` exports `baseStorybookConfig` + `baseStorybookViteConfig` (no JSX, safe for Storybook's node-side `main.ts` loader); `./preview` exports `withRezicsTheme(getTheme, { canvas })`, `themeGlobalTypes`, `basePreviewParameters`. UnoCSS is loaded via dynamic import and declared as an optional peer, so `editor` + `host` (which pass `{ uno: false }`) don't pull it. All 6 `.storybook/` shells reduced to thin wrappers (3-line `main.ts`, ~15-line `preview.tsx`, 3-line `vite.config.ts`). Latent bugs fixed in passing: folio + app preview now import `@rezics/ui/shared/styles/layers.css` (canvas `var(--rzc-*)` previously resolved to nothing); folio's vite config now actually loads the UnoCSS plugin its preview's `virtual:uno.css` import depended on. Root `package.json` gained `"type": "module"` so the host (root `.storybook/`) can import the ESM-only config package — verified no root-level `.js` files exist that would break (`tool/` is already its own type-module package). `bun run build-storybook` produces all 6 dists with exit 0; story counts unchanged from pre-refactor (1+4+2+1+1+1).
 - [x] **T6.2** Add Storybook to `@rezics/folio` (port 6009).
   - **Done**: `.storybook/` + `Folio.stories.tsx` (Placeholder reader). Build clean.
 - [x] **T6.3** Add Storybook to `@rezics/admin` (port 6010).

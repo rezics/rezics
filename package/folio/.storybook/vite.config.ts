@@ -1,12 +1,3 @@
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { baseStorybookViteConfig } from "@rezics/storybook-config";
 
-export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
-  plugins: [react()],
-  define: {
-    "process.env": {},
-  },
-});
+export default baseStorybookViteConfig();
