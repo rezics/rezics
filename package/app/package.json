@@ -7,7 +7,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "cosmos": "cosmos",
-    "cosmos-export": "cosmos-export"
+    "cosmos-export": "cosmos-export",
+    "storybook": "storybook dev -p 6011 --no-open",
+    "build-storybook": "storybook build -o storybook-static"
   },
   "exports": {
     "./*": {
@@ -92,6 +94,7 @@
     "zustand": "5.0.7"
   },
   "devDependencies": {
+    "@storybook/react-vite": "^10.3.6",
     "@tanstack/router-plugin": "^1.167.12",
     "@types/humanize-plus": "1.8.2",
     "@types/lodash": "4.17.20",
@@ -107,6 +110,7 @@
     "react-cosmos": "7.0.0",
     "react-cosmos-plugin-vite": "7.0.0",
     "rollup-plugin-visualizer": "^7.0.0",
+    "storybook": "^10.3.6",
     "typescript": "^6.0.3",
     "unocss": "^66.5.10",
     "unocss-preset-animations": "^1.3.0",

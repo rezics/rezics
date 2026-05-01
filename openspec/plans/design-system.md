@@ -145,12 +145,18 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 - [ ] **T6.1** Extract shared config to `package/storybook-config/`.
   - **Accept**: `main-base.ts`, `preview-base.tsx` exported; ui + editor refactored to consume.
-- [ ] **T6.2** Add Storybook to `@rezics/folio` (port 6009).
-- [ ] **T6.3** Add Storybook to `@rezics/admin` (port 6010).
-- [ ] **T6.4** Add Storybook to `@rezics/app` (port 6011).
-- [ ] **T6.5** Update root `.storybook/main.ts` refs to include all 5 packages.
-- [ ] **T6.6** Add root scripts: `bun storybook` (concurrently runs all + host) and `bun storybook:build` (builds all + host).
-- [ ] **T6.7** Document port convention in `CONTRIBUTING.md` (incl. the Chrome unsafe-ports note).
+- [x] **T6.2** Add Storybook to `@rezics/folio` (port 6009).
+  - **Done**: `.storybook/` + `Folio.stories.tsx` (Placeholder reader). Build clean.
+- [x] **T6.3** Add Storybook to `@rezics/admin` (port 6010).
+  - **Done**: `.storybook/` (with MUI theme + UnoCSS in `preview.tsx`) + `AdminDensity.stories.tsx` (Users table). Build clean.
+- [x] **T6.4** Add Storybook to `@rezics/app` (port 6011).
+  - **Done**: `.storybook/` (with MUI theme + UnoCSS + parchment canvas) + `AppSection.stories.tsx` (Recent Books). Build clean.
+- [x] **T6.5** Update root `.storybook/main.ts` refs to include all 5 packages.
+  - **Done**: Host now refs ui (6007), editor (6008), folio (6009), admin (6010), app (6011). Welcome story updated with port table.
+- [x] **T6.6** Add root scripts: `bun storybook` (concurrently runs all + host) and `bun storybook:build` (builds all + host).
+  - **Done**: `concurrently@^9` orchestrates `storybook:all` / `build-storybook:all` with color-prefixed labels for host/ui/editor/folio/admin/app. Validated end-to-end via `bun run build-storybook` (all 6 dists built, exit 0).
+- [x] **T6.7** Document port convention in `CONTRIBUTING.md` (incl. the Chrome unsafe-ports note).
+  - **Done**: New `## Storybook` section with 6-row port table, Chrome unsafe-ports footnote (`:6000`, `:6566`, `:6665–6669`, `:6697`), and run instructions.
 
 ### Phase 7 — Token Galleries & Design Docs (MDX)
 

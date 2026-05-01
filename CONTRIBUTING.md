@@ -94,6 +94,31 @@ The retired `SEED_*` env vars (e.g. `SEED_PROFILE=fast`) no longer have any effe
 
 This project uses **OpenSpec** for non-trivial changes. See `CLAUDE.md` for workflow commands.
 
+## Storybook
+
+The design system is documented across **five package-owned Storybooks** plus an aggregating host. Each publishable surface owns its Storybook so the package can ship standalone.
+
+### Port assignments
+
+| Port | Instance | Owner |
+| ---- | -------- | ----- |
+| 6006 | host | root `.storybook/` (refs the rest) |
+| 6007 | UI · Foundation | `@rezics/ui` |
+| 6008 | Editor · CodeMirror | `@rezics/editor` |
+| 6009 | Folio · Reader | `@rezics/folio` |
+| 6010 | Admin | `@rezics/admin` |
+| 6011 | App | `@rezics/app` |
+
+> **Chrome unsafe ports.** Don't reassign to `:6000` (X11 — `ERR_UNSAFE_PORT`), `:6566`, `:6665–6669`, or `:6697`. Storybook's own default `:6006` is what we use for the host.
+
+### Running
+
+- `bun run storybook` — boots all six instances concurrently (color-prefixed output via `concurrently`).
+- `bun run build-storybook` — builds all six static dists concurrently.
+- `bun run storybook:host` / `bun --cwd package/<name> run storybook` — boot one at a time.
+
+The host on `:6006` aggregates the others via `refs`, so visiting a single URL is enough once the per-package instances are up.
+
 ## Code Style
 
 - **Formatter:** Prettier (2 spaces, single quotes, trailing commas)

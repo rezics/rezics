@@ -12,7 +12,9 @@
   "scripts": {
     "test": "bun test",
     "dev": "bun run --watch src/index.ts",
-    "cosmos": "cosmos"
+    "cosmos": "cosmos",
+    "storybook": "storybook dev -p 6009 --no-open",
+    "build-storybook": "storybook build -o storybook-static"
   },
   "dependencies": {
     "@use-gesture/react": "^10.3.1",
@@ -26,11 +28,13 @@
     "@rezics/ui": "workspace:*"
   },
   "devDependencies": {
+    "@storybook/react-vite": "^10.3.6",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "bun-types": "latest",
     "react-cosmos": "^7.2.0",
-    "react-cosmos-plugin-vite": "^7.2.0"
+    "react-cosmos-plugin-vite": "^7.2.0",
+    "storybook": "^10.3.6"
   }
 }

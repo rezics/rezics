@@ -21,6 +21,21 @@ const config: StorybookConfig = {
       url: "http://localhost:6008",
       expanded: true,
     },
+    folio: {
+      title: "Folio · Reader",
+      url: "http://localhost:6009",
+      expanded: false,
+    },
+    admin: {
+      title: "Admin",
+      url: "http://localhost:6010",
+      expanded: false,
+    },
+    app: {
+      title: "App",
+      url: "http://localhost:6011",
+      expanded: false,
+    },
   },
   addons: [],
   core: {

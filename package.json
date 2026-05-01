@@ -15,8 +15,12 @@
     "check": "biome check --write .",
     "check:convention": "bun run tool/scripts/check-convention.ts",
     "knip": "knip",
-    "storybook": "storybook dev -p 6006 --no-open",
-    "build-storybook": "storybook build -o storybook-static",
+    "storybook:host": "storybook dev -p 6006 --no-open",
+    "storybook:all": "concurrently -k -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run storybook:host\" \"bun --cwd package/ui run storybook\" \"bun --cwd package/editor run storybook\" \"bun --cwd package/folio run storybook\" \"bun --cwd package/admin run storybook\" \"bun --cwd package/app run storybook\"",
+    "storybook": "bun run storybook:all",
+    "build-storybook:host": "storybook build -o storybook-static",
+    "build-storybook:all": "concurrently -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run build-storybook:host\" \"bun --cwd package/ui run build-storybook\" \"bun --cwd package/editor run build-storybook\" \"bun --cwd package/folio run build-storybook\" \"bun --cwd package/admin run build-storybook\" \"bun --cwd package/app run build-storybook\"",
+    "build-storybook": "bun run build-storybook:all",
     "postinstall": "lefthook install || true"
   },
   "workspaces": [
@@ -26,6 +30,7 @@
     "@biomejs/biome": "^2.4.10",
     "@storybook/react-vite": "^10.3.6",
     "babel-plugin-react-compiler": "^1.0.0",
+    "concurrently": "^9",
     "knip": "^5.85.0",
     "lefthook": "^2.1.6",
     "react": "^19.2.4",
