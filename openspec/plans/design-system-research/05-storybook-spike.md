@@ -169,21 +169,79 @@ But while developing without a build step, when one package's storybook (e.g. `@
 
 Note that the consumer's own application Vite config doesn't hit this because it runs `resolve: { tsconfigPaths: true }`, which Vite 8 supports natively — but Storybook builds its own Vite instance and that flag isn't set.
 
-**Fix.** Add `vite-tsconfig-paths` plugin to every storybook's vite config. With no `projects` argument it crawls from the workspace root, picks up every package's tsconfig, and matches each source file to its nearest tsconfig — so `@/` inside `package/ui/src/...` resolves via ui's tsconfig, while `@/` inside `package/app/src/...` resolves via app's. The aliases coexist because resolution is anchored to the source file's location.
+**Fix.** Vite 8 ships built-in tsconfig paths resolution. Set `resolve: { tsconfigPaths: true }` in each storybook's vite config — it walks each source file up to its nearest tsconfig and applies that file's `paths` mapping. So `@/` inside `package/ui/src/...` resolves via ui's tsconfig, while `@/` inside `package/app/src/...` resolves via app's. The aliases coexist because resolution is anchored to the source file's location.
 
 ```ts
 // e.g. package/app/.storybook/vite.config.ts
-import tsconfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [
-    tsconfigPaths({ ignoreConfigErrors: true }),
-    UnoCSS(),
-    react(),
-  ],
+  resolve: { tsconfigPaths: true },
+  plugins: [UnoCSS(), react()],
 });
 ```
 
-`ignoreConfigErrors: true` silences `TSConfckParseError` warnings that fire on broken `extends:"../tsconfig.json"` references inside `node_modules` (Bun's install cache holds a number of `@aws-crypto/*` packages that ship malformed tsconfigs). The errors are advisory and don't break resolution.
+(We initially reached for the `vite-tsconfig-paths` plugin and it worked — but Vite emits a runtime hint that the same is now built-in. Built-in is one less dep and one less warning source.)
 
 Verified: all 6 instances boot, all `iframe.html` endpoints return 200, admin and app stories that pull in `@rezics/ui` (which uses `@/shadcn/*` and `@/shared/lib/utils`) compile and render with no resolution errors.
+
+---
+
+## Output orchestration
+
+Default `concurrently` output for 6 storybooks is unreadable: each instance prints a multi-line ANSI box-drawing "Storybook ready!" banner, each line gets a `[host] @rezics/ui storybook: │ │` triple-prefix, and 6 simultaneous boots interleave. The host URL gets buried.
+
+**Fix — three pieces:**
+
+1. **Per-instance silence.** Pass `--quiet --loglevel error` to every storybook invocation. With both flags set, a successful boot prints nothing — only errors come through. Crucially this is set on the **root orchestration** call (`bun --filter='@rezics/<pkg>' run storybook -- --quiet --loglevel error`), not in each package's own `storybook` script. Standalone debug boots (`bun --filter='@rezics/admin' run storybook`) keep the verbose banner.
+
+2. **Custom ready-watcher.** `tool/scripts/storybook-banner.ts` polls each `:60xx/iframe.html` until 200, then prints one clean panel:
+
+   ```
+   ✓ rezics design system — all 6 storybooks ready
+
+     Host    http://localhost:6006/  ← open this
+     ui      http://localhost:6007/
+     editor  http://localhost:6008/
+     folio   http://localhost:6009/
+     admin   http://localhost:6010/
+     app     http://localhost:6011/
+   ```
+
+   Then awaits SIGINT indefinitely, so `concurrently -k`'s "kill on sibling exit" doesn't tear down the servers.
+
+3. **Wire as 7th task.** Add the banner script to `concurrently` alongside the 6 storybooks with prefix `info`. Keep `-k` — any *server* dying still kills the others, which is what we want; the banner doesn't exit on its own.
+
+Verified: `bun run storybook` produces ~12 lines of output total, banner prints ~5s after start with all URLs visible.
+
+---
+
+## Gotcha — Storybook 10.3.6 missing CORS header on `/project.json` (ref composition)
+
+When the host (`:6006`) loads a `refs` entry pointing at another Storybook (e.g. `http://localhost:6010`), the manager fetches:
+
+- `GET <ref>/index.json` — the story manifest
+- `GET <ref>/project.json` — instance metadata (Storybook version, framework, etc.)
+
+In Storybook **10.3.6** (`node_modules/storybook/dist/core-server/index.js`), the `/index.json` handler sets `Access-Control-Allow-Origin: *` (line 4680) but the `/project.json` handler does not (line 5688). The browser's CORS preflight rejects the second request and the manager surfaces a generic *"Loading of ref failed — it's possible a CORS error happened"* in the sidebar.
+
+It is not our config; it is a 2-line oversight in upstream `useStorybookMetadata`.
+
+**Fix.** Patch via `bun patch storybook`. The patch (`patches/storybook@10.3.6.patch`) adds the missing `setHeader` calls so `/project.json` mirrors `/index.json`'s CORS posture:
+
+```diff
+   app.use("/project.json", async (req, res) => {
+     let storybookMetadata = await getStorybookMetadata(configDir);
+-    res.setHeader("Content-Type", "application/json"), res.write(JSON.stringify(storybookMetadata)), res.end();
++    res.setHeader("Content-Type", "application/json"),
++      res.setHeader("Access-Control-Allow-Origin", "*"),
++      res.setHeader("Access-Control-Allow-Headers",
++        "Origin, X-Requested-With, Content-Type, Accept"),
++      res.write(JSON.stringify(storybookMetadata)),
++      res.end();
+   });
+```
+
+Bun applies the patch automatically on every `bun install`. Verified: `curl -I -H "Origin: http://localhost:6006" http://localhost:6010/project.json` now returns `Access-Control-Allow-Origin: *`.
+
+**Drop the patch when upstream fixes it.** When Storybook ships >10.3.6 with this resolved, remove `patches/storybook@10.3.6.patch` and the `patchedDependencies` entry. Worth filing an upstream bug at https://github.com/storybookjs/storybook so this doesn't linger.

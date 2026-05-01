@@ -16,7 +16,9 @@
     "check:convention": "bun run tool/scripts/check-convention.ts",
     "knip": "knip",
     "storybook:host": "storybook dev -p 6006 --no-open",
-    "storybook:all": "concurrently -k -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run storybook:host\" \"bun --filter='@rezics/ui' run storybook\" \"bun --filter='@rezics/editor' run storybook\" \"bun --filter='@rezics/folio' run storybook\" \"bun --filter='@rezics/admin' run storybook\" \"bun --filter='@rezics/app' run storybook\"",
+    "storybook:host:quiet": "storybook dev -p 6006 --no-open --quiet --loglevel error",
+    "storybook:banner": "bun run tool/scripts/storybook-banner.ts",
+    "storybook:all": "concurrently -k -n host,ui,editor,folio,admin,app,info -c blue,cyan,magenta,green,yellow,red,greenBright \"bun run storybook:host:quiet\" \"bun --filter='@rezics/ui' run storybook -- --quiet --loglevel error\" \"bun --filter='@rezics/editor' run storybook -- --quiet --loglevel error\" \"bun --filter='@rezics/folio' run storybook -- --quiet --loglevel error\" \"bun --filter='@rezics/admin' run storybook -- --quiet --loglevel error\" \"bun --filter='@rezics/app' run storybook -- --quiet --loglevel error\" \"bun run storybook:banner\"",
     "storybook": "bun run storybook:all",
     "build-storybook:host": "storybook build -o storybook-static",
     "build-storybook:all": "concurrently -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run build-storybook:host\" \"bun --filter='@rezics/ui' run build-storybook\" \"bun --filter='@rezics/editor' run build-storybook\" \"bun --filter='@rezics/folio' run build-storybook\" \"bun --filter='@rezics/admin' run build-storybook\" \"bun --filter='@rezics/app' run build-storybook\"",
@@ -36,13 +38,15 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "storybook": "^10.3.6",
-    "vite": "^8.0.10",
-    "vite-tsconfig-paths": "^6.1.1"
+    "vite": "^8.0.10"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",
     "@vitejs/plugin-react": "^5.1.4",
     "valibot": "^1.2.0",
     "better-result": "^2.7.0"
+  },
+  "patchedDependencies": {
+    "storybook@10.3.6": "patches/storybook@10.3.6.patch"
   }
 }
