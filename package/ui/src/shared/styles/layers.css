@@ -109,3 +109,175 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ================================================================
+ * rezics design tokens (Foundation v1)
+ * Source: openspec/plans/design-system-research/briefs/01-foundation-v1.md
+ * Mode switch: <html data-theme="dark"> (orthogonal to legacy .theme-rezics.dark)
+ * ================================================================ */
+
+:root {
+  /* Surfaces */
+  --rzc-color-surface-canvas: #f5f4ed;
+  --rzc-color-surface-base: #faf9f5;
+  --rzc-color-surface-elevated: #ffffff;
+  --rzc-color-surface-subtle: #ebeae5;
+  --rzc-color-surface-sunken: #e6e5e0;
+
+  /* Text */
+  --rzc-color-text-primary: #1d1d1f;
+  --rzc-color-text-secondary: #6e6e73;
+  --rzc-color-text-tertiary: #86868b;
+  --rzc-color-text-disabled: #c7c7cc;
+  --rzc-color-text-on-brand: #ffffff;
+  --rzc-color-text-brand: #c4433a;
+
+  /* Brand fill (mode-invariant) */
+  --rzc-color-brand-fill: #f4606c;
+  --rzc-color-brand-fill-hover: #e85666;
+  --rzc-color-brand-fill-active: #d94c5c;
+
+  /* Semantic — fill (UI element) */
+  --rzc-color-success-fill: #1f8a65;
+  --rzc-color-warning-fill: #b8732e;
+  --rzc-color-error-fill: #cf2d56;
+  --rzc-color-info-fill: #3898ec;
+
+  /* Semantic — text (AA-body verified) */
+  --rzc-color-success-text: #157352;
+  --rzc-color-warning-text: #8a5520;
+  --rzc-color-error-text: #cf2d56;
+  --rzc-color-info-text: #1565c0;
+
+  /* Borders */
+  --rzc-color-border-whisper: rgba(0, 0, 0, 0.08);
+  --rzc-color-border-defined: #d2d2d7;
+  --rzc-color-border-strong: #86868b;
+  --rzc-color-border-focus: #f4606c;
+  --rzc-color-border-error: #cf2d56;
+
+  /* Spacing (8px base) */
+  --rzc-space-0: 0;
+  --rzc-space-px: 1px;
+  --rzc-space-0_5: 2px;
+  --rzc-space-1: 4px;
+  --rzc-space-2: 8px;
+  --rzc-space-3: 12px;
+  --rzc-space-4: 16px;
+  --rzc-space-5: 24px;
+  --rzc-space-6: 32px;
+  --rzc-space-8: 48px;
+  --rzc-space-10: 64px;
+  --rzc-space-12: 96px;
+  --rzc-space-16: 128px;
+
+  /* Radius */
+  --rzc-radius-xs: 4px;
+  --rzc-radius-sm: 6px;
+  --rzc-radius-md: 8px;
+  --rzc-radius-lg: 12px;
+  --rzc-radius-xl: 16px;
+  --rzc-radius-2xl: 24px;
+  --rzc-radius-pill: 9999px;
+  --rzc-radius-full: 50%;
+
+  /* Motion — duration */
+  --rzc-motion-fast: 120ms;
+  --rzc-motion-base: 200ms;
+  --rzc-motion-slow: 350ms;
+  --rzc-motion-page: 500ms;
+
+  /* Motion — easing */
+  --rzc-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --rzc-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --rzc-ease-spring: cubic-bezier(0.4, 1.4, 0.5, 1);
+
+  /* Shadows (light) — borderless default; modal-tier only */
+  --rzc-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --rzc-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --rzc-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04),
+    0 16px 32px rgba(0, 0, 0, 0.06);
+  --rzc-shadow-modal: 0 1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04),
+    0 16px 32px rgba(0, 0, 0, 0.06);
+
+  /* Font families — see typography.ts; CJK var defaults to TC, swapped via :lang() */
+  --rzc-font-sans-cjk: "Source Han Sans TC", "Noto Sans TC";
+  --rzc-font-serif-cjk: "Source Han Serif TC", "Noto Serif TC";
+  --rzc-font-sans:
+    "Inter", "rzc-sans", var(--rzc-font-sans-cjk), system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --rzc-font-serif:
+    "Source Serif 4", "rzc-serif", var(--rzc-font-serif-cjk), Georgia, serif;
+  --rzc-font-mono:
+    "CaskaydiaMono Nerd Font", "Cascadia Code", "rzc-mono", "Sarasa Mono TC",
+    ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* Per-language CJK routing */
+:lang(zh-Hans), :lang(zh-CN) {
+  --rzc-font-sans-cjk: "Source Han Sans SC", "Noto Sans SC";
+  --rzc-font-serif-cjk: "Source Han Serif SC", "Noto Serif SC";
+}
+:lang(ja) {
+  --rzc-font-sans-cjk: "Source Han Sans JP", "Noto Sans JP";
+  --rzc-font-serif-cjk: "Source Han Serif JP", "Noto Serif JP";
+}
+:lang(ko) {
+  --rzc-font-sans-cjk: "Source Han Sans KR", "Noto Sans KR";
+  --rzc-font-serif-cjk: "Source Han Serif KR", "Noto Serif KR";
+}
+
+/* Dark mode — canonical: <html data-theme="dark">.
+ * `html.dark` accepted as transitional alias (current app shell sets this; cleanup tracked in Phase 9). */
+[data-theme="dark"],
+html.dark {
+  /* Surfaces */
+  --rzc-color-surface-canvas: #1a1a18;
+  --rzc-color-surface-base: #26251e;
+  --rzc-color-surface-elevated: #30302e;
+  --rzc-color-surface-subtle: #1f1e1c;
+  --rzc-color-surface-sunken: #141413;
+
+  /* Text */
+  --rzc-color-text-primary: #f0eee6;
+  --rzc-color-text-secondary: #a39e98;
+  --rzc-color-text-tertiary: #6e6c66;
+  --rzc-color-text-disabled: #48484a;
+  --rzc-color-text-on-brand: #ffffff;
+  --rzc-color-text-brand: #fa7882;
+
+  /* Semantic — text (dark variants) */
+  --rzc-color-success-text: #3da884;
+  --rzc-color-warning-text: #d8943e;
+  --rzc-color-error-text: #e34c75;
+  --rzc-color-info-text: #5aa9f0;
+
+  /* Borders */
+  --rzc-color-border-whisper: rgba(255, 255, 255, 0.1);
+  --rzc-color-border-defined: #3a3937;
+  --rzc-color-border-strong: #5a5856;
+  --rzc-color-border-focus: #fa7882;
+  --rzc-color-border-error: #e34c75;
+
+  /* Shadows scale up opacity in dark mode */
+  --rzc-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --rzc-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.24);
+  --rzc-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.24),
+    0 8px 16px rgba(0, 0, 0, 0.28), 0 16px 32px rgba(0, 0, 0, 0.36);
+  --rzc-shadow-modal: 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.28), 0 8px 16px rgba(0, 0, 0, 0.32),
+    0 16px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Reduced motion — strip all transitions and animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

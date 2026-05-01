@@ -4,117 +4,255 @@ import {
   type ThemeOptions,
 } from "@mui/material/styles";
 import { dynamicColorsToPalette, generateDynamicColors } from "./dynamicTheme";
+import { darkColors, lightColors, type ColorTokens } from "./tokens/colors";
+import {
+  fontFamilies,
+  fontSizes,
+  fontWeights,
+  lineHeights,
+} from "./tokens/typography";
+import { darkShadows, lightShadows } from "./tokens/elevation";
+import { duration, easing } from "./tokens/motion";
+import { SPACING_BASE_PX } from "./tokens/spacing";
+import { RADIUS_BASE_PX } from "./tokens/radius";
+
+const buildPalette = (
+  mode: "light" | "dark",
+  c: ColorTokens,
+  customColor?: string,
+): ThemeOptions["palette"] => ({
+  mode,
+  primary: {
+    main: customColor || c.brand.fill,
+    light: c.brand.textDark,
+    dark: c.brand.fillActive,
+    contrastText: c.text.onBrand,
+  },
+  secondary: {
+    main: c.semantic.info.fill,
+    light: c.semantic.info.textDark,
+    dark: c.semantic.info.textLight,
+    contrastText: "#ffffff",
+  },
+  success: {
+    main: c.semantic.success.fill,
+    light: c.semantic.success.textDark,
+    dark: c.semantic.success.textLight,
+    contrastText: "#ffffff",
+  },
+  warning: {
+    main: c.semantic.warning.fill,
+    light: c.semantic.warning.textDark,
+    dark: c.semantic.warning.textLight,
+    contrastText: "#ffffff",
+  },
+  error: {
+    main: c.semantic.error.fill,
+    light: c.semantic.error.textDark,
+    dark: c.semantic.error.textLight,
+    contrastText: "#ffffff",
+  },
+  info: {
+    main: c.semantic.info.fill,
+    light: c.semantic.info.textDark,
+    dark: c.semantic.info.textLight,
+    contrastText: "#ffffff",
+  },
+  background: {
+    default: c.surface.canvas,
+    paper: c.surface.base,
+  },
+  text: {
+    primary: c.text.primary,
+    secondary: c.text.secondary,
+    disabled: c.text.disabled,
+  },
+  divider: c.border.whisper,
+});
+
+const buildTypography = (): ThemeOptions["typography"] => ({
+  fontFamily: fontFamilies.sans,
+  fontWeightLight: fontWeights.regular,
+  fontWeightRegular: fontWeights.regular,
+  fontWeightMedium: fontWeights.medium,
+  fontWeightBold: fontWeights.semibold,
+  h1: {
+    fontSize: fontSizes["3xl"],
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.dense,
+    letterSpacing: "-0.01em",
+  },
+  h2: {
+    fontSize: fontSizes["2xl"],
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.dense,
+    letterSpacing: "-0.01em",
+  },
+  h3: {
+    fontSize: fontSizes.xl,
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.ui,
+  },
+  h4: {
+    fontSize: fontSizes.lg,
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.ui,
+  },
+  h5: {
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.ui,
+  },
+  h6: {
+    fontSize: fontSizes.base,
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.ui,
+  },
+  body1: {
+    fontSize: fontSizes.base,
+    fontWeight: fontWeights.regular,
+    lineHeight: lineHeights.body,
+  },
+  body2: {
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.regular,
+    lineHeight: lineHeights.body,
+  },
+  subtitle1: {
+    fontSize: fontSizes.md,
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.ui,
+  },
+  subtitle2: {
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.ui,
+  },
+  caption: {
+    fontSize: fontSizes.xs,
+    fontWeight: fontWeights.regular,
+    lineHeight: lineHeights.ui,
+  },
+  overline: {
+    fontSize: fontSizes.xs,
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.ui,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+  },
+  button: {
+    fontSize: fontSizes.sm,
+    fontWeight: fontWeights.medium,
+    lineHeight: lineHeights.ui,
+    textTransform: "none",
+  },
+});
+
+const buildShadows = (mode: "light" | "dark"): ThemeOptions["shadows"] => {
+  const s = mode === "dark" ? darkShadows : lightShadows;
+  // MUI shadows array is 25-long. Map our 4-tier scale across it; modal-tier (top) for high indices.
+  const mapped: string[] = ["none"];
+  for (let i = 1; i <= 24; i++) {
+    if (i <= 2) mapped.push(s[1]);
+    else if (i <= 6) mapped.push(s[2]);
+    else if (i <= 16) mapped.push(s[3]);
+    else mapped.push(s.modal);
+  }
+  return mapped as ThemeOptions["shadows"];
+};
 
 const getDesignTokens = (
   mode: "light" | "dark",
   customColor?: string,
-): ThemeOptions => ({
-  palette: {
-    mode,
-    ...(mode === "light"
-      ? {
-          primary: {
-            main: customColor || "#f4606c",
-            light: "rgba(244, 96, 108, 0.8)",
-            dark: "rgba(244, 96, 108, 1)",
-            contrastText: "#ffffff",
-          },
-          secondary: {
-            main: "#1976d2",
-            light: "rgba(25, 118, 210, 0.8)",
-            dark: "rgba(25, 118, 210, 1)",
-            contrastText: "#ffffff",
-          },
-          background: {
-            default: "#f5f5f5",
-            paper: "#ffffff",
-          },
-          text: {
-            primary: "rgba(0, 0, 0, 0.87)",
-            secondary: "rgba(0, 0, 0, 0.6)",
-            disabled: "rgba(0, 0, 0, 0.38)",
-          },
-        }
-      : {
-          primary: {
-            main: customColor || "#f4606c",
-            light: "rgba(244, 96, 108, 0.8)",
-            dark: "rgba(244, 96, 108, 1)",
-            contrastText: "#ffffff",
-          },
-          secondary: {
-            main: "#1976d2",
-            light: "rgba(25, 118, 210, 0.8)",
-            dark: "rgba(25, 118, 210, 1)",
-            contrastText: "#ffffff",
-          },
-          background: {
-            default: "#121212",
-            paper: "#1e1e1e",
-          },
-          text: {
-            primary: "#ffffff",
-            secondary: "rgba(255, 255, 255, 0.7)",
-            disabled: "rgba(255, 255, 255, 0.5)",
-          },
-        }),
-  },
+): ThemeOptions => {
+  const c = mode === "dark" ? darkColors : lightColors;
+  return {
+    palette: buildPalette(mode, c, customColor),
 
-  components: {
-    MuiLink: {
-      defaultProps: {
-        underline: "none",
+    typography: buildTypography(),
+
+    shadows: buildShadows(mode),
+
+    transitions: {
+      duration: {
+        shortest: parseInt(duration.fast),
+        shorter: parseInt(duration.base),
+        short: parseInt(duration.slow),
+        standard: parseInt(duration.page),
+        complex: 375,
+        enteringScreen: parseInt(duration.base),
+        leavingScreen: parseInt(duration.fast),
+      },
+      easing: {
+        easeInOut: easing.inOut,
+        easeOut: easing.out,
+        easeIn: "cubic-bezier(0.4, 0.0, 1, 1)",
+        sharp: easing.spring,
       },
     },
-    MuiCssBaseline: {
-      styleOverrides: {
-        body: {},
+
+    components: {
+      MuiLink: {
+        defaultProps: {
+          underline: "none",
+        },
+      },
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            backgroundColor: c.surface.canvas,
+            color: c.text.primary,
+            fontFamily: fontFamilies.sans,
+            fontSize: fontSizes.base,
+            lineHeight: lineHeights.body,
+          },
+        },
+      },
+      MuiButton: {
+        defaultProps: {
+          disableElevation: true,
+          variant: "contained",
+        },
+      },
+      MuiPaper: {
+        defaultProps: {
+          elevation: 0,
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {},
+        },
       },
     },
-    MuiButton: {
-      defaultProps: {
-        disableElevation: true,
-        variant: "contained",
+
+    breakpoints: {
+      values: {
+        xs: 0,
+        sm: 640,
+        md: 768,
+        lg: 1024,
+        xl: 1280,
       },
     },
-    MuiPaper: {
-      defaultProps: {
-        elevation: 0,
-      },
+
+    spacing: SPACING_BASE_PX,
+
+    shape: {
+      borderRadius: RADIUS_BASE_PX,
     },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {},
-      },
-    },
-  },
 
-  breakpoints: {
-    values: {
-      xs: 0,
-      sm: 640,
-      md: 768,
-      lg: 1024,
-      xl: 1280,
-    },
-  },
-
-  spacing: 8,
-
-  shape: {
-    borderRadius: 8,
-  },
-
-  mixins: {
-    toolbar: {
-      minHeight: 60,
-
-      "@media (min-width:768px)": {
+    mixins: {
+      toolbar: {
         minHeight: 60,
+
+        "@media (min-width:768px)": {
+          minHeight: 60,
+        },
       },
     },
-  },
-});
+  };
+};
 
 export const getDynamicTheme = (
   mode: "light" | "dark",
@@ -159,3 +297,6 @@ export const getTheme = (
     cssVariables: true,
   });
 };
+
+export const lightTheme = getTheme("light");
+export const darkTheme = getTheme("dark");

@@ -74,42 +74,36 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 ### Phase 1 — Setup & Bootstrap
 
-- [ ] **T1.1** Clone `nexu-io/open-design` to `../example/open-design`.
-  - **Accept**: `../example/open-design/.git` exists; `README.md` readable; clone is shallow (`--depth=1`) to save space.
-- [ ] **T1.2** Survey open-design top-level structure to locate the 72 design systems' definitions.
-  - **Accept**: Path to design-system inventory recorded in `openspec/plans/design-system-research/00-inventory.md`.
-- [ ] **T1.3** Create research scratch directory.
-  - **Accept**: `openspec/plans/design-system-research/` exists with `README.md` noting transient status.
+- [x] **T1.1** Clone `nexu-io/open-design` to `../example/open-design`.
+- [x] **T1.2** Survey open-design top-level structure to locate the 72 design systems' definitions.
+- [x] **T1.3** Create research scratch directory.
 
 ### Phase 2 — Analyze open-design (semi-auto, with review gate)
 
-- [ ] **T2.1** Sub-agent extracts token shape across all 72 systems (color scale depth, type ramp size, spacing units, radius scale, motion curves).
-  - **Accept**: `02-token-shape-survey.md` summarizes statistical commonalities (e.g., "85% use 11-step color scales").
-- [ ] **T2.2** Sub-agent shortlists 3–5 reference systems matching rezics preferences (Apple-inspired, MUI-first, borderless, content-dense, no emoji icons).
-  - **Accept**: `03-reference-shortlist.md` names candidates with one-paragraph rationale each + a token snapshot per candidate.
-- [ ] **T2.3** Author **rezics design direction brief**.
-  - **Accept**: `04-rezics-direction-brief.md` covers brand attributes, primary palette concept, typography family direction, density, motion personality, dark/light strategy.
-- [ ] **🚦 GATE-A** User reviews `04-rezics-direction-brief.md` and approves direction (or requests revisions).
+- [x] **T2.1** Sub-agent extracts token shape across all 72 systems → `02-token-shape-survey.md`.
+- [x] **T2.2** Sub-agent shortlists 3–5 reference systems → `03-reference-shortlist.md` (apple, claude, notion, mintlify, cursor).
+- [x] **T2.3** Author **rezics design direction brief**.
+  - v0 `04-rezics-direction-brief.md` superseded by `briefs/01-foundation-v1.md`.
+- [x] **🚦 GATE-A** User approved `briefs/01-foundation-v1.md` with all defaults (2026-05-01).
 
 ### Phase 3 — Codify Design Tokens
 
-- [ ] **T3.1** Author `package/ui/src/config/tokens/colors.ts` (semantic + scale).
-  - **Accept**: Exports light + dark mode token maps; types check; consumed by smoke-test component.
-- [ ] **T3.2** Author `package/ui/src/config/tokens/typography.ts` (families, scale, weights, line-heights, tracking).
-  - **Accept**: Same as above.
-- [ ] **T3.3** Author `package/ui/src/config/tokens/spacing.ts` (base unit + scale).
-- [ ] **T3.4** Author `package/ui/src/config/tokens/radius.ts`.
-- [ ] **T3.5** Author `package/ui/src/config/tokens/elevation.ts` (shadows).
-- [ ] **T3.6** Author `package/ui/src/config/tokens/motion.ts` (durations, easings).
-- [ ] **T3.7** Aggregate barrel: `package/ui/src/config/tokens/index.ts`.
-- [ ] **T3.8** Author `package/ui/src/config/mui-theme.ts` deriving MUI `createTheme()` from tokens (light + dark variants).
-  - **Accept**: A demo component using `useTheme()` renders with token-derived palette.
-- [ ] **T3.9** Wire tokens into `package/ui/src/config/uno-config.ts` (custom theme extension).
-  - **Accept**: An UnoCSS class like `bg-brand-primary` resolves to a token color.
-- [ ] **T3.10** Inject CSS custom properties via `package/ui/src/shared/style/layers.css`.
-  - **Accept**: `--rezics-color-bg` etc. resolvable in browser devtools.
-- [ ] **T3.11** Smoke-test theme in `@rezics/app` dev server.
-  - **Accept**: App boots; existing pages do not visually regress catastrophically (allowed: cosmetic drift to be addressed in Phase 8).
+- [x] **T3.1** Author `package/ui/src/config/tokens/colors.ts` (semantic + scale, light + dark).
+- [x] **T3.2** Author `package/ui/src/config/tokens/typography.ts` (families, viewport-clamp scale, line-heights, weights, font-size-adjust).
+- [x] **T3.3** Author `package/ui/src/config/tokens/spacing.ts` (8px base scale).
+- [x] **T3.4** Author `package/ui/src/config/tokens/radius.ts` (xs/sm/md/lg/xl/2xl/pill/full).
+- [x] **T3.5** Author `package/ui/src/config/tokens/elevation.ts` (light + dark 4-tier modal shadows).
+- [x] **T3.6** Author `package/ui/src/config/tokens/motion.ts` (120/200/350/500ms + easings).
+- [x] **T3.7** Aggregate barrel: `package/ui/src/config/tokens/index.ts`.
+- [x] **T3.8** Refactor `package/ui/src/config/theme.ts` to consume tokens.
+  - Public API (`getTheme`, `getDynamicTheme`) preserved; consumers in app/admin/folio unchanged.
+  - Adds `lightTheme` / `darkTheme` exports.
+- [x] **T3.9** Wire tokens into `package/ui/src/config/uno-config.ts`.
+  - Adds `brand` / `surface` / `text` / `success` / `warning` / `error` / `info` / `border` namespaces resolving to `var(--rzc-*)`. Preserves legacy `primary` / `secondary` MUI references.
+- [x] **T3.10** Inject CSS custom properties via `package/ui/src/shared/styles/layers.css`.
+  - `:root` + `[data-theme="dark"], html.dark` (transitional alias for current app shell). `:lang()` regional CJK routing. `prefers-reduced-motion` global rule.
+- [x] **T3.11** Smoke-test in `@rezics/app` dev server.
+  - Vite boots clean; `--rzc-*` vars served via layers.css; Uno preflight resolves `border-border` to our whisper token. Visual audit deferred to Phase 9.
 
 ### Phase 4 — Author Claude Skill
 
