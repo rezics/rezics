@@ -307,6 +307,117 @@ export function TypeSample({
   );
 }
 
+export function Do({
+  caption,
+  children,
+}: {
+  caption?: string;
+  children: ReactNode;
+}) {
+  return <Verdict tone="do" caption={caption}>{children}</Verdict>;
+}
+
+export function Dont({
+  caption,
+  children,
+}: {
+  caption?: string;
+  children: ReactNode;
+}) {
+  return <Verdict tone="dont" caption={caption}>{children}</Verdict>;
+}
+
+export function Compare({ children }: { children: ReactNode }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 16,
+        margin: "16px 0",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Verdict({
+  tone,
+  caption,
+  children,
+}: {
+  tone: "do" | "dont";
+  caption?: string;
+  children: ReactNode;
+}) {
+  const isDo = tone === "do";
+  const accent = isDo
+    ? "var(--rzc-color-success-fill)"
+    : "var(--rzc-color-error-fill)";
+  return (
+    <div
+      style={{
+        border: "1px solid var(--rzc-color-border-whisper)",
+        borderRadius: "var(--rzc-radius-md)",
+        background: "var(--rzc-color-surface-elevated)",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "10px 12px",
+          borderBottom: "1px solid var(--rzc-color-border-whisper)",
+          fontFamily: "var(--rzc-font-sans)",
+          fontSize: 12,
+          fontWeight: 500,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+          color: accent,
+        }}
+      >
+        <span
+          aria-hidden
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "var(--rzc-radius-full)",
+            background: accent,
+          }}
+        />
+        {isDo ? "Do" : "Don't"}
+        {caption ? (
+          <span
+            style={{
+              marginLeft: 4,
+              fontWeight: 400,
+              letterSpacing: 0,
+              textTransform: "none",
+              color: "var(--rzc-color-text-secondary)",
+            }}
+          >
+            — {caption}
+          </span>
+        ) : null}
+      </div>
+      <div
+        style={{
+          padding: 16,
+          background: "var(--rzc-color-surface-canvas)",
+          minHeight: 96,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function MotionSample({
   name,
   cssVar,

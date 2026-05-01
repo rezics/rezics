@@ -31,11 +31,11 @@ This plan uses `nexu-io/open-design` (a local AI-design tool that bundles 72 ref
 
 **Three projections of that truth:**
 
-| Projection | Audience | Artifact |
-| --- | --- | --- |
-| **AI** | Claude Code agents | `.claude/skills/rezics-design/` skill |
-| **Human (interactive)** | Designers, developers | Storybook composition site |
-| **Human (in-editor)** | Developers writing code | `CLAUDE.md` UI Conventions anchor pointing to skill |
+| Projection              | Audience                | Artifact                                            |
+| ----------------------- | ----------------------- | --------------------------------------------------- |
+| **AI**                  | Claude Code agents      | `.claude/skills/rezics-design/` skill               |
+| **Human (interactive)** | Designers, developers   | Storybook composition site                          |
+| **Human (in-editor)**   | Developers writing code | `CLAUDE.md` UI Conventions anchor pointing to skill |
 
 **Storybook Composition (multi-package + independent):**
 - One Storybook per UI-producing package: `ui`, `app`, `editor`, `folio`, `admin` (5 total).
@@ -128,20 +128,20 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
   - **Done**: Root `.storybook/` host with `refs.ui` (port 6001) + `refs.editor` (port 6002). Demo `Welcome.stories.tsx`. `react`/`react-dom` added at root devDeps.
 - [x] **T5.6** Validate `storybook build` for both packages and host produces deployable static dist.
   - **Done**: All three `storybook build` runs succeed — `package/ui/storybook-static/`, `package/editor/storybook-static/`, root `storybook-static/`. Each `index.json` lists the expected story IDs.
-- [ ] **🚦 GATE-B** User reviews spike outcome. Decide: full migration (Phase 6/7) or fall back (revise plan).
+- [x] **🚦 GATE-B** User reviews spike outcome. Decide: full migration (Phase 6/7) or fall back (revise plan).
 
 ### Phase 6 — Storybook Build-Out
 
 **Topology**: 5 publishable surfaces each own their Storybook so they can ship standalone; the root host on `:6006` composes them via `refs`. Chrome blocks `:6000` (`ERR_UNSAFE_PORT` — X11), `:6566`, `:6665–6669`, and `:6697` — the assignments below avoid those. Storybook's own default is `:6006`.
 
-| Port | Instance | Owner |
-| ---- | -------- | ----- |
-| 6006 | host | root `.storybook/` (aggregator) |
-| 6007 | `@rezics/ui` | foundation, tokens, primitives — done in Phase 5 |
-| 6008 | `@rezics/editor` | CodeMirror — done in Phase 5 |
-| 6009 | `@rezics/folio` | reader (txt / epub) |
-| 6010 | `@rezics/admin` | admin app |
-| 6011 | `@rezics/app` | main app |
+| Port | Instance         | Owner                                            |
+| ---- | ---------------- | ------------------------------------------------ |
+| 6006 | host             | root `.storybook/` (aggregator)                  |
+| 6007 | `@rezics/ui`     | foundation, tokens, primitives — done in Phase 5 |
+| 6008 | `@rezics/editor` | CodeMirror — done in Phase 5                     |
+| 6009 | `@rezics/folio`  | reader (txt / epub)                              |
+| 6010 | `@rezics/admin`  | admin app                                        |
+| 6011 | `@rezics/app`    | main app                                         |
 
 - [x] **T6.1** Extract shared config to `package/storybook-config/`.
   - **Done**: New workspace package `@rezics/storybook-config` with two entrypoints — `.` exports `baseStorybookConfig` + `baseStorybookViteConfig` (no JSX, safe for Storybook's node-side `main.ts` loader); `./preview` exports `withRezicsTheme(getTheme, { canvas })`, `themeGlobalTypes`, `basePreviewParameters`. UnoCSS is loaded via dynamic import and declared as an optional peer, so `editor` + `host` (which pass `{ uno: false }`) don't pull it. All 6 `.storybook/` shells reduced to thin wrappers (3-line `main.ts`, ~15-line `preview.tsx`, 3-line `vite.config.ts`). Latent bugs fixed in passing: folio + app preview now import `@rezics/ui/shared/styles/layers.css` (canvas `var(--rzc-*)` previously resolved to nothing); folio's vite config now actually loads the UnoCSS plugin its preview's `virtual:uno.css` import depended on. Root `package.json` gained `"type": "module"` so the host (root `.storybook/`) can import the ESM-only config package — verified no root-level `.js` files exist that would break (`tool/` is already its own type-module package). `bun run build-storybook` produces all 6 dists with exit 0; story counts unchanged from pre-refactor (1+4+2+1+1+1).
@@ -166,8 +166,10 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 - [x] **T7.4** Author `package/ui/src/docs/tokens/radius.mdx`, `elevation.mdx`, `motion.mdx`.
 
   **T7.1–T7.4 completed.** Six MDX galleries under `package/ui/src/docs/tokens/` (`colors`, `typography`, `spacing`, `radius`, `elevation`, `motion`) plus a shared `_gallery.tsx` helper module (Grid, Swatch, Row, SpacingRuler, RadiusSample, ElevationSample, TypeSample, MotionSample). Wired by adding `@storybook/addon-docs` to `baseStorybookConfig` (Storybook 10 split docs out of core; this is now a peer-dep of `@rezics/storybook-config`) and extending the stories pattern to include `../src/**/*.mdx`. Each gallery imports `Meta` from `@storybook/addon-docs/blocks` to set its title under `Foundation/Tokens/{Name}`; built `index.json` confirms all six docs entries plus a clean folio build.
-- [ ] **T7.5** Author `package/ui/src/docs/voice.mdx` — design language for human readers (mirrors skill voice.md).
-- [ ] **T7.6** Author `package/ui/src/docs/patterns.mdx` — do/don't gallery.
+- [x] **T7.5** Author `package/ui/src/docs/voice.mdx` — design language for human readers (mirrors skill voice.md).
+- [x] **T7.6** Author `package/ui/src/docs/patterns.mdx` — do/don't gallery.
+
+  **T7.5–T7.6 completed.** `voice.mdx` (mood pillars + parchment swatches, tone-per-surface table, "don't say" Do/Dont compare, reference systems, litmus test) and `patterns.mdx` (12 do/don't sections — layout, cards, buttons, inputs, links, icons, color, typography, spacing, mode handling, mock convention, admin/app density — with rendered Compare cards where the contrast is visual). Added `Do` / `Dont` / `Compare` helpers to `tokens/_gallery.tsx`. `bun run build-storybook` for `@rezics/ui` exits clean; `storybook-static/index.json` registers `foundation-voice--docs` and `foundation-patterns--docs` under `Foundation/`.
 
 ### Phase 8 — Cosmos Retirement
 
@@ -200,13 +202,13 @@ Each task has an ID, an action, and acceptance criteria. Mark complete only when
 
 ## 6. Risks
 
-| Risk | Likelihood | Mitigation |
-| --- | --- | --- |
-| Storybook 10 + Vite 8 + UnoCSS incompatibility | Resolved | Phase 5 spike confirmed Storybook 10.3.6 builds clean against our stack. Fallback (stay on Cosmos + MDX route) was not needed. |
-| open-design's 72 systems are wrapped in non-machine-readable formats | Medium | Sub-agent reports back at T2.1; if blocked, fall back to manual sampling of top 5 candidate brands. |
-| Token migration breaks existing visual surfaces | Medium-High | Smoke-test in T3.11; full audits gated to Phase 9 (post-Storybook). |
-| Multi-Storybook concurrent dev too slow | Low | Document selective `bun -F <pkg> storybook` usage; only host needs all running. |
-| Skill drift over time without enforcement | Medium | Cosmos has no enforcement either; mitigation = quarterly review (`/loop` audit agent), not this plan. |
+| Risk                                                                 | Likelihood  | Mitigation                                                                                                                     |
+| -------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Storybook 10 + Vite 8 + UnoCSS incompatibility                       | Resolved    | Phase 5 spike confirmed Storybook 10.3.6 builds clean against our stack. Fallback (stay on Cosmos + MDX route) was not needed. |
+| open-design's 72 systems are wrapped in non-machine-readable formats | Medium      | Sub-agent reports back at T2.1; if blocked, fall back to manual sampling of top 5 candidate brands.                            |
+| Token migration breaks existing visual surfaces                      | Medium-High | Smoke-test in T3.11; full audits gated to Phase 9 (post-Storybook).                                                            |
+| Multi-Storybook concurrent dev too slow                              | Low         | Document selective `bun -F <pkg> storybook` usage; only host needs all running.                                                |
+| Skill drift over time without enforcement                            | Medium      | Cosmos has no enforcement either; mitigation = quarterly review (`/loop` audit agent), not this plan.                          |
 
 ---
 
