@@ -1,4 +1,4 @@
-// Curated English text corpus for seed data
+// Curated English text corpus for seed and story data
 
 export const BOOK_TITLES = [
   "One Hundred Years of Solitude",

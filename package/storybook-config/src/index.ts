@@ -1,6 +1,11 @@
-import react from "@vitejs/plugin-react";
 import type { StorybookConfig } from "@storybook/react-vite";
-import { type Plugin, type UserConfig, mergeConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import {
+  mergeConfig,
+  type Plugin,
+  type PluginOption,
+  type UserConfig,
+} from "vite";
 
 export type StorybookConfigOverrides = Partial<StorybookConfig>;
 
@@ -46,7 +51,8 @@ function corsLegacyEndpointsPlugin(): Plugin {
         res.end(
           JSON.stringify({
             error: "endpoint removed in storybook 10",
-            replacement: path === "/stories.json" ? "/index.json" : "/project.json",
+            replacement:
+              path === "/stories.json" ? "/index.json" : "/project.json",
           }),
         );
       });
@@ -60,10 +66,7 @@ export function baseStorybookConfig(
   const { framework, typescript, core, ...rest } = overrides;
 
   return {
-    stories: [
-      "../src/**/*.mdx",
-      "../src/**/*.stories.@(ts|tsx|mdx)",
-    ],
+    stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx|mdx)"],
     addons: ["@storybook/addon-docs"],
     ...rest,
     framework: {
@@ -102,12 +105,12 @@ export async function baseStorybookViteConfig(
 ): Promise<UserConfig> {
   const { uno = true } = options;
 
-  const plugins: Plugin[] = [corsLegacyEndpointsPlugin()];
+  const plugins: PluginOption[] = [corsLegacyEndpointsPlugin()];
   if (uno) {
     const { default: UnoCSS } = await import("unocss/vite");
-    plugins.push(UnoCSS() as unknown as Plugin);
+    plugins.push(UnoCSS());
   }
-  plugins.push(react());
+  plugins.push(...react());
 
   return mergeConfig(
     {

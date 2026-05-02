@@ -59,7 +59,9 @@ A component MAY use any subset; it SHALL NOT invent new names without proposing 
 
 ### Requirement: Mock data lives in a central per-domain module
 
-Story-only mock data SHALL live in `package/app/src/stories/fixtures/<domain>.ts` modules, one per domain (book, post, shelf, review, excerpt, remark, user, realm, notification, tag). Stories SHALL import from these modules; they SHALL NOT inline domain shapes beyond trivial overrides. Every export from a fixtures module SHALL carry a `// MOCK:` comment per `CLAUDE.md` Mock convention. Fixtures SHALL NOT import from `package/server/prisma/factory/` — fixture shapes match runtime types by hand.
+Story-only mock data SHALL live in `package/app/src/stories/fixtures/<domain>.ts` modules, one per domain (book, post, shelf, review, excerpt, remark, user, realm, notification, tag). Stories SHALL import from these modules; they SHALL NOT inline domain shapes beyond trivial overrides. Every export from a fixtures module SHALL carry a `// MOCK:` comment per `CLAUDE.md` Mock convention. Fixtures SHALL NOT import from `package/server/prisma/factory/` — entity shapes match runtime types by hand.
+
+Fixtures MAY import primitive generators and locale-aware text utilities from `@rezics/shared/random` (`randomInt`, `randomBoolean`, `pickN`, …) and `@rezics/shared/text` (`getFaker`, `generateTitle`, `generateParagraph`, `getTitlePool`, `getSummaryPool`, `getDescriptionPool`). These primitives are the same functions the server factory uses, so multi-language CJK / Latin string generation stays consistent across backend seed data and Storybook fixtures without coupling fixtures to Prisma-shaped generators.
 
 #### Scenario: Fixtures module structure
 
@@ -71,6 +73,12 @@ Story-only mock data SHALL live in `package/app/src/stories/fixtures/<domain>.ts
 
 - **WHEN** `rg "from .*prisma/factory" package/app/src/stories/` is run
 - **THEN** there SHALL be zero matches
+
+#### Scenario: Shared primitives may be imported
+
+- **WHEN** `*.stories.tsx` or `package/app/src/stories/fixtures/*.ts` files are reviewed
+- **THEN** imports from `@rezics/shared/random` and `@rezics/shared/text` SHALL be permitted for primitive value generation and locale-aware text
+- **AND** such imports SHALL NOT count as a violation of the "No factory imports" rule above
 
 #### Scenario: Stories prefer central fixtures
 

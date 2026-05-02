@@ -1,8 +1,27 @@
 {
   "name": "@rezics/shared",
-  "type": "module",
   "version": "0.0.1",
-  "scripts": {},
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    "./random": {
+      "types": "./src/random/index.ts",
+      "default": "./src/random/index.ts"
+    },
+    "./text": {
+      "types": "./src/text/index.ts",
+      "default": "./src/text/index.ts"
+    },
+    "./text/corpus": {
+      "types": "./src/text/corpus/index.ts",
+      "default": "./src/text/corpus/index.ts"
+    }
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.1.0",
+    "@rezics/contract": "workspace:*"
+  },
   "devDependencies": {
     "@types/bun": "^1.3.11"
   }

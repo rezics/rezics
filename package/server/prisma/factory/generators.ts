@@ -1,45 +1,18 @@
-/** biome-ignore-all lint/correctness/noUnusedImports: <any> */
-import { base, de, en, Faker, faker, ja, zh_CN, zh_TW } from "@faker-js/faker";
+import { faker } from "@faker-js/faker";
 import { LANGUAGES, type Language } from "@rezics/contract";
-import type { Prisma } from "../generated/client.js";
-import { PostKind, UnitType } from "../generated/client.js";
-import {
-  getDescriptionPool,
-  getSummaryPool,
-  getTitlePool,
-} from "./data/text/index.js";
 import {
   generateParagraph,
-  generateTitle,
-  randomBoolean,
-  randomFloat,
-  randomInt,
-} from "./utils.js";
+  getDescriptionPool,
+  getFaker,
+  getSummaryPool,
+  getTitlePool,
+  LANG_DISTRIBUTION,
+} from "@rezics/shared/text";
+import type { Prisma } from "../generated/client.js";
+import { PostKind, UnitType } from "../generated/client.js";
+import { randomBoolean, randomFloat } from "./utils.js";
 
-// ── Faker Locale Instances ─────────────────────────────
-
-const fakerInstances: Record<Language, Faker> = {
-  [LANGUAGES.ZH_HANT]: new Faker({ locale: [zh_TW, en, base] }),
-  [LANGUAGES.ZH_HANS]: new Faker({ locale: [zh_CN, en, base] }),
-  [LANGUAGES.EN]: new Faker({ locale: [en, base] }),
-  [LANGUAGES.JA]: new Faker({ locale: [ja, en, base] }),
-  [LANGUAGES.DE]: new Faker({ locale: [de, en, base] }),
-};
-
-/** Get the locale-appropriate faker instance for a language. */
-export function getFaker(lang: Language): Faker {
-  return fakerInstances[lang];
-}
-
-// ── Language Distribution ──────────────────────────────
-
-/** Languages beyond zh-hant and their inclusion probability. */
-const LANG_DISTRIBUTION: [Language, number][] = [
-  [LANGUAGES.EN, 0.7],
-  [LANGUAGES.ZH_HANS, 0.4],
-  [LANGUAGES.JA, 0.2],
-  [LANGUAGES.DE, 0.1],
-];
+export { getFaker };
 
 // ── Multilingual Translation ───────────────────────────
 

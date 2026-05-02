@@ -1,14 +1,13 @@
-import type { Language } from "@rezics/contract";
-import { LANGUAGES } from "@rezics/contract";
-import * as de from "./de.js";
-import * as en from "./en.js";
-import * as ja from "./ja.js";
-import * as zhHans from "./zh-hans.js";
-import * as zhHant from "./zh-hant.js";
+import { LANGUAGES, type Language } from "@rezics/contract";
+import * as de from "./de.ts";
+import * as en from "./en.ts";
+import * as ja from "./ja.ts";
+import * as zhHans from "./zh-hans.ts";
+import * as zhHant from "./zh-hant.ts";
 
-type UnitTextType = "BOOK" | "GAME" | "MEDIA" | "REALM" | "SHELF";
+export type UnitTextType = "BOOK" | "GAME" | "MEDIA" | "REALM" | "SHELF";
 
-interface TextPool {
+export interface TextPool {
   titles: Record<UnitTextType, readonly string[]>;
   summaries: readonly string[];
   descriptions: readonly string[];
@@ -37,21 +36,22 @@ const POOLS: Record<Language, TextPool> = {
 };
 
 /**
- * Get the title pool for a given language and unit type.
- * Falls back to BOOK titles for unrecognized types.
+ * Title pool for a given language and unit-type-like key.
+ * Falls back to BOOK titles for unrecognized keys.
  */
-export function getTitlePool(lang: Language, type: string): readonly string[] {
+export function getTitlePool(
+  lang: Language,
+  type: string,
+): readonly string[] {
   const pool = POOLS[lang];
   const key = type as UnitTextType;
   return pool.titles[key] ?? pool.titles.BOOK;
 }
 
-/** Get the summary pool for a given language. */
 export function getSummaryPool(lang: Language): readonly string[] {
   return POOLS[lang].summaries;
 }
 
-/** Get the description pool for a given language. */
 export function getDescriptionPool(lang: Language): readonly string[] {
   return POOLS[lang].descriptions;
 }

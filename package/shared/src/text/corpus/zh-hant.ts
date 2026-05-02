@@ -1,4 +1,4 @@
-// Curated Traditional Chinese text corpus for seed data
+// Curated Traditional Chinese text corpus for seed and story data
 
 export const BOOK_TITLES = [
   "百年孤寂",

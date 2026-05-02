@@ -149,8 +149,9 @@ Stories rendering Tier 3/4 components need realistic data. Three choices conside
 | --------------- | ------- | --- |
 | Import from `package/server/prisma/factory/` | rejected | Server-side concerns leak into frontend stories; factory shapes are realistic-preset deterministic, not story-friendly; tight coupling makes story authoring depend on factory stability |
 | Hand-author shapes matching runtime types | **chosen** | Stories own their data fate; matching shapes by hand is one-time work and rarely changes |
+| Hand-author shapes **+ shared primitive generators** via `@rezics/shared/{random,text}` | **chosen** for primitives | Avoids re-deriving locale-aware CJK/Latin string generation, faker locale instances, and the curated multilingual title/summary corpus — the server factory uses the same primitives, so fixtures stay drift-free for typography axes without inheriting Prisma-coupled entity generators |
 
-Each fixtures module exports collections by data shape (`bookEmpty`, `bookFew`, `bookMany`, `bookLongTitle`, `bookCJK`, `bookLatin`) so stories pick by intent. Every export carries `// MOCK:` per project convention.
+Each fixtures module exports collections by data shape (`bookEmpty`, `bookFew`, `bookMany`, `bookLongTitle`, `bookCJK`, `bookLatin`) so stories pick by intent. Every export carries `// MOCK:` per project convention. Where a fixture needs a long CJK string, a Latin paragraph, or a title from the curated corpus, it imports the relevant helper from `@rezics/shared/text` (`getFaker`, `generateParagraph`, `getTitlePool`, …) rather than re-deriving locale machinery. The ban on `prisma/factory/` imports stands — `@rezics/shared` carries only the **pure**, Prisma-free subset of the factory's helpers.
 
 ### Decision 6 — Story naming vocabulary as a closed list
 

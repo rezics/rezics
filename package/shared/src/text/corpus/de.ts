@@ -1,4 +1,4 @@
-// Curated German text corpus for seed data
+// Curated German text corpus for seed and story data
 
 export const BOOK_TITLES = [
   "Hundert Jahre Einsamkeit",
