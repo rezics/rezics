@@ -16,6 +16,7 @@ export interface DomainCarouselProps<TItem> {
   itemClassName?: string;
   className?: string;
   showArrows?: boolean;
+  /** @deprecated no-op since shadcn upgrade — ArrowButton has no variants */
   arrowVariant?: DomainCarouselArrowVariant;
   scrollSnap?: "start" | "center";
   dragFree?: boolean;
@@ -30,7 +31,6 @@ export function DomainCarousel<TItem>({
   itemClassName,
   className,
   showArrows = true,
-  arrowVariant = "ghost",
   scrollSnap = "start",
   dragFree = true,
   ariaLabel,
@@ -57,8 +57,8 @@ export function DomainCarousel<TItem>({
       </CarouselContent>
       {showArrows ? (
         <>
-          <CarouselPrevious variant={arrowVariant} />
-          <CarouselNext variant={arrowVariant} />
+          <CarouselPrevious />
+          <CarouselNext />
         </>
       ) : null}
     </Carousel>

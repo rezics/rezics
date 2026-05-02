@@ -1,6 +1,12 @@
 export { Alert, AlertDescription, AlertTitle } from "./alert";
-export { Avatar, AvatarFallback, AvatarImage } from "./avatar";
-export type { BadgeProps } from "./badge";
+export {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+  AvatarImage,
+} from "./avatar";
 export { Badge, badgeVariants } from "./badge";
 export {
   Breadcrumb,
@@ -11,10 +17,10 @@ export {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./breadcrumb";
-export type { ButtonProps } from "./button";
 export { Button, buttonVariants } from "./button";
 export {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -99,6 +105,9 @@ export {
   Popover,
   PopoverAnchor,
   PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
   PopoverTrigger,
 } from "./popover";
 export {
@@ -133,8 +142,6 @@ export {
   SheetDescription,
   SheetFooter,
   SheetHeader,
-  SheetOverlay,
-  SheetPortal,
   SheetTitle,
   SheetTrigger,
 } from "./sheet";
@@ -176,7 +183,13 @@ export {
   TableHeader,
   TableRow,
 } from "./table";
-export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
+export {
+  Tabs,
+  TabsContent,
+  TabsList,
+  tabsListVariants,
+  TabsTrigger,
+} from "./tabs";
 export { ThemeSwitch } from "./theme-switch";
 export { Toggle, toggleVariants } from "./toggle";
 export { ToggleGroup, ToggleGroupItem } from "./toggle-group";

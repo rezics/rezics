@@ -1,11 +1,10 @@
-import type { SvgIconComponent } from "@mui/icons-material";
 import { useTheme } from "@mui/material";
 import clsx from "clsx";
 import React from "react";
 
 export interface ArrowButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  icon: SvgIconComponent;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 export const ArrowButton = React.forwardRef<
@@ -49,7 +48,7 @@ export const ArrowButton = React.forwardRef<
       aria-label="arrow"
       {...props}
     >
-      <Icon fontSize="inherit" className="pointer-events-none" />
+      <Icon className="pointer-events-none size-5" />
       {children}
     </button>
   );
