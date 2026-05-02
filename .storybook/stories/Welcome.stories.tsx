@@ -89,7 +89,9 @@ export const Welcome: Story = {
           {refs.map((r) => (
             <tr
               key={r.port}
-              style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}
+              style={{
+                borderTop: "1px solid var(--rezics-color-border-whisper)",
+              }}
             >
               <td style={{ padding: "8px 0" }}>{r.port}</td>
               <td>{r.title}</td>
@@ -101,7 +103,13 @@ export const Welcome: Story = {
           ))}
         </tbody>
       </table>
-      <p style={{ marginTop: 24, color: "#666", fontSize: 13 }}>
+      <p
+        style={{
+          marginTop: 24,
+          color: "var(--rezics-color-text-tertiary)",
+          fontSize: 13,
+        }}
+      >
         Note: Chrome blocks ports 6000, 6566, 6665–6669, 6697 with{" "}
         <code>ERR_UNSAFE_PORT</code>. The assignments above are all safe.
       </p>

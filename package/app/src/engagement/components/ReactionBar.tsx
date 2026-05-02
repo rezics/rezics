@@ -10,8 +10,8 @@ import type {
 } from "../types";
 import { OverflowMenu } from "./OverflowMenu";
 import {
-  ReactionBarProvider,
   type ReactionBarContextValue,
+  ReactionBarProvider,
 } from "./ReactionBarContext";
 import { ReplyAction } from "./ReplyAction";
 import { ShareAction } from "./ShareAction";
@@ -127,13 +127,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   };
 
   const spacing =
-    variant === "pill"
-      ? 0
-      : size === "sm"
-        ? 0.25
-        : size === "lg"
-          ? 1
-          : 0.5;
+    variant === "pill" ? 0 : size === "sm" ? 0.25 : size === "lg" ? 1 : 0.5;
 
   const handleBarClick = (event: React.MouseEvent) => {
     event.stopPropagation();

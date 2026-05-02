@@ -3,8 +3,44 @@ import { StyledEngineProvider } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import type { Decorator } from "@storybook/react-vite";
 import { useEffect } from "react";
+import { GLOBALS_UPDATED } from "storybook/internal/core-events";
+import { addons } from "storybook/preview-api";
 
 export type ThemeMode = "light" | "dark";
+
+export const THEME_BROADCAST_EVENT = "rezics:theme-mode";
+
+const THEME_LISTENERS_FLAG = "__rezicsThemeListenersAttached";
+
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+  const w = window as typeof window & { [THEME_LISTENERS_FLAG]?: boolean };
+  if (!w[THEME_LISTENERS_FLAG]) {
+    w[THEME_LISTENERS_FLAG] = true;
+    const applyThemeMode = (mode: unknown) => {
+      const resolved: ThemeMode = mode === "dark" ? "dark" : "light";
+      const root = document.documentElement;
+      root.dataset.theme = resolved;
+      root.classList.toggle("dark", resolved === "dark");
+    };
+    addons
+      .getChannel()
+      .on(
+        GLOBALS_UPDATED,
+        ({ globals }: { globals?: { themeMode?: unknown } }) =>
+          applyThemeMode(globals?.themeMode),
+      );
+    window.addEventListener("message", (event: MessageEvent) => {
+      const data = event.data;
+      if (
+        data &&
+        typeof data === "object" &&
+        (data as { type?: unknown }).type === THEME_BROADCAST_EVENT
+      ) {
+        applyThemeMode((data as { mode?: unknown }).mode);
+      }
+    });
+  }
+}
 
 export type CanvasOption =
   | "none"
