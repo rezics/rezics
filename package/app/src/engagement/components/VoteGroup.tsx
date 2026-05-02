@@ -3,18 +3,16 @@ import {
   KeyboardArrowUp,
 } from "@mui/icons-material";
 import { IconButton, Stack, Typography } from "@mui/material";
-import {
-  useCreateReactionMutation,
-  useDeleteReactionMutation,
-} from "@rezics/api/reaction/reaction.mutations";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useVoteController, type VoteValue } from "../hooks/useVoteController";
 import type { EngagementSize } from "../types";
+import { useReactionBarContext } from "./ReactionBarContext";
 
 export type VoteGroupProps = {
   targetUnitId: string;
   initialScore: number;
-  initialUserVote?: "like" | "dislike" | null;
+  initialUserVote?: VoteValue;
+  /** Override the size from context. Rarely needed; prefer setting on the bar. */
   size?: EngagementSize;
 };
 
@@ -52,65 +50,57 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
   targetUnitId,
   initialScore,
   initialUserVote = null,
-  size = "md",
+  size: sizeProp,
 }) => {
-  const [userVote, setUserVote] = useState<"like" | "dislike" | null>(
+  const ctx = useReactionBarContext();
+  const size = sizeProp ?? ctx.size;
+  const { score, userVote, toggleUp, toggleDown } = useVoteController({
+    targetUnitId,
+    initialScore,
     initialUserVote,
-  );
-  const [score, setScore] = useState<number>(initialScore);
-
-  useEffect(() => {
-    setUserVote(initialUserVote);
-  }, [initialUserVote]);
-
-  useEffect(() => {
-    setScore(initialScore);
-  }, [initialScore]);
-
-  const createReaction = useCreateReactionMutation();
-  const deleteReaction = useDeleteReactionMutation();
-
-  const applyVote = (next: "like" | "dislike" | null) => {
-    const prev = userVote;
-    if (prev === next) return;
-    const delta =
-      (next === "like" ? 1 : next === "dislike" ? -1 : 0) -
-      (prev === "like" ? 1 : prev === "dislike" ? -1 : 0);
-    setUserVote(next);
-    setScore((s) => s + delta);
-    if (prev) {
-      deleteReaction.mutate({ targetId: targetUnitId, reaction: prev });
-    }
-    if (next) {
-      createReaction.mutate({ targetId: targetUnitId, reaction: next });
-    }
-  };
+  });
 
   const handleUp = (event: React.MouseEvent) => {
     event.stopPropagation();
-    applyVote(userVote === "like" ? null : "like");
+    toggleUp();
   };
 
   const handleDown = (event: React.MouseEvent) => {
     event.stopPropagation();
-    applyVote(userVote === "dislike" ? null : "dislike");
+    toggleDown();
   };
 
   const iconFontSize = sizeToIconFontSize(size);
   const typoVariant = sizeToTypography(size);
   const buttonSize = size === "lg" ? "medium" : "small";
 
+  const iconButtonSx = {
+    p: size === "sm" ? 0.25 : 0.5,
+    color: "text.secondary",
+    "&:hover": {
+      bgcolor: (theme: { palette: { mode: string } }) =>
+        theme.palette.mode === "dark"
+          ? "rgba(255, 255, 255, 0.06)"
+          : "rgba(0, 0, 0, 0.06)",
+    },
+  };
+
   return (
     <Stack direction="row" alignItems="center" spacing={0.25}>
       <IconButton
         size={buttonSize}
         onClick={handleUp}
-        sx={{ p: size === "sm" ? 0.25 : 0.5 }}
+        sx={iconButtonSx}
         aria-label="Upvote"
       >
         <KeyboardArrowUp
-          sx={{ fontSize: iconFontSize }}
-          color={userVote === "like" ? "primary" : "inherit"}
+          sx={{
+            fontSize: iconFontSize,
+            color:
+              userVote === "like"
+                ? "var(--rezics-color-text-brand)"
+                : "inherit",
+          }}
         />
       </IconButton>
       <Typography
@@ -121,7 +111,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
           fontVariantNumeric: "tabular-nums",
           color:
             userVote === "like"
-              ? "primary.main"
+              ? "var(--rezics-color-text-brand)"
               : userVote === "dislike"
                 ? "error.main"
                 : "text.secondary",
@@ -133,12 +123,14 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
       <IconButton
         size={buttonSize}
         onClick={handleDown}
-        sx={{ p: size === "sm" ? 0.25 : 0.5 }}
+        sx={iconButtonSx}
         aria-label="Downvote"
       >
         <KeyboardArrowDown
-          sx={{ fontSize: iconFontSize }}
-          color={userVote === "dislike" ? "error" : "inherit"}
+          sx={{
+            fontSize: iconFontSize,
+            color: userVote === "dislike" ? "error.main" : "inherit",
+          }}
         />
       </IconButton>
     </Stack>

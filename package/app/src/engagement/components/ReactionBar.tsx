@@ -1,8 +1,18 @@
 import { Stack } from "@mui/material";
 import type React from "react";
+import { useMemo } from "react";
 import { parseReactionSummaries } from "@/shared/utils/reaction-summaries-parser";
-import type { Action, ActionPolicy, EngagementSize } from "../types";
+import type {
+  Action,
+  ActionPolicy,
+  EngagementSize,
+  ReactionBarVariant,
+} from "../types";
 import { OverflowMenu } from "./OverflowMenu";
+import {
+  ReactionBarProvider,
+  type ReactionBarContextValue,
+} from "./ReactionBarContext";
 import { ReplyAction } from "./ReplyAction";
 import { ShareAction } from "./ShareAction";
 import { ShelfAction } from "./ShelfAction";
@@ -34,6 +44,11 @@ export type ReactionBarProps = {
   /** Alternative to `actions` + `overflow` when the caller already has a policy object. */
   actionPolicy?: ActionPolicy;
   size?: EngagementSize;
+  /**
+   * Visual treatment. Defaults to `"plain"` (transparent chrome). Use `"pill"`
+   * for the segmented capsule that fuses with the host card surface.
+   */
+  variant?: ReactionBarVariant;
   /** Reply-click handler. Fires on main-bar reply and on overflow-menu reply. */
   onReplyInvoke?: () => void;
   /** Render mode for the Reply atom. `"count"` shows number when > 0, `"label"` always shows "Reply". */
@@ -69,6 +84,18 @@ function resolvePolicy(
   return { visible: rawActions, hidden };
 }
 
+const PILL_SX = {
+  display: "inline-flex",
+  alignItems: "center",
+  borderRadius: "var(--rezics-radius-pill, 999px)",
+  bgcolor: (theme: { palette: { mode: string } }) =>
+    theme.palette.mode === "dark"
+      ? "rgba(255, 255, 255, 0.04)"
+      : "rgba(0, 0, 0, 0.04)",
+  px: 0.5,
+  py: 0.25,
+};
+
 export const ReactionBar: React.FC<ReactionBarProps> = ({
   post,
   policy,
@@ -76,6 +103,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   overflow,
   actionPolicy,
   size = "md",
+  variant = "plain",
   onReplyInvoke,
   replyMode = "count",
   className,
@@ -98,76 +126,87 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
     }
   };
 
-  const spacing = size === "sm" ? 0.25 : size === "lg" ? 1 : 0.5;
+  const spacing =
+    variant === "pill"
+      ? 0
+      : size === "sm"
+        ? 0.25
+        : size === "lg"
+          ? 1
+          : 0.5;
 
   const handleBarClick = (event: React.MouseEvent) => {
     event.stopPropagation();
   };
 
+  const ctx = useMemo<ReactionBarContextValue>(
+    () => ({ variant, size }),
+    [variant, size],
+  );
+
+  const stackSx =
+    variant === "pill"
+      ? { ...PILL_SX, flexWrap: "nowrap" as const }
+      : { flexWrap: "wrap" as const };
+
   return (
-    <Stack
-      direction="row"
-      alignItems="center"
-      spacing={spacing}
-      className={className}
-      onClick={handleBarClick}
-      sx={{ flexWrap: "wrap" }}
-    >
-      {visible.map((token) => {
-        switch (token) {
-          case "vote":
-            return (
-              <VoteGroup
-                key="vote"
-                targetUnitId={post.unitId}
-                initialScore={score}
-                initialUserVote={userVote}
-                size={size}
-              />
-            );
-          case "reply":
-            return (
-              <ReplyAction
-                key="reply"
-                size={size}
-                replyCount={post.replyCount ?? 0}
-                mode={replyMode}
-                onInvoke={onReplyInvoke}
-              />
-            );
-          case "share":
-            return (
-              <ShareAction
-                key="share"
-                size={size}
-                href={shareHref}
-                title={shareTitle}
-              />
-            );
-          case "shelf":
-            return (
-              <ShelfAction
-                key="shelf"
-                targetUnitId={post.unitId}
-                size={size}
-                isReview={policy.isReview}
-              />
-            );
-          case "more":
-          case "funny":
-          case "award":
-            return null;
-          default:
-            return null;
-        }
-      })}
-      {hidden.length > 0 && (
-        <OverflowMenu
-          items={hidden}
-          size={size}
-          onInvoke={handleOverflowInvoke}
-        />
-      )}
-    </Stack>
+    <ReactionBarProvider value={ctx}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={spacing}
+        className={className}
+        onClick={handleBarClick}
+        sx={stackSx}
+      >
+        {visible.map((token) => {
+          switch (token) {
+            case "vote":
+              return (
+                <VoteGroup
+                  key="vote"
+                  targetUnitId={post.unitId}
+                  initialScore={score}
+                  initialUserVote={userVote}
+                />
+              );
+            case "reply":
+              return (
+                <ReplyAction
+                  key="reply"
+                  replyCount={post.replyCount ?? 0}
+                  mode={replyMode}
+                  onInvoke={onReplyInvoke}
+                />
+              );
+            case "share":
+              return (
+                <ShareAction key="share" href={shareHref} title={shareTitle} />
+              );
+            case "shelf":
+              return (
+                <ShelfAction
+                  key="shelf"
+                  targetUnitId={post.unitId}
+                  isReview={policy.isReview}
+                />
+              );
+            case "more":
+            case "funny":
+            case "award":
+              return null;
+            default:
+              return null;
+          }
+        })}
+        {hidden.length > 0 && (
+          <OverflowMenu
+            items={hidden}
+            size={size}
+            onInvoke={handleOverflowInvoke}
+          />
+        )}
+      </Stack>
+    </ReactionBarProvider>
   );
 };

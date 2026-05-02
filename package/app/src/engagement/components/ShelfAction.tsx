@@ -2,13 +2,13 @@ import { LibraryAdd } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import type React from "react";
 import { CollectionModal } from "@/collection/components/CollectionModal";
-import { useCollectionModal } from "@/collection/hooks/useCollectionModal";
-import { useAuth } from "@/user/pages/useAuth";
-import { useAuthModal } from "@/user/components/useAuthModal";
+import { useShelfTrigger } from "../hooks/useShelfTrigger";
 import type { EngagementSize } from "../types";
+import { useReactionBarContext } from "./ReactionBarContext";
 
 export type ShelfActionProps = {
   targetUnitId: string;
+  /** Override the size from context. Rarely needed; prefer setting on the bar. */
   size?: EngagementSize;
   /** When the target is a review, the collection modal surfaces the review-specific dual-mode UI. */
   isReview?: boolean;
@@ -27,25 +27,19 @@ function sizeToIconFontSize(size: EngagementSize): string {
 
 export const ShelfAction: React.FC<ShelfActionProps> = ({
   targetUnitId,
-  size = "md",
+  size: sizeProp,
   isReview,
 }) => {
-  const { isAuthenticated } = useAuth();
-  const collection = useCollectionModal(targetUnitId);
-  const auth = useAuthModal("login");
-
-  const handleClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    if (!isAuthenticated) {
-      auth.openLogin();
-      return;
-    }
-    collection.handleOpen();
-  };
+  const ctx = useReactionBarContext();
+  const size = sizeProp ?? ctx.size;
+  const { isAuthenticated, collection, auth, handleClick } = useShelfTrigger({
+    targetUnitId,
+  });
 
   return (
     <>
       <Button
+        variant="text"
         size={size === "lg" ? "medium" : "small"}
         onClick={handleClick}
         startIcon={<LibraryAdd sx={{ fontSize: sizeToIconFontSize(size) }} />}
@@ -56,6 +50,13 @@ export const ShelfAction: React.FC<ShelfActionProps> = ({
             size === "sm" ? "0.75rem" : size === "lg" ? "0.95rem" : "0.875rem",
           minWidth: 0,
           px: size === "sm" ? 0.75 : 1,
+          "&:hover": {
+            bgcolor: (theme: { palette: { mode: string } }) =>
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.06)"
+                : "rgba(0, 0, 0, 0.06)",
+            color: "text.primary",
+          },
         }}
       >
         Shelf

@@ -1,10 +1,12 @@
 import { IosShare } from "@mui/icons-material";
 import { Button, Menu, MenuItem } from "@mui/material";
 import type React from "react";
-import { useState } from "react";
+import { useShareMenu } from "../hooks/useShareMenu";
 import type { EngagementSize } from "../types";
+import { useReactionBarContext } from "./ReactionBarContext";
 
 export type ShareActionProps = {
+  /** Override the size from context. Rarely needed; prefer setting on the bar. */
   size?: EngagementSize;
   /** Absolute or relative URL to share. Resolved via `getShareHref` at the call site. */
   href: string;
@@ -23,61 +25,27 @@ function sizeToIconFontSize(size: EngagementSize): string {
   }
 }
 
-function absolute(href: string): string {
-  if (/^https?:\/\//.test(href)) return href;
-  if (typeof window === "undefined") return href;
-  return window.location.origin + href;
-}
-
 export const ShareAction: React.FC<ShareActionProps> = ({
-  size = "md",
+  size: sizeProp,
   href,
   title,
 }) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-
-  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = (event?: React.MouseEvent | {}) => {
-    if (event && "stopPropagation" in event) {
-      (event as React.MouseEvent).stopPropagation();
-    }
-    setAnchorEl(null);
-  };
-
-  const handleCopy = async (event: React.MouseEvent) => {
-    event.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(absolute(href));
-    } catch {
-      // swallow — clipboard write can fail in insecure contexts
-    }
-    setAnchorEl(null);
-  };
-
-  const canWebShare =
-    typeof navigator !== "undefined" &&
-    typeof (navigator as Navigator & { share?: unknown }).share === "function";
-
-  const handleWebShare = async (event: React.MouseEvent) => {
-    event.stopPropagation();
-    try {
-      await (navigator as Navigator).share({
-        url: absolute(href),
-        title,
-      });
-    } catch {
-      // user-cancelled or unsupported; nothing to do
-    }
-    setAnchorEl(null);
-  };
+  const ctx = useReactionBarContext();
+  const size = sizeProp ?? ctx.size;
+  const {
+    anchorEl,
+    open,
+    canWebShare,
+    handleOpen,
+    handleClose,
+    handleCopy,
+    handleWebShare,
+  } = useShareMenu({ href, title });
 
   return (
     <>
       <Button
+        variant="text"
         size={size === "lg" ? "medium" : "small"}
         onClick={handleOpen}
         startIcon={<IosShare sx={{ fontSize: sizeToIconFontSize(size) }} />}
@@ -88,13 +56,20 @@ export const ShareAction: React.FC<ShareActionProps> = ({
             size === "sm" ? "0.75rem" : size === "lg" ? "0.95rem" : "0.875rem",
           minWidth: 0,
           px: size === "sm" ? 0.75 : 1,
+          "&:hover": {
+            bgcolor: (theme: { palette: { mode: string } }) =>
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.06)"
+                : "rgba(0, 0, 0, 0.06)",
+            color: "text.primary",
+          },
         }}
       >
         Share
       </Button>
       <Menu
         anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
+        open={open}
         onClose={handleClose}
         onClick={(event) => event.stopPropagation()}
       >

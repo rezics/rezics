@@ -42,6 +42,7 @@ export const BookHeroReactionBar: React.FC<{
       {bookInfo?.unitId && (
         <ReactionBar
           size="md"
+          variant="plain"
           post={reactionPost}
           policy={bookPolicy}
           actions={bookHeroActions}

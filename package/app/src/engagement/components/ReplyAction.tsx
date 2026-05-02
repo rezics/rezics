@@ -2,8 +2,10 @@ import { ChatBubbleOutline } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import type React from "react";
 import type { EngagementSize } from "../types";
+import { useReactionBarContext } from "./ReactionBarContext";
 
 export type ReplyActionProps = {
+  /** Override the size from context. Rarely needed; prefer setting on the bar. */
   size?: EngagementSize;
   replyCount?: number;
   mode?: "count" | "label";
@@ -22,11 +24,14 @@ function sizeToIconFontSize(size: EngagementSize): string {
 }
 
 export const ReplyAction: React.FC<ReplyActionProps> = ({
-  size = "md",
+  size: sizeProp,
   replyCount = 0,
   mode = "count",
   onInvoke,
 }) => {
+  const ctx = useReactionBarContext();
+  const size = sizeProp ?? ctx.size;
+
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     onInvoke?.();
@@ -37,6 +42,7 @@ export const ReplyAction: React.FC<ReplyActionProps> = ({
 
   return (
     <Button
+      variant="text"
       size={size === "lg" ? "medium" : "small"}
       onClick={handleClick}
       startIcon={
@@ -49,6 +55,13 @@ export const ReplyAction: React.FC<ReplyActionProps> = ({
           size === "sm" ? "0.75rem" : size === "lg" ? "0.95rem" : "0.875rem",
         minWidth: 0,
         px: size === "sm" ? 0.75 : 1,
+        "&:hover": {
+          bgcolor: (theme: { palette: { mode: string } }) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.06)"
+              : "rgba(0, 0, 0, 0.06)",
+          color: "text.primary",
+        },
       }}
     >
       {label}

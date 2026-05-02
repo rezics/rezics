@@ -60,6 +60,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
         />
         <ReactionBar
           size="md"
+          variant="pill"
           post={post}
           policy={postPolicy}
           actions={postCardActions}

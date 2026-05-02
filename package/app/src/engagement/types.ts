@@ -41,3 +41,13 @@ export type ActionPolicy = {
  * and label typography scale at the atom level.
  */
 export type EngagementSize = "sm" | "md" | "lg";
+
+/**
+ * Visual treatment for `ReactionBar`.
+ *
+ * - `"plain"`  — naked icon-button row, transparent chrome. Use inline next to
+ *   meta info (e.g. `BookHeroSection` right rail).
+ * - `"pill"`   — atoms share one rounded capsule that blends with the host
+ *   card surface (no brand-tinted fills). Use inside discussion / list cards.
+ */
+export type ReactionBarVariant = "plain" | "pill";
