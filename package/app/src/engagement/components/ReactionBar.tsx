@@ -84,18 +84,6 @@ function resolvePolicy(
   return { visible: rawActions, hidden };
 }
 
-const PILL_SX = {
-  display: "inline-flex",
-  alignItems: "center",
-  borderRadius: "var(--rezics-radius-pill, 999px)",
-  bgcolor: (theme: { palette: { mode: string } }) =>
-    theme.palette.mode === "dark"
-      ? "rgba(255, 255, 255, 0.04)"
-      : "rgba(0, 0, 0, 0.04)",
-  px: 0.5,
-  py: 0.25,
-};
-
 export const ReactionBar: React.FC<ReactionBarProps> = ({
   post,
   policy,
@@ -127,7 +115,17 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   };
 
   const spacing =
-    variant === "pill" ? 0 : size === "sm" ? 0.25 : size === "lg" ? 1 : 0.5;
+    variant === "pill"
+      ? size === "sm"
+        ? 0.5
+        : size === "lg"
+          ? 1
+          : 0.75
+      : size === "sm"
+        ? 0.25
+        : size === "lg"
+          ? 1
+          : 0.5;
 
   const handleBarClick = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -140,7 +138,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
 
   const stackSx =
     variant === "pill"
-      ? { ...PILL_SX, flexWrap: "nowrap" as const }
+      ? { flexWrap: "nowrap" as const }
       : { flexWrap: "wrap" as const };
 
   return (

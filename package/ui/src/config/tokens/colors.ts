@@ -31,6 +31,10 @@ export interface ColorTokens {
     error: { fill: string; textLight: string; textDark: string };
     info: { fill: string; textLight: string; textDark: string };
   };
+  sentiment: {
+    positive: { fill: string; textLight: string; textDark: string };
+    negative: { fill: string; textLight: string; textDark: string };
+  };
   border: {
     whisper: string;
     defined: string;
@@ -55,6 +59,18 @@ const semanticShared = {
   info: { fill: "#3898ec", textLight: "#1565c0", textDark: "#5aa9f0" },
 } as const;
 
+// Sentiment polarity (vote / rating / poll). Positive reuses brand 輪迴红 so they
+// move in lock-step; negative is a muted slate-blue chosen to read as a calm
+// counterpoint on parchment without competing with brand red or `info`.
+const sentimentShared = {
+  positive: {
+    fill: brandShared.fill,
+    textLight: brandShared.textLight,
+    textDark: brandShared.textDark,
+  },
+  negative: { fill: "#5B7A99", textLight: "#3F5C7A", textDark: "#7B98B5" },
+} as const;
+
 export const lightColors: ColorTokens = {
   surface: {
     canvas: "#f5f4ed",
@@ -73,6 +89,7 @@ export const lightColors: ColorTokens = {
   },
   brand: brandShared,
   semantic: semanticShared,
+  sentiment: sentimentShared,
   border: {
     whisper: "rgba(0, 0, 0, 0.08)",
     defined: "#d2d2d7",
@@ -100,6 +117,7 @@ export const darkColors: ColorTokens = {
   },
   brand: brandShared,
   semantic: semanticShared,
+  sentiment: sentimentShared,
   border: {
     whisper: "rgba(255, 255, 255, 0.10)",
     defined: "#3a3937",

@@ -149,6 +149,13 @@
   --rezics-color-error-text: #cf2d56;
   --rezics-color-info-text: #1565c0;
 
+  /* Sentiment polarity (vote / rating / poll). Positive == brand 輪迴红;
+   * negative is a muted slate-blue counterpoint. */
+  --rezics-color-sentiment-positive-fill: #f4606c;
+  --rezics-color-sentiment-positive-text: #c4433a;
+  --rezics-color-sentiment-negative-fill: #5b7a99;
+  --rezics-color-sentiment-negative-text: #3f5c7a;
+
   /* Borders */
   --rezics-color-border-whisper: rgba(0, 0, 0, 0.08);
   --rezics-color-border-defined: #d2d2d7;
@@ -252,6 +259,10 @@ html.dark {
   --rezics-color-warning-text: #d8943e;
   --rezics-color-error-text: #e34c75;
   --rezics-color-info-text: #5aa9f0;
+
+  /* Sentiment — dark variants */
+  --rezics-color-sentiment-positive-text: #fa7882;
+  --rezics-color-sentiment-negative-text: #7b98b5;
 
   /* Borders */
   --rezics-color-border-whisper: rgba(255, 255, 255, 0.1);

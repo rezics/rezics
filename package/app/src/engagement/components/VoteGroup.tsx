@@ -1,8 +1,5 @@
-import {
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-} from "@mui/icons-material";
 import { IconButton, Stack, Typography } from "@mui/material";
+import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import type React from "react";
 import { useVoteController, type VoteValue } from "../hooks/useVoteController";
 import type { EngagementSize } from "../types";
@@ -24,14 +21,14 @@ function formatScore(score: number): string {
   return `${sign}${k.toFixed(k < 10 ? 1 : 0).replace(/\.0$/, "")}K`;
 }
 
-function sizeToIconFontSize(size: EngagementSize): string {
+function sizeToIconPx(size: EngagementSize): number {
   switch (size) {
     case "sm":
-      return "1rem";
+      return 16;
     case "lg":
-      return "1.5rem";
+      return 24;
     default:
-      return "1.25rem";
+      return 20;
   }
 }
 
@@ -54,6 +51,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
 }) => {
   const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
+  const variant = ctx.variant;
   const { score, userVote, toggleUp, toggleDown } = useVoteController({
     targetUnitId,
     initialScore,
@@ -70,7 +68,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
     toggleDown();
   };
 
-  const iconFontSize = sizeToIconFontSize(size);
+  const iconPx = sizeToIconPx(size);
   const typoVariant = sizeToTypography(size);
   const buttonSize = size === "lg" ? "medium" : "small";
 
@@ -85,22 +83,39 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
     },
   };
 
+  const upActive = userVote === "like";
+  const downActive = userVote === "dislike";
+
+  const groupSx =
+    variant === "pill"
+      ? {
+          borderRadius: "var(--rezics-radius-pill, 999px)",
+          bgcolor: (theme: { palette: { mode: string } }) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.04)"
+              : "rgba(0, 0, 0, 0.04)",
+          px: 0.5,
+          py: 0.25,
+        }
+      : undefined;
+
   return (
-    <Stack direction="row" alignItems="center" spacing={0.25}>
+    <Stack direction="row" alignItems="center" spacing={0.25} sx={groupSx}>
       <IconButton
         size={buttonSize}
         onClick={handleUp}
-        sx={iconButtonSx}
+        sx={{
+          ...iconButtonSx,
+          color: upActive
+            ? "var(--rezics-color-sentiment-positive-text)"
+            : "text.secondary",
+        }}
         aria-label="Upvote"
       >
-        <KeyboardArrowUp
-          sx={{
-            fontSize: iconFontSize,
-            color:
-              userVote === "like"
-                ? "var(--rezics-color-text-brand)"
-                : "inherit",
-          }}
+        <ArrowBigUp
+          size={iconPx}
+          fill={upActive ? "currentColor" : "none"}
+          strokeWidth={2}
         />
       </IconButton>
       <Typography
@@ -111,9 +126,9 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
           fontVariantNumeric: "tabular-nums",
           color:
             userVote === "like"
-              ? "var(--rezics-color-text-brand)"
+              ? "var(--rezics-color-sentiment-positive-text)"
               : userVote === "dislike"
-                ? "error.main"
+                ? "var(--rezics-color-sentiment-negative-text)"
                 : "text.secondary",
           fontWeight: userVote ? 600 : 400,
         }}
@@ -123,14 +138,18 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
       <IconButton
         size={buttonSize}
         onClick={handleDown}
-        sx={iconButtonSx}
+        sx={{
+          ...iconButtonSx,
+          color: downActive
+            ? "var(--rezics-color-sentiment-negative-text)"
+            : "text.secondary",
+        }}
         aria-label="Downvote"
       >
-        <KeyboardArrowDown
-          sx={{
-            fontSize: iconFontSize,
-            color: userVote === "dislike" ? "error.main" : "inherit",
-          }}
+        <ArrowBigDown
+          size={iconPx}
+          fill={downActive ? "currentColor" : "none"}
+          strokeWidth={2}
         />
       </IconButton>
     </Stack>

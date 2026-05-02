@@ -1,5 +1,5 @@
-import { LibraryAdd } from "@mui/icons-material";
 import { Button } from "@mui/material";
+import { BookmarkPlus } from "lucide-react";
 import type React from "react";
 import { CollectionModal } from "@/collection/components/CollectionModal";
 import { useShelfTrigger } from "../hooks/useShelfTrigger";
@@ -14,14 +14,14 @@ export type ShelfActionProps = {
   isReview?: boolean;
 };
 
-function sizeToIconFontSize(size: EngagementSize): string {
+function sizeToIconPx(size: EngagementSize): number {
   switch (size) {
     case "sm":
-      return "1rem";
+      return 16;
     case "lg":
-      return "1.375rem";
+      return 22;
     default:
-      return "1.125rem";
+      return 18;
   }
 }
 
@@ -32,6 +32,7 @@ export const ShelfAction: React.FC<ShelfActionProps> = ({
 }) => {
   const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
+  const isPill = ctx.variant === "pill";
   const { isAuthenticated, collection, auth, handleClick } = useShelfTrigger({
     targetUnitId,
   });
@@ -42,19 +43,26 @@ export const ShelfAction: React.FC<ShelfActionProps> = ({
         variant="text"
         size={size === "lg" ? "medium" : "small"}
         onClick={handleClick}
-        startIcon={<LibraryAdd sx={{ fontSize: sizeToIconFontSize(size) }} />}
+        startIcon={<BookmarkPlus size={sizeToIconPx(size)} strokeWidth={2} />}
         sx={{
           color: "text.secondary",
           textTransform: "none",
           fontSize:
             size === "sm" ? "0.75rem" : size === "lg" ? "0.95rem" : "0.875rem",
           minWidth: 0,
-          px: size === "sm" ? 0.75 : 1,
+          px: size === "sm" ? 1 : 1.25,
+          ...(isPill && {
+            borderRadius: "var(--rezics-radius-pill, 999px)",
+            bgcolor: (theme: { palette: { mode: string } }) =>
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.04)"
+                : "rgba(0, 0, 0, 0.04)",
+          }),
           "&:hover": {
             bgcolor: (theme: { palette: { mode: string } }) =>
               theme.palette.mode === "dark"
-                ? "rgba(255, 255, 255, 0.06)"
-                : "rgba(0, 0, 0, 0.06)",
+                ? "rgba(255, 255, 255, 0.08)"
+                : "rgba(0, 0, 0, 0.08)",
             color: "text.primary",
           },
         }}

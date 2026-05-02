@@ -61,6 +61,21 @@ Fill (UI element) and text (AA-body verified) variants per state. Light/dark tex
   </Grid>
 </Unstyled>
 
+## Sentiment — 正負極性
+
+Vote / rating / poll 的正負極性配色。`positive` 直接共享品牌轮回红——投票、評分都和品牌情緒同步；`negative` 採用降飽和的板岩藍（slate-blue），冷靜、不嗆，避免與品牌紅或 `info` 競爭。
+
+應用：upvote / 評分 ≥ 5 / approve = positive · downvote / 評分 < 5 / reject = negative。`*-text` 變體會依模式自動切換為 AA-safe 的深/淺色。
+
+<Unstyled>
+  <Grid cols={2}>
+    <Swatch name="positive · fill" cssVar="--rezics-color-sentiment-positive-fill" value="var(--rezics-color-sentiment-positive-fill)" description="贊成、好評、上升趨勢（共享 brand-fill）" invertText />
+    <Swatch name="negative · fill" cssVar="--rezics-color-sentiment-negative-fill" value="var(--rezics-color-sentiment-negative-fill)" description="反對、差評、下降趨勢" invertText />
+    <Swatch name="positive · text" cssVar="--rezics-color-sentiment-positive-text" value="var(--rezics-color-sentiment-positive-text)" description="正面標籤、計數高亮" invertText height={48} />
+    <Swatch name="negative · text" cssVar="--rezics-color-sentiment-negative-text" value="var(--rezics-color-sentiment-negative-text)" description="負面標籤、計數高亮" invertText height={48} />
+  </Grid>
+</Unstyled>
+
 ## Border
 
 Whisper is the workhorse — used for borderless-feel section separation. Defined for input boundaries; strong reserved for emphasis.

@@ -33,11 +33,20 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
     aggregate.totalCount > 0 ? aggregate.totalScore / aggregate.totalCount : 0;
   const distribution = aggregate.distribution ?? {};
   const maxCount = Math.max(...Object.values(distribution).map(Number), 1);
+  const averageVar =
+    average >= 5
+      ? "var(--rezics-color-sentiment-positive-text)"
+      : "var(--rezics-color-sentiment-negative-text)";
 
   return (
     <Stack direction="row" spacing={3} alignItems="center">
       <Box textAlign="center" minWidth={80}>
-        <Typography variant="h3" fontWeight={700} lineHeight={1}>
+        <Typography
+          variant="h3"
+          fontWeight={700}
+          lineHeight={1}
+          sx={{ color: averageVar }}
+        >
           {average.toFixed(1)}
         </Typography>
         <Typography variant="caption" color="text.secondary">
@@ -49,6 +58,10 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
         {Array.from({ length: 10 }, (_, i) => 10 - i).map((score) => {
           const count = Number(distribution[String(score)] ?? 0);
           const percent = (count / maxCount) * 100;
+          const barVar =
+            score >= 5
+              ? "var(--rezics-color-sentiment-positive-fill)"
+              : "var(--rezics-color-sentiment-negative-fill)";
           return (
             <Stack key={score} direction="row" spacing={1} alignItems="center">
               <Typography
@@ -66,6 +79,9 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
                   height: 6,
                   borderRadius: 3,
                   bgcolor: "action.hover",
+                  "& .MuiLinearProgress-bar": {
+                    bgcolor: barVar,
+                  },
                 }}
               />
             </Stack>
