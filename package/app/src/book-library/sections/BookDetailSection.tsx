@@ -1,7 +1,6 @@
 import { Box, Grid, MenuItem, Stack, TextField } from "@mui/material";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import type { BookDTO } from "@rezics/contract";
+import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
@@ -10,11 +9,11 @@ import { useTranslation } from "react-i18next";
 import { useBookLanguage } from "../hooks/useBookLanguage";
 
 const TAB_ROUTES = ["info", "review", "content", "discussion"] as const;
+type TabRoute = (typeof TAB_ROUTES)[number];
 
-function useActiveTabIndex(): number {
+function useActiveTabRoute(): TabRoute {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const idx = TAB_ROUTES.findIndex((r) => pathname.endsWith(`/${r}`));
-  return idx >= 0 ? idx : 0;
+  return TAB_ROUTES.find((r) => pathname.endsWith(`/${r}`)) ?? "info";
 }
 
 export type BookDetailShellProps = {
@@ -37,7 +36,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { bookId } = useParams({ strict: false }) as { bookId: string };
-  const activeTab = useActiveTabIndex();
+  const activeTab = useActiveTabRoute();
   const [selectedLang, setSelectedLang] = useBookLanguage(bookId, bookInfo);
 
   const availableLanguages = useMemo(
@@ -45,9 +44,11 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
     [bookInfo?.translations],
   );
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    const route = TAB_ROUTES[newValue];
-    navigate({ to: `/book/$bookId/${route}`, params: { bookId } });
+  const handleTabChange = (newValue: string) => {
+    navigate({
+      to: `/book/$bookId/${newValue as TabRoute}`,
+      params: { bookId },
+    });
   };
 
   const hasSidebar = Boolean(sidebar);
@@ -55,23 +56,23 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   return (
     <Box id="book-detail">
       <Box maxWidth="xl" className="mt-4 mb-8 mx-auto">
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={2}
-          sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}
-        >
+        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              variant="scrollable"
-              scrollButtons="auto"
-            >
-              <Tab label={t("page.book.tabs.overview")} />
-              <Tab label={t("page.book.tabs.review_shelf")} />
-              <Tab label={t("page.book.tabs.content")} />
-              <Tab label={t("page.book.tabs.community")} />
+            <Tabs value={activeTab} onValueChange={handleTabChange}>
+              <TabsList variant="line">
+                <TabsTrigger value="info">
+                  {t("page.book.tabs.overview")}
+                </TabsTrigger>
+                <TabsTrigger value="review">
+                  {t("page.book.tabs.review_shelf")}
+                </TabsTrigger>
+                <TabsTrigger value="content">
+                  {t("page.book.tabs.content")}
+                </TabsTrigger>
+                <TabsTrigger value="discussion">
+                  {t("page.book.tabs.community")}
+                </TabsTrigger>
+              </TabsList>
             </Tabs>
           </Box>
 

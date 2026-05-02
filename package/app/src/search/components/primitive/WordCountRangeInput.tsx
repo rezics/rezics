@@ -1,6 +1,7 @@
 import { TextField } from "@mui/material";
 import type { SearchQuery } from "@rezics/contract";
 import type React from "react";
+import { useEffect, useState } from "react";
 
 type TextLength = NonNullable<SearchQuery["textLength"]>;
 
@@ -9,25 +10,48 @@ export type WordCountRangeInputProps = {
   onChange: (value: TextLength | undefined) => void;
   label?: string;
   size?: "small" | "medium";
+  placeholder?: string;
 };
 
-function parse(raw: string): number | undefined {
-  if (raw.trim() === "") return undefined;
-  const n = Number(raw);
+const SEPARATOR = /\s*[-–~]\s*/;
+
+function format(value: TextLength | undefined): string {
+  if (!value) return "";
+  const { min, max } = value;
+  if (min !== undefined && max !== undefined) return `${min}-${max}`;
+  if (min !== undefined) return `${min}-`;
+  if (max !== undefined) return `-${max}`;
+  return "";
+}
+
+function parseNumber(raw: string): number | undefined {
+  const trimmed = raw.trim();
+  if (trimmed === "") return undefined;
+  const n = Number(trimmed);
   return Number.isFinite(n) && n >= 0 ? n : undefined;
 }
 
-function merge(
-  prev: TextLength | undefined,
-  key: "min" | "max",
-  next: number | undefined,
-): TextLength | undefined {
-  const current = prev ?? {};
-  const merged: TextLength = { ...current, [key]: next };
-  if (merged.min === undefined) delete merged.min;
-  if (merged.max === undefined) delete merged.max;
-  if (merged.min === undefined && merged.max === undefined) return undefined;
-  return merged;
+function parse(raw: string): TextLength | undefined | "invalid" {
+  const trimmed = raw.trim();
+  if (trimmed === "") return undefined;
+
+  if (SEPARATOR.test(trimmed)) {
+    const [left, right] = trimmed.split(SEPARATOR);
+    const min = parseNumber(left ?? "");
+    const max = parseNumber(right ?? "");
+    if (left && left.trim() !== "" && min === undefined) return "invalid";
+    if (right && right.trim() !== "" && max === undefined) return "invalid";
+    if (min === undefined && max === undefined) return undefined;
+    if (min !== undefined && max !== undefined && min > max) return "invalid";
+    const out: TextLength = {};
+    if (min !== undefined) out.min = min;
+    if (max !== undefined) out.max = max;
+    return out;
+  }
+
+  const single = parseNumber(trimmed);
+  if (single === undefined) return "invalid";
+  return { min: single };
 }
 
 export const WordCountRangeInput: React.FC<WordCountRangeInputProps> = ({
@@ -35,36 +59,40 @@ export const WordCountRangeInput: React.FC<WordCountRangeInputProps> = ({
   onChange,
   label,
   size = "small",
+  placeholder = "min-max",
 }) => {
-  const min = value?.min;
-  const max = value?.max;
+  const [local, setLocal] = useState<string>(() => format(value));
+
+  useEffect(() => {
+    setLocal(format(value));
+  }, [value]);
+
+  const commit = () => {
+    const result = parse(local);
+    if (result === "invalid") {
+      setLocal(format(value));
+      return;
+    }
+    onChange(result);
+    setLocal(format(result));
+  };
 
   return (
-    <div className="flex flex-col gap-1">
-      {label && (
-        <span className="text-sm font-medium opacity-60">{label}</span>
-      )}
-      <div className="flex items-center gap-2">
-        <TextField
-          size={size}
-          type="number"
-          placeholder="min"
-          value={min ?? ""}
-          className="w-24"
-          onChange={(e) => onChange(merge(value, "min", parse(e.target.value)))}
-          slotProps={{ htmlInput: { min: 0 } }}
-        />
-        <span className="opacity-60">—</span>
-        <TextField
-          size={size}
-          type="number"
-          placeholder="max"
-          value={max ?? ""}
-          className="w-24"
-          onChange={(e) => onChange(merge(value, "max", parse(e.target.value)))}
-          slotProps={{ htmlInput: { min: 0 } }}
-        />
-      </div>
-    </div>
+    <TextField
+      size={size}
+      label={label}
+      placeholder={placeholder}
+      value={local}
+      className="w-40"
+      onChange={(e) => setLocal(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          commit();
+        }
+      }}
+      slotProps={{ htmlInput: { inputMode: "numeric" } }}
+    />
   );
 };

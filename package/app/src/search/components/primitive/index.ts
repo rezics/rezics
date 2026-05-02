@@ -16,6 +16,8 @@ export { PostKindCheckboxes } from "./PostKindCheckboxes";
 export type { PostKindCheckboxesProps } from "./PostKindCheckboxes";
 export { RatingFilterChips } from "./RatingFilterChips";
 export type { RatingFilterChipsProps } from "./RatingFilterChips";
+export { RatingMultiSelect } from "./RatingMultiSelect";
+export type { RatingMultiSelectProps } from "./RatingMultiSelect";
 export { SORT_OPTIONS, SortSelect } from "./SortSelect";
 export type { SortOption, SortSelectProps } from "./SortSelect";
 export { TagGroupSuggestions } from "./TagGroupSuggestions";

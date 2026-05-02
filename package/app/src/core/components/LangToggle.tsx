@@ -57,9 +57,6 @@ export const LangToggle: React.FC<LangToggleProps> = ({ children }) => {
           },
         }}
       >
-        <MenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANS)}>
-          <ListItemText>{LANGUAGE_META["zh-hans"].nativeName}</ListItemText>
-        </MenuItem>
         <MenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANT)}>
           <ListItemText>{LANGUAGE_META["zh-hant"].nativeName}</ListItemText>
         </MenuItem>
@@ -71,6 +68,9 @@ export const LangToggle: React.FC<LangToggleProps> = ({ children }) => {
         </MenuItem>
         <MenuItem onClick={() => handleChangeLang(LANGUAGES.DE)}>
           <ListItemText>{LANGUAGE_META.de.nativeName}</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANS)}>
+          <ListItemText>{LANGUAGE_META["zh-hans"].nativeName}</ListItemText>
         </MenuItem>
       </Menu>
     </>

@@ -7,7 +7,7 @@ import {
   AppliedFilterChips,
   KeywordInput,
   LicensedToggle,
-  RatingFilterChips,
+  RatingMultiSelect,
   TagGroupSuggestions,
   TagPicker,
   WordCountRangeInput,
@@ -106,7 +106,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
               label={t("search.input.word_count_label")}
             />
           )}
-          <RatingFilterChips
+          <RatingMultiSelect
             value={ratings.value}
             onChange={ratings.onChange}
             allowed={allowed}
