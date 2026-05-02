@@ -98,13 +98,62 @@ export function createUnoConfig() {
         modal: "var(--rezics-shadow-modal)",
       },
       colors: {
-        // Legacy MUI palette references — kept for backward compatibility.
+        // shadcn/ui tokens — overrides unocss-preset-shadcn's `oklch(var(--foo))`
+        // wrapper so utilities consume the variables (which now hold full
+        // `oklch(...)` values) directly. Matches the latest shadcn CLI output.
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
+        },
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
+        },
+        input: "var(--input)",
+        ring: "var(--ring)",
+        chart: {
+          "1": "var(--chart-1)",
+          "2": "var(--chart-2)",
+          "3": "var(--chart-3)",
+          "4": "var(--chart-4)",
+          "5": "var(--chart-5)",
+        },
+        sidebar: {
+          DEFAULT: "var(--sidebar)",
+          foreground: "var(--sidebar-foreground)",
+          primary: "var(--sidebar-primary)",
+          "primary-foreground": "var(--sidebar-primary-foreground)",
+          accent: "var(--sidebar-accent)",
+          "accent-foreground": "var(--sidebar-accent-foreground)",
+          border: "var(--sidebar-border)",
+          ring: "var(--sidebar-ring)",
+        },
+        // primary/secondary merge shadcn's DEFAULT/foreground with the
+        // legacy MUI palette references kept for backward compatibility.
         primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
           main: "var(--mui-palette-primary-main)",
           light: "var(--mui-palette-primary-light)",
           dark: "var(--mui-palette-primary-dark)",
         },
         secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
           main: "var(--mui-palette-secondary-main)",
           light: "var(--mui-palette-secondary-light)",
           dark: "var(--mui-palette-secondary-dark)",

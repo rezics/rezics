@@ -1,41 +1,63 @@
+/* ================================================================
+ * shadcn/ui tokens — Foundation v2 (OKLCH)
+ *
+ * Latest shadcn convention: variables hold full oklch(...) values and
+ * are consumed via `var(--foo)` directly. The `theme.colors` block in
+ * uno-config.ts re-declares each shadcn token as `var(--foo)` so the
+ * preset's default `oklch(var(--foo))` wrapper is bypassed.
+ *
+ * Mode switch: `<body class="theme-rezics">` + `.dark` for shadcn.
+ * The rezics design system uses an orthogonal switch via
+ * `<html data-theme="dark">` (or `html.dark`); see block below.
+ * ================================================================ */
+
 .theme-rezics {
   color-scheme: light;
 
-  --background: 0 0% 96%;
-  --foreground: 0 0% 7%;
+  --background: oklch(0.969 0 0);
+  --foreground: oklch(0.176 0 0);
 
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 7%;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.176 0 0);
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 7%;
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.176 0 0);
 
-  --primary: 355 87% 67%;
-  --primary-foreground: 0 0% 100%;
+  --primary: oklch(0.696 0.181 17.5);
+  --primary-foreground: oklch(1 0 0);
 
-  --secondary: 210 79% 46%;
-  --secondary-foreground: 0 0% 100%;
+  --secondary: oklch(0.585 0.150 247);
+  --secondary-foreground: oklch(1 0 0);
 
-  --muted: 0 0% 93%;
-  --muted-foreground: 0 0% 40%;
+  --muted: oklch(0.943 0 0);
+  --muted-foreground: oklch(0.508 0 0);
 
-  --accent: 355 100% 95%;
-  --accent-foreground: 0 0% 7%;
+  --accent: oklch(0.940 0.030 17);
+  --accent-foreground: oklch(0.176 0 0);
 
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive: oklch(0.628 0.225 27.3);
+  --destructive-foreground: oklch(1 0 0);
 
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  --ring: 355 87% 67%;
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.696 0.181 17.5);
 
   --radius: 0.5rem;
 
-  --chart-1: 355 87% 67%;
-  --chart-2: 210 79% 46%;
-  --chart-3: 160 84% 39%;
-  --chart-4: 38 92% 50%;
-  --chart-5: 258 90% 66%;
+  --chart-1: oklch(0.696 0.181 17.5);
+  --chart-2: oklch(0.585 0.150 247);
+  --chart-3: oklch(0.674 0.150 165);
+  --chart-4: oklch(0.762 0.169 70);
+  --chart-5: oklch(0.624 0.218 297);
+
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.343 0.012 271);
+  --sidebar-primary: oklch(0.171 0.013 274);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.961 0.005 264);
+  --sidebar-accent-foreground: oklch(0.171 0.013 274);
+  --sidebar-border: oklch(0.913 0.013 251);
+  --sidebar-ring: oklch(0.626 0.196 252);
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -43,64 +65,50 @@
 .theme-rezics.dark {
   color-scheme: dark;
 
-  --background: 0 0% 7%;
-  --foreground: 0 0% 100%;
+  --background: oklch(0.176 0 0);
+  --foreground: oklch(1 0 0);
 
-  --card: 0 0% 12%;
-  --card-foreground: 0 0% 100%;
+  --card: oklch(0.227 0 0);
+  --card-foreground: oklch(1 0 0);
 
-  --popover: 0 0% 12%;
-  --popover-foreground: 0 0% 100%;
+  --popover: oklch(0.227 0 0);
+  --popover-foreground: oklch(1 0 0);
 
-  --primary: 355 87% 67%;
-  --primary-foreground: 0 0% 100%;
+  --primary: oklch(0.696 0.181 17.5);
+  --primary-foreground: oklch(1 0 0);
 
-  --secondary: 210 79% 46%;
-  --secondary-foreground: 0 0% 100%;
+  --secondary: oklch(0.585 0.150 247);
+  --secondary-foreground: oklch(1 0 0);
 
-  --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 70%;
+  --muted: oklch(0.198 0 0);
+  --muted-foreground: oklch(0.755 0 0);
 
-  --accent: 0 0% 16%;
-  --accent-foreground: 0 0% 100%;
+  --accent: oklch(0.275 0 0);
+  --accent-foreground: oklch(1 0 0);
 
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive: oklch(0.628 0.225 27.3);
+  --destructive-foreground: oklch(1 0 0);
 
-  --border: 0 0% 17%;
-  --input: 0 0% 17%;
-  --ring: 355 87% 67%;
+  --border: oklch(0.286 0 0);
+  --input: oklch(0.286 0 0);
+  --ring: oklch(0.696 0.181 17.5);
 
   --radius: 0.5rem;
 
-  --chart-1: 355 87% 67%;
-  --chart-2: 210 79% 46%;
-  --chart-3: 160 84% 39%;
-  --chart-4: 38 92% 50%;
-  --chart-5: 258 90% 66%;
-}
+  --chart-1: oklch(0.696 0.181 17.5);
+  --chart-2: oklch(0.585 0.150 247);
+  --chart-3: oklch(0.674 0.150 165);
+  --chart-4: oklch(0.762 0.169 70);
+  --chart-5: oklch(0.624 0.218 297);
 
-@layer base {
-  :root {
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-  .dark {
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+  --sidebar: oklch(0.171 0.013 274);
+  --sidebar-foreground: oklch(0.961 0.005 264);
+  --sidebar-primary: oklch(0.546 0.193 263);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.249 0.008 268);
+  --sidebar-accent-foreground: oklch(0.961 0.005 264);
+  --sidebar-border: oklch(0.249 0.008 268);
+  --sidebar-ring: oklch(0.626 0.196 252);
 }
 
 @layer base {
@@ -115,7 +123,7 @@
 /* ================================================================
  * rezics design tokens (Foundation v1)
  * Source: openspec/plans/design-system-research/briefs/01-foundation-v1.md
- * Mode switch: <html data-theme="dark"> (orthogonal to legacy .theme-rezics.dark)
+ * Mode switch: <html data-theme="dark"> (orthogonal to .theme-rezics.dark)
  * ================================================================ */
 
 :root {
@@ -221,14 +229,6 @@
   --rezics-font-mono:
     "CaskaydiaMono Nerd Font", "Cascadia Code", "rezics-mono", "Sarasa Mono TC",
     ui-monospace, "SF Mono", Menlo, monospace;
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
 /* Per-language CJK routing */
@@ -301,26 +301,4 @@ html.dark {
     transition-duration: 0ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-.dark {
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
-}
-
-@theme inline {
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 }
