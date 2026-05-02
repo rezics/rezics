@@ -8,7 +8,7 @@ This change builds out coverage. It also closes three small abstraction gaps the
 
 - **ADDED**: ~80 new component stories across `@rezics/ui` (Tier 1 primitives + Tier 2 composites) and `@rezics/app` (Tier 3 domain atoms + Tier 4 domain composites), each authored as `*.stories.tsx` co-located with the source component, named exports per state (`Default · Empty · Loading · Error · LongContent · Compact · Hero · Disabled` — closed vocabulary).
 - **ADDED**: Six MDX overview pages under `package/app/src/docs/` clustering related stories with prose context — `Engagement.mdx`, `Cards.mdx`, `Posts.mdx`, `Shelves.mdx`, `Search.mdx`, `Profile.mdx`.
-- **ADDED**: Central per-domain mock-data module at `package/app/src/stories/fixtures/{book,post,shelf,review,excerpt,remark,user,realm,notification,tag}.ts`, all entries marked `// MOCK:` per project convention. Shapes are hand-authored to match the runtime types but **do not** import from `prisma/factory/`.
+- **ADDED**: Central per-domain mock-data module at `package/app/src/stories/fixtures/{book,post,shelf,review,excerpt,remark,user,realm,notification,tag}.ts`, all entries marked `// MOCK:` per project convention. Entity shapes are hand-authored to match the runtime types and SHALL NOT import from `prisma/factory/`. Locale-aware text generators (`getFaker`, `generateTitle`, `generateParagraph`) and the curated multilingual corpus (`getTitlePool`, `getSummaryPool`, `getDescriptionPool`) MAY be imported from `@rezics/shared/{random,text}` — that package houses the pure, Prisma-free subset of the factory's helpers and is already in place as a prerequisite of this change.
 - **ADDED**: `<DomainCarousel>` generic in `@rezics/ui` (`renderItem` + items API). Four `Horizontal{Book,Review,Excerpt,Shelf}Carousel` wrappers in `@rezics/app` collapse to thin domain shims that delegate to it.
 - **ADDED**: `<ColorfulButton color="green|orange|rose">` consolidating the three single-color sibling files in `@rezics/ui`. The three `*Button.tsx` source files are removed; existing call sites updated.
 - **ADDED**: `@storybook/addon-a11y@^10` enabled in shared `@rezics/storybook-config` with warnings-only severity. Every story shown in Storybook surfaces an a11y panel.
@@ -39,7 +39,8 @@ This change builds out coverage. It also closes three small abstraction gaps the
   - `@rezics/storybook-config` — adds `@storybook/addon-a11y` to the shared addon list, exposes a `playFunctionsEnabled` flag (default true).
   - `@rezics/folio`, `@rezics/admin`, `@rezics/editor` — no story expansion; remain at cosmos-parity. Folio adds one `Reader` theme-axis story (parity+1).
   - `.claude/skills/rezics-design/` — `patterns.md` and `mui-vs-shadcn.md` updated with abstraction-vs-split rule and story-ID citations.
-- **Dependencies added**: `@storybook/addon-a11y@^10` (workspace devDependency on `@rezics/storybook-config`).
+  - `@rezics/shared` — **prerequisite already landed**, not modified by this change. Houses `random/` and `text/` (corpus + locale faker helpers) extracted from `package/server/prisma/factory/`. Storybook fixtures consume from here.
+- **Dependencies added**: `@storybook/addon-a11y@^10` (workspace devDependency on `@rezics/storybook-config`). `@rezics/app` will gain `@rezics/shared` as a workspace dependency when fixtures are first authored (Phase 4).
 - **Dependencies removed**: None.
 - **APIs**:
   - `<ColorfulButton color>` is a new public export of `@rezics/ui`. The three deleted button names (`GreenButton`, `OrangeButton`, `RoseButton`) are gone — call sites must migrate. The cosmos-period stories that were renamed to `*.stories.tsx` are updated in-place.

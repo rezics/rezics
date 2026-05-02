@@ -1,13 +1,15 @@
 ## 1. Phase 1 — Foundation wiring
 
+- [x] 1.0 **Prerequisite (already landed)**: `@rezics/shared` substrate exists with `random/` (`randomInt`, `randomBoolean`, `randomFloat`, `pickN`, `powerLaw`, `createUsernameGenerator`) and `text/` (`getFaker`, `LANG_DISTRIBUTION`, `generateTitle`, `generateParagraph`, `getTitlePool`, `getSummaryPool`, `getDescriptionPool`) entry points carved out from `package/server/prisma/factory/`. Fixtures in Phase 4 import from `@rezics/shared/{random,text}` for locale-aware string generation; entity shapes remain hand-authored (no `prisma/factory/` imports). Verify by running `rg "from .*@rezics/shared" package/shared/src` — should resolve cleanly.
 - [ ] 1.1 Add `@storybook/addon-a11y@^10` to `package/storybook-config/package.json` devDependencies.
 - [ ] 1.2 Add `"@storybook/addon-a11y"` to the addons array in `package/storybook-config/src/baseStorybookConfig` (or equivalent export); ensure warnings-only behavior.
 - [ ] 1.3 Add `actions: { argTypesRegex: "^on.*" }` to `basePreviewParameters` in `@rezics/storybook-config` to enable play-function arg spying.
 - [ ] 1.4 Run `bun -F @rezics/{ui,editor,folio,admin,app} run build-storybook` and verify exit 0 across all five.
 - [ ] 1.5 Manually verify the Accessibility panel renders for one story per package (`bun -F @rezics/ui run storybook` and visit a story).
-- [ ] 1.6 Create skeleton `package/app/src/stories/fixtures/` with empty modules: `book.ts`, `post.ts`, `shelf.ts`, `review.ts`, `excerpt.ts`, `remark.ts`, `user.ts`, `realm.ts`, `notification.ts`, `tag.ts`. Each file: just an empty export object, `// MOCK:` header comment.
+- [ ] 1.6 Create skeleton `package/app/src/stories/fixtures/` with empty modules: `book.ts`, `post.ts`, `shelf.ts`, `review.ts`, `excerpt.ts`, `remark.ts`, `user.ts`, `realm.ts`, `notification.ts`, `tag.ts`. Each file: just an empty export object, `// MOCK:` header comment. (Authors will pull `getFaker`/`generateTitle`/etc. from `@rezics/shared/text` when populating in Phase 4.)
 - [ ] 1.7 Add `package/app/src/stories/fixtures/index.ts` re-exporting all domain modules.
-- [ ] 1.8 Run `bun -F @rezics/app tsc --noEmit` and confirm no new errors.
+- [ ] 1.8 Add `"@rezics/shared": "workspace:*"` to `package/app/package.json` dependencies so Phase-4 fixtures can import locale helpers and corpus.
+- [ ] 1.9 Run `bun -F @rezics/app tsc --noEmit` and confirm no new errors.
 
 ## 2. Phase 2 — Abstraction-gap refactors with their stories
 
@@ -49,7 +51,9 @@
 
 ## 4. Phase 4 — `@rezics/app` Tier 3 stories (domain atoms)
 
-- [ ] 4.1 **fixtures/book.ts** — populate with `bookEmpty`, `bookFew`, `bookMany`, `bookLongTitle`, `bookNoCover`, `bookCJK` (≥80 chars), `bookLatin` (≥80 chars). All `// MOCK:` tagged.
+> **Fixture authoring note**: entity shapes are hand-authored against runtime types (no `prisma/factory/` imports). For locale-aware string generation use `@rezics/shared/text` — `getFaker(lang)` for a Faker instance bound to the right script, `generateTitle` / `generateParagraph` for lorem-style strings, `getTitlePool` / `getSummaryPool` / `getDescriptionPool` for the curated CJK / Latin / JA / DE corpus. Random primitives (`randomInt`, `pickN`, …) live in `@rezics/shared/random`. The `LocaleCJK` / `LocaleLatin` axes consume these pools so fixtures and seed data stay drift-free.
+
+- [ ] 4.1 **fixtures/book.ts** — populate with `bookEmpty`, `bookFew`, `bookMany`, `bookLongTitle`, `bookNoCover`, `bookCJK` (≥80 chars; pull from `getTitlePool('zh-hant', 'BOOK')` + `getDescriptionPool('zh-hant')`), `bookLatin` (≥80 chars; English corpus). All `// MOCK:` tagged.
 - [ ] 4.2 Author `BookCardHorizontal.stories.tsx` and `BookCardVertical.stories.tsx` — vocab: Default, LongContent, NoCover (use a vocabulary-allowed name; if NoCover not in vocab, use `Empty` for missing-cover state), LocaleCJK, LocaleLatin.
 - [ ] 4.3 Author `BookListView.stories.tsx`, `BookRankingList.stories.tsx`, `BookRankingPanel.stories.tsx` — Default, Empty, Many.
 - [ ] 4.4 Author `ChapterList.stories.tsx`, `LinearChapterList.stories.tsx`, `ChapterArborist.stories.tsx` — Default, Empty, Deep (10+ chapters).
@@ -125,7 +129,7 @@
 - [ ] 7.6 No-promotion audit: run `git diff dev -- package/ui/src/ package/app/src/` and confirm no file moved between `app/` and `ui/`. (The `ColorfulButton`, `DomainCarousel` additions are new files in `ui/`, not promotions.)
 - [ ] 7.7 No-cosmos audit: `rg "react-cosmos|useFixtureInput|useFixtureSelect|cosmos.config" package/` — zero matches outside `openspec/changes/archive/`.
 - [ ] 7.8 Vocabulary audit: list all named exports across `*.stories.tsx`; flag any name not in the closed vocabulary (Decision 6 + Requirement-3 in `storybook-coverage`).
-- [ ] 7.9 Mock import audit: `rg "from .*prisma/factory" package/app/src/stories/` — zero matches.
+- [ ] 7.9 Mock import audit: `rg "from .*prisma/factory" package/app/src/stories/` — zero matches. Imports from `@rezics/shared/{random,text}` are permitted (see spec `Mock data lives in a central per-domain module` requirement) and SHALL NOT count as a violation.
 - [ ] 7.10 Final `bun run knip` at root; resolve any unused-export findings introduced by the change.
 - [ ] 7.11 Update `openspec/changes/storybook-coverage/proposal.md` Impact section if any item drifted during implementation; commit.
 - [ ] 7.12 Run `bunx openspec validate storybook-coverage`; confirm pass.
