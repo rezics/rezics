@@ -1,38 +1,27 @@
 import type { PostDTO } from "@rezics/contract";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@rezics/ui/shadcn/carousel.tsx";
 import type * as React from "react";
 import { useMemo } from "react";
-import { VerticalTwoReviewCard } from "@/review/components/item/VerticalTwoReviewCard";
+import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
+import { ReviewCardPair } from "@/review/components/item/ReviewCardPair";
 
 export interface HorizontalReviewCarouselProps {
   reviewList: PostDTO[];
   className?: string;
 }
 
+interface ReviewPair {
+  review1: PostDTO;
+  review2: PostDTO;
+}
+
 export const HorizontalReviewCarousel: React.FC<
   HorizontalReviewCarouselProps
 > = ({ reviewList, className }) => {
-  /**
-   * 把 review 切成两两一组
-   * [1,2,3,4,5] -> [[1,2], [3,4]]
-   * 单数会自动丢弃最后一个
-   */
   const reviewPairs = useMemo(() => {
-    const pairs: { review1: PostDTO; review2: PostDTO }[] = [];
-
+    const pairs: ReviewPair[] = [];
     for (let i = 0; i < reviewList.length - 1; i += 2) {
-      pairs.push({
-        review1: reviewList[i],
-        review2: reviewList[i + 1],
-      });
+      pairs.push({ review1: reviewList[i], review2: reviewList[i + 1] });
     }
-
     return pairs;
   }, [reviewList]);
 
@@ -41,30 +30,15 @@ export const HorizontalReviewCarousel: React.FC<
   }
 
   return (
-    <Carousel
-      className={["w-full", className ?? ""].join(" ")}
-      opts={{
-        align: "start",
-        dragFree: true,
-      }}
-    >
-      <CarouselContent className="-ml-4">
-        {reviewPairs.map((pair, index) => (
-          <CarouselItem
-            // biome-ignore lint/suspicious/noArrayIndexKey: static list
-            key={index}
-            className="pl-4 basis-[100%] lg:basis-[50%] xl:basis-[40%]"
-          >
-            <VerticalTwoReviewCard
-              review1={pair.review1}
-              review2={pair.review2}
-            />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-
-      <CarouselPrevious variant="ghost" />
-      <CarouselNext variant="ghost" />
-    </Carousel>
+    <DomainCarousel
+      items={reviewPairs}
+      itemKey={(_pair, index) => index}
+      itemClassName="pl-4 basis-[100%] lg:basis-[50%] xl:basis-[40%]"
+      className={className}
+      ariaLabel="Review pairs"
+      renderItem={(pair) => (
+        <ReviewCardPair review1={pair.review1} review2={pair.review2} />
+      )}
+    />
   );
 };

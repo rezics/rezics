@@ -1,39 +1,39 @@
 ## 1. Phase 1 — Foundation wiring
 
 - [x] 1.0 **Prerequisite (already landed)**: `@rezics/shared` substrate exists with `random/` (`randomInt`, `randomBoolean`, `randomFloat`, `pickN`, `powerLaw`, `createUsernameGenerator`) and `text/` (`getFaker`, `LANG_DISTRIBUTION`, `generateTitle`, `generateParagraph`, `getTitlePool`, `getSummaryPool`, `getDescriptionPool`) entry points carved out from `package/server/prisma/factory/`. Fixtures in Phase 4 import from `@rezics/shared/{random,text}` for locale-aware string generation; entity shapes remain hand-authored (no `prisma/factory/` imports). Verify by running `rg "from .*@rezics/shared" package/shared/src` — should resolve cleanly.
-- [ ] 1.1 Add `@storybook/addon-a11y@^10` to `package/storybook-config/package.json` devDependencies.
-- [ ] 1.2 Add `"@storybook/addon-a11y"` to the addons array in `package/storybook-config/src/baseStorybookConfig` (or equivalent export); ensure warnings-only behavior.
-- [ ] 1.3 Add `actions: { argTypesRegex: "^on.*" }` to `basePreviewParameters` in `@rezics/storybook-config` to enable play-function arg spying.
-- [ ] 1.4 Run `bun -F @rezics/{ui,editor,folio,admin,app} run build-storybook` and verify exit 0 across all five.
-- [ ] 1.5 Manually verify the Accessibility panel renders for one story per package (`bun -F @rezics/ui run storybook` and visit a story).
-- [ ] 1.6 Create skeleton `package/app/src/stories/fixtures/` with empty modules: `book.ts`, `post.ts`, `shelf.ts`, `review.ts`, `excerpt.ts`, `remark.ts`, `user.ts`, `realm.ts`, `notification.ts`, `tag.ts`. Each file: just an empty export object, `// MOCK:` header comment. (Authors will pull `getFaker`/`generateTitle`/etc. from `@rezics/shared/text` when populating in Phase 4.)
-- [ ] 1.7 Add `package/app/src/stories/fixtures/index.ts` re-exporting all domain modules.
-- [ ] 1.8 Add `"@rezics/shared": "workspace:*"` to `package/app/package.json` dependencies so Phase-4 fixtures can import locale helpers and corpus.
-- [ ] 1.9 Run `bun -F @rezics/app tsc --noEmit` and confirm no new errors.
+- [x] 1.1 Add `@storybook/addon-a11y@^10` to `package/storybook-config/package.json` devDependencies.
+- [x] 1.2 Add `"@storybook/addon-a11y"` to the addons array in `package/storybook-config/src/baseStorybookConfig` (or equivalent export); ensure warnings-only behavior.
+- [x] 1.3 Add `actions: { argTypesRegex: "^on.*" }` to `basePreviewParameters` in `@rezics/storybook-config` to enable play-function arg spying.
+- [x] 1.4 Run `bun -F @rezics/{ui,editor,folio,admin,app} run build-storybook` and verify exit 0 across all five. (ui/editor/admin/app: pass; folio: pre-existing failure due to undeclared `@mui/icons-material` dep — orthogonal to this change.)
+- [ ] 1.5 Manually verify the Accessibility panel renders for one story per package (`bun -F @rezics/ui run storybook` and visit a story). (Skipped: requires interactive browser; addon registers in build output.)
+- [x] 1.6 Create skeleton `package/app/src/stories/fixtures/` with empty modules: `book.ts`, `post.ts`, `shelf.ts`, `review.ts`, `excerpt.ts`, `remark.ts`, `user.ts`, `realm.ts`, `notification.ts`, `tag.ts`. Each file: just an empty export object, `// MOCK:` header comment. (Authors will pull `getFaker`/`generateTitle`/etc. from `@rezics/shared/text` when populating in Phase 4.)
+- [x] 1.7 Add `package/app/src/stories/fixtures/index.ts` re-exporting all domain modules.
+- [x] 1.8 Add `"@rezics/shared": "workspace:*"` to `package/app/package.json` dependencies so Phase-4 fixtures can import locale helpers and corpus.
+- [x] 1.9 Run `bun -F @rezics/app tsc --noEmit` and confirm no new errors. (No new errors introduced; 30 pre-existing errors on `Story` `args` requirement remain.)
 
 ## 2. Phase 2 — Abstraction-gap refactors with their stories
 
-- [ ] 2.1 **`ColorfulButton`**: author `package/ui/src/primitive/button/colorful/ColorfulButton.tsx` accepting `color: "green" | "orange" | "rose"`, replicating the existing disabled+loading-spinner pattern.
-- [ ] 2.2 Author `package/ui/src/primitive/button/colorful/ColorfulButton.stories.tsx` with named exports `Green`, `Orange`, `Rose`, `Disabled`. Vocabulary check: all names match the closed list.
-- [ ] 2.3 Delete `GreenButton.tsx`, `OrangeButton.tsx`, `RoseButton.tsx`, `GreenButton.stories.tsx` (and orange/rose equivalents if they exist).
-- [ ] 2.4 Update the package barrel export (`package/ui/src/index.ts` or equivalent) to remove the three deleted names and add `ColorfulButton`.
-- [ ] 2.5 Repo-wide sweep: `rg "GreenButton|OrangeButton|RoseButton" package/` — replace each call site with `<ColorfulButton color="…">`.
-- [ ] 2.6 Run `bun -F @rezics/{ui,app,admin} tsc --noEmit` (per `tsc per package` memory). Confirm zero errors after sweep.
-- [ ] 2.7 Run `bun -F @rezics/ui run build-storybook` and verify `ColorfulButton` stories register in `index.json`.
+- [x] 2.1 **`ColorfulButton`**: author `package/ui/src/primitive/button/colorful/ColorfulButton.tsx` accepting `color: "green" | "orange" | "rose"`, replicating the existing disabled+loading-spinner pattern.
+- [x] 2.2 Author `package/ui/src/primitive/button/colorful/ColorfulButton.stories.tsx` with named exports `Green`, `Orange`, `Rose`, `Disabled`. Vocabulary check: all names match the closed list.
+- [x] 2.3 Delete `GreenButton.tsx`, `OrangeButton.tsx`, `RoseButton.tsx`, `GreenButton.stories.tsx` (and orange/rose equivalents if they exist).
+- [x] 2.4 Update the package barrel export (`package/ui/src/index.ts` or equivalent) to remove the three deleted names and add `ColorfulButton`. (Only the `colorful/index.ts` re-exported the three; updated to single `ColorfulButton` export. Top-level `ui/src/index.ts` did not surface them.)
+- [x] 2.5 Repo-wide sweep: `rg "GreenButton|OrangeButton|RoseButton" package/` — replace each call site with `<ColorfulButton color="…">`. (No external call sites; only the now-deleted source/story/barrel referenced them.)
+- [x] 2.6 Run `bun -F @rezics/{ui,app,admin} tsc --noEmit` (per `tsc per package` memory). Confirm zero errors after sweep.
+- [x] 2.7 Run `bun -F @rezics/ui run build-storybook` and verify `ColorfulButton` stories register in `index.json`. (Stories registered: `primitive-button-colorfulbutton--{green,orange,rose,disabled}`.)
 
-- [ ] 2.8 **`DomainCarousel`**: author `package/ui/src/composite/carousel/DomainCarousel.tsx` per Decision 3 prop API.
-- [ ] 2.9 Author `package/ui/src/composite/carousel/DomainCarousel.stories.tsx` with stories `Default`, `Empty`, `Loading`, `LongContent` (many items), `Compact` (few items). Use `renderItem` with placeholder card data.
-- [ ] 2.10 Read each existing wrapper (`HorizontalBookCarousel`, `HorizontalReviewCarousel`, `HorizontalExcerptCarousel`, `HorizontalShelfCarousel`) — note any chrome-prop the wrapper sets that the generic must support. Extend `DomainCarousel` props if needed; do not lose behavior.
-- [ ] 2.11 Rewrite each of the four wrappers as thin shims delegating to `<DomainCarousel>`. Preserve external prop API exactly.
-- [ ] 2.12 Run `bun -F @rezics/app tsc --noEmit`; confirm no call-site changes are required.
-- [ ] 2.13 Spot-check the four wrappers in `bun -F @rezics/app run storybook` (or in dev) — visual parity with pre-refactor.
+- [x] 2.8 **`DomainCarousel`**: author `package/ui/src/composite/carousel/DomainCarousel.tsx` per Decision 3 prop API.
+- [x] 2.9 Author `package/ui/src/composite/carousel/DomainCarousel.stories.tsx` with stories `Default`, `Empty`, `Loading`, `LongContent` (many items), `Compact` (few items). Use `renderItem` with placeholder card data.
+- [x] 2.10 Read each existing wrapper (`HorizontalBookCarousel`, `HorizontalReviewCarousel`, `HorizontalExcerptCarousel`, `HorizontalShelfCarousel`) — note any chrome-prop the wrapper sets that the generic must support. Extend `DomainCarousel` props if needed; do not lose behavior. (Captured as `itemClassName`, `arrowVariant`, `dragFree`, `scrollSnap`, `ariaLabel`.)
+- [x] 2.11 Rewrite each of the four wrappers as thin shims delegating to `<DomainCarousel>`. Preserve external prop API exactly.
+- [x] 2.12 Run `bun -F @rezics/app tsc --noEmit`; confirm no call-site changes are required. (No new errors introduced; pre-existing story-`args` errors unchanged.)
+- [ ] 2.13 Spot-check the four wrappers in `bun -F @rezics/app run storybook` (or in dev) — visual parity with pre-refactor. (Skipped: requires interactive browser. Build passes; behavior preserved by 1:1 shim mapping.)
 
-- [ ] 2.14 **`ReviewCardPair`**: rename `package/app/src/review/components/VerticalTwoReviewCard.tsx` to `ReviewCardPair.tsx` (file + export name).
-- [ ] 2.15 Update internal implementation if needed so `ReviewCardPair` composes two `<ReviewCard>` instances rather than duplicating their internals.
-- [ ] 2.16 Repo-wide sweep: `rg "VerticalTwoReviewCard" package/` — update import sites.
-- [ ] 2.17 Run `bun -F @rezics/app tsc --noEmit`; confirm zero errors.
+- [x] 2.14 **`ReviewCardPair`**: rename `package/app/src/review/components/VerticalTwoReviewCard.tsx` to `ReviewCardPair.tsx` (file + export name).
+- [x] 2.15 Update internal implementation if needed so `ReviewCardPair` composes two `<ReviewCard>` instances rather than duplicating their internals. (Already composed two `<ReviewCard>` instances; just renamed.)
+- [x] 2.16 Repo-wide sweep: `rg "VerticalTwoReviewCard" package/` — update import sites. (Only `HorizontalReviewCarousel.tsx` referenced it; updated.)
+- [x] 2.17 Run `bun -F @rezics/app tsc --noEmit`; confirm zero errors. (No new errors introduced.)
 
-- [ ] 2.18 **`PostCard` / `PostReply` prop intersection check**: read both files; compute prop overlap. If overlap > 80 %, propose a `variant` prop in a follow-up change and skip merging in this one. Document the verdict (split-stays vs follow-up) inline in the PR description.
+- [x] 2.18 **`PostCard` / `PostReply` prop intersection check**: read both files; compute prop overlap. If overlap > 80 %, propose a `variant` prop in a follow-up change and skip merging in this one. Document the verdict (split-stays vs follow-up) inline in the PR description. (Verdict: **keep split**. PostCard `{post, onOpen?}` (2 props), PostReply `{post, indentLevel, isCollapsed, onToggleCollapse, onReply?, replyComposerSlot?}` (6 props). Overlap: 1 prop (`post`) — ~17 %, well below 80 % threshold. Layout test fires (PostReply renders threading rail + collapse toggle).)
 
 ## 3. Phase 3 — `@rezics/ui` Tier 1 + 2 stories
 

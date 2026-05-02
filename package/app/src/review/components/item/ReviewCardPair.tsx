@@ -3,12 +3,12 @@ import type { PostDTO } from "@rezics/contract";
 import type React from "react";
 import { ReviewCard } from "./ReviewCard";
 
-interface VerticalTwoReviewCardProps {
+export interface ReviewCardPairProps {
   review1: PostDTO;
   review2: PostDTO;
 }
 
-export const VerticalTwoReviewCard: React.FC<VerticalTwoReviewCardProps> = ({
+export const ReviewCardPair: React.FC<ReviewCardPairProps> = ({
   review1,
   review2,
 }) => {
@@ -21,4 +21,4 @@ export const VerticalTwoReviewCard: React.FC<VerticalTwoReviewCardProps> = ({
   );
 };
 
-export default VerticalTwoReviewCard;
+export default ReviewCardPair;

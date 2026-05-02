@@ -35,6 +35,10 @@ export const themeGlobalTypes = {
 export const basePreviewParameters = {
   layout: "padded",
   controls: { expanded: true },
+  actions: { argTypesRegex: "^on.*" },
+  a11y: {
+    test: "todo",
+  },
 } as const;
 
 function resolveCanvasStyle(canvas: CanvasOption): React.CSSProperties | null {

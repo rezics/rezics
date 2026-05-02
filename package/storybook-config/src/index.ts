@@ -67,7 +67,7 @@ export function baseStorybookConfig(
 
   return {
     stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx|mdx)"],
-    addons: ["@storybook/addon-docs"],
+    addons: ["@storybook/addon-docs", "@storybook/addon-a11y"],
     ...rest,
     framework: {
       name: "@storybook/react-vite",

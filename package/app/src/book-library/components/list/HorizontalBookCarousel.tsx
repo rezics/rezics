@@ -1,12 +1,7 @@
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@rezics/ui/shadcn/carousel.tsx";
 import type * as React from "react";
+import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import { BookCard, type BookProps } from "../item/VerticalBookCard";
+
 export interface HorizontalBookCarouselProps {
   bookList: (BookProps & { id: string })[];
   className?: string;
@@ -21,30 +16,22 @@ export const HorizontalBookCarousel: React.FC<HorizontalBookCarouselProps> = ({
   }
 
   return (
-    <Carousel
-      className={["w-full", className ?? ""].join(" ")}
-      opts={{
-        align: "start",
-        dragFree: true,
-      }}
-    >
-      <CarouselContent className="-ml-4">
-        {bookList.map((book) => (
-          <CarouselItem key={book.id} className="horizontal-book-carousel">
-            <BookCard
-              title={book.title}
-              author={book.author}
-              description={book.description}
-              coverUrl={book.coverUrl}
-              href={book.href}
-              className="max-w-20 md:max-w-28"
-            />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-
-      <CarouselPrevious variant="ghost" />
-      <CarouselNext variant="ghost" />
-    </Carousel>
+    <DomainCarousel
+      items={bookList}
+      itemKey={(book) => book.id}
+      itemClassName="horizontal-book-carousel"
+      className={className}
+      ariaLabel="Books"
+      renderItem={(book) => (
+        <BookCard
+          title={book.title}
+          author={book.author}
+          description={book.description}
+          coverUrl={book.coverUrl}
+          href={book.href}
+          className="max-w-20 md:max-w-28"
+        />
+      )}
+    />
   );
 };
