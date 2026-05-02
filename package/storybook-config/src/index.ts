@@ -84,7 +84,16 @@ export function baseStorybookConfig(
     },
     typescript: {
       check: false,
-      reactDocgen: false,
+      reactDocgen: "react-docgen-typescript",
+      reactDocgenTypescriptOptions: {
+        shouldExtractLiteralValuesFromEnum: true,
+        shouldRemoveUndefinedFromOptional: true,
+        savePropValueAsString: true,
+        propFilter: (prop) =>
+          prop.parent
+            ? !/node_modules\/(?!@rezics)/.test(prop.parent.fileName)
+            : true,
+      },
       ...typescript,
     },
   };
