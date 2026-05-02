@@ -1,5 +1,6 @@
 import type { SeedPreset } from "@rezics/server/prisma/factory";
 import { fast } from "./fast";
+import { medium } from "./medium";
 import { minimal } from "./minimal";
 import { postTreeFocus } from "./post-tree-focus";
 import { realistic } from "./realistic";
@@ -7,6 +8,7 @@ import { realistic } from "./realistic";
 export const PRESETS: Record<string, SeedPreset> = {
   realistic,
   fast,
+  medium,
   minimal,
   "post-tree-focus": postTreeFocus,
 };

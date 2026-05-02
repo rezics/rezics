@@ -14,7 +14,6 @@ import {
 } from "@rezics/server/prisma/factory";
 import * as v from "valibot";
 import { SEED_CACHE_DIR } from "../lib/cache-dir";
-import { resolveEditorCommand, spawnEditor } from "../lib/editor";
 
 function ensureCacheDir(): void {
   mkdirSync(SEED_CACHE_DIR, { recursive: true });
@@ -31,10 +30,23 @@ function formatIssue(issue: v.BaseIssue<unknown>): string {
   return `  ${path}: ${issue.message}`;
 }
 
+async function waitForEditDone(planPath: string): Promise<void> {
+  p.note(
+    `Plan written to:\n  ${planPath}\n\nOpen it in any editor, save, then continue.`,
+    "Edit plan",
+  );
+  const cont = await p.confirm({
+    message: "Done editing — continue?",
+    initialValue: true,
+  });
+  if (p.isCancel(cont) || !cont) {
+    throw new Error("Plan edit aborted.");
+  }
+}
+
 export async function tweakPlan(preset: SeedPreset): Promise<SeedPlan> {
   const editDir = makeEditDir();
   const planPath = join(editDir, "plan.json");
-  const editor = resolveEditorCommand();
 
   const cleanup = () => {
     try {
@@ -60,7 +72,7 @@ export async function tweakPlan(preset: SeedPreset): Promise<SeedPlan> {
     );
 
     while (true) {
-      await spawnEditor(editor, planPath);
+      await waitForEditDone(planPath);
 
       const raw = readFileSync(planPath, "utf8");
       let parsed: unknown;

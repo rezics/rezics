@@ -67,6 +67,7 @@ bun run seed
 # Factory data only, named preset, no prompts
 bun run seed:factory              # alias for --preset=realistic --no-interactive
 bun run seed:factory:fast         # alias for --preset=fast --no-interactive
+bun run seed:factory:medium       # alias for --preset=medium --no-interactive
 bun run seed --preset=minimal --no-interactive
 ```
 
@@ -76,10 +77,11 @@ bun run seed --preset=minimal --no-interactive
 | ---------------- | --------- | ------------------------------------------------------ |
 | `realistic`      | realistic | Default — power-law distributed counts, prod-ish shape |
 | `fast`           | realistic | Smaller envelope for quick iteration                   |
+| `medium`         | fixed     | Mid-volume deterministic dataset (50 books/games/media, 40 tags, 20 reviews + 100 tree posts per work) |
 | `minimal`        | fixed     | Tiny deterministic dataset for unit-style scenarios    |
 | `post-tree-focus`| fixed     | One work per type, deterministic post tree shape       |
 
-**Plan tweaking.** When running interactively, after picking a preset you can tweak the `SeedPlan` in `$VISUAL`/`$EDITOR` (notepad on Windows, vi otherwise). The plan is dumped as JSON in `node_modules/.cache/rezics-seed/edit-*/plan.json`, validated against `SeedPlanSchema` on save, and re-prompted on parse errors. Stale edit dirs older than one hour are swept on every CLI start.
+**Plan tweaking.** When running interactively, after picking a preset you can tweak the `SeedPlan`. The CLI writes it as JSON to `node_modules/.cache/rezics-seed/edit-*/plan.json`, prints the absolute path, and waits at a "Done editing — continue?" prompt. Open the file in any editor, save, then confirm to continue; the plan is validated against `SeedPlanSchema` and you are re-prompted on parse or validation errors. Stale edit dirs older than one hour are swept on every CLI start.
 
 **Modes.** A `Mode` (`realistic | fixed | uniform`) is set once per preset and threaded through `SeedCtx`; each `CountSpec = { min?, max, target?, alpha? }` is interpreted by `ctx.draw(spec)`:
 - `realistic` → `powerLaw(min ?? 0, max, alpha ?? 1.5)`
