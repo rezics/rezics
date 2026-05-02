@@ -43,7 +43,6 @@ function renderPrimary(
           <BookCard
             title={title}
             author={author}
-            description={description}
             coverUrl={coverUrl}
             href={href}
           />

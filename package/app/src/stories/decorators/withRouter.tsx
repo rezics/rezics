@@ -2,7 +2,6 @@ import {
   createMemoryHistory,
   createRootRoute,
   createRouter,
-  Outlet,
   RouterProvider,
 } from "@tanstack/react-router";
 import type { Decorator } from "@storybook/react-vite";
@@ -15,12 +14,7 @@ export const withRouter: Decorator = (Story) => {
   const RouterHost = () => {
     const router = useMemo(() => {
       const rootRoute = createRootRoute({
-        component: () => (
-          <>
-            <Story />
-            <Outlet />
-          </>
-        ),
+        component: () => <Story />,
       });
       return createRouter({
         routeTree: rootRoute,

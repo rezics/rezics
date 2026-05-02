@@ -26,7 +26,6 @@ export const HorizontalBookCarousel: React.FC<HorizontalBookCarouselProps> = ({
         <BookCard
           title={book.title}
           author={book.author}
-          description={book.description}
           coverUrl={book.coverUrl}
           href={book.href}
           className="max-w-20 md:max-w-28"

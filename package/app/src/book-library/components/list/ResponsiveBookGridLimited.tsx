@@ -1,13 +1,15 @@
 import { useMemo } from "react";
 import { useCurrentBreakpoint } from "@/core/hooks/useCurrentBreakpoint";
 import { cn } from "@/shared/utils/css-util";
-import { HorizontalBookCard } from "../item/HorizontalBookCard";
-import type { BookProps } from "../item/VerticalBookCard";
+import {
+  HorizontalBookCard,
+  type HorizontalBookProps,
+} from "../item/HorizontalBookCard";
 
 type Breakpoint = "xs" | "xsm" | "sm" | "md" | "lg" | "xl";
 
 interface ResponsiveBookGridLimitedProps {
-  bookList: (BookProps & { id: string })[];
+  bookList: (HorizontalBookProps & { id: string })[];
   className?: string;
 }
 

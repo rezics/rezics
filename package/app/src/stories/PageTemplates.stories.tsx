@@ -56,7 +56,6 @@ export const Homepage: Story = {
               <VerticalBookCard
                 title={book.title}
                 author={book.author}
-                description={book.description}
                 coverUrl={book.coverUrl}
                 href={book.href}
               />
@@ -96,7 +95,6 @@ export const BookDetail: Story = {
             <VerticalBookCard
               title={book.title}
               author={book.author}
-              description={book.description}
               coverUrl={book.coverUrl}
               href={book.href}
             />

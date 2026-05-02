@@ -5,7 +5,6 @@ import { cn } from "@/shared/utils/css-util.ts";
 export type BookProps = {
   title: string;
   author?: string;
-  description?: string;
   coverUrl: string;
   href?: string;
   onClick?: () => void;
@@ -15,7 +14,6 @@ export type BookProps = {
 export function BookCard({
   title,
   author,
-  description,
   coverUrl,
   href,
   onClick,
@@ -25,8 +23,12 @@ export function BookCard({
   const rootProps = href ? { to: href } : { type: "button" as const, onClick };
 
   return (
-    <Root {...rootProps} className="text-left" aria-label={title}>
-      <div className={cn("relative w-full overflow-hidden", className ?? "")}>
+    <Root
+      {...rootProps}
+      className={cn("block text-left", className ?? "")}
+      aria-label={title}
+    >
+      <div className="relative w-full overflow-hidden">
         <img
           src={coverUrl}
           alt={title}
@@ -36,15 +38,11 @@ export function BookCard({
       </div>
 
       <div className="mt-2">
-        <div className="line-clamp-1 text-sm font-bold mb-1">{title}</div>
+        <div title={title} className="line-clamp-2 text-sm font-bold mb-1">
+          {title}
+        </div>
 
         {author ? <div className="line-clamp-1 text-sm">{author}</div> : null}
-
-        {description ? (
-          <div className="text-sm text-gray-500 line-clamp-2">
-            {description}
-          </div>
-        ) : null}
       </div>
     </Root>
   );
