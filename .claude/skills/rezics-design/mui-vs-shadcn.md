@@ -10,31 +10,33 @@
 
 ## When to use MUI
 
-| Need                        | Component                                              |
-| --------------------------- | ------------------------------------------------------ |
-| Button (any kind)           | `<Button>` (variant: contained / outlined / text)      |
-| Icon button                 | `<IconButton>`                                         |
-| Form text input             | `<TextField>` (variant="standard" for app, outlined for admin) |
-| Form select                 | `<Select>` + `<MenuItem>`                              |
-| Form switch / checkbox      | `<Switch>` / `<Checkbox>`                              |
-| Form radio group            | `<RadioGroup>` + `<Radio>`                             |
-| Modal                       | `<Dialog>` (with `<DialogTitle>`, etc.)                |
-| Tooltip                     | `<Tooltip>`                                            |
-| Tabs                        | `<Tabs>` + `<Tab>`                                     |
-| Menu (right-click / overflow) | `<Menu>` + `<MenuItem>`                              |
-| Snackbar / toast            | `sonner` (`<Toaster />` already mounted) — NOT MUI's, sonner has better DX |
-| App bar / nav rail          | `<AppBar>` + `<Toolbar>`                               |
-| Drawer (side nav)           | `<Drawer>`                                             |
-| Avatar                      | `<Avatar>`                                             |
-| Chip / tag                  | `<Chip>`                                               |
-| Linear progress             | `<LinearProgress>`                                     |
-| Circular progress           | `<CircularProgress>`                                   |
-| Skeleton                    | `<Skeleton>`                                           |
-| Pagination                  | `<Pagination>`                                         |
-| Tables                      | `<Table>` family                                       |
-| Accordion                   | `<Accordion>`                                          |
-| Stepper                     | `<Stepper>`                                            |
-| DatePicker / TimePicker     | `@mui/x-date-pickers` (already a dep via `@mui/lab`)   |
+| Need                        | Component                                              | Storybook |
+| --------------------------- | ------------------------------------------------------ | --------- |
+| Button (any kind)           | `<Button>` (variant: contained / outlined / text)      | `Primitive/Button/ColorfulButton--green` (variant axis), `Composite/Button/CooldownButton--default` |
+| Icon button                 | `<IconButton>`                                         |           |
+| Form text input             | `<TextField>` (variant="standard" for app, outlined for admin) | `Primitive/Control/RoseTextField--default`, `--multiline`, `--with-error`, `--disabled` |
+| Form select                 | `<Select>` + `<MenuItem>`                              |           |
+| Form switch / checkbox      | `<Switch>` / `<Checkbox>`                              |           |
+| Form radio group            | `<RadioGroup>` + `<Radio>`                             |           |
+| Modal                       | `<Dialog>` (with `<DialogTitle>`, etc.)                | `Composite/Surface/DialogContainer--default`, `Composite/Surface/FullScreenModal--default`, `Composite/Forms/ConfirmDeleteDialog--default` |
+| Tooltip                     | `<Tooltip>`                                            |           |
+| Tabs                        | `<Tabs>` + `<Tab>`                                     |           |
+| Menu (right-click / overflow) | `<Menu>` + `<MenuItem>`                              |           |
+| Snackbar / toast            | `sonner` (`<Toaster />` already mounted) — NOT MUI's, sonner has better DX |           |
+| App bar / nav rail          | `<AppBar>` + `<Toolbar>`                               |           |
+| Drawer (side nav)           | `<Drawer>`                                             |           |
+| Avatar                      | `<Avatar>`                                             |           |
+| Chip / tag                  | `<Chip>`                                               |           |
+| Linear progress             | `<LinearProgress>`                                     |           |
+| Circular progress           | `<CircularProgress>`                                   |           |
+| Skeleton                    | `<Skeleton>`                                           |           |
+| Pagination                  | `<Pagination>`                                         |           |
+| Tables                      | `<Table>` family                                       |           |
+| Accordion                   | `<Accordion>`                                          |           |
+| Stepper                     | `<Stepper>`                                            |           |
+| DatePicker / TimePicker     | `@mui/x-date-pickers` (already a dep via `@mui/lab`)   |           |
+| Empty state                 | Compose with `<EmptyState>`                            | `Composite/EmptyState/EmptyState--default` |
+| Forms (multi-field)         | Compose `TextField` + `<Button>` + `<EmptyState>` for the no-data path | `Domain/Review/ReviewForm--default`, `--happy-path`, `--with-error` |
 
 ## When to reach for shadcn (Radix-based)
 
@@ -134,3 +136,46 @@ package/ui/src/
 ```
 
 Before writing anything new, `rg` for the component name in these directories. Most of the time, it already exists.
+
+---
+
+## Common abstractions
+
+When a feature pulls in carousels or color-coded calls-to-action, reach for the
+shared component instead of hand-rolling new wrappers.
+
+### `<DomainCarousel>`
+
+Generic horizontal carousel with arrows, indicators, and embla integration. The
+four domain wrappers (`HorizontalBookCarousel`, `HorizontalReviewCarousel`,
+`HorizontalExcerptCarousel`, `HorizontalShelfCarousel`) shim through it. New
+carousel surfaces should compose `<DomainCarousel>` with a `renderItem` prop
+rather than copy the embla wiring.
+
+- Story: `Composite/Carousel/DomainCarousel--default`
+- Stories: `--empty`, `--loading`, `--long-content`, `--compact`
+
+### `<ColorfulButton>`
+
+Single component, three colors via `color="green | orange | rose"`. Replaces
+the legacy `GreenButton`/`OrangeButton`/`RoseButton` triplet. The naming test
+fires for the color axis (one component, three colors) but **never** add a
+`size` prop here — sizes live on the underlying MUI `<Button>`.
+
+- Stories: `Primitive/Button/ColorfulButton--green`, `--orange`, `--rose`, `--disabled`
+
+### `<ReactionBar>` (size axis)
+
+Reactions and votes share one component with `size="small | medium | large"`.
+Don't split into `SmallReactionBar` etc; the layout is identical, only spacing
+and icon size vary. See [`patterns.md#13`](./patterns.md) for why.
+
+- Stories: `App/Engagement/ReactionBar--small`, `--medium`, `--large`, `--disabled`
+
+### `<ReviewCardPair>`
+
+Composes two `<ReviewCard>` instances with a shared layout band. Used inside
+`HorizontalReviewCarousel` to render two reviews per slide. Don't duplicate
+ReviewCard internals — wrap.
+
+- Stories: `Domain/Review/ReviewCardPair--default`, `--locale-cjk`

@@ -10,6 +10,7 @@ import { PostTreeSection } from "./PostTreeSection";
 
 const ROOT_ID = "fixture-root-1";
 
+// MOCK: deterministic post fixtures used to seed the React Query cache for stories.
 function makePost(
   overrides: Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">,
 ): PostDTO {
@@ -33,14 +34,23 @@ function makePost(
   return { ...base, ...overrides } as unknown as PostDTO;
 }
 
-const FIXTURE_POSTS: PostDTO[] = [
+const FLAT_POSTS: PostDTO[] = Array.from({ length: 4 }).map((_, i) =>
+  makePost({
+    unitId: `flat-${i + 1}`,
+    depth: 1,
+    sortPath: String(i + 1).padStart(3, "0"),
+    body: `Top-level reply ${i + 1}.`,
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
+);
+
+const THREADED_3DEEP_POSTS: PostDTO[] = [
   makePost({
     unitId: "fix-1",
     depth: 1,
     sortPath: "001",
     directReplyCount: 2,
     body: "Top-level reply with two children.",
-  }),
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-1-1",
     depth: 2,
@@ -48,37 +58,61 @@ const FIXTURE_POSTS: PostDTO[] = [
     parentPostUnitId: "fix-1",
     directReplyCount: 1,
     body: "Depth-2 child, default collapsed.",
-  }),
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-1-1-1",
     depth: 3,
     sortPath: "001/001/001",
     parentPostUnitId: "fix-1-1",
     body: "Deep descendant hidden by default collapse.",
-  }),
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-1-2",
     depth: 2,
     sortPath: "001/002",
     parentPostUnitId: "fix-1",
     body: "Sibling of the first depth-2 node.",
-  }),
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-2",
     depth: 1,
     sortPath: "002",
     body: "Second top-level reply with no children.",
-  }),
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
 ];
 
-function Seeded() {
+function buildDeepThread(depth: number): PostDTO[] {
+  const posts: PostDTO[] = [];
+  let parent: string | undefined;
+  let path = "";
+  for (let i = 1; i <= depth; i += 1) {
+    const id = `deep-${i}`;
+    path = path ? `${path}/001` : "001";
+    posts.push(
+      makePost({
+        unitId: id,
+        depth: i,
+        sortPath: path,
+        parentPostUnitId: parent,
+        directReplyCount: i < depth ? 1 : 0,
+        body: `Depth ${i} reply in 10-deep chain.`,
+      } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
+    );
+    parent = id;
+  }
+  return posts;
+}
+
+const THREADED_10DEEP_POSTS = buildDeepThread(10);
+
+function Seeded({ posts }: { posts: PostDTO[] }) {
   const qc = useQueryClient();
   useEffect(() => {
     qc.setQueryData(
       postKeys.thread(ROOT_ID, { mode: "threaded", maxDepth: 5 }),
-      { posts: FIXTURE_POSTS },
+      { posts },
     );
-  }, [qc]);
+  }, [qc, posts]);
 
   return (
     <Box p={2}>
@@ -95,6 +129,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Depth3TreeWithDefaultCollapse: Story = {
-  render: () => <Seeded />,
+export const Default: Story = {
+  render: () => <Seeded posts={THREADED_3DEEP_POSTS} />,
+};
+
+export const Empty: Story = {
+  render: () => <Seeded posts={[]} />,
+};
+
+export const Flat: Story = {
+  render: () => <Seeded posts={FLAT_POSTS} />,
+};
+
+export const Threaded3Deep: Story = {
+  render: () => <Seeded posts={THREADED_3DEEP_POSTS} />,
+};
+
+export const Threaded10Deep: Story = {
+  render: () => <Seeded posts={THREADED_10DEEP_POSTS} />,
 };

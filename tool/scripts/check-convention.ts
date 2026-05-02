@@ -61,6 +61,7 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "kinds",
   "presets",
   "stories",
+  "decorators",
   "corpus",
 ]);
 

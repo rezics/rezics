@@ -50,6 +50,15 @@ const POPULATED_POSTS: PostDTO[] = [
   }),
 ];
 
+const MANY_POSTS: PostDTO[] = Array.from({ length: 12 }).map((_, i) =>
+  makePost({
+    unitId: `shelf-many-${i + 1}`,
+    depth: 1,
+    sortPath: String(i + 1).padStart(3, "0"),
+    body: `Comment ${i + 1}: thoughtful note about the curation choices.`,
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
+);
+
 // MOCK: story-only auth state override so Storybook can demo signed-out path.
 function useMockAuthed(authed: boolean) {
   useEffect(() => {
@@ -93,6 +102,22 @@ function SeededAuthedPopulated() {
   );
 }
 
+function SeededAuthedMany() {
+  const qc = useQueryClient();
+  useMockAuthed(true);
+  useEffect(() => {
+    qc.setQueryData(
+      postKeys.thread(SHELF_ID, { mode: "threaded", maxDepth: 5 }),
+      { posts: MANY_POSTS },
+    );
+  }, [qc]);
+  return (
+    <Box p={2}>
+      <ShelfDiscussionSection shelfUnitId={SHELF_ID} />
+    </Box>
+  );
+}
+
 function SeededUnauthenticated() {
   const qc = useQueryClient();
   useMockAuthed(false);
@@ -117,14 +142,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const EmptySignedIn: Story = {
-  render: () => <SeededAuthedEmpty />,
-};
-
-export const PopulatedSignedIn: Story = {
+export const Default: Story = {
   render: () => <SeededAuthedPopulated />,
 };
 
-export const UnauthenticatedSignInPrompt: Story = {
+export const Empty: Story = {
+  render: () => <SeededAuthedEmpty />,
+};
+
+export const Many: Story = {
+  render: () => <SeededAuthedMany />,
+};
+
+export const Disabled: Story = {
+  name: "Disabled (signed-out)",
   render: () => <SeededUnauthenticated />,
 };

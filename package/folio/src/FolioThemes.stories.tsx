@@ -281,3 +281,85 @@ export const SepiaTheme: Story = {
     </PhoneFrame>
   ),
 };
+
+function CompactReaderFrame({
+  label,
+  themeAction,
+}: {
+  label: string;
+  themeAction: FolioAction;
+}) {
+  const { plugins, tree } = setup();
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 6,
+        flex: 1,
+        minWidth: 0,
+      }}
+    >
+      <div style={{ fontSize: 12, fontWeight: 500, color: "#444" }}>{label}</div>
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 280,
+          height: 360,
+          borderRadius: 16,
+          border: "2px solid #222",
+          overflow: "hidden",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <FolioProvider tree={tree} plugins={plugins}>
+          <StateOverride actions={[themeAction]} />
+          <ThemedFrame>
+            <PageContainer>
+              <FolioContent />
+            </PageContainer>
+          </ThemedFrame>
+        </FolioProvider>
+      </div>
+    </div>
+  );
+}
+
+export const ThemeAxis: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Side-by-side comparison of the three reader theme palettes (light, dark, sepia) so palette drift is obvious at a glance.",
+      },
+    },
+  },
+  render: () => (
+    <div
+      style={{
+        display: "flex",
+        gap: 16,
+        padding: 24,
+        background: "#f0f0f0",
+        alignItems: "flex-start",
+        flexWrap: "wrap",
+      }}
+    >
+      <CompactReaderFrame
+        label="Light"
+        themeAction={{ type: "SET_THEME", theme: "light" }}
+      />
+      <CompactReaderFrame
+        label="Dark"
+        themeAction={{ type: "SET_THEME", theme: "dark" }}
+      />
+      <CompactReaderFrame
+        label="Sepia"
+        themeAction={{ type: "SET_THEME", theme: "sepia" }}
+      />
+    </div>
+  ),
+};

@@ -405,3 +405,41 @@ const reviews: Review[] = [
 ```
 
 Admin ≠ App. Don't replicate app-side layouts in admin; the audiences and tasks differ.
+
+---
+
+## 13. Abstraction vs Split
+
+When two components look similar, decide whether they're **one component with a variant prop** or **two separate components**. Apply three tests in order — the first failure decides.
+
+### Layout test
+
+Do the render trees differ structurally (different children, different slots, different number of regions)? **Split.** A `variant` prop that swaps the JSX tree is the prop telling you it shouldn't exist.
+
+### Naming test
+
+Could the variants share *one* component name without a qualifier?
+
+- `Default / Compact / Small / Medium / Large / LongContent / LocaleCJK` — these name an axis on one component → **variant prop**.
+- `Hero / Sidebar / Inline / Embedded` — these name *what something is*, not which mode → **split**.
+
+### Evolution test
+
+If the next feature needs a new sub-region for one variant only, will the prop API still feel like one component? If you'd add `showHeader`, `headerSlot`, `headerVariant` just to satisfy one variant, **split** before that grows.
+
+### 10-second story-name heuristic
+
+Look at the story names you'd write. If the list is `Default / Compact / Large` you have a variant axis. If the list is `Hero / Compact / Sidebar` you have multiple components (the names label *kinds*, not *modes*).
+
+### Worked examples
+
+| Decision | Why | Story IDs |
+|---|---|---|
+| `BookCardHorizontal` vs `BookCardVertical` — split | Layout test fires (cover-left vs cover-top). | `Domain/Book/HorizontalBookCard--default`, `Domain/Book/VerticalBookCard--default` |
+| `ColorfulButton color="green | orange | rose"` — variant | Same shape, color axis only. | `Primitive/Button/ColorfulButton--green` |
+| `ReactionBar size="small | medium | large"` — variant | Same shape, size axis only. | `App/Engagement/ReactionBar--sm-thread-row`, `--md-discussion-card`, `--lg-detail-surface` |
+| `ReviewCardPair` — composition (not split, not variant) | Composes two `ReviewCard`s rather than duplicating. Layout test fires; naming test passes (`Pair` *is* what it is). | `Domain/Review/ReviewCardPair--default` |
+| `PostCard` vs `PostReply` — split | 17% prop overlap; PostReply renders threading rail + collapse toggle that PostCard doesn't have. | `Domain/Post/PostCard--default`, `Domain/Post/PostReply--default` |
+| `DomainCarousel` — generic | Four domain wrappers (`HorizontalBookCarousel`, etc.) shim through this. Naming test: each wrapper has its own name; the generic stays headless. | `Composite/Carousel/DomainCarousel--default` |
+
+The full prose version of this section lives in [`Foundation/Patterns#13`](./../../package/ui/src/docs/patterns.mdx) with side-by-side `<Compare>` blocks.

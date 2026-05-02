@@ -521,3 +521,95 @@ Admin is operations and management — dense tables, terse copy. The app side is
 ```
 
 Admin ≠ App. Don't replicate app-side layouts in admin; the audiences and tasks differ.
+
+---
+
+## 13. Abstraction vs Split
+
+When two components look similar, the question is whether they're the same
+component with a variant prop or two distinct components that happen to share
+metadata. Three tests, applied in order:
+
+### Layout test
+
+Do the two render trees differ structurally? Different children, different
+slots, different number of regions? **Split.** A `variant` prop that flips the
+JSX tree based on its value is the prop trying to tell you it shouldn't exist.
+
+### Naming test
+
+Could the variants share *one* name without a qualifier? `Default / Compact /
+Large` — yes, that's a size axis on one component. `Hero / Sidebar / Inline` —
+no, those are three different components doing three different jobs.
+
+### Evolution test
+
+If the next feature requires a new sub-region for one variant only, will the
+prop API still feel like one component? If you'd add `showHeader`, `headerSlot`,
+`headerVariant` to satisfy one variant, **split** before that grows.
+
+### 10-second heuristic (story names)
+
+Look at the story names you'd write:
+
+- `Default / Compact / Small / Medium / Large / LongContent / LocaleCJK` →
+  variant prop on one component.
+- `Hero / Compact / Sidebar / Inline / Embedded` → these are different
+  components; the words name *what they are*, not *which mode they're in*.
+
+### Examples
+
+<Compare>
+  <Do caption="Split — layout differs">
+    <div style={{ fontFamily: "var(--rezics-font-sans)", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", gap: 12, padding: 12 }}>
+        <div style={{ width: 60, aspectRatio: "2/3", background: "var(--rezics-color-surface-subtle)", borderRadius: 4 }} />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 500 }}>蛇之名</div>
+          <div style={{ fontSize: 13, color: "var(--rezics-color-text-secondary)" }}>Le Guin · 320 pages</div>
+        </div>
+      </div>
+      <div style={{ width: 120 }}>
+        <div style={{ aspectRatio: "2/3", background: "var(--rezics-color-surface-subtle)", borderRadius: 4 }} />
+        <div style={{ paddingTop: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 500 }}>蛇之名</div>
+          <div style={{ fontSize: 12, color: "var(--rezics-color-text-secondary)" }}>Le Guin</div>
+        </div>
+      </div>
+    </div>
+  </Do>
+  <Do caption="Variant prop — same layout, axis varies">
+    <div style={{ fontFamily: "var(--rezics-font-sans)", display: "flex", gap: 8, alignItems: "center" }}>
+      <button style={{ padding: "4px 10px", borderRadius: 6, fontSize: 12, background: "#7DBE5A", color: "white", border: "none" }}>Save</button>
+      <button style={{ padding: "4px 10px", borderRadius: 6, fontSize: 12, background: "#E89B4D", color: "white", border: "none" }}>Pin</button>
+      <button style={{ padding: "4px 10px", borderRadius: 6, fontSize: 12, background: "#D14A6E", color: "white", border: "none" }}>Heart</button>
+    </div>
+  </Do>
+</Compare>
+
+```tsx
+// Split — layout test fires (cover-left vs cover-top)
+<BookCardHorizontal book={book} />   // Domain/Book/HorizontalBookCard--default
+<BookCardVertical   book={book} />   // Domain/Book/VerticalBookCard--default
+
+// Variant prop — same shape, color axis only
+<ColorfulButton color="green">  Save  </ColorfulButton>  // Primitive/Button/ColorfulButton--green
+<ColorfulButton color="orange"> Pin   </ColorfulButton>  // Primitive/Button/ColorfulButton--orange
+<ColorfulButton color="rose">   Heart </ColorfulButton>  // Primitive/Button/ColorfulButton--rose
+```
+
+```tsx
+// Variant prop — same shape, size axis
+<ReactionBar size="small"  />   // App/Engagement/ReactionBar--sm-thread-row
+<ReactionBar size="medium" />   // App/Engagement/ReactionBar--md-discussion-card
+<ReactionBar size="large"  />   // App/Engagement/ReactionBar--lg-detail-surface
+
+// Composition — `ReviewCardPair` composes two ReviewCards rather than
+// duplicating their internals. Layout test fires; naming test passes
+// (Pair *is* what it is).
+<ReviewCardPair primary={a} secondary={b} />   // Domain/Review/ReviewCardPair--default
+```
+
+The four split-vs-variant verdicts above all come from the same three tests:
+**look at the layout, look at the names, look at how the next feature would
+land**.

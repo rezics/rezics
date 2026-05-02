@@ -1,0 +1,52 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Domain/Search" />
+
+# Search
+
+The search surface is a **search bar + a stack of filter primitives + an
+applied-chip strip + a result list**. Each primitive is its own small component
+so each can be reused independently in advanced-search forms, sidebar filters,
+and the homepage hero search.
+
+## Input family
+
+- `TextSearchInput` — base input.
+- `TextSearchInputBase` — unstyled hook-host.
+- `TextSearchInputWithIcon` — icon-prefixed variant for chrome-rich surfaces.
+
+The three exist because the **layout test fires**: the icon variant has a
+visible icon slot the bare input doesn't, and the base hook-host has no chrome
+at all. Variant-prop merging would force every consumer through one render
+path.
+
+## Filter primitives (11)
+
+Each primitive wraps a single facet and emits a serialized filter value:
+
+- `ContentTypeCheckboxes` — book / review / excerpt / remark / shelf
+- `PostKindCheckboxes` — post / reply / remark / review thread
+- `SortSelect` — recent / popular / score
+- `LicensedToggle` — licensed-only flag
+- `WordCountRangeInput` — min/max range
+- `TagGroupSuggestions` — group-scoped tag picker
+- `KeywordInput` — free-text keyword
+- `TagPicker` — generic tag picker
+- `RatingFilterChips` — score-bucket chip row
+- `LangCheckboxes` (in `SearchFilter` body) — language facet
+- `AppliedFilterChips` — composed read-only summary of applied filters
+
+## Composition
+
+- `SearchFilter` — sidebar/sheet that stacks the primitives.
+- `AdvancedSearch` — full advanced-search form.
+- `SearchResultList` — result list (book / review / excerpt cards).
+- `SearchSuggestions` — typeahead dropdown.
+
+## Patterns at play
+
+The 11 primitives are **not** merged into one `<Filter>` with a `kind` prop —
+each has a distinct UI affordance (chip row vs range slider vs typeahead). The
+naming test fires (`KeywordInput` vs `TagPicker` is *what they are*, not
+*which mode they're in*), so they stay split. See
+[`Foundation/Patterns`](?path=/docs/foundation-patterns--docs).
