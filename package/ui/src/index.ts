@@ -1,3 +1,4 @@
+export * from "./brand";
 export * from "./composite";
 // Theme system
 export {

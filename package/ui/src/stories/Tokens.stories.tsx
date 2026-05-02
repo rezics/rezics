@@ -84,32 +84,3 @@ export const Typography_: Story = {
   ),
 };
 
-export const Brand: Story = {
-  render: () => (
-    <Stack spacing={3}>
-      <Typography variant="h2">Brand 轮回红</Typography>
-      <Stack direction="row" spacing={2} alignItems="center">
-        <Box
-          sx={{
-            width: 64,
-            height: 64,
-            borderRadius: 1,
-            bgcolor: "var(--rezics-color-brand-fill)",
-          }}
-        />
-        <Stack>
-          <Typography
-            variant="body1"
-            sx={{ color: "var(--rezics-color-text-brand)" }}
-            fontWeight={500}
-          >
-            Brand-text token (AA-safe)
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            fill: #f4606c · text: auto-resolves to #C4433A light / #fa7882 dark
-          </Typography>
-        </Stack>
-      </Stack>
-    </Stack>
-  ),
-};
