@@ -63,7 +63,7 @@ export const BookReviewPage: React.FC = () => {
       .slice(0, REVIEW_PREVIEW_LIMIT) ?? [];
 
   return (
-    <Stack spacing={4}>
+    <div>
       <Box className="lg:hidden">
         <ScoreOverview unitId={bookId} />
       </Box>
@@ -94,13 +94,13 @@ export const BookReviewPage: React.FC = () => {
         <ReviewList reviews={reviews} />
       </Box>
 
-      <Divider />
+      <Divider className="my-4" />
 
       <ShelfByBookPreview
         bookId={bookInfo.unitId || ""}
         title={title}
         shelfNumber={SHELF_PREVIEW_LIMIT}
       />
-    </Stack>
+    </div>
   );
 };

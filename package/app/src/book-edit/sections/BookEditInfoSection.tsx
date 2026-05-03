@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  Stack,
   Typography,
 } from "@mui/material";
 import {
@@ -15,13 +16,16 @@ import {
   useCreateBookMutation,
   useUpdateBookMutation,
 } from "@rezics/api/book/book";
+import {
+  useDeleteTranslationMutation,
+  useUpsertTranslationMutation,
+} from "@rezics/api/unit/unit.mutations";
 import type {
   BookDTO,
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { DEFAULT_LANGUAGE, normalizeLanguage } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate } from "@tanstack/react-router";
@@ -29,15 +33,21 @@ import type { TFunction } from "i18next";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import {
-  getBookDescription,
-  getBookTitle,
-} from "@/shared/utils/translation-helpers";
+import { AddTranslationDialog } from "../components/AddTranslationDialog";
 import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
 import {
   BookMetadataEditor,
   type BookMetadataValue,
 } from "../components/Metadata/BookMetadataEditor";
+import { SetSourceReleaseControl } from "../components/SetSourceReleaseControl";
+import { TranslationFieldsEditor } from "../components/TranslationFieldsEditor";
+import { TranslationLanguageBar } from "../components/TranslationLanguageBar";
+import { TranslationSyncActions } from "../components/TranslationSyncActions";
+import {
+  ALL_LANGUAGES,
+  type TranslationDraft,
+  useBookTranslationEditor,
+} from "../hooks/useBookTranslationEditor";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));
@@ -85,9 +95,12 @@ export interface BookEditMainPageProps {
 }
 
 /**
- * BookEditMainPage - updated for new BookDTO with translations layer.
- * Title/description are now in translations[], not top-level fields.
- * isbn -> isbn13, author/press/producer -> personCredits/orgCredits.
+ * BookEditMainPage — multi-language book editor.
+ *
+ * Layout: book-level metadata (isbn/cover/etc.) is edited once and saved via
+ * `updateBook`. Per-language fields (title/subtitle/summary/description) live
+ * in `translations[]` and are saved via `upsertTranslation` keyed by the
+ * language picked in the language bar.
  */
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   newBook = false,
@@ -104,16 +117,15 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   });
   const [metadataState, setMetadataState] =
     React.useState<BookMetadataValue | null>(null);
-  const [descriptionOverride, setDescriptionOverride] = React.useState<
-    string | null
-  >(null);
   const [updateBookErrorOpen, setUpdateBookErrorOpen] = React.useState(false);
   const [dialogState, setDialogState] =
     React.useState<UpdateBookDialogState>(null);
   const [extraOpen, setExtraOpen] = React.useState(true);
+  const [addOpen, setAddOpen] = React.useState(false);
+
+  const editor = useBookTranslationEditor(data);
 
   const metadata: BookMetadataValue = metadataState ?? data ?? {};
-  const currentDescription = descriptionOverride ?? getBookDescription(data);
 
   const createBookMutation = useCreateBookMutation({
     onSuccess: (responseData) => {
@@ -153,9 +165,60 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     },
   });
 
+  const upsertTranslationMutation = useUpsertTranslationMutation({
+    onError: (err) => {
+      setDialogState({
+        title: t("page.book_edit.info.toast.update_failed_title"),
+        message: String(err || t("common.unknown_error")),
+        error: true,
+      });
+      setUpdateBookErrorOpen(true);
+    },
+  });
+
+  const deleteTranslationMutation = useDeleteTranslationMutation();
+
   async function handleSubmit() {
-    const editTitle = metadataState?._editTitle ?? getBookTitle(data);
-    const editDescription = descriptionOverride ?? getBookDescription(data);
+    const draft = editor.currentDraft;
+
+    if (newBook || !bookId) {
+      const createBookData: CreateBookInput = {
+        isbn13: metadataState?.isbn13 ?? undefined,
+        coverUrl: metadataState?.coverUrl ?? undefined,
+        pageCount: metadataState?.pageCount ?? undefined,
+        textLength: metadataState?.textLength,
+        formatKey: metadataState?.formatKey ?? undefined,
+        rating: metadataState?.rating,
+        isLicensed: metadataState?.isLicensed,
+        extra: metadataState?.extra,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        translations: [
+          {
+            language:
+              normalizeLanguage(editor.selectedLanguage) ?? DEFAULT_LANGUAGE,
+            title: draft.title || undefined,
+            subtitle: draft.subtitle || undefined,
+            summary: draft.summary || undefined,
+            description: draft.description || undefined,
+          },
+        ],
+      };
+      const publishURL = metadataState?.extra?.publishURL;
+      if (
+        createBookData.isLicensed ||
+        (publishURL && validatePublishURL(publishURL))
+      ) {
+        await createBookMutation.mutateAsync(createBookData);
+      } else {
+        setDialogState({
+          title: t("page.book_edit.info.toast.create_failed_title"),
+          message: t("page.book_edit.info.validation.publish_url_required"),
+          error: true,
+        });
+        setUpdateBookErrorOpen(true);
+      }
+      return;
+    }
 
     const updateBookData: UpdateBookInput = {
       isbn13: metadataState?.isbn13,
@@ -168,46 +231,63 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       extra: metadataState?.extra,
     };
 
-    const createBookData: CreateBookInput = {
-      isbn13: metadataState?.isbn13 ?? undefined,
-      coverUrl: metadataState?.coverUrl ?? undefined,
-      pageCount: metadataState?.pageCount ?? undefined,
-      textLength: metadataState?.textLength,
-      formatKey: metadataState?.formatKey ?? undefined,
-      rating: metadataState?.rating,
-      isLicensed: metadataState?.isLicensed,
-      extra: metadataState?.extra,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      translations: [
-        {
-          language: DEFAULT_LANGUAGE,
-          title: editTitle,
-          description: editDescription,
-        },
-      ],
-    };
-
-    if (bookId) {
-      updateBookMutation.mutateAsync({
+    await Promise.all([
+      updateBookMutation.mutateAsync({ unitId: bookId, input: updateBookData }),
+      upsertTranslationMutation.mutateAsync({
         unitId: bookId,
-        input: updateBookData,
-      });
-    } else {
-      const publishURL = metadataState?.extra?.publishURL;
-      if (
-        updateBookData.isLicensed ||
-        (publishURL && validatePublishURL(publishURL))
-      ) {
-        createBookMutation.mutateAsync(createBookData);
-      } else {
-        setDialogState({
-          title: t("page.book_edit.info.toast.create_failed_title"),
-          message: t("page.book_edit.info.validation.publish_url_required"),
-          error: true,
-        });
-        setUpdateBookErrorOpen(true);
-      }
-    }
+        language: editor.selectedLanguage,
+        input: {
+          title: draft.title || null,
+          subtitle: draft.subtitle || null,
+          summary: draft.summary || null,
+          description: draft.description || null,
+        },
+      }),
+    ]);
+    editor.clearDraft(editor.selectedLanguage);
+  }
+
+  function handleAddTranslation(params: {
+    language: string;
+    sourceReleaseUnitId: string | null;
+  }) {
+    if (!bookId) return;
+    upsertTranslationMutation.mutate(
+      {
+        unitId: bookId,
+        language: params.language,
+        input: {
+          sourceReleaseUnitId: params.sourceReleaseUnitId ?? undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          setAddOpen(false);
+          editor.setSelectedLanguage(params.language);
+        },
+      },
+    );
+  }
+
+  function handleDeleteCurrentTranslation() {
+    if (!bookId) return;
+    if (!editor.currentTranslation) return;
+    if (
+      !window.confirm(
+        t("page.book_edit.info.translation.delete_confirm", {
+          lang: editor.selectedLanguage,
+        }),
+      )
+    )
+      return;
+    deleteTranslationMutation.mutate(
+      { unitId: bookId, language: editor.selectedLanguage },
+      {
+        onSuccess: () => {
+          editor.clearDraft(editor.selectedLanguage);
+        },
+      },
+    );
   }
 
   if (isLoading)
@@ -230,17 +310,21 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     );
 
   const resolvedPageTitle = pageTitle ?? t("page.book_edit.info.title");
+  const sourceReleaseUnitId = editor.currentTranslation?.sourceReleaseUnitId;
+  const hasAvailable =
+    ALL_LANGUAGES.length > editor.existingLanguages.length;
 
   return (
     <div className="mt-16 mx-auto max-w-3xl px-4 pb-16">
-      {/* Header */}
       <div className="flex justify-between items-center mb-12">
         <h1 className="text-2xl font-bold">{resolvedPageTitle}</h1>
         <div className="flex items-center gap-2">
           {bookId && (
             <Button
               variant="outlined"
-              onClick={() => navigate({ to: `/book/${bookId}/` })}
+              onClick={() =>
+                navigate({ to: "/book/$bookId", params: { bookId } })
+              }
             >
               {t("common.back")}
             </Button>
@@ -252,7 +336,86 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       </div>
 
       <div className="space-y-16">
-        {/* Metadata */}
+        {/* Translation: language bar + per-language fields + sync actions */}
+        {!newBook && data && (
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              {t("page.book_edit.info.translation.section_title")}
+            </h3>
+            <Divider className="mb-6" />
+            <Stack gap={4}>
+              <TranslationLanguageBar
+                existingLanguages={editor.existingLanguages}
+                selectedLanguage={editor.selectedLanguage}
+                defaultLanguage={data.defaultLanguage}
+                onSelect={editor.setSelectedLanguage}
+                onAddClick={() => setAddOpen(true)}
+                hasAvailable={hasAvailable}
+              />
+
+              {!editor.currentTranslation && (
+                <Alert severity="info" variant="outlined">
+                  {t("page.book_edit.info.translation.empty_for_lang", {
+                    lang: editor.selectedLanguage,
+                  })}
+                </Alert>
+              )}
+
+              <TranslationFieldsEditor
+                draft={editor.currentDraft}
+                onChange={editor.updateField}
+              />
+
+              <SetSourceReleaseControl
+                book={data}
+                language={editor.selectedLanguage}
+                currentSourceReleaseUnitId={sourceReleaseUnitId}
+              />
+
+              {editor.isDirty && sourceReleaseUnitId && (
+                <Alert severity="warning" variant="outlined">
+                  {t("page.book_edit.info.translation.diverge_warning")}
+                </Alert>
+              )}
+
+              <TranslationSyncActions
+                sourceReleaseUnitId={sourceReleaseUnitId}
+                language={editor.selectedLanguage}
+                onSync={(draft: TranslationDraft) =>
+                  editor.replaceDraft(editor.selectedLanguage, draft)
+                }
+              />
+
+              {editor.currentTranslation && editor.existingLanguages.length > 1 && (
+                <Stack direction="row" justifyContent="flex-end">
+                  <Button
+                    size="small"
+                    color="error"
+                    variant="text"
+                    onClick={handleDeleteCurrentTranslation}
+                  >
+                    {t("page.book_edit.info.translation.delete_button")}
+                  </Button>
+                </Stack>
+              )}
+            </Stack>
+          </section>
+        )}
+
+        {/* For newBook flow: just show one language's fields, no language bar yet */}
+        {newBook && (
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              {t("page.book_edit.info.translation.section_title")}
+            </h3>
+            <Divider className="mb-6" />
+            <TranslationFieldsEditor
+              draft={editor.currentDraft}
+              onChange={editor.updateField}
+            />
+          </section>
+        )}
+
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
             {t("book.edit_sections.metadata")}
@@ -269,21 +432,6 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           />
         </section>
 
-        {/* Description */}
-        <section>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-            {t("book.description")}
-          </h3>
-          <Divider className="mb-6" />
-          <RezicsMarkdownEditor
-            value={currentDescription}
-            onChange={(value) => {
-              setDescriptionOverride(value);
-            }}
-          />
-        </section>
-
-        {/* Extra -- Collapsible */}
         <section>
           <button
             type="button"
@@ -313,6 +461,14 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           </Collapse>
         </section>
       </div>
+
+      <AddTranslationDialog
+        open={addOpen}
+        book={data}
+        existingLanguages={editor.existingLanguages}
+        onClose={() => setAddOpen(false)}
+        onSubmit={handleAddTranslation}
+      />
 
       <UpdateBookDialog
         t={t}

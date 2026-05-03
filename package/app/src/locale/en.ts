@@ -197,6 +197,45 @@ export default {
           publish_url_required:
             "Please add at least one valid publish URL (starting with https://), e.g. a Qidian book page URL.",
         },
+        translation: {
+          section_title: "Translations",
+          language_label: "Language",
+          default_badge: "default",
+          add_button: "Add translation",
+          delete_button: "Remove this translation",
+          delete_confirm:
+            "Remove the {{lang}} translation? This cannot be undone.",
+          empty_for_lang:
+            "No translation yet for {{lang}} — fill in the fields and Submit to create it.",
+          diverge_warning:
+            "This translation is sourced from a release. Saving local edits will diverge from the source.",
+          fields: {
+            subtitle: "Subtitle",
+            summary: "Summary",
+          },
+          source: {
+            label: "Source release",
+            sync_tooltip:
+              "Replace the form with the source release's content for this language. You still need to Submit to save.",
+            no_match:
+              "The source release has no translation in {{lang}} to copy from.",
+            sync_button: "Sync from release",
+            open_button: "Open source release",
+          },
+          set_source: {
+            label: "Source release",
+            none: "(none)",
+          },
+          add_dialog: {
+            title: "Add translation",
+            language: "Language",
+            source_release: "Sync source (optional)",
+            source_release_help:
+              "If set, this language's content will be marked as sourced from that release.",
+            no_source: "(no source release)",
+            submit: "Add",
+          },
+        },
       },
     },
     shelf: {

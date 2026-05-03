@@ -1,33 +1,16 @@
 import { InfoOutlined } from "@mui/icons-material";
-import {
-  Checkbox,
-  FormControlLabel,
-  TextField as MuiTextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Checkbox, FormControlLabel, Tooltip, Typography } from "@mui/material";
 import type { BookDTO, ContentRating } from "@rezics/contract";
 import { RatingSelector } from "@rezics/ui";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  getBookAuthorName,
-  getBookCoverUrl,
-  getBookDescription,
-  getBookPublisherName,
-  getBookTitle,
-} from "@/shared/utils/translation-helpers";
 
 /**
- * BookMetadataValue - editing state uses a flat overlay on top of BookDTO.
- * New fields: isbn13, coverUrl, pageCount, formatKey, publicationDate.
- * Title/description come from translations but we expose them as flat fields for editing.
+ * BookMetadataValue — flat overlay of book unit-level fields (i.e. fields
+ * that are NOT per-language). Per-language title/subtitle/summary/description
+ * are edited via the translation editor instead.
  */
-export type BookMetadataValue = Partial<BookDTO> & {
-  // MOCK: flat editing fields that map to translations
-  _editTitle?: string;
-  _editDescription?: string;
-};
+export type BookMetadataValue = Partial<BookDTO>;
 
 interface BookMetadataEditorProps {
   value?: BookMetadataValue;
@@ -79,8 +62,6 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // Resolve current display values from translations or override fields
-  const currentTitle = value?._editTitle ?? getBookTitle(value as BookDTO);
   const currentIsbn = value?.isbn13 ?? "";
   const currentCoverUrl = value?.coverUrl ?? "";
   const currentPageCount = value?.pageCount ?? "";
@@ -88,20 +69,6 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Title (from translations) */}
-      <div className="space-y-1">
-        <Typography variant="body2" component="label" htmlFor="book-title">
-          {t("book.fields.title")}
-        </Typography>
-        <input
-          id="book-title"
-          value={currentTitle}
-          onChange={(e) => onChange?.({ _editTitle: e.target.value })}
-          disabled={disabled}
-          className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
-        />
-      </div>
-
       {/* ISBN-13 + Cover URL */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">

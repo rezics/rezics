@@ -20,8 +20,10 @@ export { unitKeys } from "./unit.keys";
 export {
   unitMutations,
   useCreateUnitMutation,
+  useDeleteTranslationMutation,
   useDeleteUnitMutation,
   useUpdateUnitMutation,
+  useUpsertTranslationMutation,
 } from "./unit.mutations";
 
 // Query Configurations

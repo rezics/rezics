@@ -5,6 +5,8 @@
 import type {
   CreateUnitInput,
   UnitResponse,
+  UnitTranslationDTO,
+  UpdateTranslationInput,
   UpdateUnitInput,
 } from "@rezics/contract";
 import {
@@ -100,10 +102,70 @@ export function useDeleteUnitMutation(
 }
 
 /**
+ * Mutation for upserting a translation row on a unit
+ */
+export function useUpsertTranslationMutation(
+  options?: Omit<
+    UseMutationOptions<
+      UnitTranslationDTO,
+      Error,
+      { unitId: string; language: string; input: UpdateTranslationInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unitId, language, input }) =>
+      unitApi.upsertTranslation(unitId, language, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: unitKeys.detail(variables.unitId),
+      });
+      queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
+ * Mutation for deleting a translation row on a unit
+ */
+export function useDeleteTranslationMutation(
+  options?: Omit<
+    UseMutationOptions<
+      { message: string },
+      Error,
+      { unitId: string; language: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unitId, language }) =>
+      unitApi.deleteTranslation(unitId, language),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: unitKeys.detail(variables.unitId),
+      });
+      queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
  * Combined mutations export
  */
 export const unitMutations = {
   useCreate: useCreateUnitMutation,
   useUpdate: useUpdateUnitMutation,
   useDelete: useDeleteUnitMutation,
+  useUpsertTranslation: useUpsertTranslationMutation,
+  useDeleteTranslation: useDeleteTranslationMutation,
 };

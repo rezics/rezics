@@ -193,6 +193,43 @@ export default {
           publish_url_required:
             "請至少新增一個正確的書籍發布連結，例如起點對應書籍的連結，以 https:// 開頭。",
         },
+        translation: {
+          section_title: "翻譯",
+          language_label: "語言",
+          default_badge: "預設",
+          add_button: "新增翻譯",
+          delete_button: "刪除此語言翻譯",
+          delete_confirm: "確定刪除 {{lang}} 的翻譯嗎？此操作無法復原。",
+          empty_for_lang:
+            "{{lang}} 尚無翻譯——填入欄位並按提交以建立。",
+          diverge_warning:
+            "此翻譯來源於某個 release，儲存本地修改將與來源版本分歧。",
+          fields: {
+            subtitle: "副標題",
+            summary: "摘要",
+          },
+          source: {
+            label: "來源 release",
+            sync_tooltip:
+              "用來源 release 對應語言的內容覆蓋目前表單，仍需按提交才會儲存。",
+            no_match: "來源 release 沒有 {{lang}} 翻譯可供複製。",
+            sync_button: "從 release 同步",
+            open_button: "前往來源 release",
+          },
+          set_source: {
+            label: "來源 release",
+            none: "（未設定）",
+          },
+          add_dialog: {
+            title: "新增翻譯",
+            language: "語言",
+            source_release: "同步來源（選填）",
+            source_release_help:
+              "若指定，此語言的內容將標記為來自該 release。",
+            no_source: "（不設定來源 release）",
+            submit: "新增",
+          },
+        },
       },
     },
     shelf: {

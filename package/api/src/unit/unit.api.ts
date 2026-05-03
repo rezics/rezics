@@ -124,4 +124,19 @@ export const unitApi = {
       },
     );
   },
+
+  /**
+   * Delete a translation for a unit by language
+   */
+  deleteTranslation: async (
+    unitId: string,
+    language: string,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/unit/${unitId}/translations/${language}`,
+      {
+        method: "DELETE",
+      },
+    );
+  },
 };
