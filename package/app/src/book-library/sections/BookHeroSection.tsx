@@ -1,5 +1,7 @@
+import { postQueries } from "@rezics/api/post/post";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
+import { PostKind } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -13,11 +15,11 @@ import {
 } from "@/shared/utils/translation-helpers";
 
 import { useBookLanguage } from "../hooks/useBookLanguage";
-import { BookHeroActionMenu } from "./BookHeroActionMenu";
-import { BookHeroActionStack } from "./BookHeroActionStack";
-import { BookHeroCountsStrip } from "./BookHeroCountsStrip";
+import { BookHeroActionBar } from "./BookHeroActionBar";
+import { BookHeroCountLinks } from "./BookHeroCountLinks";
 import { BookHeroFeaturedReview } from "./BookHeroFeaturedReview";
 import { BookHeroScoreBlock } from "./BookHeroScoreBlock";
+import { BookHeroStatCards, type BookHeroStatKey } from "./BookHeroStatCards";
 
 type Book = BookDTO;
 
@@ -27,6 +29,9 @@ interface BookHeroSectionProps {
   /** Number of users who rated; 0 hides the count line under the score. */
   ratingCount?: number;
 }
+
+type BriefPart = { id: string; text: string };
+type MetaRow = { key: string; label: string; name: string };
 
 export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   bookInfo,
@@ -46,6 +51,8 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
     bookInfo?.defaultLanguage ?? undefined,
   );
   const title = selectedTranslation?.title ?? "";
+  const summary =
+    selectedTranslation?.summary ?? selectedTranslation?.description ?? "";
   const coverUrl = getBookCoverUrl(bookInfo);
   const author = getEntityTranslation(
     bookInfo?.attributions,
@@ -71,19 +78,57 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   );
   const navigateToTagSearch = useNavigateToBookTagSearch();
 
-  const metaParts: string[] = [];
-  if (author?.name) metaParts.push(author.name);
-  if (publisher?.name) metaParts.push(publisher.name);
-  if (producer?.name) metaParts.push(producer.name);
+  // Lifted review query — drives both the centre review card and the dynamic
+  // right-column layout. React Query dedupes with the child component.
+  const { data: reviewData } = useQuery({
+    ...postQueries.byTarget(bookId, { kind: PostKind.REVIEW, limit: 1 }),
+    enabled: Boolean(bookId),
+  });
+  const hasReview = (reviewData?.posts?.length ?? 0) > 0;
+
+  // When the centre review card renders, the right column has ~4 cols of width
+  // and stacks 2 stat cards. Otherwise the stat column takes the centre+right
+  // span and promotes all available stats so the stack fills the freed area.
+  const statCardKeys: BookHeroStatKey[] = hasReview
+    ? ["reviews", "shelves"]
+    : ["reviews", "shelves", "tags"];
+
+  const briefParts: BriefPart[] = [
+    { id: "kind", text: t("book.hero.kind.book", "Book") },
+  ];
   if (typeof bookInfo?.textLength === "number" && bookInfo.textLength > 0) {
-    metaParts.push(
-      t("book.hero.meta.length_chars", "{{count}} 字", {
+    briefParts.push({
+      id: "length",
+      text: t("book.hero.meta.length_chars", "{{count}} 字", {
         count: bookInfo.textLength,
       }),
-    );
+    });
   }
   if (bookInfo?.isbn13) {
-    metaParts.push(`ISBN ${bookInfo.isbn13}`);
+    briefParts.push({ id: "isbn", text: `ISBN ${bookInfo.isbn13}` });
+  }
+
+  const metaRows: MetaRow[] = [];
+  if (author?.name) {
+    metaRows.push({
+      key: "author",
+      label: t("book.hero.meta.author", "作者"),
+      name: author.name,
+    });
+  }
+  if (publisher?.name) {
+    metaRows.push({
+      key: "publisher",
+      label: t("book.hero.meta.publisher", "出版"),
+      name: publisher.name,
+    });
+  }
+  if (producer?.name) {
+    metaRows.push({
+      key: "producer",
+      label: t("book.hero.meta.producer", "製作"),
+      name: producer.name,
+    });
   }
 
   return (
@@ -93,77 +138,109 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
     >
       <div className="bg-black/65 backdrop-blur-md w-full">
         <div className="container mx-auto max-w-[1250px] px-4 py-8 lg:py-10">
-          {/* Top utility row: action cluster on right */}
-          <div className="flex items-start justify-end mb-4 min-h-[36px]">
-            <BookHeroActionMenu bookInfo={bookInfo} shareTitle={title} />
+          {/* Title row + inline score (count stacks below the score). */}
+          <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
+            <h1 className="text-white font-serif text-3xl lg:text-5xl font-semibold leading-tight tracking-tight break-words flex-1 min-w-[12rem]">
+              {title}
+            </h1>
+            <BookHeroScoreBlock
+              rating={rating}
+              count={ratingCount}
+              variant="inline"
+            />
           </div>
 
-          {/* Title row — full width, large */}
-          <h1 className="text-white font-serif text-3xl lg:text-5xl font-semibold leading-tight tracking-tight break-words">
-            {title}
-          </h1>
+          {/* Brief info strip: Book · {wordCount} words · ISBN ... */}
+          <p className="mt-2 text-white/70 text-sm flex flex-wrap items-center gap-x-2 gap-y-1">
+            {briefParts.map((part, i) => (
+              <span key={part.id} className="flex items-center gap-2">
+                {i > 0 && <span className="text-white/40">·</span>}
+                <span>{part.text}</span>
+              </span>
+            ))}
+          </p>
 
-          {/* Meta inline line */}
-          {metaParts.length > 0 && (
-            <p className="mt-3 text-white/70 text-sm lg:text-base flex flex-wrap items-center gap-x-2 gap-y-1">
-              {metaParts.map((part, i) => (
-                <span key={`${part}-${i}`} className="flex items-center gap-2">
-                  {i > 0 && <span className="text-white/40">·</span>}
-                  <span>{part}</span>
-                </span>
-              ))}
-            </p>
-          )}
-
-          {/* Tag chips row */}
-          {unitTags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {unitTags.map((tag) => {
-                const tr = tagTranslations?.[tag.tagUnitId];
-                const label = tr?.name || tag.tagUnitId;
-                const slug = tr?.slug || undefined;
-                return (
-                  <button
-                    key={tag.tagUnitId}
-                    type="button"
-                    onClick={() =>
-                      navigateToTagSearch([
-                        { slug, unitId: tag.tagUnitId, name: label },
-                      ])
-                    }
-                    className="px-2.5 py-1 rounded-full bg-white/10 text-white/90 text-xs hover:bg-white/20 transition cursor-pointer"
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Body grid — cover · featured review · right column */}
-          <div className="mt-8 grid grid-cols-12 gap-6 lg:gap-8 items-start">
-            <div className="col-span-12 sm:col-span-3 lg:col-span-2 flex justify-center sm:justify-start">
+          {/* Body row: cover + (optional review card) + stat cards. */}
+          <div className="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
+            <div className="flex justify-center lg:justify-start lg:shrink-0">
               <LazyLoadImage
                 src={coverUrl}
                 alt={title}
-                className="max-h-[280px] rounded-lg shadow-xl"
+                className="max-h-[320px] rounded-lg shadow-xl"
               />
             </div>
 
-            <div className="col-span-12 sm:col-span-9 lg:col-span-6 min-w-0">
-              <BookHeroFeaturedReview bookId={bookId} />
+            {hasReview && (
+              <div className="flex-1 min-w-0 rounded-xl p-6 bg-white/10 backdrop-blur-sm flex">
+                <BookHeroFeaturedReview bookId={bookId} />
+              </div>
+            )}
+
+            <div
+              className={
+                hasReview
+                  ? "w-full lg:w-[240px] lg:shrink-0"
+                  : "w-full lg:flex-1 lg:max-w-[360px]"
+              }
+            >
+              <BookHeroStatCards bookId={bookId} cardKeys={statCardKeys} />
+            </div>
+          </div>
+
+          {/* Bottom row: metadata block (left) | action cluster (right). */}
+          <div className="mt-8 flex flex-col lg:flex-row gap-6 lg:gap-10">
+            <div className="flex-1 min-w-0 space-y-4">
+              {summary && (
+                <p className="text-white/85 leading-relaxed text-sm lg:text-base max-w-[60ch]">
+                  {summary}
+                </p>
+              )}
+
+              {metaRows.length > 0 && (
+                <dl className="border-t border-white/10">
+                  {metaRows.map((row) => (
+                    <div
+                      key={row.key}
+                      className="flex items-baseline gap-3 border-b border-white/10 py-2.5"
+                    >
+                      <dt className="text-white font-semibold text-sm w-16 shrink-0">
+                        {row.label}
+                      </dt>
+                      <dd className="text-white/85 text-sm">{row.name}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+
+              {unitTags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {unitTags.map((tag) => {
+                    const tr = tagTranslations?.[tag.tagUnitId];
+                    const label = tr?.name || tag.tagUnitId;
+                    const slug = tr?.slug || undefined;
+                    return (
+                      <button
+                        key={tag.tagUnitId}
+                        type="button"
+                        onClick={() =>
+                          navigateToTagSearch([
+                            { slug, unitId: tag.tagUnitId, name: label },
+                          ])
+                        }
+                        className="px-2.5 py-1 rounded-full bg-white/10 text-white/90 text-xs hover:bg-white/20 transition cursor-pointer"
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <BookHeroCountLinks bookId={bookId} excludeKeys={statCardKeys} />
             </div>
 
-            <div className="col-span-12 lg:col-span-4 flex flex-col gap-5 lg:items-end">
-              <div className="self-stretch lg:self-end">
-                <BookHeroScoreBlock rating={rating} count={ratingCount} />
-              </div>
-              <div className="self-stretch lg:max-w-[260px] w-full lg:w-auto">
-                <BookHeroCountsStrip bookId={bookId} />
-              </div>
-              <div className="self-stretch lg:max-w-[260px] w-full lg:w-auto">
-                <BookHeroActionStack bookId={bookId} />
-              </div>
+            <div className="lg:w-[260px] lg:flex-shrink-0">
+              <BookHeroActionBar bookInfo={bookInfo} shareTitle={title} />
             </div>
           </div>
         </div>
