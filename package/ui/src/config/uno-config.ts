@@ -21,10 +21,7 @@ export function createUnoConfig() {
       presetScrollbarHide(),
     ],
     transformers: [transformerDirectives()],
-    shortcuts: {
-      "horizontal-book-carousel":
-        "pl-4 !basis-1/3 xsm:!basis-1/4 sm:!basis-1/5 md:!basis-1/6 lg:!basis-1/7 xl:!basis-1/8",
-    },
+    shortcuts: {},
     theme: {
       breakpoint: {
         xs: "0px",
@@ -44,6 +41,7 @@ export function createUnoConfig() {
         lg: "1024px",
         xl: "1280px",
         "2xl": "1536px",
+        "8xl": "1440px",
       },
       // rezics design tokens — resolve to CSS variables defined in shared/styles/layers.css
       // so utilities auto-switch with [data-theme="dark"]. See foundation v1 brief.

@@ -63,7 +63,7 @@ export const ProfileLayout: FC = () => {
 
   return (
     <ProfileContext.Provider value={{ user, isCurrentUser, unitId }}>
-      <Box className="w-full max-w-8xl mx-auto">
+      <Box className="w-full max-w-12/16 mx-auto">
         <div className="flex flex-col md:flex-row md:gap-12 px-4 pb-12">
           <aside className="w-full md:w-[280px] md:shrink-0">
             <ProfileBasicInfo

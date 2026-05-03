@@ -138,7 +138,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
       style={{ backgroundImage: `url(${coverUrl})` }}
     >
       <div className="bg-black/65 backdrop-blur-md w-full">
-        <div className="container mx-auto max-w-[1250px] px-4 py-8 lg:py-10">
+        <div className="container mx-auto max-w-[1280px] px-4 py-8 lg:py-10">
           {/* Title row + inline score (count stacks below the score). */}
           <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
             <h1 className="text-white font-serif text-3xl lg:text-5xl font-semibold leading-tight tracking-tight break-words flex-1 min-w-[12rem]">

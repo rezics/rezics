@@ -20,7 +20,7 @@ type Story = StoryObj<Args>;
 
 function Render({ autoplayIntervalNum }: Args) {
   return (
-    <div className="p-4 max-w-16/12 mx-auto">
+    <div className="p-4 max-w-14/16 mx-auto">
       <h3 className="mb-4 text-lg font-semibold">Home Carousel Component</h3>
       <div className="border border-gray-200 rounded-lg p-4">
         <div className="mb-4">
