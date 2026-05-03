@@ -45,7 +45,7 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
     <Link
       to="/book/$bookId/read/$chapterId"
       params={{ bookId, chapterId: node.id }}
-      className="block hover:text-[var(--mui-palette-primary-main)]"
+      className="block hover:text-brand"
     >
       <p className="truncate p-2 rounded-md transition-colors duration-200">
         {displayName}

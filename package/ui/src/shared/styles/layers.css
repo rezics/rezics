@@ -1,123 +1,85 @@
 /* ================================================================
- * shadcn/ui tokens — Foundation v2 (OKLCH)
+ * shadcn/ui tokens — bound to rezics foundation v1
  *
- * Latest shadcn convention: variables hold full oklch(...) values and
- * are consumed via `var(--foo)` directly. The `theme.colors` block in
- * uno-config.ts re-declares each shadcn token as `var(--foo)` so the
- * preset's default `oklch(var(--foo))` wrapper is bypassed.
- *
- * Mode switch: `<body class="theme-rezics">` + `.dark` for shadcn.
- * The rezics design system uses an orthogonal switch via
- * `<html data-theme="dark">` (or `html.dark`); see block below.
+ * Every shadcn token routes to a `--rezics-*` var declared further
+ * below, so shadcn surfaces, popovers, borders, and accents share the
+ * same parchment palette as the MUI palette and Uno utilities. Dark
+ * mode auto-flips through the rezics tokens themselves — no separate
+ * `.theme-rezics.dark` value table needed.
  * ================================================================ */
 
 .theme-rezics {
   color-scheme: light;
 
-  --background: oklch(0.969 0 0);
-  --foreground: oklch(0.176 0 0);
+  --background: var(--rezics-color-surface-canvas);
+  --foreground: var(--rezics-color-text-primary);
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.176 0 0);
+  --card: var(--rezics-color-surface-base);
+  --card-foreground: var(--rezics-color-text-primary);
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.176 0 0);
+  --popover: var(--rezics-color-surface-elevated);
+  --popover-foreground: var(--rezics-color-text-primary);
 
-  --primary: oklch(0.696 0.181 17.5);
-  --primary-foreground: oklch(1 0 0);
+  --primary: var(--rezics-color-brand-fill);
+  --primary-foreground: var(--rezics-color-text-on-brand);
 
-  --secondary: oklch(0.585 0.150 247);
-  --secondary-foreground: oklch(1 0 0);
+  --secondary: var(--rezics-color-surface-subtle);
+  --secondary-foreground: var(--rezics-color-text-primary);
 
-  --muted: oklch(0.943 0 0);
-  --muted-foreground: oklch(0.508 0 0);
+  --muted: var(--rezics-color-surface-subtle);
+  --muted-foreground: var(--rezics-color-text-secondary);
 
-  --accent: oklch(0.940 0.030 17);
-  --accent-foreground: oklch(0.176 0 0);
+  --accent: var(--rezics-color-surface-subtle);
+  --accent-foreground: var(--rezics-color-text-primary);
 
-  --destructive: oklch(0.628 0.225 27.3);
-  --destructive-foreground: oklch(1 0 0);
+  --destructive: var(--rezics-color-error-fill);
+  --destructive-foreground: var(--rezics-color-text-on-brand);
 
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.696 0.181 17.5);
+  --border: var(--rezics-color-border-whisper);
+  --input: var(--rezics-color-border-defined);
+  --ring: var(--rezics-color-border-focus);
 
   --radius: 0.5rem;
 
+  /* Charts retain explicit OKLCH pending a separate token pass. */
   --chart-1: oklch(0.696 0.181 17.5);
   --chart-2: oklch(0.585 0.150 247);
   --chart-3: oklch(0.674 0.150 165);
   --chart-4: oklch(0.762 0.169 70);
   --chart-5: oklch(0.624 0.218 297);
 
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.343 0.012 271);
-  --sidebar-primary: oklch(0.171 0.013 274);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.961 0.005 264);
-  --sidebar-accent-foreground: oklch(0.171 0.013 274);
-  --sidebar-border: oklch(0.913 0.013 251);
-  --sidebar-ring: oklch(0.626 0.196 252);
+  --sidebar: var(--rezics-color-surface-base);
+  --sidebar-foreground: var(--rezics-color-text-primary);
+  --sidebar-primary: var(--rezics-color-brand-fill);
+  --sidebar-primary-foreground: var(--rezics-color-text-on-brand);
+  --sidebar-accent: var(--rezics-color-surface-subtle);
+  --sidebar-accent-foreground: var(--rezics-color-text-primary);
+  --sidebar-border: var(--rezics-color-border-whisper);
+  --sidebar-ring: var(--rezics-color-border-focus);
 }
 
 @custom-variant dark (&:is(.dark *));
 
-.theme-rezics.dark {
+/* Dark mode color-scheme; values flip through the rezics tokens below. */
+html.dark .theme-rezics,
+[data-theme="dark"] .theme-rezics {
   color-scheme: dark;
-
-  --background: oklch(0.176 0 0);
-  --foreground: oklch(1 0 0);
-
-  --card: oklch(0.227 0 0);
-  --card-foreground: oklch(1 0 0);
-
-  --popover: oklch(0.227 0 0);
-  --popover-foreground: oklch(1 0 0);
-
-  --primary: oklch(0.696 0.181 17.5);
-  --primary-foreground: oklch(1 0 0);
-
-  --secondary: oklch(0.585 0.150 247);
-  --secondary-foreground: oklch(1 0 0);
-
-  --muted: oklch(0.198 0 0);
-  --muted-foreground: oklch(0.755 0 0);
-
-  --accent: oklch(0.275 0 0);
-  --accent-foreground: oklch(1 0 0);
-
-  --destructive: oklch(0.628 0.225 27.3);
-  --destructive-foreground: oklch(1 0 0);
-
-  --border: oklch(0.286 0 0);
-  --input: oklch(0.286 0 0);
-  --ring: oklch(0.696 0.181 17.5);
-
-  --radius: 0.5rem;
-
-  --chart-1: oklch(0.696 0.181 17.5);
-  --chart-2: oklch(0.585 0.150 247);
-  --chart-3: oklch(0.674 0.150 165);
-  --chart-4: oklch(0.762 0.169 70);
-  --chart-5: oklch(0.624 0.218 297);
-
-  --sidebar: oklch(0.171 0.013 274);
-  --sidebar-foreground: oklch(0.961 0.005 264);
-  --sidebar-primary: oklch(0.546 0.193 263);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.249 0.008 268);
-  --sidebar-accent-foreground: oklch(0.961 0.005 264);
-  --sidebar-border: oklch(0.249 0.008 268);
-  --sidebar-ring: oklch(0.626 0.196 252);
 }
 
 @layer base {
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+}
+
+/* Defeat unocss-preset-shadcn's `body { background: oklch(var(--background)) }`
+ * preflight — `--background` holds a hex (e.g. #f5f4ed), not an OKLCH triple,
+ * so `oklch(#f5f4ed)` is invalid and resolves to transparent. Bind body
+ * directly to the rezics tokens. Unlayered + later in source order wins
+ * the cascade against the preset preflight. */
+body {
+  background-color: var(--rezics-color-surface-canvas);
+  color: var(--rezics-color-text-primary);
 }
 
 /* ================================================================

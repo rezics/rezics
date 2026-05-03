@@ -35,7 +35,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           NAVIGATION={NAVIGATION(isAdmin)}
         />
         <main className="flex flex-col flex-1 min-w-0 pt-[60px] transition-all duration-300 h-screen w-full">
-          <div className="flex-1 pb-4 dark:bg-dark bg-light">{children}</div>
+          <div className="flex-1 pb-4">{children}</div>
           <MainLayoutFooter />
         </main>
       </div>

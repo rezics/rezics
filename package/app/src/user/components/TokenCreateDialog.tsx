@@ -101,7 +101,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
           <Alert severity="warning" className="mb-4">
             Make sure to copy your token now. You won't be able to see it again.
           </Alert>
-          <div className="flex items-center gap-2 p-3 rounded bg-[var(--mui-palette-action-hover)] font-mono text-sm break-all">
+          <div className="flex items-center gap-2 p-3 rounded bg-surface-subtle font-mono text-sm break-all">
             <span className="flex-1">{rawToken}</span>
             <IconButton size="small" onClick={handleCopy}>
               {copied ? (

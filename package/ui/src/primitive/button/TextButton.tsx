@@ -16,7 +16,7 @@ export const TextButton = ({
     <button
       type="button"
       onClick={onClick}
-      className={`text-[var(--mui-palette-primary-main)] ${buttonClassName}`}
+      className={`text-brand ${buttonClassName}`}
     >
       {children}
     </button>

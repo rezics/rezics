@@ -29,7 +29,7 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
           backgroundImage: bgImage ? `url(${bgImage})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundColor: accentColor ?? "var(--mui-palette-primary-main)",
+          backgroundColor: accentColor ?? "var(--rezics-color-brand-fill)",
         }}
       >
         <div className="relative z-10">

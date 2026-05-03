@@ -136,16 +136,16 @@ export function createUnoConfig() {
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",
-          main: "var(--mui-palette-primary-main)",
-          light: "var(--mui-palette-primary-light)",
-          dark: "var(--mui-palette-primary-dark)",
+          main: "var(--rezics-color-brand-fill)",
+          light: "var(--rezics-color-brand-fill-hover)",
+          dark: "var(--rezics-color-brand-fill-active)",
         },
         secondary: {
           DEFAULT: "var(--secondary)",
           foreground: "var(--secondary-foreground)",
-          main: "var(--mui-palette-secondary-main)",
-          light: "var(--mui-palette-secondary-light)",
-          dark: "var(--mui-palette-secondary-dark)",
+          main: "var(--rezics-color-info-fill)",
+          light: "var(--rezics-color-info-text)",
+          dark: "var(--rezics-color-info-text)",
         },
         // Foundation v1 tokens — bg-brand, text-text, border-whisper, etc.
         brand: {

@@ -121,16 +121,9 @@ export function dynamicColorsToPalette(
       dark: colors.tertiary,
       contrastText: colors.onTertiary,
     },
-    background: {
-      default: colors.background,
-      paper: colors.surface,
-    },
-    text: {
-      primary: colors.onBackground,
-      secondary: colors.onSurfaceVariant,
-      disabled: colors.outline,
-    },
-    divider: colors.outlineVariant,
+    // Background, text, and divider intentionally omitted — those stay on the
+    // rezics surface tokens regardless of dynamic accent. Only brand-derived
+    // hues (primary/secondary/etc.) follow the user's chosen color.
     ...(mode === "light"
       ? {
           surface: {

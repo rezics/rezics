@@ -20,6 +20,11 @@ declare module "@mui/material/styles" {
   interface TypeText {
     brand: string;
   }
+  interface TypeBackground {
+    elevated: string;
+    subtle: string;
+    sunken: string;
+  }
 }
 
 const buildPalette = (
@@ -67,6 +72,9 @@ const buildPalette = (
   background: {
     default: c.surface.canvas,
     paper: c.surface.base,
+    elevated: c.surface.elevated,
+    subtle: c.surface.subtle,
+    sunken: c.surface.sunken,
   },
   text: {
     primary: c.text.primary,
@@ -223,8 +231,8 @@ const getDesignTokens = (
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            backgroundColor: c.surface.canvas,
-            color: c.text.primary,
+            backgroundColor: "var(--rezics-color-surface-canvas)",
+            color: "var(--rezics-color-text-primary)",
             fontFamily: fontFamilies.sans,
             fontSize: fontSizes.base,
             lineHeight: lineHeights.body,
@@ -241,10 +249,42 @@ const getDesignTokens = (
         defaultProps: {
           elevation: 0,
         },
+        styleOverrides: {
+          root: {
+            backgroundColor: "var(--rezics-color-surface-base)",
+            backgroundImage: "none",
+          },
+        },
       },
       MuiAppBar: {
         styleOverrides: {
-          root: {},
+          root: {
+            backgroundColor: "var(--rezics-color-surface-canvas)",
+            color: "var(--rezics-color-text-primary)",
+            backgroundImage: "none",
+            boxShadow: "none",
+          },
+        },
+      },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            backgroundColor: "var(--rezics-color-surface-canvas)",
+            backgroundImage: "none",
+          },
+        },
+      },
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            backgroundColor: "var(--rezics-color-surface-canvas)",
+            color: "var(--rezics-color-text-primary)",
+            border: "1px solid var(--rezics-color-border-whisper)",
+            boxShadow: "var(--rezics-shadow-2)",
+          },
+          arrow: {
+            color: "var(--rezics-color-surface-canvas)",
+          },
         },
       },
     },
@@ -282,7 +322,7 @@ export const getDynamicTheme = (
   sourceColor?: string,
 ): Theme => {
   if (!sourceColor) {
-    return createTheme({ ...getDesignTokens(mode), cssVariables: true });
+    return createTheme(getDesignTokens(mode));
   }
 
   const dynamicColors = generateDynamicColors(sourceColor, mode === "dark");
@@ -308,17 +348,14 @@ export const getDynamicTheme = (
     },
   };
 
-  return createTheme({ ...enhancedTokens, cssVariables: true });
+  return createTheme(enhancedTokens);
 };
 
 export const getTheme = (
   mode: "light" | "dark",
   customColor?: string,
 ): Theme => {
-  return createTheme({
-    ...getDesignTokens(mode, customColor),
-    cssVariables: true,
-  });
+  return createTheme(getDesignTokens(mode, customColor));
 };
 
 export const lightTheme = getTheme("light");

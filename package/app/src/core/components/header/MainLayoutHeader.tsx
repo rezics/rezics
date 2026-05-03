@@ -2,8 +2,7 @@ import { AppBar, Avatar, Toolbar, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useRouterState } from "@tanstack/react-router";
-import React, { useMemo } from "react";
-import { useAppStore } from "@/app/states/appStore.ts";
+import React from "react";
 import { AuthenticatedSection } from "@/core/sections/header/AuthenticatedSection.tsx";
 import { PendingVerificationSection } from "@/core/sections/header/PendingVerificationSection.tsx";
 import { UnauthenticatedSection } from "@/core/sections/header/UnauthenticatedSection.tsx";
@@ -31,9 +30,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
     const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
     const theme = useTheme();
     const isMobile = useIsMobile();
-    const themeMode = useAppStore((state) => state.theme);
 
-    const isDark = useMemo(() => themeMode === "dark", [themeMode]);
     const isHomePage = useRouterState({
       select: (s) => s.location.pathname === "/",
     });
@@ -56,7 +53,6 @@ export const Header: React.FC<HeaderProps> = React.memo(
         position="fixed"
         elevation={0}
         sx={{
-          backgroundColor: "background.paper",
           zIndex: theme.zIndex.drawer + 1,
           ml: layoutType === "type-a" && sidebarOpen ? drawerWidth : 0,
           width:
@@ -71,8 +67,6 @@ export const Header: React.FC<HeaderProps> = React.memo(
         className={cn(
           isDragging && "rounded-tl-2xl rounded-bl-2xl",
           "pointer-events-auto",
-          "border-b",
-          isDark ? "border-gray-800" : "border-gray-200",
         )}
       >
         <Toolbar className="px-2 gap-2">

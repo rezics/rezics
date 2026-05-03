@@ -56,7 +56,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
     <Box
       className={className}
       component="footer"
-      sx={{ bgcolor: "background.paper", color: "text.primary" }}
+      sx={{ bgcolor: "background.default", color: "text.primary" }}
     >
       <Divider sx={{ borderColor: "divider" }} />
 

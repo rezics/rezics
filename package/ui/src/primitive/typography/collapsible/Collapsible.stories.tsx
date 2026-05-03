@@ -29,7 +29,6 @@ export const Default: Story = {};
 export const LongContent: Story = {
   args: {
     maxLines: 4,
-    fade: true,
     children: `${LONG_TEXT}\n\n${LONG_TEXT}`,
   },
 };

@@ -1,7 +1,47 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { easing } from "../../config/tokens/motion";
 import { radius } from "../../config/tokens/radius";
 import { fontFamilies } from "../../config/tokens/typography";
+
+function rgbToHex(input: string): string {
+  const trimmed = input.trim();
+  if (trimmed.startsWith("#")) return trimmed.toLowerCase();
+  const match = trimmed.match(
+    /rgba?\(\s*(\d+(?:\.\d+)?)[ ,]+(\d+(?:\.\d+)?)[ ,]+(\d+(?:\.\d+)?)\s*(?:[,/]\s*([0-9.]+%?))?\s*\)/i,
+  );
+  if (!match) return trimmed;
+  const [, r, g, b, a] = match;
+  const toHex = (n: string) =>
+    Math.round(Number(n)).toString(16).padStart(2, "0");
+  const hex = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  if (a == null) return hex;
+  const alpha = a.endsWith("%") ? Number(a.slice(0, -1)) / 100 : Number(a);
+  if (Number.isNaN(alpha) || alpha >= 1) return hex;
+  const alphaHex = Math.round(alpha * 255)
+    .toString(16)
+    .padStart(2, "0");
+  return `${hex}${alphaHex}`;
+}
+
+function useResolvedColor(ref: React.RefObject<HTMLElement | null>) {
+  const [hex, setHex] = useState<string>("");
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const read = () => {
+      const cs = getComputedStyle(el);
+      setHex(rgbToHex(cs.backgroundColor));
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "class", "style"],
+    });
+    return () => observer.disconnect();
+  }, [ref]);
+  return hex;
+}
 
 export function Grid({
   cols = 4,
@@ -39,6 +79,8 @@ export function Swatch({
   invertText?: boolean;
   height?: number;
 }) {
+  const swatchRef = useRef<HTMLDivElement>(null);
+  const hex = useResolvedColor(swatchRef);
   return (
     <div
       style={{
@@ -49,6 +91,7 @@ export function Swatch({
       }}
     >
       <div
+        ref={swatchRef}
         style={{
           height,
           background: value,
@@ -58,9 +101,11 @@ export function Swatch({
           alignItems: "flex-end",
           fontFamily: fontFamilies.mono,
           fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: "0.02em",
         }}
       >
-        {value}
+        {hex || value}
       </div>
       <div style={{ padding: "10px 12px" }}>
         <div

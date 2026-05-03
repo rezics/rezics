@@ -19,7 +19,7 @@ export const HorizontalBookCarousel: React.FC<HorizontalBookCarouselProps> = ({
     <DomainCarousel
       items={bookList}
       itemKey={(book) => book.id}
-      itemClassName="pl-4 !basis-1/3 xsm:!basis-1/4 sm:!basis-1/5 md:!basis-1/6 lg:!basis-1/7 xl:!basis-1/12"
+      itemClassName="pl-4 !basis-1/3 xsm:!basis-1/4 sm:!basis-1/5 md:!basis-1/6 lg:!basis-1/7 xl:!basis-1/8"
       className={className}
       ariaLabel="Books"
       renderItem={(book) => (

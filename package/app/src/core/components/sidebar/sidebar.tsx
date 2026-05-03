@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // --- Fixed 模式渲染逻辑 ---
   if (mode === "fixed") {
     return (
-      <Box sx={{ backgroundColor: "background.paper" }}>
+      <Box sx={{ backgroundColor: "background.default" }}>
         {/* 背景遮罩 (Backdrop) - 处理淡入淡出 */}
         <div
           className={cn(
@@ -65,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               "relative h-full flex flex-col overflow-hidden",
               className,
             )}
-            sx={{ backgroundColor: "background.paper" }}
+            sx={{ backgroundColor: "background.default" }}
           >
             {/* 仅在 Fixed 模式下，通常需要一个显式的关闭按钮 */}
             <button
@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <Box
       className="inline-sidebar-container"
-      sx={{ backgroundColor: "background.paper" }}
+      sx={{ backgroundColor: "background.default" }}
     >
       <div
         className={cn(`shrink-0`)}
