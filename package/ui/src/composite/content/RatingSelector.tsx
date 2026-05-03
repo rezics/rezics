@@ -1,10 +1,12 @@
 import type { ContentRating } from "@rezics/contract";
-import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import type { SelectChangeEvent } from "@mui/material/Select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shadcn/select";
+import { Label } from "@/shadcn/label";
 
 const RATING_OPTIONS: readonly { value: ContentRating; label: string }[] = [
   { value: "GENERAL", label: "General" },
@@ -20,7 +22,7 @@ export interface RatingSelectorProps {
   helperText?: string;
   disabled?: boolean;
   fullWidth?: boolean;
-  size?: "small" | "medium";
+  size?: "sm" | "default";
 }
 
 export function RatingSelector({
@@ -30,28 +32,36 @@ export function RatingSelector({
   helperText,
   disabled,
   fullWidth = true,
-  size = "small",
+  size = "sm",
 }: RatingSelectorProps) {
-  const handleChange = (event: SelectChangeEvent<ContentRating>) => {
-    onChange(event.target.value as ContentRating);
-  };
-
   return (
-    <FormControl fullWidth={fullWidth} size={size} disabled={disabled}>
-      <InputLabel id="rating-selector-label">{label}</InputLabel>
+    <div className={`flex flex-col gap-1 ${fullWidth ? "w-full" : ""}`}>
+      <Label htmlFor="rating-selector" className="text-sm text-rezics-fg-muted">
+        {label}
+      </Label>
       <Select
-        labelId="rating-selector-label"
         value={value}
-        label={label}
-        onChange={handleChange}
+        onValueChange={(v) => onChange(v as ContentRating)}
+        disabled={disabled}
       >
-        {RATING_OPTIONS.map((opt) => (
-          <MenuItem key={opt.value} value={opt.value}>
-            {opt.label}
-          </MenuItem>
-        ))}
+        <SelectTrigger
+          id="rating-selector"
+          size={size}
+          className={fullWidth ? "w-full" : undefined}
+        >
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          {RATING_OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
       </Select>
-      {helperText ? <FormHelperText>{helperText}</FormHelperText> : null}
-    </FormControl>
+      {helperText ? (
+        <p className="text-xs text-rezics-fg-muted">{helperText}</p>
+      ) : null}
+    </div>
   );
 }

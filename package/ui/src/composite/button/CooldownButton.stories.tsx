@@ -8,7 +8,7 @@ const meta = {
   args: {
     cooldownMs: 5000,
     children: "Send code",
-    variant: "contained",
+    variant: "default",
   },
 } satisfies Meta<typeof CooldownButton>;
 
@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const Small: Story = {
-  args: { cooldownMs: 3000, size: "small", children: "Resend" },
+  args: { cooldownMs: 3000, size: "sm", children: "Resend" },
 };
 
 export const Disabled: Story = {

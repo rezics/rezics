@@ -15,7 +15,7 @@ This page is the human-readable counterpart to `.claude/skills/rezics-design/pat
 
 ## 1. Section / page layout
 
-Sections separate via `p-12` (48px UnoCSS) or `sx={{ py: 6 }}` (48px MUI) vertical padding. No card wrap, no border, no shadow.
+Sections separate via `p-12` (48px UnoCSS) vertical padding. No card wrap, no border, no shadow.
 
 <Compare>
   <Do caption="Borderless, whitespace-separated">
@@ -57,18 +57,18 @@ Sections separate via `p-12` (48px UnoCSS) or `sx={{ py: 6 }}` (48px MUI) vertic
 
 ```tsx
 // Do
-<Box sx={{ py: 8 }}>
-  <Typography variant="h2" mb={4}>Recent Books</Typography>
-  <Grid container spacing={4}>{books.map((b) => <BookCard key={b.id} book={b} />)}</Grid>
-</Box>
-<Box sx={{ py: 8 }}>
-  <Typography variant="h2" mb={4}>Reading Lists</Typography>
-</Box>
+<section className="py-16">
+  <h2 className="text-3xl font-bold mb-8">Recent Books</h2>
+  <div className="grid grid-cols-3 gap-8">{books.map((b) => <BookCard key={b.id} book={b} />)}</div>
+</section>
+<section className="py-16">
+  <h2 className="text-3xl font-bold mb-8">Reading Lists</h2>
+</section>
 
 // Don't
-<Card sx={{ p: 4, mb: 4, border: '1px solid #ddd', boxShadow: 1 }}>
-  <Typography variant="h2">Recent Books</Typography>
-</Card>
+<div className="p-8 mb-8 border border-gray-200 shadow-md rounded-lg">
+  <h2 className="text-3xl font-bold">Recent Books</h2>
+</div>
 ```
 
 Bordered/shadowed section cards are the SaaS-dashboard look. Rezics is a library — sections breathe through whitespace.
@@ -112,28 +112,28 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 
 ```tsx
 // Do — content-led
-<Card sx={{ p: 0, bgcolor: 'transparent', border: 'none', boxShadow: 'none' }}>
-  <CardMedia component="img" image={book.cover} sx={{ aspectRatio: '2/3', borderRadius: 1 }} />
-  <Box sx={{ pt: 1.5 }}>
-    <Typography variant="body1" fontWeight={500}>{book.title}</Typography>
-    <Typography variant="body2" color="text.secondary">{book.author}</Typography>
-  </Box>
-</Card>
+<article>
+  <img src={book.cover} alt={book.title} className="aspect-[2/3] rounded-md" />
+  <div className="pt-3">
+    <p className="text-base font-medium">{book.title}</p>
+    <p className="text-sm text-rezics-fg-muted">{book.author}</p>
+  </div>
+</article>
 
 // Do — list-row with whisper divider
-<Stack divider={<Divider sx={{ borderColor: 'var(--rezics-color-border-whisper)' }} />}>
-  {posts.map((p) => <Box key={p.id} sx={{ py: 3 }}>{/* row */}</Box>)}
-</Stack>
+<div className="divide-y divide-border-whisper">
+  {posts.map((p) => <div key={p.id} className="py-6">{/* row */}</div>)}
+</div>
 ```
 
 ---
 
 ## 3. Buttons
 
-`MuiButton.defaultProps` already sets `variant: "contained"` and `disableElevation: true`. A bare `<Button>` is correct.
+Use `<Button>` from `@/shadcn/button`. Default `variant="default"` is the brand-fill button; `outline` and `ghost` cover the secondary tiers.
 
 <Compare>
-  <Do caption="MUI Button variants">
+  <Do caption="shadcn Button variants">
     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
       <button
         style={{
@@ -192,14 +192,16 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 </Compare>
 
 ```tsx
-// Do
-<Button variant="contained">Save</Button>
-<Button variant="outlined">Cancel</Button>
-<Button variant="text">More</Button>
+import { Button } from '@/shadcn/button';
 
-// Need an icon? Use startIcon, never an emoji label.
+// Do
+<Button variant="default">Save</Button>
+<Button variant="outline">Cancel</Button>
+<Button variant="ghost">More</Button>
+
+// Need an icon? Use a child icon, never an emoji label.
 import { Plus } from 'lucide-react';
-<Button startIcon={<Plus size={16} />}>Add book</Button>
+<Button><Plus size={16} /> Add book</Button>
 
 // Don't
 <button style={{ background: '#f4606c', color: 'white', padding: '8px 16px', borderRadius: 8 }}>
@@ -212,10 +214,10 @@ import { Plus } from 'lucide-react';
 
 ## 4. Form inputs
 
-Standard variant for the app side, outlined for admin / dense forms. If MUI doesn't fit, reach for shadcn — see [MUI vs shadcn](.claude/skills/rezics-design/mui-vs-shadcn.md).
+Use shadcn `<Input>` and `<Label>` from `@/shadcn/input` / `@/shadcn/label`. The default style is borderless-friendly with a focus ring; pair with rezics tokens for muted helper text.
 
 <Compare>
-  <Do caption="MUI TextField, standard variant">
+  <Do caption="shadcn Input + Label">
     <div style={{ fontFamily: fontFamilies.sans, maxWidth: 280 }}>
       <div style={{ fontSize: 12, color: "var(--rezics-color-text-secondary)", marginBottom: 4 }}>Email</div>
       <input
@@ -252,9 +254,14 @@ Standard variant for the app side, outlined for admin / dense forms. If MUI does
 </Compare>
 
 ```tsx
+import { Input } from '@/shadcn/input';
+import { Label } from '@/shadcn/label';
+
 // Do
-<TextField label="Email" variant="standard" fullWidth />          // app
-<TextField label="Title" variant="outlined" size="small" />        // admin
+<div className="flex flex-col gap-1">
+  <Label htmlFor="email">Email</Label>
+  <Input id="email" type="email" />
+</div>
 
 // Don't
 <input className="border border-gray-300 rounded p-2 focus:border-blue-500" placeholder="Email" />
@@ -273,12 +280,9 @@ import { SafeLink } from '@rezics/ui';
 
 // Don't — raw <a> fails check:convention
 <a href={url}>Read on Goodreads</a>
-
-// Don't — MUI Link bypasses safety for external URLs
-<Link href={externalUrl}>Read on Goodreads</Link>
 ```
 
-MUI `<Link>` is fine for in-app navigation (TanStack Router, internal anchors). For anything that leaves rezics, `<SafeLink>` only.
+For in-app navigation use TanStack Router's `<Link>`. For anything that leaves rezics, `<SafeLink>` only.
 
 ---
 
@@ -289,21 +293,22 @@ MUI `<Link>` is fine for in-app navigation (TanStack Router, internal anchors). 
 ```tsx
 // Do
 import { Bookmark, Heart } from 'lucide-react';
-<IconButton><Bookmark size={20} /></IconButton>
+import { Button } from '@/shadcn/button';
+<Button variant="ghost" size="icon"><Bookmark size={20} /></Button>
 <Heart size={16} fill="currentColor" />
 
 // Don't
 <button>📚 My Library</button>
 <span>❤️ Like</span>
 <svg viewBox="0 0 24 24"><path d="..." /></svg>  // no theme integration
-import AddIcon from '@mui/icons-material/Add';   // deprecated — use lucide-react
+// import from the legacy mui icons package — removed; use lucide-react
 ```
 
 ---
 
 ## 7. Color usage
 
-Tokens flow from `tokens.ts` → MUI palette + CSS vars + UnoCSS theme. All four call sites resolve to the same value.
+Tokens flow from `tokens.ts` → CSS vars + UnoCSS theme. The two call sites resolve to the same value.
 
 <Compare>
   <Do caption="Token-driven, mode-aware">
@@ -342,28 +347,26 @@ Tokens flow from `tokens.ts` → MUI palette + CSS vars + UnoCSS theme. All four
 
 ```tsx
 // Do
-<Box sx={{ bgcolor: 'background.default', color: 'text.primary' }} />
 <div className="bg-surface text-text-primary p-4 rounded-md" />
 <div style={{ background: 'var(--rezics-color-surface-base)' }} />
 
 // Don't
-<Box sx={{ bgcolor: '#f5f4ed', color: '#1d1d1f' }} />
-<div className="bg-[#faf9f5]" />
+<div className="bg-[#faf9f5] text-[#1d1d1f]" />
 
 // Don't — #f4606c as text fails AA
-<Typography sx={{ color: '#f4606c' }}>Brand label</Typography>
+<p style={{ color: '#f4606c' }}>Brand label</p>
 // Do — auto-resolves to AA-safe text-brand (#C4433A light / #fa7882 dark)
-<Typography sx={{ color: 'var(--rezics-color-text-brand)' }}>Brand label</Typography>
+<p className="text-brand">Brand label</p>
 ```
 
 ---
 
 ## 8. Typography
 
-Theme defines all variants with the correct `clamp()` size, weight, and line-height per Foundation v1. Trust the variants. See [Typography](?path=/docs/foundation-tokens-typography--docs).
+The UnoCSS scale defines `text-xs`–`text-3xl` with the correct `clamp()` size, weight, and line-height per Foundation v1. Trust the scale. See [Typography](?path=/docs/foundation-tokens-typography--docs).
 
 <Compare>
-  <Do caption="MUI variants, default weights">
+  <Do caption="Type scale, default weights">
     <div style={{ color: "var(--rezics-color-text-primary)" }}>
       <div style={{ fontFamily: fontFamilies.sans, fontSize: "clamp(28px, 1.75rem + 0.8vw, 36px)", fontWeight: 600, lineHeight: 1.3 }}>
         Recent Reviews
@@ -390,33 +393,31 @@ Theme defines all variants with the correct `clamp()` size, weight, and line-hei
 
 ```tsx
 // Do
-<Typography variant="h2">Recent Reviews</Typography>
-<Typography variant="body1">Lorem ipsum…</Typography>
-<Typography variant="caption" color="text.secondary">3 days ago</Typography>
+<h2 className="text-3xl font-semibold">Recent Reviews</h2>
+<p className="text-base">Lorem ipsum…</p>
+<span className="text-xs text-rezics-fg-muted">3 days ago</span>
 
 // Do — serif for the reader (UnoCSS)
-<Box className="font-serif leading-reader">
+<div className="font-serif leading-reader">
   {chapterContent}
-</Box>
+</div>
 
 // Don't
 <h2 style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2 }}>Recent Reviews</h2>
-<Typography variant="h1" fontWeight={700}>Books</Typography>  // theme default 500 is correct
+<h1 className="font-bold">Books</h1>  // default semibold (600) is correct
 ```
 
 ---
 
 ## 9. Spacing
 
-MUI `theme.spacing(N)` = `N × 8px`; UnoCSS `p-N` = `N × 4px`. Different step numbers, same 4/8 pixel grid. Keep multiples on the grid; don't escape with arbitrary px.
+UnoCSS `p-N` = `N × 4px`. Stay on the 4-pixel grid; don't escape with arbitrary px.
 
 ```tsx
 // Do
-<Box sx={{ p: 2, gap: 4 }} />
 <div className="p-2 gap-4" />
 
 // Don't
-<Box sx={{ p: '13px', gap: '22px' }} />
 <div className="p-[13px] gap-[22px]" />
 ```
 
@@ -426,18 +427,18 @@ If the closest token feels wrong, propose a token addition — don't bypass.
 
 ## 10. Mode (light / dark) handling
 
-Tokens auto-switch via `<html data-theme="dark">`. Never branch on `palette.mode` in component code.
+Tokens auto-switch via `<html data-theme="dark">`. Never branch on theme mode in component code — let CSS variables resolve.
 
 ```tsx
 // Do — works in both modes, no branching
-<Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
-  <Typography>Auto light/dark.</Typography>
-</Box>
+<div className="bg-rezics-surface-base text-rezics-fg-primary">
+  <p>Auto light/dark.</p>
+</div>
 
 // Don't
-const theme = useTheme();
-const bg = theme.palette.mode === 'dark' ? '#1a1a18' : '#f5f4ed';
-<Box sx={{ bgcolor: bg }} />
+const { resolvedTheme } = useTheme();
+const bg = resolvedTheme === 'dark' ? '#1a1a18' : '#f5f4ed';
+<div style={{ background: bg }} />
 ```
 
 If a token doesn't exist for what you need, propose a token — don't branch on mode.
@@ -508,18 +509,20 @@ Admin is operations and management — dense tables, terse copy. The app side is
 </Compare>
 
 ```tsx
+import { TableRow, TableCell } from '@/shadcn/table';
+
 // Admin — dense (p-3 / p-4 = 12–16px)
-<TableRow sx={{ height: 40 }}>
-  <TableCell sx={{ py: 1.5, px: 2 }}>{user.name}</TableCell>
-  <TableCell sx={{ py: 1.5, px: 2 }}>{user.email}</TableCell>
+<TableRow className="h-10">
+  <TableCell className="py-3 px-4">{user.name}</TableCell>
+  <TableCell className="py-3 px-4">{user.email}</TableCell>
 </TableRow>
 
-// App — generous (p-12 = 48px, or MUI sx py: 6)
-<Stack spacing={4} sx={{ py: 8 }}>
+// App — generous (p-12 = 48px)
+<div className="flex flex-col gap-8 py-16">
   <BookSection />
   <ReviewSection />
   <ShelfSection />
-</Stack>
+</div>
 ```
 
 Admin ≠ App. Don't replicate app-side layouts in admin; the audiences and tasks differ.

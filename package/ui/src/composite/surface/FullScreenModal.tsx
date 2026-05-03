@@ -1,22 +1,5 @@
-// import { TransitionProps } from "@mui/material/transitions";
-import {
-  AppBar,
-  Box,
-  IconButton,
-  Modal,
-  Slide,
-  Toolbar,
-  Typography,
-} from "@mui/material";
-import React from "react";
-import { X as CloseIcon } from "lucide-react";
-
-//  ;
-
-// 过渡动画 (从下方滑入)
-const Transition = React.forwardRef(function Transition(props: any, ref: any) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import type React from "react";
+import { Dialog, DialogContent } from "@/shadcn/dialog";
 
 interface FullScreenModalProps {
   open: boolean;
@@ -40,59 +23,20 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
   children,
 }) => {
   return (
-    <Modal open={open} onClose={onClose} closeAfterTransition>
-      <Transition in={open}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-            width: "100vw",
-            bgcolor: "background.paper",
-          }}
-        >
-          {/* 顶栏: 承载 title 插槽 */}
-          <AppBar position="static" sx={{ flexShrink: 0 }}>
-            <Toolbar>
-              <Box sx={{ flexGrow: 1 }}>
-                {/* 这里是 title 插槽的关键逻辑：
-                  - 如果 title 是字符串, 用 Typography 组件包裹来应用默认样式
-                  - 如果 title 是一个 React 元素 (JSX), 则直接渲染
-                */}
-                {typeof title === "string" ? (
-                  <Typography variant="h6" component="div">
-                    {title}
-                  </Typography>
-                ) : (
-                  title
-                )}
-              </Box>
-
-              {/* 关闭按钮 */}
-              <IconButton
-                edge="end"
-                color="inherit"
-                onClick={onClose}
-                aria-label="Close"
-              >
-                <CloseIcon />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-
-          {/* 内容区: 默认插槽 */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              p: 3,
-              overflowY: "auto",
-            }}
-          >
-            {children}
-          </Box>
-        </Box>
-      </Transition>
-    </Modal>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="w-screen h-screen max-w-none rounded-none p-0 flex flex-col gap-0">
+        <div className="flex items-center px-4 py-2 border-b border-border-whisper shrink-0">
+          <div className="flex-1">
+            {typeof title === "string" ? (
+              <div className="text-lg font-medium">{title}</div>
+            ) : (
+              title
+            )}
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">{children}</div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

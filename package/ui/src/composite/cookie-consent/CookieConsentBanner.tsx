@@ -1,7 +1,5 @@
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import type { FC, ReactNode } from "react";
+import { Button } from "@/shadcn/button";
 
 export interface CookieConsentBannerProps {
   title: string;
@@ -29,44 +27,34 @@ export const CookieConsentBanner: FC<CookieConsentBannerProps> = ({
 }) => {
   return (
     <section aria-label={title}>
-      <Stack
-        spacing={2}
+      <div
         role="region"
-        sx={{
-          border: (theme) => `1px solid ${theme.palette.divider}`,
-          borderRadius: 2,
-          p: 2,
-          backgroundColor: (theme) => theme.palette.background.paper,
-        }}
+        className="flex flex-col gap-4 rounded-lg border border-border-whisper p-4 bg-rezics-surface-base"
       >
         <div>
-          <Typography component="h2" variant="h6">
-            {title}
-          </Typography>
-          <Typography color="text.secondary" variant="body2">
-            {body}
-          </Typography>
+          <h2 className="text-lg font-medium">{title}</h2>
+          <p className="text-sm text-rezics-fg-muted">{body}</p>
         </div>
-        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+        <div className="flex flex-row flex-wrap gap-2">
           {policyAction ?? (
-            <Button type="button" variant="text" onClick={onPolicyClick}>
+            <Button type="button" variant="ghost" onClick={onPolicyClick}>
               {policyLabel}
             </Button>
           )}
           {secondaryAction ? (
             <Button
               type="button"
-              variant="outlined"
+              variant="outline"
               onClick={secondaryAction.onClick}
             >
               {secondaryAction.label}
             </Button>
           ) : null}
-          <Button type="button" variant="contained" onClick={onAccept}>
+          <Button type="button" variant="default" onClick={onAccept}>
             {acceptLabel}
           </Button>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </section>
   );
 };

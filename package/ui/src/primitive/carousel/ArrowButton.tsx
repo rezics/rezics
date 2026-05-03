@@ -1,4 +1,3 @@
-import { useTheme } from "@mui/material";
 import clsx from "clsx";
 import React from "react";
 
@@ -11,8 +10,6 @@ export const ArrowButton = React.forwardRef<
   HTMLButtonElement,
   ArrowButtonProps
 >(({ icon: Icon, className, children, disabled, ...props }, ref) => {
-  const isDark = useTheme().palette.mode === "dark";
-
   return (
     <button
       ref={ref}
@@ -31,10 +28,9 @@ export const ArrowButton = React.forwardRef<
         // focus
         "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
 
-        // Theme
-        isDark
-          ? "bg-white/10 text-white hover:bg-white/16 active:bg-white/20 focus-visible:ring-white/30 shadow-black/40"
-          : "bg-black/5 text-black hover:bg-black/10 active:bg-black/14 focus-visible:ring-black/20 shadow-black/15",
+        // Theme — light first, dark variant
+        "bg-black/5 text-black hover:bg-black/10 active:bg-black/14 focus-visible:ring-black/20 shadow-black/15",
+        "dark:bg-white/10 dark:text-white dark:hover:bg-white/16 dark:active:bg-white/20 dark:focus-visible:ring-white/30 dark:shadow-black/40",
 
         // Disabled styles
         "disabled:opacity-40",

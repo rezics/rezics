@@ -1,5 +1,5 @@
-import { Chip, Stack, Typography } from "@mui/material";
 import type React from "react";
+import { Badge } from "@/shadcn/badge";
 
 export interface WorkReleaseNavRelease {
   unitId: string;
@@ -40,23 +40,21 @@ export const WorkReleaseNav: React.FC<WorkReleaseNavProps> = ({
 
   return (
     <div>
-      <Typography variant="subtitle2" fontWeight={600} mb={1}>
-        {heading}
-      </Typography>
-      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+      <p className="text-sm font-semibold mb-1">{heading}</p>
+      <div className="flex flex-row flex-wrap gap-2">
         {others.map((release) =>
           renderLink(
             release,
-            <Chip
+            <Badge
               key={release.unitId}
-              label={release.title ?? emptyLabel}
-              size="small"
-              variant="outlined"
-              clickable
-            />,
+              variant="outline"
+              className="cursor-pointer"
+            >
+              {release.title ?? emptyLabel}
+            </Badge>,
           ),
         )}
-      </Stack>
+      </div>
     </div>
   );
 };

@@ -1,22 +1,13 @@
-import { Button, type ButtonProps } from "@mui/material";
 import React, { useState } from "react";
+import { Button } from "@/shadcn/button";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 
 export interface DeleteWrapperProps {
-  /** 点击确认后执行的删除逻辑 */
   onDelete: () => Promise<unknown> | unknown;
-  /** 触发删除的任意元素（按钮、图标等） */
   children: React.ReactElement<any>;
-  /** 是否禁用删除入口 */
   disabled?: boolean;
 }
 
-/**
- * 通用删除确认包装组件。
- * - 可以包裹任意可点击元素；
- * - 点击后弹出确认删除 Dialog；
- * - 确认后执行传入的删除函数。
- */
 export const DeleteWrapper: React.FC<DeleteWrapperProps> = ({
   children,
   onDelete,
@@ -32,7 +23,6 @@ export const DeleteWrapper: React.FC<DeleteWrapperProps> = ({
       | React.MouseEventHandler<any>
       | undefined;
 
-    // 保留子元素原有 onClick 行为
     if (originalOnClick) {
       originalOnClick(event);
     }
@@ -75,32 +65,29 @@ export const DeleteWrapper: React.FC<DeleteWrapperProps> = ({
   );
 };
 
-export interface DeleteButtonProps
-  extends Omit<ButtonProps, "onClick" | "children"> {
-  /** 点击确认后执行的删除逻辑 */
+export interface DeleteButtonProps {
   onDelete: () => Promise<unknown> | unknown;
-  /** 按钮文案，默认“删除” */
   label?: React.ReactNode;
-  variant?: "contained" | "outlined";
+  variant?: "default" | "outline" | "destructive" | "ghost";
+  disabled?: boolean;
+  className?: string;
 }
 
-/**
- * 自带确认弹窗的删除按钮。
- * 使用示例：
- * ```tsx
- * <DeleteButton onDelete={handleDelete} color="error" />
- * ```
- */
 export const DeleteButton: React.FC<DeleteButtonProps> = ({
   onDelete,
   label = "删除",
   disabled,
-  variant = "outlined",
-  ...buttonProps
+  variant = "destructive",
+  className,
 }) => {
   return (
     <DeleteWrapper onDelete={onDelete} disabled={disabled}>
-      <Button variant={variant} {...buttonProps} disabled={disabled}>
+      <Button
+        type="button"
+        variant={variant}
+        disabled={disabled}
+        className={className}
+      >
         {label}
       </Button>
     </DeleteWrapper>

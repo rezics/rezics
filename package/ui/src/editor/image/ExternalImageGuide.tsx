@@ -1,9 +1,7 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import { useState } from "react";
+import { Button } from "@/shadcn/button";
+import { Input } from "@/shadcn/input";
+import { SafeLink } from "@/link/SafeLink";
 
 export interface ExternalImageGuideConfig {
   name: string;
@@ -40,31 +38,22 @@ export function ExternalImageGuide({
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, p: 1 }}>
-      <Typography variant="body2" fontWeight={500}>
+    <div className="flex flex-col gap-3 p-1">
+      <p className="text-sm font-medium">
         Upload your image to{" "}
-        <Link href={url} target="_blank" rel="noopener noreferrer">
+        <SafeLink href={url} className="text-brand underline">
           {name}
-        </Link>
+        </SafeLink>
         , then paste the direct image URL below.
-      </Typography>
-      <Box component="ol" sx={{ pl: 2.5, m: 0, "& li": { mb: 0.5 } }}>
+      </p>
+      <ol className="pl-5 m-0 list-decimal text-sm text-rezics-fg-muted [&_li]:mb-1">
         {steps.map((step, i) => (
-          <Typography
-            component="li"
-            variant="body2"
-            color="text.secondary"
-            // biome-ignore lint/suspicious/noArrayIndexKey: static list
-            key={i}
-          >
-            {step}
-          </Typography>
+          // biome-ignore lint/suspicious/noArrayIndexKey: static list
+          <li key={i}>{step}</li>
         ))}
-      </Box>
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <TextField
-          size="small"
-          fullWidth
+      </ol>
+      <div className="flex gap-2">
+        <Input
           placeholder="https://..."
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
@@ -73,14 +62,15 @@ export function ExternalImageGuide({
           }}
         />
         <Button
-          variant="contained"
-          size="small"
+          type="button"
+          variant="default"
+          size="sm"
           onClick={handleSubmit}
           disabled={!valid}
         >
           Insert
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

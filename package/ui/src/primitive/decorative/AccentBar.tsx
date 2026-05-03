@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@mui/material";
+import clsx from "clsx";
 import type React from "react";
 
 export interface AccentBarProps {
@@ -16,19 +16,18 @@ export const AccentBar: React.FC<AccentBarProps> = ({
   radius = 2,
   className,
 }) => {
-  const theme = useTheme();
-
   return (
-    <Box
-      className={className}
-      sx={{
-        display: "inline-block",
+    <span
+      className={clsx(
+        "inline-block flex-shrink-0 align-middle",
+        color ? undefined : "bg-brand",
+        className,
+      )}
+      style={{
         width: `${width}px`,
         height: `${height}px`,
         borderRadius: `${radius}px`,
-        backgroundColor: color ?? theme.palette.primary.main,
-        verticalAlign: "middle",
-        flexShrink: 0,
+        backgroundColor: color,
       }}
     />
   );

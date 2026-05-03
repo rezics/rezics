@@ -1,11 +1,10 @@
-import AppBar from "@mui/material/AppBar";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import IconButton from "@mui/material/IconButton";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import type React from "react";
-import { X as CloseIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shadcn/dialog";
 
 export interface DialogContainerProps {
   /** 控制对话框显示 */
@@ -22,6 +21,17 @@ export interface DialogContainerProps {
   fullScreen?: boolean;
 }
 
+const MAX_WIDTH_CLASS: Record<
+  NonNullable<DialogContainerProps["maxWidth"]>,
+  string
+> = {
+  xs: "sm:max-w-xs",
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-xl",
+};
+
 /**
  * 通用弹窗容器，包含状态栏（标题+关闭按钮）和内容展示区。
  * 支持Esc键或点击关闭按钮关闭，对话框关闭时调用 onClose。
@@ -34,41 +44,27 @@ const DialogContainer: React.FC<DialogContainerProps> = ({
   maxWidth = "md",
   fullScreen = false,
 }) => {
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth={maxWidth}
-      fullScreen={fullScreen}
-      scroll="paper"
-      // MUI Dialog 默认支持 Esc 关闭
-    >
-      <AppBar
-        position="relative"
-        elevation={1}
-        sx={{ position: fullScreen ? "fixed" : "static" }}
-      >
-        <Toolbar variant="dense">
-          {title && (
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              {title}
-            </Typography>
-          )}
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={onClose}
-            aria-label="close"
-            size="large"
-          >
-            <CloseIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+  const widthClass = fullScreen
+    ? "w-screen h-screen max-w-none rounded-none p-0"
+    : MAX_WIDTH_CLASS[maxWidth];
 
-      <DialogContent dividers sx={{ p: 2 }}>
-        {children}
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className={widthClass}>
+        {title && (
+          <DialogHeader className={fullScreen ? "px-4 pt-4" : undefined}>
+            <DialogTitle>{title}</DialogTitle>
+          </DialogHeader>
+        )}
+        <div
+          className={
+            fullScreen
+              ? "flex-1 overflow-y-auto p-4"
+              : "border-t border-border-whisper pt-2"
+          }
+        >
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   );

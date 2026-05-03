@@ -1,11 +1,12 @@
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
 import { useImageUpload } from "@rezics/api/upload/upload.mutations";
+import {
+  Camera as CameraAltIcon,
+  CloudUpload as CloudUploadIcon,
+} from "lucide-react";
 import { useCallback, useRef, useState } from "react";
+import { Alert, AlertDescription } from "@/shadcn/alert";
+import { Spinner } from "@/primitive/feedback/Spinner";
 import type { ImageProvider } from "./types";
-import { Camera as CameraAltIcon, CloudUpload as CloudUploadIcon } from "lucide-react";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ACCEPTED_EXTENSIONS = ".jpg,.jpeg,.png,.webp,.gif";
@@ -81,28 +82,15 @@ function UploadContent({ onInsert }: UploadContentProps) {
   );
 
   return (
-    <Box
-      sx={{ display: "flex", flexDirection: "column", gap: 1.5, p: 1 }}
-      onPaste={handlePaste}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: 2,
-          border: 2,
-          borderStyle: "dashed",
-          borderColor: dragActive ? "primary.main" : "divider",
-          bgcolor: dragActive ? "action.hover" : "transparent",
-          p: 4,
-          cursor: "pointer",
-          transition: "border-color 0.2s, background-color 0.2s",
-          "&:hover": {
-            borderColor: "text.secondary",
-          },
-        }}
+    <div className="flex flex-col gap-3 p-1" onPaste={handlePaste}>
+      <div
+        className={[
+          "flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 cursor-pointer",
+          "transition-colors duration-200",
+          dragActive
+            ? "border-brand bg-rezics-surface-subtle"
+            : "border-border-whisper hover:border-rezics-fg-secondary",
+        ].join(" ")}
         onDragOver={(e: React.DragEvent) => {
           e.preventDefault();
           setDragActive(true);
@@ -112,38 +100,25 @@ function UploadContent({ onInsert }: UploadContentProps) {
         onClick={() => inputRef.current?.click()}
       >
         {mutation.isPending ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <CircularProgress size={32} />
-            <Typography variant="body2" color="text.secondary">
-              Uploading...
-            </Typography>
-          </Box>
+          <div className="flex flex-col items-center gap-2">
+            <Spinner size="lg" />
+            <p className="text-sm text-rezics-fg-muted">Uploading...</p>
+          </div>
         ) : (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <CameraAltIcon size={32} color="var(--rezics-color-text-tertiary)" />
-            <Typography variant="body2" color="text.secondary">
+          <div className="flex flex-col items-center gap-2">
+            <CameraAltIcon
+              size={32}
+              color="var(--rezics-color-text-tertiary)"
+            />
+            <p className="text-sm text-rezics-fg-muted">
               Drop image here, paste, or click to browse
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            </p>
+            <p className="text-xs text-rezics-fg-muted">
               JPEG, PNG, WebP, GIF — max 5MB
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
-      </Box>
+      </div>
 
       <input
         ref={inputRef}
@@ -154,17 +129,17 @@ function UploadContent({ onInsert }: UploadContentProps) {
       />
 
       {error && (
-        <Alert severity="error" onClose={() => setError(null)}>
-          {error}
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-    </Box>
+    </div>
   );
 }
 
 export const rezicsUploadProvider: ImageProvider = {
   name: "rezics-upload",
   label: "Upload",
-  icon: <CloudUploadIcon fontSize="small" />,
+  icon: <CloudUploadIcon className="size-4" />,
   render: ({ onInsert }) => <UploadContent onInsert={onInsert} />,
 };

@@ -1,25 +1,15 @@
-import {
-  Autocomplete,
-  Avatar,
-  Box,
-  Chip,
-  CircularProgress,
-  List,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Popper,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { meiliUserApi } from "@rezics/api/meili/meili.api";
-import type { BookDTO, UserDTO } from "@rezics/contract";
+import type { UserDTO } from "@rezics/contract";
 import React from "react";
+import { createPortal } from "react-dom";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shadcn/avatar";
+import { Spinner } from "@/primitive/feedback/Spinner";
 
 type PublicUserLike = Partial<UserDTO>;
-
-export type BookMetadataValue = Partial<BookDTO>;
 
 export type MentionUserOption = PublicUserLike;
 
@@ -58,104 +48,6 @@ const useUserSearchQuery = (query: string) => {
 
   return { options, loading };
 };
-
-// ---------------------------------------------------------------------------
-// Form-level multi-select (unchanged)
-// ---------------------------------------------------------------------------
-
-const useUserSearch = () => {
-  const [input, setInput] = React.useState("");
-  const { options, loading } = useUserSearchQuery(input);
-  return { input, setInput, options, loading };
-};
-
-const UsersMultiSelect: React.FC<{
-  label: string;
-  value: MentionUserOption[];
-  onChange: (v: MentionUserOption[]) => void;
-  placeholder?: string;
-  disabled?: boolean;
-}> = ({ label, value, onChange, placeholder, disabled }) => {
-  const { input, setInput, options, loading } = useUserSearch();
-  return (
-    <div>
-      <Autocomplete
-        multiple
-        disableCloseOnSelect
-        options={options}
-        value={value}
-        onChange={(_, newValue) => onChange(newValue)}
-        inputValue={input}
-        onInputChange={(_, v) => setInput(v)}
-        getOptionLabel={(o) => o.name ?? ""}
-        isOptionEqualToValue={(o, v) => o.unitId === v.unitId}
-        filterOptions={(x) => x}
-        loading={loading}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={label}
-            placeholder={placeholder}
-            disabled={disabled}
-            InputProps={{
-              ...(params.InputProps as any),
-              endAdornment: (
-                <>
-                  {loading ? (
-                    <CircularProgress color="inherit" size={16} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            }}
-          />
-        )}
-        renderOption={(props, option) => (
-          <li {...props} key={option.unitId}>
-            <div className="flex items-center gap-2">
-              <Avatar src={option.avatar} sx={{ width: 24, height: 24 }}>
-                {option.name?.[0] ?? "?"}
-              </Avatar>
-              <span>{option.name}</span>
-            </div>
-          </li>
-        )}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
-            <Chip
-              {...getTagProps({ index })}
-              key={option.unitId}
-              avatar={<Avatar src={option.avatar}>{option.name?.[0]}</Avatar>}
-              label={option.name}
-            />
-          ))
-        }
-        disabled={disabled}
-      />
-    </div>
-  );
-};
-
-interface EditorMentionProps {
-  value: MentionUserOption[];
-  onChange: (v: MentionUserOption[]) => void;
-  disabled?: boolean;
-}
-
-export function EditorMention({
-  value,
-  onChange,
-  disabled,
-}: EditorMentionProps) {
-  return (
-    <UsersMultiSelect
-      label="Mention"
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-    />
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Editor mention trigger detection
@@ -213,7 +105,6 @@ export function useMentionPanel(view: any) {
   optionsRef.current = options;
   activeIndexRef.current = activeIndex;
 
-  // Reset highlight when results change
   React.useEffect(() => {
     setActiveIndex(0);
   }, []);
@@ -222,7 +113,6 @@ export function useMentionPanel(view: any) {
     setTrigger(detectMentionTrigger(view));
   }, [view]);
 
-  // Re-check trigger on cursor movement (keyup) and clicks
   React.useEffect(() => {
     if (!view) return;
     const dom = view.dom as HTMLElement;
@@ -235,7 +125,6 @@ export function useMentionPanel(view: any) {
     };
   }, [view, checkTrigger]);
 
-  // Close on editor scroll (anchored coordinates go stale)
   React.useEffect(() => {
     if (!view || !trigger) return;
     const scroller = view.scrollDOM as HTMLElement;
@@ -244,7 +133,6 @@ export function useMentionPanel(view: any) {
     return () => scroller.removeEventListener("scroll", close);
   }, [view, trigger]);
 
-  // Keyboard interception while panel is open (capture phase)
   const pickRef = React.useRef<(o: MentionUserOption) => void>(() => {});
 
   React.useEffect(() => {
@@ -285,7 +173,6 @@ export function useMentionPanel(view: any) {
 
     dom.addEventListener("keydown", handleKeyDown, true);
     return () => dom.removeEventListener("keydown", handleKeyDown, true);
-    // Only re-attach when the panel opens / closes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, trigger]);
 
@@ -321,7 +208,7 @@ export function useMentionPanel(view: any) {
 }
 
 // ---------------------------------------------------------------------------
-// MUI Mention Panel
+// Mention Panel — portal-rendered floating list
 // ---------------------------------------------------------------------------
 
 export interface MentionPanelProps {
@@ -343,107 +230,79 @@ export function MentionPanel({
   onPick,
   onClose,
 }: MentionPanelProps) {
-  const virtualAnchorEl = React.useMemo(() => {
-    if (!trigger) return null;
-    const { left, top } = trigger.anchorPos;
-    return {
-      getBoundingClientRect: () => ({
-        x: left,
-        y: top,
-        top,
-        left,
-        right: left,
-        bottom: top,
-        width: 0,
-        height: 0,
-        toJSON: () => ({}),
-      }),
-    };
-  }, [trigger]);
+  if (!trigger) return null;
 
-  const isOpen = !!trigger && !!virtualAnchorEl;
-  const showEmpty = !loading && options.length === 0 && !!trigger?.query;
+  const showEmpty = !loading && options.length === 0 && !!trigger.query;
+  const { left, top } = trigger.anchorPos;
 
-  return (
-    <Popper
-      open={isOpen}
-      anchorEl={virtualAnchorEl as any}
-      placement="bottom-start"
-      style={{ zIndex: 2000 }}
+  return createPortal(
+    <div
+      className="fixed z-[2000] min-w-[260px] max-w-[420px] rounded-lg shadow-lg bg-rezics-surface-elevated border border-border-whisper"
+      style={{ top, left }}
     >
-      <Paper
-        elevation={8}
-        sx={{ minWidth: 260, maxWidth: 420, borderRadius: 2 }}
-      >
-        {loading && (
-          <Box sx={{ p: 1.5, display: "flex", alignItems: "center", gap: 1 }}>
-            <CircularProgress size={16} />
-            <Typography variant="body2" color="text.secondary">
-              Searching…
-            </Typography>
-          </Box>
-        )}
+      {loading && (
+        <div className="flex items-center gap-2 p-3">
+          <Spinner size="sm" />
+          <span className="text-sm text-rezics-fg-muted">Searching…</span>
+        </div>
+      )}
 
-        {showEmpty && (
-          <Box sx={{ p: 1.5 }}>
-            <Typography variant="body2" color="text.secondary">
-              No matches
-            </Typography>
-          </Box>
-        )}
+      {showEmpty && (
+        <div className="p-3">
+          <span className="text-sm text-rezics-fg-muted">No matches</span>
+        </div>
+      )}
 
-        {options.length > 0 && (
-          <List dense sx={{ maxHeight: 280, overflow: "auto", py: 0.5 }}>
-            {options.map((option, idx) => (
-              <ListItemButton
-                key={option.unitId ?? idx}
-                selected={idx === activeIndex}
+      {options.length > 0 && (
+        <ul className="max-h-[280px] overflow-auto py-1 list-none m-0 p-0">
+          {options.map((option, idx) => (
+            <li key={option.unitId ?? idx}>
+              <button
+                type="button"
+                className={[
+                  "w-full text-left flex items-center gap-2 px-3 py-1.5 mx-1 rounded-md",
+                  idx === activeIndex
+                    ? "bg-rezics-surface-subtle"
+                    : "hover:bg-rezics-surface-subtle",
+                ].join(" ")}
                 onMouseEnter={() => setActiveIndex(idx)}
                 onClick={() => onPick(option)}
-                sx={{ borderRadius: 1, mx: 0.5, px: 1.5 }}
               >
-                <ListItemAvatar sx={{ minWidth: 36 }}>
-                  <Avatar src={option.avatar} sx={{ width: 24, height: 24 }}>
-                    {option.name?.[0] ?? "?"}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={option.name ?? "(unknown)"}
-                  secondary={option.unitId}
-                  primaryTypographyProps={{ variant: "body2", fontWeight: 500 }}
-                  secondaryTypographyProps={{ variant: "caption" }}
-                />
-              </ListItemButton>
-            ))}
-          </List>
-        )}
+                <Avatar className="size-6">
+                  {option.avatar && <AvatarImage src={option.avatar} />}
+                  <AvatarFallback>{option.name?.[0] ?? "?"}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-medium truncate">
+                    {option.name ?? "(unknown)"}
+                  </span>
+                  {option.unitId && (
+                    <span className="text-xs text-rezics-fg-muted truncate">
+                      {option.unitId}
+                    </span>
+                  )}
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
-        {isOpen && (
-          <Box
-            sx={{
-              px: 1.5,
-              py: 0.5,
-              display: "flex",
-              justifyContent: "flex-end",
-              borderTop: options.length > 0 ? "1px solid" : "none",
-              borderColor: "divider",
-            }}
-          >
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{
-                userSelect: "none",
-                cursor: "pointer",
-                "&:hover": { color: "text.primary" },
-              }}
-              onClick={onClose}
-            >
-              Esc to close
-            </Typography>
-          </Box>
-        )}
-      </Paper>
-    </Popper>
+      <div
+        className={[
+          "px-3 py-1 flex justify-end",
+          options.length > 0 ? "border-t border-border-whisper" : "",
+        ].join(" ")}
+      >
+        <button
+          type="button"
+          className="text-xs text-rezics-fg-muted select-none hover:text-rezics-fg-primary"
+          onClick={onClose}
+        >
+          Esc to close
+        </button>
+      </div>
+    </div>,
+    document.body,
   );
 }

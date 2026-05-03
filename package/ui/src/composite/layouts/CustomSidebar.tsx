@@ -1,5 +1,3 @@
-import { Typography } from "@mui/material";
-
 export function CustomSidebar({
   section,
   setSection,
@@ -11,9 +9,7 @@ export function CustomSidebar({
     <div className="w-80 bg-white/90 backdrop-blur-sm border-r border-rose-200 min-h-screen shadow-sm">
       <div className="p-12">
         <div className="mb-24">
-          <Typography variant="h4" className="font-bold text-gray-900 mb-3">
-            Settings
-          </Typography>
+          <h2 className="font-bold text-gray-900 mb-3 text-3xl">Settings</h2>
           <div className="w-32 h-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full" />
         </div>
 

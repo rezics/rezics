@@ -1,5 +1,5 @@
-import { Tab, Tabs } from "@mui/material";
 import type React from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/shadcn/tabs";
 
 interface TranslationTabsProps {
   languages: string[];
@@ -15,21 +15,14 @@ export const TranslationTabs: React.FC<TranslationTabsProps> = ({
   if (languages.length <= 1) return null;
 
   return (
-    <Tabs
-      value={selected}
-      onChange={(_, v) => onChange(v)}
-      variant="scrollable"
-      scrollButtons="auto"
-      sx={{ minHeight: 32 }}
-    >
-      {languages.map((lang) => (
-        <Tab
-          key={lang}
-          label={lang}
-          value={lang}
-          sx={{ minHeight: 32, py: 0.5 }}
-        />
-      ))}
+    <Tabs value={selected} onValueChange={onChange}>
+      <TabsList className="overflow-x-auto">
+        {languages.map((lang) => (
+          <TabsTrigger key={lang} value={lang}>
+            {lang}
+          </TabsTrigger>
+        ))}
+      </TabsList>
     </Tabs>
   );
 };

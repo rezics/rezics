@@ -1,4 +1,3 @@
-import Typography from "@mui/material/Typography";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
@@ -20,10 +19,10 @@ function FullScreenModalPreview({ title }: { title: string }) {
         onClose={() => setOpen(false)}
         title={title}
       >
-        <Typography variant="body1">
+        <p className="text-base">
           Full-screen modals carry attention-heavy flows: chapter editors,
           immersive search, or onboarding sheets.
-        </Typography>
+        </p>
       </FullScreenModal>
     </>
   );

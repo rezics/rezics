@@ -1,28 +1,6 @@
-import { Box, styled, Typography } from "@mui/material";
+import { ChevronRight as ArrowForwardIosRoundedIcon } from "lucide-react";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import type React from "react";
-import { ChevronRight as ArrowForwardIosRoundedIcon } from "lucide-react";
-
-const LinkWithIcon = styled(Box)(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  cursor: "pointer",
-  color: theme.palette.text.primary,
-  transition: "color var(--default-transition-duration) var(--ease-out)",
-  "& .arrow-icon": {
-    fontWeight: 900,
-    marginLeft: "0.125rem",
-    lineHeight: 1.3,
-    fontSize: "24px",
-    color: "var(--color-on-base)",
-    transition:
-      "color var(--default-transition-duration) var(--ease-out), transform var(--default-transition-duration) var(--ease-out)",
-  },
-  "&:hover .arrow-icon": {
-    color: theme.palette.primary.main,
-    transform: "scale(1.1)",
-  },
-}));
 
 export type ArrowForwardIconProps = {
   size?: number;
@@ -37,12 +15,20 @@ export const ArrowForwardIcon: React.FC<ArrowForwardIconProps> = ({
 }) => {
   return (
     <Link to={to || "/"}>
-      <LinkWithIcon>
-        {/* 文本部分，用 Typography 能保证行高一致 */}
-        <Typography component="span">{children}</Typography>
-        {/* 图标部分，初始继承父级 text color */}
-        <ArrowForwardIosRoundedIcon className="arrow-icon transform !text-base" />
-      </LinkWithIcon>
+      <span
+        className={[
+          "inline-flex items-center cursor-pointer text-text-primary",
+          "transition-colors duration-200 ease-out",
+          "[&_.arrow-icon]:text-on-base [&_.arrow-icon]:transition-[color,transform] [&_.arrow-icon]:duration-200 [&_.arrow-icon]:ease-out",
+          "hover:[&_.arrow-icon]:text-brand hover:[&_.arrow-icon]:scale-110",
+        ].join(" ")}
+      >
+        <span>{children}</span>
+        <ArrowForwardIosRoundedIcon
+          className="arrow-icon ml-0.5 font-black leading-tight !text-base"
+          style={{ fontSize: 24 }}
+        />
+      </span>
     </Link>
   );
 };

@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import type { FC } from "react";
 import { PasswordField } from "../forms/field/PasswordField";
 
@@ -24,9 +23,7 @@ export const OptionalPasswordField: FC<OptionalPasswordFieldProps> = ({
         helperText={helperText}
       />
       {note ? (
-        <Typography variant="body2" color="text.secondary">
-          {note}
-        </Typography>
+        <p className="text-sm text-rezics-fg-muted">{note}</p>
       ) : null}
     </>
   );

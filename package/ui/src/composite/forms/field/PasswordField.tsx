@@ -1,14 +1,15 @@
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import TextField from "@mui/material/TextField";
+import { Eye as Visibility, EyeOff as VisibilityOff } from "lucide-react";
 import React, { type FC, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Eye as Visibility, EyeOff as VisibilityOff } from "lucide-react";
+import { Button } from "@/shadcn/button";
+import { Input } from "@/shadcn/input";
+import { Label } from "@/shadcn/label";
 
 interface PasswordFieldProps {
   name?: string;
   label?: string;
   value: string;
+  /** Kept for source-level compatibility with prior MUI variants — not rendered. */
   variant?: "standard" | "outlined" | "filled";
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   setValue: (value: string) => void;
@@ -22,7 +23,6 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   label,
   value,
   setValue,
-  variant = "standard",
   helperText,
   className,
   required = true,
@@ -30,47 +30,48 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleMouseDownPassword = (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    event.preventDefault();
-  };
-
-  const handleMouseUpPassword = (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    event.preventDefault();
-  };
+  const inputName = name ?? "password";
+  const help = helperText ?? t("auth.help.password_require");
+  const labelText = label ?? t("common.password");
 
   return (
-    <TextField
-      className={className}
-      name={name ?? "password"}
-      type={showPassword ? "text" : "password"}
-      label={label ?? t("common.password")}
-      helperText={helperText ?? t("auth.help.password_require")}
-      variant={variant}
-      required={required}
-      value={value}
-      onChange={(event: any) => {
-        setValue(event.target.value);
-      }}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position="end">
-            <IconButton
-              aria-label={
-                showPassword ? "hide the password" : "display the password"
-              }
-              onClick={() => setShowPassword(!showPassword)}
-              onMouseDown={handleMouseDownPassword}
-              onMouseUp={handleMouseUpPassword}
-            >
-              {showPassword ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
-          </InputAdornment>
-        ),
-      }}
-    />
+    <div className={`flex flex-col gap-1 ${className ?? ""}`}>
+      <Label htmlFor={inputName} className="text-sm text-rezics-fg-muted">
+        {labelText}
+        {required ? <span aria-hidden="true"> *</span> : null}
+      </Label>
+      <div className="relative">
+        <Input
+          id={inputName}
+          name={inputName}
+          type={showPassword ? "text" : "password"}
+          required={required}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          className="pr-10"
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={
+            showPassword ? "hide the password" : "display the password"
+          }
+          onClick={() => setShowPassword(!showPassword)}
+          onMouseDown={(e) => e.preventDefault()}
+          onMouseUp={(e) => e.preventDefault()}
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+        >
+          {showPassword ? (
+            <VisibilityOff className="size-4" />
+          ) : (
+            <Visibility className="size-4" />
+          )}
+        </Button>
+      </div>
+      {help ? (
+        <p className="text-xs text-rezics-fg-muted">{help}</p>
+      ) : null}
+    </div>
   );
 };

@@ -1,7 +1,10 @@
-import { Box, Button, Stack, Tab, Tabs, TextField } from "@mui/material";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type React from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
+import { Button } from "@/shadcn/button";
+import { Input } from "@/shadcn/input";
+import { Label } from "@/shadcn/label";
+import { Tabs, TabsList, TabsTrigger } from "@/shadcn/tabs";
 
 export interface TranslationEditorEntry {
   language: string;
@@ -16,6 +19,23 @@ interface TranslationEditorProps {
   onChange: (translations: TranslationEditorEntry[]) => void;
 }
 
+interface FieldRowProps {
+  label: string;
+  children: React.ReactNode;
+  htmlFor: string;
+}
+
+function FieldRow({ label, children, htmlFor }: FieldRowProps) {
+  return (
+    <div className="flex flex-col gap-1">
+      <Label htmlFor={htmlFor} className="text-xs text-rezics-fg-muted">
+        {label}
+      </Label>
+      {children}
+    </div>
+  );
+}
+
 export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   translations,
   onChange,
@@ -23,6 +43,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   const [activeTab, setActiveTab] = useState(
     translations[0]?.language ?? DEFAULT_LANGUAGE,
   );
+  const idPrefix = useId();
 
   const activeTranslation = translations.find(
     (t) => t.language === activeTab,
@@ -49,56 +70,55 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   };
 
   return (
-    <Box>
-      <Stack direction="row" alignItems="center" spacing={1}>
-        <Tabs
-          value={activeTab}
-          onChange={(_, v) => setActiveTab(v)}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          {translations.map((t) => (
-            <Tab key={t.language} label={t.language} value={t.language} />
-          ))}
+    <div>
+      <div className="flex flex-row items-center gap-2">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="overflow-x-auto">
+            {translations.map((t) => (
+              <TabsTrigger key={t.language} value={t.language}>
+                {t.language}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         </Tabs>
-        <Button size="small" onClick={addLanguage}>
+        <Button type="button" size="sm" variant="ghost" onClick={addLanguage}>
           + Language
         </Button>
-      </Stack>
-      <Stack spacing={2} mt={2}>
-        <TextField
-          label="Title"
-          value={activeTranslation.title ?? ""}
-          onChange={(e) => updateField("title", e.target.value)}
-          variant="standard"
-          fullWidth
-        />
-        <TextField
-          label="Subtitle"
-          value={activeTranslation.subtitle ?? ""}
-          onChange={(e) => updateField("subtitle", e.target.value)}
-          variant="standard"
-          fullWidth
-        />
-        <TextField
-          label="Summary"
-          value={activeTranslation.summary ?? ""}
-          onChange={(e) => updateField("summary", e.target.value)}
-          variant="standard"
-          fullWidth
-          multiline
-          rows={2}
-        />
-        <TextField
-          label="Description"
-          value={activeTranslation.description ?? ""}
-          onChange={(e) => updateField("description", e.target.value)}
-          variant="standard"
-          fullWidth
-          multiline
-          rows={4}
-        />
-      </Stack>
-    </Box>
+      </div>
+      <div className="flex flex-col gap-4 mt-4">
+        <FieldRow htmlFor={`${idPrefix}-title`} label="Title">
+          <Input
+            id={`${idPrefix}-title`}
+            value={activeTranslation.title ?? ""}
+            onChange={(e) => updateField("title", e.target.value)}
+          />
+        </FieldRow>
+        <FieldRow htmlFor={`${idPrefix}-subtitle`} label="Subtitle">
+          <Input
+            id={`${idPrefix}-subtitle`}
+            value={activeTranslation.subtitle ?? ""}
+            onChange={(e) => updateField("subtitle", e.target.value)}
+          />
+        </FieldRow>
+        <FieldRow htmlFor={`${idPrefix}-summary`} label="Summary">
+          <textarea
+            id={`${idPrefix}-summary`}
+            rows={2}
+            value={activeTranslation.summary ?? ""}
+            onChange={(e) => updateField("summary", e.target.value)}
+            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+          />
+        </FieldRow>
+        <FieldRow htmlFor={`${idPrefix}-description`} label="Description">
+          <textarea
+            id={`${idPrefix}-description`}
+            rows={4}
+            value={activeTranslation.description ?? ""}
+            onChange={(e) => updateField("description", e.target.value)}
+            className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+          />
+        </FieldRow>
+      </div>
+    </div>
   );
 };

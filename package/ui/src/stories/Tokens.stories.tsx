@@ -1,5 +1,5 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Button } from "@/shadcn/button";
 
 const meta = {
   title: "Foundation/Tokens",
@@ -7,7 +7,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Smoke-test of token wiring: surfaces, brand, text, and motion tokens resolve through MUI theme + CSS variables.",
+          "Smoke-test of token wiring: surfaces, brand, text, and motion tokens resolve through CSS variables.",
       },
     },
   },
@@ -19,9 +19,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Surfaces: Story = {
   render: () => (
-    <Stack spacing={4}>
-      <Typography variant="h2">Surfaces</Typography>
-      <Stack direction="row" spacing={2}>
+    <div className="flex flex-col gap-8">
+      <h2 className="text-3xl font-bold">Surfaces</h2>
+      <div className="flex flex-row gap-4">
         {(
           [
             ["canvas", "var(--rezics-color-surface-canvas)"],
@@ -30,57 +30,47 @@ export const Surfaces: Story = {
             ["sunken", "var(--rezics-color-surface-sunken)"],
           ] as const
         ).map(([name, value]) => (
-          <Box
+          <div
             key={name}
-            sx={{
-              p: 3,
-              minWidth: 140,
-              bgcolor: value,
-              border: "1px solid var(--rezics-color-border-whisper)",
-              borderRadius: 1,
-            }}
+            className="p-6 min-w-[140px] rounded-md border border-border-whisper"
+            style={{ backgroundColor: value }}
           >
-            <Typography variant="overline">{name}</Typography>
-            <Typography variant="caption" color="text.secondary">
-              {value}
-            </Typography>
-          </Box>
+            <p className="text-xs uppercase tracking-wide">{name}</p>
+            <p className="text-xs text-rezics-fg-muted">{value}</p>
+          </div>
         ))}
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   ),
 };
 
 export const Buttons: Story = {
   render: () => (
-    <Stack spacing={3}>
-      <Typography variant="h2">Buttons</Typography>
-      <Stack direction="row" spacing={2}>
-        <Button variant="contained">Save</Button>
-        <Button variant="outlined">Cancel</Button>
-        <Button variant="text">More</Button>
-      </Stack>
-    </Stack>
+    <div className="flex flex-col gap-6">
+      <h2 className="text-3xl font-bold">Buttons</h2>
+      <div className="flex flex-row gap-4">
+        <Button variant="default">Save</Button>
+        <Button variant="outline">Cancel</Button>
+        <Button variant="ghost">More</Button>
+      </div>
+    </div>
   ),
 };
 
 export const Typography_: Story = {
   name: "Typography",
   render: () => (
-    <Stack spacing={2}>
-      <Typography variant="h1">Heading 1</Typography>
-      <Typography variant="h2">Heading 2</Typography>
-      <Typography variant="h3">Heading 3</Typography>
-      <Typography variant="body1">
+    <div className="flex flex-col gap-4">
+      <h1 className="text-4xl font-bold">Heading 1</h1>
+      <h2 className="text-3xl font-bold">Heading 2</h2>
+      <h3 className="text-2xl font-bold">Heading 3</h3>
+      <p className="text-base">
         Body 1 — Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
+      </p>
+      <p className="text-sm text-rezics-fg-muted">
         Body 2 secondary — supporting text in muted token.
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        Caption — 3 days ago
-      </Typography>
-    </Stack>
+      </p>
+      <p className="text-xs text-rezics-fg-muted">Caption — 3 days ago</p>
+    </div>
   ),
 };
-

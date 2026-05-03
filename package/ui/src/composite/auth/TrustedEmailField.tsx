@@ -1,7 +1,7 @@
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import type { ChangeEvent, FC } from "react";
+import { Button } from "@/shadcn/button";
+import { Input } from "@/shadcn/input";
+import { Label } from "@/shadcn/label";
 
 interface TrustedEmailFieldProps {
   value: string;
@@ -25,27 +25,32 @@ export const TrustedEmailField: FC<TrustedEmailFieldProps> = ({
   onUnlock,
 }) => {
   return (
-    <Stack spacing={1}>
-      <TextField
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="email" className="text-sm text-rezics-fg-muted">
+        {label}
+        {required ? <span aria-hidden="true"> *</span> : null}
+      </Label>
+      <Input
+        id="email"
         name="email"
         type="email"
-        label={label}
-        variant="standard"
         required={required}
         disabled={locked}
         value={value}
         onChange={(event: ChangeEvent<HTMLInputElement>) =>
           onChange(event.target.value)
         }
-        helperText={locked ? lockedHelperText : editableHelperText}
       />
+      <p className="text-xs text-rezics-fg-muted">
+        {locked ? lockedHelperText : editableHelperText}
+      </p>
       {locked ? (
         <div>
-          <Button variant="text" onClick={onUnlock}>
+          <Button type="button" variant="ghost" onClick={onUnlock}>
             Edit Email
           </Button>
         </div>
       ) : null}
-    </Stack>
+    </div>
   );
 };

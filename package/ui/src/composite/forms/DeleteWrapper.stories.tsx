@@ -45,7 +45,7 @@ export const WithDeleteButton: Story = {
       onDelete={async () => {
         await new Promise((resolve) => setTimeout(resolve, 600));
       }}
-      color="error"
+      variant="destructive"
       label="Remove account"
     />
   ),

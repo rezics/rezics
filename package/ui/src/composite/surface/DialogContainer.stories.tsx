@@ -1,4 +1,3 @@
-import Typography from "@mui/material/Typography";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
@@ -32,10 +31,10 @@ function DialogContainerPreview({
         maxWidth={maxWidth}
         fullScreen={fullScreen}
       >
-        <Typography variant="body1">
+        <p className="text-base">
           Dialog body content. Press <kbd>Esc</kbd> or use the close button to
           dismiss.
-        </Typography>
+        </p>
       </DialogContainer>
     </>
   );

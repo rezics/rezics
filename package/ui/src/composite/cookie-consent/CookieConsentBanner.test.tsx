@@ -1,22 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 
-mock.module("@mui/material/Button", () => ({
-  default: (props: Record<string, unknown>) => ({
+mock.module("@/shadcn/button", () => ({
+  Button: (props: Record<string, unknown>) => ({
     type: "Button",
-    props,
-  }),
-}));
-
-mock.module("@mui/material/Stack", () => ({
-  default: (props: Record<string, unknown>) => ({
-    type: "Stack",
-    props,
-  }),
-}));
-
-mock.module("@mui/material/Typography", () => ({
-  default: (props: Record<string, unknown>) => ({
-    type: "Typography",
     props,
   }),
 }));
@@ -38,8 +24,8 @@ describe("CookieConsentBanner", () => {
       },
     }) as any;
 
-    const stack = element.props.children;
-    const actions = stack.props.children[1];
+    const region = element.props.children;
+    const actions = region.props.children[1];
     const buttons = actions.props.children;
 
     expect(element.props["aria-label"]).toBe("Cookies on Rezics");

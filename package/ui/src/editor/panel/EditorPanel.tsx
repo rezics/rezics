@@ -1,5 +1,3 @@
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
 import type { ReactNode } from "react";
 
 export interface EditorPanelProps {
@@ -10,34 +8,17 @@ export interface EditorPanelProps {
 
 export function EditorPanel({ left, right, className }: EditorPanelProps) {
   return (
-    <Toolbar
-      variant="dense"
-      disableGutters
-      className={className}
-      sx={{
-        gap: 0.5,
-        px: 1,
-        minHeight: 36,
-      }}
+    <div
+      className={[
+        "flex items-center gap-1 px-2 min-h-[36px]",
+        className ?? "",
+      ].join(" ")}
     >
       {left && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            flexShrink: 0,
-          }}
-        >
-          {left}
-        </Box>
+        <div className="flex items-center gap-1 shrink-0">{left}</div>
       )}
-      <Box sx={{ flex: 1 }} />
-      {right && (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          {right}
-        </Box>
-      )}
-    </Toolbar>
+      <div className="flex-1" />
+      {right && <div className="flex items-center gap-1">{right}</div>}
+    </div>
   );
 }

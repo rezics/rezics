@@ -1,11 +1,11 @@
-import Chip from "@mui/material/Chip";
+import { Badge } from "@/shadcn/badge";
 import { ExternalImageGuide } from "./ExternalImageGuide";
 import type { ImageProvider } from "./types";
 
 export const imgboxGuide: ImageProvider = {
   name: "imgbox",
   label: "Imgbox",
-  icon: <Chip label="IB" size="small" variant="outlined" />,
+  icon: <Badge variant="outline">IB</Badge>,
   render: ({ onInsert }) => (
     <ExternalImageGuide
       name="Imgbox"

@@ -1,4 +1,4 @@
-import Button from "@mui/material/Button";
+import { Button } from "@/shadcn/button";
 import type {
   MarkdownEditorProps,
   ResizeConfig,
@@ -160,35 +160,37 @@ export function RezicsMarkdownEditor({
       <EditorPanel
         left={
           <Button
-            variant="text"
-            startIcon={<Paperclip />}
+            type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => setImageModalOpen(true)}
             title="Insert image"
-            sx={{
-              textTransform: "none",
-              fontSize: "0.9rem",
-              lineHeight: 1.3,
-              px: 1,
-              "& .MuiButton-startIcon": {
-                "& svg": {
-                  height: "0.9em",
-                },
-              },
-            }}
+            className="px-2 text-[0.9rem] leading-tight font-normal normal-case"
           >
-            upload image
+            <Paperclip className="size-[0.9em]" />
+            <span>upload image</span>
           </Button>
         }
         right={
           <>
             {extraRight}
             {onCancel && (
-              <Button size="small" onClick={onCancel}>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={onCancel}
+              >
                 Cancel
               </Button>
             )}
             {onSubmit && (
-              <Button size="small" variant="contained" onClick={onSubmit}>
+              <Button
+                type="button"
+                size="sm"
+                variant="default"
+                onClick={onSubmit}
+              >
                 {submitLabel}
               </Button>
             )}

@@ -1,21 +1,24 @@
 import {
-  Box,
-  FormControl,
-  Grid,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Pagination,
-  Paper,
-  Select,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from "@mui/material";
+  ArrowDown as ArrowDownward,
+  ArrowUp as ArrowUpward,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import type React from "react";
 import { useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowDown as ArrowDownward, ArrowUp as ArrowUpward } from "lucide-react";
+import { Button } from "@/shadcn/button";
+import { Label } from "@/shadcn/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shadcn/select";
+import { ToggleGroup, ToggleGroupItem } from "@/shadcn/toggle-group";
 
 /**
  * example:
@@ -34,10 +37,7 @@ export interface SortControlsProps {
   sortOrder: "asc" | "desc";
   onSortChange: (newSort: { type?: string; order?: "asc" | "desc" }) => void;
 }
-/**
- * SortControls
- * @param {SortControlsProps} props
- */
+
 const SortControls: React.FC<SortControlsProps> = ({
   sortType,
   sortOrder,
@@ -50,48 +50,43 @@ const SortControls: React.FC<SortControlsProps> = ({
     { value: "agree", label: "按赞同数" },
   ];
   return (
-    <Paper elevation={1} sx={{ p: 2, mb: 2, borderRadius: 2 }}>
-      <Grid container spacing={2} alignItems="center">
-        <Grid sx={{ xs: 12, sm: "auto" }}>
-          <FormControl sx={{ minWidth: 150 }}>
-            <InputLabel>排序方式</InputLabel>
-            <Select
-              value={sortType}
-              label="排序方式"
-              onChange={(e) =>
-                onSortChange({
-                  type: e.target.value as string,
-                })
-              }
-            >
-              {sortOptions.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid sx={{ xs: 12, sm: "auto" }}>
-          <ToggleButtonGroup
-            value={sortOrder}
-            exclusive
-            onChange={(_, v: "asc" | "desc" | null) =>
-              v && onSortChange({ order: v })
-            }
-          >
-            <ToggleButton value="desc">
-              <ArrowDownward />
-              &nbsp; 降序
-            </ToggleButton>
-            <ToggleButton value="asc">
-              <ArrowUpward />
-              &nbsp; 升序
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Grid>
-      </Grid>
-    </Paper>
+    <div className="rounded-md p-2 mb-2 flex flex-wrap items-center gap-2">
+      <div className="flex flex-col gap-1 min-w-[150px]">
+        <Label htmlFor="sort-type">排序方式</Label>
+        <Select
+          value={sortType}
+          onValueChange={(v) => onSortChange({ type: v })}
+        >
+          <SelectTrigger id="sort-type" size="sm" className="w-full">
+            <SelectValue placeholder="排序方式" />
+          </SelectTrigger>
+          <SelectContent>
+            {sortOptions.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <ToggleGroup
+        type="single"
+        value={sortOrder}
+        onValueChange={(v: string) =>
+          (v === "asc" || v === "desc") && onSortChange({ order: v })
+        }
+        variant="outline"
+      >
+        <ToggleGroupItem value="desc" aria-label="降序">
+          <ArrowDownward className="size-4" />
+          <span className="ml-1">降序</span>
+        </ToggleGroupItem>
+        <ToggleGroupItem value="asc" aria-label="升序">
+          <ArrowUpward className="size-4" />
+          <span className="ml-1">升序</span>
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </div>
   );
 };
 
@@ -101,6 +96,17 @@ interface PaginationBarProps {
   totalPages: number;
   onPageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
 }
+
+function getPageRange(current: number, total: number, siblings = 1): number[] {
+  const range = new Set<number>();
+  range.add(1);
+  range.add(total);
+  for (let i = current - siblings; i <= current + siblings; i++) {
+    if (i >= 1 && i <= total) range.add(i);
+  }
+  return Array.from(range).sort((a, b) => a - b);
+}
+
 const PaginationBar: React.FC<PaginationBarProps> = ({
   page,
   dataLength,
@@ -119,26 +125,79 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
     );
   }, [page, dataLength, totalPages]);
   if (totalPages <= 1) return null;
+  // dataLength is the visible page count for the paginator; mirror MUI behavior
+  // where `count` is the number of buttons shown.
+  const visibleTotal = dataLength;
+  const pages = getPageRange(page, visibleTotal, 1);
+
+  const go = (target: number) => {
+    if (target < 1 || target > visibleTotal) return;
+    onPageChange(null as unknown as React.ChangeEvent<unknown>, target);
+  };
+
   return (
     <div>
-      <Box sx={{ display: "flex", justifyContent: "center", p: 2, mt: 2 }}>
-        <Pagination
-          // count={totalPages}
-          count={dataLength}
-          page={page}
-          onChange={onPageChange}
-          color="primary"
-          showFirstButton
-          showLastButton
-        />
-        {/* <Button
-          variant="text"
-          style={{bottom: '3px'}}
-          onClick={() => onPageChange(null as any, page + 1)}
+      <div className="flex justify-center items-center gap-1 p-2 mt-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="第一页"
+          disabled={page <= 1}
+          onClick={() => go(1)}
         >
-          Next
-        </Button> */}
-      </Box>
+          <ChevronsLeft className="size-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="上一页"
+          disabled={page <= 1}
+          onClick={() => go(page - 1)}
+        >
+          <ChevronLeft className="size-4" />
+        </Button>
+        {pages.map((p, idx) => {
+          const prev = pages[idx - 1];
+          const showEllipsis = prev !== undefined && p - prev > 1;
+          return (
+            <span key={p} className="inline-flex items-center">
+              {showEllipsis && (
+                <span className="px-1 text-rezics-fg-muted">…</span>
+              )}
+              <Button
+                type="button"
+                variant={p === page ? "default" : "ghost"}
+                size="icon"
+                onClick={() => go(p)}
+              >
+                {p}
+              </Button>
+            </span>
+          );
+        })}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="下一页"
+          disabled={page >= visibleTotal}
+          onClick={() => go(page + 1)}
+        >
+          <ChevronRight className="size-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="最后一页"
+          disabled={page >= visibleTotal}
+          onClick={() => go(visibleTotal)}
+        >
+          <ChevronsRight className="size-4" />
+        </Button>
+      </div>
       <div className="text-sm text-gray-500 text-center">
         {t("search.pagination.tips")}
       </div>
@@ -324,7 +383,7 @@ export const UniversalPaginator = <T,>({
   };
 
   return (
-    <Box>
+    <div>
       {!disableSortControl &&
         (sortControl || (
           <SortControls
@@ -334,28 +393,23 @@ export const UniversalPaginator = <T,>({
           />
         ))}
 
-      <Box sx={{ minHeight: 300, position: "relative" }}>
+      <div className="min-h-[300px] relative">
         {isLoading && (
-          <LinearProgress
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-            }}
-          />
+          <div className="absolute top-0 left-0 w-full h-1 overflow-hidden rounded-sm bg-rezics-color-info/20">
+            <div className="h-full w-1/3 bg-rezics-color-info animate-[indeterminate_1.4s_ease-in-out_infinite]" />
+          </div>
         )}
         {children(currentPageItems)}
         {!isLoading && currentPageItems.length === 0 && (
-          <Typography sx={{ textAlign: "center", p: 5 }}>没有内容。</Typography>
+          <p className="text-center p-5">没有内容。</p>
         )}
-      </Box>
+      </div>
       <PaginationBar
         page={currentPage}
         dataLength={paginationPageNumber}
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-    </Box>
+    </div>
   );
 };

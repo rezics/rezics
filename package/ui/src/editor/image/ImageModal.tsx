@@ -1,8 +1,6 @@
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import { useState } from "react";
+import { Dialog, DialogContent } from "@/shadcn/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/tabs";
 import { imgbbGuide } from "./imgbb-guide";
 import { imgboxGuide } from "./imgbox-guide";
 import { postimagesGuide } from "./postimages-guide";
@@ -29,7 +27,8 @@ export function ImageModal({
   onInsert,
   providers = defaultProviders,
 }: ImageModalProps) {
-  const [tabIndex, setTabIndex] = useState(0);
+  const initial = providers[0]?.name ?? "";
+  const [active, setActive] = useState<string>(initial);
 
   const handleInsert = (url: string, alt?: string) => {
     onInsert(url, alt);
@@ -37,26 +36,27 @@ export function ImageModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogContent dividers>
-        <Tabs
-          value={tabIndex}
-          onChange={(_, v) => setTabIndex(v)}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ minHeight: 36, mb: 1 }}
-        >
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <Tabs value={active} onValueChange={setActive}>
+          <TabsList className="overflow-x-auto">
+            {providers.map((p) => (
+              <TabsTrigger
+                key={p.name}
+                value={p.name}
+                className="text-[0.8125rem] gap-1"
+              >
+                {p.icon}
+                <span>{p.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
           {providers.map((p) => (
-            <Tab
-              key={p.name}
-              icon={p.icon}
-              label={p.label}
-              iconPosition="start"
-              sx={{ minHeight: 36, py: 0.5, px: 1.5, fontSize: "0.8125rem" }}
-            />
+            <TabsContent key={p.name} value={p.name}>
+              {p.render({ onInsert: handleInsert })}
+            </TabsContent>
           ))}
         </Tabs>
-        {providers[tabIndex]?.render({ onInsert: handleInsert })}
       </DialogContent>
     </Dialog>
   );
