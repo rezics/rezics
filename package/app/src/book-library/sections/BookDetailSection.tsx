@@ -99,7 +99,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
 
         <Grid container spacing={4}>
           <Grid size={{ xs: 12, lg: hasSidebar ? 9 : 12 }}>
-            <Box sx={{ p: { xs: 1, sm: 3 } }}>{children}</Box>
+            <Box sx={{ px: { xs: 1, sm: 3 } }}>{children}</Box>
           </Grid>
 
           {hasSidebar && (

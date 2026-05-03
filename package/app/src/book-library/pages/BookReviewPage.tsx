@@ -8,13 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
+import { useMemo } from "react";
 import { ScoreOverview } from "@/engagement/components/ScoreOverview";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { ShelfByBookPreview } from "../components/ShelfByBookPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
-import { BookDetailShell } from "../sections/BookDetailSection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
+import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
 const REVIEW_PREVIEW_LIMIT = 5;
 const SHELF_PREVIEW_LIMIT = 5;
@@ -37,6 +38,16 @@ export const BookReviewPage: React.FC = () => {
     enabled: Boolean(bookId),
   });
 
+  const sidebar = useMemo(
+    () => (
+      <Stack spacing={3}>
+        <ScoreOverview unitId={bookId} />
+      </Stack>
+    ),
+    [bookId],
+  );
+  useBookDetailSidebar(sidebar);
+
   if (!bookInfo) return null;
 
   const title =
@@ -51,53 +62,45 @@ export const BookReviewPage: React.FC = () => {
       ?.filter((p) => p.kind === PostKind.REVIEW)
       .slice(0, REVIEW_PREVIEW_LIMIT) ?? [];
 
-  const sidebar = (
-    <Stack spacing={3}>
-      <ScoreOverview unitId={bookId} />
-    </Stack>
-  );
-
   return (
-    <BookDetailShell bookInfo={bookInfo} sidebar={sidebar}>
-      <Stack spacing={4}>
-        <Box className="lg:hidden">
-          <ScoreOverview unitId={bookId} />
-        </Box>
+    <Stack spacing={4}>
+      <Box className="lg:hidden">
+        <ScoreOverview unitId={bookId} />
+      </Box>
 
-        <Box>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={1}
+      <Box>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={1}
+        >
+          <ArrowForwardIcon size={16} to={`/review/book/${bookId}`}>
+            <AccentBarWithText text={`Reviews of ${title}`} />
+          </ArrowForwardIcon>
+          <Button
+            variant="text"
+            size="small"
+            onClick={() =>
+              navigate({
+                to: "/review/new/$bookUnitId",
+                params: { bookUnitId: bookId },
+              })
+            }
           >
-            <ArrowForwardIcon size={16} to={`/review/book/${bookId}`}>
-              <AccentBarWithText text={`Reviews of ${title}`} />
-            </ArrowForwardIcon>
-            <Button
-              variant="text"
-              size="small"
-              onClick={() =>
-                navigate({
-                  to: "/review/new/$bookUnitId",
-                  params: { bookUnitId: bookId },
-                })
-              }
-            >
-              Write a Review
-            </Button>
-          </Stack>
-          <ReviewList reviews={reviews} />
-        </Box>
+            Write a Review
+          </Button>
+        </Stack>
+        <ReviewList reviews={reviews} />
+      </Box>
 
-        <Divider />
+      <Divider />
 
-        <ShelfByBookPreview
-          bookId={bookInfo.unitId || ""}
-          title={title}
-          shelfNumber={SHELF_PREVIEW_LIMIT}
-        />
-      </Stack>
-    </BookDetailShell>
+      <ShelfByBookPreview
+        bookId={bookInfo.unitId || ""}
+        title={title}
+        shelfNumber={SHELF_PREVIEW_LIMIT}
+      />
+    </Stack>
   );
 };

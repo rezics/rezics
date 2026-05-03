@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { RemarkInlineForm } from "@/remark";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
@@ -19,8 +20,8 @@ import { MetadataPanel } from "../components/BookDetail/MetadataPanel";
 import { ExcerptPreview } from "../components/ExcerptPreview";
 import { RemarkPreview } from "../components/RemarkPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
-import { BookDetailShell } from "../sections/BookDetailSection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
+import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
 interface BookWorkReleaseNavProps {
   workUnitId: string;
@@ -84,6 +85,22 @@ export const BookBasicInfoPage: React.FC = () => {
     tagQueries.batchTranslations(tagUnitIds, selectedLang),
   );
 
+  const sidebar = useMemo(() => {
+    if (!bookInfo) return null;
+    return (
+      <Stack spacing={3}>
+        <MetadataPanel bookInfo={bookInfo} />
+        {bookInfo.workUnitId && (
+          <BookWorkReleaseNav
+            workUnitId={bookInfo.workUnitId}
+            currentUnitId={bookInfo.unitId}
+          />
+        )}
+      </Stack>
+    );
+  }, [bookInfo]);
+  useBookDetailSidebar(sidebar);
+
   if (!bookInfo) return null;
 
   const description =
@@ -93,86 +110,72 @@ export const BookBasicInfoPage: React.FC = () => {
       bookInfo.defaultLanguage ?? undefined,
     )?.description ?? "";
 
-  const sidebar = (
-    <Stack spacing={3}>
-      <MetadataPanel bookInfo={bookInfo} />
-      {bookInfo.workUnitId && (
-        <BookWorkReleaseNav
-          workUnitId={bookInfo.workUnitId}
-          currentUnitId={bookInfo.unitId}
-        />
-      )}
-    </Stack>
-  );
-
   return (
-    <BookDetailShell bookInfo={bookInfo} sidebar={sidebar}>
-      <Stack spacing={4}>
-        <BookDescription description={description} book={bookInfo} />
+    <Stack spacing={4}>
+      <BookDescription description={description} book={bookInfo} />
 
-        <Box className="lg:hidden">
-          <MetadataPanel bookInfo={bookInfo} variant="inline" />
+      <Box className="lg:hidden">
+        <MetadataPanel bookInfo={bookInfo} variant="inline" />
+      </Box>
+
+      {unitTags.length > 0 && (
+        <>
+          <Divider />
+          <div>
+            <AccentBarWithText text={t("book.fields.tags", "Tags")} />
+            <Box mt={1}>
+              <TagInteraction
+                tags={unitTags}
+                translations={tagTranslations ?? {}}
+                bookUnitId={bookInfo.unitId ?? bookId}
+                bookUnit={bookInfo}
+                onSearchTags={navigateToBookTagSearch}
+              />
+            </Box>
+          </div>
+        </>
+      )}
+
+      <Divider />
+
+      <div>
+        <ArrowForwardIcon size={16} to={`/excerpt/book/${bookInfo.unitId}`}>
+          <AccentBarWithText text={t("book.excerpts")} />
+        </ArrowForwardIcon>
+      </div>
+      <ExcerptPreview id={bookInfo.unitId || ""} />
+
+      <Divider />
+
+      <div>
+        <AccentBarWithText text={t("book.fields.score" as any)} />
+        <Box mt={1}>
+          <RemarkInlineForm bookUnitId={bookInfo.unitId || ""} />
         </Box>
+      </div>
 
-        {unitTags.length > 0 && (
-          <>
-            <Divider />
-            <div>
-              <AccentBarWithText text={t("book.fields.tags", "Tags")} />
-              <Box mt={1}>
-                <TagInteraction
-                  tags={unitTags}
-                  translations={tagTranslations ?? {}}
-                  bookUnitId={bookInfo.unitId ?? bookId}
-                  bookUnit={bookInfo}
-                  onSearchTags={navigateToBookTagSearch}
-                />
-              </Box>
-            </div>
-          </>
-        )}
+      <Divider />
 
-        <Divider />
-
+      <Box>
         <div>
-          <ArrowForwardIcon size={16} to={`/excerpt/book/${bookInfo.unitId}`}>
-            <AccentBarWithText text={t("book.excerpts")} />
+          <ArrowForwardIcon
+            size={16}
+            to={`/review/book/${bookInfo.unitId}?tab=remark`}
+          >
+            <AccentBarWithText text={t("book.remark")} />
           </ArrowForwardIcon>
         </div>
-        <ExcerptPreview id={bookInfo.unitId || ""} />
+        <RemarkPreview bookId={bookInfo.unitId || ""} />
+      </Box>
 
-        <Divider />
-
-        <div>
-          <AccentBarWithText text={t("book.fields.score" as any)} />
-          <Box mt={1}>
-            <RemarkInlineForm bookUnitId={bookInfo.unitId || ""} />
-          </Box>
-        </div>
-
-        <Divider />
-
-        <Box>
-          <div>
-            <ArrowForwardIcon
-              size={16}
-              to={`/review/book/${bookInfo.unitId}?tab=remark`}
-            >
-              <AccentBarWithText text={t("book.remark")} />
-            </ArrowForwardIcon>
-          </div>
-          <RemarkPreview bookId={bookInfo.unitId || ""} />
+      {bookInfo.workUnitId && (
+        <Box className="lg:hidden">
+          <BookWorkReleaseNav
+            workUnitId={bookInfo.workUnitId}
+            currentUnitId={bookInfo.unitId}
+          />
         </Box>
-
-        {bookInfo.workUnitId && (
-          <Box className="lg:hidden">
-            <BookWorkReleaseNav
-              workUnitId={bookInfo.workUnitId}
-              currentUnitId={bookInfo.unitId}
-            />
-          </Box>
-        )}
-      </Stack>
-    </BookDetailShell>
+      )}
+    </Stack>
   );
 };

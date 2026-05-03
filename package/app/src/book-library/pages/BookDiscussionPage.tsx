@@ -4,9 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
+import { useMemo } from "react";
 import { PostListSection, ReplyComposer } from "@/post";
-import { BookDetailShell } from "../sections/BookDetailSection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
+import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
 const CommunitySidebar: React.FC = () => (
   <Paper variant="outlined" sx={{ p: 2 }}>
@@ -31,22 +32,23 @@ export const BookCommunityPage: React.FC = () => {
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
 
+  const sidebar = useMemo(() => <CommunitySidebar />, []);
+  useBookDetailSidebar(sidebar);
+
   if (!bookInfo) return null;
 
   return (
-    <BookDetailShell bookInfo={bookInfo} sidebar={<CommunitySidebar />}>
-      <Stack spacing={3}>
-        <Box className="lg:hidden">
-          <CommunitySidebar />
-        </Box>
+    <Stack spacing={3}>
+      <Box className="lg:hidden">
+        <CommunitySidebar />
+      </Box>
 
-        <ReplyComposer mode="progressive" targetUnitId={bookId} />
+      <ReplyComposer mode="progressive" targetUnitId={bookId} />
 
-        <Divider />
+      <Divider />
 
-        <PostListSection targetUnitId={bookId} />
-      </Stack>
-    </BookDetailShell>
+      <PostListSection targetUnitId={bookId} />
+    </Stack>
   );
 };
 

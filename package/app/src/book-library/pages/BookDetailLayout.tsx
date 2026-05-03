@@ -4,21 +4,27 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
 import type React from "react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 
+import { BookDetailShell } from "../sections/BookDetailSection";
 import { BookHeroSection } from "../sections/BookHeroSection";
 import {
   bookDetailAtomFamily,
   setBookDetailAtomFamily,
 } from "../states/bookDetailAtoms";
+import { BookDetailLayoutContext } from "./bookDetailLayoutContext";
 
 /**
  * Book Detail Layout
  *
- * Shared layout for all book detail sub-routes.
- * Fetches book data, renders the hero section, and renders children (routed tab content).
+ * Shared layout for all book detail sub-routes. Owns the hero, the tab bar,
+ * and the content/sidebar grid — so the `Tabs` instance persists across
+ * route changes and the active-tab underline transition fires normally.
+ *
+ * Pages populate the sidebar via `useBookDetailSidebar` from
+ * `bookDetailLayoutContext.ts`.
  */
 export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -52,6 +58,9 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
 
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
 
+  const [sidebar, setSidebar] = useState<ReactNode>(null);
+  const layoutContextValue = useMemo(() => ({ setSidebar }), []);
+
   if (!queriesEnabled) {
     return <div>{t("common.error_generic")} Missing bookId</div>;
   }
@@ -65,9 +74,11 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   }
 
   return (
-    <div>
+    <BookDetailLayoutContext.Provider value={layoutContextValue}>
       <BookHeroSection bookInfo={bookInfo} rating={ratingValue || 0} />
-      {children}
-    </div>
+      <BookDetailShell bookInfo={bookInfo} sidebar={sidebar}>
+        {children}
+      </BookDetailShell>
+    </BookDetailLayoutContext.Provider>
   );
 };
