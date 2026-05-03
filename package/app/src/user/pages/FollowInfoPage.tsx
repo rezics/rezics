@@ -36,7 +36,7 @@ const EXTERNAL_ITEMS_PER_PAGE = 20;
 
 function FollowUserList({ users }: { users: SimpleUser[] }) {
   if (users.length === 0) {
-    return <div className="py-10 text-center text-gray-500">暂无用户。</div>;
+    return <div className="py-16 text-center text-gray-500">暂无用户。</div>;
   }
 
   return (
@@ -135,7 +135,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
 
   if (!resolvedUnitId) {
     return (
-      <div className="w-full max-w-3xl mx-auto mt-16 text-center">
+      <div className="w-full max-w-3xl mx-auto mt-32 text-center">
         <Typography variant="h6">无法确定用户信息</Typography>
         <Typography variant="body2" color="textSecondary">
           请先登录，或从用户详情页进入本页面。
@@ -146,14 +146,14 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
 
   if (error) {
     return (
-      <div className="w-full max-w-3xl mx-auto mt-16">
+      <div className="w-full max-w-3xl mx-auto mt-32">
         <QueryErrorDisplay error={error} />
       </div>
     );
   }
 
   return (
-    <div className="w-11/12 mx-auto mt-10 px-4">
+    <div className="w-11/12 mx-auto mt-16 px-4">
       <div className="flex items-center justify-between">
         <div className="mb-4">
           <Typography variant="h5" className="font-bold mb-2">

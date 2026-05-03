@@ -19,7 +19,7 @@ export const Home: React.FC<HomeProps> = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className={cn("mx-auto mb-10", isMobile ? "w-full" : "w-10/12")}>
+    <div className={cn("mx-auto mb-16", isMobile ? "w-full" : "w-16/12")}>
       <section>
         <Paper sx={{ p: 2, mt: 2 }}>
           {isMobile && (

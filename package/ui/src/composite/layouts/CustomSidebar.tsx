@@ -9,12 +9,12 @@ export function CustomSidebar({
 }) {
   return (
     <div className="w-80 bg-white/90 backdrop-blur-sm border-r border-rose-200 min-h-screen shadow-sm">
-      <div className="p-8">
-        <div className="mb-12">
+      <div className="p-12">
+        <div className="mb-24">
           <Typography variant="h4" className="font-bold text-gray-900 mb-3">
             Settings
           </Typography>
-          <div className="w-16 h-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full" />
+          <div className="w-32 h-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full" />
         </div>
 
         <nav className="space-y-3">
@@ -26,7 +26,7 @@ export function CustomSidebar({
               type="button"
               key={item.id}
               onClick={() => setSection(item.id as any)}
-              className={`w-full text-left px-6 py-4 rounded-xl transition-all duration-300 group
+              className={`w-full text-left px-8 py-4 rounded-xl transition-all duration-300 group
                                 ${
                                   section === item.id
                                     ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/25 transform scale-[1.02]"

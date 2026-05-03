@@ -10,7 +10,7 @@ export function ExcerptByBookPage() {
   const { bookId } = excerptByBookRoute.useParams();
   const { t } = useTranslation();
   return (
-    <div className="mt-10 mx-auto max-w-4xl w-11/12">
+    <div className="mt-16 mx-auto max-w-4xl w-11/12">
       <ArrowForwardIcon size={16}>
         <AccentBarWithText text={t("excerpt.excerpts_title")} />
       </ArrowForwardIcon>

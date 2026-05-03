@@ -35,14 +35,15 @@ import { Grid, RadiusSample } from "./_gallery";
 ## Usage
 
 ```tsx
-// CSS variable (always)
-<Box sx={{ borderRadius: "var(--rezics-radius-md)" }}>
-
-// MUI shape default (already wired to md / 8px)
+// MUI — shape.borderRadius default is `md` (8px)
 <Card>  // borderRadius: 8 by default
+<Box sx={{ borderRadius: 1 }}>  // theme.shape.borderRadius * 1
 
-// UnoCSS
-<div className="rounded-md">  // 8px through theme
+// UnoCSS — utilities resolve through theme.borderRadius
+<div className="rounded-md">  // 8px
+
+// TS source (rare — only if generating CSS outside MUI/UnoCSS)
+import { radius } from "@rezics/ui/config/tokens/radius";
 ```
 
 Avoid mixing radii within a single composition — if the parent card is `md`, child elements should be `xs` or `sm`, never larger than the parent.

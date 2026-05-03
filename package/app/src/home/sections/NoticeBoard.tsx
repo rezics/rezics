@@ -46,13 +46,13 @@ function NoticeBoardHeader({
       <div className="p-2 flex items-center justify-between">
         <Stack direction="row" spacing={1.5} alignItems="center">
           <div
-            className="w-8 h-8 inline-flex items-center justify-center rounded-[10px] shadow-sm"
+            className="w-12 h-12 inline-flex items-center justify-center rounded-[10px] shadow-sm"
             style={{
               backgroundColor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
             }}
           >
-            <NotificationsRoundedIcon className="w-5 h-5" />
+            <NotificationsRoundedIcon className="w-6 h-6" />
           </div>
           <div>
             <Typography variant="caption" color="text.secondary">

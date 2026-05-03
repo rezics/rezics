@@ -12,7 +12,7 @@ export const DangerZone: FC<DangerZoneProps> = ({
   description,
   children,
 }) => (
-  <section className="mt-6 rounded-lg border border-error/30 p-4">
+  <section className="mt-8 rounded-lg border border-error/30 p-4">
     <Typography variant="h6" color="error" className="font-semibold mb-1">
       {title}
     </Typography>

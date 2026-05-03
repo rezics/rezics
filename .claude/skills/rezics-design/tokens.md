@@ -1,11 +1,16 @@
 # Token Reference — Foundation v1
 
-All tokens have three projections that resolve to the same value:
+**Single source of truth**: `package/ui/src/config/tokens/*.ts`. Both MUI (`createTheme`) and UnoCSS (`theme.spacing` / `theme.fontFamily` / etc.) consume the TS objects directly via their native APIs.
 
-- **TS source**: `package/ui/src/config/tokens/*.ts` (import via `@rezics/ui` if needed)
-- **MUI theme**: `theme.palette.*`, `theme.spacing()`, `theme.shape.borderRadius`, `theme.typography.*`
-- **CSS var**: `var(--rzc-*)` (set in `package/ui/src/shared/styles/layers.css`)
-- **UnoCSS class**: namespace utilities (`bg-*`, `text-*`, `border-*`, `p-*`, etc.)
+**Two surfaces** depending on whether the token needs to switch with theme:
+
+| Category | Where it lives | How to consume |
+| --- | --- | --- |
+| **Colors** (surface, text, brand, semantic, sentiment, border) | TS source + `--rezics-color-*` CSS var (set in `layers.css`, switches with `[data-theme="dark"]`) | UnoCSS utility (`bg-brand`, `text-text-primary`) or MUI palette (`color="primary"`) |
+| **Shadows** | TS source + `--rezics-shadow-*` CSS var (light/dark variants in `layers.css`) | UnoCSS utility (`shadow-md`) or MUI `elevation` prop |
+| **Spacing / radius / motion / font** | TS source ONLY — UnoCSS auto-emits `--spacing-*`/`--radius-*` etc. through preset-wind4's theme system | UnoCSS utility (`p-4`, `rounded-md`, `duration-fast`, `font-sans`) or MUI prop (`spacing={2}`, `theme.shape.borderRadius`) |
+
+**Hard rule — never hand-write `var(--rezics-space-*)`, `var(--rezics-radius-*)`, `var(--rezics-motion-*)`, `var(--rezics-ease-*)`, `var(--rezics-font-sans/serif/mono)` — they don't exist.** Use the utility class or import the token from `@rezics/ui/config/tokens/*` directly. The only `--rezics-*` vars that exist are colors, shadows, and the per-`:lang()` CJK font fallback (`--rezics-font-sans-cjk`, `--rezics-font-serif-cjk`).
 
 ---
 
@@ -13,22 +18,22 @@ All tokens have three projections that resolve to the same value:
 
 | Token              | Light      | Dark       | UnoCSS         | CSS var                          | When                                  |
 | ------------------ | ---------- | ---------- | -------------- | -------------------------------- | ------------------------------------- |
-| `surface-canvas`   | `#f5f4ed`  | `#1a1a18`  | `bg-surface`   | `--rzc-color-surface-canvas`     | Page background. Default body.        |
-| `surface-base`     | `#faf9f5`  | `#26251e`  | `bg-surface-base` | `--rzc-color-surface-base`    | Default raised surface (cards).       |
-| `surface-elevated` | `#ffffff`  | `#30302e`  | `bg-surface-elevated` | `--rzc-color-surface-elevated` | Modals, popovers, command palette. |
-| `surface-subtle`   | `#ebeae5`  | `#1f1e1c`  | `bg-surface-subtle` | `--rzc-color-surface-subtle`  | Code blocks, table zebra, chip bg.    |
-| `surface-sunken`   | `#e6e5e0`  | `#141413`  | `bg-surface-sunken` | `--rzc-color-surface-sunken`  | Inset panels (rare).                  |
+| `surface-canvas`   | `#f5f4ed`  | `#1a1a18`  | `bg-surface`   | `--rezics-color-surface-canvas`     | Page background. Default body.        |
+| `surface-base`     | `#faf9f5`  | `#26251e`  | `bg-surface-base` | `--rezics-color-surface-base`    | Default raised surface (cards).       |
+| `surface-elevated` | `#ffffff`  | `#30302e`  | `bg-surface-elevated` | `--rezics-color-surface-elevated` | Modals, popovers, command palette. |
+| `surface-subtle`   | `#ebeae5`  | `#1f1e1c`  | `bg-surface-subtle` | `--rezics-color-surface-subtle`  | Code blocks, table zebra, chip bg.    |
+| `surface-sunken`   | `#e6e5e0`  | `#141413`  | `bg-surface-sunken` | `--rezics-color-surface-sunken`  | Inset panels (rare).                  |
 
 ## Color — text
 
 | Token            | Light       | Dark      | UnoCSS              | CSS var                     | When                                |
 | ---------------- | ----------- | --------- | ------------------- | --------------------------- | ----------------------------------- |
-| `text-primary`   | `#1d1d1f`   | `#f0eee6` | `text-text-primary` | `--rzc-color-text-primary`  | Body, headings. AAA on canvas.      |
-| `text-secondary` | `#6e6e73`   | `#a39e98` | `text-text-secondary` | `--rzc-color-text-secondary` | Secondary copy, captions.        |
-| `text-tertiary`  | `#86868b`   | `#6e6c66` | `text-text-tertiary` | `--rzc-color-text-tertiary` | Metadata, ≥18px only (AA-large). |
-| `text-disabled`  | `#c7c7cc`   | `#48484a` | `text-text-disabled` | `--rzc-color-text-disabled` | Decorative disabled labels only. |
-| `text-on-brand`  | `#ffffff`   | `#ffffff` | `text-text-on-brand` | `--rzc-color-text-on-brand` | White on `brand-fill` button (AA-large only — use ≥14px medium / ≥16px regular). |
-| `text-brand`     | `#C4433A`   | `#fa7882` | `text-text-brand`   | `--rzc-color-text-brand`    | Brand-color text. **Use this, never `brand-fill` as text.** |
+| `text-primary`   | `#1d1d1f`   | `#f0eee6` | `text-text-primary` | `--rezics-color-text-primary`  | Body, headings. AAA on canvas.      |
+| `text-secondary` | `#6e6e73`   | `#a39e98` | `text-text-secondary` | `--rezics-color-text-secondary` | Secondary copy, captions.        |
+| `text-tertiary`  | `#86868b`   | `#6e6c66` | `text-text-tertiary` | `--rezics-color-text-tertiary` | Metadata, ≥18px only (AA-large). |
+| `text-disabled`  | `#c7c7cc`   | `#48484a` | `text-text-disabled` | `--rezics-color-text-disabled` | Decorative disabled labels only. |
+| `text-on-brand`  | `#ffffff`   | `#ffffff` | `text-text-on-brand` | `--rezics-color-text-on-brand` | White on `brand-fill` button (AA-large only — use ≥14px medium / ≥16px regular). |
+| `text-brand`     | `#C4433A`   | `#fa7882` | `text-text-brand`   | `--rezics-color-text-brand`    | Brand-color text. **Use this, never `brand-fill` as text.** |
 
 ## Color — brand
 
@@ -36,10 +41,10 @@ Brand fill is **mode-invariant**: `#f4606c` in both light and dark.
 
 | Token               | Value      | UnoCSS         | CSS var                          | When                                              |
 | ------------------- | ---------- | -------------- | -------------------------------- | ------------------------------------------------- |
-| `brand-fill`        | `#f4606c`  | `bg-brand`     | `--rzc-color-brand-fill`         | Button bg, badge fill, focus ring, icon fill.    |
-| `brand-fill-hover`  | `#e85666`  | `bg-brand-hover` | `--rzc-color-brand-fill-hover` | Button `:hover`.                                  |
-| `brand-fill-active` | `#d94c5c`  | `bg-brand-active` | `--rzc-color-brand-fill-active` | Button `:active` / pressed.                  |
-| `text-brand`        | (see text) | `text-text-brand` | `--rzc-color-text-brand`     | The ONLY brand-text token (above).               |
+| `brand-fill`        | `#f4606c`  | `bg-brand`     | `--rezics-color-brand-fill`         | Button bg, badge fill, focus ring, icon fill.    |
+| `brand-fill-hover`  | `#e85666`  | `bg-brand-hover` | `--rezics-color-brand-fill-hover` | Button `:hover`.                                  |
+| `brand-fill-active` | `#d94c5c`  | `bg-brand-active` | `--rezics-color-brand-fill-active` | Button `:active` / pressed.                  |
+| `text-brand`        | (see text) | `text-text-brand` | `--rezics-color-text-brand`     | The ONLY brand-text token (above).               |
 
 **Hard rule**: `#f4606c` on parchment is 2.83:1 — fails AA-body (4.5:1), fails AA-large (3:1). Never use `brand-fill` (or its hex) as a text color.
 
@@ -66,29 +71,33 @@ Each semantic has `*-fill` (UI element, 3:1) and `*-text` (AA-body, mode-aware).
 | `border-focus`   | `#f4606c`                | `#fa7882`                  | `border-focus`   | `:focus-visible` ring (brand).    |
 | `border-error`   | `#cf2d56`                | `#e34c75`                  | `border-error`   | Form validation error.            |
 
-**Focus ring spec**: `outline: 2px solid var(--rzc-color-border-focus); outline-offset: 2px;`
+**Focus ring spec**: `outline: 2px solid var(--rezics-color-border-focus); outline-offset: 2px;`
 
 ---
 
-## Spacing — 8px base
+## Spacing — two systems, one rhythm
 
-| Token       | Value | MUI                | UnoCSS class       | When                                |
-| ----------- | ----- | ------------------ | ------------------ | ----------------------------------- |
-| `space-0`   | 0     | `theme.spacing(0)` | `p-0` / `m-0`      | —                                   |
-| `space-px`  | 1px   | —                  | `p-px`             | Hairline borders.                   |
-| `space-0.5` | 2px   | `theme.spacing(0.25)` | `p-0.5`         | Micro-gaps.                         |
-| `space-1`   | 4px   | `theme.spacing(0.5)` | `p-1`            | Compact icon margin.                |
-| `space-2`   | 8px   | `theme.spacing(1)` | `p-2`              | **Base padding.** Default gap.      |
-| `space-3`   | 12px  | `theme.spacing(1.5)` | `p-3`            | Input vertical padding.             |
-| `space-4`   | 16px  | `theme.spacing(2)` | `p-4`              | Card padding, default content gap.  |
-| `space-5`   | 24px  | `theme.spacing(3)` | `p-5`              | Section internal padding.           |
-| `space-6`   | 32px  | `theme.spacing(4)` | `p-6`              | Section divider rhythm.             |
-| `space-8`   | 48px  | `theme.spacing(6)` | `p-8`              | **Between sections (app default).** |
-| `space-10`  | 64px  | `theme.spacing(8)` | `p-10`             | Page-level vertical rhythm.         |
-| `space-12`  | 96px  | `theme.spacing(12)` | `p-12`            | Chapter-level breathing.            |
-| `space-16`  | 128px | `theme.spacing(16)` | `p-16`            | Hero / landing extra.               |
+UnoCSS and MUI use different step numbers for the same pixel size. This is unavoidable: preset-wind4 follows Tailwind v4's `N × 4px` model while MUI uses `theme.spacing(N) = N × 8px`. Always pick the column matching your syntax.
 
-**Section rhythm**: app uses `space-8`–`space-12`; admin/editor use `space-4`–`space-5`.
+| Pixels | UnoCSS class | MUI sx                | When                                |
+| ------ | ------------ | --------------------- | ----------------------------------- |
+| 0      | `p-0`        | `p: 0`                | —                                   |
+| 1px    | `p-px`       | —                     | Hairline borders.                   |
+| 2px    | `p-0.5`      | `p: 0.25`             | Micro-gaps.                         |
+| 4px    | `p-1`        | `p: 0.5`              | Compact icon margin.                |
+| 8px    | `p-2`        | `p: 1`                | **Base padding.** Default gap.      |
+| 12px   | `p-3`        | `p: 1.5`              | Input vertical padding.             |
+| 16px   | `p-4`        | `p: 2`                | Card padding, default content gap.  |
+| 24px   | `p-6`        | `p: 3`                | Section internal padding.           |
+| 32px   | `p-8`        | `p: 4`                | Section divider rhythm.             |
+| 48px   | `p-12`       | `p: 6`                | **Between sections (app default).** |
+| 64px   | `p-16`       | `p: 8`                | Page-level vertical rhythm.         |
+| 96px   | `p-24`       | `p: 12`               | Chapter-level breathing.            |
+| 128px  | `p-32`       | `p: 16`               | Hero / landing extra.               |
+
+**Common mistake:** writing `p-8` thinking it equals `sx={{ p: 8 }}`. They differ — `p-8` = 32px (UnoCSS); `sx={{ p: 8 }}` = 64px (MUI).
+
+**Section rhythm**: app uses `p-12`–`p-24` (48–96px); admin/editor use `p-4`–`p-6` (16–24px).
 
 ---
 

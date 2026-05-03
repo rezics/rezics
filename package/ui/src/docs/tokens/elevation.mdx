@@ -33,11 +33,15 @@ Dark mode shadows scale up opacity (×5) so they stay perceptible against deeper
 ## Usage
 
 ```tsx
+// MUI sx — radius via theme.shape, color/shadow via CSS vars
 <Box sx={{
-  borderRadius: "var(--rezics-radius-lg)",
+  borderRadius: 1.5,                                 // theme.shape.borderRadius * 1.5
   background: "var(--rezics-color-surface-elevated)",
   boxShadow: "var(--rezics-shadow-modal)",
 }}>
+
+// UnoCSS — utilities resolve through theme
+<div className="rounded-lg bg-surface-elevated shadow-modal">
 ```
 
 Don't reach for `shadow-2` to "make a card stand out" — that's what surface tokens (`base` vs `elevated`) and whisper borders are for. Shadows for hierarchy is a Material-2 reflex; rezics is closer to Material-3 + Apple in temperament.

@@ -12,7 +12,7 @@ export const ReviewPage: React.FC = () => {
     "";
 
   return (
-    <div className="w-11/12 mx-auto mt-10 max-w-4xl">
+    <div className="w-11/12 mx-auto mt-16 max-w-4xl">
       <ReviewDetailSection reviewId={reviewId} />
     </div>
   );

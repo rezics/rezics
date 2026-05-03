@@ -62,7 +62,7 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <div className="my-6" />
+          <div className="my-8" />
           <TextField
             fullWidth
             type="datetime-local"
@@ -71,7 +71,7 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
             value={expiresAt}
             onChange={(e) => setExpiresAt(e.target.value)}
           />
-          <div className="my-6" />
+          <div className="my-8" />
           <ScopesEditor scopes={scopes} onChange={setScopes} />
           {error && <Alert severity="error">{error}</Alert>}
         </Box>

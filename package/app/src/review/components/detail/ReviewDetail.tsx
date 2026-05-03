@@ -30,7 +30,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
     : "";
 
   return (
-    <Box className="flex flex-col gap-6">
+    <Box className="flex flex-col gap-8">
       {book && <BookListViewItem book={book} />}
 
       <Box className="flex items-center justify-between">

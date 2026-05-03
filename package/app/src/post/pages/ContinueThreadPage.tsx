@@ -15,7 +15,7 @@ export const ContinueThreadPage: React.FC = () => {
   const { data: anchor } = useQuery(postQueries.detail(unitId));
 
   return (
-    <Box className="w-full max-w-3xl mx-auto mt-6 px-4">
+    <Box className="w-full max-w-3xl mx-auto mt-8 px-4">
       <Box mb={2}>
         <Link to="/post/$rootPostUnitId" params={{ rootPostUnitId }}>
           <Typography variant="caption" color="primary">

@@ -5,9 +5,18 @@ import { SpacingRuler } from "./_gallery";
 
 # Spacing
 
-8px base scale. `theme.spacing(1) === 8px` in MUI; tokens align 1-to-1. Source: `package/ui/src/config/tokens/spacing.ts`.
+Two systems coexist. They use different step numbers — pick the one that matches your syntax.
 
-Use multiples of the scale; never raw pixel values. The scale is intentionally coarse — if you need a value between two steps, that's a signal to reconsider the layout.
+| System | Formula | Example |
+| --- | --- | --- |
+| **UnoCSS classes** (`p-N`, `gap-N`, `mt-N`, …) | `N × 4px` (Tailwind v4 single-`--spacing` model) | `p-8 = 32px` |
+| **MUI sx** (`sx={{ p: N }}`, `<Stack spacing={N}>`) | `N × 8px` (theme.spacing base) | `sx={{ p: 4 }} = 32px` |
+
+For a 32px gap, write `p-8` in UnoCSS or `sx={{ p: 4 }}` in MUI. Both render the same pixel result; the step number is just different.
+
+Source of truth: `package/ui/src/config/tokens/spacing.ts` (docs reference) and `package/ui/src/config/theme.ts` (`spacing: SPACING_BASE_PX`).
+
+## Common steps (UnoCSS / Tailwind v4)
 
 <Unstyled>
   <SpacingRuler name="0" value="0" />
@@ -17,36 +26,42 @@ Use multiples of the scale; never raw pixel values. The scale is intentionally c
   <SpacingRuler name="2" value="8px" />
   <SpacingRuler name="3" value="12px" />
   <SpacingRuler name="4" value="16px" />
-  <SpacingRuler name="5" value="24px" />
-  <SpacingRuler name="6" value="32px" />
-  <SpacingRuler name="8" value="48px" />
-  <SpacingRuler name="10" value="64px" />
-  <SpacingRuler name="12" value="96px" />
-  <SpacingRuler name="16" value="128px" />
+  <SpacingRuler name="6" value="24px" />
+  <SpacingRuler name="8" value="32px" />
+  <SpacingRuler name="12" value="48px" />
+  <SpacingRuler name="16" value="64px" />
+  <SpacingRuler name="24" value="96px" />
+  <SpacingRuler name="32" value="128px" />
 </Unstyled>
+
+Any integer N produces `N × 4px` — these are just the rhythm steps the design system actually uses. Avoid arbitrary in-between values like `p-7` (28px) — if a step feels off, the surrounding rhythm is the problem, not the scale.
 
 ## Common patterns
 
-| Use | Token |
-| --- | --- |
-| Inline icon-to-label gap | `2` (8px) |
-| Form field row gap | `3` (12px) |
-| Card padding | `4` (16px) |
-| Section gap | `5`–`6` (24–32px) |
-| Page-level vertical rhythm | `8`–`12` (48–96px) |
+| Use | UnoCSS | MUI sx | Pixels |
+| --- | --- | --- | --- |
+| Inline icon-to-label gap | `gap-2` | `gap: 1` | 8px |
+| Form field row gap | `gap-3` | `gap: 1.5` | 12px |
+| Card padding | `p-4` | `p: 2` | 16px |
+| Section internal padding | `p-6` | `p: 3` | 24px |
+| Section divider rhythm | `p-8` | `p: 4` | 32px |
+| Between sections (app default) | `p-12` | `p: 6` | 48px |
+| Page-level vertical rhythm | `p-16` | `p: 8` | 64px |
+| Hero / chapter-level breathing | `p-24` | `p: 12` | 96px |
 
 ## Usage
 
 ```tsx
-// MUI sx — pass numeric step (auto × theme.spacing == 8px)
-<Stack spacing={3} sx={{ p: 4 }}>
-<Box sx={{ mt: 5, gap: 2 }}>
+// MUI sx — N × 8px
+<Stack spacing={3} sx={{ p: 4 }}>      // gap: 24px, padding: 32px
+<Box sx={{ mt: 6, gap: 2 }}>           // mt: 48px, gap: 16px
 
-// CSS variables
-.row { padding: var(--rezics-space-4); gap: var(--rezics-space-2); }
+// UnoCSS — N × 4px
+<div className="p-4 gap-2">            // padding: 16px, gap: 8px
+<section className="py-12 gap-8">      // py: 48px, gap: 32px
 
-// UnoCSS (shadcn preset uses 4-based scale; rezics theme overrides to 8-based)
-<div className="p-4 gap-2">  // 16px / 8px
+// TS source (rare — only for generating CSS outside MUI/UnoCSS)
+import { spacing } from "@rezics/ui/config/tokens/spacing";
 ```
 
 Don't introduce off-grid values. If 12px feels right but the next step (24px) feels too big, the spacing rhythm of the surrounding section is probably wrong, not the scale.

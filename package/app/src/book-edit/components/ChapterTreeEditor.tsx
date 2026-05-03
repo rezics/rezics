@@ -422,7 +422,7 @@ export const ChapterTreeEditor = forwardRef<
         }}
       >
         {treeData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
             <p className="text-sm">No chapters yet</p>
             <Button
               variant="outlined"
@@ -471,7 +471,7 @@ export const ChapterTreeEditor = forwardRef<
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between py-3 pb-6 text-sm text-muted-foreground">
+      <div className="flex items-center justify-between py-3 pb-8 text-sm text-muted-foreground">
         <span>
           {chapterCount} chapters · {formatTotal(wordCount)} words
         </span>

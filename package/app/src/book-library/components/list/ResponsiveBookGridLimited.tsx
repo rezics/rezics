@@ -52,7 +52,7 @@ export function ResponsiveBookGridLimited({
   );
 
   return (
-    <div className={cn("grid gap-6", columnClassMap[columns], className)}>
+    <div className={cn("grid gap-8", columnClassMap[columns], className)}>
       {visibleBooks.map((book) => (
         <HorizontalBookCard key={book.id} {...book} />
       ))}

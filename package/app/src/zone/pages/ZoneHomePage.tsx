@@ -20,7 +20,7 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+      <div className="max-w-4xl mx-auto px-4 py-24 text-center">
         <Typography color="text.secondary">Loading zone...</Typography>
       </div>
     );
@@ -28,7 +28,7 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
 
   if (error || !zone) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+      <div className="max-w-4xl mx-auto px-4 py-24 text-center">
         <Typography variant="h5" className="mb-2">
           Zone not found
         </Typography>
@@ -50,7 +50,7 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
+    <div className="max-w-8xl mx-auto px-4 py-8">
       <Template zone={zone} onSearch={handleSearch} />
     </div>
   );

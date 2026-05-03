@@ -78,12 +78,12 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
   const totalPages = Math.ceil(total / itemsPerPage);
 
   return (
-    <Box className="w-11/12 mx-auto mt-10">
-      <Typography variant="h3" className="font-bold mb-6">
+    <Box className="w-11/12 mx-auto mt-16">
+      <Typography variant="h3" className="font-bold mb-8">
         Users
       </Typography>
 
-      <Box className="mb-6">
+      <Box className="mb-8">
         <TextField
           fullWidth
           placeholder="Search users by name or email..."
@@ -164,7 +164,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
           </Box>
 
           {totalPages > 1 && (
-            <Box className="flex justify-center mt-8">
+            <Box className="flex justify-center mt-12">
               <Pagination
                 count={totalPages}
                 page={page}

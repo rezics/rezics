@@ -44,7 +44,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
       {showEditButton && (
         <EditButtonFloatRightShow onClick={onEdit} text={t("common.edit")} />
       )}
-      <div className="flex items-start gap-4 px-4 pt-6">
+      <div className="flex items-start gap-4 px-4 pt-8">
         {/* Left: Avatar + Follow */}
         <div className="flex flex-col items-center w-24 flex-shrink-0">
           <LazyLoadImage

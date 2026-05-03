@@ -82,7 +82,7 @@ export const ShelvesTabSection: FC = () => {
         <Typography
           variant="body2"
           color="text.secondary"
-          className="py-8 text-center"
+          className="py-12 text-center"
         >
           Loading...
         </Typography>
@@ -90,7 +90,7 @@ export const ShelvesTabSection: FC = () => {
         <Typography
           variant="body2"
           color="text.secondary"
-          className="py-8 text-center"
+          className="py-12 text-center"
         >
           {filters.q ? "No shelves match your search" : "No shelves yet"}
         </Typography>

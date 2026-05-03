@@ -52,7 +52,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
         direction="row"
         spacing={2}
         alignItems="center"
-        className="book-search-filter mb-6"
+        className="book-search-filter mb-8"
       >
         {(Object.keys(LABEL_KEYS) as BookLibSortKey[]).map((key) => {
           const active = key === sortType;

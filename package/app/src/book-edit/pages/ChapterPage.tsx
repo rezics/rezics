@@ -135,7 +135,7 @@ export const BookEditChapterPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="w-full flex items-center justify-center p-10">
+      <div className="w-full flex items-center justify-center p-16">
         <CircularProgress size={24} />
       </div>
     );
@@ -143,7 +143,7 @@ export const BookEditChapterPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="max-w-xl mx-auto p-6 text-destructive">
+      <div className="max-w-xl mx-auto p-8 text-destructive">
         {(error as Error)?.message || "Failed to load chapter"}
       </div>
     );
@@ -153,7 +153,7 @@ export const BookEditChapterPage: React.FC = () => {
 
   return (
     <div
-      className={`mx-auto px-6 pt-4 pb-6 flex flex-col h-[calc(100vh-5rem)] transition-all duration-300 ${isDual ? "max-w-7xl" : "max-w-4xl"}`}
+      className={`mx-auto px-8 pt-4 pb-8 flex flex-col h-[calc(100vh-5rem)] transition-all duration-300 ${isDual ? "max-w-7xl" : "max-w-4xl"}`}
     >
       <div className="flex items-center gap-2 mb-4">
         <TextField

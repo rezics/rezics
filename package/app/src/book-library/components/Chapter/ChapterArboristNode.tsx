@@ -35,7 +35,7 @@ export const createChapterArboristNode = (bookId: string) => {
           <button
             type="button"
             onClick={() => node.toggle()}
-            className="w-5 h-5 flex justify-center items-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            className="w-6 h-6 flex justify-center items-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             aria-label={node.isOpen ? "Collapse" : "Expand"}
           >
             {node.isOpen ? (

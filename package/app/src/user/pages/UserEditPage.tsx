@@ -130,7 +130,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   }
 
   return (
-    <Box className="w-11/12 max-w-2xl mx-auto mt-10">
+    <Box className="w-11/12 max-w-2xl mx-auto mt-16">
       <Card className="shadow-lg rounded-2xl">
         <CardHeader
           avatar={
@@ -209,7 +209,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 required={false}
               />
               <div className="h-2" />
-              <Box className="flex gap-2 justify-end mt-6">
+              <Box className="flex gap-2 justify-end mt-8">
                 {onCancel && (
                   <Button
                     variant="outlined"

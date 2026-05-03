@@ -62,15 +62,15 @@ export function MainLayoutFooter({ className }: { className?: string }) {
 
       <Container maxWidth="xl" className="mx-auto px-4">
         {/* Top content */}
-        <Box className="py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <Box className="py-24">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
             {/* Brand / Intro */}
             <div className="md:col-span-1">
               <div className="flex items-center gap-2 mt-2">
                 <LazyLoadImage
                   src="/logo.svg"
                   alt="logo"
-                  className="w-11 h-8"
+                  className="w-11 h-12"
                 />
                 <Typography
                   variant="h6"
@@ -232,7 +232,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
 
         {/* Bottom bar */}
         <Box
-          className="py-6"
+          className="py-8"
           sx={{
             display: "flex",
             alignItems: "center",

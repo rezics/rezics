@@ -7,7 +7,7 @@ export const ReactionInfoPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="w-11/12 mx-auto mt-10 px-4">
+    <div className="w-11/12 mx-auto mt-16 px-4">
       <div className="flex items-center justify-between">
         <div className="mb-4">
           <Typography variant="h5" className="font-bold mb-2">
@@ -26,7 +26,7 @@ export const ReactionInfoPage: React.FC = () => {
         </Button>
       </div>
 
-      <div className="py-10 text-center text-gray-500">
+      <div className="py-16 text-center text-gray-500">
         互动历史功能正在迁移中，请稍后再来。
       </div>
     </div>

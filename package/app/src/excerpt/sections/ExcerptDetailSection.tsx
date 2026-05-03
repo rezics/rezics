@@ -29,7 +29,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   if (isLoading) return <div>{t("common.loading")}</div>;
   if (!excerpt?.id) {
     return (
-      <div className="text-center py-10 text-red-500">
+      <div className="text-center py-16 text-red-500">
         {t("excerpt.not_found")}
       </div>
     );
@@ -42,7 +42,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   };
 
   return (
-    <Box className="flex flex-col gap-6">
+    <Box className="flex flex-col gap-8">
       <Box className="flex items-center">
         {title && (
           <Typography variant="h5" fontWeight={700}>

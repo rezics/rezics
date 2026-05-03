@@ -31,7 +31,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       <div className="flex flex-1">
         <Sidebar
-          sidebarHeaderClassName="mx-6"
+          sidebarHeaderClassName="mx-8"
           NAVIGATION={NAVIGATION(isAdmin)}
         />
         <main className="flex flex-col flex-1 min-w-0 pt-[60px] transition-all duration-300 h-screen w-full">

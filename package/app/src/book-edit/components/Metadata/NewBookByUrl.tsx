@@ -25,7 +25,7 @@ export function NewBookByUrl() {
     }
   }, [supportedSitesQuery]);
   return (
-    <div className="mt-10 mx-auto w-11/12">
+    <div className="mt-16 mx-auto w-11/12">
       <div className="text-2xl font-bold mb-4">通过URL创建书籍</div>
       <Alert severity="info">
         请输入书籍的URL，系统将自动获取书籍的元数据，并创建书籍。
@@ -42,7 +42,7 @@ export function NewBookByUrl() {
           ))}
         </ul>
       </div>
-      <div className="mt-8">
+      <div className="mt-12">
         <div className="flex mb-4">
           <TextField
             fullWidth

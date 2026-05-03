@@ -21,7 +21,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
       <Header />
 
       <div>
-        <Sidebar NAVIGATION={[]} sidebarHeaderClassName="mx-6">
+        <Sidebar NAVIGATION={[]} sidebarHeaderClassName="mx-8">
           <div>
             <div className="flex items-center justify-between mb-2 bg-gray-50 text-sm text-gray-800">
               <div className="font-medium">目录</div>
@@ -44,7 +44,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
         </Sidebar>
       </div>
 
-      <main className="flex-grow pt-16 transition-all duration-300">
+      <main className="flex-grow pt-32 transition-all duration-300">
         {children}
       </main>
     </div>

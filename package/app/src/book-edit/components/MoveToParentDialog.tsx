@@ -101,7 +101,7 @@ function TreeNode({
               e.stopPropagation();
               setExpanded((v) => !v);
             }}
-            className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-muted-foreground"
+            className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-muted-foreground"
           >
             {expanded ? (
               <ExpandMore sx={{ fontSize: 18 }} />
@@ -110,7 +110,7 @@ function TreeNode({
             )}
           </button>
         ) : (
-          <span className="w-5" />
+          <span className="w-6" />
         )}
         <AccountTree
           sx={{ fontSize: 16 }}
@@ -218,7 +218,7 @@ export function MoveToParentDialog({
           style={{ maxHeight: 320 }}
         >
           {filteredTree.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground text-sm py-8">
+            <div className="flex items-center justify-center h-full text-muted-foreground text-sm py-12">
               {t("book.chapter.move_dialog.no_results", "No matching nodes")}
             </div>
           ) : (

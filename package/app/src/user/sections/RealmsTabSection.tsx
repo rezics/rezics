@@ -104,19 +104,19 @@ export const RealmsTabSection: FC = () => {
         <Typography
           variant="body2"
           color="text.secondary"
-          className="py-8 text-center"
+          className="py-12 text-center"
         >
           Loading...
         </Typography>
       ) : errorMessage ? (
-        <Typography variant="body2" color="error" className="py-8 text-center">
+        <Typography variant="body2" color="error" className="py-12 text-center">
           {errorMessage}
         </Typography>
       ) : realms.length === 0 ? (
         <Typography
           variant="body2"
           color="text.secondary"
-          className="py-8 text-center"
+          className="py-12 text-center"
         >
           {emptyMessage}
         </Typography>

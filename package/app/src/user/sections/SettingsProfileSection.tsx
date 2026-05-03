@@ -48,7 +48,7 @@ export const SettingsProfileSection: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-12">
+      <div className="flex justify-center py-24">
         <CircularProgress />
       </div>
     );
@@ -85,7 +85,7 @@ export const SettingsProfileSection: FC = () => {
           </Alert>
         )}
 
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-8">
           <Avatar
             src={formData.avatar}
             variant="rounded"
@@ -105,7 +105,7 @@ export const SettingsProfileSection: FC = () => {
           </div>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-6">
           <TextField
             fullWidth
             label="Display Name"

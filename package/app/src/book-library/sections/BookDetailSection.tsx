@@ -55,7 +55,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
 
   return (
     <Box id="book-detail">
-      <Box maxWidth="xl" className="mt-4 mb-8 mx-auto">
+      <Box maxWidth="xl" className="mt-4 mb-12 mx-auto">
         <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Tabs value={activeTab} onValueChange={handleTabChange}>

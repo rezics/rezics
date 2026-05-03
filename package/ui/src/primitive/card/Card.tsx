@@ -9,7 +9,7 @@ export function ShadowRoundedCard({
 }) {
   return (
     <div className={className}>
-      <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-rose-200 p-8 shadow-2xl shadow-rose-500/10">
+      <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-rose-200 p-12 shadow-2xl shadow-rose-500/10">
         {children}
       </div>
     </div>

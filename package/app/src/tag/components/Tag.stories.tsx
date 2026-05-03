@@ -83,7 +83,7 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
   children,
 }) => (
-  <section className="mb-8">
+  <section className="mb-12">
     <h3 className="text-lg font-semibold mb-3">{title}</h3>
     <div className="border rounded-md p-3">{children}</div>
   </section>
@@ -157,7 +157,7 @@ function Render({
   }, [demoTags]);
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-8">
       <h2 className="text-xl font-bold">Tag Components – Interactive Story</h2>
 
       <Section title="TagCard">

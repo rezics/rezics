@@ -46,7 +46,7 @@ export const ProfileOverviewPage: FC = () => {
   const recent = recentQuery.data?.items ?? [];
 
   return (
-    <div className="flex flex-col gap-6 py-4">
+    <div className="flex flex-col gap-8 py-4">
       {/* Mobile stats — hidden on desktop (shown in sidebar) */}
       <div className="md:hidden flex flex-wrap gap-4 text-sm">
         <StatItem

@@ -39,7 +39,7 @@ const DefaultResultItem: React.FC<{
         <img
           src={item.coverUrl}
           alt={title}
-          className="w-12 h-16 object-cover rounded"
+          className="w-24 h-32 object-cover rounded"
         />
       )}
       <div className="flex-1 min-w-0">
@@ -73,7 +73,7 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
 
   if (isLoading) {
     return (
-      <div className="py-8 text-center">
+      <div className="py-12 text-center">
         <Typography color="text.secondary">{t("common.loading")}</Typography>
       </div>
     );

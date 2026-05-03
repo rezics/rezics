@@ -125,7 +125,7 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
       ref={resizerRef}
       className="
             absolute right-[-10px] -translate-y-1/2
-            h-8 w-1 hover:w-2 hover:h-10
+            h-12 w-1 hover:w-2 hover:h-16
             bg-gray-300 hover:bg-gray-400
             rounded-l transition-all duration-200
             cursor-col-resize z-1000

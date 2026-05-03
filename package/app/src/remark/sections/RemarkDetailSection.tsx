@@ -33,7 +33,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   };
 
   return (
-    <Box className="flex flex-col gap-6">
+    <Box className="flex flex-col gap-8">
       {canEdit && (
         <Box alignSelf="flex-end">
           <MUILink to="/remark/$reviewId/edit" params={{ reviewId: remarkId }}>

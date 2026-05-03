@@ -14,7 +14,7 @@ export function TagDomainPage() {
   const { data, isLoading, error } = useQuery(tagQueries.list({ unitId }));
   if (isLoading) {
     return (
-      <div className="w-11/12 mx-auto mt-10">
+      <div className="w-11/12 mx-auto mt-16">
         <div className="text-sm text-gray-500">正在加载标签…</div>
       </div>
     );
@@ -22,7 +22,7 @@ export function TagDomainPage() {
 
   if (error) {
     return (
-      <div className="w-11/12 mx-auto mt-10">
+      <div className="w-11/12 mx-auto mt-16">
         <div className="text-sm text-red-600">
           加载失败：{String((error as any)?.message ?? error)}
         </div>
@@ -31,7 +31,7 @@ export function TagDomainPage() {
   }
 
   return (
-    <div className="w-11/12 mx-auto mt-10">
+    <div className="w-11/12 mx-auto mt-16">
       <AccentBarWithText text={title ?? `域（${unitId}）`} />
       <TagWrapper filters={{ unitId }} mode="flat" />
     </div>

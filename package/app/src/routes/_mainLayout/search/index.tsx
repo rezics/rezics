@@ -68,8 +68,8 @@ function GlobalSearchPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">Search</h1>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-8">Search</h1>
       <AdvancedSearch
         query={search.query}
         bind={search.bind}
@@ -79,7 +79,7 @@ function GlobalSearchPage() {
         middleware={search.middleware}
       />
       {hasSearched && (
-        <div className="mt-6">
+        <div className="mt-8">
           <SearchResultList result={data} isLoading={isLoading} />
         </div>
       )}

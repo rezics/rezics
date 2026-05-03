@@ -87,7 +87,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   const currentTextLength = value?.textLength ?? "";
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {/* Title (from translations) */}
       <div className="space-y-1">
         <Typography variant="body2" component="label" htmlFor="book-title">
@@ -193,7 +193,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             disabled={disabled}
           />
         </div>
-        <div className="flex flex-wrap gap-6">
+        <div className="flex flex-wrap gap-8">
           <FlagWithTooltip
             label={t("book.flags.licensed")}
             tooltip={t("book.tooltips.licensed")}

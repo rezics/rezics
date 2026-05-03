@@ -107,7 +107,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
       </div>
 
       {/* Desktop: generous vertical layout */}
-      <div className="hidden md:flex flex-col items-start gap-4 py-8 px-4">
+      <div className="hidden md:flex flex-col items-start gap-4 py-12 px-4">
         <Avatar
           src={user.avatar ?? undefined}
           variant="rounded"

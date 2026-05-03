@@ -49,7 +49,7 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
             <LazyLoadImage
               src={excerpt.user.avatar ?? ""}
               alt={excerpt.user.name ?? ""}
-              className="w-10 h-10 rounded-full shadow"
+              className="w-16 h-16 rounded-full shadow"
             />
             <Typography variant="body2" fontWeight={600}>
               {excerpt.user.name ?? ""}

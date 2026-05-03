@@ -7,7 +7,7 @@ import TagListEdit from "@/tag/components/Edit/TagListEdit";
 export const BookEditTagPage: React.FC = () => {
   const { bookId } = bookEditLayoutRoute.useParams();
   return (
-    <div className="mt-10 mx-auto w-11/12">
+    <div className="mt-16 mx-auto w-11/12">
       <div className="pl-4">
         <div className="flex mb-4">
           <AccentBarWithText text="Tag编辑" />

@@ -108,9 +108,9 @@ export const TokenPage: FC = () => {
   };
 
   return (
-    <Box className="w-11/12 mx-auto mt-10">
+    <Box className="w-11/12 mx-auto mt-16">
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h3" className="font-bold mb-6">
+        <Typography variant="h3" className="font-bold mb-8">
           API Tokens
         </Typography>
         <Button

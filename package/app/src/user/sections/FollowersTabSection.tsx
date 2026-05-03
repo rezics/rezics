@@ -64,7 +64,7 @@ export const FollowersTabSection: FC = () => {
         <Typography
           variant="body2"
           color="text.secondary"
-          className="py-8 text-center"
+          className="py-12 text-center"
         >
           Loading...
         </Typography>
@@ -72,7 +72,7 @@ export const FollowersTabSection: FC = () => {
         <Typography
           variant="body2"
           color="text.secondary"
-          className="py-8 text-center"
+          className="py-12 text-center"
         >
           {filter === "followers"
             ? "No followers yet"

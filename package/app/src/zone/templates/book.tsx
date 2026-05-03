@@ -25,7 +25,7 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
     <div>
       {/* Banner */}
       <div
-        className="relative py-12 px-6 mb-6 rounded-lg"
+        className="relative py-24 px-8 mb-8 rounded-lg"
         style={{
           backgroundImage: bgImage ? `url(${bgImage})` : undefined,
           backgroundSize: "cover",
@@ -46,7 +46,7 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
       </div>
 
       {/* Search */}
-      <div className="mb-8">
+      <div className="mb-12">
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}

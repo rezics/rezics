@@ -40,17 +40,17 @@ export function UnitPage() {
 
   if (isLoading) {
     return (
-      <div className="mt-6 text-center text-sm text-gray-500">Loading...</div>
+      <div className="mt-8 text-center text-sm text-gray-500">Loading...</div>
     );
   }
 
   if (error) {
-    return <QueryErrorDisplay error={error} className="mt-6" />;
+    return <QueryErrorDisplay error={error} className="mt-8" />;
   }
 
   if (!unit) {
     return (
-      <div className="mt-6 text-center text-sm text-gray-500">
+      <div className="mt-8 text-center text-sm text-gray-500">
         {t("common.no_data")}
       </div>
     );
@@ -84,7 +84,7 @@ export function UnitPage() {
   };
 
   return (
-    <div className="w-11/12 max-w-4xl mx-auto mt-10 mb-10">
+    <div className="w-11/12 max-w-4xl mx-auto mt-16 mb-16">
       {/* ANCHOR Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
@@ -131,7 +131,7 @@ export function UnitPage() {
 
       {/* ANCHOR User & basic meta */}
       {(unit.user || unit.createdAt || unit.updatedAt) && (
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {unit.user && (
             <div className="flex items-center gap-3">
               <Avatar
@@ -172,7 +172,7 @@ export function UnitPage() {
 
       {/* ANCHOR Translation switcher (POST only when grouped) */}
       {isPost && groupId && (
-        <div className="mt-6">
+        <div className="mt-8">
           <PostLanguageSwitcher
             currentUnitId={unit.id}
             currentLanguage={unit.defaultLanguage ?? null}
@@ -186,8 +186,8 @@ export function UnitPage() {
       )}
 
       {/* ANCHOR Content */}
-      <div className="mt-8">
-        <Paper className="p-5">
+      <div className="mt-12">
+        <Paper className="p-6">
           {content ? (
             <MarkdownContent content={content} />
           ) : (
@@ -199,7 +199,7 @@ export function UnitPage() {
       </div>
 
       {/* ANCHOR Metadata */}
-      <div className="mt-10">
+      <div className="mt-16">
         <div className="flex items-center gap-2 mb-4">
           <AccentBar />
           <Typography variant="h6" className="font-bold">

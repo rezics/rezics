@@ -29,7 +29,7 @@ export function TagByBookPage() {
   const showSeeAll = total > pageSize;
 
   return (
-    <div className="w-11/12 mx-auto mt-10">
+    <div className="w-11/12 mx-auto mt-16">
       <AccentBarWithText text={`标签`} />
 
       {isLoading && <div>加载中…</div>}
@@ -88,7 +88,7 @@ export function TagByBookFullPage() {
   const total = listData?.tags?.length ?? 0;
 
   return (
-    <div className="w-11/12 mx-auto mt-10">
+    <div className="w-11/12 mx-auto mt-16">
       <AccentBarWithText text={`标签`} />
 
       {isLoading && <div>加载中…</div>}

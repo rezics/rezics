@@ -30,7 +30,7 @@ export const Sizes: Story = {
       <div className="flex items-center space-x-4">
         <ArrowButton
           icon={KeyboardArrowLeftIcon}
-          className="h-8 w-8 text-[16px]"
+          className="h-12 w-12 text-[16px]"
         />
         <span>小尺寸 (16)</span>
       </div>
@@ -41,7 +41,7 @@ export const Sizes: Story = {
       <div className="flex items-center space-x-4">
         <ArrowButton
           icon={KeyboardArrowLeftIcon}
-          className="h-12 w-12 text-[32px]"
+          className="h-24 w-24 text-[32px]"
         />
         <span>大尺寸 (32)</span>
       </div>

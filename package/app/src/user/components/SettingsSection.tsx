@@ -15,7 +15,7 @@ export const SettingsSection: FC<SettingsSectionProps> = ({
   divider = true,
 }) => (
   <>
-    <section className="py-6">
+    <section className="py-8">
       <Typography variant="h6" className="font-semibold mb-1">
         {title}
       </Typography>

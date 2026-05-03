@@ -25,18 +25,18 @@ This skill is the human/AI-readable index.
 
 ## Top-Level Rules (always apply)
 
-1. **Brand color**: 轮回红 `#f4606c` (`--rzc-color-brand-fill`). It is a fill color, never a text color. For brand-tinted text, use `text-brand` (`#C4433A` light / `#fa7882` dark) — already contrast-verified.
+1. **Brand color**: 轮回红 `#f4606c` (`--rezics-color-brand-fill`). It is a fill color, never a text color. For brand-tinted text, use `text-brand` (`#C4433A` light / `#fa7882` dark) — already contrast-verified.
 2. **Background**: warm parchment `#f5f4ed` (light) / warm dark stone `#1a1a18` (dark). Not pure white, not pure black.
 3. **Borderless by default**: cards, sections, panels do NOT get bordered card chrome. Use whitespace and `border-whisper` (`rgba(0,0,0,0.08)`) for containment. Reserve shadows for modal-tier surfaces only.
 4. **MUI is the foundation**. Reach for shadcn only when MUI lacks the component (see `mui-vs-shadcn.md`). Avoid custom unthemed components.
 5. **No emoji icons in UI chrome**. Use `@mui/icons-material` or `lucide-react`. Emoji are content (user posts), not interface vocabulary.
 6. **No raw `<a href>`**. Always use `<SafeLink href={url}>` from `@rezics/ui` (enforced by `bun run check:convention` R5).
-7. **Tokens, not hex literals**. `bg-brand`, `text-text-primary`, `var(--rzc-color-surface-canvas)` — never `bg-[#f4606c]` or `color: #1d1d1f`.
+7. **Tokens, not hex literals**. `bg-brand`, `text-text-primary`, `var(--rezics-color-surface-canvas)` — never `bg-[#f4606c]` or `color: #1d1d1f`.
 8. **Type sizing is `clamp()` viewport-responsive**. Use the scale (`text-xs` → `text-3xl`, plus `text-reader` for book content). Don't hardcode `font-size: 14px`.
 9. **Line-height is mandatory**: book reader = `1.60`, body = `1.55`, UI = `1.40`, dense = `1.30`. Never set lower.
 10. **Both light and dark modes are first-class**. Every color decision must work in both. Mode switches via `<html data-theme="dark">` (canonical) or `html.dark` (transitional alias).
 11. **Default CJK locale is Traditional Chinese**. Per-language CJK font routing happens automatically via CSS `:lang()` — don't override.
-12. **Admin ≠ App**. Admin is operations/management, not a duplicate of app-side editing. Compact density (`space-4` to `space-5`); app uses generous rhythm (`space-8` to `space-12`).
+12. **Admin ≠ App**. Admin is operations/management, not a duplicate of app-side editing. Compact density (`p-4`–`p-6`, 16–24px); app uses generous rhythm (`p-12`–`p-24`, 48–96px).
 
 ---
 
@@ -47,7 +47,7 @@ This skill is the human/AI-readable index.
 | Button color                      | `brand-fill` background, `text-on-brand`     | Secondary = ghost (`text-text-primary`)    |
 | Card chrome                       | No border, whitespace separation             | Whisper border for table rows / list items |
 | Heading typography                | `font-sans` + medium weight (500)            | Long-form 書評 / book content → `font-serif` |
-| Spacing between sections          | `space-8` (48px) for app; `space-4` for admin | Hero pages → `space-12` (96px)             |
+| Spacing between sections          | `p-12` (48px) for app; `p-4` (16px) for admin | Hero pages → `p-24` (96px)                 |
 | Icon library                      | `@mui/icons-material`                        | If absent: `lucide-react`                  |
 | Form input                        | MUI `<TextField>` (variant="standard")       | shadcn for command palette, drawer         |
 | Modal                             | MUI `<Dialog>`                                | vaul `<Drawer>` for mobile bottom sheet    |
@@ -66,7 +66,7 @@ For full details, load `tokens.md`.
 - **Brand**: `brand-fill` / `-fill-hover` / `-fill-active` / `text-brand` (light/dark variants auto-switch)
 - **Semantic**: `success-fill` / `success-text`, same for `warning` / `error` / `info`
 - **Borders**: `border-whisper` (default) / `-defined` / `-strong` / `-focus` / `-error`
-- **Spacing**: `space-0` (0) / `-px` (1px) / `-0.5` (2) / `-1` (4) / `-2` (8 base) / `-3` (12) / `-4` (16) / `-5` (24) / `-6` (32) / `-8` (48) / `-10` (64) / `-12` (96) / `-16` (128)
+- **Spacing**: UnoCSS `p-N` = `N × 4px` (Tailwind v4); MUI `sx={{ p: N }}` = `N × 8px`. Common UnoCSS steps: `p-2` (8px base) / `p-4` (16px) / `p-6` (24px) / `p-8` (32px) / `p-12` (48px) / `p-16` (64px) / `p-24` (96px) / `p-32` (128px). For 32px in MUI: `sx={{ p: 4 }}`.
 - **Radius**: `radius-xs` (4) / `-sm` (6) / `-md` (8 default) / `-lg` (12) / `-xl` (16) / `-2xl` (24) / `-pill` / `-full`
 - **Motion**: `motion-fast` (120ms) / `-base` (200) / `-slow` (350) / `-page` (500) + easings `ease-out` / `-in-out` / `-spring`
 
@@ -79,7 +79,7 @@ For full details, load `tokens.md`.
 | MUI `sx` prop     | `sx={{ color: 'primary.main' }}` (theme-derived) |
 | MUI `useTheme()`  | `theme.palette.primary.main`                     |
 | UnoCSS classes    | `bg-brand`, `text-text-primary`, `p-4`           |
-| Raw CSS / `<style>` | `var(--rzc-color-brand-fill)`                  |
+| Raw CSS / `<style>` | `var(--rezics-color-brand-fill)`                  |
 
 All four resolve to the same underlying value because tokens flow:
 `tokens.ts` → `theme.ts` (MUI) + `layers.css` (CSS vars) + `uno-config.ts` (Uno theme).

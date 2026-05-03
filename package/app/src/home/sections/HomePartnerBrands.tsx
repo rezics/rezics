@@ -26,14 +26,14 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
       <div className="flex items-center justify-between mb-3">
         <span className="font-semibold">{resolvedTitle}</span>
       </div>
-      <div className="flex flex-wrap gap-6 items-center">
+      <div className="flex flex-wrap gap-8 items-center">
         {logos.map((src, i) => (
           <LazyLoadImage
             // biome-ignore lint/suspicious/noArrayIndexKey: static list
             key={i}
             src={src}
             alt={`brand-${i}`}
-            className="h-10 object-contain"
+            className="h-16 object-contain"
           />
         ))}
       </div>

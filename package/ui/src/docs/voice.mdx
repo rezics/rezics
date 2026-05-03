@@ -1,5 +1,6 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
 import { Grid, Swatch, Compare, Do, Dont } from "./tokens/_gallery";
+import { fontFamilies } from "../config/tokens/typography";
 
 <Meta title="Foundation/Voice" />
 
@@ -68,12 +69,12 @@ Every surface earns its own register. Don't paste landing-page voice into the ad
 
 <Compare>
   <Dont caption="Playful chrome copy">
-    <div style={{ fontFamily: "var(--rezics-font-sans)", fontSize: 14, color: "var(--rezics-color-text-primary)" }}>
+    <div style={{ fontFamily: fontFamilies.sans, fontSize: 14, color: "var(--rezics-color-text-primary)" }}>
       Get started ✨ &nbsp;·&nbsp; Looks like you haven't added any books — let's fix that!
     </div>
   </Dont>
   <Do caption="Verbs and informational copy">
-    <div style={{ fontFamily: "var(--rezics-font-sans)", fontSize: 14, color: "var(--rezics-color-text-primary)" }}>
+    <div style={{ fontFamily: fontFamilies.sans, fontSize: 14, color: "var(--rezics-color-text-primary)" }}>
       Save &nbsp;·&nbsp; Publish &nbsp;·&nbsp; No books yet
     </div>
   </Do>

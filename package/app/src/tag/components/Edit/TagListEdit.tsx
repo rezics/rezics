@@ -133,7 +133,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
       {!isLoading && !error && renderListView()}
 
       {/* Search and attach existing tags */}
-      <div className="mt-6 pt-4 border-t">
+      <div className="mt-8 pt-4 border-t">
         <div className="text-sm font-semibold text-gray-700 mb-2">
           搜索并添加标签
         </div>

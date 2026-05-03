@@ -149,7 +149,7 @@ export const createChapterTreeEditorNode = ({
             </span>
           )}
 
-          <span className="flex-shrink-0 w-5 h-5 flex justify-center items-center text-muted-foreground">
+          <span className="flex-shrink-0 w-6 h-6 flex justify-center items-center text-muted-foreground">
             <ExpandMore
               sx={{
                 fontSize: 20,
@@ -267,7 +267,7 @@ export const createChapterTreeEditorNode = ({
 
                 {/* Status & date line */}
                 <div
-                  className={`flex items-center gap-3 mt-2 ${isSortingMode ? "pl-5" : "pl-0"}`}
+                  className={`flex items-center gap-3 mt-2 ${isSortingMode ? "pl-6" : "pl-0"}`}
                 >
                   {/* MOCK: publish status chip */}
                   <Chip
@@ -284,7 +284,7 @@ export const createChapterTreeEditorNode = ({
 
                 {/* Stats line */}
                 <div
-                  className={`flex items-center gap-3 mt-1 ${isSortingMode ? "pl-5" : "pl-0"}`}
+                  className={`flex items-center gap-3 mt-1 ${isSortingMode ? "pl-6" : "pl-0"}`}
                 >
                   <span className="text-xs text-muted-foreground tabular-nums">
                     {formatCount(wordCount)} words

@@ -103,7 +103,7 @@ export const BookHeroSection: React.FC<{
       }}
     >
       <div className="bg-black/60 backdrop-blur-md shadow-lg w-full">
-        <div className="container mx-auto max-w-[1250px] py-6 grid grid-cols-12 gap-6 px-4">
+        <div className="container mx-auto max-w-[1250px] py-8 grid grid-cols-12 gap-8 px-4">
           {/* Cover Image */}
           <div className="col-span-4 md:col-span-3 lg:col-span-2 flex justify-center">
             <LazyLoadImage

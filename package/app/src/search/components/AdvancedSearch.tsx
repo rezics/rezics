@@ -94,7 +94,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
           allowed={allowed}
           isAuthenticated={isAuthenticated}
         />
-        <div className="flex items-center gap-2 mt-5">
+        <div className="flex items-center gap-2 mt-6">
           <LicensedToggle
             value={isLicensed.value}
             onChange={isLicensed.onChange}

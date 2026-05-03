@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { easing } from "../../config/tokens/motion";
+import { radius } from "../../config/tokens/radius";
+import { fontFamilies } from "../../config/tokens/typography";
 
 export function Grid({
   cols = 4,
@@ -40,7 +43,7 @@ export function Swatch({
     <div
       style={{
         border: "1px solid var(--rezics-color-border-whisper)",
-        borderRadius: "var(--rezics-radius-md)",
+        borderRadius: radius.md,
         overflow: "hidden",
         background: "var(--rezics-color-surface-elevated)",
       }}
@@ -53,7 +56,7 @@ export function Swatch({
           padding: "0 12px",
           display: "flex",
           alignItems: "flex-end",
-          fontFamily: "var(--rezics-font-mono)",
+          fontFamily: fontFamilies.mono,
           fontSize: 12,
         }}
       >
@@ -62,7 +65,7 @@ export function Swatch({
       <div style={{ padding: "10px 12px" }}>
         <div
           style={{
-            fontFamily: "var(--rezics-font-sans)",
+            fontFamily: fontFamilies.sans,
             fontWeight: 500,
             fontSize: 13,
             color: "var(--rezics-color-text-primary)",
@@ -73,7 +76,7 @@ export function Swatch({
         {cssVar ? (
           <div
             style={{
-              fontFamily: "var(--rezics-font-mono)",
+              fontFamily: fontFamilies.mono,
               fontSize: 11,
               color: "var(--rezics-color-text-secondary)",
               marginTop: 2,
@@ -85,7 +88,7 @@ export function Swatch({
         {description ? (
           <div
             style={{
-              fontFamily: "var(--rezics-font-sans)",
+              fontFamily: fontFamilies.sans,
               fontSize: 12,
               color: "var(--rezics-color-text-secondary)",
               marginTop: 4,
@@ -122,7 +125,7 @@ export function Row({
       <div>
         <div
           style={{
-            fontFamily: "var(--rezics-font-sans)",
+            fontFamily: fontFamilies.sans,
             fontWeight: 500,
             fontSize: 13,
             color: "var(--rezics-color-text-primary)",
@@ -133,7 +136,7 @@ export function Row({
         {cssVar ? (
           <div
             style={{
-              fontFamily: "var(--rezics-font-mono)",
+              fontFamily: fontFamilies.mono,
               fontSize: 11,
               color: "var(--rezics-color-text-secondary)",
               marginTop: 2,
@@ -150,7 +153,7 @@ export function Row({
 
 export function SpacingRuler({ name, value }: { name: string; value: string }) {
   return (
-    <Row label={name} cssVar={`--rezics-space-${name.replace(".", "_")}`}>
+    <Row label={name} cssVar={`p-${name} · gap-${name} · h-${name}`}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div
           style={{
@@ -162,7 +165,7 @@ export function SpacingRuler({ name, value }: { name: string; value: string }) {
         />
         <span
           style={{
-            fontFamily: "var(--rezics-font-mono)",
+            fontFamily: fontFamilies.mono,
             fontSize: 12,
             color: "var(--rezics-color-text-secondary)",
           }}
@@ -195,7 +198,7 @@ export function RadiusSample({
       <div
         style={{
           marginTop: 8,
-          fontFamily: "var(--rezics-font-sans)",
+          fontFamily: fontFamilies.sans,
           fontWeight: 500,
           fontSize: 13,
           color: "var(--rezics-color-text-primary)",
@@ -205,7 +208,7 @@ export function RadiusSample({
       </div>
       <div
         style={{
-          fontFamily: "var(--rezics-font-mono)",
+          fontFamily: fontFamilies.mono,
           fontSize: 11,
           color: "var(--rezics-color-text-secondary)",
         }}
@@ -228,7 +231,7 @@ export function ElevationSample({
       <div
         style={{
           height: 96,
-          borderRadius: "var(--rezics-radius-md)",
+          borderRadius: radius.md,
           background: "var(--rezics-color-surface-elevated)",
           boxShadow: `var(${cssVar})`,
           padding: 16,
@@ -239,7 +242,7 @@ export function ElevationSample({
       >
         <div
           style={{
-            fontFamily: "var(--rezics-font-sans)",
+            fontFamily: fontFamilies.sans,
             fontWeight: 500,
             fontSize: 13,
             color: "var(--rezics-color-text-primary)",
@@ -249,7 +252,7 @@ export function ElevationSample({
         </div>
         <div
           style={{
-            fontFamily: "var(--rezics-font-mono)",
+            fontFamily: fontFamilies.mono,
             fontSize: 11,
             color: "var(--rezics-color-text-secondary)",
           }}
@@ -283,7 +286,7 @@ export function TypeSample({
     >
       <div
         style={{
-          fontFamily: `var(--rezics-font-${family})`,
+          fontFamily: fontFamilies[family],
           fontSize: size,
           fontWeight: weight ?? 400,
           color: "var(--rezics-color-text-primary)",
@@ -295,7 +298,7 @@ export function TypeSample({
       <div
         style={{
           marginTop: 6,
-          fontFamily: "var(--rezics-font-mono)",
+          fontFamily: fontFamilies.mono,
           fontSize: 11,
           color: "var(--rezics-color-text-secondary)",
         }}
@@ -359,7 +362,7 @@ function Verdict({
     <div
       style={{
         border: "1px solid var(--rezics-color-border-whisper)",
-        borderRadius: "var(--rezics-radius-md)",
+        borderRadius: radius.md,
         background: "var(--rezics-color-surface-elevated)",
         overflow: "hidden",
         display: "flex",
@@ -373,7 +376,7 @@ function Verdict({
           gap: 8,
           padding: "10px 12px",
           borderBottom: "1px solid var(--rezics-color-border-whisper)",
-          fontFamily: "var(--rezics-font-sans)",
+          fontFamily: fontFamilies.sans,
           fontSize: 12,
           fontWeight: 500,
           letterSpacing: "0.04em",
@@ -386,7 +389,7 @@ function Verdict({
           style={{
             width: 8,
             height: 8,
-            borderRadius: "var(--rezics-radius-full)",
+            borderRadius: radius.full,
             background: accent,
           }}
         />
@@ -422,7 +425,7 @@ export function MotionSample({
   name,
   cssVar,
   duration,
-  easing = "var(--rezics-ease-out)",
+  easing: easingProp = easing.out,
 }: {
   name: string;
   cssVar: string;
@@ -437,7 +440,7 @@ export function MotionSample({
             width: 240,
             height: 32,
             background: "var(--rezics-color-surface-subtle)",
-            borderRadius: "var(--rezics-radius-pill)",
+            borderRadius: radius.pill,
             overflow: "hidden",
             position: "relative",
           }}
@@ -446,15 +449,15 @@ export function MotionSample({
             style={{
               width: 32,
               height: 32,
-              borderRadius: "var(--rezics-radius-pill)",
+              borderRadius: radius.pill,
               background: "var(--rezics-color-brand-fill)",
-              animation: `rezics-motion-demo ${duration} ${easing} infinite alternate`,
+              animation: `rezics-motion-demo ${duration} ${easingProp} infinite alternate`,
             }}
           />
         </div>
         <span
           style={{
-            fontFamily: "var(--rezics-font-mono)",
+            fontFamily: fontFamilies.mono,
             fontSize: 12,
             color: "var(--rezics-color-text-secondary)",
           }}

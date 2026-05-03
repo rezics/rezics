@@ -9,11 +9,13 @@ Foundation v1 typography. Source: `package/ui/src/config/tokens/typography.ts`. 
 
 ## Families
 
-- **Sans** (`--rezics-font-sans`) — Inter + Source Han Sans (CJK auto-routed by `:lang()`). Default UI, body, headings.
-- **Serif** (`--rezics-font-serif`) — Source Serif 4 + Source Han Serif. Reader / longform prose.
-- **Mono** (`--rezics-font-mono`) — CaskaydiaMono Nerd Font + Sarasa Mono. Code, IDs, technical metadata.
+Stacks live in `tokens/typography.ts` and are wired into MUI (`theme.typography.fontFamily`) and UnoCSS (`theme.fontFamily.{sans,serif,mono}`).
 
-CJK family is variable-routed: SC for `zh-Hans`/`zh-CN`, JP for `ja`, KR for `ko`, TC default.
+- **Sans** (`font-sans` / MUI default) — Inter + Source Han Sans (CJK auto-routed by `:lang()`). Default UI, body, headings.
+- **Serif** (`font-serif`) — Source Serif 4 + Source Han Serif. Reader / longform prose.
+- **Mono** (`font-mono`) — CaskaydiaMono Nerd Font + Sarasa Mono. Code, IDs, technical metadata.
+
+The CJK fallback inside each stack is the only piece that lives in CSS (`--rezics-font-sans-cjk`), so it can re-route per `:lang()` — SC for `zh-Hans`/`zh-CN`, JP for `ja`, KR for `ko`, TC default.
 
 ## Scale (sans)
 

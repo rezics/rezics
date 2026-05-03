@@ -20,7 +20,7 @@ export const ArrowButton = React.forwardRef<
       aria-disabled={disabled}
       className={clsx(
         "group inline-flex items-center justify-center",
-        "h-10 w-10 rounded-full p-0",
+        "h-16 w-16 rounded-full p-0",
         "select-none backdrop-blur-md",
         "transition-[transform,background-color,box-shadow] duration-200 ease-out",
 
@@ -48,7 +48,7 @@ export const ArrowButton = React.forwardRef<
       aria-label="arrow"
       {...props}
     >
-      <Icon className="pointer-events-none size-5" />
+      <Icon className="pointer-events-none size-6" />
       {children}
     </button>
   );

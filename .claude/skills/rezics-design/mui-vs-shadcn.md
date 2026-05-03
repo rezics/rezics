@@ -4,7 +4,7 @@
 
 1. **MUI first.** It's the foundation. Tokens map to `theme.palette` / `theme.spacing` / `theme.shape` / `theme.typography`. MUI components inherit all of it for free.
 2. **shadcn supplements** when MUI is missing the primitive or its API is awkward for the use case.
-3. **Custom only** when neither MUI nor shadcn fits — and the component must consume `var(--rzc-*)` CSS variables, not hex literals.
+3. **Custom only** when neither MUI nor shadcn fits — and the component must consume tokens (UnoCSS utilities, MUI theme props, `var(--rezics-color-*)` for colors, or token imports from `@rezics/ui/config/tokens/*`), not hex literals.
 
 ---
 

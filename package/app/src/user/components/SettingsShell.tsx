@@ -6,8 +6,8 @@ import { SettingsTabBar } from "./SettingsTabBar";
 
 export const SettingsShell: FC = () => {
   return (
-    <Box className="w-full max-w-5xl mx-auto pb-8">
-      <Typography variant="h5" className="px-4 pt-6 pb-4 font-semibold">
+    <Box className="w-full max-w-6xl mx-auto pb-12">
+      <Typography variant="h5" className="px-4 pt-8 pb-4 font-semibold">
         Settings
       </Typography>
 
@@ -17,7 +17,7 @@ export const SettingsShell: FC = () => {
       </div>
 
       {/* Desktop: sidebar + content */}
-      <div className="flex flex-col md:flex-row md:gap-8 px-4 pt-4">
+      <div className="flex flex-col md:flex-row md:gap-12 px-4 pt-4">
         <aside className="hidden md:block w-[220px] shrink-0">
           <SettingsSidebar />
         </aside>

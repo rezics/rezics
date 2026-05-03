@@ -28,10 +28,10 @@ export const FeedbackAdminPage: React.FC = () => {
   useQuery(feedbackListQuery());
 
   return (
-    <Box className="max-w-6xl mx-auto p-4">
+    <Box className="max-w-8xl mx-auto p-4">
       <Stack
         direction={{ xs: "column", sm: "row" }}
-        className="items-center justify-between mb-6 gap-4"
+        className="items-center justify-between mb-8 gap-4"
       >
         <Typography variant="h5" className="font-bold">
           反馈管理

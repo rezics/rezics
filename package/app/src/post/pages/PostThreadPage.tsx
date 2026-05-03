@@ -13,7 +13,7 @@ export const PostThreadPage: React.FC = () => {
   const { data: root } = useQuery(postQueries.detail(rootPostUnitId));
 
   return (
-    <Box className="w-full max-w-3xl mx-auto mt-6 px-4">
+    <Box className="w-full max-w-3xl mx-auto mt-8 px-4">
       {root && <PostCard post={root} />}
       <PostTreeSection rootPostUnitId={rootPostUnitId} />
     </Box>

@@ -10,10 +10,10 @@ Four-step duration scale, three-easing-curve set. Source: `package/ui/src/config
 ## Duration
 
 <Unstyled>
-  <MotionSample name="fast" cssVar="--rezics-motion-fast" duration="120ms" />
-  <MotionSample name="base" cssVar="--rezics-motion-base" duration="200ms" />
-  <MotionSample name="slow" cssVar="--rezics-motion-slow" duration="350ms" />
-  <MotionSample name="page" cssVar="--rezics-motion-page" duration="500ms" easing="var(--rezics-ease-in-out)" />
+  <MotionSample name="fast" cssVar="duration-fast · 120ms" duration="120ms" />
+  <MotionSample name="base" cssVar="duration-base · 200ms" duration="200ms" />
+  <MotionSample name="slow" cssVar="duration-slow · 350ms" duration="350ms" />
+  <MotionSample name="page" cssVar="duration-page · 500ms" duration="500ms" easing="cubic-bezier(0.4, 0, 0.2, 1)" />
 </Unstyled>
 
 | Token | Value | Use |
@@ -33,20 +33,31 @@ Four-step duration scale, three-easing-curve set. Source: `package/ui/src/config
 
 ## Press scale
 
-For tactile press affordance on buttons / interactive cards:
+For tactile press affordance on buttons / interactive cards (`pressScale` from `tokens/motion.ts`):
 
-```css
-.button { transform: var(--rezics-press-resting); transition: transform var(--rezics-motion-fast) var(--rezics-ease-spring); }
-.button:active { transform: var(--rezics-press-active); /* scale(0.98) */ }
+```tsx
+import { pressScale, duration, easing } from "@rezics/ui/config/tokens/motion";
+
+<Box sx={{
+  transform: pressScale.resting,
+  transition: `transform ${duration.fast} ${easing.spring}`,
+  "&:active": { transform: pressScale.active },  // scale(0.98)
+}}>
 ```
 
 ## Usage
 
 ```tsx
-<Box sx={{
-  transition: "background var(--rezics-motion-fast) var(--rezics-ease-out)",
-  "&:hover": { background: "var(--rezics-color-surface-subtle)" },
-}}>
+// MUI sx — use the MUI transitions theme (already wired to the same scale)
+<Box sx={(theme) => ({
+  transition: theme.transitions.create("background", {
+    duration: theme.transitions.duration.shortest,  // === duration.fast (120ms)
+    easing: theme.transitions.easing.easeOut,
+  }),
+})}>
+
+// UnoCSS — utilities resolve through theme.transitionDuration / Function
+<div className="transition-colors duration-fast ease-out hover:bg-surface-subtle">
 ```
 
 Respect reduced-motion automatically — every token-based transition is wiped to instant by the global `@media (prefers-reduced-motion: reduce)` rule. Don't hand-roll `transition-duration` outside the scale; you'll bypass the wipe.

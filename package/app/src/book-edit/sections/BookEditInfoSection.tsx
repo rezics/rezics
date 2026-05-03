@@ -212,19 +212,19 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
   if (isLoading)
     return (
-      <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">
+      <div className="mt-16 mx-auto max-w-3xl px-4 text-muted-foreground">
         {t("common.loading")}
       </div>
     );
   if (error)
     return (
-      <div className="mt-10 mx-auto max-w-3xl px-4">
+      <div className="mt-16 mx-auto max-w-3xl px-4">
         <QueryErrorDisplay error={error} />
       </div>
     );
   if (!data && !newBook)
     return (
-      <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">
+      <div className="mt-16 mx-auto max-w-3xl px-4 text-muted-foreground">
         {t("common.no_data")}
       </div>
     );
@@ -232,9 +232,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const resolvedPageTitle = pageTitle ?? t("page.book_edit.info.title");
 
   return (
-    <div className="mt-10 mx-auto max-w-3xl px-4 pb-10">
+    <div className="mt-16 mx-auto max-w-3xl px-4 pb-16">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-12">
         <h1 className="text-2xl font-bold">{resolvedPageTitle}</h1>
         <div className="flex items-center gap-2">
           {bookId && (
@@ -251,13 +251,13 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         </div>
       </div>
 
-      <div className="space-y-10">
+      <div className="space-y-16">
         {/* Metadata */}
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
             {t("book.edit_sections.metadata")}
           </h3>
-          <Divider className="mb-5" />
+          <Divider className="mb-6" />
           <BookMetadataEditor
             value={metadata}
             onChange={(value) => {
@@ -274,7 +274,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
             {t("book.description")}
           </h3>
-          <Divider className="mb-5" />
+          <Divider className="mb-6" />
           <RezicsMarkdownEditor
             value={currentDescription}
             onChange={(value) => {
@@ -302,7 +302,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               }}
             />
           </button>
-          <Divider className="mt-3 mb-5" />
+          <Divider className="mt-3 mb-6" />
           <Collapse in={extraOpen} timeout="auto" unmountOnExit>
             <BookExtraEditor
               value={metadata.extra}

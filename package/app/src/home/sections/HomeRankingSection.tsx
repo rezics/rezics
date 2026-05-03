@@ -82,7 +82,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
               <ListItemText
                 primary={
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 w-6 text-right">
+                    <span className="text-xs text-gray-500 w-8 text-right">
                       {idx + 1}
                     </span>
                     <span className="truncate" title={title}>

@@ -50,7 +50,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
   };
 
   return (
-    <Box className="flex flex-col gap-6">
+    <Box className="flex flex-col gap-8">
       {canEdit && (
         <Box alignSelf="flex-end">
           <MUILink to="/review/$reviewId/edit" params={{ reviewId }}>

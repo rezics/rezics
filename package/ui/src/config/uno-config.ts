@@ -47,21 +47,12 @@ export function createUnoConfig() {
       },
       // rezics design tokens — resolve to CSS variables defined in shared/styles/layers.css
       // so utilities auto-switch with [data-theme="dark"]. See foundation v1 brief.
-      spacing: {
-        "0": "0",
-        px: "1px",
-        "0.5": "var(--rezics-space-0_5)",
-        "1": "var(--rezics-space-1)",
-        "2": "var(--rezics-space-2)",
-        "3": "var(--rezics-space-3)",
-        "4": "var(--rezics-space-4)",
-        "5": "var(--rezics-space-5)",
-        "6": "var(--rezics-space-6)",
-        "8": "var(--rezics-space-8)",
-        "10": "var(--rezics-space-10)",
-        "12": "var(--rezics-space-12)",
-        "16": "var(--rezics-space-16)",
-      },
+      //
+      // NOTE: spacing intentionally omitted. preset-wind4 follows Tailwind v4's
+      // single-`--spacing` model (every step = N × 4px via calc). Overriding
+      // `theme.spacing` here breaks shadcn (which assumes native step values)
+      // and conflicts with preset-wind4's preflight emission. Mental model:
+      // step number × 4 = pixels (so 8 → 32px, 12 → 48px, 24 → 96px).
       borderRadius: {
         none: "0",
         xs: "var(--rezics-radius-xs)",

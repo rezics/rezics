@@ -50,7 +50,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
 
   if (zoneLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+      <div className="max-w-4xl mx-auto px-4 py-24 text-center">
         <Typography color="text.secondary">Loading...</Typography>
       </div>
     );
@@ -58,7 +58,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
 
   if (!zone) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+      <div className="max-w-4xl mx-auto px-4 py-24 text-center">
         <Typography variant="h5">Zone not found</Typography>
       </div>
     );
@@ -70,7 +70,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <Typography variant="h5" className="mb-4">
         Search in {zone.name}
       </Typography>
@@ -82,7 +82,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
         onSubmit={handleSubmit}
       />
       {hasSearched && (
-        <div className="mt-6">
+        <div className="mt-8">
           <SearchResultList result={data} isLoading={searchLoading} />
         </div>
       )}

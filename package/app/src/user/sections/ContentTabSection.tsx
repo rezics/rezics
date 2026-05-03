@@ -100,7 +100,7 @@ export const ContentTabSection: FC = () => {
         <Typography
           variant="body2"
           color="text.secondary"
-          className="py-8 text-center"
+          className="py-12 text-center"
         >
           {t("common.loading")}
         </Typography>

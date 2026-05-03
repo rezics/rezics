@@ -10,7 +10,7 @@ function GlobalProgressBarPreview({ active }: { active: boolean }) {
   return (
     <div className="space-y-4">
       <SimpleProgress progress={progress} />
-      <div className="space-y-2 pt-8">
+      <div className="space-y-2 pt-12">
         <p className="text-sm text-neutral-700">
           The progress bar simulates a navigation tick. Toggle the button to
           start a fresh fake progress run.

@@ -169,7 +169,7 @@ export const SettingsPreferencesSection: FC = () => {
 
   if (settingsLoading) {
     return (
-      <div className="flex justify-center py-12">
+      <div className="flex justify-center py-24">
         <CircularProgress />
       </div>
     );

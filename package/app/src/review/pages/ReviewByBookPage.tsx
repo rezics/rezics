@@ -11,7 +11,7 @@ export function ReviewByBookPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="w-11/12 max-w-4xl mx-auto mt-10">
+    <div className="w-11/12 max-w-4xl mx-auto mt-16">
       <div className="flex items-center justify-between">
         <AccentBarWithText text={`${t("pages.review_page")}`} />
         <Button

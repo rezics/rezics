@@ -173,41 +173,10 @@
   --rezics-color-border-focus: #f4606c;
   --rezics-color-border-error: #cf2d56;
 
-  /* Spacing (8px base) */
-  --rezics-space-0: 0;
-  --rezics-space-px: 1px;
-  --rezics-space-0_5: 2px;
-  --rezics-space-1: 4px;
-  --rezics-space-2: 8px;
-  --rezics-space-3: 12px;
-  --rezics-space-4: 16px;
-  --rezics-space-5: 24px;
-  --rezics-space-6: 32px;
-  --rezics-space-8: 48px;
-  --rezics-space-10: 64px;
-  --rezics-space-12: 96px;
-  --rezics-space-16: 128px;
-
-  /* Radius */
-  --rezics-radius-xs: 4px;
-  --rezics-radius-sm: 6px;
-  --rezics-radius-md: 8px;
-  --rezics-radius-lg: 12px;
-  --rezics-radius-xl: 16px;
-  --rezics-radius-2xl: 24px;
-  --rezics-radius-pill: 9999px;
-  --rezics-radius-full: 50%;
-
-  /* Motion — duration */
-  --rezics-motion-fast: 120ms;
-  --rezics-motion-base: 200ms;
-  --rezics-motion-slow: 350ms;
-  --rezics-motion-page: 500ms;
-
-  /* Motion — easing */
-  --rezics-ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --rezics-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --rezics-ease-spring: cubic-bezier(0.4, 1.4, 0.5, 1);
+  /* Spacing / radius / motion / font tokens are sourced from
+   * `package/ui/src/config/tokens/*.ts` and consumed natively by MUI
+   * (`createTheme`) and UnoCSS (`theme.spacing` etc). They are NOT exposed
+   * as `--rezics-*` CSS vars because they don't switch with theme. */
 
   /* Shadows (light) — borderless default; modal-tier only */
   --rezics-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -218,17 +187,10 @@
     0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04),
     0 16px 32px rgba(0, 0, 0, 0.06);
 
-  /* Font families — see typography.ts; CJK var defaults to TC, swapped via :lang() */
+  /* CJK font fallback — defaults to TC, swapped per `:lang()` below.
+   * Referenced inside font stacks defined in `tokens/typography.ts`. */
   --rezics-font-sans-cjk: "Source Han Sans TC", "Noto Sans TC";
   --rezics-font-serif-cjk: "Source Han Serif TC", "Noto Serif TC";
-  --rezics-font-sans:
-    "Inter", "rezics-sans", var(--rezics-font-sans-cjk), system-ui, -apple-system,
-    "Segoe UI", sans-serif;
-  --rezics-font-serif:
-    "Source Serif 4", "rezics-serif", var(--rezics-font-serif-cjk), Georgia, serif;
-  --rezics-font-mono:
-    "CaskaydiaMono Nerd Font", "Cascadia Code", "rezics-mono", "Sarasa Mono TC",
-    ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 /* Per-language CJK routing */

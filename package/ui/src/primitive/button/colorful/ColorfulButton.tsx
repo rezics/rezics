@@ -35,7 +35,7 @@ export function ColorfulButton({
             <CircularProgress size={16} className="text-white" />
           ) : null
         }
-        className={`${COLOR_CLASSES[color]} rounded-xl px-8 py-3 text-base font-semibold normal-case hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none`}
+        className={`${COLOR_CLASSES[color]} rounded-xl px-12 py-3 text-base font-semibold normal-case hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none`}
       >
         {label}
       </Button>

@@ -73,7 +73,7 @@ export const TagDetailCard: React.FC<{
           <MUILink
             to={"/book"}
             search={{ tags: label }}
-            className="text-sm text-blue-600 hover:underline !ml-8"
+            className="text-sm text-blue-600 hover:underline !ml-12"
           >
             搜索标签 →
           </MUILink>

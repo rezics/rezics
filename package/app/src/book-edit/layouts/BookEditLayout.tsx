@@ -20,7 +20,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
       </div>
 
       <main
-        className="flex-grow pt-16 transition-all duration-300"
+        className="flex-grow pt-32 transition-all duration-300"
         style={{ backgroundColor: "var(--mui-palette-background-default)" }}
       >
         {children}

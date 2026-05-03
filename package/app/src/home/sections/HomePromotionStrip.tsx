@@ -21,7 +21,7 @@ export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
 
   return (
     <div className="w-full bg-purple-50 border border-purple-100 rounded px-4 py-2 overflow-x-auto">
-      <div className="flex gap-6 whitespace-nowrap text-sm">
+      <div className="flex gap-8 whitespace-nowrap text-sm">
         {resolvedItems.map((item, i) => (
           <a
             // biome-ignore lint/suspicious/noArrayIndexKey: static list

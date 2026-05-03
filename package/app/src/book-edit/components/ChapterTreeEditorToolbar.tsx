@@ -55,7 +55,7 @@ export const ChapterTreeEditorToolbar: React.FC<
             onSearchChange(e.target.value)
           }
           placeholder="Search chapters..."
-          className="w-full pl-8 h-8 border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors"
+          className="w-full pl-12 h-12 border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors"
         />
       </div>
 

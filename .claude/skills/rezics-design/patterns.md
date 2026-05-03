@@ -22,7 +22,7 @@ Code-level patterns. The "why" is in voice.md; the "what to use" is in tokens.md
 </Box>
 ```
 
-Sections separate via `space-8` (48px) vertical padding. No card wrap, no border, no shadow.
+Sections separate via `p-12` (48px UnoCSS) or `sx={{ py: 6 }}` (48px MUI) vertical padding. No card wrap, no border, no shadow.
 
 ### ❌ DON'T — bordered card chrome around sections
 
@@ -57,7 +57,7 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 ### ✅ DO — list-row card with whisper border
 
 ```tsx
-<Stack divider={<Divider sx={{ borderColor: 'var(--rzc-color-border-whisper)' }} />}>
+<Stack divider={<Divider sx={{ borderColor: 'var(--rezics-color-border-whisper)' }} />}>
   {posts.map((p) => (
     <Box key={p.id} sx={{ py: 3 }}>
       {/* row content */}
@@ -235,7 +235,7 @@ Use the icon libraries; they integrate with theme color and size.
 <div className="bg-surface text-text-primary p-4 rounded-md">...</div>
 
 {/* CSS vars */}
-<div style={{ background: 'var(--rzc-color-surface-base)' }}>...</div>
+<div style={{ background: 'var(--rezics-color-surface-base)' }}>...</div>
 ```
 
 ### ❌ DON'T — hex literals
@@ -258,7 +258,7 @@ Hex literals lock you out of dark mode and break the token contract.
 
 ```tsx
 {/* RIGHT — auto-resolves to #C4433A light / #fa7882 dark */}
-<Typography sx={{ color: 'var(--rzc-color-text-brand)' }}>Brand label</Typography>
+<Typography sx={{ color: 'var(--rezics-color-text-brand)' }}>Brand label</Typography>
 <span className="text-text-brand">Brand label</span>
 ```
 
@@ -279,7 +279,7 @@ The theme defines all variants with the correct `clamp()` size, weight, and line
 ### ✅ DO — serif for book reader
 
 ```tsx
-<Box sx={{ fontFamily: 'var(--rzc-font-serif)', fontSize: 'var(--rzc-text-reader-or-clamp)', lineHeight: 1.6 }}>
+<Box className="font-serif text-reader leading-reader">
   {chapterContent}
 </Box>
 ```
@@ -309,7 +309,7 @@ Theme defaults headings to 500 medium. Trust it.
 ### ✅ DO — token-aligned
 
 ```tsx
-{/* MUI: theme.spacing(1) = 8px = space-2 */}
+{/* MUI: theme.spacing(N) = N × 8px (sx p:2 = 16px). UnoCSS: p-N = N × 4px (p-2 = 8px). Different numbers, same grid. */}
 <Box sx={{ p: 2, gap: 4 }}>...</Box>
 
 {/* UnoCSS: matching scale */}
@@ -386,7 +386,7 @@ const reviews: Review[] = [
 ### Admin (operations, dense)
 
 ```tsx
-{/* table rows ~40px tall, space-3/4 padding */}
+{/* table rows ~40px tall, p-3/p-4 padding (12–16px) */}
 <TableRow sx={{ height: 40 }}>
   <TableCell sx={{ py: 1.5, px: 2 }}>{user.name}</TableCell>
   <TableCell sx={{ py: 1.5, px: 2 }}>{user.email}</TableCell>
