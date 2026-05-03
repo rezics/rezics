@@ -112,7 +112,7 @@ export const BookBasicInfoPage: React.FC = () => {
 
   return (
     <Stack spacing={4}>
-      <BookDescription description={description} book={bookInfo} />
+      <BookDescription description={description} />
 
       <Box className="lg:hidden">
         <MetadataPanel bookInfo={bookInfo} variant="inline" />

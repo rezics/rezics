@@ -109,7 +109,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           <Box className="flex items-center gap-2">
             <Typography
               variant="caption"
-              color="primary"
+              color="text.secondary"
               noWrap
               sx={{ lineHeight: 1 }}
             >

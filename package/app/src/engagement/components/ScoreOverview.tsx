@@ -35,7 +35,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
   const maxCount = Math.max(...Object.values(distribution).map(Number), 1);
   const averageVar =
     average >= 5
-      ? "var(--rezics-color-sentiment-positive-text)"
+      ? "var(--rezics-color-brand-fill)"
       : "var(--rezics-color-sentiment-negative-text)";
 
   return (

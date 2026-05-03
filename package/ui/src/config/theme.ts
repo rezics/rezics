@@ -16,6 +16,12 @@ import { duration, easing } from "./tokens/motion";
 import { SPACING_BASE_PX } from "./tokens/spacing";
 import { RADIUS_BASE_PX } from "./tokens/radius";
 
+declare module "@mui/material/styles" {
+  interface TypeText {
+    brand: string;
+  }
+}
+
 const buildPalette = (
   mode: "light" | "dark",
   c: ColorTokens,
@@ -66,6 +72,7 @@ const buildPalette = (
     primary: c.text.primary,
     secondary: c.text.secondary,
     disabled: c.text.disabled,
+    brand: c.text.brand,
   },
   divider: c.border.whisper,
 });
@@ -195,6 +202,22 @@ const getDesignTokens = (
       MuiLink: {
         defaultProps: {
           underline: "none",
+        },
+        styleOverrides: {
+          root: ({ ownerState }) => ({
+            ...(ownerState.color === "primary" && {
+              color: "var(--rezics-color-text-brand)",
+            }),
+          }),
+        },
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: ({ ownerState }) => ({
+            ...(ownerState.color === "primary" && {
+              color: "var(--rezics-color-text-brand)",
+            }),
+          }),
         },
       },
       MuiCssBaseline: {

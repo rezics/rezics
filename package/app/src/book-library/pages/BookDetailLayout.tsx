@@ -50,6 +50,7 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
     const average = agg.totalScore / agg.totalCount;
     return Number(average.toFixed(1));
   }, [scoreAggregates]);
+  const ratingCount = scoreAggregates?.[0]?.totalCount ?? 0;
 
   const setBookDetail = useSetAtom(setBookDetailAtomFamily(bookId));
   useEffect(() => {
@@ -75,7 +76,11 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <BookDetailLayoutContext.Provider value={layoutContextValue}>
-      <BookHeroSection bookInfo={bookInfo} rating={ratingValue || 0} />
+      <BookHeroSection
+        bookInfo={bookInfo}
+        rating={ratingValue || 0}
+        ratingCount={ratingCount}
+      />
       <BookDetailShell bookInfo={bookInfo} sidebar={sidebar}>
         {children}
       </BookDetailShell>
