@@ -72,7 +72,9 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
     >
       {currentValue ? (
         <>
-          <StarRounded sx={{ color: "#5da9ff", fontSize: 30 }} />
+          <StarRounded
+            sx={{ color: "var(--rezics-color-brand-fill)", fontSize: 30 }}
+          />
           <span className="inline-flex items-baseline gap-1 text-white">
             <span className="text-xl font-semibold tabular-nums leading-none">
               {currentValue}
@@ -82,8 +84,10 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
         </>
       ) : (
         <>
-          <StarBorder sx={{ color: "#5da9ff", fontSize: 30 }} />
-          <span className="text-base font-medium text-[#5da9ff]">
+          <StarBorder
+            sx={{ color: "var(--rezics-color-brand-fill)", fontSize: 30 }}
+          />
+          <span className="text-base font-medium text-brand">
             {t("book.hero.your_score.rate", "Rate")}
           </span>
         </>

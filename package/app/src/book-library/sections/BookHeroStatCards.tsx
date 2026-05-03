@@ -28,7 +28,8 @@ export const DEFAULT_STAT_CARD_KEYS: BookHeroStatKey[] = [
   "tags",
 ];
 
-const TINT_CYCLE = ["bg-white/10", "color-mix-brand-15", "bg-white/5"] as const;
+const TINT_CYCLE = ["bg-white/5"] as const;
+// const TINT_CYCLE = ["bg-white/10", "color-mix-brand-15", "bg-white/5"] as const;
 
 const BRAND_TINT_STYLE: React.CSSProperties = {
   backgroundColor:
@@ -99,7 +100,8 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
     <div className="flex flex-col gap-3 h-full">
       {visible.map((stat, i) => {
         const tint = TINT_CYCLE[i % TINT_CYCLE.length];
-        const isBrand = tint === "color-mix-brand-15";
+        // const isBrand = tint === "color-mix-brand-15";
+        const isBrand = false;
         return (
           <Link
             key={stat.key}
