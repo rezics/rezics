@@ -1,14 +1,6 @@
 export * from "./brand";
 export * from "./composite";
-// Theme system
-export {
-  applyDynamicThemeToDOM,
-  type DynamicColorScheme,
-  dynamicColorsToPalette,
-  extractColorFromImage,
-  generateDynamicColors,
-  PRESET_COLORS,
-} from "./config/dynamicTheme";
-export { getDynamicTheme, getTheme } from "./config/theme";
 export * from "./link";
+export { RatingInput, type RatingInputProps } from "./primitive/control";
+export { Spinner, type SpinnerProps } from "./primitive/feedback";
 export * from "./translation";

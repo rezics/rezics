@@ -1,5 +1,5 @@
-import GoogleIcon from "@mui/icons-material/Google";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Globe } from "lucide-react";
 
 import { AuthProviderButton } from "./AuthProviderButton";
 
@@ -8,7 +8,7 @@ const meta = {
   component: AuthProviderButton,
   args: {
     label: "Continue with Google",
-    icon: <GoogleIcon fontSize="small" />,
+    icon: <Globe className="h-4 w-4" />,
     onClick: () => undefined,
   },
 } satisfies Meta<typeof AuthProviderButton>;

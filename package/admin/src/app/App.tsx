@@ -1,17 +1,8 @@
 import "github-markdown-css/github-markdown-light.css";
-import { ThemeProvider } from "@mui/material";
-import CssBaseline from "@mui/material/CssBaseline";
-import { StyledEngineProvider } from "@mui/material/styles";
 import { AuthProvider } from "@rezics/api/providers";
-import {
-  applyDynamicThemeToDOM,
-  ExternalLinkModal,
-  generateDynamicColors,
-  getDynamicTheme,
-  getTheme,
-} from "@rezics/ui";
+import { ExternalLinkModal } from "@rezics/ui";
 import { RouterProvider } from "@tanstack/react-router";
-import { type ReactNode, StrictMode, useEffect, useMemo } from "react";
+import { type ReactNode, StrictMode, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
 import { router } from "@/router";
@@ -26,47 +17,26 @@ import "@rezics/ui/shared/styles/layers.css";
 
 function AppProviders({ children }: { children: ReactNode }) {
   const themeMode = useAppStore((s) => s.theme);
-  const customColor = useAppStore((s) => s.customColor);
-  const useDynamicTheme = useAppStore((s) => s.useDynamicTheme);
 
   useAppInit();
-
-  const theme = useMemo(() => {
-    if (useDynamicTheme && customColor) {
-      return getDynamicTheme(themeMode, customColor);
-    }
-    return getTheme(themeMode, customColor);
-  }, [themeMode, customColor, useDynamicTheme]);
 
   useEffect(() => {
     const html = document.documentElement;
     html.classList.toggle("dark", themeMode === "dark");
-
-    if (useDynamicTheme && customColor) {
-      const dynamicColors = generateDynamicColors(
-        customColor,
-        themeMode === "dark",
-      );
-      applyDynamicThemeToDOM(dynamicColors, themeMode === "dark");
-    }
-  }, [themeMode, customColor, useDynamicTheme]);
+    html.dataset.theme = themeMode;
+  }, [themeMode]);
 
   return (
     <StrictMode>
       <ErrorBoundary fallback={<div>Something went wrong</div>}>
         <HelmetProvider>
-          <StyledEngineProvider injectFirst>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <PersistentSettingsLoader />
-              <ReactQueryProvider>
-                <AuthProvider />
-                <WindowAlert />
-                <ExternalLinkModal />
-                {children}
-              </ReactQueryProvider>
-            </ThemeProvider>
-          </StyledEngineProvider>
+          <PersistentSettingsLoader />
+          <ReactQueryProvider>
+            <AuthProvider />
+            <WindowAlert />
+            <ExternalLinkModal />
+            {children}
+          </ReactQueryProvider>
         </HelmetProvider>
       </ErrorBoundary>
     </StrictMode>

@@ -1,6 +1,3 @@
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { StyledEngineProvider } from "@mui/material/styles";
-import type { Theme } from "@mui/material/styles";
 import type { Decorator } from "@storybook/react-vite";
 import { useEffect } from "react";
 import { GLOBALS_UPDATED } from "storybook/internal/core-events";
@@ -94,14 +91,12 @@ function resolveCanvasStyle(canvas: CanvasOption): React.CSSProperties | null {
 }
 
 export function withRezicsTheme(
-  getTheme: (mode: ThemeMode) => Theme,
   options: WithRezicsThemeOptions = {},
 ): Decorator {
   const canvasStyle = resolveCanvasStyle(options.canvas ?? "padded");
 
   return (Story, context) => {
     const mode = (context.globals.themeMode ?? "light") as ThemeMode;
-    const theme = getTheme(mode);
 
     useEffect(() => {
       const root = document.documentElement;
@@ -109,19 +104,12 @@ export function withRezicsTheme(
       root.classList.toggle("dark", mode === "dark");
     }, [mode]);
 
-    return (
-      <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {canvasStyle ? (
-            <div style={canvasStyle}>
-              <Story />
-            </div>
-          ) : (
-            <Story />
-          )}
-        </ThemeProvider>
-      </StyledEngineProvider>
+    return canvasStyle ? (
+      <div style={canvasStyle}>
+        <Story />
+      </div>
+    ) : (
+      <Story />
     );
   };
 }

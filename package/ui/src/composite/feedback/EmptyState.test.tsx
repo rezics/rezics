@@ -1,40 +1,61 @@
 import { describe, expect, test } from "bun:test";
-import { EmptyState } from "./EmptyState";
+import type { ReactElement } from "react";
 
-function renderProps(props: Parameters<typeof EmptyState>[0]) {
-  const element = EmptyState(props);
-  return (element as any).props;
+import { EmptyState, type EmptyStateProps } from "./EmptyState";
+
+type AnyNode =
+  | ReactElement<{ children?: unknown; className?: string }>
+  | null
+  | undefined
+  | false;
+
+function renderProps(props: EmptyStateProps) {
+  const element = EmptyState(props) as ReactElement<{
+    children: AnyNode | AnyNode[];
+    role?: string;
+    "aria-live"?: string;
+  }>;
+  return element.props;
+}
+
+function nonNullChildren(children: AnyNode | AnyNode[]): ReactElement[] {
+  const list = Array.isArray(children) ? children : [children];
+  return list.filter(
+    (child) => Boolean(child) && typeof child === "object",
+  ) as ReactElement[];
 }
 
 describe("EmptyState", () => {
-  test("renders only the title when no optional slots are provided", () => {
+  test("renders title only when no optional slots are provided", () => {
     const props = renderProps({ title: "Nothing here yet" });
-    const children = (props.children as Array<any>).filter(Boolean);
+    const slots = nonNullChildren(props.children);
 
-    expect(children).toHaveLength(1);
-    const title = children[0];
-    expect(title.props.variant).toBe("subtitle1");
-    expect(title.props.children).toBe("Nothing here yet");
+    expect(slots).toHaveLength(1);
+    expect((slots[0]?.props as { children?: unknown }).children).toBe(
+      "Nothing here yet",
+    );
     expect(props.role).toBe("status");
     expect(props["aria-live"]).toBe("polite");
   });
 
   test("renders icon, description, and action when provided", () => {
-    const icon = { type: "svg" } as any;
-    const action = { type: "button" } as any;
+    const icon = { type: "svg" } as unknown as ReactElement;
+    const action = { type: "button" } as unknown as ReactElement;
+
     const props = renderProps({
       title: "Nothing here yet",
       description: "Try adjusting your filters",
       icon,
       action,
     });
-    const children = (props.children as Array<any>).filter(Boolean);
+    const slots = nonNullChildren(props.children);
 
-    expect(children).toHaveLength(4);
-    const [iconSlot, title, description, actionSlot] = children;
+    expect(slots).toHaveLength(4);
+    const [iconSlot, title, description, actionSlot] = slots as Array<
+      ReactElement<{ children: unknown }>
+    >;
     expect(iconSlot.props.children).toBe(icon);
     expect(title.props.children).toBe("Nothing here yet");
-    expect(description.props.variant).toBe("body2");
     expect(description.props.children).toBe("Try adjusting your filters");
     expect(actionSlot.props.children).toBe(action);
   });
@@ -44,10 +65,19 @@ describe("EmptyState", () => {
       title: "Empty",
       description: "Only description",
     });
-    const children = (props.children as Array<any>).filter(Boolean);
+    const slots = nonNullChildren(props.children);
 
-    expect(children).toHaveLength(2);
-    expect(children[0].props.children).toBe("Empty");
-    expect(children[1].props.children).toBe("Only description");
+    expect(slots).toHaveLength(2);
+    expect((slots[0]?.props as { children?: unknown }).children).toBe("Empty");
+    expect((slots[1]?.props as { children?: unknown }).children).toBe(
+      "Only description",
+    );
+  });
+
+  test("does not import @mui/material (smoke check)", async () => {
+    const source = await Bun.file(
+      new URL("./EmptyState.tsx", import.meta.url),
+    ).text();
+    expect(source.includes("@mui/")).toBe(false);
   });
 });

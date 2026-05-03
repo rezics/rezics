@@ -1,6 +1,4 @@
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import Link from "@mui/material/Link";
-import type { SxProps, Theme } from "@mui/material/styles";
+import { Ellipsis } from "lucide-react";
 import type React from "react";
 import {
   type KeyboardEvent,
@@ -11,7 +9,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/shared/lib/utils";
+
+import { cn } from "../../../shared/lib/utils";
 
 export type CollapsibleProps = {
   children: React.ReactNode;
@@ -22,7 +21,6 @@ export type CollapsibleProps = {
   expanded?: boolean;
   onExpandedChange?: (next: boolean) => void;
   className?: string;
-  sx?: SxProps<Theme>;
 };
 
 const FADE_MASK =
@@ -40,7 +38,6 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   expanded: controlledExpanded,
   onExpandedChange,
   className,
-  sx,
 }) => {
   const isControlled = controlledExpanded !== undefined;
   const [internalExpanded, setInternalExpanded] = useState(false);
@@ -111,37 +108,26 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
         {showInlineCollapse && (
           <>
             {" "}
-            <Link
-              component="span"
+            <span
               role="button"
               tabIndex={0}
               onClick={handleToggle}
               onKeyDown={handleKeyDown}
               aria-expanded={isExpanded}
               aria-controls={contentId}
-              underline="hover"
-              sx={[
-                {
-                  verticalAlign: "baseline",
-                  font: "inherit",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  color: "primary.main",
-                },
-                ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-              ]}
+              className={cn(
+                "inline cursor-pointer align-baseline font-medium",
+                "text-brand hover:underline",
+              )}
+              style={{ font: "inherit", fontWeight: 500 }}
             >
               {showLessLabel}
-            </Link>
+            </span>
           </>
         )}
       </div>
 
       {showOverlayExpand && (
-        // Wrapper establishes the hover group; its top edge marks where the fade begins.
-        // The click target fills this entire area.
-        // The icon is pinned to the wrapper's bottom edge (= content's last line) via
-        // `bottom-0` + `h-[1lh]`, completely independent of the wrapper's height.
         <div className={cn("group", "absolute inset-x-0 bottom-0 top-[40%]")}>
           {/* biome-ignore lint/a11y/useSemanticElements: button would collapse to icon size or inflate to fill area */}
           <div
@@ -163,7 +149,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               "text-text-secondary group-hover:text-brand group-focus-within:text-brand transition-colors duration-150 motion-reduce:transition-none",
             )}
           >
-            <MoreHorizIcon fontSize="medium" />
+            <Ellipsis className="h-5 w-5" />
           </span>
         </div>
       )}

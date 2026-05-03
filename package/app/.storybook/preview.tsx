@@ -7,7 +7,6 @@ import {
   themeGlobalTypes,
   withRezicsTheme,
 } from "@rezics/storybook-config/preview";
-import { getTheme } from "@rezics/ui";
 import type { Preview } from "@storybook/react-vite";
 import { QueryClientProvider } from "@tanstack/react-query";
 
@@ -54,7 +53,7 @@ const preview: Preview = {
       },
       { defaultLanguage: DEFAULT_LANGUAGE, fallbackLng: "en" },
     ),
-    withRezicsTheme(getTheme, { canvas: { padding: 48 } }),
+    withRezicsTheme({ canvas: { padding: 48 } }),
   ],
   parameters: { ...basePreviewParameters, layout: "fullscreen" },
 };

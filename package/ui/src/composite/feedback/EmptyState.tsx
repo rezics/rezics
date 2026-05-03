@@ -1,41 +1,45 @@
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import type React from "react";
+import type { FC, ReactNode } from "react";
+
+import { cn } from "../../shared/lib/utils";
 
 export interface EmptyStateProps {
   title: string;
   description?: string;
-  icon?: React.ReactNode;
-  action?: React.ReactNode;
+  /** A `lucide-react` (or `@tabler/icons-react`) icon node, or any custom React node. */
+  icon?: ReactNode;
+  /** Optional action affordance — typically a shadcn `Button`. */
+  action?: ReactNode;
+  className?: string;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({
+export const EmptyState: FC<EmptyStateProps> = ({
   title,
   description,
   icon,
   action,
+  className,
 }) => {
   return (
-    <Stack
-      alignItems="center"
-      justifyContent="center"
-      spacing={1.5}
+    <div
       role="status"
       aria-live="polite"
-      sx={{ py: { xs: 4, sm: 6 }, textAlign: "center" }}
+      className={cn(
+        "flex flex-col items-center justify-center gap-3 px-4 py-10 text-center sm:py-14",
+        className,
+      )}
     >
       {icon ? (
-        <Stack sx={{ color: "text.disabled" }}>{icon}</Stack>
+        <div className="text-[var(--rezics-color-text-tertiary)]">{icon}</div>
       ) : null}
-      <Typography variant="subtitle1" color="text.primary">
+      <p className="text-base font-medium text-[var(--rezics-color-text-primary)]">
         {title}
-      </Typography>
+      </p>
       {description ? (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-[var(--rezics-color-text-secondary)]">
           {description}
-        </Typography>
+        </p>
       ) : null}
-      {action ? <Stack sx={{ mt: 1 }}>{action}</Stack> : null}
-    </Stack>
+      {action ? <div className="mt-2">{action}</div> : null}
+    </div>
   );
 };

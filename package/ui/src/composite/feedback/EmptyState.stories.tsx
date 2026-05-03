@@ -1,7 +1,7 @@
-import InboxIcon from "@mui/icons-material/InboxOutlined";
-import Button from "@mui/material/Button";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Inbox } from "lucide-react";
 
+import { Button } from "../../shadcn/button";
 import { EmptyState } from "./EmptyState";
 
 const meta = {
@@ -28,7 +28,7 @@ export const WithAction: Story = {
   args: {
     title: "Your shelf is empty",
     description: "Save a book to start tracking your reading.",
-    icon: <InboxIcon fontSize="large" />,
-    action: <Button variant="contained">Browse books</Button>,
+    icon: <Inbox className="h-10 w-10" />,
+    action: <Button>Browse books</Button>,
   },
 };

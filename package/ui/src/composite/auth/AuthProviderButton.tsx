@@ -1,8 +1,7 @@
-import { Box } from "@mui/material";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import { useTheme } from "@mui/material/styles";
 import type { FC, ReactNode } from "react";
+
+import { cn } from "../../shared/lib/utils";
+import { Spinner } from "../../primitive/feedback/Spinner";
 
 interface AuthProviderButtonProps {
   label: string;
@@ -21,63 +20,38 @@ export const AuthProviderButton: FC<AuthProviderButtonProps> = ({
   disabled = false,
   onClick,
 }) => {
-  const theme = useTheme();
-
   return (
-    <Button
+    <button
       type="button"
       disabled={disabled || loading}
       onClick={onClick}
       aria-label={label}
-      sx={{
-        position: "relative",
-
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-
-        textTransform: "none",
-        fontWeight: 400,
-
-        px: compact ? 1.5 : 2,
-        py: compact ? 0.75 : 1,
-        fontSize: compact ? "0.8125rem" : "0.875rem",
-
-        color: theme.palette.text.primary,
-
-        border: `1px solid ${theme.palette.grey[400]}`,
-
-        backgroundColor: theme.palette.background.paper,
-
-        "&:hover": {
-          borderColor: theme.palette.primary.main,
-          backgroundColor: theme.palette.action.hover,
-        },
-
-        "&:active": {
-          borderColor: theme.palette.primary.main,
-        },
-
-        "&.Mui-disabled": {
-          opacity: 0.6,
-        },
-      }}
+      className={cn(
+        "relative inline-flex w-full items-center justify-center",
+        "rounded-md border transition-colors",
+        "border-[var(--rezics-color-border-default)]",
+        "bg-[var(--rezics-color-surface-canvas)]",
+        "text-[var(--rezics-color-text-primary)]",
+        "hover:border-[var(--rezics-color-brand-fill)]",
+        "hover:bg-[var(--rezics-color-surface-elevated)]",
+        "active:border-[var(--rezics-color-brand-fill)]",
+        "disabled:opacity-60 disabled:pointer-events-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rezics-color-brand-fill)]/40",
+        compact ? "px-3 py-1.5 text-[0.8125rem]" : "px-4 py-2 text-sm",
+      )}
     >
-      {/* icon absolute，保证文字始终居中 */}
       {!loading && icon && (
-        <Box
-          sx={{
-            position: "absolute",
-            left: compact ? 6 : 10,
-            display: "flex",
-            alignItems: "center",
-          }}
+        <span
+          className={cn(
+            "absolute flex items-center",
+            compact ? "left-1.5" : "left-2.5",
+          )}
         >
           {icon}
-        </Box>
+        </span>
       )}
 
-      {loading ? <CircularProgress size={18} /> : label}
-    </Button>
+      {loading ? <Spinner size="sm" label={label} /> : label}
+    </button>
   );
 };
