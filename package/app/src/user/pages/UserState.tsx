@@ -1,11 +1,14 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Spinner } from "@rezics/ui";
 import type { FC, ReactNode } from "react";
 
 export const UserLoading: FC<{ height?: number }> = ({ height = 256 }) => {
   return (
-    <Box className="flex items-center justify-center" sx={{ height }}>
-      <CircularProgress />
-    </Box>
+    <div
+      className="flex items-center justify-center"
+      style={{ height }}
+    >
+      <Spinner />
+    </div>
   );
 };
 
@@ -14,8 +17,11 @@ export const UserError: FC<{ message?: ReactNode; height?: number }> = ({
   height = 256,
 }) => {
   return (
-    <Box className="flex items-center justify-center" sx={{ height }}>
-      <Typography color="error">{message}</Typography>
-    </Box>
+    <div
+      className="flex items-center justify-center"
+      style={{ height }}
+    >
+      <p className="text-rezics-color-danger">{message}</p>
+    </div>
   );
 };

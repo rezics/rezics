@@ -1,10 +1,11 @@
 import {
-  FormControl,
-  InputLabel,
-  MenuItem,
+  Input,
   Select,
-  TextField,
-} from "@mui/material";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import type { FC } from "react";
 
 export interface FilterDropdownConfig {
@@ -34,30 +35,30 @@ export const FilterBar: FC<FilterBarProps> = ({
 }) => (
   <div className={`flex flex-wrap items-center gap-3 ${className ?? ""}`}>
     {config.showSearch && (
-      <TextField
-        size="small"
-        variant="outlined"
+      <Input
         placeholder={config.searchPlaceholder ?? "Search..."}
         value={values.q ?? ""}
         onChange={(e) => onChange("q", e.target.value)}
-        className="min-w-[180px] flex-1 md:flex-none"
+        className="min-w-[180px] flex-1 md:flex-none h-9"
       />
     )}
     {config.dropdowns?.map((dd) => (
-      <FormControl key={dd.key} size="small" className="min-w-[120px]">
-        <InputLabel>{dd.label}</InputLabel>
-        <Select
-          label={dd.label}
-          value={values[dd.key] ?? ""}
-          onChange={(e) => onChange(dd.key, e.target.value as string)}
-        >
+      <Select
+        key={dd.key}
+        value={values[dd.key] ?? ""}
+        onValueChange={(value) => onChange(dd.key, value)}
+      >
+        <SelectTrigger className="min-w-[120px] h-9">
+          <SelectValue placeholder={dd.label} />
+        </SelectTrigger>
+        <SelectContent>
           {dd.options.map((opt) => (
-            <MenuItem key={opt.value} value={opt.value}>
+            <SelectItem key={opt.value} value={opt.value}>
               {opt.label}
-            </MenuItem>
+            </SelectItem>
           ))}
-        </Select>
-      </FormControl>
+        </SelectContent>
+      </Select>
     ))}
   </div>
 );

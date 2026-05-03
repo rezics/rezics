@@ -1,4 +1,4 @@
-import { Button, TextField, Typography } from "@mui/material";
+import { Button, Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,24 +17,24 @@ export const HomeNewsletterSignup: React.FC = () => {
 
   return (
     <div className="w-full rounded border p-4 bg-white">
-      <Typography variant="subtitle1" className="mb-2">
+      <p className="text-base font-medium mb-2">
         {t("page.home.sections.newsletter.title")}
-      </Typography>
+      </p>
       {submitted ? (
-        <Typography variant="body2" color="success.main">
+        <p className="text-sm text-rezics-color-success m-0">
           {t("page.home.sections.newsletter.thanks")}
-        </Typography>
+        </p>
       ) : (
         <form className="flex gap-2" onSubmit={onSubmit}>
-          <TextField
-            size="small"
+          <Input
             type="email"
             required
             placeholder={t("page.home.sections.newsletter.email_placeholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="h-9"
           />
-          <Button type="submit" variant="contained">
+          <Button type="submit">
             {t("page.home.sections.newsletter.submit")}
           </Button>
         </form>

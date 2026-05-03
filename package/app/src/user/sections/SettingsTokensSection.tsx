@@ -1,30 +1,31 @@
 import {
-  Alert,
-  Button,
-  Checkbox,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControlLabel,
-  TextField,
-  Typography,
-} from "@mui/material";
-import {
   useRevokeTokenMutation,
   useUpdateTokenMutation,
 } from "@rezics/api/token/token.mutations";
 import { tokenQueries } from "@rezics/api/token/token.queries";
 import type { ApiTokenDTO, ApiTokenScopes } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { Plus as AddIcon } from "lucide-react";
 import { type FC, useState } from "react";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { TokenCreateDialog } from "@/user/components/TokenCreateDialog";
 import { TokenListItem } from "@/user/components/TokenListItem";
 import { useRequireAuth } from "@/user/pages/useAuth";
-import { Plus as AddIcon } from "lucide-react";
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },
@@ -122,25 +123,21 @@ export const SettingsTokensSection: FC = () => {
         divider={false}
       >
         <div className="mb-4">
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateOpen(true)}
-          >
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <AddIcon className="w-4 h-4 mr-1" />
             Generate New Token
           </Button>
         </div>
 
         {isLoading ? (
           <div className="flex justify-center py-4">
-            <CircularProgress size={24} />
+            <Spinner />
           </div>
         ) : tokens.length > 0 ? (
           <div>
             {tokens.map((token, i) => (
               <div key={token.id}>
-                {i > 0 && <Divider />}
+                {i > 0 && <Separator />}
                 <TokenListItem
                   token={token}
                   onEdit={handleStartEdit}
@@ -150,9 +147,9 @@ export const SettingsTokensSection: FC = () => {
             ))}
           </div>
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-rezics-color-fg-muted">
             No API tokens yet. Generate one to get started.
-          </Typography>
+          </p>
         )}
       </SettingsSection>
 
@@ -164,87 +161,91 @@ export const SettingsTokensSection: FC = () => {
       {/* Edit dialog */}
       <Dialog
         open={!!editToken}
-        onClose={() => setEditToken(null)}
-        maxWidth="sm"
-        fullWidth
+        onOpenChange={(o) => !o && setEditToken(null)}
       >
-        <DialogTitle>Edit Token</DialogTitle>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle>Edit Token</DialogTitle>
+          </DialogHeader>
           {updateToken.error && (
-            <Alert severity="error" className="mb-4">
-              {updateToken.error.message}
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{updateToken.error.message}</AlertDescription>
             </Alert>
           )}
           <div className="space-y-4 pt-2">
-            <TextField
-              fullWidth
-              label="Token Name"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              variant="standard"
-              required
-            />
-            <div>
-              <Typography variant="body2" className="font-medium mb-2">
-                Scopes
-              </Typography>
-              {AVAILABLE_SCOPES.map((s) => (
-                <FormControlLabel
-                  key={s.label}
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={editScopes.has(s.label)}
-                      onChange={() => handleToggleEditScope(s.label)}
-                    />
-                  }
-                  label={<Typography variant="body2">{s.label}</Typography>}
-                />
-              ))}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-token-name">Token Name</Label>
+              <Input
+                id="edit-token-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                required
+              />
             </div>
-            <TextField
-              fullWidth
-              label="Expiration Date"
-              type="date"
-              value={editExpiry}
-              onChange={(e) => setEditExpiry(e.target.value)}
-              variant="standard"
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
+            <div>
+              <p className="text-sm font-medium mb-2">Scopes</p>
+              <div className="flex flex-col gap-2">
+                {AVAILABLE_SCOPES.map((s) => (
+                  <label
+                    key={s.label}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={editScopes.has(s.label)}
+                      onCheckedChange={() => handleToggleEditScope(s.label)}
+                    />
+                    <span className="text-sm">{s.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-token-expiry">Expiration Date</Label>
+              <Input
+                id="edit-token-expiry"
+                type="date"
+                value={editExpiry}
+                onChange={(e) => setEditExpiry(e.target.value)}
+              />
+            </div>
           </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditToken(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveEdit}
+              disabled={!editName || updateToken.isPending}
+            >
+              {updateToken.isPending ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditToken(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleSaveEdit}
-            disabled={!editName || updateToken.isPending}
-          >
-            {updateToken.isPending ? "Saving..." : "Save"}
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* Revoke confirmation dialog */}
-      <Dialog open={!!revokeId} onClose={() => setRevokeId(null)}>
-        <DialogTitle>Revoke Token</DialogTitle>
+      <Dialog open={!!revokeId} onOpenChange={(o) => !o && setRevokeId(null)}>
         <DialogContent>
-          <Typography variant="body2">
+          <DialogHeader>
+            <DialogTitle>Revoke Token</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm">
             Are you sure you want to revoke this token? Any applications using
             it will lose access immediately.
-          </Typography>
+          </p>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRevokeId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmRevoke}
+              disabled={revokeToken.isPending}
+            >
+              {revokeToken.isPending ? "Revoking..." : "Revoke"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setRevokeId(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleConfirmRevoke}
-            disabled={revokeToken.isPending}
-          >
-            {revokeToken.isPending ? "Revoking..." : "Revoke"}
-          </Button>
-        </DialogActions>
       </Dialog>
     </div>
   );

@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import type {
   ContentSearchDocument,
   ContentSearchResult,
@@ -34,7 +33,7 @@ const DefaultResultItem: React.FC<{
   const title = resolveTitle(item.titles, item.languages, preferredLanguage);
 
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+    <div className="flex items-start gap-3 py-3 border-b border-rezics-color-border last:border-b-0">
       {item.coverUrl && (
         <img
           src={item.coverUrl}
@@ -43,20 +42,12 @@ const DefaultResultItem: React.FC<{
         />
       )}
       <div className="flex-1 min-w-0">
-        <Typography variant="subtitle2" noWrap>
-          {title || item.id}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          {item.type}
-        </Typography>
+        <p className="text-sm font-medium truncate">{title || item.id}</p>
+        <p className="text-xs text-rezics-color-fg-muted">{item.type}</p>
         {item.summaries[0] && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            className="line-clamp-2 mt-1"
-          >
+          <p className="text-sm text-rezics-color-fg-muted line-clamp-2 mt-1">
             {item.summaries[0]}
-          </Typography>
+          </p>
         )}
       </div>
     </div>
@@ -74,7 +65,7 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
   if (isLoading) {
     return (
       <div className="py-12 text-center">
-        <Typography color="text.secondary">{t("common.loading")}</Typography>
+        <p className="text-rezics-color-fg-muted">{t("common.loading")}</p>
       </div>
     );
   }
@@ -85,13 +76,9 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
 
   return (
     <div>
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        className="mb-2 block"
-      >
+      <p className="mb-2 block text-xs text-rezics-color-fg-muted">
         {result.total} results ({result.processingTimeMs}ms)
-      </Typography>
+      </p>
       <div>
         {result.items.map((item) =>
           renderItem ? (

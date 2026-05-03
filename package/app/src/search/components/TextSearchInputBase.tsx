@@ -1,4 +1,4 @@
-import { InputAdornment, TextField } from "@mui/material";
+import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
 
@@ -16,7 +16,6 @@ export type TextSearchInputBaseProps = {
 
 export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
   value,
-  size = "small",
   height,
   onValueChange,
   onSubmit,
@@ -28,45 +27,45 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
   const [focused, setFocused] = useState(false);
   return (
     <div className={className}>
-      <TextField
-        fullWidth
-        size={size}
-        sx={{
-          "& .MuiInputBase-root": {
-            height: height,
-          },
-        }}
-        label={label ?? ""}
-        autoComplete="off"
-        placeholder={placeholder ?? "Find anything"}
-        value={value}
-        onChange={(event) => onValueChange(event.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                {startAdornmentIcon}
-              </InputAdornment>
-            ),
-          },
-        }}
-        onKeyDown={(event) => {
-          /**
-           * 防止中文 / 日文 IME 输入时误触 Enter
-           */
-          if (event.nativeEvent.isComposing) return;
+      {label && (
+        <label className="mb-1 block text-sm text-rezics-color-fg-muted">
+          {label}
+        </label>
+      )}
+      <div
+        className="relative flex items-center w-full"
+        style={height ? { height: `${height}px` } : undefined}
+      >
+        {startAdornmentIcon && (
+          <div className="absolute left-2 flex items-center pointer-events-none">
+            {startAdornmentIcon}
+          </div>
+        )}
+        <Input
+          autoComplete="off"
+          placeholder={placeholder ?? "Find anything"}
+          value={value}
+          onChange={(event) => onValueChange(event.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={height ? { height: `${height}px` } : undefined}
+          className={startAdornmentIcon ? "pl-10" : ""}
+          onKeyDown={(event) => {
+            /**
+             * 防止中文 / 日文 IME 输入时误触 Enter
+             */
+            if (event.nativeEvent.isComposing) return;
 
-          /**
-           * 仅在 focus 时触发 search
-           */
-          if (focused && event.key === "Enter") {
-            event.preventDefault();
-            onSubmit(value);
-          }
-        }}
-      />
+            /**
+             * 仅在 focus 时触发 search
+             */
+            if (focused && event.key === "Enter") {
+              event.preventDefault();
+              onSubmit(value);
+            }
+          }}
+        />
+      </div>
     </div>
   );
 };

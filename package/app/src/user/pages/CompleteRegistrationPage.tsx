@@ -1,26 +1,28 @@
-import {
-  CircularProgress,
-  Divider,
-  Step,
-  StepContent,
-  StepLabel,
-  Stepper,
-  TextField,
-  Typography,
-} from "@mui/material";
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
 import {
   exchangeForSessionToken,
   queryAccessToken,
 } from "@rezics/api/react-query/jwt";
+import { Spinner } from "@rezics/ui";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
+  CircleCheck as CheckCircleIcon,
+  Check as CheckIcon,
+} from "lucide-react";
+import {
   type FC,
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -34,7 +36,6 @@ import { OtpInput } from "../components/OtpInput";
 import { Layout } from "../layouts/Layout";
 import { logout } from "../models/handler";
 import { useAuth } from "./useAuth";
-import { CircleCheck as CheckCircleIcon } from "lucide-react";
 
 function deriveSlugFromName(name: string): string {
   return name
@@ -44,6 +45,74 @@ function deriveSlugFromName(name: string): string {
     .replace(/--+/g, "-")
     .replace(/^-|-$/g, "");
 }
+
+// --- Vertical Stepper primitives (shadcn replacement for MUI Stepper) ---
+
+type StepDefinition = {
+  label: ReactNode;
+  optional?: ReactNode;
+  completed: boolean;
+  active: boolean;
+  content: ReactNode;
+};
+
+const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
+  <ol className="flex flex-col">
+    {steps.map((step, idx) => {
+      const isLast = idx === steps.length - 1;
+      return (
+        <li key={idx} className="relative flex gap-3">
+          {/* connector line */}
+          {!isLast && (
+            <span
+              className={`absolute left-[11px] top-7 bottom-0 w-px ${
+                step.completed
+                  ? "bg-rezics-color-primary"
+                  : "bg-rezics-color-border"
+              }`}
+            />
+          )}
+          {/* indicator */}
+          <span
+            className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+              step.completed
+                ? "bg-rezics-color-primary text-white"
+                : step.active
+                  ? "bg-rezics-color-primary text-white"
+                  : "bg-rezics-color-border text-rezics-color-fg-muted"
+            }`}
+          >
+            {step.completed ? (
+              <CheckIcon className="w-3.5 h-3.5" />
+            ) : (
+              idx + 1
+            )}
+          </span>
+          {/* label + content */}
+          <div className="flex-1 pb-6 min-w-0">
+            <div className="flex flex-col">
+              <span
+                className={`text-sm font-medium ${
+                  step.active || step.completed
+                    ? "text-rezics-color-fg"
+                    : "text-rezics-color-fg-muted"
+                }`}
+              >
+                {step.label}
+              </span>
+              {step.optional && (
+                <span className="text-xs text-rezics-color-fg-muted">
+                  {step.optional}
+                </span>
+              )}
+            </div>
+            {step.active && <div className="mt-3">{step.content}</div>}
+          </div>
+        </li>
+      );
+    })}
+  </ol>
+);
 
 // --- Step 1: Identity Form ---
 
@@ -115,40 +184,57 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
     }
   };
 
+  const slugHelper = checkingSlug
+    ? "Checking availability..."
+    : (slugError ?? (slugCheck?.available ? "Available" : undefined));
+
   return (
     <div className="flex flex-col gap-4">
-      {error && <Alert severity="error">{error}</Alert>}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-      <TextField
-        label="Username"
-        variant="standard"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-      />
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="reg-username">Username</Label>
+        <Input
+          id="reg-username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+      </div>
 
-      <TextField
-        label="Slug (your unique URL handle)"
-        variant="standard"
-        value={slug}
-        onChange={(e) => {
-          setSlug(e.target.value);
-          setSlugTouched(true);
-        }}
-        error={Boolean(slugError)}
-        helperText={
-          checkingSlug
-            ? "Checking availability..."
-            : (slugError ?? (slugCheck?.available ? "Available" : undefined))
-        }
-        required
-      />
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="reg-slug">Slug (your unique URL handle)</Label>
+        <Input
+          id="reg-slug"
+          value={slug}
+          onChange={(e) => {
+            setSlug(e.target.value);
+            setSlugTouched(true);
+          }}
+          required
+          className={slugError ? "border-rezics-color-danger" : ""}
+        />
+        {slugHelper && (
+          <p
+            className={`text-xs ${
+              slugError
+                ? "text-rezics-color-danger"
+                : "text-rezics-color-fg-muted"
+            }`}
+          >
+            {slugHelper}
+          </p>
+        )}
+      </div>
 
       <Button
-        variant="contained"
         disabled={!canSubmit}
         onClick={handleSubmit}
-        fullWidth
+        className="w-full"
       >
         {loading ? t("common.loading") : "Confirm Identity"}
       </Button>
@@ -282,13 +368,21 @@ function EmailVerificationStep({
 
   return (
     <div className="flex flex-col gap-4">
-      {error && <Alert severity="error">{error}</Alert>}
-      {message && <Alert severity="success">{message}</Alert>}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {message && (
+        <Alert className="text-rezics-color-success">
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      )}
 
-      <Typography variant="body1">
+      <p className="text-base">
         {t("auth.flow.verify_intro_prefix")} <strong>{email}</strong>{" "}
         {t("auth.flow.verify_intro_suffix")}
-      </Typography>
+      </p>
 
       <Turnstile
         siteKeyProps={env.VITE_TURNSTILE_SITE_KEY}
@@ -310,20 +404,23 @@ function EmailVerificationStep({
         }}
         loadingComponent={
           <div className="flex items-center gap-3">
-            <CircularProgress size={18} />
-            <Typography variant="body2">
+            <Spinner size="sm" />
+            <p className="text-sm">
               {t("auth.flow.verify_widget_loading")}
-            </Typography>
+            </p>
           </div>
         }
       />
-      {turnstileError && <Alert severity="error">{turnstileError}</Alert>}
+      {turnstileError && (
+        <Alert variant="destructive">
+          <AlertDescription>{turnstileError}</AlertDescription>
+        </Alert>
+      )}
 
       <Button
-        variant="contained"
         disabled={!canSend}
         onClick={handleSendCode}
-        fullWidth
+        className="w-full"
       >
         {codeSent
           ? cooldownRemaining > 0
@@ -334,23 +431,22 @@ function EmailVerificationStep({
           : t("auth.flow.verify_send_code")}
       </Button>
 
-      <Divider />
+      <Separator />
 
       {codeSent && (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-rezics-color-fg-muted">
           {t("auth.flow.verify_code_sent_to")} <strong>{email}</strong>
           {" — "}
           {t("auth.flow.verify_code_expires")}
-        </Typography>
+        </p>
       )}
 
       <OtpInput value={otpCode} onChange={setOtpCode} disabled={loading} />
 
       <Button
-        variant="contained"
         disabled={otpCode.replace(/\s/g, "").length !== 6 || loading}
         onClick={handleVerifyCode}
-        fullWidth
+        className="w-full"
       >
         {t("auth.flow.verify_submit_code")}
       </Button>
@@ -402,18 +498,13 @@ export const CompleteRegistrationPage: FC = () => {
       <Layout
         title="Complete Registration"
         content={
-          <Alert severity="info">
-            Please sign in first to complete your registration.
+          <Alert>
+            <AlertDescription>
+              Please sign in first to complete your registration.
+            </AlertDescription>
           </Alert>
         }
-        actions={
-          <Button
-            variant="contained"
-            onClick={() => navigate({ to: "/login" })}
-          >
-            {t("auth.login")}
-          </Button>
-        }
+        actions={<Button onClick={() => navigate({ to: "/login" })}>{t("auth.login")}</Button>}
       />
     );
   }
@@ -423,64 +514,54 @@ export const CompleteRegistrationPage: FC = () => {
     navigate({ to: "/" });
   };
 
+  const steps: StepDefinition[] = [
+    {
+      label: "Choose your identity",
+      optional:
+        identitySet && auth.user?.slug ? auth.user.slug : undefined,
+      completed: identitySet,
+      active: activeStep === 0,
+      content: <IdentityStep onComplete={handleIdentityComplete} />,
+    },
+    {
+      label: "Verify your email",
+      optional: emailVerified
+        ? `${email}${trustedProvider ? ` (verified by ${trustedProvider})` : ""}`
+        : undefined,
+      completed: !!emailVerified,
+      active: activeStep === 1,
+      content: (
+        <EmailVerificationStep
+          email={email}
+          onComplete={handleEmailComplete}
+        />
+      ),
+    },
+  ];
+
   return (
     <Layout
       title="Complete Registration"
       content={
         <div className="flex flex-col gap-4">
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-rezics-color-fg-muted">
             Complete the steps below to finish setting up your account.
-          </Typography>
+          </p>
 
-          <Stepper activeStep={activeStep} orientation="vertical">
-            {/* --- Step 1: Identity --- */}
-            <Step completed={identitySet}>
-              <StepLabel
-                optional={
-                  identitySet && auth.user?.slug ? (
-                    <Typography variant="caption">{auth.user.slug}</Typography>
-                  ) : undefined
-                }
-              >
-                Choose your identity
-              </StepLabel>
-              <StepContent>
-                <IdentityStep onComplete={handleIdentityComplete} />
-              </StepContent>
-            </Step>
-
-            {/* --- Step 2: Email Verification --- */}
-            <Step completed={emailVerified}>
-              <StepLabel
-                optional={
-                  emailVerified ? (
-                    <Typography variant="caption">
-                      {email}
-                      {trustedProvider && ` (verified by ${trustedProvider})`}
-                    </Typography>
-                  ) : undefined
-                }
-              >
-                Verify your email
-              </StepLabel>
-              <StepContent>
-                <EmailVerificationStep
-                  email={email}
-                  onComplete={handleEmailComplete}
-                />
-              </StepContent>
-            </Step>
-          </Stepper>
+          <VerticalStepper steps={steps} />
 
           {activeStep === 2 && (
-            <Alert severity="success" icon={<CheckCircleIcon />}>
-              Registration complete! Redirecting...
+            <Alert className="text-rezics-color-success">
+              <CheckCircleIcon className="w-4 h-4" />
+              <AlertDescription>
+                Registration complete! Redirecting...
+              </AlertDescription>
             </Alert>
           )}
         </div>
       }
       actions={
-        <Button variant="text" onClick={handleLogout} color="inherit">
+        <Button variant="ghost" onClick={handleLogout}>
           {t("auth.logout")}
         </Button>
       }

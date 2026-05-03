@@ -1,5 +1,6 @@
-import { Autocomplete, Chip, TextField } from "@mui/material";
+import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import type { TagRef } from "@rezics/contract";
+import { X as CloseIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTagSuggest } from "../../hooks/useTagSuggest";
@@ -14,15 +15,13 @@ export type TagPickerProps = {
 
 const tagIdentity = (t: TagRef): string => t.unitId ?? t.slug ?? "";
 
-const tagLabel = (t: TagRef): string =>
-  t.name ?? t.slug ?? t.unitId ?? "";
+const tagLabel = (t: TagRef): string => t.name ?? t.slug ?? t.unitId ?? "";
 
 export const TagPicker: React.FC<TagPickerProps> = ({
   value,
   onChange,
   label,
   placeholder,
-  size = "small",
 }) => {
   const [inputValue, setInputValue] = useState("");
   const { suggestions } = useTagSuggest(inputValue);
@@ -47,78 +46,110 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     setInputValue("");
   };
 
+  const addSuggestion = (item: TagRef) => {
+    const id = tagIdentity(item);
+    if (!id) return;
+    const seen = new Set(value.map(tagIdentity));
+    if (seen.has(id)) return;
+    onChange([
+      ...value,
+      {
+        ...(item.unitId ? { unitId: item.unitId } : {}),
+        ...(item.slug ? { slug: item.slug } : {}),
+        ...(item.name ? { name: item.name } : {}),
+      },
+    ]);
+    setInputValue("");
+  };
+
+  const removeTag = (id: string) => {
+    onChange(value.filter((t) => tagIdentity(t) !== id));
+  };
+
+  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const v = e.target.value;
+    if (v.includes(",")) {
+      commit(v);
+    } else {
+      setInputValue(v);
+    }
+  };
+
+  const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commit(inputValue);
+    } else if (
+      e.key === "Backspace" &&
+      inputValue === "" &&
+      value.length > 0
+    ) {
+      const last = value[value.length - 1];
+      if (last) removeTag(tagIdentity(last));
+    }
+  };
+
   return (
-    <Autocomplete
-      multiple
-      freeSolo
-      size={size}
-      value={value}
-      options={suggestions}
-      inputValue={inputValue}
-      onInputChange={(_e, v, reason) => {
-        if (reason === "input") {
-          if (v.includes(",")) {
-            commit(v);
-          } else {
-            setInputValue(v);
-          }
-        } else if (reason === "reset" || reason === "clear") {
-          setInputValue("");
-        }
-      }}
-      isOptionEqualToValue={(opt, val) => {
-        const optId = typeof opt === "string" ? opt : tagIdentity(opt);
-        const valId = typeof val === "string" ? val : tagIdentity(val);
-        return optId === valId;
-      }}
-      getOptionLabel={(opt) => {
-        if (typeof opt === "string") return opt;
-        return tagLabel(opt);
-      }}
-      onChange={(_e, newValue) => {
-        const next: TagRef[] = [];
-        const seen = new Set<string>();
-        for (const item of newValue) {
-          if (typeof item === "string") {
-            const slug = item.trim();
-            if (!slug || seen.has(slug)) continue;
-            seen.add(slug);
-            next.push({ slug });
-            continue;
-          }
-          const id = tagIdentity(item);
-          if (!id || seen.has(id)) continue;
-          seen.add(id);
-          next.push({
-            ...(item.unitId ? { unitId: item.unitId } : {}),
-            ...(item.slug ? { slug: item.slug } : {}),
-            ...(item.name ? { name: item.name } : {}),
-          });
-        }
-        onChange(next);
-      }}
-      renderTags={(tags, getTagProps) =>
-        tags.map((tag, index) => {
-          const props = getTagProps({ index });
+    <div className="flex flex-col gap-1 relative">
+      {label && <Label>{label}</Label>}
+      <div className="flex flex-wrap items-center gap-1 rounded-md border border-input p-1">
+        {value.map((tag, index) => {
+          const id = tagIdentity(tag) || `idx-${index}`;
           return (
-            <Chip
-              {...props}
-              key={tagIdentity(tag) || `idx-${index}`}
-              label={tagLabel(tag)}
-              size={size}
-              variant="outlined"
-            />
+            <Badge
+              key={id}
+              variant="outline"
+              className="flex items-center gap-1"
+            >
+              <span>{tagLabel(tag)}</span>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-4 w-4 p-0"
+                aria-label="remove tag"
+                onClick={() => removeTag(tagIdentity(tag))}
+              >
+                <CloseIcon size={12} />
+              </Button>
+            </Badge>
           );
-        })
-      }
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label}
+        })}
+        <Input
+          className="flex-1 min-w-[120px] border-0 shadow-none focus-visible:ring-0 focus-visible:border-0 p-0 h-7"
           placeholder={placeholder}
-          size={size}
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onBlur={() => {
+            if (inputValue.trim()) commit(inputValue);
+          }}
         />
+      </div>
+      {inputValue.trim() && suggestions.length > 0 && (
+        <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-rezics-color-bg-elevated rounded-md shadow-lg border border-rezics-color-border max-h-60 overflow-auto">
+          <ul>
+            {suggestions.map((item) => {
+              const id = tagIdentity(item);
+              if (!id) return null;
+              return (
+                <li key={id}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      // prevent blur stealing focus
+                      e.preventDefault();
+                      addSuggestion(item);
+                    }}
+                    className="block w-full text-left px-3 py-1.5 text-sm hover:bg-rezics-color-bg-hover"
+                  >
+                    {tagLabel(item)}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
-    />
+    </div>
   );
 };

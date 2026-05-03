@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
@@ -22,49 +21,49 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <Box p={2}>
+    <div className="p-4">
       <ReplyComposer
         mode="progressive"
         targetUnitId="fixture-target-1"
         placeholder="Start a discussion"
       />
-    </Box>
+    </div>
   ),
 };
 
 export const Compact: Story = {
   render: () => (
-    <Box p={2}>
+    <div className="p-4">
       <ReplyComposer
         mode="progressive"
         autoFocus
         targetUnitId="fixture-target-2"
       />
-    </Box>
+    </div>
   ),
 };
 
 export const Empty: Story = {
   render: () => (
-    <Box p={2}>
+    <div className="p-4">
       <ReplyComposer
         mode="expanded"
         targetUnitId="fixture-target-3"
         parentPostUnitId="fixture-parent-3"
       />
-    </Box>
+    </div>
   ),
 };
 
 export const HappyPath: Story = {
   render: () => (
-    <Box p={2}>
+    <div className="p-4">
       <ReplyComposer
         mode="progressive"
         targetUnitId="fixture-target-happy"
         placeholder="Start a discussion"
       />
-    </Box>
+    </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

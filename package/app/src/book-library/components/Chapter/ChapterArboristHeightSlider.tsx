@@ -1,13 +1,4 @@
-import Grid from "@mui/material/Grid";
-import MuiInput from "@mui/material/Input";
-import Slider from "@mui/material/Slider";
-import { styled } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
-
-const Input = styled(MuiInput)`
-  width: 42px;
-`;
 
 export function ChapterArboristHeightSlider({
   height,
@@ -17,8 +8,8 @@ export function ChapterArboristHeightSlider({
   setHeight: (height: number) => void;
 }) {
   const maxHeight = 2000;
-  const handleSliderChange = (_event: Event, newValue: number) => {
-    setHeight(newValue);
+  const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setHeight(Number(event.target.value));
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,35 +26,37 @@ export function ChapterArboristHeightSlider({
 
   return (
     <div>
-      <Grid container spacing={2} sx={{ alignItems: "center" }}>
-        <Grid>
-          <Typography id="input-slider" gutterBottom>
+      <div className="flex items-center gap-4">
+        <div>
+          <label
+            htmlFor="chapter-arborist-height"
+            className="block mb-2 text-sm"
+          >
             Chapter Arborist Height
-          </Typography>
-        </Grid>
-        <Grid size="grow">
-          <Slider
+          </label>
+        </div>
+        <div className="flex-1">
+          <input
+            id="chapter-arborist-height"
+            type="range"
             value={typeof height === "number" ? height : 0}
             onChange={handleSliderChange}
             aria-labelledby="input-slider"
             max={maxHeight}
+            min={0}
+            className="w-full"
           />
-        </Grid>
-        <Grid>
-          <Input
+        </div>
+        <div>
+          <input
+            type="number"
             value={height}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            // inputProps={{
-            //   step: 10,
-            //   min: 0,
-            //   max: maxHeight,
-            //   type: 'number',
-            //   'aria-labelledby': 'input-slider',
-            // }}
+            className="w-[42px] border-b border-rezics-color-border-defined bg-transparent text-sm"
           />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </div>
   );
 }

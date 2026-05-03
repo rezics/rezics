@@ -1,15 +1,20 @@
-import { Avatar, Box, Tooltip, Typography } from "@mui/material";
 import type { BookDTO, PostDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
 import { ReactionBar } from "@/engagement";
-import {
-  reviewDetailActions,
-  reviewPolicy,
-} from "../../models/reviewPolicy";
+import { reviewDetailActions, reviewPolicy } from "../../models/reviewPolicy";
 
 interface ReviewDetailProps {
   review: PostDTO;
@@ -28,53 +33,61 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
   const dateStr = review.createdAt
     ? new Date(String(review.createdAt)).toLocaleDateString()
     : "";
+  const authorName = review.author?.name ?? "";
+  const authorInitial = authorName.charAt(0).toUpperCase();
 
   return (
-    <Box className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8">
       {book && <BookListViewItem book={book} />}
 
-      <Box className="flex items-center justify-between">
-        <Typography variant="h5" fontWeight={700}>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">
           {title || t("pages.review_page")}
-        </Typography>
+        </h1>
         {rating !== undefined && (
-          <Typography variant="body2" color="text.secondary">
+          <span className="text-sm text-rezics-color-fg-muted">
             {rating.toFixed(1)} / 10
-          </Typography>
+          </span>
         )}
-      </Box>
+      </div>
 
-      <Box className="flex items-start gap-4">
+      <div className="flex items-start gap-4">
         <Avatar
-          src={review.author?.avatar ?? ""}
-          sx={{ width: 56, height: 56, borderRadius: 1 }}
+          className="h-14 w-14 rounded-md"
           onClick={(e) => e.stopPropagation()}
-        />
-        <Box className="flex-1">
-          <Tooltip
-            title={t("review.open_user_interface")}
-            placement="top-start"
-          >
-            <MUILink
-              to="/user/$unitId"
-              params={{ unitId: review.author?.unitId ?? "" }}
-            >
-              <Typography variant="h6" fontWeight={700} color="primary">
-                {review.author?.name}
-              </Typography>
-            </MUILink>
-          </Tooltip>
-          {dateStr && (
-            <Typography variant="caption" color="text.secondary">
-              {dateStr}
-            </Typography>
+        >
+          {review.author?.avatar && (
+            <AvatarImage src={review.author.avatar} alt={authorName} />
           )}
-        </Box>
-      </Box>
+          <AvatarFallback>{authorInitial}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <MUILink
+                  to="/user/$unitId"
+                  params={{ unitId: review.author?.unitId ?? "" }}
+                >
+                  <span className="text-lg font-bold text-rezics-color-primary">
+                    {authorName}
+                  </span>
+                </MUILink>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {t("review.open_user_interface")}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          {dateStr && (
+            <div className="text-xs text-rezics-color-fg-muted">{dateStr}</div>
+          )}
+        </div>
+      </div>
 
-      <Box>
+      <div>
         <MarkdownContent content={review.body ?? ""} />
-      </Box>
+      </div>
 
       <ReactionBar
         size="lg"
@@ -83,6 +96,6 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
         actions={reviewDetailActions}
         onReplyInvoke={onReplyInvoke}
       />
-    </Box>
+    </div>
   );
 };

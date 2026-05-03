@@ -1,4 +1,3 @@
-import { Avatar, Chip, Paper, Tooltip, Typography } from "@mui/material";
 import {
   useAttachTranslation,
   useTranslationGroupSiblings,
@@ -7,6 +6,16 @@ import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Badge,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
@@ -88,43 +97,21 @@ export function UnitPage() {
       {/* ANCHOR Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <Typography variant="h4" className="font-bold">
+          <h1 className="text-3xl font-bold">
             {title || t("pages.unit_page", "Unit")}
-          </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            className="text-xs sm:text-sm break-all"
-          >
+          </h1>
+          <p className="text-xs sm:text-sm break-all text-rezics-color-fg-muted">
             ID: {unit.id}
-          </Typography>
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2 mt-1 sm:mt-0 justify-start sm:justify-end">
-          {unit.type && (
-            <Chip
-              label={unit.type}
-              color="primary"
-              size="small"
-              variant="outlined"
-            />
-          )}
-          {unit.status && (
-            <Chip
-              label={unit.status}
-              size="small"
-              variant="outlined"
-              color="default"
-            />
-          )}
+          {unit.type && <Badge variant="outline">{unit.type}</Badge>}
+          {unit.status && <Badge variant="outline">{unit.status}</Badge>}
           {(unit.extra?.tags as string[] | undefined)?.map((tag: string) => (
-            <Chip
-              key={tag}
-              label={tag}
-              size="small"
-              variant="outlined"
-              sx={{ borderRadius: 999 }}
-            />
+            <Badge key={tag} variant="outline" className="rounded-full">
+              {tag}
+            </Badge>
           ))}
         </div>
       </div>
@@ -134,23 +121,30 @@ export function UnitPage() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {unit.user && (
             <div className="flex items-center gap-3">
-              <Avatar
-                src={unit.user.avatar ?? ""}
-                sx={{ width: 40, height: 40, borderRadius: 1 }}
-              />
+              <Avatar className="w-10 h-10 rounded-md">
+                <AvatarImage src={unit.user.avatar ?? ""} />
+                <AvatarFallback>
+                  {unit.user.name?.charAt(0).toUpperCase() ?? "?"}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex flex-col">
-                <Tooltip title={t("user.open_profile")}>
-                  <MUILink
-                    to="/user/$unitId"
-                    params={{ unitId: unit.user.unitId }}
-                    className="text-sm font-medium"
-                  >
-                    {unit.user.name}
-                  </MUILink>
-                </Tooltip>
-                <Typography variant="caption" color="text.secondary">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <MUILink
+                        to="/user/$unitId"
+                        params={{ unitId: unit.user.unitId }}
+                        className="text-sm font-medium"
+                      >
+                        {unit.user.name}
+                      </MUILink>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("user.open_profile")}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <span className="text-xs text-rezics-color-fg-muted">
                   {unit.user.slug}
-                </Typography>
+                </span>
               </div>
             </div>
           )}
@@ -187,45 +181,40 @@ export function UnitPage() {
 
       {/* ANCHOR Content */}
       <div className="mt-12">
-        <Paper className="p-6">
+        <div className="bg-rezics-color-bg-elevated p-6 rounded-md">
           {content ? (
             <MarkdownContent content={content} />
           ) : (
-            <Typography variant="body2" color="text.secondary">
+            <p className="text-sm text-rezics-color-fg-muted">
               {t("unit.no_content")}
-            </Typography>
+            </p>
           )}
-        </Paper>
+        </div>
       </div>
 
       {/* ANCHOR Metadata */}
       <div className="mt-16">
         <div className="flex items-center gap-2 mb-4">
           <AccentBar />
-          <Typography variant="h6" className="font-bold">
-            {t("unit.meta_data")}
-          </Typography>
+          <h2 className="text-lg font-bold">{t("unit.meta_data")}</h2>
         </div>
 
         {metadataEntries.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-rezics-color-fg-muted">
             {t("unit.no_metadata", "暂无 Meta 信息")}
-          </Typography>
+          </p>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {metadataEntries.map(([key, value]) => (
-              <Paper key={key} className="p-4">
-                <Typography variant="subtitle2" className="font-semibold">
-                  {key}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  className="mt-1 whitespace-pre-wrap break-words"
-                >
+              <div
+                key={key}
+                className="bg-rezics-color-bg-elevated p-4 rounded-md"
+              >
+                <p className="text-sm font-semibold">{key}</p>
+                <p className="mt-1 whitespace-pre-wrap break-words text-sm text-rezics-color-fg-muted">
                   {formatMetadataValue(value)}
-                </Typography>
-              </Paper>
+                </p>
+              </div>
             ))}
           </div>
         )}

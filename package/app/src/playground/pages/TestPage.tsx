@@ -1,16 +1,10 @@
-import { TabContext, TabList, TabPanel } from "@mui/lab";
-import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
 import * as React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 
 import { ThemeDemo } from "@/preference/sections/ThemeDemo.tsx";
 
 export default function PersistentTabs() {
   const [value, setValue] = React.useState<"1" | "2">("1");
-
-  const handleChange = (_: React.SyntheticEvent, newValue: "1" | "2") => {
-    setValue(newValue);
-  };
 
   return (
     <div>
@@ -21,21 +15,14 @@ export default function PersistentTabs() {
         </p>
       </div>
       <ThemeDemo />
-      <TabContext value={value}>
-        {" "}
-        {/* ① 提供上下文 */}
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <TabList onChange={handleChange} aria-label="lab API tabs example">
-            <Tab label="面板一" value="1" />
-            <Tab label="面板二" value="2" />
-          </TabList>
-        </Box>
-        {/* ② TabPanel 的 value 必须和 Tab 的 value 对应 */}
-        <TabPanel value="1" keepMounted>
-          {/* keepMounted 保持在 DOM，不会被卸载，内部状态持久化】 */}
-        </TabPanel>
-        <TabPanel value="2" keepMounted></TabPanel>
-      </TabContext>
+      <Tabs value={value} onValueChange={(v) => setValue(v as "1" | "2")}>
+        <TabsList>
+          <TabsTrigger value="1">面板一</TabsTrigger>
+          <TabsTrigger value="2">面板二</TabsTrigger>
+        </TabsList>
+        <TabsContent value="1" forceMount />
+        <TabsContent value="2" forceMount />
+      </Tabs>
     </div>
   );
 }

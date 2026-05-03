@@ -1,4 +1,10 @@
-import { Checkbox, FormControlLabel, Tooltip } from "@mui/material";
+import {
+  Checkbox,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import type { ContentRating } from "@rezics/contract";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -35,44 +41,49 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
       <span className="text-sm font-medium opacity-60">
         {t("search.filters.rating", "Rating")}
       </span>
-      <div className="flex flex-wrap items-center gap-2">
-        {RATINGS.map((rating) => {
-          const disabled = allowSet !== null && !allowSet.has(rating);
-          const hint =
-            disabled && !isAuthenticated
-              ? t(
-                  "search.tooltips.ratingSignIn",
-                  "Sign in and opt in to enable this rating",
-                )
-              : disabled
+      <TooltipProvider>
+        <div className="flex flex-wrap items-center gap-2">
+          {RATINGS.map((rating) => {
+            const disabled = allowSet !== null && !allowSet.has(rating);
+            const hint =
+              disabled && !isAuthenticated
                 ? t(
-                    "search.tooltips.ratingOptIn",
-                    "Enable this rating in settings",
+                    "search.tooltips.ratingSignIn",
+                    "Sign in and opt in to enable this rating",
                   )
-                : "";
-          const label = (
-            <FormControlLabel
-              className="m-0"
-              control={
+                : disabled
+                  ? t(
+                      "search.tooltips.ratingOptIn",
+                      "Enable this rating in settings",
+                    )
+                  : "";
+            const label = (
+              <label className="m-0 inline-flex items-center gap-2 cursor-pointer">
                 <Checkbox
-                  size="small"
                   checked={selected.has(rating)}
                   disabled={disabled}
-                  onChange={(e) => toggle(rating, e.target.checked)}
+                  onCheckedChange={(checked) =>
+                    toggle(rating, checked === true)
+                  }
                 />
-              }
-              label={t(`rating.tier.${rating}`, rating)}
-            />
-          );
-          return hint ? (
-            <Tooltip key={rating} title={hint}>
-              <span>{label}</span>
-            </Tooltip>
-          ) : (
-            <span key={rating}>{label}</span>
-          );
-        })}
-      </div>
+                <span className="text-sm">
+                  {t(`rating.tier.${rating}`, rating)}
+                </span>
+              </label>
+            );
+            return hint ? (
+              <Tooltip key={rating}>
+                <TooltipTrigger asChild>
+                  <span>{label}</span>
+                </TooltipTrigger>
+                <TooltipContent>{hint}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <span key={rating}>{label}</span>
+            );
+          })}
+        </div>
+      </TooltipProvider>
     </div>
   );
 };

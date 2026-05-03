@@ -1,14 +1,16 @@
+import type { CreateApiTokenInput } from "@rezics/contract";
 import {
   Alert,
-  Box,
+  AlertDescription,
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  TextField,
-} from "@mui/material";
-import type { CreateApiTokenInput } from "@rezics/contract";
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import type { FC } from "react";
 import { useState } from "react";
 import { ScopesEditor } from "./ScopesEditor";
@@ -52,41 +54,47 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>Create API Token</DialogTitle>
-      <DialogContent>
-        <Box className="space-y-4 mt-2">
-          <TextField
-            fullWidth
-            label="Token name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <div className="my-8" />
-          <TextField
-            fullWidth
-            type="datetime-local"
-            label="Expires At (optional)"
-            InputLabelProps={{ shrink: true }}
-            value={expiresAt}
-            onChange={(e) => setExpiresAt(e.target.value)}
-          />
-          <div className="my-8" />
+    <Dialog open={open} onOpenChange={(o) => (o ? null : handleClose())}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Create API Token</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 mt-2">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="ctd-name">Token name</Label>
+            <Input
+              id="ctd-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="ctd-exp">Expires At (optional)</Label>
+            <Input
+              id="ctd-exp"
+              type="datetime-local"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+            />
+          </div>
           <ScopesEditor scopes={scopes} onChange={setScopes} />
-          {error && <Alert severity="error">{error}</Alert>}
-        </Box>
+          {error && (
+            <Alert>
+              <AlertDescription className="text-rezics-color-danger">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleCreate} disabled={creating}>
+            {creating ? "Creating…" : "Create"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button
-          onClick={handleCreate}
-          variant="contained"
-          color="primary"
-          disabled={creating}
-        >
-          {creating ? "Creating…" : "Create"}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

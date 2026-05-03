@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import type { Action } from "../types";
@@ -114,14 +114,14 @@ export const PillLg: Story = {
  */
 export const PillInCard: Story = {
   render: () => (
-    <Card sx={{ maxWidth: 520 }}>
+    <Card className="max-w-[520px]">
       <CardContent>
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Discussion thread title</Typography>
-          <Typography variant="body2" color="text.secondary">
+        <div className="flex flex-col gap-3">
+          <div className="text-sm font-semibold">Discussion thread title</div>
+          <p className="text-sm text-rezics-color-fg-muted">
             A short snippet of the post body to give the bar a real surface to
             sit against.
-          </Typography>
+          </p>
           <ReactionBar
             size="md"
             variant="pill"
@@ -130,7 +130,7 @@ export const PillInCard: Story = {
             actions={discussionCardActions}
             overflow={discussionCardOverflow}
           />
-        </Stack>
+        </div>
       </CardContent>
     </Card>
   ),
@@ -142,16 +142,9 @@ export const PillInCard: Story = {
  */
 export const PlainInHero: Story = {
   render: () => (
-    <Box
-      sx={{
-        bgcolor: "rgba(0,0,0,0.7)",
-        color: "common.white",
-        p: 3,
-        borderRadius: 2,
-        maxWidth: 640,
-        display: "flex",
-        justifyContent: "flex-end",
-      }}
+    <div
+      className="flex max-w-[640px] justify-end rounded-lg p-6 text-white"
+      style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
     >
       <ReactionBar
         size="md"
@@ -160,6 +153,6 @@ export const PlainInHero: Story = {
         policy={samplePolicy}
         actions={contentAsArtifactActions}
       />
-    </Box>
+    </div>
   ),
 };

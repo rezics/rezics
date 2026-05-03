@@ -1,5 +1,3 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import type React from "react";
 
 interface RealmTagManagerProps {
@@ -11,11 +9,11 @@ export const RealmTagManager: React.FC<RealmTagManagerProps> = ({
 }) => {
   // MOCK: tag management UI placeholder
   return (
-    <Box py={2}>
-      <Typography variant="body2" color="text.secondary">
+    <div className="py-4">
+      <p className="text-sm text-rezics-color-fg-muted">
         Tag management will be available when the realm-tag API endpoints are
         wired up.
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 };

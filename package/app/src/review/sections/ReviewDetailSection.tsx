@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
@@ -50,13 +49,13 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
   };
 
   return (
-    <Box className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8">
       {canEdit && (
-        <Box alignSelf="flex-end">
+        <div className="self-end">
           <MUILink to="/review/$reviewId/edit" params={{ reviewId }}>
             {t("common.edit")}
           </MUILink>
-        </Box>
+        </div>
       )}
 
       <ReviewDetail
@@ -65,13 +64,11 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
         onReplyInvoke={handleReplyInvoke}
       />
 
-      <Box ref={commentRef} className="mt-4 flex flex-col gap-3">
-        <Box className="flex items-center gap-2">
+      <div ref={commentRef} className="mt-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2">
           <AccentBar />
-          <Typography variant="h6" fontWeight={700}>
-            {t("review.comments")}
-          </Typography>
-        </Box>
+          <h2 className="text-lg font-bold">{t("review.comments")}</h2>
+        </div>
 
         <ReplyComposer
           ref={composerRef}
@@ -80,7 +77,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
         />
 
         <PostTreeSection rootPostUnitId={review.unitId} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

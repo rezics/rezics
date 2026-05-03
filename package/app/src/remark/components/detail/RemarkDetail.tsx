@@ -1,15 +1,11 @@
-import { Box, Typography } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { ThumbsDown as ThumbDownIcon, ThumbsUp as ThumbUpIcon } from "lucide-react";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
-import {
-  remarkDetailActions,
-  remarkPolicy,
-} from "../../models/remarkPolicy";
-import { ThumbsDown as ThumbDownIcon, ThumbsUp as ThumbUpIcon } from "lucide-react";
+import { remarkDetailActions, remarkPolicy } from "../../models/remarkPolicy";
 
 interface RemarkDetailProps {
   remark: PostDTO;
@@ -25,28 +21,26 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
   const bookUnitId = remark.targetUnitId;
 
   return (
-    <Box className="flex flex-col gap-4">
-      <Box className="flex items-start justify-between gap-4">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start justify-between gap-4">
         <PostAuthorHeader post={remark} />
-        <Box className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           {isRecommended ? (
-            <ThumbUpIcon color="primary" />
+            <ThumbUpIcon className="h-5 w-5 text-rezics-color-primary" />
           ) : (
-            <ThumbDownIcon color="disabled" />
+            <ThumbDownIcon className="h-5 w-5 text-rezics-color-fg-muted" />
           )}
           {rating !== undefined && (
-            <Typography variant="body2">{rating.toFixed(1)} / 10</Typography>
+            <span className="text-sm">{rating.toFixed(1)} / 10</span>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
       {bookUnitId && (
-        <Box>
+        <div>
           <MUILink to="/book/$bookId" params={{ bookId: bookUnitId }}>
-            <Typography variant="caption" color="primary">
-              View book
-            </Typography>
+            <span className="text-xs text-rezics-color-primary">View book</span>
           </MUILink>
-        </Box>
+        </div>
       )}
       <PostBodyMarkdown body={remark.body ?? ""} />
       <ReactionBar
@@ -56,6 +50,6 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
         actions={remarkDetailActions}
         onReplyInvoke={onReplyInvoke}
       />
-    </Box>
+    </div>
   );
 };

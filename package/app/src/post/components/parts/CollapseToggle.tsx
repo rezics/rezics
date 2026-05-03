@@ -1,7 +1,6 @@
-import { IconButton } from "@mui/material";
+import { Plus as AddIcon, Minus as RemoveIcon } from "lucide-react";
 import type React from "react";
 import { useThreadingHover } from "./ThreadingContext";
-import { Plus as AddIcon, Minus as RemoveIcon } from "lucide-react";
 
 export interface CollapseToggleProps {
   isCollapsed: boolean;
@@ -20,29 +19,21 @@ export const CollapseToggle: React.FC<CollapseToggleProps> = ({
   };
 
   return (
-    <IconButton
-      size="small"
+    <button
+      type="button"
       aria-label={isCollapsed ? "Expand replies" : "Collapse replies"}
       onClick={handleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       data-hovered={hovered ? "true" : undefined}
-      sx={{
-        width: 20,
-        height: 20,
-        border: "1px solid",
-        borderColor: hovered ? "primary.main" : "divider",
-        color: hovered ? "primary.main" : "text.secondary",
-        borderRadius: "50%",
-        p: 0,
-        transition: "border-color 120ms ease, color 120ms ease",
-      }}
+      className={[
+        "inline-flex items-center justify-center w-5 h-5 rounded-full border p-0 transition-colors duration-100 ease-in-out",
+        hovered
+          ? "border-rezics-color-primary text-rezics-color-primary"
+          : "border-rezics-color-border text-rezics-color-fg-muted",
+      ].join(" ")}
     >
-      {isCollapsed ? (
-        <AddIcon size={14} />
-      ) : (
-        <RemoveIcon size={14} />
-      )}
-    </IconButton>
+      {isCollapsed ? <AddIcon size={14} /> : <RemoveIcon size={14} />}
+    </button>
   );
 };

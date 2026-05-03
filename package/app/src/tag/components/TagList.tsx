@@ -1,7 +1,8 @@
-import { Chip, Typography } from "@mui/material";
+import { Badge } from "@rezics/ui/shadcn";
 import type { UnitTagDTO } from "@rezics/contract";
 import type React from "react";
 import { useCallback, useState } from "react";
+import { cn } from "@/shared/utils/css-util";
 import { TagDetailCard } from "./TagCards";
 
 interface SingleTagChipProps {
@@ -32,16 +33,17 @@ export function SingleTagChip({
   );
 
   const label = tag.tagUnitId;
+  const isActive = tag.tagUnitId === activeId;
 
   return (
     <div className={className}>
-      <Chip
-        label={`${label} (${tag.score})`}
-        size="small"
-        clickable
-        color={tag.tagUnitId === activeId ? "primary" : "default"}
+      <Badge
+        variant={isActive ? "default" : "secondary"}
+        className="cursor-pointer"
         onClick={(e) => handleClick(e, tag)}
-      />
+      >
+        {label} ({tag.score})
+      </Badge>
       {activeId && (
         <div className="mt-4">
           <TagDetailCard tag={tag} />
@@ -75,9 +77,7 @@ export const TagList: React.FC<{
   if (tags.length === 0) {
     return (
       <div className={className}>
-        <Typography variant="body2" color="text.secondary">
-          暂无标签
-        </Typography>
+        <p className="text-sm text-rezics-color-fg-muted">暂无标签</p>
       </div>
     );
   }
@@ -87,15 +87,16 @@ export const TagList: React.FC<{
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => {
           const label = tag.tagUnitId;
+          const isActive = tag.tagUnitId === activeId;
           return (
             <div key={tag.tagUnitId} className="flex items-center">
-              <Chip
-                label={`${label} (${tag.score})`}
-                size="small"
-                clickable
-                color={tag.tagUnitId === activeId ? "primary" : "default"}
+              <Badge
+                variant={isActive ? "default" : "secondary"}
+                className={cn("cursor-pointer")}
                 onClick={(e) => handleClick(e, tag)}
-              />
+              >
+                {label} ({tag.score})
+              </Badge>
             </div>
           );
         })}

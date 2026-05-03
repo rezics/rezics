@@ -1,5 +1,5 @@
-import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
 import type { BookDTO } from "@rezics/contract";
+import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,46 +19,46 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   const { t } = useTranslation();
 
   const items = (
-    <Stack spacing={1}>
+    <div className="flex flex-col gap-2">
       {bookInfo?.isbn13 && (
-        <Typography variant="body2">
+        <p className="text-sm">
           {t("book.fields.isbn")}：{bookInfo.isbn13}
-        </Typography>
+        </p>
       )}
-      <Typography variant="body2">
+      <p className="text-sm">
         {t("book.fields.text_length")}：{bookInfo?.textLength ?? 0}
-      </Typography>
+      </p>
       {bookInfo?.pageCount != null && (
-        <Typography variant="body2">
+        <p className="text-sm">
           {t("book.fields.page_count" as any)}：{bookInfo.pageCount}
-        </Typography>
+        </p>
       )}
       {bookInfo?.formatKey && (
-        <Typography variant="body2">
+        <p className="text-sm">
           {t("book.fields.format" as any)}：{bookInfo.formatKey}
-        </Typography>
+        </p>
       )}
-    </Stack>
+    </div>
   );
 
   if (variant === "inline") {
     return (
-      <Box>
-        <Typography variant="subtitle2" fontWeight={600} mb={1}>
+      <div>
+        <h3 className="text-sm font-semibold mb-2">
           {t("book.info_panel.title")}
-        </Typography>
+        </h3>
         {items}
-      </Box>
+      </div>
     );
   }
 
   return (
-    <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle1" fontWeight={600} mb={1}>
+    <div className="bg-rezics-color-surface-elevated p-4 border border-rezics-color-border-whisper rounded-md">
+      <h3 className="text-base font-semibold mb-2">
         {t("book.info_panel.title")}
-      </Typography>
-      <Divider sx={{ mb: 2 }} />
+      </h3>
+      <Separator className="mb-4" />
       {items}
-    </Paper>
+    </div>
   );
 };

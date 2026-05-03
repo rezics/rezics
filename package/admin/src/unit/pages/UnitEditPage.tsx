@@ -1,19 +1,18 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Divider,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import { unitMutations } from "@rezics/api/unit/unit.mutations";
 
+import { Spinner } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
@@ -92,150 +91,147 @@ export default function UnitEditPage() {
     <Page title="Edit Unit" description={`编辑 Unit：${unitId}`}>
       <Card>
         <CardContent>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-            <Button
-              component={Link}
-              to="/unit"
-              startIcon={<ArrowBackIcon />}
-              variant="text"
-            >
-              Back
+          <div className="flex flex-row items-center gap-2 mb-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/unit">
+                <ArrowBackIcon className="size-4" />
+                Back
+              </Link>
             </Button>
-            <Box sx={{ flex: 1 }} />
-          </Stack>
+            <div className="flex-1" />
+          </div>
 
-          <Divider sx={{ my: 2 }} />
+          <Separator className="my-4" />
 
           {detailQuery.isLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={24} />
-            </Box>
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
           ) : detailQuery.isError ? (
-            <Box>
-              <Alert severity="error">Failed to load unit.</Alert>
+            <div>
+              <Alert>
+                <AlertDescription className="text-rezics-color-danger">
+                  Failed to load unit.
+                </AlertDescription>
+              </Alert>
               {detailQuery.error ? (
-                <Typography color="error" variant="caption">
+                <p className="text-xs text-rezics-color-danger mt-2">
                   {String(detailQuery.error)}
-                </Typography>
+                </p>
               ) : null}
-            </Box>
+            </div>
           ) : (
             <>
               {error ? (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {error}
+                <Alert className="mb-4">
+                  <AlertDescription className="text-rezics-color-danger">
+                    {error}
+                  </AlertDescription>
                 </Alert>
               ) : null}
 
-              <Stack spacing={0.5} sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
+              <div className="flex flex-col gap-1 mb-4">
+                <p className="text-sm text-rezics-color-fg-muted">
                   ID: <strong>{detailQuery.data?.id ?? "-"}</strong>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
+                </p>
+                <p className="text-sm text-rezics-color-fg-muted">
                   User ID: <strong>{detailQuery.data?.userId ?? "-"}</strong>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
+                </p>
+                <p className="text-sm text-rezics-color-fg-muted">
                   Type: <strong>{detailQuery.data?.type ?? "-"}</strong>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
+                </p>
+                <p className="text-sm text-rezics-color-fg-muted">
                   Default Language:{" "}
                   <strong>{detailQuery.data?.defaultLanguage ?? "-"}</strong>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
+                </p>
+                <p className="text-sm text-rezics-color-fg-muted">
                   Created:{" "}
                   <strong>{fmtDate(detailQuery.data?.createdAt)}</strong>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
+                </p>
+                <p className="text-sm text-rezics-color-fg-muted">
                   Updated:{" "}
                   <strong>{fmtDate(detailQuery.data?.updatedAt)}</strong>
-                </Typography>
-              </Stack>
+                </p>
+              </div>
 
               {/* Translations (read-only display) */}
               {detailQuery.data?.translations?.length ? (
-                <Stack spacing={1} sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
+                <div className="flex flex-col gap-2 mb-6">
+                  <p className="text-xs font-semibold text-rezics-color-fg-muted">
                     Translations
-                  </Typography>
+                  </p>
                   {detailQuery.data.translations.map((tr) => (
-                    <Box
+                    <div
                       key={`${tr.unitId}-${tr.language}`}
-                      sx={{
-                        pl: 2,
-                        borderLeft: 2,
-                        borderColor: "divider",
-                      }}
+                      className="pl-4 border-l-2 border-rezics-color-border"
                     >
-                      <Typography variant="body2" fontWeight={600}>
+                      <p className="text-sm font-semibold">
                         [{tr.language}] {tr.title || "(no title)"}
-                      </Typography>
+                      </p>
                       {tr.subtitle ? (
-                        <Typography variant="caption" color="text.secondary">
+                        <p className="text-xs text-rezics-color-fg-muted">
                           Subtitle: {tr.subtitle}
-                        </Typography>
+                        </p>
                       ) : null}
                       {tr.summary ? (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mt: 0.5 }}
-                        >
+                        <p className="text-sm text-rezics-color-fg-muted mt-1">
                           {tr.summary}
-                        </Typography>
+                        </p>
                       ) : null}
-                    </Box>
+                    </div>
                   ))}
-                  <Typography variant="caption" color="text.secondary">
+                  <p className="text-xs text-rezics-color-fg-muted">
                     Translations are managed via the translation API endpoints.
-                  </Typography>
-                </Stack>
+                  </p>
+                </div>
               ) : (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 2 }}
-                >
+                <p className="text-sm text-rezics-color-fg-muted mb-4">
                   No translations available.
-                </Typography>
+                </p>
               )}
 
-              <Divider sx={{ mb: 2 }} />
+              <Separator className="mb-4" />
 
-              <Box component="form" onSubmit={onSubmit}>
-                <Stack spacing={2}>
-                  <TextField
-                    label="Status"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    placeholder="DRAFT / PUBLISHED / ARCHIVED / ..."
-                  />
-                  <TextField
-                    label="Visibility"
-                    value={visibility}
-                    onChange={(e) => setVisibility(e.target.value)}
-                    placeholder="PUBLIC / UNLISTED / PRIVATE"
-                  />
-                  <TextField
-                    label="Extra (JSON)"
-                    value={extraText}
-                    onChange={(e) => setExtraText(e.target.value)}
-                    multiline
-                    minRows={6}
-                    placeholder='{"key":"value"}'
-                  />
+              <form onSubmit={onSubmit}>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="uep-status">Status</Label>
+                    <Input
+                      id="uep-status"
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                      placeholder="DRAFT / PUBLISHED / ARCHIVED / ..."
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="uep-visibility">Visibility</Label>
+                    <Input
+                      id="uep-visibility"
+                      value={visibility}
+                      onChange={(e) => setVisibility(e.target.value)}
+                      placeholder="PUBLIC / UNLISTED / PRIVATE"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="uep-extra">Extra (JSON)</Label>
+                    <textarea
+                      id="uep-extra"
+                      value={extraText}
+                      onChange={(e) => setExtraText(e.target.value)}
+                      rows={6}
+                      placeholder='{"key":"value"}'
+                      className="font-mono rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                    />
+                  </div>
 
-                  <Box>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      startIcon={<SaveIcon />}
-                      disabled={updateMutation.isPending}
-                    >
+                  <div>
+                    <Button type="submit" disabled={updateMutation.isPending}>
+                      <SaveIcon className="size-4" />
                       {updateMutation.isPending ? "Saving…" : "Save"}
                     </Button>
-                  </Box>
-                </Stack>
-              </Box>
+                  </div>
+                </div>
+              </form>
             </>
           )}
         </CardContent>

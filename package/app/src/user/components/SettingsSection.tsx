@@ -1,4 +1,4 @@
-import { Divider, Typography } from "@mui/material";
+import { Separator } from "@rezics/ui/shadcn";
 import type { FC, ReactNode } from "react";
 
 interface SettingsSectionProps {
@@ -16,16 +16,12 @@ export const SettingsSection: FC<SettingsSectionProps> = ({
 }) => (
   <>
     <section className="py-8">
-      <Typography variant="h6" className="font-semibold mb-1">
-        {title}
-      </Typography>
+      <h6 className="text-base font-semibold mb-1">{title}</h6>
       {description && (
-        <Typography variant="body2" color="text.secondary" className="mb-4">
-          {description}
-        </Typography>
+        <p className="text-sm text-rezics-color-fg-muted mb-4">{description}</p>
       )}
       <div className="mt-4">{children}</div>
     </section>
-    {divider && <Divider />}
+    {divider && <Separator />}
   </>
 );

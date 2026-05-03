@@ -1,16 +1,15 @@
+import { userMutations } from "@rezics/api/user/user.mutations";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import {
   Alert,
-  Box,
+  AlertDescription,
   Button,
   Card,
   CardContent,
-  Divider,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { userMutations } from "@rezics/api/user/user.mutations";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 
@@ -49,79 +48,92 @@ export default function UserCreatePage() {
     <Page title="Create User" description="创建一个新用户（Admin）">
       <Card>
         <CardContent>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-            <Button
-              component={Link}
-              to="/user"
-              startIcon={<ArrowBackIcon />}
-              variant="text"
-            >
-              Back
+          <div className="flex flex-row items-center gap-2 mb-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/user">
+                <ArrowBackIcon className="size-4" />
+                Back
+              </Link>
             </Button>
-            <Box sx={{ flex: 1 }} />
-          </Stack>
+            <div className="flex-1" />
+          </div>
 
-          <Divider sx={{ my: 2 }} />
+          <Separator className="my-4" />
 
           {error ? (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
+            <Alert className="mb-4">
+              <AlertDescription className="text-rezics-color-danger">
+                {error}
+              </AlertDescription>
             </Alert>
           ) : null}
 
-          <Box component="form" onSubmit={onSubmit}>
-            <Stack spacing={2}>
-              <TextField
-                label="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                type="email"
-              />
-              <TextField
-                label="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                type="password"
-                helperText="至少 6 位"
-              />
-              <TextField
-                label="Slug (username)"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                required
-                helperText="5+ chars, letters/numbers, may include - _"
-              />
-              <TextField
-                label="Avatar URL"
-                value={avatar}
-                onChange={(e) => setAvatar(e.target.value)}
-              />
-              <TextField
-                label="Bio"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                multiline
-                minRows={3}
-              />
+          <form onSubmit={onSubmit}>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="ucp-email">Email</Label>
+                <Input
+                  id="ucp-email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  type="email"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="ucp-password">Password</Label>
+                <Input
+                  id="ucp-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  type="password"
+                />
+                <p className="text-xs text-rezics-color-fg-muted">至少 6 位</p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="ucp-slug">Slug (username)</Label>
+                <Input
+                  id="ucp-slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-rezics-color-fg-muted">
+                  5+ chars, letters/numbers, may include - _
+                </p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="ucp-avatar">Avatar URL</Label>
+                <Input
+                  id="ucp-avatar"
+                  value={avatar}
+                  onChange={(e) => setAvatar(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="ucp-bio">Bio</Label>
+                <textarea
+                  id="ucp-bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={3}
+                  className="rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                />
+              </div>
 
-              <Box>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  disabled={createMutation.isPending}
-                >
+              <div>
+                <Button type="submit" disabled={createMutation.isPending}>
+                  <SaveIcon className="size-4" />
                   {createMutation.isPending ? "Creating…" : "Create"}
                 </Button>
-              </Box>
-              <Typography variant="caption" color="text.secondary">
+              </div>
+              <p className="text-xs text-rezics-color-fg-muted">
                 注意：这里是 Admin 创建用户，不需要验证码；后端会自动做 slug
                 校验、email/slug 唯一性校验并哈希密码。
-              </Typography>
-            </Stack>
-          </Box>
+              </p>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </Page>

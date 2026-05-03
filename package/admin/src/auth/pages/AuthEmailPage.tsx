@@ -1,20 +1,19 @@
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { render, templateRegistry } from "@rezics/email";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
-
-type TemplateInfo = (typeof templateRegistry)[number];
 
 export default function AuthEmailPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>(
@@ -111,127 +110,134 @@ export default function AuthEmailPage() {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200 }}>
-      <Typography variant="h5" gutterBottom>
-        Email Templates
-      </Typography>
+    <div className="p-6 max-w-[1200px]">
+      <h2 className="text-xl font-bold mb-4">Email Templates</h2>
 
-      <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+      <div className="flex gap-6 flex-wrap">
         {/* Left panel: controls */}
-        <Box sx={{ flex: "1 1 400px", minWidth: 360 }}>
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Template</InputLabel>
+        <div className="flex-1 min-w-[360px] basis-[400px]">
+          <div className="flex flex-col gap-1 mb-4">
+            <Label>Template</Label>
             <Select
               value={selectedTemplate}
-              label="Template"
-              onChange={(e) => setSelectedTemplate(e.target.value)}
+              onValueChange={setSelectedTemplate}
             >
-              {templateRegistry.map((t) => (
-                <MenuItem key={t.name} value={t.name}>
-                  {t.name} — {t.description}
-                </MenuItem>
-              ))}
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Template" />
+              </SelectTrigger>
+              <SelectContent>
+                {templateRegistry.map((t) => (
+                  <SelectItem key={t.name} value={t.name}>
+                    {t.name} — {t.description}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
-          </FormControl>
+          </div>
 
           {currentTemplate &&
             Object.entries(currentTemplate.propSchema).map(([key, schema]) => (
-              <TextField
-                key={key}
-                label={`${key}${schema.required ? " *" : ""}`}
-                helperText={schema.description}
-                value={formValues[key] ?? ""}
-                onChange={(e) =>
-                  setFormValues((prev) => ({ ...prev, [key]: e.target.value }))
-                }
-                fullWidth
-                sx={{ mb: 2 }}
-              />
+              <div key={key} className="flex flex-col gap-1 mb-4">
+                <Label htmlFor={`aep-${key}`}>
+                  {key}
+                  {schema.required ? " *" : ""}
+                </Label>
+                <Input
+                  id={`aep-${key}`}
+                  value={formValues[key] ?? ""}
+                  onChange={(e) =>
+                    setFormValues((prev) => ({
+                      ...prev,
+                      [key]: e.target.value,
+                    }))
+                  }
+                />
+                {schema.description ? (
+                  <p className="text-xs text-rezics-color-fg-muted">
+                    {schema.description}
+                  </p>
+                ) : null}
+              </div>
             ))}
 
-          <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
-            Send Test Email
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
-            <TextField
-              label="Recipient email"
-              value={recipientEmail}
-              onChange={(e) => setRecipientEmail(e.target.value)}
-              sx={{ flex: 1 }}
-            />
+          <h3 className="text-base font-bold mt-6 mb-2">Send Test Email</h3>
+          <div className="flex gap-2 items-start">
+            <div className="flex-1 flex flex-col gap-1">
+              <Label htmlFor="aep-recipient">Recipient email</Label>
+              <Input
+                id="aep-recipient"
+                value={recipientEmail}
+                onChange={(e) => setRecipientEmail(e.target.value)}
+              />
+            </div>
             <Button
-              variant="contained"
+              className="self-end"
               onClick={handleSendTest}
               disabled={loading || !recipientEmail}
             >
-              {loading ? <CircularProgress size={20} /> : "Send Test"}
+              {loading ? <Spinner size="sm" /> : null}
+              Send Test
             </Button>
-          </Box>
+          </div>
           {sendResult && (
-            <Alert severity={sendResult.type} sx={{ mt: 1 }}>
-              {sendResult.message}
+            <Alert className="mt-2">
+              <AlertDescription
+                className={
+                  sendResult.type === "success"
+                    ? "text-rezics-color-success"
+                    : "text-rezics-color-danger"
+                }
+              >
+                {sendResult.message}
+              </AlertDescription>
             </Alert>
           )}
 
-          <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
-            SMTP Diagnostics
-          </Typography>
+          <h3 className="text-base font-bold mt-6 mb-2">SMTP Diagnostics</h3>
           <Button
-            variant="outlined"
+            variant="outline"
             onClick={handleSmtpTest}
             disabled={loading}
           >
-            {loading ? <CircularProgress size={20} /> : "Test Connection"}
+            {loading ? <Spinner size="sm" /> : null}
+            Test Connection
           </Button>
           {smtpResult && (
-            <Alert severity={smtpResult.type} sx={{ mt: 1 }}>
-              {smtpResult.message}
+            <Alert className="mt-2">
+              <AlertDescription
+                className={
+                  smtpResult.type === "success"
+                    ? "text-rezics-color-success"
+                    : "text-rezics-color-danger"
+                }
+              >
+                {smtpResult.message}
+              </AlertDescription>
             </Alert>
           )}
-        </Box>
+        </div>
 
         {/* Right panel: preview */}
-        <Box
-          sx={{
-            flex: "1 1 500px",
-            minWidth: 400,
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 1,
-            overflow: "hidden",
-          }}
-        >
-          <Typography
-            variant="subtitle2"
-            sx={{
-              p: 1,
-              bgcolor: "grey.100",
-              borderBottom: "1px solid",
-              borderColor: "divider",
-            }}
-          >
+        <div className="flex-1 min-w-[400px] basis-[500px] rounded-md border border-rezics-color-border overflow-hidden">
+          <p className="text-sm font-semibold p-2 bg-rezics-color-bg-elevated border-b border-rezics-color-border">
             Preview
-          </Typography>
+          </p>
           {previewHtml ? (
             <iframe
               srcDoc={previewHtml}
               title="Email Preview"
-              style={{
-                width: "100%",
-                height: 600,
-                border: "none",
-              }}
+              className="w-full h-[600px] border-none"
             />
           ) : (
-            <Box sx={{ p: 3, textAlign: "center" }}>
-              <Typography color="text.secondary">
+            <div className="p-6 text-center">
+              <p className="text-rezics-color-fg-muted">
                 Select a template to preview
-              </Typography>
-            </Box>
+              </p>
+            </div>
           )}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
 

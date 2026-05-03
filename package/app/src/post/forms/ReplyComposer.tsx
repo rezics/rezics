@@ -1,6 +1,6 @@
-import { Box, Button, Stack, TextField } from "@mui/material";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import { Button, Input } from "@rezics/ui/shadcn";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import type React from "react";
 import {
@@ -116,49 +116,45 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
 
     if (mode === "progressive" && !expanded) {
       return (
-        <Box ref={triggerRef} onClick={(e) => e.stopPropagation()}>
-          <TextField
-            fullWidth
-            size="small"
+        <div ref={triggerRef} onClick={(e) => e.stopPropagation()}>
+          <Input
             placeholder={placeholder}
             onFocus={handleProgressiveFocus}
             onClick={handleProgressiveFocus}
-            variant="outlined"
           />
-        </Box>
+        </div>
       );
     }
 
     return (
-      <Box
+      <div
         ref={triggerRef}
         onClick={(e) => e.stopPropagation()}
-        sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+        className="flex flex-col gap-2"
       >
         <RezicsMarkdownEditor
           value={body}
           onChange={setBody}
           resize={resize}
         />
-        <Stack direction="row" spacing={1} justifyContent="flex-end">
+        <div className="flex flex-row justify-end gap-2">
           <Button
-            size="small"
+            size="sm"
+            variant="ghost"
             onClick={handleCancel}
             disabled={mutation.isPending}
           >
             Cancel
           </Button>
           <Button
-            size="small"
-            variant="contained"
-            disableElevation
+            size="sm"
             onClick={handleSubmit}
             disabled={mutation.isPending || !body.trim()}
           >
             {mutation.isPending ? "Posting…" : "Reply"}
           </Button>
-        </Stack>
-      </Box>
+        </div>
+      </div>
     );
   },
 );

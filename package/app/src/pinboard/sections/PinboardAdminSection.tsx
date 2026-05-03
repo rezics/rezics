@@ -1,16 +1,15 @@
 import {
-  Box,
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogContentText,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  Stack,
-  Tab,
   Tabs,
-  Typography,
-} from "@mui/material";
+  TabsList,
+  TabsTrigger,
+} from "@rezics/ui/shadcn";
 import {
   useAppendRealmExtraMutation,
   useRemoveRealmExtraMutation,
@@ -61,24 +60,24 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
   const [activeKey, setActiveKey] = useState<PinboardListKey>(availableKeys[0]);
 
   return (
-    <Box>
-      <Typography variant="h6" fontWeight={600} mb={1}>
+    <div>
+      <h2 className="text-lg font-semibold mb-2">
         {t("pinboard.admin.title")}
-      </Typography>
+      </h2>
       {availableKeys.length > 1 ? (
         <Tabs
           value={activeKey}
-          onChange={(_, v) => setActiveKey(v as RealmExtraListKey)}
-          sx={{ mb: 2 }}
+          onValueChange={(v) => setActiveKey(v as RealmExtraListKey)}
           aria-label={t("pinboard.admin.tabs_aria")}
+          className="mb-4"
         >
-          {availableKeys.map((key) => (
-            <Tab
-              key={key}
-              value={key}
-              label={t(`pinboard.admin.tabs.${key}`)}
-            />
-          ))}
+          <TabsList>
+            {availableKeys.map((key) => (
+              <TabsTrigger key={key} value={key}>
+                {t(`pinboard.admin.tabs.${key}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         </Tabs>
       ) : null}
 
@@ -86,7 +85,7 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
         realmUnitId={realmUnitId}
         pinboardKey={activeKey}
       />
-    </Box>
+    </div>
   );
 };
 
@@ -204,16 +203,13 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   );
 
   return (
-    <Stack spacing={2}>
-      <Stack direction="row" justifyContent="flex-end">
-        <Button
-          variant="contained"
-          startIcon={<AddRoundedIcon />}
-          onClick={openCreate}
-        >
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-row justify-end">
+        <Button onClick={openCreate}>
+          <AddRoundedIcon className="h-4 w-4 mr-1" />
           {t("pinboard.admin.create")}
         </Button>
-      </Stack>
+      </div>
 
       {staleIds.length > 0 ? (
         <StaleIdsBanner
@@ -263,29 +259,36 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
 
       <Dialog
         open={pendingRemove !== null}
-        onClose={() => setPendingRemove(null)}
-        aria-labelledby="pinboard-delete-title"
+        onOpenChange={(open) => {
+          if (!open) setPendingRemove(null);
+        }}
       >
-        <DialogTitle id="pinboard-delete-title">
-          {t("pinboard.admin.delete_title")}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {t("pinboard.admin.delete_description", {
-              title: pendingRemove?.title ?? "",
-            })}
-          </DialogContentText>
+        <DialogContent aria-labelledby="pinboard-delete-title">
+          <DialogHeader>
+            <DialogTitle id="pinboard-delete-title">
+              {t("pinboard.admin.delete_title")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("pinboard.admin.delete_description", {
+                title: pendingRemove?.title ?? "",
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPendingRemove(null)}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmRemove}
+              disabled={removing}
+            >
+              {t("common.delete")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPendingRemove(null)}>
-            {t("common.cancel")}
-          </Button>
-          <Button color="error" onClick={confirmRemove} disabled={removing}>
-            {t("common.delete")}
-          </Button>
-        </DialogActions>
       </Dialog>
-    </Stack>
+    </div>
   );
 };
 
@@ -362,31 +365,35 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="md"
-      aria-labelledby="pinboard-editor-title"
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
     >
-      <DialogTitle id="pinboard-editor-title">
-        {isEdit
-          ? t("pinboard.editor.title_edit")
-          : t("pinboard.editor.title_create")}
-      </DialogTitle>
-      <DialogContent>
+      <DialogContent
+        className="sm:max-w-2xl"
+        aria-labelledby="pinboard-editor-title"
+      >
+        <DialogHeader>
+          <DialogTitle id="pinboard-editor-title">
+            {isEdit
+              ? t("pinboard.editor.title_edit")
+              : t("pinboard.editor.title_create")}
+          </DialogTitle>
+        </DialogHeader>
         {isEdit && detailQuery.isLoading ? (
           <PinboardSkeleton rows={3} rowHeight={48} />
         ) : (
           <TranslationEditor translations={drafts} onChange={setDrafts} />
         )}
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose} disabled={saving}>
+            {t("common.cancel")}
+          </Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {t("common.save")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={saving}>
-          {t("common.cancel")}
-        </Button>
-        <Button variant="contained" onClick={handleSave} disabled={saving}>
-          {t("common.save")}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

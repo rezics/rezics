@@ -1,16 +1,4 @@
 import {
-  Alert,
-  Button,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Stack,
-  Typography,
-} from "@mui/material";
-import {
   bookQueries,
   useCreateBookMutation,
   useUpdateBookMutation,
@@ -26,6 +14,17 @@ import type {
 } from "@rezics/contract";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
@@ -68,23 +67,27 @@ const UpdateBookDialog: React.FC<{
   state: UpdateBookDialogState;
 }> = ({ t, open, onClose, state }) => {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{state?.title}</DialogTitle>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
-        <Alert severity={state?.error ? "error" : "success"}>
-          <Typography variant="body1">{state?.message}</Typography>
-          <Typography variant="body1">
-            {state?.showBookLink && state?.bookId && (
-              <MUILink to="/book/$bookId" params={{ bookId: state.bookId }}>
-                {t("page.book_edit.info.dialog.view_book")}
-              </MUILink>
-            )}
-          </Typography>
+        <DialogHeader>
+          <DialogTitle>{state?.title}</DialogTitle>
+        </DialogHeader>
+        <Alert variant={state?.error ? "destructive" : "default"}>
+          <AlertDescription>
+            <p className="text-base">{state?.message}</p>
+            <p className="text-base">
+              {state?.showBookLink && state?.bookId && (
+                <MUILink to="/book/$bookId" params={{ bookId: state.bookId }}>
+                  {t("page.book_edit.info.dialog.view_book")}
+                </MUILink>
+              )}
+            </p>
+          </AlertDescription>
         </Alert>
+        <DialogFooter>
+          <Button onClick={onClose}>{t("common.close")}</Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t("common.close")}</Button>
-      </DialogActions>
     </Dialog>
   );
 };
@@ -321,7 +324,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         <div className="flex items-center gap-2">
           {bookId && (
             <Button
-              variant="outlined"
+              variant="outline"
               onClick={() =>
                 navigate({ to: "/book/$bookId", params: { bookId } })
               }
@@ -329,9 +332,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {t("common.back")}
             </Button>
           )}
-          <Button variant="contained" onClick={() => handleSubmit()}>
-            {t("common.submit")}
-          </Button>
+          <Button onClick={() => handleSubmit()}>{t("common.submit")}</Button>
         </div>
       </div>
 
@@ -342,8 +343,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
               {t("page.book_edit.info.translation.section_title")}
             </h3>
-            <Divider className="mb-6" />
-            <Stack gap={4}>
+            <Separator className="mb-6" />
+            <div className="flex flex-col gap-8">
               <TranslationLanguageBar
                 existingLanguages={editor.existingLanguages}
                 selectedLanguage={editor.selectedLanguage}
@@ -354,10 +355,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               />
 
               {!editor.currentTranslation && (
-                <Alert severity="info" variant="outlined">
-                  {t("page.book_edit.info.translation.empty_for_lang", {
-                    lang: editor.selectedLanguage,
-                  })}
+                <Alert>
+                  <AlertDescription>
+                    {t("page.book_edit.info.translation.empty_for_lang", {
+                      lang: editor.selectedLanguage,
+                    })}
+                  </AlertDescription>
                 </Alert>
               )}
 
@@ -373,8 +376,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               />
 
               {editor.isDirty && sourceReleaseUnitId && (
-                <Alert severity="warning" variant="outlined">
-                  {t("page.book_edit.info.translation.diverge_warning")}
+                <Alert>
+                  <AlertDescription>
+                    {t("page.book_edit.info.translation.diverge_warning")}
+                  </AlertDescription>
                 </Alert>
               )}
 
@@ -387,18 +392,18 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               />
 
               {editor.currentTranslation && editor.existingLanguages.length > 1 && (
-                <Stack direction="row" justifyContent="flex-end">
+                <div className="flex flex-row justify-end">
                   <Button
-                    size="small"
-                    color="error"
-                    variant="text"
+                    size="sm"
+                    variant="ghost"
+                    className="text-rezics-color-text-error"
                     onClick={handleDeleteCurrentTranslation}
                   >
                     {t("page.book_edit.info.translation.delete_button")}
                   </Button>
-                </Stack>
+                </div>
               )}
-            </Stack>
+            </div>
           </section>
         )}
 
@@ -408,7 +413,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
               {t("page.book_edit.info.translation.section_title")}
             </h3>
-            <Divider className="mb-6" />
+            <Separator className="mb-6" />
             <TranslationFieldsEditor
               draft={editor.currentDraft}
               onChange={editor.updateField}
@@ -420,7 +425,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
             {t("book.edit_sections.metadata")}
           </h3>
-          <Divider className="mb-6" />
+          <Separator className="mb-6" />
           <BookMetadataEditor
             value={metadata}
             onChange={(value) => {
@@ -442,18 +447,21 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {t("book.edit_sections.extra")}
             </h3>
             <ExpandMore
-              size={20} color={"text.secondary"} style={{ transition: "transform 200ms ease", transform: extraOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+              className="w-5 h-5 text-rezics-color-text-secondary transition-transform duration-200"
+              style={{
+                transform: extraOpen ? "rotate(180deg)" : "rotate(0deg)",
+              }}
             />
           </button>
-          <Divider className="mt-3 mb-6" />
-          <Collapse in={extraOpen} timeout="auto" unmountOnExit>
+          <Separator className="mt-3 mb-6" />
+          {extraOpen && (
             <BookExtraEditor
               value={metadata.extra}
               onChange={(value) => {
                 setMetadataState((prev) => ({ ...prev, extra: value }));
               }}
             />
-          </Collapse>
+          )}
         </section>
       </div>
 

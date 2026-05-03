@@ -1,12 +1,3 @@
-import {
-  Box,
-  Chip,
-  Paper,
-  Tab,
-  Tabs,
-  Tooltip,
-  Typography,
-} from "@mui/material";
 import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
 import type { UnitDTO, UnitType } from "@rezics/contract";
 import {
@@ -14,6 +5,16 @@ import {
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import {
+  Badge,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
@@ -31,42 +32,35 @@ function defaultChildren(units: Unit[]) {
   return (
     <div className="space-y-3">
       {units.map((item) => (
-        <Paper
+        <div
           key={item.id}
-          elevation={2}
-          className="flex items-start justify-between rounded-md px-3 py-2"
+          className="flex items-start justify-between rounded-md bg-rezics-color-bg-elevated px-3 py-2 shadow-sm"
         >
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Tooltip title="打开内容页面" placement="top">
-                <Link to={buildUnitUrl(item)}>
-                  <Chip
-                    label={item.type || "UNKNOWN"}
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {}}
-                    className="text-[11px]"
-                  />
-                </Link>
-              </Tooltip>
-              <Typography
-                variant="subtitle1"
-                className="font-semibold truncate mb-1"
-              >
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link to={buildUnitUrl(item)}>
+                      <Badge variant="outline" className="text-[11px]">
+                        {item.type || "UNKNOWN"}
+                      </Badge>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>打开内容页面</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <p className="text-base font-semibold truncate mb-1">
                 {item.translations?.[0]?.title || "(未命名内容)"}
-              </Typography>
+              </p>
             </div>
             {item.translations?.[0]?.description && (
-              <Typography
-                variant="body2"
-                color="textSecondary"
-                className="line-clamp-4"
-              >
+              <p className="text-sm text-rezics-color-fg-muted line-clamp-4">
                 {item.translations[0].description}
-              </Typography>
+              </p>
             )}
           </div>
-        </Paper>
+        </div>
       ))}
     </div>
   );
@@ -240,19 +234,17 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
               placeholder={t("units.search_placeholder")}
             />
             {!isSingle && (
-              <Box
-                sx={{ borderBottom: 1, borderColor: "divider", mt: 2, mb: 2 }}
-              >
-                <Tabs
-                  value={tab}
-                  onChange={(_, v) => setTab(v)}
-                  aria-label="unit type tabs"
-                >
-                  {types.map((t) => (
-                    <Tab key={t} label={t} value={t} />
-                  ))}
+              <div className="mt-4 mb-4 border-b border-rezics-color-border">
+                <Tabs value={tab} onValueChange={(v) => setTab(v)}>
+                  <TabsList aria-label="unit type tabs">
+                    {types.map((t) => (
+                      <TabsTrigger key={t} value={t}>
+                        {t}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
                 </Tabs>
-              </Box>
+              </div>
             )}
           </div>
         }

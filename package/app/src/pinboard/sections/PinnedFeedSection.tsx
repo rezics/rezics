@@ -1,4 +1,3 @@
-import { Box, Stack, Typography } from "@mui/material";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { PinboardEntryCard } from "../components/PinboardEntryCard";
@@ -29,28 +28,28 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
 
   if (isLoading) {
     return (
-      <Box mb={2}>
+      <div className="mb-4">
         <PinboardSkeleton rows={2} rowHeight={64} />
-      </Box>
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <Box mb={2}>
+      <div className="mb-4">
         <PinboardErrorState onRetry={() => refetch()} />
-      </Box>
+      </div>
     );
   }
 
   if (entries.length === 0) return null;
 
   return (
-    <Box mb={2} component="section" aria-label={t("pinboard.pinned.region")}>
-      <Typography variant="overline" color="text.secondary" sx={{ px: 0.5 }}>
+    <section className="mb-4" aria-label={t("pinboard.pinned.region")}>
+      <p className="px-1 text-xs font-medium uppercase tracking-wider text-rezics-color-fg-muted">
         {t("pinboard.pinned.heading")}
-      </Typography>
-      <Stack spacing={1}>
+      </p>
+      <div className="flex flex-col gap-2 mt-1">
         {entries.map((entry) => (
           <PinboardEntryCard
             key={entry.unitId}
@@ -59,7 +58,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
             href={linkFor?.(entry.unitId)}
           />
         ))}
-      </Stack>
-    </Box>
+      </div>
+    </section>
   );
 };

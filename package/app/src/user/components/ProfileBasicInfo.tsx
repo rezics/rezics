@@ -1,12 +1,17 @@
-import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { UserDTO } from "@rezics/contract";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+} from "@rezics/ui/shadcn";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
+import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
 import type { FC } from "react";
 import FollowButton from "@/engagement/components/FollowButton";
-import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
 
 interface ProfileBasicInfoProps {
   user: UserDTO;
@@ -45,35 +50,42 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
       <div className="relative flex items-start gap-4 py-4 px-4 md:hidden">
         {isCurrentUser && (
           <Link to="/user/me/setting" className="absolute top-3 right-3">
-            <IconButton size="small">
-              <SettingsIcon fontSize="small" />
-            </IconButton>
+            <Button
+              size="icon"
+              variant="ghost"
+              aria-label="Settings"
+              className="h-8 w-8"
+            >
+              <SettingsIcon className="w-4 h-4" />
+            </Button>
           </Link>
         )}
-        <Avatar
-          src={user.avatar ?? undefined}
-          variant="rounded"
-          sx={{ width: 72, height: 72, borderRadius: 2, fontSize: 32 }}
-        >
-          {user.name?.charAt(0).toUpperCase()}
+        <Avatar className="w-[72px] h-[72px] rounded-md text-3xl">
+          <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
+          <AvatarFallback>
+            {user.name?.charAt(0).toUpperCase()}
+          </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
-            <Typography variant="h6" className="font-semibold">
-              {user.name}
-            </Typography>
+            <h6 className="text-base font-semibold">{user.name}</h6>
             {canEdit && (
               <Link to="/user/$unitId/edit" params={{ unitId }}>
-                <IconButton size="small" aria-label="Edit profile">
-                  <EditOutlined fontSize="small" />
-                </IconButton>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Edit profile"
+                  className="h-8 w-8"
+                >
+                  <EditOutlined className="w-4 h-4" />
+                </Button>
               </Link>
             )}
           </div>
           {user.slug && (
-            <Typography variant="body2" color="text.secondary">
+            <span className="block text-sm text-rezics-color-fg-muted">
               @{user.slug}
-            </Typography>
+            </span>
           )}
           <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
             <span>
@@ -85,13 +97,9 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
             </span>
           </div>
           {user.bio && (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              className="mt-2 line-clamp-2"
-            >
+            <p className="text-sm text-rezics-color-fg-muted mt-2 line-clamp-2">
               {user.bio}
-            </Typography>
+            </p>
           )}
           {!isCurrentUser && (
             <div className="mt-3">
@@ -107,43 +115,26 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
 
       {/* Desktop: generous vertical layout */}
       <div className="hidden md:flex flex-col items-start gap-4 py-12 px-4">
-        <Avatar
-          src={user.avatar ?? undefined}
-          variant="rounded"
-          sx={{
-            width: "100%",
-            height: "auto",
-            aspectRatio: "1",
-            borderRadius: 3,
-            fontSize: 48,
-          }}
-        >
-          {user.name?.charAt(0).toUpperCase()}
+        <Avatar className="w-full h-auto aspect-square rounded-lg text-5xl">
+          <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
+          <AvatarFallback>
+            {user.name?.charAt(0).toUpperCase()}
+          </AvatarFallback>
         </Avatar>
 
         <div>
-          <Typography variant="h5" className="font-semibold">
-            {user.name}
-          </Typography>
+          <h5 className="text-xl font-semibold">{user.name}</h5>
           {user.slug && (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              className="mt-0.5"
-            >
+            <span className="block text-sm text-rezics-color-fg-muted mt-0.5">
               @{user.slug}
-            </Typography>
+            </span>
           )}
         </div>
 
         {user.bio && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            className="max-w-xs"
-          >
+          <p className="text-sm text-rezics-color-fg-muted max-w-xs">
             {user.bio}
-          </Typography>
+          </p>
         )}
 
         <div className="flex items-center gap-3 text-sm text-gray-500">
@@ -159,7 +150,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         <div className="w-full">
           {canEdit ? (
             <Link to="/user/$unitId/edit" params={{ unitId }} className="block">
-              <Button variant="outlined" size="small" fullWidth>
+              <Button variant="outline" size="sm" className="w-full">
                 Edit profile
               </Button>
             </Link>
@@ -175,9 +166,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
 
         {/* Stats — desktop only, shown in sidebar */}
         <div className="w-full mt-4 flex flex-col gap-1">
-          <Typography variant="subtitle2" className="font-semibold mb-1">
-            Stats
-          </Typography>
+          <span className="text-sm font-semibold mb-1">Stats</span>
           <StatLink
             label="Shelves"
             count={shelvesCountQuery.data?.total}
@@ -210,17 +199,11 @@ const StatLink: FC<{
   to: string;
 }> = ({ label, count, to }) => (
   <Link to={to} className="no-underline">
-    <Box className="flex items-center justify-between py-0.5 hover:bg-gray-50 rounded px-1">
-      <Typography variant="body2" color="text.primary">
-        {label}
-      </Typography>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        className="font-medium"
-      >
+    <div className="flex items-center justify-between py-0.5 hover:bg-gray-50 rounded px-1">
+      <span className="text-sm text-rezics-color-fg">{label}</span>
+      <span className="text-sm font-medium text-rezics-color-fg-muted">
         {count ?? "—"}
-      </Typography>
-    </Box>
+      </span>
+    </div>
   </Link>
 );

@@ -1,12 +1,4 @@
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
-import {
   useCreateTokenMutation,
   useRevokeTokenMutation,
   useUpdateTokenMutation,
@@ -17,6 +9,8 @@ import type {
   CreateApiTokenInput,
   UpdateApiTokenInput,
 } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
@@ -108,38 +102,32 @@ export const TokenPage: FC = () => {
   };
 
   return (
-    <Box className="w-11/12 mx-auto mt-16">
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h3" className="font-bold mb-8">
-          API Tokens
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setOpenCreate(true)}
-        >
-          Create Token
-        </Button>
-      </Stack>
+    <div className="w-11/12 mx-auto mt-16">
+      <div className="flex flex-row justify-between items-center">
+        <h1 className="text-3xl font-bold mb-8">API Tokens</h1>
+        <Button onClick={() => setOpenCreate(true)}>Create Token</Button>
+      </div>
 
       {isLoading && (
-        <Box className="flex items-center justify-center h-40">
-          <CircularProgress />
-        </Box>
+        <div className="flex items-center justify-center h-40">
+          <Spinner />
+        </div>
       )}
 
       {error && (
-        <Alert severity="error" className="mb-4">
-          {(error as Error).message}
+        <Alert className="mb-4">
+          <AlertDescription className="text-rezics-color-danger">
+            {(error as Error).message}
+          </AlertDescription>
         </Alert>
       )}
 
       {!isLoading && !error && tokens.length === 0 && (
-        <Box className="flex items-center justify-center h-40">
-          <Typography variant="h6" color="textSecondary">
+        <div className="flex items-center justify-center h-40">
+          <p className="text-base text-rezics-color-fg-muted">
             No API tokens found
-          </Typography>
-        </Box>
+          </p>
+        </div>
       )}
 
       {!isLoading && !error && tokens.length > 0 && (
@@ -179,7 +167,7 @@ export const TokenPage: FC = () => {
         secret={createdSecret}
         onClose={() => setCreatedSecret(null)}
       />
-    </Box>
+    </div>
   );
 };
 

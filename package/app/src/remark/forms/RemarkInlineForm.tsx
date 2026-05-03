@@ -1,8 +1,8 @@
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
 import { useCreatePostMutation } from "@rezics/api/post/post";
-import { PostKind } from "@rezics/contract";
+import { PostKind, SCORE_MAX } from "@rezics/contract";
+import { RatingInput } from "@rezics/ui";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,6 +19,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [body, setBody] = useState("");
+  const [score, setScore] = useState<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const postMutation = useCreatePostMutation();
@@ -30,17 +31,20 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
 
   const reset = useCallback(() => {
     setBody("");
+    setScore(null);
     setExpanded(false);
   }, []);
 
   const handleSubmit = () => {
     const trimmed = body.trim();
     if (!trimmed || postMutation.isPending) return;
+    const extra = score !== null ? { rating: score } : undefined;
     postMutation.mutate(
       {
         targetUnitId: bookUnitId,
         kind: PostKind.REMARK,
         body: trimmed,
+        ...(extra ? { extra } : {}),
       },
       {
         onSuccess: () => {
@@ -68,21 +72,26 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
 
   if (!expanded) {
     return (
-      <Box ref={wrapperRef}>
-        <TextField
-          fullWidth
-          size="small"
+      <div ref={wrapperRef}>
+        <Input
           placeholder={t("remark.compose_placeholder", "寫下你的短評…")}
           onFocus={handleExpand}
           onClick={handleExpand}
-          variant="outlined"
         />
-      </Box>
+      </div>
     );
   }
 
   return (
-    <Box ref={wrapperRef} sx={{ display: "flex", flexDirection: "column" }}>
+    <div ref={wrapperRef} className="flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <RatingInput
+          value={score}
+          onChange={setScore}
+          max={SCORE_MAX}
+          aria-label={t("remark.form.rating", "Rating")}
+        />
+      </div>
       <RezicsMarkdownEditor
         value={body}
         onChange={setBody}
@@ -95,6 +104,6 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
             : t("remark.submit", "Submit Remark")
         }
       />
-    </Box>
+    </div>
   );
 };

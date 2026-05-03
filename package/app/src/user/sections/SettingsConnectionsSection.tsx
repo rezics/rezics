@@ -1,7 +1,8 @@
-import { CircularProgress, Divider, Typography } from "@mui/material";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
 import type { AuthProvider } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
 import { ProviderCard } from "@/user/components/ProviderCard";
@@ -28,7 +29,7 @@ export const SettingsConnectionsSection: FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center py-24">
-        <CircularProgress />
+        <Spinner />
       </div>
     );
   }
@@ -60,7 +61,7 @@ export const SettingsConnectionsSection: FC = () => {
     >
       {PROVIDERS.map((provider, i) => (
         <div key={provider.id}>
-          {i > 0 && <Divider />}
+          {i > 0 && <Separator />}
           <ProviderCard
             providerId={provider.id}
             name={provider.name}

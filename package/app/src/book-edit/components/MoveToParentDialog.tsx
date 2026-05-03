@@ -1,17 +1,21 @@
 import {
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  InputAdornment,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
+  Input,
+} from "@rezics/ui/shadcn";
+import {
+  Network as AccountTree,
+  ChevronRight,
+  ChevronDown as ExpandMore,
+  Search,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Chapter } from "./ChapterTreeEditor";
-import { Network as AccountTree, ChevronRight, ChevronDown as ExpandMore, Search } from "lucide-react";
 
 interface MoveToParentDialogProps {
   open: boolean;
@@ -99,17 +103,16 @@ function TreeNode({
             className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-muted-foreground"
           >
             {expanded ? (
-              <ExpandMore size={18} />
+              <ExpandMore className="w-[18px] h-[18px]" />
             ) : (
-              <ChevronRight size={18} />
+              <ChevronRight className="w-[18px] h-[18px]" />
             )}
           </button>
         ) : (
           <span className="w-6" />
         )}
         <AccountTree
-          size={16}
-          className={isSelected ? "text-primary" : "text-muted-foreground"}
+          className={`w-4 h-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`}
         />
         <span className={`text-sm truncate ${isSelected ? "font-medium" : ""}`}>
           {node.title}
@@ -159,86 +162,71 @@ export function MoveToParentDialog({
   }, [selectedId, onConfirm, onClose]);
 
   // Reset state when dialog opens
-  const handleEnter = useCallback(() => {
-    setSearch("");
-    setSelectedId(null);
-  }, []);
+  useEffect(() => {
+    if (open) {
+      setSearch("");
+      setSelectedId(null);
+    }
+  }, [open]);
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="xs"
-      TransitionProps={{ onEnter: handleEnter }}
-    >
-      <DialogTitle>
-        {t("book.chapter.move_dialog.title", "Move to...")}
-      </DialogTitle>
-      <DialogContent
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.5,
-          pt: "8px !important",
-          minHeight: 320,
-        }}
-      >
-        {movingNode && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-            {t("book.chapter.move_dialog.moving", "Moving:")}{" "}
-            <strong>{movingNode.title}</strong>
-          </Typography>
-        )}
-        <TextField
-          size="small"
-          variant="outlined"
-          placeholder={t(
-            "book.chapter.move_dialog.search_placeholder",
-            "Search nodes...",
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-xs">
+        <DialogHeader>
+          <DialogTitle>
+            {t("book.chapter.move_dialog.title", "Move to...")}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-3 min-h-[320px]">
+          {movingNode && (
+            <p className="text-sm text-rezics-color-text-secondary mb-1">
+              {t("book.chapter.move_dialog.moving", "Moving:")}{" "}
+              <strong>{movingNode.title}</strong>
+            </p>
           )}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          autoFocus
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search size={18} />
-              </InputAdornment>
-            ),
-          }}
-        />
-        <div
-          className="flex-1 overflow-y-auto -mx-1"
-          style={{ maxHeight: 320 }}
-        >
-          {filteredTree.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground text-sm py-12">
-              {t("book.chapter.move_dialog.no_results", "No matching nodes")}
-            </div>
-          ) : (
-            filteredTree.map((node) => (
-              <TreeNode
-                key={node.id}
-                node={node}
-                depth={0}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-              />
-            ))
-          )}
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-rezics-color-text-tertiary" />
+            <Input
+              placeholder={t(
+                "book.chapter.move_dialog.search_placeholder",
+                "Search nodes...",
+              )}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+              className="pl-8"
+            />
+          </div>
+          <div
+            className="flex-1 overflow-y-auto -mx-1"
+            style={{ maxHeight: 320 }}
+          >
+            {filteredTree.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm py-12">
+                {t("book.chapter.move_dialog.no_results", "No matching nodes")}
+              </div>
+            ) : (
+              filteredTree.map((node) => (
+                <TreeNode
+                  key={node.id}
+                  node={node}
+                  depth={0}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                />
+              ))
+            )}
+          </div>
         </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            {t("common.cancel", "Cancel")}
+          </Button>
+          <Button onClick={handleConfirm} disabled={selectedId === null}>
+            {t("common.ok", "OK")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>{t("common.cancel", "Cancel")}</Button>
-        <Button
-          variant="contained"
-          onClick={handleConfirm}
-          disabled={selectedId === null}
-        >
-          {t("common.ok", "OK")}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

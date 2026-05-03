@@ -1,4 +1,3 @@
-import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import {
   useActivateJwtServiceMutation,
   useDeactivateJwtServiceMutation,
@@ -6,6 +5,8 @@ import {
 } from "@rezics/api/jwt-service/jwt-service.mutations";
 import { jwtServiceQueries } from "@rezics/api/jwt-service/jwt-service.queries";
 import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
@@ -81,31 +82,31 @@ export const JwtServicesPage: FC = () => {
   };
 
   return (
-    <Box className="w-11/12 mx-auto mt-16">
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h3" className="font-bold mb-8">
-          JWT Services
-        </Typography>
-      </Stack>
+    <div className="w-11/12 mx-auto mt-16">
+      <div className="flex flex-row justify-between items-center">
+        <h1 className="text-3xl font-bold mb-8">JWT Services</h1>
+      </div>
 
       {isLoading && (
-        <Box className="flex items-center justify-center h-40">
-          <CircularProgress />
-        </Box>
+        <div className="flex items-center justify-center h-40">
+          <Spinner />
+        </div>
       )}
 
       {error && (
-        <Alert severity="error" className="mb-4">
-          {(error as Error).message}
+        <Alert className="mb-4">
+          <AlertDescription className="text-rezics-color-danger">
+            {(error as Error).message}
+          </AlertDescription>
         </Alert>
       )}
 
       {!isLoading && !error && services.length === 0 && (
-        <Box className="flex items-center justify-center h-40">
-          <Typography variant="h6" color="textSecondary">
+        <div className="flex items-center justify-center h-40">
+          <p className="text-base text-rezics-color-fg-muted">
             No JWT services found
-          </Typography>
-        </Box>
+          </p>
+        </div>
       )}
 
       {!isLoading && !error && services.length > 0 && (
@@ -125,7 +126,7 @@ export const JwtServicesPage: FC = () => {
         updating={updating}
         error={updatingError}
       />
-    </Box>
+    </div>
   );
 };
 

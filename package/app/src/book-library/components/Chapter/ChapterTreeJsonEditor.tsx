@@ -1,7 +1,7 @@
-import { Alert } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import type { ChapterTreeItem } from "@rezics/contract";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
+import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
@@ -45,8 +45,8 @@ export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({
 
   return (
     <div>
-      <Alert severity="error" className="mb-2">
-        该功能暂未启用
+      <Alert variant="destructive" className="mb-2">
+        <AlertDescription>该功能暂未启用</AlertDescription>
       </Alert>
       <RezicsJsonEditor
         value={JSON.stringify(jsonData, null, 2)}

@@ -1,16 +1,4 @@
 import {
-  Alert,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Typography,
-} from "@mui/material";
-import {
   useChangeEmailMutation,
   useSendVerificationEmailMutation,
   useSignOutMutation,
@@ -18,12 +6,26 @@ import {
 import { authQueries } from "@rezics/api/auth/auth.queries";
 import { useDeleteMeMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { BadgeCheck as VerifiedIcon } from "lucide-react";
 import { type FC, useState } from "react";
 import { DangerZone } from "@/user/components/DangerZone";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
-import { BadgeCheck as VerifiedIcon } from "lucide-react";
 
 export const SettingsAccountSection: FC = () => {
   useRequireAuth();
@@ -46,7 +48,7 @@ export const SettingsAccountSection: FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center py-24">
-        <CircularProgress />
+        <Spinner />
       </div>
     );
   }
@@ -92,29 +94,26 @@ export const SettingsAccountSection: FC = () => {
         description="Manage your email address and verification status."
       >
         <div className="flex items-center gap-2 mb-4">
-          <Typography variant="body1">{currentEmail}</Typography>
+          <p className="text-base">{currentEmail}</p>
           {isVerified ? (
-            <Chip
-              icon={<VerifiedIcon />}
-              label="Verified"
-              size="small"
-              color="success"
-              variant="outlined"
-            />
+            <Badge
+              variant="outline"
+              className="text-rezics-color-success flex items-center gap-1"
+            >
+              <VerifiedIcon className="w-3 h-3" />
+              Verified
+            </Badge>
           ) : (
-            <Chip
-              label="Unverified"
-              size="small"
-              color="warning"
-              variant="outlined"
-            />
+            <Badge variant="outline" className="text-rezics-color-warning">
+              Unverified
+            </Badge>
           )}
         </div>
 
         {!isVerified && (
           <Button
-            variant="outlined"
-            size="small"
+            variant="outline"
+            size="sm"
             onClick={handleResendVerification}
             disabled={sendVerification.isPending}
           >
@@ -123,8 +122,8 @@ export const SettingsAccountSection: FC = () => {
         )}
 
         {sendVerification.isSuccess && (
-          <Alert severity="success" className="mt-2">
-            Verification email sent.
+          <Alert className="mt-2 text-rezics-color-success">
+            <AlertDescription>Verification email sent.</AlertDescription>
           </Alert>
         )}
       </SettingsSection>
@@ -134,29 +133,29 @@ export const SettingsAccountSection: FC = () => {
         description="Update your email address. A verification link will be sent to the new address."
       >
         {emailSuccess && (
-          <Alert severity="success" className="mb-4">
-            {emailSuccess}
+          <Alert className="mb-4 text-rezics-color-success">
+            <AlertDescription>{emailSuccess}</AlertDescription>
           </Alert>
         )}
         {changeEmail.error && (
-          <Alert severity="error" className="mb-4">
-            {changeEmail.error.message}
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{changeEmail.error.message}</AlertDescription>
           </Alert>
         )}
         <form onSubmit={handleChangeEmail} className="flex items-end gap-3">
-          <TextField
-            label="New Email"
-            type="email"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-            variant="standard"
-            required
-            className="flex-1"
-          />
+          <div className="flex-1 flex flex-col gap-1.5">
+            <Label htmlFor="new-email">New Email</Label>
+            <Input
+              id="new-email"
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              required
+            />
+          </div>
           <Button
             type="submit"
-            variant="contained"
-            size="small"
+            size="sm"
             disabled={changeEmail.isPending || !newEmail}
           >
             {changeEmail.isPending ? "Updating..." : "Change Email"}
@@ -166,45 +165,49 @@ export const SettingsAccountSection: FC = () => {
 
       <DangerZone description="Once you delete your account, there is no going back. Please be certain.">
         <Button
-          variant="outlined"
-          color="error"
+          variant="outline"
+          className="text-rezics-color-danger"
           onClick={() => setDeleteOpen(true)}
         >
           Delete Account
         </Button>
 
-        <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-          <DialogTitle>Delete Account</DialogTitle>
+        <Dialog
+          open={deleteOpen}
+          onOpenChange={(o) => !o && setDeleteOpen(false)}
+        >
           <DialogContent>
-            <Typography variant="body2" className="mb-4">
+            <DialogHeader>
+              <DialogTitle>Delete Account</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm mb-4">
               This action is permanent and cannot be undone. To confirm, type
               your username <strong>{user?.slug}</strong> below.
-            </Typography>
-            <TextField
-              fullWidth
-              variant="standard"
+            </p>
+            <Input
               placeholder={user?.slug}
               value={deleteConfirm}
               onChange={(e) => setDeleteConfirm(e.target.value)}
               autoFocus
             />
             {deleteMe.error && (
-              <Alert severity="error" className="mt-2">
-                {deleteMe.error.message}
+              <Alert variant="destructive" className="mt-2">
+                <AlertDescription>{deleteMe.error.message}</AlertDescription>
               </Alert>
             )}
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={!slugMatch || deleteMe.isPending}
+                onClick={handleDeleteAccount}
+              >
+                {deleteMe.isPending ? "Deleting..." : "Delete My Account"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
-            <Button
-              variant="contained"
-              color="error"
-              disabled={!slugMatch || deleteMe.isPending}
-              onClick={handleDeleteAccount}
-            >
-              {deleteMe.isPending ? "Deleting..." : "Delete My Account"}
-            </Button>
-          </DialogActions>
         </Dialog>
       </DangerZone>
     </div>

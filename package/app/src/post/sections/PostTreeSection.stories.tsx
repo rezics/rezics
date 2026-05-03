@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { postKeys } from "@rezics/api/post/post.keys";
 import type { PostDTO } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
@@ -115,9 +114,9 @@ function Seeded({ posts }: { posts: PostDTO[] }) {
   }, [qc, posts]);
 
   return (
-    <Box p={2}>
+    <div className="p-4">
       <PostTreeSection rootPostUnitId={ROOT_ID} />
-    </Box>
+    </div>
   );
 }
 

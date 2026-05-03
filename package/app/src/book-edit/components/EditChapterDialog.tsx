@@ -1,17 +1,20 @@
+import type { ContentRating } from "@rezics/contract";
+import { RatingSelector } from "@rezics/ui";
 import {
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
+  Input,
+  Label,
   Select,
-  TextField,
-} from "@mui/material";
-import type { ContentRating } from "@rezics/contract";
-import { RatingSelector } from "@rezics/ui";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Chapter } from "./ChapterTreeEditor";
@@ -58,54 +61,57 @@ export function EditChapterDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>
-        {t("book.chapter.edit_dialog.title", "Edit Chapter")}
-      </DialogTitle>
-      <DialogContent
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2.5,
-          pt: "16px !important",
-        }}
-      >
-        <TextField
-          label={t("book.fields.title", "Title")}
-          fullWidth
-          variant="filled"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          error={!title.trim()}
-          autoFocus
-        />
-        <FormControl fullWidth variant="filled">
-          <InputLabel>
-            {t("book.chapter.edit_dialog.status", "Publish Status")}
-          </InputLabel>
-          <Select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as PublishStatus)}
-          >
-            {PUBLISH_STATUSES.map((s) => (
-              <MenuItem key={s} value={s}>
-                {t(`book.chapter.status.${s.toLowerCase()}`, s)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <RatingSelector value={rating} onChange={setRating} />
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-xs">
+        <DialogHeader>
+          <DialogTitle>
+            {t("book.chapter.edit_dialog.title", "Edit Chapter")}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-5 pt-4">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="edit-chapter-title">
+              {t("book.fields.title", "Title")}
+            </Label>
+            <Input
+              id="edit-chapter-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus
+              className={!title.trim() ? "border-rezics-color-error-text" : ""}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="edit-chapter-status">
+              {t("book.chapter.edit_dialog.status", "Publish Status")}
+            </Label>
+            <Select
+              value={status}
+              onValueChange={(v) => setStatus(v as PublishStatus)}
+            >
+              <SelectTrigger id="edit-chapter-status" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PUBLISH_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {t(`book.chapter.status.${s.toLowerCase()}`, s)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <RatingSelector value={rating} onChange={setRating} />
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            {t("common.cancel", "Cancel")}
+          </Button>
+          <Button onClick={handleSave} disabled={!title.trim()}>
+            {t("common.save", "Save")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>{t("common.cancel", "Cancel")}</Button>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={!title.trim()}
-        >
-          {t("common.save", "Save")}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

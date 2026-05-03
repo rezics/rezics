@@ -1,5 +1,5 @@
-import { Divider } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
+import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
 import { ReviewCard } from "./ReviewCard";
 
@@ -15,7 +15,7 @@ export const ReviewCardPair: React.FC<ReviewCardPairProps> = ({
   return (
     <div className="flex flex-col mb-2">
       <ReviewCard review={review1} />
-      <Divider sx={{ my: 1 }} />
+      <Separator className="my-2" />
       <ReviewCard review={review2} />
     </div>
   );

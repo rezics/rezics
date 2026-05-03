@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 
 interface HealthStripProps {
   server: "ok" | "degraded";
@@ -6,16 +6,13 @@ interface HealthStripProps {
 }
 
 function StatusDot({ status }: { status: "ok" | "degraded" | "unreachable" }) {
-  const color = status === "ok" ? "success.main" : "error.main";
+  const cls =
+    status === "ok"
+      ? "bg-rezics-color-success"
+      : "bg-rezics-color-danger";
   return (
-    <Box
-      sx={{
-        width: 10,
-        height: 10,
-        borderRadius: "50%",
-        bgcolor: color,
-        flexShrink: 0,
-      }}
+    <div
+      className={`w-2.5 h-2.5 rounded-full shrink-0 ${cls}`}
     />
   );
 }
@@ -23,26 +20,18 @@ function StatusDot({ status }: { status: "ok" | "degraded" | "unreachable" }) {
 export function HealthStrip({ server, meili }: HealthStripProps) {
   return (
     <Card>
-      <CardContent
-        sx={{
-          display: "flex",
-          gap: 4,
-          alignItems: "center",
-          py: 1.5,
-          "&:last-child": { pb: 1.5 },
-        }}
-      >
-        <Typography variant="overline" color="text.secondary" sx={{ mr: 1 }}>
+      <CardContent className="flex gap-8 items-center py-3">
+        <span className="text-[0.6875rem] uppercase tracking-wider text-rezics-color-fg-muted mr-2">
           System Health
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        </span>
+        <div className="flex items-center gap-2">
           <StatusDot status={server} />
-          <Typography variant="body2">Server: {server}</Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <span className="text-sm">Server: {server}</span>
+        </div>
+        <div className="flex items-center gap-2">
           <StatusDot status={meili} />
-          <Typography variant="body2">Meilisearch: {meili}</Typography>
-        </Box>
+          <span className="text-sm">Meilisearch: {meili}</span>
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,11 +1,22 @@
-import { Card, CardContent, Checkbox, Chip, IconButton } from "@mui/material";
 import type { ContentRating } from "@rezics/contract";
 import { RatingBadge } from "@rezics/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+} from "@rezics/ui/shadcn";
+import {
+  GripVertical as DragIndicator,
+  ChevronDown as ExpandMore,
+  EllipsisVertical as MoreVert,
+  Eye as Visibility,
+} from "lucide-react";
 import type React from "react";
 import type { NodeRendererProps, TreeApi } from "react-arborist";
 import { useLongPress } from "../hooks/useLongPress";
 import type { Chapter, ChapterContextMenuState } from "./ChapterTreeEditor";
-import { GripVertical as DragIndicator, ChevronDown as ExpandMore, EllipsisVertical as MoreVert, Eye as Visibility } from "lucide-react";
 
 /** Uniform row height — react-arborist (react-window) requires a single number. */
 export const LEAF_ROW_HEIGHT = 100;
@@ -164,16 +175,17 @@ export const createChapterTreeEditorNode = ({
             </div>
           </div>
 
-          <IconButton
-            size="small"
+          <Button
+            size="icon"
+            variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
               handleContextMenu(e);
             }}
-            sx={{ width: 28, height: 28 }}
+            className="w-7 h-7"
           >
             <MoreVert size={18} />
-          </IconButton>
+          </Button>
         </div>
       );
     }
@@ -216,24 +228,19 @@ export const createChapterTreeEditorNode = ({
         {...longPress}
       >
         <Card
-          sx={{
-            mx: 1,
-            mr: 2,
-            height: "calc(100% - 2px)",
-            mt: "1px",
-            "&:hover": { boxShadow: 3 },
-            ...(isChecked ? { outline: "2px solid", outlineColor: "primary.main" } : {}),
-          }}
+          className={`mx-2 mr-4 mt-px hover:shadow-md transition-shadow ${
+            isChecked ? "outline outline-2 outline-primary" : ""
+          }`}
+          style={{ height: "calc(100% - 2px)" }}
         >
-          <CardContent sx={{ py: 1.5, px: 2, "&:last-child": { pb: 1.5 } }}>
+          <CardContent className="py-3 px-4">
             <div className="flex items-start justify-between gap-2">
               {isSelectionMode && (
                 <Checkbox
-                  size="small"
                   checked={isChecked}
                   onClick={(e) => e.stopPropagation()}
-                  onChange={() => onToggleSelect(String(node.id))}
-                  sx={{ p: 0.5, mt: -0.5 }}
+                  onCheckedChange={() => onToggleSelect(String(node.id))}
+                  className="mt-1"
                 />
               )}
               <div className="min-w-0 flex-1">
@@ -261,13 +268,16 @@ export const createChapterTreeEditorNode = ({
                   className={`flex items-center gap-3 mt-2 ${isSortingMode ? "pl-6" : "pl-0"}`}
                 >
                   {/* MOCK: publish status chip */}
-                  <Chip
-                    label={status}
-                    size="small"
-                    color={status === "PUBLISHED" ? "success" : "default"}
-                    variant="outlined"
-                    sx={{ height: 20, fontSize: "0.675rem" }}
-                  />
+                  <Badge
+                    variant="outline"
+                    className={`h-5 text-[0.675rem] ${
+                      status === "PUBLISHED"
+                        ? "border-rezics-color-success-text text-rezics-color-success-text"
+                        : ""
+                    }`}
+                  >
+                    {status}
+                  </Badge>
                   <span className="text-xs text-muted-foreground">
                     Updated {mockDate(node.id)}
                   </span>
@@ -289,16 +299,17 @@ export const createChapterTreeEditorNode = ({
               </div>
 
               {/* Kebab menu — always visible */}
-              <IconButton
-                size="small"
+              <Button
+                size="icon"
+                variant="ghost"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleContextMenu(e);
                 }}
-                sx={{ width: 28, height: 28 }}
+                className="w-7 h-7"
               >
                 <MoreVert size={18} />
-              </IconButton>
+              </Button>
             </div>
           </CardContent>
         </Card>

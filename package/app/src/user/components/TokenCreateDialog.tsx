@@ -1,20 +1,20 @@
+import { useCreateTokenMutation } from "@rezics/api/token/token.mutations";
+import type { ApiTokenScopes } from "@rezics/contract";
 import {
   Alert,
+  AlertDescription,
   Button,
   Checkbox,
   Dialog,
-  DialogActions,
   DialogContent,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  FormControlLabel,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { useCreateTokenMutation } from "@rezics/api/token/token.mutations";
-import type { ApiTokenScopes } from "@rezics/contract";
-import { type FC, useState } from "react";
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
+import { type FC, useState } from "react";
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },
@@ -94,92 +94,104 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
 
   if (rawToken) {
     return (
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Token Created</DialogTitle>
-        <DialogContent>
-          <Alert severity="warning" className="mb-4">
-            Make sure to copy your token now. You won't be able to see it again.
+      <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+        <DialogContent className="sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle>Token Created</DialogTitle>
+          </DialogHeader>
+          <Alert className="mb-4 text-rezics-color-warning">
+            <AlertDescription>
+              Make sure to copy your token now. You won't be able to see it
+              again.
+            </AlertDescription>
           </Alert>
           <div className="flex items-center gap-2 p-3 rounded bg-surface-subtle font-mono text-sm break-all">
             <span className="flex-1">{rawToken}</span>
-            <IconButton size="small" onClick={handleCopy}>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={handleCopy}
+              aria-label="Copy token"
+            >
               {copied ? (
-                <CheckIcon fontSize="small" color="success" />
+                <CheckIcon className="w-4 h-4 text-rezics-color-success" />
               ) : (
-                <ContentCopyIcon fontSize="small" />
+                <ContentCopyIcon className="w-4 h-4" />
               )}
-            </IconButton>
+            </Button>
           </div>
+          <DialogFooter>
+            <Button onClick={handleClose}>Done</Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} variant="contained">
-            Done
-          </Button>
-        </DialogActions>
       </Dialog>
     );
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Generate New Token</DialogTitle>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+      <DialogContent className="sm:max-w-[640px]">
+        <DialogHeader>
+          <DialogTitle>Generate New Token</DialogTitle>
+        </DialogHeader>
         {createToken.error && (
-          <Alert severity="error" className="mb-4">
-            {createToken.error.message}
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{createToken.error.message}</AlertDescription>
           </Alert>
         )}
         <div className="space-y-4 pt-2">
-          <TextField
-            fullWidth
-            label="Token Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            variant="standard"
-            required
-            placeholder="e.g. CI Pipeline"
-          />
-
-          <div>
-            <Typography variant="body2" className="font-medium mb-2">
-              Scopes
-            </Typography>
-            {AVAILABLE_SCOPES.map((s) => (
-              <FormControlLabel
-                key={s.label}
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={selectedScopes.has(s.label)}
-                    onChange={() => handleToggleScope(s.label)}
-                  />
-                }
-                label={<Typography variant="body2">{s.label}</Typography>}
-              />
-            ))}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="token-name">Token Name</Label>
+            <Input
+              id="token-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="e.g. CI Pipeline"
+            />
           </div>
 
-          <TextField
-            fullWidth
-            label="Expiration Date (optional)"
-            type="date"
-            value={expiresAt}
-            onChange={(e) => setExpiresAt(e.target.value)}
-            variant="standard"
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
+          <div>
+            <p className="text-sm font-medium mb-2">Scopes</p>
+            <div className="flex flex-col gap-2">
+              {AVAILABLE_SCOPES.map((s) => (
+                <label
+                  key={s.label}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Checkbox
+                    checked={selectedScopes.has(s.label)}
+                    onCheckedChange={() => handleToggleScope(s.label)}
+                  />
+                  <span className="text-sm">{s.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="token-expiry">Expiration Date (optional)</Label>
+            <Input
+              id="token-expiry"
+              type="date"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+            />
+          </div>
         </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreate}
+            disabled={!name || createToken.isPending}
+          >
+            {createToken.isPending ? "Creating..." : "Generate Token"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button
-          variant="contained"
-          onClick={handleCreate}
-          disabled={!name || createToken.isPending}
-        >
-          {createToken.isPending ? "Creating..." : "Generate Token"}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

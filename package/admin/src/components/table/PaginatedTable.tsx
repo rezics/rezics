@@ -1,19 +1,25 @@
 import {
-  Box,
   Button,
-  Stack,
-  type SxProps,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
-  TablePagination,
+  TableHeader,
   TableRow,
-  TextField,
-  type Theme,
-  Typography,
-} from "@mui/material";
+} from "@rezics/ui/shadcn";
+import clsx from "clsx";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import React from "react";
 
 export type PaginatedColumn<T> = {
@@ -36,7 +42,7 @@ export function PaginatedTable<T>({
   dense = true,
   stickyHeader = true,
   enablePageJump = true,
-  sx,
+  className,
 }: {
   columns: PaginatedColumn<T>[];
   rows: T[];
@@ -49,7 +55,7 @@ export function PaginatedTable<T>({
   dense?: boolean;
   stickyHeader?: boolean;
   enablePageJump?: boolean;
-  sx?: SxProps<Theme>;
+  className?: string;
 }) {
   const totalPages = rowsPerPage > 0 ? Math.ceil(count / rowsPerPage) : 0;
   const [pageInput, setPageInput] = React.useState(() => String(page + 1));
@@ -79,28 +85,47 @@ export function PaginatedTable<T>({
     if (nextPage !== page) onPageChange(nextPage);
   }, [onPageChange, page, pageInput, totalPages]);
 
+  const fromRow = count === 0 ? 0 : page * rowsPerPage + 1;
+  const toRow = Math.min((page + 1) * rowsPerPage, count);
+
+  const cellPaddingClass = dense ? "py-1.5" : "py-3";
+  const textSizeClass = dense ? "text-sm" : "text-base";
+
   return (
-    <Box sx={sx}>
-      <TableContainer sx={{ overflowX: "auto" }}>
-        <Table size={dense ? "small" : "medium"} stickyHeader={stickyHeader}>
-          <TableHead>
+    <div className={className}>
+      <div className="overflow-x-auto">
+        <Table className={textSizeClass}>
+          <TableHeader
+            className={clsx(stickyHeader && "sticky top-0 z-10 bg-rezics-color-bg")}
+          >
             <TableRow>
               {columns.map((c) => (
-                <TableCell
+                <TableHead
                   key={c.id}
-                  sx={{ minWidth: c.minWidth }}
-                  align={c.align}
+                  style={c.minWidth ? { minWidth: c.minWidth } : undefined}
+                  className={clsx(
+                    cellPaddingClass,
+                    c.align === "right" && "text-right",
+                    c.align === "center" && "text-center",
+                  )}
                 >
                   {c.header}
-                </TableCell>
+                </TableHead>
               ))}
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             {rows.map((row) => (
-              <TableRow key={getRowId(row)} hover>
+              <TableRow key={getRowId(row)}>
                 {columns.map((c) => (
-                  <TableCell key={c.id} align={c.align}>
+                  <TableCell
+                    key={c.id}
+                    className={clsx(
+                      cellPaddingClass,
+                      c.align === "right" && "text-right",
+                      c.align === "center" && "text-center",
+                    )}
+                  >
                     {c.cell(row)}
                   </TableCell>
                 ))}
@@ -108,44 +133,75 @@ export function PaginatedTable<T>({
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </div>
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 1,
-        }}
-      >
-        <TablePagination
-          component="div"
-          count={count}
-          page={page}
-          onPageChange={(_, nextPage) => onPageChange(nextPage)}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) =>
-            onRowsPerPageChange(Number(e.target.value))
-          }
-          rowsPerPageOptions={[10, 20, 50, 100]}
-        />
+      <div className="flex items-center justify-between flex-wrap gap-2 mt-2 px-2 py-1">
+        <div className="flex items-center gap-2 text-sm text-rezics-color-fg-muted">
+          <span>Rows per page:</span>
+          <Select
+            value={String(rowsPerPage)}
+            onValueChange={(v) => onRowsPerPageChange(Number(v))}
+          >
+            <SelectTrigger size="sm" className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 20, 50, 100].map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span>
+            {fromRow}-{toRow} of {count}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="First page"
+            disabled={page <= 0 || !totalPages}
+            onClick={() => onPageChange(0)}
+          >
+            <ChevronsLeft className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Previous page"
+            disabled={page <= 0 || !totalPages}
+            onClick={() => onPageChange(page - 1)}
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Next page"
+            disabled={!totalPages || page + 1 >= totalPages}
+            onClick={() => onPageChange(page + 1)}
+          >
+            <ChevronRight className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Last page"
+            disabled={!totalPages || page + 1 >= totalPages}
+            onClick={() => onPageChange(Math.max(totalPages - 1, 0))}
+          >
+            <ChevronsRight className="size-4" />
+          </Button>
+        </div>
 
         {enablePageJump ? (
-          <Stack
-            direction="row"
-            spacing={1}
-            alignItems="center"
-            sx={{ px: 1, pb: 1, pt: { xs: 0, sm: 1 } }}
-          >
-            <Typography variant="body2" color="text.secondary">
+          <div className="flex flex-row gap-2 items-center px-2 py-1">
+            <span className="text-sm text-rezics-color-fg-muted">
               Go to page
-            </Typography>
-            <TextField
-              size="small"
+            </span>
+            <Input
               value={pageInput}
               onChange={(e) => {
-                // Keep numeric only (avoid "e", "+", "-" from number inputs)
                 const next = e.target.value.replace(/[^\d]/g, "");
                 setPageInput(next);
               }}
@@ -153,28 +209,26 @@ export function PaginatedTable<T>({
               onKeyDown={(e) => {
                 if (e.key === "Enter") commitPageInput();
               }}
-              inputProps={{
-                inputMode: "numeric",
-                pattern: "[0-9]*",
-                "aria-label": "go to page",
-              }}
-              sx={{ width: 110 }}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              aria-label="go to page"
+              className="w-24 h-8 text-sm"
               disabled={!totalPages}
             />
-            <Typography variant="body2" color="text.secondary">
+            <span className="text-sm text-rezics-color-fg-muted">
               / {Math.max(totalPages, 1)}
-            </Typography>
+            </span>
             <Button
-              size="small"
-              variant="outlined"
+              size="sm"
+              variant="outline"
               onClick={commitPageInput}
               disabled={!totalPages}
             >
               Go
             </Button>
-          </Stack>
+          </div>
         ) : null}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

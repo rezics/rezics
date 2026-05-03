@@ -1,5 +1,3 @@
-import { AppBar, Avatar, Toolbar, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useRouterState } from "@tanstack/react-router";
 import React from "react";
@@ -28,7 +26,6 @@ export const Header: React.FC<HeaderProps> = React.memo(
     const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
     const drawerWidth = useLayoutStore((s) => s.drawerWidth);
     const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
-    const theme = useTheme();
     const isMobile = useIsMobile();
 
     const isHomePage = useRouterState({
@@ -48,30 +45,20 @@ export const Header: React.FC<HeaderProps> = React.memo(
       return <UnauthenticatedSection />;
     })();
 
+    const isOffsetByDrawer = layoutType === "type-a" && sidebarOpen;
+
     return (
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          zIndex: theme.zIndex.drawer + 1,
-          ml: layoutType === "type-a" && sidebarOpen ? drawerWidth : 0,
-          width:
-            layoutType === "type-a" && sidebarOpen
-              ? `calc(100% - ${drawerWidth}px)`
-              : "100%",
-          transition: theme.transitions.create(["margin", "width"], {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-          borderBottom: 1,
-          borderColor: "divider",
-        }}
+      <header
         className={cn(
+          "fixed top-0 z-[1201] bg-rezics-color-bg-elevated border-b border-rezics-color-border transition-[margin,width] duration-225 ease-out pointer-events-auto",
           isDragging && "rounded-tl-2xl rounded-bl-2xl",
-          "pointer-events-auto",
         )}
+        style={{
+          marginLeft: isOffsetByDrawer ? `${drawerWidth}px` : 0,
+          width: isOffsetByDrawer ? `calc(100% - ${drawerWidth}px)` : "100%",
+        }}
       >
-        <Toolbar className="px-2 gap-2">
+        <div className="flex items-center min-h-16 px-2 gap-2">
           <DrawerToggler
             handleDrawerToggleInner={handleDrawerToggle}
             layoutType={layoutType}
@@ -80,17 +67,13 @@ export const Header: React.FC<HeaderProps> = React.memo(
 
           <Link to="/" className="flex items-center gap-2 shrink-0">
             {!isHomePage && (
-              <Avatar sx={{ bgcolor: "transparent" }} variant="rounded">
+              <div className="w-10 h-10 inline-flex items-center justify-center rounded-md bg-transparent overflow-hidden">
                 <img src="/logo.svg" alt="logo" />
-              </Avatar>
+              </div>
             )}
-            <Typography
-              variant="h1"
-              className="text-3xl font-bold"
-              sx={{ color: "primary.main" }}
-            >
+            <h1 className="text-3xl font-bold text-rezics-color-primary m-0">
               REZICS
-            </Typography>
+            </h1>
           </Link>
 
           <div className="flex-1 min-w-0 flex justify-center">
@@ -100,8 +83,8 @@ export const Header: React.FC<HeaderProps> = React.memo(
           </div>
 
           {authSection}
-        </Toolbar>
-      </AppBar>
+        </div>
+      </header>
     );
   },
 );

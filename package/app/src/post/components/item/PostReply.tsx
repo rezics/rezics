@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
@@ -37,12 +36,9 @@ export const PostReply: React.FC<PostReplyProps> = ({
 
   return (
     <ThreadingHoverProvider>
-      <Box
-        sx={{
-          position: "relative",
-          pl: `${paddingLeft}px`,
-        }}
-        className="py-2"
+      <div
+        className="relative py-2"
+        style={{ paddingLeft: `${paddingLeft}px` }}
       >
         {indentLevel > 0 && (
           <ThreadingRail
@@ -51,18 +47,18 @@ export const PostReply: React.FC<PostReplyProps> = ({
             onToggleCollapse={onToggleCollapse}
           />
         )}
-        <Box className="flex items-start gap-2">
+        <div className="flex items-start gap-2">
           {hasChildren ? (
-            <Box sx={{ mt: 0.5 }}>
+            <div className="mt-1">
               <CollapseToggle
                 isCollapsed={isCollapsed}
                 onToggle={onToggleCollapse}
               />
-            </Box>
+            </div>
           ) : (
-            <Box sx={{ width: 20, height: 20, mt: 0.5 }} />
+            <div className="w-5 h-5 mt-1" />
           )}
-          <Box className="flex-1 flex flex-col gap-1">
+          <div className="flex-1 flex flex-col gap-1">
             <PostAuthorHeader post={post} size="compact" />
             {!isCollapsed && (
               <>
@@ -82,9 +78,9 @@ export const PostReply: React.FC<PostReplyProps> = ({
                 {replyComposerSlot}
               </>
             )}
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
     </ThreadingHoverProvider>
   );
 };

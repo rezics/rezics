@@ -1,10 +1,14 @@
-import { Avatar, Box, Typography } from "@mui/material";
 import {
   postSearchQueryOptions,
   usePostSearchQuery,
 } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
@@ -97,13 +101,9 @@ export const ContentTabSection: FC = () => {
       </InnerFilterPanel>
 
       {isLoading ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="py-12 text-center"
-        >
+        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
           {t("common.loading")}
-        </Typography>
+        </p>
       ) : posts.length === 0 ? (
         <EmptyState
           title={
@@ -128,9 +128,9 @@ export const ContentTabSection: FC = () => {
               >
                 Previous
               </button>
-              <Typography variant="body2" color="text.secondary">
+              <span className="text-sm text-rezics-color-fg-muted">
                 Page {currentPage + 1} of {totalPages}
-              </Typography>
+              </span>
               <button
                 type="button"
                 onClick={() => setOffset(offset + limit)}
@@ -156,40 +156,37 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
       : null;
 
   return (
-    <Box className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+    <div className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
       <div className="flex items-start gap-3">
-        <Avatar
-          src={post.authorAvatar ?? undefined}
-          sx={{ width: 32, height: 32 }}
-        >
-          {post.authorName?.charAt(0).toUpperCase()}
+        <Avatar className="w-8 h-8">
+          <AvatarImage
+            src={post.authorAvatar ?? undefined}
+            alt={post.authorName ?? ""}
+          />
+          <AvatarFallback>
+            {post.authorName?.charAt(0).toUpperCase()}
+          </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             {scoreDisplay && (
-              <Typography variant="body2" className="text-amber-500">
-                {scoreDisplay}
-              </Typography>
+              <span className="text-sm text-amber-500">{scoreDisplay}</span>
             )}
             {targetTitle && (
-              <Typography variant="body2" color="text.secondary">
+              <span className="text-sm text-rezics-color-fg-muted">
                 on {targetTitle}
-              </Typography>
+              </span>
             )}
-            <Typography variant="caption" color="text.secondary">
-              {date}
-            </Typography>
+            <span className="text-xs text-rezics-color-fg-muted">{date}</span>
           </div>
           {post.body && (
-            <Typography variant="body2" className="mt-1 line-clamp-3">
-              {post.body}
-            </Typography>
+            <p className="text-sm mt-1 line-clamp-3">{post.body}</p>
           )}
           <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
             {post.replyCount > 0 && <span>{post.replyCount} replies</span>}
           </div>
         </div>
       </div>
-    </Box>
+    </div>
   );
 };

@@ -1,20 +1,20 @@
+import { type BookDTO, bookQueries } from "@rezics/api/book/book";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import type { BookListResponse } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import {
-  Box,
   Button,
   Card,
   CardContent,
-  CircularProgress,
-  Divider,
-  IconButton,
-  Stack,
-  TextField,
+  Input,
+  Label,
+  Separator,
   Tooltip,
-  Typography,
-} from "@mui/material";
-import { type BookDTO, bookQueries } from "@rezics/api/book/book";
-import type { BookListResponse } from "@rezics/contract";
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
 import React from "react";
@@ -97,20 +97,16 @@ export default function BooksPage() {
         id: "unitId",
         header: "Unit ID",
         minWidth: 220,
-        cell: (b) => (
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            {b.unitId}
-          </Typography>
-        ),
+        cell: (b) => <span className="text-sm font-mono">{b.unitId}</span>,
       },
       {
         id: "title",
         header: "Title",
         minWidth: 260,
         cell: (b) => (
-          <Typography variant="body2" fontWeight={700} noWrap>
+          <span className="text-sm font-bold whitespace-nowrap">
             {extractTitle(b)}
-          </Typography>
+          </span>
         ),
       },
       {
@@ -124,11 +120,18 @@ export default function BooksPage() {
         header: "Credits",
         minWidth: 260,
         cell: (b) => (
-          <Tooltip title={formatCredits(b)} arrow>
-            <Typography variant="body2" noWrap sx={{ maxWidth: 240 }}>
-              {formatCredits(b)}
-            </Typography>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className="text-sm whitespace-nowrap inline-block max-w-[240px] overflow-hidden text-ellipsis"
+                >
+                  {formatCredits(b)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{formatCredits(b)}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         ),
       },
       {
@@ -136,16 +139,16 @@ export default function BooksPage() {
         header: "User",
         minWidth: 200,
         cell: (b) => (
-          <Stack spacing={0}>
-            <Typography variant="body2" noWrap>
+          <div className="flex flex-col">
+            <span className="text-sm whitespace-nowrap">
               {b.user?.name ?? b.userId ?? "-"}
-            </Typography>
+            </span>
             {b.user?.slug ? (
-              <Typography variant="caption" color="text.secondary" noWrap>
+              <span className="text-xs text-rezics-color-fg-muted whitespace-nowrap">
                 @{b.user.slug}
-              </Typography>
+              </span>
             ) : null}
-          </Stack>
+          </div>
         ),
       },
       {
@@ -165,13 +168,8 @@ export default function BooksPage() {
         header: "Actions",
         minWidth: 140,
         cell: (b) => (
-          <Button
-            size="small"
-            component={Link}
-            to={`/unit/${b.unitId}`}
-            variant="outlined"
-          >
-            Edit Unit
+          <Button asChild size="sm" variant="outline">
+            <Link to={`/unit/${b.unitId}`}>Edit Unit</Link>
           </Button>
         ),
       },
@@ -213,53 +211,54 @@ export default function BooksPage() {
       ) : (
         <Card>
           <CardContent>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1.5}
-              alignItems="stretch"
-            >
-              <TextField
-                size="small"
-                label="Search"
-                placeholder="q/title/isbn..."
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setPage(0);
-                    setQuery(q.trim());
-                  }
-                }}
-                fullWidth
-              />
-              <IconButton
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+              <div className="flex-1 flex flex-col gap-1">
+                <Label htmlFor="book-search" className="text-xs">
+                  Search
+                </Label>
+                <Input
+                  id="book-search"
+                  placeholder="q/title/isbn..."
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setPage(0);
+                      setQuery(q.trim());
+                    }
+                  }}
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
                 aria-label="search"
                 onClick={() => {
                   setPage(0);
                   setQuery(q.trim());
                 }}
-                sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}
+                className="self-end sm:self-center"
               >
-                <SearchIcon />
-              </IconButton>
-            </Stack>
-            <Divider sx={{ my: 2 }} />
+                <SearchIcon className="size-4" />
+              </Button>
+            </div>
+            <Separator className="my-4" />
 
             {(isMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading) ? (
-              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-                <CircularProgress size={24} />
-              </Box>
+              <div className="flex justify-center py-12">
+                <Spinner />
+              </div>
             ) : (isMeiliMode ? meiliQuery.isError : normalQuery.isError) ? (
-              <Box>
-                <Typography color="error" variant="body2">
+              <div>
+                <p className="text-sm text-rezics-color-danger">
                   Failed to load books.
-                </Typography>
+                </p>
                 {(isMeiliMode ? meiliQuery.error : normalQuery.error) ? (
-                  <Typography color="error" variant="caption">
+                  <p className="text-xs text-rezics-color-danger">
                     {String(isMeiliMode ? meiliQuery.error : normalQuery.error)}
-                  </Typography>
+                  </p>
                 ) : null}
-              </Box>
+              </div>
             ) : (
               <PaginatedTable<BookDTO>
                 columns={columns}

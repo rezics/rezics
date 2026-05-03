@@ -1,8 +1,8 @@
-import { Box, Tab, Tabs } from "@mui/material";
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { useBatchReactionSummary } from "@rezics/api/reaction/reaction";
 import type { PostDTO, PostSearchDocument } from "@rezics/contract";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
+import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
@@ -145,16 +145,18 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
               onSubmit={() => setStart(0)}
               placeholder="Search reviews"
             />
-            <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 2, mb: 2 }}>
+            <div className="mb-4 mt-4 border-b border-rezics-color-border">
               <Tabs
                 value={tab}
-                onChange={(_, v) => setTab(v)}
+                onValueChange={(v) => setTab(v as typeof tab)}
                 aria-label="review tabs"
               >
-                <Tab label="REVIEW" value="review" />
-                <Tab label="REMARK" value="remark" />
+                <TabsList>
+                  <TabsTrigger value="review">REVIEW</TabsTrigger>
+                  <TabsTrigger value="remark">REMARK</TabsTrigger>
+                </TabsList>
               </Tabs>
-            </Box>
+            </div>
           </div>
         }
       >

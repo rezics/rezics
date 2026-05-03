@@ -1,8 +1,8 @@
-import { IconButton } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
+import { Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TextSearchInputBase } from "./TextSearchInputBase";
-import { Search as SearchIcon } from "lucide-react";
 
 export const TextSearchInputWithIcon = ({
   onSearch,
@@ -25,13 +25,15 @@ export const TextSearchInputWithIcon = ({
         placeholder={placeholder}
         className="flex-1"
       />
-      <IconButton
-        color="primary"
+      <Button
+        size="icon"
+        variant="ghost"
+        className="text-rezics-color-primary"
         aria-label={t("accessibility.search")}
         onClick={() => onSearch(value.keyword ?? "")}
       >
         <SearchIcon />
-      </IconButton>
+      </Button>
     </div>
   );
 };

@@ -1,44 +1,49 @@
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Divider,
-  IconButton,
-  MenuItem,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { lowScoreTagsQuery } from "@rezics/api/tag/tag.queries";
-import {
-  useDeleteUnitTagMutation,
-  usePatchUnitTagMutation,
-} from "@rezics/api/tag/tag.mutations";
-import {
-  positionForNewTopPin,
   positionForNewBottomPin,
+  positionForNewTopPin,
 } from "@rezics/api/tag/fractional-index";
 import {
   useDeleteRealmTagUnitMutation,
   usePatchRealmTagUnitMutation,
 } from "@rezics/api/realm/realm.mutations";
+import {
+  useDeleteUnitTagMutation,
+  usePatchUnitTagMutation,
+} from "@rezics/api/tag/tag.mutations";
+import { lowScoreTagsQuery } from "@rezics/api/tag/tag.queries";
 import type {
   LowScoreTagsScope,
   RealmTagUnitDTO,
   UnitTagDTO,
 } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Separator,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { Pin, Trash2 } from "lucide-react";
 import React from "react";
 import {
   type PaginatedColumn,
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
-import { Pin, Trash2 } from "lucide-react";
 
 type Row =
   | ({ kind: "global" } & UnitTagDTO)
@@ -150,11 +155,7 @@ export default function LowScoreTagsPage() {
         id: "scope",
         header: "Scope",
         minWidth: 90,
-        cell: (r) => (
-          <Typography variant="caption" sx={{ fontFamily: "monospace" }}>
-            {r.kind}
-          </Typography>
-        ),
+        cell: (r) => <span className="text-xs font-mono">{r.kind}</span>,
       },
       ...(scope === "realm"
         ? [
@@ -164,9 +165,7 @@ export default function LowScoreTagsPage() {
               minWidth: 220,
               cell: (r: Row) =>
                 r.kind === "realm" ? (
-                  <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-                    {r.realmUnitId}
-                  </Typography>
+                  <span className="text-sm font-mono">{r.realmUnitId}</span>
                 ) : null,
             },
           ]
@@ -175,35 +174,22 @@ export default function LowScoreTagsPage() {
         id: "unit",
         header: "Unit",
         minWidth: 220,
-        cell: (r) => (
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            {r.unitId}
-          </Typography>
-        ),
+        cell: (r) => <span className="text-sm font-mono">{r.unitId}</span>,
       },
       {
         id: "tag",
         header: "Tag",
         minWidth: 220,
-        cell: (r) => (
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            {r.tagUnitId}
-          </Typography>
-        ),
+        cell: (r) => <span className="text-sm font-mono">{r.tagUnitId}</span>,
       },
       {
         id: "score",
         header: "Score",
         minWidth: 90,
         cell: (r) => (
-          <Typography
-            variant="body2"
-            color="error.main"
-            fontWeight={600}
-            sx={{ fontFamily: "monospace" }}
-          >
+          <span className="text-sm font-mono font-semibold text-rezics-color-danger">
             {r.score}
-          </Typography>
+          </span>
         ),
       },
       {
@@ -211,9 +197,7 @@ export default function LowScoreTagsPage() {
         header: "Votes",
         minWidth: 80,
         cell: (r) => (
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            {r.voteCount}
-          </Typography>
+          <span className="text-sm font-mono">{r.voteCount}</span>
         ),
       },
       {
@@ -227,43 +211,52 @@ export default function LowScoreTagsPage() {
         header: "Actions",
         minWidth: 130,
         cell: (r) => (
-          <Stack direction="row" spacing={0.5}>
-            <Tooltip title={r.pinned ? "Unpin" : "Pin"}>
-              <span>
-                <IconButton
-                  size="small"
-                  onClick={() => handleTogglePin(r)}
-                  disabled={
-                    r.kind === "global"
-                      ? patchUnitTag.isPending
-                      : patchRealmTagUnit.isPending
-                  }
-                >
-                  {r.pinned ? (
-                    <Pin size={18} fill="currentColor" />
-                  ) : (
-                    <Pin size={18} />
-                  )}
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title="Delete">
-              <span>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleDelete(r)}
-                  disabled={
-                    r.kind === "global"
-                      ? deleteUnitTag.isPending
-                      : deleteRealmTagUnit.isPending
-                  }
-                >
-                  <Trash2 size={18} />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Stack>
+          <TooltipProvider>
+            <div className="flex flex-row gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="size-8"
+                    onClick={() => handleTogglePin(r)}
+                    disabled={
+                      r.kind === "global"
+                        ? patchUnitTag.isPending
+                        : patchRealmTagUnit.isPending
+                    }
+                    aria-label={r.pinned ? "Unpin" : "Pin"}
+                  >
+                    {r.pinned ? (
+                      <Pin size={18} fill="currentColor" />
+                    ) : (
+                      <Pin size={18} />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{r.pinned ? "Unpin" : "Pin"}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="size-8 text-rezics-color-danger"
+                    onClick={() => handleDelete(r)}
+                    disabled={
+                      r.kind === "global"
+                        ? deleteUnitTag.isPending
+                        : deleteRealmTagUnit.isPending
+                    }
+                    aria-label="Delete"
+                  >
+                    <Trash2 size={18} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Delete</TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         ),
       },
     ];
@@ -283,61 +276,73 @@ export default function LowScoreTagsPage() {
     >
       <Card>
         <CardContent>
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            spacing={1.5}
-            alignItems="stretch"
-          >
-            <TextField
-              size="small"
-              select
-              label="Scope"
-              value={scope}
-              onChange={(e) => {
-                setScope(e.target.value as LowScoreTagsScope);
-                setPage(0);
-              }}
-              sx={{ minWidth: 140 }}
-            >
-              <MenuItem value="global">Global (UnitTag)</MenuItem>
-              <MenuItem value="realm">Realm (RealmTagUnit)</MenuItem>
-            </TextField>
-            <TextField
-              size="small"
-              type="number"
-              label="Threshold (≤)"
-              value={thresholdInput}
-              onChange={(e) => setThresholdInput(e.target.value)}
-              sx={{ width: 160 }}
-            />
-            {scope === "realm" ? (
-              <TextField
-                size="small"
-                label="Realm unitId (optional)"
-                placeholder="filter to one realm…"
-                value={realmInput}
-                onChange={(e) => setRealmInput(e.target.value)}
-                fullWidth
+          <div className="flex flex-col md:flex-row gap-3 items-stretch">
+            <div className="flex flex-col gap-1 min-w-[140px]">
+              <Label className="text-xs">Scope</Label>
+              <Select
+                value={scope}
+                onValueChange={(v) => {
+                  setScope(v as LowScoreTagsScope);
+                  setPage(0);
+                }}
+              >
+                <SelectTrigger size="sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="global">Global (UnitTag)</SelectItem>
+                  <SelectItem value="realm">Realm (RealmTagUnit)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1 w-40">
+              <Label htmlFor="lst-threshold" className="text-xs">
+                Threshold (≤)
+              </Label>
+              <Input
+                id="lst-threshold"
+                type="number"
+                value={thresholdInput}
+                onChange={(e) => setThresholdInput(e.target.value)}
+                className="h-8"
               />
+            </div>
+            {scope === "realm" ? (
+              <div className="flex-1 flex flex-col gap-1">
+                <Label htmlFor="lst-realm" className="text-xs">
+                  Realm unitId (optional)
+                </Label>
+                <Input
+                  id="lst-realm"
+                  placeholder="filter to one realm…"
+                  value={realmInput}
+                  onChange={(e) => setRealmInput(e.target.value)}
+                  className="h-8"
+                />
+              </div>
             ) : null}
-            <Button variant="contained" onClick={handleApplyFilters}>
-              Apply
-            </Button>
-          </Stack>
+            <div className="flex items-end">
+              <Button onClick={handleApplyFilters}>Apply</Button>
+            </div>
+          </div>
 
-          <Divider sx={{ my: 2 }} />
+          <Separator className="my-4" />
 
           {query.isLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={24} />
-            </Box>
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
           ) : query.isError ? (
-            <Alert severity="error">
-              Failed to load low-score tags: {String(query.error)}
+            <Alert>
+              <AlertDescription className="text-rezics-color-danger">
+                Failed to load low-score tags: {String(query.error)}
+              </AlertDescription>
             </Alert>
           ) : rows.length === 0 ? (
-            <Alert severity="info">
-              No tag rows at or below score {appliedThreshold}.
+            <Alert>
+              <AlertDescription className="text-rezics-color-info">
+                No tag rows at or below score {appliedThreshold}.
+              </AlertDescription>
             </Alert>
           ) : (
             <PaginatedTable<Row>

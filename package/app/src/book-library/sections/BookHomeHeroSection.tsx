@@ -1,9 +1,9 @@
-import { IconButton, InputBase, Paper } from "@mui/material";
+import { Button, Input } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
+import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search as SearchIcon } from "lucide-react";
 
 export const BookHomeHeroSection: React.FC = () => {
   const { t } = useTranslation();
@@ -34,29 +34,26 @@ export const BookHomeHeroSection: React.FC = () => {
         </p>
       </div>
 
-      <Paper
-        component="form"
+      <form
         onSubmit={handleSubmit}
-        variant="outlined"
-        sx={{
-          p: "2px 4px",
-          display: "flex",
-          alignItems: "center",
-        }}
+        className="flex items-center gap-1 px-1 py-[2px] border border-rezics-color-border-defined rounded-md"
       >
-        <InputBase
-          sx={{ ml: 1, flex: 1 }}
+        <Input
+          className="ml-1 flex-1 border-0 shadow-none focus-visible:ring-0"
           placeholder={t("page.book_home.hero.search_placeholder")}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          inputProps={{
-            "aria-label": t("page.book_home.hero.search_placeholder"),
-          }}
+          aria-label={t("page.book_home.hero.search_placeholder")}
         />
-        <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
-          <SearchIcon />
-        </IconButton>
-      </Paper>
+        <Button
+          type="submit"
+          size="icon"
+          variant="ghost"
+          aria-label="search"
+        >
+          <SearchIcon className="w-5 h-5" />
+        </Button>
+      </form>
     </div>
   );
 };

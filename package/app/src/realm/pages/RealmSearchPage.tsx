@@ -1,8 +1,6 @@
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
 import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
 import type { RealmDTO, RealmSearchDocument } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { RealmCard } from "../components/RealmCard";
@@ -39,25 +37,23 @@ export function RealmSearchPage() {
   const hasKeyword = keyword.length > 0;
 
   return (
-    <Box maxWidth="lg" mx="auto" px={2} py={3}>
-      <Typography variant="h5" fontWeight={600} mb={3}>
-        Search Realms
-      </Typography>
-      <Box mb={3}>
+    <div className="mx-auto w-full max-w-5xl px-4 py-6">
+      <h1 className="mb-6 text-2xl font-semibold">Search Realms</h1>
+      <div className="mb-6">
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
           placeholder="Search realms..."
         />
-      </Box>
+      </div>
       {isLoading ? (
-        <Box display="flex" justifyContent="center" py={6}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-12">
+          <Spinner />
+        </div>
       ) : hasKeyword && realms.length === 0 ? (
-        <Typography color="text.secondary" textAlign="center" py={4}>
+        <p className="py-8 text-center text-rezics-color-fg-muted">
           No realms found
-        </Typography>
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {realms.map((realm) => (
@@ -65,7 +61,7 @@ export function RealmSearchPage() {
           ))}
         </div>
       )}
-    </Box>
+    </div>
   );
 }
 

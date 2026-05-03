@@ -1,20 +1,4 @@
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Divider,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Typography,
-} from "@mui/material";
-import {
   getToken,
   parseJwt,
   queryAccessToken,
@@ -24,6 +8,21 @@ import {
   useAuthSessionStore,
 } from "@rezics/api/states";
 import { NormalizedTokenName } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  Separator,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "@rezics/ui/shadcn";
+import { Shield, ShieldUser } from "lucide-react";
 import { useState } from "react";
 
 import { Page } from "@/core/layouts/Page";
@@ -52,35 +51,40 @@ function getTokenStatus(tokenName: NormalizedTokenName): TokenStatus {
   return claims.exp * 1000 > Date.now() ? "active" : "expired";
 }
 
-function StatusChip({ status }: { status: TokenStatus }) {
+function StatusBadge({ status }: { status: TokenStatus }) {
   const map = {
-    active: { label: "Active", color: "success" as const },
-    expired: { label: "Expired", color: "error" as const },
-    missing: { label: "Not Present", color: "default" as const },
-  };
-  const { label, color } = map[status];
-  return <Chip label={label} color={color} size="small" />;
+    active: { label: "Active", className: "bg-rezics-color-success text-white" },
+    expired: { label: "Expired", className: "bg-rezics-color-danger text-white" },
+    missing: { label: "Not Present", className: "" },
+  } as const;
+  const { label, className } = map[status];
+  return (
+    <Badge variant={status === "missing" ? "secondary" : "default"} className={className}>
+      {label}
+    </Badge>
+  );
 }
 
 function ClaimsTable({ tokenName }: { tokenName: NormalizedTokenName }) {
   const token = getToken(tokenName);
-  if (!token) return <Typography color="text.secondary">No token</Typography>;
+  if (!token)
+    return <p className="text-sm text-rezics-color-fg-muted">No token</p>;
 
   const claims = parseJwt(token);
   if (!claims)
-    return <Typography color="text.secondary">Invalid token</Typography>;
+    return <p className="text-sm text-rezics-color-fg-muted">Invalid token</p>;
 
   const entries = Object.entries(claims).filter(
     ([k]) => !["iat", "nbf"].includes(k),
   );
 
   return (
-    <Table size="small">
+    <Table className="text-sm">
       <TableBody>
         {entries.map(([key, value]) => (
           <TableRow key={key}>
-            <TableCell sx={{ fontWeight: 600, width: 140 }}>{key}</TableCell>
-            <TableCell sx={{ fontFamily: "monospace", fontSize: 13 }}>
+            <TableCell className="py-1.5 font-semibold w-36">{key}</TableCell>
+            <TableCell className="py-1.5 font-mono text-[13px]">
               {key === "exp" ? formatExpiry(value as number) : String(value)}
             </TableCell>
           </TableRow>
@@ -121,34 +125,37 @@ function TokenCard({
   }
 
   return (
-    <Card variant="outlined">
+    <Card>
       <CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-          <Typography variant="h6" fontWeight={700}>
-            {title}
-          </Typography>
-          <StatusChip status={status} />
-        </Box>
+        <div className="flex items-center gap-2 mb-4">
+          <Shield className="size-4" />
+          <h3 className="text-base font-bold">{title}</h3>
+          <StatusBadge status={status} />
+        </div>
         <ClaimsTable tokenName={tokenName} />
-        <Box sx={{ mt: 2 }}>
+        <div className="mt-4">
           <Button
-            variant="outlined"
-            size="small"
+            variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={16} /> : undefined}
           >
+            {loading ? <Spinner size="sm" /> : null}
             {refreshLabel}
           </Button>
-        </Box>
+        </div>
         {error && (
-          <Alert severity="error" sx={{ mt: 1 }}>
-            {error}
+          <Alert className="mt-2">
+            <AlertDescription className="text-rezics-color-danger">
+              {error}
+            </AlertDescription>
           </Alert>
         )}
         {success && (
-          <Alert severity="success" sx={{ mt: 1 }}>
-            Done
+          <Alert className="mt-2">
+            <AlertDescription className="text-rezics-color-success">
+              Done
+            </AlertDescription>
           </Alert>
         )}
       </CardContent>
@@ -172,7 +179,9 @@ function SessionStoreCard() {
     ["Authenticated", permission ? "Yes" : "No"],
     [
       "Server Permission",
-      <Chip key="perm" label={permission?.role ?? "none"} size="small" />,
+      <Badge key="perm" variant="secondary">
+        {permission?.role ?? "none"}
+      </Badge>,
     ],
     ["Identity Set", identitySet ? "Yes" : "No"],
     ["Registration Complete", registrationComplete ? "Yes" : "No"],
@@ -184,26 +193,29 @@ function SessionStoreCard() {
   ];
 
   return (
-    <Card variant="outlined">
+    <Card>
       <CardContent>
-        <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-          Auth Session Store
-        </Typography>
-        <Table size="small">
+        <div className="flex items-center gap-2 mb-4">
+          <ShieldUser className="size-4" />
+          <h3 className="text-base font-bold">Auth Session Store</h3>
+        </div>
+        <Table className="text-sm">
           <TableBody>
             {rows.map(([label, value]) => (
               <TableRow key={label}>
-                <TableCell sx={{ fontWeight: 600, width: 180 }}>
+                <TableCell className="py-1.5 font-semibold w-44">
                   {label}
                 </TableCell>
-                <TableCell>{value}</TableCell>
+                <TableCell className="py-1.5">{value}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
+          <Alert className="mt-4">
+            <AlertDescription className="text-rezics-color-danger">
+              {error}
+            </AlertDescription>
           </Alert>
         )}
       </CardContent>
@@ -235,42 +247,44 @@ function ActionsCard() {
   }
 
   return (
-    <Card variant="outlined">
+    <Card>
       <CardContent>
-        <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-          Actions
-        </Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+        <h3 className="text-base font-bold mb-4">Actions</h3>
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="outlined"
-            size="small"
+            variant="outline"
+            size="sm"
             disabled={loading !== null}
             onClick={() =>
               run("Hydrate", () => hydrateAuthSessionState().then(() => {}))
             }
           >
-            {loading === "Hydrate" ? (
-              <CircularProgress size={16} sx={{ mr: 1 }} />
-            ) : null}
+            {loading === "Hydrate" ? <Spinner size="sm" /> : null}
             Re-hydrate Session
           </Button>
-          <Divider orientation="vertical" flexItem />
+          <Separator orientation="vertical" className="h-6" />
           <Button
-            variant="outlined"
-            size="small"
-            color="error"
+            variant="outline"
+            size="sm"
             disabled={loading !== null}
             onClick={() => run("Logout", adminLogout)}
+            className="text-rezics-color-danger"
           >
-            {loading === "Logout" ? (
-              <CircularProgress size={16} sx={{ mr: 1 }} />
-            ) : null}
+            {loading === "Logout" ? <Spinner size="sm" /> : null}
             Logout
           </Button>
-        </Box>
+        </div>
         {feedback && (
-          <Alert severity={feedback.type} sx={{ mt: 2 }}>
-            {feedback.message}
+          <Alert className="mt-4">
+            <AlertDescription
+              className={
+                feedback.type === "success"
+                  ? "text-rezics-color-success"
+                  : "text-rezics-color-danger"
+              }
+            >
+              {feedback.message}
+            </AlertDescription>
           </Alert>
         )}
       </CardContent>
@@ -284,8 +298,8 @@ export default function AuthStatusPage() {
       title="Auth Status"
       description="View login status across services and manage tokens"
     >
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 6 }}>
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-12 md:col-span-6">
           <TokenCard
             title="AUTH_SESSION"
             tokenName={NormalizedTokenName.AUTH_SESSION}
@@ -294,14 +308,14 @@ export default function AuthStatusPage() {
             }}
             refreshLabel="Refresh Token"
           />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        </div>
+        <div className="col-span-12 md:col-span-6">
           <SessionStoreCard />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        </div>
+        <div className="col-span-12 md:col-span-6">
           <ActionsCard />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </Page>
   );
 }

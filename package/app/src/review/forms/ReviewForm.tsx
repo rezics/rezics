@@ -1,6 +1,7 @@
-import { Rating, TextField } from "@mui/material";
 import { SCORE_MAX } from "@rezics/contract";
+import { RatingInput } from "@rezics/ui";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { Input, Label } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,10 +35,9 @@ export function ReviewForm({
   return (
     <div className="flex flex-col gap-4 mt-2">
       <div className="flex flex-col gap-2">
-        <TextField
-          id="standard-basic"
-          label={t("review.form.title")}
-          variant="standard"
+        <Label htmlFor="review-title">{t("review.form.title")}</Label>
+        <Input
+          id="review-title"
           value={data._editTitle || ""}
           onChange={(e) => setData({ ...data, _editTitle: e.target.value })}
         />
@@ -45,15 +45,14 @@ export function ReviewForm({
 
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium">{t("review.form.rating")}</span>
-        <Rating
-          value={data._editRating || 0}
-          onChange={(_, value) =>
+        <RatingInput
+          value={data._editRating > 0 ? data._editRating : null}
+          onChange={(value) =>
             setData({ ...data, _editRating: value ?? 0 })
           }
           max={SCORE_MAX}
-          precision={1}
-          size="large"
-          name="score-rating-10"
+          size="lg"
+          aria-label={t("review.form.rating")}
         />
       </div>
       <div className="flex-1 min-h-[300px]">

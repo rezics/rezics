@@ -1,8 +1,14 @@
-import { Alert, Box, Tab, Tabs } from "@mui/material";
 import {
   contentSearchQueryOptions,
   meiliBookSearchQuery,
 } from "@rezics/api/meili/meili.queries";
+import {
+  Alert,
+  AlertDescription,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@rezics/ui/shadcn";
 import { useBatchReactionSummary } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
 import { UnitType } from "@rezics/contract";
@@ -306,24 +312,26 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
           onChange={(v) => keywordBind.onChange(v)}
           placeholder="Search user's content"
         />
-        <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 2, mb: 2 }}>
+        <div className="border-b border-rezics-color-border mt-4 mb-4">
           <Tabs
             value={tab}
-            onChange={(_, v) => setTab(v)}
+            onValueChange={(v) => setTab(v as TabKey)}
             aria-label="user unit tabs"
           >
-            <Tab label="SHELF" value="shelf" />
-            <Tab label="REVIEW" value="review" />
-            <Tab label="BOOK" value="book" />
-            <Tab label="REMARK" value="remark" />
-            <Tab label="EXCERPT" value="excerpt" />
+            <TabsList>
+              <TabsTrigger value="shelf">SHELF</TabsTrigger>
+              <TabsTrigger value="review">REVIEW</TabsTrigger>
+              <TabsTrigger value="book">BOOK</TabsTrigger>
+              <TabsTrigger value="remark">REMARK</TabsTrigger>
+              <TabsTrigger value="excerpt">EXCERPT</TabsTrigger>
+            </TabsList>
           </Tabs>
-        </Box>
+        </div>
       </div>
 
       {activeError && (
-        <Alert severity="error" className="mb-4">
-          {String(activeError)}
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{String(activeError)}</AlertDescription>
         </Alert>
       )}
 

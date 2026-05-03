@@ -1,4 +1,5 @@
-import { Button, CircularProgress, Typography } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
@@ -34,9 +35,7 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <Typography variant="h6" className="mb-3">
-          {resolvedTitle}
-        </Typography>
+        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
         <QueryErrorDisplay error={error} />
       </div>
     );
@@ -46,16 +45,12 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
     <div className="w-full @container">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
-        <Button
-          variant="text"
-          color="primary"
-          onClick={() => navigate({ to: "/shelf" })}
-        >
+        <Button variant="ghost" onClick={() => navigate({ to: "/shelf" })}>
           More
         </Button>
       </div>
 
-      {isLoading && <CircularProgress size={20} />}
+      {isLoading && <Spinner size="sm" />}
 
       <div>
         <HorizontalShelfCarousel shelves={items} />

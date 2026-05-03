@@ -1,9 +1,15 @@
-import { Checkbox, FormControlLabel, Tooltip, Typography } from "@mui/material";
 import type { BookDTO, ContentRating } from "@rezics/contract";
 import { RatingSelector } from "@rezics/ui";
+import {
+  Checkbox,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
+import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { Info as InfoOutlined } from "lucide-react";
 
 /**
  * BookMetadataValue — flat overlay of book unit-level fields (i.e. fields
@@ -33,24 +39,27 @@ function FlagWithTooltip({
 }) {
   return (
     <div className="flex items-center gap-1">
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={checked}
-            onChange={(_, c) => onCheckedChange(c)}
-            disabled={disabled}
-            size="small"
-          />
-        }
-        label={label}
-        slotProps={{ typography: { variant: "body2" } }}
-      />
-      <Tooltip title={tooltip}>
-        <InfoOutlined
-          size={16}
-          className="text-muted-foreground cursor-help"
+      <label className="flex items-center gap-2 text-sm cursor-pointer">
+        <Checkbox
+          checked={checked}
+          onCheckedChange={(c) => onCheckedChange(!!c)}
+          disabled={disabled}
         />
-      </Tooltip>
+        {label}
+      </label>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span>
+              <InfoOutlined
+                size={16}
+                className="text-muted-foreground cursor-help"
+              />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{tooltip}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }
@@ -72,9 +81,9 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       {/* ISBN-13 + Cover URL */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Typography variant="body2" component="label" htmlFor="book-isbn">
+          <label className="text-sm" htmlFor="book-isbn">
             {t("book.fields.isbn")}
-          </Typography>
+          </label>
           <input
             id="book-isbn"
             value={currentIsbn}
@@ -84,9 +93,9 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           />
         </div>
         <div className="space-y-1">
-          <Typography variant="body2" component="label" htmlFor="book-cover">
+          <label className="text-sm" htmlFor="book-cover">
             {t("book.fields.cover_url")}
-          </Typography>
+          </label>
           <input
             id="book-cover"
             value={currentCoverUrl}
@@ -101,13 +110,9 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       {/* Page Count + Text Length */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Typography
-            variant="body2"
-            component="label"
-            htmlFor="book-pagecount"
-          >
+          <label className="text-sm" htmlFor="book-pagecount">
             {t("book.fields.page_count" as any)}
-          </Typography>
+          </label>
           <input
             id="book-pagecount"
             type="number"
@@ -122,13 +127,9 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           />
         </div>
         <div className="space-y-1">
-          <Typography
-            variant="body2"
-            component="label"
-            htmlFor="book-textlength"
-          >
+          <label className="text-sm" htmlFor="book-textlength">
             {t("book.fields.text_length")}
-          </Typography>
+          </label>
           <input
             id="book-textlength"
             type="number"
@@ -179,12 +180,21 @@ export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
   return (
     <div className="flex items-center gap-1 whitespace-nowrap">
       <span>{t("book.flags.licensed")}</span>
-      <Tooltip title={tooltipTitle ?? t("book.tooltips.licensed")}>
-        <InfoOutlined
-          size={16}
-          className="text-muted-foreground cursor-help"
-        />
-      </Tooltip>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span>
+              <InfoOutlined
+                size={16}
+                className="text-muted-foreground cursor-help"
+              />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            {tooltipTitle ?? t("book.tooltips.licensed")}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }

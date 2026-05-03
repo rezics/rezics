@@ -1,9 +1,9 @@
-import { Box, Button, Divider, Stack } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { Button, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
@@ -40,9 +40,9 @@ export const BookReviewPage: React.FC = () => {
 
   const sidebar = useMemo(
     () => (
-      <Stack spacing={3}>
+      <div className="flex flex-col gap-6">
         <ScoreOverview unitId={bookId} />
-      </Stack>
+      </div>
     ),
     [bookId],
   );
@@ -64,23 +64,18 @@ export const BookReviewPage: React.FC = () => {
 
   return (
     <div>
-      <Box className="lg:hidden">
+      <div className="lg:hidden">
         <ScoreOverview unitId={bookId} />
-      </Box>
+      </div>
 
-      <Box>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={1}
-        >
+      <div>
+        <div className="flex flex-row justify-between items-center mb-2">
           <ArrowForwardIcon size={16} to={`/review/book/${bookId}`}>
             <AccentBarWithText text={`Reviews of ${title}`} />
           </ArrowForwardIcon>
           <Button
-            variant="text"
-            size="small"
+            variant="ghost"
+            size="sm"
             onClick={() =>
               navigate({
                 to: "/review/new/$bookUnitId",
@@ -90,11 +85,11 @@ export const BookReviewPage: React.FC = () => {
           >
             Write a Review
           </Button>
-        </Stack>
+        </div>
         <ReviewList reviews={reviews} />
-      </Box>
+      </div>
 
-      <Divider className="my-4" />
+      <Separator className="my-4" />
 
       <ShelfByBookPreview
         bookId={bookInfo.unitId || ""}

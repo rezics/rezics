@@ -1,12 +1,16 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import TextField from "@mui/material/TextField";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import type { ContentRating } from "@rezics/contract";
 import { RatingSelector } from "@rezics/ui";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import type { Chapter } from "./ChapterTreeEditor";
@@ -104,19 +108,24 @@ export function CreateChapterDialog({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Create Chapter</DialogTitle>
-      <DialogContent dividers>
-        <div className="space-y-4">
-          <TextField
-            label="章节标题"
-            fullWidth
-            variant="filled"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            error={!title.trim()}
-            helperText={!title.trim() ? "必填" : " "}
-          />
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Create Chapter</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 pt-4 border-t border-rezics-color-border-whisper">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="create-chapter-title">章节标题</Label>
+            <Input
+              id="create-chapter-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={!title.trim() ? "border-rezics-color-error-text" : ""}
+            />
+            {!title.trim() && (
+              <p className="text-xs text-rezics-color-error-text">必填</p>
+            )}
+          </div>
           <div className="max-w-xs">
             <RatingSelector value={rating} onChange={setRating} />
           </div>

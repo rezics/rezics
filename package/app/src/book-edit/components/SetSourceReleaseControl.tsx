@@ -1,11 +1,19 @@
-import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { useSetTranslationSourceMutation } from "@rezics/api/unit/translation-source.mutations";
 import type { BookDTO } from "@rezics/contract";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
+
+const NO_SOURCE = "__none__";
 
 export interface SetSourceReleaseControlProps {
   book: BookDTO;
@@ -38,36 +46,37 @@ export const SetSourceReleaseControl: React.FC<
   );
 
   return (
-    <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
-      <Typography variant="caption" color="text.secondary">
+    <div className="flex flex-row items-center gap-2 flex-wrap">
+      <span className="text-xs text-rezics-color-text-secondary">
         {t("page.book_edit.info.translation.set_source.label")}
-      </Typography>
-      <TextField
-        select
-        size="small"
-        variant="standard"
-        sx={{ minWidth: 240 }}
-        value={currentSourceReleaseUnitId ?? ""}
-        onChange={(e) =>
+      </span>
+      <Select
+        value={currentSourceReleaseUnitId ?? NO_SOURCE}
+        onValueChange={(v) =>
           mutation.mutate({
             workId: book.unitId,
             lang: language,
-            body: { sourceReleaseUnitId: e.target.value || null },
+            body: { sourceReleaseUnitId: v === NO_SOURCE ? null : v },
           })
         }
         disabled={mutation.isPending}
       >
-        <MenuItem value="">
-          <Typography component="span" color="text.secondary">
-            {t("page.book_edit.info.translation.set_source.none")}
-          </Typography>
-        </MenuItem>
-        {candidates.map((b) => (
-          <MenuItem key={b.unitId} value={b.unitId}>
-            {getBookTitle(b) || b.unitId}
-          </MenuItem>
-        ))}
-      </TextField>
-    </Stack>
+        <SelectTrigger className="min-w-[240px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={NO_SOURCE}>
+            <span className="text-rezics-color-text-secondary">
+              {t("page.book_edit.info.translation.set_source.none")}
+            </span>
+          </SelectItem>
+          {candidates.map((b) => (
+            <SelectItem key={b.unitId} value={b.unitId}>
+              {getBookTitle(b) || b.unitId}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 };

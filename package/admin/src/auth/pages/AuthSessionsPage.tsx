@@ -1,18 +1,17 @@
+import { useRevokeSessionMutation } from "@rezics/api/auth/auth.mutations";
+import { authQueries } from "@rezics/api/auth/auth.queries";
+import { Spinner } from "@rezics/ui";
 import {
-  Box,
   Button,
   Card,
   CardContent,
-  CircularProgress,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogContentText,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  Typography,
-} from "@mui/material";
-import { useRevokeSessionMutation } from "@rezics/api/auth/auth.mutations";
-import { authQueries } from "@rezics/api/auth/auth.queries";
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import {
@@ -57,9 +56,7 @@ export default function AuthSessionsPage() {
         header: "Token",
         minWidth: 220,
         cell: (s) => (
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            {s.token.slice(0, 16)}…
-          </Typography>
+          <span className="text-sm font-mono">{s.token.slice(0, 16)}…</span>
         ),
       },
       {
@@ -79,9 +76,9 @@ export default function AuthSessionsPage() {
         header: "User Agent",
         minWidth: 300,
         cell: (s) => (
-          <Typography variant="body2" noWrap>
+          <span className="text-sm whitespace-nowrap overflow-hidden text-ellipsis inline-block max-w-[300px]">
             {s.userAgent ?? "-"}
-          </Typography>
+          </span>
         ),
       },
       {
@@ -90,9 +87,9 @@ export default function AuthSessionsPage() {
         minWidth: 120,
         cell: (s) => (
           <Button
-            size="small"
-            variant="outlined"
-            color="error"
+            size="sm"
+            variant="outline"
+            className="text-rezics-color-danger"
             onClick={() => setConfirmDialog({ open: true, token: s.token })}
           >
             Revoke
@@ -108,13 +105,13 @@ export default function AuthSessionsPage() {
       <Card>
         <CardContent>
           {sessionsQuery.isLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={24} />
-            </Box>
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
           ) : sessionsQuery.isError ? (
-            <Typography color="error" variant="body2">
+            <p className="text-sm text-rezics-color-danger">
               Failed to load sessions.
-            </Typography>
+            </p>
           ) : (
             <PaginatedTable<AuthSession>
               columns={columns}
@@ -135,30 +132,36 @@ export default function AuthSessionsPage() {
 
       <Dialog
         open={confirmDialog.open}
-        onClose={() => setConfirmDialog({ open: false, token: "" })}
+        onOpenChange={(open) =>
+          setConfirmDialog((prev) => ({ ...prev, open }))
+        }
       >
-        <DialogTitle>Revoke Session</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Are you sure you want to revoke this session? The user will be
-            logged out.
-          </DialogContentText>
+          <DialogHeader>
+            <DialogTitle>Revoke Session</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to revoke this session? The user will be
+              logged out.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialog({ open: false, token: "" })}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-rezics-color-danger text-white"
+              onClick={() => {
+                revokeMutation.mutate({ token: confirmDialog.token });
+                setConfirmDialog({ open: false, token: "" });
+              }}
+            >
+              Revoke
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmDialog({ open: false, token: "" })}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              revokeMutation.mutate({ token: confirmDialog.token });
-              setConfirmDialog({ open: false, token: "" });
-            }}
-            color="error"
-            variant="contained"
-          >
-            Revoke
-          </Button>
-        </DialogActions>
       </Dialog>
     </Page>
   );

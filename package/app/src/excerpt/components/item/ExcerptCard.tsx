@@ -1,10 +1,4 @@
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Typography,
-} from "@mui/material";
+import { Avatar, AvatarFallback, AvatarImage, Card, CardContent } from "@rezics/ui/shadcn";
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -62,43 +56,42 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
 
   return (
     <Card
-      elevation={0}
-      className={cn("w-full transition-all mb-1", className)}
+      className={cn(
+        "w-full transition-all mb-1 shadow-none border-none",
+        excerptId && "cursor-pointer",
+        className,
+      )}
       onClick={handleOpenExcerpt}
-      sx={excerptId ? { cursor: "pointer" } : undefined}
     >
       <CardContent>
-        <Box className="flex items-start gap-2">
+        <div className="flex items-start gap-2">
           <FormatQuoteRoundedIcon
-            color={"text.secondary"} style={{ marginTop: "3.2px" }}
-            fontSize="small"
+            className="h-4 w-4 text-rezics-color-fg-muted mt-1 shrink-0"
           />
 
-          <Box className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
             {excerpt.user && (
-              <Box
+              <div
                 className="flex items-center gap-2 mb-1"
                 onClick={(e) => e.stopPropagation()}
+                onKeyDown={() => undefined}
               >
-                <Avatar
-                  src={excerpt.user.avatar ?? ""}
-                  sx={{ width: 20, height: 20 }}
-                  variant="rounded"
-                />
-                <Typography variant="caption" fontWeight={600}>
+                <Avatar className="h-5 w-5 rounded-md">
+                  <AvatarImage src={excerpt.user.avatar ?? ""} />
+                  <AvatarFallback>
+                    {(excerpt.user.name ?? "?").slice(0, 1)}
+                  </AvatarFallback>
+                </Avatar>
+                <p className="text-xs font-semibold">
                   {excerpt.user.name ?? ""}
-                </Typography>
-              </Box>
+                </p>
+              </div>
             )}
-            <Typography
-              variant="body2"
-              color="text.primary"
-              className="line-clamp-3 leading-7"
-            >
+            <p className="text-sm text-rezics-color-fg line-clamp-3 leading-7">
               {description}
-            </Typography>
+            </p>
 
-            <Box className="mt-3 flex items-center justify-between gap-2">
+            <div className="mt-3 flex items-center justify-between gap-2">
               <ReactionBar
                 size="sm"
                 post={reactionPost}
@@ -106,12 +99,12 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
                 actions={excerptCardActions}
                 onReplyInvoke={handleReplyInvoke}
               />
-              <Typography variant="caption" color="text.secondary" noWrap>
+              <p className="text-xs text-rezics-color-fg-muted truncate">
                 —— <ExcerptCardSource source={source} />
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
+              </p>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

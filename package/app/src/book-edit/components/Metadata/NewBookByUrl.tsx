@@ -1,6 +1,12 @@
-import { Alert, Button, TextField } from "@mui/material";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -27,8 +33,10 @@ export function NewBookByUrl() {
   return (
     <div className="mt-16 mx-auto w-11/12">
       <div className="text-2xl font-bold mb-4">通过URL创建书籍</div>
-      <Alert severity="info">
-        请输入书籍的URL，系统将自动获取书籍的元数据，并创建书籍。
+      <Alert>
+        <AlertDescription>
+          请输入书籍的URL，系统将自动获取书籍的元数据，并创建书籍。
+        </AlertDescription>
       </Alert>
       <div className="mt-4">
         <div>支持的网站：</div>
@@ -43,22 +51,16 @@ export function NewBookByUrl() {
         </ul>
       </div>
       <div className="mt-12">
-        <div className="flex mb-4">
-          <TextField
-            fullWidth
-            label="书籍URL"
-            value={url}
-            onChange={(newValue) => setUrl(newValue.target.value)}
-            className="flex-1"
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCreateBook}
-            className="!ml-4"
-          >
-            创建
-          </Button>
+        <div className="flex mb-4 items-end gap-4">
+          <div className="flex-1 flex flex-col gap-1">
+            <Label htmlFor="new-book-url">书籍URL</Label>
+            <Input
+              id="new-book-url"
+              value={url}
+              onChange={(newValue) => setUrl(newValue.target.value)}
+            />
+          </div>
+          <Button onClick={handleCreateBook}>创建</Button>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { Button, Divider } from "@mui/material";
+import { Button, Separator } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import type { ReactNode } from "react";
@@ -26,7 +26,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
             <div className="flex items-center justify-between mb-2 bg-gray-50 text-sm text-gray-800">
               <div className="font-medium">目录</div>
               <Button
-                variant="text"
+                variant="ghost"
                 onClick={() => {
                   navigate({ to: `/book/${bookId}/` });
                 }}
@@ -34,7 +34,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
                 返回书籍
               </Button>
             </div>
-            <Divider className="mb-4" />
+            <Separator className="mb-4" />
             <LinearChapterList
               bookId={bookId || ""}
               chapterId={chapterId || ""}

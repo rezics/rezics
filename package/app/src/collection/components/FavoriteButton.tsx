@@ -1,12 +1,17 @@
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
 import {
   collectionStatusQuery,
   useToggleFavoriteMutation,
 } from "@rezics/api/shelf";
+import {
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
 import { Heart } from "lucide-react";
+import { useCallback } from "react";
 
 interface FavoriteButtonProps {
   unitId: string;
@@ -33,19 +38,34 @@ export function FavoriteButton({
   }, [unitId, toggleMutation]);
 
   return (
-    <Tooltip title={isFavorited ? "Remove from favorites" : "Add to favorites"}>
-      <IconButton
-        size={size}
-        onClick={handleToggle}
-        disabled={toggleMutation.isPending}
-        sx={{ color }}
-      >
-        {isFavorited ? (
-          <Heart size={iconSize(size)} fill="currentColor" color="var(--rezics-color-status-error-fill)" />
-        ) : (
-          <Heart size={iconSize(size)} />
-        )}
-      </IconButton>
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleToggle}
+            disabled={toggleMutation.isPending}
+            style={color ? { color } : undefined}
+            aria-label={
+              isFavorited ? "Remove from favorites" : "Add to favorites"
+            }
+          >
+            {isFavorited ? (
+              <Heart
+                size={iconSize(size)}
+                fill="currentColor"
+                color="var(--rezics-color-status-error-fill)"
+              />
+            ) : (
+              <Heart size={iconSize(size)} />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {isFavorited ? "Remove from favorites" : "Add to favorites"}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

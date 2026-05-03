@@ -1,14 +1,16 @@
+import type { ApiTokenDTO, UpdateApiTokenInput } from "@rezics/contract";
 import {
   Alert,
-  Box,
+  AlertDescription,
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  TextField,
-} from "@mui/material";
-import type { ApiTokenDTO, UpdateApiTokenInput } from "@rezics/contract";
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { ScopesEditor } from "./ScopesEditor";
@@ -72,41 +74,47 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>Edit API Token</DialogTitle>
-      <DialogContent>
-        <Box className="space-y-4 mt-2">
-          <TextField
-            fullWidth
-            label="Token name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <div className="my-8" />
-          <TextField
-            fullWidth
-            type="datetime-local"
-            label="Expires At (optional)"
-            InputLabelProps={{ shrink: true }}
-            value={expiresAt}
-            onChange={(e) => setExpiresAt(e.target.value)}
-          />
-          <div className="my-8" />
+    <Dialog open={open} onOpenChange={(o) => (o ? null : handleClose())}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit API Token</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 mt-2">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="etd-name">Token name</Label>
+            <Input
+              id="etd-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="etd-exp">Expires At (optional)</Label>
+            <Input
+              id="etd-exp"
+              type="datetime-local"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+            />
+          </div>
           <ScopesEditor scopes={scopes} onChange={setScopes} />
-          {error && <Alert severity="error">{error}</Alert>}
-        </Box>
+          {error && (
+            <Alert>
+              <AlertDescription className="text-rezics-color-danger">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleUpdate} disabled={updating}>
+            {updating ? "Updating…" : "Update"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button
-          onClick={handleUpdate}
-          variant="contained"
-          color="primary"
-          disabled={updating}
-        >
-          {updating ? "Updating…" : "Update"}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

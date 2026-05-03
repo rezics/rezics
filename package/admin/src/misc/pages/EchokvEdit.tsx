@@ -1,23 +1,17 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import {
-  Box,
-  Button,
-  Divider,
-  InputAdornment,
-  List,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { echoKvApi, echoKvKeyListQuery } from "@rezics/api/echokv/echokv";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
+import {
+  Button,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
+import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { Search as SearchIcon } from "lucide-react";
 
 export const EchokvEditPage: React.FC = () => {
   const { show: showAlert } = useAlertStore();
@@ -83,122 +77,104 @@ export const EchokvEditPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: "auto", mt: 4, mb: 6, px: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        EchoKV JSON 编辑器
-      </Typography>
+    <div className="max-w-[1200px] mx-auto mt-8 mb-12 px-4">
+      <h1 className="text-2xl font-bold mb-2">EchoKV JSON 编辑器</h1>
 
-      <Paper sx={{ mt: 2, borderRadius: 2, p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Key 列表
-        </Typography>
-        <Stack spacing={1.5}>
-          <TextField
-            size="small"
-            label="搜索 Key"
-            value={searchKey}
-            onChange={(e) => setSearchKey(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Box
-            sx={{
-              maxHeight: 260,
-              overflow: "auto",
-              borderRadius: 1,
-              border: (theme) => `1px solid ${theme.palette.divider}`,
-            }}
-          >
+      <div className="mt-2 rounded-lg p-4 bg-rezics-color-bg-elevated">
+        <h2 className="text-base font-semibold mb-2">Key 列表</h2>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="echokv-search">搜索 Key</Label>
+            <div className="relative">
+              <SearchIcon className="size-4 absolute left-2 top-1/2 -translate-y-1/2 text-rezics-color-fg-muted" />
+              <Input
+                id="echokv-search"
+                value={searchKey}
+                onChange={(e) => setSearchKey(e.target.value)}
+                className="pl-8 h-9"
+              />
+            </div>
+          </div>
+          <div className="max-h-[260px] overflow-auto rounded-md border border-rezics-color-border">
             {keyListLoading && (
-              <Box sx={{ p: 1.5 }}>
-                <Typography variant="body2" color="text.secondary">
-                  加载中…
-                </Typography>
-              </Box>
+              <div className="p-3">
+                <p className="text-sm text-rezics-color-fg-muted">加载中…</p>
+              </div>
             )}
             {!keyListLoading &&
               (!keyList?.keys || keyList.keys.length === 0) && (
-                <Box sx={{ p: 1.5 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    暂无数据
-                  </Typography>
-                </Box>
+                <div className="p-3">
+                  <p className="text-sm text-rezics-color-fg-muted">暂无数据</p>
+                </div>
               )}
             {!keyListLoading && keyList?.keys && keyList.keys.length > 0 && (
-              <List dense disablePadding>
+              <ul className="list-none">
                 {keyList.keys.map((key) => (
-                  <ListItemButton
-                    key={key}
-                    selected={currentKey === key}
-                    onClick={() => setCurrentKey(key)}
-                  >
-                    <ListItemText
-                      primary={key}
-                      primaryTypographyProps={{
-                        noWrap: true,
-                        title: key,
-                      }}
-                    />
-                  </ListItemButton>
+                  <li key={key}>
+                    <button
+                      type="button"
+                      title={key}
+                      onClick={() => setCurrentKey(key)}
+                      className={clsx(
+                        "w-full text-left text-sm px-3 py-1.5 hover:bg-rezics-color-bg-hover whitespace-nowrap overflow-hidden text-ellipsis",
+                        currentKey === key &&
+                          "bg-rezics-color-bg-selected font-semibold",
+                      )}
+                    >
+                      {key}
+                    </button>
+                  </li>
                 ))}
-              </List>
+              </ul>
             )}
-          </Box>
-        </Stack>
-      </Paper>
+          </div>
+        </div>
+      </div>
 
-      <Paper sx={{ mt: 3, borderRadius: 2, overflow: "hidden" }}>
-        <Box sx={{ px: 2, py: 1.5 }}>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-            <TextField
-              size="small"
-              label="Key"
-              value={currentKey}
-              onChange={(e) => setCurrentKey(e.target.value)}
-              sx={{ minWidth: 260 }}
-            />
-            <Stack
-              direction="row"
-              spacing={1}
-              flex={1}
-              justifyContent="flex-end"
-            >
+      <div className="mt-6 rounded-lg overflow-hidden bg-rezics-color-bg-elevated">
+        <div className="px-4 py-3">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col gap-1 min-w-[260px]">
+              <Label htmlFor="echokv-key">Key</Label>
+              <Input
+                id="echokv-key"
+                value={currentKey}
+                onChange={(e) => setCurrentKey(e.target.value)}
+                className="h-9"
+              />
+            </div>
+            <div className="flex flex-row gap-2 flex-1 justify-end items-end">
               <Button
-                variant="outlined"
-                size="small"
+                variant="outline"
+                size="sm"
                 onClick={handleLoad}
                 disabled={loading}
               >
                 {loading ? "加载中…" : "加载"}
               </Button>
               <Button
-                variant="outlined"
-                size="small"
+                variant="outline"
+                size="sm"
                 onClick={handleClear}
                 disabled={loading}
               >
                 清空
               </Button>
-            </Stack>
-          </Stack>
-        </Box>
+            </div>
+          </div>
+        </div>
 
-        <Divider />
+        <Separator />
 
-        <Box sx={{ p: 2 }} className="min-h-[500px]">
+        <div className="p-4 min-h-[500px]">
           <RezicsJsonEditor
             value={editorValue}
             onChange={setEditorValue}
             onSubmit={handleSave}
           />
-        </Box>
-      </Paper>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };
 

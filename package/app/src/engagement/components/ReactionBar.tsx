@@ -1,6 +1,6 @@
-import { Stack } from "@mui/material";
 import type React from "react";
 import { useMemo } from "react";
+import { cn } from "@/shared/utils/css-util";
 import { parseReactionSummaries } from "@/shared/utils/reaction-summaries-parser";
 import type {
   Action,
@@ -114,18 +114,18 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
     }
   };
 
-  const spacing =
+  const gapClass =
     variant === "pill"
       ? size === "sm"
-        ? 0.5
+        ? "gap-1"
         : size === "lg"
-          ? 1
-          : 0.75
+          ? "gap-2"
+          : "gap-1.5"
       : size === "sm"
-        ? 0.25
+        ? "gap-0.5"
         : size === "lg"
-          ? 1
-          : 0.5;
+          ? "gap-2"
+          : "gap-1";
 
   const handleBarClick = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -136,20 +136,13 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
     [variant, size],
   );
 
-  const stackSx =
-    variant === "pill"
-      ? { flexWrap: "nowrap" as const }
-      : { flexWrap: "wrap" as const };
+  const wrapClass = variant === "pill" ? "flex-nowrap" : "flex-wrap";
 
   return (
     <ReactionBarProvider value={ctx}>
-      <Stack
-        direction="row"
-        alignItems="center"
-        spacing={spacing}
-        className={className}
+      <div
+        className={cn("flex flex-row items-center", gapClass, wrapClass, className)}
         onClick={handleBarClick}
-        sx={stackSx}
       >
         {visible.map((token) => {
           switch (token) {
@@ -198,7 +191,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
             onInvoke={handleOverflowInvoke}
           />
         )}
-      </Stack>
+      </div>
     </ReactionBarProvider>
   );
 };

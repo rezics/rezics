@@ -1,11 +1,11 @@
-import { Skeleton } from "@mui/material";
+import { Skeleton } from "@rezics/ui/shadcn";
 import { AnnouncementFeedSection } from "@/pinboard";
 import { AnnouncementBar } from "../components/AnnouncementBar";
 
 export const AnnouncementBarSection = () => {
   return (
     <AnnouncementFeedSection
-      loadingFallback={<Skeleton variant="rectangular" height={40} />}
+      loadingFallback={<Skeleton className="h-10 w-full rounded-none" />}
     >
       {(items) => {
         if (items.length === 0) return null;

@@ -1,20 +1,17 @@
 import {
-  Box,
+  Badge,
   Button,
-  Chip,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
+  Input,
+  Label,
   Select,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
+import { Plus as AddIcon, Trash2 as DeleteIcon, X as CloseIcon } from "lucide-react";
 import type { FC } from "react";
 import { useState } from "react";
-import { Plus as AddIcon, Trash2 as DeleteIcon } from "lucide-react";
 
 interface ScopesEditorProps {
   scopes: Record<string, string[]>;
@@ -77,90 +74,100 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
   };
 
   return (
-    <Box>
-      <Typography variant="subtitle1" className="mb-2 font-medium">
-        Permissions (Scopes)
-      </Typography>
+    <div>
+      <p className="mb-2 font-medium text-sm">Permissions (Scopes)</p>
 
       {/* 显示当前 scopes */}
       {Object.keys(scopes).length > 0 && (
-        <Paper variant="outlined" className="p-3 mb-4">
+        <div className="rounded-md border border-rezics-color-border p-3 mb-4">
           {Object.entries(scopes).map(([domain, permissions]) => (
-            <Box key={domain} className="mb-2">
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography variant="body2" className="font-medium min-w-20">
+            <div key={domain} className="mb-2">
+              <div className="flex flex-row items-center gap-2">
+                <span className="text-sm font-medium min-w-20">
                   {domain}:
-                </Typography>
-                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                </span>
+                <div className="flex flex-row flex-wrap gap-1">
                   {permissions.map((perm) => (
-                    <Chip
+                    <Badge
                       key={`${domain}:${perm}`}
-                      label={perm}
-                      size="small"
-                      color="primary"
-                      onDelete={() => removeScope(domain, perm)}
-                    />
+                      className="bg-rezics-color-primary text-white inline-flex items-center gap-1"
+                    >
+                      {perm}
+                      <button
+                        type="button"
+                        aria-label={`remove ${perm}`}
+                        onClick={() => removeScope(domain, perm)}
+                        className="hover:opacity-80"
+                      >
+                        <CloseIcon className="size-3" />
+                      </button>
+                    </Badge>
                   ))}
-                </Stack>
-                <IconButton
-                  size="small"
-                  color="error"
+                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-rezics-color-danger size-8"
                   onClick={() => removeDomain(domain)}
+                  aria-label="Remove domain"
                 >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Stack>
-            </Box>
+                  <DeleteIcon className="size-4" />
+                </Button>
+              </div>
+            </div>
           ))}
-        </Paper>
+        </div>
       )}
 
       {/* 添加新 scope */}
-      <Stack direction="row" spacing={2} alignItems="flex-end">
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Domain</InputLabel>
-          <Select
-            value={newDomain}
-            label="Domain"
-            onChange={(e) => setNewDomain(e.target.value)}
-          >
-            {PREDEFINED_DOMAINS.map((d) => (
-              <MenuItem key={d} value={d}>
-                {d}
-              </MenuItem>
-            ))}
-            <MenuItem value="custom">Custom...</MenuItem>
+      <div className="flex flex-row gap-2 items-end flex-wrap">
+        <div className="flex flex-col gap-1">
+          <Label className="text-xs">Domain</Label>
+          <Select value={newDomain} onValueChange={setNewDomain}>
+            <SelectTrigger size="sm" className="min-w-30">
+              <SelectValue placeholder="Domain" />
+            </SelectTrigger>
+            <SelectContent>
+              {PREDEFINED_DOMAINS.map((d) => (
+                <SelectItem key={d} value={d}>
+                  {d}
+                </SelectItem>
+              ))}
+              <SelectItem value="custom">Custom...</SelectItem>
+            </SelectContent>
           </Select>
-        </FormControl>
+        </div>
 
         {newDomain === "custom" && (
-          <TextField
-            size="small"
-            label="Custom domain"
-            value={customDomain}
-            onChange={(e) => setCustomDomain(e.target.value)}
-          />
+          <div className="flex flex-col gap-1">
+            <Label className="text-xs">Custom domain</Label>
+            <Input
+              value={customDomain}
+              onChange={(e) => setCustomDomain(e.target.value)}
+              className="h-8"
+            />
+          </div>
         )}
 
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Permission</InputLabel>
-          <Select
-            value={newPermission}
-            label="Permission"
-            onChange={(e) => setNewPermission(e.target.value)}
-          >
-            {PREDEFINED_PERMISSIONS.map((p) => (
-              <MenuItem key={p} value={p}>
-                {p}
-              </MenuItem>
-            ))}
+        <div className="flex flex-col gap-1">
+          <Label className="text-xs">Permission</Label>
+          <Select value={newPermission} onValueChange={setNewPermission}>
+            <SelectTrigger size="sm" className="min-w-30">
+              <SelectValue placeholder="Permission" />
+            </SelectTrigger>
+            <SelectContent>
+              {PREDEFINED_PERMISSIONS.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
-        </FormControl>
+        </div>
 
         <Button
-          variant="outlined"
-          size="small"
-          startIcon={<AddIcon />}
+          variant="outline"
+          size="sm"
           onClick={addScope}
           disabled={
             !newDomain ||
@@ -168,16 +175,17 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
             (newDomain === "custom" && !customDomain)
           }
         >
+          <AddIcon className="size-4" />
           Add
         </Button>
-      </Stack>
+      </div>
 
       {Object.keys(scopes).length === 0 && (
-        <Typography variant="body2" color="textSecondary" className="mt-2">
+        <p className="text-sm text-rezics-color-fg-muted mt-2">
           No scopes defined. Token will have default permissions.
-        </Typography>
+        </p>
       )}
-    </Box>
+    </div>
   );
 };
 

@@ -1,6 +1,11 @@
-import { Button, Divider, Stack, TextField } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { ChapterTreeItem } from "@rezics/contract";
+import {
+  Button,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
@@ -50,39 +55,40 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
     <div className="w-full">
       <div className="mx-auto">
         <div className="space-y-4 mb-4 w-full pl-2 pr-2">
-          <Stack direction="row" spacing={1} className="w-full justify-start">
+          <div className="flex flex-row gap-2 w-full justify-start">
             <Button
-              variant="outlined"
-              size="small"
+              variant="outline"
+              size="sm"
               onClick={() => arboristRef.current?.expandAll()}
             >
               Expand All
             </Button>
             <Button
-              variant="outlined"
-              size="small"
+              variant="outline"
+              size="sm"
               onClick={() => arboristRef.current?.collapseAll()}
             >
               Collapse All
             </Button>
-          </Stack>
+          </div>
 
-          <TextField
-            id="chapter-search"
-            label="Search"
-            variant="standard"
-            value={searchTerm}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearchTerm(e.target.value)
-            }
-            placeholder="Enter search term"
-            className="w-full"
-          />
+          <div className="flex flex-col gap-1 w-full">
+            <Label htmlFor="chapter-search">Search</Label>
+            <Input
+              id="chapter-search"
+              value={searchTerm}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
+              placeholder="Enter search term"
+              className="w-full"
+            />
+          </div>
         </div>
       </div>
 
       <div>
-        <Divider className="mb-2 md:hidden" />
+        <Separator className="mb-2 md:hidden" />
 
         <ChapterArborist
           ref={arboristRef}

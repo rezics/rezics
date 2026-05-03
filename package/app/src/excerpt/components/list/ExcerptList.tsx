@@ -1,4 +1,3 @@
-import { Stack } from "@mui/material";
 import type { UnitDTO } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
@@ -7,7 +6,8 @@ import { ExcerptCard } from "../item/ExcerptCard";
 
 interface ExcerptListProps {
   units: UnitDTO[];
-  spacing?: number | string;
+  /** MUI-style spacing scale (1 = 8px). Defaults to 2 (16px). */
+  spacing?: number;
 }
 
 export const ExcerptList: React.FC<ExcerptListProps> = ({
@@ -21,10 +21,13 @@ export const ExcerptList: React.FC<ExcerptListProps> = ({
   }
 
   return (
-    <Stack spacing={spacing}>
+    <div
+      className="flex flex-col"
+      style={{ gap: `${spacing * 8}px` }}
+    >
       {units.map((unit) => (
         <ExcerptCard key={unit.id} excerpt={unit} />
       ))}
-    </Stack>
+    </div>
   );
 };

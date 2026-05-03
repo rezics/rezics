@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import type { FC } from "react";
 import {
   type ChipDefinition,
@@ -20,12 +19,8 @@ export const ReactionsTabSection: FC = () => (
       onChipChange={() => {}}
     />
 
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      className="py-12 text-center"
-    >
+    <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
       Reaction history is coming soon
-    </Typography>
+    </p>
   </div>
 );

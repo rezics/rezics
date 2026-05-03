@@ -1,4 +1,4 @@
-import { TextField } from "@mui/material";
+import { Input } from "@rezics/ui/shadcn";
 import {
   type ClipboardEvent,
   type FC,
@@ -84,9 +84,9 @@ export const OtpInput: FC<OtpInputProps> = ({
   return (
     <div className="flex gap-2 justify-center">
       {digits.map((digit, i) => (
-        <TextField
+        <Input
           key={i}
-          inputRef={(el: HTMLInputElement | null) => {
+          ref={(el: HTMLInputElement | null) => {
             inputRefs.current[i] = el;
           }}
           value={digit || ""}
@@ -100,28 +100,11 @@ export const OtpInput: FC<OtpInputProps> = ({
           onPaste={handlePaste}
           onFocus={(e) => e.target.select()}
           disabled={disabled}
-          slotProps={{
-            input: {
-              style: {
-                width: "48px",
-                height: "56px",
-                padding: 0,
-              },
-            },
-            htmlInput: {
-              maxLength: 1,
-              inputMode: "numeric",
-              pattern: "[0-9]",
-              autoComplete: "one-time-code",
-              style: {
-                textAlign: "center",
-                fontSize: "24px",
-                fontFamily: "monospace",
-                fontWeight: 700,
-              },
-            },
-          }}
-          variant="outlined"
+          maxLength={1}
+          inputMode="numeric"
+          pattern="[0-9]"
+          autoComplete="one-time-code"
+          className="w-12 h-14 p-0 text-center text-2xl font-mono font-bold"
         />
       ))}
     </div>

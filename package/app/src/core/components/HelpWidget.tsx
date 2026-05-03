@@ -1,4 +1,5 @@
-import { Box, Fab, Zoom } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
+import { cn } from "@/shared/utils/css-util";
 import * as React from "react";
 import FeedbackDialog from "@/feedback/components/FeedbackDialog";
 import { Plus as AddIcon, FileText as ArticleOutlined, Bug as BugReport, MessageCircle as ChatBubbleOutline, X as CloseIcon, TriangleAlert as ReportProblemIcon } from "lucide-react";
@@ -22,7 +23,7 @@ const _defaultHelpActionsFutureExample: HelpFabAction[] = [
   {
     id: "quick-start",
     label: "快速上手",
-    icon: <ArticleOutlined fontSize="small" />,
+    icon: <ArticleOutlined className="w-4 h-4" />,
     onClick: () => {
       console.log("打开快速上手文档");
     },
@@ -30,7 +31,7 @@ const _defaultHelpActionsFutureExample: HelpFabAction[] = [
   {
     id: "faq",
     label: "常见问题 FAQ",
-    icon: <ArticleOutlined fontSize="small" />,
+    icon: <ArticleOutlined className="w-4 h-4" />,
     onClick: () => {
       console.log("打开 FAQ 页面");
     },
@@ -38,7 +39,7 @@ const _defaultHelpActionsFutureExample: HelpFabAction[] = [
   {
     id: "bug",
     label: "提交 Bug",
-    icon: <BugReport fontSize="small" />,
+    icon: <BugReport className="w-4 h-4" />,
     onClick: () => {
       console.log("打开 Bug 反馈入口");
     },
@@ -46,7 +47,7 @@ const _defaultHelpActionsFutureExample: HelpFabAction[] = [
   {
     id: "suggestion",
     label: "功能建议",
-    icon: <ChatBubbleOutline fontSize="small" />,
+    icon: <ChatBubbleOutline className="w-4 h-4" />,
     onClick: () => {
       console.log("打开功能建议入口");
     },
@@ -57,7 +58,7 @@ const defaultHelpActions: HelpFabAction[] = [
   {
     id: "feedback",
     label: "反馈",
-    icon: <ReportProblemIcon fontSize="small" />,
+    icon: <ReportProblemIcon className="w-4 h-4" />,
   },
 ];
 
@@ -72,7 +73,6 @@ export const HelpFab: React.FC<HelpFabProps> = ({
   enterDelayMs = 0,
 }) => {
   const [open, setOpen] = React.useState(false);
-
   const [feedbackDialogOpen, setFeedbackDialogOpen] = React.useState(false);
 
   const list = actions ?? defaultHelpActions;
@@ -90,89 +90,63 @@ export const HelpFab: React.FC<HelpFabProps> = ({
     setOpen(false);
   };
 
-  // Animation duration
-  const transitionDuration = {
-    appear: 0,
-    enter: 225,
-    exit: 195,
-  } as const;
+  if (!visible) return null;
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        bottom: 24,
-        right: 24,
-        zIndex: (theme) => theme.zIndex.tooltip + 1,
-      }}
+    <div
+      className="fixed bottom-6 right-6 z-[1502]"
+      style={{ transitionDelay: `${enterDelayMs}ms` }}
     >
       {/* Action FAB list */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column-reverse", // Stack from bottom to top, for delay
-          alignItems: "flex-end",
-          mb: 1.5,
-          pointerEvents: "none", // Only allow internal FAB to handle events
-        }}
-      >
+      <div className="flex flex-col-reverse items-end mb-3 pointer-events-none">
         {list.map((item, index) => {
-          // Reverse the index to make the nearest one appear first
           const reversedIndex = list.length - 1 - index;
           const delay = open ? (reversedIndex + 1) * 30 : 0;
 
           return (
-            <Zoom
+            <div
               key={item.id}
-              in={visible && open}
-              timeout={transitionDuration}
-              style={{
-                transitionDelay: `${delay}ms`,
-              }}
-              unmountOnExit
+              className={cn(
+                "transition-all duration-225 ease-out mt-2 pointer-events-auto",
+                open
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-0 pointer-events-none",
+              )}
+              style={{ transitionDelay: `${delay}ms` }}
             >
-              <Fab
-                variant="extended"
-                size="small"
-                color="default"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => handleActionClick(item)}
-                sx={{
-                  mt: 1,
-                  pointerEvents: "auto",
-                  boxShadow: (theme) => theme.shadows[6],
-                  px: 1.5,
-                  minHeight: 32,
-                }}
+                className="shadow-lg rounded-full px-3 min-h-8"
               >
                 {item.icon && (
                   <span className="mr-1 flex items-center">{item.icon}</span>
                 )}
                 {item.label}
-              </Fab>
-            </Zoom>
+              </Button>
+            </div>
           );
         })}
-      </Box>
+      </div>
 
-      {/* Main FAB: Control open/close + overall visibility */}
-      <Zoom
-        in={visible}
-        className="float-end"
-        timeout={transitionDuration}
-        style={{
-          transitionDelay: visible ? `${enterDelayMs}ms` : "0ms",
-        }}
-        unmountOnExit
-      >
-        <Fab color="primary" aria-label={ariaLabel} onClick={handleToggle}>
-          {/* Change to close icon when open, for better UX */}
+      {/* Main FAB */}
+      <div className="float-end">
+        <Button
+          variant="default"
+          size="icon"
+          aria-label={ariaLabel}
+          onClick={handleToggle}
+          className="rounded-full shadow-lg w-14 h-14"
+        >
           {open ? <CloseIcon /> : (icon ?? <AddIcon />)}
-        </Fab>
-      </Zoom>
+        </Button>
+      </div>
+
       <FeedbackDialog
         open={feedbackDialogOpen}
         onClose={() => setFeedbackDialogOpen(false)}
       />
-    </Box>
+    </div>
   );
 };

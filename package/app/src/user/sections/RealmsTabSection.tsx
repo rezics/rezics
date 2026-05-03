@@ -1,7 +1,7 @@
-import { Box, Chip, Typography } from "@mui/material";
 import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
 import { realmQueries } from "@rezics/api/realm/realm.queries";
 import type { RealmDTO, RealmSearchDocument } from "@rezics/contract";
+import { Badge } from "@rezics/ui/shadcn";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
@@ -101,25 +101,17 @@ export const RealmsTabSection: FC = () => {
       />
 
       {isLoading ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="py-12 text-center"
-        >
+        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
           Loading...
-        </Typography>
+        </p>
       ) : errorMessage ? (
-        <Typography variant="body2" color="error" className="py-12 text-center">
+        <p className="text-sm text-rezics-color-danger py-12 text-center">
           {errorMessage}
-        </Typography>
+        </p>
       ) : realms.length === 0 ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="py-12 text-center"
-        >
+        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
           {emptyMessage}
-        </Typography>
+        </p>
       ) : (
         <div className="flex flex-col gap-2">
           {realms.map((realm) => (
@@ -138,48 +130,31 @@ const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
       params={{ realmId: realm.unitId }}
       className="no-underline"
     >
-      <Box className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+      <div className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <Typography
-                variant="body1"
-                className="font-medium"
-                color="text.primary"
-              >
+              <span className="text-base font-medium text-rezics-color-fg">
                 {realm.title}
-              </Typography>
+              </span>
               {realm.isOfficial && (
-                <Chip
-                  label="Official"
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
+                <Badge variant="outline" className="text-rezics-color-primary">
+                  Official
+                </Badge>
               )}
-              {!realm.isPublic && (
-                <Chip label="Private" size="small" variant="outlined" />
-              )}
+              {!realm.isPublic && <Badge variant="outline">Private</Badge>}
             </div>
             {realm.description && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                className="mt-1 line-clamp-2"
-              >
+              <p className="text-sm text-rezics-color-fg-muted mt-1 line-clamp-2">
                 {realm.description}
-              </Typography>
+              </p>
             )}
           </div>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            className="shrink-0"
-          >
+          <span className="text-sm text-rezics-color-fg-muted shrink-0">
             {realm.memberCount} members
-          </Typography>
+          </span>
         </div>
-      </Box>
+      </div>
     </Link>
   );
 };

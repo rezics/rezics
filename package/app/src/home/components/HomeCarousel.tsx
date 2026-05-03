@@ -1,5 +1,4 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { Typography } from "@mui/material";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
 import { CarouselIndicator } from "@rezics/ui/primitive/carousel/CarouselIndicator.tsx";
@@ -48,10 +47,8 @@ const CarouselContentInner = ({
           />
         </div>
         <div className="flex-1 min-w-0">
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
-            {product?.title}
-          </Typography>
-          <Typography variant="body2">{product?.lorem}</Typography>
+          <h6 className="text-base font-bold mb-2">{product?.title}</h6>
+          <p className="text-sm m-0">{product?.lorem}</p>
         </div>
       </div>
     </Link>
@@ -76,12 +73,12 @@ const CarouselContentInnerCompact = ({
           />
         </div>
         <div className="flex-1 min-w-0">
-          <Typography variant="subtitle2" fontWeight="600" noWrap>
+          <p className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis m-0">
             {product?.title}
-          </Typography>
-          <Typography variant="caption" className="line-clamp-4 leading-snug">
+          </p>
+          <p className="text-xs line-clamp-4 leading-snug m-0">
             {product?.lorem}
-          </Typography>
+          </p>
         </div>
       </div>
     </Link>

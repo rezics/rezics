@@ -1,4 +1,3 @@
-import { Box, Card, CardMedia, Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
@@ -27,47 +26,32 @@ const books = [
 
 function BookCard({ title, author }: { title: string; author: string }) {
   return (
-    <Card
-      sx={{
-        p: 0,
-        bgcolor: "transparent",
-        border: "none",
-        boxShadow: "none",
-        width: 160,
-      }}
-    >
-      <CardMedia
-        component="div"
-        sx={{
-          aspectRatio: "2/3",
-          borderRadius: 1,
+    <div className="w-40">
+      <div
+        className="rounded-md"
+        style={{
+          aspectRatio: "2 / 3",
           background:
             "linear-gradient(135deg, var(--rezics-color-surface-raised), var(--rezics-color-surface-sunken))",
         }}
       />
-      <Box sx={{ pt: 1.5 }}>
-        <Typography variant="body1" fontWeight={500} noWrap>
-          {title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" noWrap>
-          {author}
-        </Typography>
-      </Box>
-    </Card>
+      <div className="pt-3">
+        <p className="text-base font-medium truncate">{title}</p>
+        <p className="text-sm text-rezics-color-fg-muted truncate">{author}</p>
+      </div>
+    </div>
   );
 }
 
 export const RecentBooks: Story = {
   render: () => (
-    <Box sx={{ py: 8 }}>
-      <Typography variant="h2" mb={4}>
-        Recent Books
-      </Typography>
-      <Stack direction="row" spacing={4} sx={{ overflowX: "auto" }}>
+    <div className="py-16">
+      <h2 className="text-2xl font-semibold mb-8">Recent Books</h2>
+      <div className="flex flex-row gap-8 overflow-x-auto">
         {books.map((b) => (
           <BookCard key={b.id} title={b.title} author={b.author} />
         ))}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   ),
 };

@@ -1,8 +1,8 @@
-import { Button, Chip, Stack, Typography } from "@mui/material";
 import { LANGUAGE_META } from "@rezics/contract";
+import { Badge, Button } from "@rezics/ui/shadcn";
+import { Plus as AddIcon } from "lucide-react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { Plus as AddIcon } from "lucide-react";
 
 export interface TranslationLanguageBarProps {
   existingLanguages: string[];
@@ -34,47 +34,46 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
       : [];
 
   return (
-    <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
-      <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+    <div className="flex flex-row items-center gap-2 flex-wrap">
+      <span className="text-sm text-rezics-color-text-secondary mr-2">
         {t("page.book_edit.info.translation.language_label")}
-      </Typography>
+      </span>
       {visible.map((lang) => {
         const isActive = lang === selectedLanguage;
         const isDefault = defaultLanguage === lang;
         return (
-          <Chip
+          <Badge
             key={lang}
-            size="small"
-            label={
-              <Stack direction="row" alignItems="center" gap={0.75}>
-                <span>{languageLabel(lang)}</span>
-                {isDefault && (
-                  <Typography
-                    component="span"
-                    variant="caption"
-                    color={isActive ? "inherit" : "text.secondary"}
-                  >
-                    · {t("page.book_edit.info.translation.default_badge")}
-                  </Typography>
-                )}
-              </Stack>
-            }
-            color={isActive ? "primary" : "default"}
-            variant={isActive ? "filled" : "outlined"}
+            variant={isActive ? "default" : "outline"}
             onClick={() => onSelect(lang)}
-            sx={{ cursor: "pointer" }}
-          />
+            className="cursor-pointer"
+          >
+            <span className="flex flex-row items-center gap-1">
+              <span>{languageLabel(lang)}</span>
+              {isDefault && (
+                <span
+                  className={`text-xs ${
+                    isActive
+                      ? ""
+                      : "text-rezics-color-text-secondary"
+                  }`}
+                >
+                  · {t("page.book_edit.info.translation.default_badge")}
+                </span>
+              )}
+            </span>
+          </Badge>
         );
       })}
       <Button
-        size="small"
-        variant="text"
-        startIcon={<AddIcon fontSize="small" />}
+        size="sm"
+        variant="ghost"
         onClick={onAddClick}
         disabled={!hasAvailable}
       >
+        <AddIcon className="w-4 h-4 mr-2" />
         {t("page.book_edit.info.translation.add_button")}
       </Button>
-    </Stack>
+    </div>
   );
 };

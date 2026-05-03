@@ -1,20 +1,19 @@
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControlLabel,
-  Stack,
-  Typography,
-} from "@mui/material";
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
 import { RatingBadge } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -66,31 +65,28 @@ export const ContentRatingPreferences: FC = () => {
   return (
     <>
       {saved && (
-        <Alert severity="success" className="mb-3">
-          {t("settings.content_rating.saved", "Preferences saved.")}
+        <Alert className="mb-3 text-rezics-color-success">
+          <AlertDescription>
+            {t("settings.content_rating.saved", "Preferences saved.")}
+          </AlertDescription>
         </Alert>
       )}
 
-      <Stack spacing={1.5}>
+      <div className="flex flex-col gap-3">
         {BASELINE_RATINGS.map((rating) => (
           <div
             key={rating}
             className="flex items-center justify-between gap-2"
           >
-            <FormControlLabel
-              control={<Checkbox checked disabled />}
-              label={
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <RatingBadge rating={rating} />
-                  <Typography variant="body2" color="text.secondary">
-                    {t(
-                      "settings.content_rating.always_on",
-                      "Always on",
-                    )}
-                  </Typography>
-                </Stack>
-              }
-            />
+            <label className="flex items-center gap-2 cursor-default">
+              <Checkbox checked disabled />
+              <span className="flex flex-row items-center gap-2">
+                <RatingBadge rating={rating} />
+                <span className="text-sm text-rezics-color-fg-muted">
+                  {t("settings.content_rating.always_on", "Always on")}
+                </span>
+              </span>
+            </label>
           </div>
         ))}
 
@@ -99,59 +95,59 @@ export const ContentRatingPreferences: FC = () => {
             key={rating}
             className="flex items-center justify-between gap-2"
           >
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={optedIn.includes(rating)}
-                  onChange={(e) => handleToggle(rating, e.target.checked)}
-                  disabled={updateSettings.isPending}
-                />
-              }
-              label={
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <RatingBadge rating={rating} />
-                  <Typography variant="body2" color="text.secondary">
-                    {t(
-                      `settings.content_rating.description.${rating}`,
-                      rating === "R_18"
-                        ? "Adult content."
-                        : "Explicit adult content.",
-                    )}
-                  </Typography>
-                </Stack>
-              }
-            />
+            <label className="flex items-center gap-2 cursor-pointer">
+              <Checkbox
+                checked={optedIn.includes(rating)}
+                onCheckedChange={(checked) =>
+                  handleToggle(rating, checked === true)
+                }
+                disabled={updateSettings.isPending}
+              />
+              <span className="flex flex-row items-center gap-2">
+                <RatingBadge rating={rating} />
+                <span className="text-sm text-rezics-color-fg-muted">
+                  {t(
+                    `settings.content_rating.description.${rating}`,
+                    rating === "R_18"
+                      ? "Adult content."
+                      : "Explicit adult content.",
+                  )}
+                </span>
+              </span>
+            </label>
           </div>
         ))}
-      </Stack>
+      </div>
 
-      <Dialog open={confirming !== null} onClose={() => setConfirming(null)}>
-        <DialogTitle>
-          {t(
-            "settings.content_rating.opt_in_modal.title",
-            "Confirm age-restricted content",
-          )}
-        </DialogTitle>
+      <Dialog
+        open={confirming !== null}
+        onOpenChange={(o) => !o && setConfirming(null)}
+      >
         <DialogContent>
-          <DialogContentText>
-            {t(
-              "settings.content_rating.opt_in_modal.body",
-              "By enabling {{rating}} you confirm you are of legal age in your jurisdiction and consent to viewing this content.",
-              { rating: confirming ?? "" },
-            )}
-          </DialogContentText>
+          <DialogHeader>
+            <DialogTitle>
+              {t(
+                "settings.content_rating.opt_in_modal.title",
+                "Confirm age-restricted content",
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {t(
+                "settings.content_rating.opt_in_modal.body",
+                "By enabling {{rating}} you confirm you are of legal age in your jurisdiction and consent to viewing this content.",
+                { rating: confirming ?? "" },
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirming(null)}>
+              {t("common.cancel", "Cancel")}
+            </Button>
+            <Button onClick={confirmOptIn}>
+              {t("settings.content_rating.opt_in_modal.confirm", "I confirm")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirming(null)}>
-            {t("common.cancel", "Cancel")}
-          </Button>
-          <Button variant="contained" onClick={confirmOptIn}>
-            {t(
-              "settings.content_rating.opt_in_modal.confirm",
-              "I confirm",
-            )}
-          </Button>
-        </DialogActions>
       </Dialog>
     </>
   );

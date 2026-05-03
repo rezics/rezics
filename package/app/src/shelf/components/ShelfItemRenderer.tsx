@@ -1,13 +1,10 @@
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import type {
   EnrichedShelfItem,
   ShelfView,
   TagListEntryDTO,
 } from "@rezics/api/shelf";
 import type { BookDTO, PostDTO, UnitDTO, UnitTagDTO } from "@rezics/contract";
+import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { HorizontalBookCard } from "@/book-library/components/item/HorizontalBookCard";
 import { BookCard } from "@/book-library/components/item/VerticalBookCard";
@@ -84,7 +81,7 @@ function renderPrimary(
 }
 
 function NestedPrimeCard({ enriched }: { enriched: EnrichedShelfItem }) {
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState("0");
   const primary = renderPrimary(enriched, "nested");
   const reviews = enriched.attachedReviews;
 
@@ -92,29 +89,25 @@ function NestedPrimeCard({ enriched }: { enriched: EnrichedShelfItem }) {
     return <>{primary}</>;
   }
 
+  const activeIdx = Number(tab);
+
   return (
-    <Stack spacing={1}>
+    <div className="flex flex-col gap-2">
       {primary}
-      <Box>
-        <Tabs
-          value={tab}
-          onChange={(_, v) => setTab(v)}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          {reviews.map((review, idx) => (
-            <Tab
-              key={review.unitId}
-              label={
-                (review.extra as { title?: string } | undefined)?.title ??
-                `Review ${idx + 1}`
-              }
-            />
-          ))}
+      <div>
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList className="overflow-x-auto">
+            {reviews.map((review, idx) => (
+              <TabsTrigger key={review.unitId} value={String(idx)}>
+                {(review.extra as { title?: string } | undefined)?.title ??
+                  `Review ${idx + 1}`}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         </Tabs>
-        {reviews[tab] && <ReviewCard review={reviews[tab]} />}
-      </Box>
-    </Stack>
+        {reviews[activeIdx] && <ReviewCard review={reviews[activeIdx]} />}
+      </div>
+    </div>
   );
 }
 

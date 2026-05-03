@@ -1,4 +1,4 @@
-import { TextField } from "@mui/material";
+import { Input, Label } from "@rezics/ui/shadcn";
 import type { SearchQuery } from "@rezics/contract";
 import type React from "react";
 import { useEffect, useState } from "react";
@@ -58,7 +58,6 @@ export const WordCountRangeInput: React.FC<WordCountRangeInputProps> = ({
   value,
   onChange,
   label,
-  size = "small",
   placeholder = "min-max",
 }) => {
   const [local, setLocal] = useState<string>(() => format(value));
@@ -78,21 +77,22 @@ export const WordCountRangeInput: React.FC<WordCountRangeInputProps> = ({
   };
 
   return (
-    <TextField
-      size={size}
-      label={label}
-      placeholder={placeholder}
-      value={local}
-      className="w-40"
-      onChange={(e) => setLocal(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          commit();
-        }
-      }}
-      slotProps={{ htmlInput: { inputMode: "numeric" } }}
-    />
+    <div className="flex flex-col gap-1">
+      {label && <Label>{label}</Label>}
+      <Input
+        placeholder={placeholder}
+        value={local}
+        className="w-40"
+        inputMode="numeric"
+        onChange={(e) => setLocal(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+          }
+        }}
+      />
+    </div>
   );
 };

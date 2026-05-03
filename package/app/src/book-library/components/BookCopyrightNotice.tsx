@@ -1,40 +1,31 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Copyright as CopyrightOutlined } from "lucide-react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { Copyright as CopyrightOutlined } from "lucide-react";
 
 export const BookCopyrightNotice: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <Box>
-      <Stack direction="row" spacing={1.5} alignItems="flex-start">
+    <div>
+      <div className="flex flex-row gap-3 items-start">
         <CopyrightOutlined
-          size={16} color={"var(--rezics-color-text-tertiary)"} style={{ marginTop: "2px", flexShrink: 0 }}
+          className="w-4 h-4 mt-[2px] flex-shrink-0 text-rezics-color-text-tertiary"
         />
-        <Stack spacing={0.5}>
-          <Typography
-            variant="caption"
-            sx={{
-              color: "text.secondary",
-              lineHeight: 1.55,
-              display: "block",
-            }}
+        <div className="flex flex-col gap-1">
+          <span
+            className="block text-xs text-rezics-color-text-secondary"
+            style={{ lineHeight: 1.55 }}
           >
             {t("book.copyright_notice.body")}
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              color: "var(--rezics-color-text-tertiary)",
-              lineHeight: 1.55,
-              display: "block",
-            }}
+          </span>
+          <span
+            className="block text-xs text-rezics-color-text-tertiary"
+            style={{ lineHeight: 1.55 }}
           >
             {t("book.copyright_notice.fair_use")}
-          </Typography>
-        </Stack>
-      </Stack>
-    </Box>
+          </span>
+        </div>
+      </div>
+    </div>
   );
 };

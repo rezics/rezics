@@ -16,7 +16,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { IconButton, Stack } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
 import { useReorderRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -58,17 +58,18 @@ function SortableRow({ entry, stale, onEdit, onDelete }: SortableRowProps) {
         onEdit={onEdit}
         onDelete={onDelete}
         dragHandle={
-          <IconButton
-            size="small"
-            sx={{ cursor: "grab", touchAction: "none" }}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="cursor-grab touch-none"
             {...attributes}
             {...listeners}
             aria-label={t("pinboard.reorder.drag_handle", {
               title: entry.title ?? entry.unitId,
             })}
           >
-            <DragIndicatorRoundedIcon fontSize="small" />
-          </IconButton>
+            <DragIndicatorRoundedIcon className="h-4 w-4" />
+          </Button>
         }
       />
     </div>
@@ -156,7 +157,11 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <Stack spacing={1} role="list" aria-label={t("pinboard.reorder.list")}>
+        <div
+          className="flex flex-col gap-2"
+          role="list"
+          aria-label={t("pinboard.reorder.list")}
+        >
           {ids.map((id) => {
             const entry = byId.get(id);
             if (!entry) return null;
@@ -171,7 +176,7 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
               </div>
             );
           })}
-        </Stack>
+        </div>
       </SortableContext>
     </DndContext>
   );

@@ -1,4 +1,4 @@
-import { Box, Chip, Collapse, Stack, Typography } from "@mui/material";
+import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
 
@@ -20,42 +20,38 @@ export const RealmTagHighlights: React.FC<RealmTagHighlightsProps> = ({
   if (realmHighlights.length === 0) return null;
 
   return (
-    <Box>
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ cursor: "pointer" }}
+    <div>
+      <button
+        type="button"
+        className="text-xs text-rezics-color-fg-muted cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
         Realm highlights ({realmHighlights.length})
-      </Typography>
-      <Collapse in={expanded}>
-        <Stack spacing={1} mt={1}>
-          {realmHighlights.map((rh) => (
-            <Box key={rh.realmUnitId}>
-              <Typography variant="caption" fontWeight={600}>
-                {rh.realmName}
-              </Typography>
-              <Stack
-                direction="row"
-                spacing={0.5}
-                flexWrap="wrap"
-                useFlexGap
-                mt={0.5}
-              >
-                {rh.tags.map((tagId) => (
-                  <Chip
-                    key={tagId}
-                    label={tagId}
-                    size="small"
-                    variant="outlined"
-                  />
-                ))}
-              </Stack>
-            </Box>
-          ))}
-        </Stack>
-      </Collapse>
-    </Box>
+      </button>
+      <div
+        className={
+          expanded
+            ? "grid grid-rows-[1fr] transition-[grid-template-rows] duration-200"
+            : "grid grid-rows-[0fr] transition-[grid-template-rows] duration-200"
+        }
+      >
+        <div className="overflow-hidden">
+          <div className="flex flex-col gap-2 mt-2">
+            {realmHighlights.map((rh) => (
+              <div key={rh.realmUnitId}>
+                <p className="text-xs font-semibold">{rh.realmName}</p>
+                <div className="flex flex-row flex-wrap gap-1 mt-1">
+                  {rh.tags.map((tagId) => (
+                    <Badge key={tagId} variant="outline">
+                      {tagId}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };

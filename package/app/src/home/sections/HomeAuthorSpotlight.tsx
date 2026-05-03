@@ -1,4 +1,5 @@
-import { Avatar, CircularProgress, Typography } from "@mui/material";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO, PublicUser } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
@@ -45,9 +46,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <Typography variant="h6" className="mb-3">
-          {resolvedTitle}
-        </Typography>
+        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
         <QueryErrorDisplay error={error} />
       </div>
     );
@@ -56,8 +55,8 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{resolvedTitle}</Typography>
-        {isLoading && <CircularProgress size={20} />}
+        <h6 className="text-base font-semibold m-0">{resolvedTitle}</h6>
+        {isLoading && <Spinner size="sm" />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {authors.map((a) => (
@@ -65,7 +64,12 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
             key={a.unitId}
             className="flex items-center gap-3 p-3 rounded border bg-white"
           >
-            <Avatar src={a.avatar || undefined} alt={a.name} />
+            <Avatar>
+              {a.avatar && <AvatarImage src={a.avatar} alt={a.name} />}
+              <AvatarFallback>
+                {a.name?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             <div className="min-w-0">
               <div className="font-medium truncate" title={a.name}>
                 {a.name}

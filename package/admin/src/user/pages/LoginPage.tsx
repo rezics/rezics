@@ -1,13 +1,11 @@
+import { Spinner } from "@rezics/ui";
 import {
   Alert,
-  Box,
+  AlertDescription,
   Button,
-  CircularProgress,
-  Container,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type { FormEvent } from "react";
 import { useState } from "react";
@@ -49,67 +47,62 @@ export default function LoginPage() {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ py: 8 }}>
-      <Paper
-        elevation={0}
-        sx={{ p: 3, border: 1, borderColor: "divider", borderRadius: 2 }}
-      >
-        <Typography variant="h5" fontWeight={800} gutterBottom>
-          Admin Login
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+    <div className="mx-auto w-full max-w-sm py-16 px-4">
+      <div className="bg-rezics-color-bg-elevated rounded-lg p-6">
+        <h1 className="text-xl font-extrabold mb-2">Admin Login</h1>
+        <p className="text-sm text-rezics-color-fg-muted mb-4">
           Sign in to access the admin console.
-        </Typography>
+        </p>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+          <Alert className="mb-4">
+            <AlertDescription className="text-rezics-color-danger">
+              {error}
+            </AlertDescription>
           </Alert>
         )}
 
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{ display: "grid", gap: 2 }}
-        >
-          <TextField
-            label="Email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            fullWidth
-          />
-          <TextField
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            fullWidth
-          />
+        <form onSubmit={handleSubmit} className="grid gap-4">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
           <Button
             type="submit"
-            variant="contained"
-            size="large"
+            size="lg"
             disabled={submitting}
+            className="w-full"
           >
             {submitting ? (
-              <Box
-                sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}
-              >
-                <CircularProgress size={18} color="inherit" />
+              <span className="inline-flex items-center gap-2">
+                <Spinner size="sm" />
                 Signing in…
-              </Box>
+              </span>
             ) : (
               "Sign in"
             )}
           </Button>
-        </Box>
-      </Paper>
-    </Container>
+        </form>
+      </div>
+    </div>
   );
 }

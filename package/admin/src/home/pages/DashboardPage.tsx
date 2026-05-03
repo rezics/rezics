@@ -1,70 +1,77 @@
-import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { adminStatsQueryOptions } from "@rezics/api/stat/stats.queries";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Page } from "@/core/layouts/Page";
 import { ContentTrendChart } from "../components/chart/ContentTrendChart";
 import { HealthStrip } from "../components/HealthStrip";
 import { StatCard } from "../components/StatCard";
-import { MessageCircle as CommentIcon, MessageCircleQuestion as FeedbackIcon, BookOpen as MenuBookIcon, Users as PeopleIcon } from "lucide-react";
+import {
+  MessageCircle as CommentIcon,
+  MessageCircleQuestion as FeedbackIcon,
+  BookOpen as MenuBookIcon,
+  Users as PeopleIcon,
+} from "lucide-react";
 
 export default function DashboardPage() {
   const { data: stats } = useSuspenseQuery(adminStatsQueryOptions());
 
   return (
     <Page title="Dashboard" description="Platform overview and system health">
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
             label="Total Users"
             value={stats.counts.users}
             icon={<PeopleIcon />}
           />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        </div>
+        <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
             label="Total Books"
             value={stats.counts.books}
             icon={<MenuBookIcon />}
           />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        </div>
+        <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
             label="Comments"
             value={stats.counts.comments}
             icon={<CommentIcon />}
           />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        </div>
+        <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
             label="Unresolved Feedback"
             value={stats.counts.unresolvedFeedback}
             icon={<FeedbackIcon />}
             color={
-              stats.counts.unresolvedFeedback > 0 ? "warning.main" : undefined
+              stats.counts.unresolvedFeedback > 0
+                ? "var(--rezics-color-warning)"
+                : undefined
             }
           />
-        </Grid>
+        </div>
 
-        <Grid size={{ xs: 12 }}>
+        <div className="col-span-12">
           <HealthStrip
             server={stats.health.server}
             meili={stats.health.meili}
           />
-        </Grid>
+        </div>
 
-        <Grid size={{ xs: 12 }}>
+        <div className="col-span-12">
           <Card>
             <CardContent>
-              <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1 }}>
+              <h3 className="text-sm font-extrabold mb-2">
                 Content Created (Last 30 Days)
-              </Typography>
+              </h3>
               <div style={{ height: 320 }}>
                 <ContentTrendChart trend={stats.contentTrend} />
               </div>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </Page>
   );
 }

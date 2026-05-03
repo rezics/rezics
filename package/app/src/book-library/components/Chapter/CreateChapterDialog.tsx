@@ -1,10 +1,14 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import TextField from "@mui/material/TextField";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import type { Chapter } from "./ChapterArborist";
@@ -98,19 +102,30 @@ export function CreateChapterDialog({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Create Chapter</DialogTitle>
-      <DialogContent dividers>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Create Chapter</DialogTitle>
+        </DialogHeader>
         <div className="space-y-4">
-          <TextField
-            label="章节标题"
-            fullWidth
-            variant="filled"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            error={!title.trim()}
-            helperText={!title.trim() ? "必填" : " "}
-          />
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="chapter-title">章节标题</Label>
+            <Input
+              id="chapter-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={!title.trim() ? "border-rezics-color-border-error" : ""}
+            />
+            <p
+              className={
+                !title.trim()
+                  ? "text-sm text-rezics-color-text-error"
+                  : "text-sm text-rezics-color-text-secondary"
+              }
+            >
+              {!title.trim() ? "必填" : " "}
+            </p>
+          </div>
           <div className="min-h-[300px]">
             <RezicsMarkdownEditor
               value={content}
@@ -120,7 +135,9 @@ export function CreateChapterDialog({
               submitLabel={createMutation.isPending ? "创建中..." : "创建"}
             />
             {!content.trim() && (
-              <div className="text-sm text-red-600 mt-2">内容为必填</div>
+              <div className="text-sm text-rezics-color-text-error mt-2">
+                内容为必填
+              </div>
             )}
           </div>
         </div>

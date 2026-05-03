@@ -1,20 +1,17 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Divider,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import type { UnitListResponse } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
 import React from "react";
@@ -88,27 +85,28 @@ export default function UnitsPage() {
         id: "id",
         header: "ID",
         minWidth: 220,
-        cell: (u) => (
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            {u.id}
-          </Typography>
-        ),
+        cell: (u) => <span className="text-sm font-mono">{u.id}</span>,
       },
       {
         id: "title",
         header: "Title",
         minWidth: 220,
         cell: (u) => (
-          <Typography variant="body2" fontWeight={600} noWrap>
+          <span className="text-sm font-semibold whitespace-nowrap">
             {extractUnitTitle(u)}
-          </Typography>
+          </span>
         ),
       },
       {
         id: "type",
         header: "Type",
         minWidth: 120,
-        cell: (u) => (u.type ? <Chip size="small" label={u.type} /> : "-"),
+        cell: (u) =>
+          u.type ? (
+            <Badge variant="secondary">{u.type}</Badge>
+          ) : (
+            "-"
+          ),
       },
       {
         id: "status",
@@ -121,16 +119,16 @@ export default function UnitsPage() {
         header: "User",
         minWidth: 200,
         cell: (u) => (
-          <Stack spacing={0}>
-            <Typography variant="body2" noWrap>
+          <div className="flex flex-col">
+            <span className="text-sm whitespace-nowrap">
               {u.user?.name ?? u.userId}
-            </Typography>
+            </span>
             {u.user?.slug ? (
-              <Typography variant="caption" color="text.secondary" noWrap>
+              <span className="text-xs text-rezics-color-fg-muted whitespace-nowrap">
                 @{u.user.slug}
-              </Typography>
+              </span>
             ) : null}
-          </Stack>
+          </div>
         ),
       },
       {
@@ -150,13 +148,8 @@ export default function UnitsPage() {
         header: "Actions",
         minWidth: 120,
         cell: (u) => (
-          <Button
-            size="small"
-            component={Link}
-            to={`/unit/${u.id}`}
-            variant="outlined"
-          >
-            Edit
+          <Button asChild size="sm" variant="outline">
+            <Link to={`/unit/${u.id}`}>Edit</Link>
           </Button>
         ),
       },
@@ -181,14 +174,11 @@ export default function UnitsPage() {
             setQuery(q.trim());
           }}
           toolbarRight={
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              component={Link}
-              to="/unit/create"
-              sx={{ whiteSpace: "nowrap" }}
-            >
-              Create
+            <Button asChild className="whitespace-nowrap">
+              <Link to="/unit/create">
+                <AddIcon className="size-4" />
+                Create
+              </Link>
             </Button>
           }
           isLoading={meiliQuery.isLoading}
@@ -209,63 +199,61 @@ export default function UnitsPage() {
       ) : (
         <Card>
           <CardContent>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1.5}
-              alignItems="stretch"
-            >
-              <TextField
-                size="small"
-                label="Search"
-                placeholder="q/userId/type..."
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setPage(0);
-                    setQuery(q.trim());
-                  }
-                }}
-                fullWidth
-              />
-              <IconButton
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+              <div className="flex-1 flex flex-col gap-1">
+                <Label htmlFor="unit-search" className="text-xs">
+                  Search
+                </Label>
+                <Input
+                  id="unit-search"
+                  placeholder="q/userId/type..."
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setPage(0);
+                      setQuery(q.trim());
+                    }
+                  }}
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
                 aria-label="search"
                 onClick={() => {
                   setPage(0);
                   setQuery(q.trim());
                 }}
-                sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}
+                className="self-end sm:self-center"
               >
-                <SearchIcon />
-              </IconButton>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                component={Link}
-                to="/unit/create"
-                sx={{ whiteSpace: "nowrap" }}
-              >
-                Create
+                <SearchIcon className="size-4" />
               </Button>
-            </Stack>
+              <Button asChild className="whitespace-nowrap">
+                <Link to="/unit/create">
+                  <AddIcon className="size-4" />
+                  Create
+                </Link>
+              </Button>
+            </div>
 
-            <Divider sx={{ my: 2 }} />
+            <Separator className="my-4" />
 
             {normalQuery.isLoading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-                <CircularProgress size={24} />
-              </Box>
+              <div className="flex justify-center py-12">
+                <Spinner />
+              </div>
             ) : normalQuery.isError ? (
-              <Box>
-                <Typography color="error" variant="body2">
+              <div>
+                <p className="text-sm text-rezics-color-danger">
                   Failed to load units.
-                </Typography>
+                </p>
                 {normalQuery.error ? (
-                  <Typography color="error" variant="caption">
+                  <p className="text-xs text-rezics-color-danger">
                     {String(normalQuery.error)}
-                  </Typography>
+                  </p>
                 ) : null}
-              </Box>
+              </div>
             ) : (
               <PaginatedTable<UnitDTO>
                 columns={columns}

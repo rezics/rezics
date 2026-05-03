@@ -1,5 +1,3 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { createFileRoute } from "@tanstack/react-router";
 import { RemarkListSection } from "@/remark";
 
@@ -7,12 +5,10 @@ export const Route = createFileRoute("/_mainLayout/remark/book/$bookId")({
   component: () => {
     const { bookId } = Route.useParams();
     return (
-      <Box maxWidth="lg" mx="auto" px={2} py={3}>
-        <Typography variant="h5" fontWeight={600} mb={3}>
-          Remarks
-        </Typography>
+      <div className="mx-auto w-full max-w-lg px-4 py-6">
+        <h2 className="text-xl font-semibold mb-6">Remarks</h2>
         <RemarkListSection targetUnitId={bookId} limit={50} />
-      </Box>
+      </div>
     );
   },
 });

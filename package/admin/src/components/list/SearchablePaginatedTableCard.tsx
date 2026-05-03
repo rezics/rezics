@@ -1,21 +1,19 @@
+import { Spinner } from "@rezics/ui";
 import {
-  Box,
+  Button,
   Card,
   CardContent,
-  CircularProgress,
-  Divider,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
 
 import {
   type PaginatedColumn,
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
-import { Search as SearchIcon } from "lucide-react";
 
 export function SearchablePaginatedTableCard<T>({
   title,
@@ -61,61 +59,58 @@ export function SearchablePaginatedTableCard<T>({
   return (
     <>
       {title ? (
-        <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>
-          {title}
-        </Typography>
+        <h2 className="text-xl font-extrabold mb-2">{title}</h2>
       ) : null}
       {description ? (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {description}
-        </Typography>
+        <p className="text-sm text-rezics-color-fg-muted mb-4">{description}</p>
       ) : null}
 
       <Card>
         <CardContent>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1.5}
-            alignItems="stretch"
-          >
-            <TextField
-              size="small"
-              label={searchLabel}
-              placeholder={searchPlaceholder}
-              value={q}
-              onChange={(e) => onQChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") onSearch();
-              }}
-              fullWidth
-            />
-            <IconButton
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+            <div className="flex-1 flex flex-col gap-1">
+              <Label htmlFor="search-input" className="text-xs">
+                {searchLabel}
+              </Label>
+              <Input
+                id="search-input"
+                placeholder={searchPlaceholder}
+                value={q}
+                onChange={(e) => onQChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") onSearch();
+                }}
+              />
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
               aria-label="search"
               onClick={onSearch}
-              sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}
+              className="self-end sm:self-center"
             >
-              <SearchIcon />
-            </IconButton>
+              <SearchIcon className="size-4" />
+            </Button>
             {toolbarRight}
-          </Stack>
+          </div>
 
-          <Divider sx={{ my: 2 }} />
+          <Separator className="my-4" />
 
           {isLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={24} />
-            </Box>
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
           ) : isError ? (
-            <Box>
-              <Typography color="error" variant="body2">
+            <div>
+              <p className="text-sm text-rezics-color-danger">
                 Failed to load.
-              </Typography>
+              </p>
               {error ? (
-                <Typography color="error" variant="caption">
+                <p className="text-xs text-rezics-color-danger">
                   {String(error)}
-                </Typography>
+                </p>
               ) : null}
-            </Box>
+            </div>
           ) : (
             <PaginatedTable<T>
               columns={columns}

@@ -1,7 +1,4 @@
-import { Typography } from "@mui/material";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
+import { Card, CardContent, CardFooter } from "@rezics/ui/shadcn";
 import type React from "react";
 import type { FC } from "react";
 
@@ -13,10 +10,10 @@ export const Layout: FC<{
   <div className="w-full h-dvh flex flex-col items-center justify-center">
     <Card className="w-full max-w-[480px] mx-4 sm:mx-0">
       <CardContent className="flex flex-col gap-4">
-        <Typography variant="h4">{title}</Typography>
+        <h4 className="text-2xl font-semibold">{title}</h4>
         {content}
       </CardContent>
-      <CardActions className="flex flex-row justify-end">{actions}</CardActions>
+      <CardFooter className="flex flex-row justify-end">{actions}</CardFooter>
     </Card>
   </div>
 );

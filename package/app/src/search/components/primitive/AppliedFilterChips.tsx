@@ -1,7 +1,7 @@
-import { Chip, Stack } from "@mui/material";
+import { Badge, Button } from "@rezics/ui/shadcn";
 import type { SearchQuery, TagRef } from "@rezics/contract";
-import type React from "react";
 import { X as CloseIcon } from "lucide-react";
+import type React from "react";
 
 export type { ChipDescriptor as AppliedFilterChipDescriptor };
 
@@ -188,21 +188,27 @@ export const AppliedFilterChips: React.FC<AppliedFilterChipsProps> = ({
   if (chips.length === 0) return null;
 
   return (
-    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+    <div className="flex flex-row flex-wrap gap-2">
       {chips.map((chip) => (
-        <Chip
+        <Badge
           key={chip.key}
-          label={chip.label}
-          size="small"
-          variant="outlined"
-          onDelete={
-            onRemove && chip.remove
-              ? () => onRemove(chip.remove as Partial<SearchQuery>)
-              : undefined
-          }
-          deleteIcon={<CloseIcon fontSize="small" />}
-        />
+          variant="outline"
+          className="flex items-center gap-1"
+        >
+          <span>{chip.label}</span>
+          {onRemove && chip.remove && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-4 w-4 p-0"
+              aria-label="remove"
+              onClick={() => onRemove(chip.remove as Partial<SearchQuery>)}
+            >
+              <CloseIcon size={12} />
+            </Button>
+          )}
+        </Badge>
       ))}
-    </Stack>
+    </div>
   );
 };

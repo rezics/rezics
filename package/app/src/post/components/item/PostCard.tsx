@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -46,12 +45,11 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
   };
 
   return (
-    <Box
-      className="py-3 border-b border-gray-200 dark:border-gray-700"
+    <div
+      className="py-3 border-b border-rezics-color-border cursor-pointer"
       onClick={handleCardClick}
-      sx={{ cursor: "pointer" }}
     >
-      <Box className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <PostAuthorHeader post={post} />
         <PostBodyMarkdown
           body={post.body ?? ""}
@@ -67,7 +65,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
           overflow={postCardOverflow}
           onReplyInvoke={handleReplyInvoke}
         />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

@@ -1,9 +1,9 @@
-import Button from "@mui/material/Button";
 import {
   myRealmsQuery,
   useJoinRealmMutation,
   useLeaveRealmMutation,
 } from "@rezics/api/realm/realm";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 
@@ -29,9 +29,8 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
 
   return (
     <Button
-      variant={isMember ? "outlined" : "contained"}
-      disableElevation
-      size="small"
+      variant={isMember ? "outline" : "default"}
+      size="sm"
       onClick={handleToggle}
       disabled={isPending}
     >

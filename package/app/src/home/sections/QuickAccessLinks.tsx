@@ -1,4 +1,4 @@
-import { Chip, type ChipProps } from "@mui/material";
+import { Badge } from "@rezics/ui/shadcn";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -44,16 +44,16 @@ export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
       }}
     >
       <CarouselContent className="-ml-2">
-        {items.map(({ name, icon, color }) => (
+        {items.map(({ name, icon }) => (
           <CarouselItem key={name} className="pl-2 basis-auto">
             <Link to="/book/search" search={{ tags: name }}>
-              <Chip
-                icon={<DynamicIcon name={icon as IconKey} className="ml-1" />}
-                label={name}
-                clickable
-                size="small"
-                color={color as ChipProps["color"]}
-              />
+              <Badge
+                variant="secondary"
+                className="cursor-pointer flex items-center gap-1"
+              >
+                <DynamicIcon name={icon as IconKey} className="ml-1" />
+                {name}
+              </Badge>
             </Link>
           </CarouselItem>
         ))}

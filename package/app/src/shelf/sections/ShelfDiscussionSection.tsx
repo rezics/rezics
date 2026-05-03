@@ -1,12 +1,12 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
 import { postThreadQuery } from "@rezics/api/post/post";
 import { EmptyState } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { PostTreeSection, ReplyComposer } from "@/post";
-import { useAuth } from "@/user/pages/useAuth";
 import { useAuthModal } from "@/user/components/useAuthModal";
+import { useAuth } from "@/user/pages/useAuth";
 
 interface ShelfDiscussionSectionProps {
   shelfUnitId: string;
@@ -28,7 +28,7 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
   const isEmpty = posts.length === 0;
 
   return (
-    <Stack spacing={2}>
+    <div className="flex flex-col gap-4">
       {isAuthenticated ? (
         <ReplyComposer
           mode="progressive"
@@ -36,30 +36,20 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
           placeholder={t("shelf.discussion.composer.placeholder")}
         />
       ) : (
-        <Box
-          sx={{
-            p: 2,
-            borderRadius: 1,
-            backgroundColor: "action.hover",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 2,
+        <div
+          className="flex items-center justify-between gap-4 rounded-md p-4"
+          style={{
+            backgroundColor: "var(--rezics-color-bg-muted, rgba(0,0,0,0.04))",
           }}
         >
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-rezics-color-fg-muted">
             {t("shelf.discussion.signInPrompt")}
-          </Typography>
-          <Button
-            size="small"
-            variant="contained"
-            disableElevation
-            onClick={auth.openLogin}
-          >
+          </p>
+          <Button size="sm" onClick={auth.openLogin}>
             {t("auth.login")}
           </Button>
           {auth.AuthModal({})}
-        </Box>
+        </div>
       )}
 
       {isEmpty ? (
@@ -67,6 +57,6 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
       ) : (
         <PostTreeSection rootPostUnitId={shelfUnitId} maxDepth={maxDepth} />
       )}
-    </Stack>
+    </div>
   );
 };

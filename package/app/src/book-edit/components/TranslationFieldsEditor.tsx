@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -23,9 +22,9 @@ export const TranslationFieldsEditor: React.FC<TranslationFieldsEditorProps> = (
   return (
     <div className="flex flex-col gap-5">
       <div className="space-y-1">
-        <Typography variant="body2" component="label" htmlFor="tr-title">
+        <label className="text-sm" htmlFor="tr-title">
           {t("book.fields.title")}
-        </Typography>
+        </label>
         <input
           id="tr-title"
           value={draft.title}
@@ -36,9 +35,9 @@ export const TranslationFieldsEditor: React.FC<TranslationFieldsEditorProps> = (
       </div>
 
       <div className="space-y-1">
-        <Typography variant="body2" component="label" htmlFor="tr-subtitle">
+        <label className="text-sm" htmlFor="tr-subtitle">
           {t("page.book_edit.info.translation.fields.subtitle")}
-        </Typography>
+        </label>
         <input
           id="tr-subtitle"
           value={draft.subtitle}
@@ -49,9 +48,9 @@ export const TranslationFieldsEditor: React.FC<TranslationFieldsEditorProps> = (
       </div>
 
       <div className="space-y-1">
-        <Typography variant="body2" component="label" htmlFor="tr-summary">
+        <label className="text-sm" htmlFor="tr-summary">
           {t("page.book_edit.info.translation.fields.summary")}
-        </Typography>
+        </label>
         <input
           id="tr-summary"
           value={draft.summary}
@@ -62,9 +61,7 @@ export const TranslationFieldsEditor: React.FC<TranslationFieldsEditorProps> = (
       </div>
 
       <div className="space-y-1">
-        <Typography variant="body2" component="label">
-          {t("book.description")}
-        </Typography>
+        <label className="text-sm">{t("book.description")}</label>
         <RezicsMarkdownEditor
           value={draft.description}
           onChange={(value) => onChange("description", value)}

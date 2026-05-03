@@ -1,4 +1,3 @@
-import Box from "@mui/material/Box";
 import { postQueries } from "@rezics/api/post/post";
 import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
@@ -22,10 +21,10 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   }
 
   return (
-    <Box>
+    <div>
       {posts.map((post) => (
         <PostCard key={post.unitId} post={post} />
       ))}
-    </Box>
+    </div>
   );
 };

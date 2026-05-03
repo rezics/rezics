@@ -1,12 +1,3 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import CircularProgress from "@mui/material/CircularProgress";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Stack from "@mui/material/Stack";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Typography from "@mui/material/Typography";
 import type { ShelfSortMode, ShelfView } from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
@@ -14,13 +5,25 @@ import {
   useCleanupOrphansMutation,
   useHydratedShelfItems,
 } from "@rezics/api/shelf";
+import { Spinner } from "@rezics/ui";
+import {
+  Button,
+  Checkbox,
+  Label,
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import {
+  LayoutGrid as ViewQuiltIcon,
+  LayoutList as ViewAgendaIcon,
+  List as ViewListIcon,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import { deriveShelfStream } from "../models/shelfStream";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
-import { LayoutList as ViewAgendaIcon, List as ViewListIcon, LayoutGrid as ViewQuiltIcon } from "lucide-react";
 
 interface ShelfPageProps {
   unitId: string;
@@ -43,12 +46,8 @@ function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
 // MOCK: masonry layout uses CSS column-count as a placeholder until the real
 // masonry primitive lands. The column breaks are browser-driven and not
 // height-balanced; the emitted stream and the enum value are real.
-const MASONRY_COLUMNS_SX = {
-  xs: 2,
-  sm: 3,
-  md: 4,
-  lg: 5,
-} as const;
+const MASONRY_COLUMN_CLASS =
+  "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
   const [viewMode, setViewMode] = useState<ShelfView>("nested");
@@ -104,80 +103,76 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
 
   if (detailQuery.isLoading) {
     return (
-      <Box display="flex" justifyContent="center" py={6}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-12">
+        <Spinner />
+      </div>
     );
   }
 
   return (
-    <Box maxWidth="lg" mx="auto" px={2} py={3}>
-      <Stack spacing={3}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Typography variant="h5">{title}</Typography>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="body2" color="text.secondary">
+    <div className="mx-auto w-full max-w-5xl px-4 py-6">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-row items-center justify-between">
+          <h1 className="text-2xl font-semibold">{title}</h1>
+          <div className="flex flex-row items-center gap-2">
+            <span className="text-sm text-rezics-color-fg-muted">
               {shelf?.itemCount ?? 0} items
-            </Typography>
-            <ToggleButtonGroup
+            </span>
+            <ToggleGroup
+              type="single"
               value={effectiveViewMode}
-              exclusive
-              size="small"
-              onChange={(_, v) => v && setViewMode(v)}
+              onValueChange={(v) => v && setViewMode(v as ShelfView)}
+              size="sm"
             >
-              <ToggleButton value="nested">
-                <ViewAgendaIcon fontSize="small" />
-              </ToggleButton>
-              <ToggleButton value="flat">
-                <ViewListIcon fontSize="small" />
-              </ToggleButton>
-              <ToggleButton value="masonry">
-                <ViewQuiltIcon fontSize="small" />
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Stack>
-        </Stack>
+              <ToggleGroupItem value="nested" aria-label="Nested view">
+                <ViewAgendaIcon className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="flat" aria-label="Flat view">
+                <ViewListIcon className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="masonry" aria-label="Masonry view">
+                <ViewQuiltIcon className="h-4 w-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </div>
 
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-          <Typography variant="body2" color="text.secondary">
-            Sort
-          </Typography>
-          <ToggleButtonGroup
+        <div className="flex flex-row flex-wrap items-center gap-2">
+          <span className="text-sm text-rezics-color-fg-muted">Sort</span>
+          <ToggleGroup
+            type="single"
             value={sortMode}
-            exclusive
-            size="small"
-            onChange={(_, v) => v && setSortMode(v as ShelfSortMode)}
+            onValueChange={(v) => v && setSortMode(v as ShelfSortMode)}
+            size="sm"
           >
-            <ToggleButton value="manual">Manual</ToggleButton>
-            <ToggleButton value="time">Time</ToggleButton>
-            <ToggleButton value="title">Title</ToggleButton>
-          </ToggleButtonGroup>
+            <ToggleGroupItem value="manual">Manual</ToggleGroupItem>
+            <ToggleGroupItem value="time">Time</ToggleGroupItem>
+            <ToggleGroupItem value="title">Title</ToggleGroupItem>
+          </ToggleGroup>
           {showSortScopeToggle && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  checked={sortPrimeOnly}
-                  onChange={(_, checked) => setSortPrimeOnly(checked)}
-                />
-              }
-              label="Sort prime only"
-            />
+            <Label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={sortPrimeOnly}
+                onCheckedChange={(checked) =>
+                  setSortPrimeOnly(checked === true)
+                }
+              />
+              Sort prime only
+            </Label>
           )}
           {hydration.orphanItemRefs.length > 0 && (
             <>
-              <Typography variant="caption" color="warning.main">
+              <span
+                className="text-xs"
+                style={{ color: "var(--rezics-color-warning, #f59e0b)" }}
+              >
                 {hydration.orphanItemRefs.length} orphan
                 {hydration.orphanItemRefs.length === 1 ? "" : "s"}
-              </Typography>
+              </span>
               {isOwner && (
                 <Button
-                  size="small"
-                  variant="text"
+                  size="sm"
+                  variant="ghost"
                   disabled={cleanupMutation.isPending}
                   onClick={() =>
                     cleanupMutation.mutate({
@@ -191,28 +186,18 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               )}
             </>
           )}
-        </Stack>
+        </div>
 
         {itemsQuery.isLoading ? (
-          <Box display="flex" justifyContent="center" py={4}>
-            <CircularProgress size={20} />
-          </Box>
+          <div className="flex justify-center py-8">
+            <Spinner size="sm" />
+          </div>
         ) : visibleStream.length === 0 ? (
-          <Typography color="text.secondary" textAlign="center" py={4}>
+          <p className="py-8 text-center text-rezics-color-fg-muted">
             No items in this shelf
-          </Typography>
+          </p>
         ) : effectiveViewMode === "masonry" ? (
-          <Box
-            sx={{
-              columnCount: MASONRY_COLUMNS_SX,
-              columnGap: 2,
-              "& > *": {
-                breakInside: "avoid",
-                mb: 2,
-                display: "block",
-              },
-            }}
-          >
+          <div className={MASONRY_COLUMN_CLASS}>
             {visibleStream.map((entry) => (
               <ShelfItemRenderer
                 key={
@@ -224,9 +209,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 viewMode={effectiveViewMode}
               />
             ))}
-          </Box>
+          </div>
         ) : (
-          <Stack spacing={1}>
+          <div className="flex flex-col gap-2">
             {visibleStream.map((entry) => (
               <ShelfItemRenderer
                 key={
@@ -238,11 +223,11 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 viewMode={effectiveViewMode}
               />
             ))}
-          </Stack>
+          </div>
         )}
 
         {shelf?.unitId && <ShelfDiscussionSection shelfUnitId={shelf.unitId} />}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 }

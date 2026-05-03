@@ -1,14 +1,4 @@
-import {
-  Chip,
-  Divider,
-  List,
-  ListItemButton,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
-import type { Theme } from "@mui/material/styles";
-import { useTheme } from "@mui/material/styles";
+import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import type { TFunction } from "i18next";
 import type React from "react";
@@ -33,202 +23,123 @@ function formatRelativeWithT(t: TFunction, dateIso: string): string {
 }
 
 function NoticeBoardHeader({
-  theme,
   className,
   t,
 }: {
-  theme: Theme;
   className?: string;
   t: TFunction;
 }) {
   return (
     <div className={className}>
       <div className="p-2 flex items-center justify-between">
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <div
-            className="w-12 h-12 inline-flex items-center justify-center rounded-[10px] shadow-sm"
-            style={{
-              backgroundColor: theme.palette.primary.main,
-              color: theme.palette.primary.contrastText,
-            }}
-          >
+        <div className="flex flex-row gap-3 items-center">
+          <div className="w-12 h-12 inline-flex items-center justify-center rounded-[10px] shadow-sm bg-rezics-color-primary text-white">
             <NotificationsRoundedIcon className="w-6 h-6" />
           </div>
           <div>
-            <Typography variant="caption" color="text.secondary">
+            <p className="text-xs text-rezics-color-fg-muted">
               {t("page.home.noticeboard.caption")}
-            </Typography>
-            <Typography variant="subtitle1" fontWeight={600}>
+            </p>
+            <p className="text-base font-semibold">
               {t("page.home.noticeboard.title")}
-            </Typography>
+            </p>
           </div>
-        </Stack>
+        </div>
         <MUILink to="/notice" underline="hover" color="primary" variant="body2">
           {t("common.view_all")}
         </MUILink>
       </div>
 
-      <Divider />
+      <Separator />
     </div>
   );
 }
 
 function NoticeBoardItem({
   item,
-  theme,
   t,
 }: {
   item: PinboardAnnouncementItem;
-  theme: Theme;
   t: TFunction;
 }) {
   return (
     <div className="mb-1">
-      <ListItemButton
-        component="a"
+      <a
         href={item.link ?? "#"}
-        sx={{
-          border: `1px solid ${theme.palette.divider}`,
-          bgcolor: theme.palette.background.paper,
-          transition: theme.transitions.create(
-            ["background-color", "border-color"],
-            {
-              duration: theme.transitions.duration.shortest,
-            },
-          ),
-          "&:hover": {
-            borderColor: theme.palette.primary.light,
-            bgcolor:
-              theme.palette.mode === "light"
-                ? ((theme.palette.primary as any)[50] ??
-                  "rgba(25,118,210,0.06)")
-                : "rgba(25,118,210,0.12)",
-          },
-        }}
+        className="block p-2 rounded-md border border-rezics-color-border bg-rezics-color-bg-elevated transition-colors duration-150 hover:border-rezics-color-primary group"
       >
-        <Stack
-          direction="row"
-          spacing={1.5}
-          alignItems="flex-start"
-          sx={{ width: "100%" }}
-        >
-          <Chip
-            label={item.pin ? t("common.pinned") : t("common.new")}
-            color={item.pin ? "warning" : "default"}
-            size="small"
-            variant={item.pin ? "filled" : "outlined"}
-            sx={{ mt: 0.25 }}
-          />
+        <div className="flex flex-row gap-3 items-start w-full">
+          <Badge
+            variant={item.pin ? "default" : "outline"}
+            className="mt-0.5"
+          >
+            {item.pin ? t("common.pinned") : t("common.new")}
+          </Badge>
           <div className="min-w-0 flex-1">
-            <Typography
-              variant="body2"
-              fontWeight={600}
-              noWrap
-              sx={{
-                color: "text.primary",
-                flexShrink: 1,
-                minWidth: 0,
-              }}
-            >
+            <p className="text-sm font-semibold text-rezics-color-fg truncate min-w-0">
               {item.title}
-            </Typography>
+            </p>
             {item.content && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  mt: 0.5,
+              <p
+                className="text-sm text-rezics-color-fg-muted mt-1 overflow-hidden"
+                style={{
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
                 }}
               >
                 {item.content}
-              </Typography>
+              </p>
             )}
-            <Typography
-              variant="caption"
-              color="text.disabled"
-              sx={{ mt: 0.5, display: "block" }}
-            >
+            <p className="text-xs text-rezics-color-fg-muted opacity-60 mt-1 block">
               {formatRelativeWithT(t, item.date)}
-            </Typography>
+            </p>
           </div>
-          <Typography
-            variant="body2"
-            color="text.disabled"
-            sx={{
-              ml: 0.5,
-              opacity: 0,
-              transition: theme.transitions.create("opacity", {
-                duration: theme.transitions.duration.shortest,
-              }),
-              ".MuiListItemButton-root:hover &": { opacity: 1 },
-            }}
-            className={item.link ? "visible" : "invisible"}
+          <p
+            className={`text-sm text-rezics-color-fg-muted opacity-60 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ${item.link ? "visible" : "invisible"}`}
           >
             →
-          </Typography>
-        </Stack>
-      </ListItemButton>
+          </p>
+        </div>
+      </a>
     </div>
   );
 }
 
 export const NoticeBoard: React.FC = () => {
-  const theme = useTheme();
   const { t } = useTranslation();
 
   return (
     <div className="w-full h-full flex flex-col">
-      <NoticeBoardHeader
-        theme={theme}
-        className="sticky top-0 z-10 rounded-lg"
-        t={t}
-      />
+      <NoticeBoardHeader className="sticky top-0 z-10 rounded-lg" t={t} />
 
       <div className="flex-1 overflow-y-auto space-y-3 mt-3 p-2">
         <AnnouncementFeedSection
           loadingFallback={
-            <Stack spacing={1.2}>
-              <Skeleton variant="rounded" height={18} />
-              <Skeleton variant="rounded" height={18} />
-              <Skeleton variant="rounded" height={18} />
-              <Skeleton variant="rounded" height={18} />
-            </Stack>
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 rounded" />
+              <Skeleton className="h-4 rounded" />
+              <Skeleton className="h-4 rounded" />
+              <Skeleton className="h-4 rounded" />
+            </div>
           }
         >
           {(items) => {
             if (items.length === 0) {
               return (
-                <Typography variant="body2" color="text.secondary">
+                <p className="text-sm text-rezics-color-fg-muted">
                   {t("page.home.noticeboard.empty")}
-                </Typography>
+                </p>
               );
             }
             return (
-              <List
-                dense
-                disablePadding
-                sx={{
-                  maxHeight: "100%",
-                  overflow: "auto",
-                  pr: 0.5,
-                  "& .MuiListItemButton-root": {
-                    borderRadius: 1.5,
-                  },
-                }}
-              >
+              <ul className="max-h-full overflow-auto pr-1 list-none m-0 p-0">
                 {items.map((item) => (
-                  <NoticeBoardItem
-                    key={item.id}
-                    item={item}
-                    theme={theme}
-                    t={t}
-                  />
+                  <li key={item.id}>
+                    <NoticeBoardItem item={item} t={t} />
+                  </li>
                 ))}
-              </List>
+              </ul>
             );
           }}
         </AnnouncementFeedSection>

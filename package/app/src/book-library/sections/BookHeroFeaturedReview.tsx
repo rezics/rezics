@@ -1,7 +1,8 @@
-import { Avatar, Rating, Skeleton, Typography } from "@mui/material";
 import { postQueries } from "@rezics/api/post/post";
 import { type PostDTO, PostKind } from "@rezics/contract";
+import { RatingInput } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Avatar, AvatarFallback, AvatarImage, Skeleton } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -43,9 +44,18 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3">
-        <Skeleton variant="text" width="90%" sx={{ bgcolor: "rgba(255,255,255,0.12)" }} />
-        <Skeleton variant="text" width="80%" sx={{ bgcolor: "rgba(255,255,255,0.12)" }} />
-        <Skeleton variant="text" width="40%" sx={{ bgcolor: "rgba(255,255,255,0.12)" }} />
+        <Skeleton
+          className="h-4 w-[90%]"
+          style={{ background: "rgba(255,255,255,0.12)" }}
+        />
+        <Skeleton
+          className="h-4 w-[80%]"
+          style={{ background: "rgba(255,255,255,0.12)" }}
+        />
+        <Skeleton
+          className="h-4 w-[40%]"
+          style={{ background: "rgba(255,255,255,0.12)" }}
+        />
       </div>
     );
   }
@@ -53,17 +63,14 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   if (!review) {
     return (
       <div className="flex flex-col items-start justify-center gap-3 h-full text-white/80">
-        <Typography
+        <p
           className="font-serif italic leading-relaxed"
-          sx={{ fontSize: "1.125rem" }}
+          style={{ fontSize: "1.125rem" }}
         >
           {QUOTE_OPEN}
-          {t(
-            "book.hero.featured_review.empty_quote",
-            "等待你的第一篇書評…",
-          )}
+          {t("book.hero.featured_review.empty_quote", "等待你的第一篇書評…")}
           {QUOTE_CLOSE}
-        </Typography>
+        </p>
         <Link
           to="/review/book/$bookId"
           params={{ bookId }}
@@ -81,39 +88,43 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
 
   return (
     <div className="flex flex-col gap-3 text-white">
-      <Typography
-        className="font-serif leading-relaxed"
-        sx={{
+      <p
+        className="font-serif leading-relaxed overflow-hidden"
+        style={{
           fontSize: "1.125rem",
           display: "-webkit-box",
           WebkitLineClamp: 3,
           WebkitBoxOrient: "vertical",
-          overflow: "hidden",
         }}
       >
         {QUOTE_OPEN}
         {body || t("book.hero.featured_review.empty_body", "（無正文）")}
         {QUOTE_CLOSE}
-      </Typography>
+      </p>
 
       <div className="flex items-center gap-2 text-white/85">
         {author?.avatar && (
-          <Avatar src={author.avatar} alt={author.name ?? ""} sx={{ width: 24, height: 24 }} />
+          <Avatar className="w-6 h-6">
+            <AvatarImage src={author.avatar} alt={author.name ?? ""} />
+            <AvatarFallback>
+              {(author.name ?? "?").slice(0, 1)}
+            </AvatarFallback>
+          </Avatar>
         )}
         <span className="text-sm font-medium">
-          {author?.name ?? t("book.hero.featured_review.unknown_author", "匿名讀者")}
+          {author?.name ??
+            t("book.hero.featured_review.unknown_author", "匿名讀者")}
         </span>
         {score != null && (
-          <Rating
-            value={score}
-            precision={0.5}
-            readOnly
-            size="small"
-            sx={{
-              ml: 0.5,
-              "& .MuiRating-iconEmpty": { color: "rgba(255,255,255,0.3)" },
-            }}
-          />
+          <div className="ml-1">
+            <RatingInput
+              value={Math.round(score)}
+              onChange={() => {}}
+              readOnly
+              size="sm"
+              aria-label="review score"
+            />
+          </div>
         )}
       </div>
 

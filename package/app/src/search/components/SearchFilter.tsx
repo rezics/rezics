@@ -1,9 +1,18 @@
-import { Button, Menu, MenuItem, Stack, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { Button } from "@rezics/ui/shadcn";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@rezics/ui/shadcn";
 import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
-import React from "react";
+import {
+  ArrowDown as ArrowDownward,
+  ChevronDown as ArrowDropDownIcon,
+  ArrowUp as ArrowUpward,
+} from "lucide-react";
+import type React from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowDown as ArrowDownward, ChevronDown as ArrowDropDownIcon, ArrowUp as ArrowUpward } from "lucide-react";
 
 export type BookLibSortKey =
   | "relevance"
@@ -29,95 +38,66 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
   onSortChange,
 }) => {
   const { t } = useTranslation();
-  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-  const theme = useTheme();
-
-  const handleClick = (key: string) => (e: React.MouseEvent) => {
-    if (key === "recommend") {
-      const el = e.currentTarget as HTMLElement;
-      setAnchorEl(el);
-      return;
-    }
-  };
 
   const handleSecondaryMenuSelect = (key: string) => () => {
     console.log(key);
-    setAnchorEl(null);
   };
 
   return (
     <div className="flex justify-between">
-      <Stack
-        direction="row"
-        spacing={2}
-        alignItems="center"
-        className="book-search-filter mb-8"
-      >
+      <div className="book-search-filter mb-8 flex flex-row items-center gap-4">
         {(Object.keys(LABEL_KEYS) as BookLibSortKey[]).map((key) => {
           const active = key === sortType;
           return (
             <Button
               key={key}
+              variant={active ? "secondary" : "ghost"}
               onClick={() => onSortChange({ type: key })}
-              sx={{
-                backgroundColor: active ? theme.palette.secondary.main : "",
-              }}
             >
-              <Typography variant="body2">
+              <span className="text-sm">
                 {t(LABEL_KEYS[key]! as any)}
-              </Typography>
+              </span>
             </Button>
           );
         })}
-        <Button
-          onClick={handleClick("recommend")}
-          endIcon={<ArrowDropDownIcon fontSize="small" />}
-        >
-          <Typography variant="body2">
-            {t("search.filter.recommendation")}
-          </Typography>
-        </Button>
 
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={() => setAnchorEl(null)}
-        >
-          <MenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>
-            {t("search.filter.week_votes")}
-          </MenuItem>
-          <MenuItem onClick={handleSecondaryMenuSelect("monthVotes")}>
-            {t("search.filter.month_votes")}
-          </MenuItem>
-          <MenuItem onClick={handleSecondaryMenuSelect("totalVotes")}>
-            {t("search.filter.total_votes")}
-          </MenuItem>
-        </Menu>
-      </Stack>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost">
+              <span className="text-sm">
+                {t("search.filter.recommendation")}
+              </span>
+              <ArrowDropDownIcon className="ml-1" size={16} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>
+              {t("search.filter.week_votes")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSecondaryMenuSelect("monthVotes")}>
+              {t("search.filter.month_votes")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSecondaryMenuSelect("totalVotes")}>
+              {t("search.filter.total_votes")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <div>
         <Button
-          value="desc"
+          variant={sortOrder === "desc" ? "secondary" : "ghost"}
+          size="sm"
           onClick={() => onSortChange({ order: "desc" })}
-          size="small"
-          sx={{
-            backgroundColor:
-              sortOrder === "desc" ? theme.palette.secondary.main : "",
-            textTransform: "none",
-          }}
+          className="normal-case"
         >
           <ArrowDownward />
           &nbsp; {t("search.filter.desc")}
         </Button>
         <Button
-          value="asc"
+          variant={sortOrder === "asc" ? "secondary" : "ghost"}
+          size="sm"
           onClick={() => onSortChange({ order: "asc" })}
-          className="!ml-2"
-          size="small"
-          sx={{
-            backgroundColor:
-              sortOrder === "asc" ? theme.palette.secondary.main : "",
-            textTransform: "none",
-          }}
+          className="ml-2 normal-case"
         >
           <ArrowUpward />
           &nbsp; {t("search.filter.asc")}

@@ -1,5 +1,5 @@
-import { IconButton } from "@mui/material";
 import type { SearchQuery } from "@rezics/contract";
+import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -83,9 +83,15 @@ export const BookSearch: React.FC<BookSearchProps> = ({
           />
         </div>
         {onToggleAdvanced && (
-          <IconButton onClick={onToggleAdvanced} aria-label="advanced search">
-            <TuneIcon />
-          </IconButton>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={onToggleAdvanced}
+            aria-label="advanced search"
+          >
+            <TuneIcon className="w-5 h-5" />
+          </Button>
         )}
       </div>
 

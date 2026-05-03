@@ -1,11 +1,15 @@
 import {
-  Divider,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Typography,
-} from "@mui/material";
+  Network as AccountTree,
+  Copy as ContentCopy,
+  Trash2 as Delete,
+  Pencil as Edit,
+  ChevronDown as KeyboardArrowDown,
+  ChevronUp as KeyboardArrowUp,
+  FilePlus as PostAdd,
+  ChevronsDownUp as UnfoldLess,
+  ChevronsUpDown as UnfoldMore,
+} from "lucide-react";
+import { useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   insertSiblingAfter,
@@ -13,7 +17,6 @@ import {
   moveSiblingLast,
 } from "@/shared/utils/arborist-tree";
 import type { Chapter, ChapterContextMenuState } from "./ChapterTreeEditor";
-import { Network as AccountTree, Copy as ContentCopy, Trash2 as Delete, Pencil as Edit, ChevronDown as KeyboardArrowDown, ChevronUp as KeyboardArrowUp, FilePlus as PostAdd, ChevronsDownUp as UnfoldLess, ChevronsUpDown as UnfoldMore } from "lucide-react";
 
 interface ChapterTreeContextMenuProps {
   contextMenu: NonNullable<ChapterContextMenuState>;
@@ -22,6 +25,30 @@ interface ChapterTreeContextMenuProps {
   handleCreate: (parentId: string | number) => void;
   onEditChapter: (chapter: Chapter) => void;
   onMoveToParent: (chapter: Chapter) => void;
+}
+
+interface MenuItemProps {
+  onClick: () => void;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  destructive?: boolean;
+}
+
+function MenuItem({ onClick, icon, children, destructive }: MenuItemProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-sm hover:bg-accent transition-colors ${
+        destructive ? "text-rezics-color-error-text" : ""
+      }`}
+    >
+      <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+        {icon}
+      </span>
+      <span className="flex-1">{children}</span>
+    </button>
+  );
 }
 
 export const ChapterTreeContextMenu = ({
@@ -33,60 +60,69 @@ export const ChapterTreeContextMenu = ({
   onMoveToParent,
 }: ChapterTreeContextMenuProps) => {
   const { node } = contextMenu;
+  const ref = useRef<HTMLDivElement>(null);
 
   const close = () => setContextMenu(null);
 
+  useEffect(() => {
+    const handleClickAway = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        close();
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("mousedown", handleClickAway);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickAway);
+      document.removeEventListener("keydown", handleEscape);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <Menu
-      open
-      onClose={close}
-      anchorReference="anchorPosition"
-      anchorPosition={{ top: contextMenu.y, left: contextMenu.x }}
-      slotProps={{
-        paper: {
-          sx: { minWidth: 200 },
-        },
-      }}
+    <div
+      ref={ref}
+      role="menu"
+      className="fixed z-50 min-w-[200px] rounded-md border border-rezics-color-border-defined bg-rezics-color-surface-elevated shadow-lg p-1"
+      style={{ top: contextMenu.y, left: contextMenu.x }}
     >
       <MenuItem
+        icon={<Edit className="w-4 h-4" />}
         onClick={() => {
           onEditChapter(node.data);
           close();
         }}
       >
-        <ListItemIcon>
-          <Edit fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Edit</ListItemText>
+        Edit
       </MenuItem>
 
       <MenuItem
+        icon={<AccountTree className="w-4 h-4" />}
         onClick={() => {
           onMoveToParent(node.data);
           close();
         }}
       >
-        <ListItemIcon>
-          <AccountTree fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Move to...</ListItemText>
+        Move to...
       </MenuItem>
 
-      <Divider />
+      <div className="my-1 h-px bg-rezics-color-border-whisper" />
 
       <MenuItem
+        icon={<PostAdd className="w-4 h-4" />}
         onClick={() => {
           handleCreate(node.id);
           close();
         }}
       >
-        <ListItemIcon>
-          <PostAdd fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>New Child Chapter</ListItemText>
+        New Child Chapter
       </MenuItem>
 
       <MenuItem
+        icon={<ContentCopy className="w-4 h-4" />}
         onClick={() => {
           const newNode: Chapter = {
             id: uuidv4(),
@@ -99,15 +135,19 @@ export const ChapterTreeContextMenu = ({
           close();
         }}
       >
-        <ListItemIcon>
-          <ContentCopy fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>New Sibling After</ListItemText>
+        New Sibling After
       </MenuItem>
 
-      <Divider />
+      <div className="my-1 h-px bg-rezics-color-border-whisper" />
 
       <MenuItem
+        icon={
+          node.isOpen ? (
+            <UnfoldLess className="w-4 h-4" />
+          ) : (
+            <UnfoldMore className="w-4 h-4" />
+          )
+        }
         onClick={() => {
           if (node.children && node.children.length > 0) {
             node.toggle();
@@ -115,17 +155,11 @@ export const ChapterTreeContextMenu = ({
           close();
         }}
       >
-        <ListItemIcon>
-          {node.isOpen ? (
-            <UnfoldLess fontSize="small" />
-          ) : (
-            <UnfoldMore fontSize="small" />
-          )}
-        </ListItemIcon>
-        <ListItemText>{node.isOpen ? "Collapse" : "Expand"}</ListItemText>
+        {node.isOpen ? "Collapse" : "Expand"}
       </MenuItem>
 
       <MenuItem
+        icon={<KeyboardArrowUp className="w-4 h-4" />}
         onClick={() => {
           setTreeData(
             (current) => moveSiblingFirst(current, node.id) as Chapter[],
@@ -133,13 +167,11 @@ export const ChapterTreeContextMenu = ({
           close();
         }}
       >
-        <ListItemIcon>
-          <KeyboardArrowUp fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Move to First</ListItemText>
+        Move to First
       </MenuItem>
 
       <MenuItem
+        icon={<KeyboardArrowDown className="w-4 h-4" />}
         onClick={() => {
           setTreeData(
             (current) => moveSiblingLast(current, node.id) as Chapter[],
@@ -147,27 +179,21 @@ export const ChapterTreeContextMenu = ({
           close();
         }}
       >
-        <ListItemIcon>
-          <KeyboardArrowDown fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Move to Last</ListItemText>
+        Move to Last
       </MenuItem>
 
-      <Divider />
+      <div className="my-1 h-px bg-rezics-color-border-whisper" />
 
       <MenuItem
+        destructive
+        icon={<Delete className="w-4 h-4" />}
         onClick={() => {
           node.tree.delete(node.id);
           close();
         }}
       >
-        <ListItemIcon>
-          <Delete fontSize="small" color="error" />
-        </ListItemIcon>
-        <ListItemText>
-          <Typography color="error">Delete</Typography>
-        </ListItemText>
+        Delete
       </MenuItem>
-    </Menu>
+    </div>
   );
 };

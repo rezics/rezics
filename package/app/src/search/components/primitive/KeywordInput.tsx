@@ -1,9 +1,9 @@
-import { IconButton, TextField } from "@mui/material";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
 import type { SearchQuery } from "@rezics/contract";
+import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import type { QueryMiddleware } from "../../hooks/useSearchQuery";
-import { Search as SearchIcon } from "lucide-react";
 
 export type KeywordInputProps = {
   value: string;
@@ -25,8 +25,6 @@ export const KeywordInput: React.FC<KeywordInputProps> = ({
   middleware,
   placeholder,
   label,
-  size = "small",
-  fullWidth = true,
 }) => {
   const [local, setLocal] = useState(value);
 
@@ -54,18 +52,24 @@ export const KeywordInput: React.FC<KeywordInputProps> = ({
 
   return (
     <div className="flex items-center gap-2">
-      <TextField
-        fullWidth={fullWidth}
-        size={size}
-        label={label}
-        placeholder={placeholder}
-        value={local}
-        onChange={(e) => setLocal(e.target.value)}
-        onKeyDown={handleKeyDown}
-      />
-      <IconButton color="primary" onClick={commit} aria-label="search">
+      <div className="flex-1">
+        {label && <Label className="mb-1 block">{label}</Label>}
+        <Input
+          placeholder={placeholder}
+          value={local}
+          onChange={(e) => setLocal(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="text-rezics-color-primary"
+        onClick={commit}
+        aria-label="search"
+      >
         <SearchIcon />
-      </IconButton>
+      </Button>
     </div>
   );
 };

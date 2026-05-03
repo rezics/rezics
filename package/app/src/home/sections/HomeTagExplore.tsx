@@ -1,4 +1,5 @@
-import { Chip, CircularProgress, Typography } from "@mui/material";
+import { Badge } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -34,9 +35,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <Typography variant="h6" className="mb-3">
-          {resolvedTitle}
-        </Typography>
+        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
         <QueryErrorDisplay error={error} />
       </div>
     );
@@ -45,8 +44,8 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{resolvedTitle}</Typography>
-        {isLoading && <CircularProgress size={20} />}
+        <h6 className="text-base font-semibold m-0">{resolvedTitle}</h6>
+        {isLoading && <Spinner size="sm" />}
       </div>
       <div className="flex flex-wrap gap-2">
         {tagUnitIds.map((id) => {
@@ -54,7 +53,9 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
           const slug = translations?.[id]?.slug ?? "";
           return (
             <Link key={id} to="/book" search={{ tags: slug || label }}>
-              <Chip label={label} clickable variant="outlined" />
+              <Badge variant="outline" className="cursor-pointer">
+                {label}
+              </Badge>
             </Link>
           );
         })}

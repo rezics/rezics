@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import { shelfQueries } from "@rezics/api/shelf/shelf.queries";
 import type { ShelfDTO } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -79,21 +78,13 @@ export const ShelvesTabSection: FC = () => {
       </InnerFilterPanel>
 
       {isLoading ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="py-12 text-center"
-        >
+        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
           Loading...
-        </Typography>
+        </p>
       ) : filtered.length === 0 ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="py-12 text-center"
-        >
+        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
           {filters.q ? "No shelves match your search" : "No shelves yet"}
-        </Typography>
+        </p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {filtered.map((shelf) => (
@@ -115,7 +106,7 @@ const ShelfCard: FC<{ shelf: ShelfDTO }> = ({ shelf }) => {
       params={{ shelfId: shelf.unitId }}
       className="no-underline"
     >
-      <Box className="border border-gray-200 rounded-lg p-4 hover:border-gray-400 transition-colors h-full flex flex-col">
+      <div className="border border-gray-200 rounded-lg p-4 hover:border-gray-400 transition-colors h-full flex flex-col">
         {shelf.coverUrl && (
           <img
             src={shelf.coverUrl}
@@ -123,24 +114,20 @@ const ShelfCard: FC<{ shelf: ShelfDTO }> = ({ shelf }) => {
             className="w-full h-24 object-cover rounded mb-2"
           />
         )}
-        <Typography
-          variant="body2"
-          className="font-medium line-clamp-2"
-          color="text.primary"
-        >
+        <span className="text-sm font-medium line-clamp-2 text-rezics-color-fg">
           {title}
-        </Typography>
+        </span>
         <div className="flex items-center justify-between mt-auto pt-2">
-          <Typography variant="caption" color="text.secondary">
+          <span className="text-xs text-rezics-color-fg-muted">
             {itemCount} items
-          </Typography>
+          </span>
           {shelf.kindKey && (
-            <Typography variant="caption" color="text.secondary">
+            <span className="text-xs text-rezics-color-fg-muted">
               {shelf.kindKey}
-            </Typography>
+            </span>
           )}
         </div>
-      </Box>
+      </div>
     </Link>
   );
 };

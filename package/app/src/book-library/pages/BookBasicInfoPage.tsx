@@ -1,10 +1,10 @@
-import { Box, Divider, Stack } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
+import { WorkReleaseNav } from "@rezics/ui";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
-import { WorkReleaseNav } from "@rezics/ui";
+import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
@@ -89,7 +89,7 @@ export const BookBasicInfoPage: React.FC = () => {
   const sidebar = useMemo(() => {
     if (!bookInfo) return null;
     return (
-      <Stack spacing={3}>
+      <div className="flex flex-col gap-6">
         <MetadataPanel bookInfo={bookInfo} />
         {bookInfo.workUnitId && (
           <BookWorkReleaseNav
@@ -97,7 +97,7 @@ export const BookBasicInfoPage: React.FC = () => {
             currentUnitId={bookInfo.unitId}
           />
         )}
-      </Stack>
+      </div>
     );
   }, [bookInfo]);
   useBookDetailSidebar(sidebar);
@@ -112,19 +112,19 @@ export const BookBasicInfoPage: React.FC = () => {
     )?.description ?? "";
 
   return (
-    <Stack spacing={4}>
+    <div className="flex flex-col gap-8">
       <BookDescription description={description} />
 
-      <Box className="lg:hidden">
+      <div className="lg:hidden">
         <MetadataPanel bookInfo={bookInfo} variant="inline" />
-      </Box>
+      </div>
 
       {unitTags.length > 0 && (
         <>
-          <Divider />
+          <Separator />
           <div>
             <AccentBarWithText text={t("book.fields.tags", "Tags")} />
-            <Box mt={1}>
+            <div className="mt-2">
               <TagInteraction
                 tags={unitTags}
                 translations={tagTranslations ?? {}}
@@ -132,12 +132,12 @@ export const BookBasicInfoPage: React.FC = () => {
                 bookUnit={bookInfo}
                 onSearchTags={navigateToBookTagSearch}
               />
-            </Box>
+            </div>
           </div>
         </>
       )}
 
-      <Divider />
+      <Separator />
 
       <div>
         <ArrowForwardIcon size={16} to={`/excerpt/book/${bookInfo.unitId}`}>
@@ -146,9 +146,9 @@ export const BookBasicInfoPage: React.FC = () => {
       </div>
       <ExcerptPreview id={bookInfo.unitId || ""} />
 
-      <Divider />
+      <Separator />
 
-      <Box>
+      <div>
         <div>
           <ArrowForwardIcon
             size={16}
@@ -157,22 +157,22 @@ export const BookBasicInfoPage: React.FC = () => {
             <AccentBarWithText text={t("book.remark")} />
           </ArrowForwardIcon>
         </div>
-        <Box mt={1.5} mb={2}>
+        <div className="mt-3 mb-4">
           <RemarkInlineForm bookUnitId={bookInfo.unitId || ""} />
-        </Box>
+        </div>
         <RemarkPreview bookId={bookInfo.unitId || ""} />
-      </Box>
+      </div>
 
       {bookInfo.workUnitId && (
-        <Box className="lg:hidden">
+        <div className="lg:hidden">
           <BookWorkReleaseNav
             workUnitId={bookInfo.workUnitId}
             currentUnitId={bookInfo.unitId}
           />
-        </Box>
+        </div>
       )}
 
       <BookCopyrightNotice />
-    </Stack>
+    </div>
   );
 };

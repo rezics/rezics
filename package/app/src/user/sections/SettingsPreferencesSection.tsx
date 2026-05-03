@@ -16,19 +16,19 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  IconButton,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { GripVerticalIcon, XIcon } from "lucide-react";
 import { type FC, useState } from "react";
@@ -75,40 +75,35 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
   };
 
   return (
-    <Box
+    <div
       ref={setNodeRef}
       style={style}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-        px: 1,
-        py: 0.5,
-        borderRadius: 1,
-        bgcolor: "action.hover",
-      }}
+      className="flex items-center gap-2 px-2 py-1 rounded bg-rezics-color-bg-elevated"
     >
-      <IconButton
-        size="small"
-        sx={{ cursor: "grab", touchAction: "none" }}
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        className="h-7 w-7 cursor-grab touch-none"
         {...attributes}
         {...listeners}
         aria-label="drag handle"
       >
         <GripVerticalIcon size={14} />
-      </IconButton>
-      <Typography variant="body2" sx={{ flex: 1 }}>
-        {LANG_LABELS[code] ?? code}
-      </Typography>
-      <IconButton
-        size="small"
+      </Button>
+      <span className="text-sm flex-1">{LANG_LABELS[code] ?? code}</span>
+      <Button
+        type="button"
+        size="icon"
+        variant="ghost"
+        className="h-7 w-7"
         onClick={() => onRemove(code)}
         disabled={disabled}
         aria-label={`remove ${code}`}
       >
         <XIcon size={14} />
-      </IconButton>
-    </Box>
+      </Button>
+    </div>
   );
 };
 
@@ -170,7 +165,7 @@ export const SettingsPreferencesSection: FC = () => {
   if (settingsLoading) {
     return (
       <div className="flex justify-center py-24">
-        <CircularProgress />
+        <Spinner />
       </div>
     );
   }
@@ -182,15 +177,15 @@ export const SettingsPreferencesSection: FC = () => {
         description="Drag to reorder by priority. The first language is the most preferred."
       >
         {langSuccess && (
-          <Alert severity="success" className="mb-3">
-            Language preferences saved.
+          <Alert className="mb-3 text-rezics-color-success">
+            <AlertDescription>Language preferences saved.</AlertDescription>
           </Alert>
         )}
 
         {preferredLangs.length === 0 ? (
-          <Typography variant="body2" color="text.secondary" mb={2}>
+          <p className="text-sm text-rezics-color-fg-muted mb-4">
             No language preferences yet. Add one below.
-          </Typography>
+          </p>
         ) : (
           <DndContext
             sensors={sensors}
@@ -202,7 +197,7 @@ export const SettingsPreferencesSection: FC = () => {
               items={preferredLangs}
               strategy={verticalListSortingStrategy}
             >
-              <Stack spacing={1} mb={2}>
+              <div className="flex flex-col gap-2 mb-4">
                 {preferredLangs.map((code) => (
                   <SortableLangItem
                     key={code}
@@ -211,37 +206,34 @@ export const SettingsPreferencesSection: FC = () => {
                     disabled={updateSettings.isPending}
                   />
                 ))}
-              </Stack>
+              </div>
             </SortableContext>
           </DndContext>
         )}
 
         {availableToAdd.length > 0 && (
-          <Stack direction="row" spacing={1} alignItems="center">
-            <TextField
-              select
-              size="small"
-              variant="outlined"
-              label="Add language"
-              value={addPick}
-              onChange={(e) => setAddPick(e.target.value)}
-              sx={{ minWidth: 220 }}
-            >
-              {availableToAdd.map(({ code, label }) => (
-                <MenuItem key={code} value={code}>
-                  {label}
-                </MenuItem>
-              ))}
-            </TextField>
+          <div className="flex flex-row items-center gap-2">
+            <Select value={addPick} onValueChange={setAddPick}>
+              <SelectTrigger className="min-w-[220px] h-9">
+                <SelectValue placeholder="Add language" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableToAdd.map(({ code, label }) => (
+                  <SelectItem key={code} value={code}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button
-              variant="outlined"
-              size="small"
+              variant="outline"
+              size="sm"
               onClick={() => handleAddLang(addPick)}
               disabled={!addPick || updateSettings.isPending}
             >
               Add
             </Button>
-          </Stack>
+          </div>
         )}
       </SettingsSection>
 
@@ -263,21 +255,19 @@ export const SettingsPreferencesSection: FC = () => {
             {Object.entries(settings.realmTagPreferences).map(
               ([realm, pref]) => (
                 <div key={realm} className="flex items-center gap-2">
-                  <Typography variant="body2" className="font-medium">
-                    {realm}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <span className="text-sm font-medium">{realm}</span>
+                  <span className="text-xs text-rezics-color-fg-muted">
                     Max display: {pref.maxDisplay} | Realms:{" "}
                     {pref.realmIds.join(", ")}
-                  </Typography>
+                  </span>
                 </div>
               ),
             )}
           </div>
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-rezics-color-fg-muted">
             No realm tag preferences configured.
-          </Typography>
+          </p>
         )}
       </SettingsSection>
     </div>

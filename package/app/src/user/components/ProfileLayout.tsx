@@ -1,6 +1,6 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { createContext, type FC, useContext } from "react";
@@ -45,25 +45,25 @@ export const ProfileLayout: FC = () => {
 
   if (isLoading) {
     return (
-      <Box className="flex items-center justify-center h-64">
-        <CircularProgress />
-      </Box>
+      <div className="flex items-center justify-center h-64">
+        <Spinner />
+      </div>
     );
   }
 
   if (error || !user) {
     return (
-      <Box className="flex items-center justify-center h-64">
-        <Typography color="error">
+      <div className="flex items-center justify-center h-64">
+        <p className="text-rezics-color-danger">
           {error ? (error as Error).message : "User not found"}
-        </Typography>
-      </Box>
+        </p>
+      </div>
     );
   }
 
   return (
     <ProfileContext.Provider value={{ user, isCurrentUser, unitId }}>
-      <Box className="w-full max-w-12/16 mx-auto">
+      <div className="w-full max-w-12/16 mx-auto">
         <div className="flex flex-col md:flex-row md:gap-12 px-4 pb-12">
           <aside className="w-full md:w-[280px] md:shrink-0">
             <ProfileBasicInfo
@@ -74,7 +74,7 @@ export const ProfileLayout: FC = () => {
           </aside>
           <ProfileShell unitId={unitId} />
         </div>
-      </Box>
+      </div>
     </ProfileContext.Provider>
   );
 };

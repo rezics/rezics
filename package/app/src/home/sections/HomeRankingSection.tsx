@@ -1,12 +1,5 @@
-import {
-  Avatar,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Typography,
-} from "@mui/material";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
@@ -51,9 +44,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <Typography variant="h6" className="mb-3">
-          {resolvedTitle}
-        </Typography>
+        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
         <QueryErrorDisplay error={error} />
       </div>
     );
@@ -62,40 +53,40 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{resolvedTitle}</Typography>
-        {isLoading && <CircularProgress size={20} />}
+        <h6 className="text-base font-semibold m-0">{resolvedTitle}</h6>
+        {isLoading && <Spinner size="sm" />}
       </div>
-      <List dense>
+      <ul className="list-none m-0 p-0">
         {books.map((book, idx) => {
           const title = getBookTitle(book);
           const coverUrl = getBookCoverUrl(book);
           const authorName = getBookAuthorName(book);
           return (
-            <ListItem key={book.unitId} className="!py-2">
-              <ListItemAvatar>
+            <li key={book.unitId} className="py-2 flex items-center gap-3">
+              <Avatar className="rounded-md">
                 {coverUrl ? (
-                  <Avatar variant="rounded" src={coverUrl} alt={title} />
+                  <AvatarImage src={coverUrl} alt={title} />
                 ) : (
-                  <Avatar variant="rounded">{idx + 1}</Avatar>
+                  <AvatarFallback>{idx + 1}</AvatarFallback>
                 )}
-              </ListItemAvatar>
-              <ListItemText
-                primary={
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 w-8 text-right">
-                      {idx + 1}
-                    </span>
-                    <span className="truncate" title={title}>
-                      {title}
-                    </span>
-                  </div>
-                }
-                secondary={authorName}
-              />
-            </ListItem>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 w-8 text-right">
+                    {idx + 1}
+                  </span>
+                  <span className="truncate" title={title}>
+                    {title}
+                  </span>
+                </div>
+                <div className="text-xs text-rezics-color-fg-muted truncate pl-10">
+                  {authorName}
+                </div>
+              </div>
+            </li>
           );
         })}
-      </List>
+      </ul>
     </div>
   );
 };

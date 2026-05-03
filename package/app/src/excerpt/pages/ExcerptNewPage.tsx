@@ -1,5 +1,5 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { TextField } from "@mui/material";
+import { Input, Label } from "@rezics/ui/shadcn";
 import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
 import { CooldownButton } from "@rezics/ui/composite/button/CooldownButton.tsx";
@@ -51,13 +51,15 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
     <div>
       <div className="max-w-4xl mx-auto mt-4">
         <h1 className="text-xl font-semibold">New Excerpt</h1>
-        <TextField
-          label="Book Unit ID"
-          variant="filled"
-          className="w-full !mt-4"
-          value={bookUnitId}
-          disabled
-        />
+        <div className="flex flex-col gap-1 mt-4">
+          <Label htmlFor="book-unit-id">Book Unit ID</Label>
+          <Input
+            id="book-unit-id"
+            className="w-full"
+            value={bookUnitId}
+            disabled
+          />
+        </div>
         <ExcerptEditPage
           unitId={""}
           data={excerptData}

@@ -1,15 +1,12 @@
 import {
-  Box,
   Button,
-  Container,
-  Divider,
-  IconButton,
-  Link as MUILink,
-  Stack,
-  TextField,
+  Input,
+  Separator,
   Tooltip,
-  Typography,
-} from "@mui/material";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -18,14 +15,7 @@ import { IconBrandTelegram as TelegramIcon } from "@tabler/icons-react";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <Typography
-      variant="subtitle1"
-      fontWeight={700}
-      color="text.primary"
-      gutterBottom
-    >
-      {children}
-    </Typography>
+    <p className="text-base font-bold text-rezics-color-fg mb-2">{children}</p>
   );
 }
 
@@ -37,14 +27,12 @@ function FooterLink({
   children: React.ReactNode;
 }) {
   return (
-    <MUILink
+    <a
       href={href}
-      underline="hover"
-      color="text.secondary"
-      sx={{ lineHeight: 1.9, display: "inline-block" }}
+      className="text-rezics-color-fg-muted hover:underline leading-[1.9] inline-block"
     >
       {children}
-    </MUILink>
+    </a>
   );
 }
 
@@ -53,16 +41,14 @@ export function MainLayoutFooter({ className }: { className?: string }) {
   const year = new Date().getFullYear();
 
   return (
-    <Box
-      className={className}
-      component="footer"
-      sx={{ bgcolor: "background.default", color: "text.primary" }}
+    <footer
+      className={`bg-rezics-color-bg text-rezics-color-fg ${className ?? ""}`}
     >
-      <Divider sx={{ borderColor: "divider" }} />
+      <Separator />
 
-      <Container maxWidth="xl" className="mx-auto px-4">
+      <div className="mx-auto w-full max-w-screen-xl px-4">
         {/* Top content */}
-        <Box className="py-24">
+        <div className="py-24">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
             {/* Brand / Intro */}
             <div className="md:col-span-1">
@@ -72,80 +58,68 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                   alt="logo"
                   className="w-11 h-12"
                 />
-                <Typography
-                  variant="h6"
-                  fontWeight={800}
-                  sx={{ letterSpacing: 0.2 }}
-                >
+                <h6 className="text-base font-extrabold tracking-[0.2px] m-0">
                   REZICS
-                </Typography>
+                </h6>
               </div>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mt: 1.5 }}
-              >
+              <p className="text-sm text-rezics-color-fg-muted mt-3">
                 {t("layout.footer.brand.description")}
                 <br />
                 {t("layout.footer.brand.slogan")}
-              </Typography>
+              </p>
 
-              <Stack
-                direction="row"
-                spacing={1}
-                sx={{ mt: 2 }}
-                aria-label={t("layout.footer.social.aria")}
-              >
-                <Tooltip title={t("layout.footer.social.github")}>
-                  <IconButton
-                    aria-label={t("layout.footer.social.github")}
-                    color="primary"
-                    size="small"
-                    href="https://github.com/REZICS"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <GitHubIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title={t("layout.footer.social.telegram")}>
-                  <IconButton
-                    aria-label={t("layout.footer.social.telegram")}
-                    color="primary"
-                    size="small"
-                    href="https://t.me/REZICSofficial"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <TelegramIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+              <TooltipProvider>
+                <div
+                  className="flex flex-row gap-2 mt-4"
+                  aria-label={t("layout.footer.social.aria")}
+                >
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t("layout.footer.social.github")}
+                        className="text-rezics-color-primary"
+                        asChild
+                      >
+                        <a
+                          href="https://github.com/REZICS"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <GitHubIcon className="w-4 h-4" />
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("layout.footer.social.github")}
+                    </TooltipContent>
+                  </Tooltip>
 
-                {/* <Tooltip title="暂无账号">
-                  <IconButton
-                    aria-label="Twitter"
-                    color="primary"
-                    size="small"
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <TwitterIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="暂无账号">
-                  <IconButton
-                    aria-label="LinkedIn"
-                    color="primary"
-                    size="small"
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <LinkedInIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip> */}
-              </Stack>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t("layout.footer.social.telegram")}
+                        className="text-rezics-color-primary"
+                        asChild
+                      >
+                        <a
+                          href="https://t.me/REZICSofficial"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <TelegramIcon className="w-4 h-4" />
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("layout.footer.social.telegram")}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
             </div>
 
             {/* Navigation */}
@@ -154,7 +128,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               className="md:col-span-1"
             >
               <SectionTitle>{t("layout.footer.product.title")}</SectionTitle>
-              <Stack spacing={0.5}>
+              <div className="flex flex-col gap-1">
                 <FooterLink href="/book">
                   {t("layout.footer.product.discover")}
                 </FooterLink>
@@ -167,7 +141,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                 <FooterLink href="/unit">
                   {t("layout.footer.product.search")}
                 </FooterLink>
-              </Stack>
+              </div>
             </nav>
 
             <nav
@@ -175,7 +149,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               className="md:col-span-1"
             >
               <SectionTitle>{t("layout.footer.resources.title")}</SectionTitle>
-              <Stack spacing={0.5}>
+              <div className="flex flex-col gap-1">
                 <FooterLink href="/docs">
                   {t("layout.footer.resources.docs")}
                 </FooterLink>
@@ -188,91 +162,63 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                 <FooterLink href="/status">
                   {t("layout.footer.resources.status")}
                 </FooterLink>
-              </Stack>
+              </div>
             </nav>
 
             {/* Newsletter */}
             <div className="md:col-span-1">
               <SectionTitle>{t("layout.footer.newsletter.title")}</SectionTitle>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mb: 1.5 }}
-              >
+              <p className="text-sm text-rezics-color-fg-muted mb-3">
                 {t("layout.footer.newsletter.description")}
-              </Typography>
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                component="form"
+              </p>
+              <form
+                className="flex flex-col sm:flex-row gap-2"
                 onSubmit={(e) => e.preventDefault()}
               >
-                <TextField
-                  size="small"
+                <Input
                   type="email"
                   placeholder={t("layout.footer.newsletter.email_placeholder")}
-                  fullWidth
                   aria-label={t("layout.footer.newsletter.email_aria")}
+                  className="h-9"
                 />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  disableElevation
-                  disabled
-                >
+                <Button type="submit" disabled>
                   {t("layout.footer.newsletter.submit")}
                 </Button>
-              </Stack>
+              </form>
             </div>
           </div>
-        </Box>
+        </div>
 
-        <Divider sx={{ borderColor: "divider" }} />
+        <Separator />
 
         {/* Bottom bar */}
-        <Box
-          className="py-8"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            rowGap: 1.5,
-          }}
-        >
-          <Typography variant="caption" color="text.secondary">
+        <div className="py-8 flex items-center justify-between flex-wrap gap-y-3">
+          <p className="text-xs text-rezics-color-fg-muted m-0">
             {t("layout.footer.copyright", { year })}
-          </Typography>
+          </p>
 
-          <Stack direction="row" spacing={2} alignItems="center">
-            <MUILink
+          <div className="flex flex-row items-center gap-4">
+            <a
               href="/privacy"
-              color="text.secondary"
-              underline="hover"
-              variant="caption"
+              className="text-xs text-rezics-color-fg-muted hover:underline"
             >
               {t("layout.footer.legal.privacy")}
-            </MUILink>
-            <MUILink
+            </a>
+            <a
               href="/terms"
-              color="text.secondary"
-              underline="hover"
-              variant="caption"
+              className="text-xs text-rezics-color-fg-muted hover:underline"
             >
               {t("layout.footer.legal.terms")}
-            </MUILink>
-            <MUILink
+            </a>
+            <a
               href="/contact"
-              color="text.secondary"
-              underline="hover"
-              variant="caption"
+              className="text-xs text-rezics-color-fg-muted hover:underline"
             >
               {t("layout.footer.legal.contact")}
-            </MUILink>
-          </Stack>
-        </Box>
-      </Container>
-    </Box>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }

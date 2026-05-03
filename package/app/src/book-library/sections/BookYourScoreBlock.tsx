@@ -1,12 +1,3 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Rating,
-  Tooltip,
-} from "@mui/material";
 import { useCurrentUnitId } from "@rezics/api/hooks";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import {
@@ -15,11 +6,24 @@ import {
   useUpsertScoreMutation,
 } from "@rezics/api/score/score";
 import { SCORE_MAX } from "@rezics/contract";
+import { RatingInput } from "@rezics/ui";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { Star } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Star } from "lucide-react";
 
 interface BookYourScoreBlockProps {
   bookUnitId: string;
@@ -73,9 +77,9 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
       {currentValue ? (
         <>
           <Star
-            size={30}
+            className="w-[30px] h-[30px]"
             fill="currentColor"
-            color="var(--rezics-color-brand-fill)"
+            style={{ color: "var(--rezics-color-brand-fill)" }}
           />
           <span className="inline-flex items-baseline gap-1 text-white">
             <span className="text-xl font-semibold tabular-nums leading-none">
@@ -86,7 +90,10 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
         </>
       ) : (
         <>
-          <Star size={30} color="var(--rezics-color-brand-fill)" />
+          <Star
+            className="w-[30px] h-[30px]"
+            style={{ color: "var(--rezics-color-brand-fill)" }}
+          />
           <span className="text-base font-medium text-brand">
             {t("book.hero.your_score.rate", "Rate")}
           </span>
@@ -109,61 +116,72 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
       {isAuthed ? (
         trigger
       ) : (
-        <Tooltip title={t("book.hero.your_score.sign_in", "登入後可評分")}>
-          <span>{trigger}</span>
-        </Tooltip>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>{trigger}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t("book.hero.your_score.sign_in", "登入後可評分")}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
 
       <Dialog
         open={open}
-        onClose={() => !isPending && setOpen(false)}
-        fullWidth
-        maxWidth="xs"
+        onOpenChange={(o) => {
+          if (!isPending) setOpen(o);
+        }}
       >
-        <DialogTitle>
-          {currentValue
-            ? t("book.hero.your_score.dialog_edit", "修改評分")
-            : t("book.hero.your_score.dialog_rate", "為這本書評分")}
-        </DialogTitle>
-        <DialogContent>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle>
+              {currentValue
+                ? t("book.hero.your_score.dialog_edit", "修改評分")
+                : t("book.hero.your_score.dialog_rate", "為這本書評分")}
+            </DialogTitle>
+          </DialogHeader>
           <div className="flex flex-col items-center gap-3 pt-2">
-            <Rating
+            <RatingInput
               max={SCORE_MAX}
-              precision={1}
-              size="large"
+              size="lg"
               value={draft}
-              onChange={(_, v) => setDraft(v)}
+              onChange={(v) => setDraft(v)}
+              aria-label={t("book.hero.your_score.dialog_rate", "為這本書評分")}
             />
             <span className="text-sm text-text-secondary tabular-nums">
               {draft ? `${draft} / ${SCORE_MAX}` : "—"}
             </span>
           </div>
-        </DialogContent>
-        <DialogActions>
-          {existing && (
+          <DialogFooter>
+            {existing && (
+              <Button
+                variant="destructive"
+                onClick={handleRemove}
+                disabled={isPending}
+                className="mr-auto"
+              >
+                {t("book.hero.your_score.remove", "移除評分")}
+              </Button>
+            )}
             <Button
-              color="error"
-              onClick={handleRemove}
+              variant="ghost"
+              onClick={() => setOpen(false)}
               disabled={isPending}
-              sx={{ mr: "auto" }}
             >
-              {t("book.hero.your_score.remove", "移除評分")}
+              {t("common.cancel", "取消")}
             </Button>
-          )}
-          <Button onClick={() => setOpen(false)} disabled={isPending}>
-            {t("common.cancel", "取消")}
-          </Button>
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={handleSubmit}
-            disabled={isPending || draft == null || draft < 1}
-          >
-            {isPending
-              ? t("common.saving", "Saving…")
-              : t("common.submit", "Submit")}
-          </Button>
-        </DialogActions>
+            <Button
+              onClick={handleSubmit}
+              disabled={isPending || draft == null || draft < 1}
+            >
+              {isPending
+                ? t("common.saving", "Saving…")
+                : t("common.submit", "Submit")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </>
   );

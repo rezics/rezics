@@ -1,19 +1,19 @@
-import {
-  CircularProgress,
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  TextField,
-} from "@mui/material";
 import { bookChapterIndexQuery, bookMutations } from "@rezics/api/book/book";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import {
   chapterDetailQuery,
   useUpdateChapterMutation,
 } from "@rezics/api/chapter/chapter";
+import { Spinner } from "@rezics/ui";
 import { RezicsMarkdownEditor, type ViewMode } from "@rezics/ui/editor";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Input,
+} from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -51,7 +51,6 @@ export const BookEditChapterPage: React.FC = () => {
   );
 
   // ---- Chapter actions menu ----
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
 
@@ -136,7 +135,7 @@ export const BookEditChapterPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center p-16">
-        <CircularProgress size={24} />
+        <Spinner />
       </div>
     );
   }
@@ -156,56 +155,42 @@ export const BookEditChapterPage: React.FC = () => {
       className={`mx-auto px-8 pt-4 pb-8 flex flex-col h-[calc(100vh-5rem)] transition-all duration-300 ${isDual ? "max-w-7xl" : "max-w-4xl"}`}
     >
       <div className="flex items-center gap-2 mb-4">
-        <TextField
+        <Input
           id="chapter-title"
           placeholder={t("placeholders.chapter_title", "章节标题")}
-          variant="standard"
-          className="flex-1"
+          className={`flex-1 text-xl font-semibold border-0 border-b shadow-none rounded-none ${
+            !title.trim()
+              ? "border-rezics-color-border-error"
+              : "border-rezics-color-border-defined"
+          }`}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          error={!title.trim()}
-          slotProps={{
-            input: {
-              sx: { fontSize: "1.25rem", fontWeight: 600 },
-            },
-          }}
         />
-        <IconButton
-          size="small"
-          onClick={(e) => setMenuAnchor(e.currentTarget)}
-        >
-          <MoreHoriz />
-        </IconButton>
-        <Menu
-          anchorEl={menuAnchor}
-          open={Boolean(menuAnchor)}
-          onClose={() => setMenuAnchor(null)}
-        >
-          <MenuItem
-            onClick={() => {
-              setMenuAnchor(null);
-              setMoveDialogOpen(true);
-            }}
-          >
-            <ListItemIcon>
-              <AccountTree fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" size="icon" variant="ghost">
+              <MoreHoriz className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              onClick={() => {
+                setMoveDialogOpen(true);
+              }}
+            >
+              <AccountTree className="w-4 h-4 mr-2" />
               {t("chapter.move_volume", "移动至分卷")}
-            </ListItemText>
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setMenuAnchor(null);
-              setEditDialogOpen(true);
-            }}
-          >
-            <ListItemIcon>
-              <Settings fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>{t("chapter.metadata", "章节设置")}</ListItemText>
-          </MenuItem>
-        </Menu>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setEditDialogOpen(true);
+              }}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              {t("chapter.metadata", "章节设置")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="flex-1 min-h-0">

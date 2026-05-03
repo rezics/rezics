@@ -1,16 +1,19 @@
-import { Tooltip, Typography, Box } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
+import { ThumbsDown as ThumbDownIcon, ThumbsUp as ThumbUpIcon } from "lucide-react";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
-import {
-  remarkCardActions,
-  remarkPolicy,
-} from "../../models/remarkPolicy";
-import { ThumbsDown as ThumbDownIcon, ThumbsUp as ThumbUpIcon } from "lucide-react";
+import { cn } from "@/shared/utils/css-util";
+import { remarkCardActions, remarkPolicy } from "../../models/remarkPolicy";
 
 interface RemarkRatingBadgeProps {
   remark: PostDTO;
@@ -24,31 +27,28 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
     : "";
 
   return (
-    <Tooltip title="阅读完整评测" placement="top-start">
-      <MUILink
-        to="/remark/$reviewId"
-        params={{ reviewId: remark.unitId }}
-        className="flex items-center gap-1"
-        onClick={(e) => e.stopPropagation()}
-        sx={{
-          textDecoration: "none",
-          color: "inherit",
-          p: 0.5,
-          borderRadius: 1,
-          transition: "background-color 0.2s ease",
-          "&:hover": { backgroundColor: "action.hover" },
-        }}
-      >
-        {isRecommended ? (
-          <ThumbUpIcon fontSize="small" color="primary" />
-        ) : (
-          <ThumbDownIcon fontSize="small" color="disabled" />
-        )}
-        <Typography variant="caption">
-          {rating?.toFixed(1) ?? "0.0"}/10 · {dateStr}
-        </Typography>
-      </MUILink>
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <MUILink
+            to="/remark/$reviewId"
+            params={{ reviewId: remark.unitId }}
+            className="flex items-center gap-1 rounded p-1 text-inherit no-underline transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isRecommended ? (
+              <ThumbUpIcon className="h-4 w-4 text-rezics-color-primary" />
+            ) : (
+              <ThumbDownIcon className="h-4 w-4 text-rezics-color-fg-muted" />
+            )}
+            <span className="text-xs">
+              {rating?.toFixed(1) ?? "0.0"}/10 · {dateStr}
+            </span>
+          </MUILink>
+        </TooltipTrigger>
+        <TooltipContent side="top">阅读完整评测</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -74,18 +74,20 @@ export const RemarkCard: React.FC<RemarkCardProps> = ({ remark }) => {
   };
 
   return (
-    <Box
-      className="py-4 border-b border-gray-200 dark:border-gray-700"
+    <div
+      className={cn(
+        "py-4 border-b border-gray-200 dark:border-gray-700",
+        remark.unitId && "cursor-pointer",
+      )}
       onClick={handleCardClick}
-      sx={remark.unitId ? { cursor: "pointer" } : undefined}
     >
-      <Box className="flex flex-col gap-2">
-        <Box className="flex items-center gap-2">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
           <PostAuthorHeader post={remark} />
-          <Box ml="auto">
+          <div className="ml-auto">
             <RemarkRatingBadge remark={remark} />
-          </Box>
-        </Box>
+          </div>
+        </div>
         <PostBodyMarkdown body={remark.body ?? ""} clamp={{ maxLines: 4 }} />
         <ReactionBar
           size="md"
@@ -94,7 +96,7 @@ export const RemarkCard: React.FC<RemarkCardProps> = ({ remark }) => {
           actions={remarkCardActions}
           onReplyInvoke={handleReplyInvoke}
         />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

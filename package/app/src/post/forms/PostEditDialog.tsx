@@ -1,14 +1,13 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-} from "@mui/material";
 import { useUpdatePostMutation } from "@rezics/api/post/post";
 import type { PostDTO } from "@rezics/contract";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -42,34 +41,33 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{t("common.edit")}</DialogTitle>
-      <DialogContent>
-        <Box pt={1}>
-          <TextField
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{t("common.edit")}</DialogTitle>
+        </DialogHeader>
+        <div className="pt-2">
+          <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            multiline
-            minRows={4}
-            maxRows={16}
-            variant="outlined"
-            fullWidth
+            rows={6}
+            className="w-full min-h-[120px] max-h-[400px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
           />
-        </Box>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            {t("common.cancel", "Cancel")}
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={updateMutation.isPending || !text.trim()}
+          >
+            {updateMutation.isPending
+              ? t("common.saving", "Saving…")
+              : t("common.save", "Save")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t("common.cancel", "Cancel")}</Button>
-        <Button
-          variant="contained"
-          disableElevation
-          onClick={handleSubmit}
-          disabled={updateMutation.isPending || !text.trim()}
-        >
-          {updateMutation.isPending
-            ? t("common.saving", "Saving…")
-            : t("common.save", "Save")}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

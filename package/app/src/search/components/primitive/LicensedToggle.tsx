@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel } from "@mui/material";
+import { Checkbox } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { IsLicensedInfo } from "@/book-edit/components/Metadata/BookMetadataEditor";
@@ -14,16 +14,12 @@ export const LicensedToggle: React.FC<LicensedToggleProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <FormControlLabel
-      className="m-0"
-      control={
-        <Checkbox
-          size="small"
-          checked={!!value}
-          onChange={(e) => onChange(e.target.checked || undefined)}
-        />
-      }
-      label={<IsLicensedInfo tooltipTitle={t("search.tooltips.licensed")} />}
-    />
+    <label className="m-0 inline-flex items-center gap-2 cursor-pointer">
+      <Checkbox
+        checked={!!value}
+        onCheckedChange={(checked) => onChange(checked === true || undefined)}
+      />
+      <IsLicensedInfo tooltipTitle={t("search.tooltips.licensed")} />
+    </label>
   );
 };

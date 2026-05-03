@@ -1,4 +1,4 @@
-import { ListItemIcon, ListItemText, MenuItem } from "@mui/material";
+import { DropdownMenuItem } from "@rezics/ui/shadcn";
 import { useMemo } from "react";
 import { useAppStore } from "@/app/states/appStore";
 import { Moon as Brightness4Icon, Sun as Brightness7Icon } from "lucide-react";
@@ -14,15 +14,13 @@ export function ThemeToggler() {
   const isDark = useMemo(() => themeMode === "dark", [themeMode]);
 
   return (
-    <MenuItem onClick={toggleTheme}>
-      <ListItemIcon>
-        {isDark ? (
-          <Brightness7Icon fontSize="small" />
-        ) : (
-          <Brightness4Icon fontSize="small" />
-        )}
-      </ListItemIcon>
-      <ListItemText>Toggle theme</ListItemText>
-    </MenuItem>
+    <DropdownMenuItem onClick={toggleTheme}>
+      {isDark ? (
+        <Brightness7Icon className="w-4 h-4" />
+      ) : (
+        <Brightness4Icon className="w-4 h-4" />
+      )}
+      <span>Toggle theme</span>
+    </DropdownMenuItem>
   );
 }

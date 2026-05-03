@@ -1,16 +1,17 @@
 import {
-  Alert,
-  Button,
-  CircularProgress,
-  Divider,
-  TextField,
-  Typography,
-} from "@mui/material";
-import {
   useRevokeSessionMutation,
   useSetPasswordMutation,
 } from "@rezics/api/auth/auth.mutations";
 import { authQueries } from "@rezics/api/auth/auth.queries";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
 import { SessionListItem } from "@/user/components/SessionListItem";
@@ -76,42 +77,49 @@ export const SettingsSecuritySection: FC = () => {
         }
       >
         {passwordSuccess && (
-          <Alert severity="success" className="mb-4">
-            Password {hasPassword ? "changed" : "set"} successfully.
+          <Alert className="mb-4 text-rezics-color-success">
+            <AlertDescription>
+              Password {hasPassword ? "changed" : "set"} successfully.
+            </AlertDescription>
           </Alert>
         )}
         {setPassword.error && (
-          <Alert severity="error" className="mb-4">
-            {setPassword.error.message}
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{setPassword.error.message}</AlertDescription>
           </Alert>
         )}
 
         <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-md">
-          <TextField
-            fullWidth
-            label="New Password"
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            variant="standard"
-            required
-            inputProps={{ minLength: 6 }}
-          />
-          <TextField
-            fullWidth
-            label="Confirm Password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            variant="standard"
-            required
-            error={passwordMismatch}
-            helperText={passwordMismatch ? "Passwords do not match" : ""}
-          />
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="new-password">New Password</Label>
+            <Input
+              id="new-password"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Input
+              id="confirm-password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className={passwordMismatch ? "border-rezics-color-danger" : ""}
+            />
+            {passwordMismatch && (
+              <p className="text-sm text-rezics-color-danger">
+                Passwords do not match
+              </p>
+            )}
+          </div>
           <Button
             type="submit"
-            variant="contained"
-            size="small"
+            size="sm"
             disabled={setPassword.isPending || !newPassword || passwordMismatch}
           >
             {setPassword.isPending
@@ -130,13 +138,13 @@ export const SettingsSecuritySection: FC = () => {
       >
         {sessionsLoading ? (
           <div className="flex justify-center py-4">
-            <CircularProgress size={24} />
+            <Spinner />
           </div>
         ) : Array.isArray(sessions) && sessions.length > 0 ? (
           <div>
             {sessions.map((session: any, i: number) => (
               <div key={session.id ?? session.token}>
-                {i > 0 && <Divider />}
+                {i > 0 && <Separator />}
                 <SessionListItem
                   session={session}
                   isCurrent={session.token === currentSessionToken}
@@ -147,9 +155,9 @@ export const SettingsSecuritySection: FC = () => {
             ))}
           </div>
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-rezics-color-fg-muted">
             No active sessions found.
-          </Typography>
+          </p>
         )}
       </SettingsSection>
     </div>

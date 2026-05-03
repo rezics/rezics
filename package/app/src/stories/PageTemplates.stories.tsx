@@ -1,4 +1,8 @@
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { BookCard as VerticalBookCard } from "@/book-library/components/item/VerticalBookCard";
@@ -28,57 +32,38 @@ export const Homepage: Story = {
     docs: { description: { story: "illustrative-not-canonical" } },
   },
   render: () => (
-    <Box sx={{ maxWidth: 1100, mx: "auto", px: 3 }}>
-      <Box sx={{ py: 8 }}>
-        <Typography
-          variant="overline"
-          sx={{ color: "primary.main", letterSpacing: "0.35em" }}
-        >
+    <div className="mx-auto w-full max-w-[1100px] px-6">
+      <div className="py-16">
+        <p className="text-xs uppercase tracking-[0.35em] text-rezics-color-brand-fill">
           Library
-        </Typography>
-        <Typography variant="h1" sx={{ mt: 1 }}>
-          Read together
-        </Typography>
-      </Box>
+        </p>
+        <h1 className="text-5xl font-semibold mt-2">Read together</h1>
+      </div>
 
-      <Box
-        sx={{
-          py: 6,
-          borderTop: "1px solid var(--rezics-color-border-whisper)",
-        }}
-      >
-        <Typography variant="h2" mb={3}>
-          Recent Books
-        </Typography>
-        <Stack direction="row" spacing={3} sx={{ overflowX: "auto", pb: 2 }}>
+      <div className="py-12 border-t border-rezics-color-border-whisper">
+        <h2 className="text-3xl font-semibold mb-6">Recent Books</h2>
+        <div className="flex flex-row gap-6 overflow-x-auto pb-4">
           {bookCardPropsList.slice(0, 6).map((book) => (
-            <Box key={book.id} sx={{ width: 180, flexShrink: 0 }}>
+            <div key={book.id} className="w-[180px] flex-shrink-0">
               <VerticalBookCard
                 title={book.title}
                 author={book.author}
                 coverUrl={book.coverUrl}
                 href={book.href}
               />
-            </Box>
+            </div>
           ))}
-        </Stack>
-      </Box>
+        </div>
+      </div>
 
-      <Box
-        sx={{
-          py: 6,
-          borderTop: "1px solid var(--rezics-color-border-whisper)",
-        }}
-      >
-        <Typography variant="h2" mb={3}>
-          Trending Reviews
-        </Typography>
-        <Stack spacing={3}>
+      <div className="py-12 border-t border-rezics-color-border-whisper">
+        <h2 className="text-3xl font-semibold mb-6">Trending Reviews</h2>
+        <div className="flex flex-col gap-6">
           <ReviewCard review={reviewLong} />
           <ReviewCard review={reviewShort} />
-        </Stack>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   ),
 };
 
@@ -89,47 +74,37 @@ export const BookDetail: Story = {
   render: () => {
     const book = bookCardPropsList[0];
     return (
-      <Box sx={{ maxWidth: 1100, mx: "auto", px: 3, py: 6 }}>
-        <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
-          <Box sx={{ width: 220, flexShrink: 0 }}>
+      <div className="mx-auto w-full max-w-[1100px] px-6 py-12">
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className="w-[220px] flex-shrink-0">
             <VerticalBookCard
               title={book.title}
               author={book.author}
               coverUrl={book.coverUrl}
               href={book.href}
             />
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h1" sx={{ mb: 2 }}>
-              {book.title}
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+          </div>
+          <div className="flex-1">
+            <h1 className="text-5xl font-semibold mb-4">{book.title}</h1>
+            <p className="text-base text-rezics-color-fg-muted mb-8">
               {book.description ?? "—"}
-            </Typography>
-            <Typography variant="body1">
+            </p>
+            <p className="text-base">
               Across twelve essays, the narrator walks through public libraries
               from Tokyo to Buenos Aires, tracing how each city's reading rooms
               shape the books that find their way home with us.
-            </Typography>
-          </Box>
-        </Stack>
+            </p>
+          </div>
+        </div>
 
-        <Box
-          sx={{
-            py: 6,
-            mt: 4,
-            borderTop: "1px solid var(--rezics-color-border-whisper)",
-          }}
-        >
-          <Typography variant="h2" mb={3}>
-            Reviews
-          </Typography>
-          <Stack spacing={3}>
+        <div className="py-12 mt-8 border-t border-rezics-color-border-whisper">
+          <h2 className="text-3xl font-semibold mb-6">Reviews</h2>
+          <div className="flex flex-col gap-6">
             <ReviewCard review={reviewLong} />
             <ReviewCard review={reviewShort} />
-          </Stack>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
     );
   },
 };
@@ -139,35 +114,27 @@ export const Profile: Story = {
     docs: { description: { story: "illustrative-not-canonical" } },
   },
   render: () => (
-    <Box sx={{ maxWidth: 900, mx: "auto", px: 3, py: 6 }}>
-      <Stack direction="row" spacing={3} alignItems="center">
-        <Avatar
-          src="https://i.pravatar.cc/120?u=mei"
-          sx={{ width: 96, height: 96 }}
-        />
-        <Box>
-          <Typography variant="h1">Mei Tanaka</Typography>
-          <Typography variant="body2" color="text.secondary">
+    <div className="mx-auto w-full max-w-[900px] px-6 py-12">
+      <div className="flex flex-row gap-6 items-center">
+        <Avatar className="w-24 h-24">
+          <AvatarImage src="https://i.pravatar.cc/120?u=mei" />
+          <AvatarFallback>M</AvatarFallback>
+        </Avatar>
+        <div>
+          <h1 className="text-5xl font-semibold">Mei Tanaka</h1>
+          <p className="text-sm text-rezics-color-fg-muted">
             @mei · Reading widely; writing slowly.
-          </Typography>
-        </Box>
-      </Stack>
+          </p>
+        </div>
+      </div>
 
-      <Box
-        sx={{
-          py: 6,
-          mt: 4,
-          borderTop: "1px solid var(--rezics-color-border-whisper)",
-        }}
-      >
-        <Typography variant="h2" mb={3}>
-          Recent reviews
-        </Typography>
-        <Stack spacing={3}>
+      <div className="py-12 mt-8 border-t border-rezics-color-border-whisper">
+        <h2 className="text-3xl font-semibold mb-6">Recent reviews</h2>
+        <div className="flex flex-col gap-6">
           <ReviewCard review={reviewLong} />
           <ReviewCard review={reviewShort} />
-        </Stack>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   ),
 };

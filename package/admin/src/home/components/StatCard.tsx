@@ -1,10 +1,4 @@
-import {
-  Box,
-  Card,
-  CardActionArea,
-  CardContent,
-  Typography,
-} from "@mui/material";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
@@ -21,30 +15,39 @@ export function StatCard({ label, value, icon, color, href }: StatCardProps) {
 
   const content = (
     <CardContent>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+      <div className="flex items-center gap-3">
         {icon && (
-          <Box sx={{ color: color ?? "primary.main", display: "flex" }}>
+          <div
+            className="flex"
+            style={
+              color ? { color } : { color: "var(--rezics-color-primary)" }
+            }
+          >
             {icon}
-          </Box>
+          </div>
         )}
-        <Box>
-          <Typography variant="overline" color="text.secondary">
+        <div>
+          <span className="text-[0.6875rem] uppercase tracking-wider text-rezics-color-fg-muted">
             {label}
-          </Typography>
-          <Typography variant="h4" fontWeight={800} sx={{ color }}>
+          </span>
+          <h2
+            className="text-2xl font-extrabold"
+            style={color ? { color } : undefined}
+          >
             {typeof value === "number" ? value.toLocaleString() : value}
-          </Typography>
-        </Box>
-      </Box>
+          </h2>
+        </div>
+      </div>
     </CardContent>
   );
 
   if (href) {
     return (
-      <Card>
-        <CardActionArea onClick={() => navigate({ to: href })}>
-          {content}
-        </CardActionArea>
+      <Card
+        className="cursor-pointer transition-colors hover:bg-rezics-color-bg-elevated"
+        onClick={() => navigate({ to: href })}
+      >
+        {content}
       </Card>
     );
   }

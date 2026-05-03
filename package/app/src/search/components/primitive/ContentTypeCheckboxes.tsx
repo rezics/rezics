@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel } from "@mui/material";
+import { Checkbox } from "@rezics/ui/shadcn";
 import type React from "react";
 
 export const CONTENT_TYPES = ["BOOK", "GAME", "MEDIA", "SHELF", "POST"] as const;
@@ -33,18 +33,16 @@ export const ContentTypeCheckboxes: React.FC<ContentTypeCheckboxesProps> = ({
       )}
       <div className="flex flex-wrap gap-1">
         {options.map((type) => (
-          <FormControlLabel
+          <label
             key={type}
-            control={
-              <Checkbox
-                size="small"
-                checked={value.includes(type)}
-                onChange={(e) => toggle(type, e.target.checked)}
-              />
-            }
-            label={type}
-            className="m-0"
-          />
+            className="m-0 inline-flex items-center gap-2 cursor-pointer"
+          >
+            <Checkbox
+              checked={value.includes(type)}
+              onCheckedChange={(checked) => toggle(type, checked === true)}
+            />
+            <span className="text-sm">{type}</span>
+          </label>
         ))}
       </div>
     </div>

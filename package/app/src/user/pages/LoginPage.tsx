@@ -1,10 +1,15 @@
-import { Dialog, DialogContent } from "@mui/material";
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Dialog,
+  DialogContent,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FC, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -93,18 +98,24 @@ export const LoginPage: FC<LoginPageProps> = ({
 
   const content = (
     <>
-      {error && <Alert severity="error">{error}</Alert>}
-      <TextField
-        name="email"
-        type="email"
-        label={t("common.email")}
-        variant="standard"
-        required
-        value={data?.email}
-        onChange={(event: any) => {
-          setData({ ...data, email: event.target.value });
-        }}
-      />
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="login-email">{t("common.email")}</Label>
+        <Input
+          id="login-email"
+          name="email"
+          type="email"
+          required
+          value={data?.email}
+          onChange={(event) => {
+            setData({ ...data, email: event.target.value });
+          }}
+        />
+      </div>
       <PasswordField
         value={data?.password}
         setValue={(value: string) => {
@@ -125,13 +136,9 @@ export const LoginPage: FC<LoginPageProps> = ({
 
   const actions = (
     <>
-      {/* <Button variant="text" type="button" onClick={handleRegisterClick}>
-        {t('auth.register')}
-      </Button> */}
       <Button
         className="justify-end"
         type="button"
-        variant="contained"
         disabled={loading}
         onClick={handleSubmit}
       >
@@ -157,7 +164,7 @@ export function LoginModal({
   onClose: () => void;
 }) {
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="!p-0">
         <LoginPage isModal={true} onClose={onClose} />
       </DialogContent>

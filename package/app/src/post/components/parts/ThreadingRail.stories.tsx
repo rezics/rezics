@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
@@ -9,16 +8,16 @@ function Row({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   return (
     <ThreadingHoverProvider>
-      <Box sx={{ position: "relative", pl: "40px", py: 6, height: 120 }}>
+      <div className="relative pl-10 py-12 h-[120px]">
         <ThreadingRail
           leftPx={30}
           isCollapsed={collapsed}
           onToggleCollapse={() => setCollapsed((c) => !c)}
         />
-        <Box sx={{ color: "text.secondary" }}>
+        <div className="text-rezics-color-fg-muted">
           Hover the 12 px rail zone to see the stroke highlight.
-        </Box>
-      </Box>
+        </div>
+      </div>
     </ThreadingHoverProvider>
   );
 }

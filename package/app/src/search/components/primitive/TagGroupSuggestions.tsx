@@ -1,4 +1,4 @@
-import { Chip } from "@mui/material";
+import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
 
 export type TagGroupSuggestionsProps = {
@@ -20,14 +20,14 @@ export const TagGroupSuggestions: React.FC<TagGroupSuggestionsProps> = ({
           <span className="text-sm font-medium opacity-60">{key}</span>
           <div className="flex flex-wrap gap-1">
             {tags.map((tag) => (
-              <Chip
+              <Badge
                 key={tag}
-                label={tag}
-                clickable
-                variant="outlined"
-                size="small"
+                variant="outline"
+                className="cursor-pointer"
                 onClick={() => onAddTag(tag)}
-              />
+              >
+                {tag}
+              </Badge>
             ))}
           </div>
         </div>

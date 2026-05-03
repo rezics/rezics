@@ -1,9 +1,3 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import { useServerPermission } from "@rezics/api/hooks";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import {
@@ -14,6 +8,8 @@ import {
 } from "@rezics/api/realm/realm";
 import { unitApi } from "@rezics/api/unit/unit";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -33,7 +29,8 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
     myRealmMembershipQuery(realmId),
   );
   const permission = useServerPermission();
-  const updateMutation = useUpdateRealmMutation();
+  // updateMutation kept for completeness; actual save runs through unitApi
+  useUpdateRealmMutation();
 
   const translation = realm ? getTranslation(realm.translations) : null;
   const [title, setTitle] = useState("");
@@ -63,13 +60,11 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
     try {
       const language = translation?.language ?? DEFAULT_LANGUAGE;
 
-      // Upsert translation via unit translation endpoint
       await unitApi.upsertTranslation(realmId, language, {
         title,
         description,
       });
 
-      // Invalidate realm detail to pick up updated translations
       await queryClient.invalidateQueries({
         queryKey: realmKeys.detail(realmId),
       });
@@ -82,9 +77,9 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
 
   if (isLoading || membershipLoading) {
     return (
-      <Box display="flex" justifyContent="center" py={6}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-12">
+        <Spinner />
+      </div>
     );
   }
 
@@ -95,51 +90,46 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
   const isDefaultRealm = realmId === getDefaultRealmId();
 
   return (
-    <Box maxWidth="md" mx="auto" px={2} py={3}>
-      <Typography variant="h5" fontWeight={600} mb={3}>
-        Manage Realm
-      </Typography>
-      <Stack spacing={3}>
-        <TextField
-          label="Name"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          fullWidth
-          variant="standard"
-        />
-        <TextField
-          label="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          fullWidth
-          multiline
-          rows={4}
-          variant="standard"
-        />
+    <div className="mx-auto w-full max-w-3xl px-4 py-6">
+      <h1 className="mb-6 text-2xl font-semibold">Manage Realm</h1>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="realm-name">Name</Label>
+          <Input
+            id="realm-name"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="realm-description">Description</Label>
+          <textarea
+            id="realm-description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+            className="w-full rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
         <PinboardAdminSection
           realmUnitId={realmId}
           isDefaultRealm={isDefaultRealm}
         />
-        <Stack direction="row" spacing={2} justifyContent="flex-end">
+        <div className="flex flex-row justify-end gap-4">
           <Button
-            variant="text"
+            variant="ghost"
             onClick={() =>
               navigate({ to: "/realm/$realmId", params: { realmId } })
             }
           >
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={handleSave}
-            disabled={saving}
-          >
+          <Button onClick={handleSave} disabled={saving}>
             Save
           </Button>
-        </Stack>
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,12 +1,4 @@
-import {
-  Box,
-  Card,
-  CardActionArea,
-  CardContent,
-  Chip,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -35,32 +27,32 @@ export const LibraryCardsSection: React.FC = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {libraries.map((lib) => (
-        <Card key={lib.key} elevation={0}>
-          <CardActionArea
+        <Card key={lib.key} className="border-0 shadow-none">
+          <button
+            type="button"
             onClick={() => lib.active && navigate({ to: lib.to })}
             disabled={!lib.active}
+            className="w-full text-left disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <CardContent>
-              <Stack direction="row" spacing={2} alignItems="center">
+              <div className="flex flex-row items-center gap-4">
                 <lib.icon
                   size={32}
                   color={lib.active ? "currentColor" : "var(--rezics-color-text-disabled)"}
                 />
-                <Box>
-                  <Typography variant="h6" fontWeight={600}>
+                <div>
+                  <h6 className="text-base font-semibold m-0">
                     {t(`page.home.sections.library_cards.${lib.key}`)}
-                  </Typography>
+                  </h6>
                   {!lib.active && (
-                    <Chip
-                      label={t("page.home.sections.library_cards.coming_soon")}
-                      size="small"
-                      variant="outlined"
-                    />
+                    <Badge variant="outline" className="text-xs">
+                      {t("page.home.sections.library_cards.coming_soon")}
+                    </Badge>
                   )}
-                </Box>
-              </Stack>
+                </div>
+              </div>
             </CardContent>
-          </CardActionArea>
+          </button>
         </Card>
       ))}
     </div>

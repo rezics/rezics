@@ -1,4 +1,4 @@
-import { Chip } from "@mui/material";
+import { Badge } from "@rezics/ui/shadcn";
 import type { FC, ReactNode } from "react";
 
 export interface ChipDefinition {
@@ -25,19 +25,26 @@ export const InnerFilterPanel: FC<InnerFilterPanelProps> = ({
 }) => (
   <div className={`flex flex-col gap-3 ${className ?? ""}`}>
     <div className="flex flex-wrap gap-2">
-      {chips.map((chip) => (
-        <Chip
-          key={chip.value}
-          label={
-            chip.count != null ? `${chip.label} (${chip.count})` : chip.label
-          }
-          variant={activeValue === chip.value ? "filled" : "outlined"}
-          color={activeValue === chip.value ? "primary" : "default"}
-          onClick={chip.disabled ? undefined : () => onChipChange(chip.value)}
-          disabled={chip.disabled}
-          clickable={!chip.disabled}
-        />
-      ))}
+      {chips.map((chip) => {
+        const isActive = activeValue === chip.value;
+        const label =
+          chip.count != null ? `${chip.label} (${chip.count})` : chip.label;
+        return (
+          <Badge
+            key={chip.value}
+            variant={isActive ? "default" : "outline"}
+            onClick={chip.disabled ? undefined : () => onChipChange(chip.value)}
+            aria-disabled={chip.disabled || undefined}
+            className={
+              chip.disabled
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer"
+            }
+          >
+            {label}
+          </Badge>
+        );
+      })}
     </div>
     {children}
   </div>

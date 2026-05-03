@@ -1,4 +1,5 @@
-import { Card, CardContent, CircularProgress, Typography } from "@mui/material";
+import { Card, CardContent } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
@@ -20,10 +21,6 @@ export type HomeEditorPicksProps = {
   limit?: number;
 };
 
-/**
- * HomeEditorPicks
- * For now, shows a curated-style grid from the same list API.
- */
 export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   title,
   limit = 8,
@@ -39,9 +36,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <Typography variant="h6" className="mb-3">
-          {resolvedTitle}
-        </Typography>
+        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
         <QueryErrorDisplay error={error} />
       </div>
     );
@@ -50,8 +45,8 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{resolvedTitle}</Typography>
-        {isLoading && <CircularProgress size={20} />}
+        <h6 className="text-base font-semibold m-0">{resolvedTitle}</h6>
+        {isLoading && <Spinner size="sm" />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
         {books.map((book) => {
@@ -68,20 +63,12 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
                 />
               )}
               <CardContent className="!pt-3">
-                <Typography
-                  variant="subtitle2"
-                  className="truncate"
-                  title={title}
-                >
+                <p className="text-sm font-medium truncate m-0" title={title}>
                   {title}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  className="truncate"
-                >
+                </p>
+                <p className="text-xs text-rezics-color-fg-muted truncate m-0">
                   {authorName}
-                </Typography>
+                </p>
               </CardContent>
             </Card>
           );

@@ -1,6 +1,13 @@
-import { Chip, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
+import {
+  Badge,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
@@ -117,35 +124,31 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
   if (options.length <= 1) return null;
 
   return (
-    <Stack direction="row" alignItems="center" spacing={1}>
-      <Typography variant="body2" color="text.secondary">
-        Release
-      </Typography>
-      <TextField
-        select
-        size="small"
-        variant="outlined"
+    <div className="flex flex-row items-center gap-2">
+      <span className="text-sm text-rezics-color-text-secondary">Release</span>
+      <Select
         value={selectedReleaseUnitId}
-        onChange={(e) => onSelect(e.target.value)}
-        sx={{ minWidth: 260 }}
+        onValueChange={(v) => onSelect(v)}
       >
-        {options.map((opt) => (
-          <MenuItem key={opt.unitId} value={opt.unitId}>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <span>{opt.title}</span>
-              <Chip label={opt.language} size="small" variant="outlined" />
-              {opt.isOfficial && (
-                <Chip
-                  label="official"
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-            </Stack>
-          </MenuItem>
-        ))}
-      </TextField>
-    </Stack>
+        <SelectTrigger className="min-w-[260px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt.unitId} value={opt.unitId}>
+              <div className="flex flex-row items-center gap-2">
+                <span>{opt.title}</span>
+                <Badge variant="outline">{opt.language}</Badge>
+                {opt.isOfficial && (
+                  <Badge variant="outline" className="text-rezics-color-brand-fill border-rezics-color-brand-fill">
+                    official
+                  </Badge>
+                )}
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 };

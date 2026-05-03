@@ -1,16 +1,16 @@
-import { IconButton } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
 import { useCanEdit } from "@rezics/api/hooks";
 import { createRezicsRenderer } from "@rezics/editor/markdown";
 import { handleExternalLinkClick } from "@rezics/ui/link/handleExternalLinkClick.ts";
-import { useNavigate } from "@tanstack/react-router";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { bookReadLayoutRoute } from "@/router";
-import { Pencil as EditOutlined } from "lucide-react";
 
 export const BookReadChapterPage: React.FC = () => {
   const { bookId, chapterId } = bookReadLayoutRoute.useParams();
@@ -38,15 +38,17 @@ export const BookReadChapterPage: React.FC = () => {
       <div className="flex items-center gap-2 mb-2">
         <h1 className="text-2xl font-bold">{data?.title}</h1>
         {canEdit && bookId && chapterId && (
-          <IconButton
-            size="small"
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
             aria-label={t("common.edit")}
             onClick={() =>
               navigate({ to: `/book/${bookId}/edit/${chapterId}` })
             }
           >
-            <EditOutlined fontSize="small" />
-          </IconButton>
+            <EditOutlined className="w-4 h-4" />
+          </Button>
         )}
       </div>
       <div id="markdown-chapter-content" className="markdown-body">

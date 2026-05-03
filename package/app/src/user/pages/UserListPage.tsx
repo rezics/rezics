@@ -1,21 +1,20 @@
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  InputAdornment,
-  Pagination,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  Input,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { Search as SearchIcon } from "lucide-react";
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { UserError, UserLoading } from "./UserState";
-import { Search as SearchIcon } from "lucide-react";
 
 export interface UserListPageProps {
   onUserClick?: (unitId: string) => void;
@@ -62,7 +61,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
     }
   }, [data]);
 
-  const handlePageChange = (_event: unknown, value: number) => {
+  const handlePageChange = (value: number) => {
     setPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -78,111 +77,103 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
   const totalPages = Math.ceil(total / itemsPerPage);
 
   return (
-    <Box className="w-11/12 mx-auto mt-16">
-      <Typography variant="h3" className="font-bold mb-8">
-        Users
-      </Typography>
+    <div className="w-11/12 mx-auto mt-16">
+      <h3 className="text-3xl font-bold mb-8">Users</h3>
 
-      <Box className="mb-8">
-        <TextField
-          fullWidth
+      <div className="mb-8 relative">
+        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rezics-color-fg-muted pointer-events-none" />
+        <Input
+          className="pl-10"
           placeholder="Search users by name or email..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          variant="outlined"
         />
-      </Box>
+      </div>
 
       {isLoading && <UserLoading />}
 
       {error && <UserError message={(error as Error).message} />}
 
       {!isLoading && !error && users.length === 0 && (
-        <Box className="flex items-center justify-center h-64">
-          <Typography variant="h6" color="textSecondary">
-            No users found
-          </Typography>
-        </Box>
+        <div className="flex items-center justify-center h-64">
+          <h6 className="text-lg text-rezics-color-fg-muted">No users found</h6>
+        </div>
       )}
 
       {!isLoading && !error && users.length > 0 && (
         <>
-          <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {users.map((user) => (
               <Card
                 key={user.unitId}
                 className="shadow-md rounded-lg cursor-pointer hover:shadow-xl transition-shadow"
                 onClick={() => handleUserClick(user.unitId)}
               >
-                <CardContent className="text-center">
-                  <Avatar
-                    src={user.avatar}
-                    sx={{ width: 64, height: 64, margin: "0 auto" }}
-                    className="mb-3"
-                  >
-                    {user.name?.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <Typography variant="h6" className="font-semibold mb-2">
-                    {user.name}
-                  </Typography>
-                  {user.slug && (
-                    <Chip
-                      label={`@${user.slug}`}
-                      size="small"
-                      variant="outlined"
-                      className="mb-2"
+                <CardContent className="text-center pt-6">
+                  <Avatar className="w-16 h-16 mx-auto mb-3">
+                    <AvatarImage
+                      src={user.avatar ?? undefined}
+                      alt={user.name ?? ""}
                     />
+                    <AvatarFallback>
+                      {user.name?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <h6 className="text-base font-semibold mb-2">
+                    {user.name}
+                  </h6>
+                  {user.slug && (
+                    <Badge variant="outline" className="mb-2">
+                      @{user.slug}
+                    </Badge>
                   )}
                   {user.bio && (
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      className="line-clamp-2"
-                    >
+                    <p className="text-sm text-rezics-color-fg-muted line-clamp-2">
                       {user.bio}
-                    </Typography>
+                    </p>
                   )}
                   {!user.bio && (
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      className="italic"
-                    >
+                    <p className="text-sm text-rezics-color-fg-muted italic">
                       No bio
-                    </Typography>
+                    </p>
                   )}
                 </CardContent>
               </Card>
             ))}
-          </Box>
+          </div>
 
           {totalPages > 1 && (
-            <Box className="flex justify-center mt-12">
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={handlePageChange}
-                color="primary"
-                size="large"
-              />
-            </Box>
+            <div className="flex justify-center items-center gap-2 mt-12">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => handlePageChange(Math.max(1, page - 1))}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-rezics-color-fg-muted px-2">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= totalPages}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                Next
+              </Button>
+            </div>
           )}
 
-          <Box className="mt-4 text-center">
-            <Typography variant="body2" color="textSecondary">
+          <div className="mt-4 text-center">
+            <p className="text-sm text-rezics-color-fg-muted">
               Showing {(page - 1) * itemsPerPage + 1} -{" "}
               {Math.min(page * itemsPerPage, total)} of {total} users
-            </Typography>
-          </Box>
+            </p>
+          </div>
         </>
       )}
-    </Box>
+    </div>
   );
 };

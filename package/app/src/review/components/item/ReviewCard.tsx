@@ -1,20 +1,11 @@
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  useTheme,
-} from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PostBodyMarkdown } from "@/post";
 import { cn } from "@/shared/utils/css-util";
-import {
-  reviewCardActions,
-  reviewPolicy,
-} from "../../models/reviewPolicy";
+import { reviewCardActions, reviewPolicy } from "../../models/reviewPolicy";
 
 interface ReviewCardProps {
   review: PostDTO;
@@ -25,7 +16,6 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   review,
   className,
 }) => {
-  const theme = useTheme();
   const navigate = useNavigate();
 
   const bookMetadata = (review.extra as any)?.book as
@@ -50,54 +40,49 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
   return (
     <Card
-      className={cn("w-full transition-all hover:shadow-md", className)}
+      className={cn(
+        "w-full transition-all hover:shadow-md",
+        review.unitId && "cursor-pointer",
+        className,
+      )}
       onClick={handleOpenReview}
-      sx={review.unitId ? { cursor: "pointer" } : undefined}
     >
       <CardContent>
-        <Box className="flex gap-4">
+        <div className="flex gap-4">
           {bookMetadata?.coverUrl && (
-            <Box
-              className="flex-shrink-0 w-20 h-28 overflow-hidden rounded shadow-sm"
-              sx={{ border: `1px solid ${theme.palette.divider}` }}
-            >
+            <div className="flex-shrink-0 w-20 h-28 overflow-hidden rounded shadow-sm border border-rezics-color-border">
               <img
                 src={bookMetadata.coverUrl}
                 alt={bookMetadata.title}
                 className="w-full h-full object-cover"
               />
-            </Box>
+            </div>
           )}
 
-          <Box className="flex-grow min-w-0">
+          <div className="flex-grow min-w-0">
             {bookMetadata?.title && (
-              <Typography
-                variant="caption"
-                className="block truncate"
-                sx={{ letterSpacing: 1 }}
+              <span
+                className="block truncate text-xs"
+                style={{ letterSpacing: "1px" }}
               >
                 《{bookMetadata.title}》
-              </Typography>
+              </span>
             )}
 
             {reviewTitle && (
-              <Typography
-                variant="h6"
-                className="truncate"
-                sx={{ fontSize: "1.1rem", color: "text.primary" }}
-              >
+              <h3 className="truncate text-[1.1rem] text-rezics-color-fg">
                 {reviewTitle}
-              </Typography>
+              </h3>
             )}
 
             <PostBodyMarkdown
               body={review.body ?? ""}
               clamp={{ maxLines: 3 }}
             />
-          </Box>
-        </Box>
+          </div>
+        </div>
 
-        <Box className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between mt-2">
           <ReactionBar
             size="md"
             post={review}
@@ -106,28 +91,27 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             onReplyInvoke={handleReplyInvoke}
           />
 
-          <Box className="flex items-center gap-2">
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              noWrap
-              sx={{ lineHeight: 1 }}
+          <div className="flex items-center gap-2">
+            <span
+              className="text-xs text-rezics-color-fg-muted whitespace-nowrap"
+              style={{ lineHeight: 1 }}
             >
               {review.author?.name || "匿名"}
-            </Typography>
+            </span>
 
             {rating !== undefined && (
-              <Typography
-                variant="caption"
-                color="secondary"
-                noWrap
-                sx={{ lineHeight: 1 }}
+              <span
+                className="text-xs whitespace-nowrap"
+                style={{
+                  lineHeight: 1,
+                  color: "var(--rezics-color-secondary, var(--rezics-color-fg-muted))",
+                }}
               >
                 {rating}
-              </Typography>
+              </span>
             )}
-          </Box>
-        </Box>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

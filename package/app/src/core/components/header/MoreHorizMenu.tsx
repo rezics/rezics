@@ -1,6 +1,10 @@
-import { IconButton, Menu } from "@mui/material";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@rezics/ui/shadcn";
 import type React from "react";
-import { useState } from "react";
 import { MiscMenuItems } from "./MiscMenuItems";
 import { Ellipsis as MoreHorizIcon } from "lucide-react";
 
@@ -10,38 +14,22 @@ type Props = {
 };
 
 export function MoreHorizMenu({ children, className }: Props) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
   return (
-    <>
-      <IconButton
-        onClick={(e) => setAnchorEl(e.currentTarget)}
-        className={className}
-        sx={{
-          ml: 2,
-          mr: 1,
-        }}
-      >
-        <MoreHorizIcon />
-      </IconButton>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-      >
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="more"
+          className={`ml-4 mr-2 ${className ?? ""}`}
+        >
+          <MoreHorizIcon />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
         <MiscMenuItems />
         {children}
-      </Menu>
-    </>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

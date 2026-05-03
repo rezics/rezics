@@ -1,20 +1,17 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Divider,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 
+import { Spinner } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import {
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
 import React from "react";
@@ -77,20 +74,14 @@ export default function UserListPage() {
         id: "unitId",
         header: "Unit ID",
         minWidth: 220,
-        cell: (u) => (
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            {u.unitId}
-          </Typography>
-        ),
+        cell: (u) => <span className="text-sm font-mono">{u.unitId}</span>,
       },
       {
         id: "email",
         header: "Email",
         minWidth: 240,
         cell: (u) => (
-          <Typography variant="body2" noWrap>
-            {u.email ?? "-"}
-          </Typography>
+          <span className="text-sm whitespace-nowrap">{u.email ?? "-"}</span>
         ),
       },
       {
@@ -98,9 +89,7 @@ export default function UserListPage() {
         header: "Name",
         minWidth: 160,
         cell: (u) => (
-          <Typography variant="body2" fontWeight={700} noWrap>
-            {u.name}
-          </Typography>
+          <span className="text-sm font-bold whitespace-nowrap">{u.name}</span>
         ),
       },
       {
@@ -108,9 +97,9 @@ export default function UserListPage() {
         header: "Slug",
         minWidth: 160,
         cell: (u) => (
-          <Typography variant="body2" noWrap>
+          <span className="text-sm whitespace-nowrap">
             {u.slug ? `@${u.slug}` : "-"}
-          </Typography>
+          </span>
         ),
       },
       {
@@ -118,9 +107,9 @@ export default function UserListPage() {
         header: "Roles",
         minWidth: 220,
         cell: (u) => (
-          <Typography variant="body2" noWrap>
+          <span className="text-sm whitespace-nowrap">
             {u.permission?.role?.length ? u.permission.role.join(", ") : "-"}
-          </Typography>
+          </span>
         ),
       },
       {
@@ -134,13 +123,8 @@ export default function UserListPage() {
         header: "Actions",
         minWidth: 120,
         cell: (u) => (
-          <Button
-            size="small"
-            component={Link}
-            to={`/user/${u.unitId}`}
-            variant="outlined"
-          >
-            Edit
+          <Button asChild size="sm" variant="outline">
+            <Link to={`/user/${u.unitId}`}>Edit</Link>
           </Button>
         ),
       },
@@ -159,56 +143,54 @@ export default function UserListPage() {
     >
       <Card>
         <CardContent>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1.5}
-            alignItems="stretch"
-          >
-            <TextField
-              size="small"
-              label="Search"
-              placeholder="q/email/slug..."
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setPage(0);
-                  setQuery(q.trim());
-                }
-              }}
-              fullWidth
-            />
-            <IconButton
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+            <div className="flex-1 flex flex-col gap-1">
+              <Label htmlFor="user-search" className="text-xs">
+                Search
+              </Label>
+              <Input
+                id="user-search"
+                placeholder="q/email/slug..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setPage(0);
+                    setQuery(q.trim());
+                  }
+                }}
+              />
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
               aria-label="search"
               onClick={() => {
                 setPage(0);
                 setQuery(q.trim());
               }}
-              sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}
+              className="self-end sm:self-center"
             >
-              <SearchIcon />
-            </IconButton>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              component={Link}
-              to="/user/create"
-              sx={{ whiteSpace: "nowrap" }}
-            >
-              Create
+              <SearchIcon className="size-4" />
             </Button>
-          </Stack>
+            <Button asChild className="whitespace-nowrap">
+              <Link to="/user/create">
+                <AddIcon className="size-4" />
+                Create
+              </Link>
+            </Button>
+          </div>
 
-          <Divider sx={{ my: 2 }} />
+          <Separator className="my-4" />
 
           {(isMeiliMode ? meiliQuery.isLoading : listQuery.isLoading) ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={24} />
-            </Box>
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
           ) : (isMeiliMode ? meiliQuery.isError : listQuery.isError) ? (
-            <Typography color="error" variant="body2">
+            <p className="text-sm text-rezics-color-danger">
               Failed to load users.
-            </Typography>
+            </p>
           ) : (
             <PaginatedTable<UserDTO>
               columns={columns}

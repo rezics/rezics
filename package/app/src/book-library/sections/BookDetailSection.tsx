@@ -1,6 +1,14 @@
-import { Box, Grid, MenuItem, Stack, TextField } from "@mui/material";
 import type { BookDTO } from "@rezics/contract";
-import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@rezics/ui/shadcn";
 import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
@@ -54,10 +62,10 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   const hasSidebar = Boolean(sidebar);
 
   return (
-    <Box id="book-detail">
-      <Box maxWidth="xl" className="mt-4 mb-12 mx-auto">
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+    <div id="book-detail">
+      <div className="mt-4 mb-12 mx-auto max-w-screen-xl">
+        <div className="flex flex-row items-center gap-4 mb-4">
+          <div className="flex-1 min-w-0">
             <Tabs value={activeTab} onValueChange={handleTabChange}>
               <TabsList variant="line">
                 <TabsTrigger value="info">
@@ -74,44 +82,41 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                 </TabsTrigger>
               </TabsList>
             </Tabs>
-          </Box>
+          </div>
 
           {availableLanguages.length > 1 && (
-            <TextField
-              select
-              size="small"
-              variant="standard"
+            <Select
               value={selectedLang}
-              onChange={(e) => setSelectedLang(e.target.value)}
-              sx={{ flexShrink: 0, minWidth: 100 }}
-              slotProps={{
-                input: { disableUnderline: true },
-              }}
+              onValueChange={(v) => setSelectedLang(v)}
             >
-              {availableLanguages.map((lang) => (
-                <MenuItem key={lang} value={lang}>
-                  {lang}
-                </MenuItem>
-              ))}
-            </TextField>
+              <SelectTrigger className="flex-shrink-0 min-w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {availableLanguages.map((lang) => (
+                  <SelectItem key={lang} value={lang}>
+                    {lang}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
-        </Stack>
+        </div>
 
-        <Grid container spacing={4}>
-          <Grid size={{ xs: 12, lg: hasSidebar ? 9 : 12 }}>
-            <Box sx={{ px: { xs: 1, sm: 3 }, pt: 2 }}>{children}</Box>
-          </Grid>
+        <div className="grid grid-cols-12 gap-8">
+          <div
+            className={`col-span-12 ${hasSidebar ? "lg:col-span-9" : "lg:col-span-12"}`}
+          >
+            <div className="px-2 sm:px-6 pt-4">{children}</div>
+          </div>
 
           {hasSidebar && (
-            <Grid
-              size={{ xs: 12, lg: 3 }}
-              sx={{ display: { xs: "none", lg: "block" } }}
-            >
+            <div className="col-span-12 lg:col-span-3 hidden lg:block">
               {sidebar}
-            </Grid>
+            </div>
           )}
-        </Grid>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };

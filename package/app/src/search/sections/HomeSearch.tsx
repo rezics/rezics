@@ -1,4 +1,3 @@
-import { SvgIcon } from "@mui/material";
 import type React from "react";
 import LogoIcon from "@/shared/assets/logo.svg?react";
 import { TextSearchInput } from "../components/TextSearchInput";
@@ -14,11 +13,7 @@ export const HomeSearch: React.FC<{ className?: string }> = ({ className }) => {
         onSearch={navigateByKeyword}
         enableSuggestions={true}
         startAdornmentIcon={
-          <SvgIcon
-            component={LogoIcon}
-            sx={{ width: 32, height: 32 }}
-            inheritViewBox
-          />
+          <LogoIcon className="w-8 h-8" />
         }
       />
     </div>

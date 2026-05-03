@@ -1,5 +1,5 @@
-import { Button } from "@mui/material";
 import { EmptyState } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { CircleAlert as ErrorOutlineRoundedIcon } from "lucide-react";
@@ -16,12 +16,16 @@ export const PinboardErrorState: React.FC<PinboardErrorStateProps> = ({
   const { t } = useTranslation();
   return (
     <EmptyState
-      icon={<ErrorOutlineRoundedIcon fontSize="large" color="error" />}
+      icon={
+        <ErrorOutlineRoundedIcon
+          className="h-9 w-9 text-rezics-color-danger"
+        />
+      }
       title={t("pinboard.error.title")}
       description={message ?? t("pinboard.error.description")}
       action={
         onRetry ? (
-          <Button variant="outlined" size="small" onClick={onRetry}>
+          <Button variant="outline" size="sm" onClick={onRetry}>
             {t("common.retry")}
           </Button>
         ) : undefined

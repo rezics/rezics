@@ -1,4 +1,4 @@
-import { Divider } from "@mui/material";
+import { Separator } from "@rezics/ui/shadcn";
 import { NavigationList } from "../navigation/NavigationList";
 import type { NavigationItem } from "../navigation/navigation";
 import { MainSidebarDrawerHeader } from "./MainSidebarDrawerHeader";
@@ -29,7 +29,7 @@ export function MainSidebarMenuSection({
   return (
     <div>
       <MainSidebarDrawerHeader handleDrawerToggle={handleDrawerToggle} />
-      {layoutType === "type-a" && <Divider />}
+      {layoutType === "type-a" && <Separator />}
       {layoutType === "type-b" && <div className="mt-2" />}
       <NavigationList
         NAVIGATION={NAVIGATION}

@@ -1,10 +1,6 @@
-import { Stack } from "@mui/material";
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import Skeleton from "@mui/material/Skeleton";
 import { authApi, authQueries } from "@rezics/api/auth/auth";
 import type { AuthProvider } from "@rezics/contract";
+import { Alert, AlertDescription, Separator, Skeleton } from "@rezics/ui/shadcn";
 import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type { TFunction } from "i18next";
@@ -107,38 +103,40 @@ export const SocialAuthButtons: FC<{
   };
 
   return (
-    <Stack spacing={1.5}>
-      <Divider>{t("auth.flow.providers_divider")}</Divider>
+    <div className="flex flex-col gap-3">
+      <div className="relative flex items-center">
+        <Separator className="flex-1" />
+        <span className="px-3 text-sm text-rezics-color-fg-muted">
+          {t("auth.flow.providers_divider")}
+        </span>
+        <Separator className="flex-1" />
+      </div>
 
-      {error && <Alert severity="error">{error}</Alert>}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-      <Stack spacing={1}>
+      <div className="flex flex-col gap-2">
         {featured.map((p) => renderProviderButton(p, false))}
-      </Stack>
+      </div>
 
       {isLoading && providers.length === 0 && (
-        <Stack spacing={0.75}>
-          <Skeleton variant="rounded" height={36} />
-          <Box
-            sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0.75 }}
-          >
-            <Skeleton variant="rounded" height={34} />
-            <Skeleton variant="rounded" height={34} />
-          </Box>
-        </Stack>
+        <div className="flex flex-col gap-1.5">
+          <Skeleton className="h-9 rounded-md" />
+          <div className="grid grid-cols-2 gap-1.5">
+            <Skeleton className="h-[34px] rounded-md" />
+            <Skeleton className="h-[34px] rounded-md" />
+          </div>
+        </div>
       )}
 
       {compact.length > 0 && (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 0.75,
-          }}
-        >
+        <div className="grid grid-cols-2 gap-1.5">
           {compact.map((p) => renderProviderButton(p, true))}
-        </Box>
+        </div>
       )}
-    </Stack>
+    </div>
   );
 };

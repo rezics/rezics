@@ -1,6 +1,12 @@
-import { Button, Stack, Tooltip, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
+import {
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -64,36 +70,38 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
     )?.title ?? sourceReleaseUnitId;
 
   return (
-    <Stack direction="column" gap={1}>
-      <Typography variant="caption" color="text.secondary">
+    <div className="flex flex-col gap-2">
+      <span className="text-xs text-rezics-color-text-secondary">
         {t("page.book_edit.info.translation.source.label")}: {sourceTitle}
-      </Typography>
-      <Stack direction="row" gap={1} flexWrap="wrap">
-        <Tooltip
-          title={
-            sourceTranslation
-              ? t("page.book_edit.info.translation.source.sync_tooltip")
-              : t("page.book_edit.info.translation.source.no_match", {
-                  lang: language,
-                })
-          }
-        >
-          <span>
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<SyncIcon fontSize="small" />}
-              onClick={handleSync}
-              disabled={!sourceTranslation || isFetching}
-            >
-              {t("page.book_edit.info.translation.source.sync_button")}
-            </Button>
-          </span>
-        </Tooltip>
+      </span>
+      <div className="flex flex-row gap-2 flex-wrap">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleSync}
+                  disabled={!sourceTranslation || isFetching}
+                >
+                  <SyncIcon className="w-4 h-4 mr-2" />
+                  {t("page.book_edit.info.translation.source.sync_button")}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              {sourceTranslation
+                ? t("page.book_edit.info.translation.source.sync_tooltip")
+                : t("page.book_edit.info.translation.source.no_match", {
+                    lang: language,
+                  })}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <Button
-          size="small"
-          variant="text"
-          startIcon={<LaunchIcon fontSize="small" />}
+          size="sm"
+          variant="ghost"
           onClick={() =>
             navigate({
               to: "/book/$bookId/edit",
@@ -102,10 +110,11 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
             })
           }
         >
+          <LaunchIcon className="w-4 h-4 mr-2" />
           {t("page.book_edit.info.translation.source.open_button")}
         </Button>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 };
 

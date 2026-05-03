@@ -1,4 +1,3 @@
-import { Box, Paper, Stack, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -16,19 +15,13 @@ const ContentSidebar: React.FC<{ textLength: number; pageCount?: number }> = ({
   textLength,
   pageCount,
 }) => (
-  <Paper variant="outlined" sx={{ p: 2 }}>
-    <Typography variant="subtitle1" fontWeight={600} mb={1}>
-      Reading
-    </Typography>
-    <Stack spacing={1}>
-      <Typography variant="body2">
-        Text length: {textLength.toLocaleString()}
-      </Typography>
-      {pageCount != null && (
-        <Typography variant="body2">Pages: {pageCount}</Typography>
-      )}
-    </Stack>
-  </Paper>
+  <div className="bg-rezics-color-surface-elevated p-4 border border-rezics-color-border-whisper rounded-md">
+    <h3 className="text-base font-semibold mb-2">Reading</h3>
+    <div className="flex flex-col gap-2">
+      <p className="text-sm">Text length: {textLength.toLocaleString()}</p>
+      {pageCount != null && <p className="text-sm">Pages: {pageCount}</p>}
+    </div>
+  </div>
 );
 
 export const BookContentPage: React.FC = () => {
@@ -58,7 +51,7 @@ export const BookContentPage: React.FC = () => {
   if (!bookInfo) return null;
 
   return (
-    <Stack spacing={3}>
+    <div className="flex flex-col gap-6">
       <ReleaseSelector
         bookInfo={bookInfo}
         selectedLang={selectedLang}
@@ -66,14 +59,14 @@ export const BookContentPage: React.FC = () => {
         onSelect={setSelectedRelease}
       />
 
-      <Box className="lg:hidden">
+      <div className="lg:hidden">
         <ContentSidebar
           textLength={bookInfo.textLength ?? 0}
           pageCount={bookInfo.pageCount ?? undefined}
         />
-      </Box>
+      </div>
 
       <ChapterList id={selectedReleaseUnitId || bookInfo.unitId} />
-    </Stack>
+    </div>
   );
 };

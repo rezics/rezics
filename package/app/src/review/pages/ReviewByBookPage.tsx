@@ -1,5 +1,5 @@
-import { Button, Divider } from "@mui/material";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { Button, Separator } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { reviewByBookRoute } from "@/router";
@@ -15,8 +15,7 @@ export function ReviewByBookPage() {
       <div className="flex items-center justify-between">
         <AccentBarWithText text={`${t("pages.review_page")}`} />
         <Button
-          variant="outlined"
-          color="primary"
+          variant="outline"
           onClick={() => navigate({ to: `/book/${bookId}` })}
         >
           {t("common.back")}
@@ -25,7 +24,7 @@ export function ReviewByBookPage() {
       <div className="mt-4">
         <ReviewNewPage bookUnitId={bookId || ""} />
         <div className="my-4">
-          <Divider />
+          <Separator />
         </div>
         <ReviewsPage bookUnitId={bookId || ""} />
       </div>

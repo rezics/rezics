@@ -1,4 +1,4 @@
-import { Alert, AlertTitle, Button, Stack } from "@mui/material";
+import { Alert, AlertTitle, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useRemoveRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -55,32 +55,34 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
   };
 
   return (
-    <Alert
-      severity="warning"
-      action={
-        <Stack direction="row" spacing={1}>
+    <Alert variant="default" className="border-rezics-color-warning/40 bg-rezics-color-warning/10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <AlertTitle>{t("pinboard.stale.title")}</AlertTitle>
+          <AlertDescription>
+            {t("pinboard.stale.description", { count: staleIds.length })}
+          </AlertDescription>
+        </div>
+        <div className="flex flex-row gap-2 shrink-0">
           <Button
-            size="small"
-            variant="outlined"
-            startIcon={<CleaningServicesRoundedIcon />}
+            size="sm"
+            variant="outline"
             onClick={handleCleanup}
             disabled={working}
           >
+            <CleaningServicesRoundedIcon className="h-4 w-4 mr-1" />
             {t("pinboard.stale.cleanup")}
           </Button>
           <Button
-            size="small"
-            color="inherit"
+            size="sm"
+            variant="ghost"
             onClick={() => setDismissed(true)}
             disabled={working}
           >
             {t("common.dismiss")}
           </Button>
-        </Stack>
-      }
-    >
-      <AlertTitle>{t("pinboard.stale.title")}</AlertTitle>
-      {t("pinboard.stale.description", { count: staleIds.length })}
+        </div>
+      </div>
     </Alert>
   );
 };

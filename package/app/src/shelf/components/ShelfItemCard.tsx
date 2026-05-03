@@ -1,7 +1,5 @@
-import Chip from "@mui/material/Chip";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import type { ShelfItemDTO } from "@rezics/api/shelf";
+import { Badge } from "@rezics/ui/shadcn";
 
 interface ShelfItemCardProps {
   item: ShelfItemDTO;
@@ -14,11 +12,13 @@ export function ShelfItemCard({ item }: ShelfItemCardProps) {
       : item.itemRef;
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center" py={0.5} px={1}>
-      <Chip label={item.kind} size="small" variant="outlined" />
-      <Typography variant="caption" color="text.secondary" noWrap>
+    <div className="flex flex-row items-center gap-2 px-2 py-1">
+      <Badge variant="outline" className="text-xs">
+        {item.kind}
+      </Badge>
+      <span className="text-xs text-rezics-color-fg-muted whitespace-nowrap">
         {shortRef}
-      </Typography>
-    </Stack>
+      </span>
+    </div>
   );
 }

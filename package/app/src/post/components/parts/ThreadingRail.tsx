@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import type React from "react";
 import { useThreadingHover } from "./ThreadingContext";
 
@@ -27,7 +26,7 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
   };
 
   return (
-    <Box
+    <div
       role="button"
       aria-label={isCollapsed ? "Expand thread" : "Collapse thread"}
       tabIndex={0}
@@ -41,30 +40,15 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       data-hovered={hovered ? "true" : undefined}
-      sx={{
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: `${leftPx}px`,
-        width: "12px",
-        cursor: "pointer",
-        display: "flex",
-        justifyContent: "center",
-        "&:focus-visible": {
-          outline: "2px solid",
-          outlineColor: "primary.main",
-          outlineOffset: "1px",
-        },
-      }}
+      className="absolute top-0 bottom-0 w-3 cursor-pointer flex justify-center focus-visible:outline-2 focus-visible:outline-rezics-color-primary focus-visible:outline-offset-1"
+      style={{ left: `${leftPx}px` }}
     >
-      <Box
-        sx={{
-          width: "2px",
-          height: "100%",
-          backgroundColor: hovered ? "primary.main" : "divider",
-          transition: "background-color 120ms ease",
-        }}
+      <div
+        className={[
+          "w-[2px] h-full transition-colors duration-100 ease-in-out",
+          hovered ? "bg-rezics-color-primary" : "bg-rezics-color-border",
+        ].join(" ")}
       />
-    </Box>
+    </div>
   );
 };

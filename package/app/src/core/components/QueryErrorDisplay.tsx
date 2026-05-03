@@ -1,6 +1,4 @@
-import Alert from "@mui/material/Alert";
-import Collapse from "@mui/material/Collapse";
-import Typography from "@mui/material/Typography";
+import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { ApiError } from "@rezics/api";
 import { useState } from "react";
 
@@ -23,43 +21,37 @@ export function QueryErrorDisplay({
   const hasDetail = isApiError && (prismaDetail || error.status);
 
   return (
-    <Alert severity="error" className={className}>
-      <Typography variant="body2">{message}</Typography>
-      {hasDetail && (
-        <>
-          <Typography
-            variant="caption"
-            onClick={() => setDetailOpen((v) => !v)}
-            sx={{
-              cursor: "pointer",
-              userSelect: "none",
-              mt: 0.5,
-              display: "block",
-              color: "text.secondary",
-            }}
-          >
-            {detailOpen ? "▾" : "▸"} Technical details
-          </Typography>
-          <Collapse in={detailOpen}>
-            <Typography
-              variant="caption"
-              component="div"
-              sx={{ mt: 0.5, fontFamily: "monospace", color: "text.secondary" }}
+    <Alert variant="destructive" className={className}>
+      <AlertDescription>
+        <p className="text-sm m-0">{message}</p>
+        {hasDetail && (
+          <>
+            <button
+              type="button"
+              onClick={() => setDetailOpen((v) => !v)}
+              className="text-xs cursor-pointer select-none mt-1 block text-rezics-color-fg-muted bg-transparent border-0 p-0"
             >
-              {prismaDetail && (
-                <>
-                  <div>Prisma {prismaDetail.code}</div>
-                  {prismaDetail.model && <div>Model: {prismaDetail.model}</div>}
-                  {prismaDetail.target && (
-                    <div>Target: {prismaDetail.target.join(", ")}</div>
-                  )}
-                </>
-              )}
-              <div>HTTP {error.status}</div>
-            </Typography>
-          </Collapse>
-        </>
-      )}
+              {detailOpen ? "▾" : "▸"} Technical details
+            </button>
+            {detailOpen && (
+              <div className="text-xs mt-1 font-mono text-rezics-color-fg-muted">
+                {prismaDetail && (
+                  <>
+                    <div>Prisma {prismaDetail.code}</div>
+                    {prismaDetail.model && (
+                      <div>Model: {prismaDetail.model}</div>
+                    )}
+                    {prismaDetail.target && (
+                      <div>Target: {prismaDetail.target.join(", ")}</div>
+                    )}
+                  </>
+                )}
+                <div>HTTP {error.status}</div>
+              </div>
+            )}
+          </>
+        )}
+      </AlertDescription>
     </Alert>
   );
 }

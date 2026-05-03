@@ -1,9 +1,13 @@
-import { Button, Divider, IconButton } from "@mui/material";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
+import { Button } from "@rezics/ui/shadcn";
+import {
+  Plus as Add,
+  Trash2 as Delete,
+  ExternalLink as OpenInNew,
+} from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus as Add, Trash2 as Delete, ExternalLink as OpenInNew } from "lucide-react";
 
 /** Book extra data structure. */
 export type BookExtraData = {
@@ -65,13 +69,14 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
               >
                 {url}
               </a>
-              <IconButton
-                size="small"
-                color="error"
+              <Button
+                size="icon"
+                variant="ghost"
                 onClick={() => handleRemove(index)}
+                className="w-7 h-7 text-rezics-color-error-text hover:text-rezics-color-error-text"
               >
                 <Delete size={14} />
-              </IconButton>
+              </Button>
             </div>
           ))}
         </div>
@@ -92,12 +97,12 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
           className="flex-1 border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors"
         />
         <Button
-          variant="outlined"
-          size="small"
+          variant="outline"
+          size="sm"
           onClick={handleAdd}
           disabled={!newUrl.trim()}
-          startIcon={<Add />}
         >
+          <Add className="w-4 h-4 mr-2" />
           {t("common.add")}
         </Button>
       </div>
@@ -126,7 +131,7 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
   return (
     <div className="space-y-4">
       <PublishURL value={extraData || undefined} onChange={handleExtraChange} />
-      <Divider />
+      <div className="h-px bg-rezics-color-border-whisper" />
       <RezicsJsonEditor
         value={JSON.stringify(extraData, null, 2)}
         onChange={(text) => {

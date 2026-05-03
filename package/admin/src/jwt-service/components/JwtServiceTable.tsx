@@ -1,18 +1,20 @@
+import type { JwtServiceDTO } from "@rezics/contract";
 import {
-  Chip,
-  IconButton,
-  Paper,
+  Badge,
+  Button,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
+  TableHeader,
   TableRow,
   Tooltip,
-} from "@mui/material";
-import type { JwtServiceDTO } from "@rezics/contract";
-import type { FC } from "react";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { Pencil as EditOutlinedIcon } from "lucide-react";
+import type { FC } from "react";
 
 type Props = {
   services: JwtServiceDTO[];
@@ -21,59 +23,67 @@ type Props = {
 
 export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
   return (
-    <TableContainer component={Paper} variant="outlined">
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Service Key</TableCell>
-            <TableCell>Issuer</TableCell>
-            <TableCell>Audience</TableCell>
-            <TableCell>Local Issuer</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell align="right">Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {services.map((service) => (
-            <TableRow key={service.serviceKey} hover>
-              <TableCell>
-                <strong>{service.serviceKey}</strong>
-              </TableCell>
-              <TableCell
-                sx={{
-                  maxWidth: 250,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {service.issuer}
-              </TableCell>
-              <TableCell>{service.audience}</TableCell>
-              <TableCell>
-                {service.isLocalIssuer ? (
-                  <Chip label="Local" size="small" color="info" />
-                ) : (
-                  <Chip label="Remote" size="small" variant="outlined" />
-                )}
-              </TableCell>
-              <TableCell>
-                {service.isActive ? (
-                  <Chip label="Active" size="small" color="success" />
-                ) : (
-                  <Chip label="Inactive" size="small" color="default" />
-                )}
-              </TableCell>
-              <TableCell align="right">
-                <Tooltip title="Edit">
-                  <IconButton size="small" onClick={() => onEdit(service)}>
-                    <EditOutlinedIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </TableCell>
+    <TooltipProvider>
+      <div className="rounded-md border border-rezics-color-border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Service Key</TableHead>
+              <TableHead>Issuer</TableHead>
+              <TableHead>Audience</TableHead>
+              <TableHead>Local Issuer</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHeader>
+          <TableBody>
+            {services.map((service) => (
+              <TableRow key={service.serviceKey}>
+                <TableCell>
+                  <strong>{service.serviceKey}</strong>
+                </TableCell>
+                <TableCell className="max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap">
+                  {service.issuer}
+                </TableCell>
+                <TableCell>{service.audience}</TableCell>
+                <TableCell>
+                  {service.isLocalIssuer ? (
+                    <Badge className="bg-rezics-color-info text-white">
+                      Local
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">Remote</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {service.isActive ? (
+                    <Badge className="bg-rezics-color-success text-white">
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">Inactive</Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => onEdit(service)}
+                        aria-label="Edit"
+                      >
+                        <EditOutlinedIcon className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit</TooltipContent>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </TooltipProvider>
   );
 };

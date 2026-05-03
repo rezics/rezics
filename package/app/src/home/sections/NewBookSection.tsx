@@ -1,4 +1,9 @@
-import { Button, Tab, Tabs } from "@mui/material";
+import {
+  Button,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -46,30 +51,25 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
         <h2 className="font-semibold">
           {t("page.home.sections.new_book.title")}
         </h2>
-        <Button
-          variant="text"
-          color="primary"
-          onClick={() => navigate({ to: "/book" })}
-        >
+        <Button variant="ghost" onClick={() => navigate({ to: "/book" })}>
           {t("page.home.sections.new_book.more")}
         </Button>
       </div>
 
       {/* Tabs */}
       <div className="mb-4">
-        <Tabs value={tab} onChange={(_, value) => setTab(value)}>
-          <Tab
-            value="latest"
-            label={t("page.home.sections.new_book.tab_latest_serial")}
-          />
-          <Tab
-            value="new"
-            label={t("page.home.sections.new_book.tab_new_on_shelf")}
-          />
-          <Tab
-            value="completed"
-            label={t("page.home.sections.new_book.tab_recently_completed")}
-          />
+        <Tabs value={tab} onValueChange={(value) => setTab(value as TabKey)}>
+          <TabsList>
+            <TabsTrigger value="latest">
+              {t("page.home.sections.new_book.tab_latest_serial")}
+            </TabsTrigger>
+            <TabsTrigger value="new">
+              {t("page.home.sections.new_book.tab_new_on_shelf")}
+            </TabsTrigger>
+            <TabsTrigger value="completed">
+              {t("page.home.sections.new_book.tab_recently_completed")}
+            </TabsTrigger>
+          </TabsList>
         </Tabs>
       </div>
 

@@ -1,9 +1,16 @@
-import { IconButton, Tooltip } from "@mui/material";
 import { useCanEdit } from "@rezics/api/hooks";
 import type { EditableResource } from "@rezics/api/hooks";
+import {
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
-import { useTranslation } from "react-i18next";
 import { Pencil as Edit } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/shared/utils/css-util";
 
 interface MiniAdminActionBarProps {
   editionURL: string;
@@ -30,17 +37,24 @@ export function MiniAdminActionBar({
   }
   return (
     <span>
-      <Tooltip title={t("common.edit")} placement="top">
-        <IconButton
-          aria-label={t("common.edit")}
-          size="small"
-          onClick={() => {
-            navigate({ to: editionURL });
-          }}
-        >
-          <Edit fontSize="small" className={textColor} />
-        </IconButton>
-      </Tooltip>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("common.edit")}
+              onClick={() => {
+                navigate({ to: editionURL });
+              }}
+              className="h-7 w-7"
+            >
+              <Edit className={cn("h-4 w-4", textColor)} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">{t("common.edit")}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </span>
   );
 }

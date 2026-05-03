@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -16,18 +16,18 @@ const LoginPrompt = () => {
 
   if (isMobile) {
     return (
-      <Button variant="text" component={Link} to="/login">
-        {t("auth.login")}
+      <Button variant="ghost" asChild>
+        <Link to="/login">{t("auth.login")}</Link>
       </Button>
     );
   }
 
   return (
     <div className="flex gap-2">
-      <Button variant="text" onClick={() => setLoginModalOpen(true)}>
+      <Button variant="ghost" onClick={() => setLoginModalOpen(true)}>
         {t("auth.login")}
       </Button>
-      <Button variant="outlined" onClick={() => setRegisterModalOpen(true)}>
+      <Button variant="outline" onClick={() => setRegisterModalOpen(true)}>
         {t("auth.register")}
       </Button>
 

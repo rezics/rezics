@@ -1,4 +1,4 @@
-import { IconButton } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
 import { useTranslation } from "react-i18next";
 import { Menu } from "lucide-react";
 
@@ -14,16 +14,16 @@ export const DrawerToggler = ({
   sidebarOpen,
 }: DrawerTogglerProps) => {
   const { t } = useTranslation();
+  const hidden = layoutType === "type-a" && sidebarOpen;
   return (
-    <IconButton
+    <Button
+      variant="ghost"
+      size="icon"
       aria-label={t("accessibility.open_drawer")}
       onClick={handleDrawerToggleInner}
-      sx={{
-        display:
-          layoutType === "type-b" ? "flex" : sidebarOpen ? "none" : "flex",
-      }}
+      className={hidden ? "hidden" : "flex"}
     >
       <Menu />
-    </IconButton>
+    </Button>
   );
 };

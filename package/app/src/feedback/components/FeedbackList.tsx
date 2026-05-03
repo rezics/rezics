@@ -1,17 +1,13 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import {
-  Box,
+  Badge,
   Button,
-  Chip,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  Paper,
-  Stack,
+  Separator,
   Tooltip,
-  Typography,
-} from "@mui/material";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useSetFeedbackResolvedMutation } from "@rezics/api/feedback/feedback.mutations";
 import type {
   FeedbackDTO,
@@ -33,7 +29,11 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { CircleCheck as CheckCircleOutlineIcon, Check as DoneIcon, Hourglass as HourglassEmptyIcon } from "lucide-react";
+import {
+  CircleCheck as CheckCircleOutlineIcon,
+  Check as DoneIcon,
+  Hourglass as HourglassEmptyIcon,
+} from "lucide-react";
 
 export type FeedbackResolvedFilter = boolean | undefined;
 
@@ -48,20 +48,11 @@ export type FeedbackListProps = {
   resolved?: FeedbackResolvedFilter;
 };
 
-const typeColor: Record<
-  FeedbackDTO["type"],
-  | "default"
-  | "primary"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "error"
-  | undefined
-> = {
-  BUG: "error",
-  FEATURE: "primary",
-  REPORT: "secondary",
-  OTHER: "default",
+const typeBadgeClass: Record<FeedbackDTO["type"], string> = {
+  BUG: "bg-rezics-color-danger text-white",
+  FEATURE: "bg-rezics-color-primary text-white",
+  REPORT: "bg-rezics-color-accent text-white",
+  OTHER: "",
 };
 
 const EXTERNAL_PAGE_SIZE = 50;
@@ -193,11 +184,11 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
   };
 
   return (
-    <Box className="">
+    <div>
       {isError && (
-        <Typography variant="body2" color="error" className="px-2 py-1">
+        <p className="text-sm text-rezics-color-danger px-2 py-1">
           加载反馈失败，请稍后重试。
-        </Typography>
+        </p>
       )}
 
       <UniversalPaginator<FeedbackDTO>
@@ -217,64 +208,53 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
         disableSortControl={true}
       >
         {(currentPageItems: FeedbackDTO[]) => (
-          <List>
+          <ul className="flex flex-col gap-3">
             {currentPageItems.map((item: FeedbackDTO) => (
-              <ListItem key={item.id} disableGutters className="mb-3">
-                <Paper
-                  variant="outlined"
-                  className="w-full px-3 py-2"
-                  elevation={0}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    className="items-center justify-between mb-1"
-                  >
-                    <Stack direction="row" spacing={1} className="items-center">
-                      <Chip
-                        size="small"
-                        label={item.type}
-                        color={typeColor[item.type]}
-                      />
-                      <Typography variant="subtitle2" className="font-medium">
-                        反馈 #{item.id}
-                      </Typography>
+              <li key={item.id}>
+                <div className="w-full px-3 py-2 rounded-md border border-rezics-color-border bg-rezics-color-bg-elevated">
+                  <div className="flex flex-row items-center justify-between gap-2 mb-1">
+                    <div className="flex flex-row items-center gap-2 flex-wrap">
+                      <Badge className={typeBadgeClass[item.type]}>
+                        {item.type}
+                      </Badge>
+                      <p className="text-sm font-medium">反馈 #{item.id}</p>
                       {item.unitId && (
-                        <Chip
-                          size="small"
-                          variant="outlined"
-                          label={`单元 ${item.unitId}`}
-                        />
+                        <Badge variant="outline">
+                          单元 {item.unitId}
+                        </Badge>
                       )}
                       {item.resolved ? (
-                        <Chip
-                          size="small"
-                          color="success"
-                          label="已解决"
-                          icon={<DoneIcon />}
-                        />
+                        <Badge className="bg-rezics-color-success text-white inline-flex items-center gap-1">
+                          <DoneIcon className="h-3 w-3" />
+                          已解决
+                        </Badge>
                       ) : (
-                        <Chip
-                          size="small"
-                          color="warning"
-                          label="待处理"
-                          icon={<HourglassEmptyIcon />}
-                        />
+                        <Badge className="bg-rezics-color-warning text-white inline-flex items-center gap-1">
+                          <HourglassEmptyIcon className="h-3 w-3" />
+                          待处理
+                        </Badge>
                       )}
-                    </Stack>
+                    </div>
 
                     {!item.resolved && (
                       <Popover>
-                        <PopoverTrigger asChild>
-                          <Tooltip title="标记为已解决">
-                            <IconButton
-                              size="small"
-                              disabled={resolveMutation.isPending}
-                            >
-                              <CheckCircleOutlineIcon fontSize="small" />
-                            </IconButton>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  disabled={resolveMutation.isPending}
+                                  aria-label="标记为已解决"
+                                >
+                                  <CheckCircleOutlineIcon className="h-4 w-4" />
+                                </Button>
+                              </PopoverTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>标记为已解决</TooltipContent>
                           </Tooltip>
-                        </PopoverTrigger>
+                        </TooltipProvider>
                         <PopoverContent>
                           <div className="flex flex-col gap-4 p-4">
                             <div className="text-base font-medium">
@@ -282,8 +262,6 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                             </div>
 
                             <Button
-                              variant="contained"
-                              color="primary"
                               onClick={() => handleResolve(item.id)}
                             >
                               确定
@@ -292,30 +270,24 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                         </PopoverContent>
                       </Popover>
                     )}
-                  </Stack>
+                  </div>
 
-                  <Stack
-                    direction="row"
-                    spacing={2}
-                    className="text-xs text-gray-500 mb-1 flex-wrap"
-                  >
-                    <Typography variant="caption">
-                      用户ID：{item.userId}
-                    </Typography>
-                    <Typography variant="caption">
+                  <div className="flex flex-row gap-4 text-xs text-rezics-color-fg-muted mb-1 flex-wrap">
+                    <span>用户ID：{item.userId}</span>
+                    <span>
                       创建时间：{new Date(item.createdAt).toLocaleString()}
-                    </Typography>
-                    <Typography variant="caption">
+                    </span>
+                    <span>
                       更新时间：{new Date(item.updatedAt).toLocaleString()}
-                    </Typography>
+                    </span>
                     {item.resolvedAt && (
-                      <Typography variant="caption">
+                      <span>
                         解决时间：{new Date(item.resolvedAt).toLocaleString()}
-                      </Typography>
+                      </span>
                     )}
-                  </Stack>
+                  </div>
 
-                  <Divider className="my-1" />
+                  <Separator className="my-1" />
 
                   <div>
                     {(() => {
@@ -329,14 +301,14 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                       );
                     })()}
                   </div>
-                  <Typography variant="body2">{item.content}</Typography>
-                </Paper>
-              </ListItem>
+                  <p className="text-sm">{item.content}</p>
+                </div>
+              </li>
             ))}
-          </List>
+          </ul>
         )}
       </UniversalPaginator>
-    </Box>
+    </div>
   );
 };
 

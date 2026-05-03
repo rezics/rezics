@@ -1,17 +1,9 @@
-import {
-  Box,
-  Collapse,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-} from "@mui/material";
 import { getToken, parseJwt } from "@rezics/api/react-query/jwt";
 import { NormalizedTokenName } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Separator } from "@rezics/ui/shadcn";
 import { useRouterState } from "@tanstack/react-router";
+import clsx from "clsx";
 import React from "react";
 import { adminConfig } from "@/app/config/adminConfig";
 
@@ -20,7 +12,10 @@ import type {
   AdminNavGroup,
   AdminNavItem,
 } from "./adminNavConfig";
-import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon } from "lucide-react";
+import {
+  ChevronUp as ExpandLessIcon,
+  ChevronDown as ExpandMoreIcon,
+} from "lucide-react";
 
 function isGroup(entry: AdminNavEntry): entry is AdminNavGroup {
   return "children" in entry;
@@ -47,6 +42,9 @@ function isItemVisible(item: AdminNavItem): boolean {
   if (!item.requiredRole) return true;
   return getCurrentUserRole() === item.requiredRole;
 }
+
+const navItemBaseClass =
+  "flex items-center gap-2 rounded-md py-1.5 mx-2 text-sm transition-colors hover:bg-rezics-color-bg-elevated cursor-pointer";
 
 export function AdminNav({
   items,
@@ -111,48 +109,34 @@ export function AdminNav({
     }
 
     return (
-      <ListItemButton
-        key={item.id}
-        component={Link}
-        to={item.to}
-        selected={selected}
-        onClick={onNavigate}
-        sx={{
-          pl: depth === 0 ? 1.5 : 4,
-          py: 0.75,
-          borderRadius: 1,
-          mx: 1,
-        }}
-      >
-        <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
-        <ListItemText primary={item.label} />
-      </ListItemButton>
+      <li key={item.id}>
+        <Link
+          to={item.to}
+          onClick={onNavigate}
+          className={clsx(
+            navItemBaseClass,
+            depth === 0 ? "pl-3" : "pl-8",
+            selected && "bg-rezics-color-bg-elevated font-semibold",
+          )}
+        >
+          <span className="inline-flex items-center min-w-9">{item.icon}</span>
+          <span>{item.label}</span>
+        </Link>
+      </li>
     );
   };
 
   return (
-    <Box
-      sx={{
-        marginTop: 8,
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <Box sx={{ px: 2, py: 2 }}>
-        <Typography variant="subtitle1" fontWeight={700}>
-          {adminConfig.appName}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
+    <div className="mt-16 h-full flex flex-col">
+      <div className="px-4 py-4">
+        <p className="text-sm font-bold">{adminConfig.appName}</p>
+        <p className="text-xs text-rezics-color-fg-muted">
           env: {adminConfig.env}
-        </Typography>
-      </Box>
-      <Divider />
+        </p>
+      </div>
+      <Separator />
 
-      <List
-        dense
-        sx={{ py: 1, display: "flex", flexDirection: "column", gap: 0.5 }}
-      >
+      <ul className="py-2 flex flex-col gap-1 list-none">
         {items.map((entry) => {
           if (isItem(entry)) {
             if (!isItemVisible(entry)) return null;
@@ -169,45 +153,50 @@ export function AdminNav({
           );
 
           return (
-            <Box key={entry.id}>
-              <ListItemButton
+            <li key={entry.id}>
+              <button
+                type="button"
                 onClick={() =>
                   setOpenGroups((prev) => ({
                     ...prev,
                     [entry.id]: !prev[entry.id],
                   }))
                 }
-                selected={anySelected}
-                sx={{
-                  pl: 1.5,
-                  py: 0.75,
-                  borderRadius: 1,
-                  mx: 1,
-                }}
+                className={clsx(
+                  navItemBaseClass,
+                  "pl-3 w-[calc(100%-1rem)]",
+                  anySelected && "bg-rezics-color-bg-elevated font-semibold",
+                )}
               >
-                <ListItemIcon sx={{ minWidth: 36 }}>{entry.icon}</ListItemIcon>
-                <ListItemText primary={entry.label} />
-                {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-              </ListItemButton>
-              <Collapse in={open} timeout="auto" unmountOnExit>
-                <List dense sx={{ py: 0.5 }}>
+                <span className="inline-flex items-center min-w-9">
+                  {entry.icon}
+                </span>
+                <span className="flex-1 text-left">{entry.label}</span>
+                {open ? (
+                  <ExpandLessIcon size={16} />
+                ) : (
+                  <ExpandMoreIcon size={16} />
+                )}
+              </button>
+              {open ? (
+                <ul className="py-1 list-none">
                   {visibleChildren.map((child) =>
                     renderItem(child, 1, visibleChildren),
                   )}
-                </List>
-              </Collapse>
-            </Box>
+                </ul>
+              ) : null}
+            </li>
           );
         })}
-      </List>
+      </ul>
 
-      <Box sx={{ flex: 1 }} />
-      <Divider />
-      <Box sx={{ px: 2, py: 1.5 }}>
-        <Typography variant="caption" color="text.secondary">
+      <div className="flex-1" />
+      <Separator />
+      <div className="px-4 py-3">
+        <p className="text-xs text-rezics-color-fg-muted">
           REZICS Book Library
-        </Typography>
-      </Box>
-    </Box>
+        </p>
+      </div>
+    </div>
   );
 }

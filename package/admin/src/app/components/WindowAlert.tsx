@@ -1,4 +1,4 @@
-import { Alert } from "@mui/material";
+import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import clsx from "clsx";
 import type React from "react";
 import { useEffect } from "react";
@@ -23,13 +23,8 @@ export const WindowAlert: React.FC = () => {
         open ? "translate-y-3" : "-translate-y-full",
       )}
     >
-      <Alert
-        severity="info"
-        variant="standard"
-        className="shadow-lg"
-        sx={{ minWidth: "280px" }}
-      >
-        {message}
+      <Alert className="shadow-lg min-w-[280px]">
+        <AlertDescription>{message}</AlertDescription>
       </Alert>
     </div>
   );

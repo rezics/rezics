@@ -1,17 +1,3 @@
-import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import { getSeedTagId } from "@rezics/api/infra/bootstrap";
 import type {
   CollectionStatusResponse,
@@ -22,6 +8,18 @@ import {
   SEED_TAG_TITLES,
   type SeedTagName,
 } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useCallback, useMemo, useState } from "react";
 
 interface CollectionModalProps {
@@ -79,95 +77,94 @@ export function CollectionModal({
   }, [selectedShelves, independent, onCollect]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Collect</DialogTitle>
-      <DialogContent dividers>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-xs">
+        <DialogHeader>
+          <DialogTitle>Collect</DialogTitle>
+        </DialogHeader>
+        <Separator />
         {isLoading ? (
-          <Stack alignItems="center" py={3}>
-            <CircularProgress size={24} />
-          </Stack>
+          <div className="flex items-center justify-center py-6">
+            <Spinner size="sm" />
+          </div>
         ) : (
-          <Stack spacing={2}>
+          <div className="flex flex-col gap-4">
             {/* Content-type filter chips */}
-            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-              <Chip
-                label="All"
-                size="small"
-                variant={filterTag === null ? "filled" : "outlined"}
+            <div className="flex flex-wrap gap-1">
+              <Badge
+                variant={filterTag === null ? "default" : "outline"}
+                className="cursor-pointer"
                 onClick={() => setFilterTag(null)}
-              />
+              >
+                All
+              </Badge>
               {SEED_TAG_NAMES.map((name) => (
-                <Chip
+                <Badge
                   key={name}
-                  label={SEED_TAG_TITLES[name]}
-                  size="small"
-                  variant={filterTag === name ? "filled" : "outlined"}
+                  variant={filterTag === name ? "default" : "outline"}
+                  className="cursor-pointer"
                   onClick={() => setFilterTag(filterTag === name ? null : name)}
-                />
+                >
+                  {SEED_TAG_TITLES[name]}
+                </Badge>
               ))}
-            </Stack>
+            </div>
 
             {/* Shelf list with checkboxes */}
-            <List dense disablePadding>
+            <ul className="flex flex-col">
               {filteredShelves.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" px={1}>
+                <p className="text-sm text-rezics-color-fg-muted px-2">
                   No shelves found
-                </Typography>
+                </p>
               ) : (
                 filteredShelves.map((shelf) => (
-                  <ListItem
+                  <li
                     key={shelf.unitId}
-                    disablePadding
-                    sx={{ cursor: "pointer" }}
+                    className="flex items-center gap-2 py-1 cursor-pointer"
                     onClick={() => toggleShelf(shelf.unitId)}
                   >
                     <Checkbox
-                      size="small"
                       checked={selectedShelves.has(shelf.unitId)}
                       tabIndex={-1}
                     />
-                    <ListItemText
-                      primary={shelf.title ?? "Untitled"}
-                      secondary={`${shelf.itemCount} items`}
-                    />
-                  </ListItem>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">
+                        {shelf.title ?? "Untitled"}
+                      </p>
+                      <p className="text-xs text-rezics-color-fg-muted">
+                        {shelf.itemCount} items
+                      </p>
+                    </div>
+                  </li>
                 ))
               )}
-            </List>
+            </ul>
 
             {/* Dual collection mode for reviews */}
             {isReview && (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={independent}
-                    onChange={(e) => setIndependent(e.target.checked)}
-                  />
-                }
-                label={
-                  <Typography variant="body2">
-                    Collect as independent unit
-                  </Typography>
-                }
-              />
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Checkbox
+                  checked={independent}
+                  onCheckedChange={(c) => setIndependent(c === true)}
+                />
+                <span className="text-sm">Collect as independent unit</span>
+              </label>
             )}
-          </Stack>
+          </div>
         )}
+        <DialogFooter>
+          <Button onClick={onClose} size="sm" variant="ghost">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            size="sm"
+            disabled={isCollecting || selectedShelves.size === 0}
+          >
+            {isCollecting ? "Saving..." : "Save"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} size="small">
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          size="small"
-          disabled={isCollecting || selectedShelves.size === 0}
-        >
-          {isCollecting ? "Saving..." : "Save"}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

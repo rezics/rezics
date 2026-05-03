@@ -1,4 +1,5 @@
-import { Button, CircularProgress, Typography } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -39,9 +40,7 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <Typography variant="h6" className="mb-3">
-          {resolvedTitle}
-        </Typography>
+        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
         <QueryErrorDisplay error={error instanceof Error ? error : null} />
       </div>
     );
@@ -51,17 +50,17 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
-        <Button variant="text" color="primary" onClick={handleMoreClick}>
+        <Button variant="ghost" onClick={handleMoreClick}>
           {t("page.home.sections.trending_excerpt.more")}
         </Button>
       </div>
 
-      {isLoading && <CircularProgress size={20} />}
+      {isLoading && <Spinner size="sm" />}
 
       {!isLoading && !items.length && (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-rezics-color-fg-muted">
           {t("page.home.sections.trending_excerpt.empty")}
-        </Typography>
+        </p>
       )}
 
       <div>

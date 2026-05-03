@@ -1,4 +1,3 @@
-import { useTheme } from "@mui/material";
 import type { AdminStatsResponse } from "@rezics/contract";
 import {
   BarElement,
@@ -17,9 +16,30 @@ interface ContentTrendChartProps {
   trend: AdminStatsResponse["contentTrend"];
 }
 
+/**
+ * Read a CSS custom property from the root, with a sensible fallback for SSR or
+ * if the variable is missing.
+ */
+function readCssVar(name: string, fallback: string): string {
+  if (typeof window === "undefined") return fallback;
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return value || fallback;
+}
+
 export function ContentTrendChart({ trend }: ContentTrendChartProps) {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+  const isDark =
+    typeof document !== "undefined" &&
+    document.documentElement.classList.contains("dark");
+
+  const primary = readCssVar("--rezics-color-primary", "#f4606c");
+  const secondary = readCssVar("--rezics-color-accent", "#9aa0a6");
+  const fg = readCssVar("--rezics-color-fg", isDark ? "#f5f5f5" : "#1a1a1a");
+  const fgMuted = readCssVar(
+    "--rezics-color-fg-muted",
+    isDark ? "#aaaaaa" : "#666666",
+  );
 
   const data = useMemo(
     () => ({
@@ -28,16 +48,16 @@ export function ContentTrendChart({ trend }: ContentTrendChartProps) {
         {
           label: "Books",
           data: trend.map((d) => d.books),
-          backgroundColor: theme.palette.primary.main,
+          backgroundColor: primary,
         },
         {
           label: "Comments",
           data: trend.map((d) => d.comments),
-          backgroundColor: theme.palette.secondary.main,
+          backgroundColor: secondary,
         },
       ],
     }),
-    [trend, theme],
+    [trend, primary, secondary],
   );
 
   const options = useMemo(
@@ -48,26 +68,26 @@ export function ContentTrendChart({ trend }: ContentTrendChartProps) {
         legend: {
           display: true,
           position: "top" as const,
-          labels: { color: theme.palette.text.primary },
+          labels: { color: fg },
         },
       },
       scales: {
         x: {
-          ticks: { color: theme.palette.text.secondary, maxRotation: 45 },
+          ticks: { color: fgMuted, maxRotation: 45 },
           grid: {
             color: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)",
           },
         },
         y: {
           beginAtZero: true,
-          ticks: { color: theme.palette.text.secondary },
+          ticks: { color: fgMuted },
           grid: {
             color: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)",
           },
         },
       },
     }),
-    [theme, isDark],
+    [fg, fgMuted, isDark],
   );
 
   return <Bar data={data} options={options} />;

@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import type { FC, ReactNode } from "react";
 
 interface DangerZoneProps {
@@ -12,14 +11,12 @@ export const DangerZone: FC<DangerZoneProps> = ({
   description,
   children,
 }) => (
-  <section className="mt-8 rounded-lg border border-error/30 p-4">
-    <Typography variant="h6" color="error" className="font-semibold mb-1">
+  <section className="mt-8 rounded-lg border border-rezics-color-danger/30 p-4">
+    <h6 className="text-base font-semibold text-rezics-color-danger mb-1">
       {title}
-    </Typography>
+    </h6>
     {description && (
-      <Typography variant="body2" color="text.secondary" className="mb-4">
-        {description}
-      </Typography>
+      <p className="text-sm text-rezics-color-fg-muted mb-4">{description}</p>
     )}
     <div className="mt-4">{children}</div>
   </section>

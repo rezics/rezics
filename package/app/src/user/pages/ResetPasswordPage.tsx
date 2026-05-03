@@ -1,10 +1,15 @@
-import { Dialog, DialogContent } from "@mui/material";
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Dialog,
+  DialogContent,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { type FC, useMemo, useState } from "react";
 import { Layout } from "../layouts/Layout.tsx";
@@ -114,18 +119,28 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
 
   const content = (
     <>
-      {error && <Alert severity="error">{error}</Alert>}
-      {message && <Alert severity="success">{message}</Alert>}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {message && (
+        <Alert className="text-rezics-color-success">
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      )}
       {!resetToken ? (
-        <TextField
-          name="email"
-          type="email"
-          label="Email"
-          variant="standard"
-          required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="reset-email">Email</Label>
+          <Input
+            id="reset-email"
+            name="email"
+            type="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </div>
       ) : (
         <>
           <PasswordField value={password} setValue={setPassword} />
@@ -145,7 +160,6 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
     <>
       <Button
         type="button"
-        variant="contained"
         disabled={loading}
         onClick={resetToken ? handleResetPassword : handleRequestReset}
       >
@@ -175,7 +189,7 @@ export function ResetPasswordModal({
   onClose: () => void;
 }) {
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="!p-0">
         <ResetPasswordPage isModal={true} onClose={onClose} />
       </DialogContent>

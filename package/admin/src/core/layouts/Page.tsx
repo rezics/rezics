@@ -1,4 +1,3 @@
-import { Box, Container, Typography } from "@mui/material";
 import type React from "react";
 
 export function Page({
@@ -13,30 +12,19 @@ export function Page({
   children: React.ReactNode;
 }) {
   return (
-    <Container maxWidth="lg" disableGutters>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: { xs: "flex-start", sm: "center" },
-          justifyContent: "space-between",
-          gap: 2,
-          flexDirection: { xs: "column", sm: "row" },
-          mb: 2,
-        }}
-      >
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="h5" fontWeight={800}>
-            {title}
-          </Typography>
+    <div className="mx-auto w-full max-w-lg">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+        <div className="min-w-0">
+          <h1 className="text-xl font-extrabold leading-tight">{title}</h1>
           {description ? (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            <p className="text-sm text-rezics-color-fg-muted mt-1">
               {description}
-            </Typography>
+            </p>
           ) : null}
-        </Box>
-        {actions ? <Box sx={{ flexShrink: 0 }}>{actions}</Box> : null}
-      </Box>
+        </div>
+        {actions ? <div className="shrink-0">{actions}</div> : null}
+      </div>
       {children}
-    </Container>
+    </div>
   );
 }

@@ -1,13 +1,13 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { TextField } from "@mui/material";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { PostKind } from "@rezics/contract";
+import { Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { useUserProfileStore } from "@/user/states";
 import { ReviewForm, type ReviewEditState } from "@/review/forms/ReviewForm";
+import { useUserProfileStore } from "@/user/states";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const search = useRouterState({ select: (s) => s.location.search ?? "" });
@@ -76,13 +76,15 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     <div>
       <div className="max-w-4xl mx-auto mt-4">
         <h1 className="text-xl font-semibold">New {kind.toLowerCase()}</h1>
-        <TextField
-          label="Book Unit ID"
-          variant="filled"
-          className="w-full !mt-4"
-          value={bookUnitId}
-          disabled
-        />
+        <div className="mt-4 flex flex-col gap-2">
+          <Label htmlFor="book-unit-id">Book Unit ID</Label>
+          <Input
+            id="book-unit-id"
+            className="w-full"
+            value={bookUnitId}
+            disabled
+          />
+        </div>
         <ReviewForm
           data={reviewData}
           setData={setReviewData}

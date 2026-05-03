@@ -1,8 +1,8 @@
-import { Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import { LANGUAGE_META, type Language } from "@rezics/contract";
+import { Badge, Button, Skeleton } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
-import { useTranslation } from "react-i18next";
 import { Plus as AddIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Sibling = {
   unitId: string;
@@ -39,10 +39,10 @@ export function PostLanguageSwitcher({
 
   if (isLoading) {
     return (
-      <Box className="flex gap-2">
-        <Skeleton variant="rounded" width={72} height={28} />
-        <Skeleton variant="rounded" width={72} height={28} />
-      </Box>
+      <div className="flex gap-2">
+        <Skeleton className="w-[72px] h-7 rounded-md" />
+        <Skeleton className="w-[72px] h-7 rounded-md" />
+      </div>
     );
   }
 
@@ -53,21 +53,19 @@ export function PostLanguageSwitcher({
   );
 
   return (
-    <Stack spacing={1.25}>
-      <Typography variant="caption" color="text.secondary">
+    <div className="flex flex-col gap-2">
+      <span className="text-xs text-rezics-color-fg-muted">
         {t("post.languages", "Languages")}
-      </Typography>
-      <Box className="flex flex-wrap items-center gap-2">
+      </span>
+      <div className="flex flex-wrap items-center gap-2">
         {orderedSiblings.map((sibling) => {
           const isCurrent = sibling.unitId === currentUnitId;
           const label = languageLabel(sibling.defaultLanguage);
           return (
-            <Chip
+            <Badge
               key={sibling.unitId}
-              label={label}
-              color={isCurrent ? "primary" : "default"}
-              variant={isCurrent ? "filled" : "outlined"}
-              clickable={!isCurrent}
+              variant={isCurrent ? "default" : "outline"}
+              className={isCurrent ? undefined : "cursor-pointer"}
               onClick={
                 isCurrent
                   ? undefined
@@ -78,30 +76,29 @@ export function PostLanguageSwitcher({
                       })
               }
               title={sibling.translationSnippet ?? undefined}
-            />
+            >
+              {label}
+            </Badge>
           );
         })}
         {currentLanguage &&
           !orderedSiblings.some(
             (s) => s.defaultLanguage === currentLanguage,
           ) && (
-            <Chip
-              label={languageLabel(currentLanguage)}
-              color="primary"
-              variant="filled"
-            />
+            <Badge variant="default">{languageLabel(currentLanguage)}</Badge>
           )}
         {canAddTranslation && onAddTranslation && (
           <Button
-            size="small"
-            startIcon={<AddIcon />}
+            size="sm"
+            variant="ghost"
             onClick={onAddTranslation}
-            variant="text"
+            className="gap-1"
           >
+            <AddIcon className="h-4 w-4" />
             {t("post.add_translation", "Add translation")}
           </Button>
         )}
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }

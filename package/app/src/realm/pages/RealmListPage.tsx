@@ -1,10 +1,7 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
 import type { RealmDTO, RealmSearchDocument } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { RealmCard } from "../components/RealmCard";
 
@@ -38,41 +35,30 @@ export function RealmListPage() {
   const realms = data?.items?.map(mapRealmSearchDocToRealmDTO) ?? [];
 
   return (
-    <Box maxWidth="lg" mx="auto" px={2} py={3}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
-        <Typography variant="h5" fontWeight={600}>
-          Realms
-        </Typography>
-        <Stack direction="row" spacing={1}>
+    <div className="mx-auto w-full max-w-5xl px-4 py-6">
+      <div className="mb-6 flex flex-row items-center justify-between">
+        <h1 className="text-2xl font-semibold">Realms</h1>
+        <div className="flex flex-row gap-2">
           <Button
-            variant="text"
+            variant="ghost"
             onClick={() => navigate({ to: "/realm/search" })}
           >
             Search
           </Button>
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={() => navigate({ to: "/realm/new" })}
-          >
+          <Button onClick={() => navigate({ to: "/realm/new" })}>
             New Realm
           </Button>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
 
       {isLoading ? (
-        <Box display="flex" justifyContent="center" py={6}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-12">
+          <Spinner />
+        </div>
       ) : realms.length === 0 ? (
-        <Typography color="text.secondary" textAlign="center" py={4}>
+        <p className="py-8 text-center text-rezics-color-fg-muted">
           No realms yet
-        </Typography>
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {realms.map((realm) => (
@@ -80,7 +66,7 @@ export function RealmListPage() {
           ))}
         </div>
       )}
-    </Box>
+    </div>
   );
 }
 

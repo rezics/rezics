@@ -1,24 +1,23 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Chip,
-  Typography,
-} from "@mui/material";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { Pencil as EditIcon } from "lucide-react";
 import type { FC } from "react";
 import { useTranslation } from "react-i18next";
 import FollowButton from "@/engagement/components/FollowButton";
 import { useUserProfileStore } from "@/user/states";
 import { UserError, UserLoading } from "./UserState";
 import { UserUnitsPage } from "./UserUnitsPage";
-import { Pencil as EditIcon } from "lucide-react";
 
 export interface UserProfilePageProps {
   unitId: string;
@@ -63,49 +62,39 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
 
   if (!user) {
     return (
-      <Box className="flex items-center justify-center h-64">
-        <Typography>User not found</Typography>
-      </Box>
+      <div className="flex items-center justify-center h-64">
+        <p>User not found</p>
+      </div>
     );
   }
 
   return (
-    <Box className="w-11/12 mx-auto max-w-4xl mt-16">
+    <div className="w-11/12 mx-auto max-w-4xl mt-16">
       <Card className="shadow-lg rounded-2xl">
-        <CardHeader
-          avatar={
-            <Avatar
-              src={user.avatar}
-              variant="rounded"
-              sx={{ width: 80, height: 80, borderRadius: 2 }}
-            >
-              {user.name?.charAt(0).toUpperCase()}
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <Avatar className="w-20 h-20 rounded-lg">
+              <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
+              <AvatarFallback className="rounded-lg">
+                {user.name?.charAt(0).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
-          }
-          title={
-            <Typography variant="h4" className="font-semibold">
-              {user.name}
-            </Typography>
-          }
-          subheader={
-            <Box>
-              {user.joinDate && (
-                <Typography variant="body2" color="textSecondary">
-                  Joined on {new Date(user.joinDate).toLocaleDateString()}
-                </Typography>
-              )}
-              {user.slug && (
-                <Chip
-                  label={`@${user.slug}`}
-                  size="small"
-                  variant="outlined"
-                  sx={{ mt: 1 }}
-                />
-              )}
-            </Box>
-          }
-          action={
-            <div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-2xl font-semibold">{user.name}</h4>
+              <div>
+                {user.joinDate && (
+                  <p className="text-sm text-rezics-color-fg-muted">
+                    Joined on {new Date(user.joinDate).toLocaleDateString()}
+                  </p>
+                )}
+                {user.slug && (
+                  <Badge variant="outline" className="mt-2">
+                    @{user.slug}
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
               {!isCurrentUser && user.unitId !== currentUser?.unitId && (
                 <FollowButton
                   userId={user.unitId}
@@ -115,75 +104,63 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               )}
               {isCurrentUser ||
               currentUser?.permission?.role?.includes("ADMIN") ? (
-                <Button
-                  variant="contained"
-                  startIcon={<EditIcon />}
-                  onClick={onEditClick}
-                >
+                <Button onClick={onEditClick}>
+                  <EditIcon className="w-4 h-4 mr-2" />
                   {t("common.edit")}
                 </Button>
               ) : null}
             </div>
-          }
-        />
-        <CardContent>
-          {user.unitId && (
-            <Box className="mb-4">
-              <Typography variant="subtitle1" className="font-semibold mb-2">
-                Unit ID
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {user.unitId}
-              </Typography>
-            </Box>
-          )}
-          {user.email && (
-            <Box className="mb-4">
-              <Typography variant="subtitle1" className="font-semibold mb-2">
-                {t("common.email")}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {user.email}
-              </Typography>
-            </Box>
-          )}
-          {user.bio && (
-            <Box className="mb-4">
-              <Typography variant="subtitle1" className="font-semibold mb-2">
-                Bio
-              </Typography>
-              <Typography variant="body1">{user.bio}</Typography>
-            </Box>
-          )}
-          {!user.bio && (
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className="italic"
-            >
-              No bio available
-            </Typography>
-          )}
+          </div>
+
+          <div className="mt-6">
+            {user.unitId && (
+              <div className="mb-4">
+                <h6 className="text-base font-semibold mb-2">Unit ID</h6>
+                <p className="text-sm text-rezics-color-fg-muted">
+                  {user.unitId}
+                </p>
+              </div>
+            )}
+            {user.email && (
+              <div className="mb-4">
+                <h6 className="text-base font-semibold mb-2">
+                  {t("common.email")}
+                </h6>
+                <p className="text-sm text-rezics-color-fg-muted">
+                  {user.email}
+                </p>
+              </div>
+            )}
+            {user.bio && (
+              <div className="mb-4">
+                <h6 className="text-base font-semibold mb-2">Bio</h6>
+                <p className="text-base">{user.bio}</p>
+              </div>
+            )}
+            {!user.bio && (
+              <p className="text-sm text-rezics-color-fg-muted italic">
+                No bio available
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
       {(isCurrentUser || user.unitId === currentUser?.unitId) && (
         <Card className="shadow-lg rounded-2xl mt-4">
           <CardContent>
-            <Typography variant="h6" className="font-semibold inline-block">
-              导航：
-            </Typography>
+            <h6 className="text-lg font-semibold inline-block">导航：</h6>
             <Link to={`/user/me/bookmark`}>
-              <Button variant="text" color="primary">
+              <Button variant="ghost" className="text-rezics-color-primary">
                 书签
               </Button>
             </Link>
             <Link to={`/user/me/follow`}>
-              <Button variant="text" color="primary">
+              <Button variant="ghost" className="text-rezics-color-primary">
                 关注
               </Button>
             </Link>
             <Link to={`/user/me/reaction`}>
-              <Button variant="text" color="primary">
+              <Button variant="ghost" className="text-rezics-color-primary">
                 反应
               </Button>
             </Link>
@@ -191,6 +168,6 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
         </Card>
       )}
       <UserUnitsPage userId={user.unitId} />
-    </Box>
+    </div>
   );
 };

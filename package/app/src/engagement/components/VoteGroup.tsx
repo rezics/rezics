@@ -1,6 +1,7 @@
-import { IconButton, Stack, Typography } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import type React from "react";
+import { cn } from "@/shared/utils/css-util";
 import { useVoteController, type VoteValue } from "../hooks/useVoteController";
 import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
@@ -32,14 +33,14 @@ function sizeToIconPx(size: EngagementSize): number {
   }
 }
 
-function sizeToTypography(size: EngagementSize): "caption" | "body2" | "body1" {
+function sizeToTextClass(size: EngagementSize): string {
   switch (size) {
     case "sm":
-      return "caption";
+      return "text-xs";
     case "lg":
-      return "body1";
+      return "text-base";
     default:
-      return "body2";
+      return "text-sm";
   }
 }
 
@@ -69,89 +70,70 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
   };
 
   const iconPx = sizeToIconPx(size);
-  const typoVariant = sizeToTypography(size);
-  const buttonSize = size === "lg" ? "medium" : "small";
-
-  const iconButtonSx = {
-    p: size === "sm" ? 0.25 : 0.5,
-    color: "text.secondary",
-    "&:hover": {
-      bgcolor: (theme: { palette: { mode: string } }) =>
-        theme.palette.mode === "dark"
-          ? "rgba(255, 255, 255, 0.06)"
-          : "rgba(0, 0, 0, 0.06)",
-    },
-  };
+  const textClass = sizeToTextClass(size);
+  const buttonSizeClass = size === "sm" ? "p-0.5" : "p-1";
 
   const upActive = userVote === "like";
   const downActive = userVote === "dislike";
 
-  const groupSx =
+  const groupClass =
     variant === "pill"
-      ? {
-          borderRadius: "var(--rezics-radius-pill, 999px)",
-          bgcolor: (theme: { palette: { mode: string } }) =>
-            theme.palette.mode === "dark"
-              ? "rgba(255, 255, 255, 0.04)"
-              : "rgba(0, 0, 0, 0.04)",
-          px: 0.5,
-          py: 0.25,
-        }
-      : undefined;
+      ? "rounded-[var(--rezics-radius-pill,999px)] bg-black/5 dark:bg-white/5 px-1 py-0.5"
+      : "";
 
   return (
-    <Stack direction="row" alignItems="center" spacing={0.25} sx={groupSx}>
-      <IconButton
-        size={buttonSize}
+    <div className={cn("flex flex-row items-center gap-0.5", groupClass)}>
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={handleUp}
-        sx={{
-          ...iconButtonSx,
-          color: upActive
-            ? "var(--rezics-color-sentiment-positive-text)"
-            : "text.secondary",
-        }}
         aria-label="Upvote"
+        className={cn(
+          buttonSizeClass,
+          "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",
+          upActive
+            ? "text-[var(--rezics-color-sentiment-positive-text)]"
+            : "text-rezics-color-fg-muted",
+        )}
       >
         <ArrowBigUp
           size={iconPx}
           fill={upActive ? "currentColor" : "none"}
           strokeWidth={2}
         />
-      </IconButton>
-      <Typography
-        variant={typoVariant}
-        sx={{
-          minWidth: "2ch",
-          textAlign: "center",
-          fontVariantNumeric: "tabular-nums",
-          color:
-            userVote === "like"
-              ? "var(--rezics-color-sentiment-positive-text)"
-              : userVote === "dislike"
-                ? "var(--rezics-color-sentiment-negative-text)"
-                : "text.secondary",
-          fontWeight: userVote ? 600 : 400,
-        }}
+      </Button>
+      <span
+        className={cn(
+          "min-w-[2ch] text-center tabular-nums",
+          textClass,
+          userVote === "like"
+            ? "font-semibold text-[var(--rezics-color-sentiment-positive-text)]"
+            : userVote === "dislike"
+              ? "font-semibold text-[var(--rezics-color-sentiment-negative-text)]"
+              : "text-rezics-color-fg-muted",
+        )}
       >
         {formatScore(score)}
-      </Typography>
-      <IconButton
-        size={buttonSize}
+      </span>
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={handleDown}
-        sx={{
-          ...iconButtonSx,
-          color: downActive
-            ? "var(--rezics-color-sentiment-negative-text)"
-            : "text.secondary",
-        }}
         aria-label="Downvote"
+        className={cn(
+          buttonSizeClass,
+          "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",
+          downActive
+            ? "text-[var(--rezics-color-sentiment-negative-text)]"
+            : "text-rezics-color-fg-muted",
+        )}
       >
         <ArrowBigDown
           size={iconPx}
           fill={downActive ? "currentColor" : "none"}
           strokeWidth={2}
         />
-      </IconButton>
-    </Stack>
+      </Button>
+    </div>
   );
 };

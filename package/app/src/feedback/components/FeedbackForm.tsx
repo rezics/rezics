@@ -1,11 +1,13 @@
 import {
-  Box,
   Button,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import { useCreateFeedbackMutation } from "@rezics/api/feedback/feedback.mutations";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import { useRouterState } from "@tanstack/react-router";
@@ -17,7 +19,7 @@ type FeedbackFormProps = {
   onSubmitted?: () => void;
 };
 
-const typeOptions: { value: CreateFeedbackInput["type"]; label: string }[] = [
+const typeOptions: { value: NonNullable<CreateFeedbackInput["type"]>; label: string }[] = [
   { value: "BUG", label: "问题/缺陷" },
   { value: "FEATURE", label: "功能建议" },
   { value: "REPORT", label: "内容相关" },
@@ -81,50 +83,65 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   };
 
   return (
-    <Box component="form" onSubmit={onSubmit} className="space-y-4">
-      <Stack spacing={2}>
-        <TextField
-          label="反馈类型"
-          select
-          value={form.type}
-          onChange={(e) => handleChange("type", e.target.value)}
-        >
-          {typeOptions.map((opt) => (
-            <MenuItem key={opt.value} value={opt.value}>
-              {opt.label}
-            </MenuItem>
-          ))}
-        </TextField>
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="feedback-type">反馈类型</Label>
+          <Select
+            value={form.type ?? "BUG"}
+            onValueChange={(v) => handleChange("type", v)}
+          >
+            <SelectTrigger id="feedback-type">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {typeOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <TextField
-          label="详细内容"
-          placeholder="请提供详细描述、复现步骤或预期效果"
-          multiline
-          minRows={4}
-          value={form.content}
-          onChange={(e) => handleChange("content", e.target.value)}
-          error={errors.content}
-          helperText={errors.content ? "请填写详细内容" : ""}
-        />
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="feedback-content">详细内容</Label>
+          <textarea
+            id="feedback-content"
+            placeholder="请提供详细描述、复现步骤或预期效果"
+            rows={4}
+            value={form.content}
+            onChange={(e) => handleChange("content", e.target.value)}
+            aria-invalid={errors.content}
+            className={
+              "w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rezics-color-primary " +
+              (errors.content
+                ? "border-rezics-color-danger"
+                : "border-rezics-color-border")
+            }
+          />
+          {errors.content && (
+            <p className="text-sm text-rezics-color-danger">请填写详细内容</p>
+          )}
+        </div>
 
         {createMutation.status === "error" && (
-          <Typography color="error">提交失败，请稍后重试。</Typography>
+          <p className="text-rezics-color-danger">提交失败，请稍后重试。</p>
         )}
 
-        <Stack direction="row" spacing={2} className="justify-end">
-          <Button variant="outlined" onClick={resetForm}>
+        <div className="flex flex-row gap-4 justify-end">
+          <Button variant="outline" type="button" onClick={resetForm}>
             重置
           </Button>
           <Button
             type="submit"
-            variant="contained"
             disabled={createMutation.status === "pending"}
           >
             {createMutation.status === "pending" ? "提交中..." : "提交反馈"}
           </Button>
-        </Stack>
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </form>
   );
 };
 

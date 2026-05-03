@@ -1,4 +1,4 @@
-import { Skeleton, Stack } from "@mui/material";
+import { Skeleton } from "@rezics/ui/shadcn";
 import type React from "react";
 
 /**
@@ -16,15 +16,15 @@ export const PinboardSkeleton: React.FC<PinboardSkeletonProps> = ({
   rowHeight = 72,
 }) => {
   return (
-    <Stack spacing={1.5} aria-hidden="true">
+    <div className="flex flex-col gap-3" aria-hidden="true">
       {Array.from({ length: rows }).map((_, i) => (
         <Skeleton
           // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton rows
           key={i}
-          variant="rounded"
-          height={rowHeight}
+          className="rounded-md w-full"
+          style={{ height: rowHeight }}
         />
       ))}
-    </Stack>
+    </div>
   );
 };

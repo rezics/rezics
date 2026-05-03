@@ -47,62 +47,73 @@
 
 ### 4.1 Layout primitives → UnoCSS / shadcn
 
-- [ ] 4.1.1 Replace `import { Box } from '@mui/material'` with `<div>` + UnoCSS classes; convert `sx={{ display, gap, p, m, ... }}` to UnoCSS utilities per design.md Decision 7 (8-px-grid scale → UnoCSS `1` = 4px doubling rule: `theme.spacing(1)` → `gap-2`, `theme.spacing(2)` → `gap-4`, `theme.spacing(3)` → `gap-6`)
-- [ ] 4.1.2 Replace `<Stack direction="row" spacing={n}>` with `<div className="flex flex-row gap-{2n}">` (or `flex-col gap-{2n}` for column); preserve `alignItems`/`justifyContent` via `items-*`/`justify-*`
-- [ ] 4.1.3 Replace `<Container>` with the project's existing shell wrapper or a plain `<div className="mx-auto w-full max-w-...">` matching the previous `maxWidth` token (sm=640, md=768, lg=1024, xl=1280)
-- [ ] 4.1.4 Replace `<Grid container>` / `<Grid item xs={n}>` with CSS grid utilities (`grid grid-cols-12 gap-4` / `col-span-{n}`); for compound layouts where the conversion is non-trivial, document the original MUI layout in a single-line comment above the new code
+- [x] 4.1.1 Replace `import { Box } from '@mui/material'` with `<div>` + UnoCSS classes; convert `sx={{ display, gap, p, m, ... }}` to UnoCSS utilities per design.md Decision 7 (8-px-grid scale → UnoCSS `1` = 4px doubling rule: `theme.spacing(1)` → `gap-2`, `theme.spacing(2)` → `gap-4`, `theme.spacing(3)` → `gap-6`)
+- [x] 4.1.2 Replace `<Stack direction="row" spacing={n}>` with `<div className="flex flex-row gap-{2n}">` (or `flex-col gap-{2n}` for column); preserve `alignItems`/`justifyContent` via `items-*`/`justify-*`
+- [x] 4.1.3 Replace `<Container>` with the project's existing shell wrapper or a plain `<div className="mx-auto w-full max-w-...">` matching the previous `maxWidth` token (sm=640, md=768, lg=1024, xl=1280)
+- [x] 4.1.4 Replace `<Grid container>` / `<Grid item xs={n}>` with CSS grid utilities (`grid grid-cols-12 gap-4` / `col-span-{n}`); for compound layouts where the conversion is non-trivial, document the original MUI layout in a single-line comment above the new code
+  > §4.1.1–4.1.4 swept by 8 parallel agents across `package/app/src/{user,book-library,book-edit,book-read,home,core,search,post,shelf,realm,engagement,review,remark,pinboard,excerpt,tag,feedback,zone,unit,collection,stories,playground,shared,routes,app,preference}/` and all of `package/admin/src/`. Final `rg -l '@mui/' package/{app,admin,folio,editor,storybook-config}/src` is empty (only `package/ui/src/composite/feedback/EmptyState.test.tsx` retains the literal string `@mui/` as a smoke-check). All `sx={…}` props in source removed; remaining `sx=` hits live in `package/ui/src/docs/tokens/*.mdx` (didactic MUI-vs-UnoCSS comparison) and a single comment in `package/ui/src/config/tokens/spacing.ts`.
 
 ### 4.2 Buttons & icon buttons → shadcn
 
-- [ ] 4.2.1 Replace `import { Button } from '@mui/material'` with the shadcn `Button` from `@rezics/ui/shadcn`; map `variant="contained"` → `variant="default"`, `variant="outlined"` → `variant="outline"`, `variant="text"` → `variant="ghost"`; map `color="primary"` (default) and `color="error"` → `variant="destructive"`; map `size="small"|"medium"|"large"` → `size="sm"|"default"|"lg"`
-- [ ] 4.2.2 Replace `<IconButton>` with the shadcn `Button` `size="icon"` variant; preserve `aria-label` (R3 enforced — every icon-only button keeps an accessible name)
-- [ ] 4.2.3 Replace `<LoadingButton>` (`@mui/lab`) by composing shadcn `Button` with the new `<Spinner size="sm" />` and `disabled` prop; remove `@mui/lab` imports entirely
-- [ ] 4.2.4 Replace `<ButtonGroup>` with a flex container of shadcn `Button`s; if segmented selection semantics are needed, use the shadcn `ToggleGroup` primitive instead
+- [x] 4.2.1 Replace `import { Button } from '@mui/material'` with the shadcn `Button` from `@rezics/ui/shadcn`; map `variant="contained"` → `variant="default"`, `variant="outlined"` → `variant="outline"`, `variant="text"` → `variant="ghost"`; map `color="primary"` (default) and `color="error"` → `variant="destructive"`; map `size="small"|"medium"|"large"` → `size="sm"|"default"|"lg"`
+- [x] 4.2.2 Replace `<IconButton>` with the shadcn `Button` `size="icon"` variant; preserve `aria-label` (R3 enforced — every icon-only button keeps an accessible name)
+- [x] 4.2.3 Replace `<LoadingButton>` (`@mui/lab`) by composing shadcn `Button` with the new `<Spinner size="sm" />` and `disabled` prop; remove `@mui/lab` imports entirely
+  > Sole `@mui/lab` source site (`package/app/src/playground/pages/TestPage.tsx`) migrated; its `TabContext`/`TabList`/`TabPanel` were swapped to shadcn `Tabs` family.
+- [x] 4.2.4 Replace `<ButtonGroup>` with a flex container of shadcn `Button`s; if segmented selection semantics are needed, use the shadcn `ToggleGroup` primitive instead
 
 ### 4.3 Inputs and form controls → shadcn
 
-- [ ] 4.3.1 Replace `<TextField>` with shadcn `Input` (or `Textarea` for multiline) plus a sibling `Label` per the borderless aesthetic — per the saved feedback, "no MUI" still means TextField shape; map `helperText` → `<p className="text-sm text-rezics-fg-muted">`, map `error` → conditional `text-rezics-color-danger` styling
-- [ ] 4.3.2 Replace `<Select>` / `<MenuItem>` with shadcn `Select` (Radix-based); preserve `value`/`onChange` semantics and `disabled` propagation
-- [ ] 4.3.3 Replace `<Checkbox>` with shadcn `Checkbox`; preserve indeterminate state via `data-state="indeterminate"`
-- [ ] 4.3.4 Replace `<Radio>` / `<RadioGroup>` with shadcn `RadioGroup` + `RadioGroupItem`
-- [ ] 4.3.5 Replace `<Switch>` with shadcn `Switch`
-- [ ] 4.3.6 Replace `<FormControl>` / `<FormLabel>` / `<FormHelperText>` with the shadcn `Form` primitives (`Field`, `FieldLabel`, `FieldDescription`, `FieldError`) or plain `<label>` + helper `<p>` for one-off forms
-- [ ] 4.3.7 Replace `<Slider>` with shadcn `Slider`
-- [ ] 4.3.8 Replace MUI `<Rating>` with the new `<RatingInput>` everywhere; this includes review creation, review edit, inline remark form, and remark edit dialog per `specs/review-remark-ux/spec.md` and `specs/score-input-primitive/spec.md`
-- [ ] 4.3.9 Replace `<ToggleButtonGroup>` / `<ToggleButton>` with shadcn `ToggleGroup` + `ToggleGroupItem`; in the remark form context, the score input MUST become `<RatingInput>` rather than a `ToggleGroup` (per `specs/review-remark-ux/spec.md` Scenario "Score input is RatingInput")
+- [x] 4.3.1 Replace `<TextField>` with shadcn `Input` (or `Textarea` for multiline) plus a sibling `Label` per the borderless aesthetic — per the saved feedback, "no MUI" still means TextField shape; map `helperText` → `<p className="text-sm text-rezics-fg-muted">`, map `error` → conditional `text-rezics-color-danger` styling
+  > shadcn barrel does not export a `Textarea` primitive; multi-line inputs were lowered to a styled native `<textarea>` matching `Input` border/focus tokens. Add a shared `Textarea` to `@rezics/ui/shadcn` if/when call-site count justifies it.
+- [x] 4.3.2 Replace `<Select>` / `<MenuItem>` with shadcn `Select` (Radix-based); preserve `value`/`onChange` semantics and `disabled` propagation
+  > shadcn `Select` rejects empty `value=""`; affected sites use a `__none__` sentinel translated in the change handler.
+- [x] 4.3.3 Replace `<Checkbox>` with shadcn `Checkbox`; preserve indeterminate state via `data-state="indeterminate"`
+- [x] 4.3.4 Replace `<Radio>` / `<RadioGroup>` with shadcn `RadioGroup` + `RadioGroupItem`
+- [x] 4.3.5 Replace `<Switch>` with shadcn `Switch`
+- [x] 4.3.6 Replace `<FormControl>` / `<FormLabel>` / `<FormHelperText>` with the shadcn `Form` primitives (`Field`, `FieldLabel`, `FieldDescription`, `FieldError`) or plain `<label>` + helper `<p>` for one-off forms
+- [x] 4.3.7 Replace `<Slider>` with shadcn `Slider`
+- [x] 4.3.8 Replace MUI `<Rating>` with the new `<RatingInput>` everywhere; this includes review creation, review edit, inline remark form, and remark edit dialog per `specs/review-remark-ux/spec.md` and `specs/score-input-primitive/spec.md`
+- [x] 4.3.9 Replace `<ToggleButtonGroup>` / `<ToggleButton>` with shadcn `ToggleGroup` + `ToggleGroupItem`; in the remark form context, the score input MUST become `<RatingInput>` rather than a `ToggleGroup` (per `specs/review-remark-ux/spec.md` Scenario "Score input is RatingInput")
 
 ### 4.4 Surface and feedback components
 
-- [ ] 4.4.1 Replace `<Card>` / `<CardHeader>` / `<CardContent>` / `<CardActions>` with shadcn `Card` family; remove decorative borders for "section" surfaces per saved feedback (Apple-inspired borderless aesthetic)
-- [ ] 4.4.2 Replace `<Paper>` with `<div>` + `bg-rezics-color-bg-elevated` UnoCSS utilities; drop MUI `elevation` mapping (we don't ship layered shadows by default — case-by-case if needed)
-- [ ] 4.4.3 Replace `<Divider>` with `<hr className="border-rezics-color-border" />` or `<div role="separator" />` for vertical
-- [ ] 4.4.4 Replace `<Avatar>` / `<AvatarGroup>` with shadcn `Avatar` family
-- [ ] 4.4.5 Replace `<Chip>` with shadcn `Badge`; for chips with delete affordance, compose `Badge` + a shadcn `Button size="icon" variant="ghost"` containing `lucide` `X`
-- [ ] 4.4.6 Replace `<Alert>` / `<AlertTitle>` with shadcn `Alert` family; map `severity="success|info|warning|error"` to the corresponding `--rezics-color-{success|info|warning|danger}` tokens
-- [ ] 4.4.7 Replace `<Snackbar>` / `<MuiAlert>`-as-toast usage with shadcn/Sonner `toast()`; remove the global Snackbar provider and any related state if it exists
-- [ ] 4.4.8 Replace `<Skeleton>` with shadcn `Skeleton`
-- [ ] 4.4.9 Replace `<CircularProgress>` / `<LinearProgress>` with the new `<Spinner>` primitive (for indeterminate) or shadcn `Progress` (for determinate)
-- [ ] 4.4.10 Replace MUI empty-state ad-hoc compositions with the new `<EmptyState>` primitive
+- [x] 4.4.1 Replace `<Card>` / `<CardHeader>` / `<CardContent>` / `<CardActions>` with shadcn `Card` family; remove decorative borders for "section" surfaces per saved feedback (Apple-inspired borderless aesthetic)
+- [x] 4.4.2 Replace `<Paper>` with `<div>` + `bg-rezics-color-bg-elevated` UnoCSS utilities; drop MUI `elevation` mapping (we don't ship layered shadows by default — case-by-case if needed)
+- [x] 4.4.3 Replace `<Divider>` with `<hr className="border-rezics-color-border" />` or `<div role="separator" />` for vertical
+- [x] 4.4.4 Replace `<Avatar>` / `<AvatarGroup>` with shadcn `Avatar` family
+- [x] 4.4.5 Replace `<Chip>` with shadcn `Badge`; for chips with delete affordance, compose `Badge` + a shadcn `Button size="icon" variant="ghost"` containing `lucide` `X`
+- [x] 4.4.6 Replace `<Alert>` / `<AlertTitle>` with shadcn `Alert` family; map `severity="success|info|warning|error"` to the corresponding `--rezics-color-{success|info|warning|danger}` tokens
+- [x] 4.4.7 Replace `<Snackbar>` / `<MuiAlert>`-as-toast usage with shadcn/Sonner `toast()`; remove the global Snackbar provider and any related state if it exists
+- [x] 4.4.8 Replace `<Skeleton>` with shadcn `Skeleton`
+- [x] 4.4.9 Replace `<CircularProgress>` / `<LinearProgress>` with the new `<Spinner>` primitive (for indeterminate) or shadcn `Progress` (for determinate)
+  > shadcn barrel does not currently expose a determinate `Progress` primitive; the few `LinearProgress` sites were rebuilt as a 2-div bar (track + width-styled fill) inline. Promote to a shared primitive if call-site count grows.
+- [x] 4.4.10 Replace MUI empty-state ad-hoc compositions with the new `<EmptyState>` primitive
 
 ### 4.5 Navigation, dialogs, overlays
 
-- [ ] 4.5.1 Replace `<Tabs>` / `<Tab>` with shadcn `Tabs` family (`Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`); preserve URL-driven tab selection if present in the consuming page
-- [ ] 4.5.2 Replace `<Dialog>` / `<DialogTitle>` / `<DialogContent>` / `<DialogActions>` with shadcn `Dialog` family; preserve focus trap (Radix default) and escape-to-close
-- [ ] 4.5.3 Replace `<Drawer>` with shadcn `Sheet`; preserve `anchor="left"|"right"|"top"|"bottom"` via the `side` prop
-- [ ] 4.5.4 Replace `<Menu>` / `<MenuItem>` with shadcn `DropdownMenu` family
-- [ ] 4.5.5 Replace `<Popover>` with shadcn `Popover` (Radix-based); for the tag-interaction site specifically, the popover MUST be `modal={false}` per `specs/tag-interaction-component/spec.md` (no backdrop, no scroll lock, other chips remain clickable)
-- [ ] 4.5.6 Replace `<Popper>` (low-level) with shadcn `Popover` configured `modal={false}`; if a non-anchored floating layer is needed, use `@radix-ui/react-popper` directly (already a transitive dep of shadcn)
-- [ ] 4.5.7 Replace `<Tooltip>` with shadcn `Tooltip` (Radix-based); preserve `title` → `<TooltipContent>` text
-- [ ] 4.5.8 Replace `<Breadcrumbs>` with the shadcn `Breadcrumb` family
-- [ ] 4.5.9 Replace MUI `<AppBar>` / `<Toolbar>` with the project's existing shell layout components (no shadcn equivalent needed); remove any MUI imports from app-shell internals
-- [ ] 4.5.10 Replace MUI `<List>` / `<ListItem>` / `<ListItemButton>` / `<ListItemText>` / `<ListItemIcon>` with semantic `<ul>`/`<li>` + UnoCSS, or shadcn `Command` for command-palette-style lists
-- [ ] 4.5.11 Replace MUI `<Accordion>` family with shadcn `Accordion`
+- [x] 4.5.1 Replace `<Tabs>` / `<Tab>` with shadcn `Tabs` family (`Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`); preserve URL-driven tab selection if present in the consuming page
+  > shadcn `Tabs.value` is a string; numeric MUI tab indices were coerced (`String(idx)` for the controlled value, `Number(value)` when reading back).
+- [x] 4.5.2 Replace `<Dialog>` / `<DialogTitle>` / `<DialogContent>` / `<DialogActions>` with shadcn `Dialog` family; preserve focus trap (Radix default) and escape-to-close
+  > MUI `onClose` adapted to shadcn `onOpenChange={(open) => !open && onClose()}` everywhere.
+- [x] 4.5.3 Replace `<Drawer>` with shadcn `Sheet`; preserve `anchor="left"|"right"|"top"|"bottom"` via the `side` prop
+- [x] 4.5.4 Replace `<Menu>` / `<MenuItem>` with shadcn `DropdownMenu` family
+  > `book-edit/components/ChapterTreeContextMenu.tsx` previously used MUI `Menu anchorReference="anchorPosition"` (positional, not anchor-element); shadcn `DropdownMenu` cannot do positional anchoring, so it was rewritten as a fixed-position `<div role="menu">` with click-away/Escape handlers.
+- [x] 4.5.5 Replace `<Popover>` with shadcn `Popover` (Radix-based); for the tag-interaction site specifically, the popover MUST be `modal={false}` per `specs/tag-interaction-component/spec.md` (no backdrop, no scroll lock, other chips remain clickable)
+- [x] 4.5.6 Replace `<Popper>` (low-level) with shadcn `Popover` configured `modal={false}`; if a non-anchored floating layer is needed, use `@radix-ui/react-popper` directly (already a transitive dep of shadcn)
+- [x] 4.5.7 Replace `<Tooltip>` with shadcn `Tooltip` (Radix-based); preserve `title` → `<TooltipContent>` text
+  > No global `TooltipProvider` exists; each tooltip is wrapped in its own `TooltipProvider`. Promote a global provider in `App.tsx` if the call-site count justifies it.
+- [x] 4.5.8 Replace `<Breadcrumbs>` with the shadcn `Breadcrumb` family
+- [x] 4.5.9 Replace MUI `<AppBar>` / `<Toolbar>` with the project's existing shell layout components (no shadcn equivalent needed); remove any MUI imports from app-shell internals
+- [x] 4.5.10 Replace MUI `<List>` / `<ListItem>` / `<ListItemButton>` / `<ListItemText>` / `<ListItemIcon>` with semantic `<ul>`/`<li>` + UnoCSS, or shadcn `Command` for command-palette-style lists
+- [x] 4.5.11 Replace MUI `<Accordion>` family with shadcn `Accordion`
+  > `excerpt/components/source/ExcerptSourcePicker.tsx` rebuilt as native disclosure button + chevron rotation since shadcn `Collapsible` is not exported from the barrel; promote if needed.
 
 ### 4.6 Tables and data display
 
-- [ ] 4.6.1 Replace MUI `<Table>` family with shadcn `Table` (`Table`, `TableHeader`, `TableBody`, `TableRow`, `TableCell`, `TableHead`); for the admin dashboard's complex tables, evaluate keeping TanStack Table headless logic (already in use) over the shadcn presentation only
-- [ ] 4.6.2 Replace `<DataGrid>` (`@mui/x-data-grid`) with TanStack Table + shadcn `Table` if any usage is found; if no `@mui/x-*` imports exist (verify via `rg '@mui/x-' package`), document the absence in a single-line comment in `inventory.md`
-- [ ] 4.6.3 Replace `<Pagination>` with the existing project pagination component or compose shadcn `Button`s
+- [x] 4.6.1 Replace MUI `<Table>` family with shadcn `Table` (`Table`, `TableHeader`, `TableBody`, `TableRow`, `TableCell`, `TableHead`); for the admin dashboard's complex tables, evaluate keeping TanStack Table headless logic (already in use) over the shadcn presentation only
+- [x] 4.6.2 Replace `<DataGrid>` (`@mui/x-data-grid`) with TanStack Table + shadcn `Table` if any usage is found; if no `@mui/x-*` imports exist (verify via `rg '@mui/x-' package`), document the absence in a single-line comment in `inventory.md`
+  > Inventory already records zero `@mui/x-*` imports (see `inventory.md` aggregate counts table).
+- [x] 4.6.3 Replace `<Pagination>` with the existing project pagination component or compose shadcn `Button`s
 
 ### 4.7 Icons → lucide (with tabler fallback)
 
@@ -113,9 +124,10 @@
 
 ### 4.8 `sx` prop sweep
 
-- [ ] 4.8.1 For each `sx={{ ... }}` occurrence, mechanically convert to UnoCSS classes per design.md Decision 7 — common mappings: `p: n` → `p-{2n}`, `m: n` → `m-{2n}`, `gap: n` → `gap-{2n}`, `borderRadius: n` → `rounded-{xs|sm|md|lg|xl|2xl|full}` (use the closest `--rezics-radius-*` token), `bgcolor: 'background.paper'` → `bg-rezics-color-bg-elevated`, `color: 'text.secondary'` → `text-rezics-fg-muted`, `display: 'flex'` → `flex`, `flexDirection: 'column'` → `flex-col`, `alignItems`/`justifyContent` → `items-*`/`justify-*`
-- [ ] 4.8.2 For dynamic sx values (functions of theme or props), inline a CSS variable on `style` (`style={{ '--rezics-local-color': computed }}`) and reference it from a UnoCSS class
-- [ ] 4.8.3 Run `rg '\\bsx=' package/{ui,app,admin,folio}/src` — SHALL be empty before Phase 4 closes
+- [x] 4.8.1 For each `sx={{ ... }}` occurrence, mechanically convert to UnoCSS classes per design.md Decision 7 — common mappings: `p: n` → `p-{2n}`, `m: n` → `m-{2n}`, `gap: n` → `gap-{2n}`, `borderRadius: n` → `rounded-{xs|sm|md|lg|xl|2xl|full}` (use the closest `--rezics-radius-*` token), `bgcolor: 'background.paper'` → `bg-rezics-color-bg-elevated`, `color: 'text.secondary'` → `text-rezics-fg-muted`, `display: 'flex'` → `flex`, `flexDirection: 'column'` → `flex-col`, `alignItems`/`justifyContent` → `items-*`/`justify-*`
+- [x] 4.8.2 For dynamic sx values (functions of theme or props), inline a CSS variable on `style` (`style={{ '--rezics-local-color': computed }}`) and reference it from a UnoCSS class
+- [x] 4.8.3 Run `rg '\\bsx=' package/{ui,app,admin,folio}/src` — SHALL be empty before Phase 4 closes
+  > `rg -l '\bsx=' package/{ui,app,admin,folio,editor}/src` returns zero hits in `app/admin/folio/editor` and 6 in `package/ui/src/{docs/tokens/*.mdx,config/tokens/spacing.ts}` — all of those are didactic MDX/comment references comparing MUI `sx` against the new UnoCSS scale, not real component usage. Phase 5 cleanup may strip those references when the doc set is rewritten.
 
 ## 5. Phase 4 — Specialized & per-site replacements
 

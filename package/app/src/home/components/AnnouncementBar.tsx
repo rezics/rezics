@@ -1,4 +1,3 @@
-import { Box, Typography, useTheme } from "@mui/material";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
@@ -24,7 +23,6 @@ export function AnnouncementBar({
   max = 5,
   interval = 4000,
 }: AnnouncementBarProps) {
-  const theme = useTheme();
   const items = announcements.slice(0, max);
 
   const [index, setIndex] = useState(0);
@@ -45,18 +43,11 @@ export function AnnouncementBar({
   if (!items.length) return null;
 
   return (
-    <Box
-      component="div"
-      sx={{
-        px: 2,
-        py: 1,
-        display: "flex",
-        alignItems: "center",
-        borderRadius: 2,
-      }}
-    >
+    <div className="px-4 py-2 flex items-center rounded-lg">
       <CampaignRoundedIcon
-        color={theme.palette.primary.main} size={18} style={{ marginRight: "12px" }}
+        className="text-rezics-color-primary"
+        size={18}
+        style={{ marginRight: "12px" }}
       />
 
       <div className="relative flex-1 overflow-hidden h-[28px] flex items-center">
@@ -79,24 +70,18 @@ export function AnnouncementBar({
             >
               {item.pin && (
                 <PushPinRoundedIcon
-                  size={14} color={theme.palette.warning.main}
+                  size={14}
+                  className="text-rezics-color-warning"
                 />
               )}
 
-              <Typography
-                variant="body2"
-                sx={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
+              <p className="text-sm whitespace-nowrap overflow-hidden text-ellipsis m-0">
                 {item.content}
-              </Typography>
+              </p>
             </Wrapper>
           );
         })}
       </div>
-    </Box>
+    </div>
   );
 }

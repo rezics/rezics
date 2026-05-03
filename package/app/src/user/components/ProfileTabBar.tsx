@@ -1,4 +1,4 @@
-import { Tab, Tabs } from "@mui/material";
+import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";
 
@@ -21,28 +21,33 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({ unitId }) => {
   const pathname = routerState.location.pathname;
   const basePath = `/user/${unitId}`;
 
-  const activeIdx = PROFILE_TABS.findIndex((tab, i) => {
-    if (i === 0) {
-      return pathname === basePath || pathname === `${basePath}/`;
-    }
-    return pathname.startsWith(`${basePath}${tab.path}`);
-  });
+  const activeTab =
+    PROFILE_TABS.find((tab, i) => {
+      if (i === 0) {
+        return pathname === basePath || pathname === `${basePath}/`;
+      }
+      return pathname.startsWith(`${basePath}${tab.path}`);
+    }) ?? PROFILE_TABS[0];
 
   return (
-    <Tabs
-      value={activeIdx === -1 ? 0 : activeIdx}
-      variant="scrollable"
-      scrollButtons="auto"
-      allowScrollButtonsMobile
-      sx={{ borderBottom: 1, borderColor: "divider" }}
-      onChange={(_e, idx) => {
-        const tab = PROFILE_TABS[idx];
-        void navigate({ to: `/user/$unitId${tab.path}`, params: { unitId } });
-      }}
-    >
-      {PROFILE_TABS.map((tab) => (
-        <Tab key={tab.path} label={tab.label} />
-      ))}
-    </Tabs>
+    <div className="border-b border-rezics-color-border overflow-x-auto">
+      <Tabs
+        value={activeTab.path}
+        onValueChange={(value) => {
+          void navigate({
+            to: `/user/$unitId${value}`,
+            params: { unitId },
+          });
+        }}
+      >
+        <TabsList className="bg-transparent">
+          {PROFILE_TABS.map((tab) => (
+            <TabsTrigger key={tab.path} value={tab.path}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+    </div>
   );
 };

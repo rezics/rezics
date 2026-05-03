@@ -1,4 +1,11 @@
-import { MenuItem, TextField } from "@mui/material";
+import {
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import type React from "react";
 
 export const SORT_OPTIONS = [
@@ -23,24 +30,25 @@ export const SortSelect: React.FC<SortSelectProps> = ({
   onChange,
   options = SORT_OPTIONS,
   label,
-  size = "small",
 }) => {
+  const handleChange = (next: string) => {
+    onChange(next === "relevance" ? undefined : next);
+  };
   return (
-    <TextField
-      select
-      size={size}
-      label={label}
-      value={value ?? "relevance"}
-      onChange={(e) =>
-        onChange(e.target.value === "relevance" ? undefined : e.target.value)
-      }
-      className="min-w-[160px]"
-    >
-      {options.map((opt) => (
-        <MenuItem key={opt.value} value={opt.value}>
-          {opt.label}
-        </MenuItem>
-      ))}
-    </TextField>
+    <div className="flex flex-col gap-1 min-w-[160px]">
+      {label && <Label>{label}</Label>}
+      <Select value={value ?? "relevance"} onValueChange={handleChange}>
+        <SelectTrigger className="min-w-[160px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 };

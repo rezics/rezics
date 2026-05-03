@@ -1,11 +1,7 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import { shelfDetailQuery } from "@rezics/api/shelf";
 import { useUpdateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
+import { Spinner } from "@rezics/ui";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -51,45 +47,46 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" py={6}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-12">
+        <Spinner />
+      </div>
     );
   }
 
   return (
-    <Box maxWidth="md" mx="auto" px={2} py={3}>
-      <Typography variant="h5" fontWeight={600} mb={3}>
-        Edit Shelf
-      </Typography>
+    <div className="mx-auto w-full max-w-3xl px-4 py-6">
+      <h1 className="mb-6 text-2xl font-semibold">Edit Shelf</h1>
 
-      <Stack spacing={3}>
-        <TextField
-          label="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          fullWidth
-          variant="standard"
-        />
-        <TextField
-          label="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          fullWidth
-          multiline
-          rows={4}
-          variant="standard"
-        />
-        <TextField
-          label="Cover Image URL"
-          value={coverUrl}
-          onChange={(e) => setCoverUrl(e.target.value)}
-          fullWidth
-          variant="standard"
-        />
-        <Stack direction="row" spacing={2} justifyContent="flex-end">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-shelf-title">Title</Label>
+          <Input
+            id="edit-shelf-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-shelf-description">Description</Label>
+          <textarea
+            id="edit-shelf-description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+            className="w-full rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-shelf-cover">Cover Image URL</Label>
+          <Input
+            id="edit-shelf-cover"
+            value={coverUrl}
+            onChange={(e) => setCoverUrl(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-row justify-end gap-4">
           <Button
-            variant="text"
+            variant="ghost"
             onClick={() =>
               navigate({ to: "/shelf/$shelfId", params: { shelfId } })
             }
@@ -97,16 +94,14 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
             Cancel
           </Button>
           <Button
-            variant="contained"
-            disableElevation
             onClick={handleSave}
             disabled={updateMutation.isPending}
           >
             Save
           </Button>
-        </Stack>
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
 

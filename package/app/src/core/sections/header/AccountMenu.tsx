@@ -1,21 +1,23 @@
 import {
   Avatar,
-  Divider,
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@rezics/ui/shadcn";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { logout } from "@/user/models/handler";
 import { useUserProfileStore } from "@/user/states";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";
 import { LogOut as LogoutIcon, User as PersonIcon, Settings as SettingsIcon } from "lucide-react";
+
 export type AccountMenuProps = {
   onLogout?: () => void;
 };
@@ -24,20 +26,10 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const clearProfile = useUserProfileStore((state) => state.clearProfile);
   const user = useUserProfileStore((state) => state.user);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const { t } = useTranslation();
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleLogout = () => {
-    handleMenuClose();
     onLogout?.();
     clearProfile();
     navigate({ to: "/login" });
@@ -45,60 +37,47 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
   };
 
   return (
-    <>
-      <IconButton
-        onClick={handleMenuOpen}
-        size="small"
-        aria-controls="menu-appbar"
-        aria-haspopup="true"
-      >
-        <Avatar
-          sx={{ width: 36, height: 36 }}
-          variant="rounded"
-          src={user?.avatar}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="account menu"
+          aria-haspopup="true"
         >
-          {user?.name?.charAt(0).toUpperCase()}
-        </Avatar>
-      </IconButton>
-      <Menu
-        id="menu-appbar"
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem component={Link} to={`/user/me`} onClick={handleMenuClose}>
-          <ListItemIcon>
-            <PersonIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>{t("navigation.profile")}</ListItemText>
-        </MenuItem>
-        <MenuItem
-          component={Link}
-          to={`/user/me/setting/profile`}
-          onClick={handleMenuClose}
-        >
-          <ListItemIcon>
-            <SettingsIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>{t("navigation.settings")}</ListItemText>
-        </MenuItem>
+          <Avatar className="w-9 h-9 rounded-md">
+            {user?.avatar && (
+              <AvatarImage src={user.avatar} alt={user?.name ?? ""} />
+            )}
+            <AvatarFallback>
+              {user?.name?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" id="menu-appbar">
+        <DropdownMenuItem asChild>
+          <Link to={`/user/me`} className="flex items-center gap-2">
+            <PersonIcon className="w-4 h-4" />
+            <span>{t("navigation.profile")}</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            to={`/user/me/setting/profile`}
+            className="flex items-center gap-2"
+          >
+            <SettingsIcon className="w-4 h-4" />
+            <span>{t("navigation.settings")}</span>
+          </Link>
+        </DropdownMenuItem>
         <MiscMenuItems />
-        <Divider />
-        <MenuItem onClick={handleLogout}>
-          <ListItemIcon>
-            <LogoutIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>{t("auth.logout")}</ListItemText>
-        </MenuItem>
-      </Menu>
-    </>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout}>
+          <LogoutIcon className="w-4 h-4" />
+          <span>{t("auth.logout")}</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

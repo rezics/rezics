@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import type { PublicUser } from "@rezics/contract";
 import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButtonFloatRight.tsx";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
@@ -65,14 +64,14 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
         {/* Right: text */}
         <div className="flex flex-col flex-1 min-w-0">
           {author.bio && (
-            <Typography className="text-sm leading-relaxed line-clamp-3 overflow-hidden">
+            <p className="text-sm leading-relaxed line-clamp-3 overflow-hidden">
               {author.bio}
-            </Typography>
+            </p>
           )}
           {author.description && (
-            <Typography className="text-sm leading-relaxed mt-2 line-clamp-4 overflow-hidden">
+            <p className="text-sm leading-relaxed mt-2 line-clamp-4 overflow-hidden">
               {author.description}
-            </Typography>
+            </p>
           )}
         </div>
       </div>
@@ -129,13 +128,13 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
 
               {/* Right text */}
               <div className="flex-1 !text-md">
-                <Typography className="">
+                <p>
                   {t("book.author_info.bio_label")}:{author.bio}
-                </Typography>
+                </p>
                 <br />
-                <Typography className="">
+                <p>
                   {t("book.author_info.description_label")}:{author.description}
-                </Typography>
+                </p>
               </div>
             </div>
           </div>

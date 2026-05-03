@@ -1,15 +1,13 @@
 import {
-  Box,
   Dialog,
   DialogContent,
+  DialogHeader,
   DialogTitle,
-  Divider,
-  IconButton,
-} from "@mui/material";
+  Separator,
+} from "@rezics/ui/shadcn";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import type React from "react";
 import FeedbackForm from "./FeedbackForm";
-import { X as CloseIcon } from "lucide-react";
 
 type FeedbackDialogProps = {
   open: boolean;
@@ -29,21 +27,18 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="sm" // roughly similar width control as Drawer
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
     >
-      <DialogTitle className="flex items-center justify-between">
-        提交反馈
-        <IconButton aria-label="close" onClick={onClose} size="small">
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <Box className="pt-2">
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>提交反馈</DialogTitle>
+        </DialogHeader>
+        <Separator />
+        <div className="pt-2">
           <FeedbackForm defaultValues={defaultValues} onSubmitted={onClose} />
-        </Box>
+        </div>
       </DialogContent>
     </Dialog>
   );

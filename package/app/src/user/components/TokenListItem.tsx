@@ -1,7 +1,7 @@
-import { Button, Chip, Typography } from "@mui/material";
 import type { ApiTokenDTO } from "@rezics/contract";
-import type { FC } from "react";
+import { Badge, Button } from "@rezics/ui/shadcn";
 import { Key as KeyIcon } from "lucide-react";
+import type { FC } from "react";
 
 interface TokenListItemProps {
   token: ApiTokenDTO;
@@ -34,35 +34,35 @@ export const TokenListItem: FC<TokenListItemProps> = ({
 
   return (
     <div className="flex items-start gap-3 py-3">
-      <KeyIcon color="action" className="mt-0.5" />
+      <KeyIcon className="mt-0.5 text-rezics-color-fg-muted" />
       <div className="flex-1 min-w-0">
-        <Typography variant="body2" className="font-medium">
-          {token.name}
-        </Typography>
+        <span className="text-sm font-medium">{token.name}</span>
         {scopeLabels.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
             {scopeLabels.map((scope) => (
-              <Chip key={scope} label={scope} size="small" variant="outlined" />
+              <Badge key={scope} variant="outline">
+                {scope}
+              </Badge>
             ))}
           </div>
         )}
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          className="mt-1 block"
-        >
+        <p className="mt-1 block text-xs text-rezics-color-fg-muted">
           Created {formatDate(token.createdAt)}
-          {token.expiresAt && ` \u00b7 Expires ${formatDate(token.expiresAt)}`}
+          {token.expiresAt && ` · Expires ${formatDate(token.expiresAt)}`}
           {token.lastUsedAt &&
-            ` \u00b7 Last used ${formatDate(token.lastUsedAt)}`}
+            ` · Last used ${formatDate(token.lastUsedAt)}`}
           {token.lastIP && ` from ${token.lastIP}`}
-        </Typography>
+        </p>
       </div>
       <div className="flex gap-1 shrink-0">
-        <Button size="small" onClick={() => onEdit(token)}>
+        <Button size="sm" variant="ghost" onClick={() => onEdit(token)}>
           Edit
         </Button>
-        <Button size="small" color="error" onClick={() => onRevoke(token.id)}>
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={() => onRevoke(token.id)}
+        >
           Revoke
         </Button>
       </div>

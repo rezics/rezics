@@ -1,5 +1,5 @@
-import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
+import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
@@ -10,14 +10,12 @@ import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
 const CommunitySidebar: React.FC = () => (
-  <Paper variant="outlined" sx={{ p: 2 }}>
-    <Typography variant="subtitle1" fontWeight={600} mb={1}>
-      Community
-    </Typography>
-    <Typography variant="body2" color="text.secondary">
+  <div className="bg-rezics-color-surface-elevated p-4 border border-rezics-color-border-whisper rounded-md">
+    <h3 className="text-base font-semibold mb-2">Community</h3>
+    <p className="text-sm text-rezics-color-text-secondary">
       Hot threads and active contributors will appear here.
-    </Typography>
-  </Paper>
+    </p>
+  </div>
 );
 
 /**
@@ -38,17 +36,17 @@ export const BookCommunityPage: React.FC = () => {
   if (!bookInfo) return null;
 
   return (
-    <Stack spacing={3}>
-      <Box className="lg:hidden">
+    <div className="flex flex-col gap-6">
+      <div className="lg:hidden">
         <CommunitySidebar />
-      </Box>
+      </div>
 
       <ReplyComposer mode="progressive" targetUnitId={bookId} />
 
-      <Divider />
+      <Separator />
 
       <PostListSection targetUnitId={bookId} />
-    </Stack>
+    </div>
   );
 };
 

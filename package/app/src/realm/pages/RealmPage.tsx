@@ -1,17 +1,19 @@
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import IconButton from "@mui/material/IconButton";
-import Stack from "@mui/material/Stack";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
-import Typography from "@mui/material/Typography";
 import { useServerPermission } from "@rezics/api/hooks";
 import {
   myRealmMembershipQuery,
   realmDetailQuery,
 } from "@rezics/api/realm/realm";
+import { Spinner } from "@rezics/ui";
+import {
+  Button,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { Settings } from "lucide-react";
 import { useState } from "react";
 import { PinnedFeedSection } from "@/pinboard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -20,7 +22,6 @@ import { RealmContentFeed } from "../components/RealmContentFeed";
 import { RealmMemberList } from "../components/RealmMemberList";
 import { RealmTagManager } from "../components/RealmTagManager";
 import { canManageRealm } from "../models/canManageRealm";
-import { SlidersHorizontal as TuneRoundedIcon } from "lucide-react";
 
 interface RealmPageProps {
   realmId: string;
@@ -39,17 +40,15 @@ export function RealmPage({ realmId }: RealmPageProps) {
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" py={6}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-12">
+        <Spinner />
+      </div>
     );
   }
 
   if (!realm) {
     return (
-      <Typography color="text.secondary" py={4}>
-        Realm not found
-      </Typography>
+      <p className="py-8 text-rezics-color-fg-muted">Realm not found</p>
     );
   }
 
@@ -58,64 +57,60 @@ export function RealmPage({ realmId }: RealmPageProps) {
   const description = translation?.description ?? "";
 
   return (
-    <Box maxWidth="lg" mx="auto" px={2} py={3}>
-      <Stack spacing={2} mb={3}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="h5" fontWeight={600}>
-              {title}
-            </Typography>
+    <div className="mx-auto w-full max-w-5xl px-4 py-6">
+      <div className="mb-6 flex flex-col gap-4">
+        <div className="flex flex-row items-center justify-between">
+          <div className="flex flex-row items-center gap-2">
+            <h1 className="text-2xl font-semibold">{title}</h1>
             {showManage && (
               <Link to="/realm/$realmId/manage" params={{ realmId }}>
-                <IconButton size="small">
-                  <TuneRoundedIcon fontSize="small" />
-                </IconButton>
+                <Button variant="ghost" size="icon" aria-label="Manage realm">
+                  <Settings className="h-4 w-4" />
+                </Button>
               </Link>
             )}
-          </Stack>
+          </div>
           <JoinButton realmId={realmId} />
-        </Stack>
+        </div>
         {description && (
-          <Typography variant="body1" color="text.secondary">
-            {description}
-          </Typography>
+          <p className="text-base text-rezics-color-fg-muted">{description}</p>
         )}
-        <Stack direction="row" spacing={2}>
-          <Typography variant="caption" color="text.secondary">
+        <div className="flex flex-row gap-4">
+          <span className="text-xs text-rezics-color-fg-muted">
             {realm.memberCount ?? 0} members
-          </Typography>
+          </span>
           {realm.isPublic && (
-            <Typography variant="caption" color="primary">
-              Public
-            </Typography>
+            <span className="text-xs text-rezics-color-primary">Public</span>
           )}
           {realm.isOfficial && (
-            <Typography variant="caption" color="secondary">
+            <span className="text-xs" style={{ color: "var(--rezics-color-secondary, var(--rezics-color-fg-muted))" }}>
               Official
-            </Typography>
+            </span>
           )}
-        </Stack>
-      </Stack>
+        </div>
+      </div>
 
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-        <Tab label="Feed" value="feed" />
-        <Tab label="Tags" value="tags" />
-        <Tab label="Members" value="members" />
+      <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mb-4">
+        <TabsList>
+          <TabsTrigger value="feed">Feed</TabsTrigger>
+          <TabsTrigger value="tags">Tags</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="feed">
+          <div className="flex flex-col gap-4">
+            <PinnedFeedSection realmUnitId={realmId} />
+            <RealmContentFeed realmId={realmId} />
+          </div>
+        </TabsContent>
+        <TabsContent value="tags">
+          <RealmTagManager realmId={realmId} />
+        </TabsContent>
+        <TabsContent value="members">
+          <RealmMemberList realmId={realmId} />
+        </TabsContent>
       </Tabs>
-
-      {tab === "feed" && (
-        <Stack spacing={2}>
-          <PinnedFeedSection realmUnitId={realmId} />
-          <RealmContentFeed realmId={realmId} />
-        </Stack>
-      )}
-      {tab === "tags" && <RealmTagManager realmId={realmId} />}
-      {tab === "members" && <RealmMemberList realmId={realmId} />}
-    </Box>
+    </div>
   );
 }
 

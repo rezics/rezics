@@ -1,6 +1,6 @@
-import { Button, Chip, Typography } from "@mui/material";
-import type { FC } from "react";
+import { Badge, Button } from "@rezics/ui/shadcn";
 import { Monitor as ComputerIcon } from "lucide-react";
+import type { FC } from "react";
 
 interface SessionListItemProps {
   session: {
@@ -47,32 +47,27 @@ export const SessionListItem: FC<SessionListItemProps> = ({
 
   return (
     <div className="flex items-center gap-3 py-3">
-      <ComputerIcon color="action" />
+      <ComputerIcon className="text-rezics-color-fg-muted" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <Typography variant="body2" className="font-medium truncate">
-            {userAgent}
-          </Typography>
+          <span className="text-sm font-medium truncate">{userAgent}</span>
           {isCurrent && (
-            <Chip
-              label="Current session"
-              size="small"
-              color="primary"
-              variant="outlined"
-            />
+            <Badge variant="outline" className="text-rezics-color-primary">
+              Current session
+            </Badge>
           )}
         </div>
-        <Typography variant="caption" color="text.secondary">
-          {[session.ipAddress, createdAt].filter(Boolean).join(" \u00b7 ")}
-        </Typography>
+        <p className="text-xs text-rezics-color-fg-muted">
+          {[session.ipAddress, createdAt].filter(Boolean).join(" · ")}
+        </p>
       </div>
       {!isCurrent && (
         <Button
-          size="small"
-          color="error"
-          variant="outlined"
+          size="sm"
+          variant="outline"
           onClick={() => onRevoke(session.token)}
           disabled={revoking}
+          className="text-rezics-color-danger"
         >
           Revoke
         </Button>

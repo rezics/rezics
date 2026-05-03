@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import { postQueries } from "@rezics/api/post/post";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -15,17 +14,17 @@ export const ContinueThreadPage: React.FC = () => {
   const { data: anchor } = useQuery(postQueries.detail(unitId));
 
   return (
-    <Box className="w-full max-w-3xl mx-auto mt-8 px-4">
-      <Box mb={2}>
+    <div className="w-full max-w-3xl mx-auto mt-8 px-4">
+      <div className="mb-4">
         <Link to="/post/$rootPostUnitId" params={{ rootPostUnitId }}>
-          <Typography variant="caption" color="primary">
+          <span className="text-xs text-rezics-color-primary">
             ← Back to original thread
-          </Typography>
+          </span>
         </Link>
-      </Box>
+      </div>
       {anchor && <PostCard post={anchor} />}
       <PostTreeSection rootPostUnitId={unitId} />
-    </Box>
+    </div>
   );
 };
 

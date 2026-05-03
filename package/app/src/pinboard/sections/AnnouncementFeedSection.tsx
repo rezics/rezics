@@ -1,4 +1,4 @@
-import { Skeleton } from "@mui/material";
+import { Skeleton } from "@rezics/ui/shadcn";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import type React from "react";
 import { usePinboardList } from "../hooks/usePinboard";
@@ -62,7 +62,13 @@ export const AnnouncementFeedSection: React.FC<AnnouncementFeedSectionProps> =
     if (!resolvedRealmUnitId) return null;
 
     if (isLoading) {
-      return <>{loadingFallback ?? <Skeleton variant="rectangular" height={40} />}</>;
+      return (
+        <>
+          {loadingFallback ?? (
+            <Skeleton className="w-full h-10 rounded-md" />
+          )}
+        </>
+      );
     }
 
     const items = entries.map((e) => toItem(e, linkFor));

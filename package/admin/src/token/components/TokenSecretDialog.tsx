@@ -1,16 +1,15 @@
 import {
   Alert,
-  Box,
+  AlertDescription,
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  IconButton,
-  Typography,
-} from "@mui/material";
-import type { FC } from "react";
+} from "@rezics/ui/shadcn";
 import { Copy as ContentCopyIcon } from "lucide-react";
+import type { FC } from "react";
 
 interface TokenSecretDialogProps {
   open: boolean;
@@ -36,32 +35,39 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Token Created — Copy & Store</DialogTitle>
-      <DialogContent>
-        <Box className="mt-2">
-          <Alert severity="warning">
-            This token value is only shown once. Be sure to copy and store it
-            securely.
+    <Dialog open={open} onOpenChange={(o) => (o ? null : onClose())}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Token Created — Copy & Store</DialogTitle>
+        </DialogHeader>
+        <div className="mt-2">
+          <Alert>
+            <AlertDescription className="text-rezics-color-warning">
+              This token value is only shown once. Be sure to copy and store it
+              securely.
+            </AlertDescription>
           </Alert>
 
-          <Box className="mt-4 flex items-center justify-between">
-            <Typography
-              variant="body1"
-              component="pre"
-              style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
-            >
+          <div className="mt-4 flex items-center justify-between gap-2">
+            <pre className="text-sm font-mono whitespace-pre-wrap break-all flex-1">
               {secret}
-            </Typography>
-            <IconButton onClick={copyToClipboard}>
-              <ContentCopyIcon />
-            </IconButton>
-          </Box>
-        </Box>
+            </pre>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={copyToClipboard}
+              aria-label="Copy"
+            >
+              <ContentCopyIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Close</Button>
-      </DialogActions>
     </Dialog>
   );
 };

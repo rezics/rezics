@@ -1,10 +1,11 @@
-import { Box, Card, CardContent, Typography, useTheme } from "@mui/material";
 import type { ShelfDTO } from "@rezics/contract";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
-import { shelfCardActions, shelfPolicy } from "@/shelf/models/shelfPolicy";
+import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { shelfCardActions, shelfPolicy } from "@/shelf/models/shelfPolicy";
 
 interface ShelfCardProps {
   shelf: ShelfDTO;
@@ -12,7 +13,6 @@ interface ShelfCardProps {
 }
 
 export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? "";
@@ -44,63 +44,57 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
 
   return (
     <Card
-      elevation={0}
-      className={className}
+      className={cn(
+        "border-0 shadow-none",
+        shelf.unitId && "cursor-pointer",
+        className,
+      )}
       onClick={handleOpenShelf}
-      sx={shelf.unitId ? { cursor: "pointer" } : undefined}
     >
-      <Box
-        className="w-full aspect-[16/9] overflow-hidden relative"
-        sx={{ borderBottom: `1px solid ${theme.palette.divider}` }}
-      >
+      <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-rezics-color-border">
         {shelf.coverUrl ? (
           <img
             src={shelf.coverUrl}
             alt={title || "Shelf cover"}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
           />
         ) : (
-          <Box
-            className="w-full h-full flex items-center justify-center"
-            sx={{
-              background: `linear-gradient(135deg, ${theme.palette.action.hover}, ${theme.palette.background.default})`,
+          <div
+            className="flex h-full w-full items-center justify-center"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--rezics-color-bg-muted, rgba(0,0,0,0.04)), var(--rezics-color-bg, transparent))",
             }}
           >
-            <Typography variant="caption" color="text.secondary">
+            <span className="text-xs text-rezics-color-fg-muted">
               {itemsCount} items
-            </Typography>
-          </Box>
+            </span>
+          </div>
         )}
-      </Box>
+      </div>
 
       <CardContent>
-        <Typography variant="h6" className="truncate">
+        <h3 className="truncate text-lg font-semibold">
           {title || "Untitled Shelf"}
-        </Typography>
+        </h3>
 
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="line-clamp-2 mt-1"
-        >
+        <p className="mt-1 line-clamp-2 text-sm text-rezics-color-fg-muted">
           {description || "No description"}
-        </Typography>
+        </p>
 
-        <Box className="flex items-center justify-between text-xs mt-3">
-          <Typography variant="caption" color="text.secondary">
+        <div className="mt-3 flex items-center justify-between text-xs">
+          <span className="text-xs text-rezics-color-fg-muted">
             {itemsCount} items
-          </Typography>
-          <Typography
-            variant="caption"
-            color="primary"
-            noWrap
-            sx={{ lineHeight: 1 }}
+          </span>
+          <span
+            className="whitespace-nowrap text-xs text-rezics-color-primary"
+            style={{ lineHeight: 1 }}
           >
             {shelf.user?.name || "Anonymous"}
-          </Typography>
-        </Box>
+          </span>
+        </div>
 
-        <Box className="mt-3">
+        <div className="mt-3">
           <ReactionBar
             size="md"
             post={reactionPost}
@@ -108,7 +102,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
             actions={shelfCardActions}
             onReplyInvoke={handleReplyInvoke}
           />
-        </Box>
+        </div>
       </CardContent>
     </Card>
   );

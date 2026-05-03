@@ -1,8 +1,14 @@
-import { Button, Tooltip } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { ChapterTreeItem } from "@rezics/contract";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import {
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React, {
   forwardRef,
@@ -54,9 +60,12 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   );
 
   return isTruncated ? (
-    <Tooltip title={name} placement="top" arrow>
-      {content}
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipContent side="top">{name}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   ) : (
     content
   );
@@ -126,8 +135,8 @@ const ChapterTreeItems = React.memo(function ChapterTreeItems({
 
               {renderGroupActions && (
                 <Button
-                  variant="text"
-                  size="small"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => onToggle(String(node.id))}
                 >
                   {isOpen ? "Collapse" : "Expand"}
@@ -338,14 +347,11 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
         <AccentBarWithText text={t("book.toc")} />
 
         <div className="flex justify-end gap-2">
-          <Button
-            variant="contained"
-            onClick={() => treeRef.current?.expandAll()}
-          >
+          <Button onClick={() => treeRef.current?.expandAll()}>
             {t("common.expand_all")}
           </Button>
           <Button
-            variant="outlined"
+            variant="outline"
             onClick={() => treeRef.current?.collapseAll()}
           >
             {t("common.collapse_all")}

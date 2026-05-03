@@ -1,5 +1,5 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { TextField } from "@mui/material";
+import { Input, Label } from "@rezics/ui/shadcn";
 import { useUpdateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
@@ -65,11 +65,10 @@ export function ExcerptEditPage({
 
   return (
     <div className="flex flex-col gap-4 mt-2">
-      <div className="flex flex-col gap-2">
-        <TextField
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="excerpt-title">{t("excerpt.form.title")}</Label>
+        <Input
           id="excerpt-title"
-          label={t("excerpt.form.title")}
-          variant="standard"
           value={translation?.title || ""}
           onChange={(e) =>
             setData({

@@ -1,29 +1,42 @@
 import {
-  Box,
   Button,
-  Chip,
   Dialog,
-  DialogActions,
   DialogContent,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  Paper,
-  Stack,
-  Switch,
-  TextField,
+  Input,
   Tooltip,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { extractColorFromImage, PRESET_COLORS } from "@rezics/ui";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
+import { Palette as PaletteIcon, RefreshCw as RefreshIcon, X as CloseIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useAppStore } from "@/app/states/appStore";
-import { X as CloseIcon, Palette as PaletteIcon, Image as PhotoIcon, RefreshCw as RefreshIcon } from "lucide-react";
 
 const BRAND_DEFAULT_COLOR = "#f4606c";
+
+// MOCK: local preset palette until token-driven theme picker arrives.
+// First entry is the rezics brand red.
+const PRESET_COLORS: string[] = [
+  "#f4606c",
+  "#3b82f6",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6",
+  "#ef4444",
+];
+
+function applyAccentColor(color: string) {
+  if (typeof document === "undefined") return;
+  document.documentElement.style.setProperty(
+    "--rezics-color-brand-fill",
+    color,
+  );
+  document.documentElement.style.setProperty("--rezics-color-primary", color);
+}
 
 interface ThemeCustomizerProps {
   open: boolean;
@@ -34,24 +47,18 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   open,
   onClose,
 }) => {
-  const theme = useTheme();
   const customColor = useAppStore((state: any) => state.customColor);
-  const useDynamicTheme = useAppStore((state: any) => state.useDynamicTheme);
   const setCustomColor = useAppStore((state: any) => state.setCustomColor);
-  const setUseDynamicTheme = useAppStore(
-    (state: any) => state.setUseDynamicTheme,
-  );
 
   const [selectedColor, setSelectedColor] = useState(
     customColor || BRAND_DEFAULT_COLOR,
   );
   const [customHex, setCustomHex] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isExtracting, setIsExtracting] = useState(false);
 
   const handleColorSelect = (color: string) => {
     setSelectedColor(color);
     setCustomColor(color);
+    applyAccentColor(color);
   };
 
   const handleCustomHexChange = (
@@ -64,34 +71,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
     if (/^#[0-9A-F]{6}$/i.test(value)) {
       setSelectedColor(value);
       setCustomColor(value);
-    }
-  };
-
-  const handleDynamicThemeToggle = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setUseDynamicTheme(event.target.checked);
-  };
-
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setImageFile(file);
-    setIsExtracting(true);
-
-    try {
-      const imageUrl = URL.createObjectURL(file);
-      const extractedColor = await extractColorFromImage(imageUrl);
-      setSelectedColor(extractedColor);
-      setCustomColor(extractedColor);
-      URL.revokeObjectURL(imageUrl);
-    } catch (error) {
-      console.error("颜色提取失败:", error);
-    } finally {
-      setIsExtracting(false);
+      applyAccentColor(value);
     }
   };
 
@@ -99,8 +79,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
     setSelectedColor(BRAND_DEFAULT_COLOR);
     setCustomColor(BRAND_DEFAULT_COLOR);
     setCustomHex("");
-    setUseDynamicTheme(false);
-    setImageFile(null);
+    applyAccentColor(BRAND_DEFAULT_COLOR);
   };
 
   const handleApply = () => {
@@ -108,179 +87,104 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box display="flex" alignItems="center" gap={1}>
-            <PaletteIcon />
-            <Typography variant="h6">主题自定义</Typography>
-          </Box>
-          <IconButton onClick={onClose} size="small">
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <PaletteIcon className="h-5 w-5" />
+              <DialogTitle>主题自定义</DialogTitle>
+            </div>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              <CloseIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogHeader>
 
-      <DialogContent>
-        <Stack spacing={3}>
-          {/* 动态主题开关 */}
-          <Box>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={useDynamicTheme}
-                  onChange={handleDynamicThemeToggle}
-                  color="primary"
-                />
-              }
-              label={
-                <Box>
-                  <Typography variant="body1">启用动态主题</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    基于选择的颜色自动生成协调的配色方案
-                  </Typography>
-                </Box>
-              }
-            />
-          </Box>
-
+        <div className="flex flex-col gap-6">
           {/* 当前颜色预览 */}
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>
-              当前主色调
-            </Typography>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  backgroundColor: selectedColor,
-                  border: `2px solid ${theme.palette.divider}`,
-                }}
+          <div>
+            <p className="text-sm font-medium mb-2">当前主色调</p>
+            <div className="flex items-center gap-4">
+              <div
+                className="h-12 w-12 rounded-md border-2 border-rezics-color-border"
+                style={{ backgroundColor: selectedColor }}
               />
-              <Box>
-                <Typography variant="body1" fontWeight="medium">
+              <div>
+                <p className="text-base font-medium">
                   {selectedColor.toUpperCase()}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {useDynamicTheme ? "动态主题已启用" : "静态主题"}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
+                </p>
+                <p className="text-sm text-rezics-color-fg-muted">静态主题</p>
+              </div>
+            </div>
+          </div>
 
           {/* 预设颜色 */}
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>
-              预设颜色
-            </Typography>
-            <Grid container spacing={1}>
-              {Object.entries(PRESET_COLORS).map(([name, color]) => (
-                // <Grid item key={name}>
-                <Grid key={name}>
-                  <Tooltip title={`${name}: ${color}`}>
-                    <Paper
-                      elevation={selectedColor === color ? 4 : 1}
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        backgroundColor: color,
-                        cursor: "pointer",
-                        border:
+          <div>
+            <p className="text-sm font-medium mb-2">预设颜色</p>
+            <div className="grid grid-cols-6 gap-2">
+              {PRESET_COLORS.map((color) => (
+                <TooltipProvider key={color}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => handleColorSelect(color)}
+                        className={
                           selectedColor === color
-                            ? `3px solid ${theme.palette.primary.main}`
-                            : `1px solid ${theme.palette.divider}`,
-                        borderRadius: 1,
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          transform: "scale(1.1)",
-                          elevation: 3,
-                        },
-                      }}
-                      onClick={() => handleColorSelect(color)}
-                    />
+                            ? "h-10 w-10 rounded-md border-[3px] border-rezics-color-brand-fill cursor-pointer transition-transform hover:scale-110"
+                            : "h-10 w-10 rounded-md border border-rezics-color-border cursor-pointer transition-transform hover:scale-110"
+                        }
+                        style={{ backgroundColor: color }}
+                        aria-label={color}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>{color}</TooltipContent>
                   </Tooltip>
-                </Grid>
+                </TooltipProvider>
               ))}
-            </Grid>
-          </Box>
+            </div>
+          </div>
 
           {/* 自定义十六进制颜色 */}
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>
-              自定义颜色
-            </Typography>
-            <TextField
-              fullWidth
-              size="small"
-              label="十六进制颜色代码"
-              placeholder="#FF5722"
-              value={customHex}
-              onChange={handleCustomHexChange}
-              helperText="输入格式: #RRGGBB"
-              InputProps={{
-                startAdornment:
-                  customHex && /^#[0-9A-F]{6}$/i.test(customHex) ? (
-                    <Box
-                      sx={{
-                        width: 20,
-                        height: 20,
-                        borderRadius: "50%",
-                        backgroundColor: customHex,
-                        border: `1px solid ${theme.palette.divider}`,
-                        mr: 1,
-                      }}
-                    />
-                  ) : null,
-              }}
-            />
-          </Box>
-
-          {/* 从图片提取颜色 */}
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>
-              从图片提取颜色
-            </Typography>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={<PhotoIcon />}
-                disabled={isExtracting}
-              >
-                {isExtracting ? "提取中..." : "选择图片"}
-                <input
-                  type="file"
-                  hidden
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
-              </Button>
-              {imageFile && (
-                <Chip
-                  label={imageFile.name}
-                  onDelete={() => setImageFile(null)}
-                  size="small"
+          <div>
+            <p className="text-sm font-medium mb-2">自定义颜色</p>
+            <div className="flex items-center gap-2">
+              {customHex && /^#[0-9A-F]{6}$/i.test(customHex) && (
+                <div
+                  className="h-5 w-5 rounded-full border border-rezics-color-border"
+                  style={{ backgroundColor: customHex }}
                 />
               )}
-            </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              上传图片自动提取主色调作为主题颜色
-            </Typography>
-          </Box>
-        </Stack>
-      </DialogContent>
+              <Input
+                placeholder="#FF5722"
+                value={customHex}
+                onChange={handleCustomHexChange}
+                className="flex-1"
+              />
+            </div>
+            <p className="text-sm text-rezics-color-fg-muted mt-1">
+              输入格式: #RRGGBB
+            </p>
+          </div>
+        </div>
 
-      <DialogActions>
-        <Button onClick={handleReset} startIcon={<RefreshIcon />}>
-          重置
-        </Button>
-        <Button onClick={onClose}>取消</Button>
-        <Button onClick={handleApply} variant="contained">
-          应用
-        </Button>
-      </DialogActions>
+        <DialogFooter>
+          <Button variant="ghost" onClick={handleReset} className="gap-1">
+            <RefreshIcon className="h-4 w-4" />
+            重置
+          </Button>
+          <Button variant="ghost" onClick={onClose}>
+            取消
+          </Button>
+          <Button onClick={handleApply}>应用</Button>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 };
@@ -288,15 +192,25 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 // 快速主题切换按钮组件
 export const ThemeQuickToggle: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const _useDynamicTheme = useAppStore((state) => state.useDynamicTheme);
 
   return (
     <>
-      <Tooltip title="主题自定义">
-        <IconButton onClick={() => setOpen(true)} className="!text-white">
-          <PaletteIcon />
-        </IconButton>
-      </Tooltip>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setOpen(true)}
+              className="!text-white"
+              aria-label="主题自定义"
+            >
+              <PaletteIcon className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>主题自定义</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <ThemeCustomizer open={open} onClose={() => setOpen(false)} />
     </>
   );

@@ -1,5 +1,6 @@
-import { IconButton } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
 import type { SearchQuery } from "@rezics/contract";
+import { X as CloseIcon } from "lucide-react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
@@ -14,7 +15,6 @@ import {
   TagPicker,
   WordCountRangeInput,
 } from "./primitive";
-import { X as CloseIcon } from "lucide-react";
 
 export type AdvancedSearchProps = {
   query: UseSearchQueryReturn["query"];
@@ -60,9 +60,14 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
           />
         </div>
         {onToggleBasic && (
-          <IconButton onClick={onToggleBasic} aria-label="close advanced">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onToggleBasic}
+            aria-label="close advanced"
+          >
             <CloseIcon />
-          </IconButton>
+          </Button>
         )}
       </div>
 

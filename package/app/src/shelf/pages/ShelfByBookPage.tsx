@@ -1,7 +1,5 @@
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
 import { shelfListQuery } from "@rezics/api/shelf";
+import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { ShelfCard } from "../components/ShelfCard";
 
@@ -17,19 +15,19 @@ export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
   const shelves = data?.shelves ?? [];
 
   return (
-    <Box maxWidth="lg" mx="auto" px={2} py={3}>
-      <Typography variant="h5" fontWeight={600} mb={3}>
+    <div className="mx-auto w-full max-w-5xl px-4 py-6">
+      <h1 className="mb-6 text-2xl font-semibold">
         Shelves containing this book
-      </Typography>
+      </h1>
 
       {isLoading ? (
-        <Box display="flex" justifyContent="center" py={6}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-12">
+          <Spinner />
+        </div>
       ) : shelves.length === 0 ? (
-        <Typography color="text.secondary" textAlign="center" py={4}>
+        <p className="py-8 text-center text-rezics-color-fg-muted">
           No shelves found for this book
-        </Typography>
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {shelves.map((shelf) => (
@@ -37,7 +35,7 @@ export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
           ))}
         </div>
       )}
-    </Box>
+    </div>
   );
 }
 

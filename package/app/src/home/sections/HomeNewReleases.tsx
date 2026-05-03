@@ -1,4 +1,5 @@
-import { Card, CardContent, CircularProgress, Typography } from "@mui/material";
+import { Card, CardContent } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
@@ -20,11 +21,6 @@ export type HomeNewReleasesProps = {
   limit?: number;
 };
 
-/**
- * HomeNewReleases
- * - Fetches latest books (createdAt desc) using the standard list query with q left empty
- * - Displays a responsive grid of book cards
- */
 export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
   title,
   limit = 12,
@@ -47,7 +43,7 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
     return (
       <div className="w-full">
         <div className="flex items-center justify-between mb-3">
-          <Typography variant="h6">{resolvedTitle}</Typography>
+          <h6 className="text-base font-semibold m-0">{resolvedTitle}</h6>
         </div>
         <QueryErrorDisplay error={error} />
       </div>
@@ -57,8 +53,8 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{resolvedTitle}</Typography>
-        {isLoading && <CircularProgress size={20} />}
+        <h6 className="text-base font-semibold m-0">{resolvedTitle}</h6>
+        {isLoading && <Spinner size="sm" />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {books.map((book) => {
@@ -75,20 +71,12 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
                 />
               )}
               <CardContent className="!pt-3">
-                <Typography
-                  variant="subtitle2"
-                  className="truncate"
-                  title={title}
-                >
+                <p className="text-sm font-medium truncate m-0" title={title}>
                   {title}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  className="truncate"
-                >
+                </p>
+                <p className="text-xs text-rezics-color-fg-muted truncate m-0">
                   {authorName}
-                </Typography>
+                </p>
               </CardContent>
             </Card>
           );

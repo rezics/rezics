@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import type React from "react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
@@ -34,13 +33,9 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
         }}
       >
         <div className="relative z-10">
-          <Typography variant="h4" className="font-bold text-white mb-2">
-            {zone.name}
-          </Typography>
+          <h1 className="text-3xl font-bold text-white mb-2">{zone.name}</h1>
           {zone.description && (
-            <Typography variant="body1" className="text-white/80">
-              {zone.description}
-            </Typography>
+            <p className="text-base text-white/80">{zone.description}</p>
           )}
         </div>
       </div>
@@ -57,13 +52,11 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
 
       {/* Book sections */}
       <div>
-        <Typography variant="h6" className="mb-4">
-          Books
-        </Typography>
+        <h2 className="text-lg font-semibold mb-4">Books</h2>
         {/* MOCK: book listing sections with zone.filters pre-applied will be wired here */}
-        <Typography color="text.secondary">
+        <p className="text-rezics-color-fg-muted">
           Book content for this zone will appear here.
-        </Typography>
+        </p>
       </div>
     </div>
   );

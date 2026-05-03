@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
@@ -33,13 +32,13 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   };
 
   return (
-    <Box className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8">
       {canEdit && (
-        <Box alignSelf="flex-end">
+        <div className="self-end">
           <MUILink to="/remark/$reviewId/edit" params={{ reviewId: remarkId }}>
             {t("common.edit")}
           </MUILink>
-        </Box>
+        </div>
       )}
       <RemarkDetail remark={remark} onReplyInvoke={handleReplyInvoke} />
       <ReplyComposer
@@ -48,6 +47,6 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
         targetUnitId={remark.unitId}
       />
       <PostTreeSection rootPostUnitId={remark.unitId} />
-    </Box>
+    </div>
   );
 };

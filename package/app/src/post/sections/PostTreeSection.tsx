@@ -1,8 +1,6 @@
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
 import { postThreadQuery } from "@rezics/api/post/post";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useState } from "react";
@@ -68,14 +66,14 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" py={3}>
-        <CircularProgress size={20} />
-      </Box>
+      <div className="flex justify-center py-6">
+        <Spinner size="sm" />
+      </div>
     );
   }
 
   return (
-    <Box>
+    <div>
       {visiblePosts.map((post) => {
         const depth = post.depth ?? 0;
         const indentLevel = Math.min(depth, visualMaxDepth);
@@ -84,7 +82,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
         const composerOpen = openComposers.has(post.unitId);
 
         return (
-          <Box key={post.unitId}>
+          <div key={post.unitId}>
             <PostReply
               post={post}
               indentLevel={indentLevel}
@@ -105,7 +103,10 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
               }
             />
             {atMaxDepth && (
-              <Box sx={{ pl: `${(indentLevel + 1) * 20}px`, py: 0.5 }}>
+              <div
+                className="py-1"
+                style={{ paddingLeft: `${(indentLevel + 1) * 20}px` }}
+              >
                 <MUILink
                   to="/post/$rootPostUnitId/continue/$unitId"
                   params={{
@@ -113,15 +114,15 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
                     unitId: post.unitId,
                   }}
                 >
-                  <Typography variant="caption" color="primary">
+                  <span className="text-xs text-rezics-color-primary">
                     Continue thread →
-                  </Typography>
+                  </span>
                 </MUILink>
-              </Box>
+              </div>
             )}
-          </Box>
+          </div>
         );
       })}
-    </Box>
+    </div>
   );
 };

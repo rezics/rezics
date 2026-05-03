@@ -1,9 +1,16 @@
-import { Stack } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { RemarkCard } from "../item/RemarkCard";
+
+const SPACING_CLASS_BY_NUMBER: Record<number, string> = {
+  0: "gap-0",
+  1: "gap-2",
+  2: "gap-4",
+  3: "gap-6",
+  4: "gap-8",
+};
 
 interface RemarkListProps {
   posts: PostDTO[];
@@ -20,11 +27,16 @@ export const RemarkList: React.FC<RemarkListProps> = ({
     return <EmptyState title={t("remark.list.empty.title")} />;
   }
 
+  const gapClass =
+    typeof spacing === "number"
+      ? SPACING_CLASS_BY_NUMBER[spacing] ?? "gap-4"
+      : "gap-4";
+
   return (
-    <Stack spacing={spacing}>
+    <div className={`flex flex-col ${gapClass}`}>
       {posts.map((post) => (
         <RemarkCard key={post.unitId} remark={post} />
       ))}
-    </Stack>
+    </div>
   );
 };

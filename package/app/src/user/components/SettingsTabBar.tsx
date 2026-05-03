@@ -1,4 +1,4 @@
-import { Tab, Tabs } from "@mui/material";
+import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";
 import { SETTINGS_NAV } from "./SettingsSidebar";
@@ -8,25 +8,27 @@ export const SettingsTabBar: FC = () => {
   const { location } = useRouterState();
   const pathname = location.pathname;
 
-  const activeIdx = SETTINGS_NAV.findIndex((nav) =>
-    pathname.startsWith(`/user/me/setting/${nav.path}`),
-  );
+  const activeNav =
+    SETTINGS_NAV.find((nav) =>
+      pathname.startsWith(`/user/me/setting/${nav.path}`),
+    ) ?? SETTINGS_NAV[0];
 
   return (
-    <Tabs
-      value={activeIdx === -1 ? 0 : activeIdx}
-      variant="scrollable"
-      scrollButtons="auto"
-      allowScrollButtonsMobile
-      sx={{ borderBottom: 1, borderColor: "divider" }}
-      onChange={(_e, idx) => {
-        const nav = SETTINGS_NAV[idx];
-        void navigate({ to: `/user/me/setting/${nav.path}` });
-      }}
-    >
-      {SETTINGS_NAV.map((nav) => (
-        <Tab key={nav.path} label={nav.label} />
-      ))}
-    </Tabs>
+    <div className="border-b border-rezics-color-border overflow-x-auto">
+      <Tabs
+        value={activeNav.path}
+        onValueChange={(value) => {
+          void navigate({ to: `/user/me/setting/${value}` });
+        }}
+      >
+        <TabsList className="bg-transparent">
+          {SETTINGS_NAV.map((nav) => (
+            <TabsTrigger key={nav.path} value={nav.path}>
+              {nav.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+    </div>
   );
 };

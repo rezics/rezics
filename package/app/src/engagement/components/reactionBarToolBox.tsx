@@ -1,8 +1,13 @@
-import { Button, Dialog, DialogActions, DialogContent } from "@mui/material";
-import { useNavigate } from "@tanstack/react-router";
-import type React from "react";
-import { Facebook, Instagram } from "lucide-react";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+} from "@rezics/ui/shadcn";
 import { IconBrandTelegram as Telegram, IconBrandTwitter as Twitter } from "@tabler/icons-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Facebook, Instagram } from "lucide-react";
+import type React from "react";
 
 export type ReactionBarToolBoxProps = {
   open: boolean;
@@ -29,21 +34,12 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
   }
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      slotProps={{
-        paper: {
-          className: "min-w-[20rem]",
-        },
-      }}
-    >
-      {/* <DialogTitle>ReactionBarToolBox</DialogTitle> */}
-      <DialogContent>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="min-w-[20rem]">
         <div>
           <Button
             onClick={handleLinkClick}
-            variant="outlined"
+            variant="outline"
             className="w-full"
           >
             打开独立页面
@@ -83,11 +79,11 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
             </a>
           </div>
         </div>
-        <DialogActions>
-          <Button onClick={onClose} variant="text">
+        <DialogFooter>
+          <Button onClick={onClose} variant="ghost">
             Close
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

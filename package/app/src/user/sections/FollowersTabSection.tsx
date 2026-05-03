@@ -1,6 +1,6 @@
-import { Avatar, Box, Typography } from "@mui/material";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
@@ -61,23 +61,15 @@ export const FollowersTabSection: FC = () => {
       />
 
       {isLoading ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="py-12 text-center"
-        >
+        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
           Loading...
-        </Typography>
+        </p>
       ) : users.length === 0 ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="py-12 text-center"
-        >
+        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
           {filter === "followers"
             ? "No followers yet"
             : "Not following anyone yet"}
-        </Typography>
+        </p>
       ) : (
         <>
           <div className="flex flex-col gap-2">
@@ -100,9 +92,9 @@ export const FollowersTabSection: FC = () => {
               >
                 Previous
               </button>
-              <Typography variant="body2" color="text.secondary">
+              <span className="text-sm text-rezics-color-fg-muted">
                 Page {page} of {totalPages}
-              </Typography>
+              </span>
               <button
                 type="button"
                 onClick={() => setPage((p) => p + 1)}
@@ -123,14 +115,15 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
   user,
   showFollowButton,
 }) => (
-  <Box className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+  <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
     <Link
       to="/user/$unitId"
       params={{ unitId: user.unitId }}
       className="no-underline"
     >
-      <Avatar src={user.avatar ?? undefined} sx={{ width: 40, height: 40 }}>
-        {user.name?.charAt(0).toUpperCase()}
+      <Avatar className="w-10 h-10">
+        <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
+        <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
       </Avatar>
     </Link>
     <div className="flex-1 min-w-0">
@@ -139,29 +132,21 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
         params={{ unitId: user.unitId }}
         className="no-underline"
       >
-        <Typography
-          variant="body2"
-          className="font-medium"
-          color="text.primary"
-        >
+        <span className="block text-sm font-medium text-rezics-color-fg">
           {user.name}
-        </Typography>
+        </span>
         {user.slug && (
-          <Typography variant="caption" color="text.secondary">
+          <span className="block text-xs text-rezics-color-fg-muted">
             @{user.slug}
-          </Typography>
+          </span>
         )}
       </Link>
       {user.bio && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          className="block truncate mt-0.5"
-        >
+        <span className="block text-xs text-rezics-color-fg-muted truncate mt-0.5">
           {user.bio}
-        </Typography>
+        </span>
       )}
     </div>
     {showFollowButton && <FollowButton userId={user.unitId} size="small" />}
-  </Box>
+  </div>
 );

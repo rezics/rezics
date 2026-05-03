@@ -1,16 +1,14 @@
 import {
+  Badge,
   Button,
-  Chip,
-  Stack,
+  Input,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
+  TableHeader,
   TableRow,
-  TextField,
-  Typography,
-} from "@mui/material";
+} from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta = {
@@ -19,7 +17,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Admin density baseline — outlined inputs, dense tables, terse copy. Mirrors the admin app's MUI vocabulary on top of the rezics token palette.",
+          "Admin density baseline — outlined inputs, dense tables, terse copy. Mirrors the admin app's vocabulary on top of the rezics token palette.",
       },
     },
   },
@@ -37,56 +35,50 @@ const rows = [
   { id: 4, email: "dora@rezics.local", role: "reader", status: "suspended" },
 ];
 
+function statusVariant(status: string) {
+  switch (status) {
+    case "active":
+      return "bg-rezics-color-success text-white";
+    case "suspended":
+      return "bg-rezics-color-danger text-white";
+    default:
+      return "";
+  }
+}
+
 export const UsersTable: Story = {
   render: () => (
-    <Stack spacing={3} sx={{ maxWidth: 720 }}>
-      <Stack direction="row" spacing={2} alignItems="center">
-        <Typography variant="h2" sx={{ flex: 1 }}>
-          Users
-        </Typography>
-        <TextField
-          variant="outlined"
-          size="small"
-          placeholder="Search email"
-          sx={{ minWidth: 220 }}
-        />
-        <Button variant="contained" size="small">
-          Invite
-        </Button>
-      </Stack>
-      <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Email</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell>Status</TableCell>
+    <div className="flex flex-col gap-6 max-w-[720px]">
+      <div className="flex flex-row gap-4 items-center">
+        <h2 className="flex-1 text-2xl font-bold">Users</h2>
+        <Input placeholder="Search email" className="min-w-[220px] h-8" />
+        <Button size="sm">Invite</Button>
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((r) => (
+            <TableRow key={r.id} className="h-10">
+              <TableCell>{r.email}</TableCell>
+              <TableCell>{r.role}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={r.status === "invited" ? "outline" : "default"}
+                  className={statusVariant(r.status)}
+                >
+                  {r.status}
+                </Badge>
+              </TableCell>
             </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((r) => (
-              <TableRow key={r.id} sx={{ height: 40 }}>
-                <TableCell>{r.email}</TableCell>
-                <TableCell>{r.role}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={r.status}
-                    size="small"
-                    color={
-                      r.status === "active"
-                        ? "success"
-                        : r.status === "suspended"
-                          ? "error"
-                          : "default"
-                    }
-                    variant="outlined"
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Stack>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   ),
 };

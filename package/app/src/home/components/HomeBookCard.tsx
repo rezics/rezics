@@ -1,10 +1,4 @@
-import {
-  Box,
-  Card,
-  CardActionArea,
-  CardContent,
-  Typography,
-} from "@mui/material";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 import type { BookDTO } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -30,26 +24,24 @@ const BookCard = ({
   return (
     <Card
       key={book.unitId}
-      className={`flex flex-col rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300 group ${className}`}
-      elevation={1}
+      className={`flex flex-col rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300 group shadow-sm ${className}`}
     >
-      <CardActionArea
-        component={Link}
-        to={`/book/${book.unitId}`}
+      <Link
+        to={`/book/${book.unitId}` as any}
         className="flex flex-col items-stretch justify-start"
       >
         {coverUrl ? (
-          <Box className="relative w-full h-42 aspect-[3/4] overflow-hidden bg-gray-100">
+          <div className="relative w-full h-42 aspect-[3/4] overflow-hidden bg-gray-100">
             <LazyLoadImage
               src={coverUrl}
               alt={title}
               className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
             />
-          </Box>
+          </div>
         ) : (
-          <Box className="w-full aspect-[3/4] h-42 bg-gray-200 flex items-center justify-center text-gray-400">
+          <div className="w-full aspect-[3/4] h-42 bg-gray-200 flex items-center justify-center text-gray-400">
             {t("book.no_cover")}
-          </Box>
+          </div>
         )}
 
         <CardContent className="flex flex-col flex-1 w-full gap-1 p-1">
@@ -60,15 +52,11 @@ const BookCard = ({
             {title}
           </div>
 
-          <Typography
-            variant="caption"
-            component="p"
-            className="text-gray-500 truncate mt-auto pt-1"
-          >
+          <p className="text-xs text-gray-500 truncate mt-auto pt-1 m-0">
             {authorName || t("book.unknown_author")}
-          </Typography>
+          </p>
         </CardContent>
-      </CardActionArea>
+      </Link>
     </Card>
   );
 };

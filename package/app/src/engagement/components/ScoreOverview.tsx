@@ -1,7 +1,3 @@
-import Box from "@mui/material/Box";
-import LinearProgress from "@mui/material/LinearProgress";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { scoreQueries } from "@rezics/api/score/score";
 import { useQuery } from "@tanstack/react-query";
@@ -23,9 +19,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
 
   if (!aggregate) {
     return (
-      <Typography variant="body2" color="text.secondary">
-        No ratings yet
-      </Typography>
+      <p className="text-sm text-rezics-color-fg-muted">No ratings yet</p>
     );
   }
 
@@ -39,22 +33,20 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
       : "var(--rezics-color-sentiment-negative-text)";
 
   return (
-    <Stack direction="row" spacing={3} alignItems="center">
-      <Box textAlign="center" minWidth={80}>
-        <Typography
-          variant="h3"
-          fontWeight={700}
-          lineHeight={1}
-          sx={{ color: averageVar }}
+    <div className="flex flex-row items-center gap-6">
+      <div className="text-center min-w-[80px]">
+        <div
+          className="text-4xl font-bold leading-none"
+          style={{ color: averageVar }}
         >
           {average.toFixed(1)}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
+        </div>
+        <div className="text-xs text-rezics-color-fg-muted">
           {aggregate.totalCount} ratings
-        </Typography>
-      </Box>
+        </div>
+      </div>
 
-      <Stack spacing={0.25} flex={1}>
+      <div className="flex flex-1 flex-col gap-0.5">
         {Array.from({ length: 10 }, (_, i) => 10 - i).map((score) => {
           const count = Number(distribution[String(score)] ?? 0);
           const percent = (count / maxCount) * 100;
@@ -63,31 +55,28 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
               ? "var(--rezics-color-sentiment-positive-fill)"
               : "var(--rezics-color-sentiment-negative-fill)";
           return (
-            <Stack key={score} direction="row" spacing={1} alignItems="center">
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ width: 16, textAlign: "right" }}
-              >
+            <div key={score} className="flex flex-row items-center gap-2">
+              <span className="w-4 text-right text-xs text-rezics-color-fg-muted">
                 {score}
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={percent}
-                sx={{
-                  flex: 1,
-                  height: 6,
-                  borderRadius: 3,
-                  bgcolor: "action.hover",
-                  "& .MuiLinearProgress-bar": {
-                    bgcolor: barVar,
-                  },
+              </span>
+              <div
+                className="h-1.5 flex-1 overflow-hidden rounded-full"
+                style={{
+                  backgroundColor: "var(--rezics-color-bg-muted, rgba(0,0,0,0.06))",
                 }}
-              />
-            </Stack>
+              >
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${percent}%`,
+                    backgroundColor: barVar,
+                  }}
+                />
+              </div>
+            </div>
           );
         })}
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 };

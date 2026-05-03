@@ -1,13 +1,11 @@
 import {
-  Box,
-  Chip,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
+  Badge,
+  Label,
   Tooltip,
-} from "@mui/material";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import type { ContentRating } from "@rezics/contract";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -28,69 +26,75 @@ export const RatingMultiSelect: React.FC<RatingMultiSelectProps> = ({
   onChange,
   allowed,
   isAuthenticated = true,
-  size = "small",
   minWidth = 160,
 }) => {
   const { t } = useTranslation();
-  const selected = value ?? [];
+  const selected = new Set(value ?? []);
   const allowSet = allowed ? new Set(allowed) : null;
   const labelText = t("search.filters.rating", "Rating");
 
-  const handleChange = (event: SelectChangeEvent<ContentRating[]>) => {
-    const next = event.target.value;
-    const arr = (typeof next === "string" ? next.split(",") : next).filter(
-      (r): r is ContentRating => RATINGS.includes(r as ContentRating),
-    );
+  const toggle = (rating: ContentRating, disabled: boolean) => {
+    if (disabled) return;
+    const next = new Set(selected);
+    if (next.has(rating)) next.delete(rating);
+    else next.add(rating);
+    const arr = [...next];
     onChange(arr.length > 0 ? arr : undefined);
   };
 
   return (
-    <FormControl size={size} sx={{ minWidth }}>
-      <InputLabel>{labelText}</InputLabel>
-      <Select<ContentRating[]>
-        multiple
-        value={selected}
-        onChange={handleChange}
-        label={labelText}
-        renderValue={(selectedValues) => (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            {selectedValues.map((rating) => (
-              <Chip
-                key={rating}
-                size="small"
-                label={t(`rating.tier.${rating}`, rating)}
-              />
-            ))}
-          </Box>
-        )}
-      >
-        {RATINGS.map((rating) => {
-          const disabled = allowSet !== null && !allowSet.has(rating);
-          const hint = disabled
-            ? !isAuthenticated
-              ? t(
-                  "search.tooltips.ratingSignIn",
-                  "Sign in and opt in to enable this rating",
-                )
-              : t(
-                  "search.tooltips.ratingOptIn",
-                  "Enable this rating in settings",
-                )
-            : "";
-          const item = (
-            <MenuItem key={rating} value={rating} disabled={disabled}>
+    <div className="flex flex-col gap-1" style={{ minWidth }}>
+      <Label>{labelText}</Label>
+      <div className="flex flex-wrap gap-1">
+        {selected.size > 0 &&
+          [...selected].map((rating) => (
+            <Badge key={`sel-${rating}`} variant="secondary">
               {t(`rating.tier.${rating}`, rating)}
-            </MenuItem>
-          );
-          return hint ? (
-            <Tooltip key={rating} title={hint} placement="right">
-              <span>{item}</span>
-            </Tooltip>
-          ) : (
-            item
-          );
-        })}
-      </Select>
-    </FormControl>
+            </Badge>
+          ))}
+      </div>
+      <TooltipProvider>
+        <div className="flex flex-wrap gap-1">
+          {RATINGS.map((rating) => {
+            const disabled = allowSet !== null && !allowSet.has(rating);
+            const hint = disabled
+              ? !isAuthenticated
+                ? t(
+                    "search.tooltips.ratingSignIn",
+                    "Sign in and opt in to enable this rating",
+                  )
+                : t(
+                    "search.tooltips.ratingOptIn",
+                    "Enable this rating in settings",
+                  )
+              : "";
+            const chip = (
+              <Badge
+                key={rating}
+                variant={selected.has(rating) ? "default" : "outline"}
+                className={
+                  disabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                }
+                onClick={() => toggle(rating, disabled)}
+              >
+                {t(`rating.tier.${rating}`, rating)}
+              </Badge>
+            );
+            return hint ? (
+              <Tooltip key={rating}>
+                <TooltipTrigger asChild>
+                  <span>{chip}</span>
+                </TooltipTrigger>
+                <TooltipContent side="right">{hint}</TooltipContent>
+              </Tooltip>
+            ) : (
+              chip
+            );
+          })}
+        </div>
+      </TooltipProvider>
+    </div>
   );
 };

@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel } from "@mui/material";
+import { Checkbox } from "@rezics/ui/shadcn";
 import { PostKind } from "@rezics/contract";
 import type React from "react";
 
@@ -31,18 +31,16 @@ export const PostKindCheckboxes: React.FC<PostKindCheckboxesProps> = ({
       )}
       <div className="flex flex-wrap gap-1">
         {POST_KIND_OPTIONS.map((kind) => (
-          <FormControlLabel
+          <label
             key={kind}
-            control={
-              <Checkbox
-                size="small"
-                checked={value.includes(kind)}
-                onChange={(e) => toggle(kind, e.target.checked)}
-              />
-            }
-            label={kind}
-            className="m-0"
-          />
+            className="m-0 inline-flex items-center gap-2 cursor-pointer"
+          >
+            <Checkbox
+              checked={value.includes(kind)}
+              onCheckedChange={(checked) => toggle(kind, checked === true)}
+            />
+            <span className="text-sm">{kind}</span>
+          </label>
         ))}
       </div>
     </div>

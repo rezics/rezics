@@ -1,4 +1,4 @@
-import { Box, IconButton, useTheme } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function MainSidebarDrawerHeader({
@@ -6,21 +6,20 @@ export function MainSidebarDrawerHeader({
 }: {
   handleDrawerToggle: () => void;
 }) {
-  const theme = useTheme();
+  // Direction is fixed to LTR by default; document.dir handled at <html>.
+  const isLtr =
+    typeof document !== "undefined" ? document.dir !== "rtl" : true;
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        px: 1,
-        ...theme.mixins.toolbar, // ensures space below AppBar
-        justifyContent: "flex-end",
-      }}
-    >
-      <IconButton onClick={handleDrawerToggle}>
-        {theme.direction === "ltr" ? <ChevronLeft /> : <ChevronRight />}
-      </IconButton>
-    </Box>
+    <div className="flex items-center px-2 min-h-16 justify-end">
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="toggle drawer"
+        onClick={handleDrawerToggle}
+      >
+        {isLtr ? <ChevronLeft /> : <ChevronRight />}
+      </Button>
+    </div>
   );
 }

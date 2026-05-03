@@ -1,17 +1,20 @@
+import type { ApiTokenDTO } from "@rezics/contract";
 import {
+  Badge,
   Button,
-  Chip,
-  Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
+  TableHeader,
   TableRow,
   Tooltip,
-} from "@mui/material";
-import type { ApiTokenDTO } from "@rezics/contract";
-import type { FC } from "react";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { Pencil as EditIcon } from "lucide-react";
+import type { FC } from "react";
 
 interface TokenTableProps {
   tokens: ApiTokenDTO[];
@@ -31,78 +34,95 @@ export const TokenTable: FC<TokenTableProps> = ({
 }) => {
   const renderScopes = (scopes?: Record<string, string[]>) => {
     if (!scopes || Object.keys(scopes).length === 0) {
-      return <Chip label="No scopes" size="small" variant="outlined" />;
+      return (
+        <Badge variant="outline" className="text-xs">
+          No scopes
+        </Badge>
+      );
     }
     return (
-      <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+      <div className="flex flex-row flex-wrap gap-1">
         {Object.entries(scopes).map(([domain, perms]) =>
           perms.map((perm) => (
-            <Chip
+            <Badge
               key={`${domain}:${perm}`}
-              label={`${domain}:${perm}`}
-              size="small"
-              color="primary"
-              variant="outlined"
-            />
+              variant="outline"
+              className="text-xs border-rezics-color-primary text-rezics-color-primary"
+            >
+              {domain}:{perm}
+            </Badge>
           )),
         )}
-      </Stack>
+      </div>
     );
   };
 
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>Name</TableCell>
-          <TableCell>Scopes</TableCell>
-          <TableCell>Created</TableCell>
-          <TableCell>Expires</TableCell>
-          <TableCell>Revoked</TableCell>
-          <TableCell align="right">Actions</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {tokens.map((t) => (
-          <TableRow key={t.id} hover>
-            <TableCell>{t.name}</TableCell>
-            <TableCell>{renderScopes(t.scopes)}</TableCell>
-            <TableCell>
-              {t.createdAt ? new Date(t.createdAt).toLocaleString() : "-"}
-            </TableCell>
-            <TableCell>
-              {t.expiresAt ? new Date(t.expiresAt).toLocaleString() : "Never"}
-            </TableCell>
-            <TableCell>{t.revoked ? "Yes" : "No"}</TableCell>
-            <TableCell align="right">
-              <Stack direction="row" spacing={1} justifyContent="flex-end">
-                <Tooltip title="Edit">
-                  <Button
-                    size="small"
-                    color="primary"
-                    onClick={() => onEdit(t)}
-                    disabled={t.revoked ?? false}
-                    startIcon={<EditIcon />}
-                  >
-                    Edit
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Revoke">
-                  <Button
-                    size="small"
-                    color="error"
-                    onClick={() => onRevoke(t.id)}
-                    disabled={(t.revoked ?? false) || !!revokingIds[t.id]}
-                  >
-                    Revoke
-                  </Button>
-                </Tooltip>
-              </Stack>
-            </TableCell>
+    <TooltipProvider>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Scopes</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead>Expires</TableHead>
+            <TableHead>Revoked</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {tokens.map((t) => (
+            <TableRow key={t.id}>
+              <TableCell>{t.name}</TableCell>
+              <TableCell>{renderScopes(t.scopes)}</TableCell>
+              <TableCell>
+                {t.createdAt ? new Date(t.createdAt).toLocaleString() : "-"}
+              </TableCell>
+              <TableCell>
+                {t.expiresAt
+                  ? new Date(t.expiresAt).toLocaleString()
+                  : "Never"}
+              </TableCell>
+              <TableCell>{t.revoked ? "Yes" : "No"}</TableCell>
+              <TableCell className="text-right">
+                <div className="flex flex-row gap-2 justify-end">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onEdit(t)}
+                        disabled={t.revoked ?? false}
+                      >
+                        <EditIcon className="size-4" />
+                        Edit
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-rezics-color-danger"
+                        onClick={() => onRevoke(t.id)}
+                        disabled={
+                          (t.revoked ?? false) || !!revokingIds[t.id]
+                        }
+                      >
+                        Revoke
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Revoke</TooltipContent>
+                  </Tooltip>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TooltipProvider>
   );
 };
 

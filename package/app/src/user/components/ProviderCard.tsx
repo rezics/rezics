@@ -1,5 +1,5 @@
-import { Button, Chip, Typography } from "@mui/material";
 import type { AuthProvider } from "@rezics/contract";
+import { Badge, Button } from "@rezics/ui/shadcn";
 import type { ComponentType, FC } from "react";
 
 interface ProviderCardProps {
@@ -24,31 +24,23 @@ export const ProviderCard: FC<ProviderCardProps> = ({
     <Icon size={24} />
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-2">
-        <Typography variant="body2" className="font-medium">
-          {name}
-        </Typography>
+        <span className="text-sm font-medium">{name}</span>
         {connected && (
-          <Chip
-            label="Connected"
-            size="small"
-            color="success"
-            variant="outlined"
-          />
+          <Badge variant="outline" className="text-rezics-color-success">
+            Connected
+          </Badge>
         )}
         {isPrimary && (
-          <Chip
-            label="Primary"
-            size="small"
-            color="primary"
-            variant="outlined"
-          />
+          <Badge variant="outline" className="text-rezics-color-primary">
+            Primary
+          </Badge>
         )}
       </div>
     </div>
     {!connected && (
       <Button
-        size="small"
-        variant="outlined"
+        size="sm"
+        variant="outline"
         onClick={onConnect}
         disabled={connecting}
       >

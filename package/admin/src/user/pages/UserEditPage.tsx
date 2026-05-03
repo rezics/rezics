@@ -1,19 +1,18 @@
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Divider,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
 import { userMutations } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 
+import { Spinner } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
@@ -70,84 +69,101 @@ export default function UserEditPage() {
     <Page title="Edit User" description={`编辑用户：${unitId}`}>
       <Card>
         <CardContent>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-            <Button
-              component={Link}
-              to="/user"
-              startIcon={<ArrowBackIcon />}
-              variant="text"
-            >
-              Back
+          <div className="flex flex-row items-center gap-2 mb-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/user">
+                <ArrowBackIcon className="size-4" />
+                Back
+              </Link>
             </Button>
-            <Box sx={{ flex: 1 }} />
-          </Stack>
+            <div className="flex-1" />
+          </div>
 
-          <Divider sx={{ my: 2 }} />
+          <Separator className="my-4" />
 
           {detailQuery.isLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={24} />
-            </Box>
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
           ) : detailQuery.isError ? (
-            <Alert severity="error">Failed to load user.</Alert>
+            <Alert>
+              <AlertDescription className="text-rezics-color-danger">
+                Failed to load user.
+              </AlertDescription>
+            </Alert>
           ) : (
             <>
               {error ? (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {error}
+                <Alert className="mb-4">
+                  <AlertDescription className="text-rezics-color-danger">
+                    {error}
+                  </AlertDescription>
                 </Alert>
               ) : null}
 
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <p className="text-sm text-rezics-color-fg-muted mb-4">
                 Email: <strong>{detailQuery.data?.email ?? "-"}</strong>
-              </Typography>
+              </p>
 
-              <Box component="form" onSubmit={onSubmit}>
-                <Stack spacing={2}>
-                  <TextField
-                    label="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                  <TextField
-                    label="Avatar URL"
-                    value={avatar}
-                    onChange={(e) => setAvatar(e.target.value)}
-                  />
-                  <TextField
-                    label="Bio"
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    multiline
-                    minRows={2}
-                  />
-                  <TextField
-                    label="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    multiline
-                    minRows={4}
-                  />
-                  <TextField
-                    label="New Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    type="password"
-                    helperText="留空表示不修改密码"
-                  />
+              <form onSubmit={onSubmit}>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="uep-name">Name</Label>
+                    <Input
+                      id="uep-name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="uep-avatar">Avatar URL</Label>
+                    <Input
+                      id="uep-avatar"
+                      value={avatar}
+                      onChange={(e) => setAvatar(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="uep-bio">Bio</Label>
+                    <textarea
+                      id="uep-bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      rows={2}
+                      className="rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="uep-description">Description</Label>
+                    <textarea
+                      id="uep-description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows={4}
+                      className="rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="uep-password">New Password</Label>
+                    <Input
+                      id="uep-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type="password"
+                    />
+                    <p className="text-xs text-rezics-color-fg-muted">
+                      留空表示不修改密码
+                    </p>
+                  </div>
 
-                  <Box>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      startIcon={<SaveIcon />}
-                      disabled={updateMutation.isPending}
-                    >
+                  <div>
+                    <Button type="submit" disabled={updateMutation.isPending}>
+                      <SaveIcon className="size-4" />
                       {updateMutation.isPending ? "Saving…" : "Save"}
                     </Button>
-                  </Box>
-                </Stack>
-              </Box>
+                  </div>
+                </div>
+              </form>
             </>
           )}
         </CardContent>

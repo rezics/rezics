@@ -1,8 +1,13 @@
-import { Box, Divider, Drawer, IconButton, Typography } from "@mui/material";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  Separator,
+} from "@rezics/ui/shadcn";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import type React from "react";
 import FeedbackForm from "./FeedbackForm";
-import { X as CloseIcon } from "lucide-react";
 
 type FeedbackDrawerProps = {
   open: boolean;
@@ -20,20 +25,25 @@ const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({
   defaultValues,
 }) => {
   return (
-    <Drawer anchor="right" open={open} onClose={onClose}>
-      <Box className="w-[min(520px,100vw)]" role="presentation">
-        <Box className="flex items-center justify-between px-4 py-3">
-          <Typography variant="h6">提交反馈</Typography>
-          <IconButton aria-label="close" onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <Divider />
-        <Box className="p-4">
+    <Sheet
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
+      <SheetContent
+        side="right"
+        className="w-[min(520px,100vw)] p-0 sm:max-w-none"
+      >
+        <SheetHeader className="px-4 py-3">
+          <SheetTitle>提交反馈</SheetTitle>
+        </SheetHeader>
+        <Separator />
+        <div className="p-4">
           <FeedbackForm defaultValues={defaultValues} onSubmitted={onClose} />
-        </Box>
-      </Box>
-    </Drawer>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 

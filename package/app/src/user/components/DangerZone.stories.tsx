@@ -1,5 +1,5 @@
+import { Button } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import Button from "@mui/material/Button";
 
 import { DangerZone } from "./DangerZone";
 
@@ -10,7 +10,7 @@ const meta = {
     title: "Danger Zone",
     description: "These actions cannot be undone.",
     children: (
-      <Button variant="outlined" color="error">
+      <Button variant="outline" className="text-rezics-color-danger">
         Delete account
       </Button>
     ),

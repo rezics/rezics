@@ -1,8 +1,6 @@
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
 import { postsByTargetQuery } from "@rezics/api/post/post";
 import type { PostKind } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -33,22 +31,22 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" py={3}>
-        <CircularProgress size={20} />
-      </Box>
+      <div className="flex justify-center py-6">
+        <Spinner size="sm" />
+      </div>
     );
   }
 
   if (posts.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" py={2}>
+      <p className="text-sm text-rezics-color-fg-muted py-4">
         {t("discussion.empty", "No discussions yet.")}
-      </Typography>
+      </p>
     );
   }
 
   return (
-    <Box>
+    <div>
       {posts
         .filter((post) => !post.parentPostUnitId)
         .map((post) => (
@@ -63,6 +61,6 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
             }
           />
         ))}
-    </Box>
+    </div>
   );
 };

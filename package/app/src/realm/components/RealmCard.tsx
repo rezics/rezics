@@ -1,12 +1,5 @@
-import {
-  Card,
-  CardActionArea,
-  CardContent,
-  Chip,
-  Stack,
-  Typography,
-} from "@mui/material";
 import type { RealmDTO } from "@rezics/contract";
+import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -21,42 +14,41 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
   const title = translation?.title ?? "Untitled Realm";
   const description = translation?.description ?? "";
 
+  const handleOpen = () =>
+    navigate({ to: "/realm/$realmId", params: { realmId: realm.unitId } });
+
   return (
-    <Card elevation={0}>
-      <CardActionArea
-        onClick={() =>
-          navigate({ to: "/realm/$realmId", params: { realmId: realm.unitId } })
-        }
+    <Card className="cursor-pointer border-0 shadow-none">
+      <button
+        type="button"
+        onClick={handleOpen}
+        className="block w-full text-left"
       >
         <CardContent>
-          <Typography variant="h6" className="truncate">
-            {title}
-          </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            className="line-clamp-2 mt-1"
-          >
+          <h3 className="truncate text-lg font-semibold">{title}</h3>
+          <p className="mt-1 line-clamp-2 text-sm text-rezics-color-fg-muted">
             {description || "No description"}
-          </Typography>
-          <Stack direction="row" spacing={1} mt={2} alignItems="center">
-            <Typography variant="caption" color="text.secondary">
+          </p>
+          <div className="mt-4 flex flex-row items-center gap-2">
+            <span className="text-xs text-rezics-color-fg-muted">
               {realm.memberCount ?? 0} members
-            </Typography>
+            </span>
             {realm.isPublic && (
-              <Chip label="Public" size="small" variant="outlined" />
+              <Badge variant="outline" className="text-xs">
+                Public
+              </Badge>
             )}
             {realm.isOfficial && (
-              <Chip
-                label="Official"
-                size="small"
-                color="primary"
-                variant="outlined"
-              />
+              <Badge
+                variant="outline"
+                className="border-rezics-color-primary text-rezics-color-primary text-xs"
+              >
+                Official
+              </Badge>
             )}
-          </Stack>
+          </div>
         </CardContent>
-      </CardActionArea>
+      </button>
     </Card>
   );
 };

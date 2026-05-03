@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
@@ -38,9 +37,9 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
   };
 
   return (
-    <Box className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       {excerpt.user && (
-        <Box className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <Link
             to="/user/$unitId"
             params={{ unitId: excerpt.user.unitId ?? "" }}
@@ -51,26 +50,24 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
               alt={excerpt.user.name ?? ""}
               className="w-16 h-16 rounded-full shadow"
             />
-            <Typography variant="body2" fontWeight={600}>
+            <p className="text-sm font-semibold">
               {excerpt.user.name ?? ""}
-            </Typography>
+            </p>
           </Link>
           {dateStr && (
-            <Typography variant="caption" color="text.secondary">
-              {dateStr}
-            </Typography>
+            <p className="text-xs text-rezics-color-fg-muted">{dateStr}</p>
           )}
-        </Box>
+        </div>
       )}
 
-      <Box className="flex items-start gap-2">
+      <div className="flex items-start gap-2">
         <FormatQuoteIcon
-          size={30} color={"text.secondary"} style={{ marginTop: "4px" }}
+          className="h-7 w-7 text-rezics-color-fg-muted mt-1"
         />
-        <Box className="flex-1">
+        <div className="flex-1">
           <MarkdownContent content={description} />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       <ExcerptSourceLine source={source} />
 
@@ -81,7 +78,7 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
         actions={excerptDetailActions}
         onReplyInvoke={onReplyInvoke}
       />
-    </Box>
+    </div>
   );
 };
 
@@ -89,18 +86,16 @@ function ExcerptSourceLine({ source }: { source?: ExcerptSource | string }) {
   if (!source) return null;
   if (typeof source === "string") {
     return (
-      <Typography variant="caption" color="text.disabled">
-        —— {source}
-      </Typography>
+      <p className="text-xs text-rezics-color-fg-muted">—— {source}</p>
     );
   }
   const href = source.mode === "unit" ? `/unit/${source.unitId}` : source.url;
   return (
-    <Typography variant="caption" color="text.disabled">
+    <p className="text-xs text-rezics-color-fg-muted">
       ——{" "}
       <SafeLink href={href} className="underline">
         {source.title}
       </SafeLink>
-    </Typography>
+    </p>
   );
 }

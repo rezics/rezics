@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import type React from "react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
@@ -33,13 +32,9 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
         }}
       >
         <div className="relative z-10">
-          <Typography variant="h4" className="font-bold text-white mb-2">
-            {zone.name}
-          </Typography>
+          <h1 className="text-3xl font-bold text-white mb-2">{zone.name}</h1>
           {zone.description && (
-            <Typography variant="body1" className="text-white/80">
-              {zone.description}
-            </Typography>
+            <p className="text-base text-white/80">{zone.description}</p>
           )}
         </div>
       </div>
@@ -56,13 +51,11 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
 
       {/* Content area — populated by child routes or sections */}
       <div>
-        <Typography variant="h6" className="mb-4">
-          Latest Content
-        </Typography>
+        <h2 className="text-lg font-semibold mb-4">Latest Content</h2>
         {/* MOCK: content sections will be wired when zone-specific content queries exist */}
-        <Typography color="text.secondary">
+        <p className="text-rezics-color-fg-muted">
           Content for this zone will appear here.
-        </Typography>
+        </p>
       </div>
     </div>
   );

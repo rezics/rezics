@@ -1,4 +1,4 @@
-import { TextField } from "@mui/material";
+import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 
 interface BookTitleEditorProps {
@@ -8,12 +8,7 @@ interface BookTitleEditorProps {
 export const BookTitleEditor: React.FC<BookTitleEditorProps> = ({ title }) => {
   return (
     <div>
-      <TextField
-        id="standard-basic"
-        label=""
-        variant="standard"
-        defaultValue={title}
-      />
+      <Input id="standard-basic" defaultValue={title} />
     </div>
   );
 };

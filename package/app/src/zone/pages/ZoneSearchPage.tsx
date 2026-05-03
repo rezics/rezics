@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
 import type React from "react";
@@ -51,7 +50,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   if (zoneLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <Typography color="text.secondary">Loading...</Typography>
+        <p className="text-rezics-color-fg-muted">Loading...</p>
       </div>
     );
   }
@@ -59,7 +58,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   if (!zone) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <Typography variant="h5">Zone not found</Typography>
+        <h2 className="text-2xl font-semibold">Zone not found</h2>
       </div>
     );
   }
@@ -71,9 +70,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <Typography variant="h5" className="mb-4">
-        Search in {zone.name}
-      </Typography>
+      <h2 className="text-2xl font-semibold mb-4">Search in {zone.name}</h2>
       <AdvancedSearch
         query={search.query}
         bind={search.bind}

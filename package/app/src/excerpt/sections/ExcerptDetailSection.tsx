@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import { useCanEdit } from "@rezics/api/hooks";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
@@ -29,7 +28,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   if (isLoading) return <div>{t("common.loading")}</div>;
   if (!excerpt?.id) {
     return (
-      <div className="text-center py-16 text-red-500">
+      <div className="text-center py-16 text-rezics-color-danger">
         {t("excerpt.not_found")}
       </div>
     );
@@ -42,38 +41,32 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   };
 
   return (
-    <Box className="flex flex-col gap-8">
-      <Box className="flex items-center">
-        {title && (
-          <Typography variant="h5" fontWeight={700}>
-            {title}
-          </Typography>
-        )}
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center">
+        {title && <h1 className="text-2xl font-bold">{title}</h1>}
         {canEdit && (
-          <Box ml="auto">
+          <div className="ml-auto">
             <MUILink to="/excerpt/$unitId/edit" params={{ unitId }}>
               {t("common.edit")}
             </MUILink>
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
 
       <ExcerptDetail excerpt={excerpt} onReplyInvoke={handleReplyInvoke} />
 
-      <Box className="mt-4 flex flex-col gap-3">
-        <Box className="flex items-center gap-2">
+      <div className="mt-4 flex flex-col gap-3">
+        <div className="flex items-center gap-2">
           <AccentBar />
-          <Typography variant="h6" fontWeight={700}>
-            {t("review.comments")}
-          </Typography>
-        </Box>
+          <h2 className="text-xl font-bold">{t("review.comments")}</h2>
+        </div>
         <ReplyComposer
           ref={composerRef}
           mode="progressive"
           targetUnitId={unitId}
         />
         <PostTreeSection rootPostUnitId={unitId} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };

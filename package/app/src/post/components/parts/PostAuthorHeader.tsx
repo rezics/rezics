@@ -1,5 +1,5 @@
-import { Avatar, Box, Typography } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import type React from "react";
 
@@ -13,31 +13,32 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
   size = "default",
 }) => {
   const avatarSize = size === "compact" ? 24 : 36;
-  const nameVariant = size === "compact" ? "caption" : "body2";
   const dateStr = post.createdAt
     ? new Date(String(post.createdAt)).toLocaleDateString()
     : "";
+  const nameClass =
+    size === "compact" ? "text-xs font-semibold" : "text-sm font-semibold";
 
   return (
-    <Box
+    <div
       className="flex items-center gap-2"
       onClick={(e) => e.stopPropagation()}
     >
       <Link to="/user/$unitId" params={{ unitId: post.author?.unitId ?? "" }}>
         <Avatar
-          src={post.author?.avatar ?? ""}
-          sx={{ width: avatarSize, height: avatarSize }}
-          variant="rounded"
-        />
+          className="rounded-md"
+          style={{ width: avatarSize, height: avatarSize }}
+        >
+          <AvatarImage src={post.author?.avatar ?? ""} />
+          <AvatarFallback>
+            {(post.author?.name ?? "?").slice(0, 1)}
+          </AvatarFallback>
+        </Avatar>
       </Link>
-      <Typography variant={nameVariant} fontWeight={600}>
-        {post.author?.name ?? "Anonymous"}
-      </Typography>
+      <span className={nameClass}>{post.author?.name ?? "Anonymous"}</span>
       {dateStr && (
-        <Typography variant="caption" color="text.secondary">
-          {dateStr}
-        </Typography>
+        <span className="text-xs text-rezics-color-fg-muted">{dateStr}</span>
       )}
-    </Box>
+    </div>
   );
 };

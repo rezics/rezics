@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@mui/material";
+import { Dialog, DialogContent } from "@rezics/ui/shadcn";
 import { type FC, useState } from "react";
 import { LoginPage } from "../pages/LoginPage.tsx";
 import { RegisterPage } from "../pages/RegisterPage.tsx";
@@ -24,8 +24,8 @@ export const AuthModal: FC<AuthModalProps> = ({
   const switchToLogin = () => setMode("login");
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogContent className="p-0">
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="p-0 sm:max-w-[640px]">
         {mode === "login" ? (
           <LoginPage
             isModal={true}

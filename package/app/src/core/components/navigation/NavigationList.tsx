@@ -1,12 +1,6 @@
-import {
-  Collapse,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
+import { Separator } from "@rezics/ui/shadcn";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { cn } from "@/shared/utils/css-util";
 import type { NavigationItem } from "./navigation";
 import { ChevronUp as ExpandLess, ChevronDown as ExpandMore } from "lucide-react";
 
@@ -22,6 +16,9 @@ interface NavigationListProps {
   ) => void;
 }
 
+const itemBaseClass =
+  "flex items-center gap-3 w-full px-3 py-1 rounded-md text-left text-sm transition-colors hover:bg-rezics-color-bg-muted";
+
 export const NavigationList = ({
   NAVIGATION,
   isMobile,
@@ -30,82 +27,96 @@ export const NavigationList = ({
   handleItemClick,
 }: NavigationListProps) => {
   return (
-    <List>
+    <ul className="list-none m-0 p-0">
       {NAVIGATION.map((item, index) => {
         if (item.kind === "item" && item.onlyMobile && !isMobile) {
           return null;
         }
 
         if (item.kind === "divider")
-          // biome-ignore lint/suspicious/noArrayIndexKey: static list
-          return <Divider key={index} className="my-1 mx-2" />;
+          return (
+            // biome-ignore lint/suspicious/noArrayIndexKey: static list
+            <li key={index}>
+              <Separator className="my-1 mx-2" />
+            </li>
+          );
 
         const isActive = pathname === `/${item.segment}`;
         const hasChildren = !!item.children && item.children.length > 0;
         const isOpen = item.segment ? !!openItems[item.segment] : false;
+        const Icon = item.icon;
 
         return (
-          <div key={item.segment || index.toString()}>
-            <ListItemButton
-              className="py-1"
-              component={hasChildren ? "div" : MUILink}
-              {...(!hasChildren ? { to: `${item.segment}` } : {})}
-              selected={isActive && !hasChildren}
-              onClick={(event: any) =>
-                handleItemClick(event, item.segment, hasChildren)
-              }
-            >
-              <ListItemIcon>
-                {(() => {
-                  const Icon = item.icon;
-                  return Icon ? <Icon fontSize="small" /> : null;
-                })()}
-              </ListItemIcon>
-              <ListItemText
-                className="dark:text-light text-dark"
-                primary={item.title}
-              />
-              {hasChildren && (
+          <li key={item.segment || index.toString()}>
+            {hasChildren ? (
+              <button
+                type="button"
+                className={cn(
+                  itemBaseClass,
+                  isActive && "bg-rezics-color-bg-muted",
+                )}
+                onClick={(event: any) =>
+                  handleItemClick(event, item.segment, hasChildren)
+                }
+              >
+                {Icon ? <Icon className="w-4 h-4" /> : null}
+                <span className="flex-1 dark:text-light text-dark">
+                  {item.title}
+                </span>
                 <span className="dark:text-light text-dark">
                   {isOpen ? <ExpandLess /> : <ExpandMore />}
                 </span>
-              )}
-            </ListItemButton>
+              </button>
+            ) : (
+              <MUILink
+                to={`${item.segment}` as any}
+                className={cn(
+                  itemBaseClass,
+                  "no-underline",
+                  isActive && "bg-rezics-color-bg-muted",
+                )}
+                onClick={(event: any) =>
+                  handleItemClick(event, item.segment, hasChildren)
+                }
+              >
+                {Icon ? <Icon className="w-4 h-4" /> : null}
+                <span className="flex-1 dark:text-light text-dark">
+                  {item.title}
+                </span>
+              </MUILink>
+            )}
 
-            {hasChildren && item.segment && (
-              <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {item.children?.map((child: any) => {
-                    const isChildActive = pathname === `/${child.segment}`;
-                    return (
-                      <ListItemButton
-                        key={child.segment}
-                        component={MUILink}
-                        to={`${child.segment}`}
-                        selected={isChildActive}
+            {hasChildren && item.segment && isOpen && (
+              <ul className="list-none m-0 p-0">
+                {item.children?.map((child: any) => {
+                  const isChildActive = pathname === `/${child.segment}`;
+                  const ChildIcon = child.icon;
+                  return (
+                    <li key={child.segment}>
+                      <MUILink
+                        to={`${child.segment}` as any}
+                        className={cn(
+                          itemBaseClass,
+                          "pl-8 no-underline",
+                          isChildActive && "bg-rezics-color-bg-muted",
+                        )}
                         onClick={(event: any) =>
                           handleItemClick(event, child.segment, false)
                         }
-                        className="py-1"
-                        sx={{ pl: 4 }}
                       >
-                        {(() => {
-                          const Icon = child.icon;
-                          return <Icon fontSize="small" />;
-                        })()}
-                        <ListItemText
-                          className="dark:text-light text-dark"
-                          primary={child.title}
-                        />
-                      </ListItemButton>
-                    );
-                  })}
-                </List>
-              </Collapse>
+                        {ChildIcon ? <ChildIcon className="w-4 h-4" /> : null}
+                        <span className="flex-1 dark:text-light text-dark">
+                          {child.title}
+                        </span>
+                      </MUILink>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
-          </div>
+          </li>
         );
       })}
-    </List>
+    </ul>
   );
 };

@@ -1,6 +1,7 @@
-import { Button } from "@mui/material";
+import { useAlertStore } from "@app/states/windowAlertStore.ts";
 import { bookMutations } from "@rezics/api/book/book.mutations";
 import type { ContentRating } from "@rezics/contract";
+import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import {
@@ -39,7 +40,6 @@ import { CreateChapterDialog } from "./CreateChapterDialog";
 import { EditChapterDialog } from "./EditChapterDialog";
 import { MoveToParentDialog } from "./MoveToParentDialog";
 import { Download as DownloadIcon, Save as SaveIcon } from "lucide-react";
-import { useAlertStore } from "@app/states/windowAlertStore.ts";
 
 /** Chapter tree node structure. */
 export type Chapter = {
@@ -422,8 +422,8 @@ export const ChapterTreeEditor = forwardRef<
           <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
             <p className="text-sm">No chapters yet</p>
             <Button
-              variant="outlined"
-              size="small"
+              variant="outline"
+              size="sm"
               className="mt-3"
               onClick={() => handlePreCreate(null)}
             >
@@ -475,21 +475,20 @@ export const ChapterTreeEditor = forwardRef<
         <div className="flex items-center gap-2">
           {onDownloadJSON && (
             <Button
-              variant="outlined"
-              size="small"
-              startIcon={<DownloadIcon fontSize="small" />}
+              variant="outline"
+              size="sm"
               onClick={onDownloadJSON}
             >
+              <DownloadIcon className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">JSON</span>
             </Button>
           )}
           <Button
-            variant="contained"
-            size="small"
-            startIcon={<SaveIcon fontSize="small" />}
+            size="sm"
             onClick={() => saveTree(treeData)}
             disabled={updateChapterIndexMutation.isPending}
           >
+            <SaveIcon className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">
               {updateChapterIndexMutation.isPending ? "Saving..." : "Save"}
             </span>

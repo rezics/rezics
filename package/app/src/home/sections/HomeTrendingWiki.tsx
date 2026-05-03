@@ -1,4 +1,5 @@
-import { Card, CardContent, CircularProgress, Typography } from "@mui/material";
+import { Card, CardContent } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
@@ -15,10 +16,6 @@ export type HomeTrendingWikiProps = {
   limit?: number;
 };
 
-/**
- * HomeTrendingWiki
- * Placeholder: uses books as entries to show wiki-like teaser content.
- */
 export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
   title,
   limit = 6,
@@ -34,9 +31,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <Typography variant="h6" className="mb-3">
-          {resolvedTitle}
-        </Typography>
+        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
         <QueryErrorDisplay error={error} />
       </div>
     );
@@ -45,23 +40,17 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{resolvedTitle}</Typography>
-        {isLoading && <CircularProgress size={20} />}
+        <h6 className="text-base font-semibold m-0">{resolvedTitle}</h6>
+        {isLoading && <Spinner size="sm" />}
       </div>
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
         {books.map((book) => (
           <Card key={book.unitId} className="overflow-hidden">
             <CardContent>
-              <Typography variant="subtitle2" className="mb-1">
-                {getBookTitle(book)}
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                className="line-clamp-3"
-              >
+              <p className="text-sm font-medium mb-1">{getBookTitle(book)}</p>
+              <p className="text-sm text-rezics-color-fg-muted line-clamp-3 m-0">
                 {t("page.home.sections.wiki_teaser_placeholder")}
-              </Typography>
+              </p>
             </CardContent>
           </Card>
         ))}

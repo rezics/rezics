@@ -1,4 +1,5 @@
-import { Button, CircularProgress, Typography } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { realmListQuery } from "@rezics/api/realm/realm";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -30,16 +31,12 @@ export const ActiveRealmsSection: React.FC = () => {
         <h2 className="font-semibold">
           {t("page.home.sections.active_realms.title")}
         </h2>
-        <Button
-          variant="text"
-          color="primary"
-          onClick={() => navigate({ to: "/realm" })}
-        >
+        <Button variant="ghost" onClick={() => navigate({ to: "/realm" })}>
           {t("page.home.sections.active_realms.more")}
         </Button>
       </div>
       {isLoading ? (
-        <CircularProgress size={20} />
+        <Spinner size="sm" />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {realms.map((realm) => (

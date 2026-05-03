@@ -1,9 +1,6 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import { shelfListQuery } from "@rezics/api/shelf";
+import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ShelfCard } from "../components/ShelfCard";
@@ -17,41 +14,30 @@ export function ShelfListPage() {
   const shelves = data?.shelves ?? [];
 
   return (
-    <Box maxWidth="lg" mx="auto" px={2} py={3}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
-        <Typography variant="h5" fontWeight={600}>
-          Shelves
-        </Typography>
-        <Stack direction="row" spacing={1}>
+    <div className="mx-auto w-full max-w-5xl px-4 py-6">
+      <div className="mb-6 flex flex-row items-center justify-between">
+        <h1 className="text-2xl font-semibold">Shelves</h1>
+        <div className="flex flex-row gap-2">
           <Button
-            variant="text"
+            variant="ghost"
             onClick={() => navigate({ to: "/shelf/search" })}
           >
             Search
           </Button>
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={() => navigate({ to: "/shelf/new" })}
-          >
+          <Button onClick={() => navigate({ to: "/shelf/new" })}>
             New Shelf
           </Button>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
 
       {isLoading ? (
-        <Box display="flex" justifyContent="center" py={6}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-12">
+          <Spinner />
+        </div>
       ) : shelves.length === 0 ? (
-        <Typography color="text.secondary" textAlign="center" py={4}>
+        <p className="py-8 text-center text-rezics-color-fg-muted">
           No shelves yet
-        </Typography>
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {shelves.map((shelf) => (
@@ -59,7 +45,7 @@ export function ShelfListPage() {
           ))}
         </div>
       )}
-    </Box>
+    </div>
   );
 }
 

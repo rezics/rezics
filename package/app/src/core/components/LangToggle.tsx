@@ -1,4 +1,9 @@
-import { ListItemText, Menu, MenuItem } from "@mui/material";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@rezics/ui/shadcn";
 import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -11,68 +16,44 @@ type LangToggleProps = {
 
 export const LangToggle: React.FC<LangToggleProps> = ({ children }) => {
   const { i18n } = useTranslation();
+  const [open, setOpen] = React.useState(false);
 
   const changeLang = (lang: string) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("lang", lang);
   };
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleChangeLang = (lang: string) => {
-    handleClose();
+    setOpen(false);
     changeLang(lang);
   };
 
   return (
-    <>
-      {children({ onClick: handleClick })}
-
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-        slotProps={{
-          paper: {
-            sx: {
-              minWidth: 180,
-            },
-          },
-        }}
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <div>{children({ onClick: () => setOpen(true) })}</div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="center"
+        side="bottom"
+        className="min-w-[180px]"
       >
-        <MenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANT)}>
-          <ListItemText>{LANGUAGE_META["zh-hant"].nativeName}</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => handleChangeLang(LANGUAGES.EN)}>
-          <ListItemText>{LANGUAGE_META.en.nativeName}</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => handleChangeLang(LANGUAGES.JA)}>
-          <ListItemText>{LANGUAGE_META.ja.nativeName}</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => handleChangeLang(LANGUAGES.DE)}>
-          <ListItemText>{LANGUAGE_META.de.nativeName}</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANS)}>
-          <ListItemText>{LANGUAGE_META["zh-hans"].nativeName}</ListItemText>
-        </MenuItem>
-      </Menu>
-    </>
+        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANT)}>
+          {LANGUAGE_META["zh-hant"].nativeName}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.EN)}>
+          {LANGUAGE_META.en.nativeName}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.JA)}>
+          {LANGUAGE_META.ja.nativeName}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.DE)}>
+          {LANGUAGE_META.de.nativeName}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANS)}>
+          {LANGUAGE_META["zh-hans"].nativeName}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

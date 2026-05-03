@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ContentSearchDocument } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -78,9 +77,7 @@ export const ProfileOverviewPage: FC = () => {
 
       {/* Pinned Items */}
       <div>
-        <Typography variant="subtitle2" className="font-semibold mb-3">
-          Pinned
-        </Typography>
+        <h6 className="text-sm font-semibold mb-3">Pinned</h6>
         {pinned.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {pinned.map((item: ContentSearchDocument) => (
@@ -88,17 +85,15 @@ export const ProfileOverviewPage: FC = () => {
             ))}
           </div>
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-rezics-color-fg-muted">
             No pinned items yet
-          </Typography>
+          </p>
         )}
       </div>
 
       {/* Recent Activity */}
       <div>
-        <Typography variant="subtitle2" className="font-semibold mb-3">
-          Recent Activity
-        </Typography>
+        <h6 className="text-sm font-semibold mb-3">Recent Activity</h6>
         {recent.length > 0 ? (
           <div className="flex flex-col gap-2">
             {recent.map((item: ContentSearchDocument) => (
@@ -106,9 +101,9 @@ export const ProfileOverviewPage: FC = () => {
             ))}
           </div>
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-rezics-color-fg-muted">
             No recent activity
-          </Typography>
+          </p>
         )}
       </div>
     </div>
@@ -137,22 +132,14 @@ const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
       params={{ unitId: item.id }}
       className="no-underline"
     >
-      <Box className="border border-gray-200 rounded-lg p-3 hover:border-gray-400 transition-colors">
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          className="uppercase"
-        >
+      <div className="border border-gray-200 rounded-lg p-3 hover:border-gray-400 transition-colors">
+        <span className="block text-xs uppercase text-rezics-color-fg-muted">
           {item.type}
-        </Typography>
-        <Typography
-          variant="body2"
-          className="font-medium mt-1 line-clamp-2"
-          color="text.primary"
-        >
+        </span>
+        <span className="block text-sm font-medium mt-1 line-clamp-2 text-rezics-color-fg">
           {title}
-        </Typography>
-      </Box>
+        </span>
+      </div>
     </Link>
   );
 };
@@ -165,24 +152,14 @@ const ActivityItem: FC<{ item: ContentSearchDocument }> = ({ item }) => {
     : "";
 
   return (
-    <Box className="flex items-center gap-3 py-1">
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        className="uppercase min-w-[60px]"
-      >
+    <div className="flex items-center gap-3 py-1">
+      <span className="text-xs uppercase min-w-[60px] text-rezics-color-fg-muted">
         {item.type}
-      </Typography>
-      <Typography
-        variant="body2"
-        className="flex-1 truncate"
-        color="text.primary"
-      >
+      </span>
+      <span className="text-sm flex-1 truncate text-rezics-color-fg">
         {title}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        {date}
-      </Typography>
-    </Box>
+      </span>
+      <span className="text-xs text-rezics-color-fg-muted">{date}</span>
+    </div>
   );
 };

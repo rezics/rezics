@@ -1,4 +1,5 @@
-import { Button, CircularProgress, Typography } from "@mui/material";
+import { Button } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
@@ -14,10 +15,6 @@ export type TrendingReviewsProps = {
   limit?: number;
 };
 
-/**
- * HomeTrendingReviews
- * Placeholder: uses books as anchors to show review-like snippets.
- */
 export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
   title,
   limit = 8,
@@ -29,7 +26,6 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
     contentSearchQueryOptions({ type: "POST", offset: 0, limit }),
   );
 
-  // Content search items cast to PostDTO shape (Meilisearch content index)
   const items = useMemo<PostDTO[]>(
     () => (data?.items ?? []) as unknown as PostDTO[],
     [data],
@@ -38,9 +34,7 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
   if (error) {
     return (
       <div className="w-full">
-        <Typography variant="h6" className="mb-3">
-          {resolvedTitle}
-        </Typography>
+        <h6 className="text-base font-semibold mb-3">{resolvedTitle}</h6>
         <QueryErrorDisplay error={error} />
       </div>
     );
@@ -50,15 +44,11 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
-        <Button
-          variant="text"
-          color="primary"
-          onClick={() => navigate({ to: "/review" })}
-        >
+        <Button variant="ghost" onClick={() => navigate({ to: "/review" })}>
           {t("page.home.sections.trending_reviews")} →
         </Button>
       </div>
-      {isLoading && <CircularProgress size={20} />}
+      {isLoading && <Spinner size="sm" />}
       <div>
         <HorizontalReviewCarousel reviewList={items} />
       </div>

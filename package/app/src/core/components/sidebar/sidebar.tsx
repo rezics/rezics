@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import { X } from "lucide-react";
 import type React from "react";
 import { useEffect } from "react";
@@ -40,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // --- Fixed 模式渲染逻辑 ---
   if (mode === "fixed") {
     return (
-      <Box sx={{ backgroundColor: "background.default" }}>
+      <div className="bg-rezics-color-bg">
         {/* 背景遮罩 (Backdrop) - 处理淡入淡出 */}
         <div
           className={cn(
@@ -52,21 +51,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
 
         {/* 侧边栏面板 - 处理滑入滑出 */}
-        <Box
-          component="aside"
+        <aside
           className={cn(
-            "fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out",
+            "fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out border-r border-rezics-color-border",
             isOpen ? "translate-x-0" : "-translate-x-full",
           )}
-          sx={{ width, borderRight: 1, borderColor: "divider" }}
+          style={{ width }}
         >
-          {/* 这里放置一个相对容器，方便放置关闭按钮 */}
-          <Box
+          <div
             className={cn(
-              "relative h-full flex flex-col overflow-hidden",
+              "relative h-full flex flex-col overflow-hidden bg-rezics-color-bg",
               className,
             )}
-            sx={{ backgroundColor: "background.default" }}
           >
             {/* 仅在 Fixed 模式下，通常需要一个显式的关闭按钮 */}
             <button
@@ -78,22 +74,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <X size={20} className="text-slate-500" />
             </button>
             {children}
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </aside>
+      </div>
     );
   }
 
   /**
    * Inline 模式渲染逻辑
-   * 外层：控制 width，overflow-hidden
-   * 内层：保持固定宽度 (min-w)，防止文字换行跳动
    */
   return (
-    <Box
-      className="inline-sidebar-container"
-      sx={{ backgroundColor: "background.default" }}
-    >
+    <div className="inline-sidebar-container bg-rezics-color-bg">
       <div
         className={cn(`shrink-0`)}
         style={{
@@ -101,9 +92,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           transition: !isDragging ? "width 0.3s ease-in-out" : "none",
         }}
       />
-      <Box
-        className={cn(`fixed inset-y-0 left-0 overflow-hidden`)}
-        sx={{ borderRight: 1, borderColor: "divider" }}
+      <div
+        className={cn(
+          `fixed inset-y-0 left-0 overflow-hidden border-r border-rezics-color-border`,
+        )}
         style={{
           width,
           transform: isOpen ? "translateX(0)" : `translateX(-${width})`,
@@ -111,11 +103,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <div className={cn("h-full", className)}>
-          {/* 内容区域 */}
           <div className="h-full w-full">{children}</div>
         </div>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

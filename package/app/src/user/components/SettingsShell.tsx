@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import { Outlet } from "@tanstack/react-router";
 import type { FC } from "react";
 import { SettingsSidebar } from "./SettingsSidebar";
@@ -6,10 +5,8 @@ import { SettingsTabBar } from "./SettingsTabBar";
 
 export const SettingsShell: FC = () => {
   return (
-    <Box className="w-full max-w-6xl mx-auto pb-12">
-      <Typography variant="h5" className="px-4 pt-8 pb-4 font-semibold">
-        Settings
-      </Typography>
+    <div className="w-full max-w-6xl mx-auto pb-12">
+      <h5 className="text-xl font-semibold px-4 pt-8 pb-4">Settings</h5>
 
       {/* Mobile: horizontal tabs */}
       <div className="md:hidden">
@@ -25,6 +22,6 @@ export const SettingsShell: FC = () => {
           <Outlet />
         </div>
       </div>
-    </Box>
+    </div>
   );
 };

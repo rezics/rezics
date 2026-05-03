@@ -1,18 +1,19 @@
+import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
 import {
   Alert,
+  AlertDescription,
+  Badge,
   Button,
-  Chip,
+  Checkbox,
   Dialog,
-  DialogActions,
   DialogContent,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  Divider,
-  FormControlLabel,
-  Stack,
-  Switch,
-  TextField,
-} from "@mui/material";
-import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 
@@ -76,80 +77,102 @@ export const JwtServiceEditDialog: FC<Props> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        Edit JWT Service: <strong>{service.serviceKey}</strong>
-      </DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          {error && <Alert severity="error">{error}</Alert>}
+    <Dialog open={open} onOpenChange={(o) => (o ? null : onClose())}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            Edit JWT Service: <strong>{service.serviceKey}</strong>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 mt-1">
+          {error && (
+            <Alert>
+              <AlertDescription className="text-rezics-color-danger">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
 
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Chip
-              label={service.isActive ? "Active" : "Inactive"}
-              color={service.isActive ? "success" : "default"}
-              size="small"
-            />
+          <div className="flex flex-row items-center gap-2">
+            <Badge
+              className={
+                service.isActive
+                  ? "bg-rezics-color-success text-white"
+                  : "bg-rezics-color-bg-elevated text-rezics-color-fg-muted"
+              }
+            >
+              {service.isActive ? "Active" : "Inactive"}
+            </Badge>
             <Button
-              size="small"
-              variant="outlined"
-              color={service.isActive ? "warning" : "success"}
+              size="sm"
+              variant="outline"
+              className={
+                service.isActive
+                  ? "text-rezics-color-warning"
+                  : "text-rezics-color-success"
+              }
               onClick={handleToggleActive}
               disabled={updating}
             >
               {service.isActive ? "Deactivate" : "Activate"}
             </Button>
-          </Stack>
+          </div>
 
-          <Divider />
+          <Separator />
 
-          <TextField
-            label="Issuer"
-            value={issuer}
-            onChange={(e) => setIssuer(e.target.value)}
-            fullWidth
-            size="small"
-          />
-          <TextField
-            label="Audience"
-            value={audience}
-            onChange={(e) => setAudience(e.target.value)}
-            fullWidth
-            size="small"
-          />
-          <TextField
-            label="JWKS URL"
-            value={jwksUrl}
-            onChange={(e) => setJwksUrl(e.target.value)}
-            fullWidth
-            size="small"
-          />
-          <TextField
-            label="JWKS Path"
-            value={jwksPath}
-            onChange={(e) => setJwksPath(e.target.value)}
-            fullWidth
-            size="small"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isLocalIssuer}
-                onChange={(e) => setIsLocalIssuer(e.target.checked)}
-              />
-            }
-            label="Local Issuer"
-          />
-        </Stack>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="jsed-issuer">Issuer</Label>
+            <Input
+              id="jsed-issuer"
+              value={issuer}
+              onChange={(e) => setIssuer(e.target.value)}
+              className="h-8"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="jsed-aud">Audience</Label>
+            <Input
+              id="jsed-aud"
+              value={audience}
+              onChange={(e) => setAudience(e.target.value)}
+              className="h-8"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="jsed-url">JWKS URL</Label>
+            <Input
+              id="jsed-url"
+              value={jwksUrl}
+              onChange={(e) => setJwksUrl(e.target.value)}
+              className="h-8"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="jsed-path">JWKS Path</Label>
+            <Input
+              id="jsed-path"
+              value={jwksPath}
+              onChange={(e) => setJwksPath(e.target.value)}
+              className="h-8"
+            />
+          </div>
+          <Label className="flex flex-row items-center gap-2 cursor-pointer">
+            <Checkbox
+              checked={isLocalIssuer}
+              onCheckedChange={(v) => setIsLocalIssuer(Boolean(v))}
+            />
+            Local Issuer
+          </Label>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={updating}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={updating}>
+            {updating ? "Saving..." : "Save"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={updating}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave} variant="contained" disabled={updating}>
-          {updating ? "Saving..." : "Save"}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

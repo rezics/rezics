@@ -1,4 +1,5 @@
-import { Button, CircularProgress, TextField } from "@mui/material";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import type {
   CreateTagInput,
   UnitTagDTO,
@@ -60,12 +61,11 @@ export const TagEdit: React.FC<TagEditProps> = ({
     <form onSubmit={onSubmit} className={className}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <label htmlFor="tag-name" className="text-sm text-gray-600">
+          <Label htmlFor="tag-name" className="text-sm text-rezics-color-fg-muted">
             名称
-          </label>
-          <TextField
+          </Label>
+          <Input
             id="tag-name"
-            size="small"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -73,15 +73,10 @@ export const TagEdit: React.FC<TagEditProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <Button
-            type="submit"
-            variant="contained"
-            size="small"
-            disabled={busy}
-          >
+          <Button type="submit" size="sm" disabled={busy}>
             {isUpdate ? "保存修改" : "创建标签"}
           </Button>
-          {busy && <CircularProgress size={18} />}
+          {busy && <Spinner size="sm" />}
         </div>
       </div>
     </form>

@@ -1,13 +1,13 @@
+import type { ContentRating } from "@rezics/contract";
+import { RatingSelector } from "@rezics/ui";
 import {
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogContentText,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-} from "@mui/material";
-import type { ContentRating } from "@rezics/contract";
-import { RatingSelector } from "@rezics/ui";
+} from "@rezics/ui/shadcn";
 import { useTranslation } from "react-i18next";
 
 interface BulkRatingDialogProps {
@@ -29,31 +29,32 @@ export function BulkRatingDialog({
 }: BulkRatingDialogProps) {
   const { t } = useTranslation();
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>
-        {t("book.chapter.bulk_rating.title", "Set rating for selected")}
-      </DialogTitle>
-      <DialogContent
-        sx={{ display: "flex", flexDirection: "column", gap: 2, pt: "16px !important" }}
-      >
-        <DialogContentText>
-          {t("book.chapter.bulk_rating.description", {
-            defaultValue: "This will override the rating on {{count}} selected chapters.",
-            count,
-          })}
-        </DialogContentText>
-        <RatingSelector value={value} onChange={onChange} />
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-xs">
+        <DialogHeader>
+          <DialogTitle>
+            {t("book.chapter.bulk_rating.title", "Set rating for selected")}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 pt-4">
+          <p className="text-sm text-rezics-color-text-secondary">
+            {t("book.chapter.bulk_rating.description", {
+              defaultValue:
+                "This will override the rating on {{count}} selected chapters.",
+              count,
+            })}
+          </p>
+          <RatingSelector value={value} onChange={onChange} />
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>
+            {t("common.cancel", "Cancel")}
+          </Button>
+          <Button onClick={onConfirm} disabled={count === 0}>
+            {t("common.apply", "Apply")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>{t("common.cancel", "Cancel")}</Button>
-        <Button
-          variant="contained"
-          onClick={onConfirm}
-          disabled={count === 0}
-        >
-          {t("common.apply", "Apply")}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

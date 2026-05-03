@@ -1,8 +1,9 @@
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+} from "@rezics/ui/shadcn";
 import {
   useCanGoBack,
   useNavigate,
@@ -28,15 +29,21 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
     <div className="min-h-screen flex items-center justify-center">
       <Card className="min-w-md max-w-lg">
         <CardContent className="flex flex-col gap-4">
-          <Typography variant="h4">Not Found</Typography>
-          <div>
+          <h4 className="text-2xl font-medium m-0">Not Found</h4>
+          <div className="flex items-center gap-2">
             <Place /> {path}
           </div>
         </CardContent>
-        <CardActions className="flex flex-row justify-between">
-          {canGoBack ? <Button onClick={onBack}>Back</Button> : null}
-          <Button onClick={onHome}>Home</Button>
-        </CardActions>
+        <CardFooter className="flex flex-row justify-between">
+          {canGoBack ? (
+            <Button variant="ghost" onClick={onBack}>
+              Back
+            </Button>
+          ) : null}
+          <Button variant="ghost" onClick={onHome}>
+            Home
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );

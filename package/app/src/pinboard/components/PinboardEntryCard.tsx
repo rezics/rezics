@@ -1,14 +1,7 @@
-import {
-  Box,
-  Chip,
-  IconButton,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Badge, Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/shared/utils/css-util";
 import type { PinboardEntryView } from "../models/types";
 import { Trash2 as DeleteOutlineRoundedIcon, GripVertical as DragIndicatorRoundedIcon, Pencil as EditRoundedIcon, Pin as PushPinRoundedIcon } from "lucide-react";
 
@@ -38,175 +31,132 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
   dragHandle,
   stale,
 }) => {
-  const theme = useTheme();
   const { t } = useTranslation();
   const title = entry.title ?? t("pinboard.entry.untitled");
   const summary = entry.summary ?? undefined;
 
   if (variant === "compact") {
+    const Wrapper = (href ? "a" : "span") as "a" | "span";
     return (
-      <Stack
-        direction="row"
-        spacing={1}
-        alignItems="center"
-        sx={{ minWidth: 0, flex: 1 }}
-      >
+      <div className="flex flex-row items-center gap-2 min-w-0 flex-1">
         <PushPinRoundedIcon
-          size={14} color={theme.palette.warning.main}
+          className="h-3.5 w-3.5 text-rezics-color-warning shrink-0"
           aria-hidden="true"
         />
-        <Typography
-          variant="body2"
-          sx={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            minWidth: 0,
-            flex: 1,
-          }}
-          component={href ? "a" : "span"}
+        <Wrapper
+          className="text-sm whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1"
           {...(href ? { href } : {})}
         >
           {title}
-        </Typography>
-      </Stack>
+        </Wrapper>
+      </div>
     );
   }
 
   if (variant === "adminRow") {
     return (
-      <Stack
-        direction="row"
-        spacing={1.5}
-        alignItems="center"
-        sx={{
-          py: 1,
-          px: 1.5,
-          borderRadius: 1.5,
-          border: `1px solid ${theme.palette.divider}`,
-          bgcolor: stale
-            ? theme.palette.action.disabledBackground
-            : theme.palette.background.paper,
-          opacity: stale ? 0.75 : 1,
-        }}
+      <div
+        className={cn(
+          "flex flex-row items-center gap-3 py-2 px-3 rounded-md border border-rezics-color-border bg-rezics-color-bg-elevated",
+          stale && "opacity-75 bg-rezics-color-bg-muted",
+        )}
       >
         {dragHandle ?? (
           <DragIndicatorRoundedIcon
-            color={theme.palette.text.disabled}
+            className="h-5 w-5 text-rezics-color-fg-muted"
             aria-hidden="true"
           />
         )}
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography
-              variant="body2"
-              fontWeight={600}
-              noWrap
-              sx={{ minWidth: 0 }}
-            >
-              {title}
-            </Typography>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-row items-center gap-2">
+            <p className="text-sm font-semibold truncate min-w-0">{title}</p>
             {stale ? (
-              <Chip
-                size="small"
-                color="warning"
-                variant="outlined"
-                label={t("pinboard.entry.stale")}
-              />
+              <Badge variant="outline" className="border-rezics-color-warning text-rezics-color-warning">
+                {t("pinboard.entry.stale")}
+              </Badge>
             ) : null}
-            <Chip
-              size="small"
-              variant="outlined"
-              label={entry.language}
+            <Badge
+              variant="outline"
               aria-label={t("pinboard.entry.language", {
                 lang: entry.language,
               })}
-            />
-          </Stack>
-          {summary ? (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              noWrap
-              sx={{ display: "block" }}
             >
+              {entry.language}
+            </Badge>
+          </div>
+          {summary ? (
+            <p className="block text-xs text-rezics-color-fg-muted truncate">
               {summary}
-            </Typography>
+            </p>
           ) : null}
-        </Box>
-        <Stack direction="row" spacing={0.5}>
-          {onEdit ? (
-            <Tooltip title={t("common.edit")}>
-              <IconButton
-                size="small"
-                onClick={() => onEdit(entry)}
-                aria-label={t("common.edit")}
-              >
-                <EditRoundedIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          ) : null}
-          {onDelete ? (
-            <Tooltip title={t("common.delete")}>
-              <IconButton
-                size="small"
-                color="error"
-                onClick={() => onDelete(entry)}
-                aria-label={t("common.delete")}
-              >
-                <DeleteOutlineRoundedIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          ) : null}
-        </Stack>
-      </Stack>
+        </div>
+        <TooltipProvider>
+          <div className="flex flex-row gap-1">
+            {onEdit ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => onEdit(entry)}
+                    aria-label={t("common.edit")}
+                  >
+                    <EditRoundedIcon className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("common.edit")}</TooltipContent>
+              </Tooltip>
+            ) : null}
+            {onDelete ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-rezics-color-danger"
+                    onClick={() => onDelete(entry)}
+                    aria-label={t("common.delete")}
+                  >
+                    <DeleteOutlineRoundedIcon className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("common.delete")}</TooltipContent>
+              </Tooltip>
+            ) : null}
+          </div>
+        </TooltipProvider>
+      </div>
     );
   }
 
+  const Wrapper = (href ? "a" : "div") as "a" | "div";
   return (
-    <Box
-      component={href ? "a" : "div"}
+    <Wrapper
       {...(href ? { href } : {})}
-      sx={{
-        display: "block",
-        textDecoration: "none",
-        color: "inherit",
-        p: 2,
-        borderRadius: 2,
-        border: `1px solid ${theme.palette.divider}`,
-        bgcolor: theme.palette.background.paper,
-        transition: theme.transitions.create([
-          "border-color",
-          "background-color",
-        ]),
-        "&:hover": href
-          ? { borderColor: theme.palette.primary.light }
-          : undefined,
-      }}
+      className={cn(
+        "block no-underline text-inherit p-4 rounded-lg border border-rezics-color-border bg-rezics-color-bg-elevated transition-colors",
+        href && "hover:border-rezics-color-primary/60",
+      )}
     >
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+      <div className="flex flex-row items-center gap-2 mb-1">
         <PushPinRoundedIcon
-          size={16} color={theme.palette.warning.main}
+          className="h-4 w-4 text-rezics-color-warning shrink-0"
           aria-hidden="true"
         />
-        <Typography variant="subtitle2" fontWeight={600} noWrap>
-          {title}
-        </Typography>
-      </Stack>
+        <p className="text-sm font-semibold truncate">{title}</p>
+      </div>
       {summary ? (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
+        <p
+          className="text-sm text-rezics-color-fg-muted overflow-hidden"
+          style={{
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
-            overflow: "hidden",
           }}
         >
           {summary}
-        </Typography>
+        </p>
       ) : null}
-    </Box>
+    </Wrapper>
   );
 };

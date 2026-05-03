@@ -1,26 +1,28 @@
 import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  MenuItem,
-  Select,
-  Typography,
-} from "@mui/material";
-import {
   useAdminBanUserMutation,
   useAdminRemoveUserMutation,
   useAdminSetRoleMutation,
   useAdminUnbanUserMutation,
 } from "@rezics/api/auth/auth.mutations";
 import { authQueries } from "@rezics/api/auth/auth.queries";
+import { Spinner } from "@rezics/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import {
@@ -71,20 +73,14 @@ export default function AuthUsersPage() {
         id: "id",
         header: "ID",
         minWidth: 220,
-        cell: (u) => (
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            {u.id}
-          </Typography>
-        ),
+        cell: (u) => <span className="text-sm font-mono">{u.id}</span>,
       },
       {
         id: "name",
         header: "Name",
         minWidth: 160,
         cell: (u) => (
-          <Typography variant="body2" fontWeight={700} noWrap>
-            {u.name}
-          </Typography>
+          <span className="text-sm font-bold whitespace-nowrap">{u.name}</span>
         ),
       },
       {
@@ -92,9 +88,7 @@ export default function AuthUsersPage() {
         header: "Email",
         minWidth: 240,
         cell: (u) => (
-          <Typography variant="body2" noWrap>
-            {u.email}
-          </Typography>
+          <span className="text-sm whitespace-nowrap">{u.email}</span>
         ),
       },
       {
@@ -103,15 +97,19 @@ export default function AuthUsersPage() {
         minWidth: 140,
         cell: (u) => (
           <Select
-            size="small"
             value={u.role ?? "user"}
-            onChange={(e) =>
-              setRoleMutation.mutate({ userId: u.id, role: e.target.value })
+            onValueChange={(value) =>
+              setRoleMutation.mutate({ userId: u.id, role: value })
             }
           >
-            <MenuItem value="user">user</MenuItem>
-            <MenuItem value="admin">admin</MenuItem>
-            <MenuItem value="owner">owner</MenuItem>
+            <SelectTrigger size="sm" className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="user">user</SelectItem>
+              <SelectItem value="admin">admin</SelectItem>
+              <SelectItem value="owner">owner</SelectItem>
+            </SelectContent>
           </Select>
         ),
       },
@@ -121,9 +119,9 @@ export default function AuthUsersPage() {
         minWidth: 100,
         cell: (u) =>
           u.banned ? (
-            <Chip size="small" label="Banned" color="error" />
+            <Badge className="bg-rezics-color-danger text-white">Banned</Badge>
           ) : (
-            <Chip size="small" label="Active" color="success" />
+            <Badge className="bg-rezics-color-success text-white">Active</Badge>
           ),
       },
       {
@@ -137,29 +135,29 @@ export default function AuthUsersPage() {
         header: "Actions",
         minWidth: 200,
         cell: (u) => (
-          <Box sx={{ display: "flex", gap: 0.5 }}>
+          <div className="flex gap-1">
             {u.banned ? (
               <Button
-                size="small"
-                variant="outlined"
+                size="sm"
+                variant="outline"
                 onClick={() => unbanMutation.mutate({ userId: u.id })}
               >
                 Unban
               </Button>
             ) : (
               <Button
-                size="small"
-                variant="outlined"
-                color="warning"
+                size="sm"
+                variant="outline"
+                className="text-rezics-color-warning"
                 onClick={() => banMutation.mutate({ userId: u.id })}
               >
                 Ban
               </Button>
             )}
             <Button
-              size="small"
-              variant="outlined"
-              color="error"
+              size="sm"
+              variant="outline"
+              className="text-rezics-color-danger"
               onClick={() =>
                 setConfirmDialog({
                   open: true,
@@ -174,7 +172,7 @@ export default function AuthUsersPage() {
             >
               Remove
             </Button>
-          </Box>
+          </div>
         ),
       },
     ];
@@ -186,13 +184,13 @@ export default function AuthUsersPage() {
       <Card>
         <CardContent>
           {usersQuery.isLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={24} />
-            </Box>
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
           ) : usersQuery.isError ? (
-            <Typography color="error" variant="body2">
+            <p className="text-sm text-rezics-color-danger">
               Failed to load auth users.
-            </Typography>
+            </p>
           ) : (
             <PaginatedTable<AuthUser>
               columns={columns}
@@ -213,28 +211,32 @@ export default function AuthUsersPage() {
 
       <Dialog
         open={confirmDialog.open}
-        onClose={() => setConfirmDialog((prev) => ({ ...prev, open: false }))}
+        onOpenChange={(open) =>
+          setConfirmDialog((prev) => ({ ...prev, open }))
+        }
       >
-        <DialogTitle>{confirmDialog.title}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{confirmDialog.message}</DialogContentText>
+          <DialogHeader>
+            <DialogTitle>{confirmDialog.title}</DialogTitle>
+            <DialogDescription>{confirmDialog.message}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setConfirmDialog((prev) => ({ ...prev, open: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-rezics-color-danger text-white"
+              onClick={confirmDialog.onConfirm}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() =>
-              setConfirmDialog((prev) => ({ ...prev, open: false }))
-            }
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={confirmDialog.onConfirm}
-            color="error"
-            variant="contained"
-          >
-            Confirm
-          </Button>
-        </DialogActions>
       </Dialog>
     </Page>
   );

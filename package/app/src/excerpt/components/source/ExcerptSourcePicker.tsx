@@ -1,15 +1,10 @@
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
-  CircularProgress,
-  List,
-  ListItemButton,
-  ListItemText,
-  TextField,
-  Typography,
-} from "@mui/material";
+  AlertDescription,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
+import { Spinner } from "@rezics/ui";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
@@ -111,35 +106,46 @@ export function ExcerptSourcePicker({
 
   return (
     <div className="flex flex-col gap-2">
-      <TextField
-        label={t("excerpt.form.source_url", "Source URL")}
-        variant="standard"
-        value={displayedUrl}
-        disabled={disabled}
-        onChange={(e) => handleUrlChange(e.target.value)}
-        error={!!error}
-        helperText={error}
-        fullWidth
-      />
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="excerpt-source-url">
+          {t("excerpt.form.source_url", "Source URL")}
+        </Label>
+        <Input
+          id="excerpt-source-url"
+          value={displayedUrl}
+          disabled={disabled}
+          onChange={(e) => handleUrlChange(e.target.value)}
+          aria-invalid={!!error}
+          className={error ? "border-rezics-color-danger" : undefined}
+        />
+        {error ? (
+          <p className="text-sm text-rezics-color-danger">{error}</p>
+        ) : null}
+      </div>
 
       {justUpgradedFromUnitId && linkedUnitTitle && (
-        <Alert severity="info" variant="outlined" className="py-0">
-          {t("excerpt.form.linked_to", "Linked to: {{title}}", {
-            title: linkedUnitTitle,
-          })}
+        <Alert className="py-2">
+          <AlertDescription>
+            {t("excerpt.form.linked_to", "Linked to: {{title}}", {
+              title: linkedUnitTitle,
+            })}
+          </AlertDescription>
         </Alert>
       )}
 
       {value && (
-        <TextField
-          label={t("excerpt.form.source_title", "Source title")}
-          variant="standard"
-          value={title}
-          disabled={disabled}
-          onChange={(e) => handleTitleChange(e.target.value)}
-          inputProps={{ maxLength: 200 }}
-          fullWidth
-        />
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="excerpt-source-title">
+            {t("excerpt.form.source_title", "Source title")}
+          </Label>
+          <Input
+            id="excerpt-source-title"
+            value={title}
+            disabled={disabled}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            maxLength={200}
+          />
+        </div>
       )}
 
       {targetUnitId && (
@@ -178,39 +184,53 @@ function TreeDisclosure({
   const units = (data?.units ?? []) as UnitDTO[];
 
   return (
-    <Accordion
-      expanded={expanded}
-      onChange={(_, next) => setExpanded(next)}
-      disabled={disabled}
-      disableGutters
-      elevation={0}
-    >
-      <AccordionSummary expandIcon={<ExpandMore />}>
-        <Typography variant="body2">
+    <div className="border-t border-rezics-color-border pt-2">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setExpanded((s) => !s)}
+        className="flex items-center gap-2 text-sm w-full text-left hover:text-rezics-color-primary disabled:opacity-50"
+        aria-expanded={expanded}
+      >
+        <ExpandMore
+          className={
+            "h-4 w-4 transition-transform " +
+            (expanded ? "rotate-180" : "rotate-0")
+          }
+        />
+        <span>
           {t("excerpt.form.pick_from_work", "Pick from this work")}
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        {isLoading && <CircularProgress size={16} />}
-        {error && (
-          <Typography variant="caption" color="error">
-            {String(error)}
-          </Typography>
-        )}
-        {!isLoading && !error && units.length === 0 && (
-          <Typography variant="caption" color="text.secondary">
-            {t("excerpt.form.no_sub_units", "No sub-units")}
-          </Typography>
-        )}
-        <List dense>
-          {units.map((unit) => (
-            <ListItemButton key={unit.id} onClick={() => onPick(unit)}>
-              <ListItemText primary={displayTitle(unit, language) ?? unit.id} />
-            </ListItemButton>
-          ))}
-        </List>
-      </AccordionDetails>
-    </Accordion>
+        </span>
+      </button>
+      {expanded && (
+        <div className="pl-6 pt-2">
+          {isLoading && <Spinner size="sm" />}
+          {error && (
+            <p className="text-xs text-rezics-color-danger">
+              {String(error)}
+            </p>
+          )}
+          {!isLoading && !error && units.length === 0 && (
+            <p className="text-xs text-rezics-color-fg-muted">
+              {t("excerpt.form.no_sub_units", "No sub-units")}
+            </p>
+          )}
+          <ul className="flex flex-col">
+            {units.map((unit) => (
+              <li key={unit.id}>
+                <button
+                  type="button"
+                  onClick={() => onPick(unit)}
+                  className="w-full text-left text-sm py-1 px-2 rounded hover:bg-rezics-color-bg-muted"
+                >
+                  {displayTitle(unit, language) ?? unit.id}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 

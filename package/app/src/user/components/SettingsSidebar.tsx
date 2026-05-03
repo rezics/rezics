@@ -1,12 +1,13 @@
-import {
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  CircleUser as AccountCircleIcon,
+  Mail as EmailIcon,
+  Key as KeyIcon,
+  Link as LinkIcon,
+  ShieldCheck as SecurityIcon,
+  SlidersHorizontal as TuneIcon,
+} from "lucide-react";
 import type { FC } from "react";
-import { CircleUser as AccountCircleIcon, Mail as EmailIcon, Key as KeyIcon, Link as LinkIcon, ShieldCheck as SecurityIcon, SlidersHorizontal as TuneIcon } from "lucide-react";
 
 const SETTINGS_NAV = [
   { label: "Profile", path: "profile", icon: AccountCircleIcon },
@@ -23,35 +24,31 @@ export const SettingsSidebar: FC = () => {
   const pathname = location.pathname;
 
   return (
-    <List disablePadding>
+    <ul className="list-none p-0 m-0 flex flex-col gap-1">
       {SETTINGS_NAV.map(({ label, path, icon: Icon }) => {
         const fullPath = `/user/me/setting/${path}`;
         const isActive = pathname.startsWith(fullPath);
 
         return (
-          <ListItemButton
-            key={path}
-            selected={isActive}
-            onClick={() => void navigate({ to: fullPath })}
-            sx={{
-              borderRadius: 1,
-              mb: 0.5,
-              "&.Mui-selected": {
-                backgroundColor: "action.selected",
-              },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <Icon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={label}
-              primaryTypographyProps={{ variant: "body2" }}
-            />
-          </ListItemButton>
+          <li key={path}>
+            <button
+              type="button"
+              onClick={() => void navigate({ to: fullPath })}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-sm transition-colors ${
+                isActive
+                  ? "bg-rezics-color-bg-elevated"
+                  : "hover:bg-rezics-color-bg-elevated/60"
+              }`}
+            >
+              <span className="min-w-[24px] flex items-center">
+                <Icon className="w-4 h-4" />
+              </span>
+              <span>{label}</span>
+            </button>
+          </li>
         );
       })}
-    </List>
+    </ul>
   );
 };
 

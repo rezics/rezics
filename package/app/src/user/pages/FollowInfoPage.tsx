@@ -1,22 +1,20 @@
-import {
-  Avatar,
-  Button,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  Card,
+  CardContent,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -36,29 +34,42 @@ const EXTERNAL_ITEMS_PER_PAGE = 20;
 
 function FollowUserList({ users }: { users: SimpleUser[] }) {
   if (users.length === 0) {
-    return <div className="py-16 text-center text-gray-500">暂无用户。</div>;
+    return (
+      <div className="py-16 text-center text-rezics-color-fg-muted">
+        暂无用户。
+      </div>
+    );
   }
 
   return (
-    <List>
+    <ul className="divide-y divide-rezics-color-border">
       {users.map((user) => (
-        <ListItem key={user.unitId} divider>
-          <ListItemAvatar>
-            <Avatar src={user.avatar ?? undefined}>
+        <li
+          key={user.unitId}
+          className="flex items-center gap-3 py-3"
+        >
+          <Avatar>
+            <AvatarImage
+              src={user.avatar ?? undefined}
+              alt={user.name ?? ""}
+            />
+            <AvatarFallback>
               {user.name?.charAt(0).toUpperCase()}
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary={user.name || user.slug || user.unitId}
-            secondary={
-              user.slug ? (
-                <span className="text-sm text-gray-500">@{user.slug}</span>
-              ) : null
-            }
-          />
-        </ListItem>
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <span className="block text-sm font-medium text-rezics-color-fg">
+              {user.name || user.slug || user.unitId}
+            </span>
+            {user.slug && (
+              <span className="block text-sm text-rezics-color-fg-muted">
+                @{user.slug}
+              </span>
+            )}
+          </div>
+        </li>
       ))}
-    </List>
+    </ul>
   );
 }
 
@@ -136,10 +147,10 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   if (!resolvedUnitId) {
     return (
       <div className="w-full max-w-3xl mx-auto mt-32 text-center">
-        <Typography variant="h6">无法确定用户信息</Typography>
-        <Typography variant="body2" color="textSecondary">
+        <h6 className="text-base font-semibold">无法确定用户信息</h6>
+        <p className="text-sm text-rezics-color-fg-muted">
           请先登录，或从用户详情页进入本页面。
-        </Typography>
+        </p>
       </div>
     );
   }
@@ -156,16 +167,14 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
     <div className="w-11/12 mx-auto mt-16 px-4">
       <div className="flex items-center justify-between">
         <div className="mb-4">
-          <Typography variant="h5" className="font-bold mb-2">
-            关注信息
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
+          <h5 className="text-xl font-bold mb-2">关注信息</h5>
+          <p className="text-sm text-rezics-color-fg-muted">
             查看你关注的用户，以及关注你的用户列表。
-          </Typography>
+          </p>
         </div>
         <Button
-          variant="text"
-          color="primary"
+          variant="ghost"
+          className="text-rezics-color-primary"
           onClick={() => navigate({ to: "/user/me" })}
         >
           返回
@@ -176,16 +185,20 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
         <div className="px-4">
           <Tabs
             value={tab}
-            onChange={(_, value) => {
-              setTab(value);
+            onValueChange={(value) => {
+              setTab(value as "following" | "followers");
               setCurrentPage(1);
               paginatorRef.current?.resetPaginationPageNumber();
             }}
-            indicatorColor="primary"
-            textColor="primary"
           >
-            <Tab label={`我关注的 (${followingsTotal})`} value="following" />
-            <Tab label={`关注我的 (${followersTotal})`} value="followers" />
+            <TabsList>
+              <TabsTrigger value="following">
+                我关注的 ({followingsTotal})
+              </TabsTrigger>
+              <TabsTrigger value="followers">
+                关注我的 ({followersTotal})
+              </TabsTrigger>
+            </TabsList>
           </Tabs>
         </div>
 

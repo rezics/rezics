@@ -1,11 +1,13 @@
 import {
-  Box,
   Button,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import React from "react";
 import FeedbackDrawer from "../components/FeedbackDrawer";
 import FeedbackList from "../components/FeedbackList";
@@ -21,49 +23,46 @@ export const FeedbackPage: React.FC = () => {
     resolvedFilter === "all" ? undefined : resolvedFilter === "resolved";
 
   return (
-    <Box className="max-w-5xl mx-auto p-4">
-      <Stack direction="row" className="items-center justify-between mb-4">
-        <Typography variant="h5">我的反馈</Typography>
-        <Button variant="contained" onClick={() => setOpen(true)}>
-          提交反馈
-        </Button>
-      </Stack>
+    <div className="max-w-5xl mx-auto p-4">
+      <div className="flex flex-row items-center justify-between mb-4">
+        <h1 className="text-xl font-semibold">我的反馈</h1>
+        <Button onClick={() => setOpen(true)}>提交反馈</Button>
+      </div>
 
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        className="mb-4"
-      >
-        <TextField
-          label="搜索内容"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1"
-          size="small"
-          placeholder="搜索反馈内容..."
-        />
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <div className="flex flex-col gap-1 flex-1">
+          <Label htmlFor="feedback-search">搜索内容</Label>
+          <Input
+            id="feedback-search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="搜索反馈内容..."
+          />
+        </div>
 
-        <TextField
-          label="状态"
-          select
-          value={resolvedFilter}
-          onChange={(e) =>
-            setResolvedFilter(
-              e.target.value as "all" | "resolved" | "unresolved",
-            )
-          }
-          className="w-40"
-          size="small"
-        >
-          <MenuItem value="all">全部</MenuItem>
-          <MenuItem value="unresolved">待处理</MenuItem>
-          <MenuItem value="resolved">已解决</MenuItem>
-        </TextField>
-      </Stack>
+        <div className="flex flex-col gap-1 w-40">
+          <Label htmlFor="feedback-resolved">状态</Label>
+          <Select
+            value={resolvedFilter}
+            onValueChange={(v) =>
+              setResolvedFilter(v as "all" | "resolved" | "unresolved")
+            }
+          >
+            <SelectTrigger id="feedback-resolved">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部</SelectItem>
+              <SelectItem value="unresolved">待处理</SelectItem>
+              <SelectItem value="resolved">已解决</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       <FeedbackList queryType="mine" search={search} resolved={resolvedValue} />
 
       <FeedbackDrawer open={open} onClose={() => setOpen(false)} />
-    </Box>
+    </div>
   );
 };

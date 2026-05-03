@@ -1,20 +1,29 @@
-import {
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-} from "@mui/material";
 import { useCanEdit } from "@rezics/api/hooks";
 import type { BookDTO } from "@rezics/contract";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  ToggleGroup,
+  ToggleGroupItem,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
+import {
+  BookmarkPlus as BookmarkAddOutlined,
+  CircleCheck as CheckCircleOutline,
+  Pencil as EditOutlined,
+  Share as IosShareOutlined,
+} from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShareMenu } from "@/engagement/hooks/useShareMenu";
-import { BookmarkPlus as BookmarkAddOutlined, CircleCheck as CheckCircleOutline, Pencil as EditOutlined, Share as IosShareOutlined } from "lucide-react";
 
 interface BookHeroActionBarProps {
   bookInfo: BookDTO;
@@ -26,17 +35,9 @@ interface BookHeroActionBarProps {
 // status from the backend.
 type ReadStatus = "want" | "reading" | "read" | null;
 
-const ghostButtonSx = {
-  color: "rgba(255,255,255,0.9)",
-  borderColor: "rgba(255,255,255,0.25)",
-  textTransform: "none" as const,
-  fontWeight: 500,
-  borderRadius: "var(--rezics-radius-md, 8px)",
-  "&:hover": {
-    borderColor: "rgba(255,255,255,0.5)",
-    bgcolor: "rgba(255,255,255,0.08)",
-  },
-};
+// Ghost button styling for hero overlay surfaces (white text on dark backdrop).
+const ghostHeroClass =
+  "text-white/90 border-white/25 rounded-md hover:border-white/50 hover:bg-white/10 bg-transparent";
 
 export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   bookInfo,
@@ -65,112 +66,96 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   return (
     <div className="flex flex-col gap-3 w-full">
       <Button
-        variant="contained"
-        size="large"
-        startIcon={<BookmarkAddOutlined />}
+        size="lg"
         onClick={handleAddToShelf}
-        sx={{
-          bgcolor: "var(--rezics-color-brand-fill, #f4606c)",
+        className="rounded-md font-medium"
+        style={{
+          backgroundColor: "var(--rezics-color-brand-fill, #f4606c)",
           color: "var(--rezics-color-text-on-brand, #fff)",
-          textTransform: "none",
-          fontWeight: 500,
-          borderRadius: "var(--rezics-radius-md, 8px)",
-          boxShadow: "none",
-          "&:hover": {
-            bgcolor: "var(--rezics-color-brand-fill-hover, #e15462)",
-            boxShadow: "none",
-          },
         }}
       >
+        <BookmarkAddOutlined className="w-4 h-4 mr-2" />
         {t("book.hero.actions.add_to_shelf", "加入書架")}
       </Button>
 
-      <ToggleButtonGroup
-        exclusive
-        fullWidth
-        size="small"
-        value={readStatus}
-        onChange={(_, v) => setReadStatus(v as ReadStatus)}
-        sx={{
-          "& .MuiToggleButton-root": {
-            color: "rgba(255,255,255,0.8)",
-            borderColor: "rgba(255,255,255,0.2)",
-            textTransform: "none",
-            fontSize: "0.75rem",
-            py: 0.5,
-            "&.Mui-selected": {
-              color: "#fff",
-              bgcolor: "rgba(255,255,255,0.12)",
-              borderColor: "rgba(255,255,255,0.4)",
-              "&:hover": { bgcolor: "rgba(255,255,255,0.18)" },
-            },
-            "&:hover": { bgcolor: "rgba(255,255,255,0.06)" },
-          },
-        }}
+      <ToggleGroup
+        type="single"
+        size="sm"
+        value={readStatus ?? ""}
+        onValueChange={(v) => setReadStatus((v as ReadStatus) || null)}
+        className="w-full grid grid-cols-3"
       >
-        <ToggleButton value="want">
+        <ToggleGroupItem
+          value="want"
+          className="text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
+        >
           {t("book.hero.actions.want_to_read", "想讀")}
-        </ToggleButton>
-        <ToggleButton value="reading">
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="reading"
+          className="text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
+        >
           {t("book.hero.actions.reading", "在讀")}
-        </ToggleButton>
-        <ToggleButton value="read">
-          <CheckCircleOutline size={14} style={{ marginRight: "4px" }} />
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="read"
+          className="text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
+        >
+          <CheckCircleOutline className="w-3.5 h-3.5 mr-1" />
           {t("book.hero.actions.read", "已讀")}
-        </ToggleButton>
-      </ToggleButtonGroup>
+        </ToggleGroupItem>
+      </ToggleGroup>
 
       <div className="flex items-stretch gap-2">
-        <Button
-          variant="outlined"
-          size="medium"
-          startIcon={<IosShareOutlined />}
-          onClick={share.handleOpen}
-          sx={{ ...ghostButtonSx, flex: 1 }}
-        >
-          {t("common.share", "分享")}
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="default"
+              onClick={share.handleOpen}
+              className={`flex-1 ${ghostHeroClass}`}
+            >
+              <IosShareOutlined className="w-4 h-4 mr-2" />
+              {t("common.share", "分享")}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={share.handleCopy}>
+              {t("common.copy_link", "複製連結")}
+            </DropdownMenuItem>
+            {share.canWebShare && (
+              <DropdownMenuItem onClick={share.handleWebShare}>
+                {t("common.share_via", "分享…")}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {canEdit && (
-          <Tooltip
-            title={t("book.hero.actions.edit_details", "編輯書籍詳情")}
-            placement="top"
-          >
-            <IconButton
-              aria-label={t("book.hero.actions.edit_details", "編輯書籍詳情")}
-              onClick={handleEdit}
-              size="medium"
-              sx={{
-                color: "rgba(255,255,255,0.9)",
-                border: "1px solid rgba(255,255,255,0.25)",
-                borderRadius: "var(--rezics-radius-md, 8px)",
-                "&:hover": {
-                  bgcolor: "rgba(255,255,255,0.08)",
-                  borderColor: "rgba(255,255,255,0.5)",
-                },
-              }}
-            >
-              <EditOutlined fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  aria-label={t(
+                    "book.hero.actions.edit_details",
+                    "編輯書籍詳情",
+                  )}
+                  onClick={handleEdit}
+                  className={ghostHeroClass}
+                >
+                  <EditOutlined className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {t("book.hero.actions.edit_details", "編輯書籍詳情")}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
-
-      <Menu
-        anchorEl={share.anchorEl}
-        open={share.open}
-        onClose={share.handleClose}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <MenuItem onClick={share.handleCopy}>
-          {t("common.copy_link", "複製連結")}
-        </MenuItem>
-        {share.canWebShare && (
-          <MenuItem onClick={share.handleWebShare}>
-            {t("common.share_via", "分享…")}
-          </MenuItem>
-        )}
-      </Menu>
     </div>
   );
 };

@@ -1,13 +1,10 @@
 import {
-  Box,
+  Badge,
   Button,
-  Chip,
-  ClickAwayListener,
-  IconButton,
-  Paper,
-  Popper,
-  Typography,
-} from "@mui/material";
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@rezics/ui/shadcn";
 import { useCanEdit } from "@rezics/api/hooks";
 import { useCastTagVoteMutation } from "@rezics/api/tag/tag.mutations";
 import type {
@@ -21,8 +18,15 @@ import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { InjectedTag } from "@/search/models/injectedTags";
 import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
+import { cn } from "@/shared/utils/css-util";
 import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
-import { X as CloseIcon, Pencil as EditOutlinedIcon, Search as SearchIcon, ThumbsDown as ThumbDownOutlinedIcon, ThumbsUp as ThumbUpOutlinedIcon } from "lucide-react";
+import {
+  X as CloseIcon,
+  Pencil as EditOutlinedIcon,
+  Search as SearchIcon,
+  ThumbsDown as ThumbDownOutlinedIcon,
+  ThumbsUp as ThumbUpOutlinedIcon,
+} from "lucide-react";
 
 export type TagInteractionProps = {
   tags: UnitTagDTO[];
@@ -39,12 +43,16 @@ export type TagInteractionProps = {
  * TagInteraction — interactive tag chip group with three states.
  *
  *   idle: plain chips
- *   single-preview: clicked chip opens an anchored Popper with detail/vote/search
+ *   single-preview: clicked chip opens an anchored Popover with detail/vote/search
  *   multi-select: 2+ chips selected; an action bar offers "Search selected tags"
  *
  * Chips render translated labels from the batch translation map. Navigation
  * to search uses the shared `useNavigateToTagSearch` helper so the target
  * page receives pre-resolved tag data via router state.
+ *
+ * The popover is rendered with `modal={false}` so the backdrop is absent,
+ * scroll lock is disabled, and other chips remain clickable while the
+ * preview is open (per tag-interaction-component spec).
  */
 export const TagInteraction: React.FC<TagInteractionProps> = ({
   tags,
@@ -113,158 +121,166 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
     voteMutation.mutate({ tagUnitId, unitId: bookUnitId, value });
   };
 
+  const popoverOpen = state.kind === "single-preview" && previewTag !== null;
+
   return (
     <div className={className}>
-      <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => {
-          const selected = isSelected(tag.tagUnitId);
-          return (
-            <Chip
-              key={tag.tagUnitId}
-              label={`${labelOf(tag.tagUnitId)} (${tag.score})`}
-              size="small"
-              clickable
-              color={selected ? "primary" : "default"}
-              variant={selected ? "filled" : "outlined"}
-              onClick={(e) =>
-                handleChipClick(
-                  e as unknown as React.MouseEvent<HTMLDivElement>,
-                  tag.tagUnitId,
-                )
-              }
-            />
-          );
-        })}
-      </div>
+      <Popover
+        modal={false}
+        open={popoverOpen}
+        onOpenChange={(open) => {
+          if (!open) dispatch({ type: "CLOSE_POPPER" });
+        }}
+      >
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag) => {
+            const selected = isSelected(tag.tagUnitId);
+            const chipNode = (
+              <Badge
+                role="button"
+                tabIndex={0}
+                aria-pressed={selected}
+                variant={selected ? "default" : "outline"}
+                className={cn("cursor-pointer select-none")}
+                onClick={(e) =>
+                  handleChipClick(
+                    e as unknown as React.MouseEvent<HTMLDivElement>,
+                    tag.tagUnitId,
+                  )
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleChipClick(
+                      e as unknown as React.MouseEvent<HTMLDivElement>,
+                      tag.tagUnitId,
+                    );
+                  }
+                }}
+              >
+                {labelOf(tag.tagUnitId)} ({tag.score})
+              </Badge>
+            );
+            if (
+              state.kind === "single-preview" &&
+              state.tagUnitId === tag.tagUnitId
+            ) {
+              return (
+                <PopoverAnchor key={tag.tagUnitId} asChild>
+                  {chipNode}
+                </PopoverAnchor>
+              );
+            }
+            return <div key={tag.tagUnitId}>{chipNode}</div>;
+          })}
+        </div>
 
-      {state.kind === "single-preview" && previewTag && (
-        <Popper
-          open
-          anchorEl={state.anchor}
-          placement="bottom"
-          modifiers={[
-            { name: "offset", options: { offset: [0, 8] } },
-            { name: "preventOverflow", options: { padding: 8 } },
-          ]}
-          className="z-10"
-        >
-          <ClickAwayListener
-            onClickAway={(event) => {
-              const target = event.target as Node;
-              if (state.anchor.contains(target)) return;
-              dispatch({ type: "CLOSE_POPPER" });
-            }}
+        {popoverOpen && previewTag && (
+          <PopoverContent
+            side="bottom"
+            align="start"
+            sideOffset={8}
+            className="p-4 min-w-[280px] max-w-[360px] z-10"
+            onOpenAutoFocus={(e) => e.preventDefault()}
           >
-            <Paper elevation={4} className="p-4 min-w-[280px] max-w-[360px]">
-              <div className="flex items-start justify-between gap-2">
-                <Typography variant="subtitle1" className="font-semibold">
-                  {labelOf(previewTag.tagUnitId)}
-                </Typography>
-                <IconButton
-                  size="small"
-                  aria-label="Close"
-                  onClick={() => dispatch({ type: "CLOSE_POPPER" })}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </div>
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-sm font-semibold">
+                {labelOf(previewTag.tagUnitId)}
+              </p>
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label="Close"
+                onClick={() => dispatch({ type: "CLOSE_POPPER" })}
+              >
+                <CloseIcon className="h-4 w-4" />
+              </Button>
+            </div>
 
-              {translations[previewTag.tagUnitId]?.description && (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  className="mt-1"
+            {translations[previewTag.tagUnitId]?.description && (
+              <p className="text-sm text-rezics-color-fg-muted mt-1">
+                {translations[previewTag.tagUnitId]?.description}
+              </p>
+            )}
+
+            <div className="mt-3 flex items-center gap-3 text-sm opacity-70">
+              <span>
+                {t("tag.score", "Score")}: {previewTag.score}
+              </span>
+              <span>
+                {t("tag.votes", "Votes")}: {previewTag.voteCount}
+              </span>
+            </div>
+
+            <div className="mt-3 flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleVote(previewTag.tagUnitId, 1)}
+                disabled={voteMutation.isPending}
+              >
+                <ThumbUpOutlinedIcon className="h-4 w-4 mr-1" />
+                {t("tag.upvote", "Upvote")}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleVote(previewTag.tagUnitId, -1)}
+                disabled={voteMutation.isPending}
+              >
+                <ThumbDownOutlinedIcon className="h-4 w-4 mr-1" />
+                {t("tag.downvote", "Downvote")}
+              </Button>
+            </div>
+
+            <div className="mt-3 flex flex-col gap-2">
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={() => handleSearchSingle(previewTag.tagUnitId)}
+              >
+                <SearchIcon className="h-4 w-4 mr-1" />
+                {t("tag.search_this", "Search this tag")}
+              </Button>
+              {canEditTags && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() =>
+                    navigate({ to: `/book/${bookUnitId}/edit/tag` })
+                  }
                 >
-                  {translations[previewTag.tagUnitId]?.description}
-                </Typography>
+                  <EditOutlinedIcon className="h-4 w-4 mr-1" />
+                  {t("common.edit")}
+                </Button>
               )}
-
-              <Box className="mt-3 flex items-center gap-3 text-sm opacity-70">
-                <span>
-                  {t("tag.score", "Score")}: {previewTag.score}
-                </span>
-                <span>
-                  {t("tag.votes", "Votes")}: {previewTag.voteCount}
-                </span>
-              </Box>
-
-              <div className="mt-3 flex items-center gap-2">
-                <Button
-                  size="small"
-                  startIcon={<ThumbUpOutlinedIcon fontSize="small" />}
-                  variant="outlined"
-                  onClick={() => handleVote(previewTag.tagUnitId, 1)}
-                  disabled={voteMutation.isPending}
-                >
-                  {t("tag.upvote", "Upvote")}
-                </Button>
-                <Button
-                  size="small"
-                  startIcon={<ThumbDownOutlinedIcon fontSize="small" />}
-                  variant="outlined"
-                  onClick={() => handleVote(previewTag.tagUnitId, -1)}
-                  disabled={voteMutation.isPending}
-                >
-                  {t("tag.downvote", "Downvote")}
-                </Button>
-              </div>
-
-              <div className="mt-3 flex flex-col gap-2">
-                <Button
-                  size="small"
-                  fullWidth
-                  variant="contained"
-                  startIcon={<SearchIcon fontSize="small" />}
-                  onClick={() => handleSearchSingle(previewTag.tagUnitId)}
-                >
-                  {t("tag.search_this", "Search this tag")}
-                </Button>
-                {canEditTags && (
-                  <Button
-                    size="small"
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<EditOutlinedIcon fontSize="small" />}
-                    onClick={() =>
-                      navigate({ to: `/book/${bookUnitId}/edit/tag` })
-                    }
-                  >
-                    {t("common.edit")}
-                  </Button>
-                )}
-              </div>
-            </Paper>
-          </ClickAwayListener>
-        </Popper>
-      )}
+            </div>
+          </PopoverContent>
+        )}
+      </Popover>
 
       {state.kind === "multi-select" && (
-        <Paper
-          elevation={1}
-          className="mt-3 p-2 flex items-center justify-between gap-2"
-        >
-          <Typography variant="body2" className="px-1">
+        <div className="mt-3 p-2 flex items-center justify-between gap-2 rounded-md border border-rezics-color-border bg-rezics-color-bg-elevated">
+          <p className="text-sm px-1">
             {t("tag.selected_count", "Selected: {{count}}", {
               count: state.selected.length,
             })}
-          </Typography>
+          </p>
           <div className="flex items-center gap-2">
             <Button
-              size="small"
+              size="sm"
+              variant="ghost"
               onClick={() => dispatch({ type: "DESELECT_ALL" })}
             >
               {t("tag.clear", "Clear")}
             </Button>
-            <Button
-              size="small"
-              variant="contained"
-              startIcon={<SearchIcon fontSize="small" />}
-              onClick={handleSearchMulti}
-            >
+            <Button size="sm" onClick={handleSearchMulti}>
+              <SearchIcon className="h-4 w-4 mr-1" />
               {t("tag.search_selected", "Search selected tags")}
             </Button>
           </div>
-        </Paper>
+        </div>
       )}
     </div>
   );
