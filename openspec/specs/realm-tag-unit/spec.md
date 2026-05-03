@@ -18,56 +18,27 @@ RealmUnit SHALL be a junction table with fields `realmUnitId` (the realm's Unit 
 
 ### Requirement: RealmUnit removal withdraws a unit from a realm
 
-Removing a RealmUnit record SHALL remove the unit from the realm's content feed. Removal of a RealmUnit SHALL NOT affect any UnitTag records that were contributed by the realm's RealmTagUnit entries -- those global tags are retained.
+Removing a RealmUnit record SHALL remove the unit from the realm's content feed. Removal of a RealmUnit SHALL NOT affect any UnitTag records and SHALL NOT affect any RealmTagUnit records that reference the realm and unit; removal of those rows is a separate, deliberate action by an authorized actor.
 
 #### Scenario: Remove a unit from a realm
 
-- GIVEN RealmUnit `(realmUnitId = "realm-1", unitId = "unit-1")`
-- WHEN the RealmUnit record is deleted
-- THEN "unit-1" SHALL no longer appear in "realm-1"'s content feed
+- **GIVEN** RealmUnit `(realmUnitId = "realm-1", unitId = "unit-1")`
+- **WHEN** the RealmUnit record is deleted
+- **THEN** "unit-1" SHALL no longer appear in "realm-1"'s content feed
 
 #### Scenario: Removal does not affect global tags
 
-- GIVEN RealmUnit `(realm-1, unit-1)` and RealmTagUnit entries that previously cascaded score to UnitTag
-- WHEN the RealmUnit record is deleted
-- THEN all UnitTag records for "unit-1" SHALL retain their current scores
-- AND no UnitTag records SHALL be removed or decremented
+- **GIVEN** RealmUnit `(realm-1, unit-1)` and UnitTag rows for "unit-1" exist
+- **WHEN** the RealmUnit record is deleted
+- **THEN** all UnitTag records for "unit-1" SHALL retain their current scores
+- **AND** no UnitTag records SHALL be removed or decremented
 
-### Requirement: RealmTagUnit creation MUST cascade to UnitTag
+#### Scenario: Removal does not affect existing RealmTagUnit rows
 
-RealmTagUnit SHALL have a three-way composite primary key of `(realmUnitId, tagUnitId, unitId)`. When a RealmTagUnit record is created, the system MUST perform an upsert on UnitTag `(unitId, tagUnitId)` -- creating the record if it does not exist or incrementing its score if it does. This is a one-way additive cascade: realm classification feeds into the global tag score.
-
-#### Scenario: First realm tags a unit with a new tag
-
-- GIVEN Unit "unit-1" has no existing UnitTag for tag "tag-action"
-- WHEN a moderator of "realm-1" creates RealmTagUnit `(realmUnitId = "realm-1", tagUnitId = "tag-action", unitId = "unit-1")`
-- THEN a UnitTag record SHALL be upserted with `(unitId = "unit-1", tagUnitId = "tag-action")`
-- AND the UnitTag `score` SHALL be incremented
-
-#### Scenario: Second realm tags the same unit with the same tag
-
-- GIVEN UnitTag `(unit-1, tag-action)` already exists with a score reflecting one realm contribution
-- WHEN a moderator of "realm-2" creates RealmTagUnit `(realmUnitId = "realm-2", tagUnitId = "tag-action", unitId = "unit-1")`
-- THEN the existing UnitTag record's `score` SHALL be further incremented
-- AND no duplicate UnitTag record SHALL be created
-
-### Requirement: RealmTagUnit removal MUST NOT cascade to UnitTag
-
-When a RealmTagUnit record is removed, the system MUST NOT decrement, remove, or otherwise modify the corresponding UnitTag record. Global tag scores are accumulative -- once a realm contributes to a tag's score, that contribution persists even after the realm's classification is removed.
-
-#### Scenario: Remove a realm tag without affecting global score
-
-- GIVEN RealmTagUnit `(realm-1, tag-action, unit-1)` and UnitTag `(unit-1, tag-action)` with score 15
-- WHEN the RealmTagUnit record is deleted
-- THEN the UnitTag `(unit-1, tag-action)` record SHALL still exist
-- AND the UnitTag `score` SHALL remain 15
-- AND the UnitTag record SHALL NOT be deleted or modified
-
-#### Scenario: All realm tags removed but global tag persists
-
-- GIVEN UnitTag `(unit-1, tag-action)` that received contributions from "realm-1" and "realm-2"
-- WHEN both RealmTagUnit records are deleted
-- THEN the UnitTag `(unit-1, tag-action)` record SHALL still exist with its accumulated score intact
+- **GIVEN** RealmUnit `(realm-1, unit-1)` and RealmTagUnit rows like `(realm-1, unit-1, tag-1)` exist
+- **WHEN** the RealmUnit record is deleted
+- **THEN** RealmTagUnit rows SHALL be retained until separately deleted by an authorized actor
+- **AND** their `score` and `voteCount` SHALL be unchanged
 
 ### Requirement: Query all units in a realm
 
@@ -130,34 +101,6 @@ The system SHALL support querying all realms that have applied at least one tag 
 - WHEN a client queries all realms that have tagged "unit-orphan"
 - THEN the response SHALL return an empty list
 
-### Requirement: Only moderators and owners can manage RealmTagUnit
-
-Creating or removing RealmTagUnit entries SHALL be restricted to users who hold moderator or owner roles within the realm. Regular users and unauthenticated users MUST NOT be able to create or delete RealmTagUnit records.
-
-#### Scenario: Moderator creates a realm tag
-
-- GIVEN user "mod-1" is a moderator of "realm-1"
-- WHEN "mod-1" creates RealmTagUnit `(realm-1, tag-action, unit-1)`
-- THEN the record SHALL be created successfully
-
-#### Scenario: Owner creates a realm tag
-
-- GIVEN user "owner-1" is the owner of "realm-1"
-- WHEN "owner-1" creates RealmTagUnit `(realm-1, tag-drama, unit-1)`
-- THEN the record SHALL be created successfully
-
-#### Scenario: Regular user is denied
-
-- GIVEN user "user-1" has no moderator or owner role in "realm-1"
-- WHEN "user-1" attempts to create RealmTagUnit `(realm-1, tag-action, unit-1)`
-- THEN the system SHALL deny the operation with an authorization error
-- AND no RealmTagUnit record SHALL be created
-
-#### Scenario: Unauthenticated user is denied
-
-- WHEN an unauthenticated caller attempts to create a RealmTagUnit record
-- THEN the system SHALL deny the operation with an authentication error
-
 ### Requirement: Realms as namespaces for tag classification
 
 Different realms SHALL be able to classify the same content unit with different sets of tags from the shared global tag vocabulary. This provides namespace-like functionality (similar to e-hentai's tag namespaces) without introducing hierarchy or categories into the tag system itself. For example, a "female traits" realm and a "male traits" realm can both apply the tag "long hair" to the same unit independently.
@@ -179,3 +122,172 @@ Different realms SHALL be able to classify the same content unit with different 
 - THEN only "action" and "sci-fi" SHALL be returned
 - AND when querying tags by "realm-mood" for "unit-1", only "dark" and "intense" SHALL be returned
 - AND the global UnitTag list for "unit-1" SHALL include all four tags
+
+### Requirement: RealmTagUnit has score, voteCount, pinned, and position fields
+
+RealmTagUnit SHALL contain the following additional fields beyond its `(realmUnitId, tagUnitId, unitId)` composite primary key: `score: integer` (default `0`), `voteCount: integer` (default `0`), `pinned: boolean` (default `false`), `position: string?` (nullable), and timestamp fields `createdAt`, `updatedAt`. The `score` and `voteCount` SHALL be derived from `RealmTagVote` rows as defined by the `realm-tag-vote` capability. The `pinned` and `position` fields define editorial ordering analogous to UnitTag.
+
+#### Scenario: New RealmTagUnit row has expected default fields
+
+- **WHEN** a RealmTagUnit row is newly created via the standard creation flow
+- **THEN** the row SHALL have `score = 1`, `voteCount = 1`, `pinned = false`, `position = null`, and timestamps populated
+
+#### Scenario: RealmTagUnitDTO contains the new fields
+
+- **GIVEN** the `RealmTagUnitDTO` type
+- **WHEN** a consumer reads the type
+- **THEN** it SHALL contain `realmUnitId`, `unitId`, `tagUnitId`, `score`, `voteCount`, `pinned`, `position`, `createdAt`, `updatedAt`
+
+### Requirement: Any realm member can create a RealmTagUnit
+
+Any authenticated user who is a current member of `realmUnitId` SHALL be able to create a RealmTagUnit record by sending a `POST /realm-tag-units` request. The first creator's request creates the row and writes their `+1` RealmTagVote; subsequent calls by other members append their `+1` RealmTagVote and increment the row by `1`. Repeated calls by the same member are idempotent. Realm membership SHALL be verified at write time.
+
+#### Scenario: Regular member creates a realm tag application
+
+- **GIVEN** "user-1" is a regular member (not a moderator or owner) of "realm-1"
+- **WHEN** "user-1" sends `POST /realm-tag-units` for `(realm-1, unit-1, tag-1)`
+- **THEN** the system SHALL create the RealmTagUnit row
+- **AND** the system SHALL create a `+1` RealmTagVote row for "user-1"
+- **AND** no authorization error SHALL be returned
+
+#### Scenario: Non-member is denied
+
+- **GIVEN** "user-x" is NOT a member of "realm-1"
+- **WHEN** "user-x" sends `POST /realm-tag-units` for `(realm-1, unit-1, tag-1)`
+- **THEN** the system SHALL deny the operation with an authorization error
+
+### Requirement: RealmTagUnit display ordering pins-first then by score descending
+
+When retrieving the RealmTagUnit list for a `(realmUnitId, unitId)` pair, the system SHALL emit rows in two sections in order: first all rows where `pinned = true` sorted by `position` ascending (lexicographic string compare), then all rows where `pinned = false` sorted by `score` descending. Ties within either section SHALL maintain a stable order. This ordering rule applies to both realm-context endpoints and any list endpoint that returns realm-scoped tag rows.
+
+#### Scenario: Pinned realm tags lead the realm-context list
+
+- **GIVEN** RealmTagUnit rows for `(realm-1, unit-1)`: `tag-A (pinned=true, position="G")`, `tag-B (pinned=true, position="M")`, `tag-C (pinned=false, score=5)`, `tag-D (pinned=false, score=200)`
+- **WHEN** a client requests realm-1's tags for unit-1
+- **THEN** the order SHALL be: `tag-A`, `tag-B`, `tag-D`, `tag-C`
+
+### Requirement: Pin and delete authority for RealmTagUnit is restricted to admin or realm owner
+
+Setting `pinned`, mutating `position`, unpinning, and deleting a RealmTagUnit row SHALL be restricted to:
+- platform administrators, OR
+- the user identified as the realm's owner.
+
+Realm moderators SHALL NOT hold pin or delete authority on RealmTagUnit in this iteration.
+
+#### Scenario: Realm owner pins a realm tag
+
+- **GIVEN** "user-owner" is the owner of "realm-1"
+- **AND** RealmTagUnit `(realm-1, unit-1, tag-1)` exists with `pinned = false`
+- **WHEN** "user-owner" requests to pin the row at position `"M"`
+- **THEN** the row SHALL be updated to `pinned = true, position = "M"`
+
+#### Scenario: Platform admin deletes a RealmTagUnit
+
+- **GIVEN** RealmTagUnit `(realm-1, unit-1, tag-1)` exists
+- **WHEN** a platform administrator sends a delete request
+- **THEN** the row SHALL be removed
+- **AND** all RealmTagVote rows for `(realm-1, unit-1, tag-1)` SHALL also be removed
+
+#### Scenario: Realm moderator is denied pin authority
+
+- **GIVEN** "user-mod" is a moderator (but not the owner) of "realm-1"
+- **WHEN** "user-mod" attempts to pin or delete a RealmTagUnit row in "realm-1"
+- **THEN** the system SHALL deny the operation with an authorization error
+
+#### Scenario: Regular member is denied pin authority
+
+- **GIVEN** "user-1" is a regular member of "realm-1"
+- **WHEN** "user-1" attempts to pin or delete a RealmTagUnit row in "realm-1"
+- **THEN** the system SHALL deny the operation with an authorization error
+
+### Requirement: RealmTagUnit deletion is unconditional for authorized actors
+
+Deletion of a RealmTagUnit row by an authorized actor (platform admin or realm owner) SHALL succeed regardless of the row's current `score`. There SHALL be no minimum-score gate or community-consensus precondition for deletion.
+
+#### Scenario: Delete a high-score realm tag row
+
+- **GIVEN** RealmTagUnit `(realm-1, unit-1, tag-1)` with `score = 50`
+- **WHEN** an authorized actor sends a delete request
+- **THEN** the row SHALL be removed
+
+#### Scenario: Delete a low-score realm tag row
+
+- **GIVEN** RealmTagUnit `(realm-1, unit-1, tag-1)` with `score = -3`
+- **WHEN** an authorized actor sends a delete request
+- **THEN** the row SHALL be removed
+
+### Requirement: RealmTagUnit rows with score at or below -100 are hidden from regular users
+
+When a list/search endpoint returns RealmTagUnit rows for a regular caller (any user who is not a platform administrator and not the realm's owner), rows whose `score ≤ -100` SHALL be excluded. When the same endpoint is called by a platform administrator or by the realm's owner, those rows SHALL be included with a flag (e.g. `belowVisibilityThreshold: true`) marking their suppressed status.
+
+#### Scenario: Regular member does not see suppressed realm rows
+
+- **GIVEN** RealmTagUnit `(realm-1, unit-1, tag-1)` has `score = -120`
+- **WHEN** a regular member of "realm-1" requests the realm tag list for "unit-1"
+- **THEN** the response SHALL NOT include `(realm-1, unit-1, tag-1)`
+
+#### Scenario: Realm owner sees suppressed rows on their own realm
+
+- **GIVEN** "user-owner" is the owner of "realm-1"
+- **AND** RealmTagUnit `(realm-1, unit-1, tag-1)` has `score = -120`
+- **WHEN** "user-owner" requests the realm tag list for "unit-1"
+- **THEN** the response SHALL include `(realm-1, unit-1, tag-1)` with `belowVisibilityThreshold = true`
+
+### Requirement: Admin discovery endpoint for low-score RealmTagUnit rows
+
+The system SHALL expose an admin-only endpoint that lists RealmTagUnit rows with `score` at or below a configurable threshold (default `-100`), to support periodic moderation sweeps. The endpoint SHALL accept `threshold` and optional `realmUnitId` query parameters and SHALL return rows ordered by `score` ascending.
+
+#### Scenario: Admin lists low-score realm rows
+
+- **GIVEN** several RealmTagUnit rows have `score ≤ -100`
+- **WHEN** a platform administrator calls the admin discovery endpoint with `threshold = -100`
+- **THEN** the response SHALL include those rows ordered by `score` ascending
+
+#### Scenario: Admin scopes discovery to a single realm
+
+- **WHEN** a platform administrator calls the discovery endpoint with `threshold = -100` and `realmUnitId = "realm-1"`
+- **THEN** the response SHALL contain only rows whose `realmUnitId` is "realm-1"
+
+### Requirement: RealmTagUnit and UnitTag have fully independent lifecycles
+
+A RealmTagUnit row and the corresponding UnitTag row (if any) SHALL be independent. Specifically: deleting a UnitTag SHALL NOT delete or modify any RealmTagUnit row that references the same `(unitId, tagUnitId)`; deleting a RealmTagUnit SHALL NOT delete or modify any UnitTag row that references the same `(unitId, tagUnitId)`. There SHALL be no foreign key from RealmTagUnit to UnitTag, nor any server-side cascade between the two layers in either direction.
+
+#### Scenario: Deleting a RealmTagUnit does not affect UnitTag
+
+- **GIVEN** RealmTagUnit `(realm-1, unit-1, tag-1)` and UnitTag `(unit-1, tag-1)` both exist
+- **AND** UnitTag `(unit-1, tag-1)` has `score = 7`
+- **WHEN** an authorized actor deletes RealmTagUnit `(realm-1, unit-1, tag-1)`
+- **THEN** UnitTag `(unit-1, tag-1)` SHALL still exist with `score = 7`
+
+#### Scenario: Deleting a UnitTag does not affect RealmTagUnit
+
+- **GIVEN** UnitTag `(unit-1, tag-1)` and RealmTagUnit `(realm-1, unit-1, tag-1)` both exist
+- **AND** RealmTagUnit `(realm-1, unit-1, tag-1)` has `score = 4`
+- **WHEN** an authorized actor deletes UnitTag `(unit-1, tag-1)`
+- **THEN** RealmTagUnit `(realm-1, unit-1, tag-1)` SHALL still exist with `score = 4`
+
+### Requirement: Client coordinates simultaneous global and realm tag writes
+
+When a user tags a unit inside a realm, the client SHALL issue two independent writes: `POST /realm-tag-units` for the realm-scoped relation and `POST /unit-tags` for the global relation. Each write is independently authoritative. The server SHALL NOT couple the two writes; if only one succeeds, the system SHALL accept the resulting partial state without rollback. The client is responsible for surfacing partial-success errors to the user and offering retry.
+
+#### Scenario: Both writes succeed
+
+- **GIVEN** "user-1" is a member of "realm-1"
+- **WHEN** the client issues `POST /realm-tag-units (realm-1, unit-1, tag-1)` and `POST /unit-tags (unit-1, tag-1)` in sequence
+- **AND** both succeed
+- **THEN** RealmTagUnit `(realm-1, unit-1, tag-1)` and UnitTag `(unit-1, tag-1)` SHALL both exist with their respective +1 votes recorded
+
+#### Scenario: Realm write succeeds, global write fails
+
+- **GIVEN** the realm-scoped POST has succeeded
+- **WHEN** the global `POST /unit-tags` fails (e.g. transient network or server error)
+- **THEN** the RealmTagUnit row SHALL still exist with its +1 vote
+- **AND** the system SHALL accept this partial state; no automatic rollback SHALL occur
+- **AND** the client SHALL surface the error and offer retry of the failed global write
+
+#### Scenario: Global write succeeds, realm write fails
+
+- **GIVEN** the global `POST /unit-tags` has succeeded
+- **WHEN** the realm-scoped `POST /realm-tag-units` fails
+- **THEN** the UnitTag row SHALL still exist with its +1 vote
+- **AND** the client SHALL surface the error and offer retry of the failed realm write
