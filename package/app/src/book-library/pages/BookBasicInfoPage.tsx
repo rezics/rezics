@@ -15,6 +15,7 @@ import { RemarkInlineForm } from "@/remark";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { TagInteraction } from "@/tag/components/TagInteraction";
+import { BookCopyrightNotice } from "../components/BookCopyrightNotice";
 import { BookDescription } from "../components/BookDescription";
 import { MetadataPanel } from "../components/BookDetail/MetadataPanel";
 import { ExcerptPreview } from "../components/ExcerptPreview";
@@ -147,15 +148,6 @@ export const BookBasicInfoPage: React.FC = () => {
 
       <Divider />
 
-      <div>
-        <AccentBarWithText text={t("book.fields.score" as any)} />
-        <Box mt={1}>
-          <RemarkInlineForm bookUnitId={bookInfo.unitId || ""} />
-        </Box>
-      </div>
-
-      <Divider />
-
       <Box>
         <div>
           <ArrowForwardIcon
@@ -165,6 +157,9 @@ export const BookBasicInfoPage: React.FC = () => {
             <AccentBarWithText text={t("book.remark")} />
           </ArrowForwardIcon>
         </div>
+        <Box mt={1.5} mb={2}>
+          <RemarkInlineForm bookUnitId={bookInfo.unitId || ""} />
+        </Box>
         <RemarkPreview bookId={bookInfo.unitId || ""} />
       </Box>
 
@@ -176,6 +171,8 @@ export const BookBasicInfoPage: React.FC = () => {
           />
         </Box>
       )}
+
+      <BookCopyrightNotice />
     </Stack>
   );
 };

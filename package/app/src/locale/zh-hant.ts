@@ -411,6 +411,11 @@ export default {
     remark: "短評",
     excerpts: "原文摘錄",
     reviews_of_book: "{{title}}的書評",
+    copyright_notice: {
+      body: "封面圖像與書目元資料之版權，歸屬於原出版商、作者及版權所有者。",
+      fair_use:
+        "本平台基於合理使用原則展示，僅作書目參考與讀者交流之用。若您為版權所有者並有任何疑慮，歡迎與我們聯繫。",
+    },
     info_panel: {
       title: "書籍資訊",
     },

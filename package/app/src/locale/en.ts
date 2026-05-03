@@ -423,6 +423,11 @@ export default {
     remark: "Remark",
     excerpts: "Excerpts",
     reviews_of_book: "Reviews for {{title}}",
+    copyright_notice: {
+      body: "Cover artwork and bibliographic metadata are the property of their respective publishers, authors, and copyright holders.",
+      fair_use:
+        "This platform displays them under fair use for cataloging and reader discussion. If you are the rights holder and have any concerns, please contact us.",
+    },
     info_panel: {
       title: "Book info",
     },

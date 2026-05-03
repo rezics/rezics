@@ -20,6 +20,7 @@ import { BookHeroCountLinks } from "./BookHeroCountLinks";
 import { BookHeroFeaturedReview } from "./BookHeroFeaturedReview";
 import { BookHeroScoreBlock } from "./BookHeroScoreBlock";
 import { BookHeroStatCards, type BookHeroStatKey } from "./BookHeroStatCards";
+import { BookYourScoreBlock } from "./BookYourScoreBlock";
 
 type Book = BookDTO;
 
@@ -143,11 +144,14 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
             <h1 className="text-white font-serif text-3xl lg:text-5xl font-semibold leading-tight tracking-tight break-words flex-1 min-w-[12rem]">
               {title}
             </h1>
-            <BookHeroScoreBlock
-              rating={rating}
-              count={ratingCount}
-              variant="inline"
-            />
+            <div className="flex items-start gap-6 flex-wrap">
+              <BookHeroScoreBlock
+                rating={rating}
+                count={ratingCount}
+                variant="inline"
+              />
+              <BookYourScoreBlock bookUnitId={bookId} />
+            </div>
           </div>
 
           {/* Brief info strip: Book · {wordCount} words · ISBN ... */}

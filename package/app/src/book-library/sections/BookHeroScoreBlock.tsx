@@ -27,31 +27,40 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
   const hasRating = rating > 0;
 
   if (variant === "inline") {
-    if (!hasRating) {
-      return (
-        <div className="flex flex-col items-end gap-0.5 text-white/70">
-          <span className="inline-flex items-center gap-1 text-sm">
-            <Star sx={{ color: "rgba(255,255,255,0.4)", fontSize: 18 }} />
-            <span>{t("book.hero.score.empty", "尚無評分")}</span>
-          </span>
-        </div>
-      );
-    }
     return (
-      <div className="flex flex-col items-end gap-1 text-white">
-        <span className="inline-flex items-baseline gap-1">
-          <Star
-            sx={{ color: "#f5b942", fontSize: 22, alignSelf: "center", mr: 0.5 }}
-          />
-          <span className="text-2xl font-semibold leading-none tabular-nums">
-            {rating}
-          </span>
-          <span className="text-sm text-white/70">/&nbsp;10</span>
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-xs font-bold tracking-[0.12em] uppercase text-white/65">
+          {t("book.hero.score.rezics_label", "REZICS SCORE")}
         </span>
-        {typeof count === "number" && count > 0 && (
-          <span className="text-xs text-white/60 tabular-nums">
-            {t("book.hero.score.count", "{{count}} 人評分", { count })}
-          </span>
+        {hasRating ? (
+          <div className="flex items-center gap-1.5 min-h-[2.25rem] text-white">
+            <Star sx={{ color: "#f5b942", fontSize: 30 }} />
+            <div className="flex flex-col items-start leading-tight">
+              <span className="inline-flex items-baseline gap-1">
+                <span className="text-xl font-semibold tabular-nums leading-none">
+                  {rating}
+                </span>
+                <span className="text-xs text-white/70">/&nbsp;10</span>
+              </span>
+              <span className="text-xs text-white/55 tabular-nums">
+                {typeof count === "number" && count > 0
+                  ? t("book.hero.score.count", "{{count}} 人評分", { count })
+                  : t("book.hero.score.empty_short", "尚無評分")}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 min-h-[2.25rem] text-white/70">
+            <Star sx={{ color: "rgba(255,255,255,0.35)", fontSize: 30 }} />
+            <div className="flex flex-col items-start leading-tight">
+              <span className="text-base font-medium text-white/80">
+                {t("book.hero.score.empty", "尚無評分")}
+              </span>
+              <span className="text-xs text-white/45">
+                {t("book.hero.score.be_first", "成為第一個評分者")}
+              </span>
+            </div>
+          </div>
         )}
       </div>
     );

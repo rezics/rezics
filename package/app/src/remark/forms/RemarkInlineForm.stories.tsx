@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Inline rate-and-remark form. Submission requires the score + post mutations on the live backend; without an MSW handler the submit click is no-op.",
+          "Progressive remark composer: collapsed line expands to a full Markdown editor on focus. Submit requires the post mutation on the live backend; without an MSW handler the submit click is a no-op.",
       },
     },
   },
@@ -22,15 +22,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const HappyPath: Story = {
+export const Expanded: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const remarkField = await waitFor(() =>
-      canvas.getByPlaceholderText(/write a short remark/i),
+    const trigger = await waitFor(() =>
+      canvas.getByPlaceholderText(/短評|remark/i),
     );
-    await userEvent.type(
-      remarkField,
-      "Compelling middle act, slow finish. Worth a re-read.",
-    );
+    await userEvent.click(trigger);
   },
 };
