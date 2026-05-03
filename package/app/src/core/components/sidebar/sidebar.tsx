@@ -52,12 +52,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
 
         {/* 侧边栏面板 - 处理滑入滑出 */}
-        <aside
+        <Box
+          component="aside"
           className={cn(
             "fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out",
             isOpen ? "translate-x-0" : "-translate-x-full",
           )}
-          style={{ width: width }}
+          sx={{ width, borderRight: 1, borderColor: "divider" }}
         >
           {/* 这里放置一个相对容器，方便放置关闭按钮 */}
           <Box
@@ -78,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
             {children}
           </Box>
-        </aside>
+        </Box>
       </Box>
     );
   }
@@ -100,8 +101,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           transition: !isDragging ? "width 0.3s ease-in-out" : "none",
         }}
       />
-      <div
+      <Box
         className={cn(`fixed inset-y-0 left-0 overflow-hidden`)}
+        sx={{ borderRight: 1, borderColor: "divider" }}
         style={{
           width,
           transform: isOpen ? "translateX(0)" : `translateX(-${width})`,
@@ -112,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* 内容区域 */}
           <div className="h-full w-full">{children}</div>
         </div>
-      </div>
+      </Box>
     </Box>
   );
 };

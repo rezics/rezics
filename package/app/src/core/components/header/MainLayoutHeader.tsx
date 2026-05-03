@@ -63,6 +63,8 @@ export const Header: React.FC<HeaderProps> = React.memo(
             easing: theme.transitions.easing.easeOut,
             duration: theme.transitions.duration.enteringScreen,
           }),
+          borderBottom: 1,
+          borderColor: "divider",
         }}
         className={cn(
           isDragging && "rounded-tl-2xl rounded-bl-2xl",
