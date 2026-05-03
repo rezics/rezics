@@ -1,8 +1,8 @@
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { IconButton, Menu } from "@mui/material";
 import type React from "react";
 import { useState } from "react";
 import { MiscMenuItems } from "./MiscMenuItems";
+import { Ellipsis as MoreHorizIcon } from "lucide-react";
 
 type Props = {
   children?: React.ReactNode;

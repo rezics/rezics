@@ -1,5 +1,3 @@
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   Button,
@@ -16,6 +14,7 @@ import {
 } from "@mui/material";
 import type { FC } from "react";
 import { useState } from "react";
+import { Plus as AddIcon, Trash2 as DeleteIcon } from "lucide-react";
 
 interface ScopesEditorProps {
   scopes: Record<string, string[]>;

@@ -1,9 +1,9 @@
-import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, TextField } from "@mui/material";
 import type { SearchQuery } from "@rezics/contract";
 import type React from "react";
 import { useState } from "react";
 import type { QueryMiddleware } from "../../hooks/useSearchQuery";
+import { Search as SearchIcon } from "lucide-react";
 
 export type KeywordInputProps = {
   value: string;

@@ -1,4 +1,3 @@
-import EditIcon from "@mui/icons-material/Edit";
 import {
   Button,
   Chip,
@@ -12,6 +11,7 @@ import {
 } from "@mui/material";
 import type { ApiTokenDTO } from "@rezics/contract";
 import type { FC } from "react";
+import { Pencil as EditIcon } from "lucide-react";
 
 interface TokenTableProps {
   tokens: ApiTokenDTO[];

@@ -1,9 +1,3 @@
-import {
-  DragIndicator,
-  ExpandMore,
-  MoreVert,
-  Visibility,
-} from "@mui/icons-material";
 import { Card, CardContent, Checkbox, Chip, IconButton } from "@mui/material";
 import type { ContentRating } from "@rezics/contract";
 import { RatingBadge } from "@rezics/ui";
@@ -11,6 +5,7 @@ import type React from "react";
 import type { NodeRendererProps, TreeApi } from "react-arborist";
 import { useLongPress } from "../hooks/useLongPress";
 import type { Chapter, ChapterContextMenuState } from "./ChapterTreeEditor";
+import { GripVertical as DragIndicator, ChevronDown as ExpandMore, EllipsisVertical as MoreVert, Eye as Visibility } from "lucide-react";
 
 /** Uniform row height — react-arborist (react-window) requires a single number. */
 export const LEAF_ROW_HEIGHT = 100;
@@ -145,17 +140,13 @@ export const createChapterTreeEditorNode = ({
         >
           {isSortingMode && (
             <span className="flex-shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
-              <DragIndicator sx={{ fontSize: 16 }} />
+              <DragIndicator size={16} />
             </span>
           )}
 
           <span className="flex-shrink-0 w-6 h-6 flex justify-center items-center text-muted-foreground">
             <ExpandMore
-              sx={{
-                fontSize: 20,
-                transition: "transform 200ms ease",
-                transform: node.isOpen ? "rotate(0deg)" : "rotate(-90deg)",
-              }}
+              size={20} style={{ transition: "transform 200ms ease", transform: node.isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
             />
           </span>
 
@@ -181,7 +172,7 @@ export const createChapterTreeEditorNode = ({
             }}
             sx={{ width: 28, height: 28 }}
           >
-            <MoreVert sx={{ fontSize: 18 }} />
+            <MoreVert size={18} />
           </IconButton>
         </div>
       );
@@ -250,7 +241,7 @@ export const createChapterTreeEditorNode = ({
                 <div className="flex items-center gap-1.5">
                   {isSortingMode && (
                     <span className="flex-shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
-                      <DragIndicator sx={{ fontSize: 14 }} />
+                      <DragIndicator size={14} />
                     </span>
                   )}
                   <span className="font-medium text-sm truncate">
@@ -291,7 +282,7 @@ export const createChapterTreeEditorNode = ({
                   </span>
                   {/* MOCK: view count */}
                   <span className="text-xs text-muted-foreground tabular-nums flex items-center gap-0.5">
-                    <Visibility sx={{ fontSize: 12 }} />
+                    <Visibility size={12} />
                     {formatCount(views)}
                   </span>
                 </div>
@@ -306,7 +297,7 @@ export const createChapterTreeEditorNode = ({
                 }}
                 sx={{ width: 28, height: 28 }}
               >
-                <MoreVert sx={{ fontSize: 18 }} />
+                <MoreVert size={18} />
               </IconButton>
             </div>
           </CardContent>

@@ -1,4 +1,3 @@
-import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -26,6 +25,7 @@ import {
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { fmtDate } from "@/utils/format";
+import { Search as SearchIcon } from "lucide-react";
 
 /** Extract the best title from the translations array. */
 function extractTitle(book: BookDTO): string {

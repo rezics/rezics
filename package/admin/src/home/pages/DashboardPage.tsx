@@ -1,7 +1,3 @@
-import CommentIcon from "@mui/icons-material/Comment";
-import FeedbackIcon from "@mui/icons-material/Feedback";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import PeopleIcon from "@mui/icons-material/People";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { adminStatsQueryOptions } from "@rezics/api/stat/stats.queries";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -9,6 +5,7 @@ import { Page } from "@/core/layouts/Page";
 import { ContentTrendChart } from "../components/chart/ContentTrendChart";
 import { HealthStrip } from "../components/HealthStrip";
 import { StatCard } from "../components/StatCard";
+import { MessageCircle as CommentIcon, MessageCircleQuestion as FeedbackIcon, BookOpen as MenuBookIcon, Users as PeopleIcon } from "lucide-react";
 
 export default function DashboardPage() {
   const { data: stats } = useSuspenseQuery(adminStatsQueryOptions());

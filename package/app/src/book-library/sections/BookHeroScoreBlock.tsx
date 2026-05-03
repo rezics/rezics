@@ -1,7 +1,7 @@
-import { Star } from "@mui/icons-material";
 import { Rating } from "@mui/material";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { Star } from "lucide-react";
 
 interface BookHeroScoreBlockProps {
   /** Average score, 0–10 scale, 0 means no ratings yet. */
@@ -34,7 +34,7 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
         </span>
         {hasRating ? (
           <div className="flex items-center gap-1.5 min-h-[2.25rem] text-white">
-            <Star sx={{ color: "#f5b942", fontSize: 30 }} />
+            <Star color={"#f5b942"} size={30} />
             <div className="flex flex-col items-start leading-tight">
               <span className="inline-flex items-baseline gap-1">
                 <span className="text-xl font-semibold tabular-nums leading-none">
@@ -51,7 +51,7 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
           </div>
         ) : (
           <div className="flex items-center gap-1.5 min-h-[2.25rem] text-white/70">
-            <Star sx={{ color: "rgba(255,255,255,0.35)", fontSize: 30 }} />
+            <Star color={"rgba(255,255,255,0.35)"} size={30} />
             <div className="flex flex-col items-start leading-tight">
               <span className="text-base font-medium text-white/80">
                 {t("book.hero.score.empty", "尚無評分")}
@@ -94,7 +94,7 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
         {t("book.hero.score.label", "READER SCORE")}
       </span>
       <div className="flex items-baseline gap-1">
-        <Star sx={{ color: "#f5b942", fontSize: 28 }} />
+        <Star color={"#f5b942"} size={28} />
         <span className="text-3xl font-semibold leading-none">{rating}</span>
         <span className="text-base text-white/70">/&nbsp;10</span>
       </div>

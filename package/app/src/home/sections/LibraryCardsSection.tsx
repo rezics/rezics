@@ -1,6 +1,3 @@
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import MovieOutlinedIcon from "@mui/icons-material/MovieOutlined";
-import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined";
 import {
   Box,
   Card,
@@ -13,6 +10,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { BookOpen as MenuBookOutlinedIcon, Film as MovieOutlinedIcon, Gamepad2 as SportsEsportsOutlinedIcon } from "lucide-react";
 
 const libraries = [
   {
@@ -45,8 +43,8 @@ export const LibraryCardsSection: React.FC = () => {
             <CardContent>
               <Stack direction="row" spacing={2} alignItems="center">
                 <lib.icon
-                  sx={{ fontSize: 32 }}
-                  color={lib.active ? "primary" : "disabled"}
+                  size={32}
+                  color={lib.active ? "currentColor" : "var(--rezics-color-text-disabled)"}
                 />
                 <Box>
                   <Typography variant="h6" fontWeight={600}>

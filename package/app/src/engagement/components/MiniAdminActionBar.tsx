@@ -1,9 +1,9 @@
-import { Edit } from "@mui/icons-material";
 import { IconButton, Tooltip } from "@mui/material";
 import { useCanEdit } from "@rezics/api/hooks";
 import type { EditableResource } from "@rezics/api/hooks";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { Pencil as Edit } from "lucide-react";
 
 interface MiniAdminActionBarProps {
   editionURL: string;

@@ -1,8 +1,8 @@
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import { IconButton } from "@mui/material";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { CreateMenu } from "../../components/create-menu/CreateMenu.tsx";
 import { AccountMenu } from "./AccountMenu.tsx";
+import { Bell as NotificationsIcon } from "lucide-react";
 
 export function AuthenticatedSection() {
   return (

@@ -1,4 +1,3 @@
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {
   Alert,
   Box,
@@ -11,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { FC } from "react";
+import { Copy as ContentCopyIcon } from "lucide-react";
 
 interface TokenSecretDialogProps {
   open: boolean;

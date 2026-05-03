@@ -1,4 +1,3 @@
-import AddIcon from "@mui/icons-material/Add";
 import {
   Alert,
   Button,
@@ -25,6 +24,7 @@ import { SettingsSection } from "@/user/components/SettingsSection";
 import { TokenCreateDialog } from "@/user/components/TokenCreateDialog";
 import { TokenListItem } from "@/user/components/TokenListItem";
 import { useRequireAuth } from "@/user/pages/useAuth";
+import { Plus as AddIcon } from "lucide-react";
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },

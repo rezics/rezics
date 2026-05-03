@@ -1,10 +1,10 @@
-import CleaningServicesRoundedIcon from "@mui/icons-material/CleaningServicesRounded";
 import { Alert, AlertTitle, Button, Stack } from "@mui/material";
 import { useRemoveRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { PinboardListKey } from "../models/types";
+import { Brush as CleaningServicesRoundedIcon } from "lucide-react";
 
 interface StaleIdsBannerProps {
   realmUnitId: string;

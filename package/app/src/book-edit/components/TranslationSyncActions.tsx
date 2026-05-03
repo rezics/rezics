@@ -1,5 +1,3 @@
-import LaunchIcon from "@mui/icons-material/Launch";
-import SyncIcon from "@mui/icons-material/Sync";
 import { Button, Stack, Tooltip, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
@@ -9,6 +7,7 @@ import type React from "react";
 import { useTranslation } from "react-i18next";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
+import { ExternalLink as LaunchIcon, RefreshCw as SyncIcon } from "lucide-react";
 
 export interface TranslationSyncActionsProps {
   /** Source release unit id this language is wired to. Falsy disables actions. */

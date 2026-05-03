@@ -1,4 +1,3 @@
-import FormatQuoteRoundedIcon from "@mui/icons-material/FormatQuoteRounded";
 import {
   Avatar,
   Box,
@@ -16,6 +15,7 @@ import {
   excerptCardActions,
   excerptPolicy,
 } from "../../models/excerptPolicy";
+import { Quote as FormatQuoteRoundedIcon } from "lucide-react";
 
 export interface ExcerptCardProps {
   excerpt: UnitDTO;
@@ -70,7 +70,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
       <CardContent>
         <Box className="flex items-start gap-2">
           <FormatQuoteRoundedIcon
-            sx={{ color: "text.secondary", mt: 0.4 }}
+            color={"text.secondary"} style={{ marginTop: "3.2px" }}
             fontSize="small"
           />
 

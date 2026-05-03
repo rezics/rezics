@@ -1,8 +1,7 @@
-import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { ArrowButton } from "./ArrowButton";
+import { ChevronLeft as KeyboardArrowLeftIcon, ChevronRight as KeyboardArrowRightIcon } from "lucide-react";
 
 const meta = {
   title: "Primitive/Carousel/ArrowButton",

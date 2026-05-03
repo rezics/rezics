@@ -1,6 +1,3 @@
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import PushPinIcon from "@mui/icons-material/PushPin";
-import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import {
   Alert,
   Box,
@@ -41,6 +38,7 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import { Pin, Trash2 } from "lucide-react";
 
 type Row =
   | ({ kind: "global" } & UnitTagDTO)
@@ -242,9 +240,9 @@ export default function LowScoreTagsPage() {
                   }
                 >
                   {r.pinned ? (
-                    <PushPinIcon fontSize="small" />
+                    <Pin size={18} fill="currentColor" />
                   ) : (
-                    <PushPinOutlinedIcon fontSize="small" />
+                    <Pin size={18} />
                   )}
                 </IconButton>
               </span>
@@ -261,7 +259,7 @@ export default function LowScoreTagsPage() {
                       : deleteRealmTagUnit.isPending
                   }
                 >
-                  <DeleteOutlineIcon fontSize="small" />
+                  <Trash2 size={18} />
                 </IconButton>
               </span>
             </Tooltip>

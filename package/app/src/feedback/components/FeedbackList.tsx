@@ -1,7 +1,4 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import DoneIcon from "@mui/icons-material/Done";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import {
   Box,
   Button,
@@ -36,6 +33,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { CircleCheck as CheckCircleOutlineIcon, Check as DoneIcon, Hourglass as HourglassEmptyIcon } from "lucide-react";
 
 export type FeedbackResolvedFilter = boolean | undefined;
 

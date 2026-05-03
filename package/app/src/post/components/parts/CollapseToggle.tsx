@@ -1,8 +1,7 @@
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
 import { IconButton } from "@mui/material";
 import type React from "react";
 import { useThreadingHover } from "./ThreadingContext";
+import { Plus as AddIcon, Minus as RemoveIcon } from "lucide-react";
 
 export interface CollapseToggleProps {
   isCollapsed: boolean;
@@ -40,9 +39,9 @@ export const CollapseToggle: React.FC<CollapseToggleProps> = ({
       }}
     >
       {isCollapsed ? (
-        <AddIcon sx={{ fontSize: 14 }} />
+        <AddIcon size={14} />
       ) : (
-        <RemoveIcon sx={{ fontSize: 14 }} />
+        <RemoveIcon size={14} />
       )}
     </IconButton>
   );

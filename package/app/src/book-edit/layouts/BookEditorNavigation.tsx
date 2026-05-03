@@ -1,18 +1,5 @@
-import DashboardIcon from "@mui/icons-material/Dashboard";
-// import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-// import BarChartIcon from "@mui/icons-material/BarChart";
-// import LayersIcon from "@mui/icons-material/Layers";
-// import ErrorIcon from "@mui/icons-material/Error";
-// import PersonIcon from "@mui/icons-material/Person";
-// import LoginIcon from "@mui/icons-material/Login";
-// import HowToRegIcon from "@mui/icons-material/HowToReg";
-// import BookIcon from "@mui/icons-material/Book";
-// import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-// import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import DescriptionIcon from "@mui/icons-material/Description";
-// import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-
 import type { NavigationItem } from "@/core/components/navigation/navigation";
+import { LayoutDashboard as DashboardIcon, FileText as DescriptionIcon } from "lucide-react";
 
 // segment: router path
 

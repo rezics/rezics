@@ -1,28 +1,8 @@
 // NAVIGATION.tsx
 
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
-import FeedbackOutlinedIcon from "@mui/icons-material/FeedbackOutlined";
-import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
-import HowToRegOutlinedIcon from "@mui/icons-material/HowToRegOutlined";
-import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
-import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
-import Looks3OutlinedIcon from "@mui/icons-material/Looks3Outlined";
-import LooksOneOutlinedIcon from "@mui/icons-material/LooksOneOutlined";
-import LooksTwoOutlinedIcon from "@mui/icons-material/LooksTwoOutlined";
-import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
-import PlaylistAddOutlinedIcon from "@mui/icons-material/PlaylistAddOutlined";
-import PostAddOutlinedIcon from "@mui/icons-material/PostAddOutlined";
-import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
-import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
-import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
-
 import type { NavigationItem } from "./navigation";
+import { CircleUser as AccountCircleOutlinedIcon, FileText as ArticleOutlinedIcon, LayoutDashboard as DashboardOutlinedIcon, CircleAlert as ErrorOutlineOutlinedIcon, MessageCircleQuestion as FeedbackOutlinedIcon, Users as GroupsOutlinedIcon, UserCheck as HowToRegOutlinedIcon, ClipboardList as ListAltOutlinedIcon, LogIn as LoginOutlinedIcon, UserCog as ManageAccountsOutlinedIcon, BookOpen as MenuBookOutlinedIcon, Bell as NotificationsOutlinedIcon, Palette as PaletteOutlinedIcon, ListPlus as PlaylistAddOutlinedIcon, FilePlus as PostAddOutlinedIcon, MessageSquareText as RateReviewOutlinedIcon, FlaskConical as ScienceOutlinedIcon, Headset as SupportAgentOutlinedIcon } from "lucide-react";
+import { IconNumber3 as Looks3OutlinedIcon, IconNumber1 as LooksOneOutlinedIcon, IconNumber2 as LooksTwoOutlinedIcon } from "@tabler/icons-react";
 
 // segment: router path
 export const NAVIGATION = (isAdmin = false): NavigationItem[] => {

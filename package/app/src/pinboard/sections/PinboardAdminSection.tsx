@@ -1,4 +1,3 @@
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import {
   Box,
   Button,
@@ -36,6 +35,7 @@ import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { StaleIdsBanner } from "../components/StaleIdsBanner";
 import { usePinboardList } from "../hooks/usePinboard";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
+import { Plus as AddRoundedIcon } from "lucide-react";
 
 export interface PinboardAdminSectionProps {
   realmUnitId: string;

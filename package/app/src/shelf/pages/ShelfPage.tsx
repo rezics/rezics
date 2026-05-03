@@ -1,6 +1,3 @@
-import ViewAgendaIcon from "@mui/icons-material/ViewAgenda";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import ViewQuiltIcon from "@mui/icons-material/ViewQuilt";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -23,6 +20,7 @@ import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import { deriveShelfStream } from "../models/shelfStream";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
+import { LayoutList as ViewAgendaIcon, List as ViewListIcon, LayoutGrid as ViewQuiltIcon } from "lucide-react";
 
 interface ShelfPageProps {
   unitId: string;

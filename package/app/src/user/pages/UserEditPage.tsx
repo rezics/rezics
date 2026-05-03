@@ -1,5 +1,3 @@
-import CancelIcon from "@mui/icons-material/Cancel";
-import SaveIcon from "@mui/icons-material/Save";
 import {
   Alert,
   Avatar,
@@ -25,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$unitId/edit";
 import { UserLoading } from "./UserState";
+import { XCircle as CancelIcon, Save as SaveIcon } from "lucide-react";
 
 export interface UserEditPageProps {
   onCancel?: () => void;

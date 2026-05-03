@@ -1,9 +1,8 @@
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { alpha, useTheme } from "@mui/material/styles";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import type { NodeRendererProps } from "react-arborist";
 import type { Chapter } from "./ChapterArborist";
+import { ChevronDown as KeyboardArrowDownIcon, ChevronRight as KeyboardArrowRightIcon } from "lucide-react";
 
 /**
  * Factory that returns a reader-only Node renderer for the chapter tree.

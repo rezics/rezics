@@ -1,4 +1,3 @@
-import TuneIcon from "@mui/icons-material/Tune";
 import { IconButton } from "@mui/material";
 import type { SearchQuery } from "@rezics/contract";
 import type React from "react";
@@ -14,6 +13,7 @@ import {
 } from "@/search/components/primitive";
 import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
+import { SlidersHorizontal as TuneIcon } from "lucide-react";
 
 export type BookSearchProps = {
   query: UseSearchQueryReturn["query"];

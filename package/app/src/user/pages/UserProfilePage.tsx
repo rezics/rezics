@@ -1,4 +1,3 @@
-import EditIcon from "@mui/icons-material/Edit";
 import {
   Avatar,
   Box,
@@ -19,6 +18,7 @@ import FollowButton from "@/engagement/components/FollowButton";
 import { useUserProfileStore } from "@/user/states";
 import { UserError, UserLoading } from "./UserState";
 import { UserUnitsPage } from "./UserUnitsPage";
+import { Pencil as EditIcon } from "lucide-react";
 
 export interface UserProfilePageProps {
   unitId: string;

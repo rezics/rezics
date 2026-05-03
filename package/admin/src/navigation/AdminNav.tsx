@@ -1,5 +1,3 @@
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Box,
   Collapse,
@@ -22,6 +20,7 @@ import type {
   AdminNavGroup,
   AdminNavItem,
 } from "./adminNavConfig";
+import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon } from "lucide-react";
 
 function isGroup(entry: AdminNavEntry): entry is AdminNavGroup {
   return "children" in entry;

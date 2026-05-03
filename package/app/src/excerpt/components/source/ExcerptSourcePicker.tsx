@@ -1,4 +1,3 @@
-import { ExpandMore } from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -18,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { parseAppRoute } from "@/shared/utils/parse-app-route";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { ChevronDown as ExpandMore } from "lucide-react";
 
 interface ExcerptSourcePickerProps {
   value?: ExcerptSource;

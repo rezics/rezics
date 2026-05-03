@@ -1,4 +1,3 @@
-import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import {
   Collapse,
   Divider,
@@ -9,6 +8,7 @@ import {
 } from "@mui/material";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import type { NavigationItem } from "./navigation";
+import { ChevronUp as ExpandLess, ChevronDown as ExpandMore } from "lucide-react";
 
 interface NavigationListProps {
   NAVIGATION: NavigationItem[];

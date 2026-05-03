@@ -1,8 +1,3 @@
-import {
-  CollectionsBookmarkOutlined,
-  LocalOfferOutlined,
-  RateReviewOutlined,
-} from "@mui/icons-material";
 import { postQueries } from "@rezics/api/post/post";
 import { shelfQueries } from "@rezics/api/shelf/shelf";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
@@ -11,6 +6,7 @@ import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { BookMarked as CollectionsBookmarkOutlined, Tag as LocalOfferOutlined, MessageSquareText as RateReviewOutlined } from "lucide-react";
 
 interface BookHeroStatCardsProps {
   bookId: string;
@@ -72,21 +68,21 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
   const allStats: StatDef[] = [
     {
       key: "reviews",
-      icon: <RateReviewOutlined sx={{ fontSize: 36 }} />,
+      icon: <RateReviewOutlined size={36} />,
       count: reviewCount,
       label: t("book.hero.stat.reviews", "篇書評"),
       to: "/review/book/$bookId",
     },
     {
       key: "shelves",
-      icon: <CollectionsBookmarkOutlined sx={{ fontSize: 36 }} />,
+      icon: <CollectionsBookmarkOutlined size={36} />,
       count: shelfCount,
       label: t("book.hero.stat.shelves", "個書架"),
       to: "/shelf/book/$bookId",
     },
     {
       key: "tags",
-      icon: <LocalOfferOutlined sx={{ fontSize: 36 }} />,
+      icon: <LocalOfferOutlined size={36} />,
       count: tagCount,
       label: t("book.hero.stat.tags", "個標籤"),
       to: "/tag/book/$bookId",

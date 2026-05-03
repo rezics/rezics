@@ -1,4 +1,3 @@
-import SaveIcon from "@mui/icons-material/Save";
 import {
   Alert,
   Avatar,
@@ -15,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type FC, useEffect, useState } from "react";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
+import { Save as SaveIcon } from "lucide-react";
 
 export const SettingsProfileSection: FC = () => {
   useRequireAuth();

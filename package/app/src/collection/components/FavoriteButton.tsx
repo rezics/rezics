@@ -1,5 +1,3 @@
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import {
@@ -8,11 +6,16 @@ import {
 } from "@rezics/api/shelf";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
+import { Heart } from "lucide-react";
 
 interface FavoriteButtonProps {
   unitId: string;
   size?: "small" | "medium" | "large";
   color?: string;
+}
+
+function iconSize(size: "small" | "medium" | "large"): number {
+  return size === "small" ? 18 : size === "large" ? 28 : 22;
 }
 
 export function FavoriteButton({
@@ -38,9 +41,9 @@ export function FavoriteButton({
         sx={{ color }}
       >
         {isFavorited ? (
-          <FavoriteIcon fontSize={size} color="error" />
+          <Heart size={iconSize(size)} fill="currentColor" color="var(--rezics-color-status-error-fill)" />
         ) : (
-          <FavoriteBorderIcon fontSize={size} />
+          <Heart size={iconSize(size)} />
         )}
       </IconButton>
     </Tooltip>

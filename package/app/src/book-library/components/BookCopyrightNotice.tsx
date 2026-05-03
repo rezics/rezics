@@ -1,7 +1,7 @@
-import { CopyrightOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { Copyright as CopyrightOutlined } from "lucide-react";
 
 export const BookCopyrightNotice: React.FC = () => {
   const { t } = useTranslation();
@@ -10,12 +10,7 @@ export const BookCopyrightNotice: React.FC = () => {
     <Box>
       <Stack direction="row" spacing={1.5} alignItems="flex-start">
         <CopyrightOutlined
-          sx={{
-            fontSize: 16,
-            color: "var(--rezics-color-text-tertiary)",
-            mt: "2px",
-            flexShrink: 0,
-          }}
+          size={16} color={"var(--rezics-color-text-tertiary)"} style={{ marginTop: "2px", flexShrink: 0 }}
         />
         <Stack spacing={0.5}>
           <Typography

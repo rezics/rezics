@@ -1,5 +1,4 @@
 // import { TransitionProps } from "@mui/material/transitions";
-import CloseIcon from "@mui/icons-material/Close";
 import {
   AppBar,
   Box,
@@ -10,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
+import { X as CloseIcon } from "lucide-react";
 
 //  ;
 

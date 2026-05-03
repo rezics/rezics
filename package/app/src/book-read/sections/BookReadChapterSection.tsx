@@ -1,4 +1,3 @@
-import { EditOutlined } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
@@ -11,6 +10,7 @@ import type React from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { bookReadLayoutRoute } from "@/router";
+import { Pencil as EditOutlined } from "lucide-react";
 
 export const BookReadChapterPage: React.FC = () => {
   const { bookId, chapterId } = bookReadLayoutRoute.useParams();

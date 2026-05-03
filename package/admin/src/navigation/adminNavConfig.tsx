@@ -1,17 +1,5 @@
-import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
-import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import ForumIcon from "@mui/icons-material/Forum";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
-import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
-import ManageSearchOutlinedIcon from "@mui/icons-material/ManageSearchOutlined";
-import PeopleIcon from "@mui/icons-material/People";
-import SettingsIcon from "@mui/icons-material/Settings";
-import StorageOutlinedIcon from "@mui/icons-material/StorageOutlined";
-import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
-import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import type React from "react";
+import { ShieldUser as AdminPanelSettingsOutlinedIcon, BookMarked as CollectionsBookmarkIcon, LayoutDashboard as DashboardIcon, Mail as EmailOutlinedIcon, MessagesSquare as ForumIcon, Package as Inventory2Icon, Key as KeyOutlinedIcon, SearchCheck as ManageSearchOutlinedIcon, Users as PeopleIcon, Settings as SettingsIcon, Database as StorageOutlinedIcon, Tags as StyleOutlinedIcon, KeyRound as VpnKeyOutlinedIcon } from "lucide-react";
 
 export type AdminNavItem = {
   id: string;

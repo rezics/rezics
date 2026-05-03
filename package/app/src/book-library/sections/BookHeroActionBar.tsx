@@ -1,10 +1,4 @@
 import {
-  BookmarkAddOutlined,
-  CheckCircleOutline,
-  EditOutlined,
-  IosShareOutlined,
-} from "@mui/icons-material";
-import {
   Button,
   IconButton,
   Menu,
@@ -20,6 +14,7 @@ import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShareMenu } from "@/engagement/hooks/useShareMenu";
+import { BookmarkPlus as BookmarkAddOutlined, CircleCheck as CheckCircleOutline, Pencil as EditOutlined, Share as IosShareOutlined } from "lucide-react";
 
 interface BookHeroActionBarProps {
   bookInfo: BookDTO;
@@ -120,7 +115,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
           {t("book.hero.actions.reading", "在讀")}
         </ToggleButton>
         <ToggleButton value="read">
-          <CheckCircleOutline sx={{ fontSize: 14, mr: 0.5 }} />
+          <CheckCircleOutline size={14} style={{ marginRight: "4px" }} />
           {t("book.hero.actions.read", "已讀")}
         </ToggleButton>
       </ToggleButtonGroup>

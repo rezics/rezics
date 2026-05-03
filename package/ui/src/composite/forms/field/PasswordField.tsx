@@ -1,9 +1,9 @@
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import React, { type FC, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Eye as Visibility, EyeOff as VisibilityOff } from "lucide-react";
 
 interface PasswordFieldProps {
   name?: string;

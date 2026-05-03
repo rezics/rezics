@@ -16,7 +16,6 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import DragIndicatorRoundedIcon from "@mui/icons-material/DragIndicatorRounded";
 import { IconButton, Stack } from "@mui/material";
 import { useReorderRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
 import { useMemo, useState } from "react";
@@ -24,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 import { PinboardEntryCard } from "./PinboardEntryCard";
+import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";
 
 interface SortableRowProps {
   entry: PinboardEntryView;

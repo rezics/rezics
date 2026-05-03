@@ -1,5 +1,3 @@
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import SaveIcon from "@mui/icons-material/Save";
 import {
   Alert,
   Box,
@@ -21,6 +19,7 @@ import React from "react";
 
 import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/user/$unitId";
+import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
 
 export default function UserEditPage() {
   const { unitId } = Route.useParams();

@@ -1,4 +1,3 @@
-import { Place } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -11,6 +10,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import type React from "react";
+import { MapPin as Place } from "lucide-react";
 
 export type NotFoundShowProps = {
   path: string;

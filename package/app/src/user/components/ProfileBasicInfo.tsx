@@ -1,5 +1,3 @@
-import { EditOutlined } from "@mui/icons-material";
-import SettingsIcon from "@mui/icons-material/Settings";
 import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
@@ -8,6 +6,7 @@ import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import FollowButton from "@/engagement/components/FollowButton";
+import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
 
 interface ProfileBasicInfoProps {
   user: UserDTO;

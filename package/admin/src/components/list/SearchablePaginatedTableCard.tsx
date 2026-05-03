@@ -1,4 +1,3 @@
-import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Card,
@@ -16,6 +15,7 @@ import {
   type PaginatedColumn,
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
+import { Search as SearchIcon } from "lucide-react";
 
 export function SearchablePaginatedTableCard<T>({
   title,

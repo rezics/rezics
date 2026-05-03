@@ -1,8 +1,8 @@
-import SearchIcon from "@mui/icons-material/Search";
 import { IconButton } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TextSearchInputBase } from "./TextSearchInputBase";
+import { Search as SearchIcon } from "lucide-react";
 
 export const TextSearchInputWithIcon = ({
   onSearch,

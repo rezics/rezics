@@ -1,7 +1,7 @@
-import CloseIcon from "@mui/icons-material/Close";
 import { Chip, Stack } from "@mui/material";
 import type { SearchQuery, TagRef } from "@rezics/contract";
 import type React from "react";
+import { X as CloseIcon } from "lucide-react";
 
 export type { ChipDescriptor as AppliedFilterChipDescriptor };
 

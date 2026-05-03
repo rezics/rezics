@@ -1,8 +1,8 @@
-import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import { LANGUAGE_META, type Language } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { Plus as AddIcon } from "lucide-react";
 
 type Sibling = {
   unitId: string;

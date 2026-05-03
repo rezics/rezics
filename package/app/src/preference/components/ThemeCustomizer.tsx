@@ -1,10 +1,4 @@
 import {
-  Close as CloseIcon,
-  Palette as PaletteIcon,
-  Photo as PhotoIcon,
-  Refresh as RefreshIcon,
-} from "@mui/icons-material";
-import {
   Box,
   Button,
   Chip,
@@ -27,6 +21,7 @@ import { extractColorFromImage, PRESET_COLORS } from "@rezics/ui";
 import type React from "react";
 import { useState } from "react";
 import { useAppStore } from "@/app/states/appStore";
+import { X as CloseIcon, Palette as PaletteIcon, Image as PhotoIcon, RefreshCw as RefreshIcon } from "lucide-react";
 
 const BRAND_DEFAULT_COLOR = "#f4606c";
 

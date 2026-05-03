@@ -1,14 +1,7 @@
-import {
-  ArticleOutlined,
-  BugReport,
-  ChatBubbleOutline,
-  Close as CloseIcon,
-} from "@mui/icons-material";
-import AddIcon from "@mui/icons-material/Add";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import { Box, Fab, Zoom } from "@mui/material";
 import * as React from "react";
 import FeedbackDialog from "@/feedback/components/FeedbackDialog";
+import { Plus as AddIcon, FileText as ArticleOutlined, Bug as BugReport, MessageCircle as ChatBubbleOutline, X as CloseIcon, TriangleAlert as ReportProblemIcon } from "lucide-react";
 
 export interface HelpFabAction {
   id: string;

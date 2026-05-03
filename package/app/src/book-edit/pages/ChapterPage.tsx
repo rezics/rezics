@@ -1,4 +1,3 @@
-import { AccountTree, MoreHoriz, Settings } from "@mui/icons-material";
 import {
   CircularProgress,
   IconButton,
@@ -22,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
 import { bookEditChapterRoute, bookEditLayoutRoute } from "@/router";
+import { Network as AccountTree, Ellipsis as MoreHoriz, Settings } from "lucide-react";
 
 /**
  * TODO Chapter List 换成 Tree 模式之后，编辑还没有校验

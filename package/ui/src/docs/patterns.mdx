@@ -198,8 +198,8 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 <Button variant="text">More</Button>
 
 // Need an icon? Use startIcon, never an emoji label.
-import AddIcon from '@mui/icons-material/Add';
-<Button startIcon={<AddIcon />}>Add book</Button>
+import { Plus } from 'lucide-react';
+<Button startIcon={<Plus size={16} />}>Add book</Button>
 
 // Don't
 <button style={{ background: '#f4606c', color: 'white', padding: '8px 16px', borderRadius: 8 }}>
@@ -284,19 +284,19 @@ MUI `<Link>` is fine for in-app navigation (TanStack Router, internal anchors). 
 
 ## 6. Icons
 
-`@mui/icons-material` is the default. `lucide-react` for icons MUI lacks. Emoji are content — what users post — not UI vocabulary.
+`lucide-react` is the canonical icon library; `@tabler/icons-react` covers the few glyphs lucide lacks (numbered circles, regional alpha, etc.). See `.claude/skills/rezics-design/icons.md` for the canonical mapping. Emoji are content — what users post — not UI vocabulary.
 
 ```tsx
 // Do
-import BookmarkIcon from '@mui/icons-material/BookmarkBorder';
-import { Heart } from 'lucide-react';
-<IconButton><BookmarkIcon /></IconButton>
-<Heart size={16} />
+import { Bookmark, Heart } from 'lucide-react';
+<IconButton><Bookmark size={20} /></IconButton>
+<Heart size={16} fill="currentColor" />
 
 // Don't
 <button>📚 My Library</button>
 <span>❤️ Like</span>
 <svg viewBox="0 0 24 24"><path d="..." /></svg>  // no theme integration
+import AddIcon from '@mui/icons-material/Add';   // deprecated — use lucide-react
 ```
 
 ---

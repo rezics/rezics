@@ -1,5 +1,3 @@
-import ThumbDownIcon from "@mui/icons-material/ThumbDown";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import { Box, Typography } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
@@ -11,6 +9,7 @@ import {
   remarkDetailActions,
   remarkPolicy,
 } from "../../models/remarkPolicy";
+import { ThumbsDown as ThumbDownIcon, ThumbsUp as ThumbUpIcon } from "lucide-react";
 
 interface RemarkDetailProps {
   remark: PostDTO;

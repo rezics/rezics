@@ -1,4 +1,3 @@
-import { StarBorder, StarRounded } from "@mui/icons-material";
 import {
   Button,
   Dialog,
@@ -20,6 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Star } from "lucide-react";
 
 interface BookYourScoreBlockProps {
   bookUnitId: string;
@@ -72,8 +72,10 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
     >
       {currentValue ? (
         <>
-          <StarRounded
-            sx={{ color: "var(--rezics-color-brand-fill)", fontSize: 30 }}
+          <Star
+            size={30}
+            fill="currentColor"
+            color="var(--rezics-color-brand-fill)"
           />
           <span className="inline-flex items-baseline gap-1 text-white">
             <span className="text-xl font-semibold tabular-nums leading-none">
@@ -84,9 +86,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
         </>
       ) : (
         <>
-          <StarBorder
-            sx={{ color: "var(--rezics-color-brand-fill)", fontSize: 30 }}
-          />
+          <Star size={30} color="var(--rezics-color-brand-fill)" />
           <span className="text-base font-medium text-brand">
             {t("book.hero.your_score.rate", "Rate")}
           </span>

@@ -6,6 +6,10 @@
 # Dependencies
 node_modules/
 
+# Bun
+.bun-cache
+.bun-tmp
+
 # Build output
 dist/
 out/

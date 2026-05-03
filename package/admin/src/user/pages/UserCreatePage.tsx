@@ -1,5 +1,3 @@
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import SaveIcon from "@mui/icons-material/Save";
 import {
   Alert,
   Box,
@@ -17,6 +15,7 @@ import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 
 import { Page } from "@/core/layouts/Page";
+import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
 
 export default function UserCreatePage() {
   const navigate = useNavigate();

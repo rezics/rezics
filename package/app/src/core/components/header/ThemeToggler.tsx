@@ -1,8 +1,7 @@
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { ListItemIcon, ListItemText, MenuItem } from "@mui/material";
 import { useMemo } from "react";
 import { useAppStore } from "@/app/states/appStore";
+import { Moon as Brightness4Icon, Sun as Brightness7Icon } from "lucide-react";
 
 export function ThemeToggler() {
   const themeMode = useAppStore((state) => state.theme);

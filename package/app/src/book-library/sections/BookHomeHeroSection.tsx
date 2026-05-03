@@ -1,9 +1,9 @@
-import SearchIcon from "@mui/icons-material/Search";
 import { IconButton, InputBase, Paper } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Search as SearchIcon } from "lucide-react";
 
 export const BookHomeHeroSection: React.FC = () => {
   const { t } = useTranslation();

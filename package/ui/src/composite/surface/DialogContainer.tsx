@@ -1,4 +1,3 @@
-import CloseIcon from "@mui/icons-material/Close";
 import AppBar from "@mui/material/AppBar";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -6,6 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import type React from "react";
+import { X as CloseIcon } from "lucide-react";
 
 export interface DialogContainerProps {
   /** 控制对话框显示 */

@@ -1,5 +1,3 @@
-import CheckIcon from "@mui/icons-material/Check";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {
   Alert,
   Button,
@@ -16,6 +14,7 @@ import {
 import { useCreateTokenMutation } from "@rezics/api/token/token.mutations";
 import type { ApiTokenScopes } from "@rezics/contract";
 import { type FC, useState } from "react";
+import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },

@@ -1,9 +1,3 @@
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import EmailIcon from "@mui/icons-material/Email";
-import KeyIcon from "@mui/icons-material/Key";
-import LinkIcon from "@mui/icons-material/Link";
-import SecurityIcon from "@mui/icons-material/Security";
-import TuneIcon from "@mui/icons-material/Tune";
 import {
   List,
   ListItemButton,
@@ -12,6 +6,7 @@ import {
 } from "@mui/material";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";
+import { CircleUser as AccountCircleIcon, Mail as EmailIcon, Key as KeyIcon, Link as LinkIcon, ShieldCheck as SecurityIcon, SlidersHorizontal as TuneIcon } from "lucide-react";
 
 const SETTINGS_NAV = [
   { label: "Profile", path: "profile", icon: AccountCircleIcon },

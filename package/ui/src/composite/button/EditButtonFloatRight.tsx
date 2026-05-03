@@ -1,6 +1,6 @@
-import { Edit } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import type React from "react";
+import { Pencil as Edit } from "lucide-react";
 
 export type EditButtonFloatRightShowProps = {
   onClick?: () => void;

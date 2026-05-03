@@ -1,10 +1,4 @@
 import {
-  AccountTree,
-  ChevronRight,
-  ExpandMore,
-  Search,
-} from "@mui/icons-material";
-import {
   Button,
   Dialog,
   DialogActions,
@@ -17,6 +11,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Chapter } from "./ChapterTreeEditor";
+import { Network as AccountTree, ChevronRight, ChevronDown as ExpandMore, Search } from "lucide-react";
 
 interface MoveToParentDialogProps {
   open: boolean;
@@ -104,16 +99,16 @@ function TreeNode({
             className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-muted-foreground"
           >
             {expanded ? (
-              <ExpandMore sx={{ fontSize: 18 }} />
+              <ExpandMore size={18} />
             ) : (
-              <ChevronRight sx={{ fontSize: 18 }} />
+              <ChevronRight size={18} />
             )}
           </button>
         ) : (
           <span className="w-6" />
         )}
         <AccountTree
-          sx={{ fontSize: 16 }}
+          size={16}
           className={isSelected ? "text-primary" : "text-muted-foreground"}
         />
         <span className={`text-sm truncate ${isSelected ? "font-medium" : ""}`}>
@@ -208,7 +203,7 @@ export function MoveToParentDialog({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search sx={{ fontSize: 18 }} />
+                <Search size={18} />
               </InputAdornment>
             ),
           }}

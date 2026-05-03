@@ -1,9 +1,9 @@
-import { Add, Delete, OpenInNew } from "@mui/icons-material";
 import { Button, Divider, IconButton } from "@mui/material";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Plus as Add, Trash2 as Delete, ExternalLink as OpenInNew } from "lucide-react";
 
 /** Book extra data structure. */
 export type BookExtraData = {
@@ -54,7 +54,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
               className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2"
             >
               <OpenInNew
-                sx={{ fontSize: 14 }}
+                size={14}
                 className="flex-shrink-0 text-muted-foreground"
               />
               <a
@@ -70,7 +70,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
                 color="error"
                 onClick={() => handleRemove(index)}
               >
-                <Delete sx={{ fontSize: 14 }} />
+                <Delete size={14} />
               </IconButton>
             </div>
           ))}

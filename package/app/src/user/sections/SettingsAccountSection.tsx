@@ -1,4 +1,3 @@
-import VerifiedIcon from "@mui/icons-material/Verified";
 import {
   Alert,
   Button,
@@ -24,6 +23,7 @@ import { type FC, useState } from "react";
 import { DangerZone } from "@/user/components/DangerZone";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
+import { BadgeCheck as VerifiedIcon } from "lucide-react";
 
 export const SettingsAccountSection: FC = () => {
   useRequireAuth();

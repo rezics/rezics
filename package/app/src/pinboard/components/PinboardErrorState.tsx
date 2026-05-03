@@ -1,8 +1,8 @@
-import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import { Button } from "@mui/material";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { CircleAlert as ErrorOutlineRoundedIcon } from "lucide-react";
 
 interface PinboardErrorStateProps {
   message?: string;

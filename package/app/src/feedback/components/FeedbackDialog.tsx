@@ -1,4 +1,3 @@
-import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
   Dialog,
@@ -10,6 +9,7 @@ import {
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import type React from "react";
 import FeedbackForm from "./FeedbackForm";
+import { X as CloseIcon } from "lucide-react";
 
 type FeedbackDialogProps = {
   open: boolean;

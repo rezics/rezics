@@ -1,15 +1,6 @@
-import {
-  Add,
-  CheckBox as CheckBoxIcon,
-  Label as LabelIcon,
-  Search,
-  Sync as SyncIcon,
-  SwapVert,
-  UnfoldLess,
-  UnfoldMore,
-} from "@mui/icons-material";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import type React from "react";
+import { Plus as Add, SquareCheck as CheckBoxIcon, Tag as LabelIcon, Search, ArrowUpDown as SwapVert, RefreshCw as SyncIcon, ChevronsDownUp as UnfoldLess, ChevronsUpDown as UnfoldMore } from "lucide-react";
 
 interface ChapterTreeEditorToolbarProps {
   searchTerm: string;
@@ -46,7 +37,7 @@ export const ChapterTreeEditorToolbar: React.FC<
     <div className="flex items-center gap-2 pb-3">
       <div className="relative flex-1">
         <Search
-          sx={{ fontSize: 16 }}
+          size={16}
           className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
         <input

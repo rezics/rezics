@@ -1,6 +1,6 @@
-import ComputerIcon from "@mui/icons-material/Computer";
 import { Button, Chip, Typography } from "@mui/material";
 import type { FC } from "react";
+import { Monitor as ComputerIcon } from "lucide-react";
 
 interface SessionListItemProps {
   session: {

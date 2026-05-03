@@ -1,5 +1,3 @@
-import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -27,6 +25,7 @@ import {
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { fmtDate } from "@/utils/format";
+import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
 
 /** Extract the best title from the translations array on a UnitDTO. */
 function extractUnitTitle(unit: UnitDTO): string {

@@ -1,5 +1,3 @@
-import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -25,6 +23,7 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";

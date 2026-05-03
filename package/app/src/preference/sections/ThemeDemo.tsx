@@ -1,13 +1,4 @@
 import {
-  Add,
-  CheckCircle,
-  Error as ErrorIcon,
-  Favorite,
-  Info,
-  Share,
-  Warning,
-} from "@mui/icons-material";
-import {
   Alert,
   Avatar,
   alpha,
@@ -30,6 +21,7 @@ import {
 import { PRESET_COLORS } from "@rezics/ui";
 import type React from "react";
 import { useAppStore } from "@/app/states/appStore";
+import { Plus as Add, CircleCheck as CheckCircle, CircleAlert as ErrorIcon, Heart as Favorite, Info, Share, TriangleAlert as Warning } from "lucide-react";
 
 export const ThemeDemo: React.FC = () => {
   const theme = useTheme();

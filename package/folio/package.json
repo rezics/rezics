@@ -19,7 +19,8 @@
     "@rezics/storybook-config": "workspace:*",
     "@use-gesture/react": "^10.3.1",
     "fflate": "^0.8.2",
-    "fast-xml-parser": "^5.2.3"
+    "fast-xml-parser": "^5.2.3",
+    "lucide-react": "^0.564.0"
   },
   "peerDependencies": {
     "react": ">=18",

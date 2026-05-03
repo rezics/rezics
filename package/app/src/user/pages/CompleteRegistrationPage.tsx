@@ -1,4 +1,3 @@
-import { CheckCircle as CheckCircleIcon } from "@mui/icons-material";
 import {
   CircularProgress,
   Divider,
@@ -35,6 +34,7 @@ import { OtpInput } from "../components/OtpInput";
 import { Layout } from "../layouts/Layout";
 import { logout } from "../models/handler";
 import { useAuth } from "./useAuth";
+import { CircleCheck as CheckCircleIcon } from "lucide-react";
 
 function deriveSlugFromName(name: string): string {
   return name

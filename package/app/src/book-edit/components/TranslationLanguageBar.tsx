@@ -1,8 +1,8 @@
-import AddIcon from "@mui/icons-material/Add";
 import { Button, Chip, Stack, Typography } from "@mui/material";
 import { LANGUAGE_META } from "@rezics/contract";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { Plus as AddIcon } from "lucide-react";
 
 export interface TranslationLanguageBarProps {
   existingLanguages: string[];

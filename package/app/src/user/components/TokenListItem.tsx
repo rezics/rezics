@@ -1,7 +1,7 @@
-import KeyIcon from "@mui/icons-material/Key";
 import { Button, Chip, Typography } from "@mui/material";
 import type { ApiTokenDTO } from "@rezics/contract";
 import type { FC } from "react";
+import { Key as KeyIcon } from "lucide-react";
 
 interface TokenListItemProps {
   token: ApiTokenDTO;

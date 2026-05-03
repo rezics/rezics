@@ -33,6 +33,7 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 | `ArrowForwardIosRounded` | `lucide-react` | `ChevronRight` | |
 | `Cancel` | `lucide-react` | `XCircle` | Filled X-in-circle for hard cancel |
 | `Check` | `lucide-react` | `Check` | |
+| `CheckBox` | `lucide-react` | `SquareCheck` | Filled box-with-check; `Square` for unchecked |
 | `CheckCircle`, `CheckCircleOutline` | `lucide-react` | `CircleCheck` | Stroke style only — colorize via class |
 | `ChevronLeft` | `lucide-react` | `ChevronLeft` | |
 | `ChevronRight` | `lucide-react` | `ChevronRight` | |
@@ -40,29 +41,39 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 | `ContentCopy` | `lucide-react` | `Copy` | |
 | `Delete`, `DeleteOutline`, `DeleteOutlineRounded` | `lucide-react` | `Trash2` | Trash2 has a lid+handle that reads as "delete" |
 | `Done` | `lucide-react` | `Check` | |
+| `DragIndicator`, `DragIndicatorRounded` | `lucide-react` | `GripVertical` | Drag handle |
 | `Edit`, `EditOutlined`, `EditRounded` | `lucide-react` | `Pencil` | "Pen" reads as compose; `Pencil` reads as edit |
 | `ExpandLess` | `lucide-react` | `ChevronUp` | |
 | `ExpandMore` | `lucide-react` | `ChevronDown` | |
+| `IosShareOutlined`, `Share` | `lucide-react` | `Share` | Box-with-up-arrow (the iOS share affordance). Use `Share2` only for the 3-node network-share glyph. |
 | `KeyboardArrowDown` | `lucide-react` | `ChevronDown` | |
 | `KeyboardArrowLeft` | `lucide-react` | `ChevronLeft` | |
 | `KeyboardArrowRight` | `lucide-react` | `ChevronRight` | |
+| `KeyboardArrowUp` | `lucide-react` | `ChevronUp` | |
 | `Launch`, `OpenInNew` | `lucide-react` | `ExternalLink` | |
+| `Logout` | `lucide-react` | `LogOut` | |
 | `Menu` | `lucide-react` | `Menu` | |
 | `MoreHoriz` | `lucide-react` | `Ellipsis` | |
+| `MoreVert` | `lucide-react` | `EllipsisVertical` | |
+| `Refresh` | `lucide-react` | `RefreshCw` | Same as `Sync` — circular-arrows reload glyph |
 | `Remove` | `lucide-react` | `Minus` | |
 | `Save` | `lucide-react` | `Save` | |
 | `Search` | `lucide-react` | `Search` | |
+| `SwapVert` | `lucide-react` | `ArrowUpDown` | Two-arrow vertical reorder glyph |
 | `Sync` | `lucide-react` | `RefreshCw` | |
 | `Tune`, `TuneRounded` | `lucide-react` | `SlidersHorizontal` | "Tune" in MUI is sliders |
+| `UnfoldLess` | `lucide-react` | `ChevronsDownUp` | Collapse — arrows point inward |
+| `UnfoldMore` | `lucide-react` | `ChevronsUpDown` | Expand — arrows point outward |
 
 ### Status, info, alerts
 
 | MUI name | Replacement library | Replacement export | Notes |
 | --- | --- | --- | --- |
+| `BugReport` | `lucide-react` | `Bug` | |
 | `Error`, `ErrorOutlineOutlined`, `ErrorOutlineRounded` | `lucide-react` | `CircleAlert` | |
 | `HourglassEmpty` | `lucide-react` | `Hourglass` | |
-| `InfoOutlined` | `lucide-react` | `Info` | |
-| `ReportProblem` | `lucide-react` | `TriangleAlert` | |
+| `Info`, `InfoOutlined` | `lucide-react` | `Info` | |
+| `ReportProblem`, `Warning` | `lucide-react` | `TriangleAlert` | |
 | `Verified` | `lucide-react` | `BadgeCheck` | |
 
 ### Navigation, layout
@@ -86,7 +97,8 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 | --- | --- | --- | --- |
 | `Book` | `lucide-react` | `Book` | |
 | `BookmarkBorder` | `lucide-react` | `Bookmark` | Stroke style — toggle `fill="currentColor"` for filled state |
-| `CollectionsBookmark` | `lucide-react` | `BookMarked` | |
+| `BookmarkAddOutlined` | `lucide-react` | `BookmarkPlus` | Bookmark with plus glyph |
+| `CollectionsBookmark`, `CollectionsBookmarkOutlined` | `lucide-react` | `BookMarked` | |
 | `Description` | `lucide-react` | `FileText` | "Description" in MUI is a document with text lines |
 | `LibraryBooks`, `MenuBook`, `MenuBookOutlined` | `lucide-react` | `BookOpen` | |
 | `MovieOutlined` | `lucide-react` | `Film` | |
@@ -106,7 +118,7 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 | `ThumbUp`, `ThumbUpOutlined` | `lucide-react` | `ThumbsUp` | |
 | `ThumbDown`, `ThumbDownOutlined` | `lucide-react` | `ThumbsDown` | |
 | `RateReviewOutlined` | `lucide-react` | `MessageSquareText` | A speech bubble with lines reads as "review" |
-| `Comment` | `lucide-react` | `MessageCircle` | |
+| `ChatBubbleOutline`, `Comment` | `lucide-react` | `MessageCircle` | |
 | `Forum` | `lucide-react` | `MessagesSquare` | Multiple bubbles = forum |
 | `Feedback`, `FeedbackOutlined` | `lucide-react` | `MessageCircleQuestion` | |
 | `PushPin`, `PushPinOutlined`, `PushPinRounded` | `lucide-react` | `Pin` | |
@@ -149,6 +161,7 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 | `Inventory2` | `lucide-react` | `Package` | |
 | `StorageOutlined` | `lucide-react` | `Database` | |
 | `StyleOutlined` | `lucide-react` | `Tags` | "Style" = label/tag stack in MUI |
+| `Label`, `LocalOfferOutlined` | `lucide-react` | `Tag` | Single luggage/price tag glyph |
 | `ManageSearchOutlined` | `lucide-react` | `SearchCheck` | |
 | `SupportAgentOutlined` | `lucide-react` | `Headset` | |
 | `CleaningServicesRounded` | `lucide-react` | `Brush` | |
@@ -162,6 +175,7 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 | `CameraAlt` | `lucide-react` | `Camera` | |
 | `CloudUpload` | `lucide-react` | `CloudUpload` | |
 | `Computer` | `lucide-react` | `Monitor` | Used for active sessions |
+| `Photo` | `lucide-react` | `Image` | Picture/photo glyph |
 
 ### Visibility (form fields)
 
@@ -178,7 +192,7 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 | `LooksTwoOutlined` | `@tabler/icons-react` | `IconNumber2` | |
 | `Looks3Outlined` | `@tabler/icons-react` | `IconNumber3` | |
 | `PlaylistAddOutlined` | `lucide-react` | `ListPlus` | |
-| `PostAddOutlined` | `lucide-react` | `FilePlus` | |
+| `PostAdd`, `PostAddOutlined` | `lucide-react` | `FilePlus` | |
 
 ### Brand marks (third-party logos)
 

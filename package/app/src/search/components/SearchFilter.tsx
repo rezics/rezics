@@ -1,10 +1,9 @@
-import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Button, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { ArrowDown as ArrowDownward, ChevronDown as ArrowDropDownIcon, ArrowUp as ArrowUpward } from "lucide-react";
 
 export type BookLibSortKey =
   | "relevance"

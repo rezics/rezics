@@ -1,9 +1,9 @@
-import { InfoOutlined } from "@mui/icons-material";
 import { Checkbox, FormControlLabel, Tooltip, Typography } from "@mui/material";
 import type { BookDTO, ContentRating } from "@rezics/contract";
 import { RatingSelector } from "@rezics/ui";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { Info as InfoOutlined } from "lucide-react";
 
 /**
  * BookMetadataValue — flat overlay of book unit-level fields (i.e. fields
@@ -47,7 +47,7 @@ function FlagWithTooltip({
       />
       <Tooltip title={tooltip}>
         <InfoOutlined
-          sx={{ fontSize: 16 }}
+          size={16}
           className="text-muted-foreground cursor-help"
         />
       </Tooltip>
@@ -181,7 +181,7 @@ export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
       <span>{t("book.flags.licensed")}</span>
       <Tooltip title={tooltipTitle ?? t("book.tooltips.licensed")}>
         <InfoOutlined
-          sx={{ fontSize: 16 }}
+          size={16}
           className="text-muted-foreground cursor-help"
         />
       </Tooltip>

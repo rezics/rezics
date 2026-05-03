@@ -1,4 +1,3 @@
-import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import {
   Chip,
   Divider,
@@ -18,6 +17,7 @@ import {
   AnnouncementFeedSection,
   type PinboardAnnouncementItem,
 } from "@/pinboard";
+import { Bell as NotificationsRoundedIcon } from "lucide-react";
 
 function formatRelativeWithT(t: TFunction, dateIso: string): string {
   const ms = Date.now() - new Date(dateIso).getTime();

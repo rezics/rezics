@@ -1,4 +1,3 @@
-import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
@@ -21,6 +20,7 @@ import { RealmContentFeed } from "../components/RealmContentFeed";
 import { RealmMemberList } from "../components/RealmMemberList";
 import { RealmTagManager } from "../components/RealmTagManager";
 import { canManageRealm } from "../models/canManageRealm";
+import { SlidersHorizontal as TuneRoundedIcon } from "lucide-react";
 
 interface RealmPageProps {
   realmId: string;

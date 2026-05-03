@@ -1,5 +1,4 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -18,6 +17,7 @@ import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useState } from "react";
+import { Search as SearchIcon } from "lucide-react";
 
 export const EchokvEditPage: React.FC = () => {
   const { show: showAlert } = useAlertStore();

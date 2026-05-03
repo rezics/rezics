@@ -1,6 +1,6 @@
-import { Menu } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { Menu } from "lucide-react";
 
 interface DrawerTogglerProps {
   handleDrawerToggleInner: () => void;

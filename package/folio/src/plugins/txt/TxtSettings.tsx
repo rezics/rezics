@@ -1,8 +1,7 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CloseIcon from "@mui/icons-material/Close";
 import { useCallback, useMemo, useState } from "react";
 import type { PanelProps } from "../../types";
 import type { TxtSplitResult } from "./split";
+import { CircleCheck as CheckCircleIcon, X as CloseIcon } from "lucide-react";
 
 interface TxtSettingsInternalProps extends PanelProps {
   rawText: string;
@@ -151,8 +150,8 @@ function TxtSettingsInner({
               /{rule}/
               {splitInfo.ruleUsed === rule && (
                 <CheckCircleIcon
-                  fontSize="small"
-                  sx={{ color: "var(--rezics-color-success-fill)" }}
+                  size={16}
+                  color="var(--rezics-color-success-fill)"
                   aria-label="active rule"
                 />
               )}

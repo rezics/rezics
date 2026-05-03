@@ -1,5 +1,3 @@
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -7,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import { useImageUpload } from "@rezics/api/upload/upload.mutations";
 import { useCallback, useRef, useState } from "react";
 import type { ImageProvider } from "./types";
+import { Camera as CameraAltIcon, CloudUpload as CloudUploadIcon } from "lucide-react";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ACCEPTED_EXTENSIONS = ".jpg,.jpeg,.png,.webp,.gif";
@@ -135,7 +134,7 @@ function UploadContent({ onInsert }: UploadContentProps) {
               gap: 1,
             }}
           >
-            <CameraAltIcon sx={{ fontSize: 32 }} color="action" />
+            <CameraAltIcon size={32} color="var(--rezics-color-text-tertiary)" />
             <Typography variant="body2" color="text.secondary">
               Drop image here, paste, or click to browse
             </Typography>

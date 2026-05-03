@@ -1,8 +1,3 @@
-import CloseIcon from "@mui/icons-material/Close";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import SearchIcon from "@mui/icons-material/Search";
-import ThumbDownOutlinedIcon from "@mui/icons-material/ThumbDownOutlined";
-import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import {
   Box,
   Button,
@@ -27,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import type { InjectedTag } from "@/search/models/injectedTags";
 import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
 import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
+import { X as CloseIcon, Pencil as EditOutlinedIcon, Search as SearchIcon, ThumbsDown as ThumbDownOutlinedIcon, ThumbsUp as ThumbUpOutlinedIcon } from "lucide-react";
 
 export type TagInteractionProps = {
   tags: UnitTagDTO[];

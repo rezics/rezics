@@ -1,4 +1,3 @@
-import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import { Box, Typography } from "@mui/material";
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
@@ -11,6 +10,7 @@ import {
   excerptDetailActions,
   excerptPolicy,
 } from "../../models/excerptPolicy";
+import { Quote as FormatQuoteIcon } from "lucide-react";
 
 interface ExcerptDetailProps {
   excerpt: UnitDTO;
@@ -65,7 +65,7 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
 
       <Box className="flex items-start gap-2">
         <FormatQuoteIcon
-          sx={{ fontSize: 30, color: "text.secondary", mt: 0.5 }}
+          size={30} color={"text.secondary"} style={{ marginTop: "4px" }}
         />
         <Box className="flex-1">
           <MarkdownContent content={description} />

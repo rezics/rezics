@@ -1,6 +1,6 @@
-import SearchIcon from "@mui/icons-material/Search";
 import { List, ListItemButton, ListItemText, Paper } from "@mui/material";
 import type React from "react";
+import { Search as SearchIcon } from "lucide-react";
 
 interface SearchSuggestionsProps {
   keyword: string;
@@ -37,7 +37,7 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
       <List dense>
         {suggestions.map((item) => (
           <ListItemButton key={item} onClick={() => onSelect(item)}>
-            <SearchIcon sx={{ mr: 1 }} />
+            <SearchIcon style={{ marginRight: "8px" }} />
             <ListItemText primary={item} />
           </ListItemButton>
         ))}

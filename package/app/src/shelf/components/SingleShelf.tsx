@@ -1,4 +1,3 @@
-import { EditOutlined } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
@@ -8,6 +7,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { Pencil as EditOutlined } from "lucide-react";
 
 interface SingleShelfProps {
   shelf: ShelfDTO;

@@ -1,7 +1,3 @@
-import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
-import DragIndicatorRoundedIcon from "@mui/icons-material/DragIndicatorRounded";
-import EditRoundedIcon from "@mui/icons-material/EditRounded";
-import PushPinRoundedIcon from "@mui/icons-material/PushPinRounded";
 import {
   Box,
   Chip,
@@ -14,6 +10,7 @@ import {
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import type { PinboardEntryView } from "../models/types";
+import { Trash2 as DeleteOutlineRoundedIcon, GripVertical as DragIndicatorRoundedIcon, Pencil as EditRoundedIcon, Pin as PushPinRoundedIcon } from "lucide-react";
 
 export type PinboardEntryCardVariant = "compact" | "card" | "adminRow";
 
@@ -55,7 +52,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
         sx={{ minWidth: 0, flex: 1 }}
       >
         <PushPinRoundedIcon
-          sx={{ fontSize: 14, color: theme.palette.warning.main }}
+          size={14} color={theme.palette.warning.main}
           aria-hidden="true"
         />
         <Typography
@@ -95,7 +92,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
       >
         {dragHandle ?? (
           <DragIndicatorRoundedIcon
-            sx={{ color: theme.palette.text.disabled }}
+            color={theme.palette.text.disabled}
             aria-hidden="true"
           />
         )}
@@ -189,7 +186,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
     >
       <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
         <PushPinRoundedIcon
-          sx={{ fontSize: 16, color: theme.palette.warning.main }}
+          size={16} color={theme.palette.warning.main}
           aria-hidden="true"
         />
         <Typography variant="subtitle2" fontWeight={600} noWrap>

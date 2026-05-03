@@ -1,5 +1,5 @@
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { Box, IconButton, useTheme } from "@mui/material";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function MainSidebarDrawerHeader({
   handleDrawerToggle,

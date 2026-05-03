@@ -1,9 +1,4 @@
 import {
-  Logout as LogoutIcon,
-  Person as PersonIcon,
-  Settings as SettingsIcon,
-} from "@mui/icons-material";
-import {
   Avatar,
   Divider,
   IconButton,
@@ -20,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { logout } from "@/user/models/handler";
 import { useUserProfileStore } from "@/user/states";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";
+import { LogOut as LogoutIcon, User as PersonIcon, Settings as SettingsIcon } from "lucide-react";
 export type AccountMenuProps = {
   onLogout?: () => void;
 };

@@ -1,8 +1,8 @@
-import LanguageIcon from "@mui/icons-material/Language";
 import { ListItemIcon, ListItemText, MenuItem } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { LangToggle } from "../LangToggle";
 import { ThemeToggler } from "./ThemeToggler";
+import { Languages as LanguageIcon } from "lucide-react";
 
 export function MiscMenuItems() {
   const { t } = useTranslation();

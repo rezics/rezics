@@ -106,10 +106,10 @@
 
 ### 4.7 Icons → lucide (with tabler fallback)
 
-- [ ] 4.7.1 Replace every `import { X } from '@mui/icons-material'` with the lucide-react equivalent per `.claude/skills/rezics-design/icons.md`; common mappings: `Edit` → `Pencil`, `Delete` → `Trash2`, `Add` → `Plus`, `Close` → `X`, `Search` → `Search`, `Settings` → `Settings`, `MoreVert` → `MoreVertical`, `MoreHoriz` → `MoreHorizontal`, `ArrowBack` → `ArrowLeft`, `Visibility` → `Eye`, `VisibilityOff` → `EyeOff`, `Star` → `Star`, `StarOutline` → `Star` with `data-state="empty"`
-- [ ] 4.7.2 Specifically replace `SecurityOutlined` (realm permission icon) with `Shield` or `ShieldUser` per `specs/realm-frontend/spec.md`
-- [ ] 4.7.3 For icons missing in lucide, import from `@tabler/icons-react` and document the mapping in `.claude/skills/rezics-design/icons.md` per `specs/icon-system/spec.md`; do not add `@tabler/icons-react` to `package.json` until at least one site needs it
-- [ ] 4.7.4 Replace any emoji used as UI chrome with a lucide icon (per `specs/icon-system/spec.md` Scenario "Emoji not used as functional chrome"); decorative emoji inside user-generated content stays
+- [x] 4.7.1 Replace every `import { X } from '@mui/icons-material'` with the lucide-react equivalent per `.claude/skills/rezics-design/icons.md`; common mappings: `Edit` → `Pencil`, `Delete` → `Trash2`, `Add` → `Plus`, `Close` → `X`, `Search` → `Search`, `Settings` → `Settings`, `MoreVert` → `MoreVertical`, `MoreHoriz` → `MoreHorizontal`, `ArrowBack` → `ArrowLeft`, `Visibility` → `Eye`, `VisibilityOff` → `EyeOff`, `Star` → `Star`, `StarOutline` → `Star` with `data-state="empty"`
+- [x] 4.7.2 Specifically replace `SecurityOutlined` (realm permission icon) with `Shield` or `ShieldUser` per `specs/realm-frontend/spec.md`
+- [x] 4.7.3 For icons missing in lucide, import from `@tabler/icons-react` and document the mapping in `.claude/skills/rezics-design/icons.md` per `specs/icon-system/spec.md`; do not add `@tabler/icons-react` to `package.json` until at least one site needs it
+- [x] 4.7.4 Replace any emoji used as UI chrome with a lucide icon (per `specs/icon-system/spec.md` Scenario "Emoji not used as functional chrome"); decorative emoji inside user-generated content stays
 
 ### 4.8 `sx` prop sweep
 

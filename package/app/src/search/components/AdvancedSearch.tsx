@@ -1,4 +1,3 @@
-import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import type { SearchQuery } from "@rezics/contract";
 import type React from "react";
@@ -15,6 +14,7 @@ import {
   TagPicker,
   WordCountRangeInput,
 } from "./primitive";
+import { X as CloseIcon } from "lucide-react";
 
 export type AdvancedSearchProps = {
   query: UseSearchQueryReturn["query"];

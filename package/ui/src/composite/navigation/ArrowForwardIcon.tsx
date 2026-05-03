@@ -1,7 +1,7 @@
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import { Box, styled, Typography } from "@mui/material";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import type React from "react";
+import { ChevronRight as ArrowForwardIosRoundedIcon } from "lucide-react";
 
 const LinkWithIcon = styled(Box)(({ theme }) => ({
   display: "inline-flex",

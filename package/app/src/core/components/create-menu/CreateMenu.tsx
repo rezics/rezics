@@ -1,10 +1,9 @@
-import AddIcon from "@mui/icons-material/Add";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { IconButton, Menu } from "@mui/material";
 import type React from "react";
 import { useState } from "react";
 
 import { CreateMenuItem } from "./CreateMenuItem";
+import { Plus as AddIcon, ChevronDown as ArrowDropDownIcon } from "lucide-react";
 
 export const CreateMenu: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

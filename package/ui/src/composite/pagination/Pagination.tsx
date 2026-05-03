@@ -1,4 +1,3 @@
-import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import {
   Box,
   FormControl,
@@ -16,6 +15,7 @@ import {
 import type React from "react";
 import { useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ArrowDown as ArrowDownward, ArrowUp as ArrowUpward } from "lucide-react";
 
 /**
  * example:

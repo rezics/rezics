@@ -1,5 +1,3 @@
-import GitHubIcon from "@mui/icons-material/GitHub";
-import TelegramIcon from "@mui/icons-material/Telegram";
 import {
   Box,
   Button,
@@ -15,6 +13,8 @@ import {
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { Github as GitHubIcon } from "lucide-react";
+import { IconBrandTelegram as TelegramIcon } from "@tabler/icons-react";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (

@@ -1,7 +1,8 @@
-import { Facebook, Instagram, Telegram, Twitter } from "@mui/icons-material";
 import { Button, Dialog, DialogActions, DialogContent } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { Facebook, Instagram } from "lucide-react";
+import { IconBrandTelegram as Telegram, IconBrandTwitter as Twitter } from "@tabler/icons-react";
 
 export type ReactionBarToolBoxProps = {
   open: boolean;

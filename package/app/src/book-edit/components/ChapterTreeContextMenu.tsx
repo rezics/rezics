@@ -1,15 +1,4 @@
 import {
-  AccountTree,
-  ContentCopy,
-  Delete,
-  Edit,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  PostAdd,
-  UnfoldLess,
-  UnfoldMore,
-} from "@mui/icons-material";
-import {
   Divider,
   ListItemIcon,
   ListItemText,
@@ -24,6 +13,7 @@ import {
   moveSiblingLast,
 } from "@/shared/utils/arborist-tree";
 import type { Chapter, ChapterContextMenuState } from "./ChapterTreeEditor";
+import { Network as AccountTree, Copy as ContentCopy, Trash2 as Delete, Pencil as Edit, ChevronDown as KeyboardArrowDown, ChevronUp as KeyboardArrowUp, FilePlus as PostAdd, ChevronsDownUp as UnfoldLess, ChevronsUpDown as UnfoldMore } from "lucide-react";
 
 interface ChapterTreeContextMenuProps {
   contextMenu: NonNullable<ChapterContextMenuState>;

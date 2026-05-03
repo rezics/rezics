@@ -1,4 +1,3 @@
-import { ExpandMore } from "@mui/icons-material";
 import {
   Alert,
   Button,
@@ -48,6 +47,7 @@ import {
   type TranslationDraft,
   useBookTranslationEditor,
 } from "../hooks/useBookTranslationEditor";
+import { ChevronDown as ExpandMore } from "lucide-react";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));
@@ -442,12 +442,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {t("book.edit_sections.extra")}
             </h3>
             <ExpandMore
-              sx={{
-                fontSize: 20,
-                color: "text.secondary",
-                transition: "transform 200ms ease",
-                transform: extraOpen ? "rotate(180deg)" : "rotate(0deg)",
-              }}
+              size={20} color={"text.secondary"} style={{ transition: "transform 200ms ease", transform: extraOpen ? "rotate(180deg)" : "rotate(0deg)" }}
             />
           </button>
           <Divider className="mt-3 mb-6" />

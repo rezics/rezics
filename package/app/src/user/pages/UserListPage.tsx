@@ -1,4 +1,3 @@
-import SearchIcon from "@mui/icons-material/Search";
 import {
   Avatar,
   Box,
@@ -16,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { UserError, UserLoading } from "./UserState";
+import { Search as SearchIcon } from "lucide-react";
 
 export interface UserListPageProps {
   onUserClick?: (unitId: string) => void;

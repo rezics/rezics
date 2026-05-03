@@ -1,4 +1,3 @@
-import MenuIcon from "@mui/icons-material/Menu";
 import {
   AppBar,
   Box,
@@ -10,6 +9,7 @@ import {
 import React from "react";
 import { AdminNav } from "@/navigation/AdminNav";
 import { adminNav } from "@/navigation/adminNavConfig";
+import { Menu as MenuIcon } from "lucide-react";
 
 export default function AdminLayout({
   children,

@@ -1,9 +1,8 @@
-import CampaignRoundedIcon from "@mui/icons-material/CampaignRounded";
-import PushPinRoundedIcon from "@mui/icons-material/PushPinRounded";
 import { Box, Typography, useTheme } from "@mui/material";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
+import { Megaphone as CampaignRoundedIcon, Pin as PushPinRoundedIcon } from "lucide-react";
 
 export interface Announcement {
   id: string;
@@ -57,11 +56,7 @@ export function AnnouncementBar({
       }}
     >
       <CampaignRoundedIcon
-        sx={{
-          mr: 1.5,
-          color: theme.palette.primary.main,
-          fontSize: 18,
-        }}
+        color={theme.palette.primary.main} size={18} style={{ marginRight: "12px" }}
       />
 
       <div className="relative flex-1 overflow-hidden h-[28px] flex items-center">
@@ -84,7 +79,7 @@ export function AnnouncementBar({
             >
               {item.pin && (
                 <PushPinRoundedIcon
-                  sx={{ fontSize: 14, color: theme.palette.warning.main }}
+                  size={14} color={theme.palette.warning.main}
                 />
               )}
 

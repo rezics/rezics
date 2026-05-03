@@ -1,8 +1,8 @@
-import CloseIcon from "@mui/icons-material/Close";
 import { Box, Divider, Drawer, IconButton, Typography } from "@mui/material";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import type React from "react";
 import FeedbackForm from "./FeedbackForm";
+import { X as CloseIcon } from "lucide-react";
 
 type FeedbackDrawerProps = {
   open: boolean;

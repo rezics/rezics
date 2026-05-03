@@ -1,4 +1,3 @@
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import {
   Chip,
   IconButton,
@@ -13,6 +12,7 @@ import {
 } from "@mui/material";
 import type { JwtServiceDTO } from "@rezics/contract";
 import type { FC } from "react";
+import { Pencil as EditOutlinedIcon } from "lucide-react";
 
 type Props = {
   services: JwtServiceDTO[];
