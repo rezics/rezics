@@ -36,7 +36,7 @@ export const Home: React.FC<HomeProps> = () => {
               {t("page.home.hero.kicker")}
             </p>
             <h1 className="text-2xl font-semibold leading-snug">
-              <span className="text-primary-main">
+              <span className="text-brand">
                 {" "}
                 {t("page.home.hero.title_highlight")}
               </span>
