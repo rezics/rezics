@@ -57,17 +57,21 @@ The Meilisearch projection, the search query surface, and any aggregate-level re
 
 ### Status enum
 
-**Decision:** Four-value enum: `VIEWED`, `READING`, `COMPLETED`, `DROPPED`.
+**Decision:** Four-value enum, medium-neutral: `BACKLOG`, `ACTIVE`, `COMPLETED`, `DROPPED`.
 
-**Why:** These are the four states the product surface needs:
-- `VIEWED` — touched but not actively reading (transient; the row exists but no commitment).
-- `READING` — currently in progress.
-- `COMPLETED` — user marked finished (or progress hit 1.0 with the right kind of unit).
-- `DROPPED` — user explicitly abandoned (distinct from "stopped reading because life happened" — the latter stays `READING`).
+**Why:** These are the four states the product surface needs across every unit type (books, novels, comics, future games / media). The vocabulary deliberately avoids reading-only verbs:
+- `BACKLOG` — the row exists but the user has no meaningful engagement yet (covers both "user added it to their want-list via shelf" and "user briefly tapped through"). This is the safe default when a row is created without an explicit status.
+- `ACTIVE` — the user is currently consuming the unit.
+- `COMPLETED` — the user marked it finished, or `progress` reached `1.0` and the server coerced the status (see auto-coercion rule below).
+- `DROPPED` — the user explicitly abandoned the unit (distinct from "stopped because life happened" — the latter stays `ACTIVE`).
 
-The enum is the bucket axis for the per-unit aggregate that the sibling change builds. We deliberately separate `progress` (number) from `status` (intent) — a user can be at 0.85 and `DROPPED`, or at 0.05 and `READING`.
+The enum is the bucket axis for the per-unit aggregate that the sibling change `add-progress-search-index` builds. Cross-user aggregates (how many users have a unit in each bucket) are computed by Meilisearch from this column — Shelf is per-user and cannot answer cross-user questions efficiently. We deliberately separate `progress` (number) from `status` (intent) — a user can be at 0.85 and `DROPPED`, or at 0.05 and `ACTIVE`.
+
+**Naming convention:** Status values are `UPPER_SNAKE` (Prisma enum convention). The three corresponding system shelf `kindKey`s are lowercase (`backlog`, `active`, `completed`) — same vocabulary, different casing because they live in different stores with different conventions.
 
 **Alternative considered — derive status from progress + lastSeenAt staleness:** rejected. `DROPPED` is an explicit user signal; deriving it from inactivity would be wrong half the time.
+
+**Alternative considered — book-flavored vocabulary (`VIEWED` / `READING` / ...):** rejected. The catalog is multi-medium by design; reading verbs would force per-medium translation tables in every consumer.
 
 ### `totalTimeMs` as `BigInt`
 
@@ -102,6 +106,50 @@ The enum is the bucket axis for the per-unit aggregate that the sibling change b
 
 **Not added:** an index on `(userId, status)` — currently no API filters by it, and it would be redundant with the `lastSeenAt` index for the dominant read.
 
+### Progress and shelf are orthogonal stores
+
+**Decision:** The backend treats `UserUnitProgress` and `Shelf` / `ShelfItem` as independent stores. A progress upsert never reads or writes a shelf row, and a shelf collect / uncollect never reads or writes a progress row. The frontend issues two separate requests when a user action affects both surfaces (e.g. clicking "I'm reading this" fires `PUT /me/units/:id/progress { status: "ACTIVE" }` *and* a shelf collect to the user's `active` shelf).
+
+**Why:**
+- Shelf is per-user (`Shelf.unitId` is owned by a single user). It cannot serve cross-user aggregates — counting "how many users have this unit in `BACKLOG`" via shelves is an O(全站) scan with a dedupe step. The Meilisearch projection in `add-progress-search-index` reads `UserUnitProgress.status` directly. Therefore shelf has no aggregate role; its only role is per-user UI (curated lists, drag-to-reorder, the user-visible "my backlog" tab).
+- Drift between the two stores is local to the affected user's UI. It cannot corrupt aggregates, search results, or any downstream stat. Cost of drift = a card temporarily missing from a tab; cost of synchronization = backend cross-store transactions, write-amplification on hot shelf rows, and a coupling between the stats path and the curation path that buys nothing.
+- Self-healing: the next user action on the same unit re-fires both requests with the intended state and re-converges the stores without explicit reconciliation logic.
+
+**Auto-coercion exception:** When an upsert sets `progress >= 1.0` and the client did not set a different `status`, the server coerces `status` to `COMPLETED`. This coercion stays inside the progress row — the server still does **not** touch any shelf. The frontend is responsible for any UX prompt ("you finished this — move it to your completed shelf?") and for issuing the corresponding shelf request if the user accepts.
+
+**Alternative considered — backend transactional dual-write:** rejected. It introduces a consistency boundary the system does not need (no aggregate reads shelves), forces every progress write through the shelf write path's locking and indexes, and gives shelf an aggregate role it cannot fulfill efficiently.
+
+### System shelves and the `User.extra.shelves` pointer
+
+**Decision:** Add `extra Json?` to the `User` model. Within `extra`, store a `shelves` map from system-shelf `kindKey` to that user's shelf `unitId`:
+
+```jsonc
+user.extra = {
+  shelves: {
+    favorites: "uuid-...",
+    backlog:   "uuid-...",
+    active:    "uuid-...",
+    completed: "uuid-..."
+  }
+  // future: onboarding flags, recommender opt-in, device prefs, etc.
+}
+```
+
+**Why:**
+- These pointers are never used as filter predicates — every consumer that needs them already has the `userId` in hand and just needs the unitId of "this user's backlog shelf". Typed columns + `findFirst by kindKey` would either pay an extra query per request or grow the User row by one column per system shelf forever.
+- The shape is per-user variable (a future user-tier may add more system shelves) and conventional for this schema — `extra Json?` already exists on `Unit`, `Realm`, `Shelf`, `Post`, `UnitTranslation`, etc. Adding it to `User` aligns with the existing pattern.
+- `User` already has `permission Json?` and `settings Json?` — the codebase is comfortable with JSON columns on User. `extra` is the catch-all extension point parallel to the rest of the schema.
+
+**TypeScript safety:** A Typebox schema in `@rezics/contract` describes the `extra` shape (`extra.shelves` is a `Record<string, Uuid>`), and the server reads/writes through a typed accessor. Storage stays JSON-untyped at the Postgres layer.
+
+**Bootstrap:** New users get all four system shelves created at registration time inside the same transaction as `User` creation; the four resulting `unitId`s are written into `User.extra.shelves` in the same transaction. Existing pre-change users have `extra = NULL`; the first request needing a system shelf for them lazy-creates the missing shelf and patches `extra.shelves[kindKey]` (read-modify-write at the service layer is sufficient — the column is per-user with negligible write contention, and `jsonb_set` is available as an optimization later if needed).
+
+**Reserved kindKeys:** `favorites`, `backlog`, `active`, and `completed` are reserved system kindKeys. The shelf service rejects any user-initiated shelf creation that attempts to use one of these keys. This guard lives in the shelf service create path; it is an implementation invariant rather than a separately specified requirement.
+
+**Alternative considered — four typed `*ShelfUnitId` columns on User:** rejected. The values are pointers, not predicates; typed columns burn a migration per future system shelf for no query benefit.
+
+**Alternative considered — keep the runtime `findFirst by kindKey` lookup with no User extension:** rejected. It pays an extra query on every request that needs a system-shelf id, and it scales worse as the number of system shelves grows.
+
 ### Service / API layout
 
 **Decision:** New domain folder `package/server/src/progress/`:
@@ -119,14 +167,20 @@ Contract types live in `package/contract` (Typebox), and `package/api` exposes T
 - **`totalTimeMs` reflects only what clients report.** A user who reads with the tab closed produces no time signal. → Mitigation: this is a known limitation of any client-reported time metric. We accept it; product surfaces the value as "approximate".
 - **Schema migration on a large table is currently free** (the table doesn't exist yet), but the table will grow without bound — one row per `(active user, touched unit)`. → Mitigation: at the data scale this becomes a problem (≫100M rows), we revisit with partitioning by `userId` hash. Not now.
 - **No CDC, no Meilisearch coupling here.** The sibling change adds an in-process call from the upsert path into the search sync layer. That call lives in the sibling spec; this change leaves the service hook open (the upsert path is the natural integration point). → Mitigation: keep `progress.service.ts` framed so the upsert is one function call — the sibling change wraps it without restructuring.
+- **Frontend dual-write requires both requests to be idempotent.** Progress upsert is idempotent by construction; shelf collect must also be idempotent under repeated calls (the existing `collect` path already de-duplicates via the `(shelfUnitId, itemRef)` PK). → Mitigation: existing behavior covers it; no change required.
+- **Lazy-create race on `User.extra.shelves`:** if two concurrent requests for the same pre-existing user both find a missing system shelf, both may try to create it. → Mitigation: the bootstrap path is a `findFirst by kindKey + userId` followed by create; wrap in a small advisory check or accept the rare duplicate (the second create is the loser; cleanup is trivial). Pragmatically rare because real users only hit lazy-create once per system shelf.
 
 ## Migration Plan
 
-- One additive Prisma migration adding the `UserUnitProgress` table and its enum. No existing data is touched, no FKs are tightened on existing tables.
-- Deploy in normal release sequence: schema migration → server release with the new endpoints. Feature has no client surface until `package/app` consumes the hooks; consumers ship later.
-- Rollback: drop the table. No other system depends on it (the sibling Meilisearch projection is a separate change shipped after this one).
+- One additive Prisma migration:
+  - Adds the `UserUnitProgress` table and its enum.
+  - Adds `extra Json?` to `User`.
+- Existing data is not modified by the migration. Pre-existing users have `User.extra = NULL` after migration; the lazy-create fallback populates `extra.shelves` on first need.
+- The new `backlog` / `active` / `completed` shelves are not back-filled in bulk — they are created on demand per user (registration for new users, lazy-create for old). This avoids a one-shot bulk job that would create three rows per existing user up front, the vast majority of which will never be read.
+- Deploy in normal release sequence: schema migration → server release with the new endpoints and bootstrap hook. Feature has no client surface until `package/app` consumes the hooks; consumers ship later.
+- Rollback: drop the `UserUnitProgress` table; drop the `extra` column from `User` (or leave it — additive and harmless). Lazy-created system shelves remain as ordinary `SHELF` units; they continue to function as user-visible shelves but lose their "system" privileges. No other system depends on this change (the sibling Meilisearch projection ships after).
 
 ## Open Questions
 
-- Should `progress >= 1.0` automatically transition `status` to `COMPLETED`? Lean yes, but only as a server-side coercion on write (clients can still be explicit). Decision deferred to implementation; small enough to revisit without spec churn.
 - Do we want a `device` / `clientId` field on the row for future multi-device reconciliation? Currently no; can be added additively if needed.
+- Visibility default for the three new system shelves — `PRIVATE` matches Favorites today and is the safe default. Whether a user can flip a system shelf to `PUBLIC` (e.g. share their `completed` shelf as a "books I've read" page) is deferred to a later product decision; the schema supports either.

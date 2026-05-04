@@ -2,7 +2,7 @@
 
 ### Requirement: Progress fact source schema
 
-The system SHALL persist a single `UserUnitProgress` row per `(userId, unitId)` pair as the canonical fact source for that user's interaction with that unit. The row MUST carry: a fractional `progress` value in the closed interval `[0, 1]`, a `status` enum (`VIEWED` | `READING` | `COMPLETED` | `DROPPED`), a cumulative `totalTimeMs` non-negative integer, an opaque `lastPosition` string (nullable), `firstSeenAt` and `lastSeenAt` timestamps, and an optional free-form `extra` JSON payload. The pair `(userId, unitId)` MUST be the primary key.
+The system SHALL persist a single `UserUnitProgress` row per `(userId, unitId)` pair as the canonical fact source for that user's interaction with that unit. The row MUST carry: a fractional `progress` value in the closed interval `[0, 1]`, a `status` enum (`BACKLOG` | `ACTIVE` | `COMPLETED` | `DROPPED`), a cumulative `totalTimeMs` non-negative integer, an opaque `lastPosition` string (nullable), `firstSeenAt` and `lastSeenAt` timestamps, and an optional free-form `extra` JSON payload. The pair `(userId, unitId)` MUST be the primary key.
 
 #### Scenario: One row per user-unit pair
 - **WHEN** a user has interacted with a given unit in any way recorded by the API
@@ -22,7 +22,11 @@ The system SHALL expose an authenticated `PUT /me/units/:unitId/progress` endpoi
 
 #### Scenario: First-time write creates the row
 - **WHEN** an authenticated user calls the endpoint for a unit they have no existing progress row for
-- **THEN** the system creates a row with the provided fields, sets `firstSeenAt` and `lastSeenAt` to the current server time, and defaults unspecified fields (`progress` to 0, `status` to `VIEWED`, `totalTimeMs` to 0, `lastPosition` to null, `extra` to null)
+- **THEN** the system creates a row with the provided fields, sets `firstSeenAt` and `lastSeenAt` to the current server time, and defaults unspecified fields (`progress` to 0, `status` to `BACKLOG`, `totalTimeMs` to 0, `lastPosition` to null, `extra` to null)
+
+#### Scenario: Progress reaching 1.0 coerces status to COMPLETED
+- **WHEN** an authenticated user calls the endpoint with `progress >= 1.0` and does not explicitly set `status` to a different value
+- **THEN** the system stores the row with `status = COMPLETED` and does not modify any shelf row as a side effect
 
 #### Scenario: Partial update preserves untouched fields
 - **WHEN** an authenticated user calls the endpoint with only `progress` and `addTimeMs` for a unit they already have a progress row for
@@ -87,3 +91,35 @@ The system SHALL maintain a database index on `(userId, lastSeenAt DESC)` suffic
 #### Scenario: Continue-reading query is index-served
 - **WHEN** the system serves `GET /me/progress` for a user with many rows
 - **THEN** the query plan uses the `(userId, lastSeenAt DESC)` index and does not scan rows belonging to other users
+
+### Requirement: User-level system shelf pointers
+
+The system SHALL extend the `User` model with an `extra Json?` column. Within `extra`, the system SHALL store a `shelves` map whose keys are system-shelf `kindKey`s and whose values are the corresponding `Shelf.unitId` for that user. The four known system kindKeys are `favorites`, `backlog`, `active`, and `completed`. The system SHALL bootstrap all four shelves at user registration, populating `extra.shelves` in the same transaction as `User` creation. For pre-existing users with `extra = NULL` or a missing key in `extra.shelves`, the system SHALL lazy-create the missing shelf on first read and patch the resulting `unitId` into `extra.shelves`.
+
+#### Scenario: Registration populates all four system shelves
+- **WHEN** a new user completes registration
+- **THEN** the system creates four shelves (one per system `kindKey`) in the same transaction as the `User` row, and writes their `unitId`s into `User.extra.shelves` keyed by `kindKey`
+
+#### Scenario: Lazy-create populates missing pointer for pre-existing users
+- **WHEN** a request needs a system shelf for a user whose `User.extra.shelves` is missing the corresponding key
+- **THEN** the system creates the shelf with the corresponding `kindKey`, writes the resulting `unitId` back into `User.extra.shelves`, and proceeds with the original request using the new `unitId`
+
+#### Scenario: System kindKeys are reserved for system shelves
+- **WHEN** a user attempts to create a shelf with `kindKey` equal to `favorites`, `backlog`, `active`, or `completed`
+- **THEN** the system rejects the request with a validation error and does not create a shelf
+
+### Requirement: Progress and shelf are orthogonal stores
+
+The system SHALL treat `UserUnitProgress` and `Shelf` / `ShelfItem` / `ShelfUnit` as independent stores. A write to `UserUnitProgress` MUST NOT create, modify, or delete any shelf row as a side effect. A write to a shelf row (collect, uncollect, reorder, kindKey change) MUST NOT create, modify, or delete any `UserUnitProgress` row as a side effect. Cross-user aggregate queries over progress state (e.g. how many users have a unit in a given status) SHALL be answered by the Meilisearch projection of `UserUnitProgress` (built by a sibling change), never by aggregating shelf membership.
+
+#### Scenario: Progress upsert does not write to shelf
+- **WHEN** an authenticated user calls `PUT /me/units/:unitId/progress` with any combination of fields, including the case where the upsert coerces `status` to `COMPLETED`
+- **THEN** the system writes only to the `UserUnitProgress` row and makes no insert, update, or delete on any `Shelf`, `ShelfItem`, or `ShelfUnit` row
+
+#### Scenario: Shelf collect does not write to progress
+- **WHEN** an authenticated user adds a unit to one of their shelves through the existing shelf collect endpoints
+- **THEN** the system writes only to the shelf-related rows and makes no insert, update, or delete on any `UserUnitProgress` row
+
+#### Scenario: Frontend dual-write tolerates partial failure
+- **WHEN** a client issues two independent requests (one progress upsert, one shelf collect) representing the same user intent and one of them fails while the other succeeds
+- **THEN** the succeeding request is durable, the failing request can be retried independently, and no backend reconciliation is required for the system to remain correct from the perspective of either store
