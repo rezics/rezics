@@ -8,10 +8,9 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { GithubIcon, TelegramIcon } from "@rezics/icons";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { Github as GitHubIcon } from "lucide-react";
-import { IconBrandTelegram as TelegramIcon } from "@tabler/icons-react";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -87,7 +86,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <GitHubIcon className="w-4 h-4" />
+                          <GithubIcon className="w-4 h-4" />
                         </a>
                       </Button>
                     </TooltipTrigger>

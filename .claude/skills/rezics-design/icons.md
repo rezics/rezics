@@ -4,13 +4,14 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 
 ## Top-Level Rules
 
-1. **`lucide-react` is the default icon source.** Reach for it first.
-2. **`@tabler/icons-react` is the named fallback** when `lucide-react` lacks a glyph. Add the package to `@rezics/ui` `dependencies` only on first use; do not preempt.
-3. **No third icon library.** Brand marks (vendor logos, custom affordances) that neither library carries become inline `<svg>` primitives owned by rezics.
-4. **No emoji in UI chrome.** Emoji are content (user posts, comments). Affordances — close, menu, expand, star, check, arrows — are icons.
-5. **Named imports only:** `import { Star } from "lucide-react"`. Never barrel imports.
-6. **Sizing via UnoCSS classes:** `w-4 h-4` (body), `w-5 h-5` (UI affordances), `w-6 h-6` (emphasized buttons). Avoid the numeric `size={…}` prop.
-7. **Color via `currentColor`.** Override with `text-*` UnoCSS classes pointing to `--rezics-color-*` tokens — never hex.
+1. **Brand marks come from `@rezics/icons`.** First-party rezics-owned brand icon library — covers Github, Google, Microsoft, Telegram, X, Facebook, Instagram, Apple, Discord, LinkedIn, Reddit, YouTube, TikTok, Spotify, Twitch, Pinterest, Snapchat, Signal, Skype, Tumblr, VK, Meta, Metamask, Medium, Dribbble, Figma. Use the colored `*Icon` exports for full-color brand glyphs; use `*GrayIcon` variants when the icon must inherit `currentColor`. **Never** use `lucide-react` or `@tabler/icons-react` for brand marks: lucide has removed its brand icons (current versions throw `does not provide an export named 'Github'`), and tabler's `IconBrand*` family is also not the canonical source here.
+2. **`lucide-react` is the default icon source for non-brand glyphs.** Reach for it first.
+3. **`@tabler/icons-react` is the named fallback** when `lucide-react` lacks a non-brand glyph. Add the package to `@rezics/ui` `dependencies` only on first use; do not preempt.
+4. **No fourth icon library.** Non-brand glyphs that neither lucide nor tabler carry become inline `<svg>` primitives owned by rezics under `package/ui/src/primitive/icon/`.
+5. **No emoji in UI chrome.** Emoji are content (user posts, comments). Affordances — close, menu, expand, star, check, arrows — are icons.
+6. **Named imports only:** `import { Star } from "lucide-react"`, `import { GithubIcon } from "@rezics/icons"`. Never barrel imports.
+7. **Sizing via UnoCSS classes:** `w-4 h-4` (body), `w-5 h-5` (UI affordances), `w-6 h-6` (emphasized buttons). Avoid the numeric `size={…}` prop.
+8. **Color via `currentColor`.** Override with `text-*` UnoCSS classes pointing to `--rezics-color-*` tokens — never hex. Exception: colored `*Icon` brand variants from `@rezics/icons` paint their own canonical brand colors and ignore `text-*` overrides; use `*GrayIcon` variants when token-driven color is required.
 
 ## Replacement Convention
 
@@ -196,16 +197,38 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 
 ### Brand marks (third-party logos)
 
-Brand marks are not policy icons — they identify external services. `lucide-react` ships a small set under stable names. For marks not present in `lucide-react`, fall back to `@tabler/icons-react` (`IconBrand*`); if neither has it, author an inline `<svg>` primitive.
+Brand marks identify external services and **must come from `@rezics/icons`**, our first-party brand-icon library. Do not use `lucide-react` or `@tabler/icons-react` for brand marks — lucide has removed its brand icons (the import will throw at runtime in current versions), and tabler is not the canonical source here. Use the colored `*Icon` export for full-color brand glyphs (recommended for footers, share dialogs, auth buttons); use the `*GrayIcon` variant when the icon must inherit `currentColor` from a button/text context.
 
 | MUI name | Replacement library | Replacement export | Notes |
 | --- | --- | --- | --- |
-| `GitHub` | `lucide-react` | `Github` | |
-| `Google` | `@tabler/icons-react` | `IconBrandGoogle` | No Google mark in lucide; tabler ships an official-shape glyph. If `@tabler/icons-react` is not yet in deps, author an inline brand SVG primitive instead. |
-| `Telegram` | `@tabler/icons-react` | `IconBrandTelegram` | Not in lucide |
-| `Twitter` | `@tabler/icons-react` | `IconBrandTwitter` | Not in lucide |
-| `Facebook` | `lucide-react` | `Facebook` | |
-| `Instagram` | `lucide-react` | `Instagram` | |
+| `GitHub` | `@rezics/icons` | `GithubIcon` / `GithubGrayIcon` | |
+| `Google` | `@rezics/icons` | `GoogleIcon` / `GoogleGrayIcon` | |
+| `Microsoft` | `@rezics/icons` | `MicrosoftIcon` / `MicrosoftGrayIcon` | |
+| `Telegram` | `@rezics/icons` | `TelegramIcon` / `TelegramGrayIcon` | |
+| `Twitter` / `X` | `@rezics/icons` | `XIcon` / `XGrayIcon` | Use the X (formerly Twitter) glyph |
+| `Facebook` | `@rezics/icons` | `FacebookIcon` / `FacebookGrayIcon` | |
+| `Instagram` | `@rezics/icons` | `InstagramIcon` / `InstagramGrayIcon` | |
+| `Apple` | `@rezics/icons` | `AppleIcon` / `AppleGrayIcon` | |
+| `Discord` | `@rezics/icons` | `DiscordIcon` / `DiscordGrayIcon` | |
+| `LinkedIn` | `@rezics/icons` | `LinkedinIcon` / `LinkedinGrayIcon` | |
+| `Reddit` | `@rezics/icons` | `RedditIcon` / `RedditGrayIcon` | |
+| `YouTube` | `@rezics/icons` | `YoutubeIcon` / `YoutubeGrayIcon` | |
+| `TikTok` | `@rezics/icons` | `TiktokIcon` / `TiktokGrayIcon` | |
+| `Spotify` | `@rezics/icons` | `SpotifyIcon` / `SpotifyGrayIcon` | |
+| `Twitch` | `@rezics/icons` | `TwitchIcon` / `TwitchGrayIcon` | |
+| `Pinterest` | `@rezics/icons` | `PinterestIcon` / `PinterestGrayIcon` | |
+| `Snapchat` | `@rezics/icons` | `SnapchatIcon` / `SnapchatGrayIcon` | |
+| `Signal` | `@rezics/icons` | `SignalIcon` / `SignalGrayIcon` | |
+| `Skype` | `@rezics/icons` | `SkypeIcon` / `SkypeGrayIcon` | |
+| `Tumblr` | `@rezics/icons` | `TumblrIcon` / `TumblrGrayIcon` | |
+| `VK` | `@rezics/icons` | `VkIcon` / `VkGrayIcon` | |
+| `Meta` | `@rezics/icons` | `MetaIcon` / `MetaGrayIcon` | |
+| `MetaMask` | `@rezics/icons` | `MetamaskIcon` / `MetamaskGrayIcon` | |
+| `Medium` | `@rezics/icons` | `MediumIcon` / `MediumGrayIcon` | |
+| `Dribbble` | `@rezics/icons` | `DribbbleIcon` / `DribbbleGrayIcon` | |
+| `Figma` | `@rezics/icons` | `FigmaIcon` / `FigmaGrayIcon` | |
+
+If a brand glyph is needed that `@rezics/icons` does not yet export, add the SVG to that package (it lives at `node_modules/@rezics/icons` published from a sibling repo) and bump its version — do not reach for lucide/tabler as a workaround.
 
 ## When you don't see a mapping
 

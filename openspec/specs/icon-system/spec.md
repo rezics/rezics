@@ -3,27 +3,49 @@
 ## Purpose
 TBD - created by archiving change deprecate-mui. Update Purpose after archive.
 ## Requirements
-### Requirement: Icon vocabulary is lucide-default with tabler-fallback
+### Requirement: Brand icons come from `@rezics/icons`
 
-The rezics frontend SHALL use `lucide-react` as the default icon source. `@tabler/icons-react` SHALL be used as the named fallback when `lucide-react` lacks a glyph the design needs. No third icon library SHALL be introduced. Both sources SHALL be imported at the named-export level (e.g. `import { Star } from "lucide-react"`); barrel-only imports SHALL NOT be used.
+Brand marks for third-party services (Github, Google, Microsoft, Telegram, X / Twitter, Facebook, Instagram, Apple, Discord, LinkedIn, Reddit, YouTube, TikTok, Spotify, Twitch, Pinterest, Snapchat, Signal, Skype, Tumblr, VK, Meta, MetaMask, Medium, Dribbble, Figma, and any others the package ships) SHALL be imported from `@rezics/icons`, the project's first-party brand-icon library. Brand icons SHALL NOT be imported from `lucide-react` or `@tabler/icons-react`. The colored `*Icon` exports paint canonical brand colors; the `*GrayIcon` exports use `currentColor` for token-driven theming. Either variant is acceptable per the surface's needs.
+
+#### Scenario: Brand icon need
+
+- **WHEN** a developer (human or AI) selects an icon to identify a third-party service (footer social link, share dialog, OAuth provider button, account-linking row, etc.)
+- **THEN** the icon SHALL be imported from `@rezics/icons`
+- **AND** SHALL NOT be imported from `lucide-react` or `@tabler/icons-react`
+
+#### Scenario: Brand glyph missing from `@rezics/icons`
+
+- **WHEN** a brand glyph is needed that `@rezics/icons` does not yet export
+- **THEN** the developer SHALL extend `@rezics/icons` (publish a new version) rather than reach for `lucide-react` or `@tabler/icons-react` as a workaround
+- **AND** SHALL update the brand-icons mapping table in `.claude/skills/rezics-design/icons.md` in the same change
+
+#### Scenario: Existing brand-icon import is a regression
+
+- **WHEN** code review or the convention check encounters a brand glyph imported from `lucide-react` (e.g. `Github`, `Facebook`, `Instagram`) or `@tabler/icons-react` (e.g. `IconBrandGithub`, `IconBrandTelegram`, `IconBrandTwitter`, `IconBrandGoogle`)
+- **THEN** the import SHALL be replaced with the equivalent `@rezics/icons` export
+- **AND** the migration SHALL not introduce a tabler/lucide brand-icon import as an interim step
+
+### Requirement: Non-brand icon vocabulary is lucide-default with tabler-fallback
+
+The rezics frontend SHALL use `lucide-react` as the default source for **non-brand** glyphs. `@tabler/icons-react` SHALL be used as the named fallback when `lucide-react` lacks a non-brand glyph the design needs. No fourth icon library SHALL be introduced (the three permitted sources are `@rezics/icons` for brand marks, `lucide-react` for non-brand glyphs, `@tabler/icons-react` for the non-brand fallback). All sources SHALL be imported at the named-export level (e.g. `import { Star } from "lucide-react"`, `import { GithubIcon } from "@rezics/icons"`); barrel-only imports SHALL NOT be used.
 
 #### Scenario: Default icon need
 
-- **WHEN** a developer (human or AI) selects an icon for any UI element
+- **WHEN** a developer (human or AI) selects a non-brand icon for any UI element
 - **THEN** they SHALL first attempt to find the icon in `lucide-react`
 - **AND** SHALL only reach for `@tabler/icons-react` when no fitting `lucide-react` glyph exists
 
-#### Scenario: Third icon library introduction is forbidden
+#### Scenario: Fourth icon library introduction is forbidden
 
-- **WHEN** a pull request adds an icon library other than `lucide-react` or `@tabler/icons-react` to any `package/*/package.json`
+- **WHEN** a pull request adds an icon library other than `@rezics/icons`, `lucide-react`, or `@tabler/icons-react` to any `package/*/package.json`
 - **THEN** code review SHALL block the merge
-- **AND** introducing a third source SHALL require an OpenSpec change updating this requirement
+- **AND** introducing a fourth source SHALL require an OpenSpec change updating this requirement
 
-#### Scenario: Inline SVG for missing glyphs
+#### Scenario: Inline SVG for missing non-brand glyphs
 
-- **WHEN** neither `lucide-react` nor `@tabler/icons-react` provides a glyph (e.g. a brand-specific affordance, a vendor logo)
-- **THEN** the project SHALL use an inline `<svg>` element authored as a small rezics-owned primitive component
-- **AND** SHALL NOT introduce a third icon library
+- **WHEN** neither `lucide-react` nor `@tabler/icons-react` provides a non-brand glyph (custom affordances specific to rezics)
+- **THEN** the project SHALL use an inline `<svg>` element authored as a small rezics-owned primitive component under `package/ui/src/primitive/icon/`
+- **AND** SHALL NOT introduce a fourth icon library
 
 ### Requirement: `@tabler/icons-react` is added on first use, not preemptively
 

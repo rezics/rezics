@@ -4,9 +4,13 @@ import {
   DialogContent,
   DialogFooter,
 } from "@rezics/ui/shadcn";
-import { IconBrandTelegram as Telegram, IconBrandTwitter as Twitter } from "@tabler/icons-react";
+import {
+  FacebookIcon,
+  InstagramIcon,
+  TelegramIcon,
+  XIcon,
+} from "@rezics/icons";
 import { useNavigate } from "@tanstack/react-router";
-import { Facebook, Instagram } from "lucide-react";
 import type React from "react";
 
 export type ReactionBarToolBoxProps = {
@@ -54,28 +58,28 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Telegram />
+              <TelegramIcon />
             </a>
             <a
               href={`https://x.com/intent/tweet?url=${itemFullUrl}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Twitter />
+              <XIcon />
             </a>
             <a
               href={`https://www.facebook.com/sharer/sharer.php?u=${itemFullUrl}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Facebook />
+              <FacebookIcon />
             </a>
             <a
               href={`https://www.instagram.com/share?url=${itemFullUrl}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Instagram />
+              <InstagramIcon />
             </a>
           </div>
         </div>
