@@ -1,4 +1,10 @@
-## ADDED Requirements
+# list-empty-state Specification
+
+## Purpose
+
+Defines the `<EmptyState>` primitive (`@rezics/ui/composite/feedback/EmptyState.tsx`) and its application across `@rezics/app` list views. Every settled, length-zero list view renders `<EmptyState>` instead of an empty container; per-card fallbacks remain distinct. Empty-state copy passes through i18n.
+
+## Requirements
 
 ### Requirement: Lists render EmptyState when settled and empty
 
@@ -60,7 +66,7 @@ Per-card fallbacks (for example, `ExcerptCard` showing placeholder text when a s
 - **WHEN** the list is rendered
 - **THEN** each card SHALL render its own per-field fallback
 - **AND** the list SHALL NOT render `EmptyState` (length is 5, not 0)
-## Requirements
+
 ### Requirement: Shared EmptyState primitive
 
 `@rezics/ui` SHALL export an `EmptyState` component from `package/ui/src/composite/feedback/EmptyState.tsx`. The component SHALL be composed of rezics-owned primitives (`<div>` + UnoCSS layout classes for the container, `<h3>` / `<p>` with token-driven typography classes for the title and description, optional icon slot, optional action slot accepting any `ReactNode` including a shadcn `Button`) and SHALL provide consistent spacing, alignment, and theming for list-level "no data" UX. The component API SHALL accept:

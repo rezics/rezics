@@ -1,4 +1,10 @@
-## ADDED Requirements
+# dissolve-app-shell Specification
+
+## Purpose
+
+Defines the dissolution of the `@rezics/app-shell` package: auth state and providers move into `@rezics/api`, each consumer app (`@rezics/app`, `@rezics/admin`) owns its own shell composition, and the apps boot without a JavaScript-side theme factory import — token resolution flows exclusively through `@rezics/ui/shared/styles/layers.css`.
+
+## Requirements
 
 ### Requirement: Auth state lives in @rezics/api
 
@@ -31,7 +37,7 @@ The `@rezics/app-shell` package SHALL be removed from the monorepo. No package S
 
 - **WHEN** the change is complete
 - **THEN** searching for `@rezics/app-shell` across the codebase yields zero results
-## Requirements
+
 ### Requirement: App boots without a theme factory import
 
 `@rezics/app` and `@rezics/admin` SHALL boot without importing any theme factory or React theme provider component for design-system tokens. Token resolution SHALL flow exclusively through the imported `@rezics/ui/shared/styles/layers.css` cascade.

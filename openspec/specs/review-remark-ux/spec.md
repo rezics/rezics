@@ -1,4 +1,10 @@
-## ADDED Requirements
+# review-remark-ux Specification
+
+## Purpose
+
+Defines the review and remark UX in `@rezics/app`: review creation, edit, detail, browse, and search pages; the inline remark form on the book review tab; the score overview and input components (the input rendering via the `score-input-primitive` capability's `<RatingInput>`); reaction counts on reviews and remarks; reviews-by-book and remarks-by-book pages; and the 200-character minimum on the review body.
+
+## Requirements
 
 ### Requirement: Review editor character minimum
 
@@ -168,7 +174,7 @@ The system SHALL provide a page at `/remark/book/:bookId` that lists all remarks
 #### Scenario: Empty remark list
 - **WHEN** a book has no remarks
 - **THEN** the page displays an empty state message
-## Requirements
+
 ### Requirement: Review creation page
 
 The review creation page at `/review/new/:bookUnitId` SHALL allow an authenticated user to create a PostKind.REVIEW post. The form SHALL include a title field (stored in `extra.title`), a markdown body field with preview support, a score input rendered per the `score-input-primitive` capability (rezics-owned `<RatingInput>` from `@rezics/ui`, `max = SCORE_MAX`, `precision = 1`, integer 1–10, persisted via `scoreApi.upsertScore()`), and a target book derived from the route parameter `bookUnitId`. When a score is provided, the system SHALL first upsert a ScoreEntry, then create the post with `kind: 'REVIEW'`, `targetUnitId`, `body`, `extra` containing `title`, and `scoreEntryId` linking to the upserted ScoreEntry.

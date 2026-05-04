@@ -1,4 +1,10 @@
-## ADDED Requirements
+# tag-interaction-component Specification
+
+## Purpose
+
+Defines the tag interaction component used in `@rezics/app` for inline tag chips on book / unit detail surfaces. The component manages three states (idle, single-preview, multi-select), surfaces a non-modal popper with tag detail (description, score, voting, search), and supports multi-select with a count and search bar that navigates to search via injected router state.
+
+## Requirements
 
 ### Requirement: Tag chips are clickable and support three interaction states
 
@@ -98,7 +104,7 @@ When in multi-select state, a search action bar SHALL appear below (or above) th
 - **GIVEN** 2 tags are selected and the search bar shows "2 tags selected"
 - **WHEN** the user selects a third tag
 - **THEN** the search bar SHALL update to "3 tags selected"
-## Requirements
+
 ### Requirement: Popper is non-modal and does not block chip interaction
 
 The popper SHALL use a non-modal popover primitive — shadcn `Popover` (from `@rezics/ui/shadcn`, Radix-based) configured with `modal={false}`. It SHALL NOT render a backdrop, lock scroll, or trap focus. Other tag chips SHALL remain clickable while the popper is open.

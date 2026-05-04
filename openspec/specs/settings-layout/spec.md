@@ -1,4 +1,10 @@
-## ADDED Requirements
+# settings-layout Specification
+
+## Purpose
+
+Defines the settings page layout in `@rezics/app`: a persistent sidebar on desktop (viewports `md` and above) listing every settings section, horizontal scrollable shadcn `Tabs` on mobile, an authentication guard, a default route redirect, and a legacy `/user/me/edit` redirect.
+
+## Requirements
 
 ### Requirement: Settings page sidebar navigation on desktop
 The settings page SHALL render a persistent sidebar on the left at viewports `md` and above. The sidebar SHALL list all settings sections as navigation links: Profile, Account, Security, Connected Accounts, API Tokens, Preferences. The active section link SHALL be visually highlighted. Clicking a link navigates to the corresponding child route.
@@ -31,7 +37,7 @@ The legacy route `/user/me/edit` SHALL redirect to `/user/me/setting/profile`.
 #### Scenario: Legacy edit redirects
 - **WHEN** a user navigates to `/user/me/edit`
 - **THEN** they are redirected to `/user/me/setting/profile`
-## Requirements
+
 ### Requirement: Settings page top tabs on mobile
 
 On viewports below `md`, the settings page SHALL render horizontal scrollable shadcn `Tabs` (from `@rezics/ui/shadcn`) at the top instead of a sidebar. Each tab corresponds to a settings section. The tab strip SHALL be wrapped in a horizontally scrollable container (shadcn `ScrollArea` or a UnoCSS `overflow-x-auto` container) so the strip scrolls when tabs do not fit. The active tab SHALL be auto-scrolled into view on tab change.

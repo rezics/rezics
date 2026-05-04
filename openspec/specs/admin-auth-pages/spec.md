@@ -1,4 +1,10 @@
-## ADDED Requirements
+# admin-auth-pages Specification
+
+## Purpose
+
+Defines the admin-side auth pages and route surfaces in `@rezics/admin`: the admin login page (talking to the auth server), the admin auth guard (role-based via `useAuthStore`), the auth users and sessions management pages, the auth route definitions and sidebar navigation, the env-var contract for the auth URL, and the page-layout conventions consistent with the shadcn-or-custom UI policy.
+
+## Requirements
 
 ### Requirement: Admin login page uses auth server
 The login page at `/login` (`package/admin/src/user/pages/LoginPage.tsx`) SHALL use `useSignInMutation()` from `@rezics/api/auth/auth.mutations`. On successful sign-in, it SHALL read the freshly persisted JWT via `getToken()`/`parseJwt()`, verify the payload role is `admin` or `owner`, hydrate `useAuthStore`, then navigate to the redirect target.
@@ -103,7 +109,6 @@ The admin environment config (`package/admin/src/env.ts`) SHALL include `VITE_AU
 - **WHEN** the admin app starts
 - **THEN** `env.VITE_AUTH_API_URL` SHALL be available and point to the auth server base URL
 
-## Requirements
 ### Requirement: Admin auth nav group icon
 
 The admin sidebar's "Auth" navigation group SHALL use a security-related icon from `lucide-react`, specifically `Shield`, `ShieldUser`, or `ShieldCheck`. The selected icon SHALL be recorded in the rezics-design skill at `.claude/skills/rezics-design/icons.md`.

@@ -1,3 +1,11 @@
+# design-system-foundation Specification
+
+## Purpose
+
+Defines the foundation tokens (color, typography, spacing, radius, elevation, motion) that govern the rezics visual identity across `@rezics/app`, `@rezics/admin`, `@rezics/editor`, `@rezics/folio`, and `@rezics/ui`. Tokens are authored as TypeScript constants under `package/ui/src/config/tokens/` and exposed at runtime via the `--rezics-*` CSS custom-property cascade. Light/dark mode switches via the `[data-theme]` attribute on `<html>`; there is no JavaScript-side theme provider.
+
+## Requirements
+
 ### Requirement: CSS custom property namespace is `--rezics-*`
 
 All design-system CSS custom properties SHALL use the `--rezics-` prefix. The previous `--rzc-*` shorthand SHALL NOT be used. Font-family local fallback names SHALL use `'rezics-sans'`, `'rezics-serif'`, `'rezics-mono'` — never `'rzc-sans'` etc.
@@ -105,7 +113,6 @@ The system SHALL provide `leading-reader` (1.60), `leading-body` (1.55), `leadin
 - **WHEN** `package/ui/src/shared/styles/layers.css` is parsed
 - **THEN** there SHALL be a `@media (prefers-reduced-motion: reduce)` block applying `animation-duration: 0ms !important` and `transition-duration: 0ms !important` to `*`, `*::before`, `*::after`
 
-## Requirements
 ### Requirement: Token TypeScript modules are the single source of truth
 
 The rezics design system SHALL define all foundation tokens (color, typography, spacing, radius, elevation, motion) as TypeScript constants under `package/ui/src/config/tokens/`. Every other consumer — UnoCSS preset, CSS custom properties in `layers.css`, breakpoint constants in `package/ui/src/config/breakpoints.ts` — SHALL derive from these modules. Token authors SHALL NOT introduce parallel sources of truth (Tailwind config literals, CSS-in-TS theme objects, MDX-only definitions).

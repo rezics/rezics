@@ -1,4 +1,11 @@
+# post-reply-composer Specification
+
+## Purpose
+
+Defines `<ReplyComposer>` (`package/app/src/post/forms/`) as the single reply-editor component used across every reply surface in `@rezics/app` — focal-post composers on detail pages, inline composers in thread rows, and the shelf discussion composer. The spec covers the component's mode prop, blur-retain rule, multi-composer coexistence, reply-button click semantics, focus-reply query-param handler, removal of legacy reply drawer/modal surfaces, and the single-line-on-mount progressive-mode default.
+
 ## Requirements
+
 ### Requirement: ReplyComposer is the single reply-editor component
 
 The app SHALL expose exactly one reply-editor component, `ReplyComposer`, from `package/app/src/post/forms/`. Every surface that accepts a reply — the focal-post composer on every detail page, inline composers inside thread rows, and the shelf discussion composer — SHALL render `ReplyComposer`. The existing `InlinePostForm` component SHALL be replaced and removed.

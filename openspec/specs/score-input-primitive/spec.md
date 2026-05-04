@@ -1,6 +1,11 @@
-## ADDED Requirements
+# score-input-primitive Specification
+
+## Purpose
+
+Defines the rezics-owned `<RatingInput>` primitive (`package/ui/src/primitive/control/RatingInput.tsx`) as the single component used for every interactive score-value input across `@rezics/app`, `@rezics/admin`, and `@rezics/ui`. The primitive provides a documented prop surface, full keyboard interaction (roving-tabindex, arrow keys, digit keys), `lucide-react` Star glyphs colored via brand tokens, integer 1–SCORE_MAX semantics, and `null`-on-clear behavior.
 
 ## Requirements
+
 ### Requirement: Score input renders as RatingInput primitive
 
 Every interactive score-value input in the frontend (`package/app`, `package/admin`, `package/ui`) SHALL render the rezics-owned `RatingInput` primitive imported from `@rezics/ui` (source: `package/ui/src/primitive/control/RatingInput.tsx`). Custom score pickers — including `ToggleButtonGroup`-based number rows, bespoke star implementations, or any equivalent — SHALL NOT be used for score entry.

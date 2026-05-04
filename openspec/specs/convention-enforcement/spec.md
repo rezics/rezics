@@ -1,4 +1,10 @@
-## ADDED Requirements
+# convention-enforcement Specification
+
+## Purpose
+
+Defines the rezics convention-check tooling: a TypeScript script at `tool/scripts/check-convention.ts` that enforces the route, folder, and link-rendering conventions documented in `api-route-convention/spec.md`, `folder-naming-convention/spec.md`, and `outbound-link-protection/spec.md`. The script runs as a pre-commit hook and a PR merge gate (not CI) so violations are caught locally and on merge.
+
+## Requirements
 
 ### Requirement: Convention check script exists and is runnable
 A TypeScript script at `tool/scripts/check-convention.ts` SHALL implement the route and folder checks defined in `api-route-convention/spec.md` and `folder-naming-convention/spec.md`. The script SHALL be invokable via `bun run check:convention` at the repository root and SHALL exit with a non-zero status code when any violation is found. The script SHALL NOT require a baseline snapshot file to run — when `tool/scripts/expected-violations.json` is absent, the script SHALL treat the baseline as empty and fail on any violation (zero-tolerance). The `--snapshot` flag remains available so future migrations can opt into temporary baseline gating by regenerating the file.
@@ -21,6 +27,16 @@ A TypeScript script at `tool/scripts/check-convention.ts` SHALL implement the ro
 
 ### Requirement: Enforcement is pre-commit + PR merge gate (not CI)
 The convention check runs as a **pre-commit hook** (`--staged` mode) and as a **PR merge gate** (full scan on PRs targeting `dev`). It SHALL NOT run in CI on every push. This keeps the feedback loop local and lightweight while still blocking merges that bypass pre-commit.
+
+#### Scenario: Pre-commit invocation runs in --staged mode
+- **WHEN** a developer commits a change touching files under `package/`
+- **THEN** the pre-commit hook SHALL invoke `bun run check:convention --staged`
+- **AND** the hook SHALL only scan staged files
+
+#### Scenario: PR merge gate runs full scan
+- **WHEN** a pull request targets the `dev` branch
+- **THEN** a merge gate SHALL run `bun run check:convention` over the full repository
+- **AND** the merge SHALL be blocked when the script exits non-zero
 
 ### Requirement: No per-site suppression mechanism
 The check script SHALL NOT accept inline comments, ignore files, or configuration overrides that exempt specific paths from validation. Adjustments SHALL only be possible by editing the allowlists defined inside the script (which mirror the specs) — and those edits require a spec amendment per `folder-naming-convention/spec.md`.

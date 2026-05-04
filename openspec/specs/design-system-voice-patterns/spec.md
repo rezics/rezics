@@ -1,3 +1,11 @@
+# design-system-voice-patterns Specification
+
+## Purpose
+
+Defines the canonical voice and pattern documentation for the rezics design system: `package/ui/src/docs/voice.mdx` (mood pillars, tone-per-surface table) and `package/ui/src/docs/patterns.mdx` (code-level do/don't sections), both rendered in the `@rezics/ui` Storybook under the `Foundation` tree. Their AI-side mirrors live under `.claude/skills/rezics-design/`. The system codifies the Hard-Never rules, the abstraction-vs-split rule, and the shadcn-or-custom component selection policy.
+
+## Requirements
+
 ### Requirement: Mood is "parchment archive, not glass dashboard"
 
 The voice doc SHALL define the rezics mood as four pillars:
@@ -69,7 +77,7 @@ The patterns doc and the AI skill mirror SHALL cite Storybook story IDs (e.g. `D
 
 - **WHEN** any story-ID citation in `package/ui/src/docs/patterns.mdx`, `.claude/skills/rezics-design/patterns.md`, or `.claude/skills/rezics-design/component-selection.md` is checked against the current Storybook build
 - **THEN** the cited story SHALL exist in the corresponding package's `storybook-static/index.json`
-## Requirements
+
 ### Requirement: Hard-Never rules are enumerated and enforced
 
 The voice and patterns docs (and the skill's `patterns.md`) SHALL enumerate the Hard-Never rules — design violations that block PRs:

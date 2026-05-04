@@ -1,4 +1,10 @@
-## ADDED Requirements
+# book-detail-tab-layout Specification
+
+## Purpose
+
+Defines the book-detail page tab layout in `@rezics/app`: four tabs (Overview, Review & Shelf, Content, Community), the per-tab content map, the contextual sidebar that redistributes on mobile, and the shadcn `Tabs` implementation with horizontal overflow scrolling and a fixed-right language dropdown.
+
+## Requirements
 
 ### Requirement: Book detail page has four tabs — Overview, Review & Shelf, Content, Community
 
@@ -100,7 +106,7 @@ Each tab page SHALL define its own sidebar sections. On desktop viewports (lg br
 
 - **WHEN** the user switches from the Overview tab to the Content tab
 - **THEN** the sidebar sections SHALL change to reflect content relevant to the Content tab
-## Requirements
+
 ### Requirement: Tab bar uses shadcn Tabs with overflow scrolling
 
 The tab bar SHALL use shadcn `Tabs` from `@rezics/ui/shadcn` (with `TabsList` and `TabsTrigger` composed within the rezics layout). On screens where all tabs do not fit, the `TabsList` SHALL be wrapped in a horizontally scrollable container (shadcn `ScrollArea` or a UnoCSS `overflow-x-auto` container) so tabs scroll horizontally. The language dropdown (defined in `book-detail-language-switcher`) SHALL remain fixed at the right end and SHALL NOT scroll with the tabs.

@@ -1,4 +1,10 @@
-## ADDED Requirements
+# query-error-display Specification
+
+## Purpose
+
+Defines the shared `<QueryErrorDisplay>` component used across `@rezics/app` to render TanStack Query errors inline. The component standardizes error presentation (message, HTTP status, optional Prisma technical details) using shadcn `Alert` and `Collapsible`, replacing ad-hoc error rendering patterns.
+
+## Requirements
 
 ### Requirement: Shared QueryErrorDisplay component
 `package/app` SHALL provide a `<QueryErrorDisplay>` component that renders query errors inline, replacing the content area where data would have appeared.
@@ -32,7 +38,7 @@ All existing ad-hoc error rendering patterns in `package/app` pages and sections
 #### Scenario: Existing patterns removed
 - **WHEN** migration is complete
 - **THEN** no page in `package/app` SHALL contain `String(error)`, `error.message` inline rendering, `JSON.stringify(error)`, or hardcoded error strings for query failures
-## Requirements
+
 ### Requirement: shadcn Alert-based styling
 
 The component SHALL use shadcn `Alert` (from `@rezics/ui/shadcn`) with destructive variant for the error container, consistent with existing error display patterns in auth pages and other rezics surfaces. Collapsible technical-detail sections SHALL use shadcn `Collapsible`.

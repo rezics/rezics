@@ -1,3 +1,11 @@
+# design-system-adoption Specification
+
+## Purpose
+
+Defines the methodology for per-package design-system adoption audits in rezics: the fixed report format, the Hard-Never violation categories that block sign-off, the defensible categories that are documented rather than force-migrated, and the rule that fixes use existing tokens rather than introducing new ones. The audit covers `@rezics/app`, `@rezics/admin`, `@rezics/editor`, `@rezics/folio`, and `@rezics/ui`.
+
+## Requirements
+
 ### Requirement: Adoption audits use a fixed format
 
 A per-package adoption audit SHALL produce, at minimum:
@@ -49,7 +57,7 @@ The audit SHALL document the search patterns used to find each violation categor
 - **WHEN** the design-system aggregate audit is consulted
 - **THEN** it SHALL describe (or link to) the `rg` patterns used per category
 - **AND** running the same patterns against the same package SHALL produce comparable counts modulo subsequent fixes
-## Requirements
+
 ### Requirement: Hard-Never violations block adoption sign-off
 
 The following categories SHALL be classified as Hard-Never and SHALL be fixed inline before an audit is signed off:

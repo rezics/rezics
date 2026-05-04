@@ -1,4 +1,10 @@
-## MODIFIED Requirements
+# app-search-feature Specification
+
+## Purpose
+
+Defines the search feature in `@rezics/app`: result rendering against the `ContentSearchResult` server contract, controlled primitive components, the `useSearchQuery` session hook, the unified injection model for initial values, basic and advanced composers, applied-filter chip surfacing, and the integration with shadcn `Badge` for tag and applied-filter chips.
+
+## Requirements
 
 ### Requirement: User-Visible Search Parity
 
@@ -59,8 +65,6 @@ The search feature SHALL allow filtering by content type (BOOK, GAME, MEDIA, SHE
 - **THEN** the request SHALL include `type: "BOOK"` in search options
 - **AND** only book results SHALL be displayed
 
-## ADDED Requirements
-
 ### Requirement: Global search route
 
 The app SHALL register a `/search` route that renders the advanced search interface with no pre-applied filters. This is the universal entry point for unrestricted search across all content.
@@ -95,8 +99,6 @@ Search routes (`/book`, `/book/search`, `/zone/:slug/search`, `/realm/.../search
 - **WHEN** the user toggles between basic and advanced
 - **THEN** the URL SHALL NOT change
 - **AND** only submit actions SHALL serialize `toOptions()` into the URL
-
-## MODIFIED Requirements
 
 ### Requirement: Search supports realm and tag filtering
 
@@ -139,8 +141,6 @@ The search feature SHALL allow filtering by content type (BOOK, GAME, MEDIA, SHE
 - **WHEN** the search is executed
 - **THEN** the request SHALL include `type: ["book"]` in search options
 
-## MODIFIED Requirements
-
 ### Requirement: Search supports realm and tag filtering
 
 The search feature SHALL support filtering by realm and by tags (both global and realm-scoped). Tag filtering SHALL use tag UUIDs, not tag name strings. The frontend SHALL pass tag UUIDs obtained from prior tag lookups, UI state, or **injected router state**. When `injectedTags` is present in router navigation state, the search page SHALL use the provided `unitId` values directly. When absent, the search page SHALL resolve tag slugs (parsed from the `[slug]` URL syntax) to `unitId` values via the tag API before issuing the search request.
@@ -165,8 +165,6 @@ The search feature SHALL support filtering by realm and by tags (both global and
 - **WHEN** the search page renders
 - **THEN** the search page SHALL resolve slug "isekai" to its `unitId` via API
 - **AND** once resolved, the tag chip SHALL display the translated name and the search SHALL execute with the resolved `unitId`
-
-## ADDED Requirements
 
 ### Requirement: Search feature exports controlled primitive components
 
@@ -411,7 +409,7 @@ The `NsfwToggle` primitive and all of its references in `package/app/src/**` SHA
 - **WHEN** the search page parses the URL
 - **THEN** the `nsfw` parameter SHALL be ignored
 - **AND** the page SHALL fall back to the caller's default `ratings` set
-## Requirements
+
 ### Requirement: TagPicker chips render via shadcn Badge
 
 `TagPicker` SHALL render the current tag list as removable shadcn `Badge` components (from `@rezics/ui/shadcn`) and accept new tags via:

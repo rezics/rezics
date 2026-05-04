@@ -1,3 +1,11 @@
+# design-system-storybook Specification
+
+## Purpose
+
+Defines the multi-package Storybook topology that hosts the rezics design system documentation. Each UI-producing package owns an independent `.storybook/` directory; a root host aggregates them via Storybook composition (`refs`). Common configuration lives in the `@rezics/storybook-config` workspace package. Theme switching wires through Storybook globals and the `[data-theme]` attribute on `<html>`, with the `--rezics-*` CSS custom-property cascade resolving tokens at runtime.
+
+## Requirements
+
 ### Requirement: Storybook is the canonical documentation surface
 
 The rezics design system SHALL use Storybook 10 as the canonical documentation site. React Cosmos SHALL NOT be used. New component documentation SHALL be authored as `*.stories.tsx` (CSF) or `*.mdx` (docs) and surfaced through one of the package Storybooks.
@@ -131,7 +139,7 @@ The `@rezics/app` Storybook SHALL provide six MDX overview docs under the `Domai
 - **WHEN** any of the six `Domain/<Cluster>` MDX files is parsed
 - **THEN** it SHALL include at least one `<Story>` or `<Canvas>` block referencing a story registered in the same Storybook
 - **AND** it SHALL link or reference `Foundation/Patterns` for the abstraction-vs-split rule
-## Requirements
+
 ### Requirement: Theme switching is wired into preview
 
 Each `.storybook/preview.tsx` SHALL provide a Light/Dark global toolbar via Storybook globals that toggles the `[data-theme]` attribute on `<html>`. The CSS variable namespace SHALL switch instantly without component remount.
@@ -147,20 +155,3 @@ Each `.storybook/preview.tsx` SHALL provide a Light/Dark global toolbar via Stor
 - **WHEN** `package/{ui,editor,folio,admin,app}/.storybook/preview.tsx` is inspected
 - **THEN** each SHALL import `@rezics/ui/shared/styles/layers.css` (directly or transitively via the shared preview)
 - **AND** stories SHALL render with `--rezics-*` custom properties resolved
-
-### Requirement: Shared Storybook config is a workspace package
-
-Common Storybook configuration (Vite plugin wiring, theme decorator, story patterns, addon list) SHALL live in `@rezics/storybook-config` as a workspace package. Per-package `.storybook/` shells SHALL be thin wrappers (≤ 20 lines per file) that import from the shared package.
-
-#### Scenario: Shared package exists and has two entry points
-
-- **WHEN** `package/storybook-config/package.json` is inspected
-- **THEN** the package name SHALL be `@rezics/storybook-config`
-- **AND** the `exports` field SHALL include both `"."` (config helpers) and `"./preview"` (theme decorator)
-
-#### Scenario: UnoCSS is an optional peer
-
-- **WHEN** the Storybook for `@rezics/editor` or the root host runs
-- **THEN** the shared config SHALL accept `{ uno: false }` and SHALL NOT require UnoCSS to be installed
-- **AND** UnoCSS SHALL only be loaded for callers that opt in
-

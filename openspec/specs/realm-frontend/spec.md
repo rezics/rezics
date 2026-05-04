@@ -1,4 +1,10 @@
-## ADDED Requirements
+# realm-frontend Specification
+
+## Purpose
+
+Defines the realm-related frontend in `@rezics/app`: the realm landing page, search page with filtering and sorting, detail page with tabbed layout (content feed, tags, members), join/leave flow, management page for owners/admins, create-realm form, navigation entries, role-based UI visibility, and the manage-icon placement in the RealmPage header.
+
+## Requirements
 
 ### Requirement: Realm landing page displays public and official realms
 The route `/realm` SHALL render a landing page that displays public and official realms for discovery. The page SHALL show a curated selection of realms including an official realms section and a public realms section. Each realm SHALL be represented by a realm card. The page SHALL be accessible to both authenticated and unauthenticated users.
@@ -263,7 +269,6 @@ The mock seed generator SHALL ensure that all seeded realms have at least one Un
 - **WHEN** any realm is queried via the API
 - **THEN** `unit.translations` SHALL contain at least one entry with a non-empty `title`
 
-## Requirements
 ### Requirement: Manage icon placement in RealmPage header
 
 The manage icon SHALL appear in the realm detail page header row, positioned near the realm title and join button. The icon SHALL be a `lucide-react` icon — preferably `Settings`, `Settings2`, or `SlidersHorizontal` — recorded in the rezics-design icon mapping table at `.claude/skills/rezics-design/icons.md`. The icon SHALL link to `/realm/:realmId/manage`.
