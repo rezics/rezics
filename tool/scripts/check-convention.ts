@@ -10,6 +10,13 @@
  * - R5  outbound-link-protection — no raw <a href> outside SafeLink
  * - R6  tanstack-query-keys       — no inline `queryKey: [` outside api key/query/mutation files
  * - R7  seed-power-law-isolation  — only strategy.ts/utils.ts may import powerLaw in factory/
+ * - R9  ui-component-foundation   — token consumption goes through uno-config theme.colors
+ *                                   short names; bans long-form `*-rezics-color-*` utility
+ *                                   classes, raw `var(--rezics-(sys-color|color)-…)` in
+ *                                   className contexts, and the 11 deprecated generation
+ *                                   names (rezics-color-fg, -bg, -primary, -secondary,
+ *                                   -accent and their hover / selected / muted / canvas /
+ *                                   elevated variants).
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -124,7 +131,7 @@ const EXEMPT_PACKAGES = new Set(["auth"]);
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7";
+type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" | "R9";
 
 interface Violation {
   rule: Rule;
@@ -141,6 +148,7 @@ const SPEC_LINK: Record<Rule, string> = {
   R5: "openspec/specs/outbound-link-protection/spec.md",
   R6: "openspec/specs/tanstack-query-keys/spec.md",
   R7: "openspec/changes/seed-unified-plan-modes/specs/seed-power-law-distribution/spec.md",
+  R9: "openspec/specs/ui-component-foundation/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -497,6 +505,102 @@ function scanPowerLawImports(candidateFiles: string[]): Violation[] {
   return violations;
 }
 
+// ─── R9: token-consumption convention ──────────────────────────────────────
+
+const R9_FILE_ALLOWLIST = new Set<string>([
+  // SVG-inline / chart-fill exceptions go here. Every entry SHALL have a
+  // companion comment explaining why a UnoCSS shortcut cannot yet replace it.
+  // The list is reviewed quarterly and SHALL shrink over time.
+]);
+
+const R9_LEGACY_NAMES = [
+  "rezics-color-fg",
+  "rezics-color-fg-muted",
+  "rezics-color-bg",
+  "rezics-color-bg-muted",
+  "rezics-color-bg-canvas",
+  "rezics-color-bg-elevated",
+  "rezics-color-bg-hover",
+  "rezics-color-bg-selected",
+  "rezics-color-primary",
+  "rezics-color-secondary",
+  "rezics-color-accent",
+];
+
+const R9_LONG_FORM_PATTERN =
+  /\b(?:text|bg|border|ring|divide|from|to|fill|stroke|outline|caret|accent|placeholder|via)-rezics-color-[\w-]+/;
+
+const R9_BRACKETED_VAR_PATTERN =
+  /\[var\(--rezics-(?:sys-color|ref-color|color)-[^)]+\)/;
+
+const R9_LEGACY_NAME_PATTERN = new RegExp(
+  `(?<![A-Za-z0-9_-])(?:${R9_LEGACY_NAMES.map((n) =>
+    n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  ).join("|")})(?![A-Za-z0-9_-])`,
+);
+
+function isR9TargetFile(absPath: string): boolean {
+  const relPath = relative(REPO_ROOT, absPath).replace(/\\/g, "/");
+  if (!/^package\/[^/]+\/src\//.test(relPath)) return false;
+  if (!/\.(tsx?|jsx?|mdx)$/.test(relPath)) return false;
+  if (/\.fixture\.[tj]sx?$/.test(relPath)) return false;
+  return true;
+}
+
+function scanTokenConsumption(candidateFiles: string[]): Violation[] {
+  const violations: Violation[] = [];
+
+  for (const filePath of candidateFiles) {
+    if (!isR9TargetFile(filePath)) continue;
+    const relPath = relative(REPO_ROOT, filePath).replace(/\\/g, "/");
+    if (R9_FILE_ALLOWLIST.has(relPath)) continue;
+
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]!;
+
+      const longFormMatch = line.match(R9_LONG_FORM_PATTERN);
+      if (longFormMatch) {
+        violations.push({
+          rule: "R9",
+          path: `${relPath}:${i + 1}`,
+          message: `Long-form \`${longFormMatch[0]}\` — use the curated short name from \`package/ui/src/config/uno-config.ts\` \`theme.colors\` (e.g. \`text-text-primary\`, \`bg-surface-elevated\`).`,
+          spec: SPEC_LINK.R9,
+        });
+      }
+
+      const bracketedMatch = line.match(R9_BRACKETED_VAR_PATTERN);
+      if (bracketedMatch) {
+        violations.push({
+          rule: "R9",
+          path: `${relPath}:${i + 1}`,
+          message: `Raw \`var(--rezics-…-color-…)\` arbitrary-value class (\`${bracketedMatch[0]}\`) — replace with the curated short name from \`uno-config.ts\` \`theme.colors\`.`,
+          spec: SPEC_LINK.R9,
+        });
+      }
+
+      const legacyMatch = line.match(R9_LEGACY_NAME_PATTERN);
+      if (legacyMatch) {
+        violations.push({
+          rule: "R9",
+          path: `${relPath}:${i + 1}`,
+          message: `Deprecated generation name \`${legacyMatch[0]}\` — replace with the canonical successor (see \`package/ui/src/config/tokens.css\` for the alias mapping; e.g. \`rezics-color-fg\` → \`text-primary\`).`,
+          spec: SPEC_LINK.R9,
+        });
+      }
+    }
+  }
+
+  return violations;
+}
+
 // ─── Git staged-file helpers ────────────────────────────────────────────────
 
 function getStagedFilePaths(): string[] {
@@ -541,6 +645,7 @@ function buildSnapshot(violations: Violation[]): ViolationSnapshot {
     R5: 0,
     R6: 0,
     R7: 0,
+    R9: 0,
   };
   const keys: string[] = [];
   for (const violation of violations) {
@@ -575,6 +680,7 @@ function main() {
   const folderPaths: string[] = [];
   const tsxFiles: string[] = [];
   const tsAndTsxFiles: string[] = [];
+  const r9CandidateFiles: string[] = [];
 
   if (isStagedMode) {
     const stagedPaths = getStagedFilePaths();
@@ -591,6 +697,9 @@ function main() {
       }
       if (/\.(ts|tsx)$/.test(filePath) && !isExemptPath(filePath)) {
         tsAndTsxFiles.push(filePath);
+      }
+      if (/\.(tsx?|jsx?|mdx)$/.test(filePath) && !isExemptPath(filePath)) {
+        r9CandidateFiles.push(filePath);
       }
     }
     const affectedDirs = new Set<string>();
@@ -614,6 +723,12 @@ function main() {
     for (const filePath of walkFilesByExtension(packagesRoot, /\.(ts|tsx)$/)) {
       tsAndTsxFiles.push(filePath);
     }
+    for (const filePath of walkFilesByExtension(
+      packagesRoot,
+      /\.(tsx?|jsx?|mdx)$/,
+    )) {
+      r9CandidateFiles.push(filePath);
+    }
   }
 
   const violations = [
@@ -622,14 +737,15 @@ function main() {
     ...scanRawAnchors(tsxFiles),
     ...scanInlineQueryKeys(tsAndTsxFiles),
     ...scanPowerLawImports(tsAndTsxFiles),
+    ...scanTokenConsumption(r9CandidateFiles),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5, R6, R7 } = currentSnapshot.byRule;
+    const { R1, R2, R3, R4, R5, R6, R7, R9 } = currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9})`,
     );
     process.exit(0);
   }
@@ -646,12 +762,12 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5, R6, R7 } = currentSnapshot.byRule;
+  const { R1, R2, R3, R4, R5, R6, R7, R9 } = currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
   console.log(
-    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}`,
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}`,
   );
 
   if (newViolations.length > 0) {

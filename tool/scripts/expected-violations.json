@@ -1,45 +1,22 @@
 {
-  "schemaNote": "Legacy rezics-color alias consumption baseline. Captured at the close of openspec change `complete-rezics-token-system` (R9 baseline). Proposal 2 (`migrate-to-theme-config-classes`) drives this list to zero, after which the deprecated aliases in `package/ui/src/config/tokens.css` will be deleted. Informational only — not yet enforced by check:convention or check:tokens.",
-  "capturedAt": "2026-05-04",
-  "changeId": "complete-rezics-token-system",
-  "pattern": "var(--rezics-color-(fg|bg|primary|secondary|accent))",
-  "scanRoot": "package/*/src/",
-  "occurrences": [
-    {
-      "file": "package/app/src/post/components/parts/ThreadingContext.stories.tsx",
-      "tokens": ["--rezics-color-primary"],
-      "matches": 2
-    },
-    {
-      "file": "package/admin/src/home/components/StatCard.tsx",
-      "tokens": ["--rezics-color-primary"],
-      "matches": 1
-    },
-    {
-      "file": "package/app/src/realm/pages/RealmPage.tsx",
-      "tokens": ["--rezics-color-secondary", "--rezics-color-fg-muted"],
-      "matches": 1
-    },
-    {
-      "file": "package/app/src/engagement/components/ScoreOverview.tsx",
-      "tokens": ["--rezics-color-bg-muted"],
-      "matches": 1
-    },
-    {
-      "file": "package/app/src/shelf/sections/ShelfDiscussionSection.tsx",
-      "tokens": ["--rezics-color-bg-muted"],
-      "matches": 1
-    },
-    {
-      "file": "package/app/src/review/components/item/ReviewCard.tsx",
-      "tokens": ["--rezics-color-secondary", "--rezics-color-fg-muted"],
-      "matches": 1
-    },
-    {
-      "file": "package/app/src/shelf/components/ShelfCard.tsx",
-      "tokens": ["--rezics-color-bg-muted", "--rezics-color-bg"],
-      "matches": 1
-    }
-  ],
-  "totalMatches": 8
+  "_note": "TEMPORARY BASELINE. This snapshot exists only to block NEW violations from accumulating while a migration is in progress. Delete this file once the migration lands.",
+  "total": 6,
+  "byRule": {
+    "R1": 5,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 1,
+    "R6": 0,
+    "R7": 0,
+    "R9": 0
+  },
+  "keys": [
+    "R1  package/server/src/realm/realm-tag-unit.api.ts  prefix=\"/realm-tag-units\"",
+    "R1  package/server/src/realm/realm-tag-unit.api.ts  prefix=\"/realm-tag-votes\"",
+    "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/admin/low-score-tags\"",
+    "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/tag-votes\"",
+    "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/unit-tags\"",
+    "R5  package/preview/src/components/BookShareDocument.tsx:107"
+  ]
 }
