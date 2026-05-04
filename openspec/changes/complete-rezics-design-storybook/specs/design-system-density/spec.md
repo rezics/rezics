@@ -14,35 +14,48 @@ The system SHALL NOT expose more than three modes. The MD3 four-step density mod
 
 #### Scenario: The three modes are the only valid values
 
-- **WHEN** the `data-density` attribute is read from the `<html>` element
-- **THEN** its value SHALL be one of `compact`, `comfortable`, or `spacious`
-- **AND** any other value (or absence of the attribute) SHALL be treated as `comfortable`
+- **WHEN** the active density is read from the `<html>` element's class list
+- **THEN** the encoding SHALL be exactly one of: no density class (= `comfortable`), `density-compact`, or `density-spacious`
+- **AND** any other class encoding (or simultaneous presence of both `density-compact` and `density-spacious`) SHALL be treated as `comfortable`
 
-### Requirement: Density propagates via `data-density` on the `.theme-rezics` scope
+### Requirement: Density propagates via class on `<html>`, emitted by the existing preflight
 
-The active density mode SHALL be encoded as a `data-density` attribute on the same element that carries the `.theme-rezics` class (typically `<html>`). The system-tier token `--rezics-sys-density-step` SHALL be defined per mode:
+The active density mode SHALL be encoded as a class on the `<html>` element:
+
+- `comfortable` — no class (default).
+- `compact` — `<html class="density-compact">`.
+- `spacious` — `<html class="density-spacious">`.
+
+The system-tier token `--density-step` SHALL be emitted by the preflight in `package/ui/src/config/uno-config.ts`:
 
 ```css
-.theme-rezics[data-density="compact"]     { --rezics-sys-density-step: -4px; }
-.theme-rezics                              ,
-.theme-rezics[data-density="comfortable"] { --rezics-sys-density-step:  0px; }
-.theme-rezics[data-density="spacious"]    { --rezics-sys-density-step: +6px; }
+:root, :host  { --density-step: 0px; }   /* comfortable default */
+.density-compact  { --density-step: -2px; }
+.density-spacious { --density-step:  2px; }
 ```
 
-Component-tier tokens that opt into density SHALL be `calc(<base> + var(--rezics-sys-density-step))` expressions.
+Component-tier tokens that opt into density SHALL be `calc(<base> + var(--density-step))` expressions, also emitted by the same preflight.
 
-The `.theme-rezics` class SHALL be on `<html>` (per `ui-component-foundation/spec.md`); density therefore propagates automatically into Radix-based portals (Dialog, Tooltip, Dropdown, Toast).
+The class-on-`<html>` placement coexists with the existing theme switch (`.dark`); the two are independent. Density propagates automatically into Radix-based portals (Dialog, Tooltip, Dropdown, Toast, Sonner) because portals inherit the `<html>` cascade.
+
+The legacy `--rezics-*` namespace, attribute-based `data-density` switching, and any resurrection of `package/ui/src/config/tokens.css` are FORBIDDEN by R9 of `convention-enforcement` and SHALL NOT be introduced by any density-related implementation.
 
 #### Scenario: Density token resolves per mode
 
-- **WHEN** `<html data-density="compact">` is set
-- **THEN** `getComputedStyle(document.documentElement).getPropertyValue('--rezics-sys-density-step')` SHALL return `"-4px"` (or equivalent resolved value)
+- **WHEN** `<html class="density-compact">` is set
+- **THEN** `getComputedStyle(document.documentElement).getPropertyValue('--density-step')` SHALL return `"-2px"` (or equivalent resolved value)
 
 #### Scenario: Modal portal inherits density
 
-- **WHEN** a Radix Dialog is rendered with `<html data-density="spacious">` set
-- **THEN** the dialog's portal subtree SHALL resolve `var(--rezics-sys-density-step)` to `+6px`
+- **WHEN** a Radix Dialog is rendered with `<html class="density-spacious">` set
+- **THEN** the dialog's portal subtree SHALL resolve `var(--density-step)` to `2px`
 - **AND** any density-aware composite rendered inside the dialog SHALL use the spacious spacing
+
+#### Scenario: Density and theme classes coexist
+
+- **WHEN** `<html class="dark density-compact">` is set
+- **THEN** dark-mode color tokens SHALL resolve from the `.dark { --colors-* }` overrides
+- **AND** density-aware spacing SHALL resolve from `--density-step: -2px`
 
 ### Requirement: Density affects only spacing dimensions, never typography
 
@@ -64,27 +77,27 @@ The "density never affects type" rule mirrors both Apple HIG and MD3 — type ca
 
 #### Scenario: Density token's only callers are spacing-related
 
-- **WHEN** `package/ui/src/config/tokens.css` is grepped for `var(--rezics-sys-density-step)`
-- **THEN** every match SHALL be inside a `padding`, `margin`, `gap`, `min-height`, `min-width`, `height`, `width`, `top`, `bottom`, `left`, `right`, `inset`, `block-size`, `inline-size`, `row-gap`, or `column-gap` declaration
-- **AND** SHALL NOT appear inside a `font-size`, `line-height`, `letter-spacing`, or `font-weight` declaration
+- **WHEN** `package/ui/src/config/uno-config.ts` is grepped for `var(--density-step)`
+- **THEN** every match SHALL appear inside a `calc(...)` whose product is assigned to a `--padding-*`, `--gap-*`, `--min-height-*`, or other spacing-named token
+- **AND** SHALL NOT appear inside a `--font-size-*`, `--line-height-*`, `--letter-spacing-*`, or `--font-weight-*` declaration
 
 ### Requirement: Component opt-in / opt-out lists are explicit
 
-Density-aware components (the opt-in list) SHALL include at minimum: `Table` row, `List` item, `Toolbar`, `FormControl` (the rezics input wrapper covering TextField, Select, Combobox), `Sidebar` item, `Editor` toolbar, `MenuItem`, `TabsList` item, `Breadcrumb` item, `CommandPalette` item.
+Density-aware components (the opt-in list) SHALL include at minimum: `Table` row, `List` item, `Toolbar`, FormField (the rezics input wrapper covering TextField, Select, Combobox), `Sidebar` item, `MenuItem`, `TabsList` item, `Breadcrumb` item, `CommandPalette` item.
 
 Density-fixed components (the opt-out list) SHALL include at minimum: hero sections, reading view, book covers, dialog content surfaces (the dialog frame opts in; the *content* doesn't), onboarding screens, marketing surfaces.
 
-The component-tier tokens for opt-in components SHALL be defined in `package/ui/src/config/tokens.css` under the component-tier section. Each opt-in component SHALL consume the corresponding component-tier token via UnoCSS theme classes or direct CSS variable references.
+The component-tier `--padding-*` tokens for opt-in components SHALL be emitted by the preflight in `package/ui/src/config/uno-config.ts` and SHALL be consumed by their target components via UnoCSS theme classes or direct CSS variable references.
 
 Adding a new density-aware component SHALL require:
-1. A component-tier token in `tokens.css`.
-2. A consumer wiring the component to the token.
+1. A component-tier `--padding-*` token emitted by the preflight.
+2. A consumer wiring the component to that token.
 3. A `WithDensity` story added to the component's story file (per `design-system-storybook/spec.md`).
 
 #### Scenario: Opt-in component consumes a density token
 
-- **WHEN** any density-aware component's source CSS is inspected
-- **THEN** at least one spacing dimension SHALL resolve via `var(--rezics-comp-<component>-…)` to a `calc()` expression involving `var(--rezics-sys-density-step)`
+- **WHEN** any density-aware component's source is inspected
+- **THEN** at least one spacing dimension SHALL resolve via `var(--padding-<component>-...)` to a `calc()` expression involving `var(--density-step)`
 
 #### Scenario: Density-fixed component does not vary
 
@@ -93,26 +106,27 @@ Adding a new density-aware component SHALL require:
 
 #### Scenario: Adding a new density-aware component is governed
 
-- **WHEN** a contributor wires a component to consume `var(--rezics-sys-density-step)` directly (skipping the component-tier indirection)
+- **WHEN** a contributor wires a component to consume `var(--density-step)` directly (skipping the component-tier indirection)
 - **THEN** code review SHALL block the merge
-- **AND** the contributor SHALL be redirected to add a component-tier token first
+- **AND** the contributor SHALL be redirected to add a component-tier `--padding-*` token first
 
 ### Requirement: Density default per app reflects the app's surface
 
-The `<html data-density="…">` default per app SHALL reflect the app's primary use case:
+The density class on `<html>` per app SHALL reflect the app's primary use case:
 
-- `@rezics/admin` SHALL default to `compact` (admin tables and forms are dense by intent).
-- `@rezics/app` SHALL default to `comfortable` (consumer-facing app at the platform default).
-- `@rezics/folio` and `@rezics/editor` SHALL default to `comfortable` (mixed reading and editing contexts).
+- `@rezics/admin` SHALL set `<html class="density-compact">` on mount (admin tables and forms are dense by intent).
+- `@rezics/app` SHALL leave `<html>` without a density class (consumer-facing app at the platform default = comfortable).
+- `@rezics/folio` and `@rezics/editor` SHALL leave `<html>` without a density class (mixed reading and editing contexts default to comfortable).
 
-The user MAY override the default via a preference setting (out of scope for this spec; if introduced, it writes the chosen value to the same `<html data-density>` attribute).
+The user MAY override the default via a preference setting (out of scope for this spec; if introduced, it adds or removes the corresponding `density-*` class on `<html>`).
 
 #### Scenario: Admin defaults to compact
 
 - **WHEN** `@rezics/admin` mounts
-- **THEN** the `<html>` element SHALL have `data-density="compact"`
+- **THEN** the `<html>` element SHALL have `class="density-compact"` (or the class SHALL be present alongside other classes such as `dark`)
 
 #### Scenario: App defaults to comfortable
 
 - **WHEN** `@rezics/app` mounts
-- **THEN** the `<html>` element SHALL have `data-density="comfortable"` (or no `data-density` attribute, which is treated as comfortable per the prior Requirement)
+- **THEN** the `<html>` element SHALL NOT carry a `density-compact` or `density-spacious` class
+- **AND** `getComputedStyle(document.documentElement).getPropertyValue('--density-step')` SHALL return `"0px"`
