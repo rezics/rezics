@@ -66,10 +66,10 @@ function contrastRatio(a: string, b: string): number | null {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-function useResolvedColors(ref: React.RefObject<HTMLElement | null>): {
-  hex: string;
-  contrast: number | null;
-} {
+function useResolvedColors(
+  ref: React.RefObject<HTMLElement | null>,
+  contrastAgainstVar?: string,
+): { hex: string; contrast: number | null } {
   const [state, setState] = useState<{ hex: string; contrast: number | null }>({
     hex: "",
     contrast: null,
@@ -80,8 +80,13 @@ function useResolvedColors(ref: React.RefObject<HTMLElement | null>): {
     const compute = () => {
       const cs = getComputedStyle(el);
       const bg = cs.backgroundColor;
-      const fg = cs.color;
-      setState({ hex: rgbToHex(bg), contrast: contrastRatio(bg, fg) });
+      let pair: number | null = null;
+      if (contrastAgainstVar) {
+        const rootStyle = getComputedStyle(document.documentElement);
+        const target = rootStyle.getPropertyValue(contrastAgainstVar).trim();
+        if (target) pair = contrastRatio(bg, target);
+      }
+      setState({ hex: rgbToHex(bg), contrast: pair });
     };
     compute();
     const observer = new MutationObserver(compute);
@@ -90,7 +95,7 @@ function useResolvedColors(ref: React.RefObject<HTMLElement | null>): {
       attributeFilter: ["class"],
     });
     return () => observer.disconnect();
-  }, [ref]);
+  }, [ref, contrastAgainstVar]);
   return state;
 }
 
@@ -143,6 +148,7 @@ export function Swatch({
   invertText,
   height = 64,
   showContrast = true,
+  contrastAgainst,
 }: {
   name: string;
   value: string;
@@ -151,12 +157,19 @@ export function Swatch({
   invertText?: boolean;
   height?: number;
   showContrast?: boolean;
+  contrastAgainst?: string;
 }) {
   const swatchRef = useRef<HTMLDivElement>(null);
-  const { hex, contrast } = useResolvedColors(swatchRef);
+  const { hex, contrast } = useResolvedColors(
+    swatchRef,
+    showContrast ? contrastAgainst : undefined,
+  );
   const ratio = contrast ?? 0;
   const tier = ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : ratio >= 3 ? "AA-L" : "fail";
   const passes = ratio >= 4.5;
+  const pairLabel = contrastAgainst
+    ? contrastAgainst.replace(/^--colors-/, "")
+    : null;
   return (
     <div
       style={{
@@ -183,7 +196,7 @@ export function Swatch({
         }}
       >
         <span>{hex || value}</span>
-        {showContrast && contrast != null ? (
+        {showContrast && contrast != null && pairLabel ? (
           <span
             style={{
               padding: "2px 6px",
@@ -196,9 +209,9 @@ export function Swatch({
               fontWeight: 700,
               letterSpacing: "0.04em",
             }}
-            title={`Text-vs-surface contrast ${ratio.toFixed(2)}:1`}
+            title={`Contrast vs ${pairLabel}: ${ratio.toFixed(2)}:1`}
           >
-            {ratio.toFixed(1)} · {tier}
+            vs {pairLabel} · {ratio.toFixed(1)} · {tier}
           </span>
         ) : null}
       </div>

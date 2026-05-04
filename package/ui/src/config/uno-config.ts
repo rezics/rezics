@@ -159,6 +159,13 @@ function indentedDeclarations(
   return pairs.map(([k, v]) => `  ${k}: ${v};`).join("\n");
 }
 
+function emitLightColors(): string {
+  const lines = indentedDeclarations(
+    flattenColorVars(lightColors as unknown as Record<string, unknown>),
+  );
+  return `:root, :host {\n${lines}\n}`;
+}
+
 function emitDarkOverride(): string {
   const lines = indentedDeclarations(
     flattenColorVars(darkColors as unknown as Record<string, unknown>),
@@ -255,6 +262,10 @@ export function createUnoConfig() {
       {
         layer: "theme",
         getCSS: () => emitStaticTokens(),
+      },
+      {
+        layer: "theme",
+        getCSS: () => emitLightColors(),
       },
       {
         layer: "theme",
