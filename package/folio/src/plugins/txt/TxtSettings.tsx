@@ -114,7 +114,7 @@ function TxtSettingsInner({
         {rules.length === 0 && (
           <div
             style={{
-              color: "var(--rezics-color-text-tertiary)",
+              color: "var(--rezics-sys-color-text-tertiary)",
               fontSize: "12px",
             }}
           >
@@ -130,7 +130,7 @@ function TxtSettingsInner({
               alignItems: "center",
               gap: "8px",
               padding: "4px 8px",
-              background: "var(--rezics-color-surface-subtle)",
+              background: "var(--rezics-sys-color-surface-subtle)",
               borderRadius: "4px",
               marginBottom: "4px",
               fontFamily: "monospace",
@@ -151,7 +151,7 @@ function TxtSettingsInner({
               {splitInfo.ruleUsed === rule && (
                 <CheckCircleIcon
                   size={16}
-                  color="var(--rezics-color-success-fill)"
+                  color="var(--rezics-sys-color-success-fill)"
                   aria-label="active rule"
                 />
               )}
@@ -190,7 +190,7 @@ function TxtSettingsInner({
               padding: "6px 8px",
               fontFamily: "monospace",
               fontSize: "12px",
-              border: "1px solid var(--rezics-color-border-defined)",
+              border: "1px solid var(--rezics-sys-color-border-defined)",
               borderRadius: "4px",
               background: "transparent",
               color: "inherit",
@@ -208,7 +208,7 @@ function TxtSettingsInner({
         {testError && (
           <div
             style={{
-              color: "var(--rezics-color-error-fill)",
+              color: "var(--rezics-sys-color-error-fill)",
               fontSize: "11px",
               marginTop: "4px",
             }}
@@ -218,7 +218,7 @@ function TxtSettingsInner({
         )}
         {testPreview && (
           <div style={{ fontSize: "12px", marginTop: "4px" }}>
-            <span style={{ color: "var(--rezics-color-success-fill)" }}>
+            <span style={{ color: "var(--rezics-sys-color-success-fill)" }}>
               {testPreview.count} matches found
             </span>
             {testPreview.samples.length > 0 && (
@@ -226,7 +226,7 @@ function TxtSettingsInner({
                 style={{
                   marginTop: "4px",
                   padding: "4px 8px",
-                  background: "var(--rezics-color-surface-subtle)",
+                  background: "var(--rezics-sys-color-surface-subtle)",
                   borderRadius: "4px",
                   fontFamily: "monospace",
                   fontSize: "11px",
@@ -247,7 +247,7 @@ function TxtSettingsInner({
       <div
         style={{
           padding: "8px",
-          background: "var(--rezics-color-surface-sunken)",
+          background: "var(--rezics-sys-color-surface-sunken)",
           borderRadius: "4px",
           fontSize: "12px",
           marginBottom: "8px",

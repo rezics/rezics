@@ -29,13 +29,13 @@ export const EmptyState: FC<EmptyStateProps> = ({
       )}
     >
       {icon ? (
-        <div className="text-[var(--rezics-color-text-tertiary)]">{icon}</div>
+        <div className="text-text-tertiary">{icon}</div>
       ) : null}
-      <p className="text-base font-medium text-[var(--rezics-color-text-primary)]">
+      <p className="text-base font-medium text-text-primary">
         {title}
       </p>
       {description ? (
-        <p className="text-sm text-[var(--rezics-color-text-secondary)]">
+        <p className="text-sm text-text-secondary">
           {description}
         </p>
       ) : null}

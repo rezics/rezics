@@ -176,8 +176,8 @@ export function RatingInput({
               className={cn(
                 SIZE_CLASS[size],
                 filled
-                  ? "fill-[var(--rezics-color-brand-fill)] stroke-[var(--rezics-color-brand-fill)]"
-                  : "fill-none stroke-[var(--rezics-color-text-tertiary)]",
+                  ? "fill-brand-fill stroke-brand-fill"
+                  : "fill-none stroke-text-tertiary",
               )}
             />
           </button>

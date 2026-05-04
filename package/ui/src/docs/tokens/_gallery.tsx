@@ -84,10 +84,10 @@ export function Swatch({
   return (
     <div
       style={{
-        border: "1px solid var(--rezics-color-border-whisper)",
+        border: "1px solid var(--rezics-sys-color-border-whisper)",
         borderRadius: radius.md,
         overflow: "hidden",
-        background: "var(--rezics-color-surface-elevated)",
+        background: "var(--rezics-sys-color-surface-elevated)",
       }}
     >
       <div
@@ -95,7 +95,7 @@ export function Swatch({
         style={{
           height,
           background: value,
-          color: invertText ? "#fff" : "var(--rezics-color-text-primary)",
+          color: invertText ? "#fff" : "var(--rezics-sys-color-text-primary)",
           padding: "0 12px",
           display: "flex",
           alignItems: "flex-end",
@@ -113,7 +113,7 @@ export function Swatch({
             fontFamily: fontFamilies.sans,
             fontWeight: 500,
             fontSize: 13,
-            color: "var(--rezics-color-text-primary)",
+            color: "var(--rezics-sys-color-text-primary)",
           }}
         >
           {name}
@@ -123,7 +123,7 @@ export function Swatch({
             style={{
               fontFamily: fontFamilies.mono,
               fontSize: 11,
-              color: "var(--rezics-color-text-secondary)",
+              color: "var(--rezics-sys-color-text-secondary)",
               marginTop: 2,
             }}
           >
@@ -135,7 +135,7 @@ export function Swatch({
             style={{
               fontFamily: fontFamilies.sans,
               fontSize: 12,
-              color: "var(--rezics-color-text-secondary)",
+              color: "var(--rezics-sys-color-text-secondary)",
               marginTop: 4,
             }}
           >
@@ -164,7 +164,7 @@ export function Row({
         alignItems: "center",
         gap: 24,
         padding: "16px 0",
-        borderBottom: "1px solid var(--rezics-color-border-whisper)",
+        borderBottom: "1px solid var(--rezics-sys-color-border-whisper)",
       }}
     >
       <div>
@@ -173,7 +173,7 @@ export function Row({
             fontFamily: fontFamilies.sans,
             fontWeight: 500,
             fontSize: 13,
-            color: "var(--rezics-color-text-primary)",
+            color: "var(--rezics-sys-color-text-primary)",
           }}
         >
           {label}
@@ -183,7 +183,7 @@ export function Row({
             style={{
               fontFamily: fontFamilies.mono,
               fontSize: 11,
-              color: "var(--rezics-color-text-secondary)",
+              color: "var(--rezics-sys-color-text-secondary)",
               marginTop: 2,
             }}
           >
@@ -204,7 +204,7 @@ export function SpacingRuler({ name, value }: { name: string; value: string }) {
           style={{
             width: value,
             height: 24,
-            background: "var(--rezics-color-brand-fill)",
+            background: "var(--rezics-sys-color-brand-fill)",
             borderRadius: 2,
           }}
         />
@@ -212,7 +212,7 @@ export function SpacingRuler({ name, value }: { name: string; value: string }) {
           style={{
             fontFamily: fontFamilies.mono,
             fontSize: 12,
-            color: "var(--rezics-color-text-secondary)",
+            color: "var(--rezics-sys-color-text-secondary)",
           }}
         >
           {value}
@@ -236,7 +236,7 @@ export function RadiusSample({
           width: 96,
           height: 96,
           borderRadius: value,
-          background: "var(--rezics-color-brand-fill)",
+          background: "var(--rezics-sys-color-brand-fill)",
           margin: "0 auto",
         }}
       />
@@ -246,7 +246,7 @@ export function RadiusSample({
           fontFamily: fontFamilies.sans,
           fontWeight: 500,
           fontSize: 13,
-          color: "var(--rezics-color-text-primary)",
+          color: "var(--rezics-sys-color-text-primary)",
         }}
       >
         {name}
@@ -255,7 +255,7 @@ export function RadiusSample({
         style={{
           fontFamily: fontFamilies.mono,
           fontSize: 11,
-          color: "var(--rezics-color-text-secondary)",
+          color: "var(--rezics-sys-color-text-secondary)",
         }}
       >
         {value}
@@ -272,12 +272,12 @@ export function ElevationSample({
   cssVar: string;
 }) {
   return (
-    <div style={{ padding: 24, background: "var(--rezics-color-surface-canvas)" }}>
+    <div style={{ padding: 24, background: "var(--rezics-sys-color-surface-canvas)" }}>
       <div
         style={{
           height: 96,
           borderRadius: radius.md,
-          background: "var(--rezics-color-surface-elevated)",
+          background: "var(--rezics-sys-color-surface-elevated)",
           boxShadow: `var(${cssVar})`,
           padding: 16,
           display: "flex",
@@ -290,7 +290,7 @@ export function ElevationSample({
             fontFamily: fontFamilies.sans,
             fontWeight: 500,
             fontSize: 13,
-            color: "var(--rezics-color-text-primary)",
+            color: "var(--rezics-sys-color-text-primary)",
           }}
         >
           {name}
@@ -299,7 +299,7 @@ export function ElevationSample({
           style={{
             fontFamily: fontFamilies.mono,
             fontSize: 11,
-            color: "var(--rezics-color-text-secondary)",
+            color: "var(--rezics-sys-color-text-secondary)",
           }}
         >
           {cssVar}
@@ -326,7 +326,7 @@ export function TypeSample({
     <div
       style={{
         padding: "16px 0",
-        borderBottom: "1px solid var(--rezics-color-border-whisper)",
+        borderBottom: "1px solid var(--rezics-sys-color-border-whisper)",
       }}
     >
       <div
@@ -334,7 +334,7 @@ export function TypeSample({
           fontFamily: fontFamilies[family],
           fontSize: size,
           fontWeight: weight ?? 400,
-          color: "var(--rezics-color-text-primary)",
+          color: "var(--rezics-sys-color-text-primary)",
           lineHeight: 1.3,
         }}
       >
@@ -345,7 +345,7 @@ export function TypeSample({
           marginTop: 6,
           fontFamily: fontFamilies.mono,
           fontSize: 11,
-          color: "var(--rezics-color-text-secondary)",
+          color: "var(--rezics-sys-color-text-secondary)",
         }}
       >
         {cssVar} · {size}
@@ -401,14 +401,14 @@ function Verdict({
 }) {
   const isDo = tone === "do";
   const accent = isDo
-    ? "var(--rezics-color-success-fill)"
-    : "var(--rezics-color-error-fill)";
+    ? "var(--rezics-sys-color-success-fill)"
+    : "var(--rezics-sys-color-error-fill)";
   return (
     <div
       style={{
-        border: "1px solid var(--rezics-color-border-whisper)",
+        border: "1px solid var(--rezics-sys-color-border-whisper)",
         borderRadius: radius.md,
-        background: "var(--rezics-color-surface-elevated)",
+        background: "var(--rezics-sys-color-surface-elevated)",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -420,7 +420,7 @@ function Verdict({
           alignItems: "center",
           gap: 8,
           padding: "10px 12px",
-          borderBottom: "1px solid var(--rezics-color-border-whisper)",
+          borderBottom: "1px solid var(--rezics-sys-color-border-whisper)",
           fontFamily: fontFamilies.sans,
           fontSize: 12,
           fontWeight: 500,
@@ -446,7 +446,7 @@ function Verdict({
               fontWeight: 400,
               letterSpacing: 0,
               textTransform: "none",
-              color: "var(--rezics-color-text-secondary)",
+              color: "var(--rezics-sys-color-text-secondary)",
             }}
           >
             — {caption}
@@ -456,7 +456,7 @@ function Verdict({
       <div
         style={{
           padding: 16,
-          background: "var(--rezics-color-surface-canvas)",
+          background: "var(--rezics-sys-color-surface-canvas)",
           minHeight: 96,
         }}
       >
@@ -484,7 +484,7 @@ export function MotionSample({
           style={{
             width: 240,
             height: 32,
-            background: "var(--rezics-color-surface-subtle)",
+            background: "var(--rezics-sys-color-surface-subtle)",
             borderRadius: radius.pill,
             overflow: "hidden",
             position: "relative",
@@ -495,7 +495,7 @@ export function MotionSample({
               width: 32,
               height: 32,
               borderRadius: radius.pill,
-              background: "var(--rezics-color-brand-fill)",
+              background: "var(--rezics-sys-color-brand-fill)",
               animation: `rezics-motion-demo ${duration} ${easingProp} infinite alternate`,
             }}
           />
@@ -504,7 +504,7 @@ export function MotionSample({
           style={{
             fontFamily: fontFamilies.mono,
             fontSize: 12,
-            color: "var(--rezics-color-text-secondary)",
+            color: "var(--rezics-sys-color-text-secondary)",
           }}
         >
           {duration}

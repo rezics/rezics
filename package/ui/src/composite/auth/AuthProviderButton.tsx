@@ -29,14 +29,14 @@ export const AuthProviderButton: FC<AuthProviderButtonProps> = ({
       className={cn(
         "relative inline-flex w-full items-center justify-center",
         "rounded-md border transition-colors",
-        "border-[var(--rezics-color-border-default)]",
-        "bg-[var(--rezics-color-surface-canvas)]",
-        "text-[var(--rezics-color-text-primary)]",
-        "hover:border-[var(--rezics-color-brand-fill)]",
-        "hover:bg-[var(--rezics-color-surface-elevated)]",
-        "active:border-[var(--rezics-color-brand-fill)]",
+        "border-border-whisper",
+        "bg-surface-canvas",
+        "text-text-primary",
+        "hover:border-brand-fill",
+        "hover:bg-surface-elevated",
+        "active:border-brand-fill",
         "disabled:opacity-60 disabled:pointer-events-none",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--rezics-color-brand-fill)]/40",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-fill/40",
         compact ? "px-3 py-1.5 text-[0.8125rem]" : "px-4 py-2 text-sm",
       )}
     >

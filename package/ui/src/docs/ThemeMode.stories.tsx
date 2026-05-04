@@ -14,8 +14,8 @@ function ThemeModeProbe() {
       const cs = getComputedStyle(root);
       setSnapshot({
         dataTheme: root.dataset.theme ?? "",
-        bgColor: cs.getPropertyValue("--rezics-color-surface-canvas").trim(),
-        textColor: cs.getPropertyValue("--rezics-color-text-primary").trim(),
+        bgColor: cs.getPropertyValue("--rezics-sys-color-surface-canvas").trim(),
+        textColor: cs.getPropertyValue("--rezics-sys-color-text-primary").trim(),
       });
     };
     read();
@@ -33,17 +33,17 @@ function ThemeModeProbe() {
         <strong>data-theme:</strong> {snapshot.dataTheme || "(unset)"}
       </div>
       <div>
-        <strong>--rezics-color-surface-canvas:</strong> {snapshot.bgColor}
+        <strong>--rezics-sys-color-surface-canvas:</strong> {snapshot.bgColor}
       </div>
       <div>
-        <strong>--rezics-color-text-primary:</strong> {snapshot.textColor}
+        <strong>--rezics-sys-color-text-primary:</strong> {snapshot.textColor}
       </div>
       <div
         className="rounded-md p-4"
         style={{
-          background: "var(--rezics-color-surface-elevated)",
-          color: "var(--rezics-color-text-primary)",
-          border: "1px solid var(--rezics-color-border-whisper)",
+          background: "var(--rezics-sys-color-surface-elevated)",
+          color: "var(--rezics-sys-color-text-primary)",
+          border: "1px solid var(--rezics-sys-color-border-whisper)",
         }}
       >
         Toggle the Storybook theme toolbar (sun/moon). The values above and the

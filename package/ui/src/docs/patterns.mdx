@@ -20,16 +20,16 @@ Sections separate via `p-12` (48px UnoCSS) vertical padding. No card wrap, no bo
 <Compare>
   <Do caption="Borderless, whitespace-separated">
     <div style={{ fontFamily: fontFamilies.sans }}>
-      <div style={{ padding: "32px 0", borderBottom: "1px solid var(--rezics-color-border-whisper)" }}>
-        <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, color: "var(--rezics-color-text-primary)" }}>Recent Books</div>
+      <div style={{ padding: "32px 0", borderBottom: "1px solid var(--rezics-sys-color-border-whisper)" }}>
+        <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, color: "var(--rezics-sys-color-text-primary)" }}>Recent Books</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
           {[0, 1, 2].map((i) => (
-            <div key={i} style={{ aspectRatio: "2/3", background: "var(--rezics-color-surface-subtle)", borderRadius: radius.md }} />
+            <div key={i} style={{ aspectRatio: "2/3", background: "var(--rezics-sys-color-surface-subtle)", borderRadius: radius.md }} />
           ))}
         </div>
       </div>
       <div style={{ padding: "32px 0" }}>
-        <div style={{ fontSize: 18, fontWeight: 500, color: "var(--rezics-color-text-primary)" }}>Reading Lists</div>
+        <div style={{ fontSize: 18, fontWeight: 500, color: "var(--rezics-sys-color-text-primary)" }}>Reading Lists</div>
       </div>
     </div>
   </Do>
@@ -82,10 +82,10 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 <Compare>
   <Do caption="Minimal chrome, content-led">
     <div style={{ fontFamily: fontFamilies.sans, maxWidth: 160 }}>
-      <div style={{ aspectRatio: "2/3", background: "var(--rezics-color-surface-subtle)", borderRadius: radius.sm }} />
+      <div style={{ aspectRatio: "2/3", background: "var(--rezics-sys-color-surface-subtle)", borderRadius: radius.sm }} />
       <div style={{ paddingTop: 12 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--rezics-color-text-primary)" }}>蛇之名</div>
-        <div style={{ fontSize: 13, color: "var(--rezics-color-text-secondary)", marginTop: 2 }}>Le Guin</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--rezics-sys-color-text-primary)" }}>蛇之名</div>
+        <div style={{ fontSize: 13, color: "var(--rezics-sys-color-text-secondary)", marginTop: 2 }}>Le Guin</div>
       </div>
     </div>
   </Do>
@@ -142,8 +142,8 @@ Use `<Button>` from `@/shadcn/button`. Default `variant="default"` is the brand-
           fontWeight: 500,
           padding: "8px 16px",
           borderRadius: radius.md,
-          background: "var(--rezics-color-brand-fill)",
-          color: "var(--rezics-color-text-on-brand)",
+          background: "var(--rezics-sys-color-brand-fill)",
+          color: "var(--rezics-sys-color-text-on-brand)",
           border: "none",
           cursor: "pointer",
         }}
@@ -158,8 +158,8 @@ Use `<Button>` from `@/shadcn/button`. Default `variant="default"` is the brand-
           padding: "8px 16px",
           borderRadius: radius.md,
           background: "transparent",
-          color: "var(--rezics-color-text-brand)",
-          border: "1px solid var(--rezics-color-text-brand)",
+          color: "var(--rezics-sys-color-text-brand)",
+          border: "1px solid var(--rezics-sys-color-text-brand)",
           cursor: "pointer",
         }}
       >
@@ -173,7 +173,7 @@ Use `<Button>` from `@/shadcn/button`. Default `variant="default"` is the brand-
           padding: "8px 16px",
           borderRadius: radius.md,
           background: "transparent",
-          color: "var(--rezics-color-text-brand)",
+          color: "var(--rezics-sys-color-text-brand)",
           border: "none",
           cursor: "pointer",
         }}
@@ -219,7 +219,7 @@ Use shadcn `<Input>` and `<Label>` from `@/shadcn/input` / `@/shadcn/label`. The
 <Compare>
   <Do caption="shadcn Input + Label">
     <div style={{ fontFamily: fontFamilies.sans, maxWidth: 280 }}>
-      <div style={{ fontSize: 12, color: "var(--rezics-color-text-secondary)", marginBottom: 4 }}>Email</div>
+      <div style={{ fontSize: 12, color: "var(--rezics-sys-color-text-secondary)", marginBottom: 4 }}>Email</div>
       <input
         defaultValue="reader@rezics.io"
         style={{
@@ -229,9 +229,9 @@ Use shadcn `<Input>` and `<Label>` from `@/shadcn/input` / `@/shadcn/label`. The
           padding: "4px 0 8px",
           background: "transparent",
           border: "none",
-          borderBottom: "1px solid var(--rezics-color-border-defined)",
+          borderBottom: "1px solid var(--rezics-sys-color-border-defined)",
           outline: "none",
-          color: "var(--rezics-color-text-primary)",
+          color: "var(--rezics-sys-color-text-primary)",
         }}
       />
     </div>
@@ -315,14 +315,14 @@ Tokens flow from `tokens.ts` → CSS vars + UnoCSS theme. The two call sites res
     <div
       style={{
         fontFamily: fontFamilies.sans,
-        background: "var(--rezics-color-surface-base)",
-        color: "var(--rezics-color-text-primary)",
+        background: "var(--rezics-sys-color-surface-base)",
+        color: "var(--rezics-sys-color-text-primary)",
         padding: 16,
         borderRadius: radius.md,
       }}
     >
       <div style={{ fontWeight: 500 }}>Catalog header</div>
-      <div style={{ color: "var(--rezics-color-text-brand)", marginTop: 4, fontSize: 13 }}>
+      <div style={{ color: "var(--rezics-sys-color-text-brand)", marginTop: 4, fontSize: 13 }}>
         轮回红 brand label (text-brand)
       </div>
     </div>
@@ -348,7 +348,7 @@ Tokens flow from `tokens.ts` → CSS vars + UnoCSS theme. The two call sites res
 ```tsx
 // Do
 <div className="bg-surface text-text-primary p-4 rounded-md" />
-<div style={{ background: 'var(--rezics-color-surface-base)' }} />
+<div style={{ background: 'var(--rezics-sys-color-surface-base)' }} />
 
 // Don't
 <div className="bg-[#faf9f5] text-[#1d1d1f]" />
@@ -367,14 +367,14 @@ The UnoCSS scale defines `text-xs`–`text-3xl` with the correct `clamp()` size,
 
 <Compare>
   <Do caption="Type scale, default weights">
-    <div style={{ color: "var(--rezics-color-text-primary)" }}>
+    <div style={{ color: "var(--rezics-sys-color-text-primary)" }}>
       <div style={{ fontFamily: fontFamilies.sans, fontSize: "clamp(28px, 1.75rem + 0.8vw, 36px)", fontWeight: 600, lineHeight: 1.3 }}>
         Recent Reviews
       </div>
       <div style={{ fontFamily: fontFamilies.sans, fontSize: "clamp(14px, 0.875rem + 0.2vw, 16px)", lineHeight: 1.55, marginTop: 12 }}>
         Lorem ipsum dolor sit amet — body text rendered at base size.
       </div>
-      <div style={{ fontFamily: fontFamilies.sans, fontSize: 12, color: "var(--rezics-color-text-secondary)", marginTop: 8 }}>
+      <div style={{ fontFamily: fontFamilies.sans, fontSize: 12, color: "var(--rezics-sys-color-text-secondary)", marginTop: 8 }}>
         3 days ago
       </div>
     </div>
@@ -471,7 +471,7 @@ Admin is operations and management — dense tables, terse copy. The app side is
 
 <Compare>
   <Do caption="Admin — dense table row (~40px)">
-    <div style={{ fontFamily: fontFamilies.sans, fontSize: 13, border: "1px solid var(--rezics-color-border-whisper)", borderRadius: radius.sm }}>
+    <div style={{ fontFamily: fontFamilies.sans, fontSize: 13, border: "1px solid var(--rezics-sys-color-border-whisper)", borderRadius: radius.sm }}>
       {[
         { name: "Le Guin", email: "ursula@earthsea.org" },
         { name: "Borges", email: "jorge@biblioteca.ar" },
@@ -484,12 +484,12 @@ Admin is operations and management — dense tables, terse copy. The app side is
             gridTemplateColumns: "1fr 1.5fr",
             gap: 16,
             padding: "10px 16px",
-            borderTop: "1px solid var(--rezics-color-border-whisper)",
-            color: "var(--rezics-color-text-primary)",
+            borderTop: "1px solid var(--rezics-sys-color-border-whisper)",
+            color: "var(--rezics-sys-color-text-primary)",
           }}
         >
           <span>{u.name}</span>
-          <span style={{ color: "var(--rezics-color-text-secondary)" }}>{u.email}</span>
+          <span style={{ color: "var(--rezics-sys-color-text-secondary)" }}>{u.email}</span>
         </div>
       ))}
     </div>
@@ -497,12 +497,12 @@ Admin is operations and management — dense tables, terse copy. The app side is
   <Do caption="App — generous browsing rhythm">
     <div style={{ fontFamily: fontFamilies.sans }}>
       <div style={{ padding: "32px 0" }}>
-        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--rezics-color-text-primary)" }}>Recent Books</div>
+        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--rezics-sys-color-text-primary)" }}>Recent Books</div>
         <div style={{ height: 8 }} />
-        <div style={{ fontSize: 13, color: "var(--rezics-color-text-secondary)" }}>Browse the latest additions to the catalog.</div>
+        <div style={{ fontSize: 13, color: "var(--rezics-sys-color-text-secondary)" }}>Browse the latest additions to the catalog.</div>
       </div>
-      <div style={{ padding: "32px 0", borderTop: "1px solid var(--rezics-color-border-whisper)" }}>
-        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--rezics-color-text-primary)" }}>Reading Lists</div>
+      <div style={{ padding: "32px 0", borderTop: "1px solid var(--rezics-sys-color-border-whisper)" }}>
+        <div style={{ fontSize: 16, fontWeight: 500, color: "var(--rezics-sys-color-text-primary)" }}>Reading Lists</div>
       </div>
     </div>
   </Do>
@@ -568,17 +568,17 @@ Look at the story names you'd write:
   <Do caption="Split — layout differs">
     <div style={{ fontFamily: fontFamilies.sans, display: "flex", flexDirection: "column", gap: 12 }}>
       <div style={{ display: "flex", gap: 12, padding: 12 }}>
-        <div style={{ width: 60, aspectRatio: "2/3", background: "var(--rezics-color-surface-subtle)", borderRadius: 4 }} />
+        <div style={{ width: 60, aspectRatio: "2/3", background: "var(--rezics-sys-color-surface-subtle)", borderRadius: 4 }} />
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 14, fontWeight: 500 }}>蛇之名</div>
-          <div style={{ fontSize: 13, color: "var(--rezics-color-text-secondary)" }}>Le Guin · 320 pages</div>
+          <div style={{ fontSize: 13, color: "var(--rezics-sys-color-text-secondary)" }}>Le Guin · 320 pages</div>
         </div>
       </div>
       <div style={{ width: 120 }}>
-        <div style={{ aspectRatio: "2/3", background: "var(--rezics-color-surface-subtle)", borderRadius: 4 }} />
+        <div style={{ aspectRatio: "2/3", background: "var(--rezics-sys-color-surface-subtle)", borderRadius: 4 }} />
         <div style={{ paddingTop: 8 }}>
           <div style={{ fontSize: 13, fontWeight: 500 }}>蛇之名</div>
-          <div style={{ fontSize: 12, color: "var(--rezics-color-text-secondary)" }}>Le Guin</div>
+          <div style={{ fontSize: 12, color: "var(--rezics-sys-color-text-secondary)" }}>Le Guin</div>
         </div>
       </div>
     </div>

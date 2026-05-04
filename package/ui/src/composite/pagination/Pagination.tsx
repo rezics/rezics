@@ -394,8 +394,8 @@ export const UniversalPaginator = <T,>({
 
       <div className="min-h-[300px] relative">
         {isLoading && (
-          <div className="absolute top-0 left-0 w-full h-1 overflow-hidden rounded-sm bg-rezics-color-info/20">
-            <div className="h-full w-1/3 bg-rezics-color-info animate-[indeterminate_1.4s_ease-in-out_infinite]" />
+          <div className="absolute top-0 left-0 w-full h-1 overflow-hidden rounded-sm bg-info-fill/20">
+            <div className="h-full w-1/3 bg-info-fill animate-[indeterminate_1.4s_ease-in-out_infinite]" />
           </div>
         )}
         {children(currentPageItems)}

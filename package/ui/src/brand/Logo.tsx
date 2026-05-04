@@ -26,7 +26,7 @@ const PATH_INNER =
 
 export function Logo({
   size = 64,
-  color = "var(--rezics-color-brand-fill)",
+  color = "var(--rezics-sys-color-brand-fill)",
   title = "Rezics",
   role = "img",
   ...rest

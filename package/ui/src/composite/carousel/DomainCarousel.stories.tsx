@@ -20,7 +20,7 @@ const manyItems: DemoItem[] = Array.from({ length: 12 }, (_, i) => ({
 
 function DemoCard({ title }: DemoItem) {
   return (
-    <div className="rounded-xl bg-[var(--rezics-color-surface-card)] p-8 text-[var(--rezics-color-text-primary)] shadow-sm">
+    <div className="rounded-xl bg-surface-elevated p-8 text-text-primary shadow-sm">
       <span className="text-sm font-medium">{title}</span>
     </div>
   );
@@ -47,7 +47,7 @@ export const Empty: Story = {
   args: {
     items: [],
     emptyFallback: (
-      <div className="rounded-md border border-dashed p-8 text-sm text-[var(--rezics-color-text-secondary)]">
+      <div className="rounded-md border border-dashed p-8 text-sm text-text-secondary">
         Nothing to show
       </div>
     ),
@@ -61,7 +61,7 @@ export const Loading: Story = {
       title: "",
     })),
     renderItem: () => (
-      <div className="h-24 w-full animate-pulse rounded-xl bg-[var(--rezics-color-surface-muted)]" />
+      <div className="h-24 w-full animate-pulse rounded-xl bg-surface-subtle" />
     ),
   },
 };

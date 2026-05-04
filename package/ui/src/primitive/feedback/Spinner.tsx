@@ -27,7 +27,7 @@ export function Spinner({ size = "md", label = "Loading", className }: SpinnerPr
         aria-hidden="true"
         className={cn(
           SIZE_CLASS[size],
-          "animate-spin text-[var(--rezics-color-text-secondary)]",
+          "animate-spin text-text-secondary",
         )}
       />
       <span className="sr-only">{label}</span>

@@ -30,7 +30,7 @@ export const Large: Story = {
 
 export const InlineWithText: Story = {
   render: (args) => (
-    <span className="inline-flex items-center gap-2 text-[var(--rezics-color-text-secondary)]">
+    <span className="inline-flex items-center gap-2 text-text-secondary">
       <Spinner {...args} />
       Loading reviews…
     </span>

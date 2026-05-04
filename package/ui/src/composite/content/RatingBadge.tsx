@@ -20,8 +20,8 @@ const RATING_VARIANT: Record<
 
 const RATING_TINT: Record<ContentRating, string> = {
   GENERAL: "",
-  R_15: "text-rezics-color-info border-rezics-color-info/40",
-  R_18: "text-rezics-color-warning border-rezics-color-warning/40",
+  R_15: "text-info-text border-info-fill/40",
+  R_18: "text-warning-text border-warning-fill/40",
   R_18G: "",
 };
 
