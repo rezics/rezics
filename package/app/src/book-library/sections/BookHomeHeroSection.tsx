@@ -36,7 +36,7 @@ export const BookHomeHeroSection: React.FC = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="flex items-center gap-1 px-1 py-[2px] border border-rezics-color-border-defined rounded-md"
+        className="flex items-center gap-1 px-1 py-[2px] border border-border-defined rounded-md"
       >
         <Input
           className="ml-1 flex-1 border-0 shadow-none focus-visible:ring-0"

@@ -39,10 +39,10 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
         <div
           className="flex items-center justify-between gap-4 rounded-md p-4"
           style={{
-            backgroundColor: "var(--rezics-color-bg-muted, rgba(0,0,0,0.04))",
+            backgroundColor: "var(--rezics-sys-color-surface-subtle, rgba(0,0,0,0.04))",
           }}
         >
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             {t("shelf.discussion.signInPrompt")}
           </p>
           <Button size="sm" onClick={auth.openLogin}>

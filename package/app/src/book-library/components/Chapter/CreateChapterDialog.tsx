@@ -114,13 +114,13 @@ export function CreateChapterDialog({
               id="chapter-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={!title.trim() ? "border-rezics-color-border-error" : ""}
+              className={!title.trim() ? "border-border-error" : ""}
             />
             <p
               className={
                 !title.trim()
-                  ? "text-sm text-rezics-color-text-error"
-                  : "text-sm text-rezics-color-text-secondary"
+                  ? "text-sm text-error-text"
+                  : "text-sm text-text-secondary"
               }
             >
               {!title.trim() ? "必填" : " "}
@@ -135,7 +135,7 @@ export function CreateChapterDialog({
               submitLabel={createMutation.isPending ? "创建中..." : "创建"}
             />
             {!content.trim() && (
-              <div className="text-sm text-rezics-color-text-error mt-2">
+              <div className="text-sm text-error-text mt-2">
                 内容为必填
               </div>
             )}

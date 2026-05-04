@@ -141,7 +141,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
           <TooltipContent>{followersText}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <span className="text-xs text-rezics-color-fg-muted">{followersText}</span>
+      <span className="text-xs text-text-secondary">{followersText}</span>
     </div>
   );
 };

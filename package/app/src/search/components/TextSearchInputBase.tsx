@@ -28,7 +28,7 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
   return (
     <div className={className}>
       {label && (
-        <label className="mb-1 block text-sm text-rezics-color-fg-muted">
+        <label className="mb-1 block text-sm text-text-secondary">
           {label}
         </label>
       )}

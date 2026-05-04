@@ -67,8 +67,8 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
             <span
               className={`absolute left-[11px] top-7 bottom-0 w-px ${
                 step.completed
-                  ? "bg-rezics-color-primary"
-                  : "bg-rezics-color-border"
+                  ? "bg-brand-fill"
+                  : "bg-border-whisper"
               }`}
             />
           )}
@@ -76,10 +76,10 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
           <span
             className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
               step.completed
-                ? "bg-rezics-color-primary text-white"
+                ? "bg-brand-fill text-white"
                 : step.active
-                  ? "bg-rezics-color-primary text-white"
-                  : "bg-rezics-color-border text-rezics-color-fg-muted"
+                  ? "bg-brand-fill text-white"
+                  : "bg-border-whisper text-text-secondary"
             }`}
           >
             {step.completed ? (
@@ -94,14 +94,14 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
               <span
                 className={`text-sm font-medium ${
                   step.active || step.completed
-                    ? "text-rezics-color-fg"
-                    : "text-rezics-color-fg-muted"
+                    ? "text-text-primary"
+                    : "text-text-secondary"
                 }`}
               >
                 {step.label}
               </span>
               {step.optional && (
-                <span className="text-xs text-rezics-color-fg-muted">
+                <span className="text-xs text-text-secondary">
                   {step.optional}
                 </span>
               )}
@@ -216,14 +216,14 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
             setSlugTouched(true);
           }}
           required
-          className={slugError ? "border-rezics-color-danger" : ""}
+          className={slugError ? "border-border-error" : ""}
         />
         {slugHelper && (
           <p
             className={`text-xs ${
               slugError
-                ? "text-rezics-color-danger"
-                : "text-rezics-color-fg-muted"
+                ? "text-error-text"
+                : "text-text-secondary"
             }`}
           >
             {slugHelper}
@@ -374,7 +374,7 @@ function EmailVerificationStep({
         </Alert>
       )}
       {message && (
-        <Alert className="text-rezics-color-success">
+        <Alert className="text-success-text">
           <AlertDescription>{message}</AlertDescription>
         </Alert>
       )}
@@ -434,7 +434,7 @@ function EmailVerificationStep({
       <Separator />
 
       {codeSent && (
-        <p className="text-sm text-rezics-color-fg-muted">
+        <p className="text-sm text-text-secondary">
           {t("auth.flow.verify_code_sent_to")} <strong>{email}</strong>
           {" — "}
           {t("auth.flow.verify_code_expires")}
@@ -544,14 +544,14 @@ export const CompleteRegistrationPage: FC = () => {
       title="Complete Registration"
       content={
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             Complete the steps below to finish setting up your account.
           </p>
 
           <VerticalStepper steps={steps} />
 
           {activeStep === 2 && (
-            <Alert className="text-rezics-color-success">
+            <Alert className="text-success-text">
               <CheckCircleIcon className="w-4 h-4" />
               <AlertDescription>
                 Registration complete! Redirecting...

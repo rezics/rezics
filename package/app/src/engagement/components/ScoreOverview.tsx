@@ -19,7 +19,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
 
   if (!aggregate) {
     return (
-      <p className="text-sm text-rezics-color-fg-muted">No ratings yet</p>
+      <p className="text-sm text-text-secondary">No ratings yet</p>
     );
   }
 
@@ -29,8 +29,8 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
   const maxCount = Math.max(...Object.values(distribution).map(Number), 1);
   const averageVar =
     average >= 5
-      ? "var(--rezics-color-brand-fill)"
-      : "var(--rezics-color-sentiment-negative-text)";
+      ? "var(--rezics-sys-color-brand-fill)"
+      : "var(--rezics-sys-color-sentiment-negative-text)";
 
   return (
     <div className="flex flex-row items-center gap-6">
@@ -41,7 +41,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
         >
           {average.toFixed(1)}
         </div>
-        <div className="text-xs text-rezics-color-fg-muted">
+        <div className="text-xs text-text-secondary">
           {aggregate.totalCount} ratings
         </div>
       </div>
@@ -52,17 +52,17 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
           const percent = (count / maxCount) * 100;
           const barVar =
             score >= 5
-              ? "var(--rezics-color-sentiment-positive-fill)"
-              : "var(--rezics-color-sentiment-negative-fill)";
+              ? "var(--rezics-sys-color-sentiment-positive-fill)"
+              : "var(--rezics-sys-color-sentiment-negative-fill)";
           return (
             <div key={score} className="flex flex-row items-center gap-2">
-              <span className="w-4 text-right text-xs text-rezics-color-fg-muted">
+              <span className="w-4 text-right text-xs text-text-secondary">
                 {score}
               </span>
               <div
                 className="h-1.5 flex-1 overflow-hidden rounded-full"
                 style={{
-                  backgroundColor: "var(--rezics-color-bg-muted, rgba(0,0,0,0.06))",
+                  backgroundColor: "var(--rezics-sys-color-surface-subtle, rgba(0,0,0,0.06))",
                 }}
               >
                 <div

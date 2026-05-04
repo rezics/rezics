@@ -272,7 +272,7 @@ export const createChapterTreeEditorNode = ({
                     variant="outline"
                     className={`h-5 text-[0.675rem] ${
                       status === "PUBLISHED"
-                        ? "border-rezics-color-success-text text-rezics-color-success-text"
+                        ? "border-success-fill text-success-text"
                         : ""
                     }`}
                   >

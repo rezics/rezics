@@ -21,7 +21,7 @@ export const HomeNewsletterSignup: React.FC = () => {
         {t("page.home.sections.newsletter.title")}
       </p>
       {submitted ? (
-        <p className="text-sm text-rezics-color-success m-0">
+        <p className="text-sm text-success-text m-0">
           {t("page.home.sections.newsletter.thanks")}
         </p>
       ) : (

@@ -26,11 +26,11 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
       >
         <CardContent>
           <h3 className="truncate text-lg font-semibold">{title}</h3>
-          <p className="mt-1 line-clamp-2 text-sm text-rezics-color-fg-muted">
+          <p className="mt-1 line-clamp-2 text-sm text-text-secondary">
             {description || "No description"}
           </p>
           <div className="mt-4 flex flex-row items-center gap-2">
-            <span className="text-xs text-rezics-color-fg-muted">
+            <span className="text-xs text-text-secondary">
               {realm.memberCount ?? 0} members
             </span>
             {realm.isPublic && (
@@ -41,7 +41,7 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
             {realm.isOfficial && (
               <Badge
                 variant="outline"
-                className="border-rezics-color-primary text-rezics-color-primary text-xs"
+                className="border-brand-fill text-text-brand text-xs"
               >
                 Official
               </Badge>

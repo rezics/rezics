@@ -73,7 +73,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
                 size="icon"
                 variant="ghost"
                 onClick={() => handleRemove(index)}
-                className="w-7 h-7 text-rezics-color-error-text hover:text-rezics-color-error-text"
+                className="w-7 h-7 text-error-text hover:text-error-text"
               >
                 <Delete size={14} />
               </Button>
@@ -131,7 +131,7 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
   return (
     <div className="space-y-4">
       <PublishURL value={extraData || undefined} onChange={handleExtraChange} />
-      <div className="h-px bg-rezics-color-border-whisper" />
+      <div className="h-px bg-border-whisper" />
       <RezicsJsonEditor
         value={JSON.stringify(extraData, null, 2)}
         onChange={(text) => {

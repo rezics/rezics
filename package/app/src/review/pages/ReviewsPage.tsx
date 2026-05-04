@@ -145,7 +145,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
               onSubmit={() => setStart(0)}
               placeholder="Search reviews"
             />
-            <div className="mb-4 mt-4 border-b border-rezics-color-border">
+            <div className="mb-4 mt-4 border-b border-border-whisper">
               <Tabs
                 value={tab}
                 onValueChange={(v) => setTab(v as typeof tab)}

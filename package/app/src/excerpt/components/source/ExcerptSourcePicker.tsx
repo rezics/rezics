@@ -116,10 +116,10 @@ export function ExcerptSourcePicker({
           disabled={disabled}
           onChange={(e) => handleUrlChange(e.target.value)}
           aria-invalid={!!error}
-          className={error ? "border-rezics-color-danger" : undefined}
+          className={error ? "border-border-error" : undefined}
         />
         {error ? (
-          <p className="text-sm text-rezics-color-danger">{error}</p>
+          <p className="text-sm text-error-text">{error}</p>
         ) : null}
       </div>
 
@@ -184,12 +184,12 @@ function TreeDisclosure({
   const units = (data?.units ?? []) as UnitDTO[];
 
   return (
-    <div className="border-t border-rezics-color-border pt-2">
+    <div className="border-t border-border-whisper pt-2">
       <button
         type="button"
         disabled={disabled}
         onClick={() => setExpanded((s) => !s)}
-        className="flex items-center gap-2 text-sm w-full text-left hover:text-rezics-color-primary disabled:opacity-50"
+        className="flex items-center gap-2 text-sm w-full text-left hover:text-text-brand disabled:opacity-50"
         aria-expanded={expanded}
       >
         <ExpandMore
@@ -206,12 +206,12 @@ function TreeDisclosure({
         <div className="pl-6 pt-2">
           {isLoading && <Spinner size="sm" />}
           {error && (
-            <p className="text-xs text-rezics-color-danger">
+            <p className="text-xs text-error-text">
               {String(error)}
             </p>
           )}
           {!isLoading && !error && units.length === 0 && (
-            <p className="text-xs text-rezics-color-fg-muted">
+            <p className="text-xs text-text-secondary">
               {t("excerpt.form.no_sub_units", "No sub-units")}
             </p>
           )}
@@ -221,7 +221,7 @@ function TreeDisclosure({
                 <button
                   type="button"
                   onClick={() => onPick(unit)}
-                  className="w-full text-left text-sm py-1 px-2 rounded hover:bg-rezics-color-bg-muted"
+                  className="w-full text-left text-sm py-1 px-2 rounded hover:bg-surface-subtle"
                 >
                   {displayTitle(unit, language) ?? unit.id}
                 </button>

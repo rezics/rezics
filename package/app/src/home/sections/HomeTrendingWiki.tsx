@@ -48,7 +48,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
           <Card key={book.unitId} className="overflow-hidden">
             <CardContent>
               <p className="text-sm font-medium mb-1">{getBookTitle(book)}</p>
-              <p className="text-sm text-rezics-color-fg-muted line-clamp-3 m-0">
+              <p className="text-sm text-text-secondary line-clamp-3 m-0">
                 {t("page.home.sections.wiki_teaser_placeholder")}
               </p>
             </CardContent>

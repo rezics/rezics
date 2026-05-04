@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // --- Fixed 模式渲染逻辑 ---
   if (mode === "fixed") {
     return (
-      <div className="bg-rezics-color-bg">
+      <div className="bg-surface-canvas">
         {/* 背景遮罩 (Backdrop) - 处理淡入淡出 */}
         <div
           className={cn(
@@ -53,14 +53,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* 侧边栏面板 - 处理滑入滑出 */}
         <aside
           className={cn(
-            "fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out border-r border-rezics-color-border",
+            "fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out border-r border-border-whisper",
             isOpen ? "translate-x-0" : "-translate-x-full",
           )}
           style={{ width }}
         >
           <div
             className={cn(
-              "relative h-full flex flex-col overflow-hidden bg-rezics-color-bg",
+              "relative h-full flex flex-col overflow-hidden bg-surface-canvas",
               className,
             )}
           >
@@ -84,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
    * Inline 模式渲染逻辑
    */
   return (
-    <div className="inline-sidebar-container bg-rezics-color-bg">
+    <div className="inline-sidebar-container bg-surface-canvas">
       <div
         className={cn(`shrink-0`)}
         style={{
@@ -94,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       <div
         className={cn(
-          `fixed inset-y-0 left-0 overflow-hidden border-r border-rezics-color-border`,
+          `fixed inset-y-0 left-0 overflow-hidden border-r border-border-whisper`,
         )}
         style={{
           width,

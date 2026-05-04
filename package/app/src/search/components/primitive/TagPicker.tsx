@@ -126,7 +126,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         />
       </div>
       {inputValue.trim() && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-rezics-color-bg-elevated rounded-md shadow-lg border border-rezics-color-border max-h-60 overflow-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-surface-elevated rounded-md shadow-lg border border-border-whisper max-h-60 overflow-auto">
           <ul>
             {suggestions.map((item) => {
               const id = tagIdentity(item);
@@ -140,7 +140,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                       e.preventDefault();
                       addSuggestion(item);
                     }}
-                    className="block w-full text-left px-3 py-1.5 text-sm hover:bg-rezics-color-bg-hover"
+                    className="block w-full text-left px-3 py-1.5 text-sm hover:bg-surface-subtle"
                   >
                     {tagLabel(item)}
                   </button>

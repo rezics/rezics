@@ -35,7 +35,7 @@ export function ShelfListPage() {
           <Spinner />
         </div>
       ) : shelves.length === 0 ? (
-        <p className="py-8 text-center text-rezics-color-fg-muted">
+        <p className="py-8 text-center text-text-secondary">
           No shelves yet
         </p>
       ) : (

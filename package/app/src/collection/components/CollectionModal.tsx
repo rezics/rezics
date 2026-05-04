@@ -113,7 +113,7 @@ export function CollectionModal({
             {/* Shelf list with checkboxes */}
             <ul className="flex flex-col">
               {filteredShelves.length === 0 ? (
-                <p className="text-sm text-rezics-color-fg-muted px-2">
+                <p className="text-sm text-text-secondary px-2">
                   No shelves found
                 </p>
               ) : (
@@ -131,7 +131,7 @@ export function CollectionModal({
                       <p className="text-sm truncate">
                         {shelf.title ?? "Untitled"}
                       </p>
-                      <p className="text-xs text-rezics-color-fg-muted">
+                      <p className="text-xs text-text-secondary">
                         {shelf.itemCount} items
                       </p>
                     </div>

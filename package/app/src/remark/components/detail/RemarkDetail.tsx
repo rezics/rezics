@@ -26,9 +26,9 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
         <PostAuthorHeader post={remark} />
         <div className="flex items-center gap-2">
           {isRecommended ? (
-            <ThumbUpIcon className="h-5 w-5 text-rezics-color-primary" />
+            <ThumbUpIcon className="h-5 w-5 text-text-brand" />
           ) : (
-            <ThumbDownIcon className="h-5 w-5 text-rezics-color-fg-muted" />
+            <ThumbDownIcon className="h-5 w-5 text-text-secondary" />
           )}
           {rating !== undefined && (
             <span className="text-sm">{rating.toFixed(1)} / 10</span>
@@ -38,7 +38,7 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
       {bookUnitId && (
         <div>
           <TextLink to="/book/$bookId" params={{ bookId: bookUnitId }}>
-            <span className="text-xs text-rezics-color-primary">View book</span>
+            <span className="text-xs text-text-brand">View book</span>
           </TextLink>
         </div>
       )}

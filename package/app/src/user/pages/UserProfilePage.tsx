@@ -83,7 +83,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               <h4 className="text-2xl font-semibold">{user.name}</h4>
               <div>
                 {user.joinDate && (
-                  <p className="text-sm text-rezics-color-fg-muted">
+                  <p className="text-sm text-text-secondary">
                     Joined on {new Date(user.joinDate).toLocaleDateString()}
                   </p>
                 )}
@@ -116,7 +116,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             {user.unitId && (
               <div className="mb-4">
                 <h6 className="text-base font-semibold mb-2">Unit ID</h6>
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   {user.unitId}
                 </p>
               </div>
@@ -126,7 +126,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                 <h6 className="text-base font-semibold mb-2">
                   {t("common.email")}
                 </h6>
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   {user.email}
                 </p>
               </div>
@@ -138,7 +138,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               </div>
             )}
             {!user.bio && (
-              <p className="text-sm text-rezics-color-fg-muted italic">
+              <p className="text-sm text-text-secondary italic">
                 No bio available
               </p>
             )}
@@ -150,17 +150,17 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           <CardContent>
             <h6 className="text-lg font-semibold inline-block">导航：</h6>
             <Link to={`/user/me/bookmark`}>
-              <Button variant="ghost" className="text-rezics-color-primary">
+              <Button variant="ghost" className="text-text-brand">
                 书签
               </Button>
             </Link>
             <Link to={`/user/me/follow`}>
-              <Button variant="ghost" className="text-rezics-color-primary">
+              <Button variant="ghost" className="text-text-brand">
                 关注
               </Button>
             </Link>
             <Link to={`/user/me/reaction`}>
-              <Button variant="ghost" className="text-rezics-color-primary">
+              <Button variant="ghost" className="text-text-brand">
                 反应
               </Button>
             </Link>

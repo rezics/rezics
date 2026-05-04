@@ -78,7 +78,7 @@ export function EditChapterDialog({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               autoFocus
-              className={!title.trim() ? "border-rezics-color-error-text" : ""}
+              className={!title.trim() ? "border-border-error" : ""}
             />
           </div>
           <div className="flex flex-col gap-1">

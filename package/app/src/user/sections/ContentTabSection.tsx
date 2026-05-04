@@ -101,7 +101,7 @@ export const ContentTabSection: FC = () => {
       </InnerFilterPanel>
 
       {isLoading ? (
-        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
+        <p className="text-sm text-text-secondary py-12 text-center">
           {t("common.loading")}
         </p>
       ) : posts.length === 0 ? (
@@ -128,7 +128,7 @@ export const ContentTabSection: FC = () => {
               >
                 Previous
               </button>
-              <span className="text-sm text-rezics-color-fg-muted">
+              <span className="text-sm text-text-secondary">
                 Page {currentPage + 1} of {totalPages}
               </span>
               <button
@@ -173,11 +173,11 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
               <span className="text-sm text-amber-500">{scoreDisplay}</span>
             )}
             {targetTitle && (
-              <span className="text-sm text-rezics-color-fg-muted">
+              <span className="text-sm text-text-secondary">
                 on {targetTitle}
               </span>
             )}
-            <span className="text-xs text-rezics-color-fg-muted">{date}</span>
+            <span className="text-xs text-text-secondary">{date}</span>
           </div>
           {post.body && (
             <p className="text-sm mt-1 line-clamp-3">{post.body}</p>

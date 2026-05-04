@@ -46,7 +46,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
 
   return (
     <section className="mb-4" aria-label={t("pinboard.pinned.region")}>
-      <p className="px-1 text-xs font-medium uppercase tracking-wider text-rezics-color-fg-muted">
+      <p className="px-1 text-xs font-medium uppercase tracking-wider text-text-secondary">
         {t("pinboard.pinned.heading")}
       </p>
       <div className="flex flex-col gap-2 mt-1">

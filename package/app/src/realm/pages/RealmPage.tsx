@@ -48,7 +48,7 @@ export function RealmPage({ realmId }: RealmPageProps) {
 
   if (!realm) {
     return (
-      <p className="py-8 text-rezics-color-fg-muted">Realm not found</p>
+      <p className="py-8 text-text-secondary">Realm not found</p>
     );
   }
 
@@ -73,17 +73,17 @@ export function RealmPage({ realmId }: RealmPageProps) {
           <JoinButton realmId={realmId} />
         </div>
         {description && (
-          <p className="text-base text-rezics-color-fg-muted">{description}</p>
+          <p className="text-base text-text-secondary">{description}</p>
         )}
         <div className="flex flex-row gap-4">
-          <span className="text-xs text-rezics-color-fg-muted">
+          <span className="text-xs text-text-secondary">
             {realm.memberCount ?? 0} members
           </span>
           {realm.isPublic && (
-            <span className="text-xs text-rezics-color-primary">Public</span>
+            <span className="text-xs text-text-brand">Public</span>
           )}
           {realm.isOfficial && (
-            <span className="text-xs" style={{ color: "var(--rezics-color-secondary, var(--rezics-color-fg-muted))" }}>
+            <span className="text-xs" style={{ color: "var(--rezics-sys-color-secondary, var(--rezics-sys-color-text-secondary))" }}>
               Official
             </span>
           )}

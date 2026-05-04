@@ -81,7 +81,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
       <h3 className="text-3xl font-bold mb-8">Users</h3>
 
       <div className="mb-8 relative">
-        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rezics-color-fg-muted pointer-events-none" />
+        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
         <Input
           className="pl-10"
           placeholder="Search users by name or email..."
@@ -96,7 +96,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
 
       {!isLoading && !error && users.length === 0 && (
         <div className="flex items-center justify-center h-64">
-          <h6 className="text-lg text-rezics-color-fg-muted">No users found</h6>
+          <h6 className="text-lg text-text-secondary">No users found</h6>
         </div>
       )}
 
@@ -128,12 +128,12 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
                     </Badge>
                   )}
                   {user.bio && (
-                    <p className="text-sm text-rezics-color-fg-muted line-clamp-2">
+                    <p className="text-sm text-text-secondary line-clamp-2">
                       {user.bio}
                     </p>
                   )}
                   {!user.bio && (
-                    <p className="text-sm text-rezics-color-fg-muted italic">
+                    <p className="text-sm text-text-secondary italic">
                       No bio
                     </p>
                   )}
@@ -152,7 +152,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
               >
                 Previous
               </Button>
-              <span className="text-sm text-rezics-color-fg-muted px-2">
+              <span className="text-sm text-text-secondary px-2">
                 Page {page} of {totalPages}
               </span>
               <Button
@@ -167,7 +167,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
           )}
 
           <div className="mt-4 text-center">
-            <p className="text-sm text-rezics-color-fg-muted">
+            <p className="text-sm text-text-secondary">
               Showing {(page - 1) * itemsPerPage + 1} -{" "}
               {Math.min(page * itemsPerPage, total)} of {total} users
             </p>

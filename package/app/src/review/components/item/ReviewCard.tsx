@@ -50,7 +50,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
       <CardContent>
         <div className="flex gap-4">
           {bookMetadata?.coverUrl && (
-            <div className="flex-shrink-0 w-20 h-28 overflow-hidden rounded shadow-sm border border-rezics-color-border">
+            <div className="flex-shrink-0 w-20 h-28 overflow-hidden rounded shadow-sm border border-border-whisper">
               <img
                 src={bookMetadata.coverUrl}
                 alt={bookMetadata.title}
@@ -70,7 +70,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             )}
 
             {reviewTitle && (
-              <h3 className="truncate text-[1.1rem] text-rezics-color-fg">
+              <h3 className="truncate text-[1.1rem] text-text-primary">
                 {reviewTitle}
               </h3>
             )}
@@ -93,7 +93,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
           <div className="flex items-center gap-2">
             <span
-              className="text-xs text-rezics-color-fg-muted whitespace-nowrap"
+              className="text-xs text-text-secondary whitespace-nowrap"
               style={{ lineHeight: 1 }}
             >
               {review.author?.name || "匿名"}
@@ -104,7 +104,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
                 className="text-xs whitespace-nowrap"
                 style={{
                   lineHeight: 1,
-                  color: "var(--rezics-color-secondary, var(--rezics-color-fg-muted))",
+                  color: "var(--rezics-sys-color-secondary, var(--rezics-sys-color-text-secondary))",
                 }}
               >
                 {rating}

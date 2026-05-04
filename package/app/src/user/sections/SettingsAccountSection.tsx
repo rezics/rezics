@@ -98,13 +98,13 @@ export const SettingsAccountSection: FC = () => {
           {isVerified ? (
             <Badge
               variant="outline"
-              className="text-rezics-color-success flex items-center gap-1"
+              className="text-success-text flex items-center gap-1"
             >
               <VerifiedIcon className="w-3 h-3" />
               Verified
             </Badge>
           ) : (
-            <Badge variant="outline" className="text-rezics-color-warning">
+            <Badge variant="outline" className="text-warning-text">
               Unverified
             </Badge>
           )}
@@ -122,7 +122,7 @@ export const SettingsAccountSection: FC = () => {
         )}
 
         {sendVerification.isSuccess && (
-          <Alert className="mt-2 text-rezics-color-success">
+          <Alert className="mt-2 text-success-text">
             <AlertDescription>Verification email sent.</AlertDescription>
           </Alert>
         )}
@@ -133,7 +133,7 @@ export const SettingsAccountSection: FC = () => {
         description="Update your email address. A verification link will be sent to the new address."
       >
         {emailSuccess && (
-          <Alert className="mb-4 text-rezics-color-success">
+          <Alert className="mb-4 text-success-text">
             <AlertDescription>{emailSuccess}</AlertDescription>
           </Alert>
         )}
@@ -166,7 +166,7 @@ export const SettingsAccountSection: FC = () => {
       <DangerZone description="Once you delete your account, there is no going back. Please be certain.">
         <Button
           variant="outline"
-          className="text-rezics-color-danger"
+          className="text-error-text"
           onClick={() => setDeleteOpen(true)}
         >
           Delete Account

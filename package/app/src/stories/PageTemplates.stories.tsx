@@ -34,13 +34,13 @@ export const Homepage: Story = {
   render: () => (
     <div className="mx-auto w-full max-w-[1100px] px-6">
       <div className="py-16">
-        <p className="text-xs uppercase tracking-[0.35em] text-rezics-color-brand-fill">
+        <p className="text-xs uppercase tracking-[0.35em] text-brand-fill">
           Library
         </p>
         <h1 className="text-5xl font-semibold mt-2">Read together</h1>
       </div>
 
-      <div className="py-12 border-t border-rezics-color-border-whisper">
+      <div className="py-12 border-t border-border-whisper">
         <h2 className="text-3xl font-semibold mb-6">Recent Books</h2>
         <div className="flex flex-row gap-6 overflow-x-auto pb-4">
           {bookCardPropsList.slice(0, 6).map((book) => (
@@ -56,7 +56,7 @@ export const Homepage: Story = {
         </div>
       </div>
 
-      <div className="py-12 border-t border-rezics-color-border-whisper">
+      <div className="py-12 border-t border-border-whisper">
         <h2 className="text-3xl font-semibold mb-6">Trending Reviews</h2>
         <div className="flex flex-col gap-6">
           <ReviewCard review={reviewLong} />
@@ -86,7 +86,7 @@ export const BookDetail: Story = {
           </div>
           <div className="flex-1">
             <h1 className="text-5xl font-semibold mb-4">{book.title}</h1>
-            <p className="text-base text-rezics-color-fg-muted mb-8">
+            <p className="text-base text-text-secondary mb-8">
               {book.description ?? "—"}
             </p>
             <p className="text-base">
@@ -97,7 +97,7 @@ export const BookDetail: Story = {
           </div>
         </div>
 
-        <div className="py-12 mt-8 border-t border-rezics-color-border-whisper">
+        <div className="py-12 mt-8 border-t border-border-whisper">
           <h2 className="text-3xl font-semibold mb-6">Reviews</h2>
           <div className="flex flex-col gap-6">
             <ReviewCard review={reviewLong} />
@@ -122,13 +122,13 @@ export const Profile: Story = {
         </Avatar>
         <div>
           <h1 className="text-5xl font-semibold">Mei Tanaka</h1>
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             @mei · Reading widely; writing slowly.
           </p>
         </div>
       </div>
 
-      <div className="py-12 mt-8 border-t border-rezics-color-border-whisper">
+      <div className="py-12 mt-8 border-t border-border-whisper">
         <h2 className="text-3xl font-semibold mb-6">Recent reviews</h2>
         <div className="flex flex-col gap-6">
           <ReviewCard review={reviewLong} />

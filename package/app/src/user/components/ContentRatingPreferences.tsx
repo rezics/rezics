@@ -65,7 +65,7 @@ export const ContentRatingPreferences: FC = () => {
   return (
     <>
       {saved && (
-        <Alert className="mb-3 text-rezics-color-success">
+        <Alert className="mb-3 text-success-text">
           <AlertDescription>
             {t("settings.content_rating.saved", "Preferences saved.")}
           </AlertDescription>
@@ -82,7 +82,7 @@ export const ContentRatingPreferences: FC = () => {
               <Checkbox checked disabled />
               <span className="flex flex-row items-center gap-2">
                 <RatingBadge rating={rating} />
-                <span className="text-sm text-rezics-color-fg-muted">
+                <span className="text-sm text-text-secondary">
                   {t("settings.content_rating.always_on", "Always on")}
                 </span>
               </span>
@@ -105,7 +105,7 @@ export const ContentRatingPreferences: FC = () => {
               />
               <span className="flex flex-row items-center gap-2">
                 <RatingBadge rating={rating} />
-                <span className="text-sm text-rezics-color-fg-muted">
+                <span className="text-sm text-text-secondary">
                   {t(
                     `settings.content_rating.description.${rating}`,
                     rating === "R_18"

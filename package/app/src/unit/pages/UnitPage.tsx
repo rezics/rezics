@@ -100,7 +100,7 @@ export function UnitPage() {
           <h1 className="text-3xl font-bold">
             {title || t("pages.unit_page", "Unit")}
           </h1>
-          <p className="text-xs sm:text-sm break-all text-rezics-color-fg-muted">
+          <p className="text-xs sm:text-sm break-all text-text-secondary">
             ID: {unit.id}
           </p>
         </div>
@@ -142,7 +142,7 @@ export function UnitPage() {
                     <TooltipContent>{t("user.open_profile")}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <span className="text-xs text-rezics-color-fg-muted">
+                <span className="text-xs text-text-secondary">
                   {unit.user.slug}
                 </span>
               </div>
@@ -181,11 +181,11 @@ export function UnitPage() {
 
       {/* ANCHOR Content */}
       <div className="mt-12">
-        <div className="bg-rezics-color-bg-elevated p-6 rounded-md">
+        <div className="bg-surface-elevated p-6 rounded-md">
           {content ? (
             <MarkdownContent content={content} />
           ) : (
-            <p className="text-sm text-rezics-color-fg-muted">
+            <p className="text-sm text-text-secondary">
               {t("unit.no_content")}
             </p>
           )}
@@ -200,7 +200,7 @@ export function UnitPage() {
         </div>
 
         {metadataEntries.length === 0 ? (
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             {t("unit.no_metadata", "暂无 Meta 信息")}
           </p>
         ) : (
@@ -208,10 +208,10 @@ export function UnitPage() {
             {metadataEntries.map(([key, value]) => (
               <div
                 key={key}
-                className="bg-rezics-color-bg-elevated p-4 rounded-md"
+                className="bg-surface-elevated p-4 rounded-md"
               >
                 <p className="text-sm font-semibold">{key}</p>
-                <p className="mt-1 whitespace-pre-wrap break-words text-sm text-rezics-color-fg-muted">
+                <p className="mt-1 whitespace-pre-wrap break-words text-sm text-text-secondary">
                   {formatMetadataValue(value)}
                 </p>
               </div>

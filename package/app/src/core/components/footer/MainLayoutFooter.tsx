@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-base font-bold text-rezics-color-fg mb-2">{children}</p>
+    <p className="text-base font-bold text-text-primary mb-2">{children}</p>
   );
 }
 
@@ -28,7 +28,7 @@ function FooterLink({
   return (
     <a
       href={href}
-      className="text-rezics-color-fg-muted hover:underline leading-[1.9] inline-block"
+      className="text-text-secondary hover:underline leading-[1.9] inline-block"
     >
       {children}
     </a>
@@ -41,7 +41,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
 
   return (
     <footer
-      className={`bg-rezics-color-bg text-rezics-color-fg ${className ?? ""}`}
+      className={`bg-surface-canvas text-text-primary ${className ?? ""}`}
     >
       <Separator />
 
@@ -61,7 +61,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                   REZICS
                 </h6>
               </div>
-              <p className="text-sm text-rezics-color-fg-muted mt-3">
+              <p className="text-sm text-text-secondary mt-3">
                 {t("layout.footer.brand.description")}
                 <br />
                 {t("layout.footer.brand.slogan")}
@@ -78,7 +78,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                         variant="ghost"
                         size="icon"
                         aria-label={t("layout.footer.social.github")}
-                        className="text-rezics-color-primary"
+                        className="text-text-brand"
                         asChild
                       >
                         <a
@@ -101,7 +101,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                         variant="ghost"
                         size="icon"
                         aria-label={t("layout.footer.social.telegram")}
-                        className="text-rezics-color-primary"
+                        className="text-text-brand"
                         asChild
                       >
                         <a
@@ -167,7 +167,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
             {/* Newsletter */}
             <div className="md:col-span-1">
               <SectionTitle>{t("layout.footer.newsletter.title")}</SectionTitle>
-              <p className="text-sm text-rezics-color-fg-muted mb-3">
+              <p className="text-sm text-text-secondary mb-3">
                 {t("layout.footer.newsletter.description")}
               </p>
               <form
@@ -192,26 +192,26 @@ export function MainLayoutFooter({ className }: { className?: string }) {
 
         {/* Bottom bar */}
         <div className="py-8 flex items-center justify-between flex-wrap gap-y-3">
-          <p className="text-xs text-rezics-color-fg-muted m-0">
+          <p className="text-xs text-text-secondary m-0">
             {t("layout.footer.copyright", { year })}
           </p>
 
           <div className="flex flex-row items-center gap-4">
             <a
               href="/privacy"
-              className="text-xs text-rezics-color-fg-muted hover:underline"
+              className="text-xs text-text-secondary hover:underline"
             >
               {t("layout.footer.legal.privacy")}
             </a>
             <a
               href="/terms"
-              className="text-xs text-rezics-color-fg-muted hover:underline"
+              className="text-xs text-text-secondary hover:underline"
             >
               {t("layout.footer.legal.terms")}
             </a>
             <a
               href="/contact"
-              className="text-xs text-rezics-color-fg-muted hover:underline"
+              className="text-xs text-text-secondary hover:underline"
             >
               {t("layout.footer.legal.contact")}
             </a>

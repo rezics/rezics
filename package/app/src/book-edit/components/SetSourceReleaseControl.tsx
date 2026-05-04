@@ -47,7 +47,7 @@ export const SetSourceReleaseControl: React.FC<
 
   return (
     <div className="flex flex-row items-center gap-2 flex-wrap">
-      <span className="text-xs text-rezics-color-text-secondary">
+      <span className="text-xs text-text-secondary">
         {t("page.book_edit.info.translation.set_source.label")}
       </span>
       <Select
@@ -66,7 +66,7 @@ export const SetSourceReleaseControl: React.FC<
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={NO_SOURCE}>
-            <span className="text-rezics-color-text-secondary">
+            <span className="text-text-secondary">
               {t("page.book_edit.info.translation.set_source.none")}
             </span>
           </SelectItem>

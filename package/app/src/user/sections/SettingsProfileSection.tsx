@@ -78,7 +78,7 @@ export const SettingsProfileSection: FC = () => {
         description="This information will be displayed publicly on your profile page."
       >
         {success && (
-          <Alert className="mb-4 text-rezics-color-success">
+          <Alert className="mb-4 text-success-text">
             <AlertDescription>Profile updated successfully.</AlertDescription>
           </Alert>
         )}
@@ -119,7 +119,7 @@ export const SettingsProfileSection: FC = () => {
 
           {user?.slug && (
             <div>
-              <p className="text-xs text-rezics-color-fg-muted">Username</p>
+              <p className="text-xs text-text-secondary">Username</p>
               <p className="text-sm mt-1">@{user.slug}</p>
             </div>
           )}
@@ -132,12 +132,12 @@ export const SettingsProfileSection: FC = () => {
               onChange={(e) => handleChange("bio", e.target.value)}
               rows={2}
               placeholder="A short bio about yourself"
-              className="w-full rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+              className="w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
             />
           </div>
 
           <div>
-            <p className="text-xs text-rezics-color-fg-muted mb-2 block">
+            <p className="text-xs text-text-secondary mb-2 block">
               Description
             </p>
             <RezicsMarkdownEditor

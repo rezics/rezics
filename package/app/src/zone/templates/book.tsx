@@ -29,7 +29,7 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
           backgroundImage: bgImage ? `url(${bgImage})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundColor: accentColor ?? "var(--rezics-color-brand-fill)",
+          backgroundColor: accentColor ?? "var(--rezics-sys-color-brand-fill)",
         }}
       >
         <div className="relative z-10">
@@ -54,7 +54,7 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
       <div>
         <h2 className="text-lg font-semibold mb-4">Books</h2>
         {/* MOCK: book listing sections with zone.filters pre-applied will be wired here */}
-        <p className="text-rezics-color-fg-muted">
+        <p className="text-text-secondary">
           Book content for this zone will appear here.
         </p>
       </div>

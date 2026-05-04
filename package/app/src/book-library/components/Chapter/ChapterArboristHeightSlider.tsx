@@ -53,7 +53,7 @@ export function ChapterArboristHeightSlider({
             value={height}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            className="w-[42px] border-b border-rezics-color-border-defined bg-transparent text-sm"
+            className="w-[42px] border-b border-border-defined bg-transparent text-sm"
           />
         </div>
       </div>

@@ -78,11 +78,11 @@ export const ShelvesTabSection: FC = () => {
       </InnerFilterPanel>
 
       {isLoading ? (
-        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
+        <p className="text-sm text-text-secondary py-12 text-center">
           Loading...
         </p>
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
+        <p className="text-sm text-text-secondary py-12 text-center">
           {filters.q ? "No shelves match your search" : "No shelves yet"}
         </p>
       ) : (
@@ -114,15 +114,15 @@ const ShelfCard: FC<{ shelf: ShelfDTO }> = ({ shelf }) => {
             className="w-full h-24 object-cover rounded mb-2"
           />
         )}
-        <span className="text-sm font-medium line-clamp-2 text-rezics-color-fg">
+        <span className="text-sm font-medium line-clamp-2 text-text-primary">
           {title}
         </span>
         <div className="flex items-center justify-between mt-auto pt-2">
-          <span className="text-xs text-rezics-color-fg-muted">
+          <span className="text-xs text-text-secondary">
             {itemCount} items
           </span>
           {shelf.kindKey && (
-            <span className="text-xs text-rezics-color-fg-muted">
+            <span className="text-xs text-text-secondary">
               {shelf.kindKey}
             </span>
           )}

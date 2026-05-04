@@ -14,7 +14,7 @@ function Row({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
           isCollapsed={collapsed}
           onToggleCollapse={() => setCollapsed((c) => !c)}
         />
-        <div className="text-rezics-color-fg-muted">
+        <div className="text-text-secondary">
           Hover the 12 px rail zone to see the stroke highlight.
         </div>
       </div>

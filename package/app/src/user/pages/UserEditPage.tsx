@@ -122,7 +122,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-rezics-color-danger">Failed to load user data</p>
+        <p className="text-error-text">Failed to load user data</p>
       </div>
     );
   }
@@ -171,7 +171,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   value={formData.avatar ?? ""}
                   onChange={(e) => handleChange("avatar", e.target.value)}
                 />
-                <p className="text-xs text-rezics-color-fg-muted">
+                <p className="text-xs text-text-secondary">
                   Enter a URL for your profile picture
                 </p>
               </div>
@@ -179,12 +179,12 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 <Label htmlFor="user-edit-bio">Bio</Label>
                 <textarea
                   id="user-edit-bio"
-                  className="flex w-full rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                  className="flex w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus:ring-2 focus:ring-brand-fill"
                   value={formData.bio ?? ""}
                   onChange={(e) => handleChange("bio", e.target.value)}
                   rows={4}
                 />
-                <p className="text-xs text-rezics-color-fg-muted">
+                <p className="text-xs text-text-secondary">
                   Tell us about yourself
                 </p>
               </div>
@@ -192,12 +192,12 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 <Label htmlFor="user-edit-description">Description</Label>
                 <textarea
                   id="user-edit-description"
-                  className="flex w-full rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                  className="flex w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus:ring-2 focus:ring-brand-fill"
                   value={formData.description ?? ""}
                   onChange={(e) => handleChange("description", e.target.value)}
                   rows={4}
                 />
-                <p className="text-xs text-rezics-color-fg-muted">
+                <p className="text-xs text-text-secondary">
                   Tell us about yourself
                 </p>
               </div>

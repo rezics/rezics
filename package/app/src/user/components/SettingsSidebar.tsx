@@ -36,8 +36,8 @@ export const SettingsSidebar: FC = () => {
               onClick={() => void navigate({ to: fullPath })}
               className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-sm transition-colors ${
                 isActive
-                  ? "bg-rezics-color-bg-elevated"
-                  : "hover:bg-rezics-color-bg-elevated/60"
+                  ? "bg-surface-elevated"
+                  : "hover:bg-surface-elevated/60"
               }`}
             >
               <span className="min-w-[24px] flex items-center">

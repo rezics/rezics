@@ -53,7 +53,7 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   }
 
   return (
-    <div className="bg-rezics-color-surface-elevated p-4 border border-rezics-color-border-whisper rounded-md">
+    <div className="bg-surface-elevated p-4 border border-border-whisper rounded-md">
       <h3 className="text-base font-semibold mb-2">
         {t("book.info_panel.title")}
       </h3>

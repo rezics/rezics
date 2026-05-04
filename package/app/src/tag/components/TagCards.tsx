@@ -17,8 +17,8 @@ export const TagCard: React.FC<{
       className={cn(
         "cursor-pointer transition border rounded-md p-3 flex flex-col gap-1 hover:shadow-sm",
         selected
-          ? "border-rezics-color-primary shadow"
-          : "border-rezics-color-border",
+          ? "border-brand-fill shadow"
+          : "border-border-whisper",
       )}
       role="button"
       tabIndex={0}
@@ -33,12 +33,12 @@ export const TagCard: React.FC<{
     >
       <div className="flex items-center gap-2">
         <Badge variant={selected ? "default" : "secondary"}>{label}</Badge>
-        <span className="text-xs text-rezics-color-fg-muted font-mono">
+        <span className="text-xs text-text-secondary font-mono">
           score: {tag.score}
         </span>
       </div>
       {tag.voteCount > 0 && (
-        <div className="text-[10px] text-rezics-color-fg-muted mt-1">
+        <div className="text-[10px] text-text-secondary mt-1">
           {tag.voteCount} votes
         </div>
       )}
@@ -53,11 +53,11 @@ export const TagDetailCard: React.FC<{
 }> = ({ tag, label: labelProp }) => {
   const label = labelProp ?? tag.tagUnitId;
   return (
-    <Card className="border border-rezics-color-border rounded-md shadow-none">
+    <Card className="border border-border-whisper rounded-md shadow-none">
       <CardContent className="space-y-2">
         <h3 className="text-base font-semibold">
           {label}
-          <span className="ml-2 text-xs font-normal text-rezics-color-fg-muted align-middle">
+          <span className="ml-2 text-xs font-normal text-text-secondary align-middle">
             score: {tag.score} | {tag.voteCount} votes
           </span>
         </h3>
@@ -65,14 +65,14 @@ export const TagDetailCard: React.FC<{
           <TextLink
             to={"/tag/$unitId"}
             params={{ unitId: tag.tagUnitId }}
-            className="text-sm text-rezics-color-primary hover:underline"
+            className="text-sm text-text-brand hover:underline"
           >
             查看详情 →
           </TextLink>
           <TextLink
             to={"/book"}
             search={{ tags: label }}
-            className="text-sm text-rezics-color-primary hover:underline !ml-12"
+            className="text-sm text-text-brand hover:underline !ml-12"
           >
             搜索标签 →
           </TextLink>

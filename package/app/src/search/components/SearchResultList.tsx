@@ -33,7 +33,7 @@ const DefaultResultItem: React.FC<{
   const title = resolveTitle(item.titles, item.languages, preferredLanguage);
 
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-rezics-color-border last:border-b-0">
+    <div className="flex items-start gap-3 py-3 border-b border-border-whisper last:border-b-0">
       {item.coverUrl && (
         <img
           src={item.coverUrl}
@@ -43,9 +43,9 @@ const DefaultResultItem: React.FC<{
       )}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{title || item.id}</p>
-        <p className="text-xs text-rezics-color-fg-muted">{item.type}</p>
+        <p className="text-xs text-text-secondary">{item.type}</p>
         {item.summaries[0] && (
-          <p className="text-sm text-rezics-color-fg-muted line-clamp-2 mt-1">
+          <p className="text-sm text-text-secondary line-clamp-2 mt-1">
             {item.summaries[0]}
           </p>
         )}
@@ -65,7 +65,7 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
   if (isLoading) {
     return (
       <div className="py-12 text-center">
-        <p className="text-rezics-color-fg-muted">{t("common.loading")}</p>
+        <p className="text-text-secondary">{t("common.loading")}</p>
       </div>
     );
   }
@@ -76,7 +76,7 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
 
   return (
     <div>
-      <p className="mb-2 block text-xs text-rezics-color-fg-muted">
+      <p className="mb-2 block text-xs text-text-secondary">
         {result.total} results ({result.processingTimeMs}ms)
       </p>
       <div>

@@ -396,7 +396,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-rezics-color-text-error"
+                    className="text-error-text"
                     onClick={handleDeleteCurrentTranslation}
                   >
                     {t("page.book_edit.info.translation.delete_button")}
@@ -447,7 +447,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {t("book.edit_sections.extra")}
             </h3>
             <ExpandMore
-              className="w-5 h-5 text-rezics-color-text-secondary transition-transform duration-200"
+              className="w-5 h-5 text-text-secondary transition-transform duration-200"
               style={{
                 transform: extraOpen ? "rotate(180deg)" : "rotate(0deg)",
               }}

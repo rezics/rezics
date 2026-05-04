@@ -37,9 +37,9 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
             onClick={(e) => e.stopPropagation()}
           >
             {isRecommended ? (
-              <ThumbUpIcon className="h-4 w-4 text-rezics-color-primary" />
+              <ThumbUpIcon className="h-4 w-4 text-text-brand" />
             ) : (
-              <ThumbDownIcon className="h-4 w-4 text-rezics-color-fg-muted" />
+              <ThumbDownIcon className="h-4 w-4 text-text-secondary" />
             )}
             <span className="text-xs">
               {rating?.toFixed(1) ?? "0.0"}/10 · {dateStr}

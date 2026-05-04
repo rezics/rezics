@@ -26,12 +26,12 @@ export const ProviderCard: FC<ProviderCardProps> = ({
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">{name}</span>
         {connected && (
-          <Badge variant="outline" className="text-rezics-color-success">
+          <Badge variant="outline" className="text-success-text">
             Connected
           </Badge>
         )}
         {isPrimary && (
-          <Badge variant="outline" className="text-rezics-color-primary">
+          <Badge variant="outline" className="text-text-brand">
             Primary
           </Badge>
         )}

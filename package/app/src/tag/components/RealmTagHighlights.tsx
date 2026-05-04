@@ -23,7 +23,7 @@ export const RealmTagHighlights: React.FC<RealmTagHighlightsProps> = ({
     <div>
       <button
         type="button"
-        className="text-xs text-rezics-color-fg-muted cursor-pointer"
+        className="text-xs text-text-secondary cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
         Realm highlights ({realmHighlights.length})

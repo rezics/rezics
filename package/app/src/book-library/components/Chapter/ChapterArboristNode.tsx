@@ -22,9 +22,9 @@ export const createChapterArboristNode = (bookId: string) => {
         role="treeitem"
         tabIndex={0}
         style={style}
-        className={`flex items-center gap-2 px-2 py-1 cursor-pointer select-none rounded-sm transition-colors hover:bg-rezics-color-surface-subtle ${
+        className={`flex items-center gap-2 px-2 py-1 cursor-pointer select-none rounded-sm transition-colors hover:bg-surface-subtle ${
           isSelected
-            ? "bg-[color-mix(in_srgb,var(--rezics-color-brand-fill)_8%,transparent)] text-rezics-color-brand-fill"
+            ? "bg-[color-mix(in_srgb,var(--rezics-sys-color-brand-fill)_8%,transparent)] text-brand-fill"
             : ""
         }`}
       >
@@ -33,7 +33,7 @@ export const createChapterArboristNode = (bookId: string) => {
           <button
             type="button"
             onClick={() => node.toggle()}
-            className="w-6 h-6 flex justify-center items-center text-rezics-color-text-tertiary hover:text-rezics-color-text-primary"
+            className="w-6 h-6 flex justify-center items-center text-text-tertiary hover:text-text-primary"
             aria-label={node.isOpen ? "Collapse" : "Expand"}
           >
             {node.isOpen ? (

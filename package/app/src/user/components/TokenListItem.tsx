@@ -34,7 +34,7 @@ export const TokenListItem: FC<TokenListItemProps> = ({
 
   return (
     <div className="flex items-start gap-3 py-3">
-      <KeyIcon className="mt-0.5 text-rezics-color-fg-muted" />
+      <KeyIcon className="mt-0.5 text-text-secondary" />
       <div className="flex-1 min-w-0">
         <span className="text-sm font-medium">{token.name}</span>
         {scopeLabels.length > 0 && (
@@ -46,7 +46,7 @@ export const TokenListItem: FC<TokenListItemProps> = ({
             ))}
           </div>
         )}
-        <p className="mt-1 block text-xs text-rezics-color-fg-muted">
+        <p className="mt-1 block text-xs text-text-secondary">
           Created {formatDate(token.createdAt)}
           {token.expiresAt && ` · Expires ${formatDate(token.expiresAt)}`}
           {token.lastUsedAt &&

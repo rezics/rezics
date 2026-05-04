@@ -64,7 +64,7 @@ export const KeywordInput: React.FC<KeywordInputProps> = ({
       <Button
         size="icon"
         variant="ghost"
-        className="text-rezics-color-primary"
+        className="text-text-brand"
         onClick={commit}
         aria-label="search"
       >

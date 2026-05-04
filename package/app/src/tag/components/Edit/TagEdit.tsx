@@ -61,7 +61,7 @@ export const TagEdit: React.FC<TagEditProps> = ({
     <form onSubmit={onSubmit} className={className}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="tag-name" className="text-sm text-rezics-color-fg-muted">
+          <Label htmlFor="tag-name" className="text-sm text-text-secondary">
             名称
           </Label>
           <Input

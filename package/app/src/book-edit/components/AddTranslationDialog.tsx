@@ -129,7 +129,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NO_SOURCE}>
-                  <span className="text-rezics-color-text-secondary">
+                  <span className="text-text-secondary">
                     {t(
                       "page.book_edit.info.translation.add_dialog.no_source",
                     )}
@@ -142,7 +142,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-sm text-rezics-color-text-secondary">
+            <p className="text-sm text-text-secondary">
               {t(
                 "page.book_edit.info.translation.add_dialog.source_release_help",
               )}

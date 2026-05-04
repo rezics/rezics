@@ -179,13 +179,13 @@ export function MoveToParentDialog({
         </DialogHeader>
         <div className="flex flex-col gap-3 min-h-[320px]">
           {movingNode && (
-            <p className="text-sm text-rezics-color-text-secondary mb-1">
+            <p className="text-sm text-text-secondary mb-1">
               {t("book.chapter.move_dialog.moving", "Moving:")}{" "}
               <strong>{movingNode.title}</strong>
             </p>
           )}
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-rezics-color-text-tertiary" />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-text-tertiary" />
             <Input
               placeholder={t(
                 "book.chapter.move_dialog.search_placeholder",

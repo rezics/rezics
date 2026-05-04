@@ -58,7 +58,7 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
       {isLoading && <Spinner size="sm" />}
 
       {!isLoading && !items.length && (
-        <p className="text-sm text-rezics-color-fg-muted">
+        <p className="text-sm text-text-secondary">
           {t("page.home.sections.trending_excerpt.empty")}
         </p>
       )}

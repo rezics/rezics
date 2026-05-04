@@ -6,7 +6,7 @@ export const HomeMobileDownloadCTA: React.FC = () => {
     <div className="w-full rounded border p-4 flex items-center justify-between bg-gray-50">
       <div>
         <p className="text-base font-medium mb-1">下载移动 App</p>
-        <p className="text-sm text-rezics-color-fg-muted m-0">
+        <p className="text-sm text-text-secondary m-0">
           随时随地看书、写评、管理书单
         </p>
       </div>

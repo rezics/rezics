@@ -38,7 +38,7 @@ export const LibraryCardsSection: React.FC = () => {
               <div className="flex flex-row items-center gap-4">
                 <lib.icon
                   size={32}
-                  color={lib.active ? "currentColor" : "var(--rezics-color-text-disabled)"}
+                  color={lib.active ? "currentColor" : "var(--rezics-sys-color-text-disabled)"}
                 />
                 <div>
                   <h6 className="text-base font-semibold m-0">

@@ -114,7 +114,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
                     unitId: post.unitId,
                   }}
                 >
-                  <span className="text-xs text-rezics-color-primary">
+                  <span className="text-xs text-text-brand">
                     Continue thread →
                   </span>
                 </TextLink>

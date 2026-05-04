@@ -198,7 +198,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
             </div>
 
             {translations[previewTag.tagUnitId]?.description && (
-              <p className="text-sm text-rezics-color-fg-muted mt-1">
+              <p className="text-sm text-text-secondary mt-1">
                 {translations[previewTag.tagUnitId]?.description}
               </p>
             )}
@@ -261,7 +261,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
       </Popover>
 
       {state.kind === "multi-select" && (
-        <div className="mt-3 p-2 flex items-center justify-between gap-2 rounded-md border border-rezics-color-border bg-rezics-color-bg-elevated">
+        <div className="mt-3 p-2 flex items-center justify-between gap-2 rounded-md border border-border-whisper bg-surface-elevated">
           <p className="text-sm px-1">
             {t("tag.selected_count", "Selected: {{count}}", {
               count: state.selected.length,

@@ -55,7 +55,7 @@ export function FavoriteButton({
               <Heart
                 size={iconSize(size)}
                 fill="currentColor"
-                color="var(--rezics-color-status-error-fill)"
+                color="var(--rezics-sys-color-error-fill)"
               />
             ) : (
               <Heart size={iconSize(size)} />

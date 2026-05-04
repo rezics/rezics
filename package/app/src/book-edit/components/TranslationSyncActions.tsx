@@ -71,7 +71,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs text-rezics-color-text-secondary">
+      <span className="text-xs text-text-secondary">
         {t("page.book_edit.info.translation.source.label")}: {sourceTitle}
       </span>
       <div className="flex flex-row gap-2 flex-wrap">

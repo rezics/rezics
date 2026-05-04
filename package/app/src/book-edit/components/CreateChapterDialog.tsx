@@ -113,17 +113,17 @@ export function CreateChapterDialog({
         <DialogHeader>
           <DialogTitle>Create Chapter</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-4 border-t border-rezics-color-border-whisper">
+        <div className="space-y-4 pt-4 border-t border-border-whisper">
           <div className="flex flex-col gap-1">
             <Label htmlFor="create-chapter-title">章节标题</Label>
             <Input
               id="create-chapter-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={!title.trim() ? "border-rezics-color-error-text" : ""}
+              className={!title.trim() ? "border-border-error" : ""}
             />
             {!title.trim() && (
-              <p className="text-xs text-rezics-color-error-text">必填</p>
+              <p className="text-xs text-error-text">必填</p>
             )}
           </div>
           <div className="max-w-xs">

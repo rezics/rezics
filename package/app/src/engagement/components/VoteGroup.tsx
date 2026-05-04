@@ -92,8 +92,8 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
           buttonSizeClass,
           "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",
           upActive
-            ? "text-[var(--rezics-color-sentiment-positive-text)]"
-            : "text-rezics-color-fg-muted",
+            ? "text-sentiment-positive-text"
+            : "text-text-secondary",
         )}
       >
         <ArrowBigUp
@@ -107,10 +107,10 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
           "min-w-[2ch] text-center tabular-nums",
           textClass,
           userVote === "like"
-            ? "font-semibold text-[var(--rezics-color-sentiment-positive-text)]"
+            ? "font-semibold text-sentiment-positive-text"
             : userVote === "dislike"
-              ? "font-semibold text-[var(--rezics-color-sentiment-negative-text)]"
-              : "text-rezics-color-fg-muted",
+              ? "font-semibold text-sentiment-negative-text"
+              : "text-text-secondary",
         )}
       >
         {formatScore(score)}
@@ -124,8 +124,8 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
           buttonSizeClass,
           "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",
           downActive
-            ? "text-[var(--rezics-color-sentiment-negative-text)]"
-            : "text-rezics-color-fg-muted",
+            ? "text-sentiment-negative-text"
+            : "text-text-secondary",
         )}
       >
         <ArrowBigDown

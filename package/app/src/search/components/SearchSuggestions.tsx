@@ -23,7 +23,7 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
   return (
     <div
       tabIndex={-1}
-      className="absolute top-full left-0 right-0 mt-1 z-20 bg-rezics-color-bg-elevated rounded-md shadow-lg"
+      className="absolute top-full left-0 right-0 mt-1 z-20 bg-surface-elevated rounded-md shadow-lg"
     >
       <ul className="py-1">
         {suggestions.map((item) => (
@@ -31,7 +31,7 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
             <button
               type="button"
               onClick={() => onSelect(item)}
-              className="flex w-full items-center px-4 py-1.5 text-left text-sm hover:bg-rezics-color-bg-hover"
+              className="flex w-full items-center px-4 py-1.5 text-left text-sm hover:bg-surface-subtle"
             >
               <SearchIcon style={{ marginRight: "8px" }} />
               <span>{item}</span>

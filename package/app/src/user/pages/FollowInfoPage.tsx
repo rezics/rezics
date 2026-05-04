@@ -35,14 +35,14 @@ const EXTERNAL_ITEMS_PER_PAGE = 20;
 function FollowUserList({ users }: { users: SimpleUser[] }) {
   if (users.length === 0) {
     return (
-      <div className="py-16 text-center text-rezics-color-fg-muted">
+      <div className="py-16 text-center text-text-secondary">
         暂无用户。
       </div>
     );
   }
 
   return (
-    <ul className="divide-y divide-rezics-color-border">
+    <ul className="divide-y divide-border-whisper">
       {users.map((user) => (
         <li
           key={user.unitId}
@@ -58,11 +58,11 @@ function FollowUserList({ users }: { users: SimpleUser[] }) {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <span className="block text-sm font-medium text-rezics-color-fg">
+            <span className="block text-sm font-medium text-text-primary">
               {user.name || user.slug || user.unitId}
             </span>
             {user.slug && (
-              <span className="block text-sm text-rezics-color-fg-muted">
+              <span className="block text-sm text-text-secondary">
                 @{user.slug}
               </span>
             )}
@@ -148,7 +148,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
     return (
       <div className="w-full max-w-3xl mx-auto mt-32 text-center">
         <h6 className="text-base font-semibold">无法确定用户信息</h6>
-        <p className="text-sm text-rezics-color-fg-muted">
+        <p className="text-sm text-text-secondary">
           请先登录，或从用户详情页进入本页面。
         </p>
       </div>
@@ -168,13 +168,13 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
       <div className="flex items-center justify-between">
         <div className="mb-4">
           <h5 className="text-xl font-bold mb-2">关注信息</h5>
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             查看你关注的用户，以及关注你的用户列表。
           </p>
         </div>
         <Button
           variant="ghost"
-          className="text-rezics-color-primary"
+          className="text-text-brand"
           onClick={() => navigate({ to: "/user/me" })}
         >
           返回

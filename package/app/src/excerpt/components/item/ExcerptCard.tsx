@@ -66,7 +66,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
       <CardContent>
         <div className="flex items-start gap-2">
           <FormatQuoteRoundedIcon
-            className="h-4 w-4 text-rezics-color-fg-muted mt-1 shrink-0"
+            className="h-4 w-4 text-text-secondary mt-1 shrink-0"
           />
 
           <div className="min-w-0 flex-1">
@@ -87,7 +87,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
                 </p>
               </div>
             )}
-            <p className="text-sm text-rezics-color-fg line-clamp-3 leading-7">
+            <p className="text-sm text-text-primary line-clamp-3 leading-7">
               {description}
             </p>
 
@@ -99,7 +99,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
                 actions={excerptCardActions}
                 onReplyInvoke={handleReplyInvoke}
               />
-              <p className="text-xs text-rezics-color-fg-muted truncate">
+              <p className="text-xs text-text-secondary truncate">
                 —— <ExcerptCardSource source={source} />
               </p>
             </div>

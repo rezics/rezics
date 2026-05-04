@@ -40,13 +40,13 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       data-hovered={hovered ? "true" : undefined}
-      className="absolute top-0 bottom-0 w-3 cursor-pointer flex justify-center focus-visible:outline-2 focus-visible:outline-rezics-color-primary focus-visible:outline-offset-1"
+      className="absolute top-0 bottom-0 w-3 cursor-pointer flex justify-center focus-visible:outline-2 focus-visible:outline-brand-fill focus-visible:outline-offset-1"
       style={{ left: `${leftPx}px` }}
     >
       <div
         className={[
           "w-[2px] h-full transition-colors duration-100 ease-in-out",
-          hovered ? "bg-rezics-color-primary" : "bg-rezics-color-border",
+          hovered ? "bg-brand-fill" : "bg-border-whisper",
         ].join(" ")}
       />
     </div>

@@ -45,7 +45,7 @@ export function AnnouncementBar({
   return (
     <div className="px-4 py-2 flex items-center rounded-lg">
       <CampaignRoundedIcon
-        className="text-rezics-color-primary"
+        className="text-text-brand"
         size={18}
         style={{ marginRight: "12px" }}
       />
@@ -71,7 +71,7 @@ export function AnnouncementBar({
               {item.pin && (
                 <PushPinRoundedIcon
                   size={14}
-                  className="text-rezics-color-warning"
+                  className="text-warning-text"
                 />
               )}
 

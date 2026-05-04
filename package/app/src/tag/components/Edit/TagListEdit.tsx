@@ -90,7 +90,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-rezics-color-danger"
+                className="text-error-text"
                 onClick={() => onDetach(t)}
                 disabled={detachMutation.isPending}
               >
@@ -119,25 +119,25 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
       </div>
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-sm text-rezics-color-fg-muted">
+        <div className="flex items-center gap-2 text-sm text-text-secondary">
           <Spinner size="sm" /> 加载中…
         </div>
       )}
       {error && (
-        <div className="text-sm text-rezics-color-danger">
+        <div className="text-sm text-error-text">
           错误：{String((error as any)?.message ?? error)}
         </div>
       )}
 
       {!isLoading && !error && list.length === 0 && (
-        <div className="text-sm text-rezics-color-fg-muted">暂无标签</div>
+        <div className="text-sm text-text-secondary">暂无标签</div>
       )}
 
       {!isLoading && !error && renderListView()}
 
       {/* Search and attach existing tags */}
-      <div className="mt-8 pt-4 border-t border-rezics-color-border">
-        <div className="text-sm font-semibold text-rezics-color-fg mb-2">
+      <div className="mt-8 pt-4 border-t border-border-whisper">
+        <div className="text-sm font-semibold text-text-primary mb-2">
           搜索并添加标签
         </div>
         <div className="flex items-center gap-2 mb-3">
@@ -150,12 +150,12 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
           {isSearching && <Spinner size="sm" />}
         </div>
         {searchError && (
-          <div className="text-xs text-rezics-color-danger mb-2">
+          <div className="text-xs text-error-text mb-2">
             搜索失败：{String((searchError as any)?.message ?? searchError)}
           </div>
         )}
         {searchTerm && !isSearching && searchResults.length === 0 && (
-          <div className="text-xs text-rezics-color-fg-muted">未找到匹配的标签</div>
+          <div className="text-xs text-text-secondary">未找到匹配的标签</div>
         )}
         {searchResults.length > 0 && (
           <div className="space-y-1">

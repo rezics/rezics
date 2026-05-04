@@ -51,7 +51,7 @@ export function RealmSearchPage() {
           <Spinner />
         </div>
       ) : hasKeyword && realms.length === 0 ? (
-        <p className="py-8 text-center text-rezics-color-fg-muted">
+        <p className="py-8 text-center text-text-secondary">
           No realms found
         </p>
       ) : (

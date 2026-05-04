@@ -54,7 +54,7 @@ export function PostLanguageSwitcher({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs text-rezics-color-fg-muted">
+      <span className="text-xs text-text-secondary">
         {t("post.languages", "Languages")}
       </span>
       <div className="flex flex-wrap items-center gap-2">

@@ -37,7 +37,7 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
       </Link>
       <span className={nameClass}>{post.author?.name ?? "Anonymous"}</span>
       {dateStr && (
-        <span className="text-xs text-rezics-color-fg-muted">{dateStr}</span>
+        <span className="text-xs text-text-secondary">{dateStr}</span>
       )}
     </div>
   );

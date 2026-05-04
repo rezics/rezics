@@ -17,7 +17,7 @@ export const ContinueThreadPage: React.FC = () => {
     <div className="w-full max-w-3xl mx-auto mt-8 px-4">
       <div className="mb-4">
         <Link to="/post/$rootPostUnitId" params={{ rootPostUnitId }}>
-          <span className="text-xs text-rezics-color-primary">
+          <span className="text-xs text-text-brand">
             ← Back to original thread
           </span>
         </Link>

@@ -62,7 +62,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
           variant="ghost"
           size={size === "lg" ? "default" : "sm"}
           aria-label="More actions"
-          className="text-rezics-color-fg-muted"
+          className="text-text-secondary"
           onClick={(event) => event.stopPropagation()}
         >
           <MoreHorizontal size={sizeToIconPx(size)} strokeWidth={2} />

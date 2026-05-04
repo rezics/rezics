@@ -33,11 +33,11 @@ function NoticeBoardHeader({
     <div className={className}>
       <div className="p-2 flex items-center justify-between">
         <div className="flex flex-row gap-3 items-center">
-          <div className="w-12 h-12 inline-flex items-center justify-center rounded-[10px] shadow-sm bg-rezics-color-primary text-white">
+          <div className="w-12 h-12 inline-flex items-center justify-center rounded-[10px] shadow-sm bg-brand-fill text-white">
             <NotificationsRoundedIcon className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs text-rezics-color-fg-muted">
+            <p className="text-xs text-text-secondary">
               {t("page.home.noticeboard.caption")}
             </p>
             <p className="text-base font-semibold">
@@ -66,7 +66,7 @@ function NoticeBoardItem({
     <div className="mb-1">
       <a
         href={item.link ?? "#"}
-        className="block p-2 rounded-md border border-rezics-color-border bg-rezics-color-bg-elevated transition-colors duration-150 hover:border-rezics-color-primary group"
+        className="block p-2 rounded-md border border-border-whisper bg-surface-elevated transition-colors duration-150 hover:border-brand-fill group"
       >
         <div className="flex flex-row gap-3 items-start w-full">
           <Badge
@@ -76,12 +76,12 @@ function NoticeBoardItem({
             {item.pin ? t("common.pinned") : t("common.new")}
           </Badge>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-rezics-color-fg truncate min-w-0">
+            <p className="text-sm font-semibold text-text-primary truncate min-w-0">
               {item.title}
             </p>
             {item.content && (
               <p
-                className="text-sm text-rezics-color-fg-muted mt-1 overflow-hidden"
+                className="text-sm text-text-secondary mt-1 overflow-hidden"
                 style={{
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
@@ -91,12 +91,12 @@ function NoticeBoardItem({
                 {item.content}
               </p>
             )}
-            <p className="text-xs text-rezics-color-fg-muted opacity-60 mt-1 block">
+            <p className="text-xs text-text-secondary opacity-60 mt-1 block">
               {formatRelativeWithT(t, item.date)}
             </p>
           </div>
           <p
-            className={`text-sm text-rezics-color-fg-muted opacity-60 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ${item.link ? "visible" : "invisible"}`}
+            className={`text-sm text-text-secondary opacity-60 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ${item.link ? "visible" : "invisible"}`}
           >
             →
           </p>
@@ -127,7 +127,7 @@ export const NoticeBoard: React.FC = () => {
           {(items) => {
             if (items.length === 0) {
               return (
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   {t("page.home.noticeboard.empty")}
                 </p>
               );

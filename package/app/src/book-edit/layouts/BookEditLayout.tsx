@@ -21,7 +21,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
 
       <main
         className="flex-grow pt-32 transition-all duration-300"
-        style={{ backgroundColor: "var(--rezics-color-surface-canvas)" }}
+        style={{ backgroundColor: "var(--rezics-sys-color-surface-canvas)" }}
       >
         {children}
       </main>

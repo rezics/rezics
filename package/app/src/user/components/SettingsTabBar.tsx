@@ -14,7 +14,7 @@ export const SettingsTabBar: FC = () => {
     ) ?? SETTINGS_NAV[0];
 
   return (
-    <div className="border-b border-rezics-color-border overflow-x-auto">
+    <div className="border-b border-border-whisper overflow-x-auto">
       <Tabs
         value={activeNav.path}
         onValueChange={(value) => {

@@ -21,7 +21,7 @@ export const UserError: FC<{ message?: ReactNode; height?: number }> = ({
       className="flex items-center justify-center"
       style={{ height }}
     >
-      <p className="text-rezics-color-danger">{message}</p>
+      <p className="text-error-text">{message}</p>
     </div>
   );
 };

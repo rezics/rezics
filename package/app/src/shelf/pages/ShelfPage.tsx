@@ -115,7 +115,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
         <div className="flex flex-row items-center justify-between">
           <h1 className="text-2xl font-semibold">{title}</h1>
           <div className="flex flex-row items-center gap-2">
-            <span className="text-sm text-rezics-color-fg-muted">
+            <span className="text-sm text-text-secondary">
               {shelf?.itemCount ?? 0} items
             </span>
             <ToggleGroup
@@ -138,7 +138,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
         </div>
 
         <div className="flex flex-row flex-wrap items-center gap-2">
-          <span className="text-sm text-rezics-color-fg-muted">Sort</span>
+          <span className="text-sm text-text-secondary">Sort</span>
           <ToggleGroup
             type="single"
             value={sortMode}
@@ -164,7 +164,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
             <>
               <span
                 className="text-xs"
-                style={{ color: "var(--rezics-color-warning, #f59e0b)" }}
+                style={{ color: "var(--rezics-sys-color-warning-fill, #f59e0b)" }}
               >
                 {hydration.orphanItemRefs.length} orphan
                 {hydration.orphanItemRefs.length === 1 ? "" : "s"}
@@ -193,7 +193,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
             <Spinner size="sm" />
           </div>
         ) : visibleStream.length === 0 ? (
-          <p className="py-8 text-center text-rezics-color-fg-muted">
+          <p className="py-8 text-center text-text-secondary">
             No items in this shelf
           </p>
         ) : effectiveViewMode === "masonry" ? (

@@ -13,8 +13,8 @@ const Demo = () => {
         padding: "8px 16px",
         borderRadius: 8,
         border: "1px solid",
-        borderColor: hovered ? "var(--rezics-color-primary)" : "currentColor",
-        color: hovered ? "var(--rezics-color-primary)" : "inherit",
+        borderColor: hovered ? "var(--rezics-sys-color-primary)" : "currentColor",
+        color: hovered ? "var(--rezics-sys-color-primary)" : "inherit",
       }}
     >
       hovered: {String(hovered)}

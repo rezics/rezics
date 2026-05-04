@@ -16,7 +16,7 @@ export function ShelfItemCard({ item }: ShelfItemCardProps) {
       <Badge variant="outline" className="text-xs">
         {item.kind}
       </Badge>
-      <span className="text-xs text-rezics-color-fg-muted whitespace-nowrap">
+      <span className="text-xs text-text-secondary whitespace-nowrap">
         {shortRef}
       </span>
     </div>

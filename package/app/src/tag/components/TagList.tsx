@@ -77,7 +77,7 @@ export const TagList: React.FC<{
   if (tags.length === 0) {
     return (
       <div className={className}>
-        <p className="text-sm text-rezics-color-fg-muted">暂无标签</p>
+        <p className="text-sm text-text-secondary">暂无标签</p>
       </div>
     );
   }

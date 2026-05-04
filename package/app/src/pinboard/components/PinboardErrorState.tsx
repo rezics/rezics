@@ -18,7 +18,7 @@ export const PinboardErrorState: React.FC<PinboardErrorStateProps> = ({
     <EmptyState
       icon={
         <ErrorOutlineRoundedIcon
-          className="h-9 w-9 text-rezics-color-danger"
+          className="h-9 w-9 text-error-text"
         />
       }
       title={t("pinboard.error.title")}

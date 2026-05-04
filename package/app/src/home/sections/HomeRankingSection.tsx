@@ -79,7 +79,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
                     {title}
                   </span>
                 </div>
-                <div className="text-xs text-rezics-color-fg-muted truncate pl-10">
+                <div className="text-xs text-text-secondary truncate pl-10">
                   {authorName}
                 </div>
               </div>

@@ -30,7 +30,7 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({ unitId }) => {
     }) ?? PROFILE_TABS[0];
 
   return (
-    <div className="border-b border-rezics-color-border overflow-x-auto">
+    <div className="border-b border-border-whisper overflow-x-auto">
       <Tabs
         value={activeTab.path}
         onValueChange={(value) => {

@@ -32,10 +32,10 @@ const PRESET_COLORS: string[] = [
 function applyAccentColor(color: string) {
   if (typeof document === "undefined") return;
   document.documentElement.style.setProperty(
-    "--rezics-color-brand-fill",
+    "--rezics-sys-color-brand-fill",
     color,
   );
-  document.documentElement.style.setProperty("--rezics-color-primary", color);
+  document.documentElement.style.setProperty("--rezics-sys-color-primary", color);
 }
 
 interface ThemeCustomizerProps {
@@ -112,14 +112,14 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             <p className="text-sm font-medium mb-2">当前主色调</p>
             <div className="flex items-center gap-4">
               <div
-                className="h-12 w-12 rounded-md border-2 border-rezics-color-border"
+                className="h-12 w-12 rounded-md border-2 border-border-whisper"
                 style={{ backgroundColor: selectedColor }}
               />
               <div>
                 <p className="text-base font-medium">
                   {selectedColor.toUpperCase()}
                 </p>
-                <p className="text-sm text-rezics-color-fg-muted">静态主题</p>
+                <p className="text-sm text-text-secondary">静态主题</p>
               </div>
             </div>
           </div>
@@ -137,8 +137,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                         onClick={() => handleColorSelect(color)}
                         className={
                           selectedColor === color
-                            ? "h-10 w-10 rounded-md border-[3px] border-rezics-color-brand-fill cursor-pointer transition-transform hover:scale-110"
-                            : "h-10 w-10 rounded-md border border-rezics-color-border cursor-pointer transition-transform hover:scale-110"
+                            ? "h-10 w-10 rounded-md border-[3px] border-brand-fill cursor-pointer transition-transform hover:scale-110"
+                            : "h-10 w-10 rounded-md border border-border-whisper cursor-pointer transition-transform hover:scale-110"
                         }
                         style={{ backgroundColor: color }}
                         aria-label={color}
@@ -157,7 +157,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             <div className="flex items-center gap-2">
               {customHex && /^#[0-9A-F]{6}$/i.test(customHex) && (
                 <div
-                  className="h-5 w-5 rounded-full border border-rezics-color-border"
+                  className="h-5 w-5 rounded-full border border-border-whisper"
                   style={{ backgroundColor: customHex }}
                 />
               )}
@@ -168,7 +168,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 className="flex-1"
               />
             </div>
-            <p className="text-sm text-rezics-color-fg-muted mt-1">
+            <p className="text-sm text-text-secondary mt-1">
               输入格式: #RRGGBB
             </p>
           </div>

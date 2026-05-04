@@ -147,7 +147,7 @@ export const SettingsTokensSection: FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             No API tokens yet. Generate one to get started.
           </p>
         )}

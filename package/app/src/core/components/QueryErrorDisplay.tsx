@@ -29,12 +29,12 @@ export function QueryErrorDisplay({
             <button
               type="button"
               onClick={() => setDetailOpen((v) => !v)}
-              className="text-xs cursor-pointer select-none mt-1 block text-rezics-color-fg-muted bg-transparent border-0 p-0"
+              className="text-xs cursor-pointer select-none mt-1 block text-text-secondary bg-transparent border-0 p-0"
             >
               {detailOpen ? "▾" : "▸"} Technical details
             </button>
             {detailOpen && (
-              <div className="text-xs mt-1 font-mono text-rezics-color-fg-muted">
+              <div className="text-xs mt-1 font-mono text-text-secondary">
                 {prismaDetail && (
                   <>
                     <div>Prisma {prismaDetail.code}</div>

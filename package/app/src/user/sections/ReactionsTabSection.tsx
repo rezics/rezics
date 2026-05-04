@@ -19,7 +19,7 @@ export const ReactionsTabSection: FC = () => (
       onChipChange={() => {}}
     />
 
-    <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
+    <p className="text-sm text-text-secondary py-12 text-center">
       Reaction history is coming soon
     </p>
   </div>

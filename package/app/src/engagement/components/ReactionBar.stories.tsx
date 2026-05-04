@@ -118,7 +118,7 @@ export const PillInCard: Story = {
       <CardContent>
         <div className="flex flex-col gap-3">
           <div className="text-sm font-semibold">Discussion thread title</div>
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             A short snippet of the post body to give the bar a real surface to
             sit against.
           </p>

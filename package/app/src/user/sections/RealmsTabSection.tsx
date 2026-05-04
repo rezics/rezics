@@ -101,15 +101,15 @@ export const RealmsTabSection: FC = () => {
       />
 
       {isLoading ? (
-        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
+        <p className="text-sm text-text-secondary py-12 text-center">
           Loading...
         </p>
       ) : errorMessage ? (
-        <p className="text-sm text-rezics-color-danger py-12 text-center">
+        <p className="text-sm text-error-text py-12 text-center">
           {errorMessage}
         </p>
       ) : realms.length === 0 ? (
-        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
+        <p className="text-sm text-text-secondary py-12 text-center">
           {emptyMessage}
         </p>
       ) : (
@@ -134,23 +134,23 @@ const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-base font-medium text-rezics-color-fg">
+              <span className="text-base font-medium text-text-primary">
                 {realm.title}
               </span>
               {realm.isOfficial && (
-                <Badge variant="outline" className="text-rezics-color-primary">
+                <Badge variant="outline" className="text-text-brand">
                   Official
                 </Badge>
               )}
               {!realm.isPublic && <Badge variant="outline">Private</Badge>}
             </div>
             {realm.description && (
-              <p className="text-sm text-rezics-color-fg-muted mt-1 line-clamp-2">
+              <p className="text-sm text-text-secondary mt-1 line-clamp-2">
                 {realm.description}
               </p>
             )}
           </div>
-          <span className="text-sm text-rezics-color-fg-muted shrink-0">
+          <span className="text-sm text-text-secondary shrink-0">
             {realm.memberCount} members
           </span>
         </div>

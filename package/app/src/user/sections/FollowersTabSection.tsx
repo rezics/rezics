@@ -61,11 +61,11 @@ export const FollowersTabSection: FC = () => {
       />
 
       {isLoading ? (
-        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
+        <p className="text-sm text-text-secondary py-12 text-center">
           Loading...
         </p>
       ) : users.length === 0 ? (
-        <p className="text-sm text-rezics-color-fg-muted py-12 text-center">
+        <p className="text-sm text-text-secondary py-12 text-center">
           {filter === "followers"
             ? "No followers yet"
             : "Not following anyone yet"}
@@ -92,7 +92,7 @@ export const FollowersTabSection: FC = () => {
               >
                 Previous
               </button>
-              <span className="text-sm text-rezics-color-fg-muted">
+              <span className="text-sm text-text-secondary">
                 Page {page} of {totalPages}
               </span>
               <button
@@ -132,17 +132,17 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
         params={{ unitId: user.unitId }}
         className="no-underline"
       >
-        <span className="block text-sm font-medium text-rezics-color-fg">
+        <span className="block text-sm font-medium text-text-primary">
           {user.name}
         </span>
         {user.slug && (
-          <span className="block text-xs text-rezics-color-fg-muted">
+          <span className="block text-xs text-text-secondary">
             @{user.slug}
           </span>
         )}
       </Link>
       {user.bio && (
-        <span className="block text-xs text-rezics-color-fg-muted truncate mt-0.5">
+        <span className="block text-xs text-text-secondary truncate mt-0.5">
           {user.bio}
         </span>
       )}

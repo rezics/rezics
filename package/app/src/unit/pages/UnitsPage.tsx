@@ -34,7 +34,7 @@ function defaultChildren(units: Unit[]) {
       {units.map((item) => (
         <div
           key={item.id}
-          className="flex items-start justify-between rounded-md bg-rezics-color-bg-elevated px-3 py-2 shadow-sm"
+          className="flex items-start justify-between rounded-md bg-surface-elevated px-3 py-2 shadow-sm"
         >
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
@@ -55,7 +55,7 @@ function defaultChildren(units: Unit[]) {
               </p>
             </div>
             {item.translations?.[0]?.description && (
-              <p className="text-sm text-rezics-color-fg-muted line-clamp-4">
+              <p className="text-sm text-text-secondary line-clamp-4">
                 {item.translations[0].description}
               </p>
             )}
@@ -234,7 +234,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
               placeholder={t("units.search_placeholder")}
             />
             {!isSingle && (
-              <div className="mt-4 mb-4 border-b border-rezics-color-border">
+              <div className="mt-4 mb-4 border-b border-border-whisper">
                 <Tabs value={tab} onValueChange={(v) => setTab(v)}>
                   <TabsList aria-label="unit type tabs">
                     {types.map((t) => (

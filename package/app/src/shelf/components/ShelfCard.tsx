@@ -51,7 +51,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
       )}
       onClick={handleOpenShelf}
     >
-      <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-rezics-color-border">
+      <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-border-whisper">
         {shelf.coverUrl ? (
           <img
             src={shelf.coverUrl}
@@ -63,10 +63,10 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
             className="flex h-full w-full items-center justify-center"
             style={{
               background:
-                "linear-gradient(135deg, var(--rezics-color-bg-muted, rgba(0,0,0,0.04)), var(--rezics-color-bg, transparent))",
+                "linear-gradient(135deg, var(--rezics-sys-color-surface-subtle, rgba(0,0,0,0.04)), var(--rezics-sys-color-surface-canvas, transparent))",
             }}
           >
-            <span className="text-xs text-rezics-color-fg-muted">
+            <span className="text-xs text-text-secondary">
               {itemsCount} items
             </span>
           </div>
@@ -78,16 +78,16 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
           {title || "Untitled Shelf"}
         </h3>
 
-        <p className="mt-1 line-clamp-2 text-sm text-rezics-color-fg-muted">
+        <p className="mt-1 line-clamp-2 text-sm text-text-secondary">
           {description || "No description"}
         </p>
 
         <div className="mt-3 flex items-center justify-between text-xs">
-          <span className="text-xs text-rezics-color-fg-muted">
+          <span className="text-xs text-text-secondary">
             {itemsCount} items
           </span>
           <span
-            className="whitespace-nowrap text-xs text-rezics-color-primary"
+            className="whitespace-nowrap text-xs text-text-brand"
             style={{ lineHeight: 1 }}
           >
             {shelf.user?.name || "Anonymous"}

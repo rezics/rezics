@@ -37,16 +37,16 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
         )}
       </div>
       {description && (
-        <p className="mt-2 text-base text-rezics-color-fg-muted">
+        <p className="mt-2 text-base text-text-secondary">
           {description}
         </p>
       )}
       <div className="mt-2">
-        <span className="text-xs text-rezics-color-fg-muted">
+        <span className="text-xs text-text-secondary">
           {shelf.items?.length ?? 0} items
         </span>
         {shelf.user?.name && (
-          <span className="ml-4 text-xs text-rezics-color-fg-muted">
+          <span className="ml-4 text-xs text-text-secondary">
             by {shelf.user.name}
           </span>
         )}

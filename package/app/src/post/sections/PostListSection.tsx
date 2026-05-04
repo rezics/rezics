@@ -39,7 +39,7 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
 
   if (posts.length === 0) {
     return (
-      <p className="text-sm text-rezics-color-fg-muted py-4">
+      <p className="text-sm text-text-secondary py-4">
         {t("discussion.empty", "No discussions yet.")}
       </p>
     );

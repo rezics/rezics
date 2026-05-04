@@ -28,7 +28,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   if (isLoading) return <div>{t("common.loading")}</div>;
   if (!excerpt?.id) {
     return (
-      <div className="text-center py-16 text-rezics-color-danger">
+      <div className="text-center py-16 text-error-text">
         {t("excerpt.not_found")}
       </div>
     );

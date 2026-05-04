@@ -47,17 +47,17 @@ export const SessionListItem: FC<SessionListItemProps> = ({
 
   return (
     <div className="flex items-center gap-3 py-3">
-      <ComputerIcon className="text-rezics-color-fg-muted" />
+      <ComputerIcon className="text-text-secondary" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium truncate">{userAgent}</span>
           {isCurrent && (
-            <Badge variant="outline" className="text-rezics-color-primary">
+            <Badge variant="outline" className="text-text-brand">
               Current session
             </Badge>
           )}
         </div>
-        <p className="text-xs text-rezics-color-fg-muted">
+        <p className="text-xs text-text-secondary">
           {[session.ipAddress, createdAt].filter(Boolean).join(" · ")}
         </p>
       </div>
@@ -67,7 +67,7 @@ export const SessionListItem: FC<SessionListItemProps> = ({
           variant="outline"
           onClick={() => onRevoke(session.token)}
           disabled={revoking}
-          className="text-rezics-color-danger"
+          className="text-error-text"
         >
           Revoke
         </Button>

@@ -114,19 +114,19 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
             onChange={(e) => handleChange("content", e.target.value)}
             aria-invalid={errors.content}
             className={
-              "w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rezics-color-primary " +
+              "w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-fill " +
               (errors.content
-                ? "border-rezics-color-danger"
-                : "border-rezics-color-border")
+                ? "border-border-error"
+                : "border-border-whisper")
             }
           />
           {errors.content && (
-            <p className="text-sm text-rezics-color-danger">请填写详细内容</p>
+            <p className="text-sm text-error-text">请填写详细内容</p>
           )}
         </div>
 
         {createMutation.status === "error" && (
-          <p className="text-rezics-color-danger">提交失败，请稍后重试。</p>
+          <p className="text-error-text">提交失败，请稍后重试。</p>
         )}
 
         <div className="flex flex-row gap-4 justify-end">

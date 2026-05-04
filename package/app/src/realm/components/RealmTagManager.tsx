@@ -10,7 +10,7 @@ export const RealmTagManager: React.FC<RealmTagManagerProps> = ({
   // MOCK: tag management UI placeholder
   return (
     <div className="py-4">
-      <p className="text-sm text-rezics-color-fg-muted">
+      <p className="text-sm text-text-secondary">
         Tag management will be available when the realm-tag API endpoints are
         wired up.
       </p>

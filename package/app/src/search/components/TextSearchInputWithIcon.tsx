@@ -28,7 +28,7 @@ export const TextSearchInputWithIcon = ({
       <Button
         size="icon"
         variant="ghost"
-        className="text-rezics-color-primary"
+        className="text-text-brand"
         aria-label={t("accessibility.search")}
         onClick={() => onSearch(value.keyword ?? "")}
       >

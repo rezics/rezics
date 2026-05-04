@@ -17,7 +17,7 @@ interface NavigationListProps {
 }
 
 const itemBaseClass =
-  "flex items-center gap-3 w-full px-3 py-1 rounded-md text-left text-sm transition-colors hover:bg-rezics-color-bg-muted";
+  "flex items-center gap-3 w-full px-3 py-1 rounded-md text-left text-sm transition-colors hover:bg-surface-subtle";
 
 export const NavigationList = ({
   NAVIGATION,
@@ -53,7 +53,7 @@ export const NavigationList = ({
                 type="button"
                 className={cn(
                   itemBaseClass,
-                  isActive && "bg-rezics-color-bg-muted",
+                  isActive && "bg-surface-subtle",
                 )}
                 onClick={(event: any) =>
                   handleItemClick(event, item.segment, hasChildren)
@@ -73,7 +73,7 @@ export const NavigationList = ({
                 className={cn(
                   itemBaseClass,
                   "no-underline",
-                  isActive && "bg-rezics-color-bg-muted",
+                  isActive && "bg-surface-subtle",
                 )}
                 onClick={(event: any) =>
                   handleItemClick(event, item.segment, hasChildren)
@@ -98,7 +98,7 @@ export const NavigationList = ({
                         className={cn(
                           itemBaseClass,
                           "pl-8 no-underline",
-                          isChildActive && "bg-rezics-color-bg-muted",
+                          isChildActive && "bg-surface-subtle",
                         )}
                         onClick={(event: any) =>
                           handleItemClick(event, child.segment, false)

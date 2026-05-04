@@ -312,7 +312,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
           onChange={(v) => keywordBind.onChange(v)}
           placeholder="Search user's content"
         />
-        <div className="border-b border-rezics-color-border mt-4 mb-4">
+        <div className="border-b border-border-whisper mt-4 mb-4">
           <Tabs
             value={tab}
             onValueChange={(v) => setTab(v as TabKey)}

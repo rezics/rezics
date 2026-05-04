@@ -40,7 +40,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
     return (
       <div className="flex flex-row items-center gap-2 min-w-0 flex-1">
         <PushPinRoundedIcon
-          className="h-3.5 w-3.5 text-rezics-color-warning shrink-0"
+          className="h-3.5 w-3.5 text-warning-text shrink-0"
           aria-hidden="true"
         />
         <Wrapper
@@ -57,13 +57,13 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
     return (
       <div
         className={cn(
-          "flex flex-row items-center gap-3 py-2 px-3 rounded-md border border-rezics-color-border bg-rezics-color-bg-elevated",
-          stale && "opacity-75 bg-rezics-color-bg-muted",
+          "flex flex-row items-center gap-3 py-2 px-3 rounded-md border border-border-whisper bg-surface-elevated",
+          stale && "opacity-75 bg-surface-subtle",
         )}
       >
         {dragHandle ?? (
           <DragIndicatorRoundedIcon
-            className="h-5 w-5 text-rezics-color-fg-muted"
+            className="h-5 w-5 text-text-secondary"
             aria-hidden="true"
           />
         )}
@@ -71,7 +71,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
           <div className="flex flex-row items-center gap-2">
             <p className="text-sm font-semibold truncate min-w-0">{title}</p>
             {stale ? (
-              <Badge variant="outline" className="border-rezics-color-warning text-rezics-color-warning">
+              <Badge variant="outline" className="border-warning-fill text-warning-text">
                 {t("pinboard.entry.stale")}
               </Badge>
             ) : null}
@@ -85,7 +85,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
             </Badge>
           </div>
           {summary ? (
-            <p className="block text-xs text-rezics-color-fg-muted truncate">
+            <p className="block text-xs text-text-secondary truncate">
               {summary}
             </p>
           ) : null}
@@ -113,7 +113,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="text-rezics-color-danger"
+                    className="text-error-text"
                     onClick={() => onDelete(entry)}
                     aria-label={t("common.delete")}
                   >
@@ -134,20 +134,20 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
     <Wrapper
       {...(href ? { href } : {})}
       className={cn(
-        "block no-underline text-inherit p-4 rounded-lg border border-rezics-color-border bg-rezics-color-bg-elevated transition-colors",
-        href && "hover:border-rezics-color-primary/60",
+        "block no-underline text-inherit p-4 rounded-lg border border-border-whisper bg-surface-elevated transition-colors",
+        href && "hover:border-brand-fill/60",
       )}
     >
       <div className="flex flex-row items-center gap-2 mb-1">
         <PushPinRoundedIcon
-          className="h-4 w-4 text-rezics-color-warning shrink-0"
+          className="h-4 w-4 text-warning-text shrink-0"
           aria-hidden="true"
         />
         <p className="text-sm font-semibold truncate">{title}</p>
       </div>
       {summary ? (
         <p
-          className="text-sm text-rezics-color-fg-muted overflow-hidden"
+          className="text-sm text-text-secondary overflow-hidden"
           style={{
             display: "-webkit-box",
             WebkitLineClamp: 2,

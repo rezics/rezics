@@ -46,7 +46,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
 
   return (
     <div
-      className="py-3 border-b border-rezics-color-border cursor-pointer"
+      className="py-3 border-b border-border-whisper cursor-pointer"
       onClick={handleCardClick}
     >
       <div className="flex flex-col gap-2">

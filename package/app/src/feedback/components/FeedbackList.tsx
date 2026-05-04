@@ -49,9 +49,9 @@ export type FeedbackListProps = {
 };
 
 const typeBadgeClass: Record<FeedbackDTO["type"], string> = {
-  BUG: "bg-rezics-color-danger text-white",
-  FEATURE: "bg-rezics-color-primary text-white",
-  REPORT: "bg-rezics-color-accent text-white",
+  BUG: "bg-error-fill text-white",
+  FEATURE: "bg-brand-fill text-white",
+  REPORT: "bg-surface-subtle text-white",
   OTHER: "",
 };
 
@@ -186,7 +186,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
   return (
     <div>
       {isError && (
-        <p className="text-sm text-rezics-color-danger px-2 py-1">
+        <p className="text-sm text-error-text px-2 py-1">
           加载反馈失败，请稍后重试。
         </p>
       )}
@@ -211,7 +211,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
           <ul className="flex flex-col gap-3">
             {currentPageItems.map((item: FeedbackDTO) => (
               <li key={item.id}>
-                <div className="w-full px-3 py-2 rounded-md border border-rezics-color-border bg-rezics-color-bg-elevated">
+                <div className="w-full px-3 py-2 rounded-md border border-border-whisper bg-surface-elevated">
                   <div className="flex flex-row items-center justify-between gap-2 mb-1">
                     <div className="flex flex-row items-center gap-2 flex-wrap">
                       <Badge className={typeBadgeClass[item.type]}>
@@ -224,12 +224,12 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                         </Badge>
                       )}
                       {item.resolved ? (
-                        <Badge className="bg-rezics-color-success text-white inline-flex items-center gap-1">
+                        <Badge className="bg-success-fill text-white inline-flex items-center gap-1">
                           <DoneIcon className="h-3 w-3" />
                           已解决
                         </Badge>
                       ) : (
-                        <Badge className="bg-rezics-color-warning text-white inline-flex items-center gap-1">
+                        <Badge className="bg-warning-fill text-white inline-flex items-center gap-1">
                           <HourglassEmptyIcon className="h-3 w-3" />
                           待处理
                         </Badge>
@@ -272,7 +272,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                     )}
                   </div>
 
-                  <div className="flex flex-row gap-4 text-xs text-rezics-color-fg-muted mb-1 flex-wrap">
+                  <div className="flex flex-row gap-4 text-xs text-text-secondary mb-1 flex-wrap">
                     <span>用户ID：{item.userId}</span>
                     <span>
                       创建时间：{new Date(item.createdAt).toLocaleString()}

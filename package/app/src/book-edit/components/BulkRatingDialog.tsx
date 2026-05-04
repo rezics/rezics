@@ -37,7 +37,7 @@ export function BulkRatingDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 pt-4">
-          <p className="text-sm text-rezics-color-text-secondary">
+          <p className="text-sm text-text-secondary">
             {t("book.chapter.bulk_rating.description", {
               defaultValue:
                 "This will override the rating on {{count}} selected chapters.",

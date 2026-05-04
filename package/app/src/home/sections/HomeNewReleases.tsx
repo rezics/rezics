@@ -74,7 +74,7 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
                 <p className="text-sm font-medium truncate m-0" title={title}>
                   {title}
                 </p>
-                <p className="text-xs text-rezics-color-fg-muted truncate m-0">
+                <p className="text-xs text-text-secondary truncate m-0">
                   {authorName}
                 </p>
               </CardContent>

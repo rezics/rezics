@@ -106,7 +106,7 @@ export const SocialAuthButtons: FC<{
     <div className="flex flex-col gap-3">
       <div className="relative flex items-center">
         <Separator className="flex-1" />
-        <span className="px-3 text-sm text-rezics-color-fg-muted">
+        <span className="px-3 text-sm text-text-secondary">
           {t("auth.flow.providers_divider")}
         </span>
         <Separator className="flex-1" />

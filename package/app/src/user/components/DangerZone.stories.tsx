@@ -10,7 +10,7 @@ const meta = {
     title: "Danger Zone",
     description: "These actions cannot be undone.",
     children: (
-      <Button variant="outline" className="text-rezics-color-danger">
+      <Button variant="outline" className="text-error-text">
         Delete account
       </Button>
     ),

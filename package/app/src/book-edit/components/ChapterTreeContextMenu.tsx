@@ -40,7 +40,7 @@ function MenuItem({ onClick, icon, children, destructive }: MenuItemProps) {
       type="button"
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-left rounded-sm hover:bg-accent transition-colors ${
-        destructive ? "text-rezics-color-error-text" : ""
+        destructive ? "text-error-text" : ""
       }`}
     >
       <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
@@ -86,7 +86,7 @@ export const ChapterTreeContextMenu = ({
     <div
       ref={ref}
       role="menu"
-      className="fixed z-50 min-w-[200px] rounded-md border border-rezics-color-border-defined bg-rezics-color-surface-elevated shadow-lg p-1"
+      className="fixed z-50 min-w-[200px] rounded-md border border-border-defined bg-surface-elevated shadow-lg p-1"
       style={{ top: contextMenu.y, left: contextMenu.x }}
     >
       <MenuItem
@@ -109,7 +109,7 @@ export const ChapterTreeContextMenu = ({
         Move to...
       </MenuItem>
 
-      <div className="my-1 h-px bg-rezics-color-border-whisper" />
+      <div className="my-1 h-px bg-border-whisper" />
 
       <MenuItem
         icon={<PostAdd className="w-4 h-4" />}
@@ -138,7 +138,7 @@ export const ChapterTreeContextMenu = ({
         New Sibling After
       </MenuItem>
 
-      <div className="my-1 h-px bg-rezics-color-border-whisper" />
+      <div className="my-1 h-px bg-border-whisper" />
 
       <MenuItem
         icon={
@@ -182,7 +182,7 @@ export const ChapterTreeContextMenu = ({
         Move to Last
       </MenuItem>
 
-      <div className="my-1 h-px bg-rezics-color-border-whisper" />
+      <div className="my-1 h-px bg-border-whisper" />
 
       <MenuItem
         destructive

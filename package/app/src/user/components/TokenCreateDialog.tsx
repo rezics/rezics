@@ -99,7 +99,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
           <DialogHeader>
             <DialogTitle>Token Created</DialogTitle>
           </DialogHeader>
-          <Alert className="mb-4 text-rezics-color-warning">
+          <Alert className="mb-4 text-warning-text">
             <AlertDescription>
               Make sure to copy your token now. You won't be able to see it
               again.
@@ -115,7 +115,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
               aria-label="Copy token"
             >
               {copied ? (
-                <CheckIcon className="w-4 h-4 text-rezics-color-success" />
+                <CheckIcon className="w-4 h-4 text-success-text" />
               ) : (
                 <ContentCopyIcon className="w-4 h-4" />
               )}

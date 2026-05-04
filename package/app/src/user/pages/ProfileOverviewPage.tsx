@@ -85,7 +85,7 @@ export const ProfileOverviewPage: FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             No pinned items yet
           </p>
         )}
@@ -101,7 +101,7 @@ export const ProfileOverviewPage: FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             No recent activity
           </p>
         )}
@@ -133,10 +133,10 @@ const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
       className="no-underline"
     >
       <div className="border border-gray-200 rounded-lg p-3 hover:border-gray-400 transition-colors">
-        <span className="block text-xs uppercase text-rezics-color-fg-muted">
+        <span className="block text-xs uppercase text-text-secondary">
           {item.type}
         </span>
-        <span className="block text-sm font-medium mt-1 line-clamp-2 text-rezics-color-fg">
+        <span className="block text-sm font-medium mt-1 line-clamp-2 text-text-primary">
           {title}
         </span>
       </div>
@@ -153,13 +153,13 @@ const ActivityItem: FC<{ item: ContentSearchDocument }> = ({ item }) => {
 
   return (
     <div className="flex items-center gap-3 py-1">
-      <span className="text-xs uppercase min-w-[60px] text-rezics-color-fg-muted">
+      <span className="text-xs uppercase min-w-[60px] text-text-secondary">
         {item.type}
       </span>
-      <span className="text-sm flex-1 truncate text-rezics-color-fg">
+      <span className="text-sm flex-1 truncate text-text-primary">
         {title}
       </span>
-      <span className="text-xs text-rezics-color-fg-muted">{date}</span>
+      <span className="text-xs text-text-secondary">{date}</span>
     </div>
   );
 };

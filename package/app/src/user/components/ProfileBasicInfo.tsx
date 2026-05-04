@@ -83,7 +83,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
             )}
           </div>
           {user.slug && (
-            <span className="block text-sm text-rezics-color-fg-muted">
+            <span className="block text-sm text-text-secondary">
               @{user.slug}
             </span>
           )}
@@ -97,7 +97,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
             </span>
           </div>
           {user.bio && (
-            <p className="text-sm text-rezics-color-fg-muted mt-2 line-clamp-2">
+            <p className="text-sm text-text-secondary mt-2 line-clamp-2">
               {user.bio}
             </p>
           )}
@@ -125,14 +125,14 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         <div>
           <h5 className="text-xl font-semibold">{user.name}</h5>
           {user.slug && (
-            <span className="block text-sm text-rezics-color-fg-muted mt-0.5">
+            <span className="block text-sm text-text-secondary mt-0.5">
               @{user.slug}
             </span>
           )}
         </div>
 
         {user.bio && (
-          <p className="text-sm text-rezics-color-fg-muted max-w-xs">
+          <p className="text-sm text-text-secondary max-w-xs">
             {user.bio}
           </p>
         )}
@@ -200,8 +200,8 @@ const StatLink: FC<{
 }> = ({ label, count, to }) => (
   <Link to={to} className="no-underline">
     <div className="flex items-center justify-between py-0.5 hover:bg-gray-50 rounded px-1">
-      <span className="text-sm text-rezics-color-fg">{label}</span>
-      <span className="text-sm font-medium text-rezics-color-fg-muted">
+      <span className="text-sm text-text-primary">{label}</span>
+      <span className="text-sm font-medium text-text-secondary">
         {count ?? "—"}
       </span>
     </div>

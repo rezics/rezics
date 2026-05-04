@@ -160,8 +160,8 @@ export const BookEditChapterPage: React.FC = () => {
           placeholder={t("placeholders.chapter_title", "章节标题")}
           className={`flex-1 text-xl font-semibold border-0 border-b shadow-none rounded-none ${
             !title.trim()
-              ? "border-rezics-color-border-error"
-              : "border-rezics-color-border-defined"
+              ? "border-border-error"
+              : "border-border-defined"
           }`}
           value={title}
           onChange={(e) => setTitle(e.target.value)}

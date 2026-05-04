@@ -35,7 +35,7 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
 
   return (
     <div className="flex flex-row items-center gap-2 flex-wrap">
-      <span className="text-sm text-rezics-color-text-secondary mr-2">
+      <span className="text-sm text-text-secondary mr-2">
         {t("page.book_edit.info.translation.language_label")}
       </span>
       {visible.map((lang) => {
@@ -55,7 +55,7 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
                   className={`text-xs ${
                     isActive
                       ? ""
-                      : "text-rezics-color-text-secondary"
+                      : "text-text-secondary"
                   }`}
                 >
                   · {t("page.book_edit.info.translation.default_badge")}

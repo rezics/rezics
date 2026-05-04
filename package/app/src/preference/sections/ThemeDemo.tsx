@@ -46,10 +46,10 @@ export const ThemeDemo: React.FC = () => {
     <div className="p-6 mx-auto max-w-[1200px]">
       {/* 标题区域 */}
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-semibold mb-2 text-rezics-color-brand-fill">
+        <h1 className="text-4xl font-semibold mb-2 text-brand-fill">
           主题演示
         </h1>
-        <h2 className="text-lg text-rezics-color-fg-muted mb-2">
+        <h2 className="text-lg text-text-secondary mb-2">
           体验应用的颜色与组件系统
         </h2>
 
@@ -67,7 +67,7 @@ export const ThemeDemo: React.FC = () => {
         <div className="col-span-12 md:col-span-6">
           <Card>
             <CardContent>
-              <h2 className="text-2xl font-semibold mb-4 text-rezics-color-brand-fill">
+              <h2 className="text-2xl font-semibold mb-4 text-brand-fill">
                 颜色系统
               </h2>
               <div className="mb-6">
@@ -82,13 +82,13 @@ export const ThemeDemo: React.FC = () => {
               <div className="mb-6">
                 <p className="text-sm font-medium mb-2">表面颜色</p>
                 <div className="flex gap-2 mb-4">
-                  <div className="p-4 flex-1 bg-rezics-color-bg-canvas border border-rezics-color-border rounded-md">
-                    <span className="text-xs text-rezics-color-fg-muted">
+                  <div className="p-4 flex-1 bg-surface-canvas border border-border-whisper rounded-md">
+                    <span className="text-xs text-text-secondary">
                       Background
                     </span>
                   </div>
-                  <div className="p-4 flex-1 bg-rezics-color-bg-elevated border border-rezics-color-border rounded-md">
-                    <span className="text-xs text-rezics-color-fg-muted">
+                  <div className="p-4 flex-1 bg-surface-elevated border border-border-whisper rounded-md">
+                    <span className="text-xs text-text-secondary">
                       Surface
                     </span>
                   </div>
@@ -98,7 +98,7 @@ export const ThemeDemo: React.FC = () => {
               <div>
                 <p className="text-sm font-medium mb-2">文本颜色</p>
                 <p className="text-base mb-1">主要文本 (Primary Text)</p>
-                <p className="text-sm text-rezics-color-fg-muted mb-1">
+                <p className="text-sm text-text-secondary mb-1">
                   次要文本 (Secondary Text)
                 </p>
                 <p className="text-sm opacity-50">禁用文本 (Disabled Text)</p>
@@ -111,7 +111,7 @@ export const ThemeDemo: React.FC = () => {
         <div className="col-span-12 md:col-span-6">
           <Card>
             <CardContent>
-              <h2 className="text-2xl font-semibold mb-4 text-rezics-color-brand-fill">
+              <h2 className="text-2xl font-semibold mb-4 text-brand-fill">
                 组件展示
               </h2>
 
@@ -139,13 +139,13 @@ export const ThemeDemo: React.FC = () => {
 
               <div className="mb-6">
                 <p className="text-sm font-medium mb-2">进度条</p>
-                <div className="h-2 bg-rezics-color-bg-elevated rounded-full overflow-hidden mb-1">
+                <div className="h-2 bg-surface-elevated rounded-full overflow-hidden mb-1">
                   <div
-                    className="h-full bg-rezics-color-brand-fill"
+                    className="h-full bg-brand-fill"
                     style={{ width: "75%" }}
                   />
                 </div>
-                <p className="text-xs text-rezics-color-fg-muted">75% 完成</p>
+                <p className="text-xs text-text-secondary">75% 完成</p>
               </div>
             </CardContent>
           </Card>
@@ -153,7 +153,7 @@ export const ThemeDemo: React.FC = () => {
 
         {/* 卡片组合演示 */}
         <div className="col-span-12">
-          <h2 className="text-2xl font-semibold mb-6 text-rezics-color-brand-fill">
+          <h2 className="text-2xl font-semibold mb-6 text-brand-fill">
             卡片组合演示
           </h2>
           <div className="grid grid-cols-12 gap-4">
@@ -181,13 +181,13 @@ export const ThemeDemo: React.FC = () => {
                       </Avatar>
                       <div>
                         <p className="text-base font-semibold">{name}</p>
-                        <p className="text-sm text-rezics-color-fg-muted">
+                        <p className="text-sm text-text-secondary">
                           {color}
                         </p>
                       </div>
                     </div>
 
-                    <p className="text-sm text-rezics-color-fg-muted mb-4">
+                    <p className="text-sm text-text-secondary mb-4">
                       这是一个使用 {name} 颜色主题的演示卡片。
                     </p>
 

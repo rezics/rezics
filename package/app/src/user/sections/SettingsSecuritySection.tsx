@@ -77,7 +77,7 @@ export const SettingsSecuritySection: FC = () => {
         }
       >
         {passwordSuccess && (
-          <Alert className="mb-4 text-rezics-color-success">
+          <Alert className="mb-4 text-success-text">
             <AlertDescription>
               Password {hasPassword ? "changed" : "set"} successfully.
             </AlertDescription>
@@ -109,10 +109,10 @@ export const SettingsSecuritySection: FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className={passwordMismatch ? "border-rezics-color-danger" : ""}
+              className={passwordMismatch ? "border-border-error" : ""}
             />
             {passwordMismatch && (
-              <p className="text-sm text-rezics-color-danger">
+              <p className="text-sm text-error-text">
                 Passwords do not match
               </p>
             )}
@@ -155,7 +155,7 @@ export const SettingsSecuritySection: FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             No active sessions found.
           </p>
         )}

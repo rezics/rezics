@@ -45,7 +45,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
           {title || t("pages.review_page")}
         </h1>
         {rating !== undefined && (
-          <span className="text-sm text-rezics-color-fg-muted">
+          <span className="text-sm text-text-secondary">
             {rating.toFixed(1)} / 10
           </span>
         )}
@@ -69,7 +69,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
                   to="/user/$unitId"
                   params={{ unitId: review.author?.unitId ?? "" }}
                 >
-                  <span className="text-lg font-bold text-rezics-color-primary">
+                  <span className="text-lg font-bold text-text-brand">
                     {authorName}
                   </span>
                 </TextLink>
@@ -80,7 +80,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
             </Tooltip>
           </TooltipProvider>
           {dateStr && (
-            <div className="text-xs text-rezics-color-fg-muted">{dateStr}</div>
+            <div className="text-xs text-text-secondary">{dateStr}</div>
           )}
         </div>
       </div>

@@ -28,7 +28,7 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
           backgroundImage: bgImage ? `url(${bgImage})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundColor: accentColor ?? "var(--rezics-color-brand-fill)",
+          backgroundColor: accentColor ?? "var(--rezics-sys-color-brand-fill)",
         }}
       >
         <div className="relative z-10">
@@ -53,7 +53,7 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
       <div>
         <h2 className="text-lg font-semibold mb-4">Latest Content</h2>
         {/* MOCK: content sections will be wired when zone-specific content queries exist */}
-        <p className="text-rezics-color-fg-muted">
+        <p className="text-text-secondary">
           Content for this zone will appear here.
         </p>
       </div>

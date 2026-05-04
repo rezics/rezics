@@ -125,7 +125,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         </Alert>
       )}
       {message && (
-        <Alert className="text-rezics-color-success">
+        <Alert className="text-success-text">
           <AlertDescription>{message}</AlertDescription>
         </Alert>
       )}

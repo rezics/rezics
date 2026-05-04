@@ -54,7 +54,7 @@ export const ProfileLayout: FC = () => {
   if (error || !user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-rezics-color-danger">
+        <p className="text-error-text">
           {error ? (error as Error).message : "User not found"}
         </p>
       </div>

@@ -78,7 +78,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 px-2 py-1 rounded bg-rezics-color-bg-elevated"
+      className="flex items-center gap-2 px-2 py-1 rounded bg-surface-elevated"
     >
       <Button
         type="button"
@@ -177,13 +177,13 @@ export const SettingsPreferencesSection: FC = () => {
         description="Drag to reorder by priority. The first language is the most preferred."
       >
         {langSuccess && (
-          <Alert className="mb-3 text-rezics-color-success">
+          <Alert className="mb-3 text-success-text">
             <AlertDescription>Language preferences saved.</AlertDescription>
           </Alert>
         )}
 
         {preferredLangs.length === 0 ? (
-          <p className="text-sm text-rezics-color-fg-muted mb-4">
+          <p className="text-sm text-text-secondary mb-4">
             No language preferences yet. Add one below.
           </p>
         ) : (
@@ -256,7 +256,7 @@ export const SettingsPreferencesSection: FC = () => {
               ([realm, pref]) => (
                 <div key={realm} className="flex items-center gap-2">
                   <span className="text-sm font-medium">{realm}</span>
-                  <span className="text-xs text-rezics-color-fg-muted">
+                  <span className="text-xs text-text-secondary">
                     Max display: {pref.maxDisplay} | Realms:{" "}
                     {pref.realmIds.join(", ")}
                   </span>
@@ -265,7 +265,7 @@ export const SettingsPreferencesSection: FC = () => {
             )}
           </div>
         ) : (
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             No realm tag preferences configured.
           </p>
         )}

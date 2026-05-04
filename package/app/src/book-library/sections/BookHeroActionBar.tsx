@@ -70,8 +70,8 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
         onClick={handleAddToShelf}
         className="rounded-md font-medium"
         style={{
-          backgroundColor: "var(--rezics-color-brand-fill, #f4606c)",
-          color: "var(--rezics-color-text-on-brand, #fff)",
+          backgroundColor: "var(--rezics-sys-color-brand-fill, #f4606c)",
+          color: "var(--rezics-sys-color-text-on-brand, #fff)",
         }}
       >
         <BookmarkAddOutlined className="w-4 h-4 mr-2" />
