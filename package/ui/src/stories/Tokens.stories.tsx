@@ -24,10 +24,10 @@ export const Surfaces: Story = {
       <div className="flex flex-row gap-4">
         {(
           [
-            ["canvas", "var(--rezics-sys-color-surface-canvas)"],
-            ["base", "var(--rezics-sys-color-surface-base)"],
-            ["raised", "var(--rezics-sys-color-surface-elevated)"],
-            ["sunken", "var(--rezics-sys-color-surface-sunken)"],
+            ["canvas", "var(--colors-surface-canvas)"],
+            ["base", "var(--colors-surface-base)"],
+            ["raised", "var(--colors-surface-elevated)"],
+            ["sunken", "var(--colors-surface-sunken)"],
           ] as const
         ).map(([name, value]) => (
           <div

@@ -29,8 +29,8 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
   const maxCount = Math.max(...Object.values(distribution).map(Number), 1);
   const averageVar =
     average >= 5
-      ? "var(--rezics-sys-color-brand-fill)"
-      : "var(--rezics-sys-color-sentiment-negative-text)";
+      ? "var(--colors-brand-fill)"
+      : "var(--colors-sentiment-negative-text)";
 
   return (
     <div className="flex flex-row items-center gap-6">
@@ -52,8 +52,8 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
           const percent = (count / maxCount) * 100;
           const barVar =
             score >= 5
-              ? "var(--rezics-sys-color-sentiment-positive-fill)"
-              : "var(--rezics-sys-color-sentiment-negative-fill)";
+              ? "var(--colors-sentiment-positive-fill)"
+              : "var(--colors-sentiment-negative-fill)";
           return (
             <div key={score} className="flex flex-row items-center gap-2">
               <span className="w-4 text-right text-xs text-text-secondary">
@@ -62,7 +62,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
               <div
                 className="h-1.5 flex-1 overflow-hidden rounded-full"
                 style={{
-                  backgroundColor: "var(--rezics-sys-color-surface-subtle, rgba(0,0,0,0.06))",
+                  backgroundColor: "var(--colors-surface-subtle, rgba(0,0,0,0.06))",
                 }}
               >
                 <div

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 function ThemeModeProbe() {
   const [snapshot, setSnapshot] = useState({
-    dataTheme: "",
+    mode: "",
     bgColor: "",
     textColor: "",
   });
@@ -13,16 +13,16 @@ function ThemeModeProbe() {
       const root = document.documentElement;
       const cs = getComputedStyle(root);
       setSnapshot({
-        dataTheme: root.dataset.theme ?? "",
-        bgColor: cs.getPropertyValue("--rezics-sys-color-surface-canvas").trim(),
-        textColor: cs.getPropertyValue("--rezics-sys-color-text-primary").trim(),
+        mode: root.classList.contains("dark") ? "dark" : "light",
+        bgColor: cs.getPropertyValue("--colors-surface-canvas").trim(),
+        textColor: cs.getPropertyValue("--colors-text-primary").trim(),
       });
     };
     read();
     const observer = new MutationObserver(read);
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["data-theme", "class"],
+      attributeFilter: ["class"],
     });
     return () => observer.disconnect();
   }, []);
@@ -30,25 +30,25 @@ function ThemeModeProbe() {
   return (
     <div className="flex flex-col gap-4 p-6">
       <div>
-        <strong>data-theme:</strong> {snapshot.dataTheme || "(unset)"}
+        <strong>mode:</strong> {snapshot.mode || "(unset)"}
       </div>
       <div>
-        <strong>--rezics-sys-color-surface-canvas:</strong> {snapshot.bgColor}
+        <strong>--colors-surface-canvas:</strong> {snapshot.bgColor}
       </div>
       <div>
-        <strong>--rezics-sys-color-text-primary:</strong> {snapshot.textColor}
+        <strong>--colors-text-primary:</strong> {snapshot.textColor}
       </div>
       <div
         className="rounded-md p-4"
         style={{
-          background: "var(--rezics-sys-color-surface-elevated)",
-          color: "var(--rezics-sys-color-text-primary)",
-          border: "1px solid var(--rezics-sys-color-border-whisper)",
+          background: "var(--colors-surface-elevated)",
+          color: "var(--colors-text-primary)",
+          border: "1px solid var(--colors-border-whisper)",
         }}
       >
         Toggle the Storybook theme toolbar (sun/moon). The values above and the
-        sample card should re-resolve when `data-theme` flips between "light"
-        and "dark".
+        sample card should re-resolve when the <code>dark</code> class on{" "}
+        <code>&lt;html&gt;</code> flips.
       </div>
     </div>
   );

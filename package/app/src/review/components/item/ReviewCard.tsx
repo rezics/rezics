@@ -104,7 +104,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
                 className="text-xs whitespace-nowrap"
                 style={{
                   lineHeight: 1,
-                  color: "var(--rezics-sys-color-secondary, var(--rezics-sys-color-text-secondary))",
+                  color: "var(--colors-secondary, var(--colors-text-secondary))",
                 }}
               >
                 {rating}

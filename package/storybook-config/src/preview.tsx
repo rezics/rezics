@@ -15,10 +15,7 @@ if (typeof window !== "undefined" && typeof document !== "undefined") {
     w[THEME_LISTENERS_FLAG] = true;
     const applyThemeMode = (mode: unknown) => {
       const resolved: ThemeMode = mode === "dark" ? "dark" : "light";
-      const root = document.documentElement;
-      root.classList.add("theme-rezics");
-      root.dataset.theme = resolved;
-      root.classList.toggle("dark", resolved === "dark");
+      document.documentElement.classList.toggle("dark", resolved === "dark");
     };
     addons
       .getChannel()
@@ -86,8 +83,8 @@ function resolveCanvasStyle(canvas: CanvasOption): React.CSSProperties | null {
   return {
     minHeight: "100vh",
     padding,
-    background: "var(--rezics-sys-color-surface-canvas)",
-    color: "var(--rezics-sys-color-text-primary)",
+    background: "var(--colors-surface-canvas)",
+    color: "var(--colors-text-primary)",
   };
 }
 
@@ -100,10 +97,7 @@ export function withRezicsTheme(
     const mode = (context.globals.themeMode ?? "light") as ThemeMode;
 
     useEffect(() => {
-      const root = document.documentElement;
-      root.classList.add("theme-rezics");
-      root.dataset.theme = mode;
-      root.classList.toggle("dark", mode === "dark");
+      document.documentElement.classList.toggle("dark", mode === "dark");
     }, [mode]);
 
     return canvasStyle ? (

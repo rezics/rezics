@@ -29,7 +29,7 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
           backgroundImage: bgImage ? `url(${bgImage})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundColor: accentColor ?? "var(--rezics-sys-color-brand-fill)",
+          backgroundColor: accentColor ?? "var(--colors-brand-fill)",
         }}
       >
         <div className="relative z-10">

@@ -7,27 +7,25 @@
  *
  * Imported by app shells (App.tsx). Storybook does NOT import this — it
  * supplies its own preview-level resets.
- *
- * See openspec change `complete-rezics-token-system` for rationale.
  * ============================================================================ */
 
-/* Per-language CJK routing — overrides the default TC fallback in tokens.css
- * when the document advertises a different CJK language. Referenced inside
- * font stacks defined in `package/ui/src/config/tokens/typography.ts`. */
+/* Per-language CJK routing — overrides the default TC fallback baked into the
+ * font stacks emitted by uno-config.ts when the document advertises a different
+ * CJK language. The font stacks reference `var(--font-sans-cjk, ...)`. */
 :lang(zh-Hans),
 :lang(zh-CN) {
-  --rezics-font-sans-cjk: 'Source Han Sans SC', 'Noto Sans SC';
-  --rezics-font-serif-cjk: 'Source Han Serif SC', 'Noto Serif SC';
+  --font-sans-cjk: 'Source Han Sans SC', 'Noto Sans SC';
+  --font-serif-cjk: 'Source Han Serif SC', 'Noto Serif SC';
 }
 
 :lang(ja) {
-  --rezics-font-sans-cjk: 'Source Han Sans JP', 'Noto Sans JP';
-  --rezics-font-serif-cjk: 'Source Han Serif JP', 'Noto Serif JP';
+  --font-sans-cjk: 'Source Han Sans JP', 'Noto Sans JP';
+  --font-serif-cjk: 'Source Han Serif JP', 'Noto Serif JP';
 }
 
 :lang(ko) {
-  --rezics-font-sans-cjk: 'Source Han Sans KR', 'Noto Sans KR';
-  --rezics-font-serif-cjk: 'Source Han Serif KR', 'Noto Serif KR';
+  --font-sans-cjk: 'Source Han Sans KR', 'Noto Sans KR';
+  --font-serif-cjk: 'Source Han Serif KR', 'Noto Serif KR';
 }
 
 /* Reduced motion — strip all transitions and animations. */

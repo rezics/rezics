@@ -24,7 +24,7 @@ export const createChapterArboristNode = (bookId: string) => {
         style={style}
         className={`flex items-center gap-2 px-2 py-1 cursor-pointer select-none rounded-sm transition-colors hover:bg-surface-subtle ${
           isSelected
-            ? "bg-[color-mix(in_srgb,var(--rezics-sys-color-brand-fill)_8%,transparent)] text-brand-fill"
+            ? "bg-[color-mix(in_srgb,var(--colors-brand-fill)_8%,transparent)] text-brand-fill"
             : ""
         }`}
       >

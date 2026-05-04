@@ -15,7 +15,6 @@ import { useAppInit } from "./providers/useAppInit";
 import { useAppStore } from "./states/appStore";
 
 import "virtual:uno.css";
-import "@rezics/ui/config/tokens.css";
 import "@rezics/ui/config/base.css";
 
 function AppInit({ children }: { children: ReactNode }) {
@@ -27,10 +26,7 @@ function AppProviders({ children }: { children: ReactNode }) {
   const themeMode = useAppStore((s) => s.theme);
 
   useEffect(() => {
-    const html = document.documentElement;
-    html.classList.add("theme-rezics");
-    html.classList.toggle("dark", themeMode === "dark");
-    html.dataset.theme = themeMode;
+    document.documentElement.classList.toggle("dark", themeMode === "dark");
   }, [themeMode]);
 
   return (

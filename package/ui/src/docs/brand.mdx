@@ -25,42 +25,42 @@ Two strokes inspired by 轮回 (cyclic return). Always rendered as a single colo
       alignItems: "flex-end",
       gap: 48,
       padding: 32,
-      background: "var(--rezics-sys-color-surface-canvas)",
+      background: "var(--colors-surface-canvas)",
       borderRadius: radius.md,
-      border: "1px solid var(--rezics-sys-color-border-whisper)",
+      border: "1px solid var(--colors-border-whisper)",
     }}
   >
     <div style={{ textAlign: "center" }}>
       <Logo size={32} />
-      <div style={{ marginTop: 8, fontFamily: fontFamilies.mono, fontSize: 11, color: "var(--rezics-sys-color-text-secondary)" }}>32</div>
+      <div style={{ marginTop: 8, fontFamily: fontFamilies.mono, fontSize: 11, color: "var(--colors-text-secondary)" }}>32</div>
     </div>
     <div style={{ textAlign: "center" }}>
       <Logo size={48} />
-      <div style={{ marginTop: 8, fontFamily: fontFamilies.mono, fontSize: 11, color: "var(--rezics-sys-color-text-secondary)" }}>48</div>
+      <div style={{ marginTop: 8, fontFamily: fontFamilies.mono, fontSize: 11, color: "var(--colors-text-secondary)" }}>48</div>
     </div>
     <div style={{ textAlign: "center" }}>
       <Logo size={96} />
-      <div style={{ marginTop: 8, fontFamily: fontFamilies.mono, fontSize: 11, color: "var(--rezics-sys-color-text-secondary)" }}>96</div>
+      <div style={{ marginTop: 8, fontFamily: fontFamilies.mono, fontSize: 11, color: "var(--colors-text-secondary)" }}>96</div>
     </div>
     <div style={{ textAlign: "center" }}>
       <Logo size={160} />
-      <div style={{ marginTop: 8, fontFamily: fontFamilies.mono, fontSize: 11, color: "var(--rezics-sys-color-text-secondary)" }}>160</div>
+      <div style={{ marginTop: 8, fontFamily: fontFamilies.mono, fontSize: 11, color: "var(--colors-text-secondary)" }}>160</div>
     </div>
   </div>
 </Unstyled>
 
 ### Color variants
 
-The default fill is `--rezics-sys-color-brand-fill` (轮回红 `#f4606c`). For surfaces where the logo must blend with surrounding text or sit on a colored background, pass `color="currentColor"` and let the parent decide.
+The default fill is `--colors-brand-fill` (轮回红 `#f4606c`). For surfaces where the logo must blend with surrounding text or sit on a colored background, pass `color="currentColor"` and let the parent decide.
 
 <Unstyled>
   <Grid cols={3}>
     <div
       style={{
         padding: 24,
-        background: "var(--rezics-sys-color-surface-canvas)",
+        background: "var(--colors-surface-canvas)",
         borderRadius: radius.md,
-        border: "1px solid var(--rezics-sys-color-border-whisper)",
+        border: "1px solid var(--colors-border-whisper)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -72,7 +72,7 @@ The default fill is `--rezics-sys-color-brand-fill` (轮回红 `#f4606c`). For s
     <div
       style={{
         padding: 24,
-        background: "var(--rezics-sys-color-brand-fill)",
+        background: "var(--colors-brand-fill)",
         borderRadius: radius.md,
         display: "flex",
         alignItems: "center",
@@ -122,9 +122,9 @@ Reserve at least `½ × logo height` of empty space on every side. Don't crowd t
   <div
     style={{
       padding: 48,
-      background: "var(--rezics-sys-color-surface-canvas)",
+      background: "var(--colors-surface-canvas)",
       borderRadius: radius.md,
-      border: "1px dashed var(--rezics-sys-color-border-whisper)",
+      border: "1px dashed var(--colors-border-whisper)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -134,7 +134,7 @@ Reserve at least `½ × logo height` of empty space on every side. Don't crowd t
     <div
       style={{
         padding: 32,
-        border: "1px dashed var(--rezics-sys-color-brand-fill)",
+        border: "1px dashed var(--colors-brand-fill)",
         borderRadius: radius.sm,
       }}
     >
@@ -147,21 +147,21 @@ Reserve at least `½ × logo height` of empty space on every side. Don't crowd t
 
 ## Brand color
 
-**轮回红** `#f4606c` — the only branded accent in the system. Resolved through `--rezics-sys-color-brand-fill`. The text-safe counterpart `--rezics-sys-color-text-brand` auto-resolves to AA-safe values: `#C4433A` in light mode, `#fa7882` in dark mode.
+**轮回红** `#f4606c` — the only branded accent in the system. Resolved through `--colors-brand-fill`. The text-safe counterpart `--colors-text-brand` auto-resolves to AA-safe values: `#C4433A` in light mode, `#fa7882` in dark mode.
 
 <Unstyled>
   <Grid cols={2}>
     <Swatch
       name="brand-fill"
-      cssVar="--rezics-sys-color-brand-fill"
-      value="var(--rezics-sys-color-brand-fill)"
+      cssVar="--colors-brand-fill"
+      value="var(--colors-brand-fill)"
       description="Surfaces, logo, key actions. Never as body text."
       invertText
     />
     <Swatch
       name="text-brand"
-      cssVar="--rezics-sys-color-text-brand"
-      value="var(--rezics-sys-color-text-brand)"
+      cssVar="--colors-text-brand"
+      value="var(--colors-text-brand)"
       description="The only token allowed for brand-colored text. Auto AA-safe."
     />
   </Grid>
@@ -191,12 +191,12 @@ The full color system, including surfaces, borders, and semantic tokens, is docu
 
 <Compare>
   <Do caption="On brand-fill surfaces, render the logo in white via currentColor">
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 96, background: "var(--rezics-sys-color-brand-fill)", color: "#fff", borderRadius: radius.sm }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 96, background: "var(--colors-brand-fill)", color: "#fff", borderRadius: radius.sm }}>
       <Logo size={48} color="currentColor" />
     </div>
   </Do>
   <Dont caption="Don't render brand-fill on brand-fill — the logo disappears">
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 96, background: "var(--rezics-sys-color-brand-fill)", borderRadius: radius.sm }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 96, background: "var(--colors-brand-fill)", borderRadius: radius.sm }}>
       <Logo size={48} />
     </div>
   </Dont>
@@ -211,8 +211,8 @@ The full color system, including surfaces, borders, and semantic tokens, is docu
   <Dont caption="Don't crowd the logo with adjacent text or chrome">
     <div style={{ display: "flex", alignItems: "center", gap: 4, justifyContent: "center", minHeight: 96 }}>
       <Logo size={48} />
-      <span style={{ fontFamily: fontFamilies.sans, fontSize: 24, fontWeight: 700, color: "var(--rezics-sys-color-text-primary)" }}>REZICS™</span>
-      <span style={{ fontFamily: fontFamilies.sans, fontSize: 12, color: "var(--rezics-sys-color-text-secondary)" }}>· The Library Platform</span>
+      <span style={{ fontFamily: fontFamilies.sans, fontSize: 24, fontWeight: 700, color: "var(--colors-text-primary)" }}>REZICS™</span>
+      <span style={{ fontFamily: fontFamilies.sans, fontSize: 12, color: "var(--colors-text-secondary)" }}>· The Library Platform</span>
     </div>
   </Dont>
 </Compare>

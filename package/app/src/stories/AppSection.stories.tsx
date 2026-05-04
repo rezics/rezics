@@ -32,7 +32,7 @@ function BookCard({ title, author }: { title: string; author: string }) {
         style={{
           aspectRatio: "2 / 3",
           background:
-            "linear-gradient(135deg, var(--rezics-sys-color-surface-elevated), var(--rezics-sys-color-surface-sunken))",
+            "linear-gradient(135deg, var(--colors-surface-elevated), var(--colors-surface-sunken))",
         }}
       />
       <div className="pt-3">

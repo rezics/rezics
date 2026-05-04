@@ -79,7 +79,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
           <Star
             className="w-[30px] h-[30px]"
             fill="currentColor"
-            style={{ color: "var(--rezics-sys-color-brand-fill)" }}
+            style={{ color: "var(--colors-brand-fill)" }}
           />
           <span className="inline-flex items-baseline gap-1 text-white">
             <span className="text-xl font-semibold tabular-nums leading-none">
@@ -92,7 +92,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
         <>
           <Star
             className="w-[30px] h-[30px]"
-            style={{ color: "var(--rezics-sys-color-brand-fill)" }}
+            style={{ color: "var(--colors-brand-fill)" }}
           />
           <span className="text-base font-medium text-brand">
             {t("book.hero.your_score.rate", "Rate")}

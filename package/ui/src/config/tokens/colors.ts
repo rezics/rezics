@@ -1,25 +1,42 @@
-// Foundation v1 color tokens. Source: openspec/plans/design-system-research/briefs/01-foundation-v1.md §2.
+// Foundation v1 color tokens — single source of truth for the rezics design
+// system. UnoCSS preset-wind4 reads this file (via uno-config.ts) and emits
+// flat `--colors-*` CSS custom properties on demand. The dark-mode override is
+// emitted programmatically from `darkColors` by a uno-config preflight.
 //
-// These TS exports mirror the runtime CSS variables defined in
-// `package/ui/src/config/tokens.css` (the canonical source of truth at runtime).
-// Consumer code that needs a color literal at build/SSR time reads from here;
-// runtime UnoCSS theme classes and shadcn primitives read the CSS vars directly.
+// Shape: 32 shadcn theme slots at top level (background, foreground, primary,
+// secondary, muted, accent, destructive, card, popover, border, input, ring,
+// chart-1..5, sidebar.*) plus rezics extension groups (surface, text, brand,
+// semantic, sentiment, inverse). The rezics groups source their values into
+// the shadcn slots — the rezics identity lives in the values, not in a prefix.
 
-export type ColorMode = "light" | "dark";
+export type ColorScheme = "light" | "dark";
 
 export interface ColorTokens {
+  // ──── shadcn slots ────────────────────────────────────────────────────────
+  background: string;
+  foreground: string;
+  card: { DEFAULT: string; foreground: string };
+  popover: { DEFAULT: string; foreground: string };
+  primary: { DEFAULT: string; foreground: string };
+  secondary: { DEFAULT: string; foreground: string };
+  muted: { DEFAULT: string; foreground: string };
+  accent: { DEFAULT: string; foreground: string };
+  destructive: { DEFAULT: string; foreground: string };
+  input: string;
+  ring: string;
+
+  // ──── rezics extensions ───────────────────────────────────────────────────
   surface: {
     canvas: string;
     base: string;
     elevated: string;
     subtle: string;
     sunken: string;
-    // surface-container ladder (MD3-style; tonal, not shadow)
-    containerLowest: string;
-    containerLow: string;
+    "container-lowest": string;
+    "container-low": string;
     container: string;
-    containerHigh: string;
-    containerHighest: string;
+    "container-high": string;
+    "container-highest": string;
     tint: string;
   };
   text: {
@@ -27,54 +44,40 @@ export interface ColorTokens {
     secondary: string;
     tertiary: string;
     disabled: string;
-    onBrand: string;
+    "on-brand": string;
     brand: string;
   };
   brand: {
     fill: string;
-    fillHover: string;
-    fillActive: string;
-    textLight: string;
-    textDark: string;
-    // container variants (quieter brand role for chips, badges, banners)
+    "fill-hover": string;
+    "fill-active": string;
+    "text-light": string;
+    "text-dark": string;
     container: string;
-    onContainer: string;
+    "on-container": string;
   };
   semantic: {
-    success: {
-      fill: string;
-      textLight: string;
-      textDark: string;
-      container: string;
-      onContainer: string;
-    };
-    warning: {
-      fill: string;
-      textLight: string;
-      textDark: string;
-      container: string;
-      onContainer: string;
-    };
-    error: {
-      fill: string;
-      textLight: string;
-      textDark: string;
-      container: string;
-      onContainer: string;
-    };
-    info: {
-      fill: string;
-      textLight: string;
-      textDark: string;
-      container: string;
-      onContainer: string;
-    };
+    success: SemanticColor;
+    warning: SemanticColor;
+    error: SemanticColor;
+    info: SemanticColor;
   };
   sentiment: {
-    positive: { fill: string; textLight: string; textDark: string };
-    negative: { fill: string; textLight: string; textDark: string };
+    positive: {
+      fill: string;
+      text: string;
+      "text-light": string;
+      "text-dark": string;
+    };
+    negative: {
+      fill: string;
+      text: string;
+      "text-light": string;
+      "text-dark": string;
+    };
   };
   border: {
+    DEFAULT: string;
     whisper: string;
     defined: string;
     strong: string;
@@ -83,7 +86,7 @@ export interface ColorTokens {
   };
   inverse: {
     surface: string;
-    onSurface: string;
+    "on-surface": string;
     primary: string;
   };
   chart: {
@@ -94,49 +97,58 @@ export interface ColorTokens {
     5: string;
   };
   sidebar: {
+    DEFAULT: string;
     background: string;
     foreground: string;
     primary: string;
-    primaryForeground: string;
+    "primary-foreground": string;
     accent: string;
-    accentForeground: string;
+    "accent-foreground": string;
     border: string;
     ring: string;
   };
 }
 
+export interface SemanticColor {
+  fill: string;
+  "text-light": string;
+  "text-dark": string;
+  container: string;
+  "on-container": string;
+}
+
 const brandShared = {
   fill: "#f4606c",
-  fillHover: "#e85666",
-  fillActive: "#d94c5c",
-  textLight: "#C4433A",
-  textDark: "#fa7882",
-} as const;
-
-// Sentiment polarity (vote / rating / poll). Positive reuses brand 輪迴红 so they
-// move in lock-step; negative is a muted slate-blue chosen to read as a calm
-// counterpoint on parchment without competing with brand red or `info`.
-const sentimentShared = {
-  positive: {
-    fill: brandShared.fill,
-    textLight: brandShared.textLight,
-    textDark: brandShared.textDark,
-  },
-  negative: { fill: "#5B7A99", textLight: "#3F5C7A", textDark: "#7B98B5" },
+  "fill-hover": "#e85666",
+  "fill-active": "#d94c5c",
+  "text-light": "#C4433A",
+  "text-dark": "#fa7882",
 } as const;
 
 export const lightColors: ColorTokens = {
+  background: "#f5f4ed",
+  foreground: "#1d1d1f",
+  card: { DEFAULT: "#ffffff", foreground: "#1d1d1f" },
+  popover: { DEFAULT: "#ffffff", foreground: "#1d1d1f" },
+  primary: { DEFAULT: brandShared.fill, foreground: "#ffffff" },
+  secondary: { DEFAULT: "#ebeae5", foreground: "#1d1d1f" },
+  muted: { DEFAULT: "#e6e5e0", foreground: "#6e6e73" },
+  accent: { DEFAULT: "#ebeae5", foreground: "#1d1d1f" },
+  destructive: { DEFAULT: "#cf2d56", foreground: "#ffffff" },
+  input: "#d2d2d7",
+  ring: brandShared.fill,
+
   surface: {
     canvas: "#f5f4ed",
     base: "#faf9f5",
     elevated: "#ffffff",
     subtle: "#ebeae5",
     sunken: "#e6e5e0",
-    containerLowest: "#ffffff",
-    containerLow: "#faf9f5",
+    "container-lowest": "#ffffff",
+    "container-low": "#faf9f5",
     container: "#f5f4ed",
-    containerHigh: "#ebeae5",
-    containerHighest: "#e6e5e0",
+    "container-high": "#ebeae5",
+    "container-highest": "#e6e5e0",
     tint: brandShared.fill,
   },
   text: {
@@ -144,46 +156,60 @@ export const lightColors: ColorTokens = {
     secondary: "#6e6e73",
     tertiary: "#86868b",
     disabled: "#c7c7cc",
-    onBrand: "#ffffff",
-    brand: brandShared.textLight,
+    "on-brand": "#ffffff",
+    brand: brandShared["text-light"],
   },
   brand: {
     ...brandShared,
     container: "#ffc7cc",
-    onContainer: "#1d1d1f",
+    "on-container": "#1d1d1f",
   },
   semantic: {
     success: {
       fill: "#157352",
-      textLight: "#157352",
-      textDark: "#3da884",
+      "text-light": "#157352",
+      "text-dark": "#3da884",
       container: "#d4edd9",
-      onContainer: "#0e3a26",
+      "on-container": "#0e3a26",
     },
     warning: {
       fill: "#9c5e22",
-      textLight: "#8a5520",
-      textDark: "#d8943e",
+      "text-light": "#8a5520",
+      "text-dark": "#d8943e",
       container: "#f4e4c8",
-      onContainer: "#4a2c0a",
+      "on-container": "#4a2c0a",
     },
     error: {
       fill: "#cf2d56",
-      textLight: "#cf2d56",
-      textDark: "#e34c75",
+      "text-light": "#cf2d56",
+      "text-dark": "#e34c75",
       container: "#fbe1e8",
-      onContainer: "#4a0e22",
+      "on-container": "#4a0e22",
     },
     info: {
       fill: "#1565c0",
-      textLight: "#1565c0",
-      textDark: "#5aa9f0",
+      "text-light": "#1565c0",
+      "text-dark": "#5aa9f0",
       container: "#d8e9fb",
-      onContainer: "#0a2540",
+      "on-container": "#0a2540",
     },
   },
-  sentiment: sentimentShared,
+  sentiment: {
+    positive: {
+      fill: brandShared.fill,
+      text: brandShared["text-light"],
+      "text-light": brandShared["text-light"],
+      "text-dark": brandShared["text-dark"],
+    },
+    negative: {
+      fill: "#5b7a99",
+      text: "#3f5c7a",
+      "text-light": "#3f5c7a",
+      "text-dark": "#7b98b5",
+    },
+  },
   border: {
+    DEFAULT: "#d2d2d7",
     whisper: "rgba(0, 0, 0, 0.08)",
     defined: "#d2d2d7",
     strong: "#86868b",
@@ -192,8 +218,8 @@ export const lightColors: ColorTokens = {
   },
   inverse: {
     surface: "#1d1d1f",
-    onSurface: "#faf9f5",
-    primary: brandShared.textDark,
+    "on-surface": "#faf9f5",
+    primary: brandShared["text-dark"],
   },
   chart: {
     1: brandShared.fill,
@@ -203,107 +229,138 @@ export const lightColors: ColorTokens = {
     5: "#8e6fbb",
   },
   sidebar: {
+    DEFAULT: "#faf9f5",
     background: "#faf9f5",
     foreground: "#1d1d1f",
     primary: brandShared.fill,
-    primaryForeground: "#ffffff",
+    "primary-foreground": "#ffffff",
     accent: "#ebeae5",
-    accentForeground: "#1d1d1f",
+    "accent-foreground": "#1d1d1f",
     border: "rgba(0, 0, 0, 0.08)",
     ring: brandShared.fill,
   },
 };
 
 export const darkColors: ColorTokens = {
+  background: "#1a1a18",
+  foreground: "#f0eee6",
+  card: { DEFAULT: "#30302e", foreground: "#f0eee6" },
+  popover: { DEFAULT: "#30302e", foreground: "#f0eee6" },
+  primary: { DEFAULT: brandShared.fill, foreground: "#ffffff" },
+  secondary: { DEFAULT: "#1f1e1c", foreground: "#f0eee6" },
+  muted: { DEFAULT: "#141413", foreground: "#a39e98" },
+  accent: { DEFAULT: "#1f1e1c", foreground: "#f0eee6" },
+  destructive: { DEFAULT: "#cf2d56", foreground: "#ffffff" },
+  input: "#3a3937",
+  ring: brandShared["text-dark"],
+
   surface: {
     canvas: "#1a1a18",
     base: "#26251e",
     elevated: "#30302e",
     subtle: "#1f1e1c",
     sunken: "#141413",
-    containerLowest: "#141413",
-    containerLow: "#1a1a18",
+    "container-lowest": "#141413",
+    "container-low": "#1a1a18",
     container: "#26251e",
-    containerHigh: "#30302e",
-    containerHighest: "#48484a",
-    tint: brandShared.textDark,
+    "container-high": "#30302e",
+    "container-highest": "#48484a",
+    tint: brandShared["text-dark"],
   },
   text: {
     primary: "#f0eee6",
     secondary: "#a39e98",
     tertiary: "#6e6c66",
     disabled: "#48484a",
-    onBrand: "#ffffff",
-    brand: brandShared.textDark,
+    "on-brand": "#ffffff",
+    brand: brandShared["text-dark"],
   },
   brand: {
     ...brandShared,
-    container: brandShared.textLight,
-    onContainer: "#faf9f5",
+    container: brandShared["text-light"],
+    "on-container": "#faf9f5",
   },
   semantic: {
     success: {
       fill: "#157352",
-      textLight: "#157352",
-      textDark: "#3da884",
+      "text-light": "#157352",
+      "text-dark": "#3da884",
       container: "#1c3d33",
-      onContainer: "#b8e7c4",
+      "on-container": "#b8e7c4",
     },
     warning: {
       fill: "#9c5e22",
-      textLight: "#8a5520",
-      textDark: "#d8943e",
+      "text-light": "#8a5520",
+      "text-dark": "#d8943e",
       container: "#3d2a14",
-      onContainer: "#f0d3a0",
+      "on-container": "#f0d3a0",
     },
     error: {
       fill: "#cf2d56",
-      textLight: "#cf2d56",
-      textDark: "#e34c75",
+      "text-light": "#cf2d56",
+      "text-dark": "#e34c75",
       container: "#401520",
-      onContainer: "#f7c7d3",
+      "on-container": "#f7c7d3",
     },
     info: {
       fill: "#1565c0",
-      textLight: "#1565c0",
-      textDark: "#5aa9f0",
+      "text-light": "#1565c0",
+      "text-dark": "#5aa9f0",
       container: "#142a40",
-      onContainer: "#c4dffb",
+      "on-container": "#c4dffb",
     },
   },
-  sentiment: sentimentShared,
+  sentiment: {
+    positive: {
+      fill: brandShared.fill,
+      text: brandShared["text-dark"],
+      "text-light": brandShared["text-light"],
+      "text-dark": brandShared["text-dark"],
+    },
+    negative: {
+      fill: "#5b7a99",
+      text: "#7b98b5",
+      "text-light": "#3f5c7a",
+      "text-dark": "#7b98b5",
+    },
+  },
   border: {
+    DEFAULT: "#3a3937",
     whisper: "rgba(255, 255, 255, 0.10)",
     defined: "#3a3937",
     strong: "#5a5856",
-    focus: brandShared.textDark,
+    focus: brandShared["text-dark"],
     error: "#e34c75",
   },
   inverse: {
     surface: "#f0eee6",
-    onSurface: "#1d1d1f",
-    primary: brandShared.textLight,
+    "on-surface": "#1d1d1f",
+    primary: brandShared["text-light"],
   },
   chart: {
-    1: brandShared.textDark,
+    1: brandShared["text-dark"],
     2: "#5aa9f0",
     3: "#3da884",
     4: "#d8943e",
     5: "#ad8fd6",
   },
   sidebar: {
+    DEFAULT: "#26251e",
     background: "#26251e",
     foreground: "#f0eee6",
     primary: brandShared.fill,
-    primaryForeground: "#ffffff",
+    "primary-foreground": "#ffffff",
     accent: "#1f1e1c",
-    accentForeground: "#f0eee6",
+    "accent-foreground": "#f0eee6",
     border: "rgba(255, 255, 255, 0.10)",
-    ring: brandShared.textDark,
+    ring: brandShared["text-dark"],
   },
 };
 
-export const colors: Record<ColorMode, ColorTokens> = {
+export const colors: Record<ColorScheme, ColorTokens> = {
   light: lightColors,
   dark: darkColors,
 };
+
+// Backwards-compatible alias for callsites that imported the older name.
+export type ColorMode = ColorScheme;

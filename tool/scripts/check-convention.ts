@@ -11,12 +11,12 @@
  * - R6  tanstack-query-keys       — no inline `queryKey: [` outside api key/query/mutation files
  * - R7  seed-power-law-isolation  — only strategy.ts/utils.ts may import powerLaw in factory/
  * - R9  ui-component-foundation   — token consumption goes through uno-config theme.colors
- *                                   short names; bans long-form `*-rezics-color-*` utility
- *                                   classes, raw `var(--rezics-(sys-color|color)-…)` in
- *                                   className contexts, and the 11 deprecated generation
- *                                   names (rezics-color-fg, -bg, -primary, -secondary,
- *                                   -accent and their hover / selected / muted / canvas /
- *                                   elevated variants).
+ *                                   short names. Bans any `var(--rezics-…)` reference and
+ *                                   the (now-removed) hand-written `package/ui/src/config/
+ *                                   tokens.css`. The flat `--colors-*` / `--radius-*` /
+ *                                   `--shadow-*` / `--font-*` / `--duration-*` /
+ *                                   `--easing-*` namespace emitted by uno-config.ts is
+ *                                   the only sanctioned CSS-variable surface.
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -513,42 +513,40 @@ const R9_FILE_ALLOWLIST = new Set<string>([
   // The list is reviewed quarterly and SHALL shrink over time.
 ]);
 
-const R9_LEGACY_NAMES = [
-  "rezics-color-fg",
-  "rezics-color-fg-muted",
-  "rezics-color-bg",
-  "rezics-color-bg-muted",
-  "rezics-color-bg-canvas",
-  "rezics-color-bg-elevated",
-  "rezics-color-bg-hover",
-  "rezics-color-bg-selected",
-  "rezics-color-primary",
-  "rezics-color-secondary",
-  "rezics-color-accent",
-];
+// Match any `--rezics-*` CSS variable reference. The whole namespace was
+// retired by the unify-tokens-single-source openspec change; the flat
+// `--colors-*` / `--radius-*` / `--shadow-*` / `--font-*` / `--duration-*` /
+// `--easing-*` surface emitted by `package/ui/src/config/uno-config.ts` is the
+// only sanctioned form.
+const R9_REZICS_VAR_PATTERN = /var\(\s*--rezics-[a-zA-Z0-9_-]+/;
 
-const R9_LONG_FORM_PATTERN =
-  /\b(?:text|bg|border|ring|divide|from|to|fill|stroke|outline|caret|accent|placeholder|via)-rezics-color-[\w-]+/;
-
-const R9_BRACKETED_VAR_PATTERN =
-  /\[var\(--rezics-(?:sys-color|ref-color|color)-[^)]+\)/;
-
-const R9_LEGACY_NAME_PATTERN = new RegExp(
-  `(?<![A-Za-z0-9_-])(?:${R9_LEGACY_NAMES.map((n) =>
-    n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-  ).join("|")})(?![A-Za-z0-9_-])`,
+// `package/ui/src/config/tokens.css` SHALL NOT exist — the tokens TS source is
+// authoritative and uno-config.ts emits the runtime CSS variables.
+const R9_TOKENS_CSS_PATH = join(
+  REPO_ROOT,
+  "package/ui/src/config/tokens.css",
 );
 
 function isR9TargetFile(absPath: string): boolean {
   const relPath = relative(REPO_ROOT, absPath).replace(/\\/g, "/");
   if (!/^package\/[^/]+\/src\//.test(relPath)) return false;
-  if (!/\.(tsx?|jsx?|mdx)$/.test(relPath)) return false;
+  if (!/\.(tsx?|jsx?|mdx|css)$/.test(relPath)) return false;
   if (/\.fixture\.[tj]sx?$/.test(relPath)) return false;
   return true;
 }
 
 function scanTokenConsumption(candidateFiles: string[]): Violation[] {
   const violations: Violation[] = [];
+
+  if (existsSync(R9_TOKENS_CSS_PATH)) {
+    violations.push({
+      rule: "R9",
+      path: "package/ui/src/config/tokens.css",
+      message:
+        "`tokens.css` is forbidden — design tokens live in `package/ui/src/config/tokens/*.ts` and are emitted as flat CSS variables by `uno-config.ts`. Delete this file.",
+      spec: SPEC_LINK.R9,
+    });
+  }
 
   for (const filePath of candidateFiles) {
     if (!isR9TargetFile(filePath)) continue;
@@ -565,33 +563,12 @@ function scanTokenConsumption(candidateFiles: string[]): Violation[] {
     const lines = content.split("\n");
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]!;
-
-      const longFormMatch = line.match(R9_LONG_FORM_PATTERN);
-      if (longFormMatch) {
+      const match = line.match(R9_REZICS_VAR_PATTERN);
+      if (match) {
         violations.push({
           rule: "R9",
           path: `${relPath}:${i + 1}`,
-          message: `Long-form \`${longFormMatch[0]}\` — use the curated short name from \`package/ui/src/config/uno-config.ts\` \`theme.colors\` (e.g. \`text-text-primary\`, \`bg-surface-elevated\`).`,
-          spec: SPEC_LINK.R9,
-        });
-      }
-
-      const bracketedMatch = line.match(R9_BRACKETED_VAR_PATTERN);
-      if (bracketedMatch) {
-        violations.push({
-          rule: "R9",
-          path: `${relPath}:${i + 1}`,
-          message: `Raw \`var(--rezics-…-color-…)\` arbitrary-value class (\`${bracketedMatch[0]}\`) — replace with the curated short name from \`uno-config.ts\` \`theme.colors\`.`,
-          spec: SPEC_LINK.R9,
-        });
-      }
-
-      const legacyMatch = line.match(R9_LEGACY_NAME_PATTERN);
-      if (legacyMatch) {
-        violations.push({
-          rule: "R9",
-          path: `${relPath}:${i + 1}`,
-          message: `Deprecated generation name \`${legacyMatch[0]}\` — replace with the canonical successor (see \`package/ui/src/config/tokens.css\` for the alias mapping; e.g. \`rezics-color-fg\` → \`text-primary\`).`,
+          message: `Forbidden \`${match[0]})\` — the \`--rezics-*\` namespace was retired. Use the flat CSS variable surface emitted by \`uno-config.ts\` (e.g. \`var(--colors-text-primary)\`, \`var(--radius-md)\`, \`var(--shadow-modal)\`) or the curated short-name className (\`text-primary\`, \`bg-surface-elevated\`).`,
           spec: SPEC_LINK.R9,
         });
       }

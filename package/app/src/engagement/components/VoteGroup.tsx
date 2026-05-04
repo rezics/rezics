@@ -78,7 +78,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
 
   const groupClass =
     variant === "pill"
-      ? "rounded-[var(--rezics-radius-pill,999px)] bg-black/5 dark:bg-white/5 px-1 py-0.5"
+      ? "rounded-[var(--radius-pill,999px)] bg-black/5 dark:bg-white/5 px-1 py-0.5"
       : "";
 
   return (

@@ -1,24 +1,22 @@
 /**
- * uno-config.ts — the single consumption surface for rezics design tokens.
+ * uno-config.ts — single consumption surface for rezics design tokens.
  *
- * `theme.colors` (below) maps every consumer-facing short name (`text-primary`,
- * `bg-surface-elevated`, `border-border-whisper`, `fill-brand-fill`, etc.) to a
- * sys-tier CSS-variable reference from `tokens.css`. Consumers SHALL use the
- * short names. R9 in `tool/scripts/check-convention.ts` bans three patterns:
+ * `theme.colors` is set from `tokens/colors.ts` (`lightColors`). UnoCSS
+ * preset-wind4 emits the matching `--colors-*` CSS custom properties under
+ * `:root, :host` on demand. A preflight emits the `.dark { --colors-* }`
+ * override from `darkColors`, plus the static auxiliary tokens (`--font-*`,
+ * `--radius-*`, `--shadow-*`, `--duration-*`, `--easing-*`, state opacities)
+ * that consumers reference directly.
  *
- *   1. Long-form `<utility>-rezics-color-<name>` Tailwind/UnoCSS classes.
- *   2. Raw rezics-color CSS-variable references inside className-receiving
- *      contexts (className strings, `cn()`/`clsx()` arguments, className
- *      template literals) — including the bracketed arbitrary-value form.
- *   3. The 11 deprecated generation aliases (see `tokens.css` for the
- *      `@deprecated` list and their canonical successors).
+ * Authors SHALL consume tokens via the curated short names exposed by
+ * `theme.colors` (`text-primary`, `bg-surface-elevated`, …). R9 in
+ * `tool/scripts/check-convention.ts` bans any `var(--rezics-*)` reference in
+ * source files; the namespace was retired by openspec change
+ * `unify-tokens-single-source`.
  *
- * Inline `style={{}}` references to sys-tier CSS variables are permitted
- * (e.g. SVG `fill`, gradient stops). Prefer adding a UnoCSS shortcut here when
- * ≥3 callsites need the same value.
- *
- * Spec: `openspec/specs/ui-component-foundation/spec.md`. Adding a new short
- * name (or removing one) requires an OpenSpec change to that spec.
+ * Spec: `openspec/specs/design-system-foundation/spec.md` and
+ *       `openspec/specs/ui-component-foundation/spec.md`. Adding or removing
+ *       a short name (or any auxiliary token) requires an OpenSpec change.
  */
 import presetWind4 from "@unocss/preset-wind4";
 import { container as defaultContainer } from "@unocss/preset-wind4/theme";
@@ -26,47 +24,227 @@ import transformerDirectives from "@unocss/transformer-directives";
 import { defineConfig, presetAttributify, presetIcons } from "unocss";
 import presetAnimations from "unocss-preset-animations";
 import { presetScrollbarHide } from "unocss-preset-scrollbar-hide";
-import { builtinColors, presetShadcn } from "unocss-preset-shadcn";
+import { darkColors, lightColors } from "./tokens/colors";
+
+const FONT_SANS =
+  "'Inter', 'rezics-sans', var(--font-sans-cjk, 'Source Han Sans TC'), system-ui, -apple-system, 'Segoe UI', sans-serif";
+const FONT_SERIF =
+  "'Source Serif 4', 'rezics-serif', var(--font-serif-cjk, 'Source Han Serif TC'), Georgia, serif";
+const FONT_MONO =
+  "'CaskaydiaMono Nerd Font', 'Cascadia Code', 'rezics-mono', 'Sarasa Mono TC', ui-monospace, 'SF Mono', Menlo, monospace";
+const FONT_SANS_CJK = "'Source Han Sans TC', 'Noto Sans TC'";
+const FONT_SERIF_CJK = "'Source Han Serif TC', 'Noto Serif TC'";
+
+const RADIUS = {
+  xs: "4px",
+  sm: "6px",
+  md: "8px",
+  lg: "12px",
+  xl: "16px",
+  "2xl": "24px",
+  pill: "9999px",
+  full: "50%",
+} as const;
+
+// MD3 16-step duration ladder (50ms–1000ms).
+const DURATION = {
+  short1: "50ms",
+  short2: "100ms",
+  short3: "150ms",
+  short4: "200ms",
+  medium1: "250ms",
+  medium2: "300ms",
+  medium3: "350ms",
+  medium4: "400ms",
+  long1: "450ms",
+  long2: "500ms",
+  long3: "550ms",
+  long4: "600ms",
+  "extra-long1": "700ms",
+  "extra-long2": "800ms",
+  "extra-long3": "900ms",
+  "extra-long4": "1000ms",
+  // legacy rezics aliases mapped into the ladder.
+  fast: "150ms",
+  base: "250ms",
+  slow: "400ms",
+  page: "500ms",
+} as const;
+
+// MD3 easing set + rezics spring.
+const EASING = {
+  linear: "cubic-bezier(0, 0, 1, 1)",
+  standard: "cubic-bezier(0.2, 0, 0, 1)",
+  "standard-decelerate": "cubic-bezier(0, 0, 0, 1)",
+  "standard-accelerate": "cubic-bezier(0.3, 0, 1, 1)",
+  emphasized: "cubic-bezier(0.2, 0, 0, 1)",
+  "emphasized-decelerate": "cubic-bezier(0.05, 0.7, 0.1, 1)",
+  "emphasized-accelerate": "cubic-bezier(0.3, 0, 0.8, 0.15)",
+  spring: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+  // legacy rezics aliases.
+  out: "cubic-bezier(0, 0, 0, 1)",
+  "in-out": "cubic-bezier(0.2, 0, 0, 1)",
+} as const;
+
+const SHADOW_LIGHT = {
+  "1": "0 1px 2px rgba(0, 0, 0, 0.04)",
+  "2": "0 2px 4px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.04)",
+  "3": "0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04), 0 16px 32px rgba(0, 0, 0, 0.06)",
+  modal:
+    "0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04), 0 16px 32px rgba(0, 0, 0, 0.06)",
+} as const;
+
+const SHADOW_DARK = {
+  "1": "0 1px 2px rgba(0, 0, 0, 0.20)",
+  "2": "0 2px 4px rgba(0, 0, 0, 0.20), 0 4px 8px rgba(0, 0, 0, 0.24)",
+  "3": "0 4px 8px rgba(0, 0, 0, 0.24), 0 8px 16px rgba(0, 0, 0, 0.28), 0 16px 32px rgba(0, 0, 0, 0.36)",
+  modal:
+    "0 1px 2px rgba(0, 0, 0, 0.20), 0 4px 8px rgba(0, 0, 0, 0.28), 0 8px 16px rgba(0, 0, 0, 0.32), 0 16px 32px rgba(0, 0, 0, 0.40)",
+} as const;
+
+const STATE_OPACITY = {
+  hover: 0.08,
+  focus: 0.12,
+  pressed: 0.12,
+  dragged: 0.16,
+} as const;
+
+function flattenColorVars(
+  obj: Record<string, unknown>,
+  parent = "colors",
+  out: [string, string][] = [],
+): [string, string][] {
+  for (const [key, value] of Object.entries(obj)) {
+    const path = key === "DEFAULT" ? parent : `${parent}-${key}`;
+    if (typeof value === "string") {
+      out.push([`--${path}`, value]);
+    } else if (value && typeof value === "object") {
+      flattenColorVars(value as Record<string, unknown>, path, out);
+    }
+  }
+  return out;
+}
+
+function indentedDeclarations(
+  pairs: ReadonlyArray<readonly [string, string | number]>,
+): string {
+  return pairs.map(([k, v]) => `  ${k}: ${v};`).join("\n");
+}
+
+function emitDarkOverride(): string {
+  const lines = indentedDeclarations(
+    flattenColorVars(darkColors as unknown as Record<string, unknown>),
+  );
+  const shadowLines = indentedDeclarations(
+    Object.entries(SHADOW_DARK).map(([k, v]) => [`--shadow-${k}`, v] as const),
+  );
+  return `.dark {\n${lines}\n${shadowLines}\n}`;
+}
+
+function emitStaticTokens(): string {
+  const fontPairs: Array<[string, string]> = [
+    ["--font-sans", FONT_SANS],
+    ["--font-serif", FONT_SERIF],
+    ["--font-mono", FONT_MONO],
+    ["--font-sans-cjk", FONT_SANS_CJK],
+    ["--font-serif-cjk", FONT_SERIF_CJK],
+  ];
+  const radiusPairs = Object.entries(RADIUS).map(
+    ([k, v]) => [`--radius-${k}`, v] as [string, string],
+  );
+  const shadowPairs = Object.entries(SHADOW_LIGHT).map(
+    ([k, v]) => [`--shadow-${k}`, v] as [string, string],
+  );
+  const durationPairs = Object.entries(DURATION).map(
+    ([k, v]) => [`--duration-${k}`, v] as [string, string],
+  );
+  const easingPairs = Object.entries(EASING).map(
+    ([k, v]) => [`--easing-${k}`, v] as [string, string],
+  );
+  const opacityPairs: Array<[string, string]> = Object.entries(
+    STATE_OPACITY,
+  ).map(([k, v]) => [`--state-${k}-opacity`, String(v)]);
+
+  const all = [
+    ...fontPairs,
+    ...radiusPairs,
+    ...shadowPairs,
+    ...durationPairs,
+    ...easingPairs,
+    ...opacityPairs,
+  ];
+  return `:root, :host {\n${indentedDeclarations(all)}\n}`;
+}
+
+const ACCORDION_COLLAPSIBLE_KEYFRAMES = `
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+@keyframes collapsible-down {
+  from { height: 0; }
+  to { height: var(--radix-collapsible-content-height); }
+}
+@keyframes collapsible-up {
+  from { height: var(--radix-collapsible-content-height); }
+  to { height: 0; }
+}
+`.trim();
 
 export function createUnoConfig() {
   return defineConfig({
     presets: [
       presetWind4({ preflights: { reset: true } }),
-      presetShadcn(builtinColors.map((c) => ({ color: c }))),
       presetAnimations(),
       presetIcons(),
       presetAttributify({
         prefix: "un-",
         prefixedOnly: true,
       }), // support <div un-text="red-500">
-      // * small presets below
       presetScrollbarHide(),
     ],
     transformers: [transformerDirectives()],
+    preflights: [
+      {
+        layer: "theme",
+        getCSS: () => emitStaticTokens(),
+      },
+      {
+        layer: "theme",
+        getCSS: () => emitDarkOverride(),
+      },
+      {
+        layer: "theme",
+        getCSS: () => ACCORDION_COLLAPSIBLE_KEYFRAMES,
+      },
+    ],
     shortcuts: {
       // State-layer overlays — quiet rectangular tint per the rezics borderless
       // aesthetic (no MD3 ripple). Apply to elements that own `relative` and an
       // `on-*` foreground; the overlay uses `currentColor` so contrast tracks
       // the element's text color in either mode.
       "state-hover":
-        "before:content-[''] before:absolute before:inset-0 before:bg-current before:opacity-0 before:pointer-events-none hover:before:opacity-[var(--rezics-sys-state-hover-opacity)] before:transition-opacity",
+        "before:content-[''] before:absolute before:inset-0 before:bg-current before:opacity-0 before:pointer-events-none hover:before:opacity-[var(--state-hover-opacity)] before:transition-opacity",
       "state-focus":
-        "before:content-[''] before:absolute before:inset-0 before:bg-current before:opacity-0 before:pointer-events-none focus-visible:before:opacity-[var(--rezics-sys-state-focus-opacity)] before:transition-opacity",
+        "before:content-[''] before:absolute before:inset-0 before:bg-current before:opacity-0 before:pointer-events-none focus-visible:before:opacity-[var(--state-focus-opacity)] before:transition-opacity",
       "state-pressed":
-        "before:content-[''] before:absolute before:inset-0 before:bg-current before:opacity-0 before:pointer-events-none active:before:opacity-[var(--rezics-sys-state-pressed-opacity)] before:transition-opacity",
+        "before:content-[''] before:absolute before:inset-0 before:bg-current before:opacity-0 before:pointer-events-none active:before:opacity-[var(--state-pressed-opacity)] before:transition-opacity",
     },
     theme: {
       breakpoint: {
         xs: "0px",
-        xsm: "450px", // 基础移动端
-        sm: "640px", // 大屏手机 / 小型平板
-        md: "768px", // 平板电脑 (iPad 纵向)
-        lg: "1024px", // 笔记本电脑 (iPad 横向 / 小屏 PC)
-        xl: "1280px", // 标准桌面显示器
-        "2xl": "1536px", // 大屏显示器 / 高分屏
+        xsm: "450px",
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+        "2xl": "1536px",
       },
       container: {
-        // container 只能定义 defaultContainer 中有的key，否则会导致奇怪的覆盖
         ...defaultContainer,
         xs: "450px",
         sm: "640px",
@@ -76,277 +254,64 @@ export function createUnoConfig() {
         "2xl": "1536px",
         "8xl": "1440px",
       },
-      // rezics design tokens — resolve to CSS variables defined in
-      // `package/ui/src/config/tokens.css`. Utilities auto-switch with
-      // [data-theme="dark"] under `.theme-rezics`. See foundation v1 brief.
-      //
-      // NOTE: spacing intentionally omitted. preset-wind4 follows Tailwind v4's
-      // single-`--spacing` model (every step = N × 4px via calc). Overriding
-      // `theme.spacing` here breaks shadcn (which assumes native step values)
-      // and conflicts with preset-wind4's preflight emission. Mental model:
-      // step number × 4 = pixels (so 8 → 32px, 12 → 48px, 24 → 96px).
       borderRadius: {
         none: "0",
-        xs: "var(--rezics-radius-xs)",
-        sm: "var(--rezics-radius-sm)",
-        md: "var(--rezics-radius-md)",
-        DEFAULT: "var(--rezics-radius-md)",
-        lg: "var(--rezics-radius-lg)",
-        xl: "var(--rezics-radius-xl)",
-        "2xl": "var(--rezics-radius-2xl)",
-        pill: "var(--rezics-radius-pill)",
-        full: "var(--rezics-radius-full)",
+        xs: RADIUS.xs,
+        sm: RADIUS.sm,
+        md: RADIUS.md,
+        DEFAULT: RADIUS.md,
+        lg: RADIUS.lg,
+        xl: RADIUS.xl,
+        "2xl": RADIUS["2xl"],
+        pill: RADIUS.pill,
+        full: RADIUS.full,
       },
       fontFamily: {
-        sans: "var(--rezics-font-sans)",
-        serif: "var(--rezics-font-serif)",
-        mono: "var(--rezics-font-mono)",
+        sans: FONT_SANS,
+        serif: FONT_SERIF,
+        mono: FONT_MONO,
       },
       transitionDuration: {
-        // Legacy rezics names — alias into the MD3 ladder via the CSS var chain.
-        fast: "var(--rezics-motion-fast)",
-        base: "var(--rezics-motion-base)",
-        slow: "var(--rezics-motion-slow)",
-        page: "var(--rezics-motion-page)",
-        // MD3 16-step ladder (50ms–1000ms) — short / medium / long / extra-long.
-        short1: "var(--rezics-sys-motion-duration-short1)",
-        short2: "var(--rezics-sys-motion-duration-short2)",
-        short3: "var(--rezics-sys-motion-duration-short3)",
-        short4: "var(--rezics-sys-motion-duration-short4)",
-        medium1: "var(--rezics-sys-motion-duration-medium1)",
-        medium2: "var(--rezics-sys-motion-duration-medium2)",
-        medium3: "var(--rezics-sys-motion-duration-medium3)",
-        medium4: "var(--rezics-sys-motion-duration-medium4)",
-        long1: "var(--rezics-sys-motion-duration-long1)",
-        long2: "var(--rezics-sys-motion-duration-long2)",
-        long3: "var(--rezics-sys-motion-duration-long3)",
-        long4: "var(--rezics-sys-motion-duration-long4)",
-        "extra-long1": "var(--rezics-sys-motion-duration-extra-long1)",
-        "extra-long2": "var(--rezics-sys-motion-duration-extra-long2)",
-        "extra-long3": "var(--rezics-sys-motion-duration-extra-long3)",
-        "extra-long4": "var(--rezics-sys-motion-duration-extra-long4)",
+        ...DURATION,
       },
       transitionTimingFunction: {
-        // Legacy rezics names — aliased into the MD3 set via the CSS var chain.
-        out: "var(--rezics-ease-out)",
-        "in-out": "var(--rezics-ease-in-out)",
-        spring: "var(--rezics-ease-spring)",
-        // MD3 easing set + rezics spring.
-        linear: "var(--rezics-sys-motion-easing-linear)",
-        standard: "var(--rezics-sys-motion-easing-standard)",
-        "standard-decelerate": "var(--rezics-sys-motion-easing-standard-decelerate)",
-        "standard-accelerate": "var(--rezics-sys-motion-easing-standard-accelerate)",
-        emphasized: "var(--rezics-sys-motion-easing-emphasized)",
-        "emphasized-decelerate": "var(--rezics-sys-motion-easing-emphasized-decelerate)",
-        "emphasized-accelerate": "var(--rezics-sys-motion-easing-emphasized-accelerate)",
+        ...EASING,
       },
       boxShadow: {
         none: "none",
-        sm: "var(--rezics-shadow-1)",
-        md: "var(--rezics-shadow-2)",
-        lg: "var(--rezics-shadow-3)",
-        modal: "var(--rezics-shadow-modal)",
+        sm: SHADOW_LIGHT["1"],
+        md: SHADOW_LIGHT["2"],
+        lg: SHADOW_LIGHT["3"],
+        modal: SHADOW_LIGHT.modal,
       },
-      // Theme.colors taxonomy mirrors the role taxonomy in tokens.css:
-      //   shadcn-superset slots → surface family → text family → brand family
-      //   → secondary / tertiary → semantic states → sentiment → lines →
-      //   inverse → chart → sidebar.
-      colors: {
-        // ============================================================
-        // shadcn-superset slots — overrides unocss-preset-shadcn's
-        // `oklch(var(--foo))` wrapper so utilities consume the variables
-        // (which now hold full `oklch(...)` or hex values) directly.
-        // ============================================================
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--card-foreground)",
+      animation: {
+        keyframes: {
+          "accordion-down":
+            "{ from { height: 0; } to { height: var(--radix-accordion-content-height); } }",
+          "accordion-up":
+            "{ from { height: var(--radix-accordion-content-height); } to { height: 0; } }",
+          "collapsible-down":
+            "{ from { height: 0; } to { height: var(--radix-collapsible-content-height); } }",
+          "collapsible-up":
+            "{ from { height: var(--radix-collapsible-content-height); } to { height: 0; } }",
         },
-        popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
+        durations: {
+          "accordion-down": "200ms",
+          "accordion-up": "200ms",
+          "collapsible-down": "200ms",
+          "collapsible-up": "200ms",
         },
-        muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
-        },
-        accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-foreground)",
-        },
-        destructive: {
-          DEFAULT: "var(--destructive)",
-          foreground: "var(--destructive-foreground)",
-        },
-        input: "var(--input)",
-        ring: "var(--ring)",
-        primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
-        },
-        secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
-        },
-
-        // ============================================================
-        // surface family — parchment ladder + MD3 surface-container ladder
-        // ============================================================
-        surface: {
-          DEFAULT: "var(--rezics-sys-color-surface-canvas)",
-          canvas: "var(--rezics-sys-color-surface-canvas)",
-          base: "var(--rezics-sys-color-surface-base)",
-          elevated: "var(--rezics-sys-color-surface-elevated)",
-          subtle: "var(--rezics-sys-color-surface-subtle)",
-          sunken: "var(--rezics-sys-color-surface-sunken)",
-          variant: "var(--rezics-sys-color-surface-variant)",
-          "container-lowest": "var(--rezics-sys-color-surface-container-lowest)",
-          "container-low": "var(--rezics-sys-color-surface-container-low)",
-          container: "var(--rezics-sys-color-surface-container)",
-          "container-high": "var(--rezics-sys-color-surface-container-high)",
-          "container-highest": "var(--rezics-sys-color-surface-container-highest)",
-          tint: "var(--rezics-sys-color-surface-tint)",
-        },
-        "on-background": "var(--rezics-sys-color-on-background)",
-        "on-surface": "var(--rezics-sys-color-on-surface)",
-        "on-surface-variant": "var(--rezics-sys-color-on-surface-variant)",
-
-        // ============================================================
-        // text family
-        // ============================================================
-        text: {
-          DEFAULT: "var(--rezics-sys-color-text-primary)",
-          primary: "var(--rezics-sys-color-text-primary)",
-          secondary: "var(--rezics-sys-color-text-secondary)",
-          tertiary: "var(--rezics-sys-color-text-tertiary)",
-          disabled: "var(--rezics-sys-color-text-disabled)",
-          "on-brand": "var(--rezics-sys-color-text-on-brand)",
-          brand: "var(--rezics-sys-color-text-brand)",
-        },
-
-        // ============================================================
-        // brand family — fill / hover / active + container variant
-        // ============================================================
-        brand: {
-          DEFAULT: "var(--rezics-sys-color-brand-fill)",
-          fill: "var(--rezics-sys-color-brand-fill)",
-          hover: "var(--rezics-sys-color-brand-fill-hover)",
-          active: "var(--rezics-sys-color-brand-fill-active)",
-          text: "var(--rezics-sys-color-text-brand)",
-          container: "var(--rezics-sys-color-primary-container)",
-          "on-container": "var(--rezics-sys-color-on-primary-container)",
-        },
-        "primary-container": "var(--rezics-sys-color-primary-container)",
-        "on-primary": "var(--rezics-sys-color-on-primary)",
-        "on-primary-container": "var(--rezics-sys-color-on-primary-container)",
-
-        // ============================================================
-        // secondary / tertiary container variants
-        // ============================================================
-        "secondary-container": "var(--rezics-sys-color-secondary-container)",
-        "on-secondary": "var(--rezics-sys-color-on-secondary)",
-        "on-secondary-container": "var(--rezics-sys-color-on-secondary-container)",
-        tertiary: {
-          DEFAULT: "var(--rezics-sys-color-tertiary)",
-          container: "var(--rezics-sys-color-tertiary-container)",
-        },
-        "on-tertiary": "var(--rezics-sys-color-on-tertiary)",
-        "on-tertiary-container": "var(--rezics-sys-color-on-tertiary-container)",
-
-        // ============================================================
-        // semantic states (success / warning / error / info) + containers
-        // ============================================================
-        success: {
-          DEFAULT: "var(--rezics-sys-color-success-fill)",
-          fill: "var(--rezics-sys-color-success-fill)",
-          text: "var(--rezics-sys-color-success-text)",
-          container: "var(--rezics-sys-color-success-container)",
-          "on-container": "var(--rezics-sys-color-on-success-container)",
-        },
-        warning: {
-          DEFAULT: "var(--rezics-sys-color-warning-fill)",
-          fill: "var(--rezics-sys-color-warning-fill)",
-          text: "var(--rezics-sys-color-warning-text)",
-          container: "var(--rezics-sys-color-warning-container)",
-          "on-container": "var(--rezics-sys-color-on-warning-container)",
-        },
-        error: {
-          DEFAULT: "var(--rezics-sys-color-error-fill)",
-          fill: "var(--rezics-sys-color-error-fill)",
-          text: "var(--rezics-sys-color-error-text)",
-          container: "var(--rezics-sys-color-error-container)",
-          "on-container": "var(--rezics-sys-color-on-error-container)",
-        },
-        info: {
-          DEFAULT: "var(--rezics-sys-color-info-fill)",
-          fill: "var(--rezics-sys-color-info-fill)",
-          text: "var(--rezics-sys-color-info-text)",
-          container: "var(--rezics-sys-color-info-container)",
-          "on-container": "var(--rezics-sys-color-on-info-container)",
-        },
-
-        // ============================================================
-        // sentiment polarity (vote / rating / poll)
-        // ============================================================
-        sentiment: {
-          "positive-fill": "var(--rezics-sys-color-sentiment-positive-fill)",
-          "positive-text": "var(--rezics-sys-color-sentiment-positive-text)",
-          "negative-fill": "var(--rezics-sys-color-sentiment-negative-fill)",
-          "negative-text": "var(--rezics-sys-color-sentiment-negative-text)",
-        },
-
-        // ============================================================
-        // lines — outline / outline-variant / border family
-        // ============================================================
-        outline: {
-          DEFAULT: "var(--rezics-sys-color-outline)",
-          variant: "var(--rezics-sys-color-outline-variant)",
-        },
-        border: {
-          DEFAULT: "var(--rezics-sys-color-border-whisper)",
-          whisper: "var(--rezics-sys-color-border-whisper)",
-          defined: "var(--rezics-sys-color-border-defined)",
-          strong: "var(--rezics-sys-color-border-strong)",
-          focus: "var(--rezics-sys-color-border-focus)",
-          error: "var(--rezics-sys-color-border-error)",
-        },
-
-        // ============================================================
-        // inverse family — snackbars, pull-quotes, dark-on-light tiles
-        // ============================================================
-        inverse: {
-          surface: "var(--rezics-sys-color-inverse-surface)",
-          "on-surface": "var(--rezics-sys-color-inverse-on-surface)",
-          primary: "var(--rezics-sys-color-inverse-primary)",
-        },
-
-        // ============================================================
-        // charts — curated 5-step palette (shadcn slots alias to these)
-        // ============================================================
-        chart: {
-          "1": "var(--chart-1)",
-          "2": "var(--chart-2)",
-          "3": "var(--chart-3)",
-          "4": "var(--chart-4)",
-          "5": "var(--chart-5)",
-        },
-
-        // ============================================================
-        // sidebar chrome — long-running navigation surfaces
-        // ============================================================
-        sidebar: {
-          DEFAULT: "var(--sidebar)",
-          background: "var(--sidebar-background)",
-          foreground: "var(--sidebar-foreground)",
-          primary: "var(--sidebar-primary)",
-          "primary-foreground": "var(--sidebar-primary-foreground)",
-          accent: "var(--sidebar-accent)",
-          "accent-foreground": "var(--sidebar-accent-foreground)",
-          border: "var(--sidebar-border)",
-          ring: "var(--sidebar-ring)",
+        timingFns: {
+          "accordion-down": EASING["standard-decelerate"],
+          "accordion-up": EASING["standard-decelerate"],
+          "collapsible-down": EASING["standard-decelerate"],
+          "collapsible-up": EASING["standard-decelerate"],
         },
       },
+      // The shadcn 32 + rezics extensions live here as a single, unified shape.
+      // wind4 emits each leaf as a flat `--colors-<path>` custom property under
+      // `:root, :host`; the dark override is emitted by the preflight above.
+      colors: lightColors as unknown as Record<string, unknown>,
     },
   });
 }

@@ -50,7 +50,7 @@ export const ReplyAction: React.FC<ReplyActionProps> = ({
       className={cn(
         "min-w-0 gap-1.5 text-text-secondary normal-case hover:text-text-primary",
         size === "sm" ? "px-2 text-xs" : size === "lg" ? "px-2.5 text-[0.95rem]" : "px-2.5 text-sm",
-        isPill && "rounded-[var(--rezics-radius-pill,999px)] bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10",
+        isPill && "rounded-[var(--radius-pill,999px)] bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10",
         !isPill && "hover:bg-black/10 dark:hover:bg-white/10",
       )}
     >

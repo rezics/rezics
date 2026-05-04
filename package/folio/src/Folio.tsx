@@ -84,7 +84,7 @@ function FolioInner({
           style={{
             width: "280px",
             flexShrink: 0,
-            borderRight: "1px solid var(--rezics-sys-color-border-whisper)",
+            borderRight: "1px solid var(--colors-border-whisper)",
             ...themeVars,
           }}
         >
@@ -110,7 +110,7 @@ function FolioInner({
               alignItems: "center",
               gap: "8px",
               padding: "8px 12px",
-              borderBottom: "1px solid var(--rezics-sys-color-border-whisper)",
+              borderBottom: "1px solid var(--colors-border-whisper)",
             }}
           >
             <button
@@ -159,7 +159,7 @@ function FolioInner({
             className="folio-controls"
             style={{
               padding: "8px 12px",
-              borderTop: "1px solid var(--rezics-sys-color-border-whisper)",
+              borderTop: "1px solid var(--colors-border-whisper)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

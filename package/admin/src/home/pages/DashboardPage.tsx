@@ -46,7 +46,7 @@ export default function DashboardPage() {
             icon={<FeedbackIcon />}
             color={
               stats.counts.unresolvedFeedback > 0
-                ? "var(--rezics-sys-color-warning-fill)"
+                ? "var(--colors-semantic-warning-fill)"
                 : undefined
             }
           />

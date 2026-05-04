@@ -83,7 +83,7 @@ export function RealmPage({ realmId }: RealmPageProps) {
             <span className="text-xs text-text-brand">Public</span>
           )}
           {realm.isOfficial && (
-            <span className="text-xs" style={{ color: "var(--rezics-sys-color-secondary, var(--rezics-sys-color-text-secondary))" }}>
+            <span className="text-xs" style={{ color: "var(--colors-secondary, var(--colors-text-secondary))" }}>
               Official
             </span>
           )}

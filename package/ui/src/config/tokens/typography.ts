@@ -1,8 +1,8 @@
 // Foundation v1 typography tokens. Source: brief §3.
 
 export const fontFamilies = {
-  sans: `'Inter', 'rezics-sans', var(--rezics-font-sans-cjk, 'Source Han Sans TC'), system-ui, -apple-system, 'Segoe UI', sans-serif`,
-  serif: `'Source Serif 4', 'rezics-serif', var(--rezics-font-serif-cjk, 'Source Han Serif TC'), Georgia, serif`,
+  sans: `'Inter', 'rezics-sans', var(--font-sans-cjk, 'Source Han Sans TC'), system-ui, -apple-system, 'Segoe UI', sans-serif`,
+  serif: `'Source Serif 4', 'rezics-serif', var(--font-serif-cjk, 'Source Han Serif TC'), Georgia, serif`,
   mono: `'CaskaydiaMono Nerd Font', 'Cascadia Code', 'rezics-mono', 'Sarasa Mono TC', ui-monospace, 'SF Mono', Menlo, monospace`,
 } as const;
 

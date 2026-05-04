@@ -653,11 +653,11 @@ const chartData = [
 const chartConfig = {
   desktop: {
     label: "Desktop",
-    color: "var(--primary)",
+    color: "var(--colors-primary)",
   },
   mobile: {
     label: "Mobile",
-    color: "var(--primary)",
+    color: "var(--colors-primary)",
   },
 } satisfies ChartConfig;
 

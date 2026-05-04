@@ -15,21 +15,21 @@ Stacks live in `tokens/typography.ts` and are wired into MUI (`theme.typography.
 - **Serif** (`font-serif`) — Source Serif 4 + Source Han Serif. Reader / longform prose.
 - **Mono** (`font-mono`) — CaskaydiaMono Nerd Font + Sarasa Mono. Code, IDs, technical metadata.
 
-The CJK fallback inside each stack is the only piece that lives in CSS (`--rezics-font-sans-cjk`), so it can re-route per `:lang()` — SC for `zh-Hans`/`zh-CN`, JP for `ja`, KR for `ko`, TC default.
+The CJK fallback inside each stack is the only piece that lives in CSS (`--font-sans-cjk` / `--font-serif-cjk`), so it can re-route per `:lang()` — SC for `zh-Hans`/`zh-CN`, JP for `ja`, KR for `ko`, TC default.
 
 ## Scale (sans)
 
 Each `font-size` token is `clamp(min, fluid, max)`. Resize viewport to see the fluid step.
 
 <Unstyled>
-  <TypeSample cssVar="--rezics-font-size-3xl" size="clamp(36px, 2.25rem + 1.2vw, 48px)" weight={600} text="The serpent's name 苍穹 — display 3xl" />
-  <TypeSample cssVar="--rezics-font-size-2xl" size="clamp(28px, 1.75rem + 0.8vw, 36px)" weight={600} text="Page hero — display 2xl" />
-  <TypeSample cssVar="--rezics-font-size-xl" size="clamp(22px, 1.375rem + 0.6vw, 28px)" weight={600} text="Section heading — xl" />
-  <TypeSample cssVar="--rezics-font-size-lg" size="clamp(18px, 1.125rem + 0.4vw, 22px)" weight={500} text="Subsection — lg" />
-  <TypeSample cssVar="--rezics-font-size-md" size="clamp(16px, 1rem + 0.3vw, 18px)" weight={500} text="Lead body — md" />
-  <TypeSample cssVar="--rezics-font-size-base" size="clamp(14px, 0.875rem + 0.2vw, 16px)" text="Default body — base. Inter normalized to Source Han Sans baseline via font-size-adjust." />
-  <TypeSample cssVar="--rezics-font-size-sm" size="clamp(13px, 0.8125rem + 0.1vw, 14px)" text="Supporting text — sm" />
-  <TypeSample cssVar="--rezics-font-size-xs" size="clamp(12px, 0.75rem + 0.05vw, 13px)" text="Caption / metadata — xs" />
+  <TypeSample cssVar="fontSizes.3xl" size="clamp(36px, 2.25rem + 1.2vw, 48px)" weight={600} text="The serpent's name 苍穹 — display 3xl" />
+  <TypeSample cssVar="fontSizes.2xl" size="clamp(28px, 1.75rem + 0.8vw, 36px)" weight={600} text="Page hero — display 2xl" />
+  <TypeSample cssVar="fontSizes.xl" size="clamp(22px, 1.375rem + 0.6vw, 28px)" weight={600} text="Section heading — xl" />
+  <TypeSample cssVar="fontSizes.lg" size="clamp(18px, 1.125rem + 0.4vw, 22px)" weight={500} text="Subsection — lg" />
+  <TypeSample cssVar="fontSizes.md" size="clamp(16px, 1rem + 0.3vw, 18px)" weight={500} text="Lead body — md" />
+  <TypeSample cssVar="fontSizes.base" size="clamp(14px, 0.875rem + 0.2vw, 16px)" text="Default body — base. Inter normalized to Source Han Sans baseline via font-size-adjust." />
+  <TypeSample cssVar="fontSizes.sm" size="clamp(13px, 0.8125rem + 0.1vw, 14px)" text="Supporting text — sm" />
+  <TypeSample cssVar="fontSizes.xs" size="clamp(12px, 0.75rem + 0.05vw, 13px)" text="Caption / metadata — xs" />
 </Unstyled>
 
 ## Reader (serif)
@@ -38,7 +38,7 @@ Reader scale opens up line-height to 1.6 for longform comfort.
 
 <Unstyled>
   <TypeSample
-    cssVar="--rezics-font-size-reader"
+    cssVar="fontSizes.reader"
     size="clamp(16px, 1rem + 0.4vw, 20px)"
     family="serif"
     text="它从无名时代游来，在每一颗星辰下蜕过一次皮——the serpent shed its skin in the long dusk."
@@ -48,8 +48,8 @@ Reader scale opens up line-height to 1.6 for longform comfort.
 ## Mono
 
 <Unstyled>
-  <TypeSample cssVar="--rezics-font-size-base" size="clamp(14px, 0.875rem + 0.2vw, 16px)" family="mono" text="const id = '01HX7Q8K'; // mono — base" />
-  <TypeSample cssVar="--rezics-font-size-sm" size="clamp(13px, 0.8125rem + 0.1vw, 14px)" family="mono" text="bun run dev — mono sm" />
+  <TypeSample cssVar="fontSizes.base" size="clamp(14px, 0.875rem + 0.2vw, 16px)" family="mono" text="const id = '01HX7Q8K'; // mono — base" />
+  <TypeSample cssVar="fontSizes.sm" size="clamp(13px, 0.8125rem + 0.1vw, 14px)" family="mono" text="bun run dev — mono sm" />
 </Unstyled>
 
 ## Weights

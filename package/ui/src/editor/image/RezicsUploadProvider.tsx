@@ -108,7 +108,7 @@ function UploadContent({ onInsert }: UploadContentProps) {
           <div className="flex flex-col items-center gap-2">
             <CameraAltIcon
               size={32}
-              color="var(--rezics-sys-color-text-tertiary)"
+              color="var(--colors-text-tertiary)"
             />
             <p className="text-sm text-rezics-fg-muted">
               Drop image here, paste, or click to browse

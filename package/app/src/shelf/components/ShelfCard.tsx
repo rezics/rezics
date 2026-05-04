@@ -63,7 +63,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
             className="flex h-full w-full items-center justify-center"
             style={{
               background:
-                "linear-gradient(135deg, var(--rezics-sys-color-surface-subtle, rgba(0,0,0,0.04)), var(--rezics-sys-color-surface-canvas, transparent))",
+                "linear-gradient(135deg, var(--colors-surface-subtle, rgba(0,0,0,0.04)), var(--colors-surface-canvas, transparent))",
             }}
           >
             <span className="text-xs text-text-secondary">
