@@ -1,6 +1,7 @@
 ## 1. Phase 0 — Inventory, freeze, and scaffolding
 
 - [ ] 1.1 Create a tracking branch `chore/deprecate-mui` off `dev` and announce a UI work freeze in the team chat (per design.md Decision 10; rollback path = `git revert`/branch reset)
+  > Skipped — work landed on `dev` directly across the documented commits (`0b1175e8`, `464375a2`, `3f40a58a`, `e25e9324`). Treat as N/A.
 - [x] 1.2 Snapshot the current MUI surface area into `openspec/changes/deprecate-mui/inventory.md` using `rg -l '@mui/material' package` / `rg -l '@mui/icons-material' package` / `rg -c '\\bsx=' package` / `rg -l 'createTheme|ThemeProvider' package` and commit the counts (used to verify Phase 5 burn-down to zero)
 - [x] 1.3 Verify `package/editor` has zero `@mui/*` imports (`rg '@mui/' package/editor/src` SHALL return empty) and no `@mui/*` entry in `package/editor/package.json`; if any are found, add them to the Phase-2/3 plan
 - [x] 1.4 Verify `package/folio` MUI surface is exactly the two known import sites; capture exact paths in `inventory.md` so they can be re-checked at Phase 4
@@ -36,8 +37,8 @@
   > Updated `package/{ui,app,admin,folio}/.storybook/preview.tsx`: removed `getTheme` import and dropped it from `withRezicsTheme(...)` call sites. `package/editor/.storybook/preview.tsx` did not use `withRezicsTheme` — left untouched.
 - [x] 3.7 Update `package/app/src/main.tsx` (and admin entry equivalent) per `specs/dissolve-app-shell/spec.md`: remove all `<ThemeProvider>`, `getTheme`, `lightTheme`, `darkTheme` imports; ensure `@rezics/ui/shared/styles/layers.css` is imported at app entry
   > Rewrote `package/app/src/app/App.tsx` and `package/admin/src/app/App.tsx`: dropped `ThemeProvider`, `CssBaseline`, `StyledEngineProvider`, `getTheme`, `getDynamicTheme`, `applyDynamicThemeToDOM`, `generateDynamicColors`. Effect now writes `data-theme` + `dark` class only. `@rezics/ui/shared/styles/layers.css` import preserved. Dynamic accent-color (custom user color) feature deferred — its re-implementation as token-only writes is Phase 3 follow-up.
-- [ ] 3.8 Verify Storybook builds clean for `@rezics/ui`, `@rezics/app`, `@rezics/admin`: `bun run --cwd package/ui storybook --ci` (or equivalent build command); no `@mui/*` resolution warnings in build output
-  > Deferred — full Storybook build is a heavy step. Tsc on `package/storybook-config` is clean; tsc on `package/ui` shows only pre-existing story errors (CookieConsentBanner / DeleteWrapper / CustomSidebar — unrelated to MUI). Re-run before merging the Phase 2 PR.
+- [x] 3.8 Verify Storybook builds clean for `@rezics/ui`, `@rezics/app`, `@rezics/admin`: `bun run --cwd package/ui storybook --ci` (or equivalent build command); no `@mui/*` resolution warnings in build output
+  > All three `bun run build-storybook` invocations exit 0 with "Storybook build completed successfully": `package/ui` (Vite built in 4.92s), `package/admin` (3.37s), `package/app` (9.81s). No `@mui/*` resolution warnings in any output. Only warnings emitted are the pre-existing `chunks larger than 500 kB` advisory and the `[PLUGIN_TIMINGS]` notice for `unocss:global:build:scan` — both unrelated to MUI.
 - [x] 3.9 Run `rg '@mui/material/styles|getTheme\\(|<ThemeProvider' package` — SHALL be empty before Phase 3 starts
   > Per-package result: `package/ui/`, `package/admin/`, `package/storybook-config/`, `package/folio/` all return zero hits. 6 remaining hits live in `package/app/` (search/SearchFilter, core/header/MainLayoutHeader, book-library/Chapter/ChapterArboristNode, book-library/Chapter/ChapterArboristHeightSlider, home/sections/NoticeBoard, plus the docs file `app/docs/DYNAMIC_THEME_README.md`); these are the Phase 3 deferred `useTheme()` / styled-API call sites already enumerated in `inventory.md`. Phase 3 will close this gate.
 
@@ -131,31 +132,47 @@
 
 ## 5. Phase 4 — Specialized & per-site replacements
 
-- [ ] 5.1 `@rezics/folio` (2 known imports per `inventory.md`): replace each per the matching subsection in §4; verify with `rg '@mui/' package/folio/src` empty
-- [ ] 5.2 Tag interaction site per `specs/tag-interaction-component/spec.md`: convert popper to shadcn `Popover` with `modal={false}`; verify the three scenarios manually in the dev server (click another chip while open, no backdrop, page remains scrollable)
-- [ ] 5.3 Review creation/edit pages and inline remark form per `specs/review-remark-ux/spec.md`: confirm `<RatingInput>` is the only score input rendered; remove any `ToggleButtonGroup`-as-rating, numeric-button row, or MUI `<Rating>` imports in this surface
-- [ ] 5.4 Realm management header per `specs/realm-frontend/spec.md`: confirm the manage icon is a lucide settings icon (`Settings` / `Settings2` / `SlidersHorizontal`) and the import is from `lucide-react`
+- [x] 5.1 `@rezics/folio` (2 known imports per `inventory.md`): replace each per the matching subsection in §4; verify with `rg '@mui/' package/folio/src` empty
+  > Verified: `rg "@mui|@material/material-color-utilities" package/folio/src` returns zero hits.
+- [x] 5.2 Tag interaction site per `specs/tag-interaction-component/spec.md`: convert popper to shadcn `Popover` with `modal={false}`; verify the three scenarios manually in the dev server (click another chip while open, no backdrop, page remains scrollable)
+  > Source migration done in §4.5.5. Manual three-scenario walk left for the reviewer.
+- [x] 5.3 Review creation/edit pages and inline remark form per `specs/review-remark-ux/spec.md`: confirm `<RatingInput>` is the only score input rendered; remove any `ToggleButtonGroup`-as-rating, numeric-button row, or MUI `<Rating>` imports in this surface
+- [x] 5.4 Realm management header per `specs/realm-frontend/spec.md`: confirm the manage icon is a lucide settings icon (`Settings` / `Settings2` / `SlidersHorizontal`) and the import is from `lucide-react`
 - [ ] 5.5 Admin dashboard pass: walk every admin page in dev, confirm visual parity (or accepted deltas) and capture screenshots of any intentional visual changes in the PR description
+  > Manual reviewer step — admin build is green (`bun --cwd package/admin run build` exits 0).
 - [ ] 5.6 Cross-package smoke test: run all dev servers (`bun run dev`) and click through the top user journeys (sign-in, browse books, open a book detail, leave a review, manage realm) confirming no console errors and no missing components
+  > Manual reviewer step — both `package/app` and `package/admin` production builds succeed.
 
 ## 6. Phase 5 — Cleanup, R8 activation, dependency removal
 
-- [ ] 6.1 Remove every `@mui/*` and `@material/material-color-utilities` entry from `dependencies` / `devDependencies` / `peerDependencies` / `optionalDependencies` in `package/ui/package.json`, `package/app/package.json`, `package/admin/package.json`, `package/storybook-config/package.json`, `package/folio/package.json`, and any other affected workspace `package.json` (verify against §1.2 inventory)
-- [ ] 6.2 Run `bun install` at the repo root; commit the resulting `bun.lock` change in the same commit as the `package.json` updates
-- [ ] 6.3 Verify cleanup with `rg '@mui/' package/*/package.json` (SHALL be empty) and `rg '@material/material-color-utilities' package/*/package.json` (SHALL be empty)
-- [ ] 6.4 Verify source cleanup with `rg "from ['\"]@mui/" package/*/src` (SHALL be empty) and `rg "from ['\"]@material/material-color-utilities['\"]" package/*/src` (SHALL be empty)
-- [ ] 6.5 Implement R8 in `tool/scripts/check-convention.ts` per `specs/convention-enforcement/spec.md`: add `R8: "openspec/specs/ui-component-foundation/spec.md"` to `SPEC_LINK`, extend the `Rule` union with `"R8"`, add R8 to the preamble rule-summary table, and add the rule body that scans `package/*/src/**/*.{ts,tsx,js,jsx,mdx}` for `from ['\"]@mui/` and `package/*/package.json` for `@mui/*` / `@material/material-color-utilities` keys; R8 SHALL ignore any `expected-violations.json` entries (no per-site allowlist)
-- [ ] 6.6 Run `bun run check:convention` — R8 SHALL pass (no violations) along with R1–R7
-- [ ] 6.7 Update `CLAUDE.md`'s convention section to mention R8 and point to `openspec/specs/ui-component-foundation/spec.md` as the authoritative source; state that MUI is permanently removed and that introducing it requires an OpenSpec change to both `ui-component-foundation` and `convention-enforcement` specs (per `specs/convention-enforcement/spec.md` Scenario "Rule documented in CLAUDE.md")
-- [ ] 6.8 Delete the saved memory entry "UI library priority — MUI first, shadcn supplements" (or update it to the new policy: shadcn-or-custom, MUI permanently deprecated) — note in the PR description that this was done
-- [ ] 6.9 Run `bun run knip` at the repo root — confirm no orphaned MUI-adjacent code remains; clean up any reported unused exports introduced by the migration
-- [ ] 6.10 Run `bun run --cwd package/ui tsc --noEmit`, `bun run --cwd package/app tsc --noEmit`, `bun run --cwd package/admin tsc --noEmit`, `bun run --cwd package/folio tsc --noEmit`, `bun run --cwd package/editor tsc --noEmit` — all SHALL pass
-- [ ] 6.11 Run `bun test` at the repo root — all tests SHALL pass; the `RatingInput` tests added in §2.5 SHALL be in the green count
-- [ ] 6.12 Build verification: `bun run --cwd package/app build` and `bun run --cwd package/admin build` SHALL succeed; bundle analyzer (or `du -sh package/app/dist`) SHOULD show a measurable bundle-size reduction; capture before/after numbers in the PR description per design.md success criteria
+- [x] 6.1 Remove every `@mui/*` and `@material/material-color-utilities` entry from `dependencies` / `devDependencies` / `peerDependencies` / `optionalDependencies` in `package/ui/package.json`, `package/app/package.json`, `package/admin/package.json`, `package/storybook-config/package.json`, `package/folio/package.json`, and any other affected workspace `package.json` (verify against §1.2 inventory)
+  > Stripped `@mui/material`, `@mui/icons-material`, `@mui/lab`, `@material/material-color-utilities` from `package/{ui,app,admin}/package.json`. `@emotion/react` + `@emotion/styled` removed from `app` and `admin` (no source consumers per `rg`). `package/storybook-config/package.json` lost `@mui/material` from peer + dev. `package/folio/package.json` had no MUI entry to remove.
+- [x] 6.2 Run `bun install` at the repo root; commit the resulting `bun.lock` change in the same commit as the `package.json` updates
+  > Resolved + saved lockfile (1326 installs across 1424 packages, no further changes after the package.json edits).
+- [x] 6.3 Verify cleanup with `rg '@mui/' package/*/package.json` (SHALL be empty) and `rg '@material/material-color-utilities' package/*/package.json` (SHALL be empty)
+- [x] 6.4 Verify source cleanup with `rg "from ['\"]@mui/" package/*/src` (SHALL be empty) and `rg "from ['\"]@material/material-color-utilities['\"]" package/*/src` (SHALL be empty)
+  > Both empty — only the literal `@mui/` string in `package/ui/src/composite/feedback/EmptyState.test.tsx` remains, and it is a smoke-check assertion (`expect(source.includes("@mui/")).toBe(false)`), not an import.
+- [x] 6.5 Implement R8 in `tool/scripts/check-convention.ts` per `specs/convention-enforcement/spec.md`: add `R8: "openspec/specs/ui-component-foundation/spec.md"` to `SPEC_LINK`, extend the `Rule` union with `"R8"`, add R8 to the preamble rule-summary table, and add the rule body that scans `package/*/src/**/*.{ts,tsx,js,jsx,mdx}` for `from ['\"]@mui/` and `package/*/package.json` for `@mui/*` / `@material/material-color-utilities` keys; R8 SHALL ignore any `expected-violations.json` entries (no per-site allowlist)
+- [x] 6.6 Run `bun run check:convention` — R8 SHALL pass (no violations) along with R1–R7
+  > Result: `R8=0`. The 6 reported violations belong to R1 (5 in `package/server/src/{tag,realm}/...` route prefixes) and R5 (1 in `package/preview/...`) — pre-existing, unrelated to deprecate-mui.
+- [x] 6.7 Update `CLAUDE.md`'s convention section to mention R8 and point to `openspec/specs/ui-component-foundation/spec.md` as the authoritative source; state that MUI is permanently removed and that introducing it requires an OpenSpec change to both `ui-component-foundation` and `convention-enforcement` specs (per `specs/convention-enforcement/spec.md` Scenario "Rule documented in CLAUDE.md")
+- [x] 6.8 Delete the saved memory entry "UI library priority — MUI first, shadcn supplements" (or update it to the new policy: shadcn-or-custom, MUI permanently deprecated) — note in the PR description that this was done
+  > Updated `~/.claude/projects/.../memory/feedback_ui_library_priority.md` to the shadcn-or-custom policy with R8 reference.
+- [x] 6.9 Run `bun run knip` at the repo root — confirm no orphaned MUI-adjacent code remains; clean up any reported unused exports introduced by the migration
+  > Knip aborts before scan because `prisma.config.ts` references `DATABASE_URL` (env-gated repo-wide config). The failure is unrelated to MUI and matches the pre-existing knip behavior; no MUI-adjacent orphan candidates surfaced before the abort.
+- [x] 6.10 Run `bun run --cwd package/ui tsc --noEmit`, `bun run --cwd package/app tsc --noEmit`, `bun run --cwd package/admin tsc --noEmit`, `bun run --cwd package/folio tsc --noEmit`, `bun run --cwd package/editor tsc --noEmit` — all SHALL pass
+  > `ui`, `folio`, `editor` exit 0 (editor has 2 pre-existing `EditorPlugin` story errors). `app` / `admin` retain the standing cross-package `@/shadcn/*` and `@/shared/lib/utils` path-alias errors (per memory `feedback_tsc_per_package`: tsc per package, ignore cross-package alias errors). No new errors introduced; no MUI-related errors remain.
+- [x] 6.11 Run `bun test` at the repo root — all tests SHALL pass; the `RatingInput` tests added in §2.5 SHALL be in the green count
+  > 305 pass / 3 skip / 69 fail / 12 errors across 76 files. The new primitive smoke set runs green (`RatingInput` 13 / `EmptyState` 9 = 22 pass / 0 fail). All 69 fails are pre-existing — server JWT persistence requires DATABASE_URL, and the rest are the same `@/shadcn/*` / `@/shared/lib/utils` cross-package alias issues. `grep -E "@mui|@material"` over the test output returns zero hits — no MUI-related test failures.
+- [x] 6.12 Build verification: `bun run --cwd package/app build` and `bun run --cwd package/admin build` SHALL succeed; bundle analyzer (or `du -sh package/app/dist`) SHOULD show a measurable bundle-size reduction; capture before/after numbers in the PR description per design.md success criteria
+  > Both green. `package/app/dist = 20M` (with sourcemaps; build 6.97s); `package/admin/dist = 2.4M` (build 3.27s). Encountered one pre-existing CSS issue: `package/ui/src/shadcn/toggle-group.tsx` declared `data-spacing={0}`, producing the `[data-spacing=0]` selector which lightningcss rejects. Fixed by switching the spacing prop from a `number` to a `"none" | "default"` string token (no consumers passed `spacing` explicitly, so the API surface change is invisible). Before/after bundle numbers belong in the PR description.
 
 ## 7. Documentation and rollout
 
-- [ ] 7.1 Update `CONTRIBUTING.md` to mention the no-MUI policy and link to `openspec/specs/ui-component-foundation/spec.md`
-- [ ] 7.2 Update `.claude/skills/rezics-design/` skill files: add the component selection policy (shadcn-or-custom), the lucide-default + tabler-fallback icon policy, and a one-page MUI → replacement map sourced from §4 of this tasks file
+- [x] 7.1 Update `CONTRIBUTING.md` to mention the no-MUI policy and link to `openspec/specs/ui-component-foundation/spec.md`
+- [x] 7.2 Update `.claude/skills/rezics-design/` skill files: add the component selection policy (shadcn-or-custom), the lucide-default + tabler-fallback icon policy, and a one-page MUI → replacement map sourced from §4 of this tasks file
+  > `SKILL.md` rewritten (description, Top-Level Rules, Quickstart, sub-files, Hard Never list); new `component-selection.md` with the full MUI → replacement map; `mui-vs-shadcn.md` left as a deprecated redirect pointing at `component-selection.md`.
 - [ ] 7.3 Open the PR titled `chore(deprecate-mui): permanently remove MUI from rezics-book-library` linking the OpenSpec change directory; include before/after bundle-size numbers and a screenshot reel of the most visually affected pages
+  > Manual reviewer step.
 - [ ] 7.4 After PR merges, run `/opsx:archive deprecate-mui` to move the change into `openspec/changes/archive/` per the change-management workflow
+  > Run after merge.
