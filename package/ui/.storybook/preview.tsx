@@ -6,7 +6,6 @@ import {
 import type { Preview } from "@storybook/react-vite";
 
 import "virtual:uno.css";
-import "../src/config/tokens.css";
 
 const preview: Preview = {
   globalTypes: themeGlobalTypes,

@@ -1,0 +1,134 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
+import {
+  Search,
+  Plus,
+  ChevronDown,
+  Settings,
+  Download,
+  Save,
+  ExternalLink,
+  RefreshCw,
+  Info,
+  Star,
+  Ellipsis,
+  Network,
+  LayoutDashboard,
+  FileText,
+  SlidersHorizontal,
+  BookMarked,
+  Tag,
+  MessageSquareText,
+  Copyright,
+} from "lucide-react";
+
+<Meta title="Foundation/Tokens/Iconography" />
+
+# Iconography
+
+rezics' default icon library is **lucide-react** — a community fork of Feather, with a stroke style that reads on the warm parchment canvas without the geometric stiffness that MUI's filled defaults imposed. When lucide lacks a glyph, fall back to **`@tabler/icons-react`** (named, not aliased — make the fallback obvious in code). Apple SF Symbols is the deeper reference for stroke weight + scale sensibility; we adopt the philosophy at lower fidelity.
+
+## Standard sizes
+
+rezics uses three icon sizes only. Bigger or smaller is a sign you're carrying decoration that doesn't earn the space.
+
+<Unstyled>
+  <div style={{ display: "flex", gap: 32, alignItems: "flex-end", padding: "16px 0" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <Search size={16} />
+      <code style={{ fontSize: 11 }}>16px</code>
+      <span style={{ fontSize: 11, color: "var(--colors-text-secondary)" }}>inline w/ body text</span>
+    </div>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <Search size={20} />
+      <code style={{ fontSize: 11 }}>20px</code>
+      <span style={{ fontSize: 11, color: "var(--colors-text-secondary)" }}>buttons, list items, toolbars</span>
+    </div>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <Search size={24} />
+      <code style={{ fontSize: 11 }}>24px</code>
+      <span style={{ fontSize: 11, color: "var(--colors-text-secondary)" }}>page headers, empty states</span>
+    </div>
+  </div>
+</Unstyled>
+
+| Size | Use |
+| --- | --- |
+| `16px` | Inline with body text. Inline badges, list bullets, breadcrumb separators. |
+| `20px` | Buttons, list items, toolbars, navigation. The default for interactive chrome. |
+| `24px` | Page headers, empty-state icons, card hero glyphs. Reserved for moments that anchor the layout. |
+
+Density does **not** affect icon size. A compact-density list keeps its 20px icons; only padding and gap shrink.
+
+## Stroke + color
+
+lucide ships a `2px` stroke that sits well at all three sizes. Don't override `strokeWidth` per icon — that breaks visual consistency with the rest of the system. Color follows the surrounding text role (`currentColor`); never hard-code hex.
+
+<Unstyled>
+  <div style={{ display: "flex", gap: 24, alignItems: "center", padding: "16px 0" }}>
+    <span style={{ color: "var(--colors-text-primary)" }}><Star size={20} /></span>
+    <span style={{ color: "var(--colors-text-secondary)" }}><Star size={20} /></span>
+    <span style={{ color: "var(--colors-text-tertiary)" }}><Star size={20} /></span>
+    <span style={{ color: "var(--colors-brand-fill)" }}><Star size={20} /></span>
+    <span style={{ color: "var(--colors-feedback-success-fill)" }}><Star size={20} /></span>
+    <span style={{ color: "var(--colors-feedback-danger-fill)" }}><Star size={20} /></span>
+  </div>
+</Unstyled>
+
+## Canonical mapping (former MUI → lucide)
+
+The codebase has been migrated; this table preserves the former MUI name as a search anchor for grep-driven onboarding and for reviewers reading older PRs. Imports use the lucide name; the `as MUIName` alias pattern (`Plus as AddIcon`) is allowed but not required.
+
+| MUI name | lucide-react import | Use |
+| --- | --- | --- |
+| `Add` | `Plus` | New / create primary actions |
+| `Search` | `Search` | Search affordance |
+| `ExpandMore` | `ChevronDown` | Disclosure indicator |
+| `Settings` | `Settings` | Preferences entry point |
+| `Download` | `Download` | File download |
+| `Save` | `Save` | Persist action |
+| `Launch` | `ExternalLink` | Outbound link |
+| `Sync` | `RefreshCw` | Refresh / re-fetch |
+| `Info` / `InfoOutlined` | `Info` | Inline info hint |
+| `Star` | `Star` | Favorite, rating |
+| `MoreHoriz` | `Ellipsis` | Overflow menu |
+| `AccountTree` | `Network` | Hierarchy / lineage |
+| `Dashboard` | `LayoutDashboard` | Admin landing |
+| `Description` | `FileText` | Document, manuscript |
+| `Tune` | `SlidersHorizontal` | Filters, fine-tuning |
+| `CollectionsBookmark` | `BookMarked` | Reading list, library |
+| `LocalOffer` | `Tag` | Tag, label, pricing |
+| `RateReview` | `MessageSquareText` | Review / annotate |
+| `Copyright` | `Copyright` | Attribution / legal |
+
+<Unstyled>
+  <div style={{ display: "flex", flexWrap: "wrap", gap: 16, padding: "16px 0" }}>
+    {[
+      ["Plus", Plus], ["Search", Search], ["ChevronDown", ChevronDown],
+      ["Settings", Settings], ["Download", Download], ["Save", Save],
+      ["ExternalLink", ExternalLink], ["RefreshCw", RefreshCw], ["Info", Info],
+      ["Star", Star], ["Ellipsis", Ellipsis], ["Network", Network],
+      ["LayoutDashboard", LayoutDashboard], ["FileText", FileText],
+      ["SlidersHorizontal", SlidersHorizontal], ["BookMarked", BookMarked],
+      ["Tag", Tag], ["MessageSquareText", MessageSquareText], ["Copyright", Copyright],
+    ].map(([label, Icon]) => (
+      <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, width: 96, padding: 8, borderRadius: 8, background: "var(--colors-surface-elevated)" }}>
+        <Icon size={20} />
+        <code style={{ fontSize: 10, color: "var(--colors-text-secondary)" }}>{label}</code>
+      </div>
+    ))}
+  </div>
+</Unstyled>
+
+## Named fallback: `@tabler/icons-react`
+
+If lucide lacks a glyph (rare; tabler covers ~5,000), import from `@tabler/icons-react` with the `Tabler*` prefix or an explicit alias to make the cross-library origin visible at the import site:
+
+```tsx
+import { IconBrandGitlab as GitLabLogo } from "@tabler/icons-react";
+```
+
+Avoid mixing libraries inside a single feature folder if a lucide-only solution exists. The named-fallback rule keeps cross-library use grep-able.
+
+## Reference
+
+> Apple's SF Symbols ships **9 weights × 3 scales × 4 rendering modes** with glyph-level inflection points across the entire library — the deepest icon system in any platform UI kit. rezics adopts the underlying sensibility (consistent stroke, three sizes, color follows text role) at lucide's lower fidelity (2px stroke, single rendering mode). MD3 ships Material Symbols at 5 weights × 3 sizes; we don't use them because the geometric Roman style reads as Material brand against parchment. Apple source: developer.apple.com/sf-symbols. lucide source: lucide.dev. Tabler source: tabler-icons.io.

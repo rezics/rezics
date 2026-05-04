@@ -109,6 +109,34 @@ const STATE_OPACITY = {
   dragged: 0.16,
 } as const;
 
+// Density system. See `openspec/specs/design-system-density/spec.md`.
+//
+// `--density-step` is the system-tier knob. The class-on-`<html>` selector
+// (no class = comfortable default; `density-compact` / `density-spacious`
+// override) coexists with the `.dark` theme switch on the same root.
+//
+// `PADDING_BASE` lists the component-tier opt-ins. Each emits as
+// `calc(<base> + var(--density-step))`. Components that opt out (hero,
+// reading view, dialog content surfaces, marketing) stay on fixed spacing
+// utilities and are unaffected by the density toolbar.
+const DENSITY_STEP = {
+  comfortable: "0px",
+  compact: "-2px",
+  spacious: "2px",
+} as const;
+
+const PADDING_BASE = {
+  "table-row-y": "8px",
+  "list-item-y": "12px",
+  "toolbar-y": "8px",
+  "formfield-y": "8px",
+  "sidebar-item-y": "8px",
+  "tab-item-y": "8px",
+  "menu-item-y": "6px",
+  "breadcrumb-y": "4px",
+  "command-item-y": "8px",
+} as const;
+
 function flattenColorVars(
   obj: Record<string, unknown>,
   parent = "colors",
@@ -164,6 +192,12 @@ function emitStaticTokens(): string {
   const opacityPairs: Array<[string, string]> = Object.entries(
     STATE_OPACITY,
   ).map(([k, v]) => [`--state-${k}-opacity`, String(v)]);
+  const densityPair: Array<[string, string]> = [
+    ["--density-step", DENSITY_STEP.comfortable],
+  ];
+  const paddingPairs: Array<[string, string]> = Object.entries(
+    PADDING_BASE,
+  ).map(([k, v]) => [`--padding-${k}`, `calc(${v} + var(--density-step))`]);
 
   const all = [
     ...fontPairs,
@@ -172,8 +206,17 @@ function emitStaticTokens(): string {
     ...durationPairs,
     ...easingPairs,
     ...opacityPairs,
+    ...densityPair,
+    ...paddingPairs,
   ];
   return `:root, :host {\n${indentedDeclarations(all)}\n}`;
+}
+
+function emitDensityOverrides(): string {
+  return [
+    `.density-compact { --density-step: ${DENSITY_STEP.compact}; }`,
+    `.density-spacious { --density-step: ${DENSITY_STEP.spacious}; }`,
+  ].join("\n");
 }
 
 const ACCORDION_COLLAPSIBLE_KEYFRAMES = `
@@ -216,6 +259,10 @@ export function createUnoConfig() {
       {
         layer: "theme",
         getCSS: () => emitDarkOverride(),
+      },
+      {
+        layer: "theme",
+        getCSS: () => emitDensityOverrides(),
       },
       {
         layer: "theme",

@@ -2,12 +2,26 @@
  * rezics baseline globals
  *
  * App-shell-owned globals (separate from design tokens):
+ *  - page baseline (html/body background + foreground)
  *  - :lang() font routing for CJK fallbacks
  *  - prefers-reduced-motion
  *
  * Imported by app shells (App.tsx). Storybook does NOT import this — it
  * supplies its own preview-level resets.
  * ============================================================================ */
+
+/* Page baseline — paint html/body so unspecified regions don't fall through
+ * to the UA default. The index.html files set
+ * `<meta name="color-scheme" content="light dark">`, which makes the UA
+ * apply a dark grey when the OS is in dark mode; without this rule any gap
+ * between rendered surfaces (route transitions, layout edges, loading
+ * states) shows that grey. Bind directly to the flat `--colors-*` tokens
+ * emitted by the uno-config preflight. */
+html,
+body {
+  background-color: var(--colors-background);
+  color: var(--colors-foreground);
+}
 
 /* Per-language CJK routing — overrides the default TC fallback baked into the
  * font stacks emitted by uno-config.ts when the document advertises a different

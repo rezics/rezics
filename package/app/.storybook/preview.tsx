@@ -18,7 +18,6 @@ import zhHans from "../src/locale/zh-hans.ts";
 import zhHant from "../src/locale/zh-hant.ts";
 
 import "virtual:uno.css";
-import "@rezics/ui/config/tokens.css";
 
 const DEFAULT_LANGUAGE = "zh-hant";
 

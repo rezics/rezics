@@ -23,6 +23,77 @@ function rgbToHex(input: string): string {
   return `${hex}${alphaHex}`;
 }
 
+function relLuminance(r: number, g: number, b: number): number {
+  const channel = (n: number) => {
+    const v = n / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+}
+
+function parseRgb(input: string): [number, number, number] | null {
+  const trimmed = input.trim();
+  if (trimmed.startsWith("#")) {
+    const hex = trimmed.slice(1);
+    const expanded =
+      hex.length === 3
+        ? hex
+            .split("")
+            .map((c) => c + c)
+            .join("")
+        : hex;
+    if (expanded.length < 6) return null;
+    return [
+      parseInt(expanded.slice(0, 2), 16),
+      parseInt(expanded.slice(2, 4), 16),
+      parseInt(expanded.slice(4, 6), 16),
+    ];
+  }
+  const match = trimmed.match(
+    /rgba?\(\s*(\d+(?:\.\d+)?)[ ,]+(\d+(?:\.\d+)?)[ ,]+(\d+(?:\.\d+)?)/i,
+  );
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function contrastRatio(a: string, b: string): number | null {
+  const ar = parseRgb(a);
+  const br = parseRgb(b);
+  if (!ar || !br) return null;
+  const la = relLuminance(...ar);
+  const lb = relLuminance(...br);
+  const [hi, lo] = la >= lb ? [la, lb] : [lb, la];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+function useResolvedColors(ref: React.RefObject<HTMLElement | null>): {
+  hex: string;
+  contrast: number | null;
+} {
+  const [state, setState] = useState<{ hex: string; contrast: number | null }>({
+    hex: "",
+    contrast: null,
+  });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const compute = () => {
+      const cs = getComputedStyle(el);
+      const bg = cs.backgroundColor;
+      const fg = cs.color;
+      setState({ hex: rgbToHex(bg), contrast: contrastRatio(bg, fg) });
+    };
+    compute();
+    const observer = new MutationObserver(compute);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, [ref]);
+  return state;
+}
+
 function useResolvedColor(ref: React.RefObject<HTMLElement | null>) {
   const [hex, setHex] = useState<string>("");
   useEffect(() => {
@@ -71,6 +142,7 @@ export function Swatch({
   description,
   invertText,
   height = 64,
+  showContrast = true,
 }: {
   name: string;
   value: string;
@@ -78,9 +150,13 @@ export function Swatch({
   description?: string;
   invertText?: boolean;
   height?: number;
+  showContrast?: boolean;
 }) {
   const swatchRef = useRef<HTMLDivElement>(null);
-  const hex = useResolvedColor(swatchRef);
+  const { hex, contrast } = useResolvedColors(swatchRef);
+  const ratio = contrast ?? 0;
+  const tier = ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : ratio >= 3 ? "AA-L" : "fail";
+  const passes = ratio >= 4.5;
   return (
     <div
       style={{
@@ -99,13 +175,32 @@ export function Swatch({
           padding: "0 12px",
           display: "flex",
           alignItems: "flex-end",
+          justifyContent: "space-between",
           fontFamily: fontFamilies.mono,
           fontSize: 12,
           fontWeight: 600,
           letterSpacing: "0.02em",
         }}
       >
-        {hex || value}
+        <span>{hex || value}</span>
+        {showContrast && contrast != null ? (
+          <span
+            style={{
+              padding: "2px 6px",
+              borderRadius: 999,
+              background: passes
+                ? "rgba(0, 0, 0, 0.2)"
+                : "rgba(255, 0, 0, 0.35)",
+              color: invertText ? "#fff" : "var(--colors-text-primary)",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+            }}
+            title={`Text-vs-surface contrast ${ratio.toFixed(2)}:1`}
+          >
+            {ratio.toFixed(1)} · {tier}
+          </span>
+        ) : null}
       </div>
       <div style={{ padding: "10px 12px" }}>
         <div
@@ -512,5 +607,274 @@ export function MotionSample({
       </div>
       <style>{`@keyframes rezics-motion-demo { from { transform: translateX(0); } to { transform: translateX(208px); } }`}</style>
     </Row>
+  );
+}
+
+// Density / state-layer / depth / inverse-surface demos for Foundation/Patterns.
+// Each forces a wrapper class so all three modes render simultaneously,
+// independent of the global Density toolbar.
+
+function DensityCell({
+  mode,
+  children,
+}: {
+  mode: "compact" | "comfortable" | "spacious";
+  children: ReactNode;
+}) {
+  const cls =
+    mode === "compact"
+      ? "density-compact"
+      : mode === "spacious"
+        ? "density-spacious"
+        : "";
+  return (
+    <div
+      className={cls}
+      style={{
+        border: "1px solid var(--colors-border-whisper)",
+        borderRadius: radius.md,
+        background: "var(--colors-surface-elevated)",
+        padding: 12,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: fontFamilies.mono,
+          fontSize: 11,
+          color: "var(--colors-text-secondary)",
+          marginBottom: 8,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+        }}
+      >
+        {mode}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export function DensityDemo({ children }: { children?: ReactNode }) {
+  const sample = children ?? (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "var(--padding-list-item-y)",
+      }}
+    >
+      {["First chapter", "Second chapter", "Third chapter"].map((label) => (
+        <div
+          key={label}
+          style={{
+            paddingTop: "var(--padding-list-item-y)",
+            paddingBottom: "var(--padding-list-item-y)",
+            paddingLeft: 12,
+            paddingRight: 12,
+            borderRadius: radius.sm,
+            background: "var(--colors-surface-base)",
+            color: "var(--colors-text-primary)",
+            fontFamily: fontFamilies.sans,
+            fontSize: 14,
+          }}
+        >
+          {label}
+        </div>
+      ))}
+    </div>
+  );
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        gap: 16,
+        margin: "16px 0",
+      }}
+    >
+      <DensityCell mode="compact">{sample}</DensityCell>
+      <DensityCell mode="comfortable">{sample}</DensityCell>
+      <DensityCell mode="spacious">{sample}</DensityCell>
+    </div>
+  );
+}
+
+export function StateLayerDemo() {
+  const states: Array<{ label: string; opacityVar: string; selector: string }> = [
+    { label: "Resting", opacityVar: "0", selector: "" },
+    { label: "Hover", opacityVar: "var(--state-hover-opacity)", selector: "8%" },
+    { label: "Focus", opacityVar: "var(--state-focus-opacity)", selector: "12%" },
+    { label: "Pressed", opacityVar: "var(--state-pressed-opacity)", selector: "12%" },
+    { label: "Dragged", opacityVar: "var(--state-dragged-opacity)", selector: "16%" },
+  ];
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+        gap: 12,
+        margin: "16px 0",
+      }}
+    >
+      {states.map((s) => (
+        <div
+          key={s.label}
+          style={{
+            position: "relative",
+            background: "var(--colors-surface-base)",
+            color: "var(--colors-text-primary)",
+            border: "1px solid var(--colors-border-whisper)",
+            borderRadius: radius.md,
+            padding: "20px 16px",
+            overflow: "hidden",
+            fontFamily: fontFamilies.sans,
+            fontSize: 13,
+          }}
+        >
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "currentColor",
+              opacity: s.opacityVar as unknown as number,
+              pointerEvents: "none",
+            }}
+          />
+          <div style={{ position: "relative", fontWeight: 500 }}>
+            {s.label}
+          </div>
+          {s.selector ? (
+            <div
+              style={{
+                position: "relative",
+                marginTop: 4,
+                fontFamily: fontFamilies.mono,
+                fontSize: 11,
+                color: "var(--colors-text-secondary)",
+              }}
+            >
+              {s.selector}
+            </div>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function DepthDemo() {
+  const layers: Array<{ name: string; bg: string; cssVar: string; note: string }> = [
+    { name: "canvas", bg: "var(--colors-surface-canvas)", cssVar: "--colors-surface-canvas", note: "Page background" },
+    { name: "base", bg: "var(--colors-surface-base)", cssVar: "--colors-surface-base", note: "Default cards" },
+    { name: "elevated", bg: "var(--colors-surface-elevated)", cssVar: "--colors-surface-elevated", note: "Modals, popovers" },
+    { name: "subtle", bg: "var(--colors-surface-subtle)", cssVar: "--colors-surface-subtle", note: "Inset wells" },
+    { name: "sunken", bg: "var(--colors-surface-sunken)", cssVar: "--colors-surface-sunken", note: "Code blocks, deepest" },
+  ];
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        margin: "16px 0",
+        padding: 16,
+        background: "var(--colors-surface-canvas)",
+        border: "1px solid var(--colors-border-whisper)",
+        borderRadius: radius.md,
+      }}
+    >
+      {layers.map((l) => (
+        <div
+          key={l.name}
+          style={{
+            background: l.bg,
+            padding: "14px 16px",
+            borderRadius: radius.sm,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            color: "var(--colors-text-primary)",
+            fontFamily: fontFamilies.sans,
+            fontSize: 13,
+          }}
+        >
+          <span>
+            <strong>{l.name}</strong>
+            <span
+              style={{
+                marginLeft: 12,
+                fontFamily: fontFamilies.mono,
+                fontSize: 11,
+                color: "var(--colors-text-secondary)",
+              }}
+            >
+              {l.cssVar}
+            </span>
+          </span>
+          <span style={{ fontSize: 12, color: "var(--colors-text-secondary)" }}>
+            {l.note}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function InverseSurfaceDemo() {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 16,
+        margin: "16px 0",
+      }}
+    >
+      <div
+        style={{
+          background: "var(--colors-inverse-surface)",
+          color: "var(--colors-inverse-on-surface)",
+          padding: "12px 16px",
+          borderRadius: radius.md,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          fontFamily: fontFamilies.sans,
+          fontSize: 13,
+        }}
+      >
+        <span>Saved your changes.</span>
+        <button
+          type="button"
+          style={{
+            background: "transparent",
+            color: "inherit",
+            border: "1px solid currentColor",
+            borderRadius: radius.sm,
+            padding: "4px 10px",
+            font: "inherit",
+            cursor: "pointer",
+          }}
+        >
+          Undo
+        </button>
+      </div>
+      <blockquote
+        style={{
+          margin: 0,
+          background: "var(--colors-inverse-surface)",
+          color: "var(--colors-inverse-on-surface)",
+          padding: "16px 20px",
+          borderRadius: radius.md,
+          fontFamily: fontFamilies.serif,
+          fontSize: 16,
+          fontStyle: "italic",
+          lineHeight: 1.5,
+        }}
+      >
+        “The book is a thing made out of attention.”
+      </blockquote>
+    </div>
   );
 }

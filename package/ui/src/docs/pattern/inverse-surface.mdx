@@ -1,0 +1,45 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
+import { InverseSurfaceDemo, Compare, Do, Dont } from "../tokens/_gallery";
+
+<Meta title="Foundation/Patterns/Inverse Surface" />
+
+# Inverse Surface
+
+The inverse surface flips the page's tonal relationship: where the canvas is parchment-warm, the inverse is graphite-deep; where the dark canvas is graphite-deep, the inverse is parchment-warm. The pair of `--colors-inverse-surface` and `--colors-inverse-on-surface` carries the flip without the consumer needing to know which side they're rendering on.
+
+## Live preview
+
+<Unstyled>
+  <InverseSurfaceDemo />
+</Unstyled>
+
+## When to use it
+
+- **Snackbars and toasts.** They need to read as "system," not as content. The inverse surface pulls them out of the page flow without a heavy border.
+- **Pull-quotes.** Dark-on-light (or light-on-dark) blocks that want to be visually quoted from the page.
+- **"Switch to dark mode" preview button.** The button can preview the future state — light page, dark button.
+
+## When not to use it
+
+- **Full-bleed dark sections inside a light page** are a different pattern. They're a *page-context flip*, not a quoted surface — use the actual dark page wrapper, not the inverse-surface tokens.
+- **Long-form text.** The inverse surface is meant to draw the eye; don't ask it to host paragraphs.
+- **Don't double-flip.** Inside a dark page, an inverse-surface block already shows light on dark; nesting another inverse inside it creates a confusing depth read.
+
+## Cross-link
+
+The `Sonner` primitive (toast) is the canonical inverse-surface consumer in rezics. See `Primitives/Sonner` for the live primitive story.
+
+## We don't do this
+
+<Compare>
+  <Do caption="One inverse block at a time">
+    The snackbar overlays the page. The pull-quote interrupts a paragraph. Both stay short. The inverse surface keeps its quoted character.
+  </Do>
+  <Dont caption="Stacking inverse surfaces">
+    A snackbar inside an inverse-surface section. A dark card inside a dark page. The depth read collapses — the user can't tell which level is "system" and which is "content." Avoid.
+  </Dont>
+</Compare>
+
+## Reference
+
+> **MD3 inverse surface**: m3.material.io/styles/color/the-color-system/key-colors-tones — Material's `inverse-surface` / `inverse-on-surface` / `inverse-primary` triad is adopted as a triad. rezics renames `inverse-primary` to a single mode-invariant brand-on-inverse. **Apple HIG translucency** (developer.apple.com/design/human-interface-guidelines/materials): we don't use live blur; the inverse surface is a flat color flip.

@@ -18,8 +18,17 @@ description: >
 # rezics Design System — Foundation v1
 
 This is the canonical AI reference for rezics UI work. Truth lives in code at
-`package/ui/src/config/tokens/*.ts` and `package/ui/src/shared/styles/layers.css`.
+`package/ui/src/config/tokens/*.ts` and is emitted to CSS via the preflight in
+`package/ui/src/config/uno-config.ts` (post-`unify-tokens-single-source`: flat
+`--colors-*` namespace; legacy `--rezics-*` is forbidden by R9).
 This skill is the human/AI-readable index.
+
+**Live visual reference**: `bun -F @rezics/ui storybook` (port 6007). Foundation
+pages (Tokens × 7, Patterns × 7) render every token and pattern with live samples.
+Every shadcn primitive and rezics primitive/composite has a story. The toolbar
+exposes global Theme (Light/Dark) and Density (compact/comfortable/spacious)
+switches — both class-toggles on `<html>` (`dark`, `density-compact`,
+`density-spacious`).
 
 ---
 
@@ -87,11 +96,11 @@ Both forms resolve to the same underlying value because tokens flow:
 
 ## Sub-files (load on demand)
 
-- **`voice.md`** — design mood, density, tone, brand voice. Read when authoring landing pages, marketing copy, hero sections, or any place that establishes "what is rezics".
-- **`tokens.md`** — full token cheatsheet: every token with its value, intended use, and common mistakes. Read when picking a color, spacing, or radius and the quickstart table doesn't cover it.
-- **`patterns.md`** — concrete do/don't gallery with code snippets. Read when building a new component, reviewing one, or when uncertain about a pattern.
-- **`component-selection.md`** — shadcn-or-custom decision tree and category-by-category recommendations. Read when picking a primitive (button, input, dialog, menu, etc.).
-- **`icons.md`** — lucide-default + tabler-fallback icon guidance and brand-mark catalog.
+- **`voice.md`** — design mood, density, tone, brand voice. Read when authoring landing pages, marketing copy, hero sections, or any place that establishes "what is rezics". Storybook: `Foundation/Voice`.
+- **`tokens.md`** — full token cheatsheet: every token with its value, intended use, and common mistakes. Storybook: `Foundation/Tokens/{Colors,Typography,Spacing,Radius,Elevation,Motion,Iconography}`.
+- **`patterns.md`** — concrete do/don't gallery with code snippets. Storybook: `Foundation/Patterns/{Density,State Layer,Depth Without Shadow,Inverse Surface,Layout & Breakpoints,Patterns}`.
+- **`component-selection.md`** — shadcn-or-custom decision tree and category-by-category recommendations. Storybook: every shadcn primitive lives under `Primitives/<Name>`; rezics primitives under `Primitive/<Category>/<Name>`; composites under `Composite/<Category>/<Name>`.
+- **`icons.md`** — lucide-default + tabler-fallback icon guidance and brand-mark catalog. Storybook: `Foundation/Tokens/Iconography`.
 
 For deeper context: `openspec/plans/design-system-research/briefs/01-foundation-v1.md` (the canonical brief).
 
