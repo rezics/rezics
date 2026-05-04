@@ -20,14 +20,14 @@ export function StatCard({ label, value, icon, color, href }: StatCardProps) {
           <div
             className="flex"
             style={
-              color ? { color } : { color: "var(--rezics-color-primary)" }
+              color ? { color } : { color: "var(--rezics-sys-color-primary)" }
             }
           >
             {icon}
           </div>
         )}
         <div>
-          <span className="text-[0.6875rem] uppercase tracking-wider text-rezics-color-fg-muted">
+          <span className="text-[0.6875rem] uppercase tracking-wider text-text-secondary">
             {label}
           </span>
           <h2
@@ -44,7 +44,7 @@ export function StatCard({ label, value, icon, color, href }: StatCardProps) {
   if (href) {
     return (
       <Card
-        className="cursor-pointer transition-colors hover:bg-rezics-color-bg-elevated"
+        className="cursor-pointer transition-colors hover:bg-surface-elevated"
         onClick={() => navigate({ to: href })}
       >
         {content}

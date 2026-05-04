@@ -188,7 +188,7 @@ export default function UserListPage() {
               <Spinner />
             </div>
           ) : (isMeiliMode ? meiliQuery.isError : listQuery.isError) ? (
-            <p className="text-sm text-rezics-color-danger">
+            <p className="text-sm text-error-text">
               Failed to load users.
             </p>
           ) : (

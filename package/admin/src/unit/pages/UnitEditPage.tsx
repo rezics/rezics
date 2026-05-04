@@ -110,12 +110,12 @@ export default function UnitEditPage() {
           ) : detailQuery.isError ? (
             <div>
               <Alert>
-                <AlertDescription className="text-rezics-color-danger">
+                <AlertDescription className="text-error-text">
                   Failed to load unit.
                 </AlertDescription>
               </Alert>
               {detailQuery.error ? (
-                <p className="text-xs text-rezics-color-danger mt-2">
+                <p className="text-xs text-error-text mt-2">
                   {String(detailQuery.error)}
                 </p>
               ) : null}
@@ -124,31 +124,31 @@ export default function UnitEditPage() {
             <>
               {error ? (
                 <Alert className="mb-4">
-                  <AlertDescription className="text-rezics-color-danger">
+                  <AlertDescription className="text-error-text">
                     {error}
                   </AlertDescription>
                 </Alert>
               ) : null}
 
               <div className="flex flex-col gap-1 mb-4">
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   ID: <strong>{detailQuery.data?.id ?? "-"}</strong>
                 </p>
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   User ID: <strong>{detailQuery.data?.userId ?? "-"}</strong>
                 </p>
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   Type: <strong>{detailQuery.data?.type ?? "-"}</strong>
                 </p>
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   Default Language:{" "}
                   <strong>{detailQuery.data?.defaultLanguage ?? "-"}</strong>
                 </p>
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   Created:{" "}
                   <strong>{fmtDate(detailQuery.data?.createdAt)}</strong>
                 </p>
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   Updated:{" "}
                   <strong>{fmtDate(detailQuery.data?.updatedAt)}</strong>
                 </p>
@@ -157,35 +157,35 @@ export default function UnitEditPage() {
               {/* Translations (read-only display) */}
               {detailQuery.data?.translations?.length ? (
                 <div className="flex flex-col gap-2 mb-6">
-                  <p className="text-xs font-semibold text-rezics-color-fg-muted">
+                  <p className="text-xs font-semibold text-text-secondary">
                     Translations
                   </p>
                   {detailQuery.data.translations.map((tr) => (
                     <div
                       key={`${tr.unitId}-${tr.language}`}
-                      className="pl-4 border-l-2 border-rezics-color-border"
+                      className="pl-4 border-l-2 border-border-whisper"
                     >
                       <p className="text-sm font-semibold">
                         [{tr.language}] {tr.title || "(no title)"}
                       </p>
                       {tr.subtitle ? (
-                        <p className="text-xs text-rezics-color-fg-muted">
+                        <p className="text-xs text-text-secondary">
                           Subtitle: {tr.subtitle}
                         </p>
                       ) : null}
                       {tr.summary ? (
-                        <p className="text-sm text-rezics-color-fg-muted mt-1">
+                        <p className="text-sm text-text-secondary mt-1">
                           {tr.summary}
                         </p>
                       ) : null}
                     </div>
                   ))}
-                  <p className="text-xs text-rezics-color-fg-muted">
+                  <p className="text-xs text-text-secondary">
                     Translations are managed via the translation API endpoints.
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-rezics-color-fg-muted mb-4">
+                <p className="text-sm text-text-secondary mb-4">
                   No translations available.
                 </p>
               )}
@@ -220,7 +220,7 @@ export default function UnitEditPage() {
                       onChange={(e) => setExtraText(e.target.value)}
                       rows={6}
                       placeholder='{"key":"value"}'
-                      className="font-mono rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                      className="font-mono rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
                     />
                   </div>
 

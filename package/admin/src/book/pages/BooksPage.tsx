@@ -144,7 +144,7 @@ export default function BooksPage() {
               {b.user?.name ?? b.userId ?? "-"}
             </span>
             {b.user?.slug ? (
-              <span className="text-xs text-rezics-color-fg-muted whitespace-nowrap">
+              <span className="text-xs text-text-secondary whitespace-nowrap">
                 @{b.user.slug}
               </span>
             ) : null}
@@ -250,11 +250,11 @@ export default function BooksPage() {
               </div>
             ) : (isMeiliMode ? meiliQuery.isError : normalQuery.isError) ? (
               <div>
-                <p className="text-sm text-rezics-color-danger">
+                <p className="text-sm text-error-text">
                   Failed to load books.
                 </p>
                 {(isMeiliMode ? meiliQuery.error : normalQuery.error) ? (
-                  <p className="text-xs text-rezics-color-danger">
+                  <p className="text-xs text-error-text">
                     {String(isMeiliMode ? meiliQuery.error : normalQuery.error)}
                   </p>
                 ) : null}

@@ -62,7 +62,7 @@ export default function UserCreatePage() {
 
           {error ? (
             <Alert className="mb-4">
-              <AlertDescription className="text-rezics-color-danger">
+              <AlertDescription className="text-error-text">
                 {error}
               </AlertDescription>
             </Alert>
@@ -89,7 +89,7 @@ export default function UserCreatePage() {
                   required
                   type="password"
                 />
-                <p className="text-xs text-rezics-color-fg-muted">至少 6 位</p>
+                <p className="text-xs text-text-secondary">至少 6 位</p>
               </div>
               <div className="flex flex-col gap-1">
                 <Label htmlFor="ucp-slug">Slug (username)</Label>
@@ -99,7 +99,7 @@ export default function UserCreatePage() {
                   onChange={(e) => setSlug(e.target.value)}
                   required
                 />
-                <p className="text-xs text-rezics-color-fg-muted">
+                <p className="text-xs text-text-secondary">
                   5+ chars, letters/numbers, may include - _
                 </p>
               </div>
@@ -118,7 +118,7 @@ export default function UserCreatePage() {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={3}
-                  className="rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                  className="rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
                 />
               </div>
 
@@ -128,7 +128,7 @@ export default function UserCreatePage() {
                   {createMutation.isPending ? "Creating…" : "Create"}
                 </Button>
               </div>
-              <p className="text-xs text-rezics-color-fg-muted">
+              <p className="text-xs text-text-secondary">
                 注意：这里是 Admin 创建用户，不需要验证码；后端会自动做 slug
                 校验、email/slug 唯一性校验并哈希密码。
               </p>

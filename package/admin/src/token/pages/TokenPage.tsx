@@ -116,7 +116,7 @@ export const TokenPage: FC = () => {
 
       {error && (
         <Alert className="mb-4">
-          <AlertDescription className="text-rezics-color-danger">
+          <AlertDescription className="text-error-text">
             {(error as Error).message}
           </AlertDescription>
         </Alert>
@@ -124,7 +124,7 @@ export const TokenPage: FC = () => {
 
       {!isLoading && !error && tokens.length === 0 && (
         <div className="flex items-center justify-center h-40">
-          <p className="text-base text-rezics-color-fg-muted">
+          <p className="text-base text-text-secondary">
             No API tokens found
           </p>
         </div>

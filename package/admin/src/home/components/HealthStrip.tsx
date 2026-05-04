@@ -8,8 +8,8 @@ interface HealthStripProps {
 function StatusDot({ status }: { status: "ok" | "degraded" | "unreachable" }) {
   const cls =
     status === "ok"
-      ? "bg-rezics-color-success"
-      : "bg-rezics-color-danger";
+      ? "bg-success-fill"
+      : "bg-error-fill";
   return (
     <div
       className={`w-2.5 h-2.5 rounded-full shrink-0 ${cls}`}
@@ -21,7 +21,7 @@ export function HealthStrip({ server, meili }: HealthStripProps) {
   return (
     <Card>
       <CardContent className="flex gap-8 items-center py-3">
-        <span className="text-[0.6875rem] uppercase tracking-wider text-rezics-color-fg-muted mr-2">
+        <span className="text-[0.6875rem] uppercase tracking-wider text-text-secondary mr-2">
           System Health
         </span>
         <div className="flex items-center gap-2">

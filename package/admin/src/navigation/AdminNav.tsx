@@ -44,7 +44,7 @@ function isItemVisible(item: AdminNavItem): boolean {
 }
 
 const navItemBaseClass =
-  "flex items-center gap-2 rounded-md py-1.5 mx-2 text-sm transition-colors hover:bg-rezics-color-bg-elevated cursor-pointer";
+  "flex items-center gap-2 rounded-md py-1.5 mx-2 text-sm transition-colors hover:bg-surface-elevated cursor-pointer";
 
 export function AdminNav({
   items,
@@ -116,7 +116,7 @@ export function AdminNav({
           className={clsx(
             navItemBaseClass,
             depth === 0 ? "pl-3" : "pl-8",
-            selected && "bg-rezics-color-bg-elevated font-semibold",
+            selected && "bg-surface-elevated font-semibold",
           )}
         >
           <span className="inline-flex items-center min-w-9">{item.icon}</span>
@@ -130,7 +130,7 @@ export function AdminNav({
     <div className="mt-16 h-full flex flex-col">
       <div className="px-4 py-4">
         <p className="text-sm font-bold">{adminConfig.appName}</p>
-        <p className="text-xs text-rezics-color-fg-muted">
+        <p className="text-xs text-text-secondary">
           env: {adminConfig.env}
         </p>
       </div>
@@ -165,7 +165,7 @@ export function AdminNav({
                 className={clsx(
                   navItemBaseClass,
                   "pl-3 w-[calc(100%-1rem)]",
-                  anySelected && "bg-rezics-color-bg-elevated font-semibold",
+                  anySelected && "bg-surface-elevated font-semibold",
                 )}
               >
                 <span className="inline-flex items-center min-w-9">
@@ -193,7 +193,7 @@ export function AdminNav({
       <div className="flex-1" />
       <Separator />
       <div className="px-4 py-3">
-        <p className="text-xs text-rezics-color-fg-muted">
+        <p className="text-xs text-text-secondary">
           REZICS Book Library
         </p>
       </div>

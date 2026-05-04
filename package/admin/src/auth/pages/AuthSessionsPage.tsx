@@ -89,7 +89,7 @@ export default function AuthSessionsPage() {
           <Button
             size="sm"
             variant="outline"
-            className="text-rezics-color-danger"
+            className="text-error-text"
             onClick={() => setConfirmDialog({ open: true, token: s.token })}
           >
             Revoke
@@ -109,7 +109,7 @@ export default function AuthSessionsPage() {
               <Spinner />
             </div>
           ) : sessionsQuery.isError ? (
-            <p className="text-sm text-rezics-color-danger">
+            <p className="text-sm text-error-text">
               Failed to load sessions.
             </p>
           ) : (
@@ -152,7 +152,7 @@ export default function AuthSessionsPage() {
               Cancel
             </Button>
             <Button
-              className="bg-rezics-color-danger text-white"
+              className="bg-error-fill text-white"
               onClick={() => {
                 revokeMutation.mutate({ token: confirmDialog.token });
                 setConfirmDialog({ open: false, token: "" });

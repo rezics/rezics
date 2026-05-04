@@ -80,13 +80,13 @@ export const EchokvEditPage: React.FC = () => {
     <div className="max-w-[1200px] mx-auto mt-8 mb-12 px-4">
       <h1 className="text-2xl font-bold mb-2">EchoKV JSON 编辑器</h1>
 
-      <div className="mt-2 rounded-lg p-4 bg-rezics-color-bg-elevated">
+      <div className="mt-2 rounded-lg p-4 bg-surface-elevated">
         <h2 className="text-base font-semibold mb-2">Key 列表</h2>
         <div className="flex flex-col gap-2">
           <div className="flex flex-col gap-1">
             <Label htmlFor="echokv-search">搜索 Key</Label>
             <div className="relative">
-              <SearchIcon className="size-4 absolute left-2 top-1/2 -translate-y-1/2 text-rezics-color-fg-muted" />
+              <SearchIcon className="size-4 absolute left-2 top-1/2 -translate-y-1/2 text-text-secondary" />
               <Input
                 id="echokv-search"
                 value={searchKey}
@@ -95,16 +95,16 @@ export const EchokvEditPage: React.FC = () => {
               />
             </div>
           </div>
-          <div className="max-h-[260px] overflow-auto rounded-md border border-rezics-color-border">
+          <div className="max-h-[260px] overflow-auto rounded-md border border-border-whisper">
             {keyListLoading && (
               <div className="p-3">
-                <p className="text-sm text-rezics-color-fg-muted">加载中…</p>
+                <p className="text-sm text-text-secondary">加载中…</p>
               </div>
             )}
             {!keyListLoading &&
               (!keyList?.keys || keyList.keys.length === 0) && (
                 <div className="p-3">
-                  <p className="text-sm text-rezics-color-fg-muted">暂无数据</p>
+                  <p className="text-sm text-text-secondary">暂无数据</p>
                 </div>
               )}
             {!keyListLoading && keyList?.keys && keyList.keys.length > 0 && (
@@ -116,9 +116,9 @@ export const EchokvEditPage: React.FC = () => {
                       title={key}
                       onClick={() => setCurrentKey(key)}
                       className={clsx(
-                        "w-full text-left text-sm px-3 py-1.5 hover:bg-rezics-color-bg-hover whitespace-nowrap overflow-hidden text-ellipsis",
+                        "w-full text-left text-sm px-3 py-1.5 hover:bg-surface-subtle whitespace-nowrap overflow-hidden text-ellipsis",
                         currentKey === key &&
-                          "bg-rezics-color-bg-selected font-semibold",
+                          "bg-primary-container font-semibold",
                       )}
                     >
                       {key}
@@ -131,7 +131,7 @@ export const EchokvEditPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-6 rounded-lg overflow-hidden bg-rezics-color-bg-elevated">
+      <div className="mt-6 rounded-lg overflow-hidden bg-surface-elevated">
         <div className="px-4 py-3">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex flex-col gap-1 min-w-[260px]">

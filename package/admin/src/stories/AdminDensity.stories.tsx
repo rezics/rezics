@@ -38,9 +38,9 @@ const rows = [
 function statusVariant(status: string) {
   switch (status) {
     case "active":
-      return "bg-rezics-color-success text-white";
+      return "bg-success-fill text-white";
     case "suspended":
-      return "bg-rezics-color-danger text-white";
+      return "bg-error-fill text-white";
     default:
       return "";
   }

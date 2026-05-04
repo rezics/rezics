@@ -8,7 +8,7 @@ export default function ShelvesPage() {
       <Card>
         <CardContent>
           <h3 className="text-base font-semibold mb-2">Shelf Management</h3>
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             Shelf listing and management will be available once the shelf admin
             API endpoints are ready. Shelves are user-created collections that
             organize books and other content.

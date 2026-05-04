@@ -79,7 +79,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
 
       {/* 显示当前 scopes */}
       {Object.keys(scopes).length > 0 && (
-        <div className="rounded-md border border-rezics-color-border p-3 mb-4">
+        <div className="rounded-md border border-border-whisper p-3 mb-4">
           {Object.entries(scopes).map(([domain, permissions]) => (
             <div key={domain} className="mb-2">
               <div className="flex flex-row items-center gap-2">
@@ -90,7 +90,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
                   {permissions.map((perm) => (
                     <Badge
                       key={`${domain}:${perm}`}
-                      className="bg-rezics-color-primary text-white inline-flex items-center gap-1"
+                      className="bg-brand-fill text-white inline-flex items-center gap-1"
                     >
                       {perm}
                       <button
@@ -107,7 +107,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="text-rezics-color-danger size-8"
+                  className="text-error-text size-8"
                   onClick={() => removeDomain(domain)}
                   aria-label="Remove domain"
                 >
@@ -181,7 +181,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
       </div>
 
       {Object.keys(scopes).length === 0 && (
-        <p className="text-sm text-rezics-color-fg-muted mt-2">
+        <p className="text-sm text-text-secondary mt-2">
           No scopes defined. Token will have default permissions.
         </p>
       )}

@@ -153,7 +153,7 @@ export default function AuthEmailPage() {
                   }
                 />
                 {schema.description ? (
-                  <p className="text-xs text-rezics-color-fg-muted">
+                  <p className="text-xs text-text-secondary">
                     {schema.description}
                   </p>
                 ) : null}
@@ -184,8 +184,8 @@ export default function AuthEmailPage() {
               <AlertDescription
                 className={
                   sendResult.type === "success"
-                    ? "text-rezics-color-success"
-                    : "text-rezics-color-danger"
+                    ? "text-success-text"
+                    : "text-error-text"
                 }
               >
                 {sendResult.message}
@@ -207,8 +207,8 @@ export default function AuthEmailPage() {
               <AlertDescription
                 className={
                   smtpResult.type === "success"
-                    ? "text-rezics-color-success"
-                    : "text-rezics-color-danger"
+                    ? "text-success-text"
+                    : "text-error-text"
                 }
               >
                 {smtpResult.message}
@@ -218,8 +218,8 @@ export default function AuthEmailPage() {
         </div>
 
         {/* Right panel: preview */}
-        <div className="flex-1 min-w-[400px] basis-[500px] rounded-md border border-rezics-color-border overflow-hidden">
-          <p className="text-sm font-semibold p-2 bg-rezics-color-bg-elevated border-b border-rezics-color-border">
+        <div className="flex-1 min-w-[400px] basis-[500px] rounded-md border border-border-whisper overflow-hidden">
+          <p className="text-sm font-semibold p-2 bg-surface-elevated border-b border-border-whisper">
             Preview
           </p>
           {previewHtml ? (
@@ -230,7 +230,7 @@ export default function AuthEmailPage() {
             />
           ) : (
             <div className="p-6 text-center">
-              <p className="text-rezics-color-fg-muted">
+              <p className="text-text-secondary">
                 Select a template to preview
               </p>
             </div>

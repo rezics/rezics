@@ -87,7 +87,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
         <div className="flex flex-col gap-4 mt-1">
           {error && (
             <Alert>
-              <AlertDescription className="text-rezics-color-danger">
+              <AlertDescription className="text-error-text">
                 {error}
               </AlertDescription>
             </Alert>
@@ -97,8 +97,8 @@ export const JwtServiceEditDialog: FC<Props> = ({
             <Badge
               className={
                 service.isActive
-                  ? "bg-rezics-color-success text-white"
-                  : "bg-rezics-color-bg-elevated text-rezics-color-fg-muted"
+                  ? "bg-success-fill text-white"
+                  : "bg-surface-elevated text-text-secondary"
               }
             >
               {service.isActive ? "Active" : "Inactive"}
@@ -108,8 +108,8 @@ export const JwtServiceEditDialog: FC<Props> = ({
               variant="outline"
               className={
                 service.isActive
-                  ? "text-rezics-color-warning"
-                  : "text-rezics-color-success"
+                  ? "text-warning-text"
+                  : "text-success-text"
               }
               onClick={handleToggleActive}
               disabled={updating}

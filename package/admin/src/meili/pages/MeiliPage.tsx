@@ -35,12 +35,12 @@ type MessageState = {
 function messageClass(type: "success" | "error" | "info") {
   switch (type) {
     case "success":
-      return "text-rezics-color-success";
+      return "text-success-text";
     case "error":
-      return "text-rezics-color-danger";
+      return "text-error-text";
     case "info":
     default:
-      return "text-rezics-color-info";
+      return "text-info-text";
   }
 }
 
@@ -251,12 +251,12 @@ export function MeiliPage() {
       <div className="max-w-8xl mx-auto px-4 py-8 space-y-8">
         <div className="space-y-2">
           <h1 className="text-2xl font-bold">Meili Admin</h1>
-          <p className="text-sm text-rezics-color-fg-muted">
+          <p className="text-sm text-text-secondary">
             Root-only panel for index initialization, full sync, and Meilisearch
             API key management.
           </p>
           {isHealthLoading ? (
-            <div className="flex items-center gap-2 text-sm text-rezics-color-fg-muted">
+            <div className="flex items-center gap-2 text-sm text-text-secondary">
               <Spinner size="sm" />
               <span>Checking Meili status...</span>
             </div>
@@ -266,8 +266,8 @@ export function MeiliPage() {
               <Badge
                 className={
                   health?.status === "available"
-                    ? "bg-rezics-color-success text-white"
-                    : "bg-rezics-color-warning text-white"
+                    ? "bg-success-fill text-white"
+                    : "bg-warning-fill text-white"
                 }
               >
                 {health?.status ?? "unknown"}
@@ -417,7 +417,7 @@ export function MeiliPage() {
                     : "Sync All Realms"}
                 </Button>
               </div>
-              <p className="text-xs text-rezics-color-fg-muted">
+              <p className="text-xs text-text-secondary">
                 Sync operations are async tasks. Check the backend or Meili
                 dashboard for progress.
               </p>
@@ -438,14 +438,14 @@ export function MeiliPage() {
                 <p className="text-sm font-semibold mb-1">
                   Delete All Documents
                 </p>
-                <p className="text-xs text-rezics-color-fg-muted block mb-2">
+                <p className="text-xs text-text-secondary block mb-2">
                   Removes all documents from an index but keeps index settings
                   intact. You can re-sync afterward.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
-                    className="bg-rezics-color-danger text-white"
+                    className="bg-error-fill text-white"
                     onClick={() => {
                       const ok = window.confirm(
                         "Delete all content from Meili? This will clear search results and cannot be undone!",
@@ -461,7 +461,7 @@ export function MeiliPage() {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-rezics-color-danger text-white"
+                    className="bg-error-fill text-white"
                     onClick={() => {
                       const ok = window.confirm(
                         "Delete all feedbacks from Meili? This cannot be undone!",
@@ -477,7 +477,7 @@ export function MeiliPage() {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-rezics-color-danger text-white"
+                    className="bg-error-fill text-white"
                     onClick={() => {
                       const ok = window.confirm(
                         "Delete all users from Meili? This cannot be undone!",
@@ -493,7 +493,7 @@ export function MeiliPage() {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-rezics-color-danger text-white"
+                    className="bg-error-fill text-white"
                     onClick={() => {
                       const ok = window.confirm(
                         "Delete all posts from Meili? This cannot be undone!",
@@ -509,7 +509,7 @@ export function MeiliPage() {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-rezics-color-danger text-white"
+                    className="bg-error-fill text-white"
                     onClick={() => {
                       const ok = window.confirm(
                         "Delete all realms from Meili? This cannot be undone!",
@@ -529,10 +529,10 @@ export function MeiliPage() {
               <Separator />
 
               <div>
-                <p className="text-sm font-semibold mb-1 text-rezics-color-danger">
+                <p className="text-sm font-semibold mb-1 text-error-text">
                   Reset Everything
                 </p>
-                <p className="text-xs text-rezics-color-fg-muted block mb-2">
+                <p className="text-xs text-text-secondary block mb-2">
                   Deletes all indexes entirely (content, feedbacks, users,
                   posts, realms). All settings and documents are lost. You must
                   re-run Init to recreate indexes.
@@ -540,7 +540,7 @@ export function MeiliPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-rezics-color-danger"
+                  className="text-error-text"
                   onClick={() => setResetDialogOpen(true)}
                   disabled={resetAllIndexesMutation.isPending}
                 >
@@ -593,7 +593,7 @@ export function MeiliPage() {
                   Cancel
                 </Button>
                 <Button
-                  className="bg-rezics-color-danger text-white"
+                  className="bg-error-fill text-white"
                   disabled={resetConfirmText !== "RESET"}
                   onClick={() => {
                     resetAllIndexesMutation.mutate();
@@ -621,7 +621,7 @@ export function MeiliPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="text-rezics-color-warning"
+                className="text-warning-text"
                 onClick={() => createAdminKeyMutation.mutate()}
                 disabled={createAdminKeyMutation.isPending}
               >
@@ -641,30 +641,30 @@ export function MeiliPage() {
 
             {lastAdminKey && (
               <div className="text-xs break-all space-y-1">
-                <div className="font-semibold text-rezics-color-warning">
+                <div className="font-semibold text-warning-text">
                   Latest Admin Key (store securely):
                 </div>
-                <code className="px-2 py-1 rounded bg-rezics-color-bg-elevated">
+                <code className="px-2 py-1 rounded bg-surface-elevated">
                   {lastAdminKey}
                 </code>
               </div>
             )}
 
-            <div className="border-t border-rezics-color-border pt-3">
+            <div className="border-t border-border-whisper pt-3">
               <p className="text-sm font-semibold mb-2">Existing Keys</p>
               {isKeysLoading ? (
-                <div className="flex items-center gap-2 text-sm text-rezics-color-fg-muted">
+                <div className="flex items-center gap-2 text-sm text-text-secondary">
                   <Spinner size="sm" />
                   <span>Loading keys...</span>
                 </div>
               ) : !keyList || keyList.results.length === 0 ? (
-                <p className="text-sm text-rezics-color-fg-muted">
+                <p className="text-sm text-text-secondary">
                   No Meili API keys found.
                 </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-left text-xs">
-                    <thead className="border-b border-rezics-color-border text-rezics-color-fg-muted">
+                    <thead className="border-b border-border-whisper text-text-secondary">
                       <tr>
                         <th className="py-1 pr-3">UID</th>
                         <th className="py-1 pr-3">Name</th>
@@ -678,7 +678,7 @@ export function MeiliPage() {
                       {keyList.results.map((key) => (
                         <tr
                           key={key.uid}
-                          className="border-b border-rezics-color-border"
+                          className="border-b border-border-whisper"
                         >
                           <td className="py-1 pr-3 align-top font-mono text-[11px]">
                             {key.uid}
@@ -699,7 +699,7 @@ export function MeiliPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-rezics-color-danger"
+                              className="text-error-text"
                               onClick={() => handleDeleteKey(key)}
                               disabled={deleteKeyMutation.isPending}
                             >

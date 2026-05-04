@@ -47,7 +47,7 @@ export const TokenTable: FC<TokenTableProps> = ({
             <Badge
               key={`${domain}:${perm}`}
               variant="outline"
-              className="text-xs border-rezics-color-primary text-rezics-color-primary"
+              className="text-xs border-brand-fill text-text-brand"
             >
               {domain}:{perm}
             </Badge>
@@ -105,7 +105,7 @@ export const TokenTable: FC<TokenTableProps> = ({
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="text-rezics-color-danger"
+                        className="text-error-text"
                         onClick={() => onRevoke(t.id)}
                         disabled={
                           (t.revoked ?? false) || !!revokingIds[t.id]

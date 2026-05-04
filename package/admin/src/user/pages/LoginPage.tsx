@@ -48,15 +48,15 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto w-full max-w-sm py-16 px-4">
-      <div className="bg-rezics-color-bg-elevated rounded-lg p-6">
+      <div className="bg-surface-elevated rounded-lg p-6">
         <h1 className="text-xl font-extrabold mb-2">Admin Login</h1>
-        <p className="text-sm text-rezics-color-fg-muted mb-4">
+        <p className="text-sm text-text-secondary mb-4">
           Sign in to access the admin console.
         </p>
 
         {error && (
           <Alert className="mb-4">
-            <AlertDescription className="text-rezics-color-danger">
+            <AlertDescription className="text-error-text">
               {error}
             </AlertDescription>
           </Alert>

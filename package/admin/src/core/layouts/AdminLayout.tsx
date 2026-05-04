@@ -18,7 +18,7 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen">
-      <header className="fixed top-0 left-0 right-0 z-40 border-b border-rezics-color-border bg-rezics-color-bg-elevated">
+      <header className="fixed top-0 left-0 right-0 z-40 border-b border-border-whisper bg-surface-elevated">
         <div className="flex items-center gap-2 px-4 h-14">
           <Button
             variant="ghost"
@@ -47,7 +47,7 @@ export default function AdminLayout({
 
       {/* Desktop permanent sidebar — reserves space via flex shrink-0 */}
       <aside
-        className="hidden md:block shrink-0 border-r border-rezics-color-border bg-rezics-color-bg-elevated"
+        className="hidden md:block shrink-0 border-r border-border-whisper bg-surface-elevated"
         style={{ width: drawerWidth }}
       >
         {drawer}

@@ -33,11 +33,11 @@ export function ContentTrendChart({ trend }: ContentTrendChartProps) {
     typeof document !== "undefined" &&
     document.documentElement.classList.contains("dark");
 
-  const primary = readCssVar("--rezics-color-primary", "#f4606c");
-  const secondary = readCssVar("--rezics-color-accent", "#9aa0a6");
-  const fg = readCssVar("--rezics-color-fg", isDark ? "#f5f5f5" : "#1a1a1a");
+  const primary = readCssVar("--rezics-sys-color-primary", "#f4606c");
+  const secondary = readCssVar("--rezics-sys-color-tertiary", "#9aa0a6");
+  const fg = readCssVar("--rezics-sys-color-text-primary", isDark ? "#f5f5f5" : "#1a1a1a");
   const fgMuted = readCssVar(
-    "--rezics-color-fg-muted",
+    "--rezics-sys-color-text-secondary",
     isDark ? "#aaaaaa" : "#666666",
   );
 

@@ -124,7 +124,7 @@ export default function UnitsPage() {
               {u.user?.name ?? u.userId}
             </span>
             {u.user?.slug ? (
-              <span className="text-xs text-rezics-color-fg-muted whitespace-nowrap">
+              <span className="text-xs text-text-secondary whitespace-nowrap">
                 @{u.user.slug}
               </span>
             ) : null}
@@ -245,11 +245,11 @@ export default function UnitsPage() {
               </div>
             ) : normalQuery.isError ? (
               <div>
-                <p className="text-sm text-rezics-color-danger">
+                <p className="text-sm text-error-text">
                   Failed to load units.
                 </p>
                 {normalQuery.error ? (
-                  <p className="text-xs text-rezics-color-danger">
+                  <p className="text-xs text-error-text">
                     {String(normalQuery.error)}
                   </p>
                 ) : null}

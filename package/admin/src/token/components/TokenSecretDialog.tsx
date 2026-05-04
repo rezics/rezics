@@ -42,7 +42,7 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
         </DialogHeader>
         <div className="mt-2">
           <Alert>
-            <AlertDescription className="text-rezics-color-warning">
+            <AlertDescription className="text-warning-text">
               This token value is only shown once. Be sure to copy and store it
               securely.
             </AlertDescription>

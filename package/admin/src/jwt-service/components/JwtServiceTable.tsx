@@ -24,7 +24,7 @@ type Props = {
 export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
   return (
     <TooltipProvider>
-      <div className="rounded-md border border-rezics-color-border">
+      <div className="rounded-md border border-border-whisper">
         <Table>
           <TableHeader>
             <TableRow>
@@ -48,7 +48,7 @@ export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
                 <TableCell>{service.audience}</TableCell>
                 <TableCell>
                   {service.isLocalIssuer ? (
-                    <Badge className="bg-rezics-color-info text-white">
+                    <Badge className="bg-info-fill text-white">
                       Local
                     </Badge>
                   ) : (
@@ -57,7 +57,7 @@ export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
                 </TableCell>
                 <TableCell>
                   {service.isActive ? (
-                    <Badge className="bg-rezics-color-success text-white">
+                    <Badge className="bg-success-fill text-white">
                       Active
                     </Badge>
                   ) : (

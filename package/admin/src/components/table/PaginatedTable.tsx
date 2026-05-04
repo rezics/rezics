@@ -96,7 +96,7 @@ export function PaginatedTable<T>({
       <div className="overflow-x-auto">
         <Table className={textSizeClass}>
           <TableHeader
-            className={clsx(stickyHeader && "sticky top-0 z-10 bg-rezics-color-bg")}
+            className={clsx(stickyHeader && "sticky top-0 z-10 bg-surface-canvas")}
           >
             <TableRow>
               {columns.map((c) => (
@@ -136,7 +136,7 @@ export function PaginatedTable<T>({
       </div>
 
       <div className="flex items-center justify-between flex-wrap gap-2 mt-2 px-2 py-1">
-        <div className="flex items-center gap-2 text-sm text-rezics-color-fg-muted">
+        <div className="flex items-center gap-2 text-sm text-text-secondary">
           <span>Rows per page:</span>
           <Select
             value={String(rowsPerPage)}
@@ -196,7 +196,7 @@ export function PaginatedTable<T>({
 
         {enablePageJump ? (
           <div className="flex flex-row gap-2 items-center px-2 py-1">
-            <span className="text-sm text-rezics-color-fg-muted">
+            <span className="text-sm text-text-secondary">
               Go to page
             </span>
             <Input
@@ -215,7 +215,7 @@ export function PaginatedTable<T>({
               className="w-24 h-8 text-sm"
               disabled={!totalPages}
             />
-            <span className="text-sm text-rezics-color-fg-muted">
+            <span className="text-sm text-text-secondary">
               / {Math.max(totalPages, 1)}
             </span>
             <Button

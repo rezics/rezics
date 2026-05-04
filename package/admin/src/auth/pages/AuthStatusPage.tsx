@@ -53,8 +53,8 @@ function getTokenStatus(tokenName: NormalizedTokenName): TokenStatus {
 
 function StatusBadge({ status }: { status: TokenStatus }) {
   const map = {
-    active: { label: "Active", className: "bg-rezics-color-success text-white" },
-    expired: { label: "Expired", className: "bg-rezics-color-danger text-white" },
+    active: { label: "Active", className: "bg-success-fill text-white" },
+    expired: { label: "Expired", className: "bg-error-fill text-white" },
     missing: { label: "Not Present", className: "" },
   } as const;
   const { label, className } = map[status];
@@ -68,11 +68,11 @@ function StatusBadge({ status }: { status: TokenStatus }) {
 function ClaimsTable({ tokenName }: { tokenName: NormalizedTokenName }) {
   const token = getToken(tokenName);
   if (!token)
-    return <p className="text-sm text-rezics-color-fg-muted">No token</p>;
+    return <p className="text-sm text-text-secondary">No token</p>;
 
   const claims = parseJwt(token);
   if (!claims)
-    return <p className="text-sm text-rezics-color-fg-muted">Invalid token</p>;
+    return <p className="text-sm text-text-secondary">Invalid token</p>;
 
   const entries = Object.entries(claims).filter(
     ([k]) => !["iat", "nbf"].includes(k),
@@ -146,14 +146,14 @@ function TokenCard({
         </div>
         {error && (
           <Alert className="mt-2">
-            <AlertDescription className="text-rezics-color-danger">
+            <AlertDescription className="text-error-text">
               {error}
             </AlertDescription>
           </Alert>
         )}
         {success && (
           <Alert className="mt-2">
-            <AlertDescription className="text-rezics-color-success">
+            <AlertDescription className="text-success-text">
               Done
             </AlertDescription>
           </Alert>
@@ -213,7 +213,7 @@ function SessionStoreCard() {
         </Table>
         {error && (
           <Alert className="mt-4">
-            <AlertDescription className="text-rezics-color-danger">
+            <AlertDescription className="text-error-text">
               {error}
             </AlertDescription>
           </Alert>
@@ -268,7 +268,7 @@ function ActionsCard() {
             size="sm"
             disabled={loading !== null}
             onClick={() => run("Logout", adminLogout)}
-            className="text-rezics-color-danger"
+            className="text-error-text"
           >
             {loading === "Logout" ? <Spinner size="sm" /> : null}
             Logout
@@ -279,8 +279,8 @@ function ActionsCard() {
             <AlertDescription
               className={
                 feedback.type === "success"
-                  ? "text-rezics-color-success"
-                  : "text-rezics-color-danger"
+                  ? "text-success-text"
+                  : "text-error-text"
               }
             >
               {feedback.message}

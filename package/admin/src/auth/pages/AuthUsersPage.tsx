@@ -119,9 +119,9 @@ export default function AuthUsersPage() {
         minWidth: 100,
         cell: (u) =>
           u.banned ? (
-            <Badge className="bg-rezics-color-danger text-white">Banned</Badge>
+            <Badge className="bg-error-fill text-white">Banned</Badge>
           ) : (
-            <Badge className="bg-rezics-color-success text-white">Active</Badge>
+            <Badge className="bg-success-fill text-white">Active</Badge>
           ),
       },
       {
@@ -148,7 +148,7 @@ export default function AuthUsersPage() {
               <Button
                 size="sm"
                 variant="outline"
-                className="text-rezics-color-warning"
+                className="text-warning-text"
                 onClick={() => banMutation.mutate({ userId: u.id })}
               >
                 Ban
@@ -157,7 +157,7 @@ export default function AuthUsersPage() {
             <Button
               size="sm"
               variant="outline"
-              className="text-rezics-color-danger"
+              className="text-error-text"
               onClick={() =>
                 setConfirmDialog({
                   open: true,
@@ -188,7 +188,7 @@ export default function AuthUsersPage() {
               <Spinner />
             </div>
           ) : usersQuery.isError ? (
-            <p className="text-sm text-rezics-color-danger">
+            <p className="text-sm text-error-text">
               Failed to load auth users.
             </p>
           ) : (
@@ -230,7 +230,7 @@ export default function AuthUsersPage() {
               Cancel
             </Button>
             <Button
-              className="bg-rezics-color-danger text-white"
+              className="bg-error-fill text-white"
               onClick={confirmDialog.onConfirm}
             >
               Confirm

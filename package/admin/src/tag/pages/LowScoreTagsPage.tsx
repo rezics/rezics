@@ -187,7 +187,7 @@ export default function LowScoreTagsPage() {
         header: "Score",
         minWidth: 90,
         cell: (r) => (
-          <span className="text-sm font-mono font-semibold text-rezics-color-danger">
+          <span className="text-sm font-mono font-semibold text-error-text">
             {r.score}
           </span>
         ),
@@ -241,7 +241,7 @@ export default function LowScoreTagsPage() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="size-8 text-rezics-color-danger"
+                    className="size-8 text-error-text"
                     onClick={() => handleDelete(r)}
                     disabled={
                       r.kind === "global"
@@ -334,13 +334,13 @@ export default function LowScoreTagsPage() {
             </div>
           ) : query.isError ? (
             <Alert>
-              <AlertDescription className="text-rezics-color-danger">
+              <AlertDescription className="text-error-text">
                 Failed to load low-score tags: {String(query.error)}
               </AlertDescription>
             </Alert>
           ) : rows.length === 0 ? (
             <Alert>
-              <AlertDescription className="text-rezics-color-info">
+              <AlertDescription className="text-info-text">
                 No tag rows at or below score {appliedThreshold}.
               </AlertDescription>
             </Alert>

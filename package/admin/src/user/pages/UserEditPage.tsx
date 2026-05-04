@@ -87,7 +87,7 @@ export default function UserEditPage() {
             </div>
           ) : detailQuery.isError ? (
             <Alert>
-              <AlertDescription className="text-rezics-color-danger">
+              <AlertDescription className="text-error-text">
                 Failed to load user.
               </AlertDescription>
             </Alert>
@@ -95,13 +95,13 @@ export default function UserEditPage() {
             <>
               {error ? (
                 <Alert className="mb-4">
-                  <AlertDescription className="text-rezics-color-danger">
+                  <AlertDescription className="text-error-text">
                     {error}
                   </AlertDescription>
                 </Alert>
               ) : null}
 
-              <p className="text-sm text-rezics-color-fg-muted mb-4">
+              <p className="text-sm text-text-secondary mb-4">
                 Email: <strong>{detailQuery.data?.email ?? "-"}</strong>
               </p>
 
@@ -130,7 +130,7 @@ export default function UserEditPage() {
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       rows={2}
-                      className="rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                      className="rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -140,7 +140,7 @@ export default function UserEditPage() {
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       rows={4}
-                      className="rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                      className="rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -151,7 +151,7 @@ export default function UserEditPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       type="password"
                     />
-                    <p className="text-xs text-rezics-color-fg-muted">
+                    <p className="text-xs text-text-secondary">
                       留空表示不修改密码
                     </p>
                   </div>

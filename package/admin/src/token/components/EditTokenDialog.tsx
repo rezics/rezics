@@ -100,7 +100,7 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
           <ScopesEditor scopes={scopes} onChange={setScopes} />
           {error && (
             <Alert>
-              <AlertDescription className="text-rezics-color-danger">
+              <AlertDescription className="text-error-text">
                 {error}
               </AlertDescription>
             </Alert>

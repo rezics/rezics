@@ -83,7 +83,7 @@ export default function UnitCreatePage() {
 
           {error ? (
             <Alert className="mb-4">
-              <AlertDescription className="text-rezics-color-danger">
+              <AlertDescription className="text-error-text">
                 {error}
               </AlertDescription>
             </Alert>
@@ -99,7 +99,7 @@ export default function UnitCreatePage() {
                   onChange={(e) => setUserId(e.target.value)}
                   required
                 />
-                <p className="text-xs text-rezics-color-fg-muted">
+                <p className="text-xs text-text-secondary">
                   后端当前实现会强制用当前登录用户覆盖该字段（后续可按需改为
                   admin 可指定）。
                 </p>
@@ -131,13 +131,13 @@ export default function UnitCreatePage() {
                   onChange={(e) => setDefaultLanguage(e.target.value)}
                   placeholder="en"
                 />
-                <p className="text-xs text-rezics-color-fg-muted">
+                <p className="text-xs text-text-secondary">
                   ISO language code for the primary translation
                 </p>
               </div>
 
               <Separator />
-              <p className="text-xs font-semibold text-rezics-color-fg-muted">
+              <p className="text-xs font-semibold text-text-secondary">
                 Initial Translation
               </p>
               <div className="flex flex-col gap-1">
@@ -147,7 +147,7 @@ export default function UnitCreatePage() {
                   value={translationTitle}
                   onChange={(e) => setTranslationTitle(e.target.value)}
                 />
-                <p className="text-xs text-rezics-color-fg-muted">
+                <p className="text-xs text-text-secondary">
                   Title for the initial translation (uses default language)
                 </p>
               </div>
@@ -158,7 +158,7 @@ export default function UnitCreatePage() {
                   value={translationSummary}
                   onChange={(e) => setTranslationSummary(e.target.value)}
                   rows={3}
-                  className="rounded-md border border-rezics-color-border bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rezics-color-primary"
+                  className="rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
                 />
               </div>
 
@@ -168,7 +168,7 @@ export default function UnitCreatePage() {
                   {createMutation.isPending ? "Creating…" : "Create"}
                 </Button>
               </div>
-              <p className="text-xs text-rezics-color-fg-muted">
+              <p className="text-xs text-text-secondary">
                 Tip：列表页支持翻页；创建成功会跳转到编辑页。
               </p>
             </div>

@@ -62,7 +62,7 @@ export function SearchablePaginatedTableCard<T>({
         <h2 className="text-xl font-extrabold mb-2">{title}</h2>
       ) : null}
       {description ? (
-        <p className="text-sm text-rezics-color-fg-muted mb-4">{description}</p>
+        <p className="text-sm text-text-secondary mb-4">{description}</p>
       ) : null}
 
       <Card>
@@ -102,11 +102,11 @@ export function SearchablePaginatedTableCard<T>({
             </div>
           ) : isError ? (
             <div>
-              <p className="text-sm text-rezics-color-danger">
+              <p className="text-sm text-error-text">
                 Failed to load.
               </p>
               {error ? (
-                <p className="text-xs text-rezics-color-danger">
+                <p className="text-xs text-error-text">
                   {String(error)}
                 </p>
               ) : null}
