@@ -1,8 +1,5 @@
 // Foundation v1 spacing reference. Aligned with Tailwind v4 / preset-wind4:
 // every UnoCSS step = N × 4px (single `--spacing` base of 0.25rem).
-// MUI is independent: `theme.spacing(N) = N × 8px` (set via SPACING_BASE_PX
-// below). MUI sx step numbers and UnoCSS class step numbers therefore differ
-// for the same pixel target — pick the right one per syntax.
 //
 // This object is a docs-only reference (used by the Storybook gallery). It
 // does NOT drive UnoCSS — preset-wind4 derives every step from `--spacing`.
@@ -24,9 +21,6 @@ export const spacing = {
   24: "96px",
   32: "128px",
 } as const;
-
-// MUI base unit. `theme.spacing(N) === N * SPACING_BASE_PX` (so sx={{ p: 4 }} = 32px).
-export const SPACING_BASE_PX = 8;
 
 export type SpacingToken = keyof typeof spacing;
 export type SpacingTokens = typeof spacing;

@@ -13,7 +13,7 @@ import type {
   UpdateBookInput,
 } from "@rezics/contract";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "@rezics/contract";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import {
   Alert,
   AlertDescription,
@@ -77,9 +77,9 @@ const UpdateBookDialog: React.FC<{
             <p className="text-base">{state?.message}</p>
             <p className="text-base">
               {state?.showBookLink && state?.bookId && (
-                <MUILink to="/book/$bookId" params={{ bookId: state.bookId }}>
+                <TextLink to="/book/$bookId" params={{ bookId: state.bookId }}>
                   {t("page.book_edit.info.dialog.view_book")}
-                </MUILink>
+                </TextLink>
               )}
             </p>
           </AlertDescription>

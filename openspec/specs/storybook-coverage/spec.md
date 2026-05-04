@@ -194,11 +194,11 @@ This rule SHALL be codified in both `package/ui/src/docs/patterns.mdx` (the huma
 
 ### Requirement: Skill cites Storybook story IDs
 
-`.claude/skills/rezics-design/mui-vs-shadcn.md` and `.claude/skills/rezics-design/patterns.md` SHALL cite Storybook story IDs (e.g. `Domain/Cards/BookCard--horizontal`) when recommending or describing a component pattern. The skill SHALL NOT describe a pattern in prose alone if a corresponding story exists.
+`.claude/skills/rezics-design/component-selection.md` and `.claude/skills/rezics-design/patterns.md` SHALL cite Storybook story IDs (e.g. `Domain/Cards/BookCard--horizontal`) when recommending or describing a component pattern. The skill SHALL NOT describe a pattern in prose alone if a corresponding story exists.
 
 #### Scenario: Citations present
 
-- **WHEN** `.claude/skills/rezics-design/mui-vs-shadcn.md` is read
+- **WHEN** `.claude/skills/rezics-design/component-selection.md` is read
 - **THEN** at minimum the modal, form, empty-state, button, and table rows of its selection table SHALL each cite a story ID drawn from the live Storybook
 - **AND** every citation SHALL resolve to a valid story in `storybook-static/index.json` for the package indicated
 

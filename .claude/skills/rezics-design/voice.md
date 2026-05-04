@@ -22,7 +22,7 @@ The mood is composed of:
 | Reddit-style threads     | Hierarchical, dense, scannable. Tree visible through indentation alone. |
 | Tag system               | Inline, small caps not allowed; pill-shaped for status, otherwise plain. |
 | Admin                    | Functional, terse, dense tables. No marketing tone.                 |
-| Auth / settings          | Plain forms, MUI standard variant inputs, no flourishes.            |
+| Auth / settings          | Plain forms, borderless inputs, no flourishes.                      |
 
 ## Don't say
 

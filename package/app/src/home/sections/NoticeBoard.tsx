@@ -1,5 +1,5 @@
 import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import type { TFunction } from "i18next";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -45,9 +45,9 @@ function NoticeBoardHeader({
             </p>
           </div>
         </div>
-        <MUILink to="/notice" underline="hover" color="primary" variant="body2">
+        <TextLink to="/notice" underline="hover" color="primary" variant="body2">
           {t("common.view_all")}
-        </MUILink>
+        </TextLink>
       </div>
 
       <Separator />

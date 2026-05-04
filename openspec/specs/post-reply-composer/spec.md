@@ -23,7 +23,7 @@ The app SHALL expose exactly one reply-editor component, `ReplyComposer`, from `
 
 #### Scenario: Progressive mode collapsed on mount
 - **WHEN** a `<ReplyComposer mode="progressive" />` mounts
-- **THEN** the rendered element is a single-line placeholder control, approximately the height of a `TextField` of MUI `size="small"`
+- **THEN** the rendered element is a single-line placeholder control matching the rezics small-input scale (per "Reply composer mode is single-line on mount in progressive mode")
 - **AND** no toolbar or action buttons are visible
 
 #### Scenario: Progressive mode expands on focus

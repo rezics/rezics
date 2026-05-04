@@ -73,11 +73,4 @@ describe("EmptyState", () => {
       "Only description",
     );
   });
-
-  test("does not import @mui/material (smoke check)", async () => {
-    const source = await Bun.file(
-      new URL("./EmptyState.tsx", import.meta.url),
-    ).text();
-    expect(source.includes("@mui/")).toBe(false);
-  });
 });

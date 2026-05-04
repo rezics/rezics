@@ -48,4 +48,4 @@ const RezicsAnchor = React.forwardRef<HTMLAnchorElement, RezicsAnchorProps>(
 );
 RezicsAnchor.displayName = "RezicsAnchor";
 
-export const MUILink = createLink(RezicsAnchor);
+export const TextLink = createLink(RezicsAnchor);

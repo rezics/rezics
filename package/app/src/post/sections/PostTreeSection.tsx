@@ -1,5 +1,5 @@
 import { postThreadQuery } from "@rezics/api/post/post";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -107,7 +107,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
                 className="py-1"
                 style={{ paddingLeft: `${(indentLevel + 1) * 20}px` }}
               >
-                <MUILink
+                <TextLink
                   to="/post/$rootPostUnitId/continue/$unitId"
                   params={{
                     rootPostUnitId,
@@ -117,7 +117,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
                   <span className="text-xs text-rezics-color-primary">
                     Continue thread →
                   </span>
-                </MUILink>
+                </TextLink>
               </div>
             )}
           </div>

@@ -1,5 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import {
   Tooltip,
   TooltipContent,
@@ -30,7 +30,7 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <MUILink
+          <TextLink
             to="/remark/$reviewId"
             params={{ reviewId: remark.unitId }}
             className="flex items-center gap-1 rounded p-1 text-inherit no-underline transition-colors hover:bg-black/5 dark:hover:bg-white/5"
@@ -44,7 +44,7 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
             <span className="text-xs">
               {rating?.toFixed(1) ?? "0.0"}/10 · {dateStr}
             </span>
-          </MUILink>
+          </TextLink>
         </TooltipTrigger>
         <TooltipContent side="top">阅读完整评测</TooltipContent>
       </Tooltip>

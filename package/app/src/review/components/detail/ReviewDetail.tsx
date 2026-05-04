@@ -1,6 +1,6 @@
 import type { BookDTO, PostDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import {
   Avatar,
   AvatarFallback,
@@ -65,14 +65,14 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <MUILink
+                <TextLink
                   to="/user/$unitId"
                   params={{ unitId: review.author?.unitId ?? "" }}
                 >
                   <span className="text-lg font-bold text-rezics-color-primary">
                     {authorName}
                   </span>
-                </MUILink>
+                </TextLink>
               </TooltipTrigger>
               <TooltipContent side="top">
                 {t("review.open_user_interface")}

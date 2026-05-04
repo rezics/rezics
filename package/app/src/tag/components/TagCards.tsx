@@ -1,6 +1,6 @@
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import type { UnitTagDTO } from "@rezics/contract";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 
@@ -62,20 +62,20 @@ export const TagDetailCard: React.FC<{
           </span>
         </h3>
         <div>
-          <MUILink
+          <TextLink
             to={"/tag/$unitId"}
             params={{ unitId: tag.tagUnitId }}
             className="text-sm text-rezics-color-primary hover:underline"
           >
             查看详情 →
-          </MUILink>
-          <MUILink
+          </TextLink>
+          <TextLink
             to={"/book"}
             search={{ tags: label }}
             className="text-sm text-rezics-color-primary hover:underline !ml-12"
           >
             搜索标签 →
-          </MUILink>
+          </TextLink>
         </div>
       </CardContent>
     </Card>

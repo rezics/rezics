@@ -367,35 +367,6 @@ The submit-time patch SHALL be merged into the current query using append-merge 
 - **WHEN** the user submits `[a] [b]`
 - **THEN** the resulting `query.tags` SHALL equal `[{ slug: "a" }, { slug: "b" }]` — not `[{ slug: "a" }, { slug: "a" }, { slug: "b" }]`
 
-### Requirement: TagPicker provides real chip-based tag input
-
-`TagPicker` SHALL render the current tag list as removable MUI chips and accept new tags via:
-
-1. Typing a token and pressing Enter or comma → chip `{ slug: token }` appended.
-2. Pasting a comma-separated string → each comma-separated token added as its own chip.
-3. Selecting a server-provided autocomplete suggestion → chip `{ slug, unitId?, name? }` appended, preserving richer fields when available.
-
-`TagPicker` SHALL NOT render tag slugs as comma-separated text inside a plain `<TextField>`.
-
-#### Scenario: Chip added on Enter
-
-- **GIVEN** `TagPicker` with `value = []`
-- **WHEN** the user types "isekai" and presses Enter
-- **THEN** `onChange` SHALL be invoked with `[{ slug: "isekai" }]`
-- **AND** a chip labeled "isekai" SHALL appear
-
-#### Scenario: Paste splits on comma
-
-- **GIVEN** `TagPicker` with `value = []`
-- **WHEN** the user pastes `isekai, fantasy, romance,` into the input
-- **THEN** `onChange` SHALL be invoked with `[{ slug: "isekai" }, { slug: "fantasy" }, { slug: "romance" }]`
-
-#### Scenario: Server suggestion preserves richer fields
-
-- **GIVEN** the tag suggest endpoint returns `{ slug: "isekai", unitId: "t-1", name: "異世界" }`
-- **WHEN** the user selects that suggestion from the autocomplete dropdown
-- **THEN** `onChange` SHALL be invoked with a chip that includes the `unitId` and `name` fields
-
 ### Requirement: Default rating filter derives from caller allowed set
 
 When any search page (global `/search`, domain pages like `/book/search`, zone pages, etc.) initializes its `useSearchQuery` instance, the hook's `implicitInitial.ratings` SHALL default to the caller's derived allowed rating set (see the `content-rating` capability). The user MAY narrow the filter further via the rating primitive; narrowing SHALL be represented in `query.ratings` as a strict subset of the allowed set.
@@ -448,14 +419,13 @@ The `NsfwToggle` primitive and all of its references in `package/app/src/**` SHA
 1. Typing a token and pressing Enter or comma → chip `{ slug: token }` appended.
 2. Pasting a comma-separated string → each comma-separated token added as its own chip.
 
-Each rendered badge SHALL include an inline remove affordance — a small button containing a `lucide-react` `X` icon — that on activation removes the corresponding tag from the controlled value. Badges SHALL NOT be implemented with `@mui/material` `Chip` or any other MUI primitive.
+Each rendered badge SHALL include an inline remove affordance — a small button containing a `lucide-react` `X` icon — that on activation removes the corresponding tag from the controlled value.
 
 #### Scenario: Chip rendered as Badge
 
 - **WHEN** `TagPicker` is rendered with one or more selected tags
 - **THEN** each tag SHALL render as a shadcn `Badge`
 - **AND** each badge SHALL include a remove button with a `lucide-react` `X` icon
-- **AND** there SHALL be no import from `@mui/material` in the component file
 
 #### Scenario: Remove tag via badge close button
 
@@ -471,5 +441,4 @@ Each rendered badge SHALL include an inline remove affordance — a small button
 
 - **WHEN** `AppliedFilterChips` is rendered with one or more residual filter values
 - **THEN** each value SHALL render as a shadcn `Badge` with a remove affordance using a `lucide-react` `X` icon
-- **AND** the component file SHALL NOT import from `@mui/material`
 

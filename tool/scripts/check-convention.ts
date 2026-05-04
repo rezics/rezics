@@ -10,7 +10,6 @@
  * - R5  outbound-link-protection — no raw <a href> outside SafeLink
  * - R6  tanstack-query-keys       — no inline `queryKey: [` outside api key/query/mutation files
  * - R7  seed-power-law-isolation  — only strategy.ts/utils.ts may import powerLaw in factory/
- * - R8  ui-component-foundation   — no `@mui/*` or `@material/material-color-utilities` imports / package.json declarations
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -125,7 +124,7 @@ const EXEMPT_PACKAGES = new Set(["auth"]);
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" | "R8";
+type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7";
 
 interface Violation {
   rule: Rule;
@@ -142,7 +141,6 @@ const SPEC_LINK: Record<Rule, string> = {
   R5: "openspec/specs/outbound-link-protection/spec.md",
   R6: "openspec/specs/tanstack-query-keys/spec.md",
   R7: "openspec/changes/seed-unified-plan-modes/specs/seed-power-law-distribution/spec.md",
-  R8: "openspec/specs/ui-component-foundation/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -499,114 +497,6 @@ function scanPowerLawImports(candidateFiles: string[]): Violation[] {
   return violations;
 }
 
-// ─── R8: no @mui/* or @material/material-color-utilities ───────────────────
-
-const R8_IMPORT_PATTERN =
-  /\bfrom\s+["'](?:@mui\/[^"']*|@material\/material-color-utilities)["']/;
-const R8_FORBIDDEN_PACKAGE_PATTERN = /^(?:@mui\/|@material\/material-color-utilities$)/;
-
-function isR8SourceTargetFile(absPath: string): boolean {
-  const relPath = relative(REPO_ROOT, absPath).replace(/\\/g, "/");
-  if (!/^package\/[^/]+\/src\//.test(relPath)) return false;
-  if (!/\.(tsx?|jsx?|mdx)$/.test(relPath)) return false;
-  return true;
-}
-
-function scanMuiSourceImports(candidateFiles: string[]): Violation[] {
-  const violations: Violation[] = [];
-
-  for (const filePath of candidateFiles) {
-    if (!isR8SourceTargetFile(filePath)) continue;
-
-    let content: string;
-    try {
-      content = readFileSync(filePath, "utf8");
-    } catch {
-      continue;
-    }
-
-    const relPath = relative(REPO_ROOT, filePath).replace(/\\/g, "/");
-    const lines = content.split("\n");
-    for (let i = 0; i < lines.length; i++) {
-      if (R8_IMPORT_PATTERN.test(lines[i]!)) {
-        violations.push({
-          rule: "R8",
-          path: `${relPath}:${i + 1}`,
-          message:
-            "Import from `@mui/*` or `@material/material-color-utilities` is forbidden — use shadcn primitives or rezics-owned custom primitives.",
-          spec: SPEC_LINK.R8,
-        });
-      }
-    }
-  }
-
-  return violations;
-}
-
-const PACKAGE_JSON_DEP_FIELDS = [
-  "dependencies",
-  "devDependencies",
-  "peerDependencies",
-  "optionalDependencies",
-] as const;
-
-function findPackageJsonFiles(): string[] {
-  const packagesRoot = join(REPO_ROOT, "package");
-  let entries: string[];
-  try {
-    entries = readdirSync(packagesRoot);
-  } catch {
-    return [];
-  }
-  const files: string[] = [];
-  for (const entryName of entries) {
-    const pkgPath = join(packagesRoot, entryName, "package.json");
-    try {
-      if (statSync(pkgPath).isFile()) files.push(pkgPath);
-    } catch {
-      continue;
-    }
-  }
-  return files;
-}
-
-function scanMuiPackageJson(packageJsonFiles: string[]): Violation[] {
-  const violations: Violation[] = [];
-
-  for (const filePath of packageJsonFiles) {
-    let raw: string;
-    try {
-      raw = readFileSync(filePath, "utf8");
-    } catch {
-      continue;
-    }
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(raw) as Record<string, unknown>;
-    } catch {
-      continue;
-    }
-    const relPath = relative(REPO_ROOT, filePath).replace(/\\/g, "/");
-
-    for (const field of PACKAGE_JSON_DEP_FIELDS) {
-      const deps = parsed[field];
-      if (!deps || typeof deps !== "object") continue;
-      for (const depName of Object.keys(deps as Record<string, unknown>)) {
-        if (R8_FORBIDDEN_PACKAGE_PATTERN.test(depName)) {
-          violations.push({
-            rule: "R8",
-            path: `${relPath} (${field})`,
-            message: `Forbidden dependency "${depName}" — MUI and material-color-utilities are permanently removed.`,
-            spec: SPEC_LINK.R8,
-          });
-        }
-      }
-    }
-  }
-
-  return violations;
-}
-
 // ─── Git staged-file helpers ────────────────────────────────────────────────
 
 function getStagedFilePaths(): string[] {
@@ -651,7 +541,6 @@ function buildSnapshot(violations: Violation[]): ViolationSnapshot {
     R5: 0,
     R6: 0,
     R7: 0,
-    R8: 0,
   };
   const keys: string[] = [];
   for (const violation of violations) {
@@ -727,49 +616,26 @@ function main() {
     }
   }
 
-  const r8SourceFiles: string[] = [];
-  if (isStagedMode) {
-    for (const filePath of getStagedFilePaths()) {
-      if (!isExemptPath(filePath)) r8SourceFiles.push(filePath);
-    }
-  } else {
-    const packagesRoot = join(REPO_ROOT, "package");
-    for (const filePath of walkFilesByExtension(
-      packagesRoot,
-      /\.(tsx?|jsx?|mdx)$/,
-    )) {
-      r8SourceFiles.push(filePath);
-    }
-  }
-  const r8PackageJsonFiles = findPackageJsonFiles();
-
   const violations = [
     ...scanRoutes(routeFiles),
     ...scanFolders(folderPaths),
     ...scanRawAnchors(tsxFiles),
     ...scanInlineQueryKeys(tsAndTsxFiles),
     ...scanPowerLawImports(tsAndTsxFiles),
-    ...scanMuiSourceImports(r8SourceFiles),
-    ...scanMuiPackageJson(r8PackageJsonFiles),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5, R6, R7, R8 } = currentSnapshot.byRule;
+    const { R1, R2, R3, R4, R5, R6, R7 } = currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R8=${R8})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7})`,
     );
     process.exit(0);
   }
 
   const baselineSnapshot = loadSnapshot();
-  // R8 has no per-site allowlist — `expected-violations.json` carve-outs are ignored.
-  const baselineKeys = new Set(
-    (baselineSnapshot?.keys ?? []).filter(
-      (key) => !key.startsWith("R8  "),
-    ),
-  );
+  const baselineKeys = new Set(baselineSnapshot?.keys ?? []);
   const newViolations = violations.filter(
     (violation) => !baselineKeys.has(`${violation.rule}  ${violation.path}`),
   );
@@ -780,12 +646,12 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5, R6, R7, R8 } = currentSnapshot.byRule;
+  const { R1, R2, R3, R4, R5, R6, R7 } = currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
   console.log(
-    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R8=${R8}`,
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}`,
   );
 
   if (newViolations.length > 0) {

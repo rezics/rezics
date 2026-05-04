@@ -1,19 +1,5 @@
 ## ADDED Requirements
 
-### Requirement: Theme system lives in @rezics/ui
-
-`@rezics/ui` SHALL export: `getTheme`, `getDynamicTheme`, `generateDynamicColors`, `dynamicColorsToPalette`, `extractColorFromImage`, `applyDynamicThemeToDOM`, `PRESET_COLORS`, `DynamicColorScheme` type, and `createUnoConfig()`. These SHALL be moved from `@rezics/app-shell` with no behavioral changes.
-
-#### Scenario: App imports theme from @rezics/ui
-
-- **WHEN** `@rezics/app` needs the MUI theme factory
-- **THEN** it imports `getTheme` from `@rezics/ui` (not `@rezics/app-shell`)
-
-#### Scenario: UnoCSS config imported from @rezics/ui
-
-- **WHEN** `@rezics/app` or `@rezics/admin` configures UnoCSS
-- **THEN** it imports `createUnoConfig` from `@rezics/ui/uno.config`
-
 ### Requirement: Auth state lives in @rezics/api
 
 `@rezics/api` SHALL export: `AuthProvider`, `authSessionStore` (with `useAuthSessionStore`), `useServerPermission()`, token refresh logic, and retry policy. These SHALL be moved from `@rezics/app-shell` with no behavioral changes except the permission model update.
@@ -53,8 +39,7 @@ The `@rezics/app-shell` package SHALL be removed from the monorepo. No package S
 #### Scenario: App bootstrap inspected
 
 - **WHEN** `package/app/src/main.tsx` (or its equivalent root entry) is inspected
-- **THEN** there SHALL be no import of `getTheme`, `lightTheme`, `darkTheme`, or any function returning a MUI theme object
-- **AND** there SHALL be no `<ThemeProvider>` element wrapping the React tree
+- **THEN** there SHALL be no import of a theme factory function and no `<ThemeProvider>` element wrapping the React tree for design-system tokens
 - **AND** the import of `@rezics/ui/shared/styles/layers.css` SHALL appear at app entry
 
 #### Scenario: Admin bootstrap inspected

@@ -1,7 +1,9 @@
 # icon-system Specification
 
 ## Purpose
-TBD - created by archiving change deprecate-mui. Update Purpose after archive.
+
+Defines the rezics frontend's icon vocabulary. Brand marks come from `@rezics/icons` (the project's first-party brand-icon library); non-brand glyphs default to `lucide-react`, with `@tabler/icons-react` as the named fallback. Emoji are content, not UI chrome. Icon size and color derive from the `--rezics-*` token scale.
+
 ## Requirements
 ### Requirement: Brand icons come from `@rezics/icons`
 
@@ -17,7 +19,7 @@ Brand marks for third-party services (Github, Google, Microsoft, Telegram, X / T
 
 - **WHEN** a brand glyph is needed that `@rezics/icons` does not yet export
 - **THEN** the developer SHALL extend `@rezics/icons` (publish a new version) rather than reach for `lucide-react` or `@tabler/icons-react` as a workaround
-- **AND** SHALL update the brand-icons mapping table in `.claude/skills/rezics-design/icons.md` in the same change
+- **AND** SHALL update the brand-icons section of `.claude/skills/rezics-design/icons.md` in the same change
 
 #### Scenario: Existing brand-icon import is a regression
 
@@ -62,22 +64,6 @@ The rezics frontend SHALL use `lucide-react` as the default source for **non-bra
 - **THEN** the same change SHALL add `@tabler/icons-react` to `package/ui/package.json` `dependencies`
 - **AND** the dependency version SHALL be pinned (no caret-only) consistent with other icon library entries
 
-### Requirement: Canonical mapping table for former MUI icons
-
-The rezics-design AI skill SHALL contain a file `.claude/skills/rezics-design/icons.md` that records the canonical mapping from former `@mui/icons-material` icon names to the chosen replacement (`lucide-react` or `@tabler/icons-react`). The file SHALL list at minimum every icon name that appeared in the codebase at the start of the deprecate-mui change. Each mapping row SHALL state: former MUI name, replacement library, replacement export name, and a one-line rationale when the mapping is non-obvious.
-
-#### Scenario: AI agent looks up icon replacement
-
-- **WHEN** an AI agent or developer needs to replace a former MUI icon
-- **THEN** they SHALL consult `.claude/skills/rezics-design/icons.md` first
-- **AND** SHALL apply the mapping recorded there
-
-#### Scenario: New mapping needed
-
-- **WHEN** a former MUI icon is encountered that is not in the mapping table
-- **THEN** the developer SHALL add the mapping to `icons.md` in the same change that introduces the migration
-- **AND** the mapping SHALL prefer `lucide-react` per the default rule
-
 ### Requirement: Emoji are content, not UI chrome
 
 Emoji SHALL NOT be used as UI chrome — affordances such as close (✕), menu (☰), disclosure (▶ ▼), star ratings (★), checkmarks (✓), arrows (← →), or any iconographic role. Emoji SHALL only appear as content (in user-generated text, fixtures, and content emoji within posts/comments).
@@ -109,4 +95,3 @@ Icon size SHALL be controlled via UnoCSS class width/height utilities (e.g. `w-4
 - **WHEN** an icon is rendered without explicit color
 - **THEN** the icon SHALL inherit `currentColor` from its parent
 - **AND** color overrides SHALL use `text-*` UnoCSS classes pointing to `--rezics-color-*` tokens
-

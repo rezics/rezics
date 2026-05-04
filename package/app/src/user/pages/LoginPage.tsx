@@ -1,6 +1,6 @@
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import {
   Alert,
   AlertDescription,
@@ -128,7 +128,7 @@ export const LoginPage: FC<LoginPageProps> = ({
           {t("auth.flow.create_account")}
         </TextButton>
         <br />
-        <MUILink to="/reset-password">{t("auth.flow.forgot_password")}</MUILink>
+        <TextLink to="/reset-password">{t("auth.flow.forgot_password")}</TextLink>
       </div>
       <SocialAuthButtons mode="login" />
     </>

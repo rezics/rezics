@@ -1,5 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { ThumbsDown as ThumbDownIcon, ThumbsUp as ThumbUpIcon } from "lucide-react";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
@@ -37,9 +37,9 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
       </div>
       {bookUnitId && (
         <div>
-          <MUILink to="/book/$bookId" params={{ bookId: bookUnitId }}>
+          <TextLink to="/book/$bookId" params={{ bookId: bookUnitId }}>
             <span className="text-xs text-rezics-color-primary">View book</span>
-          </MUILink>
+          </TextLink>
         </div>
       )}
       <PostBodyMarkdown body={remark.body ?? ""} />

@@ -16,42 +16,6 @@ The review editor page SHALL enforce a 200-character minimum on the body field. 
 - **WHEN** the review body reaches exactly 200 characters
 - **THEN** the submit button becomes enabled
 
-### Requirement: Review creation
-
-The review creation page at `/review/new/:bookUnitId` SHALL allow an authenticated user to create a PostKind.REVIEW post. The form SHALL include a title field (stored in `extra.title`), a markdown body field with preview support, a score input rendered per the `score-input-primitive` capability (MUI `<Rating>`, `max = SCORE_MAX`, `precision = 1`, integer 1–10, persisted via `scoreApi.upsertScore()`), and a target book derived from the route parameter `bookUnitId`. When a score is provided, the system SHALL first upsert a ScoreEntry, then create the post with `kind: 'REVIEW'`, `targetUnitId`, `body`, `extra` containing `title`, and `scoreEntryId` linking to the upserted ScoreEntry.
-
-#### Scenario: Successful review creation with score
-- **WHEN** an authenticated user fills in title, body (200+ characters), and score (e.g. 8), then submits
-- **THEN** the system upserts a ScoreEntry with `{ unitId: bookUnitId, realm: defaultRealmId, value: 8 }`, then creates a post with `kind: 'REVIEW'`, `targetUnitId` set to the book's unit ID, `body` set to the markdown content, `extra` containing `title`, and `scoreEntryId` pointing to the upserted ScoreEntry
-
-#### Scenario: Score is optional
-- **WHEN** a user submits a review without selecting a score
-- **THEN** the review is created with no `scoreEntryId` (no ScoreEntry created)
-
-#### Scenario: Markdown body with preview
-- **WHEN** the user writes markdown in the body field
-- **THEN** a preview mode SHALL render the markdown as formatted content
-
-#### Scenario: Score input uses MUI Rating
-- **WHEN** the review creation form is rendered
-- **THEN** the score input SHALL be `<Rating>` from `@mui/material/Rating` configured with `max={SCORE_MAX}` and `precision={1}`
-
-### Requirement: Review editing
-
-The review edit page at `/review/:reviewId/edit` SHALL load the existing review data and populate the title, body, and score fields with the current values. The existing score SHALL be loaded via `scoreQueries.userScores(userId, bookUnitId)` to populate the score input. The score input SHALL be rendered per the `score-input-primitive` capability (MUI `<Rating>`, `max = SCORE_MAX`, `precision = 1`). The system SHALL preserve all existing data fields not modified by the user. The same 200-character minimum enforcement SHALL apply to the body during editing.
-
-#### Scenario: Existing data populated on edit
-- **WHEN** a user navigates to the edit page for an existing review
-- **THEN** the title field shows `extra.title`, the body field shows the current markdown body, and the score input shows the current score from the linked ScoreEntry rendered as MUI `<Rating>` stars
-
-#### Scenario: Score change on edit
-- **WHEN** a user changes the score and submits
-- **THEN** the system calls `useUpsertScoreMutation()` with the new value (upserting on the same `(userId, unitId, realm)` key), and the post's `scoreEntryId` remains unchanged
-
-#### Scenario: Partial update preserves unmodified fields
-- **WHEN** a user changes only the title and submits
-- **THEN** the body and score remain unchanged
-
 ### Requirement: Review detail page
 
 The review detail page at `/review/:reviewId` SHALL display the full review article including the title, author information, score (if a ScoreEntry is linked), full rendered markdown body, creation timestamp, and book context (book title and link to the book detail page). Reaction counts (likes, replies) SHALL be visible.
@@ -76,23 +40,6 @@ The system SHALL provide a review landing page at `/review` showing curated revi
 - **WHEN** a user navigates to `/review/search`
 - **THEN** the page provides search input and filter controls, displaying matching reviews with pagination
 
-### Requirement: Remark inline creation form
-
-The book detail review tab SHALL display an inline remark creation form below the score overview. The form SHALL contain a score input rendered per the `score-input-primitive` capability (MUI `<Rating>`, `max = SCORE_MAX`, `precision = 1`, integer 1–10) and a text input field with a submit button. The form SHALL be available to authenticated users without requiring page navigation. There SHALL be no character limit on the remark body.
-
-#### Scenario: Authenticated user sees remark form
-- **WHEN** an authenticated user views the review tab of a book detail page
-- **THEN** the inline remark creation form is visible with a MUI `<Rating>` score input (integer 1–10), text input, and submit button
-
-#### Scenario: Unauthenticated user cannot create remark
-- **WHEN** an unauthenticated user views the review tab
-- **THEN** the inline remark creation form is either hidden or replaced with a prompt to sign in
-
-#### Scenario: Score input is MUI Rating
-- **WHEN** the remark inline form renders
-- **THEN** the score input SHALL be `<Rating>` from `@mui/material/Rating`
-- **AND** no `ToggleButtonGroup`, numeric-button row, or custom widget SHALL appear as the score input
-
 ### Requirement: Remark creation API call
 
 When a user submits the inline remark form, the system SHALL first upsert a ScoreEntry (if a score was selected) via `scoreApi.upsertScore({ unitId, realm: defaultRealmId, value })`, then create a post with `kind: 'REMARK'`, `targetUnitId` set to the book's unit ID, `body` set to the entered text, and `scoreEntryId` set to the ScoreEntry's id (if a score was provided). The score SHALL be optional.
@@ -108,19 +55,6 @@ When a user submits the inline remark form, the system SHALL first upsert a Scor
 #### Scenario: Form clears after submission
 - **WHEN** the remark is successfully created
 - **THEN** the text input and score selector reset to their default empty states and the new remark appears in the remark list
-
-### Requirement: Remark edit dialog
-
-The remark edit dialog SHALL load the existing remark body and score and allow the user to update either. The score input SHALL be rendered per the `score-input-primitive` capability (MUI `<Rating>`, `max = SCORE_MAX`, `precision = 1`). The score SHALL remain optional; clearing the selection SHALL emit `null` and (on submit) disassociate the ScoreEntry from the post per existing remark semantics.
-
-#### Scenario: Score input is MUI Rating in edit dialog
-- **WHEN** the remark edit dialog opens for an existing remark with a score
-- **THEN** the score input SHALL be `<Rating>` from `@mui/material/Rating` showing the current score value
-
-#### Scenario: Clearing score emits null
-- **WHEN** the user clicks the currently selected star in the remark edit dialog
-- **THEN** the local score state SHALL become `null`
-- **AND** submitting SHALL behave as the "remark without score" path defined in the remark creation API contract
 
 ### Requirement: Remark list display
 
@@ -237,7 +171,7 @@ The system SHALL provide a page at `/remark/book/:bookId` that lists all remarks
 ## Requirements
 ### Requirement: Review creation page
 
-The review creation page at `/review/new/:bookUnitId` SHALL allow an authenticated user to create a PostKind.REVIEW post. The form SHALL include a title field (stored in `extra.title`), a markdown body field with preview support, a score input rendered per the `score-input-primitive` capability (rezics-owned `<RatingInput>` from `@rezics/ui`, `max = SCORE_MAX`, `precision = 1`, integer 1–10, persisted via `scoreApi.upsertScore()`), and a target book derived from the route parameter `bookUnitId`. When a score is provided, the system SHALL first upsert a ScoreEntry, then create the post with `kind: 'REVIEW'`, `targetUnitId`, `body`, `extra` containing `title`, and `scoreEntryId` linking to the upserted ScoreEntry. This requirement supersedes the prior "Review creation" contract that referenced MUI `<Rating>`; MUI is permanently removed from the project per R8 of `convention-enforcement`.
+The review creation page at `/review/new/:bookUnitId` SHALL allow an authenticated user to create a PostKind.REVIEW post. The form SHALL include a title field (stored in `extra.title`), a markdown body field with preview support, a score input rendered per the `score-input-primitive` capability (rezics-owned `<RatingInput>` from `@rezics/ui`, `max = SCORE_MAX`, `precision = 1`, integer 1–10, persisted via `scoreApi.upsertScore()`), and a target book derived from the route parameter `bookUnitId`. When a score is provided, the system SHALL first upsert a ScoreEntry, then create the post with `kind: 'REVIEW'`, `targetUnitId`, `body`, `extra` containing `title`, and `scoreEntryId` linking to the upserted ScoreEntry.
 
 #### Scenario: Successful review creation with score
 
@@ -249,11 +183,10 @@ The review creation page at `/review/new/:bookUnitId` SHALL allow an authenticat
 
 - **WHEN** the review creation form is rendered
 - **THEN** the score input SHALL be `<RatingInput>` from `@rezics/ui` configured with `max={SCORE_MAX}` and `precision={1}`
-- **AND** there SHALL be no import of `@mui/material/Rating` in the form module
 
 ### Requirement: Inline remark form on review tab
 
-The book detail review tab SHALL display an inline remark creation form below the score overview. The form SHALL contain a score input rendered per the `score-input-primitive` capability (rezics-owned `<RatingInput>` from `@rezics/ui`, `max = SCORE_MAX`, `precision = 1`, integer 1–10) and a text input field with a submit button. The form SHALL be available to authenticated users without requiring page navigation. There SHALL be no character limit on the remark body. This requirement supersedes the prior "Remark inline creation form" contract that referenced MUI `<Rating>`.
+The book detail review tab SHALL display an inline remark creation form below the score overview. The form SHALL contain a score input rendered per the `score-input-primitive` capability (rezics-owned `<RatingInput>` from `@rezics/ui`, `max = SCORE_MAX`, `precision = 1`, integer 1–10) and a text input field with a submit button. The form SHALL be available to authenticated users without requiring page navigation. There SHALL be no character limit on the remark body.
 
 #### Scenario: Authenticated user sees remark form
 
@@ -269,11 +202,11 @@ The book detail review tab SHALL display an inline remark creation form below th
 
 - **WHEN** the remark inline form renders
 - **THEN** the score input SHALL be `<RatingInput>` from `@rezics/ui`
-- **AND** no `ToggleButtonGroup`, numeric-button row, MUI `<Rating>`, or custom widget SHALL appear as the score input
+- **AND** no `ToggleButtonGroup`, numeric-button row, or custom widget SHALL appear as the score input
 
 ### Requirement: Review edit page uses RatingInput
 
-The review edit page at `/review/:reviewId/edit` SHALL load the existing review data and populate the title, body, and score fields with the current values. The existing score SHALL be loaded via `scoreQueries.userScores(userId, bookUnitId)` to populate the score input. The score input SHALL be rendered per the `score-input-primitive` capability (rezics-owned `<RatingInput>` from `@rezics/ui`, `max = SCORE_MAX`, `precision = 1`). The system SHALL preserve all existing data fields not modified by the user. The same 200-character minimum enforcement SHALL apply to the body during editing. This requirement supersedes the prior "Review editing" contract that referenced MUI `<Rating>`.
+The review edit page at `/review/:reviewId/edit` SHALL load the existing review data and populate the title, body, and score fields with the current values. The existing score SHALL be loaded via `scoreQueries.userScores(userId, bookUnitId)` to populate the score input. The score input SHALL be rendered per the `score-input-primitive` capability (rezics-owned `<RatingInput>` from `@rezics/ui`, `max = SCORE_MAX`, `precision = 1`). The system SHALL preserve all existing data fields not modified by the user. The same 200-character minimum enforcement SHALL apply to the body during editing.
 
 #### Scenario: Existing data populated on edit
 
@@ -287,7 +220,7 @@ The review edit page at `/review/:reviewId/edit` SHALL load the existing review 
 
 ### Requirement: Remark edit dialog uses RatingInput
 
-The remark edit dialog SHALL load the existing remark body and score and allow the user to update either. The score input SHALL be rendered per the `score-input-primitive` capability (rezics-owned `<RatingInput>` from `@rezics/ui`, `max = SCORE_MAX`, `precision = 1`). The score SHALL remain optional; clearing the selection SHALL emit `null` and (on submit) disassociate the ScoreEntry from the post per existing remark semantics. This requirement supersedes the prior "Remark edit dialog" contract that referenced MUI `<Rating>`.
+The remark edit dialog SHALL load the existing remark body and score and allow the user to update either. The score input SHALL be rendered per the `score-input-primitive` capability (rezics-owned `<RatingInput>` from `@rezics/ui`, `max = SCORE_MAX`, `precision = 1`). The score SHALL remain optional; clearing the selection SHALL emit `null` and (on submit) disassociate the ScoreEntry from the post per existing remark semantics.
 
 #### Scenario: Score input is RatingInput in edit dialog
 

@@ -1,6 +1,6 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -35,9 +35,9 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
     <div className="flex flex-col gap-8">
       {canEdit && (
         <div className="self-end">
-          <MUILink to="/remark/$reviewId/edit" params={{ reviewId: remarkId }}>
+          <TextLink to="/remark/$reviewId/edit" params={{ reviewId: remarkId }}>
             {t("common.edit")}
-          </MUILink>
+          </TextLink>
         </div>
       )}
       <RemarkDetail remark={remark} onReplyInvoke={handleReplyInvoke} />

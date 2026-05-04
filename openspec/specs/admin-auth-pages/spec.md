@@ -78,17 +78,21 @@ Each route SHALL use `lazyRouteComponent` following the existing convention.
 - **THEN** TanStack Router SHALL load and render the `AuthSessionsPage` component
 
 ### Requirement: Auth navigation section in sidebar
+
 The admin sidebar navigation (`package/admin/src/navigation/adminNavConfig.tsx`) SHALL include an "Auth" group with children:
+
 - "Users" → `/auth/users`
 - "Sessions" → `/auth/sessions`
 
-The group SHALL use a security-related MUI icon (e.g., `SecurityOutlined` or `AdminPanelSettingsOutlined`).
+The group SHALL use a security-related icon — see "Admin auth nav group icon" for the icon source rule.
 
 #### Scenario: Auth nav group visible in sidebar
+
 - **WHEN** an admin views the sidebar navigation
 - **THEN** an "Auth" group SHALL be visible with "Users" and "Sessions" sub-items
 
 #### Scenario: Clicking auth nav item navigates correctly
+
 - **WHEN** an admin clicks "Users" under the "Auth" nav group
 - **THEN** the browser SHALL navigate to `/auth/users`
 
@@ -99,27 +103,16 @@ The admin environment config (`package/admin/src/env.ts`) SHALL include `VITE_AU
 - **WHEN** the admin app starts
 - **THEN** `env.VITE_AUTH_API_URL` SHALL be available and point to the auth server base URL
 
-### Requirement: Page component conventions
-All auth page components SHALL follow existing admin page conventions:
-- Use the `Page` component from `@/core/layout/Page` for page title and description
-- Use `PaginatedTable` from `@/component/table/PaginatedTable` for data tables
-- Use MUI components (`Card`, `CardContent`, `Button`, `Typography`, etc.)
-- Use `useQuery` and mutation hooks from `@tanstack/react-query`
-- Handle loading, error, and empty states
-
-#### Scenario: Auth users page follows layout convention
-- **WHEN** the `AuthUsersPage` renders
-- **THEN** it SHALL use the `Page` wrapper with title "Auth Users" and a description, and display data in a `Card` > `CardContent` > `PaginatedTable` structure
 ## Requirements
 ### Requirement: Admin auth nav group icon
 
-The admin sidebar's "Auth" navigation group SHALL use a security-related icon from `lucide-react`, specifically `Shield`, `ShieldUser`, or `ShieldCheck`. The selected icon SHALL be recorded in the rezics-design icon mapping table at `.claude/skills/rezics-design/icons.md`.
+The admin sidebar's "Auth" navigation group SHALL use a security-related icon from `lucide-react`, specifically `Shield`, `ShieldUser`, or `ShieldCheck`. The selected icon SHALL be recorded in the rezics-design skill at `.claude/skills/rezics-design/icons.md`.
 
 #### Scenario: Auth nav group renders security icon
 
 - **WHEN** an admin views the sidebar navigation
 - **THEN** an "Auth" group SHALL be visible with a `lucide-react` security icon (`Shield`, `ShieldUser`, or `ShieldCheck`)
-- **AND** the icon import SHALL come from `lucide-react` (not `@mui/icons-material`)
+- **AND** the icon import SHALL come from `lucide-react`
 
 #### Scenario: Auth nav group items navigate correctly
 
@@ -135,18 +128,14 @@ Admin pages SHALL follow the existing layout patterns and component conventions,
 - Use shadcn primitives from `@rezics/ui/shadcn` (`Card`, `CardContent`, `Button`, `Badge`, `Alert`, etc.) and rezics-owned composites for layout and typography
 - Use `useQuery` and mutation hooks from `@tanstack/react-query`
 - Handle loading, error, and empty states using `<EmptyState>` from `@rezics/ui` and `<QueryErrorDisplay>` per their respective specs
-- SHALL NOT import from `@mui/material` or `@mui/icons-material`
 
 #### Scenario: Auth users page follows layout convention
 
 - **WHEN** the `AuthUsersPage` renders
 - **THEN** it SHALL use the `Page` wrapper with title "Auth Users" and a description, and display data in a `Card` > `CardContent` > `PaginatedTable` structure
 - **AND** the `Card` and `CardContent` imports SHALL come from `@rezics/ui/shadcn`
-- **AND** there SHALL be no import from `@mui/material` in the page module
 
 #### Scenario: Admin density preserved
 
 - **WHEN** any admin page renders
 - **THEN** it SHALL use compact-density UnoCSS classes (`p-4`–`p-6` containers, smaller text scales) per the design-system voice rules for admin
-- **AND** the absence of MUI SHALL NOT relax the density rule
-

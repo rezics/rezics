@@ -9,7 +9,7 @@ interface PasswordFieldProps {
   name?: string;
   label?: string;
   value: string;
-  /** Kept for source-level compatibility with prior MUI variants — not rendered. */
+  /** Accepted for source-level compatibility with legacy callers — not rendered. */
   variant?: "standard" | "outlined" | "filled";
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   setValue: (value: string) => void;

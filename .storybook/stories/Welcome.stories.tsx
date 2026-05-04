@@ -20,7 +20,7 @@ const refs: Array<{ port: number; title: string; pkg: string; what: string }> =
       port: 6007,
       title: "UI · Foundation",
       pkg: "@rezics/ui",
-      what: "Tokens, MUI theme, primitives, shadcn glue.",
+      what: "Tokens, primitives, shadcn glue.",
     },
     {
       port: 6008,

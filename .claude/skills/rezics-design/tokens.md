@@ -1,14 +1,14 @@
 # Token Reference — Foundation v1
 
-**Single source of truth**: `package/ui/src/config/tokens/*.ts`. Both MUI (`createTheme`) and UnoCSS (`theme.spacing` / `theme.fontFamily` / etc.) consume the TS objects directly via their native APIs.
+**Single source of truth**: `package/ui/src/config/tokens/*.ts`. UnoCSS (`theme.spacing` / `theme.fontFamily` / etc.) consumes the TS objects directly via its native API.
 
 **Two surfaces** depending on whether the token needs to switch with theme:
 
 | Category | Where it lives | How to consume |
 | --- | --- | --- |
-| **Colors** (surface, text, brand, semantic, sentiment, border) | TS source + `--rezics-color-*` CSS var (set in `layers.css`, switches with `[data-theme="dark"]`) | UnoCSS utility (`bg-brand`, `text-text-primary`) or MUI palette (`color="primary"`) |
-| **Shadows** | TS source + `--rezics-shadow-*` CSS var (light/dark variants in `layers.css`) | UnoCSS utility (`shadow-md`) or MUI `elevation` prop |
-| **Spacing / radius / motion / font** | TS source ONLY — UnoCSS auto-emits `--spacing-*`/`--radius-*` etc. through preset-wind4's theme system | UnoCSS utility (`p-4`, `rounded-md`, `duration-fast`, `font-sans`) or MUI prop (`spacing={2}`, `theme.shape.borderRadius`) |
+| **Colors** (surface, text, brand, semantic, sentiment, border) | TS source + `--rezics-color-*` CSS var (set in `layers.css`, switches with `[data-theme="dark"]`) | UnoCSS utility (`bg-brand`, `text-text-primary`) |
+| **Shadows** | TS source + `--rezics-shadow-*` CSS var (light/dark variants in `layers.css`) | UnoCSS utility (`shadow-md`) |
+| **Spacing / radius / motion / font** | TS source ONLY — UnoCSS auto-emits `--spacing-*`/`--radius-*` etc. through preset-wind4's theme system | UnoCSS utility (`p-4`, `rounded-md`, `duration-fast`, `font-sans`) |
 
 **Hard rule — never hand-write `var(--rezics-space-*)`, `var(--rezics-radius-*)`, `var(--rezics-motion-*)`, `var(--rezics-ease-*)`, `var(--rezics-font-sans/serif/mono)` — they don't exist.** Use the utility class or import the token from `@rezics/ui/config/tokens/*` directly. The only `--rezics-*` vars that exist are colors, shadows, and the per-`:lang()` CJK font fallback (`--rezics-font-sans-cjk`, `--rezics-font-serif-cjk`).
 
@@ -75,27 +75,25 @@ Each semantic has `*-fill` (UI element, 3:1) and `*-text` (AA-body, mode-aware).
 
 ---
 
-## Spacing — two systems, one rhythm
+## Spacing
 
-UnoCSS and MUI use different step numbers for the same pixel size. This is unavoidable: preset-wind4 follows Tailwind v4's `N × 4px` model while MUI uses `theme.spacing(N) = N × 8px`. Always pick the column matching your syntax.
+UnoCSS / preset-wind4 follows Tailwind v4's `N × 4px` model (`p-2 = 8px`, `p-4 = 16px`, `p-12 = 48px`). The full step list:
 
-| Pixels | UnoCSS class | MUI sx                | When                                |
-| ------ | ------------ | --------------------- | ----------------------------------- |
-| 0      | `p-0`        | `p: 0`                | —                                   |
-| 1px    | `p-px`       | —                     | Hairline borders.                   |
-| 2px    | `p-0.5`      | `p: 0.25`             | Micro-gaps.                         |
-| 4px    | `p-1`        | `p: 0.5`              | Compact icon margin.                |
-| 8px    | `p-2`        | `p: 1`                | **Base padding.** Default gap.      |
-| 12px   | `p-3`        | `p: 1.5`              | Input vertical padding.             |
-| 16px   | `p-4`        | `p: 2`                | Card padding, default content gap.  |
-| 24px   | `p-6`        | `p: 3`                | Section internal padding.           |
-| 32px   | `p-8`        | `p: 4`                | Section divider rhythm.             |
-| 48px   | `p-12`       | `p: 6`                | **Between sections (app default).** |
-| 64px   | `p-16`       | `p: 8`                | Page-level vertical rhythm.         |
-| 96px   | `p-24`       | `p: 12`               | Chapter-level breathing.            |
-| 128px  | `p-32`       | `p: 16`               | Hero / landing extra.               |
-
-**Common mistake:** writing `p-8` thinking it equals `sx={{ p: 8 }}`. They differ — `p-8` = 32px (UnoCSS); `sx={{ p: 8 }}` = 64px (MUI).
+| Pixels | UnoCSS class | When                                |
+| ------ | ------------ | ----------------------------------- |
+| 0      | `p-0`        | —                                   |
+| 1px    | `p-px`       | Hairline borders.                   |
+| 2px    | `p-0.5`      | Micro-gaps.                         |
+| 4px    | `p-1`        | Compact icon margin.                |
+| 8px    | `p-2`        | **Base padding.** Default gap.      |
+| 12px   | `p-3`        | Input vertical padding.             |
+| 16px   | `p-4`        | Card padding, default content gap.  |
+| 24px   | `p-6`        | Section internal padding.           |
+| 32px   | `p-8`        | Section divider rhythm.             |
+| 48px   | `p-12`       | **Between sections (app default).** |
+| 64px   | `p-16`       | Page-level vertical rhythm.         |
+| 96px   | `p-24`       | Chapter-level breathing.            |
+| 128px  | `p-32`       | Hero / landing extra.               |
 
 **Section rhythm**: app uses `p-12`–`p-24` (48–96px); admin/editor use `p-4`–`p-6` (16–24px).
 
@@ -114,18 +112,18 @@ UnoCSS and MUI use different step numbers for the same pixel size. This is unavo
 | `radius-pill` | 9999px | `rounded-pill` | Tags, status pills, hero CTAs.                |
 | `radius-full` | 50%    | `rounded-full` | Avatars, circular icon buttons.               |
 
-MUI `theme.shape.borderRadius` is `8` (= `radius-md`). Override per component slot when needed, don't change the default.
+`radius-md` (8px) is the system default. Override per component slot when needed, don't change the default.
 
 ---
 
 ## Motion
 
-| Token         | Value  | UnoCSS                | MUI                              | When                            |
-| ------------- | ------ | --------------------- | -------------------------------- | ------------------------------- |
-| `motion-fast` | 120ms  | `duration-fast`       | `transitions.duration.shortest`  | Press feedback, scale on tap.   |
-| `motion-base` | 200ms  | `duration-base`       | `transitions.duration.shorter`   | Hover transitions, color shifts. |
-| `motion-slow` | 350ms  | `duration-slow`       | `transitions.duration.short`     | Layout shifts, panel open/close. |
-| `motion-page` | 500ms  | `duration-page`       | `transitions.duration.standard`  | Route transitions.              |
+| Token         | Value  | UnoCSS                | When                            |
+| ------------- | ------ | --------------------- | ------------------------------- |
+| `motion-fast` | 120ms  | `duration-fast`       | Press feedback, scale on tap.   |
+| `motion-base` | 200ms  | `duration-base`       | Hover transitions, color shifts. |
+| `motion-slow` | 350ms  | `duration-slow`       | Layout shifts, panel open/close. |
+| `motion-page` | 500ms  | `duration-page`       | Route transitions.              |
 
 | Easing token  | Value                              | UnoCSS class        | When                            |
 | ------------- | ---------------------------------- | ------------------- | ------------------------------- |
@@ -210,4 +208,4 @@ CJK regional routing (SC / JP / KR) is automatic via CSS `:lang()`. Don't overri
 | `rounded-[8px]`                                 | `rounded-md`                                     |
 | `transition-all duration-200`                   | `transition duration-base`                       |
 | `font-bold` (700)                               | `font-medium` (500) — bold fights editorial mood |
-| Emoji in button label                           | MUI / Lucide icon                                |
+| Emoji in button label                           | Lucide icon                                      |

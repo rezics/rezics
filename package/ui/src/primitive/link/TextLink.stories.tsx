@@ -8,21 +8,21 @@ import {
 } from "@tanstack/react-router";
 import { useMemo } from "react";
 
-import { MUILink } from "./MUILink";
+import { TextLink } from "./TextLink";
 
-interface MUILinkPreviewProps {
+interface TextLinkPreviewProps {
   to: string;
   label: string;
 }
 
-function MUILinkPreview({ to, label }: MUILinkPreviewProps) {
+function TextLinkPreview({ to, label }: TextLinkPreviewProps) {
   const router = useMemo(() => {
     const rootRoute = createRootRoute({
       component: () => (
         <div className="space-y-3">
-          <MUILink to={to} underline="hover">
+          <TextLink to={to} underline="hover">
             {label}
-          </MUILink>
+          </TextLink>
           <Outlet />
         </div>
       ),
@@ -37,10 +37,10 @@ function MUILinkPreview({ to, label }: MUILinkPreviewProps) {
 }
 
 const meta = {
-  title: "Primitive/Link/MUILink",
-  component: MUILinkPreview,
+  title: "Primitive/Link/TextLink",
+  component: TextLinkPreview,
   args: { to: "/", label: "Open author profile" },
-} satisfies Meta<typeof MUILinkPreview>;
+} satisfies Meta<typeof TextLinkPreview>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

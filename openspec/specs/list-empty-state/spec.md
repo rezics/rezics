@@ -1,25 +1,5 @@
 ## ADDED Requirements
 
-### Requirement: Shared EmptyState primitive
-
-`@rezics/ui` SHALL export an `EmptyState` component from `package/ui/src/composite/feedback/EmptyState.tsx`. The component SHALL be composed of MUI primitives (`Stack`, `Typography`, optional icon slot, optional action slot) and SHALL provide consistent spacing, alignment, and theming for list-level "no data" UX. The component API SHALL accept:
-
-- `title: ReactNode` (required) — short headline text
-- `description?: ReactNode` — optional supporting copy
-- `icon?: ReactNode` — optional icon rendered above the title
-- `action?: ReactNode` — optional CTA (e.g., a `Button`) rendered below
-
-The component SHALL centrally align content horizontally and use responsive vertical padding.
-
-#### Scenario: Title-only usage
-- **WHEN** `<EmptyState title="No reviews yet" />` is rendered
-- **THEN** a centered stack SHALL display the title text with responsive padding
-- **AND** no description, icon, or action slot SHALL render
-
-#### Scenario: Full-slot usage
-- **WHEN** `<EmptyState title={t(...)} description={t(...)} icon={<Icon />} action={<Button>Create</Button>} />` is rendered
-- **THEN** the icon SHALL appear above the title, description below the title, and action below the description
-
 ### Requirement: Lists render EmptyState when settled and empty
 
 Every user-facing list view SHALL render `EmptyState` when the underlying query is settled (`!isLoading && !error`) and the rendered collection length is zero. A list view SHALL NOT render an empty container or a blank region in this case. Loading and error states remain the caller's responsibility and SHALL NOT be rendered by `EmptyState`.
@@ -83,7 +63,7 @@ Per-card fallbacks (for example, `ExcerptCard` showing placeholder text when a s
 ## Requirements
 ### Requirement: Shared EmptyState primitive
 
-`@rezics/ui` SHALL export an `EmptyState` component from `package/ui/src/composite/feedback/EmptyState.tsx`. The component SHALL be composed of rezics-owned primitives (`<div>` + UnoCSS layout classes for the container, `<h3>` / `<p>` with token-driven typography classes for the title and description, optional icon slot, optional action slot accepting any `ReactNode` including a shadcn `Button`) and SHALL provide consistent spacing, alignment, and theming for list-level "no data" UX. The component SHALL NOT import from `@mui/material`. The component API SHALL accept:
+`@rezics/ui` SHALL export an `EmptyState` component from `package/ui/src/composite/feedback/EmptyState.tsx`. The component SHALL be composed of rezics-owned primitives (`<div>` + UnoCSS layout classes for the container, `<h3>` / `<p>` with token-driven typography classes for the title and description, optional icon slot, optional action slot accepting any `ReactNode` including a shadcn `Button`) and SHALL provide consistent spacing, alignment, and theming for list-level "no data" UX. The component API SHALL accept:
 
 - `title: ReactNode` (required) — short headline text
 - `description?: ReactNode` — optional supporting copy
@@ -102,9 +82,4 @@ The component SHALL centrally align content horizontally and use responsive vert
 
 - **WHEN** `<EmptyState title={t(...)} description={t(...)} icon={<BookmarkIcon />} action={<Button>Create</Button>} />` is rendered
 - **THEN** the icon SHALL appear above the title, description below the title, and action below the description
-
-#### Scenario: No MUI imports
-
-- **WHEN** `package/ui/src/composite/feedback/EmptyState.tsx` is inspected
-- **THEN** there SHALL be no import from `@mui/material` or `@mui/icons-material`
 

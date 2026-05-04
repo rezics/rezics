@@ -1,4 +1,4 @@
-// Foundation v1 radius tokens. Source: brief §5. md (8px) is MUI shape.borderRadius default.
+// Foundation v1 radius tokens. Source: brief §5.
 
 export const radius = {
   xs: "4px",

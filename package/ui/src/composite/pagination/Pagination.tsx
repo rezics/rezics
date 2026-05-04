@@ -125,8 +125,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
     );
   }, [page, dataLength, totalPages]);
   if (totalPages <= 1) return null;
-  // dataLength is the visible page count for the paginator; mirror MUI behavior
-  // where `count` is the number of buttons shown.
+  // dataLength is the number of page buttons to render.
   const visibleTotal = dataLength;
   const pages = getPageRange(page, visibleTotal, 1);
 

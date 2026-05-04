@@ -59,22 +59,6 @@ Common Storybook configuration (Vite plugin wiring, theme decorator, story patte
 - **THEN** the shared config SHALL accept `{ uno: false }` and SHALL NOT require UnoCSS to be installed
 - **AND** UnoCSS SHALL only be loaded for callers that opt in
 
-### Requirement: Theme switching is wired into preview
-
-Each `.storybook/preview.tsx` SHALL provide a Light/Dark global toolbar via Storybook globals that toggles both `[data-theme]` on `<html>` and the MUI theme via `withRezicsTheme`. The CSS variable namespace SHALL switch instantly without component remount.
-
-#### Scenario: Global theme toolbar present
-
-- **WHEN** any package's Storybook preview loads
-- **THEN** there SHALL be a Light/Dark toggle in the global toolbar
-- **AND** switching SHALL update both the MUI ThemeProvider and the `[data-theme]` attribute on `<html>`
-
-#### Scenario: Layers CSS imported in every preview
-
-- **WHEN** `package/{ui,editor,folio,admin,app}/.storybook/preview.tsx` is inspected
-- **THEN** each SHALL import `@rezics/ui/shared/styles/layers.css` (directly or transitively via the shared preview)
-- **AND** stories SHALL render with `--rezics-*` custom properties resolved
-
 ### Requirement: Token galleries are MDX docs under `Foundation/Tokens`
 
 The `@rezics/ui` Storybook SHALL provide six MDX token galleries under the `Foundation/Tokens` doc tree: colors, typography, spacing, radius, elevation, motion. Each gallery SHALL render the live tokens as visual swatches / samples (not just text references).
@@ -150,7 +134,7 @@ The `@rezics/app` Storybook SHALL provide six MDX overview docs under the `Domai
 ## Requirements
 ### Requirement: Theme switching is wired into preview
 
-Each `.storybook/preview.tsx` SHALL provide a Light/Dark global toolbar via Storybook globals that toggles the `[data-theme]` attribute on `<html>`. The CSS variable namespace SHALL switch instantly without component remount. There SHALL NOT be a MUI `ThemeProvider`, `StyledEngineProvider`, `CssBaseline`, or any other MUI runtime in the preview tree.
+Each `.storybook/preview.tsx` SHALL provide a Light/Dark global toolbar via Storybook globals that toggles the `[data-theme]` attribute on `<html>`. The CSS variable namespace SHALL switch instantly without component remount.
 
 #### Scenario: Global theme toolbar present
 
@@ -164,22 +148,15 @@ Each `.storybook/preview.tsx` SHALL provide a Light/Dark global toolbar via Stor
 - **THEN** each SHALL import `@rezics/ui/shared/styles/layers.css` (directly or transitively via the shared preview)
 - **AND** stories SHALL render with `--rezics-*` custom properties resolved
 
-#### Scenario: No MUI runtime in preview
-
-- **WHEN** `package/storybook-config/src/preview.tsx` and the per-package `.storybook/preview.tsx` files are inspected
-- **THEN** there SHALL be no import from `@mui/material` or `@mui/material/styles`
-- **AND** there SHALL be no `ThemeProvider`, `StyledEngineProvider`, or `CssBaseline` element rendered
-
 ### Requirement: Shared Storybook config is a workspace package
 
-Common Storybook configuration (Vite plugin wiring, theme decorator, story patterns, addon list) SHALL live in `@rezics/storybook-config` as a workspace package. Per-package `.storybook/` shells SHALL be thin wrappers (≤ 20 lines per file) that import from the shared package. The shared package SHALL NOT declare `@mui/*` in `dependencies` or `peerDependencies`.
+Common Storybook configuration (Vite plugin wiring, theme decorator, story patterns, addon list) SHALL live in `@rezics/storybook-config` as a workspace package. Per-package `.storybook/` shells SHALL be thin wrappers (≤ 20 lines per file) that import from the shared package.
 
 #### Scenario: Shared package exists and has two entry points
 
 - **WHEN** `package/storybook-config/package.json` is inspected
 - **THEN** the package name SHALL be `@rezics/storybook-config`
 - **AND** the `exports` field SHALL include both `"."` (config helpers) and `"./preview"` (theme decorator)
-- **AND** the `dependencies` and `peerDependencies` SHALL NOT contain any `@mui/*` entry
 
 #### Scenario: UnoCSS is an optional peer
 

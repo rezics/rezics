@@ -21,14 +21,6 @@
 - **WHEN** the `error` prop is `null`
 - **THEN** the component SHALL render nothing
 
-### Requirement: MUI Alert-based styling
-The component SHALL use MUI `Alert` with `severity="error"` for the error container, consistent with existing error display patterns in auth pages.
-
-#### Scenario: Visual consistency
-- **WHEN** `<QueryErrorDisplay>` renders an error
-- **THEN** it SHALL use MUI `Alert` component with `severity="error"`
-- **AND** the collapsible section SHALL use MUI `Collapse` or equivalent
-
 ### Requirement: Replace ad-hoc error rendering
 All existing ad-hoc error rendering patterns in `package/app` pages and sections SHALL be replaced with `<QueryErrorDisplay>`. Each page retains control of when and where to render the component.
 
@@ -49,12 +41,10 @@ The component SHALL use shadcn `Alert` (from `@rezics/ui/shadcn`) with destructi
 
 - **WHEN** `<QueryErrorDisplay>` renders an error
 - **THEN** it SHALL use shadcn `Alert` from `@rezics/ui/shadcn` with the destructive variant
-- **AND** the collapsible section SHALL use shadcn `Collapsible` (not MUI `Collapse`)
-- **AND** there SHALL be no import from `@mui/material` in the component file
+- **AND** the collapsible section SHALL use shadcn `Collapsible`
 
 #### Scenario: Token-aligned destructive variant
 
 - **WHEN** the destructive variant of shadcn `Alert` renders
 - **THEN** the surface and border SHALL derive from `--rezics-color-error-fill` / `--rezics-color-error-text` / `--rezics-color-border-error` tokens
-- **AND** the visual outcome SHALL be equivalent to the prior MUI `Alert severity="error"` outcome
 

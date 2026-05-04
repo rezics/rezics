@@ -2,7 +2,7 @@
 name: rezics-design
 description: >
   rezics design system reference: brand identity (轮回红 #f4606c on warm parchment),
-  token library, typography rules, shadcn-or-custom component policy (no MUI),
+  token library, typography rules, shadcn-or-custom component policy,
   Apple-inspired borderless aesthetic, and do/don't patterns. Use this skill
   whenever generating, modifying, or reviewing UI in rezics — JSX, CSS, UnoCSS
   classes, theme tokens, color choices, typography, spacing, or component
@@ -28,7 +28,7 @@ This skill is the human/AI-readable index.
 1. **Brand color**: 轮回红 `#f4606c` (`--rezics-color-brand-fill`). It is a fill color, never a text color. For brand-tinted text, use `text-brand` (`#C4433A` light / `#fa7882` dark) — already contrast-verified.
 2. **Background**: warm parchment `#f5f4ed` (light) / warm dark stone `#1a1a18` (dark). Not pure white, not pure black.
 3. **Borderless by default**: cards, sections, panels do NOT get bordered card chrome. Use whitespace and `border-whisper` (`rgba(0,0,0,0.08)`) for containment. Reserve shadows for modal-tier surfaces only.
-4. **shadcn-or-custom**. Pick from `@rezics/ui/shadcn` first; reach for rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local) only when shadcn lacks the component. **MUI (`@mui/*`) is permanently forbidden** — R8 in `bun run check:convention` blocks any `@mui/*` import or `package.json` entry. See `component-selection.md` for the decision tree and `openspec/specs/ui-component-foundation/spec.md` for the spec.
+4. **shadcn-or-custom**. Pick from `@rezics/ui/shadcn` first; reach for rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local) only when shadcn lacks the component. See `component-selection.md` for the decision tree and `openspec/specs/ui-component-foundation/spec.md` for the spec.
 5. **No emoji icons in UI chrome**. Use `lucide-react` (default) or `@tabler/icons-react` (named fallback when lucide lacks the glyph). Emoji are content (user posts), not interface vocabulary.
 6. **No raw `<a href>`**. Always use `<SafeLink href={url}>` from `@rezics/ui` (enforced by `bun run check:convention` R5).
 7. **Tokens, not hex literals**. `bg-brand`, `text-text-primary`, `var(--rezics-color-surface-canvas)` — never `bg-[#f4606c]` or `color: #1d1d1f`.
@@ -66,7 +66,7 @@ For full details, load `tokens.md`.
 - **Brand**: `brand-fill` / `-fill-hover` / `-fill-active` / `text-brand` (light/dark variants auto-switch)
 - **Semantic**: `success-fill` / `success-text`, same for `warning` / `error` / `info`
 - **Borders**: `border-whisper` (default) / `-defined` / `-strong` / `-focus` / `-error`
-- **Spacing**: UnoCSS `p-N` = `N × 4px` (Tailwind v4). Common steps: `p-2` (8px base) / `p-4` (16px) / `p-6` (24px) / `p-8` (32px) / `p-12` (48px) / `p-16` (64px) / `p-24` (96px) / `p-32` (128px). The retired MUI `sx={{ p: N }}` 8px scale doubles when crossing into UnoCSS — `sx={{ p: 2 }}` becomes `p-4`.
+- **Spacing**: UnoCSS `p-N` = `N × 4px` (Tailwind v4). Common steps: `p-2` (8px) / `p-4` (16px) / `p-6` (24px) / `p-8` (32px) / `p-12` (48px) / `p-16` (64px) / `p-24` (96px) / `p-32` (128px).
 - **Radius**: `radius-xs` (4) / `-sm` (6) / `-md` (8 default) / `-lg` (12) / `-xl` (16) / `-2xl` (24) / `-pill` / `-full`
 - **Motion**: `motion-fast` (120ms) / `-base` (200) / `-slow` (350) / `-page` (500) + easings `ease-out` / `-in-out` / `-spring`
 
@@ -90,8 +90,8 @@ Both forms resolve to the same underlying value because tokens flow:
 - **`voice.md`** — design mood, density, tone, brand voice. Read when authoring landing pages, marketing copy, hero sections, or any place that establishes "what is rezics".
 - **`tokens.md`** — full token cheatsheet: every token with its value, intended use, and common mistakes. Read when picking a color, spacing, or radius and the quickstart table doesn't cover it.
 - **`patterns.md`** — concrete do/don't gallery with code snippets. Read when building a new component, reviewing one, or when uncertain about a pattern.
-- **`component-selection.md`** — shadcn-or-custom decision tree and MUI → shadcn replacement map. Read when picking a primitive (button, input, dialog, menu, etc.) or when migrating legacy code.
-- **`icons.md`** — lucide-default + tabler-fallback icon mapping table.
+- **`component-selection.md`** — shadcn-or-custom decision tree and category-by-category recommendations. Read when picking a primitive (button, input, dialog, menu, etc.).
+- **`icons.md`** — lucide-default + tabler-fallback icon guidance and brand-mark catalog.
 
 For deeper context: `openspec/plans/design-system-research/briefs/01-foundation-v1.md` (the canonical brief).
 
@@ -102,7 +102,6 @@ For deeper context: `openspec/plans/design-system-research/briefs/01-foundation-
 1. Never use `#f4606c` as a text color (fails AA contrast on parchment).
 2. Never use raw `<a href>`. Use `<SafeLink>`.
 3. Never use emoji as UI icons. Use `lucide-react` (default) or `@tabler/icons-react` (named fallback).
-3a. Never import from `@mui/*` or `@material/material-color-utilities` — R8 in `bun run check:convention` blocks it absolutely.
 4. Never wrap a section/page in a bordered card with shadow. Use whitespace.
 5. Never set `font-size: 14px` (or any fixed px). Use the `clamp()` scale.
 6. Never set line-height below 1.30 for any text. Below 1.55 for body. Below 1.60 for book reader.

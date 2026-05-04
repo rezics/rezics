@@ -1,5 +1,5 @@
 import { Separator } from "@rezics/ui/shadcn";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { cn } from "@/shared/utils/css-util";
 import type { NavigationItem } from "./navigation";
 import { ChevronUp as ExpandLess, ChevronDown as ExpandMore } from "lucide-react";
@@ -68,7 +68,7 @@ export const NavigationList = ({
                 </span>
               </button>
             ) : (
-              <MUILink
+              <TextLink
                 to={`${item.segment}` as any}
                 className={cn(
                   itemBaseClass,
@@ -83,7 +83,7 @@ export const NavigationList = ({
                 <span className="flex-1 dark:text-light text-dark">
                   {item.title}
                 </span>
-              </MUILink>
+              </TextLink>
             )}
 
             {hasChildren && item.segment && isOpen && (
@@ -93,7 +93,7 @@ export const NavigationList = ({
                   const ChildIcon = child.icon;
                   return (
                     <li key={child.segment}>
-                      <MUILink
+                      <TextLink
                         to={`${child.segment}` as any}
                         className={cn(
                           itemBaseClass,
@@ -108,7 +108,7 @@ export const NavigationList = ({
                         <span className="flex-1 dark:text-light text-dark">
                           {child.title}
                         </span>
-                      </MUILink>
+                      </TextLink>
                     </li>
                   );
                 })}

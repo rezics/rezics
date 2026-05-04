@@ -1,4 +1,4 @@
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { Megaphone as CampaignRoundedIcon, Pin as PushPinRoundedIcon } from "lucide-react";
@@ -53,7 +53,7 @@ export function AnnouncementBar({
       <div className="relative flex-1 overflow-hidden h-[28px] flex items-center">
         {items.map((item, i) => {
           const isActive = i === index;
-          const Wrapper = item.link ? MUILink : "div";
+          const Wrapper = item.link ? TextLink : "div";
 
           return (
             <Wrapper

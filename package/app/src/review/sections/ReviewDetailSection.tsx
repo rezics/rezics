@@ -2,7 +2,7 @@ import { bookQueries } from "@rezics/api/book/book";
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useRef } from "react";
@@ -52,9 +52,9 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
     <div className="flex flex-col gap-8">
       {canEdit && (
         <div className="self-end">
-          <MUILink to="/review/$reviewId/edit" params={{ reviewId }}>
+          <TextLink to="/review/$reviewId/edit" params={{ reviewId }}>
             {t("common.edit")}
-          </MUILink>
+          </TextLink>
         </div>
       )}
 

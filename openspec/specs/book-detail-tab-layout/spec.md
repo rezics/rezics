@@ -21,23 +21,6 @@ The book detail shell SHALL render exactly four tabs in this order: **Overview**
 - **WHEN** a user navigates to `/book/$bookId/` (no sub-path)
 - **THEN** the router SHALL redirect to `/book/$bookId/info`
 
-### Requirement: Tab bar is horizontally scrollable with scroll buttons on small screens
-
-The tab bar SHALL use MUI `Tabs` with `variant="scrollable"` and `scrollButtons="auto"`. On screens where all tabs do not fit, horizontal scroll buttons SHALL appear. The language dropdown (defined in `book-detail-language-switcher`) SHALL remain fixed at the right end and SHALL NOT scroll with the tabs.
-
-#### Scenario: Tabs overflow on small screen
-
-- **WHEN** the viewport width is too narrow to display all four tab labels
-- **THEN** the tab area SHALL become horizontally scrollable
-- **AND** scroll indicator buttons SHALL appear at the edges
-- **AND** the language dropdown SHALL remain visible and fixed at the right end
-
-#### Scenario: All tabs fit on large screen
-
-- **WHEN** the viewport width is sufficient to display all four tab labels
-- **THEN** no scroll buttons SHALL appear
-- **AND** the language dropdown SHALL remain at the right end of the tab bar
-
 ### Requirement: Overview tab displays basic info with lightweight interactions
 
 The Overview tab SHALL render the following sections in order: (1) book description (translated per selected language), (2) quote excerpts preview (2-3 items with a "view all" link to `/quote/book/$bookId`), (3) rating widget allowing the user to submit a score, (4) remark preview (3-5 short reviews with a quick-submit form and a "view all" link to `/remark/book/$bookId`).
@@ -135,9 +118,8 @@ The tab bar SHALL use shadcn `Tabs` from `@rezics/ui/shadcn` (with `TabsList` an
 - **THEN** the scroll container SHALL bring the active tab into view
 - **AND** the visible portion of the tab strip SHALL include the active tab without requiring a manual scroll
 
-#### Scenario: No MUI imports
+#### Scenario: Tabs imported from rezics-ui shadcn surface
 
 - **WHEN** the book-detail tab bar component is inspected
-- **THEN** there SHALL be no import from `@mui/material`
-- **AND** the `Tabs` import SHALL come from `@rezics/ui/shadcn`
+- **THEN** the `Tabs`, `TabsList`, and `TabsTrigger` imports SHALL come from `@rezics/ui/shadcn`
 

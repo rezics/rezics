@@ -5,16 +5,9 @@ import { SpacingRuler } from "./_gallery";
 
 # Spacing
 
-Two systems coexist. They use different step numbers — pick the one that matches your syntax.
+UnoCSS classes (`p-N`, `gap-N`, `mt-N`, …) follow Tailwind v4's single-`--spacing` model: every step is `N × 4px`. So `p-8 = 32px`, `gap-3 = 12px`.
 
-| System | Formula | Example |
-| --- | --- | --- |
-| **UnoCSS classes** (`p-N`, `gap-N`, `mt-N`, …) | `N × 4px` (Tailwind v4 single-`--spacing` model) | `p-8 = 32px` |
-| **MUI sx** (`sx={{ p: N }}`, `<Stack spacing={N}>`) | `N × 8px` (theme.spacing base) | `sx={{ p: 4 }} = 32px` |
-
-For a 32px gap, write `p-8` in UnoCSS or `sx={{ p: 4 }}` in MUI. Both render the same pixel result; the step number is just different.
-
-Source of truth: `package/ui/src/config/tokens/spacing.ts` (docs reference) and `package/ui/src/config/theme.ts` (`spacing: SPACING_BASE_PX`).
+Source of truth: `package/ui/src/config/tokens/spacing.ts` (docs reference).
 
 ## Common steps (UnoCSS / Tailwind v4)
 
@@ -38,29 +31,25 @@ Any integer N produces `N × 4px` — these are just the rhythm steps the design
 
 ## Common patterns
 
-| Use | UnoCSS | MUI sx | Pixels |
-| --- | --- | --- | --- |
-| Inline icon-to-label gap | `gap-2` | `gap: 1` | 8px |
-| Form field row gap | `gap-3` | `gap: 1.5` | 12px |
-| Card padding | `p-4` | `p: 2` | 16px |
-| Section internal padding | `p-6` | `p: 3` | 24px |
-| Section divider rhythm | `p-8` | `p: 4` | 32px |
-| Between sections (app default) | `p-12` | `p: 6` | 48px |
-| Page-level vertical rhythm | `p-16` | `p: 8` | 64px |
-| Hero / chapter-level breathing | `p-24` | `p: 12` | 96px |
+| Use | UnoCSS | Pixels |
+| --- | --- | --- |
+| Inline icon-to-label gap | `gap-2` | 8px |
+| Form field row gap | `gap-3` | 12px |
+| Card padding | `p-4` | 16px |
+| Section internal padding | `p-6` | 24px |
+| Section divider rhythm | `p-8` | 32px |
+| Between sections (app default) | `p-12` | 48px |
+| Page-level vertical rhythm | `p-16` | 64px |
+| Hero / chapter-level breathing | `p-24` | 96px |
 
 ## Usage
 
 ```tsx
-// MUI sx — N × 8px
-<Stack spacing={3} sx={{ p: 4 }}>      // gap: 24px, padding: 32px
-<Box sx={{ mt: 6, gap: 2 }}>           // mt: 48px, gap: 16px
-
 // UnoCSS — N × 4px
 <div className="p-4 gap-2">            // padding: 16px, gap: 8px
 <section className="py-12 gap-8">      // py: 48px, gap: 32px
 
-// TS source (rare — only for generating CSS outside MUI/UnoCSS)
+// TS source (rare — only for generating CSS outside UnoCSS)
 import { spacing } from "@rezics/ui/config/tokens/spacing";
 ```
 

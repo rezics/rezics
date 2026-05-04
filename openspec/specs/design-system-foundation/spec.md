@@ -1,25 +1,3 @@
-### Requirement: Token TypeScript modules are the single source of truth
-
-The rezics design system SHALL define all foundation tokens (color, typography, spacing, radius, elevation, motion) as TypeScript constants under `package/ui/src/config/tokens/`. Every other consumer — MUI theme, UnoCSS preset, CSS custom properties in `layers.css` — SHALL derive from these modules. Token authors SHALL NOT introduce parallel sources of truth (Tailwind config literals, CSS-in-TS theme objects, MDX-only definitions).
-
-#### Scenario: All token categories live under the tokens directory
-
-- **WHEN** the contents of `package/ui/src/config/tokens/` are listed
-- **THEN** the directory SHALL contain `colors.ts`, `typography.ts`, `spacing.ts`, `radius.ts`, `elevation.ts`, `motion.ts`, and `index.ts`
-- **AND** `index.ts` SHALL re-export from each of the six token modules
-
-#### Scenario: MUI theme imports tokens, not literals
-
-- **WHEN** `package/ui/src/config/theme.ts` is inspected
-- **THEN** color, spacing, radius, and motion values SHALL be sourced from `./tokens/*` imports
-- **AND** raw hex / px / millisecond literals for foundation values SHALL NOT appear in the theme file
-
-#### Scenario: UnoCSS preset binds to tokens via CSS variables
-
-- **WHEN** `package/ui/src/config/uno-config.ts` defines theme colors / spacing / radius
-- **THEN** the values SHALL be `var(--rezics-…)` strings, not raw hex / px literals
-- **AND** the same UnoCSS class SHALL render different colors when `[data-theme="dark"]` is set on `<html>`
-
 ### Requirement: CSS custom property namespace is `--rezics-*`
 
 All design-system CSS custom properties SHALL use the `--rezics-` prefix. The previous `--rzc-*` shorthand SHALL NOT be used. Font-family local fallback names SHALL use `'rezics-sans'`, `'rezics-serif'`, `'rezics-mono'` — never `'rzc-sans'` etc.
@@ -127,37 +105,16 @@ The system SHALL provide `leading-reader` (1.60), `leading-body` (1.55), `leadin
 - **WHEN** `package/ui/src/shared/styles/layers.css` is parsed
 - **THEN** there SHALL be a `@media (prefers-reduced-motion: reduce)` block applying `animation-duration: 0ms !important` and `transition-duration: 0ms !important` to `*`, `*::before`, `*::after`
 
-### Requirement: MUI theme exposes light and dark themes
-
-`@rezics/ui` SHALL export `lightTheme` and `darkTheme` as fully-built MUI theme objects, plus `getTheme(mode)` and `getDynamicTheme(...)` for backward-compatible consumers. Both themes SHALL derive `palette` / `spacing` / `shape` / `typography` / `transitions` from the token modules.
-
-#### Scenario: Light and dark themes export
-
-- **WHEN** `@rezics/ui` is imported
-- **THEN** `lightTheme` and `darkTheme` SHALL be available as named exports
-- **AND** their `palette.primary.main` SHALL equal `--rezics-color-brand-fill` (`#f4606c`)
-
-#### Scenario: Backward-compatible API preserved
-
-- **WHEN** existing consumers import `getTheme` or `getDynamicTheme`
-- **THEN** the imports SHALL resolve and produce themes structurally compatible with prior versions
-- **AND** `app` / `admin` / `folio` SHALL compile without changes
 ## Requirements
 ### Requirement: Token TypeScript modules are the single source of truth
 
-The rezics design system SHALL define all foundation tokens (color, typography, spacing, radius, elevation, motion) as TypeScript constants under `package/ui/src/config/tokens/`. Every other consumer — UnoCSS preset, CSS custom properties in `layers.css`, breakpoint constants in `package/ui/src/config/breakpoints.ts` — SHALL derive from these modules. Token authors SHALL NOT introduce parallel sources of truth (Tailwind config literals, CSS-in-TS theme objects, MDX-only definitions, MUI theme adapter). Token modules SHALL NOT import from `@mui/*`.
+The rezics design system SHALL define all foundation tokens (color, typography, spacing, radius, elevation, motion) as TypeScript constants under `package/ui/src/config/tokens/`. Every other consumer — UnoCSS preset, CSS custom properties in `layers.css`, breakpoint constants in `package/ui/src/config/breakpoints.ts` — SHALL derive from these modules. Token authors SHALL NOT introduce parallel sources of truth (Tailwind config literals, CSS-in-TS theme objects, MDX-only definitions).
 
 #### Scenario: All token categories live under the tokens directory
 
 - **WHEN** the contents of `package/ui/src/config/tokens/` are listed
 - **THEN** the directory SHALL contain `colors.ts`, `typography.ts`, `spacing.ts`, `radius.ts`, `elevation.ts`, `motion.ts`, and `index.ts`
 - **AND** `index.ts` SHALL re-export from each of the six token modules
-
-#### Scenario: Token modules contain no MUI imports
-
-- **WHEN** any file under `package/ui/src/config/tokens/` is inspected
-- **THEN** there SHALL be no import from `@mui/*`
-- **AND** no token value SHALL be a re-export of a MUI palette / spacing / typography construct
 
 #### Scenario: UnoCSS preset binds to tokens via CSS variables
 
@@ -167,7 +124,7 @@ The rezics design system SHALL define all foundation tokens (color, typography, 
 
 ### Requirement: Theme switches via `[data-theme]` attribute alone
 
-The light/dark theme SHALL switch via the `[data-theme]` attribute on the `<html>` element. The `--rezics-*` CSS custom-property cascade SHALL deliver all mode-sensitive token values. There SHALL NOT be a JavaScript-side theme object, a React context provider, or a MUI `ThemeProvider` / `StyledEngineProvider` in the runtime path. Consumers that previously imported `getTheme` / `getDynamicTheme` from `@rezics/ui` SHALL no longer do so; the prior MUI-theme contract is superseded by this attribute-based switching.
+The light/dark theme SHALL switch via the `[data-theme]` attribute on the `<html>` element. The `--rezics-*` CSS custom-property cascade SHALL deliver all mode-sensitive token values. There SHALL NOT be a JavaScript-side theme object, a React context provider, or a runtime theme-injection layer in the runtime path. Components SHALL receive token values exclusively through CSS custom properties.
 
 #### Scenario: Mode switch updates DOM attribute
 
@@ -176,9 +133,9 @@ The light/dark theme SHALL switch via the `[data-theme]` attribute on the `<html
 - **AND** the `--rezics-color-*` cascade SHALL resolve to dark-mode values
 - **AND** no React component remount SHALL be required for the change to take effect
 
-#### Scenario: No MUI ThemeProvider in runtime
+#### Scenario: No JavaScript theme provider in runtime
 
 - **WHEN** the running React tree of `@rezics/app` or `@rezics/admin` is inspected
-- **THEN** there SHALL be no MUI `ThemeProvider` or `StyledEngineProvider` in the tree
+- **THEN** there SHALL be no JavaScript-side theme provider injecting palette / spacing / typography values
 - **AND** components SHALL receive token values exclusively through CSS custom properties
 

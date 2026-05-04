@@ -1,7 +1,7 @@
 import { tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
 import { tagBookRoute } from "@/router";
@@ -47,11 +47,11 @@ export function TagByBookPage() {
 
       {showSeeAll && (
         <div className="mt-4">
-          <MUILink to="/tag/book/$bookId/tag" params={{ bookId }}>
+          <TextLink to="/tag/book/$bookId/tag" params={{ bookId }}>
             <span className="text-primary-600 hover:underline">
               查看全部标签（{total}）
             </span>
-          </MUILink>
+          </TextLink>
         </div>
       )}
     </div>

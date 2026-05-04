@@ -43,7 +43,7 @@ bun run knip             # Detect unused exports/dependencies (root)
 | `@rezics/contract`  | Shared TypeScript API contracts (Elysia + Typebox schemas)        |
 | `@rezics/api`       | Frontend API client (TanStack Query hooks + query options)        |
 | `@rezics/app`       | Main React SPA (Vite + TanStack Router)                           |
-| `@rezics/admin`     | Admin dashboard (Vite + React + Material-UI)                      |
+| `@rezics/admin`     | Admin dashboard (Vite + React + shadcn)                           |
 | `@rezics/ui`        | Shared UI components (Radix/shadcn, dnd-kit)                      |
 | `@rezics/app-shell` | Shared shell/layout components                                    |
 | `@rezics/search`    | Meilisearch integration                                           |
@@ -105,9 +105,9 @@ All JSX links must use `<SafeLink href={url}>` from `@rezics/ui` instead of raw 
 
 Any UI work (JSX, UnoCSS classes, theme tokens, colors, typography, spacing, component selection) is governed by the **rezics-design** skill. Load it before generating or reviewing UI. Source-of-truth tokens live in `package/ui/src/config/tokens/`; canonical brief is `openspec/plans/design-system-research/briefs/01-foundation-v1.md`. Don't duplicate design rules outside the skill — point to it.
 
-## No-MUI Policy
+## UI Component Policy
 
-MUI (`@mui/*`) and `@material/material-color-utilities` are permanently removed from this project. The component selection policy is **shadcn-or-custom**: shadcn primitives from `@rezics/ui/shadcn` are the default; rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`) cover gaps. Icons use `lucide-react` by default, `@tabler/icons-react` as the named fallback. Enforced by **R8** in `bun run check:convention` — any `@mui/*` or `@material/material-color-utilities` import or `package.json` declaration fails the gate (no per-site allowlist). See `openspec/specs/ui-component-foundation/spec.md` for the authoritative source. Reintroducing MUI requires an OpenSpec change updating both `ui-component-foundation` and `convention-enforcement` specs.
+The component selection policy is **shadcn-or-custom**: shadcn primitives from `@rezics/ui/shadcn` are the default; rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`) cover gaps. Icons use `lucide-react` by default, `@tabler/icons-react` as the named fallback. See `openspec/specs/ui-component-foundation/spec.md` for the authoritative source. Introducing a third-party UI library requires an OpenSpec change updating `ui-component-foundation`.
 
 ## Change Management
 

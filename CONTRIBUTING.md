@@ -90,14 +90,14 @@ bun run seed --preset=minimal --no-interactive
 
 Seeders never read counts directly — all count decisions go through `ctx.draw(...)`. R7 (`bun run check:convention`) blocks new `powerLaw` imports outside `strategy.ts`/`utils.ts`.
 
-## UI Component Policy (no MUI)
+## UI Component Policy
 
-MUI (`@mui/*`) and `@material/material-color-utilities` are permanently removed. Pick UI primitives in this order:
+Pick UI primitives in this order:
 
 1. **shadcn** — `@rezics/ui/shadcn` (Radix-based, token-aligned)
 2. **Custom rezics primitives** — `@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local `components/`
 
-There is no third option. Icons: `lucide-react` by default, `@tabler/icons-react` as the named fallback when lucide lacks the glyph. R8 (`bun run check:convention`) blocks any `@mui/*` or `@material/material-color-utilities` import or `package.json` declaration with no per-site allowlist. See `openspec/specs/ui-component-foundation/spec.md` for the authoritative spec.
+There is no third option. Icons: `lucide-react` by default, `@tabler/icons-react` as the named fallback when lucide lacks the glyph. See `openspec/specs/ui-component-foundation/spec.md` for the authoritative spec.
 
 The retired `SEED_*` env vars (e.g. `SEED_PROFILE=fast`) no longer have any effect — replace with `--preset=<name>`.
 

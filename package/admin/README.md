@@ -4,7 +4,7 @@ Admin dashboard for the Rezics platform. Provides operational management interfa
 
 ## Overview
 
-A standalone React SPA built with Vite and Material-UI. Connects to the auth and server backends via `@rezics/api` for administrative operations.
+A standalone React SPA built with Vite and shadcn primitives. Connects to the auth and server backends via `@rezics/api` for administrative operations.
 
 ## Features
 
@@ -25,7 +25,6 @@ bun run cosmos        # Launch React Cosmos for component development
 ## Tech Stack
 
 - [React 19](https://react.dev) + [Vite](https://vite.dev)
-- [Material-UI 7](https://mui.com) for UI components
 - [TanStack Router](https://tanstack.com/router) for file-based routing
 - [TanStack Query](https://tanstack.com/query) for data fetching
 - [Chart.js](https://www.chartjs.org) for data visualization

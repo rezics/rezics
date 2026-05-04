@@ -47,6 +47,6 @@ bun run cosmos        # Launch React Cosmos for component development
 - [React 19](https://react.dev) + [Vite](https://vite.dev)
 - [TanStack Router](https://tanstack.com/router) for file-based routing
 - [TanStack Query](https://tanstack.com/query) for data fetching via `@rezics/api`
-- [Material-UI 7](https://mui.com) + [UnoCSS](https://unocss.dev) for styling
+- [UnoCSS](https://unocss.dev) for styling
 - [Jotai](https://jotai.org) + [Zustand](https://zustand.docs.pmnd.rs) for state management
 - [Meilisearch](https://www.meilisearch.com) (via react-instantsearch) for search

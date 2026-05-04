@@ -1,6 +1,6 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -46,9 +46,9 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
         {title && <h1 className="text-2xl font-bold">{title}</h1>}
         {canEdit && (
           <div className="ml-auto">
-            <MUILink to="/excerpt/$unitId/edit" params={{ unitId }}>
+            <TextLink to="/excerpt/$unitId/edit" params={{ unitId }}>
               {t("common.edit")}
-            </MUILink>
+            </TextLink>
           </div>
         )}
       </div>

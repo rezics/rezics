@@ -5,7 +5,7 @@ import {
 import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import {
   Avatar,
   AvatarFallback,
@@ -131,13 +131,13 @@ export function UnitPage() {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <MUILink
+                      <TextLink
                         to="/user/$unitId"
                         params={{ unitId: unit.user.unitId }}
                         className="text-sm font-medium"
                       >
                         {unit.user.name}
-                      </MUILink>
+                      </TextLink>
                     </TooltipTrigger>
                     <TooltipContent>{t("user.open_profile")}</TooltipContent>
                   </Tooltip>

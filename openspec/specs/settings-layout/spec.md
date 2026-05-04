@@ -11,13 +11,6 @@ The settings page SHALL render a persistent sidebar on the left at viewports `md
 - **WHEN** a user clicks "Security" in the sidebar
 - **THEN** the URL changes to `/user/me/setting/security` and the Security section content loads
 
-### Requirement: Settings page top tabs on mobile
-On viewports below `md`, the settings page SHALL render horizontal scrollable MUI Tabs at the top instead of a sidebar. Each tab corresponds to a settings section.
-
-#### Scenario: Mobile tabs render
-- **WHEN** a user navigates to settings on a mobile viewport
-- **THEN** horizontal tabs are displayed at the top of the page, scrollable if they overflow
-
 ### Requirement: Authentication guard
 All settings routes SHALL require authentication. If the user is not authenticated, they SHALL be redirected to the login page.
 
@@ -47,7 +40,7 @@ On viewports below `md`, the settings page SHALL render horizontal scrollable sh
 
 - **WHEN** a user navigates to settings on a mobile viewport
 - **THEN** horizontal tabs are displayed at the top of the page using shadcn `Tabs`, scrollable if they overflow
-- **AND** the import SHALL come from `@rezics/ui/shadcn` (not `@mui/material`)
+- **AND** the import SHALL come from `@rezics/ui/shadcn`
 
 #### Scenario: Active mobile tab into view
 

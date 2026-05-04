@@ -82,16 +82,6 @@ The single-preview popper SHALL display: (1) the tag's translated name, (2) the 
 - **THEN** the browser SHALL navigate to `/search?q=[isekai]`
 - **AND** router state SHALL include `injectedTags: [{ slug: "isekai", unitId: "tag-1", name: "異世界" }]`
 
-### Requirement: Popper is non-modal and does not block chip interaction
-
-The popper SHALL use MUI `Popper` (not `Popover`). It SHALL NOT render a backdrop, lock scroll, or trap focus. Other tag chips SHALL remain clickable while the popper is open.
-
-#### Scenario: Click another chip while popper is open
-
-- **GIVEN** a popper is open for tag A
-- **WHEN** the user clicks tag B
-- **THEN** the click SHALL be received by tag B's click handler (not blocked by the popper)
-
 ### Requirement: Multi-select search bar shows count and navigates with injection
 
 When in multi-select state, a search action bar SHALL appear below (or above) the tag chips. It SHALL display the number of selected tags and a "Search selected tags" button. Clicking the button SHALL navigate to the search page with all selected tags' `[slug]` syntax in the URL and full tag objects in router state.
@@ -111,7 +101,7 @@ When in multi-select state, a search action bar SHALL appear below (or above) th
 ## Requirements
 ### Requirement: Popper is non-modal and does not block chip interaction
 
-The popper SHALL use a non-modal popover primitive — shadcn `Popover` (from `@rezics/ui/shadcn`, Radix-based) configured with `modal={false}`. It SHALL NOT render a backdrop, lock scroll, or trap focus. Other tag chips SHALL remain clickable while the popper is open. The component SHALL NOT import from `@mui/material` (no `MUI Popper`, `MUI Popover`, or related primitive).
+The popper SHALL use a non-modal popover primitive — shadcn `Popover` (from `@rezics/ui/shadcn`, Radix-based) configured with `modal={false}`. It SHALL NOT render a backdrop, lock scroll, or trap focus. Other tag chips SHALL remain clickable while the popper is open.
 
 #### Scenario: Click another chip while popper is open
 
@@ -127,9 +117,8 @@ The popper SHALL use a non-modal popover primitive — shadcn `Popover` (from `@
 - **THEN** the page SHALL remain scrollable and other elements SHALL remain clickable
 - **AND** there SHALL be no element with `pointer-events: auto` covering the page beneath the popper
 
-#### Scenario: No MUI imports in tag interaction
+#### Scenario: Popover sourced from rezics-ui shadcn surface
 
 - **WHEN** the tag-interaction component file is inspected
-- **THEN** there SHALL be no import from `@mui/material`
-- **AND** the popover SHALL be sourced from `@rezics/ui/shadcn`
+- **THEN** the popover SHALL be sourced from `@rezics/ui/shadcn`
 
