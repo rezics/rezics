@@ -22,7 +22,9 @@
       "types": "./src/primitive/link/index.ts",
       "import": "./src/primitive/link/index.ts"
     },
-    "./uno.config": "./src/config/uno-config.ts"
+    "./uno.config": "./src/config/uno-config.ts",
+    "./config/tokens.css": "./src/config/tokens.css",
+    "./config/base.css": "./src/config/base.css"
   },
   "type": "module",
   "version": "1.0.50",

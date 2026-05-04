@@ -16,6 +16,7 @@ if (typeof window !== "undefined" && typeof document !== "undefined") {
     const applyThemeMode = (mode: unknown) => {
       const resolved: ThemeMode = mode === "dark" ? "dark" : "light";
       const root = document.documentElement;
+      root.classList.add("theme-rezics");
       root.dataset.theme = resolved;
       root.classList.toggle("dark", resolved === "dark");
     };
@@ -100,6 +101,7 @@ export function withRezicsTheme(
 
     useEffect(() => {
       const root = document.documentElement;
+      root.classList.add("theme-rezics");
       root.dataset.theme = mode;
       root.classList.toggle("dark", mode === "dark");
     }, [mode]);

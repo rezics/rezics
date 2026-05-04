@@ -1,0 +1,663 @@
+/* ============================================================================
+ * rezics design tokens — canonical token table
+ *
+ * Source-of-truth file for the rezics token system. Three-tier MD3 model
+ * (reference / system / component) plus a shadcn-superset slot block, the
+ * legacy-alias compatibility block, and the dark-mode override.
+ *
+ * Authored by openspec change `complete-rezics-token-system` (archived under
+ * openspec/changes/ once landed). Migration timeline:
+ *   1. THIS change ships the three-tier model + shadcn-superset slots and
+ *      keeps the legacy 11-name aliases (`rezics-color-fg`, `-bg`, `-primary`,
+ *      etc.) live as `@deprecated` pointers. Contrast invariants are enforced
+ *      by `bun run check:tokens` (tool/scripts/check-tokens.ts).
+ *   2. Proposal 2 (`migrate-to-theme-config-classes`) rewrites the remaining
+ *      legacy-alias call sites to the new theme classes. Baseline of the
+ *      starting consumers is captured in `tool/scripts/expected-violations.json`.
+ *   3. A follow-up change deletes the legacy-alias block (lines tagged
+ *      `@deprecated` below) once that migration drives consumers to zero.
+ * See openspec/changes/complete-rezics-token-system/ for the full rationale.
+ *
+ * Section order (do not reorder; consumers grep for these banners):
+ *
+ *   /* === REFERENCE TIER (mode-invariant) ============================ */
+ *   /* === SYSTEM TIER (light) ======================================== */
+ *   /* === SHADCN-SUPERSET SLOTS (light) ============================== */
+ *   /* === LEGACY ALIASES — @deprecated =============================== */
+ *   /* === REZICS-NAME MOTION ALIASES ================================= */
+ *   /* === COMPONENT TIER ============================================= */
+ *   /* === DARK MODE OVERRIDE ========================================= */
+ *
+ * Authoring rule: system tokens reference reference tokens via var(); shadcn
+ * slots and component tokens reference system tokens via var(); literal hex /
+ * OKLCH values appear only in the reference-tier block (and in the dark-mode
+ * override of the system tier where a literal value is needed). Application
+ * code (UnoCSS theme classes, primitives) targets the system tier.
+ * ============================================================================ */
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================================
+ * === REFERENCE TIER (mode-invariant) ========================================
+ *
+ * Raw palette, type ramp, radius scale, shadow recipes, easing curves.
+ * Authored once. Mode-invariant — light/dark resolved at the system tier by
+ * remapping system tokens to different reference values, NOT by overriding
+ * reference values.
+ * ============================================================================ */
+
+.theme-rezics {
+  /* --- ref · color (parchment palette) ----------------------------------- */
+  --rezics-ref-color-parchment-50: #ffffff;
+  --rezics-ref-color-parchment-100: #faf9f5;
+  --rezics-ref-color-parchment-200: #f5f4ed;
+  --rezics-ref-color-parchment-300: #ebeae5;
+  --rezics-ref-color-parchment-400: #e6e5e0;
+  --rezics-ref-color-parchment-500: #d2d2d7;
+  --rezics-ref-color-parchment-600: #86868b;
+  --rezics-ref-color-parchment-700: #6e6e73;
+  --rezics-ref-color-parchment-800: #3a3937;
+  --rezics-ref-color-parchment-900: #26251e;
+  --rezics-ref-color-parchment-950: #1a1a18;
+  --rezics-ref-color-parchment-1000: #141413;
+
+  --rezics-ref-color-ink-50: #f0eee6;
+  --rezics-ref-color-ink-100: #c7c7cc;
+  --rezics-ref-color-ink-200: #a39e98;
+  --rezics-ref-color-ink-300: #6e6c66;
+  --rezics-ref-color-ink-400: #5a5856;
+  --rezics-ref-color-ink-500: #48484a;
+  --rezics-ref-color-ink-600: #30302e;
+  --rezics-ref-color-ink-700: #1f1e1c;
+  --rezics-ref-color-ink-800: #1d1d1f;
+
+  /* --- ref · brand (輪迴红, mode-invariant) -------------------------------- */
+  --rezics-ref-color-brand-300: #ffc7cc;
+  --rezics-ref-color-brand-400: #fa7882;
+  --rezics-ref-color-brand-500: #f4606c;
+  --rezics-ref-color-brand-600: #e85666;
+  --rezics-ref-color-brand-700: #d94c5c;
+  --rezics-ref-color-brand-800: #c4433a;
+
+  /* --- ref · semantic state colors --------------------------------------- */
+  --rezics-ref-color-success-fill: #157352;
+  --rezics-ref-color-success-text-light: #157352;
+  --rezics-ref-color-success-text-dark: #3da884;
+  --rezics-ref-color-success-container-light: #d4edd9;
+  --rezics-ref-color-success-container-dark: #1c3d33;
+  --rezics-ref-color-on-success-container-light: #0e3a26;
+  --rezics-ref-color-on-success-container-dark: #b8e7c4;
+
+  --rezics-ref-color-warning-fill: #9c5e22;
+  --rezics-ref-color-warning-text-light: #8a5520;
+  --rezics-ref-color-warning-text-dark: #d8943e;
+  --rezics-ref-color-warning-container-light: #f4e4c8;
+  --rezics-ref-color-warning-container-dark: #3d2a14;
+  --rezics-ref-color-on-warning-container-light: #4a2c0a;
+  --rezics-ref-color-on-warning-container-dark: #f0d3a0;
+
+  --rezics-ref-color-error-fill: #cf2d56;
+  --rezics-ref-color-error-text-light: #cf2d56;
+  --rezics-ref-color-error-text-dark: #e34c75;
+  --rezics-ref-color-error-container-light: #fbe1e8;
+  --rezics-ref-color-error-container-dark: #401520;
+  --rezics-ref-color-on-error-container-light: #4a0e22;
+  --rezics-ref-color-on-error-container-dark: #f7c7d3;
+
+  --rezics-ref-color-info-fill: #1565c0;
+  --rezics-ref-color-info-text-light: #1565c0;
+  --rezics-ref-color-info-text-dark: #5aa9f0;
+  --rezics-ref-color-info-container-light: #d8e9fb;
+  --rezics-ref-color-info-container-dark: #142a40;
+  --rezics-ref-color-on-info-container-light: #0a2540;
+  --rezics-ref-color-on-info-container-dark: #c4dffb;
+
+  /* --- ref · sentiment (review / poll polarity) -------------------------- */
+  --rezics-ref-color-sentiment-positive-fill: #f4606c;
+  --rezics-ref-color-sentiment-positive-text-light: #c4433a;
+  --rezics-ref-color-sentiment-positive-text-dark: #fa7882;
+  --rezics-ref-color-sentiment-negative-fill: #5b7a99;
+  --rezics-ref-color-sentiment-negative-text-light: #3f5c7a;
+  --rezics-ref-color-sentiment-negative-text-dark: #7b98b5;
+
+  /* --- ref · chart palette (curated 5-step) ------------------------------ */
+  --rezics-ref-color-chart-1-light: #f4606c;
+  --rezics-ref-color-chart-2-light: #3898ec;
+  --rezics-ref-color-chart-3-light: #1f8a65;
+  --rezics-ref-color-chart-4-light: #b8732e;
+  --rezics-ref-color-chart-5-light: #8e6fbb;
+  --rezics-ref-color-chart-1-dark: #fa7882;
+  --rezics-ref-color-chart-2-dark: #5aa9f0;
+  --rezics-ref-color-chart-3-dark: #3da884;
+  --rezics-ref-color-chart-4-dark: #d8943e;
+  --rezics-ref-color-chart-5-dark: #ad8fd6;
+
+  /* --- ref · radius ------------------------------------------------------ */
+  --rezics-ref-radius-xs: 4px;
+  --rezics-ref-radius-sm: 6px;
+  --rezics-ref-radius-md: 8px;
+  --rezics-ref-radius-lg: 12px;
+  --rezics-ref-radius-xl: 16px;
+  --rezics-ref-radius-2xl: 24px;
+  --rezics-ref-radius-pill: 9999px;
+  --rezics-ref-radius-full: 50%;
+
+  /* --- ref · shadow recipes (light) -------------------------------------- */
+  --rezics-ref-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --rezics-ref-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.04);
+  --rezics-ref-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.04), 0 16px 32px rgba(0, 0, 0, 0.06);
+  --rezics-ref-shadow-modal: 0 1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.04),
+    0 16px 32px rgba(0, 0, 0, 0.06);
+
+  /* --- ref · font stacks ------------------------------------------------- */
+  --rezics-ref-font-sans: 'Inter', 'rezics-sans',
+    var(--rezics-font-sans-cjk, 'Source Han Sans TC'), system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+  --rezics-ref-font-serif: 'Source Serif 4', 'rezics-serif',
+    var(--rezics-font-serif-cjk, 'Source Han Serif TC'), Georgia, serif;
+  --rezics-ref-font-mono: 'CaskaydiaMono Nerd Font', 'Cascadia Code',
+    'rezics-mono', 'Sarasa Mono TC', ui-monospace, 'SF Mono', Menlo, monospace;
+  --rezics-font-sans-cjk: 'Source Han Sans TC', 'Noto Sans TC';
+  --rezics-font-serif-cjk: 'Source Han Serif TC', 'Noto Serif TC';
+
+  /* ==========================================================================
+   * === SYSTEM TIER (light) =================================================
+   *
+   * Semantic roles. Light/dark resolved here by remapping system tokens to
+   * different reference values. Application code (UnoCSS theme classes,
+   * primitives) targets this tier. The rezics-prefixed system tokens and the
+   * shadcn-superset unprefixed slots are both authored under .theme-rezics so
+   * they share one cascade and one source of truth.
+   * ======================================================================== */
+
+  color-scheme: light;
+
+  /* --- sys · color · surface family -------------------------------------- */
+  --rezics-sys-color-background: var(--rezics-ref-color-parchment-200);
+  --rezics-sys-color-on-background: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-surface: var(--rezics-ref-color-parchment-200);
+  --rezics-sys-color-on-surface: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-surface-variant: var(--rezics-ref-color-parchment-300);
+  --rezics-sys-color-on-surface-variant: var(--rezics-ref-color-ink-500);
+
+  /* surface-container ladder (parchment tint shifts, NOT shadows) */
+  --rezics-sys-color-surface-container-lowest: var(--rezics-ref-color-parchment-50);
+  --rezics-sys-color-surface-container-low: var(--rezics-ref-color-parchment-100);
+  --rezics-sys-color-surface-container: var(--rezics-ref-color-parchment-200);
+  --rezics-sys-color-surface-container-high: var(--rezics-ref-color-parchment-300);
+  --rezics-sys-color-surface-container-highest: var(--rezics-ref-color-parchment-400);
+  --rezics-sys-color-surface-tint: var(--rezics-ref-color-brand-500);
+
+  /* legacy parchment ladder retained at system tier (consumed by uno theme) */
+  --rezics-sys-color-surface-canvas: var(--rezics-ref-color-parchment-200);
+  --rezics-sys-color-surface-base: var(--rezics-ref-color-parchment-100);
+  --rezics-sys-color-surface-elevated: var(--rezics-ref-color-parchment-50);
+  --rezics-sys-color-surface-subtle: var(--rezics-ref-color-parchment-300);
+  --rezics-sys-color-surface-sunken: var(--rezics-ref-color-parchment-400);
+
+  /* --- sys · color · text ladder ----------------------------------------- */
+  --rezics-sys-color-text-primary: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-text-secondary: var(--rezics-ref-color-parchment-700);
+  --rezics-sys-color-text-tertiary: var(--rezics-ref-color-parchment-600);
+  --rezics-sys-color-text-disabled: var(--rezics-ref-color-ink-100);
+  --rezics-sys-color-text-on-brand: #ffffff;
+  --rezics-sys-color-text-brand: var(--rezics-ref-color-brand-800);
+
+  /* --- sys · color · brand family ---------------------------------------- */
+  --rezics-sys-color-primary: var(--rezics-ref-color-brand-500);
+  --rezics-sys-color-on-primary: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-primary-container: var(--rezics-ref-color-brand-300);
+  --rezics-sys-color-on-primary-container: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-brand-fill: var(--rezics-ref-color-brand-500);
+  --rezics-sys-color-brand-fill-hover: var(--rezics-ref-color-brand-600);
+  --rezics-sys-color-brand-fill-active: var(--rezics-ref-color-brand-700);
+
+  /* --- sys · color · secondary family (today aliased to surface ladder) -- */
+  --rezics-sys-color-secondary: var(--rezics-ref-color-parchment-300);
+  --rezics-sys-color-on-secondary: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-secondary-container: var(--rezics-ref-color-parchment-100);
+  --rezics-sys-color-on-secondary-container: var(--rezics-ref-color-ink-800);
+
+  /* --- sys · color · tertiary / accent (reserved; today == accent) ------- */
+  --rezics-sys-color-tertiary: var(--rezics-ref-color-parchment-300);
+  --rezics-sys-color-on-tertiary: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-tertiary-container: var(--rezics-ref-color-parchment-200);
+  --rezics-sys-color-on-tertiary-container: var(--rezics-ref-color-ink-800);
+
+  /* --- sys · color · semantic states (success / warning / error / info) -- */
+  --rezics-sys-color-success: var(--rezics-ref-color-success-fill);
+  --rezics-sys-color-on-success: #ffffff;
+  --rezics-sys-color-success-container: var(--rezics-ref-color-success-container-light);
+  --rezics-sys-color-on-success-container: var(--rezics-ref-color-on-success-container-light);
+  --rezics-sys-color-success-fill: var(--rezics-ref-color-success-fill);
+  --rezics-sys-color-success-text: var(--rezics-ref-color-success-text-light);
+
+  --rezics-sys-color-warning: var(--rezics-ref-color-warning-fill);
+  --rezics-sys-color-on-warning: #ffffff;
+  --rezics-sys-color-warning-container: var(--rezics-ref-color-warning-container-light);
+  --rezics-sys-color-on-warning-container: var(--rezics-ref-color-on-warning-container-light);
+  --rezics-sys-color-warning-fill: var(--rezics-ref-color-warning-fill);
+  --rezics-sys-color-warning-text: var(--rezics-ref-color-warning-text-light);
+
+  --rezics-sys-color-error: var(--rezics-ref-color-error-fill);
+  --rezics-sys-color-on-error: #ffffff;
+  --rezics-sys-color-error-container: var(--rezics-ref-color-error-container-light);
+  --rezics-sys-color-on-error-container: var(--rezics-ref-color-on-error-container-light);
+  --rezics-sys-color-error-fill: var(--rezics-ref-color-error-fill);
+  --rezics-sys-color-error-text: var(--rezics-ref-color-error-text-light);
+
+  --rezics-sys-color-info: var(--rezics-ref-color-info-fill);
+  --rezics-sys-color-on-info: #ffffff;
+  --rezics-sys-color-info-container: var(--rezics-ref-color-info-container-light);
+  --rezics-sys-color-on-info-container: var(--rezics-ref-color-on-info-container-light);
+  --rezics-sys-color-info-fill: var(--rezics-ref-color-info-fill);
+  --rezics-sys-color-info-text: var(--rezics-ref-color-info-text-light);
+
+  /* --- sys · color · sentiment (poll / review polarity) ------------------ */
+  --rezics-sys-color-sentiment-positive-fill: var(--rezics-ref-color-sentiment-positive-fill);
+  --rezics-sys-color-sentiment-positive-text: var(--rezics-ref-color-sentiment-positive-text-light);
+  --rezics-sys-color-sentiment-negative-fill: var(--rezics-ref-color-sentiment-negative-fill);
+  --rezics-sys-color-sentiment-negative-text: var(--rezics-ref-color-sentiment-negative-text-light);
+
+  /* --- sys · color · lines (outline / border) ---------------------------- */
+  --rezics-sys-color-outline: var(--rezics-ref-color-parchment-600);
+  --rezics-sys-color-outline-variant: rgba(0, 0, 0, 0.45);
+  --rezics-sys-color-border-whisper: rgba(0, 0, 0, 0.08);
+  --rezics-sys-color-border-defined: var(--rezics-ref-color-parchment-500);
+  --rezics-sys-color-border-strong: var(--rezics-ref-color-parchment-600);
+  --rezics-sys-color-border-focus: var(--rezics-ref-color-brand-500);
+  --rezics-sys-color-border-error: var(--rezics-ref-color-error-fill);
+
+  /* --- sys · color · inverse family -------------------------------------- */
+  --rezics-sys-color-inverse-surface: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-inverse-on-surface: var(--rezics-ref-color-parchment-100);
+  --rezics-sys-color-inverse-primary: var(--rezics-ref-color-brand-400);
+
+  /* --- sys · color · focus ring ----------------------------------------- */
+  --rezics-sys-color-ring: var(--rezics-ref-color-brand-500);
+
+  /* --- sys · color · charts (light) ------------------------------------- */
+  --rezics-sys-color-chart-1: var(--rezics-ref-color-chart-1-light);
+  --rezics-sys-color-chart-2: var(--rezics-ref-color-chart-2-light);
+  --rezics-sys-color-chart-3: var(--rezics-ref-color-chart-3-light);
+  --rezics-sys-color-chart-4: var(--rezics-ref-color-chart-4-light);
+  --rezics-sys-color-chart-5: var(--rezics-ref-color-chart-5-light);
+
+  /* --- sys · color · sidebar chrome (light) ----------------------------- */
+  --rezics-sys-color-sidebar-background: var(--rezics-ref-color-parchment-100);
+  --rezics-sys-color-sidebar-foreground: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-sidebar-primary: var(--rezics-ref-color-brand-500);
+  --rezics-sys-color-sidebar-primary-foreground: #ffffff;
+  --rezics-sys-color-sidebar-accent: var(--rezics-ref-color-parchment-300);
+  --rezics-sys-color-sidebar-accent-foreground: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-sidebar-border: rgba(0, 0, 0, 0.08);
+  --rezics-sys-color-sidebar-ring: var(--rezics-ref-color-brand-500);
+
+  /* --- sys · shadow scale (resolves to ref-tier light recipes) ---------- */
+  --rezics-sys-shadow-1: var(--rezics-ref-shadow-1);
+  --rezics-sys-shadow-2: var(--rezics-ref-shadow-2);
+  --rezics-sys-shadow-3: var(--rezics-ref-shadow-3);
+  --rezics-sys-shadow-modal: var(--rezics-ref-shadow-modal);
+  --rezics-shadow-1: var(--rezics-sys-shadow-1);
+  --rezics-shadow-2: var(--rezics-sys-shadow-2);
+  --rezics-shadow-3: var(--rezics-sys-shadow-3);
+  --rezics-shadow-modal: var(--rezics-sys-shadow-modal);
+
+  /* --- sys · radius (mode-invariant; resolves to ref-tier scale) -------- */
+  --rezics-radius-xs: var(--rezics-ref-radius-xs);
+  --rezics-radius-sm: var(--rezics-ref-radius-sm);
+  --rezics-radius-md: var(--rezics-ref-radius-md);
+  --rezics-radius-lg: var(--rezics-ref-radius-lg);
+  --rezics-radius-xl: var(--rezics-ref-radius-xl);
+  --rezics-radius-2xl: var(--rezics-ref-radius-2xl);
+  --rezics-radius-pill: var(--rezics-ref-radius-pill);
+  --rezics-radius-full: var(--rezics-ref-radius-full);
+
+  /* --- sys · font (resolves to ref-tier font stacks) -------------------- */
+  --rezics-font-sans: var(--rezics-ref-font-sans);
+  --rezics-font-serif: var(--rezics-ref-font-serif);
+  --rezics-font-mono: var(--rezics-ref-font-mono);
+
+  /* --- sys · state-layer opacities (MD3 8/12/12/16 ladder) -------------- */
+  --rezics-sys-state-hover-opacity: 0.08;
+  --rezics-sys-state-focus-opacity: 0.12;
+  --rezics-sys-state-pressed-opacity: 0.12;
+  --rezics-sys-state-dragged-opacity: 0.16;
+
+  /* --- sys · motion · duration ladder (MD3 16-step, 50ms–1000ms) -------- */
+  --rezics-sys-motion-duration-short1: 50ms;
+  --rezics-sys-motion-duration-short2: 100ms;
+  --rezics-sys-motion-duration-short3: 150ms;
+  --rezics-sys-motion-duration-short4: 200ms;
+  --rezics-sys-motion-duration-medium1: 250ms;
+  --rezics-sys-motion-duration-medium2: 300ms;
+  --rezics-sys-motion-duration-medium3: 350ms;
+  --rezics-sys-motion-duration-medium4: 400ms;
+  --rezics-sys-motion-duration-long1: 450ms;
+  --rezics-sys-motion-duration-long2: 500ms;
+  --rezics-sys-motion-duration-long3: 550ms;
+  --rezics-sys-motion-duration-long4: 600ms;
+  --rezics-sys-motion-duration-extra-long1: 700ms;
+  --rezics-sys-motion-duration-extra-long2: 800ms;
+  --rezics-sys-motion-duration-extra-long3: 900ms;
+  --rezics-sys-motion-duration-extra-long4: 1000ms;
+
+  /* --- sys · motion · easing curves (MD3 + rezics spring) --------------- */
+  --rezics-sys-motion-easing-linear: cubic-bezier(0, 0, 1, 1);
+  --rezics-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --rezics-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+  --rezics-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --rezics-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --rezics-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --rezics-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --rezics-sys-motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ==========================================================================
+   * === SHADCN-SUPERSET SLOTS (light) =======================================
+   *
+   * Flat unprefixed CSS variables consumed by shadcn primitives. Each slot
+   * resolves to a system-tier role via var() chain. Adding a new shadcn
+   * primitive that needs a slot not listed here MUST extend the rezics
+   * system tier first; never bind a shadcn slot to a literal value.
+   * ======================================================================== */
+
+  --background: var(--rezics-sys-color-surface-canvas);
+  --foreground: var(--rezics-sys-color-text-primary);
+
+  --card: var(--rezics-sys-color-surface-base);
+  --card-foreground: var(--rezics-sys-color-text-primary);
+
+  --popover: var(--rezics-sys-color-surface-elevated);
+  --popover-foreground: var(--rezics-sys-color-text-primary);
+
+  --primary: var(--rezics-sys-color-primary);
+  --primary-foreground: var(--rezics-sys-color-on-primary);
+
+  --secondary: var(--rezics-sys-color-secondary);
+  --secondary-foreground: var(--rezics-sys-color-on-secondary);
+
+  --muted: var(--rezics-sys-color-surface-variant);
+  --muted-foreground: var(--rezics-sys-color-on-surface-variant);
+
+  --accent: var(--rezics-sys-color-tertiary);
+  --accent-foreground: var(--rezics-sys-color-on-tertiary);
+
+  --destructive: var(--rezics-sys-color-error);
+  --destructive-foreground: var(--rezics-sys-color-on-error);
+
+  --border: var(--rezics-sys-color-outline-variant);
+  --input: var(--rezics-sys-color-outline);
+  --ring: var(--rezics-sys-color-ring);
+
+  --radius: var(--rezics-ref-radius-md);
+
+  --chart-1: var(--rezics-sys-color-chart-1);
+  --chart-2: var(--rezics-sys-color-chart-2);
+  --chart-3: var(--rezics-sys-color-chart-3);
+  --chart-4: var(--rezics-sys-color-chart-4);
+  --chart-5: var(--rezics-sys-color-chart-5);
+
+  --sidebar: var(--rezics-sys-color-sidebar-background);
+  --sidebar-background: var(--rezics-sys-color-sidebar-background);
+  --sidebar-foreground: var(--rezics-sys-color-sidebar-foreground);
+  --sidebar-primary: var(--rezics-sys-color-sidebar-primary);
+  --sidebar-primary-foreground: var(--rezics-sys-color-sidebar-primary-foreground);
+  --sidebar-accent: var(--rezics-sys-color-sidebar-accent);
+  --sidebar-accent-foreground: var(--rezics-sys-color-sidebar-accent-foreground);
+  --sidebar-border: var(--rezics-sys-color-sidebar-border);
+  --sidebar-ring: var(--rezics-sys-color-sidebar-ring);
+
+  /* ==========================================================================
+   * === LEGACY ALIASES — @deprecated ========================================
+   *
+   * Live-aliased to their system-tier successors. Retained until proposal 2
+   * (`migrate-to-theme-config-classes`) drives consumer references to zero;
+   * a follow-up change deletes them. Do NOT add new consumers.
+   *
+   * Premature deletion of any of these 11 names blocks merge per the
+   * design-system-foundation spec — migrate consumers first.
+   * ======================================================================== */
+
+  /* --- legacy text ladder (newer: text-primary / text-secondary) -------- */
+  /* @deprecated — use --rezics-sys-color-text-primary instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-fg: var(--rezics-sys-color-text-primary);
+  /* @deprecated — use --rezics-sys-color-text-secondary instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-fg-muted: var(--rezics-sys-color-text-secondary);
+
+  /* --- legacy surface ladder (newer: surface-canvas / surface-base / …) - */
+  /* @deprecated — use --rezics-sys-color-surface-canvas instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-bg: var(--rezics-sys-color-surface-canvas);
+  /* @deprecated — use --rezics-sys-color-surface-subtle instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-bg-muted: var(--rezics-sys-color-surface-subtle);
+  /* @deprecated — use --rezics-sys-color-surface-canvas instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-bg-canvas: var(--rezics-sys-color-surface-canvas);
+  /* @deprecated — use --rezics-sys-color-surface-elevated instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-bg-elevated: var(--rezics-sys-color-surface-elevated);
+  /* @deprecated — use a state-layer overlay (state-hover) instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-bg-hover: var(--rezics-sys-color-surface-subtle);
+  /* @deprecated — use a state-layer overlay (state-pressed) instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-bg-selected: var(--rezics-sys-color-primary-container);
+
+  /* --- legacy brand triplet (newer: brand-fill / surface-subtle / …) ---- */
+  /* @deprecated — use --rezics-sys-color-primary or --rezics-sys-color-brand-fill instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-primary: var(--rezics-sys-color-primary);
+  /* @deprecated — use --rezics-sys-color-secondary instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-secondary: var(--rezics-sys-color-secondary);
+  /* @deprecated — use --rezics-sys-color-tertiary or --rezics-sys-color-surface-subtle instead. Removed after migrate-to-theme-config-classes lands. */
+  --rezics-color-accent: var(--rezics-sys-color-tertiary);
+
+  /* --- legacy color-* names retained for live consumer compatibility ---- *
+   *   (these existed before the legacy 11-name list; they remain live      *
+   *   alongside the system tier — no new consumers should be added.)      */
+  --rezics-color-surface-canvas: var(--rezics-sys-color-surface-canvas);
+  --rezics-color-surface-base: var(--rezics-sys-color-surface-base);
+  --rezics-color-surface-elevated: var(--rezics-sys-color-surface-elevated);
+  --rezics-color-surface-subtle: var(--rezics-sys-color-surface-subtle);
+  --rezics-color-surface-sunken: var(--rezics-sys-color-surface-sunken);
+
+  --rezics-color-text-primary: var(--rezics-sys-color-text-primary);
+  --rezics-color-text-secondary: var(--rezics-sys-color-text-secondary);
+  --rezics-color-text-tertiary: var(--rezics-sys-color-text-tertiary);
+  --rezics-color-text-disabled: var(--rezics-sys-color-text-disabled);
+  --rezics-color-text-on-brand: var(--rezics-sys-color-text-on-brand);
+  --rezics-color-text-brand: var(--rezics-sys-color-text-brand);
+
+  --rezics-color-brand-fill: var(--rezics-sys-color-brand-fill);
+  --rezics-color-brand-fill-hover: var(--rezics-sys-color-brand-fill-hover);
+  --rezics-color-brand-fill-active: var(--rezics-sys-color-brand-fill-active);
+
+  --rezics-color-success-fill: var(--rezics-sys-color-success-fill);
+  --rezics-color-success-text: var(--rezics-sys-color-success-text);
+  --rezics-color-warning-fill: var(--rezics-sys-color-warning-fill);
+  --rezics-color-warning-text: var(--rezics-sys-color-warning-text);
+  --rezics-color-error-fill: var(--rezics-sys-color-error-fill);
+  --rezics-color-error-text: var(--rezics-sys-color-error-text);
+  --rezics-color-info-fill: var(--rezics-sys-color-info-fill);
+  --rezics-color-info-text: var(--rezics-sys-color-info-text);
+
+  --rezics-color-sentiment-positive-fill: var(--rezics-sys-color-sentiment-positive-fill);
+  --rezics-color-sentiment-positive-text: var(--rezics-sys-color-sentiment-positive-text);
+  --rezics-color-sentiment-negative-fill: var(--rezics-sys-color-sentiment-negative-fill);
+  --rezics-color-sentiment-negative-text: var(--rezics-sys-color-sentiment-negative-text);
+
+  --rezics-color-border-whisper: var(--rezics-sys-color-border-whisper);
+  --rezics-color-border-defined: var(--rezics-sys-color-border-defined);
+  --rezics-color-border-strong: var(--rezics-sys-color-border-strong);
+  --rezics-color-border-focus: var(--rezics-sys-color-border-focus);
+  --rezics-color-border-error: var(--rezics-sys-color-border-error);
+
+  /* ==========================================================================
+   * === REZICS-NAME MOTION ALIASES ==========================================
+   *
+   * Map the historical rezics-specific motion names into the MD3 ladder. New
+   * code SHOULD prefer the sys-tier names (--rezics-sys-motion-duration-*)
+   * but these aliases stay live for established consumers.
+   * ======================================================================== */
+
+  --rezics-motion-fast: var(--rezics-sys-motion-duration-short3);
+  --rezics-motion-base: var(--rezics-sys-motion-duration-medium1);
+  --rezics-motion-slow: var(--rezics-sys-motion-duration-medium4);
+  --rezics-motion-page: var(--rezics-sys-motion-duration-long2);
+  --rezics-ease-out: var(--rezics-sys-motion-easing-standard-decelerate);
+  --rezics-ease-in-out: var(--rezics-sys-motion-easing-emphasized);
+  --rezics-ease-spring: var(--rezics-sys-motion-easing-spring);
+
+  /* ==========================================================================
+   * === COMPONENT TIER ======================================================
+   *
+   * Authored only where a component's mapping is non-obvious or where a
+   * structural variant deserves an explicit name. Every comp-token MUST
+   * resolve to a sys-token (never a ref-token directly). Keep this list
+   * SHORT — do not preemptively add tokens that have no consumer yet.
+   * ======================================================================== */
+
+  --rezics-comp-button-quiet-container: var(--rezics-sys-color-primary-container);
+  --rezics-comp-card-elevated-surface: var(--rezics-sys-color-surface-container-low);
+  --rezics-comp-snackbar-container: var(--rezics-sys-color-inverse-surface);
+}
+
+/* ============================================================================
+ * === DARK MODE OVERRIDE =====================================================
+ *
+ * Sibling block under `.theme-rezics[data-theme="dark"]`. Overrides only the
+ * SYSTEM tier (and the few shadcn slots that hold mode-dependent literal
+ * values). Reference and component tiers do not change between modes.
+ * `html.dark` retained as a transitional alias used by app shells today.
+ * ============================================================================ */
+
+.theme-rezics[data-theme='dark'],
+html.dark .theme-rezics {
+  color-scheme: dark;
+
+  /* --- sys · color · surface family (dark) ------------------------------- */
+  --rezics-sys-color-background: var(--rezics-ref-color-parchment-950);
+  --rezics-sys-color-on-background: var(--rezics-ref-color-ink-50);
+  --rezics-sys-color-surface: var(--rezics-ref-color-parchment-950);
+  --rezics-sys-color-on-surface: var(--rezics-ref-color-ink-50);
+  --rezics-sys-color-surface-variant: var(--rezics-ref-color-parchment-700);
+  --rezics-sys-color-on-surface-variant: var(--rezics-ref-color-parchment-100);
+
+  /* surface-container ladder, dark — slightly tinted toward brand */
+  --rezics-sys-color-surface-container-lowest: var(--rezics-ref-color-parchment-1000);
+  --rezics-sys-color-surface-container-low: var(--rezics-ref-color-parchment-950);
+  --rezics-sys-color-surface-container: var(--rezics-ref-color-parchment-900);
+  --rezics-sys-color-surface-container-high: var(--rezics-ref-color-ink-600);
+  --rezics-sys-color-surface-container-highest: var(--rezics-ref-color-ink-500);
+  --rezics-sys-color-surface-tint: var(--rezics-ref-color-brand-400);
+
+  --rezics-sys-color-surface-canvas: var(--rezics-ref-color-parchment-950);
+  --rezics-sys-color-surface-base: var(--rezics-ref-color-parchment-900);
+  --rezics-sys-color-surface-elevated: var(--rezics-ref-color-ink-600);
+  --rezics-sys-color-surface-subtle: var(--rezics-ref-color-parchment-700);
+  --rezics-sys-color-surface-sunken: var(--rezics-ref-color-parchment-1000);
+
+  /* --- sys · color · text ladder (dark) ---------------------------------- */
+  --rezics-sys-color-text-primary: var(--rezics-ref-color-ink-50);
+  --rezics-sys-color-text-secondary: var(--rezics-ref-color-ink-200);
+  --rezics-sys-color-text-tertiary: var(--rezics-ref-color-ink-300);
+  --rezics-sys-color-text-disabled: var(--rezics-ref-color-ink-500);
+  --rezics-sys-color-text-brand: var(--rezics-ref-color-brand-400);
+
+  /* --- sys · color · brand family (dark) -------------------------------- */
+  --rezics-sys-color-primary: var(--rezics-ref-color-brand-500);
+  --rezics-sys-color-primary-container: var(--rezics-ref-color-brand-800);
+  --rezics-sys-color-on-primary-container: var(--rezics-ref-color-parchment-100);
+
+  --rezics-sys-color-secondary: var(--rezics-ref-color-parchment-700);
+  --rezics-sys-color-on-secondary: var(--rezics-ref-color-parchment-50);
+  --rezics-sys-color-secondary-container: var(--rezics-ref-color-parchment-900);
+  --rezics-sys-color-on-secondary-container: var(--rezics-ref-color-ink-50);
+
+  --rezics-sys-color-tertiary: var(--rezics-ref-color-parchment-700);
+  --rezics-sys-color-on-tertiary: var(--rezics-ref-color-parchment-50);
+  --rezics-sys-color-tertiary-container: var(--rezics-ref-color-parchment-900);
+  --rezics-sys-color-on-tertiary-container: var(--rezics-ref-color-ink-50);
+
+  /* --- sys · color · semantic states (dark) ----------------------------- */
+  --rezics-sys-color-success-container: var(--rezics-ref-color-success-container-dark);
+  --rezics-sys-color-on-success-container: var(--rezics-ref-color-on-success-container-dark);
+  --rezics-sys-color-success-text: var(--rezics-ref-color-success-text-dark);
+
+  --rezics-sys-color-warning-container: var(--rezics-ref-color-warning-container-dark);
+  --rezics-sys-color-on-warning-container: var(--rezics-ref-color-on-warning-container-dark);
+  --rezics-sys-color-warning-text: var(--rezics-ref-color-warning-text-dark);
+
+  --rezics-sys-color-error: var(--rezics-ref-color-error-fill);
+  --rezics-sys-color-error-container: var(--rezics-ref-color-error-container-dark);
+  --rezics-sys-color-on-error-container: var(--rezics-ref-color-on-error-container-dark);
+  --rezics-sys-color-error-text: var(--rezics-ref-color-error-text-dark);
+
+  --rezics-sys-color-info-container: var(--rezics-ref-color-info-container-dark);
+  --rezics-sys-color-on-info-container: var(--rezics-ref-color-on-info-container-dark);
+  --rezics-sys-color-info-text: var(--rezics-ref-color-info-text-dark);
+
+  /* --- sys · color · sentiment (dark) ----------------------------------- */
+  --rezics-sys-color-sentiment-positive-text: var(--rezics-ref-color-sentiment-positive-text-dark);
+  --rezics-sys-color-sentiment-negative-text: var(--rezics-ref-color-sentiment-negative-text-dark);
+
+  /* --- sys · color · lines (dark) --------------------------------------- */
+  --rezics-sys-color-outline: var(--rezics-ref-color-parchment-500);
+  --rezics-sys-color-outline-variant: rgba(255, 255, 255, 0.4);
+  --rezics-sys-color-border-whisper: rgba(255, 255, 255, 0.1);
+  --rezics-sys-color-border-defined: var(--rezics-ref-color-parchment-800);
+  --rezics-sys-color-border-strong: var(--rezics-ref-color-ink-400);
+  --rezics-sys-color-border-focus: var(--rezics-ref-color-brand-400);
+  --rezics-sys-color-border-error: var(--rezics-ref-color-error-text-dark);
+
+  /* --- sys · color · inverse family (dark) ------------------------------ */
+  --rezics-sys-color-inverse-surface: var(--rezics-ref-color-ink-50);
+  --rezics-sys-color-inverse-on-surface: var(--rezics-ref-color-ink-800);
+  --rezics-sys-color-inverse-primary: var(--rezics-ref-color-brand-700);
+
+  /* --- sys · color · ring (dark) ---------------------------------------- */
+  --rezics-sys-color-ring: var(--rezics-ref-color-brand-400);
+
+  /* --- sys · color · charts (dark) -------------------------------------- */
+  --rezics-sys-color-chart-1: var(--rezics-ref-color-chart-1-dark);
+  --rezics-sys-color-chart-2: var(--rezics-ref-color-chart-2-dark);
+  --rezics-sys-color-chart-3: var(--rezics-ref-color-chart-3-dark);
+  --rezics-sys-color-chart-4: var(--rezics-ref-color-chart-4-dark);
+  --rezics-sys-color-chart-5: var(--rezics-ref-color-chart-5-dark);
+
+  /* --- sys · color · sidebar chrome (dark) ------------------------------ */
+  --rezics-sys-color-sidebar-background: var(--rezics-ref-color-parchment-900);
+  --rezics-sys-color-sidebar-foreground: var(--rezics-ref-color-ink-50);
+  --rezics-sys-color-sidebar-accent: var(--rezics-ref-color-parchment-700);
+  --rezics-sys-color-sidebar-accent-foreground: var(--rezics-ref-color-ink-50);
+  --rezics-sys-color-sidebar-border: rgba(255, 255, 255, 0.1);
+  --rezics-sys-color-sidebar-ring: var(--rezics-ref-color-brand-400);
+
+  /* --- sys · shadow scale scales up opacity in dark --------------------- */
+  --rezics-sys-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --rezics-sys-shadow-2: 0 2px 4px rgba(0, 0, 0, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.24);
+  --rezics-sys-shadow-3: 0 4px 8px rgba(0, 0, 0, 0.24),
+    0 8px 16px rgba(0, 0, 0, 0.28), 0 16px 32px rgba(0, 0, 0, 0.36);
+  --rezics-sys-shadow-modal: 0 1px 2px rgba(0, 0, 0, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.28), 0 8px 16px rgba(0, 0, 0, 0.32),
+    0 16px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================================
+ * shadcn preset preflight defeat
+ *
+ * unocss-preset-shadcn injects `body { background: oklch(var(--background)); }`.
+ * Our `--background` holds a hex (or var() chain that resolves to hex),
+ * so `oklch(<hex>)` is invalid and resolves to transparent. Bind body
+ * directly to the rezics tokens. Unlayered + later in source order wins
+ * the cascade against the preset preflight.
+ * ============================================================================ */
+
+body {
+  background-color: var(--rezics-sys-color-surface-canvas);
+  color: var(--rezics-sys-color-text-primary);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}

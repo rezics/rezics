@@ -6,7 +6,7 @@ import {
 import { getTheme } from "@rezics/ui/config/theme";
 import type { Preview } from "@storybook/react-vite";
 
-import "@rezics/ui/shared/styles/layers.css";
+import "@rezics/ui/config/tokens.css";
 
 const preview: Preview = {
   globalTypes: themeGlobalTypes,

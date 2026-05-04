@@ -15,6 +15,7 @@
     "format:check": "biome format .",
     "check": "biome check --write .",
     "check:convention": "bun run tool/scripts/check-convention.ts",
+    "check:tokens": "bun run tool/scripts/check-tokens.ts",
     "knip": "knip",
     "storybook:host": "storybook dev -p 6006 --no-open",
     "storybook:host:quiet": "storybook dev -p 6006 --no-open --quiet --loglevel error",
