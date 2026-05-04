@@ -105,6 +105,10 @@ All JSX links must use `<SafeLink href={url}>` from `@rezics/ui` instead of raw 
 
 Any UI work (JSX, UnoCSS classes, theme tokens, colors, typography, spacing, component selection) is governed by the **rezics-design** skill. Load it before generating or reviewing UI. Source-of-truth tokens live in `package/ui/src/config/tokens/`; canonical brief is `openspec/plans/design-system-research/briefs/01-foundation-v1.md`. Don't duplicate design rules outside the skill — point to it.
 
+## Token Consumption Convention
+
+Color tokens MUST be consumed via the curated short names in `package/ui/src/config/uno-config.ts` `theme.colors` (`text-primary`, `bg-surface-elevated`, `border-border-whisper`, `fill-brand-fill`, …). R9 in `bun run check:convention` bans long-form `text-rezics-color-*` utilities, raw `var(--rezics-…-color-…)` inside className/`cn()`/`clsx()` contexts, and the 11 deprecated generation names (`rezics-color-fg`, `-bg`, `-primary`, `-secondary`, `-accent`, plus their `-muted` / `-canvas` / `-elevated` / `-hover` / `-selected` variants). Inline `style={{}}` use of `var(--rezics-sys-color-*)` is permitted (SVG `fill`, gradient stops). See `openspec/specs/ui-component-foundation/spec.md` and `package/ui/src/config/README.md` for the full surface.
+
 ## UI Component Policy
 
 The component selection policy is **shadcn-or-custom**: shadcn primitives from `@rezics/ui/shadcn` are the default; rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`) cover gaps. Icons use `lucide-react` by default, `@tabler/icons-react` as the named fallback. See `openspec/specs/ui-component-foundation/spec.md` for the authoritative source. Introducing a third-party UI library requires an OpenSpec change updating `ui-component-foundation`.
