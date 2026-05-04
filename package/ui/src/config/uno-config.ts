@@ -1,3 +1,25 @@
+/**
+ * uno-config.ts — the single consumption surface for rezics design tokens.
+ *
+ * `theme.colors` (below) maps every consumer-facing short name (`text-primary`,
+ * `bg-surface-elevated`, `border-border-whisper`, `fill-brand-fill`, etc.) to a
+ * sys-tier CSS-variable reference from `tokens.css`. Consumers SHALL use the
+ * short names. R9 in `tool/scripts/check-convention.ts` bans three patterns:
+ *
+ *   1. Long-form `<utility>-rezics-color-<name>` Tailwind/UnoCSS classes.
+ *   2. Raw rezics-color CSS-variable references inside className-receiving
+ *      contexts (className strings, `cn()`/`clsx()` arguments, className
+ *      template literals) — including the bracketed arbitrary-value form.
+ *   3. The 11 deprecated generation aliases (see `tokens.css` for the
+ *      `@deprecated` list and their canonical successors).
+ *
+ * Inline `style={{}}` references to sys-tier CSS variables are permitted
+ * (e.g. SVG `fill`, gradient stops). Prefer adding a UnoCSS shortcut here when
+ * ≥3 callsites need the same value.
+ *
+ * Spec: `openspec/specs/ui-component-foundation/spec.md`. Adding a new short
+ * name (or removing one) requires an OpenSpec change to that spec.
+ */
 import presetWind4 from "@unocss/preset-wind4";
 import { container as defaultContainer } from "@unocss/preset-wind4/theme";
 import transformerDirectives from "@unocss/transformer-directives";
