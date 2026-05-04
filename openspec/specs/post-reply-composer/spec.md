@@ -1,5 +1,4 @@
 ## Requirements
-
 ### Requirement: ReplyComposer is the single reply-editor component
 
 The app SHALL expose exactly one reply-editor component, `ReplyComposer`, from `package/app/src/post/forms/`. Every surface that accepts a reply — the focal-post composer on every detail page, inline composers inside thread rows, and the shelf discussion composer — SHALL render `ReplyComposer`. The existing `InlinePostForm` component SHALL be replaced and removed.
@@ -122,3 +121,20 @@ The existing reply-drawer patterns used on `BookDiscussionPage` (`ReplyDrawer` o
 #### Scenario: No reply drawer or modal remains in the tree
 - **WHEN** a developer runs `rg "ReplyDrawer|ReplyModal|reply-drawer|reply-modal"` under `package/app/`
 - **THEN** no matches SHALL be returned after this change
+
+### Requirement: Reply composer mode is single-line on mount in progressive mode
+
+When mounted with `mode="progressive"`, the composer SHALL initially render as a single-line placeholder control whose visible height matches the rezics small-input scale (anchored to `var(--rezics-space-10)` / 40px), with no toolbar or action buttons visible. The control SHALL expand to the full editor region only when focused.
+
+#### Scenario: Progressive mode initial render
+
+- **WHEN** a `<ReplyComposer mode="progressive" />` mounts
+- **THEN** the rendered element is a single-line placeholder control with a visible height of `var(--rezics-space-10)` (40px), matching the rezics small-input scale
+- **AND** no toolbar or action buttons are visible
+
+#### Scenario: Progressive mode expands on focus
+
+- **WHEN** the user focuses the progressive composer
+- **THEN** the control expands to the full editor region
+- **AND** the body input retains focus
+
