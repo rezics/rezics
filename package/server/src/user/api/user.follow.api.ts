@@ -69,7 +69,7 @@ export const followRoute = new Elysia()
   .post(
     "/follow/:targetId",
     async ({ identity, params }) => {
-      await userService.follow(identity.unitId, params.targetId);
+      await userService.follow(identity.userId, params.targetId);
       return { message: "Followed successfully" };
     },
     {
@@ -87,7 +87,7 @@ export const followRoute = new Elysia()
   .delete(
     "/follow/:targetId",
     async ({ identity, params }) => {
-      await userService.unfollow(identity.unitId, params.targetId);
+      await userService.unfollow(identity.userId, params.targetId);
       return { message: "Unfollowed successfully" };
     },
     {
@@ -112,7 +112,7 @@ export const followRoute = new Elysia()
         ids = Array.isArray(targetIds) ? targetIds : [targetIds];
       }
 
-      const status = await userService.getFollowStatus(identity.unitId, ids);
+      const status = await userService.getFollowStatus(identity.userId, ids);
       return status;
     },
     {

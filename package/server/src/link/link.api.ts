@@ -9,7 +9,7 @@ export const linkApi = new Elysia({ prefix: "/link" })
   .post(
     "/",
     async ({ body, identity }): Promise<LinkDTO> => {
-      return linkService.create(body, identity.unitId);
+      return linkService.create(body, identity.userId);
     },
     {
       requireLogin: true,

@@ -93,7 +93,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
       }
 
       const zone = await zoneService.create({
-        userId: identity.unitId,
+        userId: identity.userId,
         slug: body.slug,
         translations: body.translations,
         filters: body.filters,

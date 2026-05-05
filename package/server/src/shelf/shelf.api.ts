@@ -42,7 +42,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   .get(
     "/me",
     async ({ identity }): Promise<ShelfSummaryDTO[]> => {
-      return shelfService.listUserShelves(identity.unitId);
+      return shelfService.listUserShelves(identity.userId);
     },
     {
       requireLogin: true,
@@ -105,7 +105,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   .post(
     "/",
     async ({ body, identity }): Promise<ShelfDTO> => {
-      return shelfService.create(body, identity.unitId);
+      return shelfService.create(body, identity.userId);
     },
     {
       requireLogin: true,
@@ -128,7 +128,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       if (
         !hasPermissionToUpdateShelf(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -157,7 +157,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       if (
         !hasPermissionToDeleteShelf(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -204,7 +204,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       if (
         !hasPermissionToUpdateShelf(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -233,7 +233,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       if (
         !hasPermissionToUpdateShelf(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -263,7 +263,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       if (
         !hasPermissionToUpdateShelf(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -292,7 +292,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       if (
         !hasPermissionToUpdateShelf(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -326,7 +326,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       if (
         !hasPermissionToUpdateShelf(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -358,7 +358,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       if (
         !hasPermissionToUpdateShelf(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -391,7 +391,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       if (
         !hasPermissionToUpdateShelf(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {

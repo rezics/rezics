@@ -11,7 +11,7 @@ export const reactionWriteApi = new Elysia({ prefix: "/reaction" })
   .post(
     "/",
     async ({ body, identity, set }) => {
-      const userId = identity.unitId;
+      const userId = identity.userId;
       const result = await createReaction(userId, body.targetId, body.reaction);
 
       set.status = result.created ? 201 : 200;
@@ -59,7 +59,7 @@ export const reactionWriteApi = new Elysia({ prefix: "/reaction" })
   .delete(
     "/",
     async ({ query, identity }) => {
-      return removeReaction(identity.unitId, query.targetId, query.reaction);
+      return removeReaction(identity.userId, query.targetId, query.reaction);
     },
     {
       requireLogin: true,

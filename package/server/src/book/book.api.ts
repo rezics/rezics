@@ -70,7 +70,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
     "/",
     async ({ body, identity }): Promise<BookResponse> => {
       const bookReq: CreateBookInput = {
-        userId: identity.unitId,
+        userId: identity.userId,
         ...body,
       };
 
@@ -147,7 +147,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
       if (
         !hasPermissionToUpdateBook(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           undefined,
           targetBookUnit as any,
         )
@@ -184,7 +184,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
       if (
         !hasPermissionToUpdateBook(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           undefined,
           targetBookUnit as any,
         )
@@ -227,7 +227,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
         throw new Error(`Book not found: ${params.unitId}`);
       }
 
-      if (targetBookUnit.userId !== identity.unitId) {
+      if (targetBookUnit.userId !== identity.userId) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this book",

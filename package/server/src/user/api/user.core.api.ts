@@ -58,7 +58,7 @@ export const coreRoute = new Elysia()
   .get(
     "/me",
     async ({ identity }) => {
-      const user = await userService.getByUnitId(identity.unitId);
+      const user = await userService.getByUnitId(identity.userId);
       return mapUserToDTO(user);
     },
     {
@@ -81,7 +81,7 @@ export const coreRoute = new Elysia()
         description: body.description,
       };
 
-      const user = await userService.update(identity.unitId, userReq);
+      const user = await userService.update(identity.userId, userReq);
       return mapUserToDTO(user);
     },
     {
@@ -100,7 +100,7 @@ export const coreRoute = new Elysia()
       if (
         !hasPermissionToUpdateUser(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           params.unitId,
         )
       ) {
@@ -141,10 +141,10 @@ export const coreRoute = new Elysia()
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
-      await userService.delete(identity.unitId);
+      await userService.delete(identity.userId);
       return { message: "User deleted successfully" };
     },
     {
@@ -169,7 +169,7 @@ export const coreRoute = new Elysia()
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       await userService.delete(params.unitId);

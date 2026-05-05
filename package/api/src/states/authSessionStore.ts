@@ -41,7 +41,7 @@ export type AuthSessionStoreState = {
    */
   permission: Permission | null;
   /**
-   * Main server actor unitId, derived from the `rezics-session-token` claims.
+   * Main server actor userId, derived from the `rezics-session-token` claims.
    * `null` when the user has no valid session token (unauthenticated).
    */
   unitId: string | null;
@@ -62,7 +62,7 @@ function deriveSessionClaims(): {
   if (!claims) return { permission: null, unitId: null };
   return {
     permission: claims.permission ?? null,
-    unitId: typeof claims.unitId === "string" ? claims.unitId : null,
+    unitId: typeof claims.userId === "string" ? claims.userId : null,
   };
 }
 

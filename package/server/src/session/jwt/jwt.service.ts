@@ -42,7 +42,6 @@ export async function signRezicsSessionToken(claims: {
   return new SignJWT({
     sub: claims.userId,
     userId: claims.userId,
-    unitId: claims.userId,
     role: claims.permission.role,
     permission: claims.permission,
   })

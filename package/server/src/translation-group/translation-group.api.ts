@@ -37,7 +37,7 @@ export const translationGroupApi = new Elysia({ prefix: "/translation-group" })
       return translationGroupService.attachTranslation(
         params.unitId,
         body,
-        identity.unitId,
+        identity.userId,
       );
     },
     {

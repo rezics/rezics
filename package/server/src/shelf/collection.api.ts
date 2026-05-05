@@ -16,7 +16,7 @@ export const collectionApi = new Elysia({ prefix: "/collect" })
   .post(
     "/",
     async ({ body, identity }): Promise<CollectResponse> => {
-      return collectionService.collect(identity.unitId, body);
+      return collectionService.collect(identity.userId, body);
     },
     {
       requireLogin: true,
@@ -32,7 +32,7 @@ export const collectionApi = new Elysia({ prefix: "/collect" })
   .post(
     "/toggle-favorite",
     async ({ body, identity }): Promise<ToggleFavoriteResponse> => {
-      return collectionService.toggleFavorite(identity.unitId, body.targetId);
+      return collectionService.toggleFavorite(identity.userId, body.targetId);
     },
     {
       requireLogin: true,
@@ -49,7 +49,7 @@ export const collectionApi = new Elysia({ prefix: "/collect" })
     "/status/:targetId",
     async ({ params, identity }): Promise<CollectionStatusResponse> => {
       return collectionService.getCollectionStatus(
-        identity.unitId,
+        identity.userId,
         params.targetId,
       );
     },

@@ -36,7 +36,7 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
     "/",
     async ({ body, identity }): Promise<UnitTagDTO> => {
       const row = await tagService.createUnitTag(
-        identity.unitId,
+        identity.userId,
         body.unitId,
         body.tagUnitId,
       );
@@ -60,7 +60,7 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
     async ({ params, body, identity, set }): Promise<UnitTagDTO> => {
       const allowed = await canMutateUnitTag(
         identity.permission,
-        identity.unitId,
+        identity.userId,
         params.unitId,
       );
       if (!allowed) {
@@ -93,7 +93,7 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const allowed = await canMutateUnitTag(
         identity.permission,
-        identity.unitId,
+        identity.userId,
         params.unitId,
       );
       if (!allowed) {
@@ -124,7 +124,7 @@ export const tagVoteApi = new Elysia({ prefix: "/tag-votes" })
     "/",
     async ({ body, identity }): Promise<{ message: string }> => {
       await tagService.castVote(
-        identity.unitId,
+        identity.userId,
         body.unitId,
         body.tagUnitId,
         body.value,

@@ -18,7 +18,7 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
     async ({ body, identity }): Promise<FeedbackDTO> => {
       const created = await feedbackService.create({
         ...body,
-        userId: identity.unitId,
+        userId: identity.userId,
       });
       return mapFeedbackToDTO(created);
     },
@@ -39,7 +39,7 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
       const { userId: _ignoredUserId, ...rest } = query as any;
       const result = await feedbackService.list({
         ...(rest as any),
-        userId: identity.unitId,
+        userId: identity.userId,
       });
       return { ...result, items: result.items.map(mapFeedbackToDTO) };
     },
@@ -58,7 +58,7 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
     "/by-user/:userId",
     async ({ params, query, identity, set }): Promise<FeedbackListResponse> => {
       const isAdmin = BasicAdminPermission(identity.permission);
-      if (!isAdmin && identity.unitId !== params.userId) {
+      if (!isAdmin && identity.userId !== params.userId) {
         set.status = 403;
         throw new Error(
           "Forbidden: you can only query feedback for your own userId",

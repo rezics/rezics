@@ -127,11 +127,11 @@ export const realmApi = {
    */
   leave: async (realmUnitId: string): Promise<{ message: string }> => {
     const claims = getAuthSessionClaims();
-    if (!claims?.unitId) {
+    if (!claims?.sub) {
       throw new Error("Cannot leave realm: no active session");
     }
     return apiFetch<{ message: string }>(
-      `/realm/${realmUnitId}/members/${claims.unitId}`,
+      `/realm/${realmUnitId}/members/${claims.sub}`,
       {
         method: "DELETE",
       },

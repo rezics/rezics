@@ -89,7 +89,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
         set.status = 403;
         throw new Error("Forbidden: Cannot list tokens");
       }
-      const tokens = await tokenService.listTokens(identity.unitId);
+      const tokens = await tokenService.listTokens(identity.userId);
       return { tokens };
     },
     {
@@ -117,7 +117,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
       const userAgent = request.headers.get("user-agent") ?? null;
 
       const { token, tokenInfo } = await tokenService.createToken(
-        identity.unitId,
+        identity.userId,
         body,
         { ip, userAgent },
       );
@@ -143,7 +143,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
         set.status = 403;
         throw new Error("Forbidden: Cannot update token");
       }
-      return tokenService.updateToken(identity.unitId, params.id, body);
+      return tokenService.updateToken(identity.userId, params.id, body);
     },
     {
       requireLogin: true,
@@ -165,7 +165,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
         set.status = 403;
         throw new Error("Forbidden: Cannot revoke token");
       }
-      await tokenService.revokeToken(identity.unitId, params.id);
+      await tokenService.revokeToken(identity.userId, params.id);
       return { message: "Token revoked successfully" };
     },
     {

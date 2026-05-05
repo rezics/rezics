@@ -14,7 +14,7 @@ export const statsAdminApi = new Elysia({ prefix: "/admin/stats" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       return statsService.getStats();

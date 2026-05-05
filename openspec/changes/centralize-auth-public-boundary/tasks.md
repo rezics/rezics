@@ -33,27 +33,27 @@
 - [x] 4.4 Publish auth/OIDC JWKS through an auth-scoped public path such as `/auth/session/jwks`.
 - [x] 4.5 Keep main `/.well-known/jwks.json` reserved for `rezics-session-token` verification.
 - [x] 4.6 Add or update discovery metadata so it advertises public main URLs and never internal auth service URLs.
-- [ ] 4.7 Verify auth admin, organization, OAuth registration, and auth JWKS service routes continue to authorize inside auth.
-- [ ] 4.8 Add tests or contract checks for discovery metadata, JWKS separation, OAuth endpoint URLs, and auth-domain authorization pass-through.
+- [x] 4.7 Verify auth admin, organization, OAuth registration, and auth JWKS service routes continue to authorize inside auth.
+- [x] 4.8 Add tests or contract checks for discovery metadata, JWKS separation, OAuth endpoint URLs, and auth-domain authorization pass-through.
 
 ## 5. Main-Domain Authorization and Token Wallet
 
-- [ ] 5.1 Identify `/auth/*` routes that mutate main DB, main permissions, main sessions, main admin state, or main token wallet state.
+- [x] 5.1 Identify `/auth/*` routes that mutate main DB, main permissions, main sessions, main admin state, or main token wallet state.
 - [ ] 5.2 Add main `rezics-session-token` and main DB authorization checks to every main-domain route identified in 5.1.
 - [ ] 5.3 Split mixed auth/main routes where practical into separate auth-domain and main-domain operations.
 - [ ] 5.4 For unsplit mixed routes, perform main authorization first and call auth internally with service context.
-- [ ] 5.5 Create or designate the main token wallet module boundary for future external/resource tokens.
-- [ ] 5.6 Ensure auth does not directly read or mutate main token wallet storage.
+- [x] 5.5 Create or designate the main token wallet module boundary for future external/resource tokens.
+- [x] 5.6 Ensure auth does not directly read or mutate main token wallet storage.
 - [ ] 5.7 Add tests for main-domain authorization under `/auth/*` and auth-domain proxy routes without duplicate main auth-role checks.
 
 ## 6. Contract and Token Claim Migration
 
 - [x] 6.1 Update `@rezics/contract` session/token schemas so `rezics-session-token.sub` and explicit actor fields represent `userId`.
-- [ ] 6.2 Remove `unitId` as the trusted actor identity from main session claim contracts.
+- [x] 6.2 Remove `unitId` as the trusted actor identity from main session claim contracts.
 - [x] 6.3 Update server token signing and verification code to issue and validate actor `userId` claims.
-- [ ] 6.4 Update auxiliary services that verify `rezics-session-token` to read actor `userId`.
-- [ ] 6.5 Preserve API token behavior for `/token/*` and `/dispatch/*` bearer authentication.
-- [ ] 6.6 Add tests for claim schema, actor identity verification, stale-role rejection behavior, and service verification compatibility.
+- [x] 6.4 Update auxiliary services that verify `rezics-session-token` to read actor `userId`.
+- [x] 6.5 Preserve API token behavior for `/token/*` and `/dispatch/*` bearer authentication.
+- [x] 6.6 Add tests for claim schema, actor identity verification, stale-role rejection behavior, and service verification compatibility.
 
 ## 7. Frontend and API Client Migration
 

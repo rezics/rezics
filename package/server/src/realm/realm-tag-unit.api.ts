@@ -54,7 +54,7 @@ export const realmTagUnitApi = new Elysia({ prefix: "/realm-tag-units" })
     async ({ body, identity, set }): Promise<RealmTagUnitDTO> => {
       const allowed = await ensureRealmMembership(
         identity.permission,
-        identity.unitId,
+        identity.userId,
         body.realmUnitId,
       );
       if (!allowed) {
@@ -64,7 +64,7 @@ export const realmTagUnitApi = new Elysia({ prefix: "/realm-tag-units" })
         );
       }
       const row = await realmService.createRealmTagUnit(
-        identity.unitId,
+        identity.userId,
         body.realmUnitId,
         body.unitId,
         body.tagUnitId,
@@ -89,7 +89,7 @@ export const realmTagUnitApi = new Elysia({ prefix: "/realm-tag-units" })
     async ({ params, body, identity, set }): Promise<RealmTagUnitDTO> => {
       const allowed = await canMutateRealmTagUnit(
         identity.permission,
-        identity.unitId,
+        identity.userId,
         params.realmUnitId,
       );
       if (!allowed) {
@@ -123,7 +123,7 @@ export const realmTagUnitApi = new Elysia({ prefix: "/realm-tag-units" })
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const allowed = await canMutateRealmTagUnit(
         identity.permission,
-        identity.unitId,
+        identity.userId,
         params.realmUnitId,
       );
       if (!allowed) {
@@ -160,7 +160,7 @@ export const realmTagVoteApi = new Elysia({ prefix: "/realm-tag-votes" })
     async ({ body, identity, set }): Promise<{ message: string }> => {
       const allowed = await ensureRealmMembership(
         identity.permission,
-        identity.unitId,
+        identity.userId,
         body.realmUnitId,
       );
       if (!allowed) {
@@ -168,7 +168,7 @@ export const realmTagVoteApi = new Elysia({ prefix: "/realm-tag-votes" })
         throw new Error("Forbidden: only realm members may vote on realm tags");
       }
       await realmService.castRealmTagVote(
-        identity.unitId,
+        identity.userId,
         body.realmUnitId,
         body.unitId,
         body.tagUnitId,

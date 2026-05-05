@@ -32,7 +32,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     "/me",
     async ({ identity }): Promise<RealmListResponse> => {
       const { realms, total } = await realmService.listByMember(
-        identity.unitId,
+        identity.userId,
       );
       return { realms, total };
     },
@@ -128,7 +128,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   .post(
     "/",
     async ({ body, identity }): Promise<RealmDTO> => {
-      return realmService.create(body, identity.unitId);
+      return realmService.create(body, identity.userId);
     },
     {
       requireLogin: true,
@@ -147,7 +147,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       if (
         !hasPermissionToUpdateUnit(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -176,7 +176,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       if (
         !hasPermissionToUpdateUnit(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -202,7 +202,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   .get(
     "/:unitId/members/me",
     async ({ params, identity }): Promise<RealmMemberDTO | null> => {
-      return realmService.getMember(params.unitId, identity.unitId);
+      return realmService.getMember(params.unitId, identity.userId);
     },
     {
       requireLogin: true,
@@ -220,7 +220,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     async ({ params, body, identity }): Promise<RealmMemberDTO> => {
       return realmService.joinRealm(
         params.unitId,
-        identity.unitId,
+        identity.userId,
         body?.roleKey,
       );
     },
@@ -241,7 +241,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       // Moderator+ can update member roles
       const actorMember = await realmService.getMember(
         params.unitId,
-        identity.unitId,
+        identity.userId,
       );
       if (
         !actorMember ||
@@ -273,12 +273,12 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   .delete(
     "/:unitId/members/:userId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
-      const isSelf = params.userId === identity.unitId;
+      const isSelf = params.userId === identity.userId;
       if (!isSelf) {
         // Only moderator+ or admin can remove others
         const actorMember = await realmService.getMember(
           params.unitId,
-          identity.unitId,
+          identity.userId,
         );
         if (
           !actorMember ||
@@ -312,7 +312,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       if (
         !hasPermissionToUpdateUnit(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -341,7 +341,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       if (
         !hasPermissionToUpdateUnit(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -377,7 +377,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       if (!isAdmin) {
         const actorMember = await realmService.getMember(
           params.unitId,
-          identity.unitId,
+          identity.userId,
         );
         if (!actorMember) {
           set.status = 403;
@@ -390,7 +390,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
         params.unitId,
         body.tagUnitId,
         body.unitId,
-        identity.unitId,
+        identity.userId,
       );
     },
     {
@@ -411,7 +411,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       // Pin/delete is restricted to platform admin or `Realm.owner`.
       if (!BasicAdminPermission(identity.permission)) {
         const realmUnit = await unitService.getByUnitId(params.unitId);
-        if (!realmUnit?.userId || realmUnit.userId !== identity.unitId) {
+        if (!realmUnit?.userId || realmUnit.userId !== identity.userId) {
           set.status = 403;
           throw new Error(
             "Forbidden: only platform admin or realm owner may delete realm tags",

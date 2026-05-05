@@ -45,7 +45,7 @@ export const sessionApi = new Elysia({ prefix: "/session" })
        * `sub` from the auth JWT maps to `unitId` in the server's user model.
        * The `unitId` claim is a legacy alias; `sub` is the canonical identifier.
        */
-      const unitId = claims.unitId || claims.sub;
+      const unitId = claims.userId || claims.sub;
       if (!unitId) {
         return status(401, "Unauthorized: Token missing unitId claim");
       }

@@ -20,7 +20,7 @@ export const adminRoute = new Elysia()
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const { users, total } = await userService.list(query as any);
@@ -49,7 +49,7 @@ export const adminRoute = new Elysia()
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const user = await userService.getByUnitId(params.unitId);
@@ -78,7 +78,7 @@ export const adminRoute = new Elysia()
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const userReq: UpdateUser = {
@@ -116,7 +116,7 @@ export const adminRoute = new Elysia()
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       await userService.delete(params.unitId);

@@ -23,7 +23,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
     "/",
     async ({ body, identity }) => {
       const entry = await scoreService.upsertScore(
-        identity.unitId,
+        identity.userId,
         body.unitId,
         body.realm,
         body.value,
@@ -122,7 +122,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const aggregate = await scoreService.recalculateAggregate(
@@ -163,7 +163,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const field = await scoreService.addRealmField(
@@ -192,7 +192,7 @@ export const scoreApi = new Elysia({ prefix: "/score" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       try {

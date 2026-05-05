@@ -1,7 +1,7 @@
 import { useAuthSessionStore } from "../states/authSessionStore";
 
 /**
- * Returns the current user's actor `unitId`, derived from the
+ * Returns the current user's actor `userId`, derived from the
  * `rezics-session-token` claims.
  *
  * Returns `null` when the user has no valid session token (unauthenticated).

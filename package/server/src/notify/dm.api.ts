@@ -7,7 +7,7 @@ import { sendDm } from "./notify-client";
 export const dmServerApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
   "/send",
   async ({ body, identity, set }) => {
-    const senderId = identity.unitId;
+    const senderId = identity.userId;
     const { recipientId, content } = body;
 
     if (senderId === recipientId) {

@@ -154,6 +154,41 @@ describe("main auth public boundary", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  test("passes auth-domain admin and oauth registration routes through without main authorization", async () => {
+    setFetch(async () => Response.json({ authOwned: true }));
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const adminResponse = await authPublicApi.handle(
+      new Request("http://main.test/auth/admin/list-users", {
+        headers: {
+          cookie: "better-auth.session_token=opaque",
+        },
+      }),
+    );
+    const registerResponse = await authPublicApi.handle(
+      new Request("http://main.test/auth/oauth/register", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          cookie: "better-auth.session_token=opaque",
+          origin: "http://main.test",
+        },
+        body: JSON.stringify({ client_name: "Test Client" }),
+      }),
+    );
+
+    expect(adminResponse.status).toBe(200);
+    expect(registerResponse.status).toBe(200);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      "http://auth.internal/api/auth/admin/list-users",
+    );
+    expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
+      "http://auth.internal/api/auth/oauth/register",
+    );
+    expect(userFindUnique).not.toHaveBeenCalled();
+    expect(signRezicsSessionToken).not.toHaveBeenCalled();
+  });
+
   test("refresh validates auth session internally and sets main session cookie", async () => {
     setFetch(async () =>
       Response.json({

@@ -31,7 +31,7 @@ export const progressApi = new Elysia()
     "/me/units/:unitId/progress",
     async ({ params, body, identity }) => {
       const row = await progressService.upsert(
-        identity.unitId,
+        identity.userId,
         params.unitId,
         body,
       );
@@ -51,7 +51,7 @@ export const progressApi = new Elysia()
   .get(
     "/me/units/:unitId/progress",
     async ({ params, identity }) => {
-      const row = await progressService.get(identity.unitId, params.unitId);
+      const row = await progressService.get(identity.userId, params.unitId);
       return row ? mapProgressToDTO(row) : null;
     },
     {
@@ -67,7 +67,7 @@ export const progressApi = new Elysia()
   .get(
     "/me/progress",
     async ({ query, identity }) => {
-      return progressService.list(identity.unitId, query);
+      return progressService.list(identity.userId, query);
     },
     {
       requireLogin: true,
@@ -82,7 +82,7 @@ export const progressApi = new Elysia()
   .delete(
     "/me/units/:unitId/progress",
     async ({ params, identity }) => {
-      await progressService.delete(identity.unitId, params.unitId);
+      await progressService.delete(identity.userId, params.unitId);
       return { message: "Progress deleted" };
     },
     {

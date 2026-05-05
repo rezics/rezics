@@ -49,7 +49,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     async ({ body, identity }): Promise<UnitResponse> => {
       const createReq: CreateUnitInput = {
         ...body,
-        userId: identity.unitId,
+        userId: identity.userId,
       };
       const unit = await unitService.create(createReq);
       return mapUnitToDTO(unit);
@@ -124,7 +124,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
       if (
         !hasPermissionToUpdateUnit(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -156,7 +156,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
       if (
         !hasPermissionToDeleteUnit(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -218,7 +218,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
 
       // Write-once: reject if slug already set and caller is not admin
       if (target.slug !== null) {
-        const isAdmin = await verifyAdminFromDb(identity.unitId);
+        const isAdmin = await verifyAdminFromDb(identity.userId);
         if (!isAdmin) {
           set.status = 403;
           return {
@@ -234,7 +234,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
       if (
         !hasPermissionToUpdateUnit(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -303,7 +303,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
       if (
         !hasPermissionToUpdateUnit(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -336,7 +336,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
       if (
         !hasPermissionToUpdateUnit(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {

@@ -17,7 +17,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
-      const isRoot = await verifyRootFromDb(identity.unitId);
+      const isRoot = await verifyRootFromDb(identity.userId);
       if (!isRoot) return status(403, "Forbidden: Root role required");
 
       const services = await jwtServiceAdminService.list();
@@ -41,7 +41,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
-      const isRoot = await verifyRootFromDb(identity.unitId);
+      const isRoot = await verifyRootFromDb(identity.userId);
       if (!isRoot) return status(403, "Forbidden: Root role required");
 
       const service = await jwtServiceAdminService.fetch(params.serviceKey);
@@ -70,7 +70,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
-      const isRoot = await verifyRootFromDb(identity.unitId);
+      const isRoot = await verifyRootFromDb(identity.userId);
       if (!isRoot) return status(403, "Forbidden: Root role required");
 
       const service = await jwtServiceAdminService.create(body);
@@ -96,7 +96,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
-      const isRoot = await verifyRootFromDb(identity.unitId);
+      const isRoot = await verifyRootFromDb(identity.userId);
       if (!isRoot) return status(403, "Forbidden: Root role required");
 
       if (body.jwksUrl !== undefined) {
@@ -129,7 +129,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
-      const isRoot = await verifyRootFromDb(identity.unitId);
+      const isRoot = await verifyRootFromDb(identity.userId);
       if (!isRoot) return status(403, "Forbidden: Root role required");
 
       return await jwtServiceAdminService.activate(params.serviceKey);
@@ -153,7 +153,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
-      const isRoot = await verifyRootFromDb(identity.unitId);
+      const isRoot = await verifyRootFromDb(identity.userId);
       if (!isRoot) return status(403, "Forbidden: Root role required");
 
       return await jwtServiceAdminService.deactivate(params.serviceKey);

@@ -44,7 +44,7 @@ describe("auth session token e2e flow", () => {
       requiredScope: "user",
     });
 
-    expect(result.payload.unitId).toBe("4f1af8b5-6c9f-4c32-8c17-9108fb6af001");
+    expect(result.payload.userId).toBe("4f1af8b5-6c9f-4c32-8c17-9108fb6af001");
     expect(String(result.payload.scope)).toContain("user");
   });
 });

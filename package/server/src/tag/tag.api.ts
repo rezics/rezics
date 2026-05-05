@@ -135,7 +135,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
     "/",
     async ({ body, identity }) => {
       const created = await tagService.create(
-        identity.unitId,
+        identity.userId,
         body as CreateTagInput,
       );
       return mapTagUnitToDTO(created);
@@ -157,7 +157,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const updated = await tagService.update(
@@ -184,7 +184,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       await tagService.delete(params.unitId);
@@ -208,11 +208,11 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const { tagUnitId, unitId } = body as AttachTagInput;
-      await tagService.attachToUnit(tagUnitId, unitId, identity.unitId);
+      await tagService.attachToUnit(tagUnitId, unitId, identity.userId);
       return { message: "Tag attached successfully" };
     },
     {
@@ -232,7 +232,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const { tagUnitId, unitId } = body as AttachTagInput;
@@ -251,7 +251,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
     "/vote",
     async ({ body, identity }) => {
       const { tagUnitId, unitId, value } = body as CastTagVoteInput;
-      await tagService.castVote(identity.unitId, unitId, tagUnitId, value);
+      await tagService.castVote(identity.userId, unitId, tagUnitId, value);
       return { message: "Vote cast successfully" };
     },
     {
@@ -269,7 +269,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       const unit = await unitService.getByUnitId(params.unitId);
       const isPrivileged =
         (identity && BasicAdminPermission(identity.permission)) ||
-        (identity?.unitId != null && unit?.userId === identity.unitId);
+        (identity?.unitId != null && unit?.userId === identity.userId);
       return getTagContext(params.unitId, identity?.unitId ?? undefined, {
         includeBelowThreshold: isPrivileged,
       });
@@ -293,7 +293,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       const unit = await unitService.getByUnitId(params.unitId);
       const isPrivileged =
         (identity && BasicAdminPermission(identity.permission)) ||
-        (identity?.unitId != null && unit?.userId === identity.unitId);
+        (identity?.unitId != null && unit?.userId === identity.userId);
 
       const unitTags = await tagService.getTagsForUnit(params.unitId, {
         includeBelowThreshold: isPrivileged,

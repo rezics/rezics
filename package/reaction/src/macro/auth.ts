@@ -25,7 +25,7 @@ export const authMacro = new Elysia({ name: "macro/reaction-auth" }).macro(
 
       try {
         const result = await verifier(raw);
-        const userId = result.payload.unitId || result.payload.sub;
+        const userId = result.payload.userId || result.payload.sub;
         if (!userId) {
           return new Response("Unauthorized: Missing user identity", {
             status: 401,

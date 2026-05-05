@@ -73,7 +73,6 @@ export type AuthSessionTokenClaims =
 export const rezicsSessionClaimsSchema = t.Object({
   sub: t.String(),
   userId: t.String(),
-  unitId: t.Optional(t.String()),
   role: tokenPermissionRoleSchema,
   permission: t.Object({
     role: tokenPermissionRoleSchema,

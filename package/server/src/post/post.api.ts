@@ -87,7 +87,7 @@ export const postApi = new Elysia({ prefix: "/post" })
   .post(
     "/",
     async ({ body, identity }): Promise<PostResponse> => {
-      const post = await postService.create(body, identity.unitId);
+      const post = await postService.create(body, identity.userId);
       return mapPostToDTO(post);
     },
     {
@@ -108,7 +108,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       if (
         !hasPermissionToUpdatePost(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target.unit as any,
         )
       ) {
@@ -138,7 +138,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       if (
         !hasPermissionToDeletePost(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target.unit as any,
         )
       ) {

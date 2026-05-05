@@ -40,7 +40,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
     "/",
     async ({ body, identity }) => {
       const post = await chapterService.create({
-        userId: identity.unitId,
+        userId: identity.userId,
         title: body.title,
         content: body.content,
         targetUnitId: body.targetUnitId,
@@ -69,7 +69,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const { items, total } = await chapterService.list(query);
@@ -102,7 +102,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
       ) {
         return status(403, "Forbidden: Admin role required");
       }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const { items, total } = await chapterService.list({
@@ -140,7 +140,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
       if (
         !hasPermissionToUpdateChapter(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {
@@ -173,7 +173,7 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
       if (
         !hasPermissionToDeleteChapter(
           identity.permission,
-          identity.unitId,
+          identity.userId,
           target as any,
         )
       ) {

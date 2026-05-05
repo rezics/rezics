@@ -180,6 +180,10 @@ describe("POST /session/exchange", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toHaveProperty("token", "signed-session-token");
+    expect(signRezicsSessionToken).toHaveBeenCalledWith({
+      userId: "user-1",
+      permission: { role: "MEMBER" },
+    });
   });
 
   test("missing auth header returns 401", async () => {

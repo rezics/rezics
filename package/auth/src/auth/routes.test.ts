@@ -1,10 +1,12 @@
 import { describe, expect, mock, test } from "bun:test";
 
-process.env.NODE_ENV ??= "test";
-process.env.PORT ??= "35003";
+process.env.NODE_ENV = "test";
+process.env.PORT = "35003";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_auth";
-process.env.BETTER_AUTH_URL ??= "http://localhost:35003";
+process.env.BETTER_AUTH_URL = "http://localhost:35003";
+process.env.AUTH_PUBLIC_BASE_URL = "http://localhost:3000/auth";
+process.env.AUTH_PUBLIC_ISSUER_URL = "http://localhost:3000";
 process.env.BETTER_AUTH_SECRET ??=
   "this-is-a-long-auth-secret-for-tests-123456";
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
@@ -83,8 +85,13 @@ describe("Auth discovery routes", () => {
     expect(openIdResponse.status).toBe(200);
 
     const openIdJson = await openIdResponse.json();
-    expect(openIdJson.issuer).toBe("http://localhost:35003");
-    expect(openIdJson.userinfo_endpoint).toBeDefined();
+    expect(openIdJson.issuer).toBe("http://localhost:3000");
+    expect(openIdJson.userinfo_endpoint).toBe(
+      "http://localhost:3000/auth/oauth/userinfo",
+    );
+    expect(openIdJson.jwks_uri).toBe("http://localhost:3000/auth/session/jwks");
+    expect(JSON.stringify(openIdJson)).not.toContain("localhost:35003");
+    expect(JSON.stringify(openIdJson)).not.toContain("/api/auth");
     expect(openIdJson.id_token_signing_alg_values_supported).toContain("ES256");
 
     const oauthResponse = await handleOAuthAuthorizationServerRequest(
@@ -96,9 +103,16 @@ describe("Auth discovery routes", () => {
     expect(oauthResponse.status).toBe(200);
 
     const oauthJson = await oauthResponse.json();
-    expect(oauthJson.issuer).toBe("http://localhost:35003");
-    expect(oauthJson.authorization_endpoint).toBeDefined();
-    expect(oauthJson.token_endpoint).toBeDefined();
+    expect(oauthJson.issuer).toBe("http://localhost:3000");
+    expect(oauthJson.authorization_endpoint).toBe(
+      "http://localhost:3000/auth/oauth/authorize",
+    );
+    expect(oauthJson.token_endpoint).toBe(
+      "http://localhost:3000/auth/oauth/token",
+    );
+    expect(oauthJson.jwks_uri).toBe("http://localhost:3000/auth/session/jwks");
+    expect(JSON.stringify(oauthJson)).not.toContain("localhost:35003");
+    expect(JSON.stringify(oauthJson)).not.toContain("/api/auth");
   });
 
   test("configures required external providers", async () => {

@@ -9,7 +9,7 @@ export const settingsRoute = new Elysia()
   .get(
     "/me/settings",
     async ({ identity }): Promise<UserSettings> => {
-      return getSettings(identity.unitId);
+      return getSettings(identity.userId);
     },
     {
       requireLogin: true,
@@ -24,7 +24,7 @@ export const settingsRoute = new Elysia()
   .put(
     "/me/settings",
     async ({ identity, body }): Promise<UserSettings> => {
-      return updateSettings(identity.unitId, body);
+      return updateSettings(identity.userId, body);
     },
     {
       requireLogin: true,
