@@ -68,6 +68,14 @@ export const BookReviewPage: React.FC = () => {
         <ScoreOverview unitId={bookId} />
       </div>
 
+      <ShelfByBookPreview
+        bookId={bookInfo.unitId || ""}
+        title={title}
+        shelfNumber={SHELF_PREVIEW_LIMIT}
+      />
+
+      <Separator className="my-4" />
+
       <div>
         <div className="flex flex-row justify-between items-center mb-2">
           <ArrowForwardIcon size={16} to={`/review/book/${bookId}`}>
@@ -88,14 +96,6 @@ export const BookReviewPage: React.FC = () => {
         </div>
         <ReviewList reviews={reviews} />
       </div>
-
-      <Separator className="my-4" />
-
-      <ShelfByBookPreview
-        bookId={bookInfo.unitId || ""}
-        title={title}
-        shelfNumber={SHELF_PREVIEW_LIMIT}
-      />
     </div>
   );
 };

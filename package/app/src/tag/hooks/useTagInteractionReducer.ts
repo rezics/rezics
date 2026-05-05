@@ -3,69 +3,77 @@ import { useReducer } from "react";
 /**
  * Three-state machine for the TagInteraction component.
  *
- * idle              → no chip active
- * single-preview    → one chip active; Popper shown
- * multi-select      → 2+ chips selected; action bar shown
+ * preview           → one chip active; Popper shown
+ * selected          → explicit tag selection for search actions
  *
  * Transitions:
- *   idle + CLICK_CHIP           → single-preview(chip)
- *   single-preview + CLICK_CHIP (same) → idle
- *   single-preview + CLICK_CHIP (other) → multi-select({prev, other})
- *   single-preview + CLOSE_POPPER → idle
- *   multi-select + CLICK_CHIP   → toggle membership (→ idle when empty)
- *   multi-select + DESELECT_ALL → idle
+ *   no selection + CLICK_CHIP                → preview(chip)
+ *   preview + CLICK_CHIP (same)              → idle
+ *   preview + CLICK_CHIP (other)             → selected({prev, other})
+ *   selected + CLICK_CHIP                    → toggle membership
+ *   SELECT_CHIPS                             → selected(chips)
+ *   CLOSE_PREVIEW                            → clear only preview
+ *   DESELECT_ALL                             → idle
  */
 
-export type TagInteractionState =
-  | { kind: "idle" }
-  | { kind: "single-preview"; tagUnitId: string; anchor: HTMLElement }
-  | { kind: "multi-select"; selected: string[] };
+export type TagInteractionState = {
+  preview: { tagUnitId: string; anchor: HTMLElement } | null;
+  selected: string[];
+};
 
 export type TagInteractionAction =
   | { type: "CLICK_CHIP"; tagUnitId: string; anchor: HTMLElement }
-  | { type: "CLOSE_POPPER" }
+  | { type: "SELECT_CHIPS"; tagUnitIds: string[] }
+  | { type: "CLOSE_PREVIEW" }
   | { type: "DESELECT_ALL" };
 
-function reducer(
+export function tagInteractionReducer(
   state: TagInteractionState,
   action: TagInteractionAction,
 ): TagInteractionState {
   switch (action.type) {
     case "CLICK_CHIP": {
-      if (state.kind === "idle") {
+      if (state.selected.length > 0) {
+        const exists = state.selected.includes(action.tagUnitId);
+        const selected = exists
+          ? state.selected.filter((id) => id !== action.tagUnitId)
+          : [...state.selected, action.tagUnitId];
+        return { preview: null, selected };
+      }
+
+      if (!state.preview) {
         return {
-          kind: "single-preview",
-          tagUnitId: action.tagUnitId,
-          anchor: action.anchor,
+          preview: { tagUnitId: action.tagUnitId, anchor: action.anchor },
+          selected: [],
         };
       }
-      if (state.kind === "single-preview") {
-        if (state.tagUnitId === action.tagUnitId) {
-          return { kind: "idle" };
-        }
+
+      if (state.preview.tagUnitId === action.tagUnitId) {
         return {
-          kind: "multi-select",
-          selected: [state.tagUnitId, action.tagUnitId],
+          preview: null,
+          selected: [],
         };
       }
-      // multi-select: toggle
-      const exists = state.selected.includes(action.tagUnitId);
-      const next = exists
-        ? state.selected.filter((id) => id !== action.tagUnitId)
-        : [...state.selected, action.tagUnitId];
-      if (next.length === 0) return { kind: "idle" };
-      return { kind: "multi-select", selected: next };
+
+      return {
+        preview: null,
+        selected: [state.preview.tagUnitId, action.tagUnitId],
+      };
     }
-    case "CLOSE_POPPER":
-      if (state.kind === "single-preview") return { kind: "idle" };
-      return state;
+    case "SELECT_CHIPS":
+      return {
+        preview: null,
+        selected: Array.from(new Set(action.tagUnitIds)),
+      };
+    case "CLOSE_PREVIEW":
+      return { ...state, preview: null };
     case "DESELECT_ALL":
-      return { kind: "idle" };
+      return { preview: null, selected: [] };
     default:
       return state;
   }
 }
 
 export function useTagInteractionReducer() {
-  return useReducer(reducer, { kind: "idle" });
+  return useReducer(tagInteractionReducer, { preview: null, selected: [] });
 }

@@ -1,11 +1,55 @@
 import type { PostDTO } from "@rezics/contract";
-import { Card, CardContent } from "@rezics/ui/shadcn";
+import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
+import { Star as StarIcon } from "lucide-react";
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import { ReactionBar } from "@/engagement";
-import { PostBodyMarkdown } from "@/post";
+import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
+import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { cn } from "@/shared/utils/css-util";
 import { reviewCardActions, reviewPolicy } from "../../models/reviewPolicy";
+
+interface ReviewRatingBadgeProps {
+  review: PostDTO;
+}
+
+const ReviewRatingBadge: React.FC<ReviewRatingBadgeProps> = ({ review }) => {
+  const { t } = useTranslation();
+  const rating = (review.extra as { rating?: number } | null)?.rating;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger
+          render={(props) => (
+            <TextLink
+              to="/review/$reviewId"
+              params={{ reviewId: review.unitId }}
+              className="flex items-center gap-1 rounded p-1 text-inherit no-underline transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+              onClick={(e) => e.stopPropagation()}
+              {...props}
+            >
+              <StarIcon className="h-4 w-4 fill-current text-text-brand" />
+              <span className="text-xs">
+                {rating !== undefined ? rating.toFixed(1) : "0.0"}/10
+              </span>
+            </TextLink>
+          )}
+        />
+        <TooltipContent side="top">
+          {t("review.open_review_page")}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 interface ReviewCardProps {
   review: PostDTO;
@@ -18,16 +62,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const bookMetadata = (review.extra as any)?.book as
-    | { coverUrl?: string; title?: string }
-    | undefined;
   const reviewTitle = (review.extra as any)?.title as string | undefined;
-  const rating = (review.extra as any)?.rating as number | undefined;
-
-  const handleOpenReview = () => {
-    if (!review.unitId) return;
-    navigate({ to: "/review/$reviewId", params: { reviewId: review.unitId } });
-  };
 
   const handleReplyInvoke = () => {
     if (!review.unitId) return;
@@ -39,81 +74,44 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   };
 
   return (
-    <Card
+    <div
       className={cn(
-        "w-full transition-all hover:shadow-md",
+        "border-b border-border-whisper py-4",
         review.unitId && "cursor-pointer",
         className,
       )}
-      onClick={handleOpenReview}
     >
-      <CardContent>
-        <div className="flex gap-4">
-          {bookMetadata?.coverUrl && (
-            <div className="flex-shrink-0 w-20 h-28 overflow-hidden rounded shadow-sm border border-border-whisper">
-              <img
-                src={bookMetadata.coverUrl}
-                alt={bookMetadata.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          <div className="flex-grow min-w-0">
-            {bookMetadata?.title && (
-              <span
-                className="block truncate text-xs"
-                style={{ letterSpacing: "1px" }}
-              >
-                《{bookMetadata.title}》
-              </span>
-            )}
-
-            {reviewTitle && (
-              <h3 className="truncate text-[1.1rem] text-text-primary">
-                {reviewTitle}
-              </h3>
-            )}
-
-            <PostBodyMarkdown
-              body={review.body ?? ""}
-              clamp={{ maxLines: 3 }}
-            />
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <PostAuthorHeader post={review} />
+          <div className="ml-auto">
+            <ReviewRatingBadge review={review} />
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-2">
-          <ReactionBar
-            size="md"
-            post={review}
-            policy={reviewPolicy}
-            actions={reviewCardActions}
-            onReplyInvoke={handleReplyInvoke}
-          />
+        {reviewTitle && (
+          <TextLink
+            to="/review/$reviewId"
+            params={{ reviewId: review.unitId }}
+            underline="none"
+            className="w-fit max-w-full truncate text-base font-medium text-text-primary hover:text-brand"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {reviewTitle}
+          </TextLink>
+        )}
 
-          <div className="flex items-center gap-2">
-            <span
-              className="text-xs text-text-secondary whitespace-nowrap"
-              style={{ lineHeight: 1 }}
-            >
-              {review.author?.name || "匿名"}
-            </span>
+        <PostBodyMarkdown body={review.body ?? ""} clamp={{ maxLines: 6 }} />
 
-            {rating !== undefined && (
-              <span
-                className="text-xs whitespace-nowrap"
-                style={{
-                  lineHeight: 1,
-                  color: "var(--colors-secondary, var(--colors-text-secondary))",
-                }}
-              >
-                {rating}
-              </span>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        <ReactionBar
+          size="md"
+          post={review}
+          policy={reviewPolicy}
+          actions={reviewCardActions}
+          onReplyInvoke={handleReplyInvoke}
+        />
+      </div>
+    </div>
   );
 };
 

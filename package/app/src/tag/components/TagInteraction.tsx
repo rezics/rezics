@@ -1,9 +1,3 @@
-import {
-  Badge,
-  Button,
-  Popover,
-  PopoverContent,
-} from "@rezics/ui/shadcn";
 import { useCanEdit } from "@rezics/api/hooks";
 import { useCastTagVoteMutation } from "@rezics/api/tag/tag.mutations";
 import type {
@@ -11,14 +5,8 @@ import type {
   BookDTO,
   UnitTagDTO,
 } from "@rezics/contract";
+import { Badge, Button, Popover, PopoverContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
-import type React from "react";
-import { useCallback, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import type { InjectedTag } from "@/search/models/injectedTags";
-import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
-import { cn } from "@/shared/utils/css-util";
-import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
 import {
   X as CloseIcon,
   Pencil as EditOutlinedIcon,
@@ -26,6 +14,38 @@ import {
   ThumbsDown as ThumbDownOutlinedIcon,
   ThumbsUp as ThumbUpOutlinedIcon,
 } from "lucide-react";
+import type React from "react";
+import { useCallback, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
+import type { InjectedTag } from "@/search/models/injectedTags";
+import { cn } from "@/shared/utils/css-util";
+import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
+
+const TAG_CHIP_SELECTOR = '[data-tag-chip="true"]';
+
+function isTagChipEventTarget(event: Event | undefined): boolean {
+  const target = event?.target;
+
+  if (target instanceof Element && target.closest(TAG_CHIP_SELECTOR)) {
+    return true;
+  }
+
+  if (
+    target instanceof Node &&
+    target.parentElement?.closest(TAG_CHIP_SELECTOR)
+  ) {
+    return true;
+  }
+
+  return (
+    event
+      ?.composedPath()
+      .some(
+        (node) => node instanceof Element && node.matches(TAG_CHIP_SELECTOR),
+      ) ?? false
+  );
+}
 
 export type TagInteractionProps = {
   tags: UnitTagDTO[];
@@ -39,11 +59,10 @@ export type TagInteractionProps = {
 };
 
 /**
- * TagInteraction — interactive tag chip group with three states.
+ * TagInteraction — interactive tag chip group with preview and selection states.
  *
- *   idle: plain chips
- *   single-preview: clicked chip opens an anchored Popover with detail/vote/search
- *   multi-select: 2+ chips selected; an action bar offers "Search selected tags"
+ *   preview: clicked chip opens an anchored Popover with detail/vote/search
+ *   selection: clicked chips are selected; an action bar offers "Search selected tags"
  *
  * Chips render translated labels from the batch translation map. Navigation
  * to search uses the shared `useNavigateToTagSearch` helper so the target
@@ -68,6 +87,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   const voteMutation = useCastTagVoteMutation();
   const navigate = useNavigate();
   const canEditTags = useCanEdit({ resource: "tag", ownerUnit: bookUnit });
+  const suppressNextClickRef = useRef<string | null>(null);
 
   const labelOf = useCallback(
     (tagUnitId: string) => translations[tagUnitId]?.name || tagUnitId,
@@ -80,23 +100,51 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   );
 
   const previewTag = useMemo(() => {
-    if (state.kind !== "single-preview") return null;
-    return tags.find((tag) => tag.tagUnitId === state.tagUnitId) ?? null;
-  }, [state, tags]);
+    if (!state.preview) return null;
+    return (
+      tags.find((tag) => tag.tagUnitId === state.preview?.tagUnitId) ?? null
+    );
+  }, [state.preview, tags]);
 
   const handleChipClick = (
     event: React.MouseEvent<HTMLDivElement>,
     tagUnitId: string,
   ) => {
+    if (suppressNextClickRef.current === tagUnitId) {
+      suppressNextClickRef.current = null;
+      return;
+    }
+
     const anchor = event.currentTarget;
     dispatch({ type: "CLICK_CHIP", tagUnitId, anchor });
   };
 
+  const handleChipPointerDownCapture = (
+    event: React.PointerEvent<HTMLDivElement>,
+    tagUnitId: string,
+  ) => {
+    if (!state.preview || state.selected.length > 0) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    suppressNextClickRef.current = tagUnitId;
+
+    if (state.preview.tagUnitId === tagUnitId) {
+      dispatch({ type: "CLICK_CHIP", tagUnitId, anchor: event.currentTarget });
+      return;
+    }
+
+    dispatch({
+      type: "SELECT_CHIPS",
+      tagUnitIds: [state.preview.tagUnitId, tagUnitId],
+    });
+  };
+
   const isSelected = (tagUnitId: string): boolean => {
-    if (state.kind === "single-preview") return state.tagUnitId === tagUnitId;
-    if (state.kind === "multi-select")
-      return state.selected.includes(tagUnitId);
-    return false;
+    return (
+      state.preview?.tagUnitId === tagUnitId ||
+      state.selected.includes(tagUnitId)
+    );
   };
 
   const handleSearchSingle = (tagUnitId: string) => {
@@ -106,7 +154,6 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   };
 
   const handleSearchMulti = () => {
-    if (state.kind !== "multi-select") return;
     const items = state.selected.map((id) => ({
       slug: slugOf(id),
       unitId: id,
@@ -120,7 +167,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
     voteMutation.mutate({ tagUnitId, unitId: bookUnitId, value });
   };
 
-  const popoverOpen = state.kind === "single-preview" && previewTag !== null;
+  const popoverOpen = state.preview !== null && previewTag !== null;
 
   return (
     <div className={className}>
@@ -129,20 +176,17 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
         open={popoverOpen}
         onOpenChange={(open, details) => {
           if (open) return;
-          // When the dismiss is caused by clicking another chip, cancel the
-          // close so the chip's onClick reaches the reducer in single-preview
-          // state and transitions to multi-select. The popover will close
-          // naturally on the next render via the controlled `open` prop.
-          const target = details?.event?.target;
+          // Preserve click ordering when moving from preview into selection.
+          // Otherwise Base UI may close the preview before the chip click can
+          // fold the previewed tag into the selected array.
           if (
             details?.reason === "outside-press" &&
-            target instanceof Element &&
-            target.closest('[data-tag-chip="true"]')
+            isTagChipEventTarget(details.event)
           ) {
             details.cancel();
             return;
           }
-          dispatch({ type: "CLOSE_POPPER" });
+          dispatch({ type: "CLOSE_PREVIEW" });
         }}
       >
         <div className="flex flex-wrap gap-2">
@@ -156,6 +200,12 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
                 aria-pressed={selected}
                 variant={selected ? "default" : "outline"}
                 className={cn("cursor-pointer select-none")}
+                onPointerDownCapture={(e) =>
+                  handleChipPointerDownCapture(
+                    e as unknown as React.PointerEvent<HTMLDivElement>,
+                    tag.tagUnitId,
+                  )
+                }
                 onClick={(e) =>
                   handleChipClick(
                     e as unknown as React.MouseEvent<HTMLDivElement>,
@@ -175,10 +225,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
                 {labelOf(tag.tagUnitId)} ({tag.score})
               </Badge>
             );
-            if (
-              state.kind === "single-preview" &&
-              state.tagUnitId === tag.tagUnitId
-            ) {
+            if (state.preview?.tagUnitId === tag.tagUnitId) {
               return <div key={tag.tagUnitId}>{chipNode}</div>;
             }
             return <div key={tag.tagUnitId}>{chipNode}</div>;
@@ -187,12 +234,11 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
 
         {popoverOpen && previewTag && (
           <PopoverContent
-            anchor={state.kind === "single-preview" ? state.anchor : undefined}
+            anchor={state.preview?.anchor}
             side="bottom"
             align="start"
             sideOffset={8}
             className="p-4 min-w-[280px] max-w-[360px] z-10"
-            onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm font-semibold">
@@ -202,7 +248,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
                 size="icon"
                 variant="ghost"
                 aria-label="Close"
-                onClick={() => dispatch({ type: "CLOSE_POPPER" })}
+                onClick={() => dispatch({ type: "CLOSE_PREVIEW" })}
               >
                 <CloseIcon className="h-4 w-4" />
               </Button>
@@ -271,7 +317,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
         )}
       </Popover>
 
-      {state.kind === "multi-select" && (
+      {state.selected.length > 0 && (
         <div className="mt-3 p-2 flex items-center justify-between gap-2 rounded-md border border-border-whisper bg-surface-elevated">
           <p className="text-sm px-1">
             {t("tag.selected_count", "Selected: {{count}}", {

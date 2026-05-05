@@ -108,21 +108,19 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
         {showInlineCollapse && (
           <>
             {" "}
-            <span
-              role="button"
-              tabIndex={0}
+            <button
+              type="button"
               onClick={handleToggle}
-              onKeyDown={handleKeyDown}
               aria-expanded={isExpanded}
               aria-controls={contentId}
               className={cn(
-                "inline cursor-pointer align-baseline font-medium",
-                "text-brand hover:underline",
+                "inline cursor-pointer align-baseline border-0 bg-transparent p-0 font-medium",
+                "text-[var(--colors-brand-fill)] hover:underline",
               )}
               style={{ font: "inherit", fontWeight: 500 }}
             >
               {showLessLabel}
-            </span>
+            </button>
           </>
         )}
       </div>
@@ -146,7 +144,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               "absolute -bottom-1 h-[1lh]",
               alignToggle === "end" ? "right-0 pr-1" : "left-0 pl-1",
               "pointer-events-none inline-flex items-center",
-              "text-text-secondary group-hover:text-brand group-focus-within:text-brand transition-colors duration-150 motion-reduce:transition-none",
+              "text-text-secondary group-hover:text-[var(--colors-brand-fill)] group-focus-within:text-[var(--colors-brand-fill)] transition-colors duration-150 motion-reduce:transition-none",
             )}
           >
             <Ellipsis className="h-5 w-5" />

@@ -17,11 +17,11 @@ export interface ReviewListProps {
 
 export const ReviewList: React.FC<ReviewListProps> = ({
   reviews,
-  spacing = 2,
+  spacing = 0,
 }) => {
   const gapClass =
     typeof spacing === "number"
-      ? SPACING_CLASS_BY_NUMBER[spacing] ?? "gap-4"
+      ? (SPACING_CLASS_BY_NUMBER[spacing] ?? "gap-4")
       : "gap-4";
   return (
     <div className={`flex flex-col ${gapClass}`}>
