@@ -19,6 +19,7 @@ export const CreateMenu: React.FC = () => {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
+        nativeButton
         render={(props) => (
           <Button
             variant="outline"

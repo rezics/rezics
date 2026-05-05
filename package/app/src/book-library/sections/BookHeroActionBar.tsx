@@ -109,6 +109,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
       <div className="flex items-stretch gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger
+            nativeButton
             render={(props) => (
               <Button
                 variant="outline"

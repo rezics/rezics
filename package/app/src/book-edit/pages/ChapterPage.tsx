@@ -170,6 +170,7 @@ export const BookEditChapterPage: React.FC = () => {
         />
         <DropdownMenu>
           <DropdownMenuTrigger
+            nativeButton
             render={(props) => (
               <Button type="button" size="icon" variant="ghost" {...props}>
                 <MoreHoriz className="w-4 h-4" />

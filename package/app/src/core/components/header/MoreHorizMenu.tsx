@@ -17,6 +17,7 @@ export function MoreHorizMenu({ children, className }: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        nativeButton
         render={(props) => (
           <Button
             variant="ghost"

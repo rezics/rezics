@@ -58,6 +58,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        nativeButton
         render={(props) => (
           <Button
             variant="ghost"

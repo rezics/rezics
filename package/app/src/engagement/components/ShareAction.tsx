@@ -48,6 +48,7 @@ export const ShareAction: React.FC<ShareActionProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        nativeButton
         render={(props) => (
           <Button
             variant="ghost"

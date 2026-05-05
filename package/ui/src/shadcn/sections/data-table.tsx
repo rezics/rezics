@@ -293,6 +293,7 @@ const columns: ColumnDef<Static<typeof schema>>[] = [
     cell: () => (
       <DropdownMenu>
         <DropdownMenuTrigger
+          nativeButton
           render={
             <Button
               variant="ghost"
@@ -454,6 +455,7 @@ export function DataTable({
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger
+              nativeButton
               render={<Button variant="outline" size="sm" />}
             >
               <ColumnsIcon />

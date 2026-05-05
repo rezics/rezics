@@ -61,6 +61,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
 
         <DropdownMenu>
           <DropdownMenuTrigger
+            nativeButton
             render={(props) => (
               <Button variant="ghost" {...props}>
                 <span className="text-sm">

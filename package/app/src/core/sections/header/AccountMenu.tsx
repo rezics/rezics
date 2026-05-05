@@ -43,6 +43,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        nativeButton
         render={(props) => (
           <Button
             variant="ghost"
