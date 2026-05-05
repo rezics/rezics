@@ -23,7 +23,7 @@ export const CreateMenu: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 rounded-full gap-1 bg-transparent px-3"
+            className="h-10 rounded-full gap-1 bg-transparent px-4"
             aria-label="create menu"
             {...props}
           >

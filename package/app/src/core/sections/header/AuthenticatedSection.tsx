@@ -12,7 +12,7 @@ export function AuthenticatedSection() {
           variant="ghost"
           size="icon"
           aria-label="notifications"
-          className="h-9 rounded-full bg-transparent"
+          className="h-10 min-w-10 rounded-full bg-transparent"
         >
           <NotificationsIcon className="w-5 h-5" />
         </Button>

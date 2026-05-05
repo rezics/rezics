@@ -1,3 +1,4 @@
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import {
   Avatar,
   AvatarFallback,
@@ -9,18 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useNavigate } from "@tanstack/react-router";
-import type React from "react";
-import { useTranslation } from "react-i18next";
-import { logout } from "@/user/models/handler";
-import { useUserProfileStore } from "@/user/states";
-import { MiscMenuItems } from "../../components/header/MiscMenuItems";
 import {
   LogOut as LogoutIcon,
   User as PersonIcon,
   Settings as SettingsIcon,
 } from "lucide-react";
+import type React from "react";
+import { useTranslation } from "react-i18next";
+import { logout } from "@/user/models/handler";
+import { useUserProfileStore } from "@/user/states";
+import { MiscMenuItems } from "../../components/header/MiscMenuItems";
 
 export type AccountMenuProps = {
   onLogout?: () => void;
@@ -50,10 +50,10 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
             size="icon"
             aria-label="account menu"
             aria-haspopup="true"
-            className="h-9 rounded-full bg-transparent"
+            className="h-10 min-w-10 rounded-md bg-transparent hover:bg-muted aria-expanded:bg-muted"
             {...props}
           >
-            <Avatar className="w-9 h-9 rounded-md">
+            <Avatar className="w-8 h-8 rounded-md">
               {user?.avatar && (
                 <AvatarImage src={user.avatar} alt={user?.name ?? ""} />
               )}

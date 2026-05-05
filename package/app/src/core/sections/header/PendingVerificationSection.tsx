@@ -15,7 +15,7 @@ export function PendingVerificationSection() {
       <Button
         variant="outline"
         size="sm"
-        className="h-9 rounded-full border-border-whisper bg-transparent px-3"
+        className="h-10 rounded-full border-border-whisper bg-transparent px-4"
         render={(props) => (
           <Link to="/complete-registration" {...props}>
             {t("auth.flow.complete_registration_action")}
@@ -25,7 +25,7 @@ export function PendingVerificationSection() {
       <Button
         variant="ghost"
         size="sm"
-        className="h-9 rounded-full border border-border-whisper bg-transparent px-3"
+        className="h-10 rounded-full border border-border-whisper bg-transparent px-4"
         onClick={handleLogout}
       >
         {t("auth.logout")}

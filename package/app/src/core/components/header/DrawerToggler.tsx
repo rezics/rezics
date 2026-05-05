@@ -24,7 +24,7 @@ export const DrawerToggler = ({
       className={
         hidden
           ? "hidden"
-          : "flex h-9 rounded-full bg-transparent"
+          : "flex h-10 min-w-10 rounded-full bg-transparent"
       }
     >
       <Menu className="w-5 h-5" />
