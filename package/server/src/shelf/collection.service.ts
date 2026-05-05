@@ -8,12 +8,11 @@ import type {
 import {
   PostKind,
   prisma,
-  UnitStatus,
   UnitType,
-  UnitVisibility,
 } from "#/prisma/client";
 import { generateBetween } from "./fractional-index";
 import { mapUnitToKind } from "./shelf.service";
+import { getOrCreateSystemShelf } from "./system-shelves";
 
 const FAVORITES_KIND_KEY = "favorites";
 
@@ -31,33 +30,7 @@ export class CollectionService {
    * Get or create the user's Favorites shelf.
    */
   private async getFavoritesShelfId(userId: string): Promise<string> {
-    const existing = await prisma.shelf.findFirst({
-      where: {
-        kindKey: FAVORITES_KIND_KEY,
-        unit: { userId, type: UnitType.SHELF },
-      },
-      select: { unitId: true },
-    });
-
-    if (existing) return existing.unitId;
-
-    const unit = await prisma.unit.create({
-      data: {
-        userId,
-        type: UnitType.SHELF,
-        status: UnitStatus.PUBLISHED,
-        visibility: UnitVisibility.PRIVATE,
-        translations: {
-          create: { language: "en", title: "Favorites" },
-        },
-      },
-    });
-
-    await prisma.shelf.create({
-      data: { unitId: unit.id, kindKey: FAVORITES_KIND_KEY },
-    });
-
-    return unit.id;
+    return getOrCreateSystemShelf(userId, FAVORITES_KIND_KEY);
   }
 
   /**

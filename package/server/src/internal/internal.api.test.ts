@@ -5,13 +5,15 @@ process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
 process.env.SERVER_INTERNAL_SECRET = "test-secret";
 
-const mockUpsert = mock(async () => ({
+const mockUserCreate = mock(async () => ({
   unitId: "user-1",
   slug: "testuser",
   name: "Test User",
 }));
 
-const mockFindUnique = mock(async () => null);
+const mockUserFindUnique = mock(async () => null as { unitId: string } | null);
+const mockUnitFindUnique = mock(async () => null);
+const mockBootstrapSystemShelves = mock(async () => {});
 
 const mockRealmMemberCreate = mock(async () => ({
   realmUnitId: "realm-1",
@@ -21,14 +23,26 @@ const mockRealmMemberCreate = mock(async () => ({
 
 mock.module("#/prisma/client", () => ({
   prisma: {
-    user: { upsert: mockUpsert },
-    unit: { findUnique: mockFindUnique },
+    $transaction: mock(async (fn: (tx: unknown) => Promise<unknown>) =>
+      fn({
+        user: {
+          findUnique: mockUserFindUnique,
+          create: mockUserCreate,
+        },
+      }),
+    ),
+    user: { findUnique: mockUserFindUnique, create: mockUserCreate },
+    unit: { findUnique: mockUnitFindUnique },
     realmMember: { create: mockRealmMemberCreate },
   },
 }));
 
 mock.module("@/meili/user/sync", () => ({
   syncUserToMeili: mock(async () => {}),
+}));
+
+mock.module("@/shelf/system-shelves", () => ({
+  bootstrapSystemShelves: mockBootstrapSystemShelves,
 }));
 
 mock.module("../env", () => ({
@@ -45,7 +59,10 @@ mock.module("../infra/default-realm", () => ({
 
 describe("POST /internal/users/provision", () => {
   beforeEach(() => {
-    mockUpsert.mockClear();
+    mockUserCreate.mockClear();
+    mockUserFindUnique.mockClear();
+    mockUserFindUnique.mockResolvedValue(null);
+    mockBootstrapSystemShelves.mockClear();
     mockRealmMemberCreate.mockClear();
     mockGetDefaultRealmId.mockClear();
     mockGetDefaultRealmId.mockReturnValue("realm-1");
@@ -72,7 +89,8 @@ describe("POST /internal/users/provision", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toEqual({ ok: true });
-    expect(mockUpsert).toHaveBeenCalled();
+    expect(mockUserCreate).toHaveBeenCalled();
+    expect(mockBootstrapSystemShelves).toHaveBeenCalled();
   });
 
   test("new user joins default realm", async () => {
@@ -154,11 +172,7 @@ describe("POST /internal/users/provision", () => {
   });
 
   test("duplicate provision is idempotent", async () => {
-    mockUpsert.mockResolvedValueOnce({
-      unitId: "user-1",
-      slug: "testuser",
-      name: "Test User",
-    });
+    mockUserFindUnique.mockResolvedValueOnce({ unitId: "user-1" });
 
     const { internalApi } = await import("./internal.api");
 
@@ -178,6 +192,7 @@ describe("POST /internal/users/provision", () => {
     );
 
     expect(response.status).toBe(200);
+    expect(mockUserCreate).not.toHaveBeenCalled();
   });
 
   test("missing secret returns 401", async () => {

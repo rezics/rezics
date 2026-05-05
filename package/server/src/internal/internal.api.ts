@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "#/prisma/client";
 import { syncUserToMeili } from "@/meili/user/sync";
+import { bootstrapSystemShelves } from "@/shelf/system-shelves";
 import { env } from "../env";
 import { getDefaultRealmId } from "../infra/default-realm";
 
@@ -43,15 +44,22 @@ export const internalApi = new Elysia({ prefix: "/internal" })
       const finalSlug = slug?.trim() || unitId;
       const finalName = name?.trim() || finalSlug;
 
-      await prisma.user.upsert({
-        where: { unitId },
-        update: {},
-        create: {
-          unitId,
-          slug: finalSlug,
-          name: finalName,
-          joinDate: new Date(),
-        },
+      await prisma.$transaction(async (tx) => {
+        const existing = await tx.user.findUnique({
+          where: { unitId },
+          select: { unitId: true },
+        });
+        if (existing) return;
+
+        await tx.user.create({
+          data: {
+            unitId,
+            slug: finalSlug,
+            name: finalName,
+            joinDate: new Date(),
+          },
+        });
+        await bootstrapSystemShelves(unitId, tx);
       });
 
       await syncUserToMeili(unitId).catch(() => {});

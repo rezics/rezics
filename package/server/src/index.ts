@@ -19,6 +19,7 @@ import { meiliApi } from "./meili";
 import { dmServerApi } from "./notify/dm.api";
 import { userBatchApi } from "./notify/user-batch.api";
 import { postApi } from "./post";
+import { progressApi } from "./progress";
 import { reactionWriteApi } from "./reaction";
 import {
   realmApi,
@@ -172,6 +173,7 @@ app
   .use(bookApi)
   .use(chapterApi)
   .use(postApi)
+  .use(progressApi)
   .use(shelfApi)
   .use(collectionApi)
   .use(linkApi)

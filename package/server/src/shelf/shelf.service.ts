@@ -20,6 +20,7 @@ import {
   UnitType,
   UnitVisibility,
 } from "#/prisma/client";
+import { AppError } from "@/utils/errors";
 import {
   generateBetween,
   POSITION_LENGTH_THRESHOLD,
@@ -33,6 +34,7 @@ import {
   mapShelfSummaryToDTO,
   mapShelfToDTO,
 } from "./shelf.mapper";
+import { isSystemKindKey } from "./system-shelves";
 import { shelfInclude, shelfListSelect } from "./types";
 
 const REBALANCE_WINDOW = 50;
@@ -127,6 +129,13 @@ export class ShelfService {
       extra,
       translations,
     } = req;
+
+    if (isSystemKindKey(kindKey)) {
+      throw new AppError(
+        400,
+        `kindKey '${kindKey}' is reserved for system shelves`,
+      );
+    }
 
     const baseTranslations = translations?.length
       ? translations

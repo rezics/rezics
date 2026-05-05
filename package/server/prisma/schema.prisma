@@ -49,6 +49,13 @@ enum ContentRating {
   R_18G
 }
 
+enum UserUnitProgressStatus {
+  BACKLOG
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
+
 enum ClaimStatus {
   PENDING
   APPROVED
@@ -167,7 +174,8 @@ model Unit {
   parentPosts     Post[] @relation("PostParent")
 
   // Shelf↔unit junction membership (primary/review/tag)
-  shelfUnits ShelfUnit[]
+  shelfUnits   ShelfUnit[]
+  userProgress UserUnitProgress[] @relation("ProgressUnit")
 
   @@unique([translationGroupId, defaultLanguage])
   @@index([type, status, createdAt])
@@ -237,15 +245,15 @@ model UnitSupportLanguage {
 // ============================================================
 
 model WorkLinkClaim {
-  id             String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  releaseUnitId  String       @db.Uuid
-  workUnitId     String       @db.Uuid
-  claimerUserId  String       @db.Uuid
-  status         ClaimStatus  @default(PENDING)
-  rejectReason   String?
-  createdAt      DateTime     @default(now())
-  resolvedAt     DateTime?
-  resolvedBy     String?      @db.Uuid
+  id            String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  releaseUnitId String      @db.Uuid
+  workUnitId    String      @db.Uuid
+  claimerUserId String      @db.Uuid
+  status        ClaimStatus @default(PENDING)
+  rejectReason  String?
+  createdAt     DateTime    @default(now())
+  resolvedAt    DateTime?
+  resolvedBy    String?     @db.Uuid
 
   releaseUnit Unit  @relation("WorkLinkClaimRelease", fields: [releaseUnitId], references: [id], onDelete: Cascade)
   workUnit    Unit  @relation("WorkLinkClaimWork", fields: [workUnitId], references: [id], onDelete: Cascade)
@@ -656,6 +664,7 @@ model User {
   followersCount  Int       @default(0)
   followingsCount Int       @default(0)
   settings        Json?
+  extra           Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -665,14 +674,35 @@ model User {
   units      Unit[]     @relation("UnitForUser")
   apiTokens  ApiToken[]
 
-  workLinkClaimsAsClaimer  WorkLinkClaim[] @relation("WorkLinkClaimClaimer")
-  workLinkClaimsAsResolver WorkLinkClaim[] @relation("WorkLinkClaimResolver")
+  workLinkClaimsAsClaimer  WorkLinkClaim[]    @relation("WorkLinkClaimClaimer")
+  workLinkClaimsAsResolver WorkLinkClaim[]    @relation("WorkLinkClaimResolver")
+  unitProgress             UserUnitProgress[]
 }
 
 // ============================================================
 // ENGAGEMENT
 // ============================================================
 // Reaction and ReactionSummary models moved to @rezics/reaction service.
+
+model UserUnitProgress {
+  userId       String                 @db.Uuid
+  unitId       String                 @db.Uuid
+  progress     Float                  @default(0)
+  status       UserUnitProgressStatus @default(BACKLOG)
+  totalTimeMs  BigInt                 @default(0)
+  lastPosition String?
+  extra        Json?
+
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [unitId], onDelete: Cascade)
+  unit Unit @relation("ProgressUnit", fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@id([userId, unitId])
+  @@index([userId, lastSeenAt(sort: Desc)])
+  @@index([unitId, status])
+}
 
 // ============================================================
 // SCORE SYSTEM

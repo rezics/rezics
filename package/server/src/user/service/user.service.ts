@@ -14,6 +14,7 @@ import {
   patchUserFieldsToMeili,
   syncUserToMeili,
 } from "@/meili/user/sync";
+import { bootstrapSystemShelves } from "@/shelf/system-shelves";
 import { emitNotificationEvent } from "../../notify/notify-client";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
 import { userInclude } from "../models/types";
@@ -126,16 +127,20 @@ export class UserService {
   async create(req: CreateUserProfileInput): Promise<UserWithRelations> {
     const { unitId, slug, avatar, bio } = req;
 
-    const user = await prisma.user.create({
-      data: {
-        unitId,
-        slug,
-        name: slug,
-        avatar: avatar ?? null,
-        bio: bio ?? null,
-        joinDate: new Date(),
-      },
-      include: userInclude,
+    const user = await prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          unitId,
+          slug,
+          name: slug,
+          avatar: avatar ?? null,
+          bio: bio ?? null,
+          joinDate: new Date(),
+        },
+        include: userInclude,
+      });
+      await bootstrapSystemShelves(unitId, tx);
+      return created;
     });
 
     await syncUserToMeili(user.unitId);
@@ -149,16 +154,24 @@ export class UserService {
     const slug = payload.slug?.trim() || payload.unitId;
     const name = payload.name?.trim() || slug;
 
-    const user = await prisma.user.upsert({
-      where: { unitId: payload.unitId },
-      update: {},
-      create: {
-        unitId: payload.unitId,
-        slug,
-        name,
-        joinDate: new Date(),
-      },
-      include: userInclude,
+    const user = await prisma.$transaction(async (tx) => {
+      const existing = await tx.user.findUnique({
+        where: { unitId: payload.unitId },
+        include: userInclude,
+      });
+      if (existing) return existing;
+
+      const created = await tx.user.create({
+        data: {
+          unitId: payload.unitId,
+          slug,
+          name,
+          joinDate: new Date(),
+        },
+        include: userInclude,
+      });
+      await bootstrapSystemShelves(payload.unitId, tx);
+      return created;
     });
 
     await syncUserToMeili(user.unitId);
@@ -169,17 +182,25 @@ export class UserService {
   async provisionFromAuthContext(
     payload: ProvisionFromAuthContextInput,
   ): Promise<UserWithRelations> {
-    const user = await prisma.user.upsert({
-      where: { unitId: payload.unitId },
-      update: {},
-      create: {
-        unitId: payload.unitId,
-        slug: payload.slug,
-        name: payload.name,
-        avatar: payload.avatar ?? null,
-        joinDate: new Date(),
-      },
-      include: userInclude,
+    const user = await prisma.$transaction(async (tx) => {
+      const existing = await tx.user.findUnique({
+        where: { unitId: payload.unitId },
+        include: userInclude,
+      });
+      if (existing) return existing;
+
+      const created = await tx.user.create({
+        data: {
+          unitId: payload.unitId,
+          slug: payload.slug,
+          name: payload.name,
+          avatar: payload.avatar ?? null,
+          joinDate: new Date(),
+        },
+        include: userInclude,
+      });
+      await bootstrapSystemShelves(payload.unitId, tx);
+      return created;
     });
 
     await syncUserToMeili(user.unitId);
