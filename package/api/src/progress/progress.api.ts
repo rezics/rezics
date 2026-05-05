@@ -2,6 +2,7 @@ import type {
   UnitProgressListQuery,
   UnitProgressListResponse,
   UnitProgressRowDTO,
+  UnitProgressStatsResponse,
   UnitProgressUpsertBody,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -11,9 +12,7 @@ export const progressApi = {
   getUnitProgress: async (
     unitId: string,
   ): Promise<UnitProgressRowDTO | null> => {
-    return apiFetch<UnitProgressRowDTO | null>(
-      `/me/units/${unitId}/progress`,
-    );
+    return apiFetch<UnitProgressRowDTO | null>(`/me/units/${unitId}/progress`);
   },
 
   updateUnitProgress: async (
@@ -31,6 +30,14 @@ export const progressApi = {
   ): Promise<UnitProgressListResponse> => {
     const qs = buildQueryString(query ?? {});
     return apiFetch<UnitProgressListResponse>(`/me/progress${qs}`);
+  },
+
+  getUnitProgressStats: async (
+    unitId: string,
+  ): Promise<UnitProgressStatsResponse> => {
+    return apiFetch<UnitProgressStatsResponse>(
+      `/units/${unitId}/progress-stats`,
+    );
   },
 
   deleteUnitProgress: async (unitId: string): Promise<{ message: string }> => {

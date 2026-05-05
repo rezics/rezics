@@ -8,7 +8,9 @@ export {
 export {
   myProgressListQuery,
   progressQueries,
+  unitProgressStatsQuery,
   unitProgressQuery,
   useMyProgressList,
   useUnitProgress,
+  useUnitProgressStats,
 } from "./progress.queries";

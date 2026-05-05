@@ -226,6 +226,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       },
     },
   )
+  .post(
+    "/progress/init",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init progress index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init progress index");
+      }
+      await meiliService.initProgressIndex();
+      return { message: "progress index initialized" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Init progress index",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
   // ANCHOR: Admin — full sync
   .post(
     "/content/sync",

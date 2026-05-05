@@ -3,6 +3,7 @@ import {
   unitProgressListResponseSchema,
   unitProgressParamsSchema,
   unitProgressRowDTOSchema,
+  unitProgressStatsResponseSchema,
   unitProgressUpsertBodySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -12,6 +13,20 @@ import { progressService } from "./progress.service";
 
 export const progressApi = new Elysia()
   .use(authMacro)
+  .get(
+    "/units/:unitId/progress-stats",
+    async ({ params }) => {
+      return progressService.progressStats(params.unitId);
+    },
+    {
+      params: unitProgressParamsSchema,
+      response: unitProgressStatsResponseSchema,
+      detail: {
+        summary: "Get aggregate unit progress stats",
+        tags: ["Progress"],
+      },
+    },
+  )
   .put(
     "/me/units/:unitId/progress",
     async ({ params, body, identity }) => {

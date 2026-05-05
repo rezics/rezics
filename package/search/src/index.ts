@@ -1,6 +1,15 @@
 export type { SearchResponse } from "meilisearch";
 export { type MeiliConfig, SearchClient } from "./client";
 export {
+  bucketize,
+  buildProgressDocument,
+  PROGRESS_BUCKET_COUNT,
+  PROGRESS_INDEX_NAME,
+  progressDocumentId,
+  type UserUnitProgressDocument,
+  type UserUnitProgressRow,
+} from "./progress";
+export {
   buildContentDocument,
   buildPostDocument,
   buildRealmDocument,
@@ -18,11 +27,13 @@ export {
   patchRealmMetadata,
   patchRealmTranslations,
   patchUserFields,
+  removeProgress,
   syncAllContent,
   syncAllFeedbacks,
   syncAllPosts,
   syncAllRealms,
   syncAllUsers,
+  syncProgress,
   syncPostsByAuthor,
   syncPostsByTarget,
   syncSingleContent,

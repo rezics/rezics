@@ -95,3 +95,25 @@ export const unitProgressListResponseSchema = t.Object({
 
 export type UnitProgressListResponse =
   (typeof unitProgressListResponseSchema)["static"];
+
+export const unitProgressStatusCountsSchema = t.Object({
+  BACKLOG: t.Number({ minimum: 0 }),
+  ACTIVE: t.Number({ minimum: 0 }),
+  COMPLETED: t.Number({ minimum: 0 }),
+  DROPPED: t.Number({ minimum: 0 }),
+});
+
+export type UnitProgressStatusCounts =
+  (typeof unitProgressStatusCountsSchema)["static"];
+
+export const unitProgressStatsResponseSchema = t.Object({
+  viewerCount: t.Number({ minimum: 0 }),
+  statusCounts: unitProgressStatusCountsSchema,
+  bucketCounts: t.Array(t.Number({ minimum: 0 }), {
+    minItems: 10,
+    maxItems: 10,
+  }),
+});
+
+export type UnitProgressStatsResponse =
+  (typeof unitProgressStatsResponseSchema)["static"];

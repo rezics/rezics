@@ -70,6 +70,10 @@ export class MeiliService {
     await searchClient.initRealmIndex();
   }
 
+  async initProgressIndex(): Promise<void> {
+    await searchClient.initProgressIndex();
+  }
+
   async syncAllContent(): Promise<unknown> {
     return syncAllContent(searchClient);
   }

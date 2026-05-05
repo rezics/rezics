@@ -1,11 +1,9 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-
-const UserUnitProgressStatus = {
-  BACKLOG: "BACKLOG",
-  ACTIVE: "ACTIVE",
-  COMPLETED: "COMPLETED",
-  DROPPED: "DROPPED",
-} as const;
+import {
+  installPrismaClientMock,
+  prismaMock,
+  UserUnitProgressStatus,
+} from "@/test/prisma-client-mock";
 
 const baseRow = {
   userId: "user-1",
@@ -21,21 +19,40 @@ const baseRow = {
 
 const mockUpsert = mock(async () => baseRow);
 const mockFindUnique = mock(async () => baseRow);
-const mockFindMany = mock(async () => [] as typeof baseRow[]);
+const mockFindMany = mock(async () => [] as (typeof baseRow)[]);
 const mockDeleteMany = mock(async () => ({ count: 0 }));
+const mockSyncProgress = mock(async () => undefined);
+const mockRemoveProgress = mock(async () => undefined);
+const mockProgressSearch = mock(async () => ({
+  estimatedTotalHits: 0,
+  hits: [],
+  facetDistribution: {},
+}));
 
 function firstArg(fn: { mock: { calls: unknown[][] } }) {
   return fn.mock.calls[0]?.[0] as any;
 }
 
-mock.module("#/prisma/client", () => ({
-  UserUnitProgressStatus,
-  prisma: {
-    userUnitProgress: {
-      upsert: mockUpsert,
-      findUnique: mockFindUnique,
-      findMany: mockFindMany,
-      deleteMany: mockDeleteMany,
+mock.module("@rezics/search", () => ({
+  PROGRESS_BUCKET_COUNT: 10,
+  removeProgress: mockRemoveProgress,
+  syncProgress: mockSyncProgress,
+}));
+
+installPrismaClientMock();
+Object.assign(prismaMock, {
+  userUnitProgress: {
+    upsert: mockUpsert,
+    findUnique: mockFindUnique,
+    findMany: mockFindMany,
+    deleteMany: mockDeleteMany,
+  },
+});
+
+mock.module("@/meili/search-client", () => ({
+  searchClient: {
+    progressIndex: {
+      search: mockProgressSearch,
     },
   },
 }));
@@ -46,9 +63,17 @@ describe("ProgressService", () => {
     mockFindUnique.mockClear();
     mockFindMany.mockClear();
     mockDeleteMany.mockClear();
+    mockSyncProgress.mockClear();
+    mockRemoveProgress.mockClear();
+    mockProgressSearch.mockClear();
     mockUpsert.mockResolvedValue(baseRow);
     mockFindUnique.mockResolvedValue(baseRow);
     mockFindMany.mockResolvedValue([]);
+    mockProgressSearch.mockResolvedValue({
+      estimatedTotalHits: 0,
+      hits: [],
+      facetDistribution: {},
+    });
   });
 
   test("first-time upsert creates defaults and additive time", async () => {
@@ -65,6 +90,7 @@ describe("ProgressService", () => {
     expect(args.create.totalTimeMs).toBe(2500n);
     expect(args.create.lastPosition).toBeNull();
     expect(args.update.totalTimeMs).toEqual({ increment: 2500n });
+    expect(mockSyncProgress).toHaveBeenCalledWith(expect.anything(), baseRow);
   });
 
   test("partial upsert preserves untouched fields in update branch", async () => {
@@ -126,6 +152,11 @@ describe("ProgressService", () => {
     expect(mockDeleteMany).toHaveBeenCalledWith({
       where: { userId: "user-1", unitId: "unit-1" },
     });
+    expect(mockRemoveProgress).toHaveBeenCalledWith(
+      expect.anything(),
+      "user-1",
+      "unit-1",
+    );
   });
 
   test("list clamps limit and returns next cursor", async () => {
@@ -144,5 +175,33 @@ describe("ProgressService", () => {
     expect(args.take).toBe(2);
     expect(result.rows).toHaveLength(1);
     expect(result.nextCursor).toBeTruthy();
+  });
+
+  test("progressStats reads Meilisearch facets and fills missing buckets", async () => {
+    mockProgressSearch.mockResolvedValue({
+      estimatedTotalHits: 4,
+      hits: [],
+      facetDistribution: {
+        status: { ACTIVE: 3, COMPLETED: 1 },
+        progressBucket: { "0": 1, "2": 1, "8": 1, "9": 1 },
+      },
+    });
+    const { progressService } = await import("./progress.service");
+
+    const result = await progressService.progressStats("unit-1");
+
+    expect(mockProgressSearch).toHaveBeenCalledWith("", {
+      filter: ['unitId = "unit-1"'],
+      facets: ["status", "progressBucket"],
+      limit: 0,
+    });
+    expect(result.viewerCount).toBe(4);
+    expect(result.statusCounts).toEqual({
+      BACKLOG: 0,
+      ACTIVE: 3,
+      COMPLETED: 1,
+      DROPPED: 0,
+    });
+    expect(result.bucketCounts).toEqual([1, 0, 1, 0, 0, 0, 0, 0, 1, 1]);
   });
 });

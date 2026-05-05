@@ -13,6 +13,7 @@ export async function initMeiliSearch(): Promise<void> {
     searchClient.initUserIndex(),
     searchClient.initPostIndex(),
     searchClient.initRealmIndex(),
+    searchClient.initProgressIndex(),
   ]);
 
   console.log("MeiliSearch indexes initialized.");

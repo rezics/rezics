@@ -8,6 +8,11 @@ import type {
 import { readCoverUrlFromExtra } from "@rezics/contract";
 import { prisma, UnitType } from "@rezics/server";
 import type { SearchClient } from "./client";
+import {
+  buildProgressDocument,
+  progressDocumentId,
+  type UserUnitProgressRow,
+} from "./progress";
 
 function pickCoverUrlFromTranslations(
   defaultLanguage: string | null | undefined,
@@ -30,6 +35,8 @@ function pickCoverUrlFromTranslations(
 }
 
 const BATCH_SIZE = 5000;
+const PROGRESS_SYNC_ATTEMPTS = 3;
+const PROGRESS_SYNC_RETRY_BASE_MS = 100;
 
 const INDEXABLE_TYPES = [
   UnitType.BOOK,
@@ -38,6 +45,45 @@ const INDEXABLE_TYPES = [
   UnitType.SHELF,
   UnitType.LINK,
 ];
+
+function describeError(error: unknown): Record<string, unknown> {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return { message: String(error) };
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function runProgressSyncWithRetry(
+  operation: () => Promise<unknown>,
+  context: { action: "sync" | "remove"; userId: string; unitId: string },
+): Promise<void> {
+  for (let attempt = 1; attempt <= PROGRESS_SYNC_ATTEMPTS; attempt += 1) {
+    try {
+      await operation();
+      return;
+    } catch (error) {
+      if (attempt === PROGRESS_SYNC_ATTEMPTS) {
+        console.error("progress search sync exhausted", {
+          ...context,
+          attempts: PROGRESS_SYNC_ATTEMPTS,
+          error: describeError(error),
+        });
+        return;
+      }
+
+      await delay(PROGRESS_SYNC_RETRY_BASE_MS * attempt);
+    }
+  }
+}
 
 const contentInclude = {
   translations: true,
@@ -212,6 +258,31 @@ export async function syncAllContent(client: SearchClient) {
   }
 
   return { message: "syncAllContent success", totalSynced: total };
+}
+
+// ANCHOR: Progress sync functions
+
+export async function syncProgress(
+  client: SearchClient,
+  row: UserUnitProgressRow,
+): Promise<void> {
+  const doc = buildProgressDocument(row);
+  await runProgressSyncWithRetry(() => client.addOrUpdateProgress([doc]), {
+    action: "sync",
+    userId: row.userId,
+    unitId: row.unitId,
+  });
+}
+
+export async function removeProgress(
+  client: SearchClient,
+  userId: string,
+  unitId: string,
+): Promise<void> {
+  await runProgressSyncWithRetry(
+    () => client.deleteProgress(progressDocumentId(userId, unitId)),
+    { action: "remove", userId, unitId },
+  );
 }
 
 // ANCHOR: Incremental single-unit sync

@@ -1,6 +1,16 @@
-import type { UnitProgressListResponse } from "@rezics/contract";
+import {
+  userUnitProgressStatusValues,
+  type UnitProgressListResponse,
+  type UnitProgressStatsResponse,
+} from "@rezics/contract";
+import {
+  PROGRESS_BUCKET_COUNT,
+  removeProgress,
+  syncProgress,
+} from "@rezics/search";
 import type { Prisma, UserUnitProgress } from "#/prisma/client";
 import { prisma, UserUnitProgressStatus } from "#/prisma/client";
+import { searchClient } from "@/meili/search-client";
 import { AppError } from "@/utils/errors";
 import { mapProgressToDTO } from "./progress.mapper";
 import type {
@@ -40,6 +50,13 @@ function validateInput(input: ProgressUpsertInput): void {
   if (input.addTimeMs !== undefined && input.addTimeMs < 0) {
     throw new AppError(400, "addTimeMs must be non-negative");
   }
+}
+
+function readFacetCount(
+  distribution: Record<string, number> | undefined,
+  key: string | number,
+): number {
+  return distribution?.[String(key)] ?? 0;
 }
 
 export class ProgressService {
@@ -91,11 +108,15 @@ export class ProgressService {
         : {}),
     };
 
-    return prisma.userUnitProgress.upsert({
+    const row = await prisma.userUnitProgress.upsert({
       where: { userId_unitId: { userId, unitId } },
       create: createData,
       update: updateData,
     });
+
+    void syncProgress(searchClient, row);
+
+    return row;
   }
 
   async get(userId: string, unitId: string): Promise<UserUnitProgress | null> {
@@ -158,6 +179,37 @@ export class ProgressService {
     await prisma.userUnitProgress.deleteMany({
       where: { userId, unitId },
     });
+
+    void removeProgress(searchClient, userId, unitId);
+  }
+
+  async progressStats(unitId: string): Promise<UnitProgressStatsResponse> {
+    const response = await searchClient.progressIndex.search("", {
+      filter: [`unitId = "${unitId}"`],
+      facets: ["status", "progressBucket"],
+      limit: 0,
+    });
+    const facets = response.facetDistribution ?? {};
+    const statusFacet = facets["status"] as Record<string, number> | undefined;
+    const bucketFacet = facets["progressBucket"] as
+      | Record<string, number>
+      | undefined;
+    const statusCounts = Object.fromEntries(
+      userUnitProgressStatusValues.map((status) => [
+        status,
+        readFacetCount(statusFacet, status),
+      ]),
+    ) as UnitProgressStatsResponse["statusCounts"];
+    const bucketCounts = Array.from(
+      { length: PROGRESS_BUCKET_COUNT },
+      (_, bucket) => readFacetCount(bucketFacet, bucket),
+    );
+
+    return {
+      viewerCount: response.estimatedTotalHits ?? response.hits.length,
+      statusCounts,
+      bucketCounts,
+    };
   }
 }
 

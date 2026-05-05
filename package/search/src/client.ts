@@ -1,4 +1,5 @@
 import { type Index, MeiliSearch } from "meilisearch";
+import { PROGRESS_INDEX_NAME } from "./progress";
 
 export interface MeiliConfig {
   host: string;
@@ -12,6 +13,7 @@ export class SearchClient {
   readonly userIndex: Index;
   readonly postIndex: Index;
   readonly realmIndex: Index;
+  readonly progressIndex: Index;
 
   constructor(config: MeiliConfig) {
     this.meili = new MeiliSearch({ host: config.host, apiKey: config.apiKey });
@@ -20,6 +22,7 @@ export class SearchClient {
     this.userIndex = this.meili.index("users");
     this.postIndex = this.meili.index("posts");
     this.realmIndex = this.meili.index("realms");
+    this.progressIndex = this.meili.index(PROGRESS_INDEX_NAME);
   }
 
   async checkHealth(): Promise<boolean> {
@@ -112,6 +115,15 @@ export class SearchClient {
     this.realmIndex.addDocuments([], { primaryKey: "id" });
   }
 
+  async initProgressIndex(): Promise<void> {
+    await this.progressIndex.updateSettings({
+      searchableAttributes: [],
+      filterableAttributes: ["unitId", "userId", "status", "progressBucket"],
+      sortableAttributes: ["lastSeenAt"],
+    });
+    await this.progressIndex.addDocuments([], { primaryKey: "id" });
+  }
+
   // ANCHOR: Content document operations
 
   addOrUpdateContent(docs: any[]) {
@@ -185,6 +197,18 @@ export class SearchClient {
   }
   deleteAllRealms() {
     return this.realmIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: Progress document operations
+
+  addOrUpdateProgress(docs: any[]) {
+    return this.progressIndex.addDocuments(docs);
+  }
+  deleteProgress(id: string) {
+    return this.progressIndex.deleteDocument(id);
+  }
+  deleteAllProgress() {
+    return this.progressIndex.deleteAllDocuments();
   }
 
   // ANCHOR: Index deletion
