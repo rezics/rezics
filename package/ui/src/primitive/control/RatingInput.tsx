@@ -152,6 +152,7 @@ export function RatingInput({
       {stars.map((star) => {
         const filled = value !== null && star <= value;
         return (
+          // biome-ignore lint/a11y/useSemanticElements: the star rating uses roving radio semantics on custom button controls.
           <button
             key={star}
             type="button"

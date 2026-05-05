@@ -34,7 +34,9 @@ export function Logo({
   const height = (size * VIEWBOX_HEIGHT) / VIEWBOX_WIDTH;
   return (
     <svg
-      role={role}
+      role={title ? role : "presentation"}
+      aria-label={title || undefined}
+      aria-hidden={title ? undefined : true}
       width={size}
       height={height}
       viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}

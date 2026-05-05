@@ -68,10 +68,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               </p>
 
               <TooltipProvider>
-                <div
-                  className="flex flex-row gap-2 mt-4"
-                  aria-label={t("layout.footer.social.aria")}
-                >
+                <div className="flex flex-row gap-2 mt-4">
                   <Tooltip>
                     <TooltipTrigger
                       render={

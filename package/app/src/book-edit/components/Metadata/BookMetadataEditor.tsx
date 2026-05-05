@@ -39,14 +39,15 @@ function FlagWithTooltip({
 }) {
   return (
     <div className="flex items-center gap-1">
-      <label className="flex items-center gap-2 text-sm cursor-pointer">
+      <div className="flex items-center gap-2 text-sm">
         <Checkbox
           checked={checked}
           onCheckedChange={(c) => onCheckedChange(!!c)}
           disabled={disabled}
+          aria-label={label}
         />
         {label}
-      </label>
+      </div>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger

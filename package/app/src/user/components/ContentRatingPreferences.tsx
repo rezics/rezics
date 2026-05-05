@@ -74,34 +74,29 @@ export const ContentRatingPreferences: FC = () => {
 
       <div className="flex flex-col gap-3">
         {BASELINE_RATINGS.map((rating) => (
-          <div
-            key={rating}
-            className="flex items-center justify-between gap-2"
-          >
-            <label className="flex items-center gap-2 cursor-default">
-              <Checkbox checked disabled />
+          <div key={rating} className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Checkbox checked disabled aria-label={rating} />
               <span className="flex flex-row items-center gap-2">
                 <RatingBadge rating={rating} />
                 <span className="text-sm text-text-secondary">
                   {t("settings.content_rating.always_on", "Always on")}
                 </span>
               </span>
-            </label>
+            </div>
           </div>
         ))}
 
         {OPT_IN_RATINGS.map((rating) => (
-          <div
-            key={rating}
-            className="flex items-center justify-between gap-2"
-          >
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div key={rating} className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
               <Checkbox
                 checked={optedIn.includes(rating)}
                 onCheckedChange={(checked) =>
                   handleToggle(rating, checked === true)
                 }
                 disabled={updateSettings.isPending}
+                aria-label={rating}
               />
               <span className="flex flex-row items-center gap-2">
                 <RatingBadge rating={rating} />
@@ -114,7 +109,7 @@ export const ContentRatingPreferences: FC = () => {
                   )}
                 </span>
               </span>
-            </label>
+            </div>
           </div>
         ))}
       </div>

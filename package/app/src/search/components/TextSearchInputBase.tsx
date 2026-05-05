@@ -1,6 +1,6 @@
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 export type TextSearchInputBaseProps = {
   value: string;
@@ -25,10 +25,14 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
   startAdornmentIcon,
 }) => {
   const [focused, setFocused] = useState(false);
+  const inputId = useId();
   return (
     <div className={className}>
       {label && (
-        <label className="mb-1 block text-sm text-text-secondary">
+        <label
+          htmlFor={inputId}
+          className="mb-1 block text-sm text-text-secondary"
+        >
           {label}
         </label>
       )}
@@ -42,6 +46,7 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
           </div>
         )}
         <Input
+          id={inputId}
           autoComplete="off"
           placeholder={placeholder ?? "Find anything"}
           value={value}

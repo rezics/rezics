@@ -156,16 +156,14 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
             <p className="text-sm font-medium mb-2">Scopes</p>
             <div className="flex flex-col gap-2">
               {AVAILABLE_SCOPES.map((s) => (
-                <label
-                  key={s.label}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
+                <div key={s.label} className="flex items-center gap-2">
                   <Checkbox
                     checked={selectedScopes.has(s.label)}
                     onCheckedChange={() => handleToggleScope(s.label)}
+                    aria-label={s.label}
                   />
                   <span className="text-sm">{s.label}</span>
-                </label>
+                </div>
               ))}
             </div>
           </div>

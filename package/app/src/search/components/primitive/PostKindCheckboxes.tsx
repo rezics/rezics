@@ -26,21 +26,17 @@ export const PostKindCheckboxes: React.FC<PostKindCheckboxesProps> = ({
 
   return (
     <div className="flex flex-col gap-1">
-      {label && (
-        <span className="text-sm font-medium opacity-60">{label}</span>
-      )}
+      {label && <span className="text-sm font-medium opacity-60">{label}</span>}
       <div className="flex flex-wrap gap-1">
         {POST_KIND_OPTIONS.map((kind) => (
-          <label
-            key={kind}
-            className="m-0 inline-flex items-center gap-2 cursor-pointer"
-          >
+          <div key={kind} className="m-0 inline-flex items-center gap-2">
             <Checkbox
               checked={value.includes(kind)}
               onCheckedChange={(checked) => toggle(kind, checked === true)}
+              aria-label={kind}
             />
             <span className="text-sm">{kind}</span>
-          </label>
+          </div>
         ))}
       </div>
     </div>

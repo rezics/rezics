@@ -45,6 +45,8 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
   };
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: whole card click is pointer-only; nested actions and links provide keyboard access.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard users can open via nested controls or route links.
     <div
       className="py-3 border-b border-border-whisper cursor-pointer"
       onClick={handleCardClick}

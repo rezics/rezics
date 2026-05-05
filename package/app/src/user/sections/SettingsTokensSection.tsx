@@ -159,10 +159,7 @@ export const SettingsTokensSection: FC = () => {
       />
 
       {/* Edit dialog */}
-      <Dialog
-        open={!!editToken}
-        onOpenChange={(o) => !o && setEditToken(null)}
-      >
+      <Dialog open={!!editToken} onOpenChange={(o) => !o && setEditToken(null)}>
         <DialogContent className="sm:max-w-[640px]">
           <DialogHeader>
             <DialogTitle>Edit Token</DialogTitle>
@@ -186,16 +183,14 @@ export const SettingsTokensSection: FC = () => {
               <p className="text-sm font-medium mb-2">Scopes</p>
               <div className="flex flex-col gap-2">
                 {AVAILABLE_SCOPES.map((s) => (
-                  <label
-                    key={s.label}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <div key={s.label} className="flex items-center gap-2">
                     <Checkbox
                       checked={editScopes.has(s.label)}
                       onCheckedChange={() => handleToggleEditScope(s.label)}
+                      aria-label={s.label}
                     />
                     <span className="text-sm">{s.label}</span>
-                  </label>
+                  </div>
                 ))}
               </div>
             </div>

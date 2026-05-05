@@ -140,8 +140,15 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
 
   return (
     <ReactionBarProvider value={ctx}>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: delegated click handling lets nested actions stop propagation. */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: the container itself is not an activation target. */}
       <div
-        className={cn("flex flex-row items-center", gapClass, wrapClass, className)}
+        className={cn(
+          "flex flex-row items-center",
+          gapClass,
+          wrapClass,
+          className,
+        )}
         onClick={handleBarClick}
       >
         {visible.map((token) => {

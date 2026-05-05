@@ -118,22 +118,26 @@ export function CollectionModal({
                 </p>
               ) : (
                 filteredShelves.map((shelf) => (
-                  <li
-                    key={shelf.unitId}
-                    className="flex items-center gap-2 py-1 cursor-pointer"
-                    onClick={() => toggleShelf(shelf.unitId)}
-                  >
-                    <Checkbox
-                      checked={selectedShelves.has(shelf.unitId)}
-                      tabIndex={-1}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">
-                        {shelf.title ?? "Untitled"}
-                      </p>
-                      <p className="text-xs text-text-secondary">
-                        {shelf.itemCount} items
-                      </p>
+                  <li key={shelf.unitId}>
+                    {/* biome-ignore lint/a11y/noStaticElementInteractions: row click mirrors the checkbox for pointer users. */}
+                    {/* biome-ignore lint/a11y/useKeyWithClickEvents: keyboard users can toggle the checkbox directly. */}
+                    <div
+                      className="flex items-center gap-2 py-1 cursor-pointer"
+                      onClick={() => toggleShelf(shelf.unitId)}
+                    >
+                      <Checkbox
+                        checked={selectedShelves.has(shelf.unitId)}
+                        tabIndex={-1}
+                        aria-label={`Select ${shelf.title ?? "Untitled"}`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">
+                          {shelf.title ?? "Untitled"}
+                        </p>
+                        <p className="text-xs text-text-secondary">
+                          {shelf.itemCount} items
+                        </p>
+                      </div>
                     </div>
                   </li>
                 ))
@@ -142,13 +146,14 @@ export function CollectionModal({
 
             {/* Dual collection mode for reviews */}
             {isReview && (
-              <label className="flex items-center gap-2 cursor-pointer">
+              <div className="flex items-center gap-2">
                 <Checkbox
                   checked={independent}
                   onCheckedChange={(c) => setIndependent(c === true)}
+                  aria-label="Collect as independent unit"
                 />
                 <span className="text-sm">Collect as independent unit</span>
-              </label>
+              </div>
             )}
           </div>
         )}

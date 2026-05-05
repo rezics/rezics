@@ -14,12 +14,13 @@ export const LicensedToggle: React.FC<LicensedToggleProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <label className="m-0 inline-flex items-center gap-2 cursor-pointer">
+    <div className="m-0 inline-flex items-center gap-2">
       <Checkbox
         checked={!!value}
         onCheckedChange={(checked) => onChange(checked === true || undefined)}
+        aria-label={t("search.tooltips.licensed")}
       />
       <IsLicensedInfo tooltipTitle={t("search.tooltips.licensed")} />
-    </label>
+    </div>
   );
 };

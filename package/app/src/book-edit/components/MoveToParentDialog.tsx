@@ -81,6 +81,7 @@ function TreeNode({
 
   return (
     <div>
+      {/* biome-ignore lint/a11y/useSemanticElements: this row is keyboard-accessible and contains a nested expand button. */}
       <div
         role="button"
         tabIndex={0}

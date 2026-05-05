@@ -26,10 +26,9 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
   };
 
   return (
-    <div
-      role="button"
+    <button
+      type="button"
       aria-label={isCollapsed ? "Expand thread" : "Collapse thread"}
-      tabIndex={0}
       onClick={handleClick}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -49,6 +48,6 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
           hovered ? "bg-brand-fill" : "bg-border-whisper",
         ].join(" ")}
       />
-    </div>
+    </button>
   );
 };

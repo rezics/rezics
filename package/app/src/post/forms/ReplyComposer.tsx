@@ -113,10 +113,7 @@ function RealmPostTagPicker({
     ? (realm?.extra?.tagTree as TagTreeNode[] | undefined)
     : undefined;
   const quickPicks = useMemo(() => flattenTagTree(tagTree), [tagTree]);
-  const selectedSet = useMemo(
-    () => new Set(selectedTagIds),
-    [selectedTagIds],
-  );
+  const selectedSet = useMemo(() => new Set(selectedTagIds), [selectedTagIds]);
 
   useEffect(() => {
     onSelectedTagIdsChange(tagIds ?? []);
@@ -261,182 +258,172 @@ function RealmPostTagPicker({
   );
 }
 
-export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>(
-  function ReplyComposer(
-    props,
+export const ReplyComposer = forwardRef<
+  ReplyComposerHandle,
+  ReplyComposerProps
+>(function ReplyComposer(props, ref) {
+  const {
+    mode,
+    placeholder = "Add a reply…",
+    autoFocus = false,
+    onSubmitted,
+    onCancelled,
+  } = props;
+  const isRealmPostMode = "realmUnitIds" in props;
+  const realmUnitIds = isRealmPostMode ? props.realmUnitIds : undefined;
+  const targetUnitId = isRealmPostMode ? undefined : props.targetUnitId;
+  const parentPostUnitId = isRealmPostMode ? undefined : props.parentPostUnitId;
+  const initialTagIds = props.tagIds;
+  const invalidMode =
+    Boolean(realmUnitIds?.length) &&
+    Boolean(
+      (props as Partial<ReplyComposerReplyModeProps>).targetUnitId ||
+        (props as Partial<ReplyComposerReplyModeProps>).parentPostUnitId,
+    );
+  const startsExpanded = mode === "expanded" || autoFocus;
+  const [expanded, setExpanded] = useState<boolean>(startsExpanded);
+  const [body, setBody] = useState("");
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
+    initialTagIds ?? [],
+  );
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const shouldRetainOnBlur = useBlurRetain(body);
+  const mutation = useCreatePostMutation();
+
+  const resize = useMemo(
+    () => ({ height: 150, minHeight: 100, maxHeight: 400 }),
+    [],
+  );
+
+  const focusEditor = useCallback(() => {
+    queueMicrotask(() => {
+      const el = triggerRef.current?.querySelector<HTMLElement>(
+        "textarea, [contenteditable='true']",
+      );
+      el?.focus();
+    });
+  }, []);
+
+  useImperativeHandle(
     ref,
-  ) {
-    const {
-      mode,
-      placeholder = "Add a reply…",
-      autoFocus = false,
-      onSubmitted,
-      onCancelled,
-    } = props;
-    const isRealmPostMode = "realmUnitIds" in props;
-    const realmUnitIds = isRealmPostMode ? props.realmUnitIds : undefined;
-    const targetUnitId = isRealmPostMode ? undefined : props.targetUnitId;
-    const parentPostUnitId = isRealmPostMode
-      ? undefined
-      : props.parentPostUnitId;
-    const initialTagIds = props.tagIds;
-    const invalidMode =
-      Boolean(realmUnitIds?.length) &&
-      Boolean((props as Partial<ReplyComposerReplyModeProps>).targetUnitId ||
-        (props as Partial<ReplyComposerReplyModeProps>).parentPostUnitId);
-    const startsExpanded = mode === "expanded" || autoFocus;
-    const [expanded, setExpanded] = useState<boolean>(startsExpanded);
-    const [body, setBody] = useState("");
-    const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
-      initialTagIds ?? [],
-    );
-    const triggerRef = useRef<HTMLDivElement>(null);
-    const shouldRetainOnBlur = useBlurRetain(body);
-    const mutation = useCreatePostMutation();
+    () => ({
+      focus: () => {
+        setExpanded(true);
+        focusEditor();
+      },
+    }),
+    [focusEditor],
+  );
 
-    const resize = useMemo(
-      () => ({ height: 150, minHeight: 100, maxHeight: 400 }),
-      [],
-    );
-
-    const focusEditor = useCallback(() => {
-      queueMicrotask(() => {
-        const el =
-          triggerRef.current?.querySelector<HTMLElement>(
-            "textarea, [contenteditable='true']",
-          );
-        el?.focus();
-      });
-    }, []);
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        focus: () => {
-          setExpanded(true);
-          focusEditor();
-        },
-      }),
-      [focusEditor],
-    );
-
-    useEffect(() => {
-      if (invalidMode) {
-        console.error(
-          "ReplyComposer received both reply props and realmUnitIds.",
-        );
-      }
-    }, [invalidMode]);
-
-    useEffect(() => {
-      if (isRealmPostMode && expanded) focusEditor();
-    }, [expanded, focusEditor, isRealmPostMode]);
-
-    const reset = () => {
-      setBody("");
-      if (mode === "progressive") setExpanded(false);
-    };
-
-    const handleSubmit = () => {
-      const trimmed = body.trim();
-      if (!trimmed) return;
-      const activeRealmUnitIds = realmUnitIds ?? [];
-      const payload = isRealmPostMode
-        ? {
-            realmUnitIds: activeRealmUnitIds,
-            tagIds: selectedTagIds,
-            kind: PostKind.POST,
-            body: trimmed,
-          }
-        : {
-            targetUnitId,
-            parentPostUnitId,
-            kind: PostKind.POST,
-            body: trimmed,
-          };
-
-      mutation.mutate(
-        payload,
-        {
-          onSuccess: () => {
-            reset();
-            onSubmitted?.();
-          },
-        },
-      );
-    };
-
-    const handleCancel = () => {
-      if (shouldRetainOnBlur()) return;
-      reset();
-      onCancelled?.();
-    };
-
-    const handleProgressiveFocus = () => {
-      setExpanded(true);
-    };
-
+  useEffect(() => {
     if (invalidMode) {
-      return (
-        <div className="rounded-md bg-error-fill/10 p-3 text-sm leading-ui text-error-text">
-          Invalid composer configuration.
-        </div>
+      console.error(
+        "ReplyComposer received both reply props and realmUnitIds.",
       );
     }
+  }, [invalidMode]);
 
-    if (mode === "progressive" && !expanded) {
-      return (
-        <div ref={triggerRef} onClick={(e) => e.stopPropagation()}>
-          <Input
-            placeholder={placeholder}
-            onFocus={handleProgressiveFocus}
-            onClick={handleProgressiveFocus}
-          />
-        </div>
-      );
-    }
+  useEffect(() => {
+    if (isRealmPostMode && expanded) focusEditor();
+  }, [expanded, focusEditor, isRealmPostMode]);
 
+  const reset = () => {
+    setBody("");
+    if (mode === "progressive") setExpanded(false);
+  };
+
+  const handleSubmit = () => {
+    const trimmed = body.trim();
+    if (!trimmed) return;
+    const activeRealmUnitIds = realmUnitIds ?? [];
+    const payload = isRealmPostMode
+      ? {
+          realmUnitIds: activeRealmUnitIds,
+          tagIds: selectedTagIds,
+          kind: PostKind.POST,
+          body: trimmed,
+        }
+      : {
+          targetUnitId,
+          parentPostUnitId,
+          kind: PostKind.POST,
+          body: trimmed,
+        };
+
+    mutation.mutate(payload, {
+      onSuccess: () => {
+        reset();
+        onSubmitted?.();
+      },
+    });
+  };
+
+  const handleCancel = () => {
+    if (shouldRetainOnBlur()) return;
+    reset();
+    onCancelled?.();
+  };
+
+  const handleProgressiveFocus = () => {
+    setExpanded(true);
+  };
+
+  if (invalidMode) {
     return (
-      <div
-        ref={triggerRef}
-        onClick={(e) => e.stopPropagation()}
-        className="flex flex-col gap-2"
-      >
-        <RezicsMarkdownEditor
-          value={body}
-          onChange={setBody}
-          resize={resize}
-        />
-        {isRealmPostMode && (realmUnitIds?.length ?? 0) > 0 && (
-          <RealmPostTagPicker
-            realmUnitIds={realmUnitIds ?? []}
-            tagIds={initialTagIds}
-            selectedTagIds={selectedTagIds}
-            onSelectedTagIdsChange={setSelectedTagIds}
-          />
-        )}
-        <div className="flex flex-row justify-end gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleCancel}
-            disabled={mutation.isPending}
-          >
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSubmit}
-            disabled={mutation.isPending || !body.trim()}
-          >
-            {mutation.isPending
-              ? "Posting…"
-              : isRealmPostMode
-                ? "Post"
-                : "Reply"}
-          </Button>
-        </div>
+      <div className="rounded-md bg-error-fill/10 p-3 text-sm leading-ui text-error-text">
+        Invalid composer configuration.
       </div>
     );
-  },
-);
+  }
+
+  if (mode === "progressive" && !expanded) {
+    return (
+      // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents parent row click propagation around the input.
+      // biome-ignore lint/a11y/useKeyWithClickEvents: the wrapper itself is not an activation target.
+      <div ref={triggerRef} onClick={(e) => e.stopPropagation()}>
+        <Input
+          placeholder={placeholder}
+          onFocus={handleProgressiveFocus}
+          onClick={handleProgressiveFocus}
+        />
+      </div>
+    );
+  }
+
+  return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents parent row click propagation around the editor.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: the wrapper itself is not an activation target.
+    <div
+      ref={triggerRef}
+      onClick={(e) => e.stopPropagation()}
+      className="flex flex-col gap-2"
+    >
+      <RezicsMarkdownEditor value={body} onChange={setBody} resize={resize} />
+      {isRealmPostMode && (realmUnitIds?.length ?? 0) > 0 && (
+        <RealmPostTagPicker
+          realmUnitIds={realmUnitIds ?? []}
+          tagIds={initialTagIds}
+          selectedTagIds={selectedTagIds}
+          onSelectedTagIdsChange={setSelectedTagIds}
+        />
+      )}
+      <div className="flex flex-row justify-end gap-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleCancel}
+          disabled={mutation.isPending}
+        >
+          Cancel
+        </Button>
+        <Button
+          size="sm"
+          onClick={handleSubmit}
+          disabled={mutation.isPending || !body.trim()}
+        >
+          {mutation.isPending ? "Posting…" : isRealmPostMode ? "Post" : "Reply"}
+        </Button>
+      </div>
+    </div>
+  );
+});

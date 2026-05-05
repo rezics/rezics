@@ -12,11 +12,9 @@ export interface TranslationFieldsEditorProps {
   disabled?: boolean;
 }
 
-export const TranslationFieldsEditor: React.FC<TranslationFieldsEditorProps> = ({
-  draft,
-  onChange,
-  disabled,
-}) => {
+export const TranslationFieldsEditor: React.FC<
+  TranslationFieldsEditorProps
+> = ({ draft, onChange, disabled }) => {
   const { t } = useTranslation();
 
   return (
@@ -61,7 +59,7 @@ export const TranslationFieldsEditor: React.FC<TranslationFieldsEditorProps> = (
       </div>
 
       <div className="space-y-1">
-        <label className="text-sm">{t("book.description")}</label>
+        <span className="text-sm">{t("book.description")}</span>
         <RezicsMarkdownEditor
           value={draft.description}
           onChange={(value) => onChange("description", value)}

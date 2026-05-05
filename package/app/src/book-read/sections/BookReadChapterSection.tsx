@@ -52,9 +52,11 @@ export const BookReadChapterPage: React.FC = () => {
         )}
       </div>
       <div id="markdown-chapter-content" className="markdown-body">
-        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: intentional HTML rendering */}
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: delegated click handler only intercepts links in rendered markdown. */}
+        {/* biome-ignore lint/a11y/useKeyWithClickEvents: markdown links remain keyboard-accessible as native anchors. */}
         <div
           onClick={handleExternalLinkClick}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional HTML rendering
           dangerouslySetInnerHTML={{ __html: chapterHtml }}
         />
       </div>

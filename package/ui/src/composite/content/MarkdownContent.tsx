@@ -12,6 +12,8 @@ export function MarkdownContent({
   const chapterHtml = md.render(content || "");
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: delegated click handler only intercepts links in rendered markdown.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: markdown links remain keyboard-accessible as native anchors.
     <div
       className={className}
       onClick={handleExternalLinkClick}

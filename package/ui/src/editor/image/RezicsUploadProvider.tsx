@@ -83,7 +83,8 @@ function UploadContent({ onInsert }: UploadContentProps) {
 
   return (
     <div className="flex flex-col gap-3 p-1" onPaste={handlePaste}>
-      <div
+      <button
+        type="button"
         className={[
           "flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 cursor-pointer",
           "transition-colors duration-200",
@@ -106,10 +107,7 @@ function UploadContent({ onInsert }: UploadContentProps) {
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <CameraAltIcon
-              size={32}
-              color="var(--colors-text-tertiary)"
-            />
+            <CameraAltIcon size={32} color="var(--colors-text-tertiary)" />
             <p className="text-sm text-rezics-fg-muted">
               Drop image here, paste, or click to browse
             </p>
@@ -118,7 +116,7 @@ function UploadContent({ onInsert }: UploadContentProps) {
             </p>
           </div>
         )}
-      </div>
+      </button>
 
       <input
         ref={inputRef}

@@ -20,6 +20,8 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
     size === "compact" ? "text-xs font-semibold" : "text-sm font-semibold";
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents the parent post card click when nested author content is used.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: the container itself is not an activation target.
     <div
       className="flex items-center gap-2"
       onClick={(e) => e.stopPropagation()}

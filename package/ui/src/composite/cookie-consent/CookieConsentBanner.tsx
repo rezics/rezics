@@ -27,10 +27,7 @@ export const CookieConsentBanner: FC<CookieConsentBannerProps> = ({
 }) => {
   return (
     <section aria-label={title}>
-      <div
-        role="region"
-        className="flex flex-col gap-4 rounded-lg border border-border-whisper p-4 bg-rezics-surface-base"
-      >
+      <section className="flex flex-col gap-4 rounded-lg border border-border-whisper p-4 bg-rezics-surface-base">
         <div>
           <h2 className="text-lg font-medium">{title}</h2>
           <p className="text-sm text-rezics-fg-muted">{body}</p>
@@ -54,7 +51,7 @@ export const CookieConsentBanner: FC<CookieConsentBannerProps> = ({
             {acceptLabel}
           </Button>
         </div>
-      </div>
+      </section>
     </section>
   );
 };

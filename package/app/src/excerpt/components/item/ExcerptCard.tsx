@@ -1,14 +1,17 @@
-import { Avatar, AvatarFallback, AvatarImage, Card, CardContent } from "@rezics/ui/shadcn";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Card,
+  CardContent,
+} from "@rezics/ui/shadcn";
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { cn } from "@/shared/utils/css-util";
-import {
-  excerptCardActions,
-  excerptPolicy,
-} from "../../models/excerptPolicy";
+import { excerptCardActions, excerptPolicy } from "../../models/excerptPolicy";
 import { Quote as FormatQuoteRoundedIcon } from "lucide-react";
 
 export interface ExcerptCardProps {
@@ -65,12 +68,11 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
     >
       <CardContent>
         <div className="flex items-start gap-2">
-          <FormatQuoteRoundedIcon
-            className="h-4 w-4 text-text-secondary mt-1 shrink-0"
-          />
+          <FormatQuoteRoundedIcon className="h-4 w-4 text-text-secondary mt-1 shrink-0" />
 
           <div className="min-w-0 flex-1">
             {excerpt.user && (
+              // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents the parent card click when nested author content is used.
               <div
                 className="flex items-center gap-2 mb-1"
                 onClick={(e) => e.stopPropagation()}

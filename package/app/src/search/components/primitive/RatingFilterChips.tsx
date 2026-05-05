@@ -58,9 +58,9 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
                     )
                   : "";
             const label = (
-              <label
+              <div
                 key={`rating-${rating}-label`}
-                className="m-0 inline-flex items-center gap-2 cursor-pointer"
+                className="m-0 inline-flex items-center gap-2"
               >
                 <Checkbox
                   checked={selected.has(rating)}
@@ -68,11 +68,12 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
                   onCheckedChange={(checked) =>
                     toggle(rating, checked === true)
                   }
+                  aria-label={t(`rating.tier.${rating}`, rating)}
                 />
                 <span className="text-sm">
                   {t(`rating.tier.${rating}`, rating)}
                 </span>
-              </label>
+              </div>
             );
             return hint ? (
               <Tooltip key={rating}>

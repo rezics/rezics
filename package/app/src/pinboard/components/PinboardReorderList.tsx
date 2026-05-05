@@ -157,26 +157,25 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <div
+        <ul
           className="flex flex-col gap-2"
-          role="list"
           aria-label={t("pinboard.reorder.list")}
         >
           {ids.map((id) => {
             const entry = byId.get(id);
             if (!entry) return null;
             return (
-              <div key={id} role="listitem">
+              <li key={id}>
                 <SortableRow
                   entry={entry}
                   stale={staleSet.has(id)}
                   onEdit={onEdit}
                   onDelete={onDelete}
                 />
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </SortableContext>
     </DndContext>
   );
