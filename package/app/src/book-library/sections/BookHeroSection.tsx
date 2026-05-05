@@ -133,11 +133,14 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   }
 
   return (
-    <div
-      className="bg-cover bg-center relative"
-      style={{ backgroundImage: `url(${coverUrl})` }}
-    >
-      <div className="bg-black/65 backdrop-blur-md w-full">
+    <div className="relative overflow-hidden bg-black">
+      <div
+        aria-hidden="true"
+        className="absolute inset-[-24px] bg-cover bg-center blur-md scale-105"
+        style={{ backgroundImage: `url(${coverUrl})` }}
+      />
+      <div aria-hidden="true" className="absolute inset-0 bg-black/65" />
+      <div className="relative w-full">
         <div className="container mx-auto max-w-[1280px] px-4 py-8 lg:py-10">
           {/* Title row + inline score (count stacks below the score). */}
           <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
@@ -175,7 +178,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
             </div>
 
             {hasReview && (
-              <div className="flex-1 min-w-0 rounded-xl p-6 bg-white/10 backdrop-blur-sm flex">
+              <div className="flex-1 min-w-0 rounded-xl p-6 bg-white/10 flex">
                 <BookHeroFeaturedReview bookId={bookId} />
               </div>
             )}
