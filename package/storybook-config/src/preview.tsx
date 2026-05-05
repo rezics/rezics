@@ -4,19 +4,10 @@ import { GLOBALS_UPDATED } from "storybook/internal/core-events";
 import { addons } from "storybook/preview-api";
 
 export type ThemeMode = "light" | "dark";
-export type Density = "compact" | "comfortable" | "spacious";
 
 export const THEME_BROADCAST_EVENT = "rezics:theme-mode";
 
 const THEME_LISTENERS_FLAG = "__rezicsThemeListenersAttached";
-
-function applyDensity(value: unknown) {
-  const resolved: Density =
-    value === "compact" || value === "spacious" ? value : "comfortable";
-  const list = document.documentElement.classList;
-  list.toggle("density-compact", resolved === "compact");
-  list.toggle("density-spacious", resolved === "spacious");
-}
 
 if (typeof window !== "undefined" && typeof document !== "undefined") {
   const w = window as typeof window & { [THEME_LISTENERS_FLAG]?: boolean };
@@ -33,10 +24,9 @@ if (typeof window !== "undefined" && typeof document !== "undefined") {
         ({
           globals,
         }: {
-          globals?: { themeMode?: unknown; density?: unknown };
+          globals?: { themeMode?: unknown };
         }) => {
           applyThemeMode(globals?.themeMode);
-          applyDensity(globals?.density);
         },
       );
     window.addEventListener("message", (event: MessageEvent) => {
@@ -76,20 +66,6 @@ export const themeGlobalTypes = {
       dynamicTitle: true,
     },
   },
-  density: {
-    name: "Density",
-    description: "Spacing density (compact/comfortable/spacious)",
-    defaultValue: "comfortable",
-    toolbar: {
-      icon: "expand",
-      items: [
-        { value: "compact", title: "Compact" },
-        { value: "comfortable", title: "Comfortable" },
-        { value: "spacious", title: "Spacious" },
-      ],
-      dynamicTitle: true,
-    },
-  },
 } as const;
 
 export const basePreviewParameters = {
@@ -124,15 +100,10 @@ export function withRezicsTheme(
 
   return (Story, context) => {
     const mode = (context.globals.themeMode ?? "light") as ThemeMode;
-    const density = (context.globals.density ?? "comfortable") as Density;
 
     useEffect(() => {
       document.documentElement.classList.toggle("dark", mode === "dark");
     }, [mode]);
-
-    useEffect(() => {
-      applyDensity(density);
-    }, [density]);
 
     return canvasStyle ? (
       <div style={canvasStyle}>

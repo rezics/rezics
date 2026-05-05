@@ -88,7 +88,9 @@ export function PaginatedTable<T>({
   const fromRow = count === 0 ? 0 : page * rowsPerPage + 1;
   const toRow = Math.min((page + 1) * rowsPerPage, count);
 
-  const cellPaddingClass = dense ? "py-1.5" : "py-3";
+  const cellPaddingClass = dense
+    ? "py-1.5"
+    : "py-[var(--padding-table-row-y)]";
   const textSizeClass = dense ? "text-sm" : "text-base";
 
   return (

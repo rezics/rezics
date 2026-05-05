@@ -5,13 +5,11 @@ import { DensityDemo, Compare, Do, Dont } from "../tokens/_gallery";
 
 # Density
 
-rezics ships density as a **three-mode user-facing system**: `compact`, `comfortable`, `spacious`. The default is comfortable. Density propagates as a class on `<html>` (no class = comfortable, `density-compact`, `density-spacious`) and coexists with the `.dark` theme switch on the same root.
-
-The Density toolbar at the top right of every Storybook page flips the global mode in real time. The same surface a contributor sees is the same surface in production — there is no separate "demo mode."
+rezics treats density as an **intrinsic property of each component type**. A table row is naturally dense, a list item is more relaxed, and a breadcrumb item is tight because it lives beside text. Density is encoded in component vocabulary, not in a user-facing mode switch.
 
 ## Live preview
 
-The three columns below render the same composite at all three densities **simultaneously**, regardless of the global toolbar state. Use it to compare; use the toolbar to feel.
+The ladder below renders the closed nine-token vocabulary from tightest to loosest. Each value is read from CSS at runtime so the page shows exactly what production components resolve.
 
 <Unstyled>
   <DensityDemo />
@@ -19,15 +17,21 @@ The three columns below render the same composite at all three densities **simul
 
 ## What density changes
 
-Density adjusts a single system-tier knob, `--density-step`:
+Density emits nine fixed-value component-tier padding tokens:
 
-| Mode | `--density-step` | Intent |
+| Token | Value | Intent |
 | --- | --- | --- |
-| Compact | `-2px` | Admin tables, editor toolbars, dense data lists, debug overlays. |
-| Comfortable | `0px` | Default consumer-facing app. Cards, navigation, forms, dialogs. |
-| Spacious | `+2px` | Hero sections, reading view, onboarding flows, marketing. |
+| `--padding-breadcrumb-y` | `4px` | Sibling-of-text affordance. |
+| `--padding-menu-item-y` | `6px` | Dropdown and context-menu rows. |
+| `--padding-table-row-y` | `8px` | Scannable data rows. |
+| `--padding-toolbar-y` | `8px` | Repeating chrome rows. |
+| `--padding-formfield-y` | `8px` | Form controls. |
+| `--padding-sidebar-item-y` | `8px` | Navigation rows. |
+| `--padding-tab-item-y` | `8px` | Tabs list items. |
+| `--padding-command-item-y` | `8px` | Command-palette rows. |
+| `--padding-list-item-y` | `12px` | Primary touch-affinity rows. |
 
-Component-tier `--padding-*` tokens (`--padding-table-row-y`, `--padding-list-item-y`, `--padding-formfield-y`, …) resolve to `calc(<base> + var(--density-step))`. A density-aware composite consumes those tokens; everything else stays on fixed spacing utilities.
+A density-aware rezics-authored composite consumes one of these tokens. Everything else stays on fixed spacing utilities.
 
 ## What density never changes
 
@@ -54,31 +58,21 @@ Both Apple HIG and MD3 forbid this for legibility. Type carries information; ref
 | Breadcrumb item | |
 | CommandPalette item | |
 
-The dialog **frame** opts in (small breathing-room differences read at the chrome level); the dialog content does not (reading and form layouts inside should not move when density flips).
+The dialog **frame** may opt in when it owns chrome rows; dialog content does not. Reading and form layouts inside should keep their own local rhythm.
 
-Adding a new density-aware component requires: (1) a component-tier `--padding-*` token in `uno-config.ts`, (2) a consumer wiring the component to that token, (3) a `WithDensity` story added to the component's story file.
+Adding a new density-aware component requires an OpenSpec change that adds a fixed `--padding-*` token in `uno-config.ts` and wires a rezics-authored consumer to that token.
 
-## Per-app default
-
-| App | `<html>` class on mount |
-| --- | --- |
-| `@rezics/admin` | `density-compact` |
-| `@rezics/app` | (none — comfortable) |
-| `@rezics/folio`, `@rezics/editor` | (none — comfortable) |
-
-The user MAY override via a preference setting; the override adds or removes the corresponding class on `<html>`.
-
-## Why three, not four
+## Why intrinsic, not runtime
 
 <Compare>
-  <Do caption="Three labeled modes — clear intent">
-    Compact / Comfortable / Spacious — each label maps to a use case (dense data, default app, leisurely reading). Reviewers can read a screenshot and know the density at a glance.
+  <Do caption="Component vocabulary">
+    The component type carries the answer: table rows are compact, breadcrumbs are tighter, and list items breathe. Designers review one stable rhythm per component.
   </Do>
-  <Dont caption="MD3's four numeric steps">
-    `default / -1 / -2 / -3` is engineered for pointer-driven dense pro tools. rezics is reading-and-browsing software with admin areas; the asymmetric "1 dense, 1 default, 1 leisurely" matches the actual use cases. Numeric labels also push the cognitive load of picking a mode onto every consumer.
+  <Dont caption="Runtime density toggle">
+    MD3's density model can be expressed as compact/default/spacious modes, but rezics does not add a toolbar, app preference, root class, or per-story runtime-density axis for this change.
   </Dont>
 </Compare>
 
 ## Reference
 
-> **MD3 density**: m3.material.io/foundations/layout/applying-layout/window-size-classes — the 4-step density model is the engineering reference. rezics maps it to three labeled modes (`compact` / `comfortable` / `spacious`) for clarity. Apple HIG offers no token vocabulary for density; we use HIG's "type carries information" sensibility to forbid type changes across modes. Spec: `openspec/specs/design-system-density/spec.md`.
+> **MD3 density**: m3.material.io/foundations/layout/applying-layout/window-size-classes — the 4-step density model is the engineering reference, but rezics adopts only the idea that repeating surfaces need explicit spacing vocabulary. Apple HIG offers no token vocabulary for density; we use HIG's "type carries information" sensibility to forbid type changes across tiers. Spec: `openspec/specs/design-system-density/spec.md`.

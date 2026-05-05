@@ -26,9 +26,9 @@ This skill is the human/AI-readable index.
 **Live visual reference**: `bun -F @rezics/ui storybook` (port 6007). Foundation
 pages (Tokens × 7, Patterns × 7) render every token and pattern with live samples.
 Every shadcn primitive and rezics primitive/composite has a story. The toolbar
-exposes global Theme (Light/Dark) and Density (compact/comfortable/spacious)
-switches — both class-toggles on `<html>` (`dark`, `density-compact`,
-`density-spacious`).
+exposes global Theme (Light/Dark). Density is documented at
+`Foundation/Patterns/Density` as an intrinsic component vocabulary backed by the
+fixed `--padding-*` tokens, not as a runtime toolbar.
 
 ---
 

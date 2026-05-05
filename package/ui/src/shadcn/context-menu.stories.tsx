@@ -50,22 +50,3 @@ function ContextMenuSample() {
 export const Default: Story = {
   render: () => <ContextMenuSample />,
 };
-
-export const WithDensity: Story = {
-  render: () => (
-    <div className="grid grid-cols-3 gap-4">
-      <div className="density-compact space-y-2">
-        <div className="text-xs font-medium text-text-muted">Compact</div>
-        <ContextMenuSample />
-      </div>
-      <div className="space-y-2">
-        <div className="text-xs font-medium text-text-muted">Comfortable</div>
-        <ContextMenuSample />
-      </div>
-      <div className="density-spacious space-y-2">
-        <div className="text-xs font-medium text-text-muted">Spacious</div>
-        <ContextMenuSample />
-      </div>
-    </div>
-  ),
-};

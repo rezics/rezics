@@ -36,7 +36,7 @@ The `@rezics/ui` Storybook SHALL provide seven MDX patterns pages, comprising th
 
 **New (under `package/ui/src/docs/patterns/`):**
 
-3. **Density** (`density.mdx`) — live three-mode demo (compact / comfortable / spacious) with a representative composite. Documents the opt-in / opt-out component lists. States the "density never affects type" rule.
+3. **Density** (`density.mdx`) — live nine-token `--padding-*` ladder showing intrinsic per-component density. Documents the opt-in / opt-out component lists. States the "density never affects type" rule and that density is not a runtime toggle.
 4. **State Layer** (`state-layer.mdx`) — live demo of the 8/12/12/16 opacity ladder applied as quiet rectangular tints. Includes a rejection sample for MD3 full-bleed circular ripple.
 5. **Depth Without Shadow** (`depth-without-shadow.mdx`) — live demo of the canvas → base → elevated → subtle → sunken surface ladder. Includes a rejection sample for the MD3 dp shadow ladder. Documents that shadow is reserved for modals only.
 6. **Inverse Surface** (`inverse-surface.mdx`) — snackbar and pull-quote demos. Documents when and when not to use inverse-surface.
@@ -55,29 +55,18 @@ Each new Patterns page SHALL include at least one live demo (not a screenshot) a
 - **THEN** it SHALL include at least one live `<Story>`, `<Canvas>`, or `<*Demo>` element from the `_gallery.tsx` helper
 - **AND** SHALL include at least one "we don't do this" rejection sample where the contrast against MD3 / shadcn-default / Tailwind-default is instructive
 
-### Requirement: Density global toolbar toggles classes on `<html>`
+### Requirement: Storybook toolbar exposes theme only
 
-`package/storybook-config/src/preview.tsx` SHALL provide a global Density toolbar (Compact / Comfortable / Spacious) using Storybook's `globalTypes` mechanism. Switching the toolbar entry SHALL toggle classes on the `<html>` element of the preview frame:
+`package/storybook-config/src/preview.tsx` SHALL provide the existing Light/Dark theme toolbar using Storybook's `globalTypes` mechanism. It SHALL NOT provide a Density toolbar, and no decorator SHALL toggle density classes on `<html>`.
 
-- `compact` → add `density-compact` (remove `density-spacious` if present).
-- `comfortable` → remove both `density-*` classes (no class = default).
-- `spacious` → add `density-spacious` (remove `density-compact` if present).
+Density is documented in `Foundation/Patterns/Density` as an intrinsic component vocabulary. The page renders the nine fixed `--padding-*` tokens directly; there is no global compact/comfortable/spacious axis.
 
-The Density toolbar SHALL be independent of the Light/Dark theme toggle — switching one SHALL NOT reset the other. The default density SHALL be `comfortable`. The default theme SHALL be `light`. Both globals SHALL persist across story navigation within a session.
-
-The Density toolbar SHALL appear in every package's Storybook (the shared config provides it; per-package previews inherit). Stories for components that do not opt into density SHALL still render at every density level (they will look identical at all three).
-
-#### Scenario: Global density toolbar present in every package's Storybook
+#### Scenario: No global density toolbar exists
 
 - **WHEN** any package's Storybook (`@rezics/ui`, `@rezics/admin`, `@rezics/app`, `@rezics/folio`, `@rezics/editor`) is opened
-- **THEN** a Density toolbar SHALL appear in the global toolbar with three options: Compact, Comfortable, Spacious
-- **AND** switching the option SHALL toggle the corresponding `density-*` class on `<html>` without remount
-
-#### Scenario: Density and theme are independent
-
-- **WHEN** the user toggles the theme toolbar from Light to Dark
-- **THEN** the density global SHALL retain its prior value (e.g. if it was Spacious, it stays Spacious)
-- **AND** the same independence holds when toggling density first and theme second
+- **THEN** only the Light/Dark theme toolbar SHALL appear from the shared rezics preview config
+- **AND** `package/storybook-config/src/preview.tsx` SHALL contain no `density` `globalType`
+- **AND** it SHALL contain no `density-compact` or `density-spacious` class toggle
 
 ### Requirement: Every shadcn primitive in `@rezics/ui` has a story file
 
@@ -88,7 +77,7 @@ Every primitive `.tsx` file directly under `package/ui/src/shadcn/` (excluding `
 - A `Disabled` story (where the primitive supports a disabled state).
 - A `Loading` story (where applicable).
 - An `InsideCard`, `InsideDialog`, or `InsideSidebar` embedded scenario for primitives where the surrounding surface affects the visual read.
-- A `WithDensity` story for primitives in the density opt-in list, rendering compact / comfortable / spacious side-by-side.
+It SHALL NOT include a `WithDensity` story axis. Density is intrinsic to the component type and documented in `Foundation/Patterns/Density`, not repeated per primitive.
 
 Story file co-location SHALL match the existing flat structure: `package/ui/src/shadcn/<primitive>.stories.tsx` (sibling to `<primitive>.tsx`), not nested per-folder.
 
@@ -98,14 +87,15 @@ Story file co-location SHALL match the existing flat structure: `package/ui/src/
 - **THEN** each SHALL have a sibling `*.stories.tsx` file
 - **AND** each story file SHALL define at least one `Default` story
 
-#### Scenario: Density-aware primitives have a WithDensity story
+#### Scenario: Primitive stories do not expose runtime density
 
-- **WHEN** a shadcn primitive is in the density opt-in list (Table, Sidebar, Tabs, Breadcrumb, Command, ContextMenu, DropdownMenu, Input, Select, plus any primitive added to the list by `design-system-density/spec.md`)
-- **THEN** its story file SHALL include a `WithDensity` story rendering the primitive at compact / comfortable / spacious side-by-side
+- **WHEN** any `package/ui/src/shadcn/*.stories.tsx` file is inspected
+- **THEN** it SHALL NOT define a `WithDensity` story
+- **AND** it SHALL NOT render `density-compact` or `density-spacious`
 
 ### Requirement: Storybook reads tokens from CSS at runtime, not from TS imports
 
-The `_gallery.tsx` helper module SHALL expose a `useToken(name: string)` hook that reads the token's computed value via `getComputedStyle(document.documentElement).getPropertyValue(name)` and re-runs whenever the `<html>` element's `class` attribute changes (covering both theme — `dark` — and density — `density-compact` / `density-spacious` — class toggles). Implementation SHALL use a `MutationObserver` watching `document.documentElement` for `attributes: ['class']`.
+The `_gallery.tsx` helper module SHALL expose token-reading helpers that read computed values via `getComputedStyle(document.documentElement).getPropertyValue(name)` and re-run whenever the `<html>` element's `class` attribute changes (covering theme — `dark` — class toggles). Implementation SHALL use a `MutationObserver` watching `document.documentElement` for `attributes: ['class']`.
 
 Foundation MDX galleries SHALL consume tokens via this hook, not via TS-level imports of `package/ui/src/config/tokens/`. Reasons: round-trip through the cascade to match production resolution, theme-and-density switching automatically updates galleries without source-data refetch, decouple gallery surface from TS-export surface.
 
@@ -115,10 +105,11 @@ Foundation MDX galleries SHALL consume tokens via this hook, not via TS-level im
 - **THEN** every `useToken` invocation in the rendered Foundation pages SHALL return the dark-mode value within one render cycle
 - **AND** every swatch / sample SHALL update without a full page reload
 
-#### Scenario: Hook re-runs on density change
+#### Scenario: Padding tokens render as fixed values
 
-- **WHEN** the density global toolbar switches between Compact / Comfortable / Spacious
-- **THEN** any `useToken` invocation reading a density-aware token (e.g. `--padding-table-row-y`) SHALL return the new value within one render cycle
+- **WHEN** the Density page reads a padding token (e.g. `--padding-table-row-y`)
+- **THEN** the displayed value SHALL be the fixed computed length
+- **AND** it SHALL NOT depend on a density global toolbar
 
 #### Scenario: Galleries do not import from `package/ui/src/config/tokens/` for value display
 

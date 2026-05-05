@@ -18,7 +18,7 @@ All token emission lives in `package/ui/src/config/uno-config.ts`. No new file i
 
 > Rollback note: the original Phase-1 plan (now corrected by user direction on 2026-05-05) added a system-tier `--density-step`, class-based overrides on `<html>`, and a Storybook density toolbar. Tasks 1.1–1.4 below are written for the corrected scope. Where prior implementation shipped the rejected mechanism, the explicit rollback steps are flagged. The implementation tracks the corrected scope going forward.
 
-- [ ] 1.1 In `package/ui/src/config/uno-config.ts`, redefine the `PADDING_BASE` constant so each entry is a fixed `<length>` (no `calc()`). Emit nine component-tier `--padding-*` tokens directly:
+- [x] 1.1 In `package/ui/src/config/uno-config.ts`, redefine the `PADDING_BASE` constant so each entry is a fixed `<length>` (no `calc()`). Emit nine component-tier `--padding-*` tokens directly:
   - `--padding-breadcrumb-y: 4px` (tightest — sibling-of-text affordance)
   - `--padding-menu-item-y: 6px` (dropdown rows)
   - `--padding-table-row-y: 8px`
@@ -29,9 +29,9 @@ All token emission lives in `package/ui/src/config/uno-config.ts`. No new file i
   - `--padding-command-item-y: 8px`
   - `--padding-list-item-y: 12px` (loosest — touch-affinity rows)
   - Update the in-source comment block to document the opt-in / opt-out distinction and the "rezics-authored only, not vendored shadcn" boundary (cross-reference `design-system-density/spec.md`).
-- [ ] 1.2 **Rollback `--density-step`.** Remove the `DENSITY_STEP` constant, the `:root, :host { --density-step: 0px; }` emission, and the `.density-compact { --density-step: -2px; } .density-spacious { --density-step: 2px; }` selector block from `package/ui/src/config/uno-config.ts`. Verify `rg "density-step|DENSITY_STEP" package/ui/src/config/uno-config.ts` returns zero matches.
-- [ ] 1.3 **Rollback Storybook density toolbar.** In `package/storybook-config/src/preview.tsx`, remove any `density` `globalType` entry, the toolbar items (`compact` / `comfortable` / `spacious`), and the class-toggle decorator that reads the density global and writes `density-compact` / `density-spacious` on `<html>`. The Light/Dark theme toggle stays. Verify `rg "density-compact|density-spacious|density.*globalType" package/storybook-config/` returns zero matches.
-- [ ] 1.4 Run `bun -F @rezics/ui storybook` and confirm: (a) only the Light/Dark toolbar entry is visible (no Density entry); (b) the nine `--padding-*` tokens resolve to their fixed values via `getComputedStyle(document.documentElement).getPropertyValue("--padding-table-row-y")` etc. in the browser console.
+- [x] 1.2 **Rollback `--density-step`.** Remove the `DENSITY_STEP` constant, the `:root, :host { --density-step: 0px; }` emission, and the `.density-compact { --density-step: -2px; } .density-spacious { --density-step: 2px; }` selector block from `package/ui/src/config/uno-config.ts`. Verify `rg "density-step|DENSITY_STEP" package/ui/src/config/uno-config.ts` returns zero matches.
+- [x] 1.3 **Rollback Storybook density toolbar.** In `package/storybook-config/src/preview.tsx`, remove any `density` `globalType` entry, the toolbar items (`compact` / `comfortable` / `spacious`), and the class-toggle decorator that reads the density global and writes `density-compact` / `density-spacious` on `<html>`. The Light/Dark theme toggle stays. Verify `rg "density-compact|density-spacious|density.*globalType" package/storybook-config/` returns zero matches.
+- [x] 1.4 Run `bun -F @rezics/ui storybook` and confirm: (a) only the Light/Dark toolbar entry is visible (no Density entry); (b) the nine `--padding-*` tokens resolve to their fixed values via `getComputedStyle(document.documentElement).getPropertyValue("--padding-table-row-y")` etc. in the browser console.
 
 ## Phase 2 — Iconography Foundation page
 
@@ -43,22 +43,22 @@ The other six Foundation pages already ship; this phase adds the seventh and ver
   - The named-fallback rule (when lucide lacks a glyph, use `@tabler/icons-react`).
   - The `<Meta title="Foundation/Tokens/Iconography" />` placement to match the other six.
   - "Reference" callout: Apple SF Symbols as the deeper reference (9 weights × 3 scales × 4 rendering modes); lucide-react is the rezics adoption at lower fidelity; tabler is the named fallback.
-- [ ] 2.2 (Optional polish — only if missing during 0.4 verification.) Add a "Reference" callout to any of the existing six Foundation pages that lack one. Otherwise skip.
+- [x] 2.2 (Optional polish — only if missing during 0.4 verification.) Add a "Reference" callout to any of the existing six Foundation pages that lack one. Otherwise skip.
 - [x] 2.3 (Per the Colors-page contrast-badge addition in proposal `What Changes`.) Extend `_gallery.tsx`'s `Swatch` to compute and display contrast against the closest `on-*` role; apply to the Colors page swatches. Defer if the existing `Swatch` already shows contrast badges.
-- [ ] 2.4 Run `bun -F @rezics/ui run build-storybook` and confirm `storybook-static/index.json` contains all 7 Foundation/Tokens/* entries.
+- [x] 2.4 Run `bun -F @rezics/ui run build-storybook` and confirm `storybook-static/index.json` contains all 7 Foundation/Tokens/* entries.
 - [ ] 2.5 Sanity-check Iconography in dev mode (`bun -F @rezics/ui storybook`). Toggle theme — icons remain visible against canvas in both modes. Toggle density — icons unchanged (icon size is not a density signal).
 
 ## Phase 3 — New Patterns MDX pages (5 pages)
 
 Pages live under a new `package/ui/src/docs/patterns/` directory. Existing `docs/voice.mdx` and `docs/patterns.mdx` are not moved or duplicated.
 
-- [ ] 3.1 Extend `package/ui/src/docs/tokens/_gallery.tsx` with the four new Patterns helpers (rewrite `<DensityDemo>` if it was previously authored against the 3-mode scope):
+- [x] 3.1 Extend `package/ui/src/docs/tokens/_gallery.tsx` with the four new Patterns helpers (rewrite `<DensityDemo>` if it was previously authored against the 3-mode scope):
   - `<DensityDemo>` — renders the nine-token `--padding-*` ladder as labelled rows, each row showing the token name, its resolved value, and a sample component (or sample bar) rendered at that padding. Sorted ascending by value (breadcrumb 4px → list-item 12px). **No mode switcher, no class toggling — values are read once via `getComputedStyle`.**
   - `<StateLayerDemo>` — renders an interactive surface with hover / focus / pressed / dragged annotated overlays at the 8/12/12/16 ladder.
   - `<DepthDemo>` — renders the canvas → base → elevated → subtle → sunken surface ladder vertically stacked with labels.
   - `<InverseSurfaceDemo>` — renders a snackbar example and a pull-quote example using inverse-surface tokens.
   - The 11 existing exports stay unchanged.
-- [ ] 3.2 Author `package/ui/src/docs/patterns/density.mdx` (`<Meta title="Foundation/Patterns/Density" />`):
+- [x] 3.2 Author `package/ui/src/docs/patterns/density.mdx` (`<Meta title="Foundation/Patterns/Density" />`):
   - Live `<DensityDemo>` rendering the nine-token ladder.
   - The opt-in list and the opt-out list (cross-reference `design-system-density/spec.md`).
   - The "density is per-component-type intrinsic, not a runtime toggle" framing as the page's lead concept.
@@ -84,7 +84,7 @@ Pages live under a new `package/ui/src/docs/patterns/` directory. Existing `docs
   - Visual ruler of all rezics breakpoints (xsm:450, sm:640, md:768, lg:1024, xl:1280, 2xl:1536, 8xl:1440).
   - Container width samples at each breakpoint.
   - The xsm-and-8xl rezics-specific rationale (smaller-than-mobile-tablet split; ultra-wide reading containers).
-- [ ] 3.7 Run `bun -F @rezics/ui run build-storybook`. Confirm 5 new Foundation/Patterns/* entries register in `index.json` (in addition to the 2 existing — `Foundation/Voice` and `Foundation/Patterns` — for a total of 7 patterns-tier entries).
+- [x] 3.7 Run `bun -F @rezics/ui run build-storybook`. Confirm 5 new Foundation/Patterns/* entries register in `index.json` (in addition to the 2 existing — `Foundation/Voice` and `Foundation/Patterns` — for a total of 7 patterns-tier entries).
 
 ## Phase 4 — Density-bearing composite migration (rezics-authored only)
 
@@ -92,16 +92,16 @@ For the opt-in list, swap inline fixed-padding utilities for the corresponding `
 
 **Scope boundary:** the migration applies to **rezics-authored components** in `package/ui/src/primitive/`, `package/ui/src/composite/`, and app-level composites (`package/admin/src/`, `package/app/src/`, `package/folio/src/`). **Vendored shadcn primitives in `package/ui/src/shadcn/` are NOT modified** — they consume the spacing values shadcn ships with. (Recalibrating the rezics token *values* against Luma's intrinsic padding is owned by `migrate-shadcn-to-base-ui-luma`, not this change.) If prior implementation patched `shadcn/*.tsx` files to consume rezics tokens, those patches MUST be reverted.
 
-- [ ] 4.1 Audit each opt-in composite/primitive and update **rezics-authored** sources to consume the component-tier token. Likely files:
+- [x] 4.1 Audit each opt-in composite/primitive and update **rezics-authored** sources to consume the component-tier token. Likely files:
   - Composite Toolbar (location: audit `package/ui/src/composite/`) — `var(--padding-toolbar-y)`.
   - Composite List item (audit `package/ui/src/composite/`) — `var(--padding-list-item-y)`.
   - rezics FormField wrapper (if it exists outside `shadcn/input.tsx`) — `var(--padding-formfield-y)`.
   - App-level rezics-authored composites that render their own breadcrumb/menu/tab/sidebar/command rows — wire to the matching token.
   - **Do not edit** `package/ui/src/shadcn/table.tsx`, `sidebar.tsx`, `tabs.tsx`, `breadcrumb.tsx`, `command.tsx`, `dropdown-menu.tsx`, `context-menu.tsx`, `input.tsx`, `select.tsx`. If the prior implementation edited these to consume `var(--padding-*)`, **revert** those edits in this phase.
-- [ ] 4.2 **Rollback `WithDensity` stories.** For every story file in `package/ui/src/shadcn/*.stories.tsx`, `package/ui/src/primitive/**/*.stories.tsx`, and `package/ui/src/composite/**/*.stories.tsx`, remove any `export const WithDensity` story (and its imports) that renders compact / comfortable / spacious via `<DensityDemo>`. Verify `rg "WithDensity|density-compact|density-spacious" package/ui/src/` returns zero source matches outside the spec/proposal/design files.
+- [x] 4.2 **Rollback `WithDensity` stories.** For every story file in `package/ui/src/shadcn/*.stories.tsx`, `package/ui/src/primitive/**/*.stories.tsx`, and `package/ui/src/composite/**/*.stories.tsx`, remove any `export const WithDensity` story (and its imports) that renders compact / comfortable / spacious via `<DensityDemo>`. Verify `rg "WithDensity|density-compact|density-spacious" package/ui/src/` returns zero source matches outside the spec/proposal/design files.
 - [ ] 4.3 Visual sweep — confirm pixel parity with the pre-migration state for every rezics-authored composite touched. Diff against `git stash` baseline if needed.
-- [ ] 4.4 (Removed) — was "visual sweep at compact and spacious." No runtime modes exist.
-- [ ] 4.5 **Rollback per-app density classes.** Audit `package/admin/`, `package/app/`, `package/folio/`, `package/editor/` for any code that writes `density-compact` / `density-spacious` to `<html>` on mount (typical entry points: `src/main.tsx`, `src/App.tsx`, root layout files). Remove. Density is per-component-type intrinsic, not per-app.
+- [x] 4.4 (Removed) — was "visual sweep at compact and spacious." No runtime modes exist.
+- [x] 4.5 **Rollback per-app density classes.** Audit `package/admin/`, `package/app/`, `package/folio/`, `package/editor/` for any code that writes `density-compact` / `density-spacious` to `<html>` on mount (typical entry points: `src/main.tsx`, `src/App.tsx`, root layout files). Remove. Density is per-component-type intrinsic, not per-app.
 
 ## Phase 5 — Shadcn primitive stories (30) + missing rezics primitive (1)
 
@@ -138,7 +138,7 @@ The 30 shadcn primitives confirmed by `ls package/ui/src/shadcn/` on 2026-05-04 
 - [x] 5.29 ToggleGroup (`toggle-group.tsx`)
 - [x] 5.30 Tooltip (`tooltip.tsx`)
 - [x] 5.31 (rezics primitive) `package/ui/src/primitive/button/TextButton.stories.tsx` — the missing 14th primitive story identified by the audit.
-- [ ] 5.32 If the Phase-4 audit surfaces a composite-tier file that needs a Toolbar story (or any other density opt-in component without an existing story), add it here.
+- [x] 5.32 If the Phase-4 audit surfaces a composite-tier file that needs a Toolbar story (or any other density opt-in component without an existing story), add it here.
 
 (Per Decision 1 in `design.md`, no `WithDensity` axis stories exist. Phase 4.2 rolls back any that the prior implementation shipped.)
 
@@ -155,14 +155,14 @@ The 30 shadcn primitives confirmed by `ls package/ui/src/shadcn/` on 2026-05-04 
   - Theme toggle works on every page.
   - Foundation/Patterns/Density renders the nine-token vocabulary ladder; no toolbar mode switcher is present.
   - Contrast badges read correctly on Foundation/Tokens/Colors swatches.
-- [ ] 6.7 `rg "--density-step|density-compact|density-spacious|WithDensity" package/` returns zero matches in source files (`.tsx`, `.ts`, `.css`, `.mdx`). Acceptable matches only inside `openspec/changes/` artifacts that document what is not introduced or what is rolled back.
+- [x] 6.7 `rg "--density-step|density-compact|density-spacious|WithDensity" package/` returns zero matches in source files (`.tsx`, `.ts`, `.css`, `.mdx`). Acceptable matches only inside `openspec/changes/` artifacts that document what is not introduced or what is rolled back.
 - [x] 6.4 `bun run check:tokens` passes (contrast script — should be unaffected by this change but verify). ✓ All 50 contrast checks pass.
 - [x] 6.5 `bun run check:convention` passes — **R9 must not regress**: no `--rezics-*` references introduced; `package/ui/src/config/tokens.css` does not appear. ✓ R9 clean; total violations match baseline. (Note: renamed `package/ui/src/docs/patterns/` → `pattern/` to satisfy R4 folder-naming-convention; the Storybook MDX titles remain `Foundation/Patterns/<Name>`.)
 - [x] 6.6 Per-package `bunx tsc --noEmit`: `@rezics/ui`, `@rezics/admin`, `@rezics/app`, `@rezics/folio` all clean (modulo pre-existing cross-package `@/...` alias noise from importing `../ui/src/shadcn/*` paths, which the user's documented policy treats as expected and ignored).
 
 ## Phase 7 — Close the loop
 
-- [ ] 7.1 Update `CLAUDE.md`'s "UI Work" section to mention the Storybook entry point (`bun -F @rezics/ui storybook`) and the Foundation/Patterns documentation as the canonical reference. Update the existing density-toolbar reference to instead point at Foundation/Patterns/Density as the vocabulary documentation surface (and remove any mention of compact/comfortable/spacious as a runtime toggle).
-- [ ] 7.2 Update `.claude/skills/rezics-design/` skill files to reference the new Storybook pages where appropriate (the skill should not duplicate documentation, just point to it).
+- [x] 7.1 Update `CLAUDE.md`'s "UI Work" section to mention the Storybook entry point (`bun -F @rezics/ui storybook`) and the Foundation/Patterns documentation as the canonical reference. Update the existing density-toolbar reference to instead point at Foundation/Patterns/Density as the vocabulary documentation surface (and remove any mention of compact/comfortable/spacious as a runtime toggle).
+- [x] 7.2 Update `.claude/skills/rezics-design/` skill files to reference the new Storybook pages where appropriate (the skill should not duplicate documentation, just point to it).
 - [ ] 7.3 Tag the OpenSpec change for archival once review is complete.
 - [ ] 7.4 Open a follow-up tracking issue: "Restyle pass on shadcn primitives that still carry MUI-era visual defaults" — surfaced by the new Phase-5 stories. Out of scope for this change.

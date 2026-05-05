@@ -84,29 +84,3 @@ export const Default: Story = {
     </div>
   ),
 };
-
-export const WithDensity: Story = {
-  render: () => (
-    <div className="grid grid-cols-3 gap-4">
-      {(["compact", "comfortable", "spacious"] as const).map((mode) => (
-        <div
-          key={mode}
-          className={`${
-            mode === "compact"
-              ? "density-compact"
-              : mode === "spacious"
-                ? "density-spacious"
-                : ""
-          } space-y-2`}
-        >
-          <div className="text-xs font-medium capitalize text-text-muted">
-            {mode}
-          </div>
-          <div className="h-[320px] overflow-hidden rounded-md border">
-            <SidebarSample />
-          </div>
-        </div>
-      ))}
-    </div>
-  ),
-};

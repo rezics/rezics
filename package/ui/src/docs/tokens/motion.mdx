@@ -61,3 +61,7 @@ import { pressScale, duration, easing } from "@rezics/ui/config/tokens/motion";
 ```
 
 Respect reduced-motion automatically — every token-based transition is wiped to instant by the global `@media (prefers-reduced-motion: reduce)` rule. Don't hand-roll `transition-duration` outside the scale; you'll bypass the wipe.
+
+## Reference
+
+> **MD3 motion easing and duration**: m3.material.io/styles/motion/easing-and-duration — rezics adopts the duration/easing discipline, then adds a spring-like curve for tactile feedback in the Apple HIG spirit.

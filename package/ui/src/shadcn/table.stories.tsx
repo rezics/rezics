@@ -57,22 +57,3 @@ export const Default: Story = {
     </div>
   ),
 };
-
-export const WithDensity: Story = {
-  render: () => (
-    <div className="grid grid-cols-1 gap-6">
-      <div className="density-compact space-y-2">
-        <div className="text-xs font-medium text-text-muted">Compact</div>
-        <TableSample />
-      </div>
-      <div className="space-y-2">
-        <div className="text-xs font-medium text-text-muted">Comfortable</div>
-        <TableSample />
-      </div>
-      <div className="density-spacious space-y-2">
-        <div className="text-xs font-medium text-text-muted">Spacious</div>
-        <TableSample />
-      </div>
-    </div>
-  ),
-};

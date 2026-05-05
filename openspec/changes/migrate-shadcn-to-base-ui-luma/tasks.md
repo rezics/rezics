@@ -7,9 +7,9 @@ The change runs in six phases. Phase 1 swaps the dependency and registry style. 
 ## Phase 0 — Preflight
 
 - [ ] 0.1 Confirm `complete-rezics-design-storybook` (corrected, no 3-mode density toggle) is in flight or landed. The nine fixed-value `--padding-*` tokens are emitted from `package/ui/src/config/uno-config.ts`. No `--density-step`.
-- [ ] 0.2 Confirm `bun run check:convention` passes on the current tree.
-- [ ] 0.3 Audit the shadcn primitive list: `ls package/ui/src/shadcn/*.tsx`. Confirm 30 primitive files. Identify carousel.tsx, sidebar.tsx, theme-switch.tsx as the three "do not auto-vendor" files (carousel + sidebar are Path-P exceptions; theme-switch is rezics-custom and not a shadcn primitive).
-- [ ] 0.4 `git log` per primitive (under `package/ui/src/shadcn/<name>.tsx`) to surface any primitive with >2 commits of local history. Flag for manual reconciliation during Phase 3.
+- [x] 0.2 Confirm `bun run check:convention` passes on the current tree.
+- [x] 0.3 Audit the shadcn primitive list: `ls package/ui/src/shadcn/*.tsx`. Confirm 30 primitive files. Identify carousel.tsx, sidebar.tsx, theme-switch.tsx as the three "do not auto-vendor" files (carousel + sidebar are Path-P exceptions; theme-switch is rezics-custom and not a shadcn primitive).
+- [x] 0.4 `git log` per primitive (under `package/ui/src/shadcn/<name>.tsx`) to surface any primitive with >2 commits of local history. Flag for manual reconciliation during Phase 3.
 
 ## Phase 1 — Dependency swap and registry style
 

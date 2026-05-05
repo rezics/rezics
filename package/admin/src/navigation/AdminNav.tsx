@@ -44,7 +44,7 @@ function isItemVisible(item: AdminNavItem): boolean {
 }
 
 const navItemBaseClass =
-  "flex items-center gap-2 rounded-md py-1.5 mx-2 text-sm transition-colors hover:bg-surface-elevated cursor-pointer";
+  "flex items-center gap-2 rounded-md py-[var(--padding-sidebar-item-y)] mx-2 text-sm transition-colors hover:bg-surface-elevated cursor-pointer";
 
 export function AdminNav({
   items,

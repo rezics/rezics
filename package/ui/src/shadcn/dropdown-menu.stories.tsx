@@ -58,22 +58,3 @@ function DropdownSample() {
 export const Default: Story = {
   render: () => <DropdownSample />,
 };
-
-export const WithDensity: Story = {
-  render: () => (
-    <div className="grid grid-cols-3 gap-4">
-      <div className="density-compact space-y-2">
-        <div className="text-xs font-medium text-text-muted">Compact</div>
-        <DropdownSample />
-      </div>
-      <div className="space-y-2">
-        <div className="text-xs font-medium text-text-muted">Comfortable</div>
-        <DropdownSample />
-      </div>
-      <div className="density-spacious space-y-2">
-        <div className="text-xs font-medium text-text-muted">Spacious</div>
-        <DropdownSample />
-      </div>
-    </div>
-  ),
-};

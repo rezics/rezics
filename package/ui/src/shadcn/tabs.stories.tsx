@@ -42,22 +42,3 @@ export const Default: Story = {
 export const Line: Story = {
   render: () => <TabsSample variant="line" />,
 };
-
-export const WithDensity: Story = {
-  render: () => (
-    <div className="grid grid-cols-3 gap-4">
-      <div className="density-compact space-y-2">
-        <div className="text-xs font-medium text-text-muted">Compact</div>
-        <TabsSample />
-      </div>
-      <div className="space-y-2">
-        <div className="text-xs font-medium text-text-muted">Comfortable</div>
-        <TabsSample />
-      </div>
-      <div className="density-spacious space-y-2">
-        <div className="text-xs font-medium text-text-muted">Spacious</div>
-        <TabsSample />
-      </div>
-    </div>
-  ),
-};

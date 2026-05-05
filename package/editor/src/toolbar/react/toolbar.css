@@ -1,7 +1,7 @@
 .editor-toolbar {
   display: flex;
   gap: 1px;
-  padding: 2px 4px;
+  padding: var(--padding-toolbar-y) 4px;
   align-items: center;
 }
 

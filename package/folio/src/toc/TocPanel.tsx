@@ -88,7 +88,7 @@ export function TocPanel() {
         style={{
           display: "flex",
           gap: "8px",
-          padding: "8px 12px",
+          padding: "var(--padding-toolbar-y) 12px",
           borderBottom: "1px solid var(--colors-border-whisper)",
         }}
       >
@@ -119,7 +119,7 @@ export function TocPanel() {
                 className="folio-toc-branch"
                 onClick={() => toggleBranch(entry.node.id)}
                 style={{
-                  padding: "10px 12px",
+                  padding: "var(--padding-list-item-y) 12px",
                   background: getDepthBg(state.theme, entry.depth),
                   cursor: "pointer",
                   fontWeight: 600,
@@ -163,7 +163,7 @@ export function TocPanel() {
                 dispatch({ type: "SET_CHAPTER", index: entry.chapter.index })
               }
               style={{
-                padding: "10px 12px",
+                padding: "var(--padding-list-item-y) 12px",
                 cursor: "pointer",
                 fontSize: "14px",
                 fontWeight: isActive ? 600 : 400,

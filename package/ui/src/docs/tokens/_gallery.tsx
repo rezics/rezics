@@ -624,90 +624,156 @@ export function MotionSample({
 }
 
 // Density / state-layer / depth / inverse-surface demos for Foundation/Patterns.
-// Each forces a wrapper class so all three modes render simultaneously,
-// independent of the global Density toolbar.
 
-function DensityCell({
-  mode,
-  children,
+const densityRows = [
+  {
+    token: "--padding-breadcrumb-y",
+    label: "Breadcrumb item",
+    sample: "Library / Fiction / Chapter 1",
+  },
+  {
+    token: "--padding-menu-item-y",
+    label: "Menu item",
+    sample: "Move to shelf",
+  },
+  {
+    token: "--padding-table-row-y",
+    label: "Table row",
+    sample: "978-0-679-72316-5",
+  },
+  {
+    token: "--padding-toolbar-y",
+    label: "Toolbar",
+    sample: "Search  Filter  Sort",
+  },
+  {
+    token: "--padding-formfield-y",
+    label: "Form field",
+    sample: "you@example.com",
+  },
+  {
+    token: "--padding-sidebar-item-y",
+    label: "Sidebar item",
+    sample: "Currently reading",
+  },
+  {
+    token: "--padding-tab-item-y",
+    label: "Tab item",
+    sample: "Highlights",
+  },
+  {
+    token: "--padding-command-item-y",
+    label: "Command item",
+    sample: "Open command palette",
+  },
+  {
+    token: "--padding-list-item-y",
+    label: "List item",
+    sample: "The Library at Mount Char",
+  },
+] as const;
+
+function useRootToken(name: string) {
+  const [value, setValue] = useState("");
+
+  useEffect(() => {
+    const compute = () => {
+      setValue(
+        getComputedStyle(document.documentElement).getPropertyValue(name).trim(),
+      );
+    };
+    compute();
+    const observer = new MutationObserver(compute);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, [name]);
+
+  return value;
+}
+
+function DensityRow({
+  token,
+  label,
+  sample,
 }: {
-  mode: "compact" | "comfortable" | "spacious";
-  children: ReactNode;
+  token: string;
+  label: string;
+  sample: string;
 }) {
-  const cls =
-    mode === "compact"
-      ? "density-compact"
-      : mode === "spacious"
-        ? "density-spacious"
-        : "";
+  const value = useRootToken(token);
   return (
     <div
-      className={cls}
       style={{
+        display: "grid",
+        gridTemplateColumns: "minmax(150px, 0.8fr) minmax(90px, 0.4fr) 1fr",
+        alignItems: "center",
+        gap: 12,
+        padding: 12,
         border: "1px solid var(--colors-border-whisper)",
         borderRadius: radius.md,
         background: "var(--colors-surface-elevated)",
-        padding: 12,
       }}
     >
+      <div>
+        <div style={{ fontWeight: 600, color: "var(--colors-text-primary)" }}>
+          {label}
+        </div>
+        <div
+          style={{
+            fontFamily: fontFamilies.mono,
+            fontSize: 12,
+            color: "var(--colors-text-secondary)",
+          }}
+        >
+          {token}
+        </div>
+      </div>
       <div
         style={{
           fontFamily: fontFamilies.mono,
-          fontSize: 11,
+          fontSize: 12,
           color: "var(--colors-text-secondary)",
-          marginBottom: 8,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
         }}
       >
-        {mode}
+        {value || "…"}
       </div>
-      {children}
+      <div
+        style={{
+          paddingTop: `var(${token})`,
+          paddingBottom: `var(${token})`,
+          paddingLeft: 12,
+          paddingRight: 12,
+          borderRadius: radius.sm,
+          background: "var(--colors-surface-base)",
+          color: "var(--colors-text-primary)",
+          fontFamily: fontFamilies.sans,
+          fontSize: 14,
+          lineHeight: 1.4,
+        }}
+      >
+        {sample}
+      </div>
     </div>
   );
 }
 
 export function DensityDemo({ children }: { children?: ReactNode }) {
-  const sample = children ?? (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--padding-list-item-y)",
-      }}
-    >
-      {["First chapter", "Second chapter", "Third chapter"].map((label) => (
-        <div
-          key={label}
-          style={{
-            paddingTop: "var(--padding-list-item-y)",
-            paddingBottom: "var(--padding-list-item-y)",
-            paddingLeft: 12,
-            paddingRight: 12,
-            borderRadius: radius.sm,
-            background: "var(--colors-surface-base)",
-            color: "var(--colors-text-primary)",
-            fontFamily: fontFamilies.sans,
-            fontSize: 14,
-          }}
-        >
-          {label}
-        </div>
-      ))}
-    </div>
-  );
+  if (children) return <>{children}</>;
+
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-        gap: 16,
+        gap: 10,
         margin: "16px 0",
       }}
     >
-      <DensityCell mode="compact">{sample}</DensityCell>
-      <DensityCell mode="comfortable">{sample}</DensityCell>
-      <DensityCell mode="spacious">{sample}</DensityCell>
+      {densityRows.map((row) => (
+        <DensityRow key={row.token} {...row} />
+      ))}
     </div>
   );
 }

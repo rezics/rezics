@@ -24,13 +24,6 @@ function AppProviders({ children }: { children: ReactNode }) {
     document.documentElement.classList.toggle("dark", themeMode === "dark");
   }, [themeMode]);
 
-  useEffect(() => {
-    document.documentElement.classList.add("density-compact");
-    return () => {
-      document.documentElement.classList.remove("density-compact");
-    };
-  }, []);
-
   return (
     <StrictMode>
       <ErrorBoundary fallback={<div>Something went wrong</div>}>

@@ -109,7 +109,7 @@ function FolioInner({
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              padding: "8px 12px",
+              padding: "var(--padding-toolbar-y) 12px",
               borderBottom: "1px solid var(--colors-border-whisper)",
             }}
           >
@@ -158,7 +158,7 @@ function FolioInner({
           <div
             className="folio-controls"
             style={{
-              padding: "8px 12px",
+              padding: "var(--padding-toolbar-y) 12px",
               borderTop: "1px solid var(--colors-border-whisper)",
               display: "flex",
               alignItems: "center",

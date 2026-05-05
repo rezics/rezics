@@ -56,22 +56,3 @@ function CommandSample() {
 export const Default: Story = {
   render: () => <CommandSample />,
 };
-
-export const WithDensity: Story = {
-  render: () => (
-    <div className="grid grid-cols-3 gap-4">
-      <div className="density-compact space-y-2">
-        <div className="text-xs font-medium text-text-muted">Compact</div>
-        <CommandSample />
-      </div>
-      <div className="space-y-2">
-        <div className="text-xs font-medium text-text-muted">Comfortable</div>
-        <CommandSample />
-      </div>
-      <div className="density-spacious space-y-2">
-        <div className="text-xs font-medium text-text-muted">Spacious</div>
-        <CommandSample />
-      </div>
-    </div>
-  ),
-};
