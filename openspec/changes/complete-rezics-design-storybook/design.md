@@ -4,7 +4,7 @@ Three input streams converge in this proposal: the Apple HIG research, the MD3 r
 
 **From Apple HIG.** The 4-tier label hierarchy (largeTitle / title / headline / body) is structurally simpler than MD3's 11-style Dynamic Type. Apple's spring-default motion (smooth / snappy / bouncy variants) ships no token vocabulary but is deeply opinionated about *which* duration feels tactile (mostly toward the shorter end of the ladder). Materials-over-shadows is Apple's elevation philosophy: depth is communicated by background blur, color shift, or vibrancy, not by `box-shadow`. The 44pt minimum touch target is a hard accessibility floor. SF Symbols' 9 weights × 3 scales × 4 rendering modes is a vast icon system; rezics' lucide-react default is a similar idea at lower fidelity. The "ellipsis for dialogs" writing convention in HIG is a fine-grained voice choice that didn't make it into rezics' voice doc but should.
 
-**From MD3.** The 3-tier ref/sys/comp token model. The 8/12/12/16 state-layer opacity ladder. The 16-step duration ladder + 7 easing curves. The HCT 40/80 contrast invariant (adopted as a *test* via the contrast script). The role vocabulary including `*-container` variants and the surface ladder. The 4dp-step density model — adopted as a *three-mode user-facing system* (compact / comfortable / spacious), because the rezics-borderless aesthetic needs gentler step boundaries than MD3's pointer-driven dense data UIs.
+**From MD3.** The 3-tier ref/sys/comp token model. The 8/12/12/16 state-layer opacity ladder. The 16-step duration ladder + 7 easing curves. The HCT 40/80 contrast invariant (adopted as a *test* via the contrast script). The role vocabulary including `*-container` variants and the surface ladder. The 4dp-step density model is the engineering inspiration but is **not** adopted as a runtime toggle — rezics treats density as per-component-type intrinsic (each component has one correct spacing tier baked into its design vocabulary), not as a user-facing knob.
 
 **From the codebase audit (re-run 2026-05-04).** 30 shadcn primitives at 0% story coverage — the largest single content gap. 14 rezics primitives at 92.9% (the missing one is `TextButton`). 21 composites at 100%. 6 of 7 Foundation MDX galleries already shipped under `package/ui/src/docs/tokens/`, authored against the post-`unify-tokens-single-source` `--colors-*` namespace; only Iconography remains. Two patterns docs already exist: `docs/voice.mdx` (Foundation/Voice) and `docs/patterns.mdx` (Foundation/Patterns). The `--rezics-*` namespace is retired and R9 in `check:convention` bans every `var(--rezics-*)` reference plus asserts `tokens.css` does not exist.
 
@@ -15,7 +15,7 @@ This proposal is the synthesis of those three streams as a *visible* artifact. I
 - A contributor opens `bun -F @rezics/ui storybook` and lands on a Foundation page that immediately communicates the rezics philosophy.
 - Every token in the role list is visualized — every color swatch, every type sample, every spacing step, every motion duration, every easing curve, every elevation tier, every icon size.
 - Every Pattern page demonstrates the rule with a live demo and a do/don't pair.
-- The three-mode density system is a working feature, not a documented intent. A toolbar entry switches it. Components react. Storybook shows it side by side.
+- The density vocabulary is a documented, instrumented surface. The nine `--padding-*` tokens are emitted as fixed values by the preflight, the rezics-authored opt-in components consume them, and the Foundation/Patterns/Density page visualizes the resulting spacing ladder.
 - All 30 shadcn primitives have stories. New contributors can copy the story for the closest existing primitive.
 - The Apple HIG and MD3 research is cited *in place* in the docs — not buried in spec text. Each Foundation page has a "Reference" callout naming the research source and the rezics-specific divergence.
 
@@ -31,60 +31,45 @@ This proposal is the synthesis of those three streams as a *visible* artifact. I
 
 ## Decisions
 
-### Decision 1: Density is class-based on `<html>`, emitted by the existing preflight
+### Decision 1: Density is per-component-type intrinsic; the vocabulary is nine fixed-value padding tokens
 
-The `unify-tokens-single-source` change established the rezics token-emission pattern: a single preflight in `uno-config.ts` emits all auxiliary tokens (`--font-*`, `--radius-*`, `--shadow-*`, `--duration-*`, `--easing-*`, `--state-*-opacity`) to `:root, :host`, plus a `.dark { … }` override for dark mode. Theme switching is **class-based** (`<html class="dark">`).
+**The model.** Density is a property of the *component type*, not the *user session*. A `Table` row is naturally dense (data scanning), a hero section is naturally spacious (it breathes), a `MenuItem` sits in between. These are design-time facts baked into each component, not runtime preferences. There is no toolbar that flips compact/comfortable/spacious; there is no `<html class="density-compact">`; there is no `--density-step`.
 
-Density follows the same pattern.
-
-**Switch mechanism.** Class-based on `<html>`, three states encoded as two classes (default = no class):
-
-```
-<html>                         <!-- comfortable (default) -->
-<html class="density-compact">  <!-- compact -->
-<html class="density-spacious"> <!-- spacious -->
-```
-
-Density and theme classes coexist (`<html class="dark density-compact">`).
-
-**Why class-based and not `data-density`.** Consistency with the existing `.dark` switch is the dominant reason. Introducing an attribute pattern alongside the class pattern would require two cascade roots in stories, in apps, and in the contrast/convention scripts — twice the surface area for the same outcome. The user feedback memory on CSS var prefix (`--rezics-*` not `--rzc-*`) signals a preference for *fewer* divergent conventions.
-
-**System-tier token.** The preflight emits `--density-step` with the comfortable default in `:root, :host` and the two non-default overrides via class selectors:
-
-```css
-:root, :host { --density-step: 0px; }
-.density-compact { --density-step: -2px; }
-.density-spacious { --density-step: 2px; }
-```
-
-Step values are `-2px` / `0px` / `+2px` — gentler than the original `-4 / 0 / +6` from the pre-`unify-tokens-single-source` draft. The modern preset-wind4 single-spacing baseline is already breathable, so wider steps tear the visual rhythm apart.
-
-**Component-tier tokens.** The same preflight emits flat `--padding-*` tokens for the opt-in component list. Each is `calc(<base> + var(--density-step))`:
+**The vocabulary.** The preflight in `uno-config.ts` emits nine component-tier `--padding-*` tokens at fixed values:
 
 ```css
 :root, :host {
-  --padding-table-row-y:    calc(8px + var(--density-step));
-  --padding-list-item-y:    calc(12px + var(--density-step));
-  --padding-toolbar-y:      calc(8px + var(--density-step));
-  --padding-formfield-y:    calc(8px + var(--density-step));
-  --padding-sidebar-item-y: calc(8px + var(--density-step));
-  --padding-tab-item-y:     calc(8px + var(--density-step));
-  --padding-menu-item-y:    calc(6px + var(--density-step));
-  --padding-breadcrumb-y:   calc(4px + var(--density-step));
-  --padding-command-item-y: calc(8px + var(--density-step));
-  /* …horizontal counterparts where the component opts in on the X axis. */
+  --padding-breadcrumb-y:   4px;  /* tightest — sibling-of-text affordance */
+  --padding-menu-item-y:    6px;  /* dropdown rows */
+  --padding-table-row-y:    8px;
+  --padding-toolbar-y:      8px;
+  --padding-formfield-y:    8px;
+  --padding-sidebar-item-y: 8px;
+  --padding-tab-item-y:     8px;
+  --padding-command-item-y: 8px;
+  --padding-list-item-y:    12px; /* loosest — touch-affinity rows */
 }
 ```
 
-The opt-in list:
+The values describe a deliberate ladder: `4 / 6 / 8 / 12`. Breadcrumb is tightest because it lives in a sentence; menu items run inside dropdown popovers and want denser stacks; the cluster at 8px is the rezics "default repeating-row tier"; list items are loosest because they're often the primary touch target on a page.
+
+These nine tokens are the **closed density vocabulary** for rezics-authored components. Adding a tenth requires an OpenSpec change.
+
+**The opt-in list** (rezics-authored components consuming the vocabulary):
 - `Table` row, `List` item, `Toolbar`, FormField (TextField + Select + Combobox), `Sidebar` item, `MenuItem`, `TabsList` item, `Breadcrumb` item, `CommandPalette` item.
 
-Components that *do not* opt in (always render at the comfortable default):
+**The opt-out list** (rezics-authored components using ad-hoc spacing utilities):
 - Hero sections, reading view, book covers, dialog content surfaces, onboarding screens, marketing surfaces.
 
-**Why density never affects type.** Apple HIG and MD3 both forbid this for legibility — type size carries information, and density that re-flows type breaks reading habits. rezics adopts the same constraint. Density affects only padding, gap, and min-height.
+**Vendored shadcn primitives are not patched.** The vocabulary applies to rezics-authored code (`package/ui/src/primitive/`, `package/ui/src/composite/`, app-level composites). Vendored shadcn primitives in `package/ui/src/shadcn/` consume the spacing values shadcn ships with — patching them to consume rezics tokens would create a divergence drift surface every time shadcn updates. (See `migrate-shadcn-to-base-ui-luma` for the rezics-tokens-vs-shadcn-tokens boundary.)
 
-**Why three modes, not MD3's four.** Three is enough discrimination for application UX; the labels (`compact` / `comfortable` / `spacious`) communicate intent better than `-2 / 0 / +1`. MD3's four-step ladder is engineered for pointer-driven dense pro tools; rezics is reading-and-browsing software with admin areas, so the asymmetry "1 dense step, 1 default, 1 leisurely" matches the actual use cases.
+**Why density never affects type.** Apple HIG and MD3 both forbid this for legibility — type size carries information, and density that re-flows type breaks reading habits. rezics adopts the same constraint. The vocabulary contains only spacing-named tokens; no `--font-*` token varies by component type.
+
+**Why no runtime toggle.** Three reasons:
+
+1. *Cost.* A runtime toggle requires a `density-compact` / `density-spacious` cascade root, decorator wiring, three stories per primitive (`Compact` / `Comfortable` / `Spacious` × every story file), per-app density-class plumbing, and review burden on every spacing decision ("does this opt in to density or not?"). The cost compounds across 30 shadcn primitives + 14 rezics primitives + 21 composites.
+2. *Lack of evidence.* The original 3-mode framing came from an MD3 reading; the user explicitly corrected it as "complex, do later" once the design intent (per-component intrinsic) was articulated. There is no concrete user surface today that benefits from a runtime toggle.
+3. *Reversibility.* The current decision is intentionally narrow. If a future need emerges (e.g. an admin power-user mode that visibly tightens every list/table on the page), an OpenSpec change can introduce `--density-step` on top of the fixed-value vocabulary without a refactor — the calc-expression form would slot in cleanly.
 
 ### Decision 2: Foundation pages are seven; six already ship, Iconography is the missing one
 
@@ -115,7 +100,7 @@ The five new pages:
 
 | # | Title | Concept |
 |---|-------|---------|
-| 3 | Foundation/Patterns/Density | Live three-mode demo (compact / comfortable / spacious) with a representative composite (Toolbar + FormField + List). Density toolbar entry lets the reader flip modes. Opt-in/opt-out lists. The "density never affects type" rule. |
+| 3 | Foundation/Patterns/Density | Visualizes the nine-token `--padding-*` ladder (breadcrumb tightest → list-item loosest) and renders each density-bearing rezics component at its intrinsic spacing tier. Documents the opt-in/opt-out classification and the "density never affects type" rule. No mode switcher — density is per-component-type intrinsic, not runtime. |
 | 4 | Foundation/Patterns/State Layer | Hover / Focus / Pressed / Dragged demos showing the 8/12/12/16 ladder applied as quiet rectangular tints. "We don't do this" sample showing MD3's full-bleed circular ripple as the rejected alternative. |
 | 5 | Foundation/Patterns/Depth Without Shadow | Live demo of the canvas → base → elevated → subtle → sunken surface ladder showing how depth is communicated by tonal shift. `shadow-modal` is the *one* exception (modal-only); shown as the rule that proves the principle. |
 | 6 | Foundation/Patterns/Inverse Surface | Snackbars, dark-on-light pull-quotes, "switch to dark mode" preview button. When and when not. |
@@ -143,22 +128,15 @@ toggle-group, tooltip
 - `Disabled` (where the primitive supports a disabled state).
 - `Loading` (where applicable, e.g. Button with `pending` prop).
 - `InsideCard` / `InsideDialog` / `InsideSidebar` for primitives where the surrounding surface affects the visual read (Button, Input, Badge, Tabs).
-- `WithDensity` (where the primitive is in the density opt-in list — three side-by-side at compact / comfortable / spacious).
-
-Stories are short (≤30 lines each); the file structure is consistent across all 30 primitives so a contributor can clone the closest existing primitive's story file and adapt.
+Stories are short (≤30 lines each); the file structure is consistent across all 30 primitives so a contributor can clone the closest existing primitive's story file and adapt. **No `WithDensity` axis** — density is per-component-type intrinsic, not a runtime axis (Decision 1).
 
 **Why all 30 in one change.** Spreading them across changes leaves the design system in a partially-documented state for too long. The work is mechanical (copy a 30-line file, swap the import, customize the variants). The aggregate cost is ~900 lines of stories across 30 files; the individual files are tractable.
 
-### Decision 5: Storybook Density toolbar mirrors the Theme toolbar
+### Decision 5: Storybook toolbar stays at one axis (Light/Dark only)
 
-`package/storybook-config/src/preview.tsx` adds a global toolbar entry for density alongside the existing theme toggle. The two are independent axes:
+`package/storybook-config/src/preview.tsx` keeps its existing single global toolbar entry for theme (Light / Dark, toggling `<html class="dark">`). **No density toolbar is added.** This follows directly from Decision 1: density is per-component-type intrinsic, so there is nothing for a global toolbar to flip.
 
-- Theme: Light / Dark — toggles `<html class="dark">`.
-- Density: Compact / Comfortable / Spacious — toggles `<html class="density-compact">` / `<html class="density-spacious">` (no class for the comfortable default).
-
-Storybook's `globalTypes` mechanism handles both. When the user switches one, the other persists. Stories never need to opt out — the global decorator applies everywhere.
-
-The Density toolbar appears in every package's Storybook (the shared config provides it; per-package previews inherit). Stories for components that don't opt into density still render at every density level (they just look identical at all three).
+The Foundation/Patterns/Density page communicates density by *showing* — it renders each density-bearing rezics component side-by-side at its intrinsic spacing tier, so a viewer sees the breadcrumb-tightest → list-item-loosest ladder at a glance. This is a documentation surface, not a configuration UI.
 
 ### Decision 6: Foundation pages cite research sources inline
 
@@ -177,7 +155,7 @@ The Apple HIG / MD3 hybrid means rezics adopts some things and rejects others. T
 
 - Patterns/State Layer: shows MD3's full-bleed circular ripple as the "we don't do this" sample. Reason: rezics borderless aesthetic; ripple's organic-spread visual signature reads as Material brand, not rezics brand.
 - Patterns/Depth Without Shadow: shows a sample of MD3's dp shadow ladder as the "we don't do this." Reason: shadow is reserved for modals only in rezics; in-flow depth is tonal.
-- Patterns/Density: shows MD3's 4-step density ladder as the rejected alternative for application UX. Reason: three labeled modes communicate intent more clearly than four numeric steps.
+- Patterns/Density: shows MD3's runtime 4-step density toggle as the rejected alternative. Reason: rezics treats density as per-component-type intrinsic (each component has one correct spacing tier), so there is no need for users or apps to flip a knob — the design vocabulary already encodes the right answer per component.
 
 Each rejection is paired with a *replacement* — what we do instead and why.
 
@@ -193,17 +171,17 @@ The existing `_gallery.tsx` helper in `package/ui/src/docs/tokens/_gallery.tsx` 
 
 ### Decision 9: Implementation phase order
 
-The ordering reflects the post-`unify-tokens-single-source` reality (most Foundation work already done) and the dependency graph (density tokens needed before density-aware composites can migrate).
+The ordering reflects the post-`unify-tokens-single-source` reality (most Foundation work already done) and the dependency graph (density vocabulary needed before density-bearing composites can migrate).
 
-1. **Phase 1** — Density tokens. Extend the preflight in `uno-config.ts` with `--density-step` (system tier) and the `--padding-*` set (component tier). Add the global Density toolbar in `package/storybook-config/src/preview.tsx`.
+1. **Phase 1** — Density vocabulary. Extend the preflight in `uno-config.ts` with the nine fixed-value `--padding-*` tokens. **No `preview.tsx` changes** (no density toolbar).
 2. **Phase 2** — Iconography MDX page (the seventh Foundation entry). Verify the existing six Foundation pages still render and have Reference callouts.
 3. **Phase 3** — Five new Patterns pages under `docs/patterns/`. Includes the four new `_gallery.tsx` exports the pages depend on.
-4. **Phase 4** — Density-aware composite migration. Each opt-in composite consumes the `--padding-*` token; each gets a Density-axis story.
+4. **Phase 4** — Density-bearing composite migration. Each opt-in rezics-authored composite consumes the corresponding `--padding-*` token. Vendored shadcn primitives are not touched.
 5. **Phase 5** — 30 shadcn-primitive stories + the 1 missing rezics-primitive story (`TextButton`).
 6. **Phase 6** — Verification (build, type-check, contrast, convention).
 7. **Phase 7** — CLAUDE.md + skill cross-links.
 
-Phases 4 and 5 are the bulk of the diff. Phase 4 changes ~15 component source files and adds ~10 new stories. Phase 5 adds 31 story files (mostly mechanical).
+Phases 4 and 5 are the bulk of the diff. Phase 4 changes ~10 rezics-authored component source files. Phase 5 adds 31 story files (mostly mechanical).
 
 ### Decision 10: Story coverage of shadcn primitives uses an inventory list, not a discovery scan
 
@@ -214,17 +192,16 @@ The task list (`tasks.md` Phase 5) hand-enumerates all 30 primitives. Reasons:
 
 ## Trade-offs
 
-- **Class-based density vs `data-density` attribute.** Chose class-based. Trade-off: tri-state class encoding (default = no class) is slightly less self-documenting than `data-density="comfortable"`. Acceptable — the convention matches `.dark`, and stories make the three states explicit.
-- **Three-mode density vs MD3 four-step.** Chose three. Trade-off: less continuous tunability. Acceptable — application UX rarely needs four steps; the three-mode labels are clearer.
-- **Density step `-2 / 0 / +2` vs the original `-4 / 0 / +6`.** Chose the gentler set. Reason: the modern preset-wind4 baseline is already breathable; wider steps tear visual rhythm. Trade-off: less differentiation between modes. If visual review during Phase 4 calibration shows the modes are too similar, the step can widen.
+- **Per-component intrinsic density vs runtime toggle.** Chose intrinsic. Trade-off: no end-user "I want everything tighter" affordance, no admin power-user mode. Acceptable — the user explicitly framed runtime variants as "complex, do later." If demand emerges, a future OpenSpec change can layer `--density-step` on top of the fixed-value vocabulary without a refactor.
+- **Closed nine-token vocabulary vs open extension.** Chose closed. Trade-off: any new density-bearing component type requires a vocabulary extension OpenSpec change. Acceptable — the friction is the point: it forces designers to ask "is this a new component type, or does it slot into an existing tier?" before adding a tenth token.
 - **Density tokens in the existing preflight vs a new file.** Chose preflight extension. Reason: `unify-tokens-single-source` retired `tokens.css` and centralized emission in `uno-config.ts`; resurrecting a separate token file would regress R9. Trade-off: `uno-config.ts` grows. Acceptable — it's already the single emission surface for the entire token system.
-- **Storybook reads from CSS via `getComputedStyle` vs TS imports.** Chose CSS. Trade-off: the gallery has a tiny perf overhead on every theme/density switch. Negligible.
+- **Vocabulary applies to rezics-authored code only, not vendored shadcn.** Chose to leave shadcn untouched. Trade-off: vendored shadcn primitives may have spacing that doesn't perfectly align with the rezics ladder. Acceptable — the alignment task is calibration, not patching, and is owned by `migrate-shadcn-to-base-ui-luma` (recalibrate the nine token *values* against Luma's intrinsic padding so visual rhythm matches without modifying shadcn source).
+- **Storybook reads from CSS via `getComputedStyle` vs TS imports.** Chose CSS. Trade-off: the gallery has a tiny perf overhead on every theme switch. Negligible.
 - **One change for all 30 shadcn stories vs phased.** Chose one. Trade-off: large PR. Mitigated by the per-primitive file structure (each ≤30 lines, mostly mechanical).
 - **Patterns pages with explicit "we don't do this" samples vs positive-only.** Chose explicit rejection samples. Trade-off: longer pages. Acceptable — the rejection is the *thing the page is teaching*.
 
 ## Open Questions
 
-- Will the `-2 / 0 / +2` density steps need recalibration during Phase 4 visual review? If a mode feels too tight or too loose, adjust before this change ships. Default: keep the values; widen only if review explicitly warrants.
-- Does Storybook's `globalTypes` toolbar support icons, or only text labels? Default: text labels. If icons cleanly available, switch to lucide icons (`Maximize2` / `Square` / `Minimize2`). Optional polish.
+- Do the nine token values (`4 / 6 / 8 / 8 / 8 / 8 / 8 / 8 / 12`) need recalibration once visual review compares them against Luma's intrinsic padding? Default: keep the values; defer recalibration to `migrate-shadcn-to-base-ui-luma` if a misalignment surfaces between rezics-authored composites and adjacent vendored shadcn primitives on the same page.
 - Should Foundation/Patterns/Inverse Surface document the `Sonner` primitive's surface use? Default: yes — `Sonner` (toast) is the canonical inverse-surface consumer.
 - Where do the 30 shadcn-primitive stories live in Storybook's tree? Default: under a `Primitives/` top-level group (`Primitives/Button`, `Primitives/Dialog`, etc.). Confirm by checking the existing rezics-primitive stories' tree placement.
