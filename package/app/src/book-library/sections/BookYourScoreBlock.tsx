@@ -94,7 +94,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
             className="w-[30px] h-[30px]"
             style={{ color: "var(--colors-brand-fill)" }}
           />
-          <span className="text-base font-medium text-brand">
+          <span className="text-base font-medium text-brand-fill">
             {t("book.hero.your_score.rate", "Rate")}
           </span>
         </>

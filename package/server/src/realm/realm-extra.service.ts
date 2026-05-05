@@ -24,6 +24,7 @@ const REALM_AUTHORITY_ROLES = ["owner", "admin", "moderator"] as const;
 
 type ExtraJson = Record<string, unknown>;
 type SingleExtraKey = "rule" | "about" | "banner";
+type UnitReferenceExtraKey = "rule" | "about" | "banner";
 
 const SINGLE_EXTRA_KEYS = new Set<string>(["rule", "about", "banner"]);
 
@@ -32,6 +33,68 @@ function readList(extra: unknown, key: string): string[] {
   const value = (extra as ExtraJson)[key];
   if (!Array.isArray(value)) return [];
   return value.filter((v): v is string => typeof v === "string");
+}
+
+function readUnitReference(extra: unknown, key: string): string | null {
+  if (!extra || typeof extra !== "object") return null;
+  const value = (extra as ExtraJson)[key];
+  if ((key === "rule" || key === "about") && typeof value === "string") {
+    return value;
+  }
+  if (
+    key === "banner" &&
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    (value as { kind?: unknown }).kind === "post" &&
+    typeof (value as { unitId?: unknown }).unitId === "string"
+  ) {
+    return (value as { unitId: string }).unitId;
+  }
+  return null;
+}
+
+async function findLiveUnitReferenceIds(
+  ids: string[],
+  caller?: RezicsSessionClaims | null,
+): Promise<Set<string>> {
+  if (ids.length === 0) return new Set();
+  const visible = await prisma.unit.findMany({
+    where: {
+      id: { in: ids },
+      type: "POST",
+      status: { not: "DELETED" },
+      OR: [
+        { visibility: "PUBLIC" },
+        ...(caller ? [{ userId: caller.unitId }] : []),
+      ],
+    },
+    select: { id: true },
+  });
+  return new Set(visible.map((unit) => unit.id));
+}
+
+export async function filterRealmExtraPublic(
+  extra: unknown,
+  caller: RezicsSessionClaims | null = null,
+): Promise<ExtraJson | undefined> {
+  if (!extra || typeof extra !== "object") return undefined;
+  const next = { ...(extra as ExtraJson) };
+  const refs = new Map<UnitReferenceExtraKey, string>();
+
+  for (const key of ["rule", "about", "banner"] as const) {
+    const id = readUnitReference(next, key);
+    if (id) refs.set(key, id);
+  }
+
+  const liveIds = await findLiveUnitReferenceIds([...refs.values()], caller);
+  for (const [key, id] of refs) {
+    if (!liveIds.has(id)) {
+      delete next[key];
+    }
+  }
+
+  return next;
 }
 
 function writeList(extra: unknown, key: string, list: string[]): ExtraJson {
@@ -375,6 +438,11 @@ export async function readListPublic(
   key: string,
 ): Promise<string[]> {
   const extra = await loadExtra(realmId);
+  const unitReference = readUnitReference(extra, key);
+  if (unitReference) {
+    const liveIds = await findLiveUnitReferenceIds([unitReference], caller);
+    return liveIds.has(unitReference) ? [unitReference] : [];
+  }
   const stored = readList(extra, key);
   if (stored.length === 0) return [];
   const visible = await prisma.unit.findMany({
@@ -403,6 +471,14 @@ export async function readListAdmin(
 ): Promise<{ unitIds: string[]; staleIds: string[] }> {
   await authorizeForRealm(caller, realmId);
   const extra = await loadExtra(realmId);
+  const unitReference = readUnitReference(extra, key);
+  if (unitReference) {
+    const liveIds = await findLiveUnitReferenceIds([unitReference], null);
+    return {
+      unitIds: [unitReference],
+      staleIds: liveIds.has(unitReference) ? [] : [unitReference],
+    };
+  }
   const stored = readList(extra, key);
   if (stored.length === 0) return { unitIds: [], staleIds: [] };
   const live = await prisma.unit.findMany({

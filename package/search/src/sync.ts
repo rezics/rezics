@@ -635,6 +635,7 @@ const postIncludeForSync = {
   unit: {
     include: {
       user: true,
+      inRealms: true,
     },
   },
   targetUnit: {
@@ -650,6 +651,7 @@ const postIncludeForSync = {
 
 export function buildPostDocument(post: any): PostSearchDocument {
   const user = post.unit?.user;
+  const inRealms: any[] = post.unit?.inRealms ?? [];
   const targetUnit = post.targetUnit;
   const scoreEntry = post.scoreEntry;
 
@@ -692,6 +694,7 @@ export function buildPostDocument(post: any): PostSearchDocument {
         : post.updatedAt,
     targetUnitId: post.targetUnitId ?? null,
     realmUnitId: post.realmUnitId ?? null,
+    realmIds: inRealms.map((realm) => realm.realmUnitId),
     rootPostUnitId: post.rootPostUnitId ?? null,
     parentPostUnitId: post.parentPostUnitId ?? null,
     authorUserId: post.authorUserId,
@@ -715,7 +718,7 @@ export async function syncSinglePost(client: SearchClient, unitId: string) {
     where: { unitId },
     include: {
       ...postIncludeForSync,
-      unit: { include: { user: true } },
+      unit: { include: { user: true, inRealms: true } },
     },
   });
 
@@ -744,7 +747,7 @@ export async function syncAllPosts(client: SearchClient) {
       },
       include: {
         ...postIncludeForSync,
-        unit: { include: { user: true } },
+        unit: { include: { user: true, inRealms: true } },
       },
       orderBy: { unitId: "asc" },
       take: BATCH_SIZE,
@@ -765,6 +768,50 @@ export async function syncAllPosts(client: SearchClient) {
   return { message: "syncAllPosts success", totalSynced: total };
 }
 
+export async function syncAllPostRealmIds(client: SearchClient) {
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const posts: any[] = await prisma.post.findMany({
+      where: {
+        unit: { status: "PUBLISHED" },
+      },
+      select: {
+        unitId: true,
+        unit: {
+          select: {
+            inRealms: {
+              select: { realmUnitId: true },
+              orderBy: { realmUnitId: "asc" },
+            },
+          },
+        },
+      },
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (posts.length === 0) break;
+
+    await client.patchPosts(
+      posts.map((post) => ({
+        id: post.unitId,
+        realmIds: (post.unit?.inRealms ?? []).map(
+          (row: any) => row.realmUnitId,
+        ),
+      })),
+    );
+
+    total += posts.length;
+    cursor = posts[posts.length - 1]!.unitId;
+  }
+
+  return { message: "syncAllPostRealmIds success", totalSynced: total };
+}
+
 export async function syncPostsByAuthor(client: SearchClient, userId: string) {
   let cursor: string | undefined;
   let total = 0;
@@ -777,7 +824,7 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
       },
       include: {
         ...postIncludeForSync,
-        unit: { include: { user: true } },
+        unit: { include: { user: true, inRealms: true } },
       },
       orderBy: { unitId: "asc" },
       take: BATCH_SIZE,
@@ -812,7 +859,7 @@ export async function syncPostsByTarget(
       },
       include: {
         ...postIncludeForSync,
-        unit: { include: { user: true } },
+        unit: { include: { user: true, inRealms: true } },
       },
       orderBy: { unitId: "asc" },
       take: BATCH_SIZE,

@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { PinboardAdminSection } from "@/pinboard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { canManageRealm } from "../models/canManageRealm";
+import { RealmExtraManageSection } from "../sections/RealmExtraManageSection";
 
 interface RealmManagePageProps {
   realmId: string;
@@ -115,6 +116,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
           realmUnitId={realmId}
           isDefaultRealm={isDefaultRealm}
         />
+        <RealmExtraManageSection realmId={realmId} extra={realm?.extra} />
         <div className="flex flex-row justify-end gap-4">
           <Button
             variant="ghost"

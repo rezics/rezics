@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
     return (
       <header
         className={cn(
-          "fixed top-0 z-[1201] bg-surface-elevated border-b border-border-whisper transition-[margin,width] duration-225 ease-out pointer-events-auto",
+          "fixed top-0 z-[1201] bg-surface-canvas border-b border-border-whisper transition-[margin,width] duration-225 ease-out pointer-events-auto",
           isDragging && "rounded-tl-2xl rounded-bl-2xl",
         )}
         style={{
@@ -71,7 +71,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
                 <img src="/logo.svg" alt="logo" />
               </div>
             )}
-            <h1 className="text-3xl font-bold text-text-brand m-0">
+            <h1 className="text-3xl font-bold text-brand-fill m-0">
               REZICS
             </h1>
           </Link>

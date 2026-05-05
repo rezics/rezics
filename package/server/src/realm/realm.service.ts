@@ -17,6 +17,7 @@ import {
   patchContentRealmIdsToMeili,
   patchContentRealmTagKeysToMeili,
 } from "@/meili/content/sync";
+import { patchPostFieldsToMeili } from "@/meili/post/sync";
 import {
   patchRealmMemberCountToMeili,
   patchRealmMetadataToMeili,
@@ -29,6 +30,7 @@ import {
   mapRealmToDTO,
   mapRealmUnitToDTO,
 } from "./realm.mapper";
+import { filterRealmExtraPublic } from "./realm-extra.service";
 import {
   type RealmWithRelations,
   realmInclude,
@@ -36,6 +38,17 @@ import {
 } from "./types";
 
 export class RealmService {
+  private async patchPostRealmIds(unitId: string): Promise<void> {
+    const rows = await prisma.realmUnit.findMany({
+      where: { unitId },
+      select: { realmUnitId: true },
+      orderBy: { realmUnitId: "asc" },
+    });
+    await patchPostFieldsToMeili(unitId, {
+      realmIds: rows.map((row) => row.realmUnitId),
+    });
+  }
+
   private buildWhere(options: RealmListQuery): Prisma.RealmWhereInput {
     const and: Prisma.RealmWhereInput[] = [
       { unit: { status: UnitStatus.PUBLISHED, type: UnitType.REALM } },
@@ -94,7 +107,18 @@ export class RealmService {
       prisma.realm.count({ where }),
     ]);
 
-    return { realms: rows.map(mapRealmListRowToDTO), total };
+    return {
+      realms: await Promise.all(
+        rows.map(async (row) => {
+          const dto = mapRealmListRowToDTO(row);
+          return {
+            ...dto,
+            extra: await filterRealmExtraPublic(dto.extra),
+          };
+        }),
+      ),
+      total,
+    };
   }
 
   async getByUnitId(unitId: string): Promise<RealmDTO> {
@@ -102,7 +126,11 @@ export class RealmService {
       where: { unitId },
       include: realmInclude,
     });
-    return mapRealmToDTO(row);
+    const dto = mapRealmToDTO(row);
+    return {
+      ...dto,
+      extra: await filterRealmExtraPublic(dto.extra),
+    };
   }
 
   async create(
@@ -159,7 +187,11 @@ export class RealmService {
     // Fire-and-forget sync to Meilisearch
     syncRealmToMeili(unit.id).catch(() => {});
 
-    return mapRealmToDTO(row);
+    const dto = mapRealmToDTO(row);
+    return {
+      ...dto,
+      extra: await filterRealmExtraPublic(dto.extra),
+    };
   }
 
   async update(unitId: string, req: UpdateRealmInput): Promise<RealmDTO> {
@@ -185,7 +217,11 @@ export class RealmService {
     if (extra !== undefined) patchFields.extra = extra;
     patchRealmMetadataToMeili(unitId, patchFields).catch(() => {});
 
-    return mapRealmToDTO(row);
+    const dto = mapRealmToDTO(row);
+    return {
+      ...dto,
+      extra: await filterRealmExtraPublic(dto.extra),
+    };
   }
 
   async delete(unitId: string): Promise<void> {
@@ -275,6 +311,12 @@ export class RealmService {
       data: { realmUnitId, unitId },
     });
     await patchContentRealmIdsToMeili(unitId);
+    this.patchPostRealmIds(unitId).catch((error) => {
+      console.error("[realmUnit] failed to patch post realmIds", {
+        unitId,
+        error,
+      });
+    });
     return mapRealmUnitToDTO(row);
   }
 
@@ -285,6 +327,12 @@ export class RealmService {
       },
     });
     await patchContentRealmIdsToMeili(unitId);
+    this.patchPostRealmIds(unitId).catch((error) => {
+      console.error("[realmUnit] failed to patch post realmIds", {
+        unitId,
+        error,
+      });
+    });
   }
 
   // --- Realm tag units ---
@@ -572,7 +620,15 @@ export class RealmService {
     ]);
 
     return {
-      realms: realms.map((r) => mapRealmToDTO(r as RealmWithRelations)),
+      realms: await Promise.all(
+        realms.map(async (r) => {
+          const dto = mapRealmToDTO(r as RealmWithRelations);
+          return {
+            ...dto,
+            extra: await filterRealmExtraPublic(dto.extra),
+          };
+        }),
+      ),
       total,
     };
   }

@@ -1,11 +1,15 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
-import { PostKind } from "@rezics/contract";
+import { realmQueries } from "@rezics/api/realm/realm";
+import { tagQueries } from "@rezics/api/tag/tag";
+import { PostKind, type TagTreeNode } from "@rezics/contract";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import {
   forwardRef,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -18,15 +22,43 @@ export type ReplyComposerHandle = {
   focus: () => void;
 };
 
-export interface ReplyComposerProps {
+type ReplyComposerBaseProps = {
   mode: ReplyComposerMode;
-  targetUnitId: string;
-  parentPostUnitId?: string;
   placeholder?: string;
   autoFocus?: boolean;
   onSubmitted?: () => void;
   onCancelled?: () => void;
-}
+};
+
+export type ReplyComposerReplyModeProps = ReplyComposerBaseProps & {
+  targetUnitId: string;
+  parentPostUnitId?: string;
+  realmUnitIds?: never;
+  tagIds?: string[];
+};
+
+export type ReplyComposerRealmPostModeProps = ReplyComposerBaseProps & {
+  realmUnitIds: string[];
+  tagIds?: string[];
+  targetUnitId?: never;
+  parentPostUnitId?: never;
+};
+
+export type ReplyComposerProps =
+  | ReplyComposerReplyModeProps
+  | ReplyComposerRealmPostModeProps;
+
+type TagOption = {
+  tagId: string;
+  label: string;
+};
+
+type TagSearchResult = {
+  unitId?: string;
+  tagUnitId?: string;
+  label?: string;
+  slug?: string;
+};
 
 /**
  * Blur-retain rule: if the body is empty, the composer should collapse on
@@ -37,22 +69,227 @@ export function useBlurRetain(body: string) {
   return useCallback(() => body.trim().length > 0, [body]);
 }
 
+function getTagLabel(tagId: string, label?: string) {
+  return label?.trim() || tagId.slice(0, 8);
+}
+
+function flattenTagTree(nodes: TagTreeNode[] | undefined): TagOption[] {
+  const options: TagOption[] = [];
+
+  const visit = (items: TagTreeNode[]) => {
+    for (const item of items) {
+      if (item.tagId && !item.disabled) {
+        options.push({
+          tagId: item.tagId,
+          label: getTagLabel(item.tagId, item.label),
+        });
+      }
+      if (item.children?.length) visit(item.children);
+    }
+  };
+
+  visit(nodes ?? []);
+  return options;
+}
+
+function RealmPostTagPicker({
+  realmUnitIds,
+  tagIds,
+  selectedTagIds,
+  onSelectedTagIdsChange,
+}: {
+  realmUnitIds: string[];
+  tagIds?: string[];
+  selectedTagIds: string[];
+  onSelectedTagIdsChange: (tagIds: string[]) => void;
+}) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const firstRealmId = realmUnitIds.length === 1 ? realmUnitIds[0] : undefined;
+  const { data: realm } = useQuery({
+    ...realmQueries.detail(firstRealmId ?? ""),
+    enabled: Boolean(firstRealmId),
+  });
+  const tagTree = firstRealmId
+    ? (realm?.extra?.tagTree as TagTreeNode[] | undefined)
+    : undefined;
+  const quickPicks = useMemo(() => flattenTagTree(tagTree), [tagTree]);
+  const selectedSet = useMemo(
+    () => new Set(selectedTagIds),
+    [selectedTagIds],
+  );
+
+  useEffect(() => {
+    onSelectedTagIdsChange(tagIds ?? []);
+  }, [onSelectedTagIdsChange, tagIds]);
+
+  const trimmedSearch = searchTerm.trim();
+  const { data: searchData, isLoading: isSearching } = useQuery(
+    tagQueries.search(trimmedSearch),
+  );
+  const searchResults = useMemo(() => {
+    return ((searchData?.tags ?? []) as TagSearchResult[])
+      .map((tag) => {
+        const tagId = tag.unitId ?? tag.tagUnitId;
+        if (!tagId || selectedSet.has(tagId)) return null;
+        return {
+          tagId,
+          label: getTagLabel(tagId, tag.label ?? tag.slug),
+        };
+      })
+      .filter(Boolean) as TagOption[];
+  }, [searchData?.tags, selectedSet]);
+
+  const toggleTag = (tagId: string) => {
+    const next = selectedSet.has(tagId)
+      ? selectedTagIds.filter((id) => id !== tagId)
+      : [...selectedTagIds, tagId];
+    onSelectedTagIdsChange(next);
+  };
+
+  const selectedLabels = new Map<string, string>();
+  for (const option of quickPicks) {
+    selectedLabels.set(option.tagId, option.label);
+  }
+  for (const option of searchResults) {
+    selectedLabels.set(option.tagId, option.label);
+  }
+
+  const renderNode = (node: TagTreeNode, depth = 0): React.ReactNode => {
+    const children = node.children?.map((child, index) => (
+      <div key={`${child.tagId ?? child.label ?? "node"}-${depth}-${index}`}>
+        {renderNode(child, depth + 1)}
+      </div>
+    ));
+
+    if (node.disabled && !node.tagId) {
+      return (
+        <div className={depth > 0 ? "pl-3" : undefined}>
+          {node.label && (
+            <div className="px-1 pt-2 text-xs font-medium leading-dense text-text-tertiary">
+              {node.label}
+            </div>
+          )}
+          {children}
+        </div>
+      );
+    }
+
+    if (node.tagId) {
+      const selected = selectedSet.has(node.tagId);
+      return (
+        <Button
+          type="button"
+          size="sm"
+          variant={selected ? "default" : "secondary"}
+          className="h-8"
+          onClick={() => toggleTag(node.tagId!)}
+        >
+          {getTagLabel(node.tagId, node.label)}
+        </Button>
+      );
+    }
+
+    return children;
+  };
+
+  return (
+    <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-3">
+      {selectedTagIds.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedTagIds.map((tagId) => (
+            <Button
+              key={tagId}
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-8"
+              onClick={() => toggleTag(tagId)}
+            >
+              {selectedLabels.get(tagId) ?? getTagLabel(tagId)}
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {tagTree && tagTree.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {tagTree.map((node, index) => (
+            <div
+              key={`${node.tagId ?? node.label ?? "node"}-${index}`}
+              className="contents"
+            >
+              {renderNode(node)}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2">
+        <Input
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search tags"
+        />
+        {trimmedSearch && (
+          <div className="flex flex-wrap gap-2">
+            {isSearching ? (
+              <span className="text-sm leading-ui text-text-secondary">
+                Searching…
+              </span>
+            ) : searchResults.length > 0 ? (
+              searchResults.map((tag) => (
+                <Button
+                  key={tag.tagId}
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  className="h-8"
+                  onClick={() => toggleTag(tag.tagId)}
+                >
+                  {tag.label}
+                </Button>
+              ))
+            ) : (
+              <span className="text-sm leading-ui text-text-secondary">
+                No matching tags
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>(
   function ReplyComposer(
-    {
+    props,
+    ref,
+  ) {
+    const {
       mode,
-      targetUnitId,
-      parentPostUnitId,
       placeholder = "Add a reply…",
       autoFocus = false,
       onSubmitted,
       onCancelled,
-    },
-    ref,
-  ) {
+    } = props;
+    const isRealmPostMode = "realmUnitIds" in props;
+    const realmUnitIds = isRealmPostMode ? props.realmUnitIds : undefined;
+    const targetUnitId = isRealmPostMode ? undefined : props.targetUnitId;
+    const parentPostUnitId = isRealmPostMode
+      ? undefined
+      : props.parentPostUnitId;
+    const initialTagIds = props.tagIds;
+    const invalidMode =
+      Boolean(realmUnitIds?.length) &&
+      Boolean((props as Partial<ReplyComposerReplyModeProps>).targetUnitId ||
+        (props as Partial<ReplyComposerReplyModeProps>).parentPostUnitId);
     const startsExpanded = mode === "expanded" || autoFocus;
     const [expanded, setExpanded] = useState<boolean>(startsExpanded);
     const [body, setBody] = useState("");
+    const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
+      initialTagIds ?? [],
+    );
     const triggerRef = useRef<HTMLDivElement>(null);
     const shouldRetainOnBlur = useBlurRetain(body);
     const mutation = useCreatePostMutation();
@@ -62,23 +299,38 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
       [],
     );
 
+    const focusEditor = useCallback(() => {
+      queueMicrotask(() => {
+        const el =
+          triggerRef.current?.querySelector<HTMLElement>(
+            "textarea, [contenteditable='true']",
+          );
+        el?.focus();
+      });
+    }, []);
+
     useImperativeHandle(
       ref,
       () => ({
         focus: () => {
           setExpanded(true);
-          // defer focus until editor mounts
-          queueMicrotask(() => {
-            const el =
-              triggerRef.current?.querySelector<HTMLTextAreaElement>(
-                "textarea, [contenteditable='true']",
-              );
-            el?.focus();
-          });
+          focusEditor();
         },
       }),
-      [],
+      [focusEditor],
     );
+
+    useEffect(() => {
+      if (invalidMode) {
+        console.error(
+          "ReplyComposer received both reply props and realmUnitIds.",
+        );
+      }
+    }, [invalidMode]);
+
+    useEffect(() => {
+      if (isRealmPostMode && expanded) focusEditor();
+    }, [expanded, focusEditor, isRealmPostMode]);
 
     const reset = () => {
       setBody("");
@@ -88,13 +340,23 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
     const handleSubmit = () => {
       const trimmed = body.trim();
       if (!trimmed) return;
+      const activeRealmUnitIds = realmUnitIds ?? [];
+      const payload = isRealmPostMode
+        ? {
+            realmUnitIds: activeRealmUnitIds,
+            tagIds: selectedTagIds,
+            kind: PostKind.POST,
+            body: trimmed,
+          }
+        : {
+            targetUnitId,
+            parentPostUnitId,
+            kind: PostKind.POST,
+            body: trimmed,
+          };
+
       mutation.mutate(
-        {
-          targetUnitId,
-          parentPostUnitId,
-          kind: PostKind.POST,
-          body: trimmed,
-        },
+        payload,
         {
           onSuccess: () => {
             reset();
@@ -113,6 +375,14 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
     const handleProgressiveFocus = () => {
       setExpanded(true);
     };
+
+    if (invalidMode) {
+      return (
+        <div className="rounded-md bg-error-fill/10 p-3 text-sm leading-ui text-error-text">
+          Invalid composer configuration.
+        </div>
+      );
+    }
 
     if (mode === "progressive" && !expanded) {
       return (
@@ -137,6 +407,14 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
           onChange={setBody}
           resize={resize}
         />
+        {isRealmPostMode && (realmUnitIds?.length ?? 0) > 0 && (
+          <RealmPostTagPicker
+            realmUnitIds={realmUnitIds ?? []}
+            tagIds={initialTagIds}
+            selectedTagIds={selectedTagIds}
+            onSelectedTagIdsChange={setSelectedTagIds}
+          />
+        )}
         <div className="flex flex-row justify-end gap-2">
           <Button
             size="sm"
@@ -151,7 +429,11 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
             onClick={handleSubmit}
             disabled={mutation.isPending || !body.trim()}
           >
-            {mutation.isPending ? "Posting…" : "Reply"}
+            {mutation.isPending
+              ? "Posting…"
+              : isRealmPostMode
+                ? "Post"
+                : "Reply"}
           </Button>
         </div>
       </div>

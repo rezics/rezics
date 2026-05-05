@@ -125,6 +125,7 @@ export function useJoinRealmMutation(
       queryClient.invalidateQueries({
         queryKey: realmKeys.detail(variables.realmUnitId),
       });
+      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -151,6 +152,7 @@ export function useLeaveRealmMutation(
       queryClient.invalidateQueries({
         queryKey: realmKeys.detail(realmUnitId),
       });
+      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
       options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
     },
   });

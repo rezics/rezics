@@ -1,4 +1,9 @@
+import { realmKeys } from "@rezics/api/realm/realm";
+import { tagKeys } from "@rezics/api/tag/tag";
+import { LANGUAGES, type RealmDTO } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, type ReactNode } from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { ReplyComposer } from "./ReplyComposer";
@@ -14,10 +19,66 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof ReplyComposer>;
+} satisfies Meta;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
+
+const REALM_WITH_TAG_TREE_ID = "fixture-realm-with-tag-tree";
+const REALM_EMPTY_TAG_TREE_ID = "fixture-realm-empty-tag-tree";
+
+function makeRealm(unitId: string, extra: RealmDTO["extra"]): RealmDTO {
+  return {
+    unitId,
+    slug: unitId,
+    userId: "fixture-user",
+    isPublic: true,
+    isOfficial: false,
+    memberCount: 18,
+    extra,
+    translations: [
+      {
+        unitId,
+        language: LANGUAGES.EN,
+        title: "Fixture Realm",
+        description: "Realm composer fixture.",
+      },
+    ],
+  } as RealmDTO;
+}
+
+function SeedRealmComposer({
+  realmId,
+  extra,
+  children,
+}: {
+  realmId: string;
+  extra: RealmDTO["extra"];
+  children: ReactNode;
+}) {
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    qc.setQueryData(realmKeys.detail(realmId), makeRealm(realmId, extra));
+    qc.setQueryData(tagKeys.search("art"), {
+      total: 2,
+      tags: [
+        {
+          unitId: "tag-art-history",
+          label: "Art history",
+          slug: "art-history",
+        },
+        {
+          unitId: "tag-visual-culture",
+          label: "Visual culture",
+          slug: "visual-culture",
+        },
+      ],
+    });
+  }, [extra, qc, realmId]);
+
+  return <div className="p-4">{children}</div>;
+}
 
 export const Default: Story = {
   render: () => (
@@ -52,6 +113,73 @@ export const Empty: Story = {
         parentPostUnitId="fixture-parent-3"
       />
     </div>
+  ),
+};
+
+export const RealmPostWithTagTree: Story = {
+  render: () => (
+    <SeedRealmComposer
+      realmId={REALM_WITH_TAG_TREE_ID}
+      extra={{
+        tagTree: [
+          {
+            disabled: true,
+            label: "Reading mode",
+            children: [
+              { tagId: "tag-close-reading", label: "Close reading" },
+              { tagId: "tag-reread", label: "Re-read" },
+            ],
+          },
+          { tagId: "tag-question", label: "Question" },
+        ],
+      }}
+    >
+      <ReplyComposer
+        mode="expanded"
+        realmUnitIds={[REALM_WITH_TAG_TREE_ID]}
+        tagIds={["tag-question"]}
+      />
+    </SeedRealmComposer>
+  ),
+};
+
+export const RealmPostSearchOnly: Story = {
+  render: () => (
+    <SeedRealmComposer
+      realmId={REALM_EMPTY_TAG_TREE_ID}
+      extra={{ tagTree: [] }}
+    >
+      <ReplyComposer mode="expanded" realmUnitIds={[REALM_EMPTY_TAG_TREE_ID]} />
+    </SeedRealmComposer>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.type(canvas.getByPlaceholderText(/search tags/i), "art");
+    await waitFor(() => {
+      expect(canvas.queryByText("Art history")).not.toBeNull();
+    });
+  },
+};
+
+export const RealmPostDisabledHeader: Story = {
+  render: () => (
+    <SeedRealmComposer
+      realmId={REALM_WITH_TAG_TREE_ID}
+      extra={{
+        tagTree: [
+          {
+            disabled: true,
+            label: "Format",
+            children: [
+              { tagId: "tag-note", label: "Note" },
+              { tagId: "tag-review", label: "Review" },
+            ],
+          },
+        ],
+      }}
+    >
+      <ReplyComposer mode="expanded" realmUnitIds={[REALM_WITH_TAG_TREE_ID]} />
+    </SeedRealmComposer>
   ),
 };
 

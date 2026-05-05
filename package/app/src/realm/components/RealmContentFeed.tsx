@@ -4,16 +4,26 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { PostCard } from "@/post";
+import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
 
 interface RealmContentFeedProps {
   realmId: string;
+  sort?: RealmFeedSort;
+  tagIds?: string[];
 }
 
 export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   realmId,
+  sort = "new",
+  tagIds = [],
 }) => {
   const { t } = useTranslation();
-  const { data } = useQuery(postQueries.byTarget(realmId));
+  const { data } = useQuery(
+    postQueries.byRealm(realmId, {
+      sort,
+      ...(tagIds.length > 0 ? { tagIds } : {}),
+    }),
+  );
   const posts = data?.posts ?? [];
 
   if (posts.length === 0) {

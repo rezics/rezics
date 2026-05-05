@@ -38,6 +38,11 @@ const unitFindUniqueMock = mock(async ({ where }: any) => {
 });
 const unitFindManyMock = mock(async ({ where }: any) => {
   const ids = where.id.in as string[];
+  if (where.type === "POST") {
+    return ids
+      .filter((id) => id.startsWith("post-"))
+      .map((id) => ({ id }));
+  }
   return ids
     .filter((id) => id.startsWith("tag-"))
     .map((id) => ({ id }));
@@ -67,6 +72,9 @@ Object.assign(prismaMock, {
 
 const {
   clearSingleExtraKey,
+  filterRealmExtraPublic,
+  readListAdmin,
+  readListPublic,
   setSingleExtraKey,
   setTagTreeExtra,
 } = await import("./realm-extra.service");
@@ -182,5 +190,35 @@ describe("realm extra single-key service", () => {
     await setSingleExtraKey(caller, "realm-1", "about", "post-about");
 
     expect(queryRawMock).toHaveBeenCalledTimes(2);
+  });
+
+  test("public stale filtering removes stale rule/about/banner post references", async () => {
+    const extra = await filterRealmExtraPublic({
+      rule: "post-rule",
+      about: "missing-post",
+      banner: { kind: "post", unitId: "deleted-post" },
+      tagTree: [{ tagId: "tag-action" }],
+    });
+
+    expect(extra).toEqual({
+      rule: "post-rule",
+      tagTree: [{ tagId: "tag-action" }],
+    });
+  });
+
+  test("single-key public and admin reads surface stale markers", async () => {
+    storedExtra = {
+      rule: "missing-post",
+      banner: { kind: "post", unitId: "post-banner" },
+    };
+
+    await expect(readListPublic(null, "realm-1", "rule")).resolves.toEqual([]);
+    await expect(readListPublic(null, "realm-1", "banner")).resolves.toEqual([
+      "post-banner",
+    ]);
+    await expect(readListAdmin(caller, "realm-1", "rule")).resolves.toEqual({
+      unitIds: ["missing-post"],
+      staleIds: ["missing-post"],
+    });
   });
 });

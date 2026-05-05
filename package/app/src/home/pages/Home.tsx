@@ -32,7 +32,7 @@ export const Home: React.FC<HomeProps> = () => {
         )}
         <div className="w-full">
           <div className="space-y-2 mb-4">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">
+            <p className="text-xs uppercase tracking-[0.35em] text-text-primary">
               {t("page.home.hero.kicker")}
             </p>
             <h1 className="text-2xl font-semibold leading-snug">

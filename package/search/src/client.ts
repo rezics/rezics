@@ -94,6 +94,7 @@ export class SearchClient {
       filterableAttributes: [
         "kind",
         "targetUnitId",
+        "realmIds",
         "realmUnitId",
         "authorUserId",
         "depth",

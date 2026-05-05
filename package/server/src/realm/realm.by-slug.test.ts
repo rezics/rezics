@@ -40,6 +40,33 @@ mock.module("@/unit/unit.service", () => ({
 mock.module("./realm.service", () => ({
   REALM_TAG_VISIBILITY_THRESHOLD: -100,
   RealmService: class {
+    private async patchPostRealmIds(unitId: string) {
+      const { prisma } = await import("#/prisma/client");
+      const { patchPostFieldsToMeili } = await import("@/meili/post/sync");
+      const rows = await prisma.realmUnit.findMany({
+        where: { unitId },
+        select: { realmUnitId: true },
+        orderBy: { realmUnitId: "asc" },
+      });
+      await patchPostFieldsToMeili(unitId, {
+        realmIds: rows.map((row: { realmUnitId: string }) => row.realmUnitId),
+      });
+    }
+    async addRealmUnit(realmUnitId: string, unitId: string) {
+      const { prisma } = await import("#/prisma/client");
+      const row = await prisma.realmUnit.create({
+        data: { realmUnitId, unitId },
+      });
+      this.patchPostRealmIds(unitId).catch(() => {});
+      return row;
+    }
+    async removeRealmUnit(realmUnitId: string, unitId: string) {
+      const { prisma } = await import("#/prisma/client");
+      await prisma.realmUnit.delete({
+        where: { realmUnitId_unitId: { realmUnitId, unitId } },
+      });
+      this.patchPostRealmIds(unitId).catch(() => {});
+    }
     async listRealmTagsForUnit(
       realmUnitId: string,
       unitId: string,

@@ -32,58 +32,58 @@
 - [x] 4.4 Add `PUT /realms/:realmId/extra/tagTree` and `DELETE /realms/:realmId/extra/tagTree` handlers. Validation recurses through the tree: each node with `tagId` references an existing tag-typed Unit; nodes without `tagId` SHALL have `disabled: true` and a `label`; reject with 400 otherwise.
 - [x] 4.5 Add authorization: all four new endpoints require moderator role on the realm OR `hasAuthorityOver(caller, realmUnit)`. Mirror the existing list-form endpoint auth checks.
 - [x] 4.6 Add tests under `package/server/src/realm/__tests__/` for: setting and replacing each key, clearing each key, validation rejection for nonexistent ids and bad shapes, authorization rejection for non-moderator callers, concurrent-write serialization.
-- [ ] 4.7 Add read-time stale-ID filtering for `rule`, `about`, and `banner.unitId` (when `banner.kind = "post"`). Public reads return `null` (or omit) for stale ids; admin reads include the stored id with a stale marker. Mirror the existing pinboard/announcement filtering rule.
+- [x] 4.7 Add read-time stale-ID filtering for `rule`, `about`, and `banner.unitId` (when `banner.kind = "post"`). Public reads return `null` (or omit) for stale ids; admin reads include the stored id with a stale marker. Mirror the existing pinboard/announcement filtering rule.
 
 ## 5. Phase A — Search index post document gains realmIds
 
-- [ ] 5.1 In `package/search` (or wherever the post index sync lives — see `package/server/src/search/post-search.service.ts` if that is the path), update the post document builder to include `realmIds: string[]` sourced from `RealmUnit` rows where `RealmUnit.unitId = post.unitId`. Empty array when post has no realms.
-- [ ] 5.2 Update the Meilisearch index settings call to add `realmIds` to `filterableAttributes`. Keep `realmUnitId` (singular) in `filterableAttributes` for Phase A so cached query strings keep working; remove it in Phase C task 9.5.
-- [ ] 5.3 Hook `RealmUnit` insert and delete events to fire-and-forget partial updates on the post document (`patchPostFields(unitId, { realmIds })`). Errors log but do not fail the originating mutation.
-- [ ] 5.4 Run a one-shot reindex script that walks every post, computes its `realmIds` from current `RealmUnit` state, and partial-updates the document. This is the bridge from "old documents have only `realmUnitId`" to "new documents have `realmIds`".
-- [ ] 5.5 Add a test verifying a post created with `realmUnitIds: ["r1", "r2"]` produces a Meilisearch document with `realmIds: ["r1", "r2"]` (order-independent), and that adding/removing a `RealmUnit` row updates the field.
+- [x] 5.1 In `package/search` (or wherever the post index sync lives — see `package/server/src/search/post-search.service.ts` if that is the path), update the post document builder to include `realmIds: string[]` sourced from `RealmUnit` rows where `RealmUnit.unitId = post.unitId`. Empty array when post has no realms.
+- [x] 5.2 Update the Meilisearch index settings call to add `realmIds` to `filterableAttributes`. Keep `realmUnitId` (singular) in `filterableAttributes` for Phase A so cached query strings keep working; remove it in Phase C task 9.5.
+- [x] 5.3 Hook `RealmUnit` insert and delete events to fire-and-forget partial updates on the post document (`patchPostFields(unitId, { realmIds })`). Errors log but do not fail the originating mutation.
+- [x] 5.4 Run a one-shot reindex script that walks every post, computes its `realmIds` from current `RealmUnit` state, and partial-updates the document. This is the bridge from "old documents have only `realmUnitId`" to "new documents have `realmIds`".
+- [x] 5.5 Add a test verifying a post created with `realmUnitIds: ["r1", "r2"]` produces a Meilisearch document with `realmIds: ["r1", "r2"]` (order-independent), and that adding/removing a `RealmUnit` row updates the field.
 
 ## 6. Phase A — Frontend composer extension
 
-- [ ] 6.1 In `package/app/src/post/composer/ReplyComposer.tsx` (or wherever `ReplyComposer` lives), extend props with optional `realmUnitIds?: string[]` and `tagIds?: string[]`. Keep `mode: "progressive" | "expanded"`, `targetUnitId`, `parentPostUnitId` unchanged.
-- [ ] 6.2 Define a TypeScript discriminated union for the prop shape: `replyMode = { targetUnitId?: string; parentPostUnitId?: string; realmUnitIds?: never }` vs `realmPostMode = { realmUnitIds: string[]; targetUnitId?: never; parentPostUnitId?: never }`. The component types SHALL reject mixing.
-- [ ] 6.3 Add a runtime invariant assertion at mount: throw (or `console.error` + render error UI in development) if both reply props and `realmUnitIds` are present.
-- [ ] 6.4 In realm-post mode (`realmUnitIds` non-empty), render a tag picker above or beside the action buttons. Hydrate the picker from `realm.extra.tagTree` of the first realm in `realmUnitIds` (when only one realm is supplied). When multiple realms are supplied, fall back to search-only.
-- [ ] 6.5 The tag picker SHALL render `tagTree` leaves as quick-pick chips, group `disabled: true` nodes as section headers, and provide a search input that hits the global tag pool. Selection state lives in the picker; `tagIds` prop only seeds initial state.
-- [ ] 6.6 On submit, build the createPost payload with `body`, `realmUnitIds`, and `tagIds` from picker state. Do NOT send `targetUnitId` or `parentPostUnitId` in realm-post mode.
-- [ ] 6.7 Add a focus behaviour: in realm-post mode, focus the body input on mount; in expanded reply mode keep existing focus behaviour.
-- [ ] 6.8 Add a Storybook story under `package/app/src/post/composer/__stories__/` covering reply mode, realm-post mode with single realm + populated tagTree, realm-post mode with empty tagTree (search-only), and the tagTree disabled-node header rendering.
+- [x] 6.1 In `package/app/src/post/composer/ReplyComposer.tsx` (or wherever `ReplyComposer` lives), extend props with optional `realmUnitIds?: string[]` and `tagIds?: string[]`. Keep `mode: "progressive" | "expanded"`, `targetUnitId`, `parentPostUnitId` unchanged.
+- [x] 6.2 Define a TypeScript discriminated union for the prop shape: `replyMode = { targetUnitId?: string; parentPostUnitId?: string; realmUnitIds?: never }` vs `realmPostMode = { realmUnitIds: string[]; targetUnitId?: never; parentPostUnitId?: never }`. The component types SHALL reject mixing.
+- [x] 6.3 Add a runtime invariant assertion at mount: throw (or `console.error` + render error UI in development) if both reply props and `realmUnitIds` are present.
+- [x] 6.4 In realm-post mode (`realmUnitIds` non-empty), render a tag picker above or beside the action buttons. Hydrate the picker from `realm.extra.tagTree` of the first realm in `realmUnitIds` (when only one realm is supplied). When multiple realms are supplied, fall back to search-only.
+- [x] 6.5 The tag picker SHALL render `tagTree` leaves as quick-pick chips, group `disabled: true` nodes as section headers, and provide a search input that hits the global tag pool. Selection state lives in the picker; `tagIds` prop only seeds initial state.
+- [x] 6.6 On submit, build the createPost payload with `body`, `realmUnitIds`, and `tagIds` from picker state. Do NOT send `targetUnitId` or `parentPostUnitId` in realm-post mode.
+- [x] 6.7 Add a focus behaviour: in realm-post mode, focus the body input on mount; in expanded reply mode keep existing focus behaviour.
+- [x] 6.8 Add a Storybook story under `package/app/src/post/composer/__stories__/` covering reply mode, realm-post mode with single realm + populated tagTree, realm-post mode with empty tagTree (search-only), and the tagTree disabled-node header rendering.
 
 ## 7. Phase A — Realm page entry point + forum surface
 
-- [ ] 7.1 In `package/app/src/realm/pages/RealmPage.tsx` (or equivalent), add a "Post in this realm" button visible to realm members. Clicking opens a modal or navigates to a composer surface with `<ReplyComposer mode="expanded" realmUnitIds={[realmId]} />`. Hide the button for non-members; show a "Join to post" affordance instead.
-- [ ] 7.2 Switch `RealmContentFeed` from `byTarget(realmId)` to `byRealm(realmId)`. Wire the `sort` and `tagIds` query params so they flow into the underlying `postQueries.byRealm` call.
-- [ ] 7.3 Create `package/app/src/realm/sections/RuleSection.tsx`. Reads `realm.extra.rule`; if set and the referenced Post exists, fetch via `unitDetailQuery` and render title + brief preview. Click opens the same modal used by the join-rule-consent flow (with a "Close" button instead of "Agree and Join" since user is not joining).
-- [ ] 7.4 Create `package/app/src/realm/sections/AboutSection.tsx`. Reads `realm.extra.about`; if set, fetch the Post and render in the sidebar. Reuse the pinboard rendering pipeline (work-release self-relation + `getTranslation`) for multi-language.
-- [ ] 7.5 Create `package/app/src/realm/sections/BannerSection.tsx`. Reads `realm.extra.banner`. When `kind = "url"`, render `<img src={banner.url}>`. When `kind = "post"`, fetch the Post and render its first image asset (or `extra.coverUrl` if provided), falling back to a textual title-only banner.
-- [ ] 7.6 Mount `BannerSection` at the top of `RealmPage`, `RuleSection` in the header or sidebar area, and `AboutSection` in the sidebar. All three sections SHALL render unconditionally hidden when their corresponding extra key is unset.
-- [ ] 7.7 Create `package/app/src/realm/sections/RealmFeedSortSwitcher.tsx`. Three options: New / Top / Hot. Reads selected sort from URL `?sort=` query param (default New). Selecting an option updates URL and re-issues `byRealm` with the new sort.
-- [ ] 7.8 Create `package/app/src/realm/sections/RealmFeedTagFilter.tsx`. Reads `realm.extra.tagTree`; renders each tag-bearing leaf (excluding `disabled: true` leaves) as a selectable chip. Multi-select with OR semantics. Selected chips appear in URL `?tags=t1,t2`; selecting/deselecting re-issues `byRealm` with `tagIds`.
-- [ ] 7.9 Mount `RealmFeedSortSwitcher` and `RealmFeedTagFilter` in the Feed tab. Verify sort + filter compose: selecting `sort=top` and a chip emits `byRealm(realmId, { sort: "top", tagIds: [chip] })`.
-- [ ] 7.10 Verify all sections render correctly for: realm with all keys set, realm with only some keys, realm with deleted unit ids in keys (sections should hide), unauthenticated viewer (sections still show, since rule/about/banner are public).
+- [x] 7.1 In `package/app/src/realm/pages/RealmPage.tsx` (or equivalent), add a "Post in this realm" button visible to realm members. Clicking opens a modal or navigates to a composer surface with `<ReplyComposer mode="expanded" realmUnitIds={[realmId]} />`. Hide the button for non-members; show a "Join to post" affordance instead.
+- [x] 7.2 Switch `RealmContentFeed` from `byTarget(realmId)` to `byRealm(realmId)`. Wire the `sort` and `tagIds` query params so they flow into the underlying `postQueries.byRealm` call.
+- [x] 7.3 Create `package/app/src/realm/sections/RuleSection.tsx`. Reads `realm.extra.rule`; if set and the referenced Post exists, fetch via `unitDetailQuery` and render title + brief preview. Click opens the same modal used by the join-rule-consent flow (with a "Close" button instead of "Agree and Join" since user is not joining).
+- [x] 7.4 Create `package/app/src/realm/sections/AboutSection.tsx`. Reads `realm.extra.about`; if set, fetch the Post and render in the sidebar. Reuse the pinboard rendering pipeline (work-release self-relation + `getTranslation`) for multi-language.
+- [x] 7.5 Create `package/app/src/realm/sections/BannerSection.tsx`. Reads `realm.extra.banner`. When `kind = "url"`, render `<img src={banner.url}>`. When `kind = "post"`, fetch the Post and render its first image asset (or `extra.coverUrl` if provided), falling back to a textual title-only banner.
+- [x] 7.6 Mount `BannerSection` at the top of `RealmPage`, `RuleSection` in the header or sidebar area, and `AboutSection` in the sidebar. All three sections SHALL render unconditionally hidden when their corresponding extra key is unset.
+- [x] 7.7 Create `package/app/src/realm/sections/RealmFeedSortSwitcher.tsx`. Three options: New / Top / Hot. Reads selected sort from URL `?sort=` query param (default New). Selecting an option updates URL and re-issues `byRealm` with the new sort.
+- [x] 7.8 Create `package/app/src/realm/sections/RealmFeedTagFilter.tsx`. Reads `realm.extra.tagTree`; renders each tag-bearing leaf (excluding `disabled: true` leaves) as a selectable chip. Multi-select with OR semantics. Selected chips appear in URL `?tags=t1,t2`; selecting/deselecting re-issues `byRealm` with `tagIds`.
+- [x] 7.9 Mount `RealmFeedSortSwitcher` and `RealmFeedTagFilter` in the Feed tab. Verify sort + filter compose: selecting `sort=top` and a chip emits `byRealm(realmId, { sort: "top", tagIds: [chip] })`.
+- [x] 7.10 Verify all sections render correctly for: realm with all keys set, realm with only some keys, realm with deleted unit ids in keys (sections should hide), unauthenticated viewer (sections still show, since rule/about/banner are public).
 
 ## 8. Phase A — Join rule consent
 
-- [ ] 8.1 In `package/app/src/realm/components/JoinButton.tsx` (or wherever `JoinButton` is defined), check `realm.extra.rule` on click. If unset, call the existing join API directly (zero-step path preserved).
-- [ ] 8.2 If `extra.rule` is set, fetch the referenced Post via `unitDetailQuery`. Open a modal that renders the Post body using the pinboard rendering pipeline (work-release self-relation + multi-language).
-- [ ] 8.3 The modal SHALL show two buttons: "Cancel" (closes the modal, no join) and "Agree and Join" (calls the existing join API). No backend changes.
-- [ ] 8.4 Handle the case where `extra.rule` references a deleted/missing Post: the public read filtering already returns `null`, so `JoinButton` falls back to zero-step join. Add a defensive log if the modal flow ever renders an empty Post.
-- [ ] 8.5 Add a Storybook story for `JoinButton` covering: realm with no rule (one-click join), realm with rule + simple body, realm with rule + multi-language releases, realm with rule referencing a deleted Post.
-- [ ] 8.6 Reuse the same modal component for `RuleSection` click target (task 7.3), with the only difference being the bottom button: "Close" when not joining, "Agree and Join" when invoked from `JoinButton`.
+- [x] 8.1 In `package/app/src/realm/components/JoinButton.tsx` (or wherever `JoinButton` is defined), check `realm.extra.rule` on click. If unset, call the existing join API directly (zero-step path preserved).
+- [x] 8.2 If `extra.rule` is set, fetch the referenced Post via `unitDetailQuery`. Open a modal that renders the Post body using the pinboard rendering pipeline (work-release self-relation + multi-language).
+- [x] 8.3 The modal SHALL show two buttons: "Cancel" (closes the modal, no join) and "Agree and Join" (calls the existing join API). No backend changes.
+- [x] 8.4 Handle the case where `extra.rule` references a deleted/missing Post: the public read filtering already returns `null`, so `JoinButton` falls back to zero-step join. Add a defensive log if the modal flow ever renders an empty Post.
+- [x] 8.5 Add a Storybook story for `JoinButton` covering: realm with no rule (one-click join), realm with rule + simple body, realm with rule + multi-language releases, realm with rule referencing a deleted Post.
+- [x] 8.6 Reuse the same modal component for `RuleSection` click target (task 7.3), with the only difference being the bottom button: "Close" when not joining, "Agree and Join" when invoked from `JoinButton`.
 
 ## 9. Phase A — Realm management page extensions
 
-- [ ] 9.1 In `package/app/src/realm/pages/RealmManagePage.tsx` (or equivalent), add a `tagTree` editor section accessible to admins (realm role admin or above, OR global admin/root). MVP: flat list with optional one level of nesting (drag-reorder, add/remove leaves, toggle `disabled`). Full arbitrary-depth tree editing is a follow-up.
-- [ ] 9.2 The tagTree editor SHALL provide: "Add leaf" (search-and-pick from global tag pool), "Add header" (creates `{ disabled: true, label }`), drag-or-arrow reorder, delete, toggle `disabled` on existing nodes.
-- [ ] 9.3 The editor's Save button calls `PUT /realms/:realmId/extra/tagTree` with the resulting array. Show validation errors from the server (nonexistent tag id, malformed node) inline.
-- [ ] 9.4 Add three slot pickers — one each for `rule`, `about`, `banner`. Each allows search-and-pick from existing Posts (within or outside the realm) by title, plus a "Clear" button. The banner picker additionally allows entering a direct URL (sets `banner.kind = "url"`).
-- [ ] 9.5 Each slot picker's Save button calls `PUT /realms/:realmId/extra/:key` with the appropriate payload, or `DELETE /realms/:realmId/extra/:key` when cleared.
-- [ ] 9.6 Authorization: hide the management page section entirely for non-admins. Server-side authorization (task 4.5) is the load-bearing check.
-- [ ] 9.7 Add a Storybook story for each picker covering: empty state, populated state, search-and-select flow, clear flow.
+- [x] 9.1 In `package/app/src/realm/pages/RealmManagePage.tsx` (or equivalent), add a `tagTree` editor section accessible to admins (realm role admin or above, OR global admin/root). MVP: flat list with optional one level of nesting (drag-reorder, add/remove leaves, toggle `disabled`). Full arbitrary-depth tree editing is a follow-up.
+- [x] 9.2 The tagTree editor SHALL provide: "Add leaf" (search-and-pick from global tag pool), "Add header" (creates `{ disabled: true, label }`), drag-or-arrow reorder, delete, toggle `disabled` on existing nodes.
+- [x] 9.3 The editor's Save button calls `PUT /realms/:realmId/extra/tagTree` with the resulting array. Show validation errors from the server (nonexistent tag id, malformed node) inline.
+- [x] 9.4 Add three slot pickers — one each for `rule`, `about`, `banner`. Each allows search-and-pick from existing Posts (within or outside the realm) by title, plus a "Clear" button. The banner picker additionally allows entering a direct URL (sets `banner.kind = "url"`).
+- [x] 9.5 Each slot picker's Save button calls `PUT /realms/:realmId/extra/:key` with the appropriate payload, or `DELETE /realms/:realmId/extra/:key` when cleared.
+- [x] 9.6 Authorization: hide the management page section entirely for non-admins. Server-side authorization (task 4.5) is the load-bearing check.
+- [x] 9.7 Add a Storybook story for each picker covering: empty state, populated state, search-and-select flow, clear flow.
 
 ## 10. Phase A — End-to-end smoke test
 

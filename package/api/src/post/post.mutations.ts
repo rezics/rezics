@@ -40,6 +40,12 @@ export function useCreatePostMutation(
         });
       }
 
+      for (const realmUnitId of variables.realmUnitIds ?? []) {
+        queryClient.invalidateQueries({
+          queryKey: postKeys.byRealms(realmUnitId),
+        });
+      }
+
       // Invalidate thread/reply queries if this is a reply
       if (variables.parentPostUnitId) {
         queryClient.invalidateQueries({

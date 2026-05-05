@@ -1,4 +1,4 @@
-import type { RealmExtraOkResponse } from "@rezics/contract";
+import type { RealmExtra, RealmExtraOkResponse } from "@rezics/contract";
 import {
   type UseMutationOptions,
   useMutation,
@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { realmExtraApi } from "./realm-extra.api";
 import { realmExtraKeys } from "./realm-extra.keys";
+import { realmKeys } from "./realm.keys";
 
 function invalidateLists(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -14,6 +15,7 @@ function invalidateLists(
 ) {
   queryClient.invalidateQueries({ queryKey: realmExtraKeys.list(realmId, key) });
   queryClient.invalidateQueries({ queryKey: realmExtraKeys.admin(realmId, key) });
+  queryClient.invalidateQueries({ queryKey: realmKeys.detail(realmId) });
 }
 
 export function useAppendRealmExtraMutation(
@@ -82,8 +84,53 @@ export function useRemoveRealmExtraMutation(
   });
 }
 
+export function useSetRealmExtraValueMutation(
+  options?: Omit<
+    UseMutationOptions<
+      RealmExtraOkResponse,
+      Error,
+      { realmId: string; key: string; value: RealmExtra[keyof RealmExtra] }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ realmId, key, value }) =>
+      realmExtraApi.setValue(realmId, key, value),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateLists(queryClient, variables.realmId, variables.key);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useClearRealmExtraValueMutation(
+  options?: Omit<
+    UseMutationOptions<
+      RealmExtraOkResponse,
+      Error,
+      { realmId: string; key: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ realmId, key }) => realmExtraApi.clearValue(realmId, key),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateLists(queryClient, variables.realmId, variables.key);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export const realmExtraMutations = {
   useAppend: useAppendRealmExtraMutation,
   useReorder: useReorderRealmExtraMutation,
   useRemove: useRemoveRealmExtraMutation,
+  useSetValue: useSetRealmExtraValueMutation,
+  useClearValue: useClearRealmExtraValueMutation,
 };
