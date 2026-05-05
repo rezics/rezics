@@ -20,8 +20,8 @@ export const Default: Story = {
   render: () => (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline">Hover me</Button>
+        <TooltipTrigger render={<Button variant="outline" />}>
+          Hover me
         </TooltipTrigger>
         <TooltipContent>Sync now (⌘K)</TooltipContent>
       </Tooltip>
@@ -35,8 +35,8 @@ export const Sides: Story = {
       <div className="flex items-center justify-center gap-4 p-12">
         {(["top", "right", "bottom", "left"] as const).map((side) => (
           <Tooltip key={side}>
-            <TooltipTrigger asChild>
-              <Button variant="outline">{side}</Button>
+            <TooltipTrigger render={<Button variant="outline" />}>
+              {side}
             </TooltipTrigger>
             <TooltipContent side={side}>From {side}</TooltipContent>
           </Tooltip>

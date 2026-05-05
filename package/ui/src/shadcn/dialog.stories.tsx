@@ -24,9 +24,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button>Edit shelf</Button>
-      </DialogTrigger>
+      <DialogTrigger render={<Button />}>Edit shelf</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Rename shelf</DialogTitle>

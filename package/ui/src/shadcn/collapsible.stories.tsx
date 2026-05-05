@@ -21,10 +21,10 @@ export const Default: Story = {
     <Collapsible className="w-80 space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">Reading goals</span>
-        <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label="Toggle">
-            <ChevronsUpDown />
-          </Button>
+        <CollapsibleTrigger
+          render={<Button variant="ghost" size="icon" aria-label="Toggle" />}
+        >
+          <ChevronsUpDown />
         </CollapsibleTrigger>
       </div>
       <div className="rounded-md border px-3 py-2 text-sm">

@@ -22,8 +22,8 @@ type Story = StoryObj<typeof meta>;
 function SheetSample({ side }: { side: "right" | "left" | "top" | "bottom" }) {
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline">Open {side}</Button>
+      <SheetTrigger render={<Button variant="outline" />}>
+        Open {side}
       </SheetTrigger>
       <SheetContent side={side}>
         <SheetHeader>

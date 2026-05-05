@@ -25,8 +25,8 @@ type Story = StoryObj<typeof meta>;
 function DropdownSample() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">Open menu</Button>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        Open menu
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>My account</DropdownMenuLabel>
