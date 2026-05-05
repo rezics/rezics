@@ -22,11 +22,30 @@ export const env = createEnv({
     DATABASE_URL: v.string(),
 
     /**
-     * Public base URL of the auth service.
-     * Used to derive issuer, JWKS (via /.well-known/jwks.json), and API calls.
+     * Legacy auth service URL. Prefer AUTH_INTERNAL_BASE_URL for new code.
      * Defaults to 'http://localhost:3001'.
      */
     AUTH_BASE_URL: v.fallback(v.string(), "http://localhost:3001"),
+
+    /**
+     * Internal base URL used by main for service-to-service auth calls.
+     */
+    AUTH_INTERNAL_BASE_URL: v.fallback(v.string(), "http://localhost:3001"),
+
+    /**
+     * Browser-facing public auth boundary exposed by main.
+     */
+    AUTH_PUBLIC_BASE_URL: v.fallback(v.string(), "http://localhost:3000/auth"),
+
+    /**
+     * Public issuer URL for auth/OIDC metadata.
+     */
+    AUTH_PUBLIC_ISSUER_URL: v.fallback(v.string(), "http://localhost:3000"),
+
+    /**
+     * Shared secret for internal auth token endpoints when main must call them.
+     */
+    AUTH_INTERNAL_TOKEN_GATEWAY_SECRET: v.optional(v.string()),
 
     /**
      * Bootstrap-only audience for auth JWT validation metadata seeding.

@@ -177,24 +177,21 @@ export async function queryAccessToken(options?: {
   }
 
   const refreshTokenResponse = await fetch(
-    `${getAuthBaseUrl()}/api/auth/token`,
+    `${getAuthBaseUrl()}/auth/session/refresh`,
     {
-      method: "GET",
+      method: "POST",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
     },
   );
-  const json =
-    (await refreshTokenResponse.json()) as Partial<AuthTokenResponse>;
-  const token = json.token ?? null;
-  if (!token) {
+
+  if (!refreshTokenResponse.ok) {
     clearAuthPresence();
     throw new Error("Unauthorized - Please login again");
   }
-  setToken(token, NormalizedTokenName.AUTH_SESSION);
-  return token;
+  return null;
 }
 
 /**
@@ -204,11 +201,6 @@ export async function queryAccessToken(options?: {
 export async function ensureAuthSessionToken(options?: {
   requirePresence?: boolean;
 }) {
-  const existingToken = getToken(NormalizedTokenName.AUTH_SESSION);
-  if (existingToken) {
-    return existingToken;
-  }
-
   return queryAccessToken(options);
 }
 
@@ -217,17 +209,10 @@ export async function ensureAuthSessionToken(options?: {
  * the server's POST /session/exchange endpoint.
  */
 export async function exchangeForSessionToken(): Promise<string | null> {
-  const authToken = getToken(NormalizedTokenName.AUTH_SESSION);
-  if (!authToken) return null;
-
-  const claims = parseJwt(authToken);
-  if (claims?.email_verified === false) return null;
-
-  const { apiBaseUrl } = getApiConfig();
-  const response = await fetch(`${apiBaseUrl}/session/exchange`, {
+  const response = await fetch(`${getAuthBaseUrl()}/auth/session/refresh`, {
     method: "POST",
+    credentials: "include",
     headers: {
-      "x-auth-session-token": authToken,
       "Content-Type": "application/json",
     },
   });
@@ -236,12 +221,9 @@ export async function exchangeForSessionToken(): Promise<string | null> {
     return null;
   }
 
-  const json = (await response.json()) as { token?: string };
-  const token = json.token ?? null;
-  if (token) {
-    setToken(token, NormalizedTokenName.REZICS_SESSION);
-  }
-  return token;
+  removeToken(NormalizedTokenName.AUTH_SESSION);
+  removeToken(NormalizedTokenName.REZICS_SESSION);
+  return null;
 }
 
 /**
@@ -250,6 +232,10 @@ export async function exchangeForSessionToken(): Promise<string | null> {
  */
 export function buildTokenHeaders(): Record<string, string> {
   const headers: Record<string, string> = {};
+
+  if (typeof window !== "undefined") {
+    return headers;
+  }
 
   const sessionToken = readStoredToken(NormalizedTokenName.REZICS_SESSION);
   if (sessionToken) {

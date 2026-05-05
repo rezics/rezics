@@ -1,6 +1,6 @@
 /**
  * Auth API client functions
- * Direct API communication layer targeting the auth server
+ * Direct API communication layer targeting the main public auth boundary.
  */
 
 import type {
@@ -30,7 +30,8 @@ import type {
 import { getApiConfig } from "../config";
 
 function getAuthBaseUrl(): string {
-  return getApiConfig().authBaseUrl;
+  const config = getApiConfig();
+  return config.authBaseUrl || config.apiBaseUrl;
 }
 
 async function authFetch<T>(
@@ -64,7 +65,7 @@ async function authFetch<T>(
 
 export const authApi = {
   signIn: async (input: SignInBody): Promise<AuthResponse> => {
-    return authFetch<AuthResponse>("/api/auth/sign-in/email", {
+    return authFetch<AuthResponse>("/auth/sign-in/email", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -76,7 +77,7 @@ export const authApi = {
   }): Promise<AuthResponse> => {
     const inferredName = input.email.split("@")[0]?.trim() || "Reader";
 
-    return authFetch<AuthResponse>("/api/auth/sign-up/email", {
+    return authFetch<AuthResponse>("/auth/sign-up/email", {
       method: "POST",
       body: JSON.stringify({
         email: input.email,
@@ -87,33 +88,33 @@ export const authApi = {
   },
 
   signOut: async (): Promise<{ success: boolean }> => {
-    return authFetch<{ success: boolean }>("/api/auth/sign-out", {
+    return authFetch<{ success: boolean }>("/auth/sign-out", {
       method: "POST",
     });
   },
 
   getSession: async (): Promise<{ session: AuthSession; user: AuthUser }> => {
     return authFetch<{ session: AuthSession; user: AuthUser }>(
-      "/api/auth/get-session",
+      "/auth/get-session",
     );
   },
 
   getSessionState: async (): Promise<GetSessionStateResponse> => {
-    return authFetch<GetSessionStateResponse>("/api/auth/get-session-state");
+    return authFetch<GetSessionStateResponse>("/auth/get-session-state");
   },
 
   getToken: async (): Promise<AuthTokenResponse> => {
-    return authFetch<AuthTokenResponse>("/api/auth/token");
+    return authFetch<AuthTokenResponse>("/auth/token");
   },
 
   listProviders: async (): Promise<{ providers: AuthProvider[] }> => {
-    return authFetch<{ providers: AuthProvider[] }>("/api/auth/providers");
+    return authFetch<{ providers: AuthProvider[] }>("/auth/providers");
   },
 
   signInSocial: async (
     input: SignInSocialBody,
   ): Promise<SignInSocialResponse> => {
-    return authFetch<SignInSocialResponse>("/api/auth/sign-in/social", {
+    return authFetch<SignInSocialResponse>("/auth/sign-in/social", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -123,7 +124,7 @@ export const authApi = {
     input: SendVerificationEmailBody,
   ): Promise<SendVerificationEmailResponse> => {
     return authFetch<SendVerificationEmailResponse>(
-      "/api/auth/send-verification-email",
+      "/auth/send-verification-email",
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -137,7 +138,7 @@ export const authApi = {
     turnstileToken?: string;
   }): Promise<{ success: boolean }> => {
     return authFetch<{ success: boolean }>(
-      "/api/auth/email-otp/send-verification-otp",
+      "/auth/email-otp/send-verification-otp",
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -153,21 +154,21 @@ export const authApi = {
     token: string | null;
     user: { id: string; email: string; emailVerified: boolean; name: string };
   }> => {
-    return authFetch("/api/auth/email-otp/verify-email", {
+    return authFetch("/auth/email-otp/verify-email", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   changeEmail: async (input: ChangeEmailBody): Promise<ChangeEmailResponse> => {
-    return authFetch<ChangeEmailResponse>("/api/auth/change-email", {
+    return authFetch<ChangeEmailResponse>("/auth/change-email", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   setPassword: async (input: SetPasswordBody): Promise<SetPasswordResponse> => {
-    return authFetch<SetPasswordResponse>("/api/auth/set-password", {
+    return authFetch<SetPasswordResponse>("/auth/set-password", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -177,7 +178,7 @@ export const authApi = {
     input: RequestPasswordResetBody,
   ): Promise<RequestPasswordResetResponse> => {
     return authFetch<RequestPasswordResetResponse>(
-      "/api/auth/request-password-reset",
+      "/auth/request-password-reset",
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -188,52 +189,52 @@ export const authApi = {
   resetPassword: async (
     input: ResetPasswordBody,
   ): Promise<ResetPasswordResponse> => {
-    return authFetch<ResetPasswordResponse>("/api/auth/reset-password", {
+    return authFetch<ResetPasswordResponse>("/auth/reset-password", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   listSessions: async () => {
-    return authFetch<{ sessions: any[] }>("/api/auth/list-sessions", {
+    return authFetch<{ sessions: any[] }>("/auth/list-sessions", {
       method: "POST",
     });
   },
 
   revokeSession: async (input: { token: string }) => {
-    return authFetch<{ success: boolean }>("/api/auth/revoke-session", {
+    return authFetch<{ success: boolean }>("/auth/revoke-session", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   adminListUsers: async () => {
-    return authFetch<{ users: any[] }>("/api/auth/admin/list-users");
+    return authFetch<{ users: any[] }>("/auth/admin/list-users");
   },
 
   adminRemoveUser: async (input: { userId: string }) => {
-    return authFetch<{ success: boolean }>("/api/auth/admin/remove-user", {
+    return authFetch<{ success: boolean }>("/auth/admin/remove-user", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   adminBanUser: async (input: { userId: string; reason?: string }) => {
-    return authFetch<{ success: boolean }>("/api/auth/admin/ban-user", {
+    return authFetch<{ success: boolean }>("/auth/admin/ban-user", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   adminUnbanUser: async (input: { userId: string }) => {
-    return authFetch<{ success: boolean }>("/api/auth/admin/unban-user", {
+    return authFetch<{ success: boolean }>("/auth/admin/unban-user", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   adminSetRole: async (input: { userId: string; role: string }) => {
-    return authFetch<{ success: boolean }>("/api/auth/admin/set-role", {
+    return authFetch<{ success: boolean }>("/auth/admin/set-role", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -280,7 +281,7 @@ export const authApi = {
   confirmIdentity: async (
     input: IdentityConfirmBody,
   ): Promise<IdentityConfirmResponse> => {
-    return authFetch<IdentityConfirmResponse>("/api/auth/identity/confirm", {
+    return authFetch<IdentityConfirmResponse>("/auth/identity/confirm", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -288,7 +289,7 @@ export const authApi = {
 
   checkSlug: async (slug: string): Promise<CheckSlugResponse> => {
     return authFetch<CheckSlugResponse>(
-      `/api/auth/identity/check-slug?slug=${encodeURIComponent(slug)}`,
+      `/auth/identity/check-slug?slug=${encodeURIComponent(slug)}`,
     );
   },
 };

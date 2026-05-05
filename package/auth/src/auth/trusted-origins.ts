@@ -21,6 +21,8 @@ function normalizeOrigins(raw: string | undefined): string[] {
 export const trustedOrigins = Array.from(
   new Set([
     env.BETTER_AUTH_URL,
+    env.AUTH_PUBLIC_ISSUER_URL,
+    env.AUTH_PUBLIC_BASE_URL,
     ...normalizeOrigins(env.AUTH_TRUSTED_ORIGINS),
     ...allowedOrigins,
   ]),

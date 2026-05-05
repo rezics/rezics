@@ -59,7 +59,7 @@ const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
     const role = dbPermission?.role?.[0] ?? "MEMBER";
 
     const token = await signRezicsSessionToken({
-      unitId: user.unitId,
+      userId: user.unitId,
       permission: { role },
     });
 

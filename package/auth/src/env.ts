@@ -33,9 +33,20 @@ export const env = createEnv({
      */
 
     /**
-     * Public base URL for the auth service. Used for issuer, trusted-origin, and links.
+     * Internal/native base URL for the auth service. Public product flows use
+     * AUTH_PUBLIC_BASE_URL through the main server boundary.
      */
     BETTER_AUTH_URL: v.string(),
+
+    /**
+     * Browser-facing auth base URL exposed by main, e.g. https://rezics.com/auth.
+     */
+    AUTH_PUBLIC_BASE_URL: v.fallback(v.string(), "http://localhost:3000/auth"),
+
+    /**
+     * Public OAuth/OIDC issuer URL, e.g. https://rezics.com.
+     */
+    AUTH_PUBLIC_ISSUER_URL: v.fallback(v.string(), "http://localhost:3000"),
 
     /**
      * Primary secret for session and internal crypto. Must be high-entropy and unique.

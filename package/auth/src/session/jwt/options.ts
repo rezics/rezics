@@ -8,7 +8,7 @@ export function getAuthJwtAudience() {
 }
 
 export function getAuthJwtIssuer() {
-  return env.AUTH_JWT_ISSUER ?? env.BETTER_AUTH_URL;
+  return env.AUTH_JWT_ISSUER ?? env.AUTH_PUBLIC_ISSUER_URL;
 }
 
 export function getAuthJwtTtlSeconds() {
@@ -32,7 +32,7 @@ export function getAuthSessionJwksPath() {
 }
 
 export function getAuthSessionJwksUrl() {
-  return new URL(getAuthSessionJwksPath(), env.BETTER_AUTH_URL).toString();
+  return new URL("/auth/session/jwks", env.AUTH_PUBLIC_BASE_URL).toString();
 }
 
 export function getAuthJwtIssuerDescriptor(): JwtIssuerDescriptor {

@@ -16,6 +16,64 @@ import { enforceInternalTokenSurface } from "./token-boundary";
 const openIdMetadataHandler = oauthProviderOpenIdConfigMetadata(auth);
 const authServerMetadataHandler = oauthProviderAuthServerMetadata(auth);
 
+function rewritePublicMetadataValue(value: unknown): unknown {
+  if (typeof value === "string") {
+    const internalPrefix = `${env.BETTER_AUTH_URL.replace(/\/$/, "")}/api/auth`;
+    const publicPrefix = env.AUTH_PUBLIC_BASE_URL.replace(/\/$/, "");
+    if (value.startsWith(internalPrefix)) {
+      return `${publicPrefix}${value.slice(internalPrefix.length)}`;
+    }
+    if (value === env.BETTER_AUTH_URL) {
+      return env.AUTH_PUBLIC_ISSUER_URL;
+    }
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(rewritePublicMetadataValue);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        rewritePublicMetadataValue(entry),
+      ]),
+    );
+  }
+
+  return value;
+}
+
+async function rewritePublicMetadataResponse(
+  response: Response,
+): Promise<Response> {
+  if (!response.ok) {
+    return response;
+  }
+
+  const metadata = (await response.json()) as Record<string, unknown>;
+  const rewritten = rewritePublicMetadataValue(metadata) as Record<
+    string,
+    unknown
+  >;
+
+  rewritten.issuer = env.AUTH_PUBLIC_ISSUER_URL;
+  rewritten.jwks_uri = new URL(
+    "/auth/session/jwks",
+    env.AUTH_PUBLIC_BASE_URL,
+  ).toString();
+
+  const headers = new Headers(response.headers);
+  headers.delete("content-length");
+  headers.set("content-type", "application/json");
+
+  return Response.json(rewritten, {
+    status: response.status,
+    headers,
+  });
+}
+
 function toJsonError(status: number, code: string, message: string): Response {
   return Response.json(
     {
@@ -171,11 +229,13 @@ export async function handleJwksCompatibilityRequest(
 export async function handleOpenIdConfigRequest(
   request: Request,
 ): Promise<Response> {
-  return openIdMetadataHandler(request);
+  return rewritePublicMetadataResponse(await openIdMetadataHandler(request));
 }
 
 export async function handleOAuthAuthorizationServerRequest(
   request: Request,
 ): Promise<Response> {
-  return authServerMetadataHandler(request);
+  return rewritePublicMetadataResponse(
+    await authServerMetadataHandler(request),
+  );
 }

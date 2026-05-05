@@ -83,7 +83,7 @@ export const sessionApi = new Elysia({ prefix: "/session" })
       const role = dbPermission?.role?.[0] ?? "MEMBER";
 
       const token = await signRezicsSessionToken({
-        unitId: user.unitId,
+        userId: user.unitId,
         permission: { role },
       });
 

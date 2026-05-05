@@ -43,6 +43,7 @@ import {
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
 import { AppError } from "./utils/errors";
+import { authPublicApi } from "./auth-boundary";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
 import { zoneApi } from "./zone/zone.api";
@@ -73,9 +74,12 @@ if (isDev) {
 
 const port = env.PORT ? Number(env.PORT) : 3000;
 
-const authBaseUrl = env.AUTH_BASE_URL;
+const authIssuerUrl = env.AUTH_PUBLIC_ISSUER_URL;
 const authAudience = env.AUTH_JWT_AUDIENCE ?? "rezics";
-const authJwksUrl = new URL("/.well-known/jwks.json", authBaseUrl).toString();
+const authJwksUrl = new URL(
+  "/auth/session/jwks",
+  env.AUTH_PUBLIC_BASE_URL,
+).toString();
 
 // Bootstrap server-local JWT service for signing rezics-session-tokens
 const serverJwksUrl = `http://localhost:${port}/.well-known/jwks.json`;
@@ -90,10 +94,10 @@ await bootstrapJwtServiceRecord("server-local", {
 
 // Bootstrap auth-upstream JWT service for token exchange verification
 await bootstrapJwtServiceRecord("auth-upstream", {
-  issuer: authBaseUrl,
+  issuer: authIssuerUrl,
   audience: authAudience,
   jwksUrl: authJwksUrl,
-  jwksPath: "/.well-known/jwks.json",
+  jwksPath: "/auth/session/jwks",
   isLocalIssuer: false,
 });
 
@@ -169,6 +173,7 @@ app
       message,
     };
   })
+  .use(authPublicApi)
   .use(wellKnownApi)
   .use(bookApi)
   .use(chapterApi)
