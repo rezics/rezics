@@ -44,18 +44,17 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
 }) => {
   const { t } = useTranslation();
   const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
-  const [language, setLanguage] = useState<string>(available[0] ?? "");
+  const firstAvailableLanguage = available[0] ?? "";
+  const [language, setLanguage] = useState<string>(firstAvailableLanguage);
   const [sourceReleaseUnitId, setSourceReleaseUnitId] =
     useState<string>(NO_SOURCE);
 
   useEffect(() => {
     if (open) {
-      setLanguage(available[0] ?? "");
+      setLanguage(firstAvailableLanguage);
       setSourceReleaseUnitId(NO_SOURCE);
     }
-    // We intentionally only reset on open transition.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, firstAvailableLanguage]);
 
   // Sibling releases under the same work — also let the user pick the work
   // itself (for releases) or any release of this work (for works).
@@ -116,9 +115,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
 
           <div className="flex flex-col gap-1">
             <Label htmlFor="add-trans-source">
-              {t(
-                "page.book_edit.info.translation.add_dialog.source_release",
-              )}
+              {t("page.book_edit.info.translation.add_dialog.source_release")}
             </Label>
             <Select
               value={sourceReleaseUnitId}
@@ -130,9 +127,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
               <SelectContent>
                 <SelectItem value={NO_SOURCE}>
                   <span className="text-text-secondary">
-                    {t(
-                      "page.book_edit.info.translation.add_dialog.no_source",
-                    )}
+                    {t("page.book_edit.info.translation.add_dialog.no_source")}
                   </span>
                 </SelectItem>
                 {candidates.map((b) => (

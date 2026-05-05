@@ -58,7 +58,10 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
                     )
                   : "";
             const label = (
-              <label className="m-0 inline-flex items-center gap-2 cursor-pointer">
+              <label
+                key={`rating-${rating}-label`}
+                className="m-0 inline-flex items-center gap-2 cursor-pointer"
+              >
                 <Checkbox
                   checked={selected.has(rating)}
                   disabled={disabled}

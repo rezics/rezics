@@ -46,17 +46,17 @@ function GlobalSearchPage() {
   const [searchOpts, setSearchOpts] = useState<ContentSearchOptions>(() =>
     search.toOptions(),
   );
+  const { toOptions } = search;
   const [hasSearched, setHasSearched] = useState(() =>
     Boolean(initialQuery.tags?.length || initialQuery.keyword),
   );
 
   useEffect(() => {
     if (initialQuery.tags?.length || initialQuery.keyword) {
-      setSearchOpts(search.toOptions());
+      setSearchOpts(toOptions());
       setHasSearched(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialQuery]);
+  }, [initialQuery, toOptions]);
 
   const { data, isLoading } = useContentSearch(
     hasSearched ? searchOpts : ({} as ContentSearchOptions),

@@ -117,10 +117,10 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
     setStart((page - 1) * EXTERNAL_PAGE_SIZE);
   }
 
-  useEffect(() => {
+  function resetPagination() {
     ref.current?.resetPaginationPageNumber?.();
     setCurrentPage(1);
-  }, [tab, keyword]);
+  }
 
   return (
     <div className="mx-auto max-w-7xl p-4 mt-4">
@@ -141,14 +141,21 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
           <div>
             <KeywordInput
               value={keywordBind.value ?? ""}
-              onChange={(v) => keywordBind.onChange(v)}
+              onChange={(v) => {
+                keywordBind.onChange(v);
+                resetPagination();
+              }}
               onSubmit={() => setStart(0)}
               placeholder="Search reviews"
             />
             <div className="mb-4 mt-4 border-b border-border-whisper">
               <Tabs
                 value={tab}
-                onValueChange={(v) => setTab(v as typeof tab)}
+                onValueChange={(v) => {
+                  setTab(v as typeof tab);
+                  resetPagination();
+                  setStart(0);
+                }}
                 aria-label="review tabs"
               >
                 <TabsList>

@@ -9,7 +9,7 @@ import {
   ChevronsDownUp as UnfoldLess,
   ChevronsUpDown as UnfoldMore,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   insertSiblingAfter,
@@ -62,7 +62,7 @@ export const ChapterTreeContextMenu = ({
   const { node } = contextMenu;
   const ref = useRef<HTMLDivElement>(null);
 
-  const close = () => setContextMenu(null);
+  const close = useCallback(() => setContextMenu(null), [setContextMenu]);
 
   useEffect(() => {
     const handleClickAway = (e: MouseEvent) => {
@@ -79,8 +79,7 @@ export const ChapterTreeContextMenu = ({
       document.removeEventListener("mousedown", handleClickAway);
       document.removeEventListener("keydown", handleEscape);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [close]);
 
   return (
     <div

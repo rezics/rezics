@@ -27,7 +27,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
       setDescription(translation.description ?? "");
       setCoverUrl(shelf?.coverUrl ?? "");
     }
-  }, [translation]);
+  }, [translation, shelf?.coverUrl]);
 
   const handleSave = () => {
     updateMutation.mutate(
@@ -93,10 +93,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={updateMutation.isPending}
-          >
+          <Button onClick={handleSave} disabled={updateMutation.isPending}>
             Save
           </Button>
         </div>

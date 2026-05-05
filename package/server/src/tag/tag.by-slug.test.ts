@@ -18,8 +18,10 @@ mock.module("@/middleware", () => ({
   verifyRootFromDb: async () => true,
 }));
 
+class UnitServiceStub {}
+
 mock.module("@/unit/unit.service", () => ({
-  UnitService: class {},
+  UnitService: UnitServiceStub,
   unitService: {
     getBySlug: async (slug: string) => {
       if (slug === "book") return { id: "tag-1", type: "TAG" };
@@ -39,7 +41,10 @@ mock.module("./tag.mapper", () => ({
 mock.module("./tag.service", () => ({
   VISIBILITY_THRESHOLD: -100,
   TagService: class {
-    async getTagsForUnit(unitId: string, opts?: { includeBelowThreshold?: boolean }) {
+    async getTagsForUnit(
+      unitId: string,
+      opts?: { includeBelowThreshold?: boolean },
+    ) {
       const { prisma } = await import("#/prisma/client");
       return prisma.unitTag.findMany({
         where: opts?.includeBelowThreshold

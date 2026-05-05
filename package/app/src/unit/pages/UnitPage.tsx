@@ -47,6 +47,13 @@ export function UnitPage() {
     error,
   } = useQuery(unitDetailQuery(unitId || ""));
 
+  const isPost = unit?.type === "POST";
+  const groupId = unit?.translationGroupId ?? null;
+  const siblingsQuery = useTranslationGroupSiblings(
+    isPost && groupId ? unit.id : null,
+  );
+  const attach = useAttachTranslation();
+
   if (isLoading) {
     return (
       <div className="mt-8 text-center text-sm text-gray-500">Loading...</div>
@@ -70,12 +77,6 @@ export function UnitPage() {
   const content = primaryTranslation?.description;
   const metadataEntries = Object.entries(unit.extra ?? {});
 
-  const isPost = unit.type === "POST";
-  const groupId = unit.translationGroupId ?? null;
-  const siblingsQuery = useTranslationGroupSiblings(
-    isPost && groupId ? unit.id : null,
-  );
-  const attach = useAttachTranslation();
   // MOCK: client-side gate until permissions are finalized for translation attach.
   const canAddTranslation = isPost;
   const handleAddTranslation = () => {

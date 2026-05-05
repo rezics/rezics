@@ -26,8 +26,10 @@ const realmDTOStub = {
   memberCount: 1,
 };
 
+class UnitServiceStub {}
+
 mock.module("@/unit/unit.service", () => ({
-  UnitService: class {},
+  UnitService: UnitServiceStub,
   unitService: {
     getBySlug: async (slug: string) => {
       if (slug === "rezics") return { id: "realm-1", type: "REALM" };

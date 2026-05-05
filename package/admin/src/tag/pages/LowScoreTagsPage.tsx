@@ -100,54 +100,60 @@ export default function LowScoreTagsPage() {
     setPage(0);
   };
 
-  const handleDelete = (row: Row) => {
-    if (row.kind === "global") {
-      deleteUnitTag.mutate({
-        unitId: row.unitId,
-        tagUnitId: row.tagUnitId,
-      });
-    } else {
-      deleteRealmTagUnit.mutate({
-        realmUnitId: row.realmUnitId,
-        unitId: row.unitId,
-        tagUnitId: row.tagUnitId,
-      });
-    }
-  };
+  const handleDelete = React.useCallback(
+    (row: Row) => {
+      if (row.kind === "global") {
+        deleteUnitTag.mutate({
+          unitId: row.unitId,
+          tagUnitId: row.tagUnitId,
+        });
+      } else {
+        deleteRealmTagUnit.mutate({
+          realmUnitId: row.realmUnitId,
+          unitId: row.unitId,
+          tagUnitId: row.tagUnitId,
+        });
+      }
+    },
+    [deleteUnitTag, deleteRealmTagUnit],
+  );
 
-  const handleTogglePin = (row: Row) => {
-    if (row.kind === "global") {
-      if (row.pinned) {
-        patchUnitTag.mutate({
-          unitId: row.unitId,
-          tagUnitId: row.tagUnitId,
-          input: { pinned: false, position: null },
-        });
+  const handleTogglePin = React.useCallback(
+    (row: Row) => {
+      if (row.kind === "global") {
+        if (row.pinned) {
+          patchUnitTag.mutate({
+            unitId: row.unitId,
+            tagUnitId: row.tagUnitId,
+            input: { pinned: false, position: null },
+          });
+        } else {
+          patchUnitTag.mutate({
+            unitId: row.unitId,
+            tagUnitId: row.tagUnitId,
+            input: { pinned: true, position: positionForNewBottomPin() },
+          });
+        }
       } else {
-        patchUnitTag.mutate({
-          unitId: row.unitId,
-          tagUnitId: row.tagUnitId,
-          input: { pinned: true, position: positionForNewBottomPin() },
-        });
+        if (row.pinned) {
+          patchRealmTagUnit.mutate({
+            realmUnitId: row.realmUnitId,
+            unitId: row.unitId,
+            tagUnitId: row.tagUnitId,
+            input: { pinned: false, position: null },
+          });
+        } else {
+          patchRealmTagUnit.mutate({
+            realmUnitId: row.realmUnitId,
+            unitId: row.unitId,
+            tagUnitId: row.tagUnitId,
+            input: { pinned: true, position: positionForNewTopPin() },
+          });
+        }
       }
-    } else {
-      if (row.pinned) {
-        patchRealmTagUnit.mutate({
-          realmUnitId: row.realmUnitId,
-          unitId: row.unitId,
-          tagUnitId: row.tagUnitId,
-          input: { pinned: false, position: null },
-        });
-      } else {
-        patchRealmTagUnit.mutate({
-          realmUnitId: row.realmUnitId,
-          unitId: row.unitId,
-          tagUnitId: row.tagUnitId,
-          input: { pinned: true, position: positionForNewTopPin() },
-        });
-      }
-    }
-  };
+    },
+    [patchUnitTag, patchRealmTagUnit],
+  );
 
   const columns = React.useMemo<PaginatedColumn<Row>[]>(() => {
     const base: PaginatedColumn<Row>[] = [
@@ -267,6 +273,8 @@ export default function LowScoreTagsPage() {
     return base;
   }, [
     scope,
+    handleDelete,
+    handleTogglePin,
     deleteUnitTag.isPending,
     deleteRealmTagUnit.isPending,
     patchUnitTag.isPending,
