@@ -10,7 +10,6 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     authorUserId: post.authorUserId,
     author: post.unit.user ?? undefined,
     targetUnitId: post.targetUnitId ?? null,
-    realmUnitId: post.realmUnitId ?? null,
     body: post.body ?? null,
     rootPostUnitId: post.rootPostUnitId ?? null,
     parentPostUnitId: post.parentPostUnitId ?? null,

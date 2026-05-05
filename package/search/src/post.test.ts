@@ -18,7 +18,6 @@ describe("buildPostDocument", () => {
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       targetUnitId: null,
-      realmUnitId: "legacy-realm",
       rootPostUnitId: null,
       parentPostUnitId: null,
       authorUserId: "user-1",
@@ -36,7 +35,6 @@ describe("buildPostDocument", () => {
     });
 
     expect(doc.realmIds).toEqual(["realm-1", "realm-2"]);
-    expect(doc.realmUnitId).toBe("legacy-realm");
   });
 
   test("uses empty realmIds when a post belongs to no realms", async () => {
@@ -56,7 +54,6 @@ describe("buildPostDocument", () => {
       createdAt: "2026-01-01T00:00:00.000Z",
       updatedAt: "2026-01-01T00:00:00.000Z",
       targetUnitId: null,
-      realmUnitId: null,
       rootPostUnitId: null,
       parentPostUnitId: null,
       authorUserId: "user-1",

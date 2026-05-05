@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
     return (
       <header
         className={cn(
-          "fixed top-0 z-[1201] bg-surface-canvas border-b border-border-whisper transition-[margin,width] duration-225 ease-out pointer-events-auto",
+          "fixed top-0 z-40 bg-surface-canvas border-b border-border-whisper transition-[margin,width] duration-225 ease-out pointer-events-auto",
           isDragging && "rounded-tl-2xl rounded-bl-2xl",
         )}
         style={{

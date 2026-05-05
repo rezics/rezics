@@ -14,7 +14,7 @@ export async function searchPosts(
     filter.push(`targetUnitId = "${opts.targetUnitId}"`);
   }
   if (opts.realmUnitId) {
-    filter.push(`realmUnitId = "${opts.realmUnitId}"`);
+    filter.push(`realmIds = "${opts.realmUnitId}"`);
   }
   if (opts.authorUserId) {
     filter.push(`authorUserId = "${opts.authorUserId}"`);

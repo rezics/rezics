@@ -87,44 +87,44 @@
 
 ## 10. Phase A — End-to-end smoke test
 
-- [ ] 10.1 Manual E2E: log in as a realm admin, navigate to manage page, set `tagTree` with a header + three leaves, set `rule` to an existing Post, set `about` to another Post, set `banner` to a URL. Save each.
-- [ ] 10.2 Manual E2E: log out, sign up as a new user, navigate to the realm. Verify rule/about/banner all render. Click "Join". Verify the rule modal opens with rule content. Click "Agree and Join". Verify membership.
-- [ ] 10.3 Manual E2E: as the new member, click "Post in this realm". Verify composer opens in realm-post mode with body input focused and tag picker showing the three tagTree leaves. Type a body, pick two tags, submit. Verify the post appears in the realm feed.
-- [ ] 10.4 Manual E2E: switch sort to Top, then to Hot. Verify the URL updates and the feed reorders. Pick a chip in the tag filter. Verify the feed reduces to matching posts.
-- [ ] 10.5 Manual E2E: verify the post appears in Meilisearch search when filtered by the realm's id.
-- [ ] 10.6 Run `bun run check:convention` and `bun run typecheck` across affected packages. Fix any failures.
+- [x] 10.1 Manual E2E: log in as a realm admin, navigate to manage page, set `tagTree` with a header + three leaves, set `rule` to an existing Post, set `about` to another Post, set `banner` to a URL. Save each. Skipped per request.
+- [x] 10.2 Manual E2E: log out, sign up as a new user, navigate to the realm. Verify rule/about/banner all render. Click "Join". Verify the rule modal opens with rule content. Click "Agree and Join". Verify membership. Skipped per request.
+- [x] 10.3 Manual E2E: as the new member, click "Post in this realm". Verify composer opens in realm-post mode with body input focused and tag picker showing the three tagTree leaves. Type a body, pick two tags, submit. Verify the post appears in the realm feed. Skipped per request.
+- [x] 10.4 Manual E2E: switch sort to Top, then to Hot. Verify the URL updates and the feed reorders. Pick a chip in the tag filter. Verify the feed reduces to matching posts. Skipped per request.
+- [x] 10.5 Manual E2E: verify the post appears in Meilisearch search when filtered by the realm's id. Skipped per request.
+- [x] 10.6 Run `bun run check:convention` and `bun run typecheck` across affected packages. Fix any failures. Skipped per request.
 
 ## 11. Phase B — Backfill migration
 
-- [ ] 11.1 Add a Prisma migration file `package/server/prisma/migrations/<timestamp>_realm_unit_backfill/migration.sql` containing `INSERT INTO "RealmUnit" ("realmUnitId", "unitId", "createdAt") SELECT "realmUnitId", "unitId", "createdAt" FROM "Post" WHERE "realmUnitId" IS NOT NULL ON CONFLICT DO NOTHING;`. Verify the SQL matches actual table/column casing.
-- [ ] 11.2 Add a one-shot post resync script (`package/server/src/scripts/resync-posts.ts`) that walks every post and partial-updates its Meilisearch document with the now-populated `realmIds`. Idempotent.
-- [ ] 11.3 Run Phase B migration in a staging environment first. Verify row counts: `SELECT COUNT(*) FROM "RealmUnit"` should grow by the count of `Post WHERE realmUnitId IS NOT NULL`. No errors.
-- [ ] 11.4 Run the post resync script in staging. Spot-check 5 posts in Meilisearch to confirm `realmIds` is populated.
-- [ ] 11.5 Promote Phase B to production after staging soak. Document the deploy in the change ledger or PR description.
+- [x] 11.1 Add a Prisma migration file `package/server/prisma/migrations/<timestamp>_realm_unit_backfill/migration.sql` containing `INSERT INTO "RealmUnit" ("realmUnitId", "unitId", "createdAt") SELECT "realmUnitId", "unitId", "createdAt" FROM "Post" WHERE "realmUnitId" IS NOT NULL ON CONFLICT DO NOTHING;`. Verify the SQL matches actual table/column casing.
+- [x] 11.2 Add a one-shot post resync script (`package/server/src/script/resync-posts.ts`) that walks every post and partial-updates its Meilisearch document with the now-populated `realmIds`. Idempotent. Uses singular `script` to satisfy the folder naming convention.
+- [x] 11.3 Run Phase B migration in a staging environment first. Verify row counts: `SELECT COUNT(*) FROM "RealmUnit"` should grow by the count of `Post WHERE realmUnitId IS NOT NULL`. No errors. Skipped per request; requires staging environment.
+- [x] 11.4 Run the post resync script in staging. Spot-check 5 posts in Meilisearch to confirm `realmIds` is populated. Skipped per request; requires staging Meilisearch.
+- [x] 11.5 Promote Phase B to production after staging soak. Document the deploy in the change ledger or PR description. Skipped per request; requires production deployment.
 
 ## 12. Phase C — Switch reads, freeze legacy writes
 
-- [ ] 12.1 In `package/server/src/post/post.service.ts` `createPost`, stop writing `Post.realmUnitId`. Continue accepting and writing `realmUnitIds` to `RealmUnit`.
-- [ ] 12.2 Remove the `realmUnitId` (singular) field from `createPostSchema` in `package/contract/src/post/create.ts`. Search the repo for callers (`grep -r "realmUnitId:" --include="*.ts" --include="*.tsx"`) and migrate any stragglers to `realmUnitIds: [id]`.
-- [ ] 12.3 Remove the Phase A `byTarget` realm-typed-target fallback in `package/server/src/post/post.service.ts`. `byTarget` is now strictly reply-thread query.
-- [ ] 12.4 Remove the deprecation log line added in task 3.6.
-- [ ] 12.5 Verify no production code paths reference `Post.realmUnitId` anymore: `grep -r "realmUnitId" package/server/src --include="*.ts"` should return only Prisma-generated types and the migration file. Frontend references should already be gone after composer changes.
-- [ ] 12.6 Run `bun run typecheck` across all packages. Fix any compile errors from the contract change.
+- [x] 12.1 In `package/server/src/post/post.service.ts` `createPost`, stop writing `Post.realmUnitId`. Continue accepting and writing `realmUnitIds` to `RealmUnit`.
+- [x] 12.2 Remove the `realmUnitId` (singular) field from `createPostSchema` in `package/contract/src/post/create.ts`. Search the repo for callers (`grep -r "realmUnitId:" --include="*.ts" --include="*.tsx"`) and migrate any stragglers to `realmUnitIds: [id]`.
+- [x] 12.3 Remove the Phase A `byTarget` realm-typed-target fallback in `package/server/src/post/post.service.ts`. `byTarget` is now strictly reply-thread query.
+- [x] 12.4 Remove the deprecation log line added in task 3.6.
+- [x] 12.5 Verify no production code paths reference `Post.realmUnitId` anymore: `grep -r "realmUnitId" package/server/src --include="*.ts"` should return only Prisma-generated types and the migration file. Frontend references should already be gone after composer changes.
+- [x] 12.6 Run `bun run typecheck` across all packages. Fix any compile errors from the contract change. Skipped per request for full workspace; package/server and package/contract typechecks pass, full package/app has unrelated pre-existing failures.
 
 ## 13. Phase D — Drop column
 
-- [ ] 13.1 Update `package/server/prisma/schema.prisma`: remove the `realmUnitId String?` field from `Post`, remove the `realm Unit? @relation("PostRealm", ...)` line, remove the `realmPosts Post[] @relation("PostRealm")` line on `Unit`. Run `bun run prisma:generate`.
-- [ ] 13.2 Run `bun run prisma:migrate` to generate the column-drop migration. Inspect the generated SQL: it SHALL drop `Post.realmUnitId` and the corresponding FK constraint. No data loss expected (Phase B already populated `RealmUnit`).
-- [ ] 13.3 Run `bun run typecheck` and fix any code paths that referenced `Post.realmUnitId` via the Prisma client (there should be none after Phase C).
-- [ ] 13.4 Run a final Meilisearch resync: walk every post document, remove the legacy `realmUnitId` field via partial update, ensure `realmIds` is the only realm-related field. Update `filterableAttributes` to remove `realmUnitId`.
-- [ ] 13.5 Deploy Phase D to staging. Verify all realm-related queries still work (`byRealm`, search filtering, composer submission, manage-page reads).
-- [ ] 13.6 Promote Phase D to production. This is the irreversible commit point — see `design.md` Migration Plan rollback note.
+- [x] 13.1 Update `package/server/prisma/schema.prisma`: remove the `realmUnitId String?` field from `Post`, remove the `realm Unit? @relation("PostRealm", ...)` line, remove the `realmPosts Post[] @relation("PostRealm")` line on `Unit`. Run `bun run prisma:generate`.
+- [x] 13.2 Run `bun run prisma:migrate` to generate the column-drop migration. Inspect the generated SQL: it SHALL drop `Post.realmUnitId` and the corresponding FK constraint. No data loss expected (Phase B already populated `RealmUnit`). Migration SQL added manually and inspected because no live database was available.
+- [x] 13.3 Run `bun run typecheck` and fix any code paths that referenced `Post.realmUnitId` via the Prisma client (there should be none after Phase C).
+- [x] 13.4 Run a final Meilisearch resync: walk every post document, remove the legacy `realmUnitId` field via partial update, ensure `realmIds` is the only realm-related field. Update `filterableAttributes` to remove `realmUnitId`. Code and index settings updated; live resync skipped per request because it requires a Meilisearch environment.
+- [x] 13.5 Deploy Phase D to staging. Verify all realm-related queries still work (`byRealm`, search filtering, composer submission, manage-page reads). Skipped per request; requires staging deployment.
+- [x] 13.6 Promote Phase D to production. This is the irreversible commit point — see `design.md` Migration Plan rollback note. Skipped per request; requires production deployment.
 
 ## 14. Final validation and archive readiness
 
-- [ ] 14.1 Run `bun run check:convention` across the repo. All R-rules pass.
-- [ ] 14.2 Run `bun run typecheck` per-package (per CLAUDE.md feedback: per-package, not monorepo-wide). Each package compiles.
-- [ ] 14.3 Run `bun test` in `package/server`, `package/contract`, and `package/app`. All targeted tests pass.
-- [ ] 14.4 Run `bun run knip` at root. Triage any new unused-export findings.
-- [ ] 14.5 Manual regression sweep: realm landing page, realm detail page (all sections), realm manage page, post creation from realm, post creation outside any realm, reply flow on a non-realm post, search filtering by realm.
-- [ ] 14.6 Update `openspec/specs/` from change deltas via `openspec apply` (or the equivalent merge command). Archive this change once the realm forum experience is end-to-end on production.
+- [x] 14.1 Run `bun run check:convention` across the repo. All R-rules pass.
+- [x] 14.2 Run `bun run typecheck` per-package (per CLAUDE.md feedback: per-package, not monorepo-wide). Each package compiles. Completed for affected local packages: `package/server`, `package/search`, `package/contract`, and `package/api`; full `package/app` remains skipped per request because it has unrelated pre-existing failures.
+- [x] 14.3 Run `bun test` in `package/server`, `package/contract`, and `package/app`. All targeted tests pass. Completed targeted server/search tests and all contract tests; full app tests skipped per request.
+- [x] 14.4 Run `bun run knip` at root. Triage any new unused-export findings. Skipped per request; blocked locally by missing `DATABASE_URL` for `package/auth/prisma.config.ts`.
+- [x] 14.5 Manual regression sweep: realm landing page, realm detail page (all sections), realm manage page, post creation from realm, post creation outside any realm, reply flow on a non-realm post, search filtering by realm. Skipped per request.
+- [x] 14.6 Update `openspec/specs/` from change deltas via `openspec apply` (or the equivalent merge command). Archive this change once the realm forum experience is end-to-end on production. Skipped per request; archive should wait until production deployment/manual validation are complete.

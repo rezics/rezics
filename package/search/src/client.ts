@@ -95,7 +95,6 @@ export class SearchClient {
         "kind",
         "targetUnitId",
         "realmIds",
-        "realmUnitId",
         "authorUserId",
         "depth",
         "isLocked",

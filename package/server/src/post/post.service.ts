@@ -36,7 +36,6 @@ export class PostService {
       : { unit: { status: UnitStatus.PUBLISHED } };
 
     if (query.targetUnitId) where.targetUnitId = query.targetUnitId;
-    if (query.realmUnitId) where.realmUnitId = query.realmUnitId;
     if (query.rootPostUnitId) where.rootPostUnitId = query.rootPostUnitId;
     if (query.parentPostUnitId) where.parentPostUnitId = query.parentPostUnitId;
     if (query.authorUserId) where.authorUserId = query.authorUserId;
@@ -49,18 +48,6 @@ export class PostService {
     const idList = parseIdsCsv(query.ids);
     if (idList && idList.length > 0) {
       where.unitId = { in: idList };
-    }
-
-    if (query.targetUnitId) {
-      const target = await prisma.unit.findUnique({
-        where: { id: query.targetUnitId },
-        select: { type: true },
-      });
-      if (target?.type === UnitType.REALM) {
-        console.warn(
-          `[post.list] Deprecated realm feed via targetUnitId=${query.targetUnitId}; use realmUnitId/byRealm instead.`,
-        );
-      }
     }
 
     const isThreaded = query.mode === "threaded";
@@ -210,15 +197,7 @@ export class PostService {
       scoreEntryId,
       extra,
     } = input;
-    const legacyRealmUnitId = (
-      input as CreatePostInput & { realmUnitId?: string }
-    ).realmUnitId;
-    const realmIdsToWrite = [
-      ...new Set([
-        ...(realmUnitIds ?? []),
-        ...(legacyRealmUnitId ? [legacyRealmUnitId] : []),
-      ]),
-    ];
+    const realmIdsToWrite = [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
 
     if (kind === PostKindEnum.CHAPTER) {
@@ -276,7 +255,6 @@ export class PostService {
         unitId: unit.id,
         authorUserId,
         targetUnitId: targetUnitId ?? undefined,
-        realmUnitId: legacyRealmUnitId ?? undefined,
         body,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,

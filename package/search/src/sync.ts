@@ -693,7 +693,6 @@ export function buildPostDocument(post: any): PostSearchDocument {
         ? post.updatedAt.toISOString()
         : post.updatedAt,
     targetUnitId: post.targetUnitId ?? null,
-    realmUnitId: post.realmUnitId ?? null,
     realmIds: inRealms.map((realm) => realm.realmUnitId),
     rootPostUnitId: post.rootPostUnitId ?? null,
     parentPostUnitId: post.parentPostUnitId ?? null,

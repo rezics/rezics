@@ -169,7 +169,6 @@ model Unit {
 
   // Post relations (other posts referencing this unit)
   targetedByPosts Post[] @relation("PostTarget")
-  realmPosts      Post[] @relation("PostRealm")
   rootPosts       Post[] @relation("PostRoot")
   parentPosts     Post[] @relation("PostParent")
 
@@ -384,7 +383,6 @@ model Post {
   authorUserId String @db.Uuid
 
   targetUnitId String? @db.Uuid
-  realmUnitId  String? @db.Uuid
   scoreEntryId String? @db.Uuid
 
   body String?
@@ -408,14 +406,12 @@ model Post {
   updatedAt DateTime @updatedAt
 
   targetUnit Unit?       @relation("PostTarget", fields: [targetUnitId], references: [id], onDelete: SetNull)
-  realmUnit  Unit?       @relation("PostRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
   rootPost   Unit?       @relation("PostRoot", fields: [rootPostUnitId], references: [id], onDelete: SetNull)
   parentPost Unit?       @relation("PostParent", fields: [parentPostUnitId], references: [id], onDelete: SetNull)
   scoreEntry ScoreEntry? @relation("PostScoreEntry", fields: [scoreEntryId], references: [id], onDelete: Restrict)
 
   @@index([authorUserId, createdAt])
   @@index([targetUnitId, createdAt])
-  @@index([targetUnitId, realmUnitId, createdAt])
   @@index([targetUnitId, sortPath])
   @@index([rootPostUnitId, sortPath])
   @@index([parentPostUnitId, createdAt])
