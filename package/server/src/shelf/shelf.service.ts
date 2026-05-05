@@ -109,14 +109,11 @@ export class ShelfService {
   }
 
   async getByUnitId(unitId: string): Promise<ShelfDetailDTO> {
-    const [row, itemCount] = await Promise.all([
-      prisma.shelf.findFirstOrThrow({
-        where: { unitId },
-        include: shelfInclude,
-      }),
-      prisma.shelfItem.count({ where: { shelfUnitId: unitId } }),
-    ]);
-    return mapShelfDetailToDTO(row, itemCount);
+    const row = await prisma.shelf.findFirstOrThrow({
+      where: { unitId },
+      include: shelfInclude,
+    });
+    return mapShelfDetailToDTO(row, row.itemCount);
   }
 
   async create(req: CreateShelfInput, userId: string): Promise<ShelfDTO> {
@@ -298,12 +295,20 @@ export class ShelfService {
     const position = generateBetween(last?.position, undefined);
 
     const item = await prisma.$transaction(async (tx) => {
-      const slot = await tx.shelfItem.upsert({
-        where: {
-          shelfUnitId_itemRef: { shelfUnitId, itemRef: req.itemRef },
-        },
-        create: { shelfUnitId, itemRef: req.itemRef, kind, position },
-        update: {},
+      const created = await tx.shelfItem.createMany({
+        data: [{ shelfUnitId, itemRef: req.itemRef, kind, position }],
+        skipDuplicates: true,
+      });
+
+      if (created.count > 0) {
+        await tx.shelf.update({
+          where: { unitId: shelfUnitId },
+          data: { itemCount: { increment: 1 } },
+        });
+      }
+
+      const slot = await tx.shelfItem.findUniqueOrThrow({
+        where: { shelfUnitId_itemRef: { shelfUnitId, itemRef: req.itemRef } },
       });
 
       await tx.shelfUnit.upsert({
@@ -374,8 +379,16 @@ export class ShelfService {
   }
 
   async removeItem(shelfUnitId: string, itemRef: string): Promise<void> {
-    await prisma.shelfItem.delete({
-      where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
+    await prisma.$transaction(async (tx) => {
+      const deleted = await tx.shelfItem.deleteMany({
+        where: { shelfUnitId, itemRef },
+      });
+      if (deleted.count > 0) {
+        await tx.shelf.update({
+          where: { unitId: shelfUnitId },
+          data: { itemCount: { decrement: deleted.count } },
+        });
+      }
     });
   }
 
@@ -523,7 +536,6 @@ export class ShelfService {
         where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
       });
 
-      let slot = existing;
       if (!existing) {
         const kind = fallbackKind ?? (await this.deriveKind(itemRef));
         const last = await tx.shelfItem.findFirst({
@@ -532,11 +544,27 @@ export class ShelfService {
           select: { position: true },
         });
         const position = generateBetween(last?.position, undefined);
-        slot = await tx.shelfItem.create({
-          data: { shelfUnitId, itemRef, kind, position },
+        const created = await tx.shelfItem.createMany({
+          data: [{ shelfUnitId, itemRef, kind, position }],
+          skipDuplicates: true,
         });
-        await tx.shelfUnit.create({
-          data: { shelfUnitId, itemRef, unitId: itemRef, role: "primary" },
+        if (created.count > 0) {
+          await tx.shelf.update({
+            where: { unitId: shelfUnitId },
+            data: { itemCount: { increment: 1 } },
+          });
+        }
+        await tx.shelfUnit.upsert({
+          where: {
+            shelfUnitId_itemRef_unitId_role: {
+              shelfUnitId,
+              itemRef,
+              unitId: itemRef,
+              role: "primary",
+            },
+          },
+          create: { shelfUnitId, itemRef, unitId: itemRef, role: "primary" },
+          update: {},
         });
       }
 
@@ -558,7 +586,9 @@ export class ShelfService {
         update: {},
       });
 
-      return slot!;
+      return tx.shelfItem.findUniqueOrThrow({
+        where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
+      });
     });
 
     const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
@@ -627,8 +657,17 @@ export class ShelfService {
     orphanItemRefs: string[],
   ): Promise<{ deleted: number }> {
     if (orphanItemRefs.length === 0) return { deleted: 0 };
-    const result = await prisma.shelfItem.deleteMany({
-      where: { shelfUnitId, itemRef: { in: orphanItemRefs } },
+    const result = await prisma.$transaction(async (tx) => {
+      const deleted = await tx.shelfItem.deleteMany({
+        where: { shelfUnitId, itemRef: { in: orphanItemRefs } },
+      });
+      if (deleted.count > 0) {
+        await tx.shelf.update({
+          where: { unitId: shelfUnitId },
+          data: { itemCount: { decrement: deleted.count } },
+        });
+      }
+      return deleted;
     });
     return { deleted: result.count };
   }

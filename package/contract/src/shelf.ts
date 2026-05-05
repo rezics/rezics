@@ -90,6 +90,7 @@ export const shelfDTOSchema = t.Object({
   kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(shelfExtraSchema)),
+  itemCount: t.Optional(t.Number()),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   items: t.Optional(t.Array(shelfItemDTOSchema)),
   reactionSummaries: t.Optional(t.Any()),

@@ -105,6 +105,7 @@ export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
       row.unit?.translations,
     ),
     extra: (row.extra as Record<string, unknown>) ?? undefined,
+    itemCount: row.itemCount,
     translations: (row.unit?.translations ??
       []) as unknown as ShelfDTO["translations"],
     items: (row.items ?? []).map((i) => mapShelfItemToDTO(i as ShelfItemRow)),
@@ -138,6 +139,7 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
       row.unit?.translations,
     ),
     extra: (row.extra as Record<string, unknown>) ?? undefined,
+    itemCount: row.itemCount,
     translations: (row.unit?.translations ??
       []) as unknown as ShelfDTO["translations"],
     createdAt: row.createdAt,
@@ -156,7 +158,7 @@ export function mapShelfSummaryToDTO(row: ShelfListSelected): ShelfSummaryDTO {
       row.unit?.translations,
     ),
     title,
-    itemCount: row._count?.items ?? 0,
+    itemCount: row.itemCount,
     tags: row.unit?.unitTags?.map((t) => ({
       tagUnitId: t.tagUnitId,
       score: t.score,

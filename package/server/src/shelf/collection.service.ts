@@ -106,23 +106,41 @@ export class CollectionService {
             select: { position: true },
           });
           const position = generateBetween(last?.position, undefined);
-          await tx.shelfItem.create({
-            data: {
-              shelfUnitId: shelfId,
-              itemRef: resolved.itemRef,
-              kind: resolved.kind,
-              position,
-            },
+          const created = await tx.shelfItem.createMany({
+            data: [
+              {
+                shelfUnitId: shelfId,
+                itemRef: resolved.itemRef,
+                kind: resolved.kind,
+                position,
+              },
+            ],
+            skipDuplicates: true,
           });
-          await tx.shelfUnit.create({
-            data: {
+          if (created.count > 0) {
+            await tx.shelf.update({
+              where: { unitId: shelfId },
+              data: { itemCount: { increment: 1 } },
+            });
+          }
+          await tx.shelfUnit.upsert({
+            where: {
+              shelfUnitId_itemRef_unitId_role: {
+                shelfUnitId: shelfId,
+                itemRef: resolved.itemRef,
+                unitId: resolved.itemRef,
+                role: "primary",
+              },
+            },
+            create: {
               shelfUnitId: shelfId,
               itemRef: resolved.itemRef,
               unitId: resolved.itemRef,
               role: "primary",
             },
+            update: {},
           });
-          isNew = true;
+          isNew = isNew || created.count > 0;
         }
 
         if (resolved.reviewUnitId) {
@@ -172,13 +190,16 @@ export class CollectionService {
     });
 
     if (existing) {
-      await prisma.shelfItem.delete({
-        where: {
-          shelfUnitId_itemRef: {
-            shelfUnitId: favShelfId,
-            itemRef: resolved.itemRef,
-          },
-        },
+      await prisma.$transaction(async (tx) => {
+        const deleted = await tx.shelfItem.deleteMany({
+          where: { shelfUnitId: favShelfId, itemRef: resolved.itemRef },
+        });
+        if (deleted.count > 0) {
+          await tx.shelf.update({
+            where: { unitId: favShelfId },
+            data: { itemCount: { decrement: deleted.count } },
+          });
+        }
       });
       return { isFavorited: false };
     }
@@ -191,30 +212,57 @@ export class CollectionService {
     const position = generateBetween(last?.position, undefined);
 
     await prisma.$transaction(async (tx) => {
-      await tx.shelfItem.create({
-        data: {
-          shelfUnitId: favShelfId,
-          itemRef: resolved.itemRef,
-          kind: resolved.kind,
-          position,
-        },
+      const created = await tx.shelfItem.createMany({
+        data: [
+          {
+            shelfUnitId: favShelfId,
+            itemRef: resolved.itemRef,
+            kind: resolved.kind,
+            position,
+          },
+        ],
+        skipDuplicates: true,
       });
-      await tx.shelfUnit.create({
-        data: {
+      if (created.count > 0) {
+        await tx.shelf.update({
+          where: { unitId: favShelfId },
+          data: { itemCount: { increment: 1 } },
+        });
+      }
+      await tx.shelfUnit.upsert({
+        where: {
+          shelfUnitId_itemRef_unitId_role: {
+            shelfUnitId: favShelfId,
+            itemRef: resolved.itemRef,
+            unitId: resolved.itemRef,
+            role: "primary",
+          },
+        },
+        create: {
           shelfUnitId: favShelfId,
           itemRef: resolved.itemRef,
           unitId: resolved.itemRef,
           role: "primary",
         },
+        update: {},
       });
       if (resolved.reviewUnitId) {
-        await tx.shelfUnit.create({
-          data: {
+        await tx.shelfUnit.upsert({
+          where: {
+            shelfUnitId_itemRef_unitId_role: {
+              shelfUnitId: favShelfId,
+              itemRef: resolved.itemRef,
+              unitId: resolved.reviewUnitId,
+              role: "review",
+            },
+          },
+          create: {
             shelfUnitId: favShelfId,
             itemRef: resolved.itemRef,
             unitId: resolved.reviewUnitId,
             role: "review",
           },
+          update: {},
         });
       }
     });

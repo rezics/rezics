@@ -24,6 +24,7 @@ export const shelfListSelect = {
   unitId: true,
   kindKey: true,
   extra: true,
+  itemCount: true,
   createdAt: true,
   updatedAt: true,
   unit: {
@@ -38,7 +39,6 @@ export const shelfListSelect = {
       unitTags: { orderBy: { score: "desc" as const } },
     },
   },
-  _count: { select: { items: true } },
 } satisfies Prisma.ShelfSelect;
 
 export type ShelfListSelected = Prisma.ShelfGetPayload<{

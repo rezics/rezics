@@ -15,7 +15,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? "";
   const description = translation?.description ?? "";
-  const itemsCount = shelf.items?.length ?? 0;
+  const itemsCount = shelf.itemCount ?? shelf.items?.length ?? 0;
 
   const handleOpenShelf = () => {
     if (!shelf.unitId) return;
