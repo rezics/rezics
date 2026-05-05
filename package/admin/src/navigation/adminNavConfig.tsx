@@ -1,5 +1,19 @@
 import type React from "react";
-import { ShieldUser as AdminPanelSettingsOutlinedIcon, BookMarked as CollectionsBookmarkIcon, LayoutDashboard as DashboardIcon, Mail as EmailOutlinedIcon, MessagesSquare as ForumIcon, Package as Inventory2Icon, Key as KeyOutlinedIcon, SearchCheck as ManageSearchOutlinedIcon, Users as PeopleIcon, Settings as SettingsIcon, Database as StorageOutlinedIcon, Tags as StyleOutlinedIcon, KeyRound as VpnKeyOutlinedIcon } from "lucide-react";
+import {
+  ShieldUser as AdminPanelSettingsOutlinedIcon,
+  BookMarked as CollectionsBookmarkIcon,
+  LayoutDashboard as DashboardIcon,
+  Mail as EmailOutlinedIcon,
+  MessagesSquare as ForumIcon,
+  Package as Inventory2Icon,
+  Key as KeyOutlinedIcon,
+  SearchCheck as ManageSearchOutlinedIcon,
+  Users as PeopleIcon,
+  Settings as SettingsIcon,
+  Database as StorageOutlinedIcon,
+  Tags as StyleOutlinedIcon,
+  KeyRound as VpnKeyOutlinedIcon,
+} from "lucide-react";
 
 export type AdminNavItem = {
   id: string;

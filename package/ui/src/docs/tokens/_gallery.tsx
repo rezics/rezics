@@ -165,7 +165,8 @@ export function Swatch({
     showContrast ? contrastAgainst : undefined,
   );
   const ratio = contrast ?? 0;
-  const tier = ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : ratio >= 3 ? "AA-L" : "fail";
+  const tier =
+    ratio >= 7 ? "AAA" : ratio >= 4.5 ? "AA" : ratio >= 3 ? "AA-L" : "fail";
   const passes = ratio >= 4.5;
   const pairLabel = contrastAgainst
     ? contrastAgainst.replace(/^--colors-/, "")
@@ -330,13 +331,7 @@ export function SpacingRuler({ name, value }: { name: string; value: string }) {
   );
 }
 
-export function RadiusSample({
-  name,
-  value,
-}: {
-  name: string;
-  value: string;
-}) {
+export function RadiusSample({ name, value }: { name: string; value: string }) {
   return (
     <div style={{ textAlign: "center" }}>
       <div
@@ -470,7 +465,11 @@ export function Do({
   caption?: string;
   children: ReactNode;
 }) {
-  return <Verdict tone="do" caption={caption}>{children}</Verdict>;
+  return (
+    <Verdict tone="do" caption={caption}>
+      {children}
+    </Verdict>
+  );
 }
 
 export function Dont({
@@ -480,7 +479,11 @@ export function Dont({
   caption?: string;
   children: ReactNode;
 }) {
-  return <Verdict tone="dont" caption={caption}>{children}</Verdict>;
+  return (
+    <Verdict tone="dont" caption={caption}>
+      {children}
+    </Verdict>
+  );
 }
 
 export function Compare({ children }: { children: ReactNode }) {
@@ -679,7 +682,9 @@ function useRootToken(name: string) {
   useEffect(() => {
     const compute = () => {
       setValue(
-        getComputedStyle(document.documentElement).getPropertyValue(name).trim(),
+        getComputedStyle(document.documentElement)
+          .getPropertyValue(name)
+          .trim(),
       );
     };
     compute();
@@ -779,13 +784,30 @@ export function DensityDemo({ children }: { children?: ReactNode }) {
 }
 
 export function StateLayerDemo() {
-  const states: Array<{ label: string; opacityVar: string; selector: string }> = [
-    { label: "Resting", opacityVar: "0", selector: "" },
-    { label: "Hover", opacityVar: "var(--state-hover-opacity)", selector: "8%" },
-    { label: "Focus", opacityVar: "var(--state-focus-opacity)", selector: "12%" },
-    { label: "Pressed", opacityVar: "var(--state-pressed-opacity)", selector: "12%" },
-    { label: "Dragged", opacityVar: "var(--state-dragged-opacity)", selector: "16%" },
-  ];
+  const states: Array<{ label: string; opacityVar: string; selector: string }> =
+    [
+      { label: "Resting", opacityVar: "0", selector: "" },
+      {
+        label: "Hover",
+        opacityVar: "var(--state-hover-opacity)",
+        selector: "8%",
+      },
+      {
+        label: "Focus",
+        opacityVar: "var(--state-focus-opacity)",
+        selector: "12%",
+      },
+      {
+        label: "Pressed",
+        opacityVar: "var(--state-pressed-opacity)",
+        selector: "12%",
+      },
+      {
+        label: "Dragged",
+        opacityVar: "var(--state-dragged-opacity)",
+        selector: "16%",
+      },
+    ];
   return (
     <div
       style={{
@@ -820,9 +842,7 @@ export function StateLayerDemo() {
               pointerEvents: "none",
             }}
           />
-          <div style={{ position: "relative", fontWeight: 500 }}>
-            {s.label}
-          </div>
+          <div style={{ position: "relative", fontWeight: 500 }}>{s.label}</div>
           {s.selector ? (
             <div
               style={{
@@ -843,12 +863,42 @@ export function StateLayerDemo() {
 }
 
 export function DepthDemo() {
-  const layers: Array<{ name: string; bg: string; cssVar: string; note: string }> = [
-    { name: "canvas", bg: "var(--colors-surface-canvas)", cssVar: "--colors-surface-canvas", note: "Page background" },
-    { name: "base", bg: "var(--colors-surface-base)", cssVar: "--colors-surface-base", note: "Default cards" },
-    { name: "elevated", bg: "var(--colors-surface-elevated)", cssVar: "--colors-surface-elevated", note: "Modals, popovers" },
-    { name: "subtle", bg: "var(--colors-surface-subtle)", cssVar: "--colors-surface-subtle", note: "Inset wells" },
-    { name: "sunken", bg: "var(--colors-surface-sunken)", cssVar: "--colors-surface-sunken", note: "Code blocks, deepest" },
+  const layers: Array<{
+    name: string;
+    bg: string;
+    cssVar: string;
+    note: string;
+  }> = [
+    {
+      name: "canvas",
+      bg: "var(--colors-surface-canvas)",
+      cssVar: "--colors-surface-canvas",
+      note: "Page background",
+    },
+    {
+      name: "base",
+      bg: "var(--colors-surface-base)",
+      cssVar: "--colors-surface-base",
+      note: "Default cards",
+    },
+    {
+      name: "elevated",
+      bg: "var(--colors-surface-elevated)",
+      cssVar: "--colors-surface-elevated",
+      note: "Modals, popovers",
+    },
+    {
+      name: "subtle",
+      bg: "var(--colors-surface-subtle)",
+      cssVar: "--colors-surface-subtle",
+      note: "Inset wells",
+    },
+    {
+      name: "sunken",
+      bg: "var(--colors-surface-sunken)",
+      cssVar: "--colors-surface-sunken",
+      note: "Code blocks, deepest",
+    },
   ];
   return (
     <div

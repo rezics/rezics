@@ -103,9 +103,7 @@ export const JwtServicesPage: FC = () => {
 
       {!isLoading && !error && services.length === 0 && (
         <div className="flex items-center justify-center h-40">
-          <p className="text-base text-text-secondary">
-            No JWT services found
-          </p>
+          <p className="text-base text-text-secondary">No JWT services found</p>
         </div>
       )}
 

@@ -12,7 +12,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    content: "# Hello\n\nThis is **markdown** rendered with the rezics renderer.",
+    content:
+      "# Hello\n\nThis is **markdown** rendered with the rezics renderer.",
   },
 };
 

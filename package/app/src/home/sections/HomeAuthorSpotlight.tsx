@@ -66,9 +66,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
           >
             <Avatar>
               {a.avatar && <AvatarImage src={a.avatar} alt={a.name} />}
-              <AvatarFallback>
-                {a.name?.charAt(0).toUpperCase()}
-              </AvatarFallback>
+              <AvatarFallback>{a.name?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
               <div className="font-medium truncate" title={a.name}>

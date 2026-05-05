@@ -17,8 +17,8 @@ export const Default: Story = {
       <Info />
       <AlertTitle>Heads up</AlertTitle>
       <AlertDescription>
-        This is a default alert. The icon, title, and description sit on a
-        quiet surface tone.
+        This is a default alert. The icon, title, and description sit on a quiet
+        surface tone.
       </AlertDescription>
     </Alert>
   ),

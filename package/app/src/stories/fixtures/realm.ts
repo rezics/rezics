@@ -3,7 +3,9 @@ import type { RealmDTO } from "@rezics/contract";
 import { LANGUAGES } from "@rezics/contract";
 import { userAlice } from "./user.ts";
 
-function makeRealm(overrides: Partial<RealmDTO> & { unitId: string }): RealmDTO {
+function makeRealm(
+  overrides: Partial<RealmDTO> & { unitId: string },
+): RealmDTO {
   return {
     unitId: overrides.unitId,
     user: userAlice,
@@ -56,4 +58,8 @@ export const realmPrivate: RealmDTO = makeRealm({
   ],
 });
 
-export const realmList: RealmDTO[] = [realmDefault, realmOfficial, realmPrivate];
+export const realmList: RealmDTO[] = [
+  realmDefault,
+  realmOfficial,
+  realmPrivate,
+];

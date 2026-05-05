@@ -5,11 +5,7 @@ import type {
   ShelfItemKind,
   ToggleFavoriteResponse,
 } from "@rezics/contract";
-import {
-  PostKind,
-  prisma,
-  UnitType,
-} from "#/prisma/client";
+import { PostKind, prisma, UnitType } from "#/prisma/client";
 import { generateBetween } from "./fractional-index";
 import { mapUnitToKind } from "./shelf.service";
 import { getOrCreateSystemShelf } from "./system-shelves";

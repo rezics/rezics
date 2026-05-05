@@ -2,7 +2,14 @@ import { Button } from "@rezics/ui/shadcn";
 import { cn } from "@/shared/utils/css-util";
 import * as React from "react";
 import FeedbackDialog from "@/feedback/components/FeedbackDialog";
-import { Plus as AddIcon, FileText as ArticleOutlined, Bug as BugReport, MessageCircle as ChatBubbleOutline, X as CloseIcon, TriangleAlert as ReportProblemIcon } from "lucide-react";
+import {
+  Plus as AddIcon,
+  FileText as ArticleOutlined,
+  Bug as BugReport,
+  MessageCircle as ChatBubbleOutline,
+  X as CloseIcon,
+  TriangleAlert as ReportProblemIcon,
+} from "lucide-react";
 
 export interface HelpFabAction {
   id: string;

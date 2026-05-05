@@ -21,10 +21,7 @@ export function generateTitle(minWords = 3, maxWords = 7): string {
 }
 
 /** Paragraph with `[minSentences, maxSentences]` random sentences from `faker.lorem`. */
-export function generateParagraph(
-  minSentences = 2,
-  maxSentences = 5,
-): string {
+export function generateParagraph(minSentences = 2, maxSentences = 5): string {
   const sentenceCount = randomInt(minSentences, maxSentences);
   return faker.lorem.sentences(sentenceCount);
 }

@@ -59,7 +59,10 @@ function StatusBadge({ status }: { status: TokenStatus }) {
   } as const;
   const { label, className } = map[status];
   return (
-    <Badge variant={status === "missing" ? "secondary" : "default"} className={className}>
+    <Badge
+      variant={status === "missing" ? "secondary" : "default"}
+      className={className}
+    >
       {label}
     </Badge>
   );
@@ -67,8 +70,7 @@ function StatusBadge({ status }: { status: TokenStatus }) {
 
 function ClaimsTable({ tokenName }: { tokenName: NormalizedTokenName }) {
   const token = getToken(tokenName);
-  if (!token)
-    return <p className="text-sm text-text-secondary">No token</p>;
+  if (!token) return <p className="text-sm text-text-secondary">No token</p>;
 
   const claims = parseJwt(token);
   if (!claims)

@@ -17,13 +17,22 @@ export const Default: Story = {
     <div className="flex flex-wrap gap-2">
       <Toaster />
       <Button onClick={() => toast("Saved")}>Default</Button>
-      <Button onClick={() => toast.success("Highlight saved")} variant="secondary">
+      <Button
+        onClick={() => toast.success("Highlight saved")}
+        variant="secondary"
+      >
         Success
       </Button>
-      <Button onClick={() => toast.info("New chapter unlocked")} variant="outline">
+      <Button
+        onClick={() => toast.info("New chapter unlocked")}
+        variant="outline"
+      >
         Info
       </Button>
-      <Button onClick={() => toast.warning("Storage almost full")} variant="outline">
+      <Button
+        onClick={() => toast.warning("Storage almost full")}
+        variant="outline"
+      >
         Warning
       </Button>
       <Button onClick={() => toast.error("Sync failed")} variant="destructive">

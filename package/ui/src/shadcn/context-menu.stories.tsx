@@ -33,7 +33,9 @@ function ContextMenuSample() {
           Mark as read <ContextMenuShortcut>⌘R</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuItem>Add bookmark</ContextMenuItem>
-        <ContextMenuItem variant="destructive">Remove highlight</ContextMenuItem>
+        <ContextMenuItem variant="destructive">
+          Remove highlight
+        </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuCheckboxItem checked>Show notes</ContextMenuCheckboxItem>
         <ContextMenuSeparator />

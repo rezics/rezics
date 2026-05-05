@@ -28,16 +28,10 @@ export const EmptyState: FC<EmptyStateProps> = ({
         className,
       )}
     >
-      {icon ? (
-        <div className="text-text-tertiary">{icon}</div>
-      ) : null}
-      <p className="text-base font-medium text-text-primary">
-        {title}
-      </p>
+      {icon ? <div className="text-text-tertiary">{icon}</div> : null}
+      <p className="text-base font-medium text-text-primary">{title}</p>
       {description ? (
-        <p className="text-sm text-text-secondary">
-          {description}
-        </p>
+        <p className="text-sm text-text-secondary">{description}</p>
       ) : null}
       {action ? <div className="mt-2">{action}</div> : null}
     </div>

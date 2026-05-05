@@ -6,9 +6,7 @@ import type {
 import { useCallback, useMemo, useState } from "react";
 import { toContentSearchOptions } from "../models/toContentSearchOptions";
 
-export type QueryMiddleware = (
-  keyword: string,
-) => Partial<SearchQuery>;
+export type QueryMiddleware = (keyword: string) => Partial<SearchQuery>;
 
 export interface UseSearchQueryOptions {
   initial?: SearchQuery;
@@ -133,10 +131,7 @@ export function mergeEffective(
     delete out.postKind;
   }
 
-  out.languages = unionStrings(
-    implicit.languages ?? [],
-    user.languages ?? [],
-  );
+  out.languages = unionStrings(implicit.languages ?? [], user.languages ?? []);
   if (out.languages.length === 0) delete out.languages;
 
   if (user.ratings !== undefined) out.ratings = user.ratings;
@@ -160,10 +155,7 @@ export function useSearchQuery(
 
   const [user, setUser] = useState<SearchQuery>(initial ?? {});
 
-  const query = useMemo(
-    () => mergeEffective(implicit, user),
-    [implicit, user],
-  );
+  const query = useMemo(() => mergeEffective(implicit, user), [implicit, user]);
 
   const patch = useCallback((p: Partial<SearchQuery>) => {
     setUser((prev) => mergeAppend(prev, p));
@@ -187,10 +179,7 @@ export function useSearchQuery(
     setUser(initial ?? {});
   }, [initial]);
 
-  const toOptions = useCallback(
-    () => toContentSearchOptions(query),
-    [query],
-  );
+  const toOptions = useCallback(() => toContentSearchOptions(query), [query]);
 
   return {
     query,

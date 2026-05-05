@@ -15,7 +15,11 @@ export interface SpinnerProps {
   className?: string;
 }
 
-export function Spinner({ size = "md", label = "Loading", className }: SpinnerProps) {
+export function Spinner({
+  size = "md",
+  label = "Loading",
+  className,
+}: SpinnerProps) {
   return (
     <span
       role="status"
@@ -25,10 +29,7 @@ export function Spinner({ size = "md", label = "Loading", className }: SpinnerPr
     >
       <Loader2
         aria-hidden="true"
-        className={cn(
-          SIZE_CLASS[size],
-          "animate-spin text-text-secondary",
-        )}
+        className={cn(SIZE_CLASS[size], "animate-spin text-text-secondary")}
       />
       <span className="sr-only">{label}</span>
     </span>

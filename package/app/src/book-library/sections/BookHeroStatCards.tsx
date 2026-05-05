@@ -6,7 +6,11 @@ import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked as CollectionsBookmarkOutlined, Tag as LocalOfferOutlined, MessageSquareText as RateReviewOutlined } from "lucide-react";
+import {
+  BookMarked as CollectionsBookmarkOutlined,
+  Tag as LocalOfferOutlined,
+  MessageSquareText as RateReviewOutlined,
+} from "lucide-react";
 
 interface BookHeroStatCardsProps {
   bookId: string;

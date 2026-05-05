@@ -1,12 +1,7 @@
 import { bookChapterIndexQuery } from "@rezics/api/book/book";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { ChapterTreeItem, ContentRating } from "@rezics/contract";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@rezics/ui/shadcn";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";

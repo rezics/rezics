@@ -47,9 +47,7 @@ export function ReviewForm({
         <span className="text-sm font-medium">{t("review.form.rating")}</span>
         <RatingInput
           value={data._editRating > 0 ? data._editRating : null}
-          onChange={(value) =>
-            setData({ ...data, _editRating: value ?? 0 })
-          }
+          onChange={(value) => setData({ ...data, _editRating: value ?? 0 })}
           max={SCORE_MAX}
           size="lg"
           aria-label={t("review.form.rating")}

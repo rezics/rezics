@@ -81,10 +81,7 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
         </Tabs>
       ) : null}
 
-      <PinboardAdminBoard
-        realmUnitId={realmUnitId}
-        pinboardKey={activeKey}
-      />
+      <PinboardAdminBoard realmUnitId={realmUnitId} pinboardKey={activeKey} />
     </div>
   );
 };
@@ -110,8 +107,9 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   const [editingEntry, setEditingEntry] = useState<PinboardEntryView | null>(
     null,
   );
-  const [pendingRemove, setPendingRemove] =
-    useState<PinboardEntryView | null>(null);
+  const [pendingRemove, setPendingRemove] = useState<PinboardEntryView | null>(
+    null,
+  );
   const [removing, setRemoving] = useState(false);
 
   const append = useAppendRealmExtraMutation();
@@ -158,7 +156,8 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
     async (translations: TranslationEditorEntry[]) => {
       const created = await unitApi.create({
         type: "POST",
-        defaultLanguage: toLanguage(translations[0]?.language) ?? DEFAULT_LANGUAGE,
+        defaultLanguage:
+          toLanguage(translations[0]?.language) ?? DEFAULT_LANGUAGE,
         translations: translations.flatMap((tr) => {
           const language = toLanguage(tr.language);
           if (!language) return [];

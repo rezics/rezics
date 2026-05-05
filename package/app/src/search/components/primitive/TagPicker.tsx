@@ -79,11 +79,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     if (e.key === "Enter") {
       e.preventDefault();
       commit(inputValue);
-    } else if (
-      e.key === "Backspace" &&
-      inputValue === "" &&
-      value.length > 0
-    ) {
+    } else if (e.key === "Backspace" && inputValue === "" && value.length > 0) {
       const last = value[value.length - 1];
       if (last) removeTag(tagIdentity(last));
     }

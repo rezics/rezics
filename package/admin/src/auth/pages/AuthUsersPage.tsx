@@ -211,9 +211,7 @@ export default function AuthUsersPage() {
 
       <Dialog
         open={confirmDialog.open}
-        onOpenChange={(open) =>
-          setConfirmDialog((prev) => ({ ...prev, open }))
-        }
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}
       >
         <DialogContent>
           <DialogHeader>

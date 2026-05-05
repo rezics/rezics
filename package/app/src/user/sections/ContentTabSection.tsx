@@ -4,11 +4,7 @@ import {
 } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@rezics/ui/shadcn";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
@@ -106,9 +102,7 @@ export const ContentTabSection: FC = () => {
         </p>
       ) : posts.length === 0 ? (
         <EmptyState
-          title={
-            filters.q ? t("search.empty.title") : t("common.no_data")
-          }
+          title={filters.q ? t("search.empty.title") : t("common.no_data")}
         />
       ) : (
         <>

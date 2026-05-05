@@ -2,7 +2,12 @@ import { postQueries } from "@rezics/api/post/post";
 import { type PostDTO, PostKind } from "@rezics/contract";
 import { RatingInput } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
-import { Avatar, AvatarFallback, AvatarImage, Skeleton } from "@rezics/ui/shadcn";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Skeleton,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -106,9 +111,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
         {author?.avatar && (
           <Avatar className="w-6 h-6">
             <AvatarImage src={author.avatar} alt={author.name ?? ""} />
-            <AvatarFallback>
-              {(author.name ?? "?").slice(0, 1)}
-            </AvatarFallback>
+            <AvatarFallback>{(author.name ?? "?").slice(0, 1)}</AvatarFallback>
           </Avatar>
         )}
         <span className="text-sm font-medium">

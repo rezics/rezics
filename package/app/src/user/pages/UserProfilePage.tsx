@@ -74,7 +74,10 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">
             <Avatar className="w-20 h-20 rounded-lg">
-              <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
+              <AvatarImage
+                src={user.avatar ?? undefined}
+                alt={user.name ?? ""}
+              />
               <AvatarFallback className="rounded-lg">
                 {user.name?.charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -116,9 +119,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             {user.unitId && (
               <div className="mb-4">
                 <h6 className="text-base font-semibold mb-2">Unit ID</h6>
-                <p className="text-sm text-text-secondary">
-                  {user.unitId}
-                </p>
+                <p className="text-sm text-text-secondary">{user.unitId}</p>
               </div>
             )}
             {user.email && (
@@ -126,9 +127,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                 <h6 className="text-base font-semibold mb-2">
                   {t("common.email")}
                 </h6>
-                <p className="text-sm text-text-secondary">
-                  {user.email}
-                </p>
+                <p className="text-sm text-text-secondary">{user.email}</p>
               </div>
             )}
             {user.bio && (

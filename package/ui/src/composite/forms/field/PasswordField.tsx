@@ -69,9 +69,7 @@ export const PasswordField: FC<PasswordFieldProps> = ({
           )}
         </Button>
       </div>
-      {help ? (
-        <p className="text-xs text-rezics-fg-muted">{help}</p>
-      ) : null}
+      {help ? <p className="text-xs text-rezics-fg-muted">{help}</p> : null}
     </div>
   );
 };

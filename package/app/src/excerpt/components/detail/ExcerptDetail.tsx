@@ -50,20 +50,14 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
               alt={excerpt.user.name ?? ""}
               className="w-16 h-16 rounded-full shadow"
             />
-            <p className="text-sm font-semibold">
-              {excerpt.user.name ?? ""}
-            </p>
+            <p className="text-sm font-semibold">{excerpt.user.name ?? ""}</p>
           </Link>
-          {dateStr && (
-            <p className="text-xs text-text-secondary">{dateStr}</p>
-          )}
+          {dateStr && <p className="text-xs text-text-secondary">{dateStr}</p>}
         </div>
       )}
 
       <div className="flex items-start gap-2">
-        <FormatQuoteIcon
-          className="h-7 w-7 text-text-secondary mt-1"
-        />
+        <FormatQuoteIcon className="h-7 w-7 text-text-secondary mt-1" />
         <div className="flex-1">
           <MarkdownContent content={description} />
         </div>
@@ -85,9 +79,7 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
 function ExcerptSourceLine({ source }: { source?: ExcerptSource | string }) {
   if (!source) return null;
   if (typeof source === "string") {
-    return (
-      <p className="text-xs text-text-secondary">—— {source}</p>
-    );
+    return <p className="text-xs text-text-secondary">—— {source}</p>;
   }
   const href = source.mode === "unit" ? `/unit/${source.unitId}` : source.url;
   return (

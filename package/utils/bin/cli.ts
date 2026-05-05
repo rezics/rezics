@@ -21,9 +21,7 @@ function renderEnvError(err: EnvValidationError): void {
 
   lines.push("");
   lines.push("Fix one of:");
-  lines.push(
-    "  1. Set up per-package envs (preferred):",
-  );
+  lines.push("  1. Set up per-package envs (preferred):");
   lines.push("       cp package/auth/.env.example   package/auth/.env");
   lines.push("       cp package/server/.env.example package/server/.env");
   lines.push("");

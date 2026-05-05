@@ -1,8 +1,4 @@
-import type {
-  Action,
-  ReactionBarPolicy,
-  ReactionBarPost,
-} from "@/engagement";
+import type { Action, ReactionBarPolicy, ReactionBarPost } from "@/engagement";
 
 export const bookHeroActions: Action[] = ["vote", "shelf", "share"];
 

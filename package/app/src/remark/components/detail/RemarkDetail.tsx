@@ -1,6 +1,9 @@
 import type { PostDTO } from "@rezics/contract";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
-import { ThumbsDown as ThumbDownIcon, ThumbsUp as ThumbUpIcon } from "lucide-react";
+import {
+  ThumbsDown as ThumbDownIcon,
+  ThumbsUp as ThumbUpIcon,
+} from "lucide-react";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";

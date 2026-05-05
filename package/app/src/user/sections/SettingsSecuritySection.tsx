@@ -112,9 +112,7 @@ export const SettingsSecuritySection: FC = () => {
               className={passwordMismatch ? "border-border-error" : ""}
             />
             {passwordMismatch && (
-              <p className="text-sm text-error-text">
-                Passwords do not match
-              </p>
+              <p className="text-sm text-error-text">Passwords do not match</p>
             )}
           </div>
           <Button

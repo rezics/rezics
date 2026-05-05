@@ -19,9 +19,10 @@ type Args = {
 };
 
 function Render({ mode, themeVariant }: Args) {
-  const theme = useMemo(() => createTheme({ variant: themeVariant }), [
-    themeVariant,
-  ]);
+  const theme = useMemo(
+    () => createTheme({ variant: themeVariant }),
+    [themeVariant],
+  );
 
   const content = sampleContent[mode] ?? "";
   const props = { value: content, theme, className: "h-full" };

@@ -39,10 +39,7 @@ const POOLS: Record<Language, TextPool> = {
  * Title pool for a given language and unit-type-like key.
  * Falls back to BOOK titles for unrecognized keys.
  */
-export function getTitlePool(
-  lang: Language,
-  type: string,
-): readonly string[] {
+export function getTitlePool(lang: Language, type: string): readonly string[] {
   const pool = POOLS[lang];
   const key = type as UnitTextType;
   return pool.titles[key] ?? pool.titles.BOOK;

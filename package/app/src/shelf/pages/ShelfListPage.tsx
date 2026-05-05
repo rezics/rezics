@@ -35,9 +35,7 @@ export function ShelfListPage() {
           <Spinner />
         </div>
       ) : shelves.length === 0 ? (
-        <p className="py-8 text-center text-text-secondary">
-          No shelves yet
-        </p>
+        <p className="py-8 text-center text-text-secondary">No shelves yet</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {shelves.map((shelf) => (

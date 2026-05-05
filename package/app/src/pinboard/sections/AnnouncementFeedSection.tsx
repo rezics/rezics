@@ -50,27 +50,24 @@ function toItem(
  * Falls back to rendering nothing when the default realm id has not
  * bootstrapped yet — the infra hook populates it on first load.
  */
-export const AnnouncementFeedSection: React.FC<AnnouncementFeedSectionProps> =
-  ({ children, loadingFallback, linkFor, realmUnitId }) => {
-    const resolvedRealmUnitId = realmUnitId ?? getDefaultRealmId() ?? "";
-    const { entries, isLoading } = usePinboardList({
-      realmUnitId: resolvedRealmUnitId,
-      pinboardKey: "announcement",
-      enabled: resolvedRealmUnitId.length > 0,
-    });
+export const AnnouncementFeedSection: React.FC<
+  AnnouncementFeedSectionProps
+> = ({ children, loadingFallback, linkFor, realmUnitId }) => {
+  const resolvedRealmUnitId = realmUnitId ?? getDefaultRealmId() ?? "";
+  const { entries, isLoading } = usePinboardList({
+    realmUnitId: resolvedRealmUnitId,
+    pinboardKey: "announcement",
+    enabled: resolvedRealmUnitId.length > 0,
+  });
 
-    if (!resolvedRealmUnitId) return null;
+  if (!resolvedRealmUnitId) return null;
 
-    if (isLoading) {
-      return (
-        <>
-          {loadingFallback ?? (
-            <Skeleton className="w-full h-10 rounded-md" />
-          )}
-        </>
-      );
-    }
+  if (isLoading) {
+    return (
+      <>{loadingFallback ?? <Skeleton className="w-full h-10 rounded-md" />}</>
+    );
+  }
 
-    const items = entries.map((e) => toItem(e, linkFor));
-    return <>{children(items)}</>;
-  };
+  const items = entries.map((e) => toItem(e, linkFor));
+  return <>{children(items)}</>;
+};

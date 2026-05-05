@@ -8,7 +8,13 @@ export * from "./radius";
 export * from "./elevation";
 export * from "./motion";
 
-import { colors, lightColors, darkColors, type ColorMode, type ColorTokens } from "./colors";
+import {
+  colors,
+  lightColors,
+  darkColors,
+  type ColorMode,
+  type ColorTokens,
+} from "./colors";
 import { typography, type TypographyTokens } from "./typography";
 import { spacing, type SpacingTokens } from "./spacing";
 import { radius, type RadiusTokens } from "./radius";

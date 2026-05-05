@@ -46,10 +46,9 @@ function unitLabel(unit: UnitDTO) {
   return tr?.title ?? unit.slug ?? unit.id;
 }
 
-export const RealmExtraManageSection: React.FC<RealmExtraManageSectionProps> = ({
-  realmId,
-  extra,
-}) => {
+export const RealmExtraManageSection: React.FC<
+  RealmExtraManageSectionProps
+> = ({ realmId, extra }) => {
   return (
     <section className="flex flex-col gap-6">
       <div>

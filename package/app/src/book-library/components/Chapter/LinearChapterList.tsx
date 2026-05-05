@@ -1,11 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { ChapterTreeItem } from "@rezics/contract";
-import {
-  Button,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
+import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";

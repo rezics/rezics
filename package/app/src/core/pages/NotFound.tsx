@@ -1,9 +1,4 @@
-import {
-  Button,
-  Card,
-  CardContent,
-  CardFooter,
-} from "@rezics/ui/shadcn";
+import { Button, Card, CardContent, CardFooter } from "@rezics/ui/shadcn";
 import {
   useCanGoBack,
   useNavigate,

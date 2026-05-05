@@ -27,7 +27,10 @@ function parseTags(raw: string | null): SlugRef[] {
 
 function parseArray(raw: string | null): string[] {
   if (!raw) return [];
-  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 export function buildSearchPath(query: SearchQuery, base = "/search"): string {

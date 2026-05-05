@@ -18,9 +18,10 @@ export function EmojiPickerOverlay({
 }: EmojiPickerOverlayProps) {
   const { resolvedTheme } = useTheme();
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(
-    null,
-  );
+  const [position, setPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!open || !anchorEl) {

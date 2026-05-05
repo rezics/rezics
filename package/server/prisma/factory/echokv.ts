@@ -28,4 +28,3 @@ export const seedEchoKV = async (prisma: PrismaClient) => {
     },
   });
 };
-

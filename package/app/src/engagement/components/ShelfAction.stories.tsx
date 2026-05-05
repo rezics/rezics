@@ -11,15 +11,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const MdDefault: Story = {
-  render: () => (
-    <ShelfAction size="md" targetUnitId="fixture-shelf-target-1" />
-  ),
+  render: () => <ShelfAction size="md" targetUnitId="fixture-shelf-target-1" />,
 };
 
 export const SmCompact: Story = {
-  render: () => (
-    <ShelfAction size="sm" targetUnitId="fixture-shelf-target-2" />
-  ),
+  render: () => <ShelfAction size="sm" targetUnitId="fixture-shelf-target-2" />,
 };
 
 export const MdReviewTarget: Story = {

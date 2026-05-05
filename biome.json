@@ -12,6 +12,8 @@
     "includes": [
       "**",
       "!**/*.d.ts",
+      "!package/admin/src/routeTree.gen.ts",
+      "!package/app/src/routeTree.gen.ts",
       "!!**/dist",
       "!!**/build",
       "!!**/coverage",

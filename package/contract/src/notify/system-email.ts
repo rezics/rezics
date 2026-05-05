@@ -57,5 +57,4 @@ export const systemEmailResponseSchema = t.Object({
   notificationId: t.Optional(t.String()),
   deduplicated: t.Optional(t.Boolean()),
 });
-export type SystemEmailResponse =
-  (typeof systemEmailResponseSchema)["static"];
+export type SystemEmailResponse = (typeof systemEmailResponseSchema)["static"];

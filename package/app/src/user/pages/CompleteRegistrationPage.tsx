@@ -67,9 +67,7 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
           {!isLast && (
             <span
               className={`absolute left-[11px] top-7 bottom-0 w-px ${
-                step.completed
-                  ? "bg-brand-fill"
-                  : "bg-border-whisper"
+                step.completed ? "bg-brand-fill" : "bg-border-whisper"
               }`}
             />
           )}
@@ -83,11 +81,7 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
                   : "bg-border-whisper text-text-secondary"
             }`}
           >
-            {step.completed ? (
-              <CheckIcon className="w-3.5 h-3.5" />
-            ) : (
-              idx + 1
-            )}
+            {step.completed ? <CheckIcon className="w-3.5 h-3.5" /> : idx + 1}
           </span>
           {/* label + content */}
           <div className="flex-1 pb-6 min-w-0">
@@ -222,9 +216,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
         {slugHelper && (
           <p
             className={`text-xs ${
-              slugError
-                ? "text-error-text"
-                : "text-text-secondary"
+              slugError ? "text-error-text" : "text-text-secondary"
             }`}
           >
             {slugHelper}
@@ -232,11 +224,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
         )}
       </div>
 
-      <Button
-        disabled={!canSubmit}
-        onClick={handleSubmit}
-        className="w-full"
-      >
+      <Button disabled={!canSubmit} onClick={handleSubmit} className="w-full">
         {loading ? t("common.loading") : "Confirm Identity"}
       </Button>
     </div>
@@ -406,9 +394,7 @@ function EmailVerificationStep({
         loadingComponent={
           <div className="flex items-center gap-3">
             <Spinner size="sm" />
-            <p className="text-sm">
-              {t("auth.flow.verify_widget_loading")}
-            </p>
+            <p className="text-sm">{t("auth.flow.verify_widget_loading")}</p>
           </div>
         }
       />
@@ -418,11 +404,7 @@ function EmailVerificationStep({
         </Alert>
       )}
 
-      <Button
-        disabled={!canSend}
-        onClick={handleSendCode}
-        className="w-full"
-      >
+      <Button disabled={!canSend} onClick={handleSendCode} className="w-full">
         {codeSent
           ? cooldownRemaining > 0
             ? t("auth.flow.verify_resend_cooldown", {
@@ -505,7 +487,11 @@ export const CompleteRegistrationPage: FC = () => {
             </AlertDescription>
           </Alert>
         }
-        actions={<Button onClick={() => navigate({ to: "/login" })}>{t("auth.login")}</Button>}
+        actions={
+          <Button onClick={() => navigate({ to: "/login" })}>
+            {t("auth.login")}
+          </Button>
+        }
       />
     );
   }
@@ -519,8 +505,7 @@ export const CompleteRegistrationPage: FC = () => {
     {
       id: "identity",
       label: "Choose your identity",
-      optional:
-        identitySet && auth.user?.slug ? auth.user.slug : undefined,
+      optional: identitySet && auth.user?.slug ? auth.user.slug : undefined,
       completed: identitySet,
       active: activeStep === 0,
       content: <IdentityStep onComplete={handleIdentityComplete} />,
@@ -534,10 +519,7 @@ export const CompleteRegistrationPage: FC = () => {
       completed: !!emailVerified,
       active: activeStep === 1,
       content: (
-        <EmailVerificationStep
-          email={email}
-          onComplete={handleEmailComplete}
-        />
+        <EmailVerificationStep email={email} onComplete={handleEmailComplete} />
       ),
     },
   ];

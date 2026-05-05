@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "@/test/prisma-client-mock";
+import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 installPrismaClientMock();
 

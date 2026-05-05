@@ -7,8 +7,7 @@ export function MainSidebarDrawerHeader({
   handleDrawerToggle: () => void;
 }) {
   // Direction is fixed to LTR by default; document.dir handled at <html>.
-  const isLtr =
-    typeof document !== "undefined" ? document.dir !== "rtl" : true;
+  const isLtr = typeof document !== "undefined" ? document.dir !== "rtl" : true;
 
   return (
     <div className="flex items-center px-2 min-h-16 justify-end">

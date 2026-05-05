@@ -314,8 +314,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
   const resolvedPageTitle = pageTitle ?? t("page.book_edit.info.title");
   const sourceReleaseUnitId = editor.currentTranslation?.sourceReleaseUnitId;
-  const hasAvailable =
-    ALL_LANGUAGES.length > editor.existingLanguages.length;
+  const hasAvailable = ALL_LANGUAGES.length > editor.existingLanguages.length;
 
   return (
     <div className="mt-16 mx-auto max-w-3xl px-4 pb-16">
@@ -391,18 +390,19 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                 }
               />
 
-              {editor.currentTranslation && editor.existingLanguages.length > 1 && (
-                <div className="flex flex-row justify-end">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-error-text"
-                    onClick={handleDeleteCurrentTranslation}
-                  >
-                    {t("page.book_edit.info.translation.delete_button")}
-                  </Button>
-                </div>
-              )}
+              {editor.currentTranslation &&
+                editor.existingLanguages.length > 1 && (
+                  <div className="flex flex-row justify-end">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-error-text"
+                      onClick={handleDeleteCurrentTranslation}
+                    >
+                      {t("page.book_edit.info.translation.delete_button")}
+                    </Button>
+                  </div>
+                )}
             </div>
           </section>
         )}

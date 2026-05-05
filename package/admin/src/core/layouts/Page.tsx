@@ -17,9 +17,7 @@ export function Page({
         <div className="min-w-0">
           <h1 className="text-xl font-extrabold leading-tight">{title}</h1>
           {description ? (
-            <p className="text-sm text-text-secondary mt-1">
-              {description}
-            </p>
+            <p className="text-sm text-text-secondary mt-1">{description}</p>
           ) : null}
         </div>
         {actions ? <div className="shrink-0">{actions}</div> : null}

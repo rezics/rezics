@@ -28,18 +28,18 @@ body {
  * CJK language. The font stacks reference `var(--font-sans-cjk, ...)`. */
 :lang(zh-Hans),
 :lang(zh-CN) {
-  --font-sans-cjk: 'Source Han Sans SC', 'Noto Sans SC';
-  --font-serif-cjk: 'Source Han Serif SC', 'Noto Serif SC';
+  --font-sans-cjk: "Source Han Sans SC", "Noto Sans SC";
+  --font-serif-cjk: "Source Han Serif SC", "Noto Serif SC";
 }
 
 :lang(ja) {
-  --font-sans-cjk: 'Source Han Sans JP', 'Noto Sans JP';
-  --font-serif-cjk: 'Source Han Serif JP', 'Noto Serif JP';
+  --font-sans-cjk: "Source Han Sans JP", "Noto Sans JP";
+  --font-serif-cjk: "Source Han Serif JP", "Noto Serif JP";
 }
 
 :lang(ko) {
-  --font-sans-cjk: 'Source Han Sans KR', 'Noto Sans KR';
-  --font-serif-cjk: 'Source Han Serif KR', 'Noto Serif KR';
+  --font-sans-cjk: "Source Han Sans KR", "Noto Sans KR";
+  --font-serif-cjk: "Source Han Serif KR", "Noto Serif KR";
 }
 
 /* Reduced motion — strip all transitions and animations. */

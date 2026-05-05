@@ -88,9 +88,7 @@ export function PaginatedTable<T>({
   const fromRow = count === 0 ? 0 : page * rowsPerPage + 1;
   const toRow = Math.min((page + 1) * rowsPerPage, count);
 
-  const cellPaddingClass = dense
-    ? "py-1.5"
-    : "py-[var(--padding-table-row-y)]";
+  const cellPaddingClass = dense ? "py-1.5" : "py-[var(--padding-table-row-y)]";
   const textSizeClass = dense ? "text-sm" : "text-base";
 
   return (
@@ -98,7 +96,9 @@ export function PaginatedTable<T>({
       <div className="overflow-x-auto">
         <Table className={textSizeClass}>
           <TableHeader
-            className={clsx(stickyHeader && "sticky top-0 z-10 bg-surface-canvas")}
+            className={clsx(
+              stickyHeader && "sticky top-0 z-10 bg-surface-canvas",
+            )}
           >
             <TableRow>
               {columns.map((c) => (
@@ -198,9 +198,7 @@ export function PaginatedTable<T>({
 
         {enablePageJump ? (
           <div className="flex flex-row gap-2 items-center px-2 py-1">
-            <span className="text-sm text-text-secondary">
-              Go to page
-            </span>
+            <span className="text-sm text-text-secondary">Go to page</span>
             <Input
               value={pageInput}
               onChange={(e) => {

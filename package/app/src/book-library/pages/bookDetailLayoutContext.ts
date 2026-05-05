@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 
 interface BookDetailLayoutContextValue {
   setSidebar: (node: ReactNode) => void;

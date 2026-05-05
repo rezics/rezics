@@ -8,9 +8,7 @@ export const BookCopyrightNotice: React.FC = () => {
   return (
     <div>
       <div className="flex flex-row gap-3 items-start">
-        <CopyrightOutlined
-          className="w-4 h-4 mt-[2px] flex-shrink-0 text-text-tertiary"
-        />
+        <CopyrightOutlined className="w-4 h-4 mt-[2px] flex-shrink-0 text-text-tertiary" />
         <div className="flex flex-col gap-1">
           <span
             className="block text-xs text-text-secondary"

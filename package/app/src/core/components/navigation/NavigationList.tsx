@@ -2,7 +2,10 @@ import { Separator } from "@rezics/ui/shadcn";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { cn } from "@/shared/utils/css-util";
 import type { NavigationItem } from "./navigation";
-import { ChevronUp as ExpandLess, ChevronDown as ExpandMore } from "lucide-react";
+import {
+  ChevronUp as ExpandLess,
+  ChevronDown as ExpandMore,
+} from "lucide-react";
 
 interface NavigationListProps {
   NAVIGATION: NavigationItem[];
@@ -51,10 +54,7 @@ export const NavigationList = ({
             {hasChildren ? (
               <button
                 type="button"
-                className={cn(
-                  itemBaseClass,
-                  isActive && "bg-surface-subtle",
-                )}
+                className={cn(itemBaseClass, isActive && "bg-surface-subtle")}
                 onClick={(event: any) =>
                   handleItemClick(event, item.segment, hasChildren)
                 }

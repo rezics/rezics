@@ -9,7 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { Plus as AddIcon, Trash2 as DeleteIcon, X as CloseIcon } from "lucide-react";
+import {
+  Plus as AddIcon,
+  Trash2 as DeleteIcon,
+  X as CloseIcon,
+} from "lucide-react";
 import type { FC } from "react";
 import { useState } from "react";
 
@@ -83,9 +87,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
           {Object.entries(scopes).map(([domain, permissions]) => (
             <div key={domain} className="mb-2">
               <div className="flex flex-row items-center gap-2">
-                <span className="text-sm font-medium min-w-20">
-                  {domain}:
-                </span>
+                <span className="text-sm font-medium min-w-20">{domain}:</span>
                 <div className="flex flex-row flex-wrap gap-1">
                   {permissions.map((perm) => (
                     <Badge

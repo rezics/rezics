@@ -107,9 +107,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
               size="sm"
               variant="outline"
               className={
-                service.isActive
-                  ? "text-warning-text"
-                  : "text-success-text"
+                service.isActive ? "text-warning-text" : "text-success-text"
               }
               onClick={handleToggleActive}
               disabled={updating}

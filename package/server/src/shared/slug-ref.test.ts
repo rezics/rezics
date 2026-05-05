@@ -1,8 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "@/test/prisma-client-mock";
+import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 import { resolveSlugRef, resolveSlugRefs } from "./slug-ref";
 
 // Mock prisma

@@ -4,7 +4,11 @@ import { userEvent, within } from "storybook/test";
 
 import { OtpInput } from "./OtpInput";
 
-const Wrapper = (args: { length?: number; initial?: string; disabled?: boolean }) => {
+const Wrapper = (args: {
+  length?: number;
+  initial?: string;
+  disabled?: boolean;
+}) => {
   const [value, setValue] = useState(args.initial ?? "");
   return (
     <OtpInput

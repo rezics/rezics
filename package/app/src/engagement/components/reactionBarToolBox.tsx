@@ -1,9 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-} from "@rezics/ui/shadcn";
+import { Button, Dialog, DialogContent, DialogFooter } from "@rezics/ui/shadcn";
 import {
   FacebookIcon,
   InstagramIcon,
@@ -38,7 +33,12 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent className="min-w-[20rem]">
         <div>
           <Button

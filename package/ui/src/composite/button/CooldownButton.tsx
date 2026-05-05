@@ -47,11 +47,7 @@ export const CooldownButton: React.FC<CooldownButtonProps> = ({
   };
 
   return (
-    <Button
-      {...rest}
-      disabled={disabled || inCooldown}
-      onClick={handleClick}
-    >
+    <Button {...rest} disabled={disabled || inCooldown} onClick={handleClick}>
       {inCooldown ? (
         <>
           {children}（{remainingSec}s）

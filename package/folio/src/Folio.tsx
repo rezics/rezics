@@ -124,7 +124,9 @@ function FolioInner({
                 border: "none",
                 padding: "4px",
               }}
-              aria-label={showToc ? "Close table of contents" : "Open table of contents"}
+              aria-label={
+                showToc ? "Close table of contents" : "Open table of contents"
+              }
             >
               {showToc ? (
                 <CloseIcon fontSize="small" />

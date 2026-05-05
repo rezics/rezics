@@ -14,9 +14,7 @@ export function EditorPanel({ left, right, className }: EditorPanelProps) {
         className ?? "",
       ].join(" ")}
     >
-      {left && (
-        <div className="flex items-center gap-1 shrink-0">{left}</div>
-      )}
+      {left && <div className="flex items-center gap-1 shrink-0">{left}</div>}
       <div className="flex-1" />
       {right && <div className="flex items-center gap-1">{right}</div>}
     </div>

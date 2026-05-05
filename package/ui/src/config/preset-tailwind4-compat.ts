@@ -281,7 +281,9 @@ export const presetTailwind4Compat = definePreset(() => ({
     {
       name: "tailwind4-group-data-shorthand",
       match(matcher: string) {
-        const match = matcher.match(/^group-data-([a-z-]+)(?:\/([^:]+))?:(.+)$/);
+        const match = matcher.match(
+          /^group-data-([a-z-]+)(?:\/([^:]+))?:(.+)$/,
+        );
         if (!match) {
           return;
         }

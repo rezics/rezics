@@ -109,9 +109,7 @@ export default function AuthSessionsPage() {
               <Spinner />
             </div>
           ) : sessionsQuery.isError ? (
-            <p className="text-sm text-error-text">
-              Failed to load sessions.
-            </p>
+            <p className="text-sm text-error-text">Failed to load sessions.</p>
           ) : (
             <PaginatedTable<AuthSession>
               columns={columns}
@@ -132,9 +130,7 @@ export default function AuthSessionsPage() {
 
       <Dialog
         open={confirmDialog.open}
-        onOpenChange={(open) =>
-          setConfirmDialog((prev) => ({ ...prev, open }))
-        }
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}
       >
         <DialogContent>
           <DialogHeader>

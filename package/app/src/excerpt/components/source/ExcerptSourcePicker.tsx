@@ -1,9 +1,4 @@
-import {
-  Alert,
-  AlertDescription,
-  Input,
-  Label,
-} from "@rezics/ui/shadcn";
+import { Alert, AlertDescription, Input, Label } from "@rezics/ui/shadcn";
 import { Spinner } from "@rezics/ui";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
@@ -118,9 +113,7 @@ export function ExcerptSourcePicker({
           aria-invalid={!!error}
           className={error ? "border-border-error" : undefined}
         />
-        {error ? (
-          <p className="text-sm text-error-text">{error}</p>
-        ) : null}
+        {error ? <p className="text-sm text-error-text">{error}</p> : null}
       </div>
 
       {justUpgradedFromUnitId && linkedUnitTitle && (
@@ -198,18 +191,12 @@ function TreeDisclosure({
             (expanded ? "rotate-180" : "rotate-0")
           }
         />
-        <span>
-          {t("excerpt.form.pick_from_work", "Pick from this work")}
-        </span>
+        <span>{t("excerpt.form.pick_from_work", "Pick from this work")}</span>
       </button>
       {expanded && (
         <div className="pl-6 pt-2">
           {isLoading && <Spinner size="sm" />}
-          {error && (
-            <p className="text-xs text-error-text">
-              {String(error)}
-            </p>
-          )}
+          {error && <p className="text-xs text-error-text">{String(error)}</p>}
           {!isLoading && !error && units.length === 0 && (
             <p className="text-xs text-text-secondary">
               {t("excerpt.form.no_sub_units", "No sub-units")}

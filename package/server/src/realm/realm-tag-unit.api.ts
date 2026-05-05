@@ -165,9 +165,7 @@ export const realmTagVoteApi = new Elysia({ prefix: "/realm-tag-votes" })
       );
       if (!allowed) {
         set.status = 403;
-        throw new Error(
-          "Forbidden: only realm members may vote on realm tags",
-        );
+        throw new Error("Forbidden: only realm members may vote on realm tags");
       }
       await realmService.castRealmTagVote(
         identity.unitId,

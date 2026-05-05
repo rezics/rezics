@@ -20,7 +20,14 @@ const VARIANT_CLASS: Record<string, string> = {
 
 const RezicsAnchor = React.forwardRef<HTMLAnchorElement, RezicsAnchorProps>(
   (
-    { underline = "always", color: _color, variant, className, children, ...rest },
+    {
+      underline = "always",
+      color: _color,
+      variant,
+      className,
+      children,
+      ...rest
+    },
     ref,
   ) => {
     const variantClass = variant ? (VARIANT_CLASS[variant] ?? "") : "";

@@ -21,11 +21,7 @@ if (typeof window !== "undefined" && typeof document !== "undefined") {
       .getChannel()
       .on(
         GLOBALS_UPDATED,
-        ({
-          globals,
-        }: {
-          globals?: { themeMode?: unknown };
-        }) => {
+        ({ globals }: { globals?: { themeMode?: unknown } }) => {
           applyThemeMode(globals?.themeMode);
         },
       );
@@ -80,11 +76,7 @@ export const basePreviewParameters = {
 function resolveCanvasStyle(canvas: CanvasOption): React.CSSProperties | null {
   if (canvas === "none") return null;
   const padding =
-    canvas === "padded"
-      ? 24
-      : canvas === "fullscreen"
-        ? 0
-        : canvas.padding;
+    canvas === "padded" ? 24 : canvas === "fullscreen" ? 0 : canvas.padding;
   return {
     minHeight: "100vh",
     padding,

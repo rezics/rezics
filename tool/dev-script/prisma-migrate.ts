@@ -45,7 +45,10 @@ async function askOnFailure(pkg: Package): Promise<FailureChoice> {
   return choice;
 }
 
-async function processPackage(pkg: Package, regenerate: boolean): Promise<StepResult> {
+async function processPackage(
+  pkg: Package,
+  regenerate: boolean,
+): Promise<StepResult> {
   // Loop allows the "retry" choice to re-run without recursion.
   while (true) {
     p.log.step(`@rezics/${pkg} — prisma migrate dev`);

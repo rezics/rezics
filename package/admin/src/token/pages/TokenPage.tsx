@@ -124,9 +124,7 @@ export const TokenPage: FC = () => {
 
       {!isLoading && !error && tokens.length === 0 && (
         <div className="flex items-center justify-center h-40">
-          <p className="text-base text-text-secondary">
-            No API tokens found
-          </p>
+          <p className="text-base text-text-secondary">No API tokens found</p>
         </div>
       )}
 

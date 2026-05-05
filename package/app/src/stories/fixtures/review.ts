@@ -62,4 +62,9 @@ export const reviewLatin: PostDTO = makeReview({
   body: "What surprised me on the second reading was how the small chapters mirror each other across hundreds of pages. The novel rewards re-reading; once you see the pattern, it never goes away.",
 });
 
-export const reviewList: PostDTO[] = [reviewShort, reviewLong, reviewCJK, reviewLatin];
+export const reviewList: PostDTO[] = [
+  reviewShort,
+  reviewLong,
+  reviewCJK,
+  reviewLatin,
+];

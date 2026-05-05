@@ -52,11 +52,7 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
               <span>{languageLabel(lang)}</span>
               {isDefault && (
                 <span
-                  className={`text-xs ${
-                    isActive
-                      ? ""
-                      : "text-text-secondary"
-                  }`}
+                  className={`text-xs ${isActive ? "" : "text-text-secondary"}`}
                 >
                   · {t("page.book_edit.info.translation.default_badge")}
                 </span>

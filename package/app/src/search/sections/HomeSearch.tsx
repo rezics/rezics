@@ -12,9 +12,7 @@ export const HomeSearch: React.FC<{ className?: string }> = ({ className }) => {
         defaultValue={{ keyword: "" }}
         onSearch={navigateByKeyword}
         enableSuggestions={true}
-        startAdornmentIcon={
-          <LogoIcon className="w-8 h-8" />
-        }
+        startAdornmentIcon={<LogoIcon className="w-8 h-8" />}
       />
     </div>
   );

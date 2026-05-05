@@ -37,9 +37,7 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
         )}
       </div>
       {description && (
-        <p className="mt-2 text-base text-text-secondary">
-          {description}
-        </p>
+        <p className="mt-2 text-base text-text-secondary">{description}</p>
       )}
       <div className="mt-2">
         <span className="text-xs text-text-secondary">

@@ -16,9 +16,7 @@ export const TagCard: React.FC<{
     <div
       className={cn(
         "cursor-pointer transition border rounded-md p-3 flex flex-col gap-1 hover:shadow-sm",
-        selected
-          ? "border-brand-fill shadow"
-          : "border-border-whisper",
+        selected ? "border-brand-fill shadow" : "border-border-whisper",
       )}
       role="button"
       tabIndex={0}

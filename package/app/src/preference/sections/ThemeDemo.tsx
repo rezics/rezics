@@ -88,9 +88,7 @@ export const ThemeDemo: React.FC = () => {
                     </span>
                   </div>
                   <div className="p-4 flex-1 bg-surface-elevated border border-border-whisper rounded-md">
-                    <span className="text-xs text-text-secondary">
-                      Surface
-                    </span>
+                    <span className="text-xs text-text-secondary">Surface</span>
                   </div>
                 </div>
               </div>
@@ -181,9 +179,7 @@ export const ThemeDemo: React.FC = () => {
                       </Avatar>
                       <div>
                         <p className="text-base font-semibold">{name}</p>
-                        <p className="text-sm text-text-secondary">
-                          {color}
-                        </p>
+                        <p className="text-sm text-text-secondary">{color}</p>
                       </div>
                     </div>
 
@@ -192,11 +188,7 @@ export const ThemeDemo: React.FC = () => {
                     </p>
 
                     <div className="flex justify-between items-center">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        style={{ color }}
-                      >
+                      <Button size="sm" variant="ghost" style={{ color }}>
                         查看
                       </Button>
                       <div className="flex gap-1">

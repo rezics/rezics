@@ -25,9 +25,7 @@ export function renderKind(
   payload: Record<string, unknown>,
   locale: string,
 ): KindRender {
-  const safeLocale: SupportedLocale = isSupportedLocale(locale)
-    ? locale
-    : "en";
+  const safeLocale: SupportedLocale = isSupportedLocale(locale) ? locale : "en";
   switch (kind) {
     case SystemEmailKind.WORK_LINK_CLAIM_PENDING:
       return renderPending(safeLocale, {

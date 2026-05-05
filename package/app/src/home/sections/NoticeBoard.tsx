@@ -45,7 +45,12 @@ function NoticeBoardHeader({
             </p>
           </div>
         </div>
-        <TextLink to="/notice" underline="hover" color="primary" variant="body2">
+        <TextLink
+          to="/notice"
+          underline="hover"
+          color="primary"
+          variant="body2"
+        >
           {t("common.view_all")}
         </TextLink>
       </div>
@@ -69,10 +74,7 @@ function NoticeBoardItem({
         className="block p-2 rounded-md border border-border-whisper bg-surface-elevated transition-colors duration-150 hover:border-brand-fill group"
       >
         <div className="flex flex-row gap-3 items-start w-full">
-          <Badge
-            variant={item.pin ? "default" : "outline"}
-            className="mt-0.5"
-          >
+          <Badge variant={item.pin ? "default" : "outline"} className="mt-0.5">
             {item.pin ? t("common.pinned") : t("common.new")}
           </Badge>
           <div className="min-w-0 flex-1">

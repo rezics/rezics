@@ -1,6 +1,11 @@
 import { authApi, authQueries } from "@rezics/api/auth/auth";
 import type { AuthProvider } from "@rezics/contract";
-import { Alert, AlertDescription, Separator, Skeleton } from "@rezics/ui/shadcn";
+import {
+  Alert,
+  AlertDescription,
+  Separator,
+  Skeleton,
+} from "@rezics/ui/shadcn";
 import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type { TFunction } from "i18next";

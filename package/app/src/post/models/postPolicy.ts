@@ -1,8 +1,4 @@
-import type {
-  Action,
-  ReactionBarPolicy,
-  ReactionBarPost,
-} from "@/engagement";
+import type { Action, ReactionBarPolicy, ReactionBarPost } from "@/engagement";
 
 /**
  * Posts (discussion comments) are content-as-discussion: shelf collapses into
@@ -17,7 +13,9 @@ export const postReplyRowOverflow: Action[] = ["share", "shelf"];
 export const postDetailActions: Action[] = ["vote", "reply", "share"];
 export const postDetailOverflow: Action[] = ["shelf"];
 
-export function getPostShareHref(post: Pick<ReactionBarPost, "unitId">): string {
+export function getPostShareHref(
+  post: Pick<ReactionBarPost, "unitId">,
+): string {
   return `/post/${post.unitId}`;
 }
 

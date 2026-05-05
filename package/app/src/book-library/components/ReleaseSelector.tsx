@@ -126,10 +126,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
   return (
     <div className="flex flex-row items-center gap-2">
       <span className="text-sm text-text-secondary">Release</span>
-      <Select
-        value={selectedReleaseUnitId}
-        onValueChange={(v) => onSelect(v)}
-      >
+      <Select value={selectedReleaseUnitId} onValueChange={(v) => onSelect(v)}>
         <SelectTrigger className="min-w-[260px]">
           <SelectValue />
         </SelectTrigger>
@@ -140,7 +137,10 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
                 <span>{opt.title}</span>
                 <Badge variant="outline">{opt.language}</Badge>
                 {opt.isOfficial && (
-                  <Badge variant="outline" className="text-brand-fill border-brand-fill">
+                  <Badge
+                    variant="outline"
+                    className="text-brand-fill border-brand-fill"
+                  >
                     official
                   </Badge>
                 )}

@@ -1,8 +1,4 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@rezics/ui/shadcn";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { BookCard as VerticalBookCard } from "@/book-library/components/item/VerticalBookCard";

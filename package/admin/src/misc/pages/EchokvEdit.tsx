@@ -1,12 +1,7 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { echoKvApi, echoKvKeyListQuery } from "@rezics/api/echokv/echokv";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
-import {
-  Button,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
+import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { Search as SearchIcon } from "lucide-react";

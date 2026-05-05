@@ -301,7 +301,9 @@ function CompactReaderFrame({
         minWidth: 0,
       }}
     >
-      <div style={{ fontSize: 12, fontWeight: 500, color: "#444" }}>{label}</div>
+      <div style={{ fontSize: 12, fontWeight: 500, color: "#444" }}>
+        {label}
+      </div>
       <div
         style={{
           width: "100%",

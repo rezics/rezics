@@ -53,7 +53,12 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{t("common.edit")}</DialogTitle>

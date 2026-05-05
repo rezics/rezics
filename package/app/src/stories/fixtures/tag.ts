@@ -43,6 +43,11 @@ export const tagLongList: TagFixture[] = [
   tagTranslation,
   { unitId: "tag-history", name: "History", slug: "history", count: 311 },
   { unitId: "tag-memoir", name: "Memoir", slug: "memoir", count: 198 },
-  { unitId: "tag-philosophy", name: "Philosophy", slug: "philosophy", count: 142 },
+  {
+    unitId: "tag-philosophy",
+    name: "Philosophy",
+    slug: "philosophy",
+    count: 142,
+  },
   { unitId: "tag-criticism", name: "Criticism", slug: "criticism", count: 88 },
 ];

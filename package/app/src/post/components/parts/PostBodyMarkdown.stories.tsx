@@ -19,7 +19,8 @@ export const LongContent: Story = {
   args: {
     body: Array.from(
       { length: 12 },
-      (_, i) => `Paragraph ${i + 1}: a long body that should be clampable and expandable on demand.`,
+      (_, i) =>
+        `Paragraph ${i + 1}: a long body that should be clampable and expandable on demand.`,
     ).join("\n\n"),
     clamp: { maxLines: 3 },
   },

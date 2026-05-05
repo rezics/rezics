@@ -194,11 +194,7 @@ export default function AuthEmailPage() {
           )}
 
           <h3 className="text-base font-bold mt-6 mb-2">SMTP Diagnostics</h3>
-          <Button
-            variant="outline"
-            onClick={handleSmtpTest}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={handleSmtpTest} disabled={loading}>
             {loading ? <Spinner size="sm" /> : null}
             Test Connection
           </Button>

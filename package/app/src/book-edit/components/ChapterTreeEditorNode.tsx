@@ -1,12 +1,6 @@
 import type { ContentRating } from "@rezics/contract";
 import { RatingBadge } from "@rezics/ui";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Checkbox,
-} from "@rezics/ui/shadcn";
+import { Badge, Button, Card, CardContent, Checkbox } from "@rezics/ui/shadcn";
 import {
   GripVertical as DragIndicator,
   ChevronDown as ExpandMore,
@@ -73,9 +67,7 @@ function mockViewCount(id: string | number): number {
 
 /** Options for the node renderer factory. */
 export interface ChapterTreeEditorNodeOptions {
-  setContextMenu: React.Dispatch<
-    React.SetStateAction<ChapterContextMenuState>
-  >;
+  setContextMenu: React.Dispatch<React.SetStateAction<ChapterContextMenuState>>;
   treeRef: React.RefObject<TreeApi<Chapter> | null>;
   onEditChapter: (node: Chapter) => void;
   onNavigateToChapter: (node: Chapter) => void;
@@ -157,7 +149,11 @@ export const createChapterTreeEditorNode = ({
 
           <span className="flex-shrink-0 w-6 h-6 flex justify-center items-center text-muted-foreground">
             <ExpandMore
-              size={20} style={{ transition: "transform 200ms ease", transform: node.isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
+              size={20}
+              style={{
+                transition: "transform 200ms ease",
+                transform: node.isOpen ? "rotate(0deg)" : "rotate(-90deg)",
+              }}
             />
           </span>
 

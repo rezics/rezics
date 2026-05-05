@@ -1,10 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import {
-  UnitStatus,
-  UnitType,
-  UnitVisibility,
-} from "../generated/client.js";
+import { UnitStatus, UnitType, UnitVisibility } from "../generated/client.js";
 import { generateBetween } from "../../src/shelf/fractional-index";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";

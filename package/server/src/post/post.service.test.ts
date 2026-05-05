@@ -1,8 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "@/test/prisma-client-mock";
+import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -234,9 +231,7 @@ describe("PostService.byRealm", () => {
     resetMocks();
     await service.byRealm("realm-1", { sort: "new" });
 
-    expect(firstPostFindManyArgs().orderBy).toEqual([
-      { createdAt: "desc" },
-    ]);
+    expect(firstPostFindManyArgs().orderBy).toEqual([{ createdAt: "desc" }]);
   });
 
   test("top sort orders by ScoreEntry value descending", async () => {

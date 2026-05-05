@@ -9,7 +9,9 @@ const meta = {
     title: "Display name",
     description:
       "How your name appears across the platform. Other readers see this on posts, reviews, and shelves.",
-    children: <input placeholder="Display name" className="border p-2 w-full" />,
+    children: (
+      <input placeholder="Display name" className="border p-2 w-full" />
+    ),
   },
 } satisfies Meta<typeof SettingsSection>;
 

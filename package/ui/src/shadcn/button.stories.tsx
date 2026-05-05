@@ -18,7 +18,9 @@ export const Secondary: Story = { args: { variant: "secondary" } };
 export const Outline: Story = { args: { variant: "outline" } };
 export const Ghost: Story = { args: { variant: "ghost" } };
 export const Link: Story = { args: { variant: "link" } };
-export const Destructive: Story = { args: { variant: "destructive", children: "Delete" } };
+export const Destructive: Story = {
+  args: { variant: "destructive", children: "Delete" },
+};
 
 export const Small: Story = { args: { size: "sm" } };
 export const Large: Story = { args: { size: "lg" } };

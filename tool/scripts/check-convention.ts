@@ -522,10 +522,7 @@ const R9_REZICS_VAR_PATTERN = /var\(\s*--rezics-[a-zA-Z0-9_-]+/;
 
 // `package/ui/src/config/tokens.css` SHALL NOT exist — the tokens TS source is
 // authoritative and uno-config.ts emits the runtime CSS variables.
-const R9_TOKENS_CSS_PATH = join(
-  REPO_ROOT,
-  "package/ui/src/config/tokens.css",
-);
+const R9_TOKENS_CSS_PATH = join(REPO_ROOT, "package/ui/src/config/tokens.css");
 
 function isR9TargetFile(absPath: string): boolean {
   const relPath = relative(REPO_ROOT, absPath).replace(/\\/g, "/");

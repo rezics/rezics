@@ -51,8 +51,7 @@ export function useBookTranslationEditor(book: BookDTO | null | undefined) {
   const search = useSearch({ strict: false }) as { lang?: string };
 
   const initialLang = pickInitialLanguage(book);
-  const selectedLanguage =
-    (search.lang as string | undefined) ?? initialLang;
+  const selectedLanguage = (search.lang as string | undefined) ?? initialLang;
 
   const [drafts, setDrafts] = useState<DraftMap>({});
 
@@ -95,21 +94,18 @@ export function useBookTranslationEditor(book: BookDTO | null | undefined) {
   const updateField = useCallback(
     <K extends keyof TranslationDraft>(key: K, value: TranslationDraft[K]) => {
       setDrafts((prev) => {
-        const base = prev[selectedLanguage] ?? translationToDraft(
-          translationByLang.get(selectedLanguage),
-        );
+        const base =
+          prev[selectedLanguage] ??
+          translationToDraft(translationByLang.get(selectedLanguage));
         return { ...prev, [selectedLanguage]: { ...base, [key]: value } };
       });
     },
     [selectedLanguage, translationByLang],
   );
 
-  const replaceDraft = useCallback(
-    (lang: string, next: TranslationDraft) => {
-      setDrafts((prev) => ({ ...prev, [lang]: next }));
-    },
-    [],
-  );
+  const replaceDraft = useCallback((lang: string, next: TranslationDraft) => {
+    setDrafts((prev) => ({ ...prev, [lang]: next }));
+  }, []);
 
   const clearDraft = useCallback((lang: string) => {
     setDrafts((prev) => {

@@ -9,7 +9,10 @@ import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostTreeSection } from "@/post";
-import { ReplyComposer, type ReplyComposerHandle } from "@/post/forms/ReplyComposer";
+import {
+  ReplyComposer,
+  type ReplyComposerHandle,
+} from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { ReviewDetail } from "../components/detail/ReviewDetail";
 

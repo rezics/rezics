@@ -20,8 +20,9 @@ export const Text: Story = { args: { buttonStyle: "text" } };
 export const InParagraph: Story = {
   render: (args) => (
     <p className="max-w-md text-sm text-text-secondary">
-      You finished Chapter 4. <TextButton {...args}>Continue reading</TextButton>{" "}
-      where you left off, or pick a different one.
+      You finished Chapter 4.{" "}
+      <TextButton {...args}>Continue reading</TextButton> where you left off, or
+      pick a different one.
     </p>
   ),
 };

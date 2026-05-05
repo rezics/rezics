@@ -85,9 +85,7 @@ export const ProfileOverviewPage: FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-text-secondary">
-            No pinned items yet
-          </p>
+          <p className="text-sm text-text-secondary">No pinned items yet</p>
         )}
       </div>
 
@@ -101,9 +99,7 @@ export const ProfileOverviewPage: FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-text-secondary">
-            No recent activity
-          </p>
+          <p className="text-sm text-text-secondary">No recent activity</p>
         )}
       </div>
     </div>
@@ -156,9 +152,7 @@ const ActivityItem: FC<{ item: ContentSearchDocument }> = ({ item }) => {
       <span className="text-xs uppercase min-w-[60px] text-text-secondary">
         {item.type}
       </span>
-      <span className="text-sm flex-1 truncate text-text-primary">
-        {title}
-      </span>
+      <span className="text-sm flex-1 truncate text-text-primary">{title}</span>
       <span className="text-xs text-text-secondary">{date}</span>
     </div>
   );

@@ -118,10 +118,7 @@ describe("mergeEffective", () => {
       { tags: [{ slug: "zone-tag" }] },
       { tags: [{ slug: "user-tag" }] },
     );
-    expect(eff.tags).toEqual([
-      { slug: "zone-tag" },
-      { slug: "user-tag" },
-    ]);
+    expect(eff.tags).toEqual([{ slug: "zone-tag" }, { slug: "user-tag" }]);
   });
 
   it("user keyword overrides (implicit has none)", () => {
@@ -147,10 +144,7 @@ describe("mergeEffective", () => {
   });
 
   it("implicit type merges with user type", () => {
-    const eff = mergeEffective(
-      { type: ["BOOK"] },
-      { type: ["GAME"] },
-    );
+    const eff = mergeEffective({ type: ["BOOK"] }, { type: ["GAME"] });
     expect(eff.type).toEqual(["BOOK", "GAME"]);
   });
 });

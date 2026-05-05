@@ -20,7 +20,12 @@ type Story = StoryObj<typeof meta>;
 
 const rows = [
   { title: "The Stranger", author: "Camus", pages: 159, status: "Reading" },
-  { title: "Norwegian Wood", author: "Murakami", pages: 296, status: "Up next" },
+  {
+    title: "Norwegian Wood",
+    author: "Murakami",
+    pages: 296,
+    status: "Up next",
+  },
   { title: "Pale Fire", author: "Nabokov", pages: 246, status: "Finished" },
 ];
 

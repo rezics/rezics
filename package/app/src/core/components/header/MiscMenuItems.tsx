@@ -10,7 +10,10 @@ export function MiscMenuItems() {
     <>
       <LangToggle>
         {({ onClick }) => (
-          <DropdownMenuItem onClick={onClick} onSelect={(e) => e.preventDefault()}>
+          <DropdownMenuItem
+            onClick={onClick}
+            onSelect={(e) => e.preventDefault()}
+          >
             <LanguageIcon className="w-4 h-4" />
             <span>{t("layout.header.toggle_language")}</span>
           </DropdownMenuItem>

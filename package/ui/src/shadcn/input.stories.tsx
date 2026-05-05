@@ -18,7 +18,12 @@ export const WithLabel: Story = {
   render: (args) => (
     <div className="grid w-72 gap-2">
       <Label htmlFor="input-email">Email</Label>
-      <Input {...args} id="input-email" type="email" placeholder="you@example.com" />
+      <Input
+        {...args}
+        id="input-email"
+        type="email"
+        placeholder="you@example.com"
+      />
     </div>
   ),
 };

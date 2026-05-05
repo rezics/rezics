@@ -1,6 +1,9 @@
 import { NavigationList } from "../navigation/NavigationList";
 import type { NavigationItem } from "../navigation/navigation";
-import { ListPlus as PlaylistAddOutlinedIcon, FilePlus as PostAddOutlinedIcon } from "lucide-react";
+import {
+  ListPlus as PlaylistAddOutlinedIcon,
+  FilePlus as PostAddOutlinedIcon,
+} from "lucide-react";
 
 const CreateMenuNavigation: NavigationItem[] = [
   {

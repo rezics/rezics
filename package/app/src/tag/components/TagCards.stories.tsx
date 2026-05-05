@@ -11,10 +11,7 @@ const tag = {
   voteCount: 312,
 } as never;
 
-const Wrapper = (args: {
-  variant: "card" | "detail";
-  selected?: boolean;
-}) => {
+const Wrapper = (args: { variant: "card" | "detail"; selected?: boolean }) => {
   if (args.variant === "detail") {
     return <TagDetailCard tag={tag} />;
   }

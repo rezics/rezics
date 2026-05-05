@@ -22,9 +22,7 @@ export const OptionalPasswordField: FC<OptionalPasswordFieldProps> = ({
         required={false}
         helperText={helperText}
       />
-      {note ? (
-        <p className="text-sm text-rezics-fg-muted">{note}</p>
-      ) : null}
+      {note ? <p className="text-sm text-rezics-fg-muted">{note}</p> : null}
     </>
   );
 };

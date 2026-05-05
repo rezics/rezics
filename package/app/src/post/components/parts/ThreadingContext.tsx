@@ -10,7 +10,11 @@ const ThreadingHoverContext = createContext<ThreadingHoverContextValue | null>(
   null,
 );
 
-export function ThreadingHoverProvider({ children }: { children: React.ReactNode }) {
+export function ThreadingHoverProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [hovered, setHovered] = useState(false);
   const value = useMemo(() => ({ hovered, setHovered }), [hovered]);
   return (

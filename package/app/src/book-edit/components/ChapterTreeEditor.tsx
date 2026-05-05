@@ -474,11 +474,7 @@ export const ChapterTreeEditor = forwardRef<
         </span>
         <div className="flex items-center gap-2">
           {onDownloadJSON && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onDownloadJSON}
-            >
+            <Button variant="outline" size="sm" onClick={onDownloadJSON}>
               <DownloadIcon className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">JSON</span>
             </Button>

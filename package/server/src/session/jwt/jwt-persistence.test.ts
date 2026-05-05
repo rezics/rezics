@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { JwtAlgorithm } from "@rezics/jwt";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "@/test/prisma-client-mock";
+import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=

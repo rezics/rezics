@@ -128,7 +128,9 @@ export const LoginPage: FC<LoginPageProps> = ({
           {t("auth.flow.create_account")}
         </TextButton>
         <br />
-        <TextLink to="/reset-password">{t("auth.flow.forgot_password")}</TextLink>
+        <TextLink to="/reset-password">
+          {t("auth.flow.forgot_password")}
+        </TextLink>
       </div>
       <SocialAuthButtons mode="login" />
     </>

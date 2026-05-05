@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "@/test/prisma-client-mock";
+import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 installPrismaClientMock();
 
@@ -39,13 +36,9 @@ const unitFindUniqueMock = mock(async ({ where }: any) => {
 const unitFindManyMock = mock(async ({ where }: any) => {
   const ids = where.id.in as string[];
   if (where.type === "POST") {
-    return ids
-      .filter((id) => id.startsWith("post-"))
-      .map((id) => ({ id }));
+    return ids.filter((id) => id.startsWith("post-")).map((id) => ({ id }));
   }
-  return ids
-    .filter((id) => id.startsWith("tag-"))
-    .map((id) => ({ id }));
+  return ids.filter((id) => id.startsWith("tag-")).map((id) => ({ id }));
 });
 const transactionMock = mock(async (fn: any) =>
   fn({

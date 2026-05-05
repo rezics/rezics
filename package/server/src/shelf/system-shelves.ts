@@ -4,12 +4,7 @@ import {
   type UserExtra,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import {
-  prisma,
-  UnitStatus,
-  UnitType,
-  UnitVisibility,
-} from "#/prisma/client";
+import { prisma, UnitStatus, UnitType, UnitVisibility } from "#/prisma/client";
 import { AppError } from "@/utils/errors";
 
 export const SYSTEM_KIND_KEYS = CONTRACT_SYSTEM_SHELF_KIND_KEYS;

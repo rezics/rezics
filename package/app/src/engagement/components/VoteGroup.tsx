@@ -91,9 +91,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
         className={cn(
           buttonSizeClass,
           "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",
-          upActive
-            ? "text-sentiment-positive-text"
-            : "text-text-secondary",
+          upActive ? "text-sentiment-positive-text" : "text-text-secondary",
         )}
       >
         <ArrowBigUp
@@ -123,9 +121,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
         className={cn(
           buttonSizeClass,
           "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",
-          downActive
-            ? "text-sentiment-negative-text"
-            : "text-text-secondary",
+          downActive ? "text-sentiment-negative-text" : "text-text-secondary",
         )}
       >
         <ArrowBigDown

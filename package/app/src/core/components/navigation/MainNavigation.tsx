@@ -1,8 +1,31 @@
 // NAVIGATION.tsx
 
 import type { NavigationItem } from "./navigation";
-import { CircleUser as AccountCircleOutlinedIcon, FileText as ArticleOutlinedIcon, LayoutDashboard as DashboardOutlinedIcon, CircleAlert as ErrorOutlineOutlinedIcon, MessageCircleQuestion as FeedbackOutlinedIcon, Users as GroupsOutlinedIcon, UserCheck as HowToRegOutlinedIcon, ClipboardList as ListAltOutlinedIcon, LogIn as LoginOutlinedIcon, UserCog as ManageAccountsOutlinedIcon, BookOpen as MenuBookOutlinedIcon, Bell as NotificationsOutlinedIcon, Palette as PaletteOutlinedIcon, ListPlus as PlaylistAddOutlinedIcon, FilePlus as PostAddOutlinedIcon, MessageSquareText as RateReviewOutlinedIcon, FlaskConical as ScienceOutlinedIcon, Headset as SupportAgentOutlinedIcon } from "lucide-react";
-import { IconNumber3 as Looks3OutlinedIcon, IconNumber1 as LooksOneOutlinedIcon, IconNumber2 as LooksTwoOutlinedIcon } from "@tabler/icons-react";
+import {
+  CircleUser as AccountCircleOutlinedIcon,
+  FileText as ArticleOutlinedIcon,
+  LayoutDashboard as DashboardOutlinedIcon,
+  CircleAlert as ErrorOutlineOutlinedIcon,
+  MessageCircleQuestion as FeedbackOutlinedIcon,
+  Users as GroupsOutlinedIcon,
+  UserCheck as HowToRegOutlinedIcon,
+  ClipboardList as ListAltOutlinedIcon,
+  LogIn as LoginOutlinedIcon,
+  UserCog as ManageAccountsOutlinedIcon,
+  BookOpen as MenuBookOutlinedIcon,
+  Bell as NotificationsOutlinedIcon,
+  Palette as PaletteOutlinedIcon,
+  ListPlus as PlaylistAddOutlinedIcon,
+  FilePlus as PostAddOutlinedIcon,
+  MessageSquareText as RateReviewOutlinedIcon,
+  FlaskConical as ScienceOutlinedIcon,
+  Headset as SupportAgentOutlinedIcon,
+} from "lucide-react";
+import {
+  IconNumber3 as Looks3OutlinedIcon,
+  IconNumber1 as LooksOneOutlinedIcon,
+  IconNumber2 as LooksTwoOutlinedIcon,
+} from "@tabler/icons-react";
 
 // segment: router path
 export const NAVIGATION = (isAdmin = false): NavigationItem[] => {

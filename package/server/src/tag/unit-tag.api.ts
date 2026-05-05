@@ -136,7 +136,8 @@ export const tagVoteApi = new Elysia({ prefix: "/tag-votes" })
       body: castTagVoteSchema,
       detail: {
         summary: "Cast a TagVote",
-        description: "Upserts the user's vote and recomputes UnitTag aggregates.",
+        description:
+          "Upserts the user's vote and recomputes UnitTag aggregates.",
         tags: ["Tags"],
       },
     },
@@ -178,9 +179,7 @@ export const lowScoreTagsAdminApi = new Elysia({
       // Realm scope is delegated to realmService via dynamic import to avoid
       // circular static imports between tag and realm modules.
       const { realmService } = await import("@/realm/realm.service");
-      const { mapRealmTagUnitToDTO } = await import(
-        "@/realm/realm.mapper"
-      );
+      const { mapRealmTagUnitToDTO } = await import("@/realm/realm.mapper");
       const rows = await realmService.listLowScoreRealmTagUnits(
         threshold,
         limit,

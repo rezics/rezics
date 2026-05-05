@@ -49,8 +49,7 @@ export const TokenListItem: FC<TokenListItemProps> = ({
         <p className="mt-1 block text-xs text-text-secondary">
           Created {formatDate(token.createdAt)}
           {token.expiresAt && ` · Expires ${formatDate(token.expiresAt)}`}
-          {token.lastUsedAt &&
-            ` · Last used ${formatDate(token.lastUsedAt)}`}
+          {token.lastUsedAt && ` · Last used ${formatDate(token.lastUsedAt)}`}
           {token.lastIP && ` from ${token.lastIP}`}
         </p>
       </div>

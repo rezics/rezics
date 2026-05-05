@@ -118,13 +118,9 @@ const ShelfCard: FC<{ shelf: ShelfDTO }> = ({ shelf }) => {
           {title}
         </span>
         <div className="flex items-center justify-between mt-auto pt-2">
-          <span className="text-xs text-text-secondary">
-            {itemCount} items
-          </span>
+          <span className="text-xs text-text-secondary">{itemCount} items</span>
           {shelf.kindKey && (
-            <span className="text-xs text-text-secondary">
-              {shelf.kindKey}
-            </span>
+            <span className="text-xs text-text-secondary">{shelf.kindKey}</span>
           )}
         </div>
       </div>

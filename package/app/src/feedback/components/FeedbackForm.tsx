@@ -19,7 +19,10 @@ type FeedbackFormProps = {
   onSubmitted?: () => void;
 };
 
-const typeOptions: { value: NonNullable<CreateFeedbackInput["type"]>; label: string }[] = [
+const typeOptions: {
+  value: NonNullable<CreateFeedbackInput["type"]>;
+  label: string;
+}[] = [
   { value: "BUG", label: "问题/缺陷" },
   { value: "FEATURE", label: "功能建议" },
   { value: "REPORT", label: "内容相关" },
@@ -115,9 +118,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
             aria-invalid={errors.content}
             className={
               "w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-fill " +
-              (errors.content
-                ? "border-border-error"
-                : "border-border-whisper")
+              (errors.content ? "border-border-error" : "border-border-whisper")
             }
           />
           {errors.content && (
@@ -133,10 +134,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
           <Button variant="outline" type="button" onClick={resetForm}>
             重置
           </Button>
-          <Button
-            type="submit"
-            disabled={createMutation.status === "pending"}
-          >
+          <Button type="submit" disabled={createMutation.status === "pending"}>
             {createMutation.status === "pending" ? "提交中..." : "提交反馈"}
           </Button>
         </div>

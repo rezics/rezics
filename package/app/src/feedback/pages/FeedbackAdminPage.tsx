@@ -72,9 +72,7 @@ export const FeedbackAdminPage: React.FC = () => {
               <Label htmlFor="admin-feedback-view">视图</Label>
               <Select
                 value={type}
-                onValueChange={(v) =>
-                  setType(v as "all" | "mine" | "user")
-                }
+                onValueChange={(v) => setType(v as "all" | "mine" | "user")}
               >
                 <SelectTrigger id="admin-feedback-view">
                   <SelectValue />

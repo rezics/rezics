@@ -1,5 +1,10 @@
 export { runFactorySeed } from "./orchestrator";
-export { makeSeedCtx, makeCountProvider, CountSpecSchema, ModeSchema } from "./strategy";
+export {
+  makeSeedCtx,
+  makeCountProvider,
+  CountSpecSchema,
+  ModeSchema,
+} from "./strategy";
 export type { Mode, CountSpec, CountProvider, SeedCtx } from "./strategy";
 export {
   PostsPerWorkPlanSchema,

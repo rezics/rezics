@@ -40,4 +40,9 @@ export const remarkLatin: PostDTO = makeRemark({
   body: "Short and good — the kind of book you keep in your bag for the bus.",
 });
 
-export const remarkList: PostDTO[] = [remarkShort, remarkLong, remarkCJK, remarkLatin];
+export const remarkList: PostDTO[] = [
+  remarkShort,
+  remarkLong,
+  remarkCJK,
+  remarkLatin,
+];

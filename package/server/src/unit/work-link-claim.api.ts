@@ -35,11 +35,7 @@ export const workLinkClaimApi = new Elysia()
   .use(authMacro)
   .get(
     "/unit/:unitId/work-link-claims",
-    async ({
-      params,
-      query,
-      identity,
-    }): Promise<WorkLinkClaimListResponse> => {
+    async ({ params, query, identity }): Promise<WorkLinkClaimListResponse> => {
       try {
         const claims = await listByWork(identity, params.unitId, query.status);
         return { claims };

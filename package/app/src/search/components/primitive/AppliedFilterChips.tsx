@@ -20,8 +20,7 @@ type ChipDescriptor = {
 
 const tagIdentity = (t: TagRef): string => t.unitId ?? t.slug ?? "";
 
-const tagLabel = (t: TagRef): string =>
-  t.name ?? t.slug ?? t.unitId ?? "";
+const tagLabel = (t: TagRef): string => t.name ?? t.slug ?? t.unitId ?? "";
 
 function hideTags(all: TagRef[], hidden: TagRef[]): TagRef[] {
   const hiddenIds = new Set(hidden.map(tagIdentity).filter(Boolean));
@@ -86,10 +85,7 @@ function buildChips(
 
   if (query.postKind && !rendered.has("postKind")) {
     const hiddenKinds = (hide.postKind ?? []) as string[];
-    const visibleKinds = hideStrings(
-      query.postKind as string[],
-      hiddenKinds,
-    );
+    const visibleKinds = hideStrings(query.postKind as string[], hiddenKinds);
     for (const kind of visibleKinds) {
       out.push({
         key: `postKind:${kind}`,

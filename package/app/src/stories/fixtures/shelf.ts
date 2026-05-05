@@ -3,7 +3,9 @@ import type { ShelfDTO } from "@rezics/contract";
 import { LANGUAGES } from "@rezics/contract";
 import { userAlice } from "./user.ts";
 
-function makeShelf(overrides: Partial<ShelfDTO> & { unitId: string }): ShelfDTO {
+function makeShelf(
+  overrides: Partial<ShelfDTO> & { unitId: string },
+): ShelfDTO {
   return {
     unitId: overrides.unitId,
     userId: userAlice.unitId,
@@ -69,4 +71,8 @@ export const shelfLongDescription: ShelfDTO = makeShelf({
   ],
 });
 
-export const shelfList: ShelfDTO[] = [shelfFew, shelfMany, shelfLongDescription];
+export const shelfList: ShelfDTO[] = [
+  shelfFew,
+  shelfMany,
+  shelfLongDescription,
+];

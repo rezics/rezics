@@ -10,11 +10,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function TabsSample({
-  variant = "default",
-}: {
-  variant?: "default" | "line";
-}) {
+function TabsSample({ variant = "default" }: { variant?: "default" | "line" }) {
   return (
     <Tabs defaultValue="reading" className="w-96">
       <TabsList variant={variant}>

@@ -119,9 +119,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
                       {user.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <h6 className="text-base font-semibold mb-2">
-                    {user.name}
-                  </h6>
+                  <h6 className="text-base font-semibold mb-2">{user.name}</h6>
                   {user.slug && (
                     <Badge variant="outline" className="mb-2">
                       @{user.slug}
@@ -133,9 +131,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
                     </p>
                   )}
                   {!user.bio && (
-                    <p className="text-sm text-text-secondary italic">
-                      No bio
-                    </p>
+                    <p className="text-sm text-text-secondary italic">No bio</p>
                   )}
                 </CardContent>
               </Card>

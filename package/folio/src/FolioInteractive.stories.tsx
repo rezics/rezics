@@ -126,7 +126,9 @@ function Interactive(args: Args) {
   const txtUpload = useFileUpload(".txt,.text,.md");
   const epubUpload = useFileUpload(".epub");
 
-  const txtResult = useTxtFromFile(args.format === "TXT" ? txtUpload.file : null);
+  const txtResult = useTxtFromFile(
+    args.format === "TXT" ? txtUpload.file : null,
+  );
   const epub = useEpubFromFile(args.format === "EPUB" ? epubUpload.file : null);
 
   if (args.format === "TXT" && !txtUpload.file) return <txtUpload.FileInput />;

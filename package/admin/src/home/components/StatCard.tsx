@@ -19,9 +19,7 @@ export function StatCard({ label, value, icon, color, href }: StatCardProps) {
         {icon && (
           <div
             className="flex"
-            style={
-              color ? { color } : { color: "var(--colors-primary)" }
-            }
+            style={color ? { color } : { color: "var(--colors-primary)" }}
           >
             {icon}
           </div>

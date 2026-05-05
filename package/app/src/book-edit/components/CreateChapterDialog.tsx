@@ -122,9 +122,7 @@ export function CreateChapterDialog({
               onChange={(e) => setTitle(e.target.value)}
               className={!title.trim() ? "border-border-error" : ""}
             />
-            {!title.trim() && (
-              <p className="text-xs text-error-text">必填</p>
-            )}
+            {!title.trim() && <p className="text-xs text-error-text">必填</p>}
           </div>
           <div className="max-w-xs">
             <RatingSelector value={rating} onChange={setRating} />

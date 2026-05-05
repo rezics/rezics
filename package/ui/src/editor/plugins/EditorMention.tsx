@@ -2,11 +2,7 @@ import { meiliUserApi } from "@rezics/api/meili/meili.api";
 import type { UserDTO } from "@rezics/contract";
 import React from "react";
 import { createPortal } from "react-dom";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/shadcn/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/avatar";
 import { Spinner } from "@/primitive/feedback/Spinner";
 
 type PublicUserLike = Partial<UserDTO>;

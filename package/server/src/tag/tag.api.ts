@@ -20,11 +20,7 @@ import {
   updateTagSchema,
 } from "@rezics/contract";
 import { Elysia, status, t } from "elysia";
-import {
-  authMacro,
-  tryResolveIdentity,
-  verifyAdminFromDb,
-} from "@/middleware";
+import { authMacro, tryResolveIdentity, verifyAdminFromDb } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
 import { tagService, VISIBILITY_THRESHOLD } from "./tag.service";

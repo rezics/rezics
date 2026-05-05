@@ -1,5 +1,8 @@
 import type { NavigationItem } from "@/core/components/navigation/navigation";
-import { LayoutDashboard as DashboardIcon, FileText as DescriptionIcon } from "lucide-react";
+import {
+  LayoutDashboard as DashboardIcon,
+  FileText as DescriptionIcon,
+} from "lucide-react";
 
 // segment: router path
 

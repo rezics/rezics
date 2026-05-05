@@ -156,8 +156,7 @@ export const patchRealmTagUnitSchema = t.Object({
   position: t.Optional(t.Nullable(t.String())),
 });
 
-export type PatchRealmTagUnitInput =
-  (typeof patchRealmTagUnitSchema)["static"];
+export type PatchRealmTagUnitInput = (typeof patchRealmTagUnitSchema)["static"];
 
 export const realmTagUnitPathParamsSchema = t.Object({
   realmUnitId: t.String(),
@@ -175,8 +174,7 @@ export const castRealmTagVoteSchema = t.Object({
   value: t.Number(),
 });
 
-export type CastRealmTagVoteInput =
-  (typeof castRealmTagVoteSchema)["static"];
+export type CastRealmTagVoteInput = (typeof castRealmTagVoteSchema)["static"];
 
 // ============================================================
 // ADMIN: LOW-SCORE TAG DISCOVERY

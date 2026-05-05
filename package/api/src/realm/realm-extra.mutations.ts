@@ -13,8 +13,12 @@ function invalidateLists(
   realmId: string,
   key: string,
 ) {
-  queryClient.invalidateQueries({ queryKey: realmExtraKeys.list(realmId, key) });
-  queryClient.invalidateQueries({ queryKey: realmExtraKeys.admin(realmId, key) });
+  queryClient.invalidateQueries({
+    queryKey: realmExtraKeys.list(realmId, key),
+  });
+  queryClient.invalidateQueries({
+    queryKey: realmExtraKeys.admin(realmId, key),
+  });
   queryClient.invalidateQueries({ queryKey: realmKeys.detail(realmId) });
 }
 

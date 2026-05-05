@@ -45,12 +45,7 @@ export const BookHomeHeroSection: React.FC = () => {
           onChange={(e) => setKeyword(e.target.value)}
           aria-label={t("page.book_home.hero.search_placeholder")}
         />
-        <Button
-          type="submit"
-          size="icon"
-          variant="ghost"
-          aria-label="search"
-        >
+        <Button type="submit" size="icon" variant="ghost" aria-label="search">
           <SearchIcon className="w-5 h-5" />
         </Button>
       </form>

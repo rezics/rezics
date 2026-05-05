@@ -21,10 +21,7 @@ export const ExcerptList: React.FC<ExcerptListProps> = ({
   }
 
   return (
-    <div
-      className="flex flex-col"
-      style={{ gap: `${spacing * 8}px` }}
-    >
+    <div className="flex flex-col" style={{ gap: `${spacing * 8}px` }}>
       {units.map((unit) => (
         <ExcerptCard key={unit.id} excerpt={unit} />
       ))}

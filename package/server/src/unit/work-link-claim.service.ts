@@ -80,11 +80,7 @@ export async function listByWork(
     select: { id: true, userId: true },
   });
   if (!workUnit) {
-    throw new WorkLinkClaimError(
-      "CLAIM_NOT_FOUND",
-      "Work unit not found",
-      404,
-    );
+    throw new WorkLinkClaimError("CLAIM_NOT_FOUND", "Work unit not found", 404);
   }
   const authorized = await hasAuthorityOver(caller, {
     id: workUnit.id,

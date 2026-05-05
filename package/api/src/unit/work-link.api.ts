@@ -37,10 +37,9 @@ export const workLinkApi = {
   },
 
   approveClaim: async (claimId: string): Promise<WorkLinkClaimDTO> => {
-    return apiFetch<WorkLinkClaimDTO>(
-      `/work-link-claims/${claimId}/approve`,
-      { method: "POST" },
-    );
+    return apiFetch<WorkLinkClaimDTO>(`/work-link-claims/${claimId}/approve`, {
+      method: "POST",
+    });
   },
 
   rejectClaim: async (

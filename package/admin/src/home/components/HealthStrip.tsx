@@ -6,15 +6,8 @@ interface HealthStripProps {
 }
 
 function StatusDot({ status }: { status: "ok" | "degraded" | "unreachable" }) {
-  const cls =
-    status === "ok"
-      ? "bg-success-fill"
-      : "bg-error-fill";
-  return (
-    <div
-      className={`w-2.5 h-2.5 rounded-full shrink-0 ${cls}`}
-    />
-  );
+  const cls = status === "ok" ? "bg-success-fill" : "bg-error-fill";
+  return <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${cls}`} />;
 }
 
 export function HealthStrip({ server, meili }: HealthStripProps) {

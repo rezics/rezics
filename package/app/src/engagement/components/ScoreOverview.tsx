@@ -18,9 +18,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
     aggregates?.find((a) => a.realm === realm) ?? aggregates?.[0];
 
   if (!aggregate) {
-    return (
-      <p className="text-sm text-text-secondary">No ratings yet</p>
-    );
+    return <p className="text-sm text-text-secondary">No ratings yet</p>;
   }
 
   const average =
@@ -62,7 +60,8 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
               <div
                 className="h-1.5 flex-1 overflow-hidden rounded-full"
                 style={{
-                  backgroundColor: "var(--colors-surface-subtle, rgba(0,0,0,0.06))",
+                  backgroundColor:
+                    "var(--colors-surface-subtle, rgba(0,0,0,0.06))",
                 }}
               >
                 <div

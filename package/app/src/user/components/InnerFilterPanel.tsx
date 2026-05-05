@@ -36,9 +36,7 @@ export const InnerFilterPanel: FC<InnerFilterPanelProps> = ({
             onClick={chip.disabled ? undefined : () => onChipChange(chip.value)}
             aria-disabled={chip.disabled || undefined}
             className={
-              chip.disabled
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer"
+              chip.disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
             }
           >
             {label}

@@ -65,5 +65,4 @@ describe("jwt token storage", () => {
       unitId: "user-1",
     });
   });
-
 });

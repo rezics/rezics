@@ -55,7 +55,10 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
   };
 
   return (
-    <Alert variant="default" className="border-warning-fill/40 bg-warning-fill/10">
+    <Alert
+      variant="default"
+      className="border-warning-fill/40 bg-warning-fill/10"
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <AlertTitle>{t("pinboard.stale.title")}</AlertTitle>

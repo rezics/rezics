@@ -8,7 +8,9 @@ export interface EmailMessage {
 }
 
 export interface EmailTransport {
-  send(message: EmailMessage): Promise<{ ok: true } | { ok: false; error: unknown }>;
+  send(
+    message: EmailMessage,
+  ): Promise<{ ok: true } | { ok: false; error: unknown }>;
 }
 
 /**

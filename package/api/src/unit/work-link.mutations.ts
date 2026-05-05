@@ -70,8 +70,7 @@ export function useRejectWorkLinkClaimMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ claimId, body }) =>
-      workLinkApi.rejectClaim(claimId, body),
+    mutationFn: ({ claimId, body }) => workLinkApi.rejectClaim(claimId, body),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: workLinkKeys.claims() });

@@ -53,9 +53,7 @@ export default function AdminLayout({
         {drawer}
       </aside>
 
-      <main className="flex-1 min-w-0 px-4 md:px-6 pb-6 pt-16">
-        {children}
-      </main>
+      <main className="flex-1 min-w-0 px-4 md:px-6 pb-6 pt-16">{children}</main>
     </div>
   );
 }

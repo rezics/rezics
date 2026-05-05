@@ -380,7 +380,9 @@ export async function removeFromList(
   await updateExtraWithLock(caller, realmId, (extra) => {
     const current = readList(extra, key);
     unitIds = current.filter((id) => id !== unitId);
-    return unitIds.length === current.length ? extra : writeList(extra, key, unitIds);
+    return unitIds.length === current.length
+      ? extra
+      : writeList(extra, key, unitIds);
   });
   return { unitIds };
 }
@@ -392,9 +394,16 @@ export async function setSingleExtraKey(
   value: unknown,
 ): Promise<{ extra: ExtraJson }> {
   if (!SINGLE_EXTRA_KEYS.has(key)) {
-    throw new RealmExtraError("INVALID_KEY", "Unsupported single extra key", 400);
+    throw new RealmExtraError(
+      "INVALID_KEY",
+      "Unsupported single extra key",
+      400,
+    );
   }
-  const validated = await validateSingleExtraValue(key as SingleExtraKey, value);
+  const validated = await validateSingleExtraValue(
+    key as SingleExtraKey,
+    value,
+  );
   const extra = await updateExtraWithLock(caller, realmId, (current) =>
     writeValue(current, key, validated),
   );

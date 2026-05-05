@@ -14,11 +14,7 @@ function FullScreenModalPreview({ title }: { title: string }) {
       >
         Open modal
       </button>
-      <FullScreenModal
-        open={open}
-        onClose={() => setOpen(false)}
-        title={title}
-      >
+      <FullScreenModal open={open} onClose={() => setOpen(false)} title={title}>
         <p className="text-base">
           Full-screen modals carry attention-heavy flows: chapter editors,
           immersive search, or onboarding sheets.

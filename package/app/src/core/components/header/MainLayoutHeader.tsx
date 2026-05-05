@@ -71,9 +71,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
                 <img src="/logo.svg" alt="logo" />
               </div>
             )}
-            <h1 className="text-3xl font-bold text-brand-fill m-0">
-              REZICS
-            </h1>
+            <h1 className="text-3xl font-bold text-brand-fill m-0">REZICS</h1>
           </Link>
 
           <div className="flex-1 min-w-0 flex justify-center">

@@ -1,12 +1,7 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { UserDTO } from "@rezics/contract";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Button,
-} from "@rezics/ui/shadcn";
+import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
@@ -62,9 +57,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         )}
         <Avatar className="w-[72px] h-[72px] rounded-md text-3xl">
           <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
-          <AvatarFallback>
-            {user.name?.charAt(0).toUpperCase()}
-          </AvatarFallback>
+          <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
@@ -117,9 +110,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
       <div className="hidden md:flex flex-col items-start gap-4 py-12 px-4">
         <Avatar className="w-full h-auto aspect-square rounded-lg text-5xl">
           <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
-          <AvatarFallback>
-            {user.name?.charAt(0).toUpperCase()}
-          </AvatarFallback>
+          <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
 
         <div>
@@ -132,9 +123,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         </div>
 
         {user.bio && (
-          <p className="text-sm text-text-secondary max-w-xs">
-            {user.bio}
-          </p>
+          <p className="text-sm text-text-secondary max-w-xs">{user.bio}</p>
         )}
 
         <div className="flex items-center gap-3 text-sm text-gray-500">

@@ -124,9 +124,21 @@ const ROLE_PAIRS: Pair[] = [
 ];
 
 const CONTAINER_PAIRS: Pair[] = [
-  { fg: "semantic.success.on-container", bg: "semantic.success.container", min: 4.5 },
-  { fg: "semantic.warning.on-container", bg: "semantic.warning.container", min: 4.5 },
-  { fg: "semantic.error.on-container", bg: "semantic.error.container", min: 4.5 },
+  {
+    fg: "semantic.success.on-container",
+    bg: "semantic.success.container",
+    min: 4.5,
+  },
+  {
+    fg: "semantic.warning.on-container",
+    bg: "semantic.warning.container",
+    min: 4.5,
+  },
+  {
+    fg: "semantic.error.on-container",
+    bg: "semantic.error.container",
+    min: 4.5,
+  },
   { fg: "semantic.info.on-container", bg: "semantic.info.container", min: 4.5 },
   { fg: "brand.on-container", bg: "brand.container", min: 4.5 },
 ];

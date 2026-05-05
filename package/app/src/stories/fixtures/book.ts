@@ -3,10 +3,7 @@
 // the curated corpus that production seed data uses.
 import type { BookDTO } from "@rezics/contract";
 import { LANGUAGES } from "@rezics/contract";
-import {
-  getDescriptionPool,
-  getTitlePool,
-} from "@rezics/shared/text";
+import { getDescriptionPool, getTitlePool } from "@rezics/shared/text";
 
 const PLACEHOLDER_COVER = "https://picsum.photos/seed/rezics-book/240/360";
 const NO_COVER_PLACEHOLDER =

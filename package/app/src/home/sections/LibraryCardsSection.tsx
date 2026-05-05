@@ -2,7 +2,11 @@ import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { BookOpen as MenuBookOutlinedIcon, Film as MovieOutlinedIcon, Gamepad2 as SportsEsportsOutlinedIcon } from "lucide-react";
+import {
+  BookOpen as MenuBookOutlinedIcon,
+  Film as MovieOutlinedIcon,
+  Gamepad2 as SportsEsportsOutlinedIcon,
+} from "lucide-react";
 
 const libraries = [
   {
@@ -38,7 +42,9 @@ export const LibraryCardsSection: React.FC = () => {
               <div className="flex flex-row items-center gap-4">
                 <lib.icon
                   size={32}
-                  color={lib.active ? "currentColor" : "var(--colors-text-disabled)"}
+                  color={
+                    lib.active ? "currentColor" : "var(--colors-text-disabled)"
+                  }
                 />
                 <div>
                   <h6 className="text-base font-semibold m-0">

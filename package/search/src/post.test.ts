@@ -24,10 +24,7 @@ describe("buildPostDocument", () => {
       scoreEntryId: null,
       unit: {
         user: { name: "Alice", slug: "alice", avatar: null },
-        inRealms: [
-          { realmUnitId: "realm-1" },
-          { realmUnitId: "realm-2" },
-        ],
+        inRealms: [{ realmUnitId: "realm-1" }, { realmUnitId: "realm-2" }],
       },
       targetUnit: null,
       scoreEntry: null,

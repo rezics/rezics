@@ -35,24 +35,16 @@ const EXTERNAL_ITEMS_PER_PAGE = 20;
 function FollowUserList({ users }: { users: SimpleUser[] }) {
   if (users.length === 0) {
     return (
-      <div className="py-16 text-center text-text-secondary">
-        暂无用户。
-      </div>
+      <div className="py-16 text-center text-text-secondary">暂无用户。</div>
     );
   }
 
   return (
     <ul className="divide-y divide-border-whisper">
       {users.map((user) => (
-        <li
-          key={user.unitId}
-          className="flex items-center gap-3 py-3"
-        >
+        <li key={user.unitId} className="flex items-center gap-3 py-3">
           <Avatar>
-            <AvatarImage
-              src={user.avatar ?? undefined}
-              alt={user.name ?? ""}
-            />
+            <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
             <AvatarFallback>
               {user.name?.charAt(0).toUpperCase()}
             </AvatarFallback>

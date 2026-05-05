@@ -130,9 +130,7 @@ export function AdminNav({
     <div className="mt-16 h-full flex flex-col">
       <div className="px-4 py-4">
         <p className="text-sm font-bold">{adminConfig.appName}</p>
-        <p className="text-xs text-text-secondary">
-          env: {adminConfig.env}
-        </p>
+        <p className="text-xs text-text-secondary">env: {adminConfig.env}</p>
       </div>
       <Separator />
 
@@ -193,9 +191,7 @@ export function AdminNav({
       <div className="flex-1" />
       <Separator />
       <div className="px-4 py-3">
-        <p className="text-xs text-text-secondary">
-          REZICS Book Library
-        </p>
+        <p className="text-xs text-text-secondary">REZICS Book Library</p>
       </div>
     </div>
   );

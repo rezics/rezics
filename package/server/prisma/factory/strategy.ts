@@ -78,4 +78,8 @@ export const CountSpecSchema = v.strictObject({
   alpha: v.optional(v.pipe(v.number(), v.minValue(0))),
 });
 
-export const ModeSchema = v.picklist(["realistic", "fixed", "uniform"] as const);
+export const ModeSchema = v.picklist([
+  "realistic",
+  "fixed",
+  "uniform",
+] as const);

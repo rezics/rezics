@@ -111,10 +111,7 @@ function NestedPrimeCard({ enriched }: { enriched: EnrichedShelfItem }) {
   );
 }
 
-export function ShelfItemRenderer({
-  entry,
-  viewMode,
-}: ShelfItemRendererProps) {
+export function ShelfItemRenderer({ entry, viewMode }: ShelfItemRendererProps) {
   if (entry.kind === "review") {
     return <ReviewCard review={entry.review} />;
   }

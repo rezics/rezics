@@ -35,12 +35,12 @@ describe("progress contract schemas", () => {
         extra: { device: "web" },
       }),
     ).toBe(true);
-    expect(
-      Value.Check(unitProgressUpsertBodySchema, { progress: 1.1 }),
-    ).toBe(false);
-    expect(
-      Value.Check(unitProgressUpsertBodySchema, { addTimeMs: -1 }),
-    ).toBe(false);
+    expect(Value.Check(unitProgressUpsertBodySchema, { progress: 1.1 })).toBe(
+      false,
+    );
+    expect(Value.Check(unitProgressUpsertBodySchema, { addTimeMs: -1 })).toBe(
+      false,
+    );
   });
 
   test("validates progress row and list response round trip shape", () => {

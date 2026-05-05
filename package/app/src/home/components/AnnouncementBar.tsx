@@ -1,7 +1,10 @@
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
-import { Megaphone as CampaignRoundedIcon, Pin as PushPinRoundedIcon } from "lucide-react";
+import {
+  Megaphone as CampaignRoundedIcon,
+  Pin as PushPinRoundedIcon,
+} from "lucide-react";
 
 export interface Announcement {
   id: string;
@@ -69,10 +72,7 @@ export function AnnouncementBar({
               }}
             >
               {item.pin && (
-                <PushPinRoundedIcon
-                  size={14}
-                  className="text-warning-text"
-                />
+                <PushPinRoundedIcon size={14} className="text-warning-text" />
               )}
 
               <p className="text-sm whitespace-nowrap overflow-hidden text-ellipsis m-0">
