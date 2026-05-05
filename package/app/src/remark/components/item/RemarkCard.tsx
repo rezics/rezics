@@ -65,11 +65,6 @@ interface RemarkCardProps {
 export const RemarkCard: React.FC<RemarkCardProps> = ({ remark }) => {
   const navigate = useNavigate();
 
-  const handleCardClick = () => {
-    if (!remark.unitId) return;
-    navigate({ to: "/remark/$reviewId", params: { reviewId: remark.unitId } });
-  };
-
   const handleReplyInvoke = () => {
     if (!remark.unitId) return;
     navigate({
@@ -85,7 +80,6 @@ export const RemarkCard: React.FC<RemarkCardProps> = ({ remark }) => {
         "py-4 border-b border-gray-200 dark:border-gray-700",
         remark.unitId && "cursor-pointer",
       )}
-      onClick={handleCardClick}
     >
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">

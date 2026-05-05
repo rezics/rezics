@@ -2,10 +2,8 @@ import type { ShelfDTO } from "@rezics/contract";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-import { shelfCardActions, shelfPolicy } from "@/shelf/models/shelfPolicy";
 
 interface ShelfCardProps {
   shelf: ShelfDTO;
@@ -27,25 +25,10 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
     });
   };
 
-  const handleReplyInvoke = () => {
-    if (!shelf.unitId) return;
-    navigate({
-      to: "/shelf/$shelfId",
-      params: { shelfId: shelf.unitId },
-      search: { focus: "reply" },
-    });
-  };
-
-  const reactionPost: ReactionBarPost = {
-    unitId: shelf.unitId,
-    reactionSummaries: shelf.reactionSummaries as unknown[] | undefined,
-    replyCount: (shelf as unknown as { replyCount?: number }).replyCount,
-  };
-
   return (
     <Card
       className={cn(
-        "border-0 shadow-none",
+        "gap-0 overflow-hidden rounded-lg border-0 py-0 shadow-none ring-0",
         shelf.unitId && "cursor-pointer",
         className,
       )}
@@ -73,12 +56,12 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
         )}
       </div>
 
-      <CardContent>
+      <CardContent className="px-4 pb-4 pt-3">
         <h3 className="truncate text-lg font-semibold">
           {title || "Untitled Shelf"}
         </h3>
 
-        <p className="mt-1 line-clamp-2 text-sm text-text-secondary">
+        <p className="mt-1 line-clamp-2 min-h-[2.8em] text-sm leading-[1.4] text-text-secondary">
           {description || "No description"}
         </p>
 
@@ -92,16 +75,6 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
           >
             {shelf.user?.name || "Anonymous"}
           </span>
-        </div>
-
-        <div className="mt-3">
-          <ReactionBar
-            size="md"
-            post={reactionPost}
-            policy={shelfPolicy}
-            actions={shelfCardActions}
-            onReplyInvoke={handleReplyInvoke}
-          />
         </div>
       </CardContent>
     </Card>

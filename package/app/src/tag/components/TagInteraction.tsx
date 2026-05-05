@@ -127,8 +127,22 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
       <Popover
         modal={false}
         open={popoverOpen}
-        onOpenChange={(open) => {
-          if (!open) dispatch({ type: "CLOSE_POPPER" });
+        onOpenChange={(open, details) => {
+          if (open) return;
+          // When the dismiss is caused by clicking another chip, cancel the
+          // close so the chip's onClick reaches the reducer in single-preview
+          // state and transitions to multi-select. The popover will close
+          // naturally on the next render via the controlled `open` prop.
+          const target = details?.event?.target;
+          if (
+            details?.reason === "outside-press" &&
+            target instanceof Element &&
+            target.closest('[data-tag-chip="true"]')
+          ) {
+            details.cancel();
+            return;
+          }
+          dispatch({ type: "CLOSE_POPPER" });
         }}
       >
         <div className="flex flex-wrap gap-2">
@@ -138,6 +152,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
               <Badge
                 role="button"
                 tabIndex={0}
+                data-tag-chip="true"
                 aria-pressed={selected}
                 variant={selected ? "default" : "outline"}
                 className={cn("cursor-pointer select-none")}

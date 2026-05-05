@@ -1,6 +1,6 @@
 import type { PostDTO } from "@rezics/contract";
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
 
 interface PostAuthorHeaderProps {
@@ -25,10 +25,7 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
       onClick={(e) => e.stopPropagation()}
     >
       <Link to="/user/$unitId" params={{ unitId: post.author?.unitId ?? "" }}>
-        <Avatar
-          className="rounded-md"
-          style={{ width: avatarSize, height: avatarSize }}
-        >
+        <Avatar style={{ width: avatarSize, height: avatarSize }}>
           <AvatarImage src={post.author?.avatar ?? ""} />
           <AvatarFallback>
             {(post.author?.name ?? "?").slice(0, 1)}

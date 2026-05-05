@@ -150,6 +150,12 @@ function flattenColorVars(
     const path = key === "DEFAULT" ? parent : `${parent}-${key}`;
     if (typeof value === "string") {
       out.push([`--${path}`, value]);
+      // preset-wind4 generates utilities (e.g. `bg-popover`) that reference
+      // `--colors-{name}-DEFAULT` rather than the collapsed `--colors-{name}`.
+      // Emit both so the dark override actually overrides what the utility reads.
+      if (key === "DEFAULT") {
+        out.push([`--${parent}-DEFAULT`, value]);
+      }
     } else if (value && typeof value === "object") {
       flattenColorVars(value as Record<string, unknown>, path, out);
     }
