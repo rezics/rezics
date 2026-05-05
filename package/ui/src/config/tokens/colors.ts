@@ -128,7 +128,7 @@ const brandShared = {
 export const lightColors: ColorTokens = {
   background: "#f5f4ed",
   foreground: "#1d1d1f",
-  card: { DEFAULT: "#ffffff", foreground: "#1d1d1f" },
+  card: { DEFAULT: "#fdfcf7", foreground: "#1d1d1f" },
   popover: { DEFAULT: "#f5f4ed", foreground: "#1d1d1f" },
   primary: { DEFAULT: brandShared.fill, foreground: "#ffffff" },
   secondary: { DEFAULT: "#ebeae5", foreground: "#1d1d1f" },
@@ -141,10 +141,10 @@ export const lightColors: ColorTokens = {
   surface: {
     canvas: "#f5f4ed",
     base: "#faf9f5",
-    elevated: "#ffffff",
+    elevated: "#fdfcf7",
     subtle: "#ebeae5",
     sunken: "#e6e5e0",
-    "container-lowest": "#ffffff",
+    "container-lowest": "#fdfcf7",
     "container-low": "#faf9f5",
     container: "#f5f4ed",
     "container-high": "#ebeae5",
