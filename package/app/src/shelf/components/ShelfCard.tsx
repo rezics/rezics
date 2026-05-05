@@ -28,7 +28,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
   return (
     <Card
       className={cn(
-        "gap-0 overflow-hidden rounded-lg border-0 py-0 shadow-none ring-0",
+        "gap-0 overflow-hidden rounded-md border-0 py-0 shadow-none ring-0",
         shelf.unitId && "cursor-pointer",
         className,
       )}

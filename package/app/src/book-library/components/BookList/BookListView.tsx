@@ -31,9 +31,9 @@ export const BookListViewItem: React.FC<BookListViewItemProps> = ({ book }) => {
   return (
     <div>
       <Link to="/book/$bookId" params={{ bookId: book.unitId }}>
-        <Card className="mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full overflow-hidden">
+        <Card className="mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full overflow-hidden rounded-md border-0 py-0 shadow-none ring-0">
           {coverUrl && (
-            <div className="aspect-[2/3]">
+            <div className="aspect-[2/3] overflow-hidden">
               <LazyLoadImage
                 src={coverUrl}
                 alt={title}

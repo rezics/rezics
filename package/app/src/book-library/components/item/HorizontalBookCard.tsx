@@ -32,7 +32,7 @@ export function HorizontalBookCard({
         block
         w-full
         text-left
-        rounded-xl
+        rounded-md
         transition
         duration-200
         hover:bg-white/5
@@ -49,7 +49,7 @@ export function HorizontalBookCard({
             sm:w-18
             shrink-0
             overflow-hidden
-            rounded-lg
+            rounded-md
             aspect-[2/3]
           "
         >

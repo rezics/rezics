@@ -37,7 +37,7 @@ type ReadStatus = "want" | "reading" | "read" | null;
 
 // Ghost button styling for hero overlay surfaces (white text on dark backdrop).
 const ghostHeroClass =
-  "text-white/90 border-white/25 rounded-md hover:border-white/50 hover:bg-white/10 bg-transparent";
+  "text-white/90 border-white/25 rounded-full hover:border-white/50 hover:bg-white/10 bg-transparent";
 
 export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   bookInfo,
@@ -68,7 +68,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
       <Button
         size="lg"
         onClick={handleAddToShelf}
-        className="rounded-md font-medium"
+        className="rounded-full font-medium"
         style={{
           backgroundColor: "var(--colors-brand-fill, #f4606c)",
           color: "var(--colors-text-on-brand, #fff)",
@@ -87,19 +87,19 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
       >
         <ToggleGroupItem
           value="want"
-          className="text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
+          className="rounded-full text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
         >
           {t("book.hero.actions.want_to_read", "想讀")}
         </ToggleGroupItem>
         <ToggleGroupItem
           value="reading"
-          className="text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
+          className="rounded-full text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
         >
           {t("book.hero.actions.reading", "在讀")}
         </ToggleGroupItem>
         <ToggleGroupItem
           value="read"
-          className="text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
+          className="rounded-full text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
         >
           <CheckCircleOutline className="w-3.5 h-3.5 mr-1" />
           {t("book.hero.actions.read", "已讀")}

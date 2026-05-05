@@ -18,6 +18,7 @@ const LoginPrompt = () => {
     return (
       <Button
         variant="ghost"
+        className="h-9 rounded-full border border-border-whisper bg-transparent px-3"
         render={(props) => (
           <Link to="/login" {...props}>
             {t("auth.login")}
@@ -29,10 +30,18 @@ const LoginPrompt = () => {
 
   return (
     <div className="flex gap-2">
-      <Button variant="ghost" onClick={() => setLoginModalOpen(true)}>
+      <Button
+        variant="ghost"
+        className="h-9 rounded-full border border-border-whisper bg-transparent px-3"
+        onClick={() => setLoginModalOpen(true)}
+      >
         {t("auth.login")}
       </Button>
-      <Button variant="outline" onClick={() => setRegisterModalOpen(true)}>
+      <Button
+        variant="outline"
+        className="h-9 rounded-full border-border-whisper bg-transparent px-3"
+        onClick={() => setRegisterModalOpen(true)}
+      >
         {t("auth.register")}
       </Button>
 

@@ -23,10 +23,10 @@ export function MoreHorizMenu({ children, className }: Props) {
             variant="ghost"
             size="icon"
             aria-label="more"
-            className={`ml-4 mr-2 ${className ?? ""}`}
+            className={`ml-4 mr-2 h-9 rounded-full bg-transparent ${className ?? ""}`}
             {...props}
           >
-            <MoreHorizIcon />
+            <MoreHorizIcon className="w-5 h-5" />
           </Button>
         )}
       />

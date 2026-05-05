@@ -50,6 +50,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
             size="icon"
             aria-label="account menu"
             aria-haspopup="true"
+            className="h-9 rounded-full bg-transparent"
             {...props}
           >
             <Avatar className="w-9 h-9 rounded-md">

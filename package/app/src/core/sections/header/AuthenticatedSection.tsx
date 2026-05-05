@@ -8,8 +8,13 @@ export function AuthenticatedSection() {
   return (
     <div className="flex items-center gap-2">
       <Link to="/inbox/notification">
-        <Button variant="ghost" size="icon" aria-label="notifications">
-          <NotificationsIcon />
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="notifications"
+          className="h-9 rounded-full bg-transparent"
+        >
+          <NotificationsIcon className="w-5 h-5" />
         </Button>
       </Link>
       <CreateMenu />
