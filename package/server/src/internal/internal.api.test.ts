@@ -1,4 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -21,21 +25,20 @@ const mockRealmMemberCreate = mock(async () => ({
   roleKey: "member",
 }));
 
-mock.module("#/prisma/client", () => ({
-  prisma: {
-    $transaction: mock(async (fn: (tx: unknown) => Promise<unknown>) =>
-      fn({
-        user: {
-          findUnique: mockUserFindUnique,
-          create: mockUserCreate,
-        },
-      }),
-    ),
-    user: { findUnique: mockUserFindUnique, create: mockUserCreate },
-    unit: { findUnique: mockUnitFindUnique },
-    realmMember: { create: mockRealmMemberCreate },
-  },
-}));
+installPrismaClientMock();
+Object.assign(prismaMock, {
+  $transaction: mock(async (fn: (tx: unknown) => Promise<unknown>) =>
+    fn({
+      user: {
+        findUnique: mockUserFindUnique,
+        create: mockUserCreate,
+      },
+    }),
+  ),
+  user: { findUnique: mockUserFindUnique, create: mockUserCreate },
+  unit: { findUnique: mockUnitFindUnique },
+  realmMember: { create: mockRealmMemberCreate },
+});
 
 mock.module("@/meili/user/sync", () => ({
   syncUserToMeili: mock(async () => {}),

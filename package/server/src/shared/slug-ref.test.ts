@@ -1,15 +1,18 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "@/test/prisma-client-mock";
 import { resolveSlugRef, resolveSlugRefs } from "./slug-ref";
 
 // Mock prisma
 const mockFindUnique = mock(() => Promise.resolve(null));
-mock.module("#/prisma/client", () => ({
-  prisma: {
-    unit: {
-      findUnique: mockFindUnique,
-    },
+installPrismaClientMock();
+Object.assign(prismaMock, {
+  unit: {
+    findUnique: mockFindUnique,
   },
-}));
+});
 
 describe("resolveSlugRef", () => {
   test("returns unitId directly when present", async () => {

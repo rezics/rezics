@@ -1,4 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -8,23 +12,28 @@ const findManyMock = mock((_args?: unknown) =>
   Promise.resolve([] as unknown[]),
 );
 
-mock.module("#/prisma/client", () => ({
-  prisma: {
-    realmTagUnit: { findMany: findManyMock },
-  },
-  UnitStatus: { PUBLISHED: "PUBLISHED" },
-  UnitType: { REALM: "REALM" },
-}));
+installPrismaClientMock();
+Object.assign(prismaMock, {
+  realmTagUnit: { findMany: findManyMock },
+});
 
 mock.module("@/meili/content/sync", () => ({
+  deleteContentFromMeili: async () => undefined,
+  patchContentCreditsToMeili: async () => undefined,
+  patchContentMetadataToMeili: async () => undefined,
   patchContentTagsToMeili: async () => undefined,
+  patchContentTranslationsToMeili: async () => undefined,
   patchContentRealmIdsToMeili: async () => undefined,
   patchContentRealmTagKeysToMeili: async () => undefined,
+  syncContentToMeili: async () => undefined,
 }));
 
 mock.module("@/meili/realm/sync", () => ({
+  deleteRealmFromMeili: async () => undefined,
   patchRealmMemberCountToMeili: async () => undefined,
   patchRealmMetadataToMeili: async () => undefined,
+  patchRealmTranslationsToMeili: async () => undefined,
+  syncAllRealmsToMeili: async () => undefined,
   syncRealmToMeili: async () => undefined,
 }));
 

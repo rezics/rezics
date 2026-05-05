@@ -12,7 +12,10 @@ mock.module("@/middleware", () => ({
       identity: { unitId: "t", permission: { role: "ADMIN" } },
     }),
   }),
+  tryResolveIdentity: async () => null,
   isAdminRole: () => true,
+  verifyAdminFromDb: async () => true,
+  verifyRootFromDb: async () => true,
 }));
 
 const zoneStub = {
@@ -29,6 +32,14 @@ mock.module("./zone.mapper", () => ({
 }));
 
 mock.module("./zone.service", () => ({
+  ZoneService: class {
+    checkLifecycle(zone: { startsAt?: Date | null; endsAt?: Date | null }) {
+      const now = Date.now();
+      if (zone.startsAt && zone.startsAt.getTime() > now) return "not_started";
+      if (zone.endsAt && zone.endsAt.getTime() < now) return "ended";
+      return null;
+    }
+  },
   zoneService: {
     getBySlug: async (slug: string) => {
       if (slug === "featured") return zoneStub;

@@ -1,4 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -7,18 +11,20 @@ process.env.DATABASE_URL ??=
 const findManyMock = mock((_args?: unknown) =>
   Promise.resolve([] as unknown[]),
 );
-mock.module("#/prisma/client", () => ({
-  prisma: {
-    unitTag: { findMany: findManyMock },
-  },
-  UnitStatus: { PUBLISHED: "PUBLISHED" },
-  UnitType: { TAG: "TAG" },
-}));
+installPrismaClientMock();
+Object.assign(prismaMock, {
+  unitTag: { findMany: findManyMock },
+});
 
 mock.module("@/meili/content/sync", () => ({
+  deleteContentFromMeili: async () => undefined,
+  patchContentCreditsToMeili: async () => undefined,
+  patchContentMetadataToMeili: async () => undefined,
   patchContentTagsToMeili: async () => undefined,
+  patchContentTranslationsToMeili: async () => undefined,
   patchContentRealmIdsToMeili: async () => undefined,
   patchContentRealmTagKeysToMeili: async () => undefined,
+  syncContentToMeili: async () => undefined,
 }));
 
 const { TagService, VISIBILITY_THRESHOLD } = await import("./tag.service");

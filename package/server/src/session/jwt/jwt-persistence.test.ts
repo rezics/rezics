@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { JwtAlgorithm } from "@rezics/jwt";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -12,19 +16,29 @@ const jwksFindUnique = mock();
 const jwksUpsert = mock();
 const jwksUpdate = mock();
 
-mock.module("../../prisma/client", () => ({
-  prisma: {
-    jwtService: {
-      upsert: jwtServiceUpsert,
-    },
-    jwks: {
-      findMany: jwksFindMany,
-      findUnique: jwksFindUnique,
-      upsert: jwksUpsert,
-      update: jwksUpdate,
-    },
+installPrismaClientMock();
+Object.assign(prismaMock, {
+  jwtService: {
+    findUnique: async () => ({
+      id: "server-local-id",
+      serviceKey: "server-local",
+      issuer: "http://localhost:3000",
+      audience: "rezics",
+      jwksUrl: "http://localhost:3000/.well-known/jwks.json",
+      jwksPath: "/.well-known/jwks.json",
+      isLocalIssuer: true,
+      isActive: true,
+      jwks: [],
+    }),
+    upsert: jwtServiceUpsert,
   },
-}));
+  jwks: {
+    findMany: jwksFindMany,
+    findUnique: jwksFindUnique,
+    upsert: jwksUpsert,
+    update: jwksUpdate,
+  },
+});
 
 describe("server jwt persistence", () => {
   beforeEach(() => {

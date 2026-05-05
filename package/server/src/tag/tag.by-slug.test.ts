@@ -12,10 +12,14 @@ mock.module("@/middleware", () => ({
       identity: { unitId: "t", permission: { role: "ADMIN" } },
     }),
   }),
+  tryResolveIdentity: async () => null,
+  isAdminRole: () => true,
   verifyAdminFromDb: async () => true,
+  verifyRootFromDb: async () => true,
 }));
 
 mock.module("@/unit/unit.service", () => ({
+  UnitService: class {},
   unitService: {
     getBySlug: async (slug: string) => {
       if (slug === "book") return { id: "tag-1", type: "TAG" };
@@ -33,6 +37,31 @@ mock.module("./tag.mapper", () => ({
 }));
 
 mock.module("./tag.service", () => ({
+  VISIBILITY_THRESHOLD: -100,
+  TagService: class {
+    async getTagsForUnit(unitId: string, opts?: { includeBelowThreshold?: boolean }) {
+      const { prisma } = await import("#/prisma/client");
+      return prisma.unitTag.findMany({
+        where: opts?.includeBelowThreshold
+          ? { unitId }
+          : { unitId, score: { gt: -100 } },
+        orderBy: [
+          { pinned: "desc" },
+          { position: "asc" },
+          { score: "desc" },
+          { tagUnitId: "asc" },
+        ],
+      });
+    }
+    async listLowScoreUnitTags(threshold: number, limit: number) {
+      const { prisma } = await import("#/prisma/client");
+      return prisma.unitTag.findMany({
+        where: { score: { lte: threshold } },
+        orderBy: [{ score: "asc" }, { unitId: "asc" }, { tagUnitId: "asc" }],
+        take: Math.max(1, Math.min(limit, 200)),
+      });
+    }
+  },
   tagService: {
     getByUnitId: async () => tagStub,
   },

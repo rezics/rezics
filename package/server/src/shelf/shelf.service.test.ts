@@ -1,27 +1,11 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "@/test/prisma-client-mock";
 
-mock.module("#/prisma/client", () => ({
-  PostKind: { REVIEW: "REVIEW" },
-  UnitStatus: { PUBLISHED: "PUBLISHED" },
-  UnitType: {
-    BOOK: "BOOK",
-    GAME: "GAME",
-    MEDIA: "MEDIA",
-    POST: "POST",
-    TAG: "TAG",
-    REALM: "REALM",
-    SHELF: "SHELF",
-    IMAGE: "IMAGE",
-    VIDEO: "VIDEO",
-    QUOTE: "QUOTE",
-    LINK: "LINK",
-  },
-  UnitVisibility: {
-    PUBLIC: "PUBLIC",
-    PRIVATE: "PRIVATE",
-  },
-  prisma: {},
-}));
+installPrismaClientMock();
+Object.assign(prismaMock, {});
 
 describe("ShelfService", () => {
   test("rejects reserved system shelf kind keys on create", async () => {

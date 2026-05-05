@@ -1,4 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -46,48 +50,36 @@ const transactionMock = mock(async (fn: any) =>
   }),
 );
 
-mock.module("#/prisma/client", () => ({
-  prisma: {
-    $transaction: transactionMock,
-    unit: {
-      create: unitCreateMock,
-      findMany: unitFindManyMock,
-      findUnique: unitFindUniqueMock,
-    },
-    post: {
-      create: postCreateMock,
-      update: postUpdateMock,
-      findMany: postFindManyMock,
-      count: postCountMock,
-      findUnique: postFindUniqueMock,
-      findUniqueOrThrow: postFindUniqueOrThrowMock,
-      findFirst: postFindFirstMock,
-    },
-    realmUnit: { create: realmUnitCreateMock },
-    unitTag: { create: unitTagCreateMock },
+installPrismaClientMock();
+Object.assign(prismaMock, {
+  $transaction: transactionMock,
+  unit: {
+    create: unitCreateMock,
+    findMany: unitFindManyMock,
+    findUnique: unitFindUniqueMock,
   },
-  PostKind: {
-    POST: "POST",
-    REVIEW: "REVIEW",
-    REMARK: "REMARK",
-    EXCERPT: "EXCERPT",
-    CHAPTER: "CHAPTER",
+  post: {
+    create: postCreateMock,
+    update: postUpdateMock,
+    findMany: postFindManyMock,
+    count: postCountMock,
+    findUnique: postFindUniqueMock,
+    findUniqueOrThrow: postFindUniqueOrThrowMock,
+    findFirst: postFindFirstMock,
   },
-  UnitStatus: {
-    DELETED: "DELETED",
-    PUBLISHED: "PUBLISHED",
-  },
-  UnitType: {
-    BOOK: "BOOK",
-    POST: "POST",
-    REALM: "REALM",
-    TAG: "TAG",
-  },
-}));
+  realmUnit: { create: realmUnitCreateMock },
+  unitTag: { create: unitTagCreateMock },
+});
 
 mock.module("@/meili/post/sync", () => ({
+  deletePostFromMeili: mock(async () => undefined),
   patchPostFieldsToMeili: mock(async () => undefined),
+  patchPostsAuthorToMeili: mock(async () => undefined),
+  patchPostsTargetToMeili: mock(async () => undefined),
+  syncAllPostsToMeili: mock(async () => undefined),
   syncPostToMeili: mock(async () => undefined),
+  syncPostsByAuthorToMeili: mock(async () => undefined),
+  syncPostsByTargetToMeili: mock(async () => undefined),
 }));
 
 mock.module("@/utils/sanitizeUser", () => ({
@@ -113,6 +105,10 @@ function resetMocks() {
   realmUnitCreateMock.mockClear();
   unitTagCreateMock.mockClear();
   transactionMock.mockClear();
+}
+
+function firstPostFindManyArgs() {
+  return (postFindManyMock.mock.calls as any[])[0]?.[0] as any;
 }
 
 describe("PostService.create realm/tag junction writes", () => {
@@ -229,7 +225,7 @@ describe("PostService.byRealm", () => {
     const result = await service.byRealm("realm-1");
 
     expect(result).toEqual({ posts: [], total: 0 });
-    expect(postFindManyMock.mock.calls[0]?.[0].where.unit.inRealms).toEqual({
+    expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
       some: { realmUnitId: "realm-1" },
     });
   });
@@ -238,7 +234,7 @@ describe("PostService.byRealm", () => {
     resetMocks();
     await service.byRealm("realm-1", { sort: "new" });
 
-    expect(postFindManyMock.mock.calls[0]?.[0].orderBy).toEqual([
+    expect(firstPostFindManyArgs().orderBy).toEqual([
       { createdAt: "desc" },
     ]);
   });
@@ -247,7 +243,7 @@ describe("PostService.byRealm", () => {
     resetMocks();
     await service.byRealm("realm-1", { sort: "top" });
 
-    expect(postFindManyMock.mock.calls[0]?.[0].orderBy).toEqual([
+    expect(firstPostFindManyArgs().orderBy).toEqual([
       { scoreEntry: { value: "desc" } },
       { createdAt: "desc" },
     ]);
@@ -257,7 +253,7 @@ describe("PostService.byRealm", () => {
     resetMocks();
     await service.byRealm("realm-1", { sort: "hot" });
 
-    const args = postFindManyMock.mock.calls[0]?.[0];
+    const args = firstPostFindManyArgs();
     expect(args.where.createdAt.gte).toBeInstanceOf(Date);
     expect(args.orderBy).toEqual([
       { scoreEntry: { value: "desc" } },
@@ -269,7 +265,7 @@ describe("PostService.byRealm", () => {
     resetMocks();
     await service.byRealm("realm-1", { tagIds: ["tag-1", "tag-2"] });
 
-    expect(postFindManyMock.mock.calls[0]?.[0].where.unit.OR).toEqual([
+    expect(firstPostFindManyArgs().where.unit.OR).toEqual([
       {
         realmTagAsUnit: {
           some: {
@@ -299,7 +295,7 @@ describe("PostService.byRealm", () => {
     resetMocks();
     await service.byRealm("realm-1", { start: 10, limit: 5 });
 
-    const args = postFindManyMock.mock.calls[0]?.[0];
+    const args = firstPostFindManyArgs();
     expect(args.skip).toBe(10);
     expect(args.take).toBe(5);
   });

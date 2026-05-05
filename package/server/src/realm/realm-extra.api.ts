@@ -17,6 +17,9 @@ import {
   RealmExtraError,
   removeFromList,
   reorderList,
+  clearSingleExtraKey,
+  setSingleExtraKey,
+  setTagTreeExtra,
 } from "./realm-extra.service";
 
 // Param names match `realmApi`'s `:unitId` — memoirist rejects mismatched names at the same trie position.
@@ -29,6 +32,10 @@ const entryParamsSchema = t.Object({
   unitId: t.String(),
   key: t.String(),
   contentUnitId: t.String(),
+});
+
+const singleValueBodySchema = t.Object({
+  value: t.Any(),
 });
 
 function handleError(error: unknown): never {
@@ -136,6 +143,56 @@ export const realmExtraApi = new Elysia()
       response: realmExtraOkResponseSchema,
       detail: {
         summary: "Reorder a Realm.extra list (must be a permutation)",
+        tags: ["Realm", "RealmExtra"],
+      },
+    },
+  )
+  .put(
+    "/realm/:unitId/extra/:key",
+    async ({ params, body, identity }): Promise<RealmExtraOkResponse> => {
+      try {
+        if (params.key === "tagTree") {
+          await setTagTreeExtra(identity, params.unitId, body.value);
+        } else {
+          await setSingleExtraKey(
+            identity,
+            params.unitId,
+            params.key,
+            body.value,
+          );
+        }
+        return { ok: true };
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    {
+      requireLogin: true,
+      params: listParamsSchema,
+      body: singleValueBodySchema,
+      response: realmExtraOkResponseSchema,
+      detail: {
+        summary: "Set a single Realm.extra value",
+        tags: ["Realm", "RealmExtra"],
+      },
+    },
+  )
+  .delete(
+    "/realm/:unitId/extra/:key",
+    async ({ params, identity }): Promise<RealmExtraOkResponse> => {
+      try {
+        await clearSingleExtraKey(identity, params.unitId, params.key);
+        return { ok: true };
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    {
+      requireLogin: true,
+      params: listParamsSchema,
+      response: realmExtraOkResponseSchema,
+      detail: {
+        summary: "Clear a single Realm.extra value",
         tags: ["Realm", "RealmExtra"],
       },
     },

@@ -1,4 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -38,18 +42,33 @@ const mockVerifyBearerToken = mock(async () => ({
 }));
 
 mock.module("@rezics/jwt", () => ({
+  asJwtPrivateJwk: (jwk: unknown) => jwk,
+  asJwtPublicJwk: (jwk: unknown) => jwk,
+  defaultJwtCryptoProvider: {},
   JwtAlgorithm: { ES256: "ES256" },
   verifyBearerToken: mockVerifyBearerToken,
+  verifyTokenFromHeader: mockVerifyBearerToken,
 }));
 
-const mockGetJwtService = mock(async () => ({
-  issuer: "http://localhost:3001",
-  audience: "rezics",
-  jwksUrl: "http://localhost:3001/.well-known/jwks.json",
-}));
+const defaultGetJwtService = async (serviceKey?: string) =>
+  serviceKey === "server-local"
+    ? {
+        id: "server-local-id",
+        issuer: "http://localhost:3000",
+        audience: "rezics",
+        jwksUrl: "http://localhost:3000/.well-known/jwks.json",
+      }
+    : {
+        issuer: "http://localhost:3001",
+        audience: "rezics",
+        jwksUrl: "http://localhost:3001/.well-known/jwks.json",
+      };
+
+const mockGetJwtService = mock(defaultGetJwtService);
 
 mock.module("@/jwt/jwtServiceCache", () => ({
   getJwtService: mockGetJwtService,
+  invalidateJwtService: () => undefined,
 }));
 
 const mockFindUnique = mock(async () => ({
@@ -57,13 +76,12 @@ const mockFindUnique = mock(async () => ({
   permission: { role: ["MEMBER"] },
 }));
 
-mock.module("#/prisma/client", () => ({
-  prisma: {
-    user: {
-      findUnique: mockFindUnique,
-    },
+installPrismaClientMock();
+Object.assign(prismaMock, {
+  user: {
+    findUnique: mockFindUnique,
   },
-}));
+});
 
 const mockProvisionFromJwt = mock(
   async () =>
@@ -109,11 +127,7 @@ beforeEach(() => {
   });
 
   mockGetJwtService.mockReset();
-  mockGetJwtService.mockResolvedValue({
-    issuer: "http://localhost:3001",
-    audience: "rezics",
-    jwksUrl: "http://localhost:3001/.well-known/jwks.json",
-  });
+  mockGetJwtService.mockImplementation(defaultGetJwtService);
 
   mockFindUnique.mockReset();
   mockFindUnique.mockResolvedValue({

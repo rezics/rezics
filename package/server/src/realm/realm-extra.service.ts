@@ -1,4 +1,5 @@
 import type { RezicsSessionClaims } from "@rezics/contract";
+import type { RealmBannerExtra, TagTreeNode } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { hasAuthorityOver } from "@/unit/authority";
@@ -9,7 +10,8 @@ export class RealmExtraError extends Error {
       | "REALM_NOT_FOUND"
       | "FORBIDDEN"
       | "INVALID_REORDER"
-      | "INVALID_KEY",
+      | "INVALID_KEY"
+      | "INVALID_VALUE",
     message: string,
     public httpStatus: 400 | 403 | 404,
   ) {
@@ -21,6 +23,9 @@ export class RealmExtraError extends Error {
 const REALM_AUTHORITY_ROLES = ["owner", "admin", "moderator"] as const;
 
 type ExtraJson = Record<string, unknown>;
+type SingleExtraKey = "rule" | "about" | "banner";
+
+const SINGLE_EXTRA_KEYS = new Set<string>(["rule", "about", "banner"]);
 
 function readList(extra: unknown, key: string): string[] {
   if (!extra || typeof extra !== "object") return [];
@@ -33,6 +38,20 @@ function writeList(extra: unknown, key: string, list: string[]): ExtraJson {
   const base: ExtraJson =
     extra && typeof extra === "object" ? { ...(extra as ExtraJson) } : {};
   base[key] = list;
+  return base;
+}
+
+function writeValue(extra: unknown, key: string, value: unknown): ExtraJson {
+  const base: ExtraJson =
+    extra && typeof extra === "object" ? { ...(extra as ExtraJson) } : {};
+  base[key] = value;
+  return base;
+}
+
+function clearValue(extra: unknown, key: string): ExtraJson {
+  const base: ExtraJson =
+    extra && typeof extra === "object" ? { ...(extra as ExtraJson) } : {};
+  delete base[key];
   return base;
 }
 
@@ -84,6 +103,151 @@ async function saveExtra(realmId: string, extra: ExtraJson): Promise<void> {
   });
 }
 
+async function validatePostUnit(unitId: string, label: string): Promise<void> {
+  const unit = await prisma.unit.findUnique({
+    where: { id: unitId },
+    select: { id: true, type: true, status: true },
+  });
+  if (!unit || unit.type !== "POST" || unit.status === "DELETED") {
+    throw new RealmExtraError(
+      "INVALID_VALUE",
+      `${label} must reference an existing Post Unit`,
+      400,
+    );
+  }
+}
+
+async function validateTagUnitIds(tagIds: Set<string>): Promise<void> {
+  if (tagIds.size === 0) return;
+  const rows = await prisma.unit.findMany({
+    where: {
+      id: { in: [...tagIds] },
+      type: "TAG",
+      status: { not: "DELETED" },
+    },
+    select: { id: true },
+  });
+  const found = new Set(rows.map((row) => row.id));
+  const missing = [...tagIds].filter((id) => !found.has(id));
+  if (missing.length > 0) {
+    throw new RealmExtraError(
+      "INVALID_VALUE",
+      `Invalid tagTree tagId values: ${missing.join(", ")}`,
+      400,
+    );
+  }
+}
+
+function collectTagTreeIds(value: unknown): Set<string> {
+  if (!Array.isArray(value)) {
+    throw new RealmExtraError("INVALID_VALUE", "tagTree must be an array", 400);
+  }
+  const tagIds = new Set<string>();
+
+  function visit(node: unknown): void {
+    if (!node || typeof node !== "object" || Array.isArray(node)) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "tagTree nodes must be objects",
+        400,
+      );
+    }
+    const item = node as TagTreeNode;
+    if (item.tagId !== undefined) {
+      if (typeof item.tagId !== "string" || item.tagId.length === 0) {
+        throw new RealmExtraError(
+          "INVALID_VALUE",
+          "tagTree tagId must be a non-empty string",
+          400,
+        );
+      }
+      tagIds.add(item.tagId);
+    } else if (item.disabled !== true || typeof item.label !== "string") {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "tagTree nodes without tagId must be disabled headers with a label",
+        400,
+      );
+    }
+    if (item.children !== undefined) {
+      if (!Array.isArray(item.children)) {
+        throw new RealmExtraError(
+          "INVALID_VALUE",
+          "tagTree children must be an array",
+          400,
+        );
+      }
+      item.children.forEach(visit);
+    }
+  }
+
+  value.forEach(visit);
+  return tagIds;
+}
+
+async function validateSingleExtraValue(
+  key: SingleExtraKey,
+  value: unknown,
+): Promise<unknown> {
+  if (key === "rule" || key === "about") {
+    if (typeof value !== "string" || value.length === 0) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        `${key} must be a Post Unit ID string`,
+        400,
+      );
+    }
+    await validatePostUnit(value, key);
+    return value;
+  }
+
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new RealmExtraError("INVALID_VALUE", "banner must be an object", 400);
+  }
+  const banner = value as RealmBannerExtra;
+  if (banner.kind === "post") {
+    if (typeof banner.unitId !== "string" || banner.unitId.length === 0) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "banner.unitId must be a Post Unit ID string",
+        400,
+      );
+    }
+    await validatePostUnit(banner.unitId, "banner");
+    return { kind: "post", unitId: banner.unitId };
+  }
+  if (banner.kind === "url" && typeof banner.url === "string") {
+    return { kind: "url", url: banner.url };
+  }
+  throw new RealmExtraError(
+    "INVALID_VALUE",
+    'banner must be { kind: "post"; unitId } or { kind: "url"; url }',
+    400,
+  );
+}
+
+async function updateExtraWithLock(
+  caller: RezicsSessionClaims,
+  realmId: string,
+  mutate: (extra: ExtraJson) => ExtraJson,
+): Promise<ExtraJson> {
+  await authorizeForRealm(caller, realmId);
+
+  return await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT 1 FROM "Realm" WHERE "unitId" = ${realmId}::uuid FOR UPDATE`;
+    const realm = await tx.realm.findUniqueOrThrow({
+      where: { unitId: realmId },
+      select: { extra: true },
+    });
+    const next = mutate((realm.extra ?? {}) as ExtraJson);
+    await tx.realm.update({
+      where: { unitId: realmId },
+      data: { extra: next as Prisma.InputJsonValue },
+    });
+    return next;
+  });
+}
+
 /**
  * Append `unitId` to `Realm.extra[key]` if absent (idempotent). Realm row is
  * locked `FOR UPDATE` for the duration of the transaction to serialize
@@ -97,23 +261,13 @@ export async function appendToList(
 ): Promise<{ unitIds: string[] }> {
   await authorizeForRealm(caller, realmId);
 
-  return await prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT 1 FROM "Realm" WHERE "unitId" = ${realmId}::uuid FOR UPDATE`;
-    const realm = await tx.realm.findUniqueOrThrow({
-      where: { unitId: realmId },
-      select: { extra: true },
-    });
-    const extra = (realm.extra ?? {}) as ExtraJson;
+  let unitIds: string[] = [];
+  await updateExtraWithLock(caller, realmId, (extra) => {
     const current = readList(extra, key);
-    const next = current.includes(unitId) ? current : [...current, unitId];
-    if (next !== current) {
-      await tx.realm.update({
-        where: { unitId: realmId },
-        data: { extra: writeList(extra, key, next) as Prisma.InputJsonValue },
-      });
-    }
-    return { unitIds: next };
+    unitIds = current.includes(unitId) ? current : [...current, unitId];
+    return unitIds === current ? extra : writeList(extra, key, unitIds);
   });
+  return { unitIds };
 }
 
 /**
@@ -128,13 +282,7 @@ export async function reorderList(
 ): Promise<{ unitIds: string[] }> {
   await authorizeForRealm(caller, realmId);
 
-  return await prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT 1 FROM "Realm" WHERE "unitId" = ${realmId}::uuid FOR UPDATE`;
-    const realm = await tx.realm.findUniqueOrThrow({
-      where: { unitId: realmId },
-      select: { extra: true },
-    });
-    const extra = (realm.extra ?? {}) as ExtraJson;
+  await updateExtraWithLock(caller, realmId, (extra) => {
     const current = readList(extra, key);
     const currentSet = new Set(current);
     const incomingSet = new Set(unitIds);
@@ -149,12 +297,9 @@ export async function reorderList(
         400,
       );
     }
-    await tx.realm.update({
-      where: { unitId: realmId },
-      data: { extra: writeList(extra, key, unitIds) as Prisma.InputJsonValue },
-    });
-    return { unitIds };
+    return writeList(extra, key, unitIds);
   });
+  return { unitIds };
 }
 
 /**
@@ -168,23 +313,56 @@ export async function removeFromList(
 ): Promise<{ unitIds: string[] }> {
   await authorizeForRealm(caller, realmId);
 
-  return await prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT 1 FROM "Realm" WHERE "unitId" = ${realmId}::uuid FOR UPDATE`;
-    const realm = await tx.realm.findUniqueOrThrow({
-      where: { unitId: realmId },
-      select: { extra: true },
-    });
-    const extra = (realm.extra ?? {}) as ExtraJson;
+  let unitIds: string[] = [];
+  await updateExtraWithLock(caller, realmId, (extra) => {
     const current = readList(extra, key);
-    const next = current.filter((id) => id !== unitId);
-    if (next.length !== current.length) {
-      await tx.realm.update({
-        where: { unitId: realmId },
-        data: { extra: writeList(extra, key, next) as Prisma.InputJsonValue },
-      });
-    }
-    return { unitIds: next };
+    unitIds = current.filter((id) => id !== unitId);
+    return unitIds.length === current.length ? extra : writeList(extra, key, unitIds);
   });
+  return { unitIds };
+}
+
+export async function setSingleExtraKey(
+  caller: RezicsSessionClaims,
+  realmId: string,
+  key: string,
+  value: unknown,
+): Promise<{ extra: ExtraJson }> {
+  if (!SINGLE_EXTRA_KEYS.has(key)) {
+    throw new RealmExtraError("INVALID_KEY", "Unsupported single extra key", 400);
+  }
+  const validated = await validateSingleExtraValue(key as SingleExtraKey, value);
+  const extra = await updateExtraWithLock(caller, realmId, (current) =>
+    writeValue(current, key, validated),
+  );
+  return { extra };
+}
+
+export async function clearSingleExtraKey(
+  caller: RezicsSessionClaims,
+  realmId: string,
+  key: string,
+): Promise<{ extra: ExtraJson }> {
+  if (!SINGLE_EXTRA_KEYS.has(key) && key !== "tagTree") {
+    throw new RealmExtraError("INVALID_KEY", "Unsupported extra key", 400);
+  }
+  const extra = await updateExtraWithLock(caller, realmId, (current) =>
+    clearValue(current, key),
+  );
+  return { extra };
+}
+
+export async function setTagTreeExtra(
+  caller: RezicsSessionClaims,
+  realmId: string,
+  value: unknown,
+): Promise<{ extra: ExtraJson }> {
+  const tagIds = collectTagTreeIds(value);
+  await validateTagUnitIds(tagIds);
+  const extra = await updateExtraWithLock(caller, realmId, (current) =>
+    writeValue(current, "tagTree", value),
+  );
+  return { extra };
 }
 
 /**

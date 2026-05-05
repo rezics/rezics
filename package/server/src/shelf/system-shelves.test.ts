@@ -1,21 +1,11 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "@/test/prisma-client-mock";
 
-const UnitStatus = {
-  PUBLISHED: "PUBLISHED",
-} as const;
-
-const UnitType = {
-  SHELF: "SHELF",
-} as const;
-
-mock.module("#/prisma/client", () => ({
-  UnitStatus,
-  UnitType,
-  UnitVisibility: {
-    PRIVATE: "PRIVATE",
-  },
-  prisma: {},
-}));
+installPrismaClientMock();
+Object.assign(prismaMock, {});
 
 function makeClient() {
   const userFindUnique = mock(async () => ({ extra: null }));

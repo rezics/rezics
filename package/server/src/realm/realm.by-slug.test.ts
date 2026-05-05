@@ -15,6 +15,7 @@ mock.module("@/middleware", () => ({
   tryResolveIdentity: async () => null,
   isAdminRole: () => false,
   verifyAdminFromDb: async () => true,
+  verifyRootFromDb: async () => true,
 }));
 
 const realmDTOStub = {
@@ -26,6 +27,7 @@ const realmDTOStub = {
 };
 
 mock.module("@/unit/unit.service", () => ({
+  UnitService: class {},
   unitService: {
     getBySlug: async (slug: string) => {
       if (slug === "rezics") return { id: "realm-1", type: "REALM" };
@@ -36,6 +38,47 @@ mock.module("@/unit/unit.service", () => ({
 }));
 
 mock.module("./realm.service", () => ({
+  REALM_TAG_VISIBILITY_THRESHOLD: -100,
+  RealmService: class {
+    async listRealmTagsForUnit(
+      realmUnitId: string,
+      unitId: string,
+      opts?: { includeBelowThreshold?: boolean },
+    ) {
+      const { prisma } = await import("#/prisma/client");
+      return prisma.realmTagUnit.findMany({
+        where: opts?.includeBelowThreshold
+          ? { realmUnitId, unitId }
+          : { realmUnitId, unitId, score: { gt: -100 } },
+        orderBy: [
+          { pinned: "desc" },
+          { position: "asc" },
+          { score: "desc" },
+          { tagUnitId: "asc" },
+        ],
+      });
+    }
+    async listLowScoreRealmTagUnits(
+      threshold: number,
+      limit: number,
+      realmUnitId?: string,
+    ) {
+      const { prisma } = await import("#/prisma/client");
+      return prisma.realmTagUnit.findMany({
+        where: {
+          score: { lte: threshold },
+          ...(realmUnitId ? { realmUnitId } : {}),
+        },
+        orderBy: [
+          { score: "asc" },
+          { realmUnitId: "asc" },
+          { unitId: "asc" },
+          { tagUnitId: "asc" },
+        ],
+        take: Math.max(1, Math.min(limit, 200)),
+      });
+    }
+  },
   realmService: {
     getByUnitId: async () => realmDTOStub,
   },
