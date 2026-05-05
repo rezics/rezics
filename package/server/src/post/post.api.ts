@@ -39,9 +39,13 @@ export const postApi = new Elysia({ prefix: "/post" })
       const identity = await tryResolveIdentity(headers["authorization"]);
       const admin = isAdminRole(identity);
 
-      const { posts, total } = await postService.list(query, {
-        isAdmin: admin,
-      });
+      const { posts, total } = query.realmUnitId
+        ? await postService.byRealm(query.realmUnitId, query, {
+            isAdmin: admin,
+          })
+        : await postService.list(query, {
+            isAdmin: admin,
+          });
       return { posts: posts.map(mapPostToDTO), total };
     },
     {
@@ -61,10 +65,12 @@ export const postApi = new Elysia({ prefix: "/post" })
       const identity = await tryResolveIdentity(headers["authorization"]);
       const admin = isAdminRole(identity);
 
-      const { posts, total } = await postService.list(
-        { ...body, ids: body.ids?.join(",") },
-        { isAdmin: admin },
-      );
+      const query = { ...body, ids: body.ids?.join(",") };
+      const { posts, total } = body.realmUnitId
+        ? await postService.byRealm(body.realmUnitId, query, {
+            isAdmin: admin,
+          })
+        : await postService.list(query, { isAdmin: admin });
       return { posts: posts.map(mapPostToDTO), total };
     },
     {

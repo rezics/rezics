@@ -595,6 +595,18 @@ export default {
       announcement: {
         note: "Ordered list of Unit IDs reserved for special pages like the homepage announcement bar. Not for general forum notifications; reserved for special pages like the homepage announcement bar.",
       },
+      rule: {
+        note: "Single Post Unit ID that holds the realm's rule content shown before joining.",
+      },
+      about: {
+        note: "Single Post Unit ID that holds the realm's about or sidebar content.",
+      },
+      banner: {
+        note: "Banner source for the realm, either a Post Unit reference or a direct image URL.",
+      },
+      tagTree: {
+        note: "Ordered tag picker tree used as a realm posting UX hint; it does not constrain tagging.",
+      },
     },
   },
 
@@ -627,7 +639,8 @@ export default {
       reject_description:
         "Provide a brief reason. The claimer will be notified.",
       reject_reason_label: "Reason",
-      reject_reason_placeholder: "Optional — explain why this claim is rejected",
+      reject_reason_placeholder:
+        "Optional — explain why this claim is rejected",
       withdraw_title: "Withdraw claim",
       withdraw_description:
         "This will remove your pending claim. You can submit again later.",
@@ -873,7 +886,8 @@ export default {
       description: "{{count}} entries are stale.",
       cleanup: "Clean up",
       cleanup_done: "Stale entries cleaned up.",
-      cleanup_partial: "{{failed}} of {{total}} stale entries failed to clean up.",
+      cleanup_partial:
+        "{{failed}} of {{total}} stale entries failed to clean up.",
     },
     admin: {
       title: "Pinboards",
@@ -885,7 +899,7 @@ export default {
       create: "New entry",
       delete_title: "Delete entry",
       delete_description:
-        "This will remove \"{{title}}\" from the pinboard. This action cannot be undone.",
+        'This will remove "{{title}}" from the pinboard. This action cannot be undone.',
       delete_done: "Entry deleted.",
       delete_failed: "Delete failed: {{error}}",
     },

@@ -255,6 +255,18 @@ export default {
       announcement: {
         note: "Geordnete Liste von Unit-IDs, die für besondere Seiten wie die Ankündigungsleiste der Startseite reserviert sind. Nicht für allgemeine Forum-Benachrichtigungen; reserviert für besondere Seiten wie die Ankündigungsleiste der Startseite.",
       },
+      rule: {
+        note: "Single Post Unit ID that holds the realm's rule content shown before joining.",
+      },
+      about: {
+        note: "Single Post Unit ID that holds the realm's about or sidebar content.",
+      },
+      banner: {
+        note: "Banner source for the realm, either a Post Unit reference or a direct image URL.",
+      },
+      tagTree: {
+        note: "Ordered tag picker tree used as a realm posting UX hint; it does not constrain tagging.",
+      },
     },
   },
 

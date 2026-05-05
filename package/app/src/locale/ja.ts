@@ -255,6 +255,18 @@ export default {
       announcement: {
         note: "ホームページのアナウンスバーなど特別なページのために予約された Unit ID の順序付きリスト。一般的なフォーラム通知ではなく、ホームページのアナウンスバーのような特別なページ専用です。",
       },
+      rule: {
+        note: "Single Post Unit ID that holds the realm's rule content shown before joining.",
+      },
+      about: {
+        note: "Single Post Unit ID that holds the realm's about or sidebar content.",
+      },
+      banner: {
+        note: "Banner source for the realm, either a Post Unit reference or a direct image URL.",
+      },
+      tagTree: {
+        note: "Ordered tag picker tree used as a realm posting UX hint; it does not constrain tagging.",
+      },
     },
   },
 
@@ -284,11 +296,13 @@ export default {
       approve_description:
         "この Release をあなたの作品に紐づけ、申請者に通知します。",
       reject_title: "申請を却下",
-      reject_description: "簡単な理由を記入してください。申請者に通知されます。",
+      reject_description:
+        "簡単な理由を記入してください。申請者に通知されます。",
       reject_reason_label: "理由",
       reject_reason_placeholder: "任意 — 却下の理由",
       withdraw_title: "申請を取り下げる",
-      withdraw_description: "現在の申請を取り下げます。後で再送信することもできます。",
+      withdraw_description:
+        "現在の申請を取り下げます。後で再送信することもできます。",
       approve_done: "申請を承認しました。",
       reject_done: "申請を却下しました。",
       withdraw_done: "申請を取り下げました。",

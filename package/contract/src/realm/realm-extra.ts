@@ -1,8 +1,47 @@
 import { t } from "elysia";
 
+export const realmRuleExtraNote =
+  "Single Post Unit ID that holds the realm's rule content shown before joining.";
+export const realmAboutExtraNote =
+  "Single Post Unit ID that holds the realm's about or sidebar content.";
+export const realmBannerExtraNote =
+  "Banner source for the realm, either a Post Unit reference or a direct image URL.";
+export const realmTagTreeExtraNote =
+  "Ordered tag picker tree used as a realm posting UX hint; it does not constrain tagging.";
+
 // ============================================================
 // REALM EXTRA — typed shape of `Realm.extra`
 // ============================================================
+
+export const realmBannerExtraSchema = t.Union([
+  t.Object({
+    kind: t.Literal("post"),
+    unitId: t.String(),
+  }),
+  t.Object({
+    kind: t.Literal("url"),
+    url: t.String(),
+  }),
+]);
+
+export type RealmBannerExtra = (typeof realmBannerExtraSchema)["static"];
+
+export const tagTreeNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
+  (self) =>
+    t.Object({
+      tagId: t.Optional(t.String()),
+      label: t.Optional(t.String()),
+      disabled: t.Optional(t.Boolean()),
+      children: t.Optional(t.Array(self)),
+    }),
+);
+
+export type TagTreeNode = {
+  tagId?: string;
+  label?: string;
+  disabled?: boolean;
+  children?: TagTreeNode[];
+};
 
 /**
  * Typed shape of `Realm.extra`. Two well-known keys carry curated ordered Unit
@@ -34,6 +73,29 @@ export const realmExtraSchema = t.Object(
      * special pages like the homepage announcement bar.
      */
     announcement: t.Optional(t.Array(t.String())),
+
+    /**
+     * Single Post Unit ID that holds the realm's rule content shown before
+     * joining.
+     */
+    rule: t.Optional(t.String()),
+
+    /**
+     * Single Post Unit ID that holds the realm's about or sidebar content.
+     */
+    about: t.Optional(t.String()),
+
+    /**
+     * Banner source for the realm, either a Post Unit reference or a direct
+     * image URL.
+     */
+    banner: t.Optional(realmBannerExtraSchema),
+
+    /**
+     * Ordered tag picker tree used as a realm posting UX hint; it does not
+     * constrain tagging.
+     */
+    tagTree: t.Optional(t.Array(tagTreeNodeSchema)),
   },
   { additionalProperties: true },
 );

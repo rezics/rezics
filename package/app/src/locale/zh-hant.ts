@@ -200,8 +200,7 @@ export default {
           add_button: "新增翻譯",
           delete_button: "刪除此語言翻譯",
           delete_confirm: "確定刪除 {{lang}} 的翻譯嗎？此操作無法復原。",
-          empty_for_lang:
-            "{{lang}} 尚無翻譯——填入欄位並按提交以建立。",
+          empty_for_lang: "{{lang}} 尚無翻譯——填入欄位並按提交以建立。",
           diverge_warning:
             "此翻譯來源於某個 release，儲存本地修改將與來源版本分歧。",
           fields: {
@@ -224,8 +223,7 @@ export default {
             title: "新增翻譯",
             language: "語言",
             source_release: "同步來源（選填）",
-            source_release_help:
-              "若指定，此語言的內容將標記為來自該 release。",
+            source_release_help: "若指定，此語言的內容將標記為來自該 release。",
             no_source: "（不設定來源 release）",
             submit: "新增",
           },
@@ -580,6 +578,18 @@ export default {
       announcement: {
         note: "為首頁公告欄等特殊頁面保留的 Unit ID 有序列表。並非一般論壇通知；僅保留給首頁公告欄等特殊頁面使用。",
       },
+      rule: {
+        note: "Single Post Unit ID that holds the realm's rule content shown before joining.",
+      },
+      about: {
+        note: "Single Post Unit ID that holds the realm's about or sidebar content.",
+      },
+      banner: {
+        note: "Banner source for the realm, either a Post Unit reference or a direct image URL.",
+      },
+      tagTree: {
+        note: "Ordered tag picker tree used as a realm posting UX hint; it does not constrain tagging.",
+      },
     },
   },
 
@@ -606,7 +616,8 @@ export default {
     },
     modal: {
       approve_title: "通過申請",
-      approve_description: "此操作將把此 Release 關聯至你的作品，並通知申請人。",
+      approve_description:
+        "此操作將把此 Release 關聯至你的作品，並通知申請人。",
       reject_title: "拒絕申請",
       reject_description: "請填寫簡短理由，申請人將收到通知。",
       reject_reason_label: "理由",

@@ -97,8 +97,15 @@ export type PostDTO = (typeof postDTOSchema)["static"];
 
 export const postListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
+  /**
+   * @deprecated Realm feeds must use `realmUnitId`; `targetUnitId` is only for
+   * reply/thread targets.
+   */
   targetUnitId: t.Optional(t.String()),
+  /** Realm Unit ID to list posts through the RealmUnit junction. */
   realmUnitId: t.Optional(t.String()),
+  /** Any-of tag filter for realm feed queries. */
+  tagIds: t.Optional(t.Array(t.String())),
   rootPostUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
@@ -106,10 +113,15 @@ export const postListQuerySchema = t.Object({
   mode: t.Optional(t.String()),
   maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
-    t.Object({
-      field: t.Optional(t.String()),
-      order: t.Optional(t.String()),
-    }),
+    t.Union([
+      t.Literal("new"),
+      t.Literal("top"),
+      t.Literal("hot"),
+      t.Object({
+        field: t.Optional(t.String()),
+        order: t.Optional(t.String()),
+      }),
+    ]),
   ),
   start: t.Optional(t.Number()),
   cursor: t.Optional(
@@ -126,8 +138,15 @@ export type PostListQuery = (typeof postListQuerySchema)["static"];
 
 export const postListBodySchema = t.Object({
   ...listPostBodyBase.properties,
+  /**
+   * @deprecated Realm feeds must use `realmUnitId`; `targetUnitId` is only for
+   * reply/thread targets.
+   */
   targetUnitId: t.Optional(t.String()),
+  /** Realm Unit ID to list posts through the RealmUnit junction. */
   realmUnitId: t.Optional(t.String()),
+  /** Any-of tag filter for realm feed queries. */
+  tagIds: t.Optional(t.Array(t.String())),
   rootPostUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
@@ -135,10 +154,15 @@ export const postListBodySchema = t.Object({
   mode: t.Optional(t.String()),
   maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
-    t.Object({
-      field: t.Optional(t.String()),
-      order: t.Optional(t.String()),
-    }),
+    t.Union([
+      t.Literal("new"),
+      t.Literal("top"),
+      t.Literal("hot"),
+      t.Object({
+        field: t.Optional(t.String()),
+        order: t.Optional(t.String()),
+      }),
+    ]),
   ),
   start: t.Optional(t.Number()),
   cursor: t.Optional(
@@ -179,7 +203,13 @@ export type PostResponse = (typeof postResponseSchema)["static"];
 
 export const createPostSchema = t.Object({
   targetUnitId: t.Optional(t.String()),
-  realmUnitId: t.Optional(t.String()),
+  /**
+   * Realm Unit IDs that create RealmUnit junction rows in the same transaction
+   * as the Post.
+   */
+  realmUnitIds: t.Optional(t.Array(t.String())),
+  /** Tag Unit IDs that create UnitTag junction rows in the same transaction. */
+  tagIds: t.Optional(t.Array(t.String())),
   parentPostUnitId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
   body: t.String(),

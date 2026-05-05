@@ -247,6 +247,18 @@ export default {
       announcement: {
         note: "为首页公告栏等特殊页面保留的 Unit ID 有序列表。并非一般论坛通知；仅保留给首页公告栏等特殊页面使用。",
       },
+      rule: {
+        note: "Single Post Unit ID that holds the realm's rule content shown before joining.",
+      },
+      about: {
+        note: "Single Post Unit ID that holds the realm's about or sidebar content.",
+      },
+      banner: {
+        note: "Banner source for the realm, either a Post Unit reference or a direct image URL.",
+      },
+      tagTree: {
+        note: "Ordered tag picker tree used as a realm posting UX hint; it does not constrain tagging.",
+      },
     },
   },
 
@@ -273,7 +285,8 @@ export default {
     },
     modal: {
       approve_title: "通过请求",
-      approve_description: "此操作会将该 Release 关联到你的作品，并通知申请人。",
+      approve_description:
+        "此操作会将该 Release 关联到你的作品，并通知申请人。",
       reject_title: "拒绝请求",
       reject_description: "请填写简短理由，申请人将收到通知。",
       reject_reason_label: "理由",

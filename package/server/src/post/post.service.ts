@@ -15,6 +15,7 @@ import {
 import { patchPostFieldsToMeili, syncPostToMeili } from "@/meili/post/sync";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
+import { AppError } from "../utils/errors";
 
 export class PostService {
   /**
@@ -50,6 +51,18 @@ export class PostService {
       where.unitId = { in: idList };
     }
 
+    if (query.targetUnitId) {
+      const target = await prisma.unit.findUnique({
+        where: { id: query.targetUnitId },
+        select: { type: true },
+      });
+      if (target?.type === UnitType.REALM) {
+        console.warn(
+          `[post.list] Deprecated realm feed via targetUnitId=${query.targetUnitId}; use realmUnitId/byRealm instead.`,
+        );
+      }
+    }
+
     const isThreaded = query.mode === "threaded";
 
     const orderBy: Prisma.PostOrderByWithRelationInput[] = isThreaded
@@ -57,11 +70,101 @@ export class PostService {
       : [
           {
             createdAt:
-              query.sort?.order === "asc" || query.sort?.order === "desc"
+              typeof query.sort === "object" &&
+              (query.sort.order === "asc" || query.sort.order === "desc")
                 ? query.sort.order
                 : "desc",
           },
         ];
+
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        orderBy,
+        skip: skipNum,
+        take: limitNum,
+        include: postInclude,
+      }),
+      prisma.post.count({ where }),
+    ]);
+
+    return { posts: posts as PostWithRelations[], total };
+  }
+
+  /** List posts associated with a realm through the RealmUnit junction. */
+  async byRealm(
+    realmUnitId: string,
+    opts: Omit<PostListQuery, "realmUnitId" | "targetUnitId"> = {},
+    options?: { isAdmin?: boolean },
+  ): Promise<{ posts: PostWithRelations[]; total: number }> {
+    const limitNum = Math.max(1, Math.min(Number(opts.limit ?? 50), 200));
+    const skipNum = opts.start ?? 0;
+    const sort = opts.sort === "top" || opts.sort === "hot" ? opts.sort : "new";
+    const tagIds = this.normalizeTagIds(opts.tagIds);
+
+    const where: Prisma.PostWhereInput = {
+      ...(options?.isAdmin ? {} : { unit: { status: UnitStatus.PUBLISHED } }),
+      unit: {
+        ...(options?.isAdmin ? {} : { status: UnitStatus.PUBLISHED }),
+        inRealms: {
+          some: { realmUnitId },
+        },
+        ...(tagIds.length > 0
+          ? {
+              OR: [
+                {
+                  realmTagAsUnit: {
+                    some: {
+                      realmUnitId,
+                      tagUnitId: { in: tagIds },
+                    },
+                  },
+                },
+                {
+                  AND: [
+                    {
+                      realmTagAsUnit: {
+                        none: { realmUnitId },
+                      },
+                    },
+                    {
+                      unitTags: {
+                        some: { tagUnitId: { in: tagIds } },
+                      },
+                    },
+                  ],
+                },
+              ],
+            }
+          : {}),
+      },
+    };
+
+    if (opts.rootPostUnitId) where.rootPostUnitId = opts.rootPostUnitId;
+    if (opts.parentPostUnitId) where.parentPostUnitId = opts.parentPostUnitId;
+    if (opts.authorUserId) where.authorUserId = opts.authorUserId;
+    if (opts.kind) where.kind = opts.kind;
+
+    if (typeof opts.maxDepth === "number") {
+      where.depth = { lte: opts.maxDepth };
+    }
+
+    const idList = parseIdsCsv(opts.ids);
+    if (idList && idList.length > 0) {
+      where.unitId = { in: idList };
+    }
+
+    if (sort === "hot") {
+      // Phase-1 approximation from design.md Decision 5: rank as top posts
+      // within the last 7 days instead of the full decay formula.
+      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      where.createdAt = { gte: since };
+    }
+
+    const orderBy: Prisma.PostOrderByWithRelationInput[] =
+      sort === "new"
+        ? [{ createdAt: "desc" }]
+        : [{ scoreEntry: { value: "desc" } }, { createdAt: "desc" }];
 
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
@@ -99,13 +202,24 @@ export class PostService {
   ): Promise<PostWithRelations> {
     const {
       targetUnitId,
-      realmUnitId,
+      realmUnitIds,
+      tagIds,
       parentPostUnitId,
       kind,
       body,
       scoreEntryId,
       extra,
     } = input;
+    const legacyRealmUnitId = (
+      input as CreatePostInput & { realmUnitId?: string }
+    ).realmUnitId;
+    const realmIdsToWrite = [
+      ...new Set([
+        ...(realmUnitIds ?? []),
+        ...(legacyRealmUnitId ? [legacyRealmUnitId] : []),
+      ]),
+    ];
+    const tagIdsToWrite = [...new Set(tagIds ?? [])];
 
     if (kind === PostKindEnum.CHAPTER) {
       if (!targetUnitId) {
@@ -162,7 +276,7 @@ export class PostService {
         unitId: unit.id,
         authorUserId,
         targetUnitId: targetUnitId ?? undefined,
-        realmUnitId: realmUnitId ?? undefined,
+        realmUnitId: legacyRealmUnitId ?? undefined,
         body,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,
@@ -177,6 +291,54 @@ export class PostService {
         data: createData,
         include: postInclude,
       });
+
+      if (realmIdsToWrite.length > 0) {
+        const createdAt = new Date();
+        await Promise.all(
+          realmIdsToWrite.map((realmUnitId) =>
+            tx.realmUnit.create({
+              data: {
+                realmUnitId,
+                unitId: created.unitId,
+                createdAt,
+              },
+            }),
+          ),
+        );
+      }
+
+      if (tagIdsToWrite.length > 0) {
+        const validTags = await tx.unit.findMany({
+          where: {
+            id: { in: tagIdsToWrite },
+            type: UnitType.TAG,
+            status: { not: UnitStatus.DELETED },
+          },
+          select: { id: true },
+        });
+        const validTagIds = new Set(validTags.map((tag) => tag.id));
+        const invalidTagIds = tagIdsToWrite.filter(
+          (id) => !validTagIds.has(id),
+        );
+
+        if (invalidTagIds.length > 0) {
+          throw new AppError(
+            400,
+            `Invalid tagIds: ${invalidTagIds.join(", ")}`,
+          );
+        }
+
+        await Promise.all(
+          tagIdsToWrite.map((tagUnitId) =>
+            tx.unitTag.create({
+              data: {
+                unitId: created.unitId,
+                tagUnitId,
+              },
+            }),
+          ),
+        );
+      }
 
       // Top-level post: set rootPostUnitId to own unitId
       if (!parentPostUnitId) {
@@ -339,6 +501,28 @@ export class PostService {
     const paddedSegment = String(nextSegment).padStart(4, "0");
 
     return parentPath ? `${parentPath}.${paddedSegment}` : paddedSegment;
+  }
+
+  private normalizeTagIds(tagIds: unknown): string[] {
+    if (!tagIds) return [];
+    if (Array.isArray(tagIds)) return tagIds.filter(Boolean);
+    if (typeof tagIds !== "string") return [];
+
+    try {
+      const parsed = JSON.parse(tagIds);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(
+          (value): value is string => typeof value === "string",
+        );
+      }
+    } catch {
+      // Fall back to comma-separated query values for hand-authored URLs.
+    }
+
+    return tagIds
+      .split(",")
+      .map((id: string) => id.trim())
+      .filter(Boolean);
   }
 }
 
