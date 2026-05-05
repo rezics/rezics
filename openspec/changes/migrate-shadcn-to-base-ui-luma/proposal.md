@@ -55,7 +55,7 @@ None. This change updates the implementation underlying an existing capability; 
 - **Verification**:
   - `bun -F @rezics/ui storybook` and `bun -F @rezics/ui run build-storybook` both succeed.
   - All five Storybook builds (`@rezics/ui`, `@rezics/admin`, `@rezics/app`, `@rezics/folio`, `@rezics/editor`) plus the root host succeed.
-  - Visual sweep (manual): every shadcn-primitive Storybook story renders; the press-down feedback (`active:translate-y-px`) is visible on Button, Toggle, ToggleGroup, and any other primitive whose Luma source ships it.
+  - Visual sweep (manual): every shadcn-primitive Storybook story renders; the press-down feedback (`active:not-aria-[haspopup]:translate-y-px`) is visible on Button, and Toggle/ToggleGroup match the official `base-luma` registry output.
   - `rg "from \"radix-ui\"|from 'radix-ui'" package/` returns zero matches in source.
   - `rg "asChild" package/{admin,app,folio,editor}/src/` returns zero matches (or only matches inside `// @ts-expect-error` shims documented during migration).
   - `bun run check:convention` passes (R5 SafeLink, R7 plan.draw, R9 token namespace).

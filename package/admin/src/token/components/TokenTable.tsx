@@ -79,41 +79,43 @@ export const TokenTable: FC<TokenTableProps> = ({
                 {t.createdAt ? new Date(t.createdAt).toLocaleString() : "-"}
               </TableCell>
               <TableCell>
-                {t.expiresAt
-                  ? new Date(t.expiresAt).toLocaleString()
-                  : "Never"}
+                {t.expiresAt ? new Date(t.expiresAt).toLocaleString() : "Never"}
               </TableCell>
               <TableCell>{t.revoked ? "Yes" : "No"}</TableCell>
               <TableCell className="text-right">
                 <div className="flex flex-row gap-2 justify-end">
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onEdit(t)}
-                        disabled={t.revoked ?? false}
-                      >
-                        <EditIcon className="size-4" />
-                        Edit
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={(props) => (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => onEdit(t)}
+                          disabled={t.revoked ?? false}
+                          {...props}
+                        >
+                          <EditIcon className="size-4" />
+                          Edit
+                        </Button>
+                      )}
+                    />
                     <TooltipContent>Edit</TooltipContent>
                   </Tooltip>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-error-text"
-                        onClick={() => onRevoke(t.id)}
-                        disabled={
-                          (t.revoked ?? false) || !!revokingIds[t.id]
-                        }
-                      >
-                        Revoke
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={(props) => (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-error-text"
+                          onClick={() => onRevoke(t.id)}
+                          disabled={(t.revoked ?? false) || !!revokingIds[t.id]}
+                          {...props}
+                        >
+                          Revoke
+                        </Button>
+                      )}
+                    />
                     <TooltipContent>Revoke</TooltipContent>
                   </Tooltip>
                 </div>

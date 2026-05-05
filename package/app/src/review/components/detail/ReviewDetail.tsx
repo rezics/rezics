@@ -64,16 +64,19 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
         <div className="flex-1">
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <TextLink
-                  to="/user/$unitId"
-                  params={{ unitId: review.author?.unitId ?? "" }}
-                >
-                  <span className="text-lg font-bold text-text-brand">
-                    {authorName}
-                  </span>
-                </TextLink>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={(props) => (
+                  <TextLink
+                    to="/user/$unitId"
+                    params={{ unitId: review.author?.unitId ?? "" }}
+                    {...props}
+                  >
+                    <span className="text-lg font-bold text-text-brand">
+                      {authorName}
+                    </span>
+                  </TextLink>
+                )}
+              />
               <TooltipContent side="top">
                 {t("review.open_user_interface")}
               </TooltipContent>

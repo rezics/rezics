@@ -122,13 +122,16 @@ export default function BooksPage() {
         cell: (b) => (
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <span
-                  className="text-sm whitespace-nowrap inline-block max-w-[240px] overflow-hidden text-ellipsis"
-                >
-                  {formatCredits(b)}
-                </span>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={(props) => (
+                  <span
+                    className="text-sm whitespace-nowrap inline-block max-w-[240px] overflow-hidden text-ellipsis"
+                    {...props}
+                  >
+                    {formatCredits(b)}
+                  </span>
+                )}
+              />
               <TooltipContent>{formatCredits(b)}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -168,9 +171,15 @@ export default function BooksPage() {
         header: "Actions",
         minWidth: 140,
         cell: (b) => (
-          <Button asChild size="sm" variant="outline">
-            <Link to={`/unit/${b.unitId}`}>Edit Unit</Link>
-          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            render={(props) => (
+              <Link to={`/unit/${b.unitId}`} {...props}>
+                Edit Unit
+              </Link>
+            )}
+          />
         ),
       },
     ];
@@ -250,9 +259,7 @@ export default function BooksPage() {
               </div>
             ) : (isMeiliMode ? meiliQuery.isError : normalQuery.isError) ? (
               <div>
-                <p className="text-sm text-error-text">
-                  Failed to load books.
-                </p>
+                <p className="text-sm text-error-text">Failed to load books.</p>
                 {(isMeiliMode ? meiliQuery.error : normalQuery.error) ? (
                   <p className="text-xs text-error-text">
                     {String(isMeiliMode ? meiliQuery.error : normalQuery.error)}

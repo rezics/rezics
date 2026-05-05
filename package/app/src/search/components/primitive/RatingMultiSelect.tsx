@@ -73,9 +73,7 @@ export const RatingMultiSelect: React.FC<RatingMultiSelectProps> = ({
                 key={rating}
                 variant={selected.has(rating) ? "default" : "outline"}
                 className={
-                  disabled
-                    ? "opacity-50 cursor-not-allowed"
-                    : "cursor-pointer"
+                  disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                 }
                 onClick={() => toggle(rating, disabled)}
               >
@@ -84,9 +82,9 @@ export const RatingMultiSelect: React.FC<RatingMultiSelectProps> = ({
             );
             return hint ? (
               <Tooltip key={rating}>
-                <TooltipTrigger asChild>
-                  <span>{chip}</span>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={(props) => <span {...props}>{chip}</span>}
+                />
                 <TooltipContent side="right">{hint}</TooltipContent>
               </Tooltip>
             ) : (

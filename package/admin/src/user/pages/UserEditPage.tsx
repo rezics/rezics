@@ -70,12 +70,16 @@ export default function UserEditPage() {
       <Card>
         <CardContent>
           <div className="flex flex-row items-center gap-2 mb-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/user">
-                <ArrowBackIcon className="size-4" />
-                Back
-              </Link>
-            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              render={(props) => (
+                <Link to="/user" {...props}>
+                  <ArrowBackIcon className="size-4" />
+                  Back
+                </Link>
+              )}
+            />
             <div className="flex-1" />
           </div>
 

@@ -62,7 +62,7 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   return isTruncated ? (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipTrigger render={content} />
         <TooltipContent side="top">{name}</TooltipContent>
       </Tooltip>
     </TooltipProvider>

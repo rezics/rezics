@@ -57,17 +57,20 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size={size === "lg" ? "default" : "sm"}
-          aria-label="More actions"
-          className="text-text-secondary"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <MoreHorizontal size={sizeToIconPx(size)} strokeWidth={2} />
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={(props) => (
+          <Button
+            variant="ghost"
+            size={size === "lg" ? "default" : "sm"}
+            aria-label="More actions"
+            className="text-text-secondary"
+            onClick={(event) => event.stopPropagation()}
+            {...props}
+          >
+            <MoreHorizontal size={sizeToIconPx(size)} strokeWidth={2} />
+          </Button>
+        )}
+      />
       <DropdownMenuContent
         align="start"
         onClick={(event) => event.stopPropagation()}

@@ -16,9 +16,14 @@ const LoginPrompt = () => {
 
   if (isMobile) {
     return (
-      <Button variant="ghost" asChild>
-        <Link to="/login">{t("auth.login")}</Link>
-      </Button>
+      <Button
+        variant="ghost"
+        render={(props) => (
+          <Link to="/login" {...props}>
+            {t("auth.login")}
+          </Link>
+        )}
+      />
     );
   }
 

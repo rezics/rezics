@@ -7,7 +7,10 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
-import { ThumbsDown as ThumbDownIcon, ThumbsUp as ThumbUpIcon } from "lucide-react";
+import {
+  ThumbsDown as ThumbDownIcon,
+  ThumbsUp as ThumbUpIcon,
+} from "lucide-react";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
@@ -29,23 +32,26 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <TextLink
-            to="/remark/$reviewId"
-            params={{ reviewId: remark.unitId }}
-            className="flex items-center gap-1 rounded p-1 text-inherit no-underline transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {isRecommended ? (
-              <ThumbUpIcon className="h-4 w-4 text-text-brand" />
-            ) : (
-              <ThumbDownIcon className="h-4 w-4 text-text-secondary" />
-            )}
-            <span className="text-xs">
-              {rating?.toFixed(1) ?? "0.0"}/10 · {dateStr}
-            </span>
-          </TextLink>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={(props) => (
+            <TextLink
+              to="/remark/$reviewId"
+              params={{ reviewId: remark.unitId }}
+              className="flex items-center gap-1 rounded p-1 text-inherit no-underline transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+              onClick={(e) => e.stopPropagation()}
+              {...props}
+            >
+              {isRecommended ? (
+                <ThumbUpIcon className="h-4 w-4 text-text-brand" />
+              ) : (
+                <ThumbDownIcon className="h-4 w-4 text-text-secondary" />
+              )}
+              <span className="text-xs">
+                {rating?.toFixed(1) ?? "0.0"}/10 · {dateStr}
+              </span>
+            </TextLink>
+          )}
+        />
         <TooltipContent side="top">阅读完整评测</TooltipContent>
       </Tooltip>
     </TooltipProvider>

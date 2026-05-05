@@ -12,11 +12,15 @@ export function PendingVerificationSection() {
 
   return (
     <div className="flex items-center gap-2">
-      <Button variant="outline" size="sm" asChild>
-        <Link to="/complete-registration">
-          {t("auth.flow.complete_registration_action")}
-        </Link>
-      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        render={(props) => (
+          <Link to="/complete-registration" {...props}>
+            {t("auth.flow.complete_registration_action")}
+          </Link>
+        )}
+      />
       <Button variant="ghost" size="sm" onClick={handleLogout}>
         {t("auth.logout")}
       </Button>

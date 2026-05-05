@@ -1,7 +1,9 @@
+// Path-P exception — see `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` Decision 2.
+// Do not run `shadcn@latest add` against this file.
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
-import { Slot } from "radix-ui"
+import { Slot } from "@radix-ui/react-slot"
 
 import { useIsMobile } from "@/shared/hooks/use-mobile"
 import { cn } from "@/shared/lib/utils"

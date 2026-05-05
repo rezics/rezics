@@ -2,7 +2,6 @@ import {
   Badge,
   Button,
   Popover,
-  PopoverAnchor,
   PopoverContent,
 } from "@rezics/ui/shadcn";
 import { useCanEdit } from "@rezics/api/hooks";
@@ -165,11 +164,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
               state.kind === "single-preview" &&
               state.tagUnitId === tag.tagUnitId
             ) {
-              return (
-                <PopoverAnchor key={tag.tagUnitId} asChild>
-                  {chipNode}
-                </PopoverAnchor>
-              );
+              return <div key={tag.tagUnitId}>{chipNode}</div>;
             }
             return <div key={tag.tagUnitId}>{chipNode}</div>;
           })}
@@ -177,6 +172,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
 
         {popoverOpen && previewTag && (
           <PopoverContent
+            anchor={state.kind === "single-preview" ? state.anchor : undefined}
             side="bottom"
             align="start"
             sideOffset={8}

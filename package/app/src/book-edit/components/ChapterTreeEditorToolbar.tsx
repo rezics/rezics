@@ -67,50 +67,70 @@ export const ChapterTreeEditorToolbar: React.FC<
         </div>
 
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={onExpandAll}>
-              <UnfoldMore className="w-4 h-4" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onExpandAll}
+                {...props}
+              >
+                <UnfoldMore className="w-4 h-4" />
+              </Button>
+            )}
+          />
           <TooltipContent>Expand All</TooltipContent>
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={onCollapseAll}>
-              <UnfoldLess className="w-4 h-4" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onCollapseAll}
+                {...props}
+              >
+                <UnfoldLess className="w-4 h-4" />
+              </Button>
+            )}
+          />
           <TooltipContent>Collapse All</TooltipContent>
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant={isSortingMode ? "secondary" : "ghost"}
-              onClick={onToggleSortingMode}
-              className={isSortingMode ? "text-primary" : undefined}
-            >
-              <SwapVert className="w-4 h-4" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <Button
+                size="icon"
+                variant={isSortingMode ? "secondary" : "ghost"}
+                onClick={onToggleSortingMode}
+                className={isSortingMode ? "text-primary" : undefined}
+                {...props}
+              >
+                <SwapVert className="w-4 h-4" />
+              </Button>
+            )}
+          />
           <TooltipContent>
             {isSortingMode ? "Exit Sorting Mode" : "Sorting Mode"}
           </TooltipContent>
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant={isSelectionMode ? "secondary" : "ghost"}
-              onClick={onToggleSelectionMode}
-              className={isSelectionMode ? "text-primary" : undefined}
-            >
-              <CheckBoxIcon className="w-4 h-4" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <Button
+                size="icon"
+                variant={isSelectionMode ? "secondary" : "ghost"}
+                onClick={onToggleSelectionMode}
+                className={isSelectionMode ? "text-primary" : undefined}
+                {...props}
+              >
+                <CheckBoxIcon className="w-4 h-4" />
+              </Button>
+            )}
+          />
           <TooltipContent>
             {isSelectionMode ? "Exit Selection Mode" : "Select Chapters"}
           </TooltipContent>
@@ -118,42 +138,58 @@ export const ChapterTreeEditorToolbar: React.FC<
 
         {isSelectionMode && (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onBulkSetRating}
-                  disabled={selectedCount === 0}
-                  className="h-8"
-                >
-                  <LabelIcon className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">
-                    Rate {selectedCount > 0 ? `(${selectedCount})` : ""}
-                  </span>
-                </Button>
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={(props) => (
+                <span {...props}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onBulkSetRating}
+                    disabled={selectedCount === 0}
+                    className="h-8"
+                  >
+                    <LabelIcon className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">
+                      Rate {selectedCount > 0 ? `(${selectedCount})` : ""}
+                    </span>
+                  </Button>
+                </span>
+              )}
+            />
             <TooltipContent>Set rating for selected</TooltipContent>
           </Tooltip>
         )}
 
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={onResyncOverrides}>
-              <SyncIcon className="w-4 h-4" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onResyncOverrides}
+                {...props}
+              >
+                <SyncIcon className="w-4 h-4" />
+              </Button>
+            )}
+          />
           <TooltipContent>Resync index overrides</TooltipContent>
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button size="sm" onClick={onNewChapter} className="h-8">
-              <Add className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">New</span>
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <Button
+                size="sm"
+                onClick={onNewChapter}
+                className="h-8"
+                {...props}
+              >
+                <Add className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">New</span>
+              </Button>
+            )}
+          />
           <TooltipContent>Add chapter to last volume</TooltipContent>
         </Tooltip>
       </div>

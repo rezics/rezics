@@ -1,9 +1,21 @@
-import { Badge, Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rezics/ui/shadcn";
+import {
+  Badge,
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/shared/utils/css-util";
 import type { PinboardEntryView } from "../models/types";
-import { Trash2 as DeleteOutlineRoundedIcon, GripVertical as DragIndicatorRoundedIcon, Pencil as EditRoundedIcon, Pin as PushPinRoundedIcon } from "lucide-react";
+import {
+  Trash2 as DeleteOutlineRoundedIcon,
+  GripVertical as DragIndicatorRoundedIcon,
+  Pencil as EditRoundedIcon,
+  Pin as PushPinRoundedIcon,
+} from "lucide-react";
 
 export type PinboardEntryCardVariant = "compact" | "card" | "adminRow";
 
@@ -71,7 +83,10 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
           <div className="flex flex-row items-center gap-2">
             <p className="text-sm font-semibold truncate min-w-0">{title}</p>
             {stale ? (
-              <Badge variant="outline" className="border-warning-fill text-warning-text">
+              <Badge
+                variant="outline"
+                className="border-warning-fill text-warning-text"
+              >
                 {t("pinboard.entry.stale")}
               </Badge>
             ) : null}
@@ -94,32 +109,38 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
           <div className="flex flex-row gap-1">
             {onEdit ? (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => onEdit(entry)}
-                    aria-label={t("common.edit")}
-                  >
-                    <EditRoundedIcon className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={(props) => (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => onEdit(entry)}
+                      aria-label={t("common.edit")}
+                      {...props}
+                    >
+                      <EditRoundedIcon className="h-4 w-4" />
+                    </Button>
+                  )}
+                />
                 <TooltipContent>{t("common.edit")}</TooltipContent>
               </Tooltip>
             ) : null}
             {onDelete ? (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="text-error-text"
-                    onClick={() => onDelete(entry)}
-                    aria-label={t("common.delete")}
-                  >
-                    <DeleteOutlineRoundedIcon className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={(props) => (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="text-error-text"
+                      onClick={() => onDelete(entry)}
+                      aria-label={t("common.delete")}
+                      {...props}
+                    >
+                      <DeleteOutlineRoundedIcon className="h-4 w-4" />
+                    </Button>
+                  )}
+                />
                 <TooltipContent>{t("common.delete")}</TooltipContent>
               </Tooltip>
             ) : null}

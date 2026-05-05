@@ -9,7 +9,7 @@ Defines the rezics frontend's UI component selection policy. The project uses **
 
 The rezics frontend SHALL select UI components from exactly two sources:
 
-1. **shadcn primitives** wrapped under `@rezics/ui/shadcn` (Radix-based, token-aligned via the flat `--colors-*` CSS custom-property cascade emitted by UnoCSS preset-wind4 from `package/ui/src/config/uno-config.ts`) — the default choice when shadcn provides a primitive that fits the case.
+1. **shadcn primitives** wrapped under `@rezics/ui/shadcn` (**base-ui-based**, token-aligned via the flat `--colors-*` CSS custom-property cascade emitted by UnoCSS preset-wind4 from `package/ui/src/config/uno-config.ts`) — the default choice when shadcn provides a primitive that fits the case.
 2. **Custom rezics-owned primitives** under `@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local primitive directories — the alternative when shadcn does not cover the case or when the rezics aesthetic requires a non-Radix-based implementation.
 
 There SHALL NOT be a third source. Third-party React component libraries (Ant Design, Chakra UI, Mantine, or any equivalent) SHALL NOT be introduced as a UI primitive source. Adding a new third-party component library SHALL require an OpenSpec change that updates this requirement.

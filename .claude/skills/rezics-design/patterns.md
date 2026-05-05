@@ -101,7 +101,7 @@ import { Button } from "@rezics/ui/shadcn";
 {/* ghost → no chrome until hover. Tertiary / inline actions. */}
 ```
 
-The shadcn `Button` is token-aligned via `--rezics-*` and already wired to the rezics aesthetic.
+The shadcn `Button` is token-aligned via the flat `--colors-*` cascade and already wired to the rezics aesthetic.
 
 ### ❌ DON'T — hand-rolled brand button
 

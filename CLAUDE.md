@@ -44,7 +44,7 @@ bun run knip             # Detect unused exports/dependencies (root)
 | `@rezics/api`       | Frontend API client (TanStack Query hooks + query options)        |
 | `@rezics/app`       | Main React SPA (Vite + TanStack Router)                           |
 | `@rezics/admin`     | Admin dashboard (Vite + React + shadcn)                           |
-| `@rezics/ui`        | Shared UI components (Radix/shadcn, dnd-kit)                      |
+| `@rezics/ui`        | Shared UI components (Base UI/shadcn, dnd-kit)                    |
 | `@rezics/app-shell` | Shared shell/layout components                                    |
 | `@rezics/search`    | Meilisearch integration                                           |
 
@@ -113,7 +113,7 @@ Color tokens MUST be consumed via the curated short names in `package/ui/src/con
 
 ## UI Component Policy
 
-The component selection policy is **shadcn-or-custom**: shadcn primitives from `@rezics/ui/shadcn` are the default; rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`) cover gaps. Icons use `lucide-react` by default, `@tabler/icons-react` as the named fallback. See `openspec/specs/ui-component-foundation/spec.md` for the authoritative source. Introducing a third-party UI library requires an OpenSpec change updating `ui-component-foundation`.
+The component selection policy is **shadcn-or-custom**: shadcn primitives from `@rezics/ui/shadcn` are the default and are vendored from the `base-luma` registry under Path P, meaning rezics-side modifications are avoided. `carousel.tsx` and `sidebar.tsx` are explicit Path-P exceptions. Rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`) cover gaps. Icons use `lucide-react` by default, `@tabler/icons-react` as the named fallback. See `openspec/specs/ui-component-foundation/spec.md` for the authoritative source. Introducing a third-party UI library requires an OpenSpec change updating `ui-component-foundation`.
 
 ## Change Management
 

@@ -130,15 +130,18 @@ export function UnitPage() {
               <div className="flex flex-col">
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <TextLink
-                        to="/user/$unitId"
-                        params={{ unitId: unit.user.unitId }}
-                        className="text-sm font-medium"
-                      >
-                        {unit.user.name}
-                      </TextLink>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={(props) => (
+                        <TextLink
+                          to="/user/$unitId"
+                          params={{ unitId: unit.user.unitId }}
+                          className="text-sm font-medium"
+                          {...props}
+                        >
+                          {unit.user.name}
+                        </TextLink>
+                      )}
+                    />
                     <TooltipContent>{t("user.open_profile")}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -206,10 +209,7 @@ export function UnitPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {metadataEntries.map(([key, value]) => (
-              <div
-                key={key}
-                className="bg-surface-elevated p-4 rounded-md"
-              >
+              <div key={key} className="bg-surface-elevated p-4 rounded-md">
                 <p className="text-sm font-semibold">{key}</p>
                 <p className="mt-1 whitespace-pre-wrap break-words text-sm text-text-secondary">
                   {formatMetadataValue(value)}

@@ -42,6 +42,7 @@ const RADIUS = {
   lg: "12px",
   xl: "16px",
   "2xl": "24px",
+  "4xl": "32px",
   pill: "9999px",
   full: "50%",
 } as const;
@@ -116,14 +117,25 @@ const STATE_OPACITY = {
 // rows and chrome only. Vendored shadcn primitives stay on their own spacing;
 // opt-out surfaces (hero, reading view, dialog content, marketing) use local
 // spacing utilities.
+//
+// Luma calibration:
+// - breadcrumb-y: keep 4px; Luma breadcrumb has text adjacency, not row padding.
+// - menu-item-y: 8px; Luma menu/context/select items use py-2.
+// - table-row-y: 12px; Luma table cells use p-3.
+// - toolbar-y: keep 8px; rezics-authored chrome, no Luma row equivalent.
+// - formfield-y: 4px; Luma Input uses py-1 inside h-9.
+// - sidebar-item-y: keep 8px; sidebar.tsx is a Path-P exception.
+// - tab-item-y: 4px; Luma horizontal TabsTrigger uses py-1.
+// - command-item-y: 8px; Luma CommandItem uses py-2.
+// - list-item-y: keep 12px; rezics composite, no Luma equivalent.
 const PADDING_BASE = {
-  "table-row-y": "8px",
+  "table-row-y": "12px",
   "list-item-y": "12px",
   "toolbar-y": "8px",
-  "formfield-y": "8px",
+  "formfield-y": "4px",
   "sidebar-item-y": "8px",
-  "tab-item-y": "8px",
-  "menu-item-y": "6px",
+  "tab-item-y": "4px",
+  "menu-item-y": "8px",
   "breadcrumb-y": "4px",
   "command-item-y": "8px",
 } as const;
@@ -297,6 +309,7 @@ export function createUnoConfig() {
         lg: RADIUS.lg,
         xl: RADIUS.xl,
         "2xl": RADIUS["2xl"],
+        "4xl": RADIUS["4xl"],
         pill: RADIUS.pill,
         full: RADIUS.full,
       },

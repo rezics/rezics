@@ -40,28 +40,31 @@ export function FavoriteButton({
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={handleToggle}
-            disabled={toggleMutation.isPending}
-            style={color ? { color } : undefined}
-            aria-label={
-              isFavorited ? "Remove from favorites" : "Add to favorites"
-            }
-          >
-            {isFavorited ? (
-              <Heart
-                size={iconSize(size)}
-                fill="currentColor"
-                color="var(--colors-semantic-error-fill)"
-              />
-            ) : (
-              <Heart size={iconSize(size)} />
-            )}
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger
+          render={(props) => (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={handleToggle}
+              disabled={toggleMutation.isPending}
+              style={color ? { color } : undefined}
+              aria-label={
+                isFavorited ? "Remove from favorites" : "Add to favorites"
+              }
+              {...props}
+            >
+              {isFavorited ? (
+                <Heart
+                  size={iconSize(size)}
+                  fill="currentColor"
+                  color="var(--colors-semantic-error-fill)"
+                />
+              ) : (
+                <Heart size={iconSize(size)} />
+              )}
+            </Button>
+          )}
+        />
         <TooltipContent>
           {isFavorited ? "Remove from favorites" : "Add to favorites"}
         </TooltipContent>

@@ -40,13 +40,15 @@ function defaultChildren(units: Unit[]) {
             <div className="flex items-center gap-2 mb-1">
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to={buildUnitUrl(item)}>
-                      <Badge variant="outline" className="text-[11px]">
-                        {item.type || "UNKNOWN"}
-                      </Badge>
-                    </Link>
-                  </TooltipTrigger>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <Link to={buildUnitUrl(item)} {...props}>
+                        <Badge variant="outline" className="text-[11px]">
+                          {item.type || "UNKNOWN"}
+                        </Badge>
+                      </Link>
+                    )}
+                  />
                   <TooltipContent>打开内容页面</TooltipContent>
                 </Tooltip>
               </TooltipProvider>

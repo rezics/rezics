@@ -47,22 +47,30 @@ export const ShareAction: React.FC<ShareActionProps> = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size={size === "lg" ? "default" : "sm"}
-          onClick={(event) => event.stopPropagation()}
-          className={cn(
-            "min-w-0 gap-1.5 text-text-secondary normal-case hover:text-text-primary",
-            size === "sm" ? "px-2 text-xs" : size === "lg" ? "px-2.5 text-[0.95rem]" : "px-2.5 text-sm",
-            isPill && "rounded-[var(--radius-pill,999px)] bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10",
-            !isPill && "hover:bg-black/10 dark:hover:bg-white/10",
-          )}
-        >
-          <Share2 size={sizeToIconPx(size)} strokeWidth={2} />
-          Share
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={(props) => (
+          <Button
+            variant="ghost"
+            size={size === "lg" ? "default" : "sm"}
+            onClick={(event) => event.stopPropagation()}
+            className={cn(
+              "min-w-0 gap-1.5 text-text-secondary normal-case hover:text-text-primary",
+              size === "sm"
+                ? "px-2 text-xs"
+                : size === "lg"
+                  ? "px-2.5 text-[0.95rem]"
+                  : "px-2.5 text-sm",
+              isPill &&
+                "rounded-[var(--radius-pill,999px)] bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10",
+              !isPill && "hover:bg-black/10 dark:hover:bg-white/10",
+            )}
+            {...props}
+          >
+            <Share2 size={sizeToIconPx(size)} strokeWidth={2} />
+            Share
+          </Button>
+        )}
+      />
       <DropdownMenuContent
         align="start"
         onClick={(event) => event.stopPropagation()}

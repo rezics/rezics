@@ -196,9 +196,7 @@ export default function LowScoreTagsPage() {
         id: "voteCount",
         header: "Votes",
         minWidth: 80,
-        cell: (r) => (
-          <span className="text-sm font-mono">{r.voteCount}</span>
-        ),
+        cell: (r) => <span className="text-sm font-mono">{r.voteCount}</span>,
       },
       {
         id: "pinned",
@@ -214,45 +212,51 @@ export default function LowScoreTagsPage() {
           <TooltipProvider>
             <div className="flex flex-row gap-1">
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="size-8"
-                    onClick={() => handleTogglePin(r)}
-                    disabled={
-                      r.kind === "global"
-                        ? patchUnitTag.isPending
-                        : patchRealmTagUnit.isPending
-                    }
-                    aria-label={r.pinned ? "Unpin" : "Pin"}
-                  >
-                    {r.pinned ? (
-                      <Pin size={18} fill="currentColor" />
-                    ) : (
-                      <Pin size={18} />
-                    )}
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={(props) => (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-8"
+                      onClick={() => handleTogglePin(r)}
+                      disabled={
+                        r.kind === "global"
+                          ? patchUnitTag.isPending
+                          : patchRealmTagUnit.isPending
+                      }
+                      aria-label={r.pinned ? "Unpin" : "Pin"}
+                      {...props}
+                    >
+                      {r.pinned ? (
+                        <Pin size={18} fill="currentColor" />
+                      ) : (
+                        <Pin size={18} />
+                      )}
+                    </Button>
+                  )}
+                />
                 <TooltipContent>{r.pinned ? "Unpin" : "Pin"}</TooltipContent>
               </Tooltip>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="size-8 text-error-text"
-                    onClick={() => handleDelete(r)}
-                    disabled={
-                      r.kind === "global"
-                        ? deleteUnitTag.isPending
-                        : deleteRealmTagUnit.isPending
-                    }
-                    aria-label="Delete"
-                  >
-                    <Trash2 size={18} />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={(props) => (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-8 text-error-text"
+                      onClick={() => handleDelete(r)}
+                      disabled={
+                        r.kind === "global"
+                          ? deleteUnitTag.isPending
+                          : deleteRealmTagUnit.isPending
+                      }
+                      aria-label="Delete"
+                      {...props}
+                    >
+                      <Trash2 size={18} />
+                    </Button>
+                  )}
+                />
                 <TooltipContent>Delete</TooltipContent>
               </Tooltip>
             </div>

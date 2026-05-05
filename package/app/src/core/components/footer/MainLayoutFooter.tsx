@@ -73,46 +73,50 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                   aria-label={t("layout.footer.social.aria")}
                 >
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={t("layout.footer.social.github")}
-                        className="text-text-brand"
-                        asChild
-                      >
-                        <a
-                          href="https://github.com/REZICS"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <GithubIcon className="w-4 h-4" />
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t("layout.footer.social.github")}
+                          className="text-text-brand"
+                          render={
+                            <a
+                              href="https://github.com/REZICS"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <GithubIcon className="w-4 h-4" />
+                            </a>
+                          }
+                        />
+                      }
+                    />
                     <TooltipContent>
                       {t("layout.footer.social.github")}
                     </TooltipContent>
                   </Tooltip>
 
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={t("layout.footer.social.telegram")}
-                        className="text-text-brand"
-                        asChild
-                      >
-                        <a
-                          href="https://t.me/REZICSofficial"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <TelegramIcon className="w-4 h-4" />
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t("layout.footer.social.telegram")}
+                          className="text-text-brand"
+                          render={
+                            <a
+                              href="https://t.me/REZICSofficial"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <TelegramIcon className="w-4 h-4" />
+                            </a>
+                          }
+                        />
+                      }
+                    />
                     <TooltipContent>
                       {t("layout.footer.social.telegram")}
                     </TooltipContent>

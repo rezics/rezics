@@ -73,9 +73,9 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
             );
             return hint ? (
               <Tooltip key={rating}>
-                <TooltipTrigger asChild>
-                  <span>{label}</span>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={(props) => <span {...props}>{label}</span>}
+                />
                 <TooltipContent>{hint}</TooltipContent>
               </Tooltip>
             ) : (

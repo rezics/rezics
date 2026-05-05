@@ -39,19 +39,22 @@ export function MiniAdminActionBar({
     <span>
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t("common.edit")}
-              onClick={() => {
-                navigate({ to: editionURL });
-              }}
-              className="h-7 w-7"
-            >
-              <Edit className={cn("h-4 w-4", textColor)} />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("common.edit")}
+                onClick={() => {
+                  navigate({ to: editionURL });
+                }}
+                className="h-7 w-7"
+                {...props}
+              >
+                <Edit className={cn("h-4 w-4", textColor)} />
+              </Button>
+            )}
+          />
           <TooltipContent side="top">{t("common.edit")}</TooltipContent>
         </Tooltip>
       </TooltipProvider>

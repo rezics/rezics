@@ -54,22 +54,22 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
               variant={active ? "secondary" : "ghost"}
               onClick={() => onSortChange({ type: key })}
             >
-              <span className="text-sm">
-                {t(LABEL_KEYS[key]! as any)}
-              </span>
+              <span className="text-sm">{t(LABEL_KEYS[key]! as any)}</span>
             </Button>
           );
         })}
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost">
-              <span className="text-sm">
-                {t("search.filter.recommendation")}
-              </span>
-              <ArrowDropDownIcon className="ml-1" size={16} />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={(props) => (
+              <Button variant="ghost" {...props}>
+                <span className="text-sm">
+                  {t("search.filter.recommendation")}
+                </span>
+                <ArrowDropDownIcon className="ml-1" size={16} />
+              </Button>
+            )}
+          />
           <DropdownMenuContent>
             <DropdownMenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>
               {t("search.filter.week_votes")}

@@ -1,3 +1,5 @@
+// Path-P exception — see `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` Decision 2.
+// Do not run `shadcn@latest add` against this file.
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";

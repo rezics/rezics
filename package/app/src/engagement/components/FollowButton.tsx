@@ -1,12 +1,24 @@
 import { userMutations, userQueries } from "@rezics/api/user/user";
-import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@rezics/ui/shadcn";
+import {
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 
 import { cn } from "@/shared/utils/css-util";
 
-type ButtonVariant = "default" | "outline" | "ghost" | "destructive" | "secondary" | "link";
+type ButtonVariant =
+  | "default"
+  | "outline"
+  | "ghost"
+  | "destructive"
+  | "secondary"
+  | "link";
 type ButtonSize = "sm" | "default" | "lg" | "icon";
 // Legacy MUI size names accepted at the prop boundary for backwards compatibility
 // with un-migrated call sites; mapped onto shadcn sizes internally.
@@ -137,7 +149,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     <div className="flex items-center gap-2">
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>{button}</TooltipTrigger>
+          <TooltipTrigger render={button} />
           <TooltipContent>{followersText}</TooltipContent>
         </Tooltip>
       </TooltipProvider>

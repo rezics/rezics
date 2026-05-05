@@ -118,9 +118,9 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
       ) : (
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span>{trigger}</span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={(props) => <span {...props}>{trigger}</span>}
+            />
             <TooltipContent>
               {t("book.hero.your_score.sign_in", "登入後可評分")}
             </TooltipContent>

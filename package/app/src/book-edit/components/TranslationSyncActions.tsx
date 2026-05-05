@@ -13,7 +13,10 @@ import type React from "react";
 import { useTranslation } from "react-i18next";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
-import { ExternalLink as LaunchIcon, RefreshCw as SyncIcon } from "lucide-react";
+import {
+  ExternalLink as LaunchIcon,
+  RefreshCw as SyncIcon,
+} from "lucide-react";
 
 export interface TranslationSyncActionsProps {
   /** Source release unit id this language is wired to. Falsy disables actions. */
@@ -77,19 +80,21 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
       <div className="flex flex-row gap-2 flex-wrap">
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleSync}
-                  disabled={!sourceTranslation || isFetching}
-                >
-                  <SyncIcon className="w-4 h-4 mr-2" />
-                  {t("page.book_edit.info.translation.source.sync_button")}
-                </Button>
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={(props) => (
+                <span {...props}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleSync}
+                    disabled={!sourceTranslation || isFetching}
+                  >
+                    <SyncIcon className="w-4 h-4 mr-2" />
+                    {t("page.book_edit.info.translation.source.sync_button")}
+                  </Button>
+                </span>
+              )}
+            />
             <TooltipContent>
               {sourceTranslation
                 ? t("page.book_edit.info.translation.source.sync_tooltip")
@@ -117,4 +122,3 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
     </div>
   );
 };
-

@@ -16,16 +16,19 @@ type Props = {
 export function MoreHorizMenu({ children, className }: Props) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="more"
-          className={`ml-4 mr-2 ${className ?? ""}`}
-        >
-          <MoreHorizIcon />
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={(props) => (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="more"
+            className={`ml-4 mr-2 ${className ?? ""}`}
+            {...props}
+          >
+            <MoreHorizIcon />
+          </Button>
+        )}
+      />
       <DropdownMenuContent align="end">
         <MiscMenuItems />
         {children}

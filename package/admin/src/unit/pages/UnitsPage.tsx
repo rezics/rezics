@@ -102,11 +102,7 @@ export default function UnitsPage() {
         header: "Type",
         minWidth: 120,
         cell: (u) =>
-          u.type ? (
-            <Badge variant="secondary">{u.type}</Badge>
-          ) : (
-            "-"
-          ),
+          u.type ? <Badge variant="secondary">{u.type}</Badge> : "-",
       },
       {
         id: "status",
@@ -148,9 +144,15 @@ export default function UnitsPage() {
         header: "Actions",
         minWidth: 120,
         cell: (u) => (
-          <Button asChild size="sm" variant="outline">
-            <Link to={`/unit/${u.id}`}>Edit</Link>
-          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            render={(props) => (
+              <Link to={`/unit/${u.id}`} {...props}>
+                Edit
+              </Link>
+            )}
+          />
         ),
       },
     ];
@@ -174,12 +176,15 @@ export default function UnitsPage() {
             setQuery(q.trim());
           }}
           toolbarRight={
-            <Button asChild className="whitespace-nowrap">
-              <Link to="/unit/create">
-                <AddIcon className="size-4" />
-                Create
-              </Link>
-            </Button>
+            <Button
+              className="whitespace-nowrap"
+              render={(props) => (
+                <Link to="/unit/create" {...props}>
+                  <AddIcon className="size-4" />
+                  Create
+                </Link>
+              )}
+            />
           }
           isLoading={meiliQuery.isLoading}
           isError={meiliQuery.isError}
@@ -229,12 +234,15 @@ export default function UnitsPage() {
               >
                 <SearchIcon className="size-4" />
               </Button>
-              <Button asChild className="whitespace-nowrap">
-                <Link to="/unit/create">
-                  <AddIcon className="size-4" />
-                  Create
-                </Link>
-              </Button>
+              <Button
+                className="whitespace-nowrap"
+                render={(props) => (
+                  <Link to="/unit/create" {...props}>
+                    <AddIcon className="size-4" />
+                    Create
+                  </Link>
+                )}
+              />
             </div>
 
             <Separator className="my-4" />
@@ -245,9 +253,7 @@ export default function UnitsPage() {
               </div>
             ) : normalQuery.isError ? (
               <div>
-                <p className="text-sm text-error-text">
-                  Failed to load units.
-                </p>
+                <p className="text-sm text-error-text">Failed to load units.</p>
                 {normalQuery.error ? (
                   <p className="text-xs text-error-text">
                     {String(normalQuery.error)}

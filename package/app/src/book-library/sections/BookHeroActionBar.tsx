@@ -108,17 +108,20 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
 
       <div className="flex items-stretch gap-2">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="default"
-              onClick={share.handleOpen}
-              className={`flex-1 ${ghostHeroClass}`}
-            >
-              <IosShareOutlined className="w-4 h-4 mr-2" />
-              {t("common.share", "分享")}
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={(props) => (
+              <Button
+                variant="outline"
+                size="default"
+                onClick={share.handleOpen}
+                className={`flex-1 ${ghostHeroClass}`}
+                {...props}
+              >
+                <IosShareOutlined className="w-4 h-4 mr-2" />
+                {t("common.share", "分享")}
+              </Button>
+            )}
+          />
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onClick={share.handleCopy}>
               {t("common.copy_link", "複製連結")}
@@ -134,21 +137,24 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
         {canEdit && (
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  aria-label={t(
-                    "book.hero.actions.edit_details",
-                    "編輯書籍詳情",
-                  )}
-                  onClick={handleEdit}
-                  className={ghostHeroClass}
-                >
-                  <EditOutlined className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={(props) => (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    aria-label={t(
+                      "book.hero.actions.edit_details",
+                      "編輯書籍詳情",
+                    )}
+                    onClick={handleEdit}
+                    className={ghostHeroClass}
+                    {...props}
+                  >
+                    <EditOutlined className="w-4 h-4" />
+                  </Button>
+                )}
+              />
               <TooltipContent side="top">
                 {t("book.hero.actions.edit_details", "編輯書籍詳情")}
               </TooltipContent>

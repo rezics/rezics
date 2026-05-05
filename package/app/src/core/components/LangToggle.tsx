@@ -30,9 +30,11 @@ export const LangToggle: React.FC<LangToggleProps> = ({ children }) => {
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <div>{children({ onClick: () => setOpen(true) })}</div>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={(props) => (
+          <div {...props}>{children({ onClick: () => setOpen(true) })}</div>
+        )}
+      />
       <DropdownMenuContent
         align="center"
         side="bottom"

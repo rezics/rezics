@@ -49,14 +49,16 @@ function FlagWithTooltip({
       </label>
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span>
-              <InfoOutlined
-                size={16}
-                className="text-muted-foreground cursor-help"
-              />
-            </span>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <span {...props}>
+                <InfoOutlined
+                  size={16}
+                  className="text-muted-foreground cursor-help"
+                />
+              </span>
+            )}
+          />
           <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -182,14 +184,16 @@ export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
       <span>{t("book.flags.licensed")}</span>
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span>
-              <InfoOutlined
-                size={16}
-                className="text-muted-foreground cursor-help"
-              />
-            </span>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <span {...props}>
+                <InfoOutlined
+                  size={16}
+                  className="text-muted-foreground cursor-help"
+                />
+              </span>
+            )}
+          />
           <TooltipContent>
             {tooltipTitle ?? t("book.tooltips.licensed")}
           </TooltipContent>

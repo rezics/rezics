@@ -219,9 +219,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                       </Badge>
                       <p className="text-sm font-medium">反馈 #{item.id}</p>
                       {item.unitId && (
-                        <Badge variant="outline">
-                          单元 {item.unitId}
-                        </Badge>
+                        <Badge variant="outline">单元 {item.unitId}</Badge>
                       )}
                       {item.resolved ? (
                         <Badge className="bg-success-fill text-white inline-flex items-center gap-1">
@@ -240,18 +238,22 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                       <Popover>
                         <TooltipProvider>
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  disabled={resolveMutation.isPending}
-                                  aria-label="标记为已解决"
-                                >
-                                  <CheckCircleOutlineIcon className="h-4 w-4" />
-                                </Button>
-                              </PopoverTrigger>
-                            </TooltipTrigger>
+                            <TooltipTrigger
+                              render={
+                                <PopoverTrigger
+                                  render={
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      disabled={resolveMutation.isPending}
+                                      aria-label="标记为已解决"
+                                    >
+                                      <CheckCircleOutlineIcon className="h-4 w-4" />
+                                    </Button>
+                                  }
+                                />
+                              }
+                            />
                             <TooltipContent>标记为已解决</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -261,9 +263,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                               确定将此项目标记为已解决？
                             </div>
 
-                            <Button
-                              onClick={() => handleResolve(item.id)}
-                            >
+                            <Button onClick={() => handleResolve(item.id)}>
                               确定
                             </Button>
                           </div>

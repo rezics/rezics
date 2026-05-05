@@ -17,7 +17,7 @@ Path P chosen. The reasoning is "stop fighting shadcn." Patching vendored primit
 ## Goals
 
 - Vendored shadcn primitives ship with their out-of-the-box Luma values for spacing, typography references, color tokens. No rezics overlay on the shadcn surface.
-- The press-down feedback (`active:not-aria-[haspopup]:translate-y-px`) is visible on every applicable primitive (Button, Toggle, ToggleGroup, etc.) without rezics-side edits.
+- The press-down feedback (`active:not-aria-[haspopup]:translate-y-px`) is visible on Button without rezics-side edits. Toggle and ToggleGroup follow the official `base-luma` registry output, which does not currently ship press-down translation.
 - `@base-ui/react` is the headless primitive base. `radix-ui` is removed.
 - `pnpm dlx shadcn@latest add <primitive>` (or the bun-equivalent CLI invocation) succeeds against the configured `base-luma` registry without manual surgery.
 - The rezics density vocabulary (the nine `--padding-*` tokens from `complete-rezics-design-storybook`) is preserved. Its values are recalibrated against Luma's intrinsic padding so rezics-authored composites placed adjacent to vendored shadcn primitives render at a coherent rhythm.
@@ -81,9 +81,9 @@ The codemod runs once during Phase 2; its output is reviewed before commit. The 
 
 ### Decision 4: `RADIUS` gains `4xl: 32px`; the eight existing entries stay
 
-Luma uses larger radii than `new-york`. Inspecting Luma's source confirms a `--radius-4xl: 32px` style binding for sheet/dialog corners, hero panels, and large card surfaces. The rezics RADIUS scale today stops at `2xl: 24px`, so vendored Luma primitives binding to `--radius-4xl` would resolve to `unset` and render with the browser default.
+Luma uses larger radii than `new-york`. Inspecting Luma's source confirms `rounded-4xl` utility usage for Button, Card, Dialog, Drawer, Command, InputGroup, and other large surfaces. The rezics RADIUS scale today stops at `2xl: 24px`, so vendored Luma primitives using `rounded-4xl` need an UnoCSS `theme.borderRadius["4xl"]` entry to resolve.
 
-Adding a single entry — `4xl: 32px` — wires the scale through. The intermediate `3xl` is intentionally **not** added: there is no Luma primitive that binds to `3xl`, and adding scale entries with no consumer creates a "what's this for?" question on every future review.
+Adding a single entry — `4xl: 32px` — wires the scale through. The intermediate `3xl` is intentionally **not** added: there is no Luma primitive in this migration that uses `rounded-3xl` as a missing scale gap we need to introduce, and adding scale entries with no explicit migration need creates a "what's this for?" question on every future review.
 
 If a future Luma primitive (or rezics-authored composite) needs `3xl`, an OpenSpec change adds it then.
 
@@ -130,7 +130,7 @@ The phases sequence the highest-leverage work first (dependency swap unblocks ev
 2. **Phase 2** — Codemod authoring (`tool/migrations/asChild-to-render.ts`) + dry-run audit (`rg "asChild" package/`). Run codemod; review output; commit transformed callsites.
 3. **Phase 3** — Re-vendor 28 of 30 shadcn primitives via the shadcn CLI (excluding `carousel.tsx` and `sidebar.tsx`). Each primitive gets its own commit so reverts are surgical. After each commit, run the storybook story for that primitive (existing stories from `complete-rezics-design-storybook` Phase 5) and confirm it renders.
 4. **Phase 4** — Token recalibration: extend `RADIUS` with `4xl: 32px`; audit and adjust the nine `--padding-*` values per Decision-5.
-5. **Phase 5** — Verification: storybook builds, type-check, contrast, convention. Visual sweep on every primitive story. Confirm press-down feedback visible on Button + Toggle + ToggleGroup.
+5. **Phase 5** — Verification: storybook builds, type-check, contrast, convention. Visual sweep on every primitive story. Confirm press-down feedback visible on Button and confirm Toggle + ToggleGroup match the official `base-luma` registry output.
 6. **Phase 6** — Spec + skill updates: `ui-component-foundation/spec.md` Requirement-1 wording flip; `CLAUDE.md` "UI Component Policy" section update; `.claude/skills/rezics-design/` references updated.
 
 ## Trade-offs

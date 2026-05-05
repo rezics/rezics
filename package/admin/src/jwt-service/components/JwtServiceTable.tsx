@@ -48,34 +48,33 @@ export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
                 <TableCell>{service.audience}</TableCell>
                 <TableCell>
                   {service.isLocalIssuer ? (
-                    <Badge className="bg-info-fill text-white">
-                      Local
-                    </Badge>
+                    <Badge className="bg-info-fill text-white">Local</Badge>
                   ) : (
                     <Badge variant="outline">Remote</Badge>
                   )}
                 </TableCell>
                 <TableCell>
                   {service.isActive ? (
-                    <Badge className="bg-success-fill text-white">
-                      Active
-                    </Badge>
+                    <Badge className="bg-success-fill text-white">Active</Badge>
                   ) : (
                     <Badge variant="secondary">Inactive</Badge>
                   )}
                 </TableCell>
                 <TableCell className="text-right">
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => onEdit(service)}
-                        aria-label="Edit"
-                      >
-                        <EditOutlinedIcon className="size-4" />
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={(props) => (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => onEdit(service)}
+                          aria-label="Edit"
+                          {...props}
+                        >
+                          <EditOutlinedIcon className="size-4" />
+                        </Button>
+                      )}
+                    />
                     <TooltipContent>Edit</TooltipContent>
                   </Tooltip>
                 </TableCell>

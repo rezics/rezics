@@ -21,7 +21,11 @@ import { useTranslation } from "react-i18next";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
 import { bookEditChapterRoute, bookEditLayoutRoute } from "@/router";
-import { Network as AccountTree, Ellipsis as MoreHoriz, Settings } from "lucide-react";
+import {
+  Network as AccountTree,
+  Ellipsis as MoreHoriz,
+  Settings,
+} from "lucide-react";
 
 /**
  * TODO Chapter List 换成 Tree 模式之后，编辑还没有校验
@@ -159,19 +163,19 @@ export const BookEditChapterPage: React.FC = () => {
           id="chapter-title"
           placeholder={t("placeholders.chapter_title", "章节标题")}
           className={`flex-1 text-xl font-semibold border-0 border-b shadow-none rounded-none ${
-            !title.trim()
-              ? "border-border-error"
-              : "border-border-defined"
+            !title.trim() ? "border-border-error" : "border-border-defined"
           }`}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" size="icon" variant="ghost">
-              <MoreHoriz className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={(props) => (
+              <Button type="button" size="icon" variant="ghost" {...props}>
+                <MoreHoriz className="w-4 h-4" />
+              </Button>
+            )}
+          />
           <DropdownMenuContent>
             <DropdownMenuItem
               onClick={() => {

@@ -123,9 +123,15 @@ export default function UserListPage() {
         header: "Actions",
         minWidth: 120,
         cell: (u) => (
-          <Button asChild size="sm" variant="outline">
-            <Link to={`/user/${u.unitId}`}>Edit</Link>
-          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            render={(props) => (
+              <Link to={`/user/${u.unitId}`} {...props}>
+                Edit
+              </Link>
+            )}
+          />
         ),
       },
     ];
@@ -173,12 +179,15 @@ export default function UserListPage() {
             >
               <SearchIcon className="size-4" />
             </Button>
-            <Button asChild className="whitespace-nowrap">
-              <Link to="/user/create">
-                <AddIcon className="size-4" />
-                Create
-              </Link>
-            </Button>
+            <Button
+              className="whitespace-nowrap"
+              render={(props) => (
+                <Link to="/user/create" {...props}>
+                  <AddIcon className="size-4" />
+                  Create
+                </Link>
+              )}
+            />
           </div>
 
           <Separator className="my-4" />
@@ -188,9 +197,7 @@ export default function UserListPage() {
               <Spinner />
             </div>
           ) : (isMeiliMode ? meiliQuery.isError : listQuery.isError) ? (
-            <p className="text-sm text-error-text">
-              Failed to load users.
-            </p>
+            <p className="text-sm text-error-text">Failed to load users.</p>
           ) : (
             <PaginatedTable<UserDTO>
               columns={columns}

@@ -11,7 +11,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { Palette as PaletteIcon, RefreshCw as RefreshIcon, X as CloseIcon } from "lucide-react";
+import {
+  Palette as PaletteIcon,
+  RefreshCw as RefreshIcon,
+  X as CloseIcon,
+} from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useAppStore } from "@/app/states/appStore";
@@ -35,7 +39,10 @@ function applyAccentColor(color: string) {
     "--rezics-sys-color-brand-fill",
     color,
   );
-  document.documentElement.style.setProperty("--rezics-sys-color-primary", color);
+  document.documentElement.style.setProperty(
+    "--rezics-sys-color-primary",
+    color,
+  );
 }
 
 interface ThemeCustomizerProps {
@@ -131,19 +138,22 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
               {PRESET_COLORS.map((color) => (
                 <TooltipProvider key={color}>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={() => handleColorSelect(color)}
-                        className={
-                          selectedColor === color
-                            ? "h-10 w-10 rounded-md border-[3px] border-brand-fill cursor-pointer transition-transform hover:scale-110"
-                            : "h-10 w-10 rounded-md border border-border-whisper cursor-pointer transition-transform hover:scale-110"
-                        }
-                        style={{ backgroundColor: color }}
-                        aria-label={color}
-                      />
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={(props) => (
+                        <button
+                          type="button"
+                          onClick={() => handleColorSelect(color)}
+                          className={
+                            selectedColor === color
+                              ? "h-10 w-10 rounded-md border-[3px] border-brand-fill cursor-pointer transition-transform hover:scale-110"
+                              : "h-10 w-10 rounded-md border border-border-whisper cursor-pointer transition-transform hover:scale-110"
+                          }
+                          style={{ backgroundColor: color }}
+                          aria-label={color}
+                          {...props}
+                        />
+                      )}
+                    />
                     <TooltipContent>{color}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -197,17 +207,20 @@ export const ThemeQuickToggle: React.FC = () => {
     <>
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setOpen(true)}
-              className="!text-white"
-              aria-label="主题自定义"
-            >
-              <PaletteIcon className="h-5 w-5" />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={(props) => (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setOpen(true)}
+                className="!text-white"
+                aria-label="主题自定义"
+                {...props}
+              >
+                <PaletteIcon className="h-5 w-5" />
+              </Button>
+            )}
+          />
           <TooltipContent>主题自定义</TooltipContent>
         </Tooltip>
       </TooltipProvider>
