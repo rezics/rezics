@@ -12,7 +12,7 @@
 - [x] 2.3 Normalize proxied `Set-Cookie` headers so auth session cookies use public `Path=/auth`.
 - [x] 2.4 Normalize proxied redirect `Location` headers so browser-visible redirects use main public URLs.
 - [x] 2.5 Block or omit public exposure of `GET /auth/token` and any equivalent auth session JWT acquisition path.
-- [ ] 2.6 Add tests for proxy path mapping, cookie path rewriting, redirect rewriting, and blocked token exposure.
+- [x] 2.6 Add tests for proxy path mapping, cookie path rewriting, redirect rewriting, and blocked token exposure.
 
 ## 3. Session Refresh and Cookie Transport
 
@@ -23,7 +23,7 @@
 - [x] 3.5 Stop returning browser-storable main session JWTs from normal web refresh/exchange flows.
 - [x] 3.6 Add CSRF and origin checks for `/auth/session/refresh`, sign-out, and other cookie-authenticated mutating auth routes.
 - [x] 3.7 Ensure sign-out clears the main `rezics-session-token` cookie and delegates auth session invalidation to auth.
-- [ ] 3.8 Add targeted tests for valid refresh, invalid auth session, missing main user/readiness failure, CSRF rejection, and sign-out cookie clearing.
+- [x] 3.8 Add targeted tests for valid refresh, invalid auth session, missing main user/readiness failure, CSRF rejection, and sign-out cookie clearing.
 
 ## 4. Auth OAuth, JWKS, and Metadata
 
