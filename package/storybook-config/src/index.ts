@@ -106,18 +106,19 @@ export interface BaseStorybookViteOptions {
    * When false, `unocss` need not be installed in the consuming package.
    */
   uno?: boolean;
+  unoConfigPath?: string;
 }
 
 export async function baseStorybookViteConfig(
   options: BaseStorybookViteOptions = {},
   overrides: UserConfig = {},
 ): Promise<UserConfig> {
-  const { uno = true } = options;
+  const { uno = true, unoConfigPath } = options;
 
   const plugins: PluginOption[] = [corsLegacyEndpointsPlugin()];
   if (uno) {
     const { default: UnoCSS } = await import("unocss/vite");
-    plugins.push(UnoCSS());
+    plugins.push(UnoCSS(unoConfigPath));
   }
   plugins.push(...react());
 
