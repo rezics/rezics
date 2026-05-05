@@ -16,14 +16,26 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const defaultSlides = ["1", "2", "3", "4", "5"];
+const coverSlides = [
+  "Cover 1",
+  "Cover 2",
+  "Cover 3",
+  "Cover 4",
+  "Cover 5",
+  "Cover 6",
+  "Cover 7",
+  "Cover 8",
+];
+
 export const Default: Story = {
   render: () => (
     <Carousel className="w-full max-w-md">
       <CarouselContent>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <CarouselItem key={i}>
+        {defaultSlides.map((slide) => (
+          <CarouselItem key={slide}>
             <div className="flex aspect-video items-center justify-center rounded-md bg-surface-subtle text-3xl font-serif text-text-primary">
-              {i + 1}
+              {slide}
             </div>
           </CarouselItem>
         ))}
@@ -38,10 +50,10 @@ export const MultiPerView: Story = {
   render: () => (
     <Carousel className="w-full max-w-2xl" opts={{ align: "start" }}>
       <CarouselContent>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <CarouselItem key={i} className="md:basis-1/3">
+        {coverSlides.map((slide) => (
+          <CarouselItem key={slide} className="md:basis-1/3">
             <div className="flex aspect-square items-center justify-center rounded-md bg-surface-subtle">
-              Cover {i + 1}
+              {slide}
             </div>
           </CarouselItem>
         ))}

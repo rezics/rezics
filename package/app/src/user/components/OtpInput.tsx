@@ -22,6 +22,11 @@ export const OtpInput: FC<OtpInputProps> = ({
 }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const digits = Array.from({ length }, (_, i) => value[i] ?? "");
+  const slots = Array.from({ length }, (_, i) => ({
+    key: `otp-slot-${i}`,
+    index: i,
+    digit: digits[i] ?? "",
+  }));
 
   const focusInput = useCallback(
     (index: number) => {
@@ -83,19 +88,19 @@ export const OtpInput: FC<OtpInputProps> = ({
 
   return (
     <div className="flex gap-2 justify-center">
-      {digits.map((digit, i) => (
+      {slots.map(({ key, index, digit }) => (
         <Input
-          key={i}
+          key={key}
           ref={(el: HTMLInputElement | null) => {
-            inputRefs.current[i] = el;
+            inputRefs.current[index] = el;
           }}
           value={digit || ""}
           onChange={(e) => {
             const char = e.target.value.slice(-1);
-            handleChange(i, char);
+            handleChange(index, char);
           }}
           onKeyDown={(e) =>
-            handleKeyDown(i, e as KeyboardEvent<HTMLInputElement>)
+            handleKeyDown(index, e as KeyboardEvent<HTMLInputElement>)
           }
           onPaste={handlePaste}
           onFocus={(e) => e.target.select()}

@@ -33,6 +33,10 @@ function nodeLabel(node: TagTreeNode) {
   return node.label?.trim() || node.tagId?.slice(0, 8) || "Untitled";
 }
 
+function nodeKey(node: TagTreeNode) {
+  return node.tagId ?? node.label ?? "untitled-node";
+}
+
 function unitLabel(unit: UnitDTO) {
   const tr = getTranslation(
     unit.translations,
@@ -140,7 +144,7 @@ function TagTreeEditor({
       <div className="flex flex-col gap-2">
         {nodes.map((node, index) => (
           <div
-            key={`${node.tagId ?? node.label ?? "node"}-${index}`}
+            key={nodeKey(node)}
             className="flex flex-wrap items-center gap-2"
           >
             <Input

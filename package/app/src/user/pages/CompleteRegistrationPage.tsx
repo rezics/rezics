@@ -49,6 +49,7 @@ function deriveSlugFromName(name: string): string {
 // --- Vertical Stepper primitives (shadcn replacement for MUI Stepper) ---
 
 type StepDefinition = {
+  id: string;
   label: ReactNode;
   optional?: ReactNode;
   completed: boolean;
@@ -61,7 +62,7 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
     {steps.map((step, idx) => {
       const isLast = idx === steps.length - 1;
       return (
-        <li key={idx} className="relative flex gap-3">
+        <li key={step.id} className="relative flex gap-3">
           {/* connector line */}
           {!isLast && (
             <span
@@ -516,6 +517,7 @@ export const CompleteRegistrationPage: FC = () => {
 
   const steps: StepDefinition[] = [
     {
+      id: "identity",
       label: "Choose your identity",
       optional:
         identitySet && auth.user?.slug ? auth.user.slug : undefined,
@@ -524,6 +526,7 @@ export const CompleteRegistrationPage: FC = () => {
       content: <IdentityStep onComplete={handleIdentityComplete} />,
     },
     {
+      id: "email",
       label: "Verify your email",
       optional: emailVerified
         ? `${email}${trustedProvider ? ` (verified by ${trustedProvider})` : ""}`

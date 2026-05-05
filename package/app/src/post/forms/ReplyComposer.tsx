@@ -73,6 +73,10 @@ function getTagLabel(tagId: string, label?: string) {
   return label?.trim() || tagId.slice(0, 8);
 }
 
+function tagTreeNodeKey(node: TagTreeNode, depth: number) {
+  return `${depth}:${node.tagId ?? node.label ?? "node"}`;
+}
+
 function flattenTagTree(nodes: TagTreeNode[] | undefined): TagOption[] {
   const options: TagOption[] = [];
 
@@ -152,8 +156,8 @@ function RealmPostTagPicker({
   }
 
   const renderNode = (node: TagTreeNode, depth = 0): React.ReactNode => {
-    const children = node.children?.map((child, index) => (
-      <div key={`${child.tagId ?? child.label ?? "node"}-${depth}-${index}`}>
+    const children = node.children?.map((child) => (
+      <div key={tagTreeNodeKey(child, depth + 1)}>
         {renderNode(child, depth + 1)}
       </div>
     ));
@@ -210,11 +214,8 @@ function RealmPostTagPicker({
 
       {tagTree && tagTree.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          {tagTree.map((node, index) => (
-            <div
-              key={`${node.tagId ?? node.label ?? "node"}-${index}`}
-              className="contents"
-            >
+          {tagTree.map((node) => (
+            <div key={tagTreeNodeKey(node, 0)} className="contents">
               {renderNode(node)}
             </div>
           ))}
