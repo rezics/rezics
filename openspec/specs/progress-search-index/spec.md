@@ -62,11 +62,11 @@ The system SHALL expose `GET /units/:unitId/progress-stats` returning aggregate 
 
 #### Scenario: Unit with no progress rows
 - **WHEN** a client requests stats for a unit no user has progressed against
-- **THEN** the response is `{ viewerCount: 0, statusCounts: { VIEWED: 0, READING: 0, COMPLETED: 0, DROPPED: 0 }, bucketCounts: [0,0,0,0,0,0,0,0,0,0] }`
+- **THEN** the response is `{ viewerCount: 0, statusCounts: { BACKLOG: 0, ACTIVE: 0, PAUSED: 0, COMPLETED: 0, DROPPED: 0 }, bucketCounts: [0,0,0,0,0,0,0,0,0,0] }`
 
 #### Scenario: Unit with mixed progress rows
-- **WHEN** a unit has, in source: 3 users with `status = READING` at progress values `{0.05, 0.27, 0.84}` and 1 user with `status = COMPLETED` at `1.0`
-- **THEN** the response reports `viewerCount: 4`, `statusCounts.READING: 3`, `statusCounts.COMPLETED: 1`, `bucketCounts[0]: 1`, `bucketCounts[2]: 1`, `bucketCounts[8]: 1`, `bucketCounts[9]: 1`, and zeros elsewhere (subject to the approximate-counts allowance below)
+- **WHEN** a unit has, in source: 3 users with `status = ACTIVE` at progress values `{0.05, 0.27, 0.84}` and 1 user with `status = COMPLETED` at `1.0`
+- **THEN** the response reports `viewerCount: 4`, `statusCounts.ACTIVE: 3`, `statusCounts.COMPLETED: 1`, `bucketCounts[0]: 1`, `bucketCounts[2]: 1`, `bucketCounts[8]: 1`, `bucketCounts[9]: 1`, and zeros elsewhere (subject to the approximate-counts allowance below)
 
 #### Scenario: Stats are allowed to be approximate
 - **WHEN** the stats response is computed during a period of high write activity for the unit

@@ -1,11 +1,20 @@
+import { useUnitProgress, useUpdateUnitProgress } from "@rezics/api";
 import { useCanEdit } from "@rezics/api/hooks";
 import type { BookDTO } from "@rezics/contract";
 import {
   Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  Input,
+  Label,
   ToggleGroup,
   ToggleGroupItem,
   Tooltip,
@@ -17,6 +26,7 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   BookmarkPlus as BookmarkAddOutlined,
   CircleCheck as CheckCircleOutline,
+  Pause as PauseOutlined,
   Pencil as EditOutlined,
   Share as IosShareOutlined,
 } from "lucide-react";
@@ -30,10 +40,22 @@ interface BookHeroActionBarProps {
   shareTitle?: string;
 }
 
-// MOCK: read-status state lives in component memory. Swap for the real
-// shelf-membership hook once we expose `currently-reading / read / want-to-read`
-// status from the backend.
-type ReadStatus = "want" | "reading" | "read" | null;
+type ReadStatus = "want" | "reading" | "paused" | "read" | null;
+
+function mapProgressStatus(status: string | undefined): ReadStatus {
+  switch (status) {
+    case "BACKLOG":
+      return "want";
+    case "ACTIVE":
+      return "reading";
+    case "PAUSED":
+      return "paused";
+    case "COMPLETED":
+      return "read";
+    default:
+      return null;
+  }
+}
 
 // Ghost button styling for hero overlay surfaces (white text on dark backdrop).
 const ghostHeroClass =
@@ -48,7 +70,11 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   const canEdit = useCanEdit({ resource: "book", ownerUnit: bookInfo });
   const bookId = bookInfo?.unitId ?? "";
 
-  const [readStatus, setReadStatus] = useState<ReadStatus>(null);
+  const progress = useUnitProgress(bookId);
+  const updateProgress = useUpdateUnitProgress(bookId);
+  const readStatus = mapProgressStatus(progress.data?.status);
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+  const [completedCountInput, setCompletedCountInput] = useState("1");
   const share = useShareMenu({
     href: bookId ? `/book/${bookId}` : "/",
     title: shareTitle,
@@ -61,6 +87,35 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
 
   const handleEdit = () => {
     if (bookId) navigate({ to: "/book/$bookId/edit", params: { bookId } });
+  };
+
+  const handleReadStatusChange = (value: string) => {
+    if (!bookId || !value) return;
+
+    if (value === "read") {
+      setCompletedCountInput(String((progress.data?.completedCount ?? 0) + 1));
+      setCompleteDialogOpen(true);
+      return;
+    }
+
+    const status =
+      value === "want" ? "BACKLOG" : value === "paused" ? "PAUSED" : "ACTIVE";
+    updateProgress.mutate({ status });
+  };
+
+  const confirmCompleted = async () => {
+    if (!bookId) return;
+
+    const completedCount = Math.max(
+      0,
+      Number.parseInt(completedCountInput, 10) || 0,
+    );
+    await updateProgress.mutateAsync({
+      status: "COMPLETED",
+      progress: 1,
+      completedCount,
+    });
+    setCompleteDialogOpen(false);
   };
 
   return (
@@ -82,8 +137,8 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
         type="single"
         size="sm"
         value={readStatus ?? ""}
-        onValueChange={(v) => setReadStatus((v as ReadStatus) || null)}
-        className="w-full grid grid-cols-3"
+        onValueChange={handleReadStatusChange}
+        className="w-full grid grid-cols-2 sm:grid-cols-4"
       >
         <ToggleGroupItem
           value="want"
@@ -96,6 +151,13 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
           className="rounded-full text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
         >
           {t("book.hero.actions.reading", "在讀")}
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="paused"
+          className="rounded-full text-white/80 border border-white/20 hover:bg-white/10 data-[state=on]:bg-white/12 data-[state=on]:text-white data-[state=on]:border-white/40 text-xs py-1"
+        >
+          <PauseOutlined className="w-3.5 h-3.5 mr-1" />
+          {t("book.hero.actions.paused", "擱置")}
         </ToggleGroupItem>
         <ToggleGroupItem
           value="read"
@@ -163,6 +225,56 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
           </TooltipProvider>
         )}
       </div>
+
+      <Dialog
+        open={completeDialogOpen}
+        onOpenChange={(open) => !open && setCompleteDialogOpen(false)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t("book.hero.complete_dialog.title", "標記為已完成")}
+            </DialogTitle>
+            <DialogDescription>
+              {t(
+                "book.hero.complete_dialog.description",
+                "確認後會將進度設為 100%，並更新這部作品的完成次數。",
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-2">
+            <Label htmlFor="book-completed-count">
+              {t("book.hero.complete_dialog.completed_count", "完成次數")}
+            </Label>
+            <Input
+              id="book-completed-count"
+              type="number"
+              min={0}
+              inputMode="numeric"
+              value={completedCountInput}
+              onChange={(event) => setCompletedCountInput(event.target.value)}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setCompleteDialogOpen(false)}
+            >
+              {t("common.cancel", "取消")}
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmCompleted}
+              disabled={updateProgress.isPending}
+            >
+              {t("common.confirm", "確認")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -7,6 +7,7 @@ export function mapProgressToDTO(row: UserUnitProgress): UnitProgressRowDTO {
     unitId: row.unitId,
     progress: row.progress,
     status: row.status,
+    completedCount: row.completedCount,
     totalTimeMs: Number(row.totalTimeMs),
     lastPosition: row.lastPosition,
     firstSeenAt: row.firstSeenAt.toISOString(),

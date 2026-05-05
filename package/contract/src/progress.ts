@@ -19,6 +19,7 @@ export type SystemShelfKindKey = (typeof systemShelfKindKeySchema)["static"];
 export const userUnitProgressStatusValues = [
   "BACKLOG",
   "ACTIVE",
+  "PAUSED",
   "COMPLETED",
   "DROPPED",
 ] as const;
@@ -26,6 +27,7 @@ export const userUnitProgressStatusValues = [
 export const userUnitProgressStatusSchema = t.Union([
   t.Literal("BACKLOG"),
   t.Literal("ACTIVE"),
+  t.Literal("PAUSED"),
   t.Literal("COMPLETED"),
   t.Literal("DROPPED"),
 ]);
@@ -52,6 +54,7 @@ export type UserExtra = (typeof userExtraSchema)["static"];
 export const unitProgressUpsertBodySchema = t.Object({
   progress: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
   status: t.Optional(userUnitProgressStatusSchema),
+  completedCount: t.Optional(t.Integer({ minimum: 0 })),
   lastPosition: t.Optional(t.Nullable(t.String())),
   addTimeMs: t.Optional(t.Integer({ minimum: 0 })),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -71,6 +74,7 @@ export const unitProgressRowDTOSchema = t.Object({
   unitId: t.String(),
   progress: t.Number({ minimum: 0, maximum: 1 }),
   status: userUnitProgressStatusSchema,
+  completedCount: t.Number({ minimum: 0 }),
   totalTimeMs: t.Number({ minimum: 0 }),
   lastPosition: t.Nullable(t.String()),
   firstSeenAt: t.String(),
@@ -99,6 +103,7 @@ export type UnitProgressListResponse =
 export const unitProgressStatusCountsSchema = t.Object({
   BACKLOG: t.Number({ minimum: 0 }),
   ACTIVE: t.Number({ minimum: 0 }),
+  PAUSED: t.Number({ minimum: 0 }),
   COMPLETED: t.Number({ minimum: 0 }),
   DROPPED: t.Number({ minimum: 0 }),
 });

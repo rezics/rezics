@@ -2,7 +2,7 @@
 
 ### Requirement: Progress fact source schema
 
-The system SHALL persist a single `UserUnitProgress` row per `(userId, unitId)` pair as the canonical fact source for that user's interaction with that unit. The row MUST carry: a fractional `progress` value in the closed interval `[0, 1]`, a `status` enum (`BACKLOG` | `ACTIVE` | `COMPLETED` | `DROPPED`), a cumulative `totalTimeMs` non-negative integer, an opaque `lastPosition` string (nullable), `firstSeenAt` and `lastSeenAt` timestamps, and an optional free-form `extra` JSON payload. The pair `(userId, unitId)` MUST be the primary key.
+The system SHALL persist a single `UserUnitProgress` row per `(userId, unitId)` pair as the canonical fact source for that user's interaction with that unit. The row MUST carry: a fractional `progress` value in the closed interval `[0, 1]`, a `status` enum (`BACKLOG` | `ACTIVE` | `PAUSED` | `COMPLETED` | `DROPPED`), a `completedCount` non-negative integer, a cumulative `totalTimeMs` non-negative integer, an opaque `lastPosition` string (nullable), `firstSeenAt` and `lastSeenAt` timestamps, and an optional free-form `extra` JSON payload. The pair `(userId, unitId)` MUST be the primary key.
 
 #### Scenario: One row per user-unit pair
 - **WHEN** a user has interacted with a given unit in any way recorded by the API
@@ -18,19 +18,23 @@ The system SHALL persist a single `UserUnitProgress` row per `(userId, unitId)` 
 
 ### Requirement: Progress upsert endpoint
 
-The system SHALL expose an authenticated `PUT /me/units/:unitId/progress` endpoint that performs a partial upsert of the caller's progress for the addressed unit. The request body MAY include any subset of `progress`, `status`, `lastPosition`, `addTimeMs`, and `extra`. Provided fields among `progress`, `status`, `lastPosition`, and `extra` MUST overwrite the stored value (last-write-wins). The `addTimeMs` field, if present, MUST be added to the stored `totalTimeMs`. The system MUST set `firstSeenAt` to the current time on first creation and never modify it thereafter, and MUST set `lastSeenAt` to the current time on every successful write. The endpoint MUST require authentication and MUST scope writes to the calling user.
+The system SHALL expose an authenticated `PUT /me/units/:unitId/progress` endpoint that performs a partial upsert of the caller's progress for the addressed unit. The request body MAY include any subset of `progress`, `status`, `completedCount`, `lastPosition`, `addTimeMs`, and `extra`. Provided fields among `progress`, `status`, `completedCount`, `lastPosition`, and `extra` MUST overwrite the stored value (last-write-wins), except that the system SHALL automatically increment `completedCount` by one when the stored status transitions from any non-`COMPLETED` status to `COMPLETED` and the request did not provide `completedCount`. The `addTimeMs` field, if present, MUST be added to the stored `totalTimeMs`. The system MUST set `firstSeenAt` to the current time on first creation and never modify it thereafter, and MUST set `lastSeenAt` to the current time on every successful write. The endpoint MUST require authentication and MUST scope writes to the calling user.
 
 #### Scenario: First-time write creates the row
 - **WHEN** an authenticated user calls the endpoint for a unit they have no existing progress row for
-- **THEN** the system creates a row with the provided fields, sets `firstSeenAt` and `lastSeenAt` to the current server time, and defaults unspecified fields (`progress` to 0, `status` to `BACKLOG`, `totalTimeMs` to 0, `lastPosition` to null, `extra` to null)
+- **THEN** the system creates a row with the provided fields, sets `firstSeenAt` and `lastSeenAt` to the current server time, and defaults unspecified fields (`progress` to 0, `status` to `BACKLOG`, `completedCount` to 0, `totalTimeMs` to 0, `lastPosition` to null, `extra` to null)
 
 #### Scenario: Progress reaching 1.0 coerces status to COMPLETED
 - **WHEN** an authenticated user calls the endpoint with `progress >= 1.0` and does not explicitly set `status` to a different value
-- **THEN** the system stores the row with `status = COMPLETED` and does not modify any shelf row as a side effect
+- **THEN** the system stores the row with `status = COMPLETED`, increments `completedCount` by one if the previous status was not `COMPLETED`, and does not modify any shelf row as a side effect
+
+#### Scenario: Explicit completed count overrides automatic increment
+- **WHEN** an authenticated user calls the endpoint with `status = COMPLETED` and `completedCount = 7`
+- **THEN** the system stores `completedCount = 7` instead of applying an additional automatic increment
 
 #### Scenario: Partial update preserves untouched fields
 - **WHEN** an authenticated user calls the endpoint with only `progress` and `addTimeMs` for a unit they already have a progress row for
-- **THEN** the system overwrites `progress`, increments `totalTimeMs` by `addTimeMs`, leaves `status`, `lastPosition`, and `extra` unchanged, leaves `firstSeenAt` unchanged, and updates `lastSeenAt` to the current server time
+- **THEN** the system overwrites `progress`, increments `totalTimeMs` by `addTimeMs`, leaves `status`, `completedCount`, `lastPosition`, and `extra` unchanged, leaves `firstSeenAt` unchanged, and updates `lastSeenAt` to the current server time
 
 #### Scenario: Cross-user write is rejected
 - **WHEN** an authenticated user calls the endpoint

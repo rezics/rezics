@@ -38,6 +38,7 @@ export const UnitVisibility = {
 export const UserUnitProgressStatus = {
   BACKLOG: "BACKLOG",
   ACTIVE: "ACTIVE",
+  PAUSED: "PAUSED",
   COMPLETED: "COMPLETED",
   DROPPED: "DROPPED",
 } as const;

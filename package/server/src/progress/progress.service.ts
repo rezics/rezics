@@ -50,6 +50,10 @@ function validateInput(input: ProgressUpsertInput): void {
   if (input.addTimeMs !== undefined && input.addTimeMs < 0) {
     throw new AppError(400, "addTimeMs must be non-negative");
   }
+
+  if (input.completedCount !== undefined && input.completedCount < 0) {
+    throw new AppError(400, "completedCount must be non-negative");
+  }
 }
 
 function readFacetCount(
@@ -77,12 +81,32 @@ export class ProgressService {
         : input.status !== undefined
           ? progressStatusMap[input.status]
           : undefined;
+    const existing =
+      coercedStatus === UserUnitProgressStatus.COMPLETED ||
+      input.completedCount !== undefined
+        ? await prisma.userUnitProgress.findUnique({
+            where: { userId_unitId: { userId, unitId } },
+            select: { status: true, completedCount: true },
+          })
+        : null;
+    const isCompletionTransition =
+      coercedStatus === UserUnitProgressStatus.COMPLETED &&
+      existing?.status !== UserUnitProgressStatus.COMPLETED;
+    const completedCount =
+      input.completedCount !== undefined
+        ? input.completedCount
+        : isCompletionTransition
+          ? (existing?.completedCount ?? 0) + 1
+          : undefined;
 
     const createData: Prisma.UserUnitProgressCreateInput = {
       user: { connect: { unitId: userId } },
       unit: { connect: { id: unitId } },
       progress: input.progress ?? 0,
       status: coercedStatus ?? UserUnitProgressStatus.BACKLOG,
+      completedCount:
+        completedCount ??
+        (coercedStatus === UserUnitProgressStatus.COMPLETED ? 1 : 0),
       totalTimeMs: addTimeMs,
       lastPosition: input.lastPosition ?? null,
       extra:
@@ -97,6 +121,7 @@ export class ProgressService {
       lastSeenAt: now,
       ...(input.progress !== undefined ? { progress: input.progress } : {}),
       ...(coercedStatus !== undefined ? { status: coercedStatus } : {}),
+      ...(completedCount !== undefined ? { completedCount } : {}),
       ...(input.lastPosition !== undefined
         ? { lastPosition: input.lastPosition }
         : {}),

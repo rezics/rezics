@@ -52,6 +52,7 @@ enum ContentRating {
 enum UserUnitProgressStatus {
   BACKLOG
   ACTIVE
+  PAUSED
   COMPLETED
   DROPPED
 }
@@ -686,6 +687,7 @@ model UserUnitProgress {
   unitId       String                 @db.Uuid
   progress     Float                  @default(0)
   status       UserUnitProgressStatus @default(BACKLOG)
+  completedCount Int                  @default(0)
   totalTimeMs  BigInt                 @default(0)
   lastPosition String?
   extra        Json?

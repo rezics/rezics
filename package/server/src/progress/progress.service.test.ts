@@ -10,6 +10,7 @@ const baseRow = {
   unitId: "unit-1",
   progress: 0,
   status: UserUnitProgressStatus.BACKLOG,
+  completedCount: 0,
   totalTimeMs: 0n,
   lastPosition: null,
   firstSeenAt: new Date("2026-01-01T00:00:00.000Z"),
@@ -87,6 +88,7 @@ describe("ProgressService", () => {
     });
     expect(args.create.progress).toBe(0);
     expect(args.create.status).toBe("BACKLOG");
+    expect(args.create.completedCount).toBe(0);
     expect(args.create.totalTimeMs).toBe(2500n);
     expect(args.create.lastPosition).toBeNull();
     expect(args.update.totalTimeMs).toEqual({ increment: 2500n });
@@ -105,6 +107,7 @@ describe("ProgressService", () => {
     expect(update.progress).toBe(0.42);
     expect(update.totalTimeMs).toEqual({ increment: 100n });
     expect(update.status).toBeUndefined();
+    expect(update.completedCount).toBeUndefined();
     expect(update.lastPosition).toBeUndefined();
     expect(update.extra).toBeUndefined();
   });
@@ -118,17 +121,85 @@ describe("ProgressService", () => {
     await expect(
       progressService.upsert("user-1", "unit-1", { addTimeMs: -1 }),
     ).rejects.toThrow(/addTimeMs/);
+    await expect(
+      progressService.upsert("user-1", "unit-1", { completedCount: -1 }),
+    ).rejects.toThrow(/completedCount/);
     expect(mockUpsert).not.toHaveBeenCalled();
   });
 
   test("coerces completed status when progress reaches 1 without explicit status", async () => {
+    mockFindUnique.mockResolvedValue({
+      status: UserUnitProgressStatus.ACTIVE,
+      completedCount: 2,
+    });
     const { progressService } = await import("./progress.service");
 
     await progressService.upsert("user-1", "unit-1", { progress: 1 });
 
     const args = firstArg(mockUpsert);
     expect(args.create.status).toBe("COMPLETED");
+    expect(args.create.completedCount).toBe(3);
     expect(args.update.status).toBe("COMPLETED");
+    expect(args.update.completedCount).toBe(3);
+  });
+
+  test("does not increment completed count when already completed", async () => {
+    mockFindUnique.mockResolvedValue({
+      status: UserUnitProgressStatus.COMPLETED,
+      completedCount: 2,
+    });
+    const { progressService } = await import("./progress.service");
+
+    await progressService.upsert("user-1", "unit-1", {
+      status: "COMPLETED",
+    });
+
+    const args = firstArg(mockUpsert);
+    expect(args.update.status).toBe("COMPLETED");
+    expect(args.update.completedCount).toBeUndefined();
+  });
+
+  test("creates completed row with count 1 on first completion", async () => {
+    mockFindUnique.mockResolvedValue(null);
+    const { progressService } = await import("./progress.service");
+
+    await progressService.upsert("user-1", "unit-1", {
+      status: "COMPLETED",
+    });
+
+    const args = firstArg(mockUpsert);
+    expect(args.create.status).toBe("COMPLETED");
+    expect(args.create.completedCount).toBe(1);
+    expect(args.update.completedCount).toBe(1);
+  });
+
+  test("allows explicit completed count override", async () => {
+    mockFindUnique.mockResolvedValue({
+      status: UserUnitProgressStatus.ACTIVE,
+      completedCount: 2,
+    });
+    const { progressService } = await import("./progress.service");
+
+    await progressService.upsert("user-1", "unit-1", {
+      status: "COMPLETED",
+      completedCount: 7,
+    });
+
+    const args = firstArg(mockUpsert);
+    expect(args.create.completedCount).toBe(7);
+    expect(args.update.completedCount).toBe(7);
+  });
+
+  test("supports paused status", async () => {
+    const { progressService } = await import("./progress.service");
+
+    await progressService.upsert("user-1", "unit-1", {
+      status: "PAUSED",
+    });
+
+    const args = firstArg(mockUpsert);
+    expect(args.create.status).toBe("PAUSED");
+    expect(args.update.status).toBe("PAUSED");
   });
 
   test("explicit status wins over progress coercion", async () => {
@@ -199,6 +270,7 @@ describe("ProgressService", () => {
     expect(result.statusCounts).toEqual({
       BACKLOG: 0,
       ACTIVE: 3,
+      PAUSED: 0,
       COMPLETED: 1,
       DROPPED: 0,
     });

@@ -14,6 +14,7 @@ describe("progress contract schemas", () => {
     expect(userUnitProgressStatusValues).toEqual([
       "BACKLOG",
       "ACTIVE",
+      "PAUSED",
       "COMPLETED",
       "DROPPED",
     ]);
@@ -30,6 +31,7 @@ describe("progress contract schemas", () => {
       Value.Check(unitProgressUpsertBodySchema, {
         progress: 0.5,
         status: "ACTIVE",
+        completedCount: 2,
         lastPosition: "chapter-1#0.5",
         addTimeMs: 1000,
         extra: { device: "web" },
@@ -41,6 +43,9 @@ describe("progress contract schemas", () => {
     expect(Value.Check(unitProgressUpsertBodySchema, { addTimeMs: -1 })).toBe(
       false,
     );
+    expect(
+      Value.Check(unitProgressUpsertBodySchema, { completedCount: -1 }),
+    ).toBe(false);
   });
 
   test("validates progress row and list response round trip shape", () => {
@@ -49,6 +54,7 @@ describe("progress contract schemas", () => {
       unitId: "unit-1",
       progress: 1,
       status: "COMPLETED",
+      completedCount: 1,
       totalTimeMs: 123,
       lastPosition: null,
       firstSeenAt: "2026-01-01T00:00:00.000Z",

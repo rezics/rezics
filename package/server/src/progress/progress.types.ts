@@ -8,6 +8,7 @@ import { UserUnitProgressStatus } from "#/prisma/client";
 export const progressStatusMap = {
   BACKLOG: UserUnitProgressStatus.BACKLOG,
   ACTIVE: UserUnitProgressStatus.ACTIVE,
+  PAUSED: UserUnitProgressStatus.PAUSED,
   COMPLETED: UserUnitProgressStatus.COMPLETED,
   DROPPED: UserUnitProgressStatus.DROPPED,
 } satisfies Record<ContractProgressStatus, UserUnitProgressStatus>;
