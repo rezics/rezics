@@ -13,7 +13,8 @@ We need to make the BookIndex schema explicit before further chapter, review, an
 - Imported or crawled chapter entries remain inline BookIndex metadata by default. The system does not pre-create empty Unit/Post/UnitTranslation rows for every chapter entry.
 - Chapter Units are materialized on demand when an action requires Unit identity, such as chapter-specific progress, review, discussion, or storing licensed chapter body content.
 - Plain TOC display and empty chapter viewing do not require materialization.
-- Book-level reading progress may store the selected chapter path in `UserUnitProgress.lastPosition` on the book Unit without creating a chapter Unit.
+- Book-level reading progress stores a typed JSON `UserUnitProgress.lastPosition` on the book Unit without creating a chapter Unit. The book position records the BookIndex path and includes `chapterUnitId` only when that node is already materialized.
+- `UserUnitProgress.lastPosition` changes from opaque string to typed JSON so each Unit type can define its own position schema.
 - The contract schemas, JSDoc comments, server validation, and frontend chapter flows will be updated to reflect these identity rules.
 
 ## Capabilities
@@ -31,15 +32,17 @@ We need to make the BookIndex schema explicit before further chapter, review, an
 
 ### Affected Packages
 
-- `package/contract` — Update BookIndex node schemas and TypeScript interfaces in `book.ts`, including JSDoc comments that define path locator semantics and `chapterUnitId` behavior.
-- `package/server` — Update BookIndex defaults, read/write validation, chapter materialization API/service behavior, and any BookIndex update path that currently assumes every node has a chapter Unit id.
-- `package/api` — Add or adjust client functions and query/mutation helpers for chapter materialization if the server exposes a dedicated endpoint.
-- `package/app` — Update book content, reader, progress, review, discussion, and chapter editor flows so they can operate on path-located empty chapter nodes and materialize only when needed.
+- `package/contract` — Update BookIndex node schemas and TypeScript interfaces in `book.ts`, including JSDoc comments that define path locator semantics and `chapterUnitId` behavior. Update progress schemas so `lastPosition` is typed JSON rather than string.
+- `package/server` — Update BookIndex defaults, read/write validation, chapter materialization API/service behavior, progress persistence, and any BookIndex update path that currently assumes every node has a chapter Unit id.
+- `package/api` — Add or adjust client functions and query/mutation helpers for chapter materialization and typed progress positions.
+- `package/app` — Update book content, reader, progress, review, discussion, and chapter editor flows so they can operate on path-located empty chapter nodes and materialize only when explicit chapter-scoped actions need Unit identity.
 - `openspec` — Update the BookIndex requirements so future work does not reintroduce required per-node Unit ids.
 
 ### Backward Compatibility
 
-- Existing BookIndex JSON that uses `id` as a chapter Unit id needs migration or compatibility normalization. The migration should map `id` to `chapterUnitId` when it references an existing Chapter Unit, then remove `id` from persisted nodes.
+- This project is still in dev stage for this model. The change does not preserve compatibility for legacy BookIndex `id` fields or string `UserUnitProgress.lastPosition` values.
+- Existing BookIndex JSON that uses `id` as a chapter Unit id will be rewritten. The migration maps `id` to `chapterUnitId` only when it references an existing Chapter Unit, removes all persisted `id` fields, and drops unmapped ids.
+- Existing string `UserUnitProgress.lastPosition` values may be discarded when the column changes to JSON.
 - Existing URLs of the form `/book/:bookId/read/:chapterId` continue to work for materialized chapters. Empty BookIndex nodes need a path-addressed URL or search parameter form until materialized.
 - Existing chapter Unit, review, discussion, and progress records remain valid. This change only prevents pre-creating unused chapter Units and clarifies how new empty nodes become materialized.
 
@@ -47,4 +50,5 @@ We need to make the BookIndex schema explicit before further chapter, review, an
 
 - Convert BookIndex rows whose nodes contain `id` to the new schema.
 - Normalize empty or missing BookIndex rows to `index = []`.
-- Add compatibility handling during rollout so old frontend clients do not corrupt BookIndex JSON by writing required `id` fields back into the new schema.
+- Convert `UserUnitProgress.lastPosition` from `TEXT` to `JSONB` and update contract/API/server/frontend code to treat it as typed JSON.
+- Remove or narrow rollout compatibility paths after the dev-stage migration so new code does not keep legacy `id` metadata alive.

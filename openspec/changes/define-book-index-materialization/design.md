@@ -10,7 +10,7 @@ Current integration points:
 - `package/server/prisma/schema.prisma` stores `BookIndex.index` as JSON and models materialized chapters as `Unit(type=POST)` + `Post(kind=CHAPTER)`.
 - `package/server/src/book/book.service.ts` creates a BookIndex row when a Book is created and updates the JSON as opaque content.
 - `package/server/src/chapter/` creates and reads materialized chapter Posts.
-- `package/server/src/progress/` requires a real Unit for `UserUnitProgress(unitId)`.
+- `package/server/src/progress/` requires a real Unit for `UserUnitProgress(unitId)` and currently stores `lastPosition` as an opaque string.
 - `package/app` reader, TOC, progress, review, and discussion flows currently assume a clickable chapter has a chapter id.
 
 ## Goals / Non-Goals
@@ -21,8 +21,9 @@ Current integration points:
 - Avoid pre-creating empty Chapter Units for imported/crawled chapter metadata.
 - Support path-addressed empty chapter surfaces without creating database objects.
 - Materialize a Chapter Unit atomically when an action requires Unit identity.
+- Store book-level reading position as typed JSON on the book Unit progress row without materializing an empty chapter.
 - Preserve existing materialized chapter URLs and records.
-- Document migration and compatibility behavior for legacy `id`-based BookIndex JSON.
+- Document dev-stage migration behavior for legacy `id`-based BookIndex JSON and string progress positions.
 
 **Non-Goals:**
 
@@ -71,9 +72,47 @@ Materialized chapters may continue using existing chapter-unit routes. After mat
 
 ### D5 — Progress separates book-level position from chapter-level identity
 
-Book-level progress can store a serialized BookIndex path in `UserUnitProgress.lastPosition` for the book Unit. This records "where the user last was in this book" without materializing a chapter.
+`UserUnitProgress.lastPosition` SHALL be typed JSON rather than an opaque string. The progress row remains keyed by `(userId, unitId)`, but each Unit type may define its own last-position shape.
+
+For book Unit progress, the first supported position shape is:
+
+```json
+{
+  "kind": "bookIndexPath",
+  "bookUnitId": "book-unit-id",
+  "path": [2, 4, 0],
+  "chapterUnitId": "chapter-unit-id-if-already-materialized"
+}
+```
+
+This records "where the user last was in this book" without materializing a chapter. `chapterUnitId` is optional and SHALL only be included when the selected BookIndex occurrence is already materialized.
+
+For chapter Unit progress, the first supported position shape is:
+
+```json
+{
+  "kind": "chapter",
+  "chapterUnitId": "chapter-unit-id",
+  "offset": 0.42
+}
+```
 
 Chapter-specific progress requires a chapter Unit and should trigger materialization first. The existing `UserUnitProgress(userId, unitId)` schema remains unchanged.
+
+Rationale: string encoding is only simpler when position is fully opaque. Book, chapter, media, and future Unit types need different schemas. JSON keeps those schemas explicit and avoids ad hoc string parsing. The payload is small and not on a hot indexed query path, so the correctness and evolvability benefits outweigh the minor JSONB storage/serialization cost.
+
+### D5a — Explicit chapter-scoped actions materialize; browsing does not
+
+TOC display and opening a path-addressed empty chapter page SHALL NOT materialize a chapter Unit. Explicit chapter-scoped actions SHALL materialize first when the selected occurrence has no `chapterUnitId`:
+
+- chapter-specific progress
+- chapter review
+- chapter discussion or reply composer
+- chapter content edit
+
+Frontend code should centralize this as a shared helper or hook that accepts `(bookUnitId, path, expectedTitle, chapterUnitId?)`, returns the existing `chapterUnitId` when present, and otherwise calls the materialization API.
+
+Book-level reading status and last-read position SHALL NOT materialize. They update the book Unit's progress row and store the BookIndex path in JSON `lastPosition`.
 
 ### D6 — Rating behavior distinguishes inline intent from materialized cache
 
@@ -87,7 +126,8 @@ The TOC editor must not materialize nodes only to apply a rating override.
 - Large BookIndex JSON rows may make materialization slower for books with very large TOCs → keep materialization rare; later introduce a `BookIndexMaterialization` side table or event-sourced BookIndex if profiling shows JSON rewrite cost is too high.
 - Concurrent materialization of the same path may create duplicates → serialize materialization per BookIndex row in a transaction and re-check the node after acquiring the lock.
 - Allowing non-unique `chapterUnitId` can confuse UI selection state → UI state must key occurrence-specific interactions by path and Unit-specific engagement by `chapterUnitId`.
-- Legacy clients may keep writing `id` fields → rollout should include compatibility normalization and contract validation before removing old write paths.
+- JSON `lastPosition` is slightly heavier than a string → acceptable because positions are small, typed, and not expected to be queried as a high-cardinality hot path.
+- Dev-stage migration intentionally drops legacy string `lastPosition` values and unmapped BookIndex ids → acceptable because compatibility is explicitly out of scope at this stage.
 
 ## Migration Plan
 
@@ -96,14 +136,16 @@ The TOC editor must not materialize nodes only to apply a rating override.
 3. Add server-side helpers to parse, locate, and update BookIndex nodes by path.
 4. Add the materialization service/API and make it idempotent for already-linked paths.
 5. Update frontend TOC and reader flows to use path-addressed empty chapter routes before materialization.
-6. Update chapter-specific progress, review, and discussion flows to call materialization before writing Unit-scoped data.
-7. Migrate existing BookIndex JSON from `id` to `chapterUnitId` where the value references an existing chapter Unit.
-8. Add validation/tests that reject new required node `id` assumptions.
+6. Convert `UserUnitProgress.lastPosition` from `TEXT` to JSON and update the progress contract/API/server/frontend types.
+7. Update book-level progress to store `{ kind: "bookIndexPath", bookUnitId, path, chapterUnitId? }` on the book Unit without materialization.
+8. Add a shared frontend materialize-before-action helper and update chapter-specific progress, review, discussion, and content-edit flows to use it.
+9. Migrate existing BookIndex JSON from `id` to `chapterUnitId` where the value references an existing chapter Unit, remove all legacy `id` fields, and drop unmapped ids.
+10. Remove or narrow legacy compatibility paths so new code does not preserve `id` metadata.
+11. Add validation/tests that reject new required node `id` assumptions and string `lastPosition` assumptions.
 
-Rollback strategy: keep existing materialized chapter Units valid. If the rollout is reverted, already-migrated nodes with `chapterUnitId` can be read through a compatibility adapter that exposes `id = chapterUnitId` to old code until the rollback is complete.
+Rollback strategy for the dev stage: no compatibility guarantee is provided for legacy BookIndex `id` or string `lastPosition`. Existing materialized chapter Units remain valid. If a rollback is needed, `chapterUnitId` values can be used to re-link materialized chapters, but old clients should not be supported as part of this change.
 
 ## Open Questions
 
-- What exact path encoding should the public empty-chapter URL use: repeated query params, dot-separated path, or base64url JSON?
 - Should materialization require a `kind`/intent value such as `progress`, `review`, `discussion`, or `content` for audit and analytics?
 - Should very large imported books get a side-table index immediately, or should that wait for profiling after JSON-based materialization lands?
