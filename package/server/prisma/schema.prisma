@@ -9,9 +9,9 @@ datasource db {
   provider = "postgres"
 }
 
-// ============================================================
-// ENUMS
-// ============================================================
+/**
+ * ANCHOR ENUMS
+ */
 
 enum UnitType {
   BOOK
@@ -71,8 +71,7 @@ enum PostKind {
    */
   REVIEW
   /**
-   * A user-highlighted passage from the work named by `targetUnitId`
-   * (e.g., memorable sentences from books or lines from games).
+   * A user-highlighted passage from the work named by `targetUnitId` (e.g., memorable sentences from books or lines from games).
    */
   EXCERPT
   /**
@@ -83,15 +82,15 @@ enum PostKind {
   POST
   /**
    * A chapter of the book named by `targetUnitId` (a Unit of type=BOOK).
-   * Body lives in `Post.body`; cover (optional) lives in
-   * `UnitTranslation.extra.coverUrl`. Order is governed by `BookIndex.index`.
+   * Body lives in `Post.body`; cover (optional) lives in `UnitTranslation.extra.coverUrl`.
+   * Order is governed by `BookIndex.index`.
    */
   CHAPTER
 }
 
-// ============================================================
-// CORE: UNIT IDENTITY
-// ============================================================
+/**
+ * ANCHOR CORE: UNIT IDENTITY
+ */
 
 model Unit {
   id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
@@ -115,8 +114,12 @@ model Unit {
   updatedAt   DateTime  @updatedAt
   publishedAt DateTime?
 
-  // Self-relation: work/release
-  // Work and Release are parallel entities. Work (a) is the version selected by Rezics. UnitTranslation caches translations derived from the Release version, while the actual content still comes from the Release(chapters, etc.). A Release can also produce translated Releases. Work should still point to Work (a).
+  /**
+   * Self-relation: work/release.
+   * Work and Release are parallel entities. Work (a) is the version selected by Rezics.
+   * UnitTranslation caches translations derived from the Release version, while the actual content still comes from the Release (chapters, etc.).
+   * A Release can also produce translated Releases. Work should still point to Work (a).
+   */
   work     Unit?  @relation("WorkRelease", fields: [workUnitId], references: [id], onDelete: SetNull)
   releases Unit[] @relation("WorkRelease")
 
@@ -188,14 +191,12 @@ model Unit {
   @@index([translationGroupId])
 }
 
-// ============================================================
-// PARALLEL TRANSLATION GROUPING
-// ============================================================
+/**
+ * ANCHOR PARALLEL TRANSLATION GROUPING
+ */
 
-/// Aggregates parallel-translation sibling Units (e.g. wiki-style POSTs in
-/// multiple languages). `supportedLanguages` is a denormalized cache of the
-/// `defaultLanguage` of each member, maintained transactionally on attach /
-/// detach to avoid per-render JOINs at scale.
+/// Aggregates parallel-translation sibling Units (e.g. wiki-style POSTs in multiple languages).
+/// `supportedLanguages` is a denormalized cache of each member's `defaultLanguage`, maintained transactionally on attach/detach to avoid per-render JOINs at scale.
 model TranslationGroup {
   id                 String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   supportedLanguages String[] @db.VarChar(16)
@@ -204,9 +205,9 @@ model TranslationGroup {
   units Unit[]
 }
 
-// ============================================================
-// TRANSLATION LAYER
-// ============================================================
+/**
+ * ANCHOR TRANSLATION LAYER
+ */
 
 model UnitTranslation {
   unitId   String @db.Uuid
@@ -242,9 +243,10 @@ model UnitSupportLanguage {
   @@index([language, unitId])
 }
 
-// ============================================================
-// WORK-LINK CLAIM (cross-user work/release linkage approval)
-// ============================================================
+/**
+ * ANCHOR WORK-LINK CLAIM
+ * Cross-user work/release linkage approval.
+ */
 
 model WorkLinkClaim {
   id            String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
@@ -267,9 +269,9 @@ model WorkLinkClaim {
   @@index([releaseUnitId, status])
 }
 
-// ============================================================
-// BOOK EXTENSION
-// ============================================================
+/**
+ * ANCHOR BOOK EXTENSION
+ */
 
 model Book {
   unitId String @id @db.Uuid
@@ -302,9 +304,9 @@ model BookIndex {
   book Book @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)
 }
 
-// ============================================================
-// GAME EXTENSION
-// ============================================================
+/**
+ * ANCHOR GAME EXTENSION
+ */
 
 model Game {
   unitId String @id @db.Uuid
@@ -334,9 +336,9 @@ model GamePlatform {
   @@index([platformKey, gameUnitId])
 }
 
-// ============================================================
-// MEDIA EXTENSION
-// ============================================================
+/**
+ * ANCHOR MEDIA EXTENSION
+ */
 
 model Media {
   unitId String @id @db.Uuid
@@ -357,9 +359,9 @@ model Media {
   @@index([kindKey, releaseDate])
 }
 
-// ============================================================
-// LINK EXTENSION
-// ============================================================
+/**
+ * ANCHOR LINK EXTENSION
+ */
 
 model Link {
   unitId String @id @db.Uuid
@@ -375,9 +377,10 @@ model Link {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// POST EXTENSION (replaces Comment, Review, Note, Remark)
-// ============================================================
+/**
+ * ANCHOR POST EXTENSION
+ * Replaces Comment, Review, Note, and Remark.
+ */
 
 model Post {
   unitId String @id @db.Uuid
@@ -422,9 +425,10 @@ model Post {
   @@index([scoreEntryId])
 }
 
-// ============================================================
-// SHELF EXTENSION (replaces ReadList + Series)
-// ============================================================
+/**
+ * ANCHOR SHELF EXTENSION
+ * Replaces ReadList and Series.
+ */
 
 model Shelf {
   unitId String @id @db.Uuid
@@ -473,9 +477,9 @@ model ShelfUnit {
   @@index([shelfUnitId, role])
 }
 
-// ============================================================
-// REALM EXTENSION
-// ============================================================
+/**
+ * ANCHOR REALM EXTENSION
+ */
 
 model Realm {
   unitId String @id @db.Uuid
@@ -492,9 +496,8 @@ model Realm {
 
   members RealmMember[]
 
-  /// Realm is a subreddit-like community space, not a tag or classifier. It
-  /// owns membership and community metadata; realm-scoped tag classification
-  /// lives in RealmTagUnit and RealmTagContext.
+  /// Realm is a subreddit-like community space, not a tag or classifier.
+  /// It owns membership and community metadata; realm-scoped tag classification lives in RealmTagUnit and RealmTagContext.
   tagApplications RealmTagUnit[]    @relation("RealmTagApplicationRealm")
   tagContexts     RealmTagContext[]
 }
@@ -514,18 +517,17 @@ model RealmMember {
   @@index([realmUnitId, roleKey])
 }
 
-// ============================================================
-// REALM ORGANIZATION
-// ============================================================
+/**
+ * ANCHOR REALM ORGANIZATION
+ */
 
 model RealmUnit {
   realmUnitId String   @db.Uuid
   unitId      String   @db.Uuid
   createdAt   DateTime @default(now())
 
-  /// Community/feed membership for a target Unit in a realm. This junction is
-  /// not semantic tagging and is not a prerequisite or owner relation for
-  /// RealmTagUnit.
+  /// Community/feed membership for a target Unit in a realm.
+  /// This junction is not semantic tagging and is not a prerequisite or owner relation for RealmTagUnit.
   realm Unit @relation("RealmContent", fields: [realmUnitId], references: [id], onDelete: Cascade)
   unit  Unit @relation("UnitInRealm", fields: [unitId], references: [id], onDelete: Cascade)
 
@@ -546,9 +548,8 @@ model RealmTagUnit {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  /// A realm-scoped application of an existing global TAG Unit to any target
-  /// Unit. This does not create a realm-local tag and does not require the
-  /// target to be posted into the realm via RealmUnit.
+  /// A realm-scoped application of an existing global TAG Unit to any target Unit.
+  /// This does not create a realm-local tag and does not require the target to be posted into the realm via RealmUnit.
   realm      Realm          @relation("RealmTagApplicationRealm", fields: [realmUnitId], references: [unitId], onDelete: Cascade)
   appliedTag Unit           @relation("RealmTagApplicationAppliedTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
   targetUnit Unit           @relation("RealmTagApplicationTargetUnit", fields: [unitId], references: [id], onDelete: Cascade)
@@ -571,9 +572,8 @@ model RealmTagVote {
 
   createdAt DateTime @default(now())
 
-  /// A member vote on one RealmTagUnit application. RealmTagVote's business
-  /// target is the `(realmUnitId, tagUnitId, unitId)` application, not three
-  /// independent Unit roles.
+  /// A member vote on one RealmTagUnit application.
+  /// RealmTagVote's business target is the `(realmUnitId, tagUnitId, unitId)` application, not three independent Unit roles.
   application RealmTagUnit @relation("RealmTagApplicationVotes", fields: [realmUnitId, tagUnitId, unitId], references: [realmUnitId, tagUnitId, unitId], onDelete: Cascade)
 
   @@id([realmUnitId, tagUnitId, unitId, userId])
@@ -588,9 +588,8 @@ model RealmTagContext {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  /// Pair-level explanatory surface for `(realmUnitId, tagUnitId)`. The pair
-  /// is the identity; `contextUnitId` is only a materialized content carrier
-  /// for explanation, examples, discussion, and history.
+  /// Pair-level explanatory surface for `(realmUnitId, tagUnitId)`.
+  /// The pair is the identity; `contextUnitId` is only a materialized content carrier for explanation, examples, discussion, and history.
   realm       Realm @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
   tag         Unit  @relation("RealmTagContextTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
   contextUnit Unit? @relation("RealmTagContextContent", fields: [contextUnitId], references: [id], onDelete: SetNull)
@@ -599,9 +598,9 @@ model RealmTagContext {
   @@index([tagUnitId])
 }
 
-// ============================================================
-// TAG SCORING SYSTEM
-// ============================================================
+/**
+ * ANCHOR TAG SCORING SYSTEM
+ */
 
 model UnitTag {
   unitId    String @db.Uuid
@@ -639,9 +638,9 @@ model TagVote {
   @@index([unitId, tagUnitId])
 }
 
-// ============================================================
-// ATTRIBUTION
-// ============================================================
+/**
+ * ANCHOR ATTRIBUTION
+ */
 
 model Entity {
   unitId   String  @id @db.Uuid
@@ -680,9 +679,10 @@ model Attribution {
   @@index([unitId, role, sortOrder])
 }
 
-// ============================================================
-// USER (simplified - UserType removed)
-// ============================================================
+/**
+ * ANCHOR USER
+ * UserType removed.
+ */
 
 model User {
   unitId          String    @id @db.Uuid
@@ -711,10 +711,12 @@ model User {
   unitProgress             UserUnitProgress[]
 }
 
-// ============================================================
-// ENGAGEMENT
-// ============================================================
-// Reaction and ReactionSummary models moved to @rezics/reaction service.
+/**
+ * ANCHOR ENGAGEMENT
+ */
+/**
+ * Reaction and ReactionSummary models moved to @rezics/reaction service.
+ */
 
 model UserUnitProgress {
   userId         String                 @db.Uuid
@@ -737,9 +739,9 @@ model UserUnitProgress {
   @@index([unitId, status])
 }
 
-// ============================================================
-// SCORE SYSTEM
-// ============================================================
+/**
+ * ANCHOR SCORE SYSTEM
+ */
 
 model ScoreEntry {
   id     String @id @default(dbgenerated("uuidv7()")) @db.Uuid
@@ -818,9 +820,10 @@ model ApiToken {
   @@index([expiresAt])
 }
 
-// ============================================================
-// PLATFORM MISC (preserved)
-// ============================================================
+/**
+ * ANCHOR PLATFORM MISC
+ * Preserved.
+ */
 
 model Feedback {
   id         String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
