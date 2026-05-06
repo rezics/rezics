@@ -40,7 +40,7 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
 
   const handleSearch = (keyword: string) => {
     navigate({
-      to: "/zone/$slug/search",
+      to: "/z/$slug/search",
       params: { slug },
       search: { keyword },
     });

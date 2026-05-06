@@ -41,6 +41,10 @@ mock.module("./zone.service", () => ({
     }
   },
   zoneService: {
+    getByUnitId: async (unitId: string) => {
+      if (unitId === "zone-1") return zoneStub;
+      return null;
+    },
     getBySlug: async (slug: string) => {
       if (slug === "featured") return zoneStub;
       return null;
@@ -63,6 +67,25 @@ describe("GET /zone/by-slug/:slug", () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
       new Request("http://localhost/zone/by-slug/does-not-exist"),
+    );
+    expect(res.status).toBe(404);
+  });
+});
+
+describe("GET /zone/:unitId", () => {
+  test("returns zone when id resolves to ZONE", async () => {
+    const { zoneApi } = await import("./zone.api");
+    const res = await zoneApi.handle(
+      new Request("http://localhost/zone/zone-1"),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(zoneStub);
+  });
+
+  test("does not resolve slug-shaped segments through the legacy route", async () => {
+    const { zoneApi } = await import("./zone.api");
+    const res = await zoneApi.handle(
+      new Request("http://localhost/zone/featured"),
     );
     expect(res.status).toBe(404);
   });

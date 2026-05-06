@@ -16,6 +16,13 @@ export type ZoneWithRelations = Prisma.ZoneGetPayload<{
 }>;
 
 export class ZoneService {
+  async getByUnitId(unitId: string): Promise<ZoneWithRelations | null> {
+    return prisma.zone.findUnique({
+      where: { unitId },
+      include: zoneInclude,
+    });
+  }
+
   async getBySlug(slug: string): Promise<ZoneWithRelations | null> {
     const unit = await prisma.unit.findUnique({
       where: { slug },

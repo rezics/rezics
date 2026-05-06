@@ -46,7 +46,6 @@ import { Route as BookBookIdEditRouteRouteImport } from './routes/book_/$bookId/
 import { Route as MainLayoutUserMeRouteRouteImport } from './routes/_mainLayout/user/me/route'
 import { Route as MainLayoutBookBookIdRouteRouteImport } from './routes/_mainLayout/book/$bookId/route'
 import { Route as BookBookIdEditIndexRouteImport } from './routes/book_/$bookId/edit/index'
-import { Route as MainLayoutZoneSlugIndexRouteImport } from './routes/_mainLayout/zone/$slug/index'
 import { Route as MainLayoutZSlugIndexRouteImport } from './routes/_mainLayout/z/$slug/index'
 import { Route as MainLayoutUserMeIndexRouteImport } from './routes/_mainLayout/user/me/index'
 import { Route as MainLayoutUserUnitIdIndexRouteImport } from './routes/_mainLayout/user/$unitId/index'
@@ -62,7 +61,6 @@ import { Route as MainLayoutBookBookIdIndexRouteImport } from './routes/_mainLay
 import { Route as BookBookIdEditTagRouteImport } from './routes/book_/$bookId/edit/tag'
 import { Route as BookBookIdEditChapterRouteImport } from './routes/book_/$bookId/edit/chapter'
 import { Route as BookBookIdEditChapterIdRouteImport } from './routes/book_/$bookId/edit/$chapterId'
-import { Route as MainLayoutZoneSlugSearchRouteImport } from './routes/_mainLayout/zone/$slug/search'
 import { Route as MainLayoutZSlugSearchRouteImport } from './routes/_mainLayout/z/$slug/search'
 import { Route as MainLayoutUserMeReactionRouteImport } from './routes/_mainLayout/user/me/reaction'
 import { Route as MainLayoutUserMeFollowRouteImport } from './routes/_mainLayout/user/me/follow'
@@ -296,11 +294,6 @@ const BookBookIdEditIndexRoute = BookBookIdEditIndexRouteImport.update({
   path: '/',
   getParentRoute: () => BookBookIdEditRouteRoute,
 } as any)
-const MainLayoutZoneSlugIndexRoute = MainLayoutZoneSlugIndexRouteImport.update({
-  id: '/zone/$slug/',
-  path: '/zone/$slug/',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
 const MainLayoutZSlugIndexRoute = MainLayoutZSlugIndexRouteImport.update({
   id: '/z/$slug/',
   path: '/z/$slug/',
@@ -386,12 +379,6 @@ const BookBookIdEditChapterIdRoute = BookBookIdEditChapterIdRouteImport.update({
   path: '/$chapterId',
   getParentRoute: () => BookBookIdEditRouteRoute,
 } as any)
-const MainLayoutZoneSlugSearchRoute =
-  MainLayoutZoneSlugSearchRouteImport.update({
-    id: '/zone/$slug/search',
-    path: '/zone/$slug/search',
-    getParentRoute: () => MainLayoutRoute,
-  } as any)
 const MainLayoutZSlugSearchRoute = MainLayoutZSlugSearchRouteImport.update({
   id: '/z/$slug/search',
   path: '/z/$slug/search',
@@ -725,7 +712,6 @@ export interface FileRoutesByFullPath {
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/user/me/reaction': typeof MainLayoutUserMeReactionRoute
   '/z/$slug/search': typeof MainLayoutZSlugSearchRoute
-  '/zone/$slug/search': typeof MainLayoutZoneSlugSearchRoute
   '/book/$bookId/edit/$chapterId': typeof BookBookIdEditChapterIdRoute
   '/book/$bookId/edit/chapter': typeof BookBookIdEditChapterRoute
   '/book/$bookId/edit/tag': typeof BookBookIdEditTagRoute
@@ -741,7 +727,6 @@ export interface FileRoutesByFullPath {
   '/user/$unitId/': typeof MainLayoutUserUnitIdIndexRoute
   '/user/me/': typeof MainLayoutUserMeIndexRoute
   '/z/$slug/': typeof MainLayoutZSlugIndexRoute
-  '/zone/$slug/': typeof MainLayoutZoneSlugIndexRoute
   '/book/$bookId/edit/': typeof BookBookIdEditIndexRoute
   '/tag/book/$bookId/tag': typeof MainLayoutTagBookBookIdTagRouteRouteWithChildren
   '/post/$rootPostUnitId/continue/$unitId': typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
@@ -816,7 +801,6 @@ export interface FileRoutesByTo {
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/user/me/reaction': typeof MainLayoutUserMeReactionRoute
   '/z/$slug/search': typeof MainLayoutZSlugSearchRoute
-  '/zone/$slug/search': typeof MainLayoutZoneSlugSearchRoute
   '/book/$bookId/edit/$chapterId': typeof BookBookIdEditChapterIdRoute
   '/book/$bookId/edit/chapter': typeof BookBookIdEditChapterRoute
   '/book/$bookId/edit/tag': typeof BookBookIdEditTagRoute
@@ -832,7 +816,6 @@ export interface FileRoutesByTo {
   '/user/$unitId': typeof MainLayoutUserUnitIdIndexRoute
   '/user/me': typeof MainLayoutUserMeIndexRoute
   '/z/$slug': typeof MainLayoutZSlugIndexRoute
-  '/zone/$slug': typeof MainLayoutZoneSlugIndexRoute
   '/book/$bookId/edit': typeof BookBookIdEditIndexRoute
   '/post/$rootPostUnitId/continue/$unitId': typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
   '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
@@ -917,7 +900,6 @@ export interface FileRoutesById {
   '/_mainLayout/user/me/follow': typeof MainLayoutUserMeFollowRoute
   '/_mainLayout/user/me/reaction': typeof MainLayoutUserMeReactionRoute
   '/_mainLayout/z/$slug/search': typeof MainLayoutZSlugSearchRoute
-  '/_mainLayout/zone/$slug/search': typeof MainLayoutZoneSlugSearchRoute
   '/book_/$bookId/edit/$chapterId': typeof BookBookIdEditChapterIdRoute
   '/book_/$bookId/edit/chapter': typeof BookBookIdEditChapterRoute
   '/book_/$bookId/edit/tag': typeof BookBookIdEditTagRoute
@@ -933,7 +915,6 @@ export interface FileRoutesById {
   '/_mainLayout/user/$unitId/': typeof MainLayoutUserUnitIdIndexRoute
   '/_mainLayout/user/me/': typeof MainLayoutUserMeIndexRoute
   '/_mainLayout/z/$slug/': typeof MainLayoutZSlugIndexRoute
-  '/_mainLayout/zone/$slug/': typeof MainLayoutZoneSlugIndexRoute
   '/book_/$bookId/edit/': typeof BookBookIdEditIndexRoute
   '/_mainLayout/tag/book/$bookId/tag': typeof MainLayoutTagBookBookIdTagRouteRouteWithChildren
   '/_mainLayout/post/$rootPostUnitId/continue/$unitId': typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
@@ -1019,7 +1000,6 @@ export interface FileRouteTypes {
     | '/user/me/follow'
     | '/user/me/reaction'
     | '/z/$slug/search'
-    | '/zone/$slug/search'
     | '/book/$bookId/edit/$chapterId'
     | '/book/$bookId/edit/chapter'
     | '/book/$bookId/edit/tag'
@@ -1035,7 +1015,6 @@ export interface FileRouteTypes {
     | '/user/$unitId/'
     | '/user/me/'
     | '/z/$slug/'
-    | '/zone/$slug/'
     | '/book/$bookId/edit/'
     | '/tag/book/$bookId/tag'
     | '/post/$rootPostUnitId/continue/$unitId'
@@ -1110,7 +1089,6 @@ export interface FileRouteTypes {
     | '/user/me/follow'
     | '/user/me/reaction'
     | '/z/$slug/search'
-    | '/zone/$slug/search'
     | '/book/$bookId/edit/$chapterId'
     | '/book/$bookId/edit/chapter'
     | '/book/$bookId/edit/tag'
@@ -1126,7 +1104,6 @@ export interface FileRouteTypes {
     | '/user/$unitId'
     | '/user/me'
     | '/z/$slug'
-    | '/zone/$slug'
     | '/book/$bookId/edit'
     | '/post/$rootPostUnitId/continue/$unitId'
     | '/user/me/setting/account'
@@ -1210,7 +1187,6 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/me/follow'
     | '/_mainLayout/user/me/reaction'
     | '/_mainLayout/z/$slug/search'
-    | '/_mainLayout/zone/$slug/search'
     | '/book_/$bookId/edit/$chapterId'
     | '/book_/$bookId/edit/chapter'
     | '/book_/$bookId/edit/tag'
@@ -1226,7 +1202,6 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/$unitId/'
     | '/_mainLayout/user/me/'
     | '/_mainLayout/z/$slug/'
-    | '/_mainLayout/zone/$slug/'
     | '/book_/$bookId/edit/'
     | '/_mainLayout/tag/book/$bookId/tag'
     | '/_mainLayout/post/$rootPostUnitId/continue/$unitId'
@@ -1513,13 +1488,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookBookIdEditIndexRouteImport
       parentRoute: typeof BookBookIdEditRouteRoute
     }
-    '/_mainLayout/zone/$slug/': {
-      id: '/_mainLayout/zone/$slug/'
-      path: '/zone/$slug'
-      fullPath: '/zone/$slug/'
-      preLoaderRoute: typeof MainLayoutZoneSlugIndexRouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
     '/_mainLayout/z/$slug/': {
       id: '/_mainLayout/z/$slug/'
       path: '/z/$slug'
@@ -1624,13 +1592,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/book/$bookId/edit/$chapterId'
       preLoaderRoute: typeof BookBookIdEditChapterIdRouteImport
       parentRoute: typeof BookBookIdEditRouteRoute
-    }
-    '/_mainLayout/zone/$slug/search': {
-      id: '/_mainLayout/zone/$slug/search'
-      path: '/zone/$slug/search'
-      fullPath: '/zone/$slug/search'
-      preLoaderRoute: typeof MainLayoutZoneSlugSearchRouteImport
-      parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/z/$slug/search': {
       id: '/_mainLayout/z/$slug/search'
@@ -2157,7 +2118,6 @@ interface MainLayoutRouteChildren {
   MainLayoutShelfShelfIdEditRoute: typeof MainLayoutShelfShelfIdEditRoute
   MainLayoutShelfBookBookIdRoute: typeof MainLayoutShelfBookBookIdRoute
   MainLayoutZSlugSearchRoute: typeof MainLayoutZSlugSearchRoute
-  MainLayoutZoneSlugSearchRoute: typeof MainLayoutZoneSlugSearchRoute
   MainLayoutExcerptUnitIdIndexRoute: typeof MainLayoutExcerptUnitIdIndexRoute
   MainLayoutPostRootPostUnitIdIndexRoute: typeof MainLayoutPostRootPostUnitIdIndexRoute
   MainLayoutRealmRealmIdIndexRoute: typeof MainLayoutRealmRealmIdIndexRoute
@@ -2166,7 +2126,6 @@ interface MainLayoutRouteChildren {
   MainLayoutShelfShelfIdIndexRoute: typeof MainLayoutShelfShelfIdIndexRoute
   MainLayoutUnitUnitSlugIndexRoute: typeof MainLayoutUnitUnitSlugIndexRoute
   MainLayoutZSlugIndexRoute: typeof MainLayoutZSlugIndexRoute
-  MainLayoutZoneSlugIndexRoute: typeof MainLayoutZoneSlugIndexRoute
   MainLayoutPostRootPostUnitIdContinueUnitIdRoute: typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
   MainLayoutUnitIdUnitIdIndexRoute: typeof MainLayoutUnitIdUnitIdIndexRoute
 }
@@ -2221,7 +2180,6 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutShelfShelfIdEditRoute: MainLayoutShelfShelfIdEditRoute,
   MainLayoutShelfBookBookIdRoute: MainLayoutShelfBookBookIdRoute,
   MainLayoutZSlugSearchRoute: MainLayoutZSlugSearchRoute,
-  MainLayoutZoneSlugSearchRoute: MainLayoutZoneSlugSearchRoute,
   MainLayoutExcerptUnitIdIndexRoute: MainLayoutExcerptUnitIdIndexRoute,
   MainLayoutPostRootPostUnitIdIndexRoute:
     MainLayoutPostRootPostUnitIdIndexRoute,
@@ -2231,7 +2189,6 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutShelfShelfIdIndexRoute: MainLayoutShelfShelfIdIndexRoute,
   MainLayoutUnitUnitSlugIndexRoute: MainLayoutUnitUnitSlugIndexRoute,
   MainLayoutZSlugIndexRoute: MainLayoutZSlugIndexRoute,
-  MainLayoutZoneSlugIndexRoute: MainLayoutZoneSlugIndexRoute,
   MainLayoutPostRootPostUnitIdContinueUnitIdRoute:
     MainLayoutPostRootPostUnitIdContinueUnitIdRoute,
   MainLayoutUnitIdUnitIdIndexRoute: MainLayoutUnitIdUnitIdIndexRoute,

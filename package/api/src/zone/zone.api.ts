@@ -3,6 +3,6 @@ import { apiFetch } from "../react-query/http";
 
 export const zoneApi = {
   getBySlug: async (slug: string): Promise<ZoneDTO> => {
-    return apiFetch<ZoneDTO>(`/zone/${slug}`);
+    return apiFetch<ZoneDTO>(`/zone/by-slug/${encodeURIComponent(slug)}`);
   },
 };

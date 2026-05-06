@@ -2,38 +2,40 @@ import { ZoneFiltersSchema } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole } from "@/middleware";
 import { mapZoneToDTO } from "./zone.mapper";
+import type { ZoneWithRelations } from "./zone.service";
 import { zoneService } from "./zone.service";
+
+function resolvePublicZone(
+  zone: ZoneWithRelations | null,
+  set: { status?: unknown },
+) {
+  if (!zone || zone.unit?.visibility === "PRIVATE") {
+    set.status = 404;
+    return { error: { code: "NOT_FOUND", message: "Zone not found" } };
+  }
+
+  const lifecycleStatus = zoneService.checkLifecycle(zone);
+  if (lifecycleStatus) {
+    set.status = 404;
+    return {
+      error: {
+        code: "NOT_FOUND",
+        message: `Zone ${lifecycleStatus === "not_started" ? "has not started yet" : "has ended"}`,
+      },
+    };
+  }
+
+  return mapZoneToDTO(zone);
+}
 
 export const zoneApi = new Elysia({ prefix: "/zone" })
   .use(authMacro)
 
-  // Public: Get zone by slug (typed endpoint — 404 if not a zone)
   .get(
     "/by-slug/:slug",
     async ({ params, set }) => {
       const zone = await zoneService.getBySlug(params.slug);
-      if (!zone) {
-        set.status = 404;
-        return { error: { code: "NOT_FOUND", message: "Zone not found" } };
-      }
-
-      if (zone.unit?.visibility === "PRIVATE") {
-        set.status = 404;
-        return { error: { code: "NOT_FOUND", message: "Zone not found" } };
-      }
-
-      const lifecycleStatus = zoneService.checkLifecycle(zone);
-      if (lifecycleStatus) {
-        set.status = 404;
-        return {
-          error: {
-            code: "NOT_FOUND",
-            message: `Zone ${lifecycleStatus === "not_started" ? "has not started yet" : "has ended"}`,
-          },
-        };
-      }
-
-      return mapZoneToDTO(zone);
+      return resolvePublicZone(zone, set);
     },
     {
       params: t.Object({ slug: t.String({ minLength: 1 }) }),
@@ -46,38 +48,17 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
     },
   )
 
-  // Public: Get zone by slug
   .get(
-    "/:slug",
+    "/:unitId",
     async ({ params, set }) => {
-      const zone = await zoneService.getBySlug(params.slug);
-      if (!zone) {
-        set.status = 404;
-        return { error: "Zone not found" };
-      }
-
-      // Visibility check
-      if (zone.unit?.visibility === "PRIVATE") {
-        set.status = 404;
-        return { error: "Zone not found" };
-      }
-
-      // Lifecycle check
-      const lifecycleStatus = zoneService.checkLifecycle(zone);
-      if (lifecycleStatus) {
-        set.status = 404;
-        return {
-          error: `Zone ${lifecycleStatus === "not_started" ? "has not started yet" : "has ended"}`,
-        };
-      }
-
-      return mapZoneToDTO(zone);
+      const zone = await zoneService.getByUnitId(params.unitId);
+      return resolvePublicZone(zone, set);
     },
     {
-      params: t.Object({ slug: t.String() }),
+      params: t.Object({ unitId: t.String({ minLength: 1 }) }),
       detail: {
-        summary: "Get zone by slug",
-        description: "Fetch a zone's public configuration by its slug",
+        summary: "Get zone",
+        description: "Get a single zone by Unit id",
         tags: ["Zones"],
       },
     },
