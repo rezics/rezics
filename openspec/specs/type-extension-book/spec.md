@@ -67,60 +67,45 @@ The Book model SHALL support an optional `isbn13` field (VarChar(32)) indexed fo
 
 ### Requirement: BookContentStructure for chapter table of contents
 
-The BookContentStructure model SHALL store a JSON-based chapter table of contents for a Book. It has a 1:1 relationship with Book via `bookUnitId` as its primary key. The `nodes` field (Json, required) contains the structured chapter listing and SHALL default to an empty array (`[]`) for books with no known chapter structure. Deleting the parent Book SHALL cascade-delete the BookContentStructure.
+The BookContentStructure model SHALL store a JSON-based content structure for a Book. It has a 1:1 relationship with Book via `bookUnitId` as its primary key. The `nodes` field (Json, required) contains the structured content listing. Deleting the parent Book SHALL cascade-delete the BookContentStructure.
 
 Each node in `nodes` SHALL conform to the following shape:
 
 ```
 {
   title: string,
+  chapterUnitId?: string,   // materialized chapter Unit id, optional and non-unique
   noContent?: boolean,
-  chapterUnitId?: string,  // optional materialized Chapter Unit id
   children?: ContentStructureNode[],
-  rating?: ContentRating   // optional override or materialization seed
+  rating?: ContentRating    // OPTIONAL override; see write rule below
 }
 ```
 
-BookContentStructure nodes SHALL NOT require an `id` field. A node's occurrence inside one BookContentStructure SHALL be located by its path in the forest, where `[2, 4, 0]` means the first child of the fifth child of the third root node. A path is a locator for the current BookContentStructure structure and SHALL NOT be treated as a permanent global identity.
+The `rating` field on a node is a denormalized cache of the chapter Unit's `rating` value, stored ONLY when it differs from the parent Book Unit's `rating`. It is NOT the source of truth for chapter rating; the chapter `Unit.rating` is. Consumers that need the authoritative chapter rating SHALL read from the chapter Unit directly; consumers rendering the TOC SHALL use `node.rating` (if present) or treat absence as "same as the Book's rating".
 
-The `chapterUnitId` field SHALL be present only when the node is linked to a materialized Chapter Unit. It SHALL be optional and SHALL NOT be required to be unique inside one BookContentStructure. Multiple node occurrences MAY reference the same `chapterUnitId`.
-
-For a node with `chapterUnitId`, the `rating` field is a denormalized cache of the chapter Unit's `rating` value, stored ONLY when it differs from the parent Book Unit's `rating`. It is NOT the source of truth for materialized chapter rating; the chapter `Unit.rating` is. For a node without `chapterUnitId`, `rating` is inline BookContentStructure metadata and MAY be used as the initial chapter Unit rating if the node is later materialized.
-
-#### Scenario: Create an empty content structure for a book
+#### Scenario: Create a content structure for a book
 
 - GIVEN a Book with `unitId = "unit-1"`
-- WHEN the system creates a BookContentStructure for that book without known chapters
-- THEN the BookContentStructure record SHALL be persisted with `bookUnitId = "unit-1"` and `nodes = []`
+- WHEN the system creates a BookContentStructure with `bookUnitId = "unit-1"` and `nodes = [{"chapterUnitId": "ch-1", "title": "Chapter One", "noContent": false}]`
+- THEN the BookContentStructure record SHALL be persisted with the provided JSON nodes
 - AND the BookContentStructure SHALL be accessible via the Book's `contentStructure` relation
 
-#### Scenario: Persist imported chapter metadata without materializing a chapter
+#### Scenario: Node rating is omitted when matching Book rating
 
-- GIVEN a Book with `unitId = "book-1"`
-- WHEN the system imports a table of contents node `{ "title": "Chapter One" }`
-- THEN the BookContentStructure SHALL persist the node without requiring `id`
-- AND the node SHALL NOT require `chapterUnitId`
-- AND no Unit, Post, or UnitTranslation row SHALL be created only because the node exists
+- GIVEN a Book Unit "book-1" with `rating = R_15` and a chapter Unit "ch-1" with `rating = R_15`
+- WHEN the frontend writes the BookContentStructure
+- THEN the node for "ch-1" SHALL NOT contain a `rating` field
 
-#### Scenario: Persist a materialized chapter reference
+#### Scenario: Node rating is written when differing from Book rating
 
-- GIVEN a Book with `unitId = "book-1"`
-- AND a materialized Chapter Unit with `unitId = "chapter-1"`
-- WHEN the system writes a BookContentStructure node `{ "title": "Chapter One", "chapterUnitId": "chapter-1" }`
-- THEN the BookContentStructure SHALL persist the node with `chapterUnitId = "chapter-1"`
-
-#### Scenario: Allow repeated materialized chapter references
-
-- GIVEN a BookContentStructure for `bookUnitId = "book-1"`
-- WHEN two different node paths both contain `chapterUnitId = "chapter-1"`
-- THEN the BookContentStructure SHALL be valid
-- AND consumers that need node occurrence state SHALL key that state by path
-- AND consumers that need Unit-scoped engagement SHALL key that state by `chapterUnitId`
+- GIVEN a Book Unit "book-1" with `rating = R_15` and a chapter Unit "ch-2" with `rating = R_18`
+- WHEN the frontend writes the BookContentStructure
+- THEN the node for "ch-2" SHALL include `rating: "R_18"`
 
 #### Scenario: Update an existing content structure
 
 - GIVEN a BookContentStructure with `bookUnitId = "unit-1"` and existing nodes
-- WHEN the owner updates the `nodes` field with a new chapter listing
+- WHEN the owner updates the `nodes` field with a new content listing
 - THEN the BookContentStructure SHALL reflect the updated JSON
 - AND `updatedAt` SHALL be set to the current timestamp
 
@@ -132,102 +117,63 @@ For a node with `chapterUnitId`, the `rating` field is a denormalized cache of t
 
 ### Requirement: BookContentStructure cache write rule is frontend-owned
 
-The BookContentStructure `nodes` JSON SHALL be constructed and written by the frontend TOC editor. The server SHALL persist the JSON as the BookContentStructure aggregate and SHALL NOT materialize Chapter Units during ordinary BookContentStructure saves. The chapter Unit's `rating` field remains the source of truth for materialized chapters; BookContentStructure acts as a render-time cache of rating deltas for nodes with `chapterUnitId`.
+The BookContentStructure `nodes` JSON SHALL be constructed and written by the frontend TOC editor. The server SHALL persist the JSON as opaque content-structure data and SHALL NOT enforce the rating cache write rule. The chapter Unit's `rating` field remains the source of truth; BookContentStructure acts as a render-time cache of deltas.
 
-When the frontend writes a materialized node, it SHALL apply the rule:
+When the frontend writes a node for a chapter, it SHALL apply the rule:
 
 ```
 if (chapter.rating !== book.rating) node.rating = chapter.rating
 else omit node.rating
 ```
 
-When the frontend writes an unmaterialized node, it MAY include `rating` only as inline BookContentStructure metadata. Writing that inline metadata SHALL NOT create a chapter Unit.
+#### Scenario: Frontend omits matching rating
 
-#### Scenario: Frontend omits matching rating for a materialized chapter
+- GIVEN book `rating = GENERAL` and chapter `rating = GENERAL`
+- WHEN the frontend serializes the node
+- THEN the serialized node object SHALL NOT include a `rating` key
 
-- GIVEN book `rating = GENERAL`
-- AND materialized chapter `chapterUnitId = "chapter-1"` has `rating = GENERAL`
-- WHEN the frontend serializes the BookContentStructure node
-- THEN the serialized node SHALL NOT include a `rating` key
+#### Scenario: Frontend includes diverging rating
 
-#### Scenario: Frontend includes diverging rating for a materialized chapter
-
-- GIVEN book `rating = GENERAL`
-- AND materialized chapter `chapterUnitId = "chapter-1"` has `rating = R_18`
-- WHEN the frontend serializes the BookContentStructure node
+- GIVEN book `rating = GENERAL` and chapter `rating = R_18`
+- WHEN the frontend serializes the node
 - THEN the serialized node SHALL include `rating: "R_18"`
-
-#### Scenario: Inline rating does not materialize a chapter
-
-- GIVEN an unmaterialized BookContentStructure node with no `chapterUnitId`
-- WHEN the frontend writes the node with `rating = R_15`
-- THEN the system SHALL persist the inline rating metadata
-- AND the system SHALL NOT create a Unit, Post, or UnitTranslation row only because the rating was written
-
-#### Scenario: Inline rating seeds materialized chapter rating
-
-- GIVEN an unmaterialized BookContentStructure node with `rating = R_15`
-- WHEN the node is materialized into a Chapter Unit
-- THEN the created chapter Unit SHALL be initialized with `rating = R_15`
 
 ### Requirement: TOC editor — resync index overrides action
 
-The TOC editor SHALL expose an action (button) that recomputes every materialized node's `rating` override from scratch using the current Book Unit rating and each linked chapter Unit's current rating. The action SHALL NOT modify any chapter Unit's `rating`. The action SHALL NOT materialize unmaterialized nodes. For unmaterialized nodes, the action SHALL preserve inline `rating` metadata unless it equals the parent Book rating, in which case it MAY omit the redundant field.
+The TOC editor SHALL expose an action (button) that recomputes every content-structure node's `rating` override from scratch using the current Book Unit rating and each chapter Unit's current rating. The action SHALL NOT modify any chapter Unit's `rating`. The action SHALL write the updated BookContentStructure in a single save.
 
 #### Scenario: Resync after Book rating change
 
 - GIVEN a Book Unit with `rating` changed from `R_18` to `GENERAL`
-- AND 10 materialized chapter Units that still have `rating = R_18`
+- AND 10 chapter Units that still have `rating = R_18`
 - WHEN the maintainer clicks the "Resync index overrides" action
-- THEN every linked BookContentStructure node SHALL include `rating: "R_18"`
+- THEN every node in the BookContentStructure SHALL include `rating: "R_18"`
 - AND no chapter Unit's `rating` field SHALL be changed
 
-#### Scenario: Resync removes stale materialized override
+#### Scenario: Resync removes stale overrides
 
-- GIVEN a BookContentStructure where node path `[0]` has `chapterUnitId = "ch-1"` and `rating: "R_15"`
-- AND the chapter Unit "ch-1" has `rating = GENERAL`
-- AND the Book Unit also has `rating = GENERAL`
+- GIVEN a BookContentStructure where node "ch-1" has `rating: "R_15"` but the chapter Unit's `rating` is now `GENERAL` and the Book Unit's `rating` is also `GENERAL`
 - WHEN the maintainer clicks "Resync index overrides"
-- THEN the updated node at path `[0]` SHALL NOT include a `rating` field
-
-#### Scenario: Resync does not materialize an empty node
-
-- GIVEN a BookContentStructure node at path `[1]` with no `chapterUnitId`
-- WHEN the maintainer clicks "Resync index overrides"
-- THEN the node SHALL remain without `chapterUnitId`
-- AND no Unit, Post, or UnitTranslation row SHALL be created for that node
+- THEN the updated node "ch-1" SHALL NOT include a `rating` field
 
 ### Requirement: TOC editor — multi-select batch rating edit
 
-The TOC editor SHALL allow the maintainer to select multiple chapter entries and apply a single `ContentRating` value to all selected entries in one operation. For selected nodes with `chapterUnitId`, each linked chapter Unit's `Unit.rating` SHALL be updated on the server. For selected nodes without `chapterUnitId`, the BookContentStructure node's inline `rating` metadata SHALL be updated instead. Batch rating edit SHALL NOT materialize unmaterialized nodes only to store a rating.
+The TOC editor SHALL allow the maintainer to select multiple chapter entries and apply a single `ContentRating` value to all selected chapters in one operation. Each selected chapter's `Unit.rating` SHALL be updated on the server. After the batch update completes, the BookContentStructure node overrides SHALL be recomputed per the standard write rule and persisted.
 
-After the batch update completes, the BookContentStructure node overrides SHALL be recomputed per the standard write rule and persisted.
+#### Scenario: Batch-edit three chapters
 
-#### Scenario: Batch-edit materialized chapters
-
-- GIVEN a Book Unit with `rating = R_15`
-- AND materialized chapter Units "ch-1", "ch-2", "ch-3" each have `rating = R_15`
-- WHEN the maintainer selects the BookContentStructure nodes for "ch-1" and "ch-2" and applies `rating = R_18`
+- GIVEN a Book Unit with `rating = R_15` and chapter Units "ch-1", "ch-2", "ch-3" each with `rating = R_15`
+- WHEN the maintainer selects "ch-1" and "ch-2" in the TOC editor and applies `rating = R_18`
 - THEN the chapter Units "ch-1" and "ch-2" SHALL be updated to `rating = R_18`
 - AND the chapter Unit "ch-3" SHALL remain at `rating = R_15`
 - AND the BookContentStructure nodes for "ch-1" and "ch-2" SHALL include `rating: "R_18"`
 - AND the BookContentStructure node for "ch-3" SHALL NOT include a `rating` field
-
-#### Scenario: Batch-edit unmaterialized chapters
-
-- GIVEN a Book Unit with `rating = GENERAL`
-- AND unmaterialized BookContentStructure nodes at paths `[0]` and `[1]`
-- WHEN the maintainer selects both nodes and applies `rating = R_15`
-- THEN both BookContentStructure nodes SHALL be persisted with `rating = R_15`
-- AND neither node SHALL gain `chapterUnitId`
-- AND no Unit, Post, or UnitTranslation row SHALL be created for either node
 
 #### Scenario: Batch-edit is explicit (no implicit propagation)
 
 - GIVEN a Book Unit whose `rating` changed from `GENERAL` to `R_15`
 - WHEN no batch-edit action is invoked
 - THEN no chapter Unit's `rating` value SHALL be changed by the Book rating update alone
-- AND no unmaterialized BookContentStructure node SHALL be materialized by the Book rating update alone
 
 ### Requirement: Chapter Unit materialization is on-demand
 

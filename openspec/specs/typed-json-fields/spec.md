@@ -33,9 +33,11 @@ The `BookDTO` schema SHALL use `bookExtraSchema` for its `extra` field.
 - **THEN** TypeScript infers the type as `string | undefined` without requiring `as any`
 
 ### Requirement: BookContentStructure nodes schema
-The contract SHALL define a `bookContentStructureNodeSchema` in `package/contract/src/book.ts` that describes the chapter tree node shape used in `BookContentStructure.nodes`.
 
-#### Scenario: Frontend iterates content structure without cast
+The contract SHALL define a `bookContentStructureNodeSchema` in `package/contract/src/book.ts` that describes the content-structure node shape used in `BookContentStructure.nodes`.
+
+#### Scenario: Frontend iterates content-structure nodes without cast
+
 - **WHEN** a component maps over `bookContentStructure.nodes`
 - **THEN** each element has typed properties such as `title`, `chapterUnitId`, `noContent`, `rating`, and `children` without `as any`
 

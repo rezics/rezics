@@ -36,38 +36,35 @@ A chapter Post SHALL use the same threading fields as any other Post (`parentPos
 
 ### Requirement: Chapter ordering and grouping live in BookContentStructure, not Post
 
-A chapter Post SHALL NOT carry ordering, numbering, or parent-chapter fields on the `Post` model. Chapter order and nesting within a book SHALL remain the responsibility of the `BookContentStructure` JSON nodes keyed by `bookUnitId`. A BookContentStructure node MAY reference a materialized chapter Post through `chapterUnitId`, but a BookContentStructure node MAY also exist without any materialized Post/Unit.
-
-The Post model SHALL remain agnostic of chapter-specific position metadata. Materialized chapter Posts remain the storage surface for chapter body content, replies, annotations, and other Unit-scoped engagement. Unmaterialized BookContentStructure nodes are table-of-contents metadata only.
+A chapter Post SHALL NOT carry ordering, numbering, or parent-chapter fields on the `Post` model. Chapter order and nesting within a book SHALL remain the responsibility of the `BookContentStructure.nodes` JSON field keyed by `bookUnitId`. A content-structure node MAY reference a materialized chapter Post through `chapterUnitId`, but the Post model SHALL remain agnostic of chapter-specific position metadata.
 
 #### Scenario: Post model has no chapter-specific ordering fields
 
 - GIVEN the Post model in the Prisma schema
 - WHEN inspecting its fields
 - THEN Post SHALL NOT contain `chapterNumber`, `sortOrder`, or `parentChapterUnitId` fields
-- AND chapter position SHALL be derivable only by reading the `BookContentStructure` JSON nodes for the target book
+- AND chapter position SHALL be derivable only by reading `BookContentStructure.nodes` for the target book
 
-#### Scenario: Listing materialized chapters of a book
+#### Scenario: Listing chapters of a book
 
 - GIVEN a book `"book-1"` with three chapter Posts whose `targetUnitId = "book-1"` and `kindKey = "chapter"`
-- AND the BookContentStructure contains nodes whose `chapterUnitId` values reference those chapter Posts
-- WHEN a client requests the materialized chapter list for `"book-1"`
+- WHEN a client requests the chapter list for `"book-1"`
 - THEN the system SHALL return the three chapter Posts
-- AND the order SHALL be determined by the BookContentStructure JSON nodes, not by any field on Post
+- AND the order SHALL be determined by `BookContentStructure.nodes`, not by any field on Post
 
-#### Scenario: BookContentStructure node can exist without a chapter Post
+#### Scenario: Content-structure node can exist without a chapter Post
 
 - GIVEN a BookContentStructure node `{ "title": "Chapter One" }` with no `chapterUnitId`
-- WHEN the system reads the table of contents for the parent book
-- THEN the node SHALL be returned as table-of-contents metadata
-- AND the system SHALL NOT require a corresponding Post row to exist
+- WHEN the system renders the book content structure
+- THEN the node SHALL be valid table-of-contents metadata
+- AND no chapter Post SHALL be required until materialization is requested
 
-#### Scenario: Chapter Post does not imply unique BookContentStructure occurrence
+#### Scenario: Chapter Post does not imply unique content-structure occurrence
 
-- GIVEN a materialized chapter Post with Unit id `"chapter-1"`
+- GIVEN a chapter Post with `unitId = "chapter-1"`
 - AND a BookContentStructure contains two different paths that both reference `chapterUnitId = "chapter-1"`
-- WHEN the system resolves Unit-scoped engagement for either occurrence
-- THEN both occurrences SHALL resolve to the same chapter Post
+- WHEN the system renders or materializes those occurrences
+- THEN both occurrences SHALL be valid
 - AND occurrence-specific UI state SHALL be keyed by BookContentStructure path rather than by Post fields
 
 ### Requirement: chapter/ server domain is a thin wrapper over post service
