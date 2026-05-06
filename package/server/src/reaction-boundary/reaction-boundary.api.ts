@@ -3,10 +3,10 @@ import { createSchema, deleteQuerySchema } from "@rezics/contract/reaction";
 import { Elysia } from "elysia";
 import { prisma } from "#/prisma/client";
 import { authMacro } from "@/middleware";
-import { emitNotificationEvent } from "../notify/notify-client";
-import { createReaction, removeReaction } from "./reaction-client";
+import { emitNotificationEvent } from "@/notify-boundary/notify-boundary.client";
+import { createReaction, removeReaction } from "./reaction-boundary.client";
 
-export const reactionWriteApi = new Elysia({ prefix: "/reaction" })
+export const reactionBoundaryApi = new Elysia({ prefix: "/reaction" })
   .use(authMacro)
   .post(
     "/",

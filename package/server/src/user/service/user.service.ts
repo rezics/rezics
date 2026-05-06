@@ -15,7 +15,7 @@ import {
   syncUserToMeili,
 } from "@/meili/user/sync";
 import { bootstrapSystemShelves } from "@/shelf/system-shelves";
-import { emitNotificationEvent } from "../../notify/notify-client";
+import { emitNotificationEvent } from "@/notify-boundary/notify-boundary.client";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
 import { userInclude } from "../models/types";
 import { syncProfileToAuth } from "./profile-sync";

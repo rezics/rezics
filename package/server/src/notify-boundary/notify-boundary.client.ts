@@ -13,7 +13,9 @@ async function postInternal<T>(
 ): Promise<{ ok: boolean; data?: unknown }> {
   const secret = env.NOTIFY_INTERNAL_SECRET;
   if (!secret) {
-    console.warn("[notify-client] NOTIFY_INTERNAL_SECRET not set, skipping");
+    console.warn(
+      "[notify-boundary-client] NOTIFY_INTERNAL_SECRET not set, skipping",
+    );
     return { ok: false };
   }
 
@@ -28,7 +30,7 @@ async function postInternal<T>(
 
   if (!res.ok) {
     console.error(
-      `[notify-client] ${path} failed: ${res.status} ${await res.text()}`,
+      `[notify-boundary-client] ${path} failed: ${res.status} ${await res.text()}`,
     );
     return { ok: false };
   }

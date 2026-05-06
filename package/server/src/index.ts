@@ -16,11 +16,10 @@ import { internalApi } from "./internal/internal.api";
 import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
 import { linkApi } from "./link";
 import { meiliApi } from "./meili";
-import { dmServerApi } from "./notify/dm.api";
-import { userBatchApi } from "./notify/user-batch.api";
 import { postApi } from "./post";
 import { progressApi } from "./progress";
-import { reactionWriteApi } from "./reaction";
+import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
+import { reactionBoundaryApi } from "./reaction-boundary";
 import {
   realmApi,
   realmExtraApi,
@@ -203,7 +202,7 @@ app
   .use(translationGroupApi)
   .use(scoreApi)
   .use(internalApi)
-  .use(reactionWriteApi)
+  .use(reactionBoundaryApi)
   .use(dispatchApi)
   .use(tokenApi)
   .use(echoKvApi)
@@ -212,8 +211,7 @@ app
   .use(jwtServiceAdminApi)
   .use(statsAdminApi)
   .use(uploadApi)
-  .use(dmServerApi)
-  .use(userBatchApi)
+  .use(dmBoundaryApi)
   .get("/", () => "Hello Elysia")
   .get("/health", () => ({ status: "ok" }));
 

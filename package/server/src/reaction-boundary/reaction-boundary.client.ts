@@ -9,7 +9,9 @@ const baseUrl = env.REACTION_BASE_URL;
 async function postInternal<T>(path: string, body: unknown): Promise<T> {
   const secret = env.REACTION_INTERNAL_SECRET;
   if (!secret) {
-    throw new Error("[reaction-client] REACTION_INTERNAL_SECRET not set");
+    throw new Error(
+      "[reaction-boundary-client] REACTION_INTERNAL_SECRET not set",
+    );
   }
 
   const res = await fetch(`${baseUrl}${path}`, {
@@ -23,7 +25,9 @@ async function postInternal<T>(path: string, body: unknown): Promise<T> {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`[reaction-client] ${path} failed: ${res.status} ${text}`);
+    throw new Error(
+      `[reaction-boundary-client] ${path} failed: ${res.status} ${text}`,
+    );
   }
 
   return res.json() as Promise<T>;
@@ -71,7 +75,7 @@ export async function cleanupReactions(
     await postInternal("/internal/cleanup", { targetId });
     return { ok: true };
   } catch (e) {
-    console.error("[reaction-client] Cleanup call failed:", e);
+    console.error("[reaction-boundary-client] Cleanup call failed:", e);
     return { ok: false };
   }
 }

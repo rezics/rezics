@@ -1,7 +1,7 @@
 import { SystemEmailKind, type WikiType, WIKI_TYPES } from "@rezics/contract";
 import type { RezicsSessionClaims } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
-import { notifySystemAndEmail } from "../notify/notify-client";
+import { notifySystemAndEmail } from "@/notify-boundary/notify-boundary.client";
 import { hasAuthorityOver } from "./authority";
 
 export interface WorkLinkResult {

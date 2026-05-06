@@ -5,7 +5,7 @@ import {
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
-import { notifySystemAndEmail } from "../notify/notify-client";
+import { notifySystemAndEmail } from "@/notify-boundary/notify-boundary.client";
 import { hasAuthorityOver } from "./authority";
 
 export class WorkLinkClaimError extends Error {

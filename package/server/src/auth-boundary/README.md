@@ -10,6 +10,10 @@ boundary at `https://rezics.com/auth/*`.
 
 ## Route Ownership
 
+Route ownership is documented on the Elysia route definitions in
+`auth-public.api.ts` through OpenAPI `detail` metadata. This table is an
+architectural summary only.
+
 | Public route | Owner | Main authorization |
 | --- | --- | --- |
 | `/auth/session/refresh` | Main | Validates the opaque auth session through auth, then checks/provisions main user readiness before issuing the main session cookie. |

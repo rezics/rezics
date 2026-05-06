@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "#/prisma/client";
 
-export const userBatchApi = new Elysia({ prefix: "/user" }).get(
+export const userBatchApi = new Elysia().get(
   "/batch",
   async ({ query }) => {
     const ids = query.ids

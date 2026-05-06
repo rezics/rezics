@@ -1,10 +1,10 @@
 import { dmSendBodySchema } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { prisma } from "#/prisma/client";
-import { authMacro } from "../middleware";
-import { sendDm } from "./notify-client";
+import { authMacro } from "@/middleware";
+import { sendDm } from "./notify-boundary.client";
 
-export const dmServerApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
+export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
   "/send",
   async ({ body, identity, set }) => {
     const senderId = identity.userId;

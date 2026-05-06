@@ -17,7 +17,7 @@ import {
   patchContentMetadataToMeili,
   syncContentToMeili,
 } from "@/meili/content/sync";
-import { cleanupReactions } from "@/reaction/reaction-client";
+import { cleanupReactions } from "@/reaction-boundary/reaction-boundary.client";
 import type { UnitWithRelations } from "./types";
 import { unitInclude } from "./types";
 
