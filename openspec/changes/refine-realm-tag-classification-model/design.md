@@ -231,9 +231,9 @@ Global `TagVote` remains unique by `(userId, unitId, tagUnitId)`. If the same us
 
 Add a realm-tag context API surface. Exact route naming can be finalized during implementation, but recommended routes are:
 
-- `GET /realm-tag-contexts/:realmUnitId/:tagUnitId`
-- `PUT /realm-tag-contexts/:realmUnitId/:tagUnitId`
-- `POST /realm-tag-contexts/:realmUnitId/:tagUnitId/materialize`
+- `GET /realm-tag-context/:realmUnitId/:tagUnitId`
+- `PUT /realm-tag-context/:realmUnitId/:tagUnitId`
+- `POST /realm-tag-context/:realmUnitId/:tagUnitId/materialize`
 
 Response DTO:
 
