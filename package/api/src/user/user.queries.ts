@@ -31,6 +31,14 @@ export const userDetailQuery = (unitId: string) =>
     staleTime: 1000 * 60 * 10,
   });
 
+export const userBySlugQuery = (userSlug: string) =>
+  queryOptions({
+    queryKey: userKeys.bySlug(userSlug),
+    queryFn: () => userApi.getBySlug(userSlug),
+    enabled: !!userSlug,
+    staleTime: 1000 * 60 * 10,
+  });
+
 export const userAdminDetailQuery = (unitId: string) =>
   queryOptions({
     queryKey: userKeys.adminDetail(unitId),
@@ -86,6 +94,7 @@ export const userQueries = {
   list: userListQuery,
   adminList: userAdminListQuery,
   detail: userDetailQuery,
+  bySlug: userBySlugQuery,
   adminDetail: userAdminDetailQuery,
   followers: userFollowersQuery,
   followings: userFollowingsQuery,

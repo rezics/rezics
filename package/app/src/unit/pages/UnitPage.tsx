@@ -37,8 +37,7 @@ function formatMetadataValue(value: unknown): string {
   }
 }
 
-export function UnitPage() {
-  const { unitId } = unitRoute.useParams();
+export function UnitPageById({ unitId }: { unitId: string }) {
   const { t } = useTranslation();
 
   const {
@@ -134,8 +133,12 @@ export function UnitPage() {
                     <TooltipTrigger
                       render={(props) => (
                         <TextLink
-                          to="/user/$unitId"
-                          params={{ unitId: unit.user.unitId }}
+                          to={unit.user.slug ? "/u/$userSlug" : "/user/$unitId"}
+                          params={
+                            unit.user.slug
+                              ? { userSlug: unit.user.slug }
+                              : { unitId: unit.user.unitId }
+                          }
                           className="text-sm font-medium"
                           {...props}
                         >
@@ -222,4 +225,9 @@ export function UnitPage() {
       </div>
     </div>
   );
+}
+
+export function UnitPage() {
+  const { unitId } = unitRoute.useParams();
+  return <UnitPageById unitId={unitId || ""} />;
 }

@@ -12,6 +12,8 @@ export const userKeys = {
     [...userKeys.adminLists(), filters] as const,
   details: () => [...userKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...userKeys.details(), unitId] as const,
+  bySlug: (userSlug: string) =>
+    [...userKeys.all(), "by-slug", userSlug] as const,
   adminDetails: () => [...userKeys.all(), "admin", "detail"] as const,
   adminDetail: (unitId: string) =>
     [...userKeys.adminDetails(), unitId] as const,

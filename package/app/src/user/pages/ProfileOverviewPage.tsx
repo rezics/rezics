@@ -124,8 +124,8 @@ const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
 
   return (
     <Link
-      to="/unit/$unitId"
-      params={{ unitId: item.id }}
+      to={item.slug ? "/unit/$unitSlug" : "/unit/id/$unitId"}
+      params={item.slug ? { unitSlug: item.slug } : { unitId: item.id }}
       className="no-underline"
     >
       <div className="border border-gray-200 rounded-lg p-3 hover:border-gray-400 transition-colors">

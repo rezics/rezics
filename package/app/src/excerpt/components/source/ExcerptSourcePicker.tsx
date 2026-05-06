@@ -97,7 +97,7 @@ export function ExcerptSourcePicker({
   }
 
   const displayedUrl =
-    value?.mode === "unit" ? `/unit/${value.unitId}` : urlInputValue;
+    value?.mode === "unit" ? `/unit/id/${value.unitId}` : urlInputValue;
 
   return (
     <div className="flex flex-col gap-2">

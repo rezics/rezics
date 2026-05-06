@@ -4,19 +4,20 @@ import { apiFetch } from "../react-query/http";
 import { realmKeys } from "./realm.keys";
 
 export const realmBySlugKeys = {
-  bySlug: (slug: string) => [...realmKeys.all(), "by-slug", slug] as const,
+  bySlug: (realmSlug: string) =>
+    [...realmKeys.all(), "by-slug", realmSlug] as const,
 };
 
-export function realmBySlugQuery(slug: string) {
+export function realmBySlugQuery(realmSlug: string) {
   return queryOptions({
-    queryKey: realmBySlugKeys.bySlug(slug),
+    queryKey: realmBySlugKeys.bySlug(realmSlug),
     queryFn: () =>
-      apiFetch<RealmDTO>(`/realm/by-slug/${encodeURIComponent(slug)}`),
-    enabled: !!slug,
+      apiFetch<RealmDTO>(`/realm/by-slug/${encodeURIComponent(realmSlug)}`),
+    enabled: !!realmSlug,
     staleTime: 1000 * 60 * 10,
   });
 }
 
-export function useRealmBySlug(slug: string) {
-  return useQuery(realmBySlugQuery(slug));
+export function useRealmBySlug(realmSlug: string) {
+  return useQuery(realmBySlugQuery(realmSlug));
 }

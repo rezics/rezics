@@ -30,7 +30,8 @@ export const unitKeys = {
   /**
    * Keys for slug lookup queries
    */
-  bySlug: (slug: string) => [...unitKeys.all(), "slug", slug] as const,
+  bySlug: (unitSlug: string) =>
+    [...unitKeys.all(), "by-slug", { unitSlug }] as const,
 
   /**
    * Keys for search queries

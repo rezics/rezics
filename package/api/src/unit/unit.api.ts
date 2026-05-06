@@ -53,7 +53,10 @@ export const unitApi = {
   },
 
   /**
-   * Get single unit by id
+   * Get single unit by id.
+   *
+   * This is id-primary API access (`GET /unit/:unitId`), not browser public
+   * route construction. Public Unit URLs live in the frontend route contract.
    */
   get: async (unitId: string): Promise<UnitResponse> => {
     return apiFetch<UnitResponse>(`/unit/${unitId}`);
@@ -62,8 +65,8 @@ export const unitApi = {
   /**
    * Get single unit by slug
    */
-  getBySlug: async (slug: string): Promise<UnitResponse> => {
-    return apiFetch<UnitResponse>(`/unit/by-slug/${slug}`);
+  getBySlug: async (unitSlug: string): Promise<UnitResponse> => {
+    return apiFetch<UnitResponse>(`/unit/by-slug/${unitSlug}`);
   },
 
   /**

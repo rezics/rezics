@@ -13,13 +13,14 @@ const PROFILE_TABS = [
 
 interface ProfileTabBarProps {
   unitId: string;
+  userSlug?: string;
 }
 
-export const ProfileTabBar: FC<ProfileTabBarProps> = ({ unitId }) => {
+export const ProfileTabBar: FC<ProfileTabBarProps> = ({ unitId, userSlug }) => {
   const navigate = useNavigate();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
-  const basePath = `/user/${unitId}`;
+  const basePath = userSlug ? `/u/${userSlug}` : `/user/${unitId}`;
 
   const activeTab =
     PROFILE_TABS.find((tab, i) => {
@@ -34,6 +35,14 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({ unitId }) => {
       <Tabs
         value={activeTab.path}
         onValueChange={(value) => {
+          if (userSlug && value === "") {
+            void navigate({
+              to: "/u/$userSlug",
+              params: { userSlug },
+            });
+            return;
+          }
+
           void navigate({
             to: `/user/$unitId${value}`,
             params: { unitId },

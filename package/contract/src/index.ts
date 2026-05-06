@@ -19,6 +19,7 @@ export * from "./pagination";
 export * from "./permission";
 export * from "./post";
 export * from "./progress";
+export * from "./public-route";
 export * from "./reaction/index";
 export * from "./realm";
 export * from "./realm/realm-extra";

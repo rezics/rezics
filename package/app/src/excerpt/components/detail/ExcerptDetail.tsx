@@ -41,8 +41,12 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
       {excerpt.user && (
         <div className="flex items-center gap-3">
           <Link
-            to="/user/$unitId"
-            params={{ unitId: excerpt.user.unitId ?? "" }}
+            to={excerpt.user.slug ? "/u/$userSlug" : "/user/$unitId"}
+            params={
+              excerpt.user.slug
+                ? { userSlug: excerpt.user.slug }
+                : { unitId: excerpt.user.unitId ?? "" }
+            }
             className="flex items-center gap-3"
           >
             <LazyLoadImage
@@ -81,7 +85,8 @@ function ExcerptSourceLine({ source }: { source?: ExcerptSource | string }) {
   if (typeof source === "string") {
     return <p className="text-xs text-text-secondary">—— {source}</p>;
   }
-  const href = source.mode === "unit" ? `/unit/${source.unitId}` : source.url;
+  const href =
+    source.mode === "unit" ? `/unit/id/${source.unitId}` : source.url;
   return (
     <p className="text-xs text-text-secondary">
       ——{" "}

@@ -24,24 +24,40 @@ export function useProfileContext(): ProfileContextValue {
 }
 
 export const ProfileLayout: FC = () => {
-  const { unitId } = useParams({ strict: false }) as { unitId: string };
+  const { unitId: routeUnitId, userSlug } = useParams({ strict: false }) as {
+    unitId?: string;
+    userSlug?: string;
+  };
   const currentUser = useUserProfileStore((s) => s.user);
-  const isCurrentUser = currentUser?.unitId === unitId;
+  const isCurrentUser = routeUnitId
+    ? currentUser?.unitId === routeUnitId
+    : userSlug
+      ? currentUser?.slug === userSlug
+      : false;
 
   const meQuery = useQuery({
     ...userQueries.me(),
     enabled: isCurrentUser,
   });
   const detailQuery = useQuery({
-    ...userQueries.detail(unitId),
-    enabled: !isCurrentUser && !!unitId,
+    ...userQueries.detail(routeUnitId ?? ""),
+    enabled: !isCurrentUser && !!routeUnitId,
+  });
+  const slugQuery = useQuery({
+    ...userQueries.bySlug(userSlug ?? ""),
+    enabled: !isCurrentUser && !routeUnitId && !!userSlug,
   });
 
-  const user = (isCurrentUser ? meQuery.data : detailQuery.data) as
-    | UserDTO
-    | undefined;
-  const isLoading = meQuery.isLoading || detailQuery.isLoading;
-  const error = meQuery.error ?? detailQuery.error;
+  const user = (
+    isCurrentUser
+      ? meQuery.data
+      : routeUnitId
+        ? detailQuery.data
+        : slugQuery.data
+  ) as UserDTO | undefined;
+  const isLoading =
+    meQuery.isLoading || detailQuery.isLoading || slugQuery.isLoading;
+  const error = meQuery.error ?? detailQuery.error ?? slugQuery.error;
 
   if (isLoading) {
     return (
@@ -61,6 +77,8 @@ export const ProfileLayout: FC = () => {
     );
   }
 
+  const unitId = user.unitId;
+
   return (
     <ProfileContext.Provider value={{ user, isCurrentUser, unitId }}>
       <div className="w-full max-w-12/16 mx-auto">
@@ -72,7 +90,7 @@ export const ProfileLayout: FC = () => {
               unitId={unitId}
             />
           </aside>
-          <ProfileShell unitId={unitId} />
+          <ProfileShell unitId={unitId} userSlug={user.slug ?? userSlug} />
         </div>
       </div>
     </ProfileContext.Provider>
