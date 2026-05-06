@@ -1,5 +1,6 @@
 import { useAlertStore } from "@app/states/windowAlertStore.ts";
 import { bookMutations } from "@rezics/api/book/book.mutations";
+import { chapterMutations } from "@rezics/api/chapter/chapter.mutations";
 import type { ContentRating } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -20,6 +21,7 @@ import type {
   RenameHandler,
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
+import type { ChapterTreeOccurrence } from "@/book-library/models/bookIndexPath";
 import {
   findAndAddChild,
   findAndDelete,
@@ -45,9 +47,12 @@ import { Download as DownloadIcon, Save as SaveIcon } from "lucide-react";
 export type Chapter = {
   id: string | number;
   title: string;
+  chapterUnitId?: string;
+  path?: number[];
+  occurrenceId?: string;
   rating?: ContentRating;
   children?: Chapter[];
-};
+} & Partial<ChapterTreeOccurrence>;
 
 /** Context menu state. */
 export type ChapterContextMenuState = {
@@ -171,6 +176,7 @@ export const ChapterTreeEditor = forwardRef<
   );
 
   const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
+  const materializeChapterMutation = chapterMutations.useMaterialize();
   const { show: showAlert } = useAlertStore();
   const navigate = useNavigate();
 
@@ -263,13 +269,25 @@ export const ChapterTreeEditor = forwardRef<
 
   /** Navigate to the chapter content editor page. */
   const handleNavigateToChapter = useCallback(
-    (chapter: Chapter) => {
+    async (chapter: Chapter) => {
+      let chapterUnitId = chapter.chapterUnitId;
+      if (!chapterUnitId && chapter.path) {
+        const materialized = await materializeChapterMutation.mutateAsync({
+          bookUnitId,
+          input: {
+            path: chapter.path,
+            expectedTitle: chapter.title,
+          },
+        });
+        chapterUnitId = materialized.chapterUnitId;
+      }
+      if (!chapterUnitId) return;
       navigate({
         to: "/book/$bookId/edit/$chapterId",
-        params: { bookId: bookUnitId, chapterId: String(chapter.id) },
+        params: { bookId: bookUnitId, chapterId: chapterUnitId },
       });
     },
-    [navigate, bookUnitId],
+    [materializeChapterMutation, navigate, bookUnitId],
   );
 
   /** Save edits from the edit dialog (title rename + mock status). */
@@ -443,7 +461,7 @@ export const ChapterTreeEditor = forwardRef<
             rowHeight={LEAF_ROW_HEIGHT}
             disableDrag={!isSortingMode}
             disableDrop={!isSortingMode}
-            idAccessor="id"
+            idAccessor={(node) => node.occurrenceId ?? String(node.id)}
             searchTerm={searchTerm}
             searchMatch={(node, t) =>
               node.data.title.toLowerCase().includes(t.toLowerCase())

@@ -17,6 +17,10 @@ import {
   patchContentMetadataToMeili,
   syncContentToMeili,
 } from "@/meili/content/sync";
+import {
+  normalizeBookIndexValue,
+  normalizeLegacyBookIndex,
+} from "./book-index";
 import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
 import { bookInclude } from "./types";
@@ -167,7 +171,11 @@ export class BookService {
     const chapterIndex = await prisma.bookIndex.findUniqueOrThrow({
       where: { bookUnitId },
     });
-    return chapterIndex;
+    const normalizedIndex = await normalizeLegacyBookIndex(
+      chapterIndex.index,
+      prisma,
+    );
+    return { ...chapterIndex, index: normalizedIndex };
   }
 
   /**
@@ -243,7 +251,7 @@ export class BookService {
         isLicensed: req.isLicensed ?? false,
         extra: (req.extra ?? null) as Prisma.InputJsonValue,
         chapterIndex: {
-          create: { index: {} as Prisma.InputJsonValue },
+          create: { index: [] as Prisma.InputJsonValue },
         },
       },
       include: bookInclude,
@@ -324,9 +332,13 @@ export class BookService {
     unitId: string,
     chaptersIndex: Prisma.InputJsonValue,
   ): Promise<Prisma.InputJsonValue> {
+    const normalizedIndex = await normalizeLegacyBookIndex(
+      normalizeBookIndexValue(chaptersIndex),
+      prisma,
+    );
     const chapterIndex = await prisma.bookIndex.update({
       where: { bookUnitId: unitId },
-      data: { index: chaptersIndex || undefined },
+      data: { index: normalizedIndex as Prisma.InputJsonValue },
     });
     return chapterIndex;
   }

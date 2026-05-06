@@ -194,24 +194,37 @@ export const updateBookSchema = t.Object({
 export type UpdateBookInput = (typeof updateBookSchema)["static"];
 
 // ============================================================
-// CHAPTER TYPES (preserved from old schema)
+// BOOK INDEX / CHAPTER TREE TYPES
 // ============================================================
 
 export const bookIndexNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
   (self) =>
     t.Object({
-      id: t.String(),
       title: t.String(),
-      noContent: t.Boolean(),
+      chapterUnitId: t.Optional(t.String()),
+      noContent: t.Optional(t.Boolean()),
       rating: t.Optional(contentRatingSchema),
       children: t.Optional(t.Array(self)),
     }),
 );
 
+/**
+ * Path to a node occurrence in the current BookIndex forest.
+ *
+ * `[2, 4, 0]` means the first child of the fifth child of the third root node.
+ * A path locates a node in the current JSON structure only; it is not a stable
+ * global identity and may become stale after TOC edits or reordering.
+ */
+export type BookIndexPath = number[];
+
 export interface ChapterTreeItem {
-  id: string;
   title: string;
-  noContent: boolean;
+  /**
+   * Materialized Chapter Unit id. Optional and intentionally non-unique inside
+   * one BookIndex because multiple node occurrences may point at the same Unit.
+   */
+  chapterUnitId?: string;
+  noContent?: boolean;
   rating?: ContentRating;
   children?: ChapterTreeItem[];
 }

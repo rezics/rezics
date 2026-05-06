@@ -52,6 +52,13 @@ export const chapterParamsSchema = t.Object({
 
 export type ChapterParams = (typeof chapterParamsSchema)["static"];
 
+export const chapterMaterializeByBookPathParamsSchema = t.Object({
+  bookUnitId: t.String(),
+});
+
+export type ChapterMaterializeByBookPathParams =
+  (typeof chapterMaterializeByBookPathParamsSchema)["static"];
+
 export const chapterListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   q: t.Optional(t.String()),
@@ -115,6 +122,26 @@ export type ChapterListResponse = (typeof chapterListResponseSchema)["static"];
 
 export const chapterResponseSchema = chapterDetailSchema;
 export type ChapterResponse = (typeof chapterResponseSchema)["static"];
+
+export const chapterMaterializationRequestSchema = t.Object({
+  path: t.Array(t.Number()),
+  expectedTitle: t.Optional(t.String()),
+  expectedBookIndexUpdatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type ChapterMaterializationRequest =
+  (typeof chapterMaterializationRequestSchema)["static"];
+
+export const chapterMaterializationResponseSchema = t.Object({
+  bookUnitId: t.String(),
+  path: t.Array(t.Number()),
+  chapterUnitId: t.String(),
+  alreadyMaterialized: t.Boolean(),
+  bookIndexUpdatedAt: t.Union([t.String(), t.Date()]),
+});
+
+export type ChapterMaterializationResponse =
+  (typeof chapterMaterializationResponseSchema)["static"];
 
 export const createChapterSchema = t.Object({
   userId: t.String(),

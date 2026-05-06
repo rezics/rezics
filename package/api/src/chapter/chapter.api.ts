@@ -4,6 +4,8 @@
  */
 
 import type {
+  ChapterMaterializationRequest,
+  ChapterMaterializationResponse,
   ChapterListResponse,
   ChapterResponse,
   CreateChapterInput,
@@ -31,6 +33,22 @@ export const chapterApi = {
    */
   get: async (unitId: string): Promise<ChapterResponse> => {
     return apiFetch<ChapterResponse>(`/chapter/${unitId}`);
+  },
+
+  /**
+   * Materialize a chapter Unit for a BookIndex path, or return the existing one.
+   */
+  materializeByBookPath: async (
+    bookUnitId: string,
+    input: ChapterMaterializationRequest,
+  ): Promise<ChapterMaterializationResponse> => {
+    return apiFetch<ChapterMaterializationResponse>(
+      `/chapter/materialize/book/${bookUnitId}`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
   },
 
   /**

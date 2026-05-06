@@ -4,6 +4,7 @@
 
 import type {
   BookResponse,
+  ChapterTreeItem,
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
@@ -107,7 +108,7 @@ export function useUpdateChapterIndexMutation(
       Error,
       {
         bookUnitId: string;
-        chaptersIndex: any;
+        chaptersIndex: ChapterTreeItem[];
       }
     >,
     "mutationFn"

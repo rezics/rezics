@@ -1,10 +1,14 @@
 import {
+  chapterMaterializationRequestSchema,
+  chapterMaterializationResponseSchema,
+  chapterMaterializeByBookPathParamsSchema,
   chapterListBodySchema,
   chapterListQuerySchema,
   chapterListResponseSchema,
   chapterParamsSchema,
   chapterResponseSchema,
   createChapterSchema,
+  hasPermissionToUpdateBook,
   hasPermissionToDeleteChapter,
   hasPermissionToUpdateChapter,
   updateChapterSchema,
@@ -32,6 +36,56 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
       detail: {
         summary: "Get chapter",
         description: "Get a single chapter unit by unit ID",
+        tags: ["Chapters"],
+      },
+    },
+  )
+  .post(
+    "/materialize/book/:bookUnitId",
+    async ({ params, body, identity, set }) => {
+      const targetBookUnit = await unitService.getByUnitId(params.bookUnitId);
+      if (!targetBookUnit) {
+        set.status = 404;
+        throw new Error(`Book not found: ${params.bookUnitId}`);
+      }
+      if (
+        !hasPermissionToUpdateBook(
+          identity.permission,
+          identity.userId,
+          undefined,
+          targetBookUnit as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to materialize chapters",
+        );
+      }
+
+      try {
+        return await chapterService.materializeByBookPath(
+          params.bookUnitId,
+          body,
+          identity.userId,
+        );
+      } catch (error) {
+        if (error instanceof Error && error.message.startsWith("Conflict:")) {
+          set.status = 409;
+        }
+        throw error;
+      }
+    },
+    {
+      requireLogin: true,
+      params: chapterMaterializeByBookPathParamsSchema,
+      body: chapterMaterializationRequestSchema,
+      response: {
+        200: chapterMaterializationResponseSchema,
+      },
+      detail: {
+        summary: "Materialize chapter by BookIndex path",
+        description:
+          "Create or return the materialized chapter Unit for a BookIndex path",
         tags: ["Chapters"],
       },
     },

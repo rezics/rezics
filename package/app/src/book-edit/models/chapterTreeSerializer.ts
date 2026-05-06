@@ -1,4 +1,4 @@
-import type { ContentRating } from "@rezics/contract";
+import type { ChapterTreeItem, ContentRating } from "@rezics/contract";
 import type { Chapter } from "../components/ChapterTreeEditor";
 
 /**
@@ -13,8 +13,11 @@ export function serializeChapterTree(
   bookRating: ContentRating | undefined,
 ): Chapter[] {
   return tree.map((node) => {
-    const { rating, children, ...rest } = node;
-    const serialized: Chapter = { ...rest };
+    const { id, path, occurrenceId, rating, children, ...rest } = node;
+    void id;
+    void path;
+    void occurrenceId;
+    const serialized: ChapterTreeItem = { ...rest };
     if (rating !== undefined && rating !== bookRating) {
       serialized.rating = rating;
     }
@@ -22,5 +25,5 @@ export function serializeChapterTree(
       serialized.children = serializeChapterTree(children, bookRating);
     }
     return serialized;
-  });
+  }) as Chapter[];
 }

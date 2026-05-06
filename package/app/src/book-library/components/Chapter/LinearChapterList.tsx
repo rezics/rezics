@@ -1,10 +1,10 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
-import type { ChapterTreeItem } from "@rezics/contract";
 import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { withBookIndexOccurrences } from "../../models/bookIndexPath";
 import type { ChapterArboristRefHandle } from "./ChapterArborist";
 import { ChapterArborist } from "./ChapterArborist";
 
@@ -34,8 +34,8 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   const selectedId = chapterId || "";
   const baseLink = bookId;
 
-  const chapterTree: ChapterTreeItem[] = useMemo(
-    () => data?.index ?? [],
+  const chapterTree = useMemo(
+    () => withBookIndexOccurrences(data?.index ?? []),
     [data],
   );
 

@@ -7,6 +7,7 @@ import type {
   BookListResponse,
   BookResponse,
   ChapterIndexResponse,
+  ChapterTreeItem,
   CreateBookInput,
   ScoreAggregateDTO,
   UpdateBookInput,
@@ -56,7 +57,7 @@ export const bookApi = {
    */
   updateChapterIndex: async (
     bookUnitId: string,
-    chaptersIndex: any,
+    chaptersIndex: ChapterTreeItem[],
   ): Promise<ChapterIndexResponse> => {
     return apiFetch<ChapterIndexResponse>(`/book/${bookUnitId}/chapterIndex`, {
       method: "PUT",

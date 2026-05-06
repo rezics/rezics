@@ -8,14 +8,11 @@ import {
   useState,
 } from "react";
 import { Tree, type TreeApi } from "react-arborist";
+import type { ChapterTreeOccurrence } from "../../models/bookIndexPath";
 import { createChapterArboristNode } from "./ChapterArboristNode.tsx";
 
 /** Chapter tree node structure for arborist. */
-export type Chapter = {
-  id: string | number;
-  title: string;
-  children?: Chapter[];
-};
+export type Chapter = ChapterTreeOccurrence;
 
 /** Imperative handle for ChapterArborist component. */
 export interface ChapterArboristRefHandle {
@@ -88,7 +85,7 @@ export const ChapterArborist = forwardRef<
           rowHeight={32}
           disableDrag={true}
           disableDrop={true}
-          idAccessor="id"
+          idAccessor={(node) => node.occurrenceId}
           searchTerm={searchTerm}
           selection={selectedId ?? ""}
           searchMatch={(node, t) =>

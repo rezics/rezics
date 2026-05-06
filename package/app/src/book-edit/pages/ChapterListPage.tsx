@@ -1,6 +1,6 @@
 import { bookChapterIndexQuery } from "@rezics/api/book/book";
 import { bookQueries } from "@rezics/api/book/book.queries";
-import type { ChapterTreeItem, ContentRating } from "@rezics/contract";
+import type { ContentRating } from "@rezics/contract";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
@@ -8,8 +8,10 @@ import { useMemo, useRef, useState } from "react";
 import { ChapterTreeJsonEditor } from "@/book-library/components/Chapter/ChapterTreeJsonEditor";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { bookEditLayoutRoute } from "@/router";
+import { withBookIndexOccurrences } from "@/book-library/models/bookIndexPath";
 import {
   ChapterTreeEditor,
+  type Chapter,
   type ChapterTreeEditorHandle,
 } from "../components/ChapterTreeEditor";
 
@@ -22,8 +24,8 @@ export const BookEditChapterListPage: React.FC = () => {
   const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
   const { data: bookData } = useQuery(bookQueries.detail(bookId));
 
-  const chapterTree: ChapterTreeItem[] = useMemo(
-    () => data?.index ?? [],
+  const chapterTree: Chapter[] = useMemo(
+    () => withBookIndexOccurrences(data?.index ?? []),
     [data],
   );
   const bookRating = (bookData?.rating ?? "GENERAL") as ContentRating;

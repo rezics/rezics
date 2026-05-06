@@ -22,6 +22,8 @@ export const chapterKeys = {
    */
   details: () => [...chapterKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...chapterKeys.details(), unitId] as const,
+  materialization: (bookUnitId: string, path: number[]) =>
+    [...chapterKeys.all(), "materialization", bookUnitId, path] as const,
 
   /**
    * Keys for search queries

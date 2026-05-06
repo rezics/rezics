@@ -21,6 +21,13 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useChapterListStore } from "@/book-library/states/chapterListStore";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import {
+  EMPTY_CHAPTER_ROUTE_ID,
+  encodeBookIndexPath,
+  materializedOrPathId,
+  type ChapterTreeOccurrence,
+  withBookIndexOccurrences,
+} from "../../models/bookIndexPath";
 
 export type ChapterTreeHandle = {
   expandAll: () => void;
@@ -32,7 +39,7 @@ export type ChapterTreeHandle = {
 
 type ChapterLeafProps = {
   bookId: string;
-  node: ChapterTreeItem;
+  node: ChapterTreeOccurrence;
 };
 
 export const ChapterLeaf = React.memo(function ChapterLeaf({
@@ -50,7 +57,15 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   const content = (
     <Link
       to="/book/$bookId/read/$chapterId"
-      params={{ bookId, chapterId: node.id }}
+      params={{
+        bookId,
+        chapterId: node.chapterUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
+      }}
+      search={
+        node.chapterUnitId
+          ? undefined
+          : { path: encodeBookIndexPath(node.path), title: node.title }
+      }
       className="block hover:text-brand"
     >
       <p className="truncate p-2 rounded-md transition-colors duration-200">
@@ -71,14 +86,14 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   );
 });
 
-function getAllExpandableIds(nodes: ChapterTreeItem[]): Set<string> {
+function getAllExpandableIds(nodes: ChapterTreeOccurrence[]): Set<string> {
   const set = new Set<string>();
   const stack = [...nodes];
   while (stack.length) {
     const n = stack.pop()!;
     const children = n.children ?? [];
     if (children.length > 0) {
-      set.add(String(n.id));
+      set.add(materializedOrPathId(n));
       for (let i = 0; i < children.length; i++) stack.push(children[i]);
     }
   }
@@ -87,7 +102,7 @@ function getAllExpandableIds(nodes: ChapterTreeItem[]): Set<string> {
 
 export type ChapterTreeProps = {
   bookId: string;
-  nodes: ChapterTreeItem[];
+  nodes: ChapterTreeOccurrence[];
   expanded: Set<string>;
   onToggle: (id: string) => void;
   renderGroupActions?: boolean;
@@ -117,18 +132,21 @@ const ChapterTreeItems = React.memo(function ChapterTreeItems({
         const hasChildren = children.length > 0;
 
         if (!hasChildren) {
-          return <ChapterLeaf key={node.id} bookId={bookId} node={node} />;
+          return (
+            <ChapterLeaf key={node.occurrenceId} bookId={bookId} node={node} />
+          );
         }
 
-        const isOpen = expanded.has(String(node.id));
+        const nodeKey = materializedOrPathId(node);
+        const isOpen = expanded.has(nodeKey);
 
         return (
-          <React.Fragment key={node.id}>
+          <React.Fragment key={node.occurrenceId}>
             <div className="col-span-full flex items-center justify-between">
               <button
                 type="button"
                 className="text-xl font-semibold mb-2 cursor-pointer text-left"
-                onClick={() => onToggle(String(node.id))}
+                onClick={() => onToggle(nodeKey)}
               >
                 {node.title}
               </button>
@@ -137,7 +155,7 @@ const ChapterTreeItems = React.memo(function ChapterTreeItems({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onToggle(String(node.id))}
+                  onClick={() => onToggle(nodeKey)}
                 >
                   {isOpen ? "Collapse" : "Expand"}
                 </Button>
@@ -184,7 +202,7 @@ const ChapterTreeInner = React.memo(function ChapterTreeInner({
 
 type ChapterTreeViewProps = {
   bookId: string;
-  nodes: ChapterTreeItem[];
+  nodes: ChapterTreeOccurrence[];
   /**
    * Optional: persist expanded ids externally (e.g. Zustand store).
    * If provided, component will read initial expanded ids from it once on mount,
@@ -335,6 +353,10 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     () => data?.index ?? [],
     [data],
   );
+  const chapterOccurrences = useMemo(
+    () => withBookIndexOccurrences(chapterTree),
+    [chapterTree],
+  );
 
   const treeRef = React.useRef<ChapterTreeHandle>(null);
 
@@ -362,7 +384,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
       <ChapterTreeView
         ref={treeRef}
         bookId={id}
-        nodes={chapterTree}
+        nodes={chapterOccurrences}
         storageKey={id}
         defaultExpandAll={true}
       />

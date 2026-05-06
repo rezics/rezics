@@ -4,6 +4,10 @@ import {
   ChevronRight as KeyboardArrowRightIcon,
 } from "lucide-react";
 import type { NodeRendererProps } from "react-arborist";
+import {
+  EMPTY_CHAPTER_ROUTE_ID,
+  encodeBookIndexPath,
+} from "../../models/bookIndexPath";
 import type { Chapter } from "./ChapterArborist";
 
 /**
@@ -51,7 +55,18 @@ export const createChapterArboristNode = (bookId: string) => {
           ) : (
             <Link
               to="/book/$bookId/read/$chapterId"
-              params={{ bookId, chapterId: String(node.id) }}
+              params={{
+                bookId,
+                chapterId: node.data.chapterUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
+              }}
+              search={
+                node.data.chapterUnitId
+                  ? undefined
+                  : {
+                      path: encodeBookIndexPath(node.data.path),
+                      title: node.data.title,
+                    }
+              }
             >
               <span className="block truncate">{node.data.title}</span>
             </Link>

@@ -1,8 +1,15 @@
 import type {
+  ChapterMaterializationRequest,
+  ChapterMaterializationResponse,
   ChapterListQuery,
   CreateChapterInput,
   UpdateChapterInput,
 } from "@rezics/contract";
+import {
+  getBookIndexNode,
+  normalizeBookIndexValue,
+  updateBookIndexNode,
+} from "@/book/book-index";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
@@ -181,6 +188,107 @@ export class ChapterService {
         where: { unitId: unit.id },
         include: chapterPostInclude,
       });
+    });
+  }
+
+  async materializeByBookPath(
+    bookUnitId: string,
+    req: ChapterMaterializationRequest,
+    userId: string,
+  ): Promise<ChapterMaterializationResponse> {
+    return prisma.$transaction(async (tx) => {
+      const book = await tx.unit.findUnique({
+        where: { id: bookUnitId },
+        select: { id: true, type: true, defaultLanguage: true },
+      });
+      if (!book || book.type !== UnitType.BOOK) {
+        throw new Error(`bookUnitId must reference a Unit(type=BOOK)`);
+      }
+
+      await tx.$queryRaw`
+        SELECT "bookUnitId"
+        FROM "BookIndex"
+        WHERE "bookUnitId" = ${bookUnitId}
+        FOR UPDATE
+      `;
+
+      const bookIndex = await tx.bookIndex.findUniqueOrThrow({
+        where: { bookUnitId },
+      });
+
+      if (
+        req.expectedBookIndexUpdatedAt &&
+        new Date(req.expectedBookIndexUpdatedAt).getTime() !==
+          new Date(bookIndex.updatedAt).getTime()
+      ) {
+        throw new Error("Conflict: BookIndex has changed");
+      }
+
+      const index = normalizeBookIndexValue(bookIndex.index);
+      const node = getBookIndexNode(index, req.path);
+      if (!node) {
+        throw new Error("Conflict: BookIndex path does not resolve");
+      }
+      if (req.expectedTitle && node.title !== req.expectedTitle) {
+        throw new Error("Conflict: BookIndex path no longer matches title");
+      }
+
+      if (node.chapterUnitId) {
+        return {
+          bookUnitId,
+          path: req.path,
+          chapterUnitId: node.chapterUnitId,
+          alreadyMaterialized: true,
+          bookIndexUpdatedAt: bookIndex.updatedAt,
+        };
+      }
+
+      const language = book.defaultLanguage ?? "en";
+      const unit = await tx.unit.create({
+        data: {
+          userId,
+          type: UnitType.POST,
+          status: UnitStatus.PUBLISHED,
+          defaultLanguage: language,
+          rating: (node.rating as ContentRating | undefined) ?? undefined,
+          translations: {
+            create: {
+              language,
+              title: node.title,
+            },
+          },
+        },
+      });
+
+      await tx.post.create({
+        data: {
+          unitId: unit.id,
+          authorUserId: userId,
+          targetUnitId: bookUnitId,
+          kind: PostKind.CHAPTER,
+          body: "",
+          rootPostUnitId: unit.id,
+          depth: 0,
+        },
+      });
+
+      const updatedIndex = updateBookIndexNode(index, req.path, (current) => ({
+        ...current,
+        chapterUnitId: unit.id,
+      }));
+
+      const updatedBookIndex = await tx.bookIndex.update({
+        where: { bookUnitId },
+        data: { index: updatedIndex as Prisma.InputJsonValue },
+      });
+
+      return {
+        bookUnitId,
+        path: req.path,
+        chapterUnitId: unit.id,
+        alreadyMaterialized: false,
+        bookIndexUpdatedAt: updatedBookIndex.updatedAt,
+      };
     });
   }
 

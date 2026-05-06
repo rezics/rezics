@@ -3,6 +3,8 @@
  */
 
 import type {
+  ChapterMaterializationRequest,
+  ChapterMaterializationResponse,
   ChapterResponse,
   CreateChapterInput,
   UpdateChapterInput,
@@ -12,6 +14,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { bookKeys } from "../book/book.keys";
 import { chapterApi } from "./chapter.api";
 import { chapterKeys } from "./chapter.keys";
 
@@ -98,10 +101,44 @@ export function useDeleteChapterMutation(
 }
 
 /**
+ * Mutation for materializing a BookIndex node into a chapter Unit.
+ */
+export function useMaterializeChapterMutation(
+  options?: Omit<
+    UseMutationOptions<
+      ChapterMaterializationResponse,
+      Error,
+      { bookUnitId: string; input: ChapterMaterializationRequest }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ bookUnitId, input }) =>
+      chapterApi.materializeByBookPath(bookUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: bookKeys.chapterIndex(variables.bookUnitId),
+      });
+      queryClient.invalidateQueries({ queryKey: chapterKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: chapterKeys.byTargetUnit(variables.bookUnitId),
+      });
+
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
  * Combined mutations export
  */
 export const chapterMutations = {
   useCreate: useCreateChapterMutation,
   useUpdate: useUpdateChapterMutation,
   useDelete: useDeleteChapterMutation,
+  useMaterialize: useMaterializeChapterMutation,
 };
