@@ -40,11 +40,14 @@ export function validateBookIndexPath(path: number[]): number[] {
 }
 
 export function normalizeBookIndexValue(value: unknown): ChapterTreeItem[] {
-  if (Array.isArray(value)) return value.map(normalizeBookIndexNode);
+  if (Array.isArray(value)) return value.map((node) => normalizeBookIndexNode(node));
   return [];
 }
 
-export function normalizeBookIndexNode(value: unknown): ChapterTreeItem {
+export function normalizeBookIndexNode(
+  value: unknown,
+  options: { readLegacyId?: boolean } = {},
+): ChapterTreeItem {
   const source = isObject(value) ? value : {};
   const node: ChapterTreeItem = {
     title: typeof source.title === "string" ? source.title : "",
@@ -53,7 +56,7 @@ export function normalizeBookIndexNode(value: unknown): ChapterTreeItem {
   const chapterUnitId =
     typeof source.chapterUnitId === "string"
       ? source.chapterUnitId
-      : typeof source.id === "string"
+      : options.readLegacyId && typeof source.id === "string"
         ? source.id
         : undefined;
   if (chapterUnitId) node.chapterUnitId = chapterUnitId;
@@ -62,10 +65,19 @@ export function normalizeBookIndexNode(value: unknown): ChapterTreeItem {
     node.rating = source.rating as ContentRating;
   }
   if (Array.isArray(source.children)) {
-    node.children = source.children.map(normalizeBookIndexNode);
+    node.children = source.children.map((child) =>
+      normalizeBookIndexNode(child, options),
+    );
   }
 
   return node;
+}
+
+export function normalizeLegacyBookIndexValue(value: unknown): ChapterTreeItem[] {
+  if (Array.isArray(value)) {
+    return value.map((node) => normalizeBookIndexNode(node, { readLegacyId: true }));
+  }
+  return [];
 }
 
 export function getBookIndexNode(
@@ -144,4 +156,12 @@ export async function normalizeLegacyBookIndex(
   }
 
   return stripUnknown(normalized);
+}
+
+export async function migrateLegacyBookIndexIds(
+  index: unknown,
+  tx: Pick<Prisma.TransactionClient, "unit">,
+): Promise<ChapterTreeItem[]> {
+  const normalized = normalizeLegacyBookIndexValue(index);
+  return normalizeLegacyBookIndex(normalized, tx);
 }

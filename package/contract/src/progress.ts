@@ -51,11 +51,43 @@ export const userExtraSchema = t.Object({
 
 export type UserExtra = (typeof userExtraSchema)["static"];
 
+export const bookIndexPathLastPositionSchema = t.Object(
+  {
+    kind: t.Literal("bookIndexPath"),
+    bookUnitId: t.String(),
+    path: t.Array(t.Integer({ minimum: 0 })),
+    chapterUnitId: t.Optional(t.String()),
+  },
+  { additionalProperties: false },
+);
+
+export type BookIndexPathLastPosition =
+  (typeof bookIndexPathLastPositionSchema)["static"];
+
+export const chapterLastPositionSchema = t.Object(
+  {
+    kind: t.Literal("chapter"),
+    chapterUnitId: t.String(),
+    offset: t.Optional(t.Number({ minimum: 0 })),
+  },
+  { additionalProperties: false },
+);
+
+export type ChapterLastPosition =
+  (typeof chapterLastPositionSchema)["static"];
+
+export const unitLastPositionSchema = t.Union([
+  bookIndexPathLastPositionSchema,
+  chapterLastPositionSchema,
+]);
+
+export type UnitLastPosition = (typeof unitLastPositionSchema)["static"];
+
 export const unitProgressUpsertBodySchema = t.Object({
   progress: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
   status: t.Optional(userUnitProgressStatusSchema),
   completedCount: t.Optional(t.Integer({ minimum: 0 })),
-  lastPosition: t.Optional(t.Nullable(t.String())),
+  lastPosition: t.Optional(t.Nullable(unitLastPositionSchema)),
   addTimeMs: t.Optional(t.Integer({ minimum: 0 })),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });
@@ -76,7 +108,7 @@ export const unitProgressRowDTOSchema = t.Object({
   status: userUnitProgressStatusSchema,
   completedCount: t.Number({ minimum: 0 }),
   totalTimeMs: t.Number({ minimum: 0 }),
-  lastPosition: t.Nullable(t.String()),
+  lastPosition: t.Nullable(unitLastPositionSchema),
   firstSeenAt: t.String(),
   lastSeenAt: t.String(),
   extra: t.Nullable(t.Record(t.String(), t.Any())),

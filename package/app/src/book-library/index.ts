@@ -84,6 +84,10 @@ export {
 // ============================================================================
 
 export {
+  useEnsureChapterUnit,
+  type EnsureChapterUnitInput,
+} from "./hooks/useEnsureChapterUnit";
+export {
   type Book,
   type BookDetailLoadingState,
   bookDetailAtomFamily,

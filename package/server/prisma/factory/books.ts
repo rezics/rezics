@@ -76,7 +76,7 @@ export async function seedBooks(
               ]),
               extra: generateBookExtra(),
               chapterIndex: {
-                create: { index: {} as Prisma.InputJsonValue },
+                create: { index: [] as Prisma.InputJsonValue },
               },
             },
           },
@@ -168,7 +168,8 @@ export async function seedChaptersForBook(
   const topLevelCount = Math.max(1, Math.min(6, Math.ceil(totalChapters / 40)));
   const useBatch = totalChapters > CHAPTER_BATCH_THRESHOLD;
 
-  const tree: ChapterTreeItem[] = [];
+  type FactoryChapterTreeItem = ChapterTreeItem & { id?: string };
+  const tree: FactoryChapterTreeItem[] = [];
 
   // Distribute children as evenly as possible across top-level parents
   const childCounts: number[] = Array.from(
@@ -185,15 +186,13 @@ export async function seedChaptersForBook(
   }
   const parentRows: ChapterUnitRow[] = [];
   const childRows: ChapterUnitRow[] = [];
-  const childTreeByParent: ChapterTreeItem[][] = [];
 
   for (let t = 0; t < topLevelCount; t++) {
     const parentTitle = generateTitle(2, 4);
     const parentId = randomUUID();
     parentRows.push({ id: parentId, title: parentTitle });
 
-    const children: ChapterTreeItem[] = [];
-    childTreeByParent.push(children);
+    const children: FactoryChapterTreeItem[] = [];
 
     const childCount = childCounts[t]!;
     for (let c = 0; c < childCount; c++) {
@@ -225,7 +224,16 @@ export async function seedChaptersForBook(
     () => Math.random() < chapterPlan.unitProbability,
   );
 
-  if (materializedRows.length === 0) return tree;
+  function serializeTree(nodes: FactoryChapterTreeItem[]): ChapterTreeItem[] {
+    const materializedIds = new Set(materializedRows.map((row) => row.id));
+    return nodes.map(({ id, children, ...node }) => ({
+      ...node,
+      ...(id && materializedIds.has(id) ? { chapterUnitId: id } : {}),
+      ...(children ? { children: serializeTree(children) } : {}),
+    }));
+  }
+
+  if (materializedRows.length === 0) return serializeTree(tree);
 
   if (useBatch) {
     for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
@@ -308,7 +316,7 @@ export async function seedChaptersForBook(
     });
   }
 
-  return tree;
+  return serializeTree(tree);
 }
 
 export async function updateChapterIndex(

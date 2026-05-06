@@ -108,7 +108,7 @@ export class ProgressService {
         completedCount ??
         (coercedStatus === UserUnitProgressStatus.COMPLETED ? 1 : 0),
       totalTimeMs: addTimeMs,
-      lastPosition: input.lastPosition ?? null,
+      lastPosition: (input.lastPosition ?? null) as Prisma.InputJsonValue,
       extra:
         input.extra !== undefined
           ? ((input.extra ?? null) as Prisma.InputJsonValue)
@@ -123,7 +123,9 @@ export class ProgressService {
       ...(coercedStatus !== undefined ? { status: coercedStatus } : {}),
       ...(completedCount !== undefined ? { completedCount } : {}),
       ...(input.lastPosition !== undefined
-        ? { lastPosition: input.lastPosition }
+        ? {
+            lastPosition: (input.lastPosition ?? null) as Prisma.InputJsonValue,
+          }
         : {}),
       ...(input.extra !== undefined
         ? { extra: (input.extra ?? null) as Prisma.InputJsonValue }

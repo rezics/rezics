@@ -2,6 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import {
   BookIndexPathError,
   getBookIndexNode,
+  migrateLegacyBookIndexIds,
   normalizeLegacyBookIndex,
   parseBookIndexPath,
   updateBookIndexNode,
@@ -47,7 +48,7 @@ describe("BookIndex helpers", () => {
     expect(index[1]?.children?.[0]?.chapterUnitId).toBeUndefined();
   });
 
-  test("drops legacy ids that are not materialized Unit ids", async () => {
+  test("normalization ignores legacy id fields during normal reads", async () => {
     const tx = {
       unit: {
         findMany: mock(async () => [{ id: "chapter-1" }]),
@@ -55,6 +56,27 @@ describe("BookIndex helpers", () => {
     };
 
     const next = await normalizeLegacyBookIndex(
+      [
+        { id: "chapter-1", title: "Materialized" },
+        { id: "imported-local-1", title: "Imported" },
+      ],
+      tx as any,
+    );
+
+    expect(next).toEqual([
+      { title: "Materialized" },
+      { title: "Imported" },
+    ]);
+  });
+
+  test("migration maps legacy ids only when they are materialized Unit ids", async () => {
+    const tx = {
+      unit: {
+        findMany: mock(async () => [{ id: "chapter-1" }]),
+      },
+    };
+
+    const next = await migrateLegacyBookIndexIds(
       [
         { id: "chapter-1", title: "Materialized" },
         { id: "imported-local-1", title: "Imported" },

@@ -112,6 +112,24 @@ describe("ProgressService", () => {
     expect(update.extra).toBeUndefined();
   });
 
+  test("persists typed JSON lastPosition values", async () => {
+    const { progressService } = await import("./progress.service");
+    const lastPosition = {
+      kind: "bookIndexPath" as const,
+      bookUnitId: "book-1",
+      path: [0, 2],
+      chapterUnitId: "chapter-1",
+    };
+
+    await progressService.upsert("user-1", "book-1", {
+      lastPosition,
+    });
+
+    const args = firstArg(mockUpsert);
+    expect(args.create.lastPosition).toEqual(lastPosition);
+    expect(args.update.lastPosition).toEqual(lastPosition);
+  });
+
   test("rejects invalid progress and negative addTimeMs", async () => {
     const { progressService } = await import("./progress.service");
 

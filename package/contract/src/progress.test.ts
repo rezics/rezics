@@ -1,10 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  bookIndexPathLastPositionSchema,
+  chapterLastPositionSchema,
   SYSTEM_SHELF_KIND_KEYS,
   unitProgressListResponseSchema,
   unitProgressRowDTOSchema,
   unitProgressUpsertBodySchema,
+  unitLastPositionSchema,
   userExtraSchema,
   userUnitProgressStatusValues,
 } from "./progress";
@@ -32,7 +35,12 @@ describe("progress contract schemas", () => {
         progress: 0.5,
         status: "ACTIVE",
         completedCount: 2,
-        lastPosition: "chapter-1#0.5",
+        lastPosition: {
+          kind: "bookIndexPath",
+          bookUnitId: "book-1",
+          path: [2, 4, 0],
+          chapterUnitId: "chapter-1",
+        },
         addTimeMs: 1000,
         extra: { device: "web" },
       }),
@@ -45,6 +53,42 @@ describe("progress contract schemas", () => {
     );
     expect(
       Value.Check(unitProgressUpsertBodySchema, { completedCount: -1 }),
+    ).toBe(false);
+    expect(
+      Value.Check(unitProgressUpsertBodySchema, {
+        lastPosition: "chapter-1#0.5",
+      }),
+    ).toBe(false);
+  });
+
+  test("validates typed last-position variants", () => {
+    expect(
+      Value.Check(bookIndexPathLastPositionSchema, {
+        kind: "bookIndexPath",
+        bookUnitId: "book-1",
+        path: [0, 2],
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(chapterLastPositionSchema, {
+        kind: "chapter",
+        chapterUnitId: "chapter-1",
+        offset: 0.42,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(unitLastPositionSchema, {
+        kind: "bookIndexPath",
+        bookUnitId: "book-1",
+        path: [-1],
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(unitLastPositionSchema, {
+        kind: "chapter",
+        chapterUnitId: "chapter-1",
+        offset: -0.1,
+      }),
     ).toBe(false);
   });
 

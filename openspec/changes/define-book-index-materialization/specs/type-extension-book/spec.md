@@ -233,9 +233,10 @@ The system SHALL migrate legacy BookIndex nodes that contain `id` as chapter Uni
 - THEN the persisted node SHALL become `{ "title": "Chapter One", "chapterUnitId": "chapter-1" }`
 - AND the persisted node SHALL NOT contain `id`
 
-#### Scenario: Preserve legacy unknown id as metadata only during compatibility normalization
+#### Scenario: Drop legacy unknown id during dev migration
 
 - GIVEN a legacy BookIndex node contains `id = "imported-local-1"` that does not reference an existing Chapter Unit
-- WHEN the compatibility normalizer reads the node
+- WHEN the dev-stage migration runs
 - THEN it SHALL NOT treat `imported-local-1` as a `chapterUnitId`
 - AND it SHALL NOT create a Chapter Unit only to preserve the old `id`
+- AND the persisted node SHALL NOT contain `id`

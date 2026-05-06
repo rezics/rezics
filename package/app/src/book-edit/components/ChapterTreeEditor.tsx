@@ -1,8 +1,10 @@
 import { useAlertStore } from "@app/states/windowAlertStore.ts";
 import { bookMutations } from "@rezics/api/book/book.mutations";
 import { chapterMutations } from "@rezics/api/chapter/chapter.mutations";
+import { chapterDetailQuery } from "@rezics/api/chapter/chapter.queries";
 import type { ContentRating } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import {
@@ -22,6 +24,7 @@ import type {
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
 import type { ChapterTreeOccurrence } from "@/book-library/models/bookIndexPath";
+import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
 import {
   findAndAddChild,
   findAndDelete,
@@ -176,7 +179,9 @@ export const ChapterTreeEditor = forwardRef<
   );
 
   const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
-  const materializeChapterMutation = chapterMutations.useMaterialize();
+  const updateChapterMutation = chapterMutations.useUpdate();
+  const ensureChapterUnit = useEnsureChapterUnit(bookUnitId);
+  const queryClient = useQueryClient();
   const { show: showAlert } = useAlertStore();
   const navigate = useNavigate();
 
@@ -219,9 +224,9 @@ export const ChapterTreeEditor = forwardRef<
     setTreeData((current) => findAndDelete(current, ids) as Chapter[]);
   }, []);
 
-  function saveTree(data: Chapter[]) {
+  async function saveTree(data: Chapter[]) {
     try {
-      updateChapterIndexMutation.mutateAsync({
+      await updateChapterIndexMutation.mutateAsync({
         bookUnitId,
         chaptersIndex: serializeChapterTree(data, bookRating),
       });
@@ -244,7 +249,7 @@ export const ChapterTreeEditor = forwardRef<
       updated = [...treeData, newNode];
     }
     setTreeData(updated);
-    saveTree(updated);
+    void saveTree(updated);
   }
 
   function handlePreCreate(parentId: string | number | null) {
@@ -270,24 +275,13 @@ export const ChapterTreeEditor = forwardRef<
   /** Navigate to the chapter content editor page. */
   const handleNavigateToChapter = useCallback(
     async (chapter: Chapter) => {
-      let chapterUnitId = chapter.chapterUnitId;
-      if (!chapterUnitId && chapter.path) {
-        const materialized = await materializeChapterMutation.mutateAsync({
-          bookUnitId,
-          input: {
-            path: chapter.path,
-            expectedTitle: chapter.title,
-          },
-        });
-        chapterUnitId = materialized.chapterUnitId;
-      }
-      if (!chapterUnitId) return;
+      const chapterUnitId = await ensureChapterUnit(chapter);
       navigate({
         to: "/book/$bookId/edit/$chapterId",
         params: { bookId: bookUnitId, chapterId: chapterUnitId },
       });
     },
-    [materializeChapterMutation, navigate, bookUnitId],
+    [ensureChapterUnit, navigate, bookUnitId],
   );
 
   /** Save edits from the edit dialog (title rename + mock status). */
@@ -368,8 +362,9 @@ export const ChapterTreeEditor = forwardRef<
   );
 
   /** Bulk-edit: set rating for only the selected leaf chapters, then save. */
-  function applyBulkRating(rating: ContentRating) {
+  async function applyBulkRating(rating: ContentRating) {
     const ids = selectedIds;
+    const materializedChapterIds: string[] = [];
     function walk(nodes: Chapter[]): Chapter[] {
       return nodes.map((node) => {
         const next: Chapter = { ...node };
@@ -378,25 +373,73 @@ export const ChapterTreeEditor = forwardRef<
           return next;
         }
         if (ids.has(String(node.id))) {
+          if (node.chapterUnitId) {
+            materializedChapterIds.push(node.chapterUnitId);
+          }
           next.rating = rating;
         }
         return next;
       });
     }
     const updated = walk(treeData);
+    await Promise.all(
+      [...new Set(materializedChapterIds)].map((unitId) =>
+        updateChapterMutation.mutateAsync({
+          unitId,
+          input: { rating },
+        }),
+      ),
+    );
     setTreeData(updated);
-    saveTree(updated);
+    await saveTree(updated);
     setBulkRatingOpen(false);
     setSelectedIds(new Set());
     setIsSelectionMode(false);
   }
 
-  /** Resync: recompute index overrides from current chapter ratings (noop placeholder). */
-  // MOCK: real implementation fetches each chapter's persisted rating from the
-  // chapter service and rewrites the index. For now, resaving the tree through
-  // `serializeChapterTree` is equivalent — it reapplies the strip-if-equal rule.
-  function handleResyncOverrides() {
-    saveTree(treeData);
+  /** Resync: recompute index overrides from current materialized chapter ratings. */
+  async function handleResyncOverrides() {
+    const ratingByChapterId = new Map<string, ContentRating | undefined>();
+
+    async function collect(nodes: Chapter[]) {
+      for (const node of nodes) {
+        if (node.chapterUnitId && !ratingByChapterId.has(node.chapterUnitId)) {
+          const chapter = await queryClient.ensureQueryData(
+            chapterDetailQuery(node.chapterUnitId),
+          );
+          ratingByChapterId.set(
+            node.chapterUnitId,
+            chapter.rating as ContentRating | undefined,
+          );
+        }
+        if (node.children) await collect(node.children);
+      }
+    }
+
+    function rewrite(nodes: Chapter[]): Chapter[] {
+      return nodes.map((node) => {
+        const next: Chapter = { ...node };
+        if (node.children) {
+          next.children = rewrite(node.children);
+        }
+        if (node.chapterUnitId) {
+          const chapterRating = ratingByChapterId.get(node.chapterUnitId);
+          if (chapterRating === undefined || chapterRating === bookRating) {
+            delete next.rating;
+          } else {
+            next.rating = chapterRating;
+          }
+        } else if (next.rating === bookRating) {
+          delete next.rating;
+        }
+        return next;
+      });
+    }
+
+    await collect(treeData);
+    const updated = rewrite(treeData);
+    setTreeData(updated);
+    await saveTree(updated);
   }
 
   const chapterCount = useMemo(() => countChapters(treeData), [treeData]);
@@ -421,7 +464,7 @@ export const ChapterTreeEditor = forwardRef<
         }}
         selectedCount={selectedIds.size}
         onBulkSetRating={() => setBulkRatingOpen(true)}
-        onResyncOverrides={handleResyncOverrides}
+        onResyncOverrides={() => void handleResyncOverrides()}
       />
 
       {/* Tree area — flex-1 fills remaining space; min-h provides scroll fallback */}
@@ -540,7 +583,7 @@ export const ChapterTreeEditor = forwardRef<
         count={selectedIds.size}
         value={bulkRating}
         onChange={setBulkRating}
-        onConfirm={() => applyBulkRating(bulkRating)}
+        onConfirm={() => void applyBulkRating(bulkRating)}
       />
     </div>
   );
