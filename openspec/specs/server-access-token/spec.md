@@ -2,31 +2,34 @@
 
 ### Requirement: Server issues rezics-session-token via exchange endpoint
 
-The server SHALL expose `POST /session/exchange` that accepts an `x-auth-session-token` header containing an auth-issued JWT. The endpoint SHALL verify the JWT against the auth service's JWKS, extract `unitId` from the `sub` claim, look up the user's current role from the server database, and return a signed `rezics-session-token` JWT.
+The server SHALL expose `POST /auth/session/refresh` as the browser session refresh endpoint. The endpoint SHALL accept the auth session httpOnly cookie, validate it by calling auth internally, derive the actor `userId` from validated auth session state, look up or provision the user's main record and current role from the server database, and set a signed `rezics-session-token` httpOnly cookie. The endpoint SHALL NOT require or accept browser-provided `x-auth-session-token` JWT exchange for normal web flows.
 
-#### Scenario: Successful token exchange
+#### Scenario: Successful token refresh
 
-- **WHEN** a valid `auth-session-token` JWT is presented via the `x-auth-session-token` header to `POST /session/exchange`
-- **THEN** the server verifies the JWT via auth JWKS, extracts `unitId`, queries the user's role from the database, and returns `{ token: "<rezics-session-token>" }` with status 200
+- **WHEN** a valid auth session cookie is presented to `POST /auth/session/refresh`
+- **THEN** the server validates the session through auth, derives `userId`, queries or provisions the user's main record and role, and sets `rezics-session-token` as an httpOnly cookie with status 200
 
-#### Scenario: Invalid or expired auth-session-token
+#### Scenario: Invalid or expired auth session cookie
 
-- **WHEN** an invalid, expired, or missing `x-auth-session-token` is presented to `POST /session/exchange`
+- **WHEN** an invalid, expired, or missing auth session cookie is presented to `POST /auth/session/refresh`
 - **THEN** the server returns status 401 with an error message
+- **AND** it SHALL NOT set or refresh `rezics-session-token`
 
-#### Scenario: User not found in server database
+#### Scenario: User not ready in server database
 
-- **WHEN** a valid `auth-session-token` is presented but no user record exists for the extracted `unitId`
-- **THEN** the server returns status 404 indicating the user is not provisioned
+- **WHEN** a valid auth session cookie is presented but the corresponding main user cannot be provisioned or is not ready
+- **THEN** the server returns an explicit non-success status indicating the user is not ready
+- **AND** it SHALL NOT return a browser-storable token body
 
 ### Requirement: rezics-session-token claims schema
 
-The `rezics-session-token` JWT SHALL contain the following claims: `sub` (unitId), `unitId` (explicit duplicate for clarity), `role` (one of MEMBER, ADMIN, ROOT, BLOCKED), `iss` ("rezics-server"), `exp` (expiration timestamp), `iat` (issued-at timestamp). The claims schema SHALL be defined in `@rezics/contract`. Only `unitId` (via `sub`) SHALL be trusted as an identity assertion. The `role` claim is a snapshot that MAY be stale and SHALL only be used for rejection, never for granting access.
+The `rezics-session-token` JWT SHALL contain the following claims: `sub` (actor `userId`), `userId` (explicit duplicate for clarity during migration), `role` (one of MEMBER, ADMIN, ROOT, BLOCKED), `iss` ("rezics-server" or configured main issuer), `exp` (expiration timestamp), and `iat` (issued-at timestamp). The claims schema SHALL be defined in `@rezics/contract`. Only `userId` via `sub` SHALL be trusted as an actor identity assertion. `unitId` SHALL NOT be used as the authenticated actor subject.
 
 #### Scenario: Token contains required claims
 
 - **WHEN** the server issues a `rezics-session-token`
-- **THEN** the token payload contains `sub`, `unitId`, `role`, `iss`, `exp`, and `iat` fields with correct values matching the user's current database state
+- **THEN** the token payload contains `sub`, `userId`, `role`, `iss`, `exp`, and `iat` fields with correct values matching the user's current database state
+- **AND** `sub` SHALL equal `userId`
 
 ### Requirement: Token role is a rejection-only hint
 
@@ -67,12 +70,12 @@ The `rezics-session-token` SHALL have a configurable TTL, defaulting to 900 seco
 
 ### Requirement: Authorization: Bearer always carries rezics-session-token
 
-All API endpoints on the server (and auxiliary services) SHALL expect `Authorization: Bearer <rezics-session-token>`, with the following exception: endpoints under the `/token` prefix and the `/dispatch` prefix SHALL accept `Authorization: Bearer <api_token>` (API tokens with `api_` prefix). The `auth-session-token` SHALL NOT be sent via the `Authorization` header. The `auth-session-token` is transported exclusively via the `x-auth-session-token` header to the exchange endpoint.
+Auxiliary services and non-browser API callers that use bearer authentication SHALL send `Authorization: Bearer <rezics-session-token>` for normal Rezics session authentication. Browser web flows SHALL rely on the `rezics-session-token` httpOnly cookie rather than localStorage bearer injection. Endpoints under the `/token` prefix and the `/dispatch` prefix SHALL continue to accept `Authorization: Bearer <api_token>` for API tokens with the `api_` prefix. Auth session credentials SHALL NOT be sent through `Authorization` or `x-auth-session-token` for normal browser session exchange.
 
-#### Scenario: Server rejects auth-session-token in Authorization header
+#### Scenario: Server rejects auth session credential in Authorization header
 
-- **WHEN** a request sends an `auth-session-token` JWT in `Authorization: Bearer` to a server API endpoint
-- **THEN** verification fails (issuer mismatch: "rezics-auth" vs expected "rezics-server") and the server returns status 401
+- **WHEN** a request sends an auth session credential in `Authorization: Bearer` to a server API endpoint
+- **THEN** verification fails and the server returns status 401
 
 #### Scenario: Token-prefix endpoints accept API tokens
 
@@ -81,5 +84,11 @@ All API endpoints on the server (and auxiliary services) SHALL expect `Authoriza
 
 #### Scenario: Non-token endpoints reject API tokens
 
-- **WHEN** a request sends `Authorization: Bearer api_xxx` to a regular API endpoint (e.g., `/book/*`)
+- **WHEN** a request sends `Authorization: Bearer api_xxx` to a regular API endpoint such as `/book/*`
 - **THEN** the endpoint rejects the request because API tokens are not valid session JWTs
+
+#### Scenario: Browser request uses cookie session
+
+- **WHEN** browser frontend code calls a main API route after login
+- **THEN** it SHALL rely on credentials-included cookie authentication or session hydration
+- **AND** it SHALL NOT inject a localStorage `rezics-session-token` bearer header

@@ -2,54 +2,106 @@
 
 ## Purpose
 
-The unit-resolver capability defines how the router behaves when the viewer navigates to `/unit/:unitId`: it resolves the unit, applies access control, and redirects to the typed destination (book, post, shelf, etc.) computed via `buildUrl`, falling back to a generic unit view when no typed destination exists. The resolver is the single entry point for unit-by-id navigation, keeping routing logic centralized and ensuring typed pages and the resolver agree on visibility.
+The unit-resolver capability defines how the router behaves when the viewer navigates to `/unit/:unitSlug` (canonical slug entry) or `/unit/id/:unitId` (technical id fallback): it resolves the unit, applies access control, and either redirects to the typed destination (book, post, shelf, etc.) computed via `buildUnitUrl` or renders the generic unit view when `?view=unit` is supplied or no typed destination exists. The resolver is the single entry point for Unit navigation, keeping routing logic centralized and ensuring typed pages and the resolver agree on visibility.
 
 ## Requirements
 
-### Requirement: `/unit/:unitId` is a loader-driven resolver
-The route `/unit/:unitId` SHALL be a router entry whose loader fetches the unit, applies the access-control check, and either redirects to the unit's typed page or to the generic `/unit/:unitId/view` fallback. The route component itself SHALL render nothing — the loader SHALL always either redirect or throw `notFound()`.
+### Requirement: Public Unit slug resolver is loader-driven
+
+The route `/unit/:unitSlug` SHALL be a router entry whose loader fetches the
+Unit by `Unit.slug`, applies the shared access-control check, and either
+redirects to the typed destination or renders the generic Unit view according to
+the Unit resolver search params.
 
 The loader SHALL:
-1. Fetch the unit via `context.queryClient.ensureQueryData(unitQueries.detail(params.unitId))`.
-2. If the unit does not exist, throw `notFound()`.
-3. If `canAccessUnit(unit, viewer)` returns `false`, throw `notFound()`.
-4. Compute the typed destination via `buildUrl(unit)`. If a destination exists, throw `redirect({ to: dest.path, params: dest.params })`.
-5. Otherwise throw `redirect({ to: '/unit/$unitId/view', params: { unitId: params.unitId } })`.
 
-#### Scenario: Book unit redirects to book page
-- **GIVEN** a unit of type BOOK with id `book-1`
-- **WHEN** a viewer navigates to `/unit/book-1`
-- **THEN** the loader resolves and the browser ends up on `/book/book-1` (or whatever route `buildUrl` returns for BOOK units)
+1. Validate params with `publicUnitSlugRouteParamsSchema`.
+2. Validate search with `publicUnitResolverSearchSchema`.
+3. Fetch the Unit by slug through the API client's Unit by-slug query.
+4. If no Unit exists for the slug, throw `notFound()`.
+5. If `canAccessUnit(unit, viewer)` returns `false`, throw `notFound()`.
+6. If `view = "unit"`, render the generic Unit view.
+7. Otherwise compute the typed destination via `buildUnitUrl(unit)` and redirect
+   when a destination exists.
+8. If no typed destination exists, render the generic Unit view.
 
-#### Scenario: Post unit with kind REVIEW redirects to review page
-- **GIVEN** a unit of type POST whose post `kind` is `REVIEW` with id `review-1`
-- **WHEN** a viewer navigates to `/unit/review-1`
-- **THEN** the browser ends up on `/review/review-1`
+#### Scenario: Realm slug redirects to typed route
 
-#### Scenario: Unmapped unit type falls through to generic view
-- **GIVEN** a unit whose type has no entry in `buildUrl`
-- **WHEN** a viewer navigates to `/unit/<id>`
-- **THEN** the loader redirects to `/unit/<id>/view`
+- **GIVEN** a visible Unit with `slug = "realm-a"` and type `REALM`
+- **WHEN** a viewer navigates to `/unit/realm-a`
+- **THEN** the loader resolves the Unit by slug
+- **AND** the browser ends up on the typed public route for that realm
 
-#### Scenario: Missing unit returns 404
-- **GIVEN** an id that does not correspond to any unit
-- **WHEN** a viewer navigates to `/unit/<id>`
-- **THEN** the loader throws `notFound()` and the user sees the standard 404 page
+#### Scenario: Slug resolver renders generic Unit view
 
-#### Scenario: Resolver page renders nothing
-- **WHEN** the resolver route is mounted in tests
-- **THEN** its component SHALL not produce any rendered output (the loader always throws before render)
+- **GIVEN** a visible Unit with `slug = "realm-a"` and type `REALM`
+- **WHEN** a viewer navigates to `/unit/realm-a?view=unit`
+- **THEN** the loader resolves the Unit by slug
+- **AND** the generic Unit page renders without redirecting
 
-### Requirement: `/unit/:unitId/view` renders the generic unit view
-The route `/unit/:unitId/view` SHALL render the generic Unit detail page that previously lived at `/unit/:unitId`. This route SHALL be reachable directly (bookmarkable) and SHALL be the fallback target of the resolver when `buildUrl` returns no typed destination.
+#### Scenario: Missing Unit slug returns 404
 
-#### Scenario: Direct navigation to /view works
-- **WHEN** a viewer navigates to `/unit/<id>/view` directly
-- **THEN** the generic Unit view renders the unit's content without redirecting
+- **WHEN** a viewer navigates to `/unit/not-found`
+- **AND** no Unit has slug `not-found`
+- **THEN** the loader throws `notFound()`
 
-#### Scenario: /view honors access control
-- **WHEN** a viewer who lacks access (per `canAccessUnit`) navigates to `/unit/<id>/view`
-- **THEN** the route returns 404 (the same outcome the resolver would have produced)
+### Requirement: Public Unit id resolver is loader-driven
+
+The route `/unit/id/:unitId` SHALL be a router entry whose loader fetches the
+Unit by `Unit.id`, applies the shared access-control check, and either redirects
+to the typed destination or renders the generic Unit view according to the Unit
+resolver search params.
+
+The loader SHALL:
+
+1. Validate params with `publicUnitIdRouteParamsSchema`.
+2. Validate search with `publicUnitResolverSearchSchema`.
+3. Fetch the Unit via `context.queryClient.ensureQueryData(unitDetailQuery(unitId))`.
+4. If no Unit exists for the id, throw `notFound()`.
+5. If `canAccessUnit(unit, viewer)` returns `false`, throw `notFound()`.
+6. If `view = "unit"`, render the generic Unit view.
+7. Otherwise compute the typed destination via `buildUnitUrl(unit)` and redirect
+   when a destination exists.
+8. If no typed destination exists, render the generic Unit view.
+
+#### Scenario: Unit id redirects to typed route
+
+- **GIVEN** a visible BOOK Unit with id `book-1`
+- **WHEN** a viewer navigates to `/unit/id/book-1`
+- **THEN** the loader resolves the Unit by id
+- **AND** the browser ends up on the typed public route for that book
+
+#### Scenario: Unit id resolver renders generic Unit view
+
+- **GIVEN** a visible BOOK Unit with id `book-1`
+- **WHEN** a viewer navigates to `/unit/id/book-1?view=unit`
+- **THEN** the loader resolves the Unit by id
+- **AND** the generic Unit page renders without redirecting
+
+#### Scenario: Missing Unit id returns 404
+
+- **WHEN** a viewer navigates to `/unit/id/missing-id`
+- **AND** no Unit has id `missing-id`
+- **THEN** the loader throws `notFound()`
+
+### Requirement: Unit resolver never mixes id and slug namespaces
+
+The Unit resolver SHALL NOT treat a single path segment as an id-or-slug mixed
+identifier. `/unit/:unitSlug` SHALL resolve only `Unit.slug`; `/unit/id/:unitId`
+SHALL resolve only `Unit.id`.
+
+#### Scenario: Slug route does not resolve ids
+
+- **GIVEN** a Unit with id `unit-1` and no slug
+- **WHEN** a viewer navigates to `/unit/unit-1`
+- **THEN** the slug resolver returns 404
+
+#### Scenario: Id route does not resolve slugs
+
+- **GIVEN** a Unit with slug `realm-a`
+- **WHEN** a viewer navigates to `/unit/id/realm-a`
+- **AND** no Unit id equals `realm-a`
+- **THEN** the id resolver returns 404
 
 ### Requirement: `canAccessUnit` is the single source of truth for visibility
 A shared helper `canAccessUnit(unit, viewer): boolean` SHALL be implemented and used by both the resolver and every typed destination page (book, post, shelf, etc.). The rules SHALL be:
