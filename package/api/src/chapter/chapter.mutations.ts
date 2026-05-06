@@ -101,7 +101,7 @@ export function useDeleteChapterMutation(
 }
 
 /**
- * Mutation for materializing a BookIndex node into a chapter Unit.
+ * Mutation for materializing a BookContentStructure node into a chapter Unit.
  */
 export function useMaterializeChapterMutation(
   options?: Omit<
@@ -121,7 +121,7 @@ export function useMaterializeChapterMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
-        queryKey: bookKeys.chapterIndex(variables.bookUnitId),
+        queryKey: bookKeys.contentStructure(variables.bookUnitId),
       });
       queryClient.invalidateQueries({ queryKey: chapterKeys.lists() });
       queryClient.invalidateQueries({

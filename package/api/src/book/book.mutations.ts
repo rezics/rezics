@@ -99,16 +99,16 @@ export function useDeleteBookMutation(
 }
 
 /**
- * Mutation for updating a book's chapter index
+ * Mutation for updating a book's content structure
  */
-export function useUpdateChapterIndexMutation(
+export function useUpdateContentStructureMutation(
   options?: Omit<
     UseMutationOptions<
       any,
       Error,
       {
         bookUnitId: string;
-        chaptersIndex: ChapterTreeItem[];
+        nodes: ChapterTreeItem[];
       }
     >,
     "mutationFn"
@@ -117,13 +117,13 @@ export function useUpdateChapterIndexMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ bookUnitId, chaptersIndex }) =>
-      bookApi.updateChapterIndex(bookUnitId, chaptersIndex),
+    mutationFn: ({ bookUnitId, nodes }) =>
+      bookApi.updateContentStructure(bookUnitId, nodes),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      // Invalidate the cached chapter index for this book
+      // Invalidate the cached content structure for this book
       queryClient.invalidateQueries({
-        queryKey: bookKeys.chapterIndex(variables.bookUnitId),
+        queryKey: bookKeys.contentStructure(variables.bookUnitId),
       });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
@@ -138,5 +138,5 @@ export const bookMutations = {
   useCreate: useCreateBookMutation,
   useUpdate: useUpdateBookMutation,
   useDelete: useDeleteBookMutation,
-  useUpdateChapterIndex: useUpdateChapterIndexMutation,
+  useUpdateContentStructure: useUpdateContentStructureMutation,
 };

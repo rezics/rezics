@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
-  bookIndexPathLastPositionSchema,
+  contentStructurePathLastPositionSchema,
   chapterLastPositionSchema,
   SYSTEM_SHELF_KIND_KEYS,
   unitProgressListResponseSchema,
@@ -36,7 +36,7 @@ describe("progress contract schemas", () => {
         status: "ACTIVE",
         completedCount: 2,
         lastPosition: {
-          kind: "bookIndexPath",
+          kind: "contentStructurePath",
           bookUnitId: "book-1",
           path: [2, 4, 0],
           chapterUnitId: "chapter-1",
@@ -63,8 +63,8 @@ describe("progress contract schemas", () => {
 
   test("validates typed last-position variants", () => {
     expect(
-      Value.Check(bookIndexPathLastPositionSchema, {
-        kind: "bookIndexPath",
+      Value.Check(contentStructurePathLastPositionSchema, {
+        kind: "contentStructurePath",
         bookUnitId: "book-1",
         path: [0, 2],
       }),
@@ -78,7 +78,7 @@ describe("progress contract schemas", () => {
     ).toBe(true);
     expect(
       Value.Check(unitLastPositionSchema, {
-        kind: "bookIndexPath",
+        kind: "contentStructurePath",
         bookUnitId: "book-1",
         path: [-1],
       }),

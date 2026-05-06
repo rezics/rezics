@@ -21,14 +21,14 @@ export {
   bookMutations,
   useCreateBookMutation,
   useDeleteBookMutation,
+  useUpdateContentStructureMutation,
   useUpdateBookMutation,
-  useUpdateChapterIndexMutation,
 } from "./book.mutations";
 
 // Query Configurations
 export {
   bookByIsbnQuery,
-  bookChapterIndexQuery,
+  bookContentStructureQuery,
   bookDetailQuery,
   bookInfiniteListQuery,
   bookListQuery,
@@ -42,13 +42,13 @@ export {
 // Types
 export type {
   BookDTO,
+  BookContentStructureResponse,
   BookFilters,
   BookFormData,
   BookListResponse,
   BookResponse,
   BookSortOption,
   BookView,
-  ChapterIndexResponse,
   CreateBookInput,
   UpdateBookInput,
 } from "./book.types";

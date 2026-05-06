@@ -16,10 +16,10 @@ import { bookReadLayoutRoute } from "@/router";
 import { PostListSection, ReplyComposer } from "@/post";
 import {
   EMPTY_CHAPTER_ROUTE_ID,
-  decodeBookIndexPath,
-  findBookIndexOccurrence,
-  withBookIndexOccurrences,
-} from "@/book-library/models/bookIndexPath";
+  decodeBookContentStructurePath,
+  findBookContentStructureOccurrence,
+  withBookContentStructureOccurrences,
+} from "@/book-library/models/bookContentStructurePath";
 import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
 
 export const BookReadChapterPage: React.FC = () => {
@@ -35,7 +35,7 @@ export const BookReadChapterPage: React.FC = () => {
   >(null);
   const emptyChapterPath =
     chapterId === EMPTY_CHAPTER_ROUTE_ID
-      ? decodeBookIndexPath(search.path)
+      ? decodeBookContentStructurePath(search.path)
       : null;
 
   const { data, isPending, error, isError } = useQuery({
@@ -46,8 +46,8 @@ export const BookReadChapterPage: React.FC = () => {
     ...bookQueries.detail(bookId ?? ""),
     enabled: Boolean(bookId),
   });
-  const { data: bookIndex } = useQuery({
-    ...bookQueries.chapterIndex(bookId ?? ""),
+  const { data: bookContentStructure } = useQuery({
+    ...bookQueries.contentStructure(bookId ?? ""),
     enabled: Boolean(bookId && emptyChapterPath),
   });
   const updateBookProgress = useUpdateUnitProgress(bookId ?? "");
@@ -57,8 +57,8 @@ export const BookReadChapterPage: React.FC = () => {
 
   const md = createRezicsRenderer();
   const emptyChapter = emptyChapterPath
-    ? findBookIndexOccurrence(
-        withBookIndexOccurrences(bookIndex?.index ?? []),
+    ? findBookContentStructureOccurrence(
+        withBookContentStructureOccurrences(bookContentStructure?.nodes ?? []),
         emptyChapterPath,
       )
     : null;
@@ -70,7 +70,7 @@ export const BookReadChapterPage: React.FC = () => {
     updateBookProgress.mutate({
       status: "ACTIVE",
       lastPosition: {
-        kind: "bookIndexPath",
+        kind: "contentStructurePath",
         bookUnitId: bookId,
         path: emptyChapterPath,
         ...(emptyChapter?.chapterUnitId
@@ -82,7 +82,7 @@ export const BookReadChapterPage: React.FC = () => {
 
   const ensureEmptyChapterUnit = async () => {
     if (!emptyChapterPath) {
-      throw new Error("Cannot materialize without a BookIndex path");
+      throw new Error("Cannot materialize without a BookContentStructure path");
     }
     return ensureChapterUnit({
       title: title ?? "",
@@ -227,7 +227,10 @@ export const BookReadChapterPage: React.FC = () => {
             >
               {pendingChapterAction === "progress"
                 ? t("book.read.chapter_actions.saving", "Saving...")
-                : t("book.read.chapter_actions.progress", "Save chapter progress")}
+                : t(
+                    "book.read.chapter_actions.progress",
+                    "Save chapter progress",
+                  )}
             </Button>
           </div>
           {chapterDiscussionUnitId && (

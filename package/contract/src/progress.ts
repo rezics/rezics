@@ -51,9 +51,9 @@ export const userExtraSchema = t.Object({
 
 export type UserExtra = (typeof userExtraSchema)["static"];
 
-export const bookIndexPathLastPositionSchema = t.Object(
+export const contentStructurePathLastPositionSchema = t.Object(
   {
-    kind: t.Literal("bookIndexPath"),
+    kind: t.Literal("contentStructurePath"),
     bookUnitId: t.String(),
     path: t.Array(t.Integer({ minimum: 0 })),
     chapterUnitId: t.Optional(t.String()),
@@ -61,8 +61,8 @@ export const bookIndexPathLastPositionSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type BookIndexPathLastPosition =
-  (typeof bookIndexPathLastPositionSchema)["static"];
+export type ContentStructurePathLastPosition =
+  (typeof contentStructurePathLastPositionSchema)["static"];
 
 export const chapterLastPositionSchema = t.Object(
   {
@@ -73,11 +73,10 @@ export const chapterLastPositionSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type ChapterLastPosition =
-  (typeof chapterLastPositionSchema)["static"];
+export type ChapterLastPosition = (typeof chapterLastPositionSchema)["static"];
 
 export const unitLastPositionSchema = t.Union([
-  bookIndexPathLastPositionSchema,
+  contentStructurePathLastPositionSchema,
   chapterLastPositionSchema,
 ]);
 

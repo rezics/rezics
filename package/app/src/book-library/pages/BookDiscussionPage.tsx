@@ -49,6 +49,3 @@ export const BookCommunityPage: React.FC = () => {
     </div>
   );
 };
-
-// Backward-compatible alias used by existing route files.
-export const BookDiscussionPage = BookCommunityPage;

@@ -115,7 +115,7 @@ describe("ProgressService", () => {
   test("persists typed JSON lastPosition values", async () => {
     const { progressService } = await import("./progress.service");
     const lastPosition = {
-      kind: "bookIndexPath" as const,
+      kind: "contentStructurePath" as const,
       bookUnitId: "book-1",
       path: [0, 2],
       chapterUnitId: "chapter-1",

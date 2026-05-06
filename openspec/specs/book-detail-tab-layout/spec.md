@@ -68,15 +68,15 @@ The Review & Shelf tab SHALL render two sections: (1) a reviews preview showing 
 - **WHEN** the Review & Shelf tab is rendered
 - **THEN** there SHALL be no "add to shelf" button or form at the tab level
 
-### Requirement: Content tab displays chapter index with release selection
+### Requirement: Content tab displays content structure with release selection
 
-The Content tab SHALL render a release selector dropdown above the chapter tree. The chapter tree loads data from `bookQueries.chapterIndex(releaseUnitId)` where `releaseUnitId` is determined by the selected release. See `book-detail-release-selector` spec for selector behavior.
+The Content tab SHALL render a release selector dropdown above the chapter tree. The chapter tree loads data from `bookQueries.contentStructure(releaseUnitId)` where `releaseUnitId` is determined by the selected release. See `book-detail-release-selector` spec for selector behavior.
 
 #### Scenario: Content tab renders chapter tree
 
 - **WHEN** the Content tab is active
 - **THEN** a release selector SHALL appear above the chapter tree
-- **AND** the chapter tree SHALL display the chapter index for the selected release
+- **AND** the chapter tree SHALL display the content structure for the selected release
 
 ### Requirement: Community tab displays discussion threads
 

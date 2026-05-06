@@ -4,9 +4,9 @@
  */
 
 import type {
+  BookContentStructureResponse,
   BookListResponse,
   BookResponse,
-  ChapterIndexResponse,
   ChapterTreeItem,
   CreateBookInput,
   ScoreAggregateDTO,
@@ -44,25 +44,30 @@ export const bookApi = {
   },
 
   /**
-   * Get chapterIndex by bookUnitId
+   * Get content structure by bookUnitId
    */
-  getChapterIndex: async (
+  getContentStructure: async (
     bookUnitId: string,
-  ): Promise<ChapterIndexResponse> => {
-    return apiFetch<ChapterIndexResponse>(`/book/${bookUnitId}/chapterIndex`);
+  ): Promise<BookContentStructureResponse> => {
+    return apiFetch<BookContentStructureResponse>(
+      `/book/${bookUnitId}/content-structure`,
+    );
   },
 
   /**
-   * Update chapterIndex by bookUnitId
+   * Update content structure by bookUnitId
    */
-  updateChapterIndex: async (
+  updateContentStructure: async (
     bookUnitId: string,
-    chaptersIndex: ChapterTreeItem[],
-  ): Promise<ChapterIndexResponse> => {
-    return apiFetch<ChapterIndexResponse>(`/book/${bookUnitId}/chapterIndex`, {
-      method: "PUT",
-      body: JSON.stringify(chaptersIndex),
-    });
+    nodes: ChapterTreeItem[],
+  ): Promise<BookContentStructureResponse> => {
+    return apiFetch<BookContentStructureResponse>(
+      `/book/${bookUnitId}/content-structure`,
+      {
+        method: "PUT",
+        body: JSON.stringify(nodes),
+      },
+    );
   },
 
   /**

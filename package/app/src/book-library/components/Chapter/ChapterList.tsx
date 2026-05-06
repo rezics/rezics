@@ -23,11 +23,11 @@ import { useChapterListStore } from "@/book-library/states/chapterListStore";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
   EMPTY_CHAPTER_ROUTE_ID,
-  encodeBookIndexPath,
+  encodeBookContentStructurePath,
   materializedOrPathId,
   type ChapterTreeOccurrence,
-  withBookIndexOccurrences,
-} from "../../models/bookIndexPath";
+  withBookContentStructureOccurrences,
+} from "../../models/bookContentStructurePath";
 
 export type ChapterTreeHandle = {
   expandAll: () => void;
@@ -64,7 +64,10 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
       search={
         node.chapterUnitId
           ? undefined
-          : { path: encodeBookIndexPath(node.path), title: node.title }
+          : {
+              path: encodeBookContentStructurePath(node.path),
+              title: node.title,
+            }
       }
       className="block hover:text-brand"
     >
@@ -347,14 +350,14 @@ export interface ChapterListProps {
  */
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
   const { t } = useTranslation();
-  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(id));
+  const { data, isLoading, error } = useQuery(bookQueries.contentStructure(id));
 
   const chapterTree: ChapterTreeItem[] = useMemo(
-    () => data?.index ?? [],
+    () => data?.nodes ?? [],
     [data],
   );
   const chapterOccurrences = useMemo(
-    () => withBookIndexOccurrences(chapterTree),
+    () => withBookContentStructureOccurrences(chapterTree),
     [chapterTree],
   );
 
@@ -391,6 +394,3 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     </div>
   );
 };
-
-// Legacy export for backward compatibility
-export { ChapterList as ChapterListContainer };

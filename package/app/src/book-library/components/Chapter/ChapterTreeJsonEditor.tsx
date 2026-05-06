@@ -15,7 +15,7 @@ interface ChapterTreeJsonEditorProps {
 
 /** JSON structure for chapter tree editor. */
 type ChapterTreeJsonData = {
-  index: ChapterTreeItem[];
+  nodes: ChapterTreeItem[];
 };
 
 /**
@@ -26,13 +26,15 @@ type ChapterTreeJsonData = {
 export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({
   bookId,
 }) => {
-  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
+  const { data, isLoading, error } = useQuery(
+    bookQueries.contentStructure(bookId),
+  );
 
-  const [jsonData, setJsonData] = useState<ChapterTreeJsonData>({ index: [] });
+  const [jsonData, setJsonData] = useState<ChapterTreeJsonData>({ nodes: [] });
 
   useEffect(() => {
     setJsonData({
-      index: data?.index ?? [],
+      nodes: data?.nodes ?? [],
     });
   }, [data]);
 

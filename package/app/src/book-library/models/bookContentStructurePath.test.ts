@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import {
-  findBookIndexOccurrence,
+  findBookContentStructureOccurrence,
   materializedOrPathId,
-  withBookIndexOccurrences,
-} from "./bookIndexPath";
+  withBookContentStructureOccurrences,
+} from "./bookContentStructurePath";
 
-describe("BookIndex occurrence helpers", () => {
+describe("BookContentStructure occurrence helpers", () => {
   test("handles mixed groups, unmaterialized nodes, materialized nodes, and repeated chapterUnitId values", () => {
-    const tree = withBookIndexOccurrences([
+    const tree = withBookContentStructureOccurrences([
       {
         title: "Volume 1",
         children: [
@@ -18,10 +18,10 @@ describe("BookIndex occurrence helpers", () => {
       { title: "Route B", chapterUnitId: "chapter-shared" },
     ]);
 
-    const group = findBookIndexOccurrence(tree, [0]);
-    const empty = findBookIndexOccurrence(tree, [0, 0]);
-    const routeA = findBookIndexOccurrence(tree, [0, 1]);
-    const routeB = findBookIndexOccurrence(tree, [1]);
+    const group = findBookContentStructureOccurrence(tree, [0]);
+    const empty = findBookContentStructureOccurrence(tree, [0, 0]);
+    const routeA = findBookContentStructureOccurrence(tree, [0, 1]);
+    const routeB = findBookContentStructureOccurrence(tree, [1]);
 
     expect(group?.occurrenceId).toBe("path:0");
     expect(empty?.occurrenceId).toBe("path:0.0");

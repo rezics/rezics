@@ -3,7 +3,11 @@ import { PostKind } from "../generated/client.js";
 import { resetDatabase } from "../seed/database.js";
 import { seedInfra } from "../seed/infra/index.js";
 import { seedOrganizations, seedPeople } from "./attribution.js";
-import { seedBooks, seedChaptersForBook, updateChapterIndex } from "./books.js";
+import {
+  seedBooks,
+  seedChaptersForBook,
+  updateContentStructure,
+} from "./books.js";
 import { seedEchoKV } from "./echokv.js";
 import { seedEngagement } from "./engagement.js";
 import { seedGames } from "./games.js";
@@ -139,7 +143,7 @@ export async function runFactorySeed(
   );
   done();
 
-  done = stepTimer("Step 10: Chapters + BookIndex");
+  done = stepTimer("Step 10: Chapters + BookContentStructure");
   const bookUnitMap = new Map<string, string>();
   for (const book of books) {
     const unit = await ctx.prisma.unit.findUnique({
@@ -159,7 +163,7 @@ export async function runFactorySeed(
       userId,
       plan.chapter,
     );
-    await updateChapterIndex(
+    await updateContentStructure(
       ctx.prisma,
       book.id,
       chapterTree as unknown as Prisma.InputJsonValue,

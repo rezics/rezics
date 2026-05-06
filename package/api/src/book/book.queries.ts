@@ -101,12 +101,12 @@ export const bookInfiniteListQuery = (filters?: Omit<BookFilters, "start">) =>
   });
 
 /**
- * Query options for getting chapterIndex by bookUnitId
+ * Query options for getting content structure by bookUnitId
  */
-export const bookChapterIndexQuery = (bookUnitId: string) =>
+export const bookContentStructureQuery = (bookUnitId: string) =>
   queryOptions({
-    queryKey: bookKeys.chapterIndex(bookUnitId),
-    queryFn: () => bookApi.getChapterIndex(bookUnitId),
+    queryKey: bookKeys.contentStructure(bookUnitId),
+    queryFn: () => bookApi.getContentStructure(bookUnitId),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -133,5 +133,5 @@ export const bookQueries = {
   byIsbn: bookByIsbnQuery,
   byTags: booksByTagsQuery,
   infiniteList: bookInfiniteListQuery,
-  chapterIndex: bookChapterIndexQuery,
+  contentStructure: bookContentStructureQuery,
 };

@@ -163,7 +163,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
 
   // Group 4: Extension children
   await Promise.all([
-    prisma.bookIndex.deleteMany(),
+    prisma.bookContentStructure.deleteMany(),
     prisma.gamePlatform.deleteMany(),
   ]);
 

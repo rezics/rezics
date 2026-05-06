@@ -6,10 +6,10 @@ import type {
   UpdateChapterInput,
 } from "@rezics/contract";
 import {
-  getBookIndexNode,
-  normalizeBookIndexValue,
-  updateBookIndexNode,
-} from "@/book/book-index";
+  getBookContentStructureNode,
+  normalizeBookContentStructureValue,
+  updateBookContentStructureNode,
+} from "@/book/book-content-structure";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
@@ -30,7 +30,7 @@ import { chapterPostInclude } from "./types";
  *   - Chapter cover URL   -> UnitTranslation.extra.coverUrl (typed)
  *   - Chapter body        -> Post.body
  *   - Chapter parent book -> Post.targetUnitId (must reference Unit(type=BOOK))
- *   - Chapter ordering    -> BookIndex.index (out of scope of this service)
+ *   - Chapter ordering    -> BookContentStructure.nodes (out of scope of this service)
  */
 export class ChapterService {
   private buildWhereClause(options: ChapterListQuery): Prisma.PostWhereInput {
@@ -207,30 +207,32 @@ export class ChapterService {
 
       await tx.$queryRaw`
         SELECT "bookUnitId"
-        FROM "BookIndex"
+        FROM "BookContentStructure"
         WHERE "bookUnitId" = ${bookUnitId}
         FOR UPDATE
       `;
 
-      const bookIndex = await tx.bookIndex.findUniqueOrThrow({
+      const contentStructure = await tx.bookContentStructure.findUniqueOrThrow({
         where: { bookUnitId },
       });
 
       if (
-        req.expectedBookIndexUpdatedAt &&
-        new Date(req.expectedBookIndexUpdatedAt).getTime() !==
-          new Date(bookIndex.updatedAt).getTime()
+        req.expectedBookContentStructureUpdatedAt &&
+        new Date(req.expectedBookContentStructureUpdatedAt).getTime() !==
+          new Date(contentStructure.updatedAt).getTime()
       ) {
-        throw new Error("Conflict: BookIndex has changed");
+        throw new Error("Conflict: BookContentStructure has changed");
       }
 
-      const index = normalizeBookIndexValue(bookIndex.index);
-      const node = getBookIndexNode(index, req.path);
+      const nodes = normalizeBookContentStructureValue(contentStructure.nodes);
+      const node = getBookContentStructureNode(nodes, req.path);
       if (!node) {
-        throw new Error("Conflict: BookIndex path does not resolve");
+        throw new Error("Conflict: BookContentStructure path does not resolve");
       }
       if (req.expectedTitle && node.title !== req.expectedTitle) {
-        throw new Error("Conflict: BookIndex path no longer matches title");
+        throw new Error(
+          "Conflict: BookContentStructure path no longer matches title",
+        );
       }
 
       if (node.chapterUnitId) {
@@ -239,7 +241,7 @@ export class ChapterService {
           path: req.path,
           chapterUnitId: node.chapterUnitId,
           alreadyMaterialized: true,
-          bookIndexUpdatedAt: bookIndex.updatedAt,
+          bookContentStructureUpdatedAt: contentStructure.updatedAt,
         };
       }
 
@@ -272,14 +274,18 @@ export class ChapterService {
         },
       });
 
-      const updatedIndex = updateBookIndexNode(index, req.path, (current) => ({
-        ...current,
-        chapterUnitId: unit.id,
-      }));
+      const updatedNodes = updateBookContentStructureNode(
+        nodes,
+        req.path,
+        (current) => ({
+          ...current,
+          chapterUnitId: unit.id,
+        }),
+      );
 
-      const updatedBookIndex = await tx.bookIndex.update({
+      const updatedContentStructure = await tx.bookContentStructure.update({
         where: { bookUnitId },
-        data: { index: updatedIndex as Prisma.InputJsonValue },
+        data: { nodes: updatedNodes as Prisma.InputJsonValue },
       });
 
       return {
@@ -287,7 +293,7 @@ export class ChapterService {
         path: req.path,
         chapterUnitId: unit.id,
         alreadyMaterialized: false,
-        bookIndexUpdatedAt: updatedBookIndex.updatedAt,
+        bookContentStructureUpdatedAt: updatedContentStructure.updatedAt,
       };
     });
   }

@@ -8,7 +8,7 @@ import { contentRatingSchema } from "./unit";
 // Chapter = Unit(type=POST) + Post(kind=CHAPTER, targetUnitId=<book>).
 // Body lives in Post.body. Title lives in UnitTranslation.title.
 // Cover (optional) lives in UnitTranslation.extra.coverUrl
-// (see unitTranslationExtraSchema). BookIndex JSON stores chapter order.
+// (see unitTranslationExtraSchema). BookContentStructure JSON stores chapter order.
 // ============================================================
 
 export const chapterListItemSchema = t.Object({
@@ -126,7 +126,9 @@ export type ChapterResponse = (typeof chapterResponseSchema)["static"];
 export const chapterMaterializationRequestSchema = t.Object({
   path: t.Array(t.Number()),
   expectedTitle: t.Optional(t.String()),
-  expectedBookIndexUpdatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+  expectedBookContentStructureUpdatedAt: t.Optional(
+    t.Union([t.String(), t.Date()]),
+  ),
 });
 
 export type ChapterMaterializationRequest =
@@ -137,7 +139,7 @@ export const chapterMaterializationResponseSchema = t.Object({
   path: t.Array(t.Number()),
   chapterUnitId: t.String(),
   alreadyMaterialized: t.Boolean(),
-  bookIndexUpdatedAt: t.Union([t.String(), t.Date()]),
+  bookContentStructureUpdatedAt: t.Union([t.String(), t.Date()]),
 });
 
 export type ChapterMaterializationResponse =

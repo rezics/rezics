@@ -1,4 +1,5 @@
 import type {
+  BookContentStructureResponse,
   BookListQuery,
   CreateBookInput,
   UpdateBookInput,
@@ -17,10 +18,7 @@ import {
   patchContentMetadataToMeili,
   syncContentToMeili,
 } from "@/meili/content/sync";
-import {
-  normalizeBookIndexValue,
-  normalizeLegacyBookIndex,
-} from "./book-index";
+import { normalizeBookContentStructureValue } from "./book-content-structure";
 import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
 import { bookInclude } from "./types";
@@ -165,17 +163,17 @@ export class BookService {
   }
 
   /**
-   * Get chapterIndex by bookUnitId
+   * Get content structure by bookUnitId
    */
-  async getChapterIndexByBookUnitId(bookUnitId: string): Promise<any> {
-    const chapterIndex = await prisma.bookIndex.findUniqueOrThrow({
-      where: { bookUnitId },
-    });
-    const normalizedIndex = await normalizeLegacyBookIndex(
-      chapterIndex.index,
-      prisma,
-    );
-    return { ...chapterIndex, index: normalizedIndex };
+  async getContentStructureByBookUnitId(
+    bookUnitId: string,
+  ): Promise<BookContentStructureResponse> {
+    const contentStructure =
+      await prisma.bookContentStructure.findUniqueOrThrow({
+        where: { bookUnitId },
+      });
+    const nodes = normalizeBookContentStructureValue(contentStructure.nodes);
+    return { ...contentStructure, nodes };
   }
 
   /**
@@ -250,8 +248,8 @@ export class BookService {
         formatKey: req.formatKey ?? undefined,
         isLicensed: req.isLicensed ?? false,
         extra: (req.extra ?? null) as Prisma.InputJsonValue,
-        chapterIndex: {
-          create: { index: [] as Prisma.InputJsonValue },
+        contentStructure: {
+          create: { nodes: [] as Prisma.InputJsonValue },
         },
       },
       include: bookInclude,
@@ -326,21 +324,18 @@ export class BookService {
   }
 
   /**
-   * Update chapter index
+   * Update content structure
    */
-  async updateChapterIndex(
+  async updateContentStructure(
     unitId: string,
-    chaptersIndex: Prisma.InputJsonValue,
-  ): Promise<Prisma.InputJsonValue> {
-    const normalizedIndex = await normalizeLegacyBookIndex(
-      normalizeBookIndexValue(chaptersIndex),
-      prisma,
-    );
-    const chapterIndex = await prisma.bookIndex.update({
+    nodes: Prisma.InputJsonValue,
+  ): Promise<BookContentStructureResponse> {
+    const normalizedNodes = normalizeBookContentStructureValue(nodes);
+    const contentStructure = await prisma.bookContentStructure.update({
       where: { bookUnitId: unitId },
-      data: { index: normalizedIndex as Prisma.InputJsonValue },
+      data: { nodes: normalizedNodes as Prisma.InputJsonValue },
     });
-    return chapterIndex;
+    return { ...contentStructure, nodes: normalizedNodes };
   }
 
   /**

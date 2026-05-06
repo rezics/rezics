@@ -12,29 +12,16 @@
 // ============================================================================
 
 /** Book detail sub-pages (routed tabs). */
-export {
-  BookBasicInfoPage,
-  BookBasicInfoPage as OverviewPage,
-} from "./pages/BookBasicInfoPage";
+export { BookBasicInfoPage } from "./pages/BookBasicInfoPage";
 export { BookContentPage } from "./pages/BookContentPage";
 /** Book detail layout (shared hero + data fetching). */
 export { BookDetailLayout } from "./pages/BookDetailLayout";
-export {
-  BookCommunityPage,
-  BookDiscussionPage,
-} from "./pages/BookDiscussionPage";
+export { BookCommunityPage } from "./pages/BookDiscussionPage";
 /** Book library curated homepage. */
 export { BookHomePage } from "./pages/BookHomePage";
 /** Book library list page. */
-// Backward compatible aliases
-export {
-  BookLibPage,
-  BookLibPage as BookLibContainer,
-} from "./pages/BookLibPage";
-export {
-  BookReviewPage,
-  BookReviewPage as ReviewShelfPage,
-} from "./pages/BookReviewPage";
+export { BookLibPage } from "./pages/BookLibPage";
+export { BookReviewPage } from "./pages/BookReviewPage";
 
 // ============================================================================
 // Section Components (Page-composable modules)
@@ -42,17 +29,13 @@ export {
 
 export {
   BookDetailShell,
-  BookDetailShell as BookDetailView,
   type BookDetailShellProps,
 } from "./sections/BookDetailSection";
 export { BookHeroSection } from "./sections/BookHeroSection";
-// Backward compatible aliases
 export {
   BookLibSection,
-  BookLibSection as BookLibShow,
   type BookLibSectionProps,
   BookLibSectionRef,
-  BookLibSectionRef as BookLibShowRef,
 } from "./sections/BookLibSection";
 
 // ============================================================================
@@ -61,8 +44,6 @@ export {
 
 export {
   BookListView,
-  BookListView as BookListViewContainer,
-  BookListView as BookListViewShow,
   BookListViewItem,
   type BookListViewItemProps,
   type BookListViewProps,
@@ -74,7 +55,6 @@ export {
 export {
   ChapterLeaf,
   ChapterList,
-  ChapterList as ChapterListContainer,
   type ChapterTreeHandle,
   ChapterTreeView,
 } from "./components/Chapter/ChapterList";

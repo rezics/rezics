@@ -2,11 +2,11 @@ import type { ChapterTreeItem, ContentRating } from "@rezics/contract";
 import type { Chapter } from "../components/ChapterTreeEditor";
 
 /**
- * Serialize chapter tree for persistence in BookIndex JSON.
+ * Serialize chapter tree for persistence in BookContentStructure JSON.
  *
  * Write rule: include `rating` on a node only when it differs from the book's
  * rating. When equal, the node inherits from the book and the override is
- * stripped to keep the index compact.
+ * stripped to keep the content structure compact.
  */
 export function serializeChapterTree(
   tree: Chapter[],

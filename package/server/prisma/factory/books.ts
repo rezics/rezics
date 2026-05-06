@@ -75,8 +75,8 @@ export async function seedBooks(
                 "ebook",
               ]),
               extra: generateBookExtra(),
-              chapterIndex: {
-                create: { index: [] as Prisma.InputJsonValue },
+              contentStructure: {
+                create: { nodes: [] as Prisma.InputJsonValue },
               },
             },
           },
@@ -216,7 +216,7 @@ export async function seedChaptersForBook(
   }
 
   // Tree is always fully built; Units are only materialized for a random
-  // subset. The rest live as JSON nodes in BookIndex and can be lazily
+  // subset. The rest live as JSON nodes in BookContentStructure and can be lazily
   // promoted to a Unit at runtime when something needs to attach to them
   // (review target, comment, attribution claim, etc.).
   const allRows = [...parentRows, ...childRows];
@@ -319,13 +319,13 @@ export async function seedChaptersForBook(
   return serializeTree(tree);
 }
 
-export async function updateChapterIndex(
+export async function updateContentStructure(
   prisma: PrismaClient,
   bookId: string,
-  chapterIndex: Prisma.InputJsonValue,
+  nodes: Prisma.InputJsonValue,
 ): Promise<void> {
-  await prisma.bookIndex.update({
+  await prisma.bookContentStructure.update({
     where: { bookUnitId: bookId },
-    data: { index: chapterIndex },
+    data: { nodes },
   });
 }

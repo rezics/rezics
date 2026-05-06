@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { withBookIndexOccurrences } from "../../models/bookIndexPath";
+import { withBookContentStructureOccurrences } from "../../models/bookContentStructurePath";
 import type { ChapterArboristRefHandle } from "./ChapterArborist";
 import { ChapterArborist } from "./ChapterArborist";
 
@@ -29,13 +29,15 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   width = 300,
   height = 300,
 }) => {
-  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
+  const { data, isLoading, error } = useQuery(
+    bookQueries.contentStructure(bookId),
+  );
 
   const selectedId = chapterId || "";
   const baseLink = bookId;
 
   const chapterTree = useMemo(
-    () => withBookIndexOccurrences(data?.index ?? []),
+    () => withBookContentStructureOccurrences(data?.nodes ?? []),
     [data],
   );
 

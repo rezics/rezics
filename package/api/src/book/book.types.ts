@@ -3,22 +3,22 @@
  */
 
 import type {
+  BookContentStructureResponse,
   BookDTO,
   BookListQuery,
   BookListResponse,
   BookResponse,
-  ChapterIndexResponse,
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
 
 // Re-export contract types
 export type {
+  BookContentStructureResponse,
   BookDTO,
   BookListQuery,
   BookListResponse,
   BookResponse,
-  ChapterIndexResponse,
   CreateBookInput,
   UpdateBookInput,
 };

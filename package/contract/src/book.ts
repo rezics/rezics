@@ -194,11 +194,11 @@ export const updateBookSchema = t.Object({
 export type UpdateBookInput = (typeof updateBookSchema)["static"];
 
 // ============================================================
-// BOOK INDEX / CHAPTER TREE TYPES
+// BOOK CONTENT STRUCTURE / CHAPTER TREE TYPES
 // ============================================================
 
-export const bookIndexNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
-  (self) =>
+export const bookContentStructureNodeSchema: ReturnType<typeof t.Recursive> =
+  t.Recursive((self) =>
     t.Object({
       title: t.String(),
       chapterUnitId: t.Optional(t.String()),
@@ -206,22 +206,23 @@ export const bookIndexNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
       rating: t.Optional(contentRatingSchema),
       children: t.Optional(t.Array(self)),
     }),
-);
+  );
 
 /**
- * Path to a node occurrence in the current BookIndex forest.
+ * Path to a node occurrence in the current BookContentStructure forest.
  *
  * `[2, 4, 0]` means the first child of the fifth child of the third root node.
  * A path locates a node in the current JSON structure only; it is not a stable
  * global identity and may become stale after TOC edits or reordering.
  */
-export type BookIndexPath = number[];
+export type BookContentStructurePath = number[];
 
 export interface ChapterTreeItem {
   title: string;
   /**
    * Materialized Chapter Unit id. Optional and intentionally non-unique inside
-   * one BookIndex because multiple node occurrences may point at the same Unit.
+   * one BookContentStructure because multiple node occurrences may point at the
+   * same Unit.
    */
   chapterUnitId?: string;
   noContent?: boolean;
@@ -229,18 +230,19 @@ export interface ChapterTreeItem {
   children?: ChapterTreeItem[];
 }
 
-export const bookIndexDTOSchema = t.Object({
+export const bookContentStructureDTOSchema = t.Object({
   bookUnitId: t.String(),
-  index: t.Array(bookIndexNodeSchema),
+  nodes: t.Array(bookContentStructureNodeSchema),
   createdAt: t.Union([t.String(), t.Date()]),
   updatedAt: t.Union([t.String(), t.Date()]),
 });
 
-export type BookIndexDTO = (typeof bookIndexDTOSchema)["static"];
+export type BookContentStructureDTO =
+  (typeof bookContentStructureDTOSchema)["static"];
 
-export interface ChapterIndexResponse {
+export interface BookContentStructureResponse {
   bookUnitId: string;
-  index: ChapterTreeItem[];
+  nodes: ChapterTreeItem[];
   createdAt: Date;
   updatedAt: Date;
 }

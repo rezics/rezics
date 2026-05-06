@@ -23,7 +23,7 @@ import type {
   RenameHandler,
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
-import type { ChapterTreeOccurrence } from "@/book-library/models/bookIndexPath";
+import type { ChapterTreeOccurrence } from "@/book-library/models/bookContentStructurePath";
 import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
 import {
   findAndAddChild,
@@ -178,7 +178,8 @@ export const ChapterTreeEditor = forwardRef<
     null,
   );
 
-  const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
+  const updateContentStructureMutation =
+    bookMutations.useUpdateContentStructure();
   const updateChapterMutation = chapterMutations.useUpdate();
   const ensureChapterUnit = useEnsureChapterUnit(bookUnitId);
   const queryClient = useQueryClient();
@@ -226,9 +227,9 @@ export const ChapterTreeEditor = forwardRef<
 
   async function saveTree(data: Chapter[]) {
     try {
-      await updateChapterIndexMutation.mutateAsync({
+      await updateContentStructureMutation.mutateAsync({
         bookUnitId,
-        chaptersIndex: serializeChapterTree(data, bookRating),
+        nodes: serializeChapterTree(data, bookRating),
       });
     } catch (error) {
       showAlert(`Failed to save: ${error}`);
@@ -543,11 +544,11 @@ export const ChapterTreeEditor = forwardRef<
           <Button
             size="sm"
             onClick={() => saveTree(treeData)}
-            disabled={updateChapterIndexMutation.isPending}
+            disabled={updateContentStructureMutation.isPending}
           >
             <SaveIcon className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">
-              {updateChapterIndexMutation.isPending ? "Saving..." : "Save"}
+              {updateContentStructureMutation.isPending ? "Saving..." : "Save"}
             </span>
           </Button>
         </div>

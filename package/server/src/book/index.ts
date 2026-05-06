@@ -10,7 +10,7 @@ export { bookApi } from "./book.api";
 
 // Service layer for internal use
 export { BookService, bookService } from "./book.service";
-export * from "./book-index";
+export * from "./book-content-structure";
 
 // Utilities
 export { mapBaseBookToDTO, mapBookToDTO } from "./mapper";

@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { Tree, type TreeApi } from "react-arborist";
-import type { ChapterTreeOccurrence } from "../../models/bookIndexPath";
+import type { ChapterTreeOccurrence } from "../../models/bookContentStructurePath";
 import { createChapterArboristNode } from "./ChapterArboristNode.tsx";
 
 /** Chapter tree node structure for arborist. */

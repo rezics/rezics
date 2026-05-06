@@ -8,8 +8,8 @@ import {
   UnitType,
 } from "@/test/prisma-client-mock";
 
-const bookIndexUpdatedAt = new Date("2026-05-06T00:00:00.000Z");
-const updatedBookIndexAt = new Date("2026-05-06T00:00:01.000Z");
+const bookContentStructureUpdatedAt = new Date("2026-05-06T00:00:00.000Z");
+const updatedContentStructureAt = new Date("2026-05-06T00:00:01.000Z");
 
 const mockQueryRaw = mock(async () => undefined);
 const mockFindBook = mock(async () => ({
@@ -19,14 +19,14 @@ const mockFindBook = mock(async () => ({
 }));
 const mockCreateUnit = mock(async () => ({ id: "chapter-new" }));
 const mockCreatePost = mock(async () => ({ unitId: "chapter-new" }));
-const mockFindBookIndex = mock(async () => ({
+const mockFindContentStructure = mock(async () => ({
   bookUnitId: "book-1",
-  index: [{ title: "Chapter One", rating: "R_15" }],
-  updatedAt: bookIndexUpdatedAt,
+  nodes: [{ title: "Chapter One", rating: "R_15" }],
+  updatedAt: bookContentStructureUpdatedAt,
 }));
-const mockUpdateBookIndex = mock(async () => ({
+const mockUpdateContentStructure = mock(async () => ({
   bookUnitId: "book-1",
-  updatedAt: updatedBookIndexAt,
+  updatedAt: updatedContentStructureAt,
 }));
 const mockTransaction = mock(async (fn: (tx: unknown) => unknown) =>
   fn({
@@ -38,9 +38,9 @@ const mockTransaction = mock(async (fn: (tx: unknown) => unknown) =>
     post: {
       create: mockCreatePost,
     },
-    bookIndex: {
-      findUniqueOrThrow: mockFindBookIndex,
-      update: mockUpdateBookIndex,
+    bookContentStructure: {
+      findUniqueOrThrow: mockFindContentStructure,
+      update: mockUpdateContentStructure,
     },
   }),
 );
@@ -60,8 +60,8 @@ describe("ChapterService.materializeByBookPath", () => {
     mockFindBook.mockClear();
     mockCreateUnit.mockClear();
     mockCreatePost.mockClear();
-    mockFindBookIndex.mockClear();
-    mockUpdateBookIndex.mockClear();
+    mockFindContentStructure.mockClear();
+    mockUpdateContentStructure.mockClear();
     mockTransaction.mockClear();
 
     mockFindBook.mockResolvedValue({
@@ -71,18 +71,18 @@ describe("ChapterService.materializeByBookPath", () => {
     });
     mockCreateUnit.mockResolvedValue({ id: "chapter-new" });
     mockCreatePost.mockResolvedValue({ unitId: "chapter-new" });
-    mockFindBookIndex.mockResolvedValue({
+    mockFindContentStructure.mockResolvedValue({
       bookUnitId: "book-1",
-      index: [{ title: "Chapter One", rating: "R_15" }],
-      updatedAt: bookIndexUpdatedAt,
+      nodes: [{ title: "Chapter One", rating: "R_15" }],
+      updatedAt: bookContentStructureUpdatedAt,
     });
-    mockUpdateBookIndex.mockResolvedValue({
+    mockUpdateContentStructure.mockResolvedValue({
       bookUnitId: "book-1",
-      updatedAt: updatedBookIndexAt,
+      updatedAt: updatedContentStructureAt,
     });
   });
 
-  test("materializes a BookIndex node and seeds title, language, and rating", async () => {
+  test("materializes a BookContentStructure node and seeds title, language, and rating", async () => {
     const { chapterService } = await import("./chapter.service");
 
     const result = await chapterService.materializeByBookPath(
@@ -118,7 +118,7 @@ describe("ChapterService.materializeByBookPath", () => {
         depth: 0,
       },
     });
-    expect(firstArg(mockUpdateBookIndex).data.index).toEqual([
+    expect(firstArg(mockUpdateContentStructure).data.nodes).toEqual([
       {
         title: "Chapter One",
         rating: "R_15",
@@ -130,15 +130,15 @@ describe("ChapterService.materializeByBookPath", () => {
       path: [0],
       chapterUnitId: "chapter-new",
       alreadyMaterialized: false,
-      bookIndexUpdatedAt: updatedBookIndexAt,
+      bookContentStructureUpdatedAt: updatedContentStructureAt,
     });
   });
 
   test("returns an existing chapterUnitId without creating duplicate rows", async () => {
-    mockFindBookIndex.mockResolvedValue({
+    mockFindContentStructure.mockResolvedValue({
       bookUnitId: "book-1",
-      index: [{ title: "Chapter One", chapterUnitId: "chapter-existing" }],
-      updatedAt: bookIndexUpdatedAt,
+      nodes: [{ title: "Chapter One", chapterUnitId: "chapter-existing" }],
+      updatedAt: bookContentStructureUpdatedAt,
     });
     const { chapterService } = await import("./chapter.service");
 
@@ -151,17 +151,17 @@ describe("ChapterService.materializeByBookPath", () => {
     expect(mockQueryRaw).toHaveBeenCalled();
     expect(mockCreateUnit).not.toHaveBeenCalled();
     expect(mockCreatePost).not.toHaveBeenCalled();
-    expect(mockUpdateBookIndex).not.toHaveBeenCalled();
+    expect(mockUpdateContentStructure).not.toHaveBeenCalled();
     expect(result).toEqual({
       bookUnitId: "book-1",
       path: [0],
       chapterUnitId: "chapter-existing",
       alreadyMaterialized: true,
-      bookIndexUpdatedAt,
+      bookContentStructureUpdatedAt,
     });
   });
 
-  test("rejects stale paths and stale BookIndex timestamps without creating rows", async () => {
+  test("rejects stale paths and stale BookContentStructure timestamps without creating rows", async () => {
     const { chapterService } = await import("./chapter.service");
 
     await expect(
@@ -170,7 +170,9 @@ describe("ChapterService.materializeByBookPath", () => {
         { path: [0], expectedTitle: "Old Title" },
         "actor-user",
       ),
-    ).rejects.toThrow("Conflict: BookIndex path no longer matches title");
+    ).rejects.toThrow(
+      "Conflict: BookContentStructure path no longer matches title",
+    );
 
     await expect(
       chapterService.materializeByBookPath(
@@ -178,28 +180,28 @@ describe("ChapterService.materializeByBookPath", () => {
         {
           path: [0],
           expectedTitle: "Chapter One",
-          expectedBookIndexUpdatedAt: "2026-05-06T01:00:00.000Z",
+          expectedBookContentStructureUpdatedAt: "2026-05-06T01:00:00.000Z",
         },
         "actor-user",
       ),
-    ).rejects.toThrow("Conflict: BookIndex has changed");
+    ).rejects.toThrow("Conflict: BookContentStructure has changed");
 
     expect(mockCreateUnit).not.toHaveBeenCalled();
     expect(mockCreatePost).not.toHaveBeenCalled();
-    expect(mockUpdateBookIndex).not.toHaveBeenCalled();
+    expect(mockUpdateContentStructure).not.toHaveBeenCalled();
   });
 
-  test("re-checks the BookIndex after acquiring the row lock", async () => {
+  test("re-checks the BookContentStructure after acquiring the row lock", async () => {
     const events: string[] = [];
     mockQueryRaw.mockImplementation(async () => {
       events.push("lock");
     });
-    mockFindBookIndex.mockImplementation(async () => {
+    mockFindContentStructure.mockImplementation(async () => {
       events.push("read-index");
       return {
         bookUnitId: "book-1",
-        index: [{ title: "Chapter One", chapterUnitId: "chapter-existing" }],
-        updatedAt: bookIndexUpdatedAt,
+        nodes: [{ title: "Chapter One", chapterUnitId: "chapter-existing" }],
+        updatedAt: bookContentStructureUpdatedAt,
       };
     });
     const { chapterService } = await import("./chapter.service");
@@ -235,7 +237,7 @@ describe("chapter materialization API permissions", () => {
       path: [0],
       chapterUnitId: "chapter-new",
       alreadyMaterialized: false,
-      bookIndexUpdatedAt,
+      bookContentStructureUpdatedAt,
     }));
     mock.module("@/unit/unit.service", () => ({
       unitService: {

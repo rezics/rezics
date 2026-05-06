@@ -24,8 +24,8 @@ export const bookKeys = {
   detail: (unitId: string) => [...bookKeys.details(), unitId] as const,
   rating: (bookUnitId: string) =>
     [...bookKeys.all(), "rating", bookUnitId] as const,
-  chapterIndex: (bookUnitId: string) =>
-    [...bookKeys.all(), "chapterIndex", bookUnitId] as const,
+  contentStructure: (bookUnitId: string) =>
+    [...bookKeys.all(), "contentStructure", bookUnitId] as const,
 
   /**
    * Keys for search queries

@@ -89,13 +89,13 @@ CREATE TABLE "Book" (
 );
 
 -- CreateTable
-CREATE TABLE "BookIndex" (
+CREATE TABLE "BookContentStructure" (
     "bookUnitId" UUID NOT NULL,
-    "index" JSONB NOT NULL,
+    "nodes" JSONB NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "BookIndex_pkey" PRIMARY KEY ("bookUnitId")
+    CONSTRAINT "BookContentStructure_pkey" PRIMARY KEY ("bookUnitId")
 );
 
 -- CreateTable
@@ -634,7 +634,7 @@ ALTER TABLE "UnitSupportLanguage" ADD CONSTRAINT "UnitSupportLanguage_unitId_fke
 ALTER TABLE "Book" ADD CONSTRAINT "Book_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BookIndex" ADD CONSTRAINT "BookIndex_bookUnitId_fkey" FOREIGN KEY ("bookUnitId") REFERENCES "Book"("unitId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "BookContentStructure" ADD CONSTRAINT "BookContentStructure_bookUnitId_fkey" FOREIGN KEY ("bookUnitId") REFERENCES "Book"("unitId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Game" ADD CONSTRAINT "Game_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;

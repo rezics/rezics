@@ -1,9 +1,13 @@
-import { bookChapterIndexQuery, bookMutations } from "@rezics/api/book/book";
+import {
+  bookContentStructureQuery,
+  bookMutations,
+} from "@rezics/api/book/book";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import {
   chapterDetailQuery,
   useUpdateChapterMutation,
 } from "@rezics/api/chapter/chapter";
+import type { ChapterTreeItem } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { RezicsMarkdownEditor, type ViewMode } from "@rezics/ui/editor";
 import {
@@ -27,6 +31,26 @@ import {
   Settings,
 } from "lucide-react";
 
+function updateContentStructureNodeTitle(
+  nodes: ChapterTreeItem[],
+  chapterUnitId: string,
+  title: string,
+): ChapterTreeItem[] {
+  return nodes.map((node) => ({
+    ...node,
+    ...(node.chapterUnitId === chapterUnitId ? { title } : {}),
+    ...(node.children
+      ? {
+          children: updateContentStructureNodeTitle(
+            node.children,
+            chapterUnitId,
+            title,
+          ),
+        }
+      : {}),
+  }));
+}
+
 /**
  * TODO Chapter List 换成 Tree 模式之后，编辑还没有校验
  */
@@ -48,10 +72,12 @@ export const BookEditChapterPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("write");
 
   // Load chapter tree for the move dialog
-  const { data: chapterIndexData } = useQuery(bookQueries.chapterIndex(bookId));
+  const { data: contentStructureData } = useQuery(
+    bookQueries.contentStructure(bookId),
+  );
   const chapterTree = useMemo(
-    () => chapterIndexData?.index ?? [],
-    [chapterIndexData],
+    () => contentStructureData?.nodes ?? [],
+    [contentStructureData],
   );
 
   // ---- Chapter actions menu ----
@@ -68,7 +94,8 @@ export const BookEditChapterPage: React.FC = () => {
 
   const updateMutation = useUpdateChapterMutation();
   const queryClient = useQueryClient();
-  const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
+  const updateContentStructureMutation =
+    bookMutations.useUpdateContentStructure();
 
   const isDirty = useMemo(() => {
     if (!data) return false;
@@ -90,23 +117,17 @@ export const BookEditChapterPage: React.FC = () => {
         content,
       } as any,
     });
-    const chapterIndex = await queryClient.fetchQuery(
-      bookChapterIndexQuery(bookId),
+    const contentStructure = await queryClient.fetchQuery(
+      bookContentStructureQuery(bookId),
     );
-    if (chapterIndex) {
-      console.log(chapterIndex);
-      const newChapterIndex = { ...chapterIndex };
-      newChapterIndex.index = {
-        ...newChapterIndex.index,
-        [chapterId]: {
-          id: chapterId,
-          title,
-          content,
-        },
-      };
-      updateChapterIndexMutation.mutateAsync({
+    if (contentStructure) {
+      updateContentStructureMutation.mutateAsync({
         bookUnitId: bookId,
-        chaptersIndex: newChapterIndex,
+        nodes: updateContentStructureNodeTitle(
+          contentStructure.nodes,
+          chapterId,
+          title,
+        ),
       });
     }
   }, [
@@ -116,7 +137,7 @@ export const BookEditChapterPage: React.FC = () => {
     title,
     content,
     queryClient,
-    updateChapterIndexMutation,
+    updateContentStructureMutation,
     bookId,
   ]);
 

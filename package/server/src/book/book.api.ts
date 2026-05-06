@@ -1,4 +1,5 @@
 import type {
+  BookContentStructureResponse,
   BookListResponse,
   BookResponse,
   CreateBookInput,
@@ -53,15 +54,15 @@ export const bookApi = new Elysia({ prefix: "/book" })
     },
   )
   .get(
-    "/:unitId/chapterIndex",
-    async ({ params }): Promise<any> => {
-      return bookService.getChapterIndexByBookUnitId(params.unitId);
+    "/:unitId/content-structure",
+    async ({ params }): Promise<BookContentStructureResponse> => {
+      return bookService.getContentStructureByBookUnitId(params.unitId);
     },
     {
       params: bookParamsSchema,
       detail: {
-        summary: "Get chapterIndex",
-        description: "Get chapterIndex by bookUnitId",
+        summary: "Get content structure",
+        description: "Get content structure by bookUnitId",
         tags: ["Books"],
       },
     },
@@ -173,8 +174,13 @@ export const bookApi = new Elysia({ prefix: "/book" })
     },
   )
   .put(
-    "/:unitId/chapterIndex",
-    async ({ params, body, identity, set }): Promise<any> => {
+    "/:unitId/content-structure",
+    async ({
+      params,
+      body,
+      identity,
+      set,
+    }): Promise<BookContentStructureResponse> => {
       const targetBookUnit = await unitService.getByUnitId(params.unitId);
       if (!targetBookUnit) {
         set.status = 404;
@@ -195,15 +201,15 @@ export const bookApi = new Elysia({ prefix: "/book" })
         );
       }
 
-      return bookService.updateChapterIndex(params.unitId, body);
+      return bookService.updateContentStructure(params.unitId, body);
     },
     {
       requireLogin: true,
       params: bookParamsSchema,
       body: t.Any(),
       detail: {
-        summary: "Update book chapter index",
-        description: "Update the chapter index of a book by unit ID",
+        summary: "Update book content structure",
+        description: "Update the content structure of a book by unit ID",
         tags: ["Books"],
       },
     },

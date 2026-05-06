@@ -1,4 +1,4 @@
-import { bookChapterIndexQuery } from "@rezics/api/book/book";
+import { bookContentStructureQuery } from "@rezics/api/book/book";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { ContentRating } from "@rezics/contract";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
@@ -8,7 +8,7 @@ import { useMemo, useRef, useState } from "react";
 import { ChapterTreeJsonEditor } from "@/book-library/components/Chapter/ChapterTreeJsonEditor";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { bookEditLayoutRoute } from "@/router";
-import { withBookIndexOccurrences } from "@/book-library/models/bookIndexPath";
+import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
 import {
   ChapterTreeEditor,
   type Chapter,
@@ -21,26 +21,28 @@ export const BookEditChapterListPage: React.FC = () => {
   const editorRef = useRef<ChapterTreeEditorHandle | null>(null);
   const [tab, setTab] = useState<"editor" | "json">("editor");
 
-  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
+  const { data, isLoading, error } = useQuery(
+    bookQueries.contentStructure(bookId),
+  );
   const { data: bookData } = useQuery(bookQueries.detail(bookId));
 
   const chapterTree: Chapter[] = useMemo(
-    () => withBookIndexOccurrences(data?.index ?? []),
+    () => withBookContentStructureOccurrences(data?.nodes ?? []),
     [data],
   );
   const bookRating = (bookData?.rating ?? "GENERAL") as ContentRating;
 
   async function downloadJSON() {
-    const chapterIndex = await queryClient.ensureQueryData(
-      bookChapterIndexQuery(bookId),
+    const contentStructure = await queryClient.ensureQueryData(
+      bookContentStructureQuery(bookId),
     );
-    const jsonString = JSON.stringify(chapterIndex, null, 2);
+    const jsonString = JSON.stringify(contentStructure, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const date = new Date().toISOString().split("T")[0];
     const a = document.createElement("a");
     a.href = url;
-    a.download = `chapterIndex-${bookId}-${date}.json`;
+    a.download = `content-structure-${bookId}-${date}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }

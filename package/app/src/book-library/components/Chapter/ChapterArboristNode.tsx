@@ -6,8 +6,8 @@ import {
 import type { NodeRendererProps } from "react-arborist";
 import {
   EMPTY_CHAPTER_ROUTE_ID,
-  encodeBookIndexPath,
-} from "../../models/bookIndexPath";
+  encodeBookContentStructurePath,
+} from "../../models/bookContentStructurePath";
 import type { Chapter } from "./ChapterArborist";
 
 /**
@@ -63,7 +63,7 @@ export const createChapterArboristNode = (bookId: string) => {
                 node.data.chapterUnitId
                   ? undefined
                   : {
-                      path: encodeBookIndexPath(node.data.path),
+                      path: encodeBookContentStructurePath(node.data.path),
                       title: node.data.title,
                     }
               }

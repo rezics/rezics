@@ -1,6 +1,6 @@
 import type { ChapterTreeItem } from "@rezics/contract";
 
-export const EMPTY_CHAPTER_ROUTE_ID = "__bookIndexPath";
+export const EMPTY_CHAPTER_ROUTE_ID = "__bookContentStructurePath";
 
 export type ChapterTreeOccurrence = ChapterTreeItem & {
   id: string;
@@ -9,11 +9,11 @@ export type ChapterTreeOccurrence = ChapterTreeItem & {
   children?: ChapterTreeOccurrence[];
 };
 
-export function encodeBookIndexPath(path: number[]): string {
+export function encodeBookContentStructurePath(path: number[]): string {
   return path.join(".");
 }
 
-export function decodeBookIndexPath(
+export function decodeBookContentStructurePath(
   value: string | undefined,
 ): number[] | null {
   if (!value) return null;
@@ -25,14 +25,14 @@ export function decodeBookIndexPath(
 }
 
 export function occurrenceIdForPath(path: number[]): string {
-  return `path:${encodeBookIndexPath(path)}`;
+  return `path:${encodeBookContentStructurePath(path)}`;
 }
 
 export function materializedOrPathId(node: ChapterTreeOccurrence): string {
   return node.chapterUnitId ?? node.occurrenceId;
 }
 
-export function withBookIndexOccurrences(
+export function withBookContentStructureOccurrences(
   nodes: ChapterTreeItem[],
   prefix: number[] = [],
 ): ChapterTreeOccurrence[] {
@@ -44,13 +44,13 @@ export function withBookIndexOccurrences(
       occurrenceId: occurrenceIdForPath(path),
       id: occurrenceIdForPath(path),
       children: node.children
-        ? withBookIndexOccurrences(node.children, path)
+        ? withBookContentStructureOccurrences(node.children, path)
         : undefined,
     };
   });
 }
 
-export function findBookIndexOccurrence(
+export function findBookContentStructureOccurrence(
   nodes: ChapterTreeOccurrence[],
   path: number[],
 ): ChapterTreeOccurrence | null {

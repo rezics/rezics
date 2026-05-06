@@ -32,12 +32,12 @@ The `BookDTO` schema SHALL use `bookExtraSchema` for its `extra` field.
 - **WHEN** a component reads `book.extra.publishURL`
 - **THEN** TypeScript infers the type as `string | undefined` without requiring `as any`
 
-### Requirement: BookIndex index schema
-The contract SHALL define a `bookIndexNodeSchema` in `package/contract/src/book.ts` that describes the chapter tree node shape used in `BookIndex.index`.
+### Requirement: BookContentStructure nodes schema
+The contract SHALL define a `bookContentStructureNodeSchema` in `package/contract/src/book.ts` that describes the chapter tree node shape used in `BookContentStructure.nodes`.
 
-#### Scenario: Frontend iterates chapter index without cast
-- **WHEN** a component maps over `bookIndex.index`
-- **THEN** each element has typed properties (e.g., `unitId`, `title`) without `as any`
+#### Scenario: Frontend iterates content structure without cast
+- **WHEN** a component maps over `bookContentStructure.nodes`
+- **THEN** each element has typed properties such as `title`, `chapterUnitId`, `noContent`, `rating`, and `children` without `as any`
 
 ### Requirement: Score aggregate schemas
 The contract SHALL define:
