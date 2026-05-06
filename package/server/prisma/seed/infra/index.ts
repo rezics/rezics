@@ -1,23 +1,24 @@
-import type { SeedTagName } from "@rezics/contract";
+import type { SeedTagName, TagGroupIds } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client";
 import { seedDefaultRealm } from "./seed-default-realm";
 import {
-  seedRealmTaxonomy,
   type RealmTaxonomySeedResult,
+  seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
-import { seedContentTypeTags } from "./seed-tags";
+import { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
 
 export { seedDefaultRealm } from "./seed-default-realm";
 export {
-  seedRealmTaxonomy,
   type RealmTaxonomySeedResult,
+  seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
-export { seedContentTypeTags } from "./seed-tags";
+export { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
 
 export interface SeedInfraResult {
   tagMap: Record<SeedTagName, string>;
   defaultRealmId: string;
   realmTaxonomy: RealmTaxonomySeedResult;
+  searchTagIds: TagGroupIds;
 }
 
 /**
@@ -35,5 +36,6 @@ export async function seedInfra(
     rootUserId,
     defaultRealmId,
   );
-  return { tagMap, defaultRealmId, realmTaxonomy };
+  const searchTagIds = await seedSearchTagIds(prisma);
+  return { tagMap, defaultRealmId, realmTaxonomy, searchTagIds };
 }
