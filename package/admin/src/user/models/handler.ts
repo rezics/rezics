@@ -2,9 +2,7 @@ import { authApi } from "@rezics/api/auth/auth.api";
 import { authKeys } from "@rezics/api/auth/auth.keys";
 import {
   clearAllTokens,
-  ensureAuthSessionToken,
   exchangeForSessionToken,
-  parseJwt,
 } from "@rezics/api/react-query/jwt";
 import {
   clearAuthSessionState,
@@ -19,21 +17,22 @@ import { qc } from "@/app/providers/reactQueryUtil";
  */
 export async function adminLogin(email: string, password: string) {
   await authApi.signIn({ email, password });
-  const authToken = await ensureAuthSessionToken({ requirePresence: false });
 
-  const claims = parseJwt(authToken);
-  if (!(claims?.role === "admin" || claims?.role === "owner")) {
-    throw new Error("You are not authorized to access this page");
-  }
-
-  const sessionToken = await exchangeForSessionToken();
-  if (!sessionToken) {
+  const refreshed = await exchangeForSessionToken();
+  if (!refreshed) {
     throw new Error("Login failed: token exchange failed");
   }
 
   await hydrateAuthSessionState();
+  const role = useAuthSessionStore.getState().user?.role;
+  if (!(role === "admin" || role === "owner")) {
+    await authApi.signOut();
+    clearAllTokens();
+    clearAuthSessionState();
+    throw new Error("You are not authorized to access this page");
+  }
 
-  return { token: sessionToken };
+  return { token: null };
 }
 
 /**

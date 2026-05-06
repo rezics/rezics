@@ -23,7 +23,7 @@ import type {
   UpdateRealmInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
-import { getAuthSessionClaims } from "../react-query/jwt";
+import { authApi } from "../auth/auth.api";
 import { buildQueryString } from "../utils/buildQuery";
 import type { RealmFilters } from "./realm.types";
 
@@ -126,12 +126,13 @@ export const realmApi = {
    * Leave a realm
    */
   leave: async (realmUnitId: string): Promise<{ message: string }> => {
-    const claims = getAuthSessionClaims();
-    if (!claims?.sub) {
+    const sessionState = await authApi.getSessionState();
+    const userId = sessionState.user?.id;
+    if (!userId) {
       throw new Error("Cannot leave realm: no active session");
     }
     return apiFetch<{ message: string }>(
-      `/realm/${realmUnitId}/members/${claims.sub}`,
+      `/realm/${realmUnitId}/members/${userId}`,
       {
         method: "DELETE",
       },

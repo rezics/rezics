@@ -16,16 +16,13 @@ mock.module("@rezics/api/states/authSessionStore", () => ({
 }));
 
 describe("createTokenRefreshRegistry", () => {
-  test("default registry contains REZICS_SESSION entry", async () => {
+  test("default registry is empty for cookie-backed browser sessions", async () => {
     const { createTokenRefreshRegistry } = await import(
       "./tokenRefreshRegistry"
     );
     const registry = createTokenRefreshRegistry();
 
-    expect(registry[NormalizedTokenName.REZICS_SESSION]).toBeDefined();
-    expect(typeof registry[NormalizedTokenName.REZICS_SESSION]).toBe(
-      "function",
-    );
+    expect(registry[NormalizedTokenName.REZICS_SESSION]).toBeUndefined();
   });
 
   test("override replaces default entry", async () => {

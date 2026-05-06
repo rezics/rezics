@@ -1,39 +1,15 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import type { TokenRefreshRegistry } from "@rezics/api/react-query/tokenRefreshRegistry";
-import { NormalizedTokenName } from "@rezics/contract";
 
 process.env.VITE_API_URL ??= "http://api.example";
-process.env.VITE_AUTH_API_URL ??= "http://auth.example";
 process.env.VITE_TURNSTILE_SITE_KEY ??= "turnstile-test-key";
 
-const tokenState: Record<string, string | null> = {};
 let presence = false;
-const queryAccessTokenMock = mock(async () => "identity-token");
+const exchangeForSessionTokenMock = mock(async () => true);
 const clearAuthSessionStateMock = mock(() => undefined);
 
 mock.module("@rezics/api/react-query/jwt", () => ({
-  AUTH_TOKEN_STORAGE_EVENT: "package-auth-token-storage",
-  getToken: (name?: string) => (name ? (tokenState[name] ?? null) : null),
-  setToken: (token: string | null, name?: string) => {
-    if (name) tokenState[name] = token;
-  },
-  removeToken: (name?: string) => {
-    if (name) delete tokenState[name];
-  },
-  clearAllTokens: () => {
-    for (const k of Object.keys(tokenState)) delete tokenState[k];
-  },
-  parseJwt: (token?: string | null) => {
-    if (!token) return null;
-    return { exp: Math.floor(Date.now() / 1000) + 3600 };
-  },
-  queryAccessToken: queryAccessTokenMock,
-  getJwtTokenStrategy: () => ({
-    storeKeyByToken: {
-      [NormalizedTokenName.AUTH_SESSION]: "auth-store",
-      [NormalizedTokenName.REZICS_SESSION]: "rezics-session-store",
-    },
-  }),
+  clearAllTokens: mock(() => undefined),
+  exchangeForSessionToken: exchangeForSessionTokenMock,
 }));
 
 mock.module("@rezics/api/react-query/authPresence", () => ({
@@ -55,9 +31,8 @@ mock.module("../states/authSessionStore", () => ({
 
 describe("AuthProvider gateway + fan-out model", () => {
   beforeEach(() => {
-    for (const k of Object.keys(tokenState)) delete tokenState[k];
     presence = false;
-    queryAccessTokenMock.mockClear();
+    exchangeForSessionTokenMock.mockClear();
     clearAuthSessionStateMock.mockClear();
   });
 
@@ -66,13 +41,12 @@ describe("AuthProvider gateway + fan-out model", () => {
     expect(typeof AuthProvider).toBe("function");
   });
 
-  test("AuthProvider defaults to AUTH_SESSION only when tokens omitted", async () => {
+  test("AuthProvider has no token props surface", async () => {
     const { AuthProvider } = await import("./AuthProvider");
-    // No tokens prop — should default to [AUTH_SESSION]
-    expect(AuthProvider.length).toBe(1); // accepts props object
+    expect(AuthProvider.length).toBe(0);
   });
 
-  test("refreshGateway calls queryAccessToken", async () => {
+  test("refresh gateway is cookie-backed", async () => {
     // Verify the gateway function exists by importing the module
     const mod = await import("./AuthProvider");
     expect(mod.AuthProvider).toBeDefined();
@@ -85,20 +59,14 @@ describe("AuthProvider gateway + fan-out model", () => {
     expect(mod).toBeDefined();
   });
 
-  test("refreshServiceToken uses registry to refresh", async () => {
+  test("does not require a token refresh registry", async () => {
     // Verify module loads correctly with registry support
     const { AuthProvider } = await import("./AuthProvider");
-    const _registry: TokenRefreshRegistry = {
-      [NormalizedTokenName.REZICS_SESSION]: async () => ({ token: "test" }),
-    };
-    // Component accepts registry prop
     expect(typeof AuthProvider).toBe("function");
   });
 
-  test("missing registry entry for a token does not crash", async () => {
+  test("missing auth presence does not crash", async () => {
     const { AuthProvider } = await import("./AuthProvider");
-    // Empty registry — tokens without entries should go dormant, not crash
-    const _emptyRegistry: TokenRefreshRegistry = {};
     expect(typeof AuthProvider).toBe("function");
   });
 

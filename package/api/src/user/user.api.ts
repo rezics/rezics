@@ -77,6 +77,10 @@ export const userApi = {
     return apiFetch(`/user/${unitId}`);
   },
 
+  getBySlug: async (userSlug: string): Promise<UserDTO> => {
+    return apiFetch(`/user/by-slug/${userSlug}`);
+  },
+
   updateMe: async (input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/user/me`, {
       method: "PUT",

@@ -19,11 +19,11 @@ import { realmService } from "./realm.service";
  */
 async function ensureRealmMembership(
   actorPermission: { role: string },
-  actorUnitId: string,
+  actorUserId: string,
   realmUnitId: string,
 ): Promise<boolean> {
   if (BasicAdminPermission(actorPermission as any)) return true;
-  const member = await realmService.getMember(realmUnitId, actorUnitId);
+  const member = await realmService.getMember(realmUnitId, actorUserId);
   return member !== null;
 }
 
@@ -34,7 +34,7 @@ async function ensureRealmMembership(
  */
 async function canMutateRealmTagUnit(
   actorPermission: { role: string },
-  actorUnitId: string,
+  actorUserId: string,
   realmUnitId: string,
 ): Promise<boolean> {
   if (BasicAdminPermission(actorPermission as any)) return true;
@@ -42,7 +42,7 @@ async function canMutateRealmTagUnit(
     where: { id: realmUnitId },
     select: { userId: true },
   });
-  return realmUnit?.userId != null && realmUnit.userId === actorUnitId;
+  return realmUnit?.userId != null && realmUnit.userId === actorUserId;
 }
 
 export const realmTagUnitApi = new Elysia({ prefix: "/realm-tag-units" })

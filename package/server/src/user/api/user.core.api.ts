@@ -1,6 +1,7 @@
 import type { UpdateUser, UserListQuery } from "@rezics/contract";
 import {
   hasPermissionToUpdateUser,
+  slugSchema,
   updateUserSchema,
   userListBodySchema,
   userListQuerySchema,
@@ -51,6 +52,25 @@ export const coreRoute = new Elysia()
         summary: "Get all users (POST)",
         description:
           "Get all users via POST body. Use when ids exceed URL length or filters contain nested objects.",
+        tags: ["Users"],
+      },
+    },
+  )
+  .get(
+    "/by-slug/:userSlug",
+    async ({ params, set }) => {
+      const user = await userService.getBySlug(params.userSlug);
+      if (!user) {
+        set.status = 404;
+        return { error: { code: "NOT_FOUND", message: "User not found" } };
+      }
+      return mapUserToDTO(user);
+    },
+    {
+      params: t.Object({ userSlug: slugSchema }),
+      detail: {
+        summary: "Get user by slug",
+        description: "Look up a user profile by user slug",
         tags: ["Users"],
       },
     },

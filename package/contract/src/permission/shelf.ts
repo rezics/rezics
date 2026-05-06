@@ -4,19 +4,19 @@ import { BasicAdminPermission, isBlocked } from "./core";
 
 export function hasPermissionToUpdateShelf(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
   if (isBlocked(permission)) return false;
   if (BasicAdminPermission(permission)) return true;
   if (!unit?.user?.unitId) return false;
-  return actorUnitId === unit.user.unitId;
+  return actorUserId === unit.user.unitId;
 }
 
 export function hasPermissionToDeleteShelf(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdateShelf(permission, actorUnitId, unit);
+  return hasPermissionToUpdateShelf(permission, actorUserId, unit);
 }

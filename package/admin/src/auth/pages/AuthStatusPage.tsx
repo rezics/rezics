@@ -1,13 +1,8 @@
-import {
-  getToken,
-  parseJwt,
-  queryAccessToken,
-} from "@rezics/api/react-query/jwt";
+import { queryAccessToken } from "@rezics/api/react-query/jwt";
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
 } from "@rezics/api/states";
-import { NormalizedTokenName } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -28,34 +23,12 @@ import { useState } from "react";
 import { Page } from "@/core/layouts/Page";
 import { adminLogout } from "@/user/models/handler";
 
-function formatExpiry(exp?: number) {
-  if (!exp) return "N/A";
-  const date = new Date(exp * 1000);
-  const now = Date.now();
-  const diff = exp * 1000 - now;
-  const mins = Math.round(diff / 60_000);
+type SessionStatus = "active" | "missing";
 
-  if (diff <= 0) return `Expired (${date.toLocaleString()})`;
-  if (mins < 60) return `${date.toLocaleString()} (${mins}m remaining)`;
-  const hours = Math.round(mins / 60);
-  return `${date.toLocaleString()} (${hours}h remaining)`;
-}
-
-type TokenStatus = "active" | "expired" | "missing";
-
-function getTokenStatus(tokenName: NormalizedTokenName): TokenStatus {
-  const token = getToken(tokenName);
-  if (!token) return "missing";
-  const claims = parseJwt(token);
-  if (!claims?.exp) return "active";
-  return claims.exp * 1000 > Date.now() ? "active" : "expired";
-}
-
-function StatusBadge({ status }: { status: TokenStatus }) {
+function StatusBadge({ status }: { status: SessionStatus }) {
   const map = {
     active: { label: "Active", className: "bg-success-fill text-white" },
-    expired: { label: "Expired", className: "bg-error-fill text-white" },
-    missing: { label: "Not Present", className: "" },
+    missing: { label: "No Main Session", className: "" },
   } as const;
   const { label, className } = map[status];
   return (
@@ -68,49 +41,20 @@ function StatusBadge({ status }: { status: TokenStatus }) {
   );
 }
 
-function ClaimsTable({ tokenName }: { tokenName: NormalizedTokenName }) {
-  const token = getToken(tokenName);
-  if (!token) return <p className="text-sm text-text-secondary">No token</p>;
-
-  const claims = parseJwt(token);
-  if (!claims)
-    return <p className="text-sm text-text-secondary">Invalid token</p>;
-
-  const entries = Object.entries(claims).filter(
-    ([k]) => !["iat", "nbf"].includes(k),
-  );
-
-  return (
-    <Table className="text-sm">
-      <TableBody>
-        {entries.map(([key, value]) => (
-          <TableRow key={key}>
-            <TableCell className="py-1.5 font-semibold w-36">{key}</TableCell>
-            <TableCell className="py-1.5 font-mono text-[13px]">
-              {key === "exp" ? formatExpiry(value as number) : String(value)}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
-
-function TokenCard({
+function SessionRefreshCard({
   title,
-  tokenName,
   onRefresh,
   refreshLabel,
 }: {
   title: string;
-  tokenName: NormalizedTokenName;
   onRefresh: () => Promise<void>;
   refreshLabel: string;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const status = getTokenStatus(tokenName);
+  const permission = useAuthSessionStore((s) => s.permission);
+  const status: SessionStatus = permission ? "active" : "missing";
 
   async function handleRefresh() {
     setLoading(true);
@@ -134,7 +78,11 @@ function TokenCard({
           <h3 className="text-base font-bold">{title}</h3>
           <StatusBadge status={status} />
         </div>
-        <ClaimsTable tokenName={tokenName} />
+        <p className="text-sm text-text-secondary">
+          Browser session credentials are httpOnly cookies. This view refreshes
+          the main session and re-hydrates server state without reading JWT
+          claims from localStorage.
+        </p>
         <div className="mt-4">
           <Button
             variant="outline"
@@ -298,17 +246,17 @@ export default function AuthStatusPage() {
   return (
     <Page
       title="Auth Status"
-      description="View login status across services and manage tokens"
+      description="View cookie-backed session status across services"
     >
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 md:col-span-6">
-          <TokenCard
-            title="AUTH_SESSION"
-            tokenName={NormalizedTokenName.AUTH_SESSION}
+          <SessionRefreshCard
+            title="Cookie Session"
             onRefresh={async () => {
               await queryAccessToken({ requirePresence: false });
+              await hydrateAuthSessionState({ requirePresence: false });
             }}
-            refreshLabel="Refresh Token"
+            refreshLabel="Refresh Session"
           />
         </div>
         <div className="col-span-12 md:col-span-6">

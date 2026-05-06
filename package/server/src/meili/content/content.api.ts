@@ -13,7 +13,7 @@ export const contentSearchApi = new Elysia().post(
     const identity = await tryResolveIdentity(
       (headers as Record<string, string | undefined>)["authorization"],
     );
-    const allowed = await deriveAllowedRatings(identity?.unitId ?? null);
+    const allowed = await deriveAllowedRatings(identity?.userId ?? null);
     const ratings = intersectRatings(allowed, body.ratings);
     return searchContent({ ...body, ratings });
   },

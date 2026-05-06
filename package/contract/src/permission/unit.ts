@@ -2,25 +2,25 @@ import type { UnitDTO } from "../index";
 import type { Permission } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
 
-function isUnitOwner(actorUnitId: string, unit?: UnitDTO): boolean {
+function isUnitOwner(actorUserId: string, unit?: UnitDTO): boolean {
   if (!unit?.user?.unitId) return false;
-  return actorUnitId === unit.user.unitId;
+  return actorUserId === unit.user.unitId;
 }
 
 export function hasPermissionToUpdateUnit(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
   if (isBlocked(permission)) return false;
   if (BasicAdminPermission(permission)) return true;
-  return isUnitOwner(actorUnitId, unit);
+  return isUnitOwner(actorUserId, unit);
 }
 
 export function hasPermissionToDeleteUnit(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdateUnit(permission, actorUnitId, unit);
+  return hasPermissionToUpdateUnit(permission, actorUserId, unit);
 }

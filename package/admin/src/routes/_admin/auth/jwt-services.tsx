@@ -1,5 +1,7 @@
-import { getToken, parseJwt } from "@rezics/api/react-query/jwt";
-import { NormalizedTokenName } from "@rezics/contract";
+import {
+  hydrateAuthSessionState,
+  useAuthSessionStore,
+} from "@rezics/api/states";
 import {
   createFileRoute,
   lazyRouteComponent,
@@ -12,9 +14,11 @@ const AuthJwtServicesPage = lazyRouteComponent(
 );
 
 export const Route = createFileRoute("/_admin/auth/jwt-services")({
-  beforeLoad: () => {
-    const token = getToken(NormalizedTokenName.AUTH_SESSION);
-    const role = token ? parseJwt(token)?.role : null;
+  beforeLoad: async () => {
+    if (useAuthSessionStore.getState().status === "idle") {
+      await hydrateAuthSessionState({ requirePresence: false });
+    }
+    const role = useAuthSessionStore.getState().user?.role ?? null;
     if (role !== "owner") {
       throw redirect({ to: "/", replace: true });
     }

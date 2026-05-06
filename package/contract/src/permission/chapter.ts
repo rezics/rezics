@@ -4,19 +4,19 @@ import { BasicAdminPermission, isBlocked } from "./core";
 
 export function hasPermissionToUpdateChapter(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
   if (isBlocked(permission)) return false;
   if (BasicAdminPermission(permission)) return true;
   if (!unit?.user?.unitId) return false;
-  return actorUnitId === unit.user.unitId;
+  return actorUserId === unit.user.unitId;
 }
 
 export function hasPermissionToDeleteChapter(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdateChapter(permission, actorUnitId, unit);
+  return hasPermissionToUpdateChapter(permission, actorUserId, unit);
 }

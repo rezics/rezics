@@ -1,15 +1,13 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { configureApi } from "@rezics/api/config";
-import { NormalizedTokenName } from "@rezics/contract";
 
 // Required for @rezics/app env.ts validation
 process.env.VITE_API_URL ??= "http://api.example";
-process.env.VITE_AUTH_API_URL ??= "http://auth.example";
 process.env.VITE_TURNSTILE_SITE_KEY ??= "turnstile-test-key";
 
 configureApi({
   apiBaseUrl: "http://api.example",
-  authBaseUrl: "http://auth.example",
+  authBaseUrl: "http://api.example",
 });
 
 const fetchMock = mock();
@@ -56,6 +54,7 @@ const removeQueriesMock = mock(() => undefined);
 const clearProfileMock = mock(() => undefined);
 const clearAuthSessionStateMock = mock(() => undefined);
 const syncBusinessTokenMock = mock(() => undefined);
+const resetAuthSessionStoreMock = mock(() => undefined);
 const setUserMock = mock(() => undefined);
 const hydrateAuthSessionStateMock = mock(async () => ({
   session: { id: "session-1" },
@@ -108,6 +107,7 @@ mock.module("@/user/states", () => ({
   useAuthSessionStore: {
     getState: () => ({
       hasBusinessToken: false,
+      reset: resetAuthSessionStoreMock,
       syncBusinessToken: syncBusinessTokenMock,
     }),
   },
@@ -158,89 +158,48 @@ describe("auth handlers", () => {
     clearProfileMock.mockClear();
     clearAuthSessionStateMock.mockClear();
     syncBusinessTokenMock.mockClear();
+    resetAuthSessionStoreMock.mockClear();
     setUserMock.mockClear();
   });
 
-  test("login acquires auth session token from the token endpoint instead of session.token", async () => {
-    fetchMock.mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          token:
-            "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-        }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      ),
-    );
+  test("login refreshes the main cookie-backed session through main", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 200 }));
 
     const { login } = await import("./handler");
-    const { getToken } = await import("@rezics/api/react-query/jwt");
 
     const result = await login("reader@example.com", "secret");
 
     expect(signInMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://auth.example/api/auth/token",
+      "http://api.example/auth/session/refresh",
     );
-    expect(result.token).toBe(
-      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-    );
-    expect(getToken(NormalizedTokenName.AUTH_SESSION)).toBe(
-      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-    );
+    expect(result.token).toBeNull();
+    expect(hydrateAuthSessionStateMock).toHaveBeenCalledTimes(1);
   });
 
-  test("registration acquires auth session token from the token endpoint instead of session.token", async () => {
-    fetchMock.mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          token:
-            "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-        }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      ),
-    );
+  test("registration refreshes the main cookie-backed session through main", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 200 }));
 
     const { register } = await import("./handler");
-    const { getToken } = await import("@rezics/api/react-query/jwt");
 
     const result = await register("reader@example.com", "secret");
 
     expect(signUpMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://auth.example/api/auth/token",
+      "http://api.example/auth/session/refresh",
     );
-    expect(result.token).toBe(
-      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-    );
-    expect(getToken(NormalizedTokenName.AUTH_SESSION)).toBe(
-      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-    );
+    expect(result.token).toBeNull();
+    expect(hydrateAuthSessionStateMock).toHaveBeenCalledTimes(1);
   });
 
   test("clears auth-session, profile, and cached auth queries on logout", async () => {
     const { logout } = await import("./handler");
-    const { getToken, setToken } = await import("@rezics/api/react-query/jwt");
-
-    setToken("identity-token", NormalizedTokenName.AUTH_SESSION);
-    setToken("member-token", NormalizedTokenName.REZICS_SESSION);
 
     await logout(true);
 
     expect(signOutMock).toHaveBeenCalledTimes(1);
-    expect(getToken(NormalizedTokenName.AUTH_SESSION)).toBeNull();
-    expect(getToken(NormalizedTokenName.REZICS_SESSION)).toBeNull();
-    expect(syncBusinessTokenMock).toHaveBeenCalledWith(null);
     expect(clearAuthSessionStateMock).toHaveBeenCalledTimes(1);
+    expect(resetAuthSessionStoreMock).toHaveBeenCalledTimes(1);
     expect(clearProfileMock).toHaveBeenCalledTimes(1);
     expect(removeQueriesMock).toHaveBeenCalledTimes(2);
     const calls = removeQueriesMock.mock.calls as unknown as Array<

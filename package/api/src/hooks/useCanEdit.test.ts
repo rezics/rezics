@@ -7,7 +7,7 @@ const ownedUnit: UnitDTO = {
   type: "book",
   userId: "user-owner",
   user: {
-    unitId: "owner-unit-id",
+    unitId: "owner-user-id",
     slug: "owner",
     name: "Owner",
   } as UnitDTO["user"],
@@ -17,12 +17,12 @@ const permission = (role: Permission["role"]): Permission => ({ role });
 
 describe("computeCanEdit", () => {
   test("null permission → false", () => {
-    expect(computeCanEdit(null, "owner-unit-id", "book", ownedUnit)).toBe(
+    expect(computeCanEdit(null, "owner-user-id", "book", ownedUnit)).toBe(
       false,
     );
   });
 
-  test("null actorUnitId → false", () => {
+  test("null actorUserId → false", () => {
     expect(computeCanEdit(permission("USER"), null, "book", ownedUnit)).toBe(
       false,
     );
@@ -30,25 +30,25 @@ describe("computeCanEdit", () => {
 
   test("BLOCKED role → false even for own content", () => {
     expect(
-      computeCanEdit(permission("BLOCKED"), "owner-unit-id", "book", ownedUnit),
+      computeCanEdit(permission("BLOCKED"), "owner-user-id", "book", ownedUnit),
     ).toBe(false);
   });
 
   test("ADMIN role → true regardless of owner", () => {
     expect(
-      computeCanEdit(permission("ADMIN"), "some-other-unit", "book", ownedUnit),
+      computeCanEdit(permission("ADMIN"), "other-user", "book", ownedUnit),
     ).toBe(true);
   });
 
   test("ROOT role → true regardless of owner", () => {
     expect(
-      computeCanEdit(permission("ROOT"), "some-other-unit", "shelf", ownedUnit),
+      computeCanEdit(permission("ROOT"), "other-user", "shelf", ownedUnit),
     ).toBe(true);
   });
 
-  test("USER owning the content → true", () => {
+  test("USER owning the content by actor userId → true", () => {
     expect(
-      computeCanEdit(permission("USER"), "owner-unit-id", "chapter", ownedUnit),
+      computeCanEdit(permission("USER"), "owner-user-id", "chapter", ownedUnit),
     ).toBe(true);
   });
 
@@ -60,20 +60,20 @@ describe("computeCanEdit", () => {
 
   test("missing ownerUnit → false (for strict resources)", () => {
     expect(
-      computeCanEdit(permission("USER"), "owner-unit-id", "book", undefined),
+      computeCanEdit(permission("USER"), "owner-user-id", "book", undefined),
     ).toBe(false);
   });
 
   test("missing ownerUnit.user → false", () => {
     const unitNoUser: UnitDTO = { id: "x", type: "book" };
     expect(
-      computeCanEdit(permission("USER"), "owner-unit-id", "shelf", unitNoUser),
+      computeCanEdit(permission("USER"), "owner-user-id", "shelf", unitNoUser),
     ).toBe(false);
   });
 
   test("unit resource: owner match → true", () => {
     expect(
-      computeCanEdit(permission("USER"), "owner-unit-id", "unit", ownedUnit),
+      computeCanEdit(permission("USER"), "owner-user-id", "unit", ownedUnit),
     ).toBe(true);
   });
 });

@@ -66,7 +66,7 @@ async function findLiveUnitReferenceIds(
       status: { not: "DELETED" },
       OR: [
         { visibility: "PUBLIC" },
-        ...(caller ? [{ userId: caller.unitId }] : []),
+        ...(caller ? [{ userId: caller.userId }] : []),
       ],
     },
     select: { id: true },
@@ -137,7 +137,7 @@ async function authorizeForRealm(
   const member = await prisma.realmMember.findFirst({
     where: {
       realmUnitId: realmId,
-      userId: caller.unitId,
+      userId: caller.userId,
       roleKey: { in: [...REALM_AUTHORITY_ROLES] },
     },
     select: { realmUnitId: true },
@@ -460,7 +460,7 @@ export async function readListPublic(
       status: { not: "DELETED" },
       OR: [
         { visibility: "PUBLIC" },
-        ...(caller ? [{ userId: caller.unitId }] : []),
+        ...(caller ? [{ userId: caller.userId }] : []),
       ],
     },
     select: { id: true },

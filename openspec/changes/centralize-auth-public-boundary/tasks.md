@@ -39,12 +39,12 @@
 ## 5. Main-Domain Authorization and Token Wallet
 
 - [x] 5.1 Identify `/auth/*` routes that mutate main DB, main permissions, main sessions, main admin state, or main token wallet state.
-- [ ] 5.2 Add main `rezics-session-token` and main DB authorization checks to every main-domain route identified in 5.1.
-- [ ] 5.3 Split mixed auth/main routes where practical into separate auth-domain and main-domain operations.
-- [ ] 5.4 For unsplit mixed routes, perform main authorization first and call auth internally with service context.
+- [x] 5.2 Add main `rezics-session-token` and main DB authorization checks to every main-domain route identified in 5.1.
+- [x] 5.3 Split mixed auth/main routes where practical into separate auth-domain and main-domain operations.
+- [x] 5.4 For unsplit mixed routes, perform main authorization first and call auth internally with service context.
 - [x] 5.5 Create or designate the main token wallet module boundary for future external/resource tokens.
 - [x] 5.6 Ensure auth does not directly read or mutate main token wallet storage.
-- [ ] 5.7 Add tests for main-domain authorization under `/auth/*` and auth-domain proxy routes without duplicate main auth-role checks.
+- [x] 5.7 Add tests for main-domain authorization under `/auth/*` and auth-domain proxy routes without duplicate main auth-role checks.
 
 ## 6. Contract and Token Claim Migration
 
@@ -58,37 +58,37 @@
 ## 7. Frontend and API Client Migration
 
 - [x] 7.1 Replace browser usage of direct auth host env variables with main-relative `/auth/*` routes in `package/api`, `package/app`, and `package/admin`.
-- [ ] 7.2 Remove normal web storage of `rezics-session-token` and auth session JWTs from localStorage.
-- [ ] 7.3 Remove frontend JWT parsing for auth capability, role, email verification, user identity, and unit identity.
+- [x] 7.2 Remove normal web storage of `rezics-session-token` and auth session JWTs from localStorage.
+- [x] 7.3 Remove frontend JWT parsing for auth capability, role, email verification, user identity, and unit identity.
 - [x] 7.4 Update API client request handling to rely on credentials-included cookies and refresh through `/auth/session/refresh`.
-- [ ] 7.5 Update login, social sign-in, callback, sign-out, and post-auth navigation flows to complete through main.
-- [ ] 7.6 Update `authSessionStore`, `useAuth()`, and profile/session hydration code to consume server session state.
-- [ ] 7.7 Add frontend/API tests for session hydration, anonymous state, member state, verification state, refresh retry, and sign-out.
+- [x] 7.5 Update login, social sign-in, callback, sign-out, and post-auth navigation flows to complete through main.
+- [x] 7.6 Update `authSessionStore`, `useAuth()`, and profile/session hydration code to consume server session state.
+- [x] 7.7 Add frontend/API tests for session hydration, anonymous state, member state, verification state, refresh retry, and sign-out.
 
 ## 8. User and Unit Identity Audit
 
-- [ ] 8.1 Use repo-wide search to list all `userId`, `unitId`, `userSlug`, and `unitSlug` usages in contracts, server, auth, API clients, app, admin, and services.
-- [ ] 8.2 Classify each usage as actor user identity, owner user identity, domain unit identity, user slug, or unit slug.
-- [ ] 8.3 Rename route params, props, DTO fields, and local variables that currently imply `userId = unitId`.
-- [ ] 8.4 Update Prisma schema or service access patterns so Unit ownership references explicit user identity rather than accidental unit identity.
-- [ ] 8.5 Update user profile and unit lookup routes so user slug and unit slug namespaces are not conflated.
-- [ ] 8.6 Add migration notes and database migration tasks for any schema-level user/unit identity changes.
-- [ ] 8.7 Add tests covering ownership checks, profile lookup by user slug, unit lookup by unit slug, and actor identity authorization.
+- [x] 8.1 Use repo-wide search to list all `userId`, `unitId`, `userSlug`, and `unitSlug` usages in contracts, server, auth, API clients, app, admin, and services.
+- [x] 8.2 Classify each usage as actor user identity, owner user identity, domain unit identity, user slug, or unit slug.
+- [x] 8.3 Rename route params, props, DTO fields, and local variables that currently imply `userId = unitId`.
+- [x] 8.4 Update Prisma schema or service access patterns so Unit ownership references explicit user identity rather than accidental unit identity.
+- [x] 8.5 Update user profile and unit lookup routes so user slug and unit slug namespaces are not conflated.
+- [x] 8.6 Add migration notes and database migration tasks for any schema-level user/unit identity changes.
+- [x] 8.7 Add tests covering ownership checks, profile lookup by user slug, unit lookup by unit slug, and actor identity authorization.
 
 ## 9. Service Boundary Review
 
-- [ ] 9.1 Audit reaction service endpoints and classify which can continue independently with only `rezics-session-token`.
-- [ ] 9.2 Identify service endpoints that need main proxy because they require non-`userId` main context or main-owned mutations.
-- [ ] 9.3 Update service auth macros or clients to support cookie-originated main sessions where services are reached through main, and bearer verification where services remain independently reachable.
-- [ ] 9.4 Add service tests for independently verifiable endpoints and main-proxied endpoints.
+- [x] 9.1 Audit reaction service endpoints and classify which can continue independently with only `rezics-session-token`.
+- [x] 9.2 Identify service endpoints that need main proxy because they require non-`userId` main context or main-owned mutations.
+- [x] 9.3 Update service auth macros or clients to support cookie-originated main sessions where services are reached through main, and bearer verification where services remain independently reachable.
+- [x] 9.4 Add service tests for independently verifiable endpoints and main-proxied endpoints.
 
 ## 10. Validation and Documentation
 
-- [ ] 10.1 Run targeted `bun test` suites for changed auth, server, API client, and service modules.
-- [ ] 10.2 Run TypeScript/build checks for affected packages.
-- [ ] 10.3 Run repo-wide searches to confirm no browser code depends on `VITE_AUTH_API_URL` or direct `auth.rezics.com` for normal web auth flows.
-- [ ] 10.4 Run repo-wide searches to confirm no normal browser flow stores `rezics-session-token` or auth session JWTs in localStorage.
-- [ ] 10.5 Run repo-wide searches to confirm no new code treats `unitId` as the authenticated actor identity.
-- [ ] 10.6 Document that `auth.rezics.com` is not a public product API despite retaining public DNS.
-- [ ] 10.7 Document public OAuth redirect URI and discovery metadata expectations for deployments.
-- [ ] 10.8 Verify OpenSpec status and archive readiness after implementation tasks are complete.
+- [x] 10.1 Run targeted `bun test` suites for changed auth, server, API client, and service modules.
+- [x] 10.2 Run TypeScript/build checks for affected packages.
+- [x] 10.3 Run repo-wide searches to confirm no browser code depends on `VITE_AUTH_API_URL` or direct `auth.rezics.com` for normal web auth flows.
+- [x] 10.4 Run repo-wide searches to confirm no normal browser flow stores `rezics-session-token` or auth session JWTs in localStorage.
+- [x] 10.5 Run repo-wide searches to confirm no new code treats `unitId` as the authenticated actor identity.
+- [x] 10.6 Document that `auth.rezics.com` is not a public product API despite retaining public DNS.
+- [x] 10.7 Document public OAuth redirect URI and discovery metadata expectations for deployments.
+- [x] 10.8 Verify OpenSpec status and archive readiness after implementation tasks are complete.

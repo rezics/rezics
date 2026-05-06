@@ -1,11 +1,7 @@
 import { getApiConfig } from "../config";
 import { clearAuthPresence, hasAuthPresence } from "./authPresence";
 import { ApiError } from "./errors";
-import {
-  buildTokenHeaders,
-  exchangeForSessionToken,
-  queryAccessToken,
-} from "./jwt";
+import { buildTokenHeaders, exchangeForSessionToken } from "./jwt";
 
 /**
  * Base API URL - should be configured via environment
@@ -18,7 +14,8 @@ export type ApiRequestInit = globalThis.RequestInit;
 
 /**
  * Build request headers for business API calls.
- * Authorization: Bearer always carries the rezics-session-token.
+ * Browser requests rely on httpOnly session cookies. Non-browser callers can
+ * still attach a stored rezics session token through buildTokenHeaders().
  */
 function buildHeaders(options?: ApiRequestInit): Record<string, string> {
   return {
@@ -52,9 +49,7 @@ async function requestWithAuthRetry(
     return response;
   }
 
-  // Try refreshing: get a new auth-session-token, then exchange for session token
   try {
-    await queryAccessToken();
     await exchangeForSessionToken();
   } catch {
     clearAuthPresence();

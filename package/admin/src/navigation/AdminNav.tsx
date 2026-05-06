@@ -1,5 +1,4 @@
-import { getToken, parseJwt } from "@rezics/api/react-query/jwt";
-import { NormalizedTokenName } from "@rezics/contract";
+import { useAuthSessionStore } from "@rezics/api/states";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { Separator } from "@rezics/ui/shadcn";
 import { useRouterState } from "@tanstack/react-router";
@@ -32,15 +31,9 @@ function isActivePath(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(`${to}/`);
 }
 
-function getCurrentUserRole(): string | null {
-  const token = getToken(NormalizedTokenName.AUTH_SESSION);
-  if (!token) return null;
-  return parseJwt(token)?.role ?? null;
-}
-
-function isItemVisible(item: AdminNavItem): boolean {
+function isItemVisible(item: AdminNavItem, role: string | null): boolean {
   if (!item.requiredRole) return true;
-  return getCurrentUserRole() === item.requiredRole;
+  return role === item.requiredRole;
 }
 
 const navItemBaseClass =
@@ -54,6 +47,7 @@ export function AdminNav({
   onNavigate?: () => void;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const currentRole = useAuthSessionStore((state) => state.user?.role ?? null);
 
   const initialOpenGroups = React.useMemo(() => {
     const open: Record<string, boolean> = {};
@@ -137,12 +131,14 @@ export function AdminNav({
       <ul className="py-2 flex flex-col gap-1 list-none">
         {items.map((entry) => {
           if (isItem(entry)) {
-            if (!isItemVisible(entry)) return null;
+            if (!isItemVisible(entry, currentRole)) return null;
             return renderItem(entry, 0);
           }
           if (!isGroup(entry)) return null;
 
-          const visibleChildren = entry.children.filter(isItemVisible);
+          const visibleChildren = entry.children.filter((child) =>
+            isItemVisible(child, currentRole),
+          );
           if (visibleChildren.length === 0) return null;
 
           const open = !!openGroups[entry.id];

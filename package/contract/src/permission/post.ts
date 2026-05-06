@@ -4,19 +4,19 @@ import { BasicAdminPermission, isBlocked } from "./core";
 
 export function hasPermissionToUpdatePost(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
   if (isBlocked(permission)) return false;
   if (BasicAdminPermission(permission)) return true;
   if (!unit?.user?.unitId) return false;
-  return actorUnitId === unit.user.unitId;
+  return actorUserId === unit.user.unitId;
 }
 
 export function hasPermissionToDeletePost(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdatePost(permission, actorUnitId, unit);
+  return hasPermissionToUpdatePost(permission, actorUserId, unit);
 }

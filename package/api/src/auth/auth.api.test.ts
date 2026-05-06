@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { NormalizedTokenName } from "@rezics/contract";
 import { configureApi } from "../config";
 
 const fetchMock = mock();
-const authToken =
-  "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln";
 
 type MemoryStorage = {
   getItem(key: string): string | null;
@@ -34,7 +31,7 @@ function createMemoryStorage(): MemoryStorage {
 
 configureApi({
   apiBaseUrl: "http://api.example",
-  authBaseUrl: "http://auth.example",
+  authBaseUrl: "http://api.example",
 });
 
 describe("authApi", () => {
@@ -63,13 +60,13 @@ describe("authApi", () => {
     expect(response).toEqual({ token: "jwt-token" });
 
     const [url, options] = fetchMock.mock.calls[0]!;
-    expect(url).toBe("http://auth.example/auth/token");
+    expect(url).toBe("http://api.example/auth/token");
     expect(options).toMatchObject({
       credentials: "include",
     });
   });
 
-  test("reads normalized auth session state from the auth service", async () => {
+  test("reads normalized auth session state from the main auth boundary", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -115,13 +112,13 @@ describe("authApi", () => {
     expect(response.authSession.emailVerified).toBe(false);
 
     const [url, options] = fetchMock.mock.calls[0]!;
-    expect(url).toBe("http://auth.example/auth/get-session-state");
+    expect(url).toBe("http://api.example/auth/get-session-state");
     expect(options).toMatchObject({
       credentials: "include",
     });
   });
 
-  test("posts social sign-in initiation to the auth service", async () => {
+  test("posts social sign-in initiation to the main auth boundary", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({ url: "http://oauth.example", redirect: false }),
@@ -147,7 +144,7 @@ describe("authApi", () => {
     });
 
     const [url, options] = fetchMock.mock.calls[0]!;
-    expect(url).toBe("http://auth.example/auth/sign-in/social");
+    expect(url).toBe("http://api.example/auth/sign-in/social");
     expect(options).toMatchObject({
       method: "POST",
       credentials: "include",
@@ -198,13 +195,13 @@ describe("authApi", () => {
     });
 
     expect(fetchMock.mock.calls[0]![0]).toBe(
-      "http://auth.example/auth/send-verification-email",
+      "http://api.example/auth/send-verification-email",
     );
     expect(fetchMock.mock.calls[1]![0]).toBe(
-      "http://auth.example/auth/change-email",
+      "http://api.example/auth/change-email",
     );
     expect(fetchMock.mock.calls[2]![0]).toBe(
-      "http://auth.example/auth/set-password",
+      "http://api.example/auth/set-password",
     );
   });
 
@@ -231,7 +228,7 @@ describe("authApi", () => {
     });
 
     const [url, options] = fetchMock.mock.calls[0]!;
-    expect(url).toBe("http://auth.example/auth/request-password-reset");
+    expect(url).toBe("http://api.example/auth/request-password-reset");
     expect(options).toMatchObject({
       method: "POST",
       credentials: "include",
@@ -262,7 +259,7 @@ describe("authApi", () => {
     expect(response).toEqual({ status: true });
 
     const [url, options] = fetchMock.mock.calls[0]!;
-    expect(url).toBe("http://auth.example/auth/reset-password");
+    expect(url).toBe("http://api.example/auth/reset-password");
     expect(options).toMatchObject({
       method: "POST",
       credentials: "include",

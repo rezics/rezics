@@ -120,7 +120,7 @@ export async function applyWorkLink(
     where: {
       releaseUnitId: releaseId,
       workUnitId,
-      claimerUserId: caller.unitId,
+      claimerUserId: caller.userId,
       status: "PENDING",
     },
     select: { id: true },
@@ -133,7 +133,7 @@ export async function applyWorkLink(
     data: {
       releaseUnitId: releaseId,
       workUnitId,
-      claimerUserId: caller.unitId,
+      claimerUserId: caller.userId,
       status: "PENDING",
     },
     select: { id: true },
@@ -145,7 +145,7 @@ export async function applyWorkLink(
       kind: SystemEmailKind.WORK_LINK_CLAIM_PENDING,
       payload: {
         claimId: claim.id,
-        claimerUserId: caller.unitId,
+        claimerUserId: caller.userId,
         workUnitId,
         releaseUnitId: releaseId,
       },

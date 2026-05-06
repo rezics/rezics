@@ -269,8 +269,8 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       const unit = await unitService.getByUnitId(params.unitId);
       const isPrivileged =
         (identity && BasicAdminPermission(identity.permission)) ||
-        (identity?.unitId != null && unit?.userId === identity.userId);
-      return getTagContext(params.unitId, identity?.unitId ?? undefined, {
+        (identity?.userId != null && unit?.userId === identity.userId);
+      return getTagContext(params.unitId, identity?.userId ?? undefined, {
         includeBelowThreshold: isPrivileged,
       });
     },
@@ -293,7 +293,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       const unit = await unitService.getByUnitId(params.unitId);
       const isPrivileged =
         (identity && BasicAdminPermission(identity.permission)) ||
-        (identity?.unitId != null && unit?.userId === identity.userId);
+        (identity?.userId != null && unit?.userId === identity.userId);
 
       const unitTags = await tagService.getTagsForUnit(params.unitId, {
         includeBelowThreshold: isPrivileged,

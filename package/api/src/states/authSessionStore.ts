@@ -3,22 +3,17 @@ import {
   clearAuthPresence,
   hasAuthPresence,
 } from "@rezics/api/react-query/authPresence";
-import {
-  getRezicsSessionClaims,
-  getToken,
-  parseJwt,
-} from "@rezics/api/react-query/jwt";
 import type {
   AuthSession,
   AuthUser,
   GetSessionStateResponse,
   Permission,
 } from "@rezics/contract";
-import { NormalizedTokenName } from "@rezics/contract";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 export type AuthSessionHydrationStatus = "idle" | "loading" | "ready" | "error";
+export type AuthCapabilityLevel = "anonymous" | "member";
 
 type AuthSessionSnapshot = {
   session: GetSessionStateResponse["session"] | null;
@@ -32,17 +27,16 @@ export type AuthSessionStoreState = {
   user: AuthUser | null;
   authSession: GetSessionStateResponse["authSession"] | null;
   /**
-   * Main server permission, derived from the `rezics-session-token` claims.
-   *
-   * This represents the main server's permission model and is unrelated to
-   * `auth-session-token` except during the session exchange flow.
-   *
-   * `null` when the user has no valid session token (unauthenticated).
+   * Main server permission as represented by server-hydrated session state.
+   * `null` when the user has no valid main session.
    */
   permission: Permission | null;
+  capabilityLevel: AuthCapabilityLevel;
+  hasAuthSession: boolean;
+  needsVerification: boolean;
   /**
-   * Main server actor userId, derived from the `rezics-session-token` claims.
-   * `null` when the user has no valid session token (unauthenticated).
+   * Main server actor userId from server-hydrated session state.
+   * The field name remains `unitId` as a temporary compatibility alias.
    */
   unitId: string | null;
   identitySet: boolean;
@@ -54,18 +48,6 @@ export type AuthSessionStoreState = {
   reset: () => void;
 };
 
-function deriveSessionClaims(): {
-  permission: Permission | null;
-  unitId: string | null;
-} {
-  const claims = getRezicsSessionClaims();
-  if (!claims) return { permission: null, unitId: null };
-  return {
-    permission: claims.permission ?? null,
-    unitId: typeof claims.userId === "string" ? claims.userId : null,
-  };
-}
-
 function deriveState(
   snapshot: AuthSessionSnapshot | null,
   status: AuthSessionHydrationStatus = "ready",
@@ -74,7 +56,18 @@ function deriveState(
   const identitySet = Boolean(snapshot?.authSession?.identitySet);
   const emailVerified = Boolean(snapshot?.authSession?.emailVerified);
   const registrationComplete = identitySet && emailVerified;
-  const { permission, unitId } = deriveSessionClaims();
+  const role = snapshot?.user?.role?.toUpperCase();
+  const permission =
+    snapshot?.authSession?.canAcquireMemberToken || registrationComplete
+      ? ({
+          role:
+            role === "ROOT" || role === "ADMIN" || role === "BLOCKED"
+              ? role
+              : "MEMBER",
+        } as Permission)
+      : null;
+  const unitId = permission ? (snapshot?.user?.id ?? null) : null;
+  const hasAuthSession = permission !== null;
 
   return {
     status,
@@ -82,6 +75,9 @@ function deriveState(
     user: snapshot?.user ?? null,
     authSession: snapshot?.authSession ?? null,
     permission,
+    capabilityLevel: hasAuthSession ? "member" : "anonymous",
+    hasAuthSession,
+    needsVerification: Boolean(snapshot?.authSession && !emailVerified),
     unitId,
     identitySet,
     registrationComplete,
@@ -113,8 +109,7 @@ export async function hydrateAuthSessionState(options?: {
   requirePresence?: boolean;
 }) {
   const store = useAuthSessionStore.getState();
-  const token = getToken(NormalizedTokenName.AUTH_SESSION);
-  const requiresPresence = options?.requirePresence ?? !token;
+  const requiresPresence = options?.requirePresence ?? true;
 
   if (requiresPresence && !hasAuthPresence()) {
     useAuthSessionStore.setState(deriveState(null, "ready"));
@@ -124,49 +119,11 @@ export async function hydrateAuthSessionState(options?: {
   store.setPending();
 
   try {
-    // Always fetch full session state from server to get identity + email status
-    const authToken = getToken(NormalizedTokenName.AUTH_SESSION);
-    const payload = authToken ? parseJwt(authToken) : null;
-
-    let authSession: GetSessionStateResponse["authSession"];
-    try {
-      const serverState = await authApi.getSessionState();
-      authSession = serverState.authSession;
-    } catch {
-      // Fallback: derive from local token claims
-      const emailVerified = payload?.email_verified !== false;
-      const identitySet = Boolean(payload?.slug);
-      authSession = {
-        canAcquireMemberToken: identitySet && emailVerified,
-        readinessStatus:
-          identitySet && emailVerified ? "ready" : "needs-registration",
-        emailVerified,
-        identitySet,
-        registrationComplete: identitySet && emailVerified,
-      } as GetSessionStateResponse["authSession"];
-    }
-
+    const serverState = await authApi.getSessionState();
     const sessionState: AuthSessionSnapshot = {
-      session: payload
-        ? {
-            id: payload.sub ?? "",
-            userId: payload.sub ?? payload.id ?? "",
-            token: authToken!,
-            expiresAt: "",
-          }
-        : null,
-      user: payload
-        ? {
-            id: payload.sub ?? payload.id ?? "",
-            name: payload.name ?? "",
-            role: payload.role ?? "user",
-            email: "",
-            emailVerified: payload.email_verified !== false,
-            createdAt: "",
-            updatedAt: "",
-          }
-        : null,
-      authSession,
+      session: serverState.session ?? null,
+      user: serverState.user ?? null,
+      authSession: serverState.authSession,
     };
 
     useAuthSessionStore.getState().setSessionState(sessionState);

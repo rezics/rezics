@@ -7,19 +7,19 @@ import { BasicAdminPermission, isBlocked } from "./core";
 /** @deprecated Use hasPermissionToUpdatePost */
 export function hasPermissionToUpdateComment(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
   if (isBlocked(permission)) return false;
   if (BasicAdminPermission(permission)) return true;
-  return actorUnitId === unit?.user?.unitId;
+  return actorUserId === unit?.user?.unitId;
 }
 
 /** @deprecated Use hasPermissionToDeletePost */
 export function hasPermissionToDeleteComment(
   permission: Permission,
-  actorUnitId: string,
+  actorUserId: string,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdateComment(permission, actorUnitId, unit);
+  return hasPermissionToUpdateComment(permission, actorUserId, unit);
 }

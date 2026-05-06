@@ -39,7 +39,7 @@ describe("jwt token storage", () => {
   beforeEach(() => {
     configureApi({
       apiBaseUrl: "http://api.example",
-      authBaseUrl: "http://auth.example",
+      authBaseUrl: "http://api.example",
     });
     globalThis.localStorage = createMemoryStorage() as Storage;
     globalThis.window = {
@@ -47,22 +47,21 @@ describe("jwt token storage", () => {
     } as unknown as Window & typeof globalThis;
   });
 
-  test("stores auth session and member session tokens separately", async () => {
+  test("does not persist browser auth or member session tokens", async () => {
     const jwt = await import("./jwt");
 
     const authToken = createToken({ sub: "user-1", slug: "reader" });
     const sessionToken = createToken({
-      unitId: "user-1",
-      permission: { role: "USER" },
+      userId: "user-1",
+      role: "MEMBER",
     });
 
     jwt.setToken(authToken, NormalizedTokenName.AUTH_SESSION);
     jwt.setToken(sessionToken, NormalizedTokenName.REZICS_SESSION);
 
-    expect(jwt.getToken(NormalizedTokenName.AUTH_SESSION)).toBe(authToken);
-    expect(jwt.getToken(NormalizedTokenName.REZICS_SESSION)).toBe(sessionToken);
-    expect(jwt.getRezicsSessionClaims()).toMatchObject({
-      unitId: "user-1",
-    });
+    expect(jwt.getToken(NormalizedTokenName.AUTH_SESSION)).toBeNull();
+    expect(jwt.getToken(NormalizedTokenName.REZICS_SESSION)).toBeNull();
+    expect(localStorage.getItem(NormalizedTokenName.AUTH_SESSION)).toBeNull();
+    expect(localStorage.getItem(NormalizedTokenName.REZICS_SESSION)).toBeNull();
   });
 });

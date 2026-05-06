@@ -21,10 +21,10 @@ export async function hasAuthorityOver(
   unit: AuthorityUnit,
 ): Promise<boolean> {
   if (!caller) return false;
-  if (unit.userId && caller.unitId === unit.userId) return true;
+  if (unit.userId && caller.userId === unit.userId) return true;
 
   if (isAdminRole(caller)) return true;
-  if (await verifyAdminFromDb(caller.unitId)) return true;
+  if (await verifyAdminFromDb(caller.userId)) return true;
 
   const containingRealms = await prisma.realmUnit.findMany({
     where: { unitId: unit.id },
@@ -34,7 +34,7 @@ export async function hasAuthorityOver(
 
   const realmMember = await prisma.realmMember.findFirst({
     where: {
-      userId: caller.unitId,
+      userId: caller.userId,
       roleKey: { in: [...REALM_AUTHORITY_ROLES] },
       realmUnitId: { in: containingRealms.map((r) => r.realmUnitId) },
     },

@@ -1,10 +1,6 @@
 import {
-  type AuthSessionTokenClaims,
-  type AuthTokenResponse,
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
-  normalizedTokenTransportMap,
-  type RezicsSessionClaims,
 } from "@rezics/contract";
 import { getApiConfig } from "../config";
 import { clearAuthPresence, hasAuthPresence } from "./authPresence";
@@ -15,20 +11,6 @@ const DEFAULT_TOKEN_STORAGE_KEYS: Record<string, string> = {
 };
 
 export const AUTH_TOKEN_STORAGE_EVENT = "package-auth-token-storage";
-type PersistedAuthSnapshot = {
-  state?: {
-    accessToken?: string | null;
-    isAuthenticated?: boolean;
-  };
-  version?: number;
-};
-
-export type JwtTokenRecord = {
-  tokenName: NormalizedTokenNameType;
-  token: string | null;
-  payload: JwtPayload | null;
-};
-
 export type JwtTokenStrategy = {
   authBaseUrl: string;
   storeKeyByToken: Partial<Record<NormalizedTokenNameType, string>>;
@@ -70,25 +52,13 @@ export function getJwtTokenStrategy(): JwtTokenStrategy {
  * Read the currently persisted token value for a normalized token type.
  */
 function readStoredToken(tokenName: NormalizedTokenNameType): string | null {
-  const storeKey = getStoreKey(tokenName);
-  if (!storeKey) return null;
-  return readAuthSnapshot(storeKey)?.state?.accessToken ?? null;
+  if (typeof window !== "undefined") return null;
+  void tokenName;
+  return null;
 }
 
 function getStoreKey(tokenName: NormalizedTokenNameType): string | undefined {
   return tokenStrategy.storeKeyByToken[tokenName];
-}
-
-function readAuthSnapshot(storeKey: string): PersistedAuthSnapshot | null {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(storeKey);
-  if (!raw) return null;
-
-  try {
-    return JSON.parse(raw) as PersistedAuthSnapshot;
-  } catch {
-    return null;
-  }
 }
 
 function writeAuthSnapshot(
@@ -96,34 +66,13 @@ function writeAuthSnapshot(
   token: string | null,
 ): void {
   if (typeof window === "undefined") return;
-
-  const storeKey = getStoreKey(tokenName);
-  if (!storeKey) return;
-
-  const payload = parseJwt(token);
-  localStorage.setItem(
-    storeKey,
-    JSON.stringify({
-      state: {
-        accessToken: token,
-        id: payload?.id ?? null,
-        slug: payload?.slug ?? null,
-        role: payload?.role ?? null,
-        isAuthenticated: !!token,
-        ...(payload?.email_verified === false ? { email_verified: false } : {}),
-      },
-      version: 0,
-    }),
-  );
-  window.dispatchEvent(
-    new CustomEvent(AUTH_TOKEN_STORAGE_EVENT, {
-      detail: { tokenName, token },
-    }),
-  );
+  void token;
+  removeToken(tokenName);
 }
 
 /**
- * Get JWT token from localStorage
+ * Browser session credentials are httpOnly cookies, so this returns null in
+ * normal web flows.
  */
 export const getToken = (
   tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_SESSION,
@@ -132,7 +81,7 @@ export const getToken = (
 };
 
 /**
- * Set JWT token to localStorage
+ * Browser session credentials are not persisted in script-visible storage.
  */
 export const setToken = (
   token: string | null,
@@ -146,7 +95,7 @@ export const setToken = (
 };
 
 /**
- * Remove JWT token from localStorage
+ * Remove any legacy script-visible token snapshot.
  */
 export const removeToken = (
   tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_SESSION,
@@ -165,15 +114,13 @@ export const removeToken = (
 /**
  * Check if user is authenticated (has a valid session token)
  */
-export const isAuthenticated = (): boolean => {
-  return !!getToken(NormalizedTokenName.REZICS_SESSION);
-};
+export const isAuthenticated = (): boolean => false;
 
 export async function queryAccessToken(options?: {
   requirePresence?: boolean;
-}) {
+}): Promise<boolean> {
   if (options?.requirePresence !== false && !hasAuthPresence()) {
-    return null;
+    return false;
   }
 
   const refreshTokenResponse = await fetch(
@@ -191,12 +138,12 @@ export async function queryAccessToken(options?: {
     clearAuthPresence();
     throw new Error("Unauthorized - Please login again");
   }
-  return null;
+  return true;
 }
 
 /**
- * Ensure an auth session JWT exists in client storage, using the auth
- * session cookie to mint one when needed.
+ * Ensure the main session cookie is refreshed from the opaque auth session
+ * cookie.
  */
 export async function ensureAuthSessionToken(options?: {
   requirePresence?: boolean;
@@ -205,10 +152,9 @@ export async function ensureAuthSessionToken(options?: {
 }
 
 /**
- * Exchange an auth-session-token for a rezics-session-token via
- * the server's POST /session/exchange endpoint.
+ * Refresh the main rezics session cookie from the opaque auth session cookie.
  */
-export async function exchangeForSessionToken(): Promise<string | null> {
+export async function exchangeForSessionToken(): Promise<boolean> {
   const response = await fetch(`${getAuthBaseUrl()}/auth/session/refresh`, {
     method: "POST",
     credentials: "include",
@@ -218,17 +164,16 @@ export async function exchangeForSessionToken(): Promise<string | null> {
   });
 
   if (!response.ok) {
-    return null;
+    return false;
   }
 
   removeToken(NormalizedTokenName.AUTH_SESSION);
   removeToken(NormalizedTokenName.REZICS_SESSION);
-  return null;
+  return true;
 }
 
 /**
- * Build transport-correct headers for API calls.
- * Authorization: Bearer always carries the REZICS_SESSION token.
+ * Build transport-correct headers for non-browser API calls.
  */
 export function buildTokenHeaders(): Record<string, string> {
   const headers: Record<string, string> = {};
@@ -245,23 +190,6 @@ export function buildTokenHeaders(): Record<string, string> {
   return headers;
 }
 
-export function getTokenRecord(
-  tokenName: NormalizedTokenNameType,
-): JwtTokenRecord {
-  const token = getToken(tokenName);
-  return {
-    tokenName,
-    token,
-    payload: parseJwt(token),
-  };
-}
-
-export function getAllTokenRecords(): JwtTokenRecord[] {
-  return (
-    Object.keys(normalizedTokenTransportMap) as NormalizedTokenNameType[]
-  ).map((tokenName) => getTokenRecord(tokenName));
-}
-
 export function clearAllTokens(): void {
   const managedTokens = Object.keys(
     tokenStrategy.storeKeyByToken,
@@ -269,70 +197,4 @@ export function clearAllTokens(): void {
   managedTokens.forEach((tokenName) => {
     removeToken(tokenName);
   });
-}
-
-export interface JwtPayload {
-  id?: string;
-  unitId?: string;
-  sub?: string;
-  name?: string;
-  avatar?: string | null;
-  emailVerified?: boolean;
-  verificationStatus?: string;
-  slug?: string;
-  role?: string;
-  exp?: number;
-  iat?: number;
-  iss?: string;
-  aud?: string | string[];
-  [key: string]: unknown;
-}
-
-function decodeBase64Url(input: string): string {
-  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
-  if (typeof globalThis.atob === "function") {
-    return globalThis.atob(padded);
-  }
-  if (typeof Buffer !== "undefined") {
-    return Buffer.from(padded, "base64").toString("utf-8");
-  }
-  throw new Error("No base64 decoder available");
-}
-
-/**
- * Parse JWT payload
- */
-export function parseJwt<T extends JwtPayload = JwtPayload>(
-  token?: string | null,
-): T | null {
-  if (!token) return null;
-  const parts = token.split(".");
-  if (parts.length < 2) return null;
-  const payloadPart = parts[1];
-  if (!payloadPart) return null;
-  try {
-    const payload = decodeBase64Url(payloadPart);
-    return JSON.parse(payload) as T;
-  } catch {
-    return null;
-  }
-}
-
-export function getParsedToken<T extends JwtPayload = JwtPayload>(
-  tokenName: NormalizedTokenNameType,
-): T | null {
-  return parseJwt<T>(getToken(tokenName));
-}
-
-export function getAuthSessionClaims(): AuthSessionTokenClaims | null {
-  return getParsedToken<AuthSessionTokenClaims>(
-    NormalizedTokenName.AUTH_SESSION,
-  );
-}
-
-export function getRezicsSessionClaims(): RezicsSessionClaims | null {
-  return getParsedToken<RezicsSessionClaims>(
-    NormalizedTokenName.REZICS_SESSION,
-  );
 }

@@ -11,7 +11,7 @@ import { initI18n } from "./providers/i18n";
 // Initialization (this type of side effect can be ingested and is not involved in hot-swap).
 configureApi({
   apiBaseUrl: env.VITE_API_URL,
-  authBaseUrl: env.VITE_AUTH_API_URL ?? env.VITE_API_URL,
+  authBaseUrl: env.VITE_API_URL,
 });
 initI18n();
 

@@ -44,7 +44,7 @@ describe("refreshAuthToken", () => {
     authPresence = false;
     configureApi({
       apiBaseUrl: "http://api.example",
-      authBaseUrl: "http://auth.example",
+      authBaseUrl: "http://api.example",
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     globalThis.window = {
@@ -69,14 +69,7 @@ describe("refreshAuthToken", () => {
         },
       }),
     );
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ token: "fresh-token" }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
-    );
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 200 }));
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ ok: true }), {
         status: 200,
@@ -93,10 +86,10 @@ describe("refreshAuthToken", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock.mock.calls[1]?.[0]).toBe(
-      "http://auth.example/api/auth/token",
+      "http://api.example/auth/session/refresh",
     );
     expect(result).toEqual({ ok: true });
-    expect(getToken()).toBe("fresh-token");
+    expect(getToken()).toBeNull();
   });
 
   test("does not probe auth token refresh when auth presence is absent", async () => {
@@ -115,7 +108,7 @@ describe("refreshAuthToken", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  test("builds managed auth headers from normalized token storage", async () => {
+  test("does not inject browser session tokens into authorization headers", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ ok: true }), {
         status: 200,
@@ -142,8 +135,12 @@ describe("refreshAuthToken", () => {
 
     expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
       headers: {
-        Authorization: "Bearer member-token",
         "x-trace-id": "trace-1",
+      },
+    });
+    expect(fetchMock.mock.calls[0]?.[1]).not.toMatchObject({
+      headers: {
+        Authorization: "Bearer member-token",
       },
     });
   });

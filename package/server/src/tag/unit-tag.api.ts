@@ -20,12 +20,12 @@ import { tagService, VISIBILITY_THRESHOLD } from "./tag.service";
  */
 async function canMutateUnitTag(
   actorPermission: { role: string },
-  actorUnitId: string,
+  actorUserId: string,
   unitId: string,
 ): Promise<boolean> {
   if (BasicAdminPermission(actorPermission as any)) return true;
   const unit = await unitService.getByUnitId(unitId);
-  return unit?.userId != null && unit.userId === actorUnitId;
+  return unit?.userId != null && unit.userId === actorUserId;
 }
 
 export const unitTagApi = new Elysia({ prefix: "/unit-tags" })

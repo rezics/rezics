@@ -10,14 +10,14 @@ function unit(overrides: Partial<UnitDTO> = {}): UnitDTO {
   } as UnitDTO;
 }
 
-const owner = { unitId: "owner-unit" };
-const other = { unitId: "other-unit" };
+const owner = { userId: "owner-user" };
+const other = { userId: "other-user" };
 
 describe("canAccessUnit", () => {
   test("DELETED always denied", () => {
     const u = unit({
       status: "DELETED",
-      user: { unitId: owner.unitId } as never,
+      user: { unitId: owner.userId } as never,
     });
     expect(canAccessUnit(u, owner)).toBe(false);
     expect(canAccessUnit(u, other)).toBe(false);
@@ -26,7 +26,7 @@ describe("canAccessUnit", () => {
   test("DRAFT owner-only", () => {
     const u = unit({
       status: "DRAFT",
-      user: { unitId: owner.unitId } as never,
+      user: { unitId: owner.userId } as never,
     });
     expect(canAccessUnit(u, owner)).toBe(true);
     expect(canAccessUnit(u, other)).toBe(false);
@@ -37,7 +37,7 @@ describe("canAccessUnit", () => {
     const u = unit({
       status: "PUBLISHED",
       visibility: "PRIVATE",
-      user: { unitId: owner.unitId } as never,
+      user: { unitId: owner.userId } as never,
     });
     expect(canAccessUnit(u, owner)).toBe(true);
     expect(canAccessUnit(u, other)).toBe(false);
@@ -47,7 +47,7 @@ describe("canAccessUnit", () => {
     const u = unit({
       status: "PUBLISHED",
       visibility: "UNLISTED",
-      user: { unitId: owner.unitId } as never,
+      user: { unitId: owner.userId } as never,
     });
     expect(canAccessUnit(u, owner)).toBe(true);
     expect(canAccessUnit(u, other)).toBe(false);
@@ -57,7 +57,7 @@ describe("canAccessUnit", () => {
     const u = unit({
       status: "PUBLISHED",
       visibility: "PUBLIC",
-      user: { unitId: owner.unitId } as never,
+      user: { unitId: owner.userId } as never,
     });
     expect(canAccessUnit(u, owner)).toBe(true);
     expect(canAccessUnit(u, other)).toBe(true);

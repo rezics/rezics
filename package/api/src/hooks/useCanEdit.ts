@@ -32,11 +32,11 @@ export type UseCanEditArgs = {
 
 export function computeCanEdit(
   permission: Permission | null,
-  actorUnitId: string | null,
+  actorUserId: string | null,
   resource: EditableResource,
   ownerUnit: OwnerBearing,
 ): boolean {
-  if (!permission || !actorUnitId) return false;
+  if (!permission || !actorUserId) return false;
 
   const unit = ownerUnit as UnitDTO | undefined;
 
@@ -44,20 +44,20 @@ export function computeCanEdit(
     case "book":
       return hasPermissionToUpdateBook(
         permission,
-        actorUnitId,
+        actorUserId,
         undefined,
         unit,
       );
     case "chapter":
-      return hasPermissionToUpdateChapter(permission, actorUnitId, unit);
+      return hasPermissionToUpdateChapter(permission, actorUserId, unit);
     case "post":
-      return hasPermissionToUpdatePost(permission, actorUnitId, unit);
+      return hasPermissionToUpdatePost(permission, actorUserId, unit);
     case "shelf":
-      return hasPermissionToUpdateShelf(permission, actorUnitId, unit);
+      return hasPermissionToUpdateShelf(permission, actorUserId, unit);
     case "tag":
-      return hasPermissionToUpdateTag(permission, actorUnitId, unit);
+      return hasPermissionToUpdateTag(permission, actorUserId, unit);
     case "unit":
-      return hasPermissionToUpdateUnit(permission, actorUnitId, unit);
+      return hasPermissionToUpdateUnit(permission, actorUserId, unit);
   }
 }
 
@@ -70,6 +70,6 @@ export function computeCanEdit(
  */
 export function useCanEdit({ resource, ownerUnit }: UseCanEditArgs): boolean {
   const permission = useServerPermission();
-  const actorUnitId = useCurrentUnitId();
-  return computeCanEdit(permission, actorUnitId, resource, ownerUnit);
+  const actorUserId = useCurrentUnitId();
+  return computeCanEdit(permission, actorUserId, resource, ownerUnit);
 }

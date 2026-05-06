@@ -1,13 +1,13 @@
 import type { UnitDTO } from "@rezics/contract";
 
-export type ViewerRef = { unitId?: string | null } | null | undefined;
+export type ViewerRef = { userId?: string | null } | null | undefined;
 
 export function canAccessUnit(unit: UnitDTO, viewer: ViewerRef): boolean {
   if (unit.status === "DELETED") return false;
 
-  const ownerUnitId = unit.user?.unitId ?? null;
-  const viewerUnitId = viewer?.unitId ?? null;
-  const isOwner = !!ownerUnitId && ownerUnitId === viewerUnitId;
+  const ownerUserId = unit.user?.unitId ?? null;
+  const viewerUserId = viewer?.userId ?? null;
+  const isOwner = !!ownerUserId && ownerUserId === viewerUserId;
 
   if (unit.status === "DRAFT") return isOwner;
   if (unit.visibility === "PRIVATE" || unit.visibility === "UNLISTED") {

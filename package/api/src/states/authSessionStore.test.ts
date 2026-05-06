@@ -1,15 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { GetSessionStateResponse } from "@rezics/contract";
-import { NormalizedTokenName } from "@rezics/contract";
 
-const tokenState: Partial<Record<NormalizedTokenName, string | null>> = {};
 let presence = false;
 const getSessionStateMock = mock();
-
-mock.module("@rezics/api/react-query/jwt", () => ({
-  getToken: (tokenName?: NormalizedTokenName) =>
-    tokenName ? (tokenState[tokenName] ?? null) : null,
-}));
 
 mock.module("@rezics/api/react-query/authPresence", () => ({
   hasAuthPresence: () => presence,
@@ -70,7 +63,6 @@ const incompleteSession = {
 
 describe("authSessionStore", () => {
   beforeEach(async () => {
-    tokenState[NormalizedTokenName.REZICS_SESSION] = null;
     presence = false;
     getSessionStateMock.mockReset();
     const { clearAuthSessionState } = await import("./authSessionStore");
@@ -78,7 +70,6 @@ describe("authSessionStore", () => {
   });
 
   test("hydrates ready state on reload when session is complete", async () => {
-    tokenState[NormalizedTokenName.REZICS_SESSION] = "member-token";
     presence = true;
     getSessionStateMock.mockResolvedValueOnce(readySession);
 
@@ -90,6 +81,9 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
+      capabilityLevel: "member",
+      hasAuthSession: true,
+      needsVerification: false,
       registrationComplete: true,
       identitySet: true,
     });
@@ -103,6 +97,7 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       registrationComplete: false,
       identitySet: false,
+      needsVerification: true,
     });
   });
 
@@ -118,11 +113,14 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
+      capabilityLevel: "anonymous",
+      hasAuthSession: false,
+      needsVerification: true,
       registrationComplete: false,
     });
   });
 
-  test("skips passive hydration when no token and no auth presence exist", async () => {
+  test("skips passive hydration when no auth presence exists", async () => {
     const { hydrateAuthSessionState, useAuthSessionStore } = await import(
       "./authSessionStore"
     );
@@ -133,6 +131,8 @@ describe("authSessionStore", () => {
     expect(getSessionStateMock).not.toHaveBeenCalled();
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
+      capabilityLevel: "anonymous",
+      hasAuthSession: false,
     });
   });
 
@@ -149,6 +149,8 @@ describe("authSessionStore", () => {
     expect(presence).toBe(false);
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "error",
+      capabilityLevel: "anonymous",
+      hasAuthSession: false,
     });
   });
 });

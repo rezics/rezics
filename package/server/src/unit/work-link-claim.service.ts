@@ -170,7 +170,7 @@ export async function approve(
       data: {
         status: "APPROVED",
         resolvedAt: new Date(),
-        resolvedBy: caller.unitId,
+        resolvedBy: caller.userId,
       },
       select: claimSelect,
     }),
@@ -223,7 +223,7 @@ export async function reject(
       status: "REJECTED",
       rejectReason: reason ?? null,
       resolvedAt: new Date(),
-      resolvedBy: caller.unitId,
+      resolvedBy: caller.userId,
     },
     select: claimSelect,
   });
@@ -257,7 +257,7 @@ export async function withdraw(
       409,
     );
   }
-  if (claim.claimerUserId !== caller.unitId) {
+  if (claim.claimerUserId !== caller.userId) {
     throw new WorkLinkClaimError(
       "FORBIDDEN",
       "Only the original claimer may withdraw a claim",
