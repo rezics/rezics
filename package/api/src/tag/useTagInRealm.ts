@@ -1,25 +1,19 @@
 /**
- * Double-write helper for tagging a unit "in a realm".
+ * Legacy helper for tagging a unit "in a realm".
  *
- * The two layers — global (UnitTag) and realm (RealmTagUnit) — are
- * intentionally independent on the server: there is no cascade, and each
- * write is authority-checked separately. Tagging in a realm should write
- * BOTH so the tag becomes visible globally and inside the realm, but the
- * client must report partial success/failure honestly because either leg
- * can fail (e.g. the user is no longer a realm member, or rate-limited).
+ * The standard backend-owned path is `POST /realm-tag-units`: it writes the
+ * realm-scoped application and idempotently contributes the caller's global
+ * TagVote. This hook keeps the old result shape for callers, but only sends
+ * the realm-tag request. The `global` leg reflects the backend-owned
+ * contribution rather than a separate client request.
  *
- * The hook returns a single `mutate(args)` that fires both legs and a
- * structured result describing each leg, plus retry helpers for the
- * failing leg only.
+ * The hook returns a single `mutate(args)` and a structured result describing
+ * the backend-owned global contribution and realm application.
  */
 
-import type {
-  CreateRealmTagUnitInput,
-  CreateUnitTagInput,
-} from "@rezics/contract";
+import type { CreateRealmTagUnitInput } from "@rezics/contract";
 import { useCallback, useState } from "react";
 import { useCreateRealmTagUnitMutation } from "../realm/realm.mutations";
-import { useCreateUnitTagMutation } from "./tag.mutations";
 
 export type TagInRealmInput = {
   realmUnitId: string;
@@ -35,7 +29,6 @@ export type TagInRealmResult = {
 };
 
 export function useTagInRealm() {
-  const createUnitTag = useCreateUnitTagMutation();
   const createRealmTagUnit = useCreateRealmTagUnitMutation();
 
   const [result, setResult] = useState<TagInRealmResult>({
@@ -45,10 +38,6 @@ export function useTagInRealm() {
 
   const mutate = useCallback(
     async (input: TagInRealmInput): Promise<TagInRealmResult> => {
-      const globalInput: CreateUnitTagInput = {
-        unitId: input.unitId,
-        tagUnitId: input.tagUnitId,
-      };
       const realmInput: CreateRealmTagUnitInput = {
         realmUnitId: input.realmUnitId,
         unitId: input.unitId,
@@ -60,16 +49,15 @@ export function useTagInRealm() {
         realm: { status: "pending", error: null },
       });
 
-      const [globalSettled, realmSettled] = await Promise.allSettled([
-        createUnitTag.mutateAsync(globalInput),
+      const [realmSettled] = await Promise.allSettled([
         createRealmTagUnit.mutateAsync(realmInput),
       ]);
 
       const next: TagInRealmResult = {
         global:
-          globalSettled.status === "fulfilled"
+          realmSettled.status === "fulfilled"
             ? { status: "success", error: null }
-            : { status: "error", error: asError(globalSettled.reason) },
+            : { status: "error", error: asError(realmSettled.reason) },
         realm:
           realmSettled.status === "fulfilled"
             ? { status: "success", error: null }
@@ -78,41 +66,17 @@ export function useTagInRealm() {
       setResult(next);
       return next;
     },
-    [createUnitTag, createRealmTagUnit],
+    [createRealmTagUnit],
   );
 
   /**
-   * Retry just the global leg using the same input.
-   * No-op if the global leg already succeeded.
+   * The global leg is backend-owned by the realm-tag request.
    */
   const retryGlobal = useCallback(
-    async (input: TagInRealmInput) => {
-      if (result.global.status === "success") return result;
-      setResult((prev) => ({
-        ...prev,
-        global: { status: "pending", error: null },
-      }));
-      try {
-        await createUnitTag.mutateAsync({
-          unitId: input.unitId,
-          tagUnitId: input.tagUnitId,
-        });
-        const next: TagInRealmResult = {
-          ...result,
-          global: { status: "success", error: null },
-        };
-        setResult(next);
-        return next;
-      } catch (err) {
-        const next: TagInRealmResult = {
-          ...result,
-          global: { status: "error", error: asError(err) },
-        };
-        setResult(next);
-        return next;
-      }
+    async (_input: TagInRealmInput) => {
+      return result;
     },
-    [createUnitTag, result],
+    [result],
   );
 
   /**

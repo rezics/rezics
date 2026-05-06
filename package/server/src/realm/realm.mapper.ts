@@ -1,11 +1,17 @@
 import type {
   RealmDTO,
   RealmMemberDTO,
+  RealmTagContextDTO,
   RealmTagUnitDTO,
   RealmUnitDTO,
   UnitTranslationDTO,
 } from "@rezics/contract";
-import type { RealmMember, RealmTagUnit, RealmUnit } from "#/prisma/client";
+import type {
+  RealmMember,
+  RealmTagContext,
+  RealmTagUnit,
+  RealmUnit,
+} from "#/prisma/client";
 import type { RealmListSelected, RealmWithRelations } from "./types";
 
 export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
@@ -75,6 +81,27 @@ export function mapRealmTagUnitToDTO(
     ...(options?.belowVisibilityThreshold
       ? { belowVisibilityThreshold: true }
       : {}),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+type RealmTagContextWithIncludes = RealmTagContext & {
+  realm?: RealmWithRelations | null;
+  tag?: any;
+  contextUnit?: any;
+};
+
+export function mapRealmTagContextToDTO(
+  row: RealmTagContextWithIncludes,
+): RealmTagContextDTO {
+  return {
+    realmUnitId: row.realmUnitId,
+    tagUnitId: row.tagUnitId,
+    contextUnitId: row.contextUnitId ?? null,
+    realm: row.realm ? mapRealmToDTO(row.realm) : undefined,
+    tag: row.tag ?? undefined,
+    contextUnit: row.contextUnit ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

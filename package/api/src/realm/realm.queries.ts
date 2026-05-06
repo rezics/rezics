@@ -76,6 +76,19 @@ export const myRealmsQuery = () =>
     staleTime: 1000 * 60 * 2,
   });
 
+/**
+ * Query options for the pair-level realm tag interpretation context.
+ */
+export const realmTagContextQuery = (
+  realmUnitId: string,
+  tagUnitId: string,
+) =>
+  queryOptions({
+    queryKey: realmKeys.tagContext(realmUnitId, tagUnitId),
+    queryFn: () => realmApi.getRealmTagContext(realmUnitId, tagUnitId),
+    staleTime: 1000 * 60 * 5,
+  });
+
 export const realmQueries = {
   list: realmListQuery,
   detail: realmDetailQuery,
@@ -83,4 +96,5 @@ export const realmQueries = {
   infiniteList: realmInfiniteListQuery,
   mine: myRealmsQuery,
   myMembership: myRealmMembershipQuery,
+  tagContext: realmTagContextQuery,
 };

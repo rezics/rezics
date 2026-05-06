@@ -17,8 +17,12 @@ import type {
   RealmListResponse,
   RealmMemberDTO,
   RealmResponse,
+  RealmTagContextDTO,
+  RealmTagContextReadResponse,
+  RealmTagContextUpdateResponse,
   RealmTagUnitDTO,
   RealmUnitDTO,
+  UpdateRealmTagContextInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,
 } from "@rezics/contract";
@@ -293,5 +297,59 @@ export const realmApi = {
       method: "POST",
       body: JSON.stringify(input),
     });
+  },
+
+  // ---- Realm-tag interpretation contexts ----
+
+  /**
+   * Read the pair-level interpretation context for a realm and global tag.
+   * GET /realm-tag-context/:realmUnitId/:tagUnitId
+   */
+  getRealmTagContext: async (
+    realmUnitId: string,
+    tagUnitId: string,
+  ): Promise<RealmTagContextReadResponse> => {
+    return apiFetch<RealmTagContextReadResponse>(
+      `/realm-tag-context/${encodeURIComponent(
+        realmUnitId,
+      )}/${encodeURIComponent(tagUnitId)}`,
+    );
+  },
+
+  /**
+   * Upsert/update the pair-level context metadata. This does not create any
+   * RealmTagUnit application row.
+   * PUT /realm-tag-context/:realmUnitId/:tagUnitId
+   */
+  updateRealmTagContext: async (
+    realmUnitId: string,
+    tagUnitId: string,
+    input: UpdateRealmTagContextInput,
+  ): Promise<RealmTagContextUpdateResponse> => {
+    return apiFetch<RealmTagContextUpdateResponse>(
+      `/realm-tag-context/${encodeURIComponent(
+        realmUnitId,
+      )}/${encodeURIComponent(tagUnitId)}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  /**
+   * Idempotently materialize the pair-level context content Unit.
+   * POST /realm-tag-context/:realmUnitId/:tagUnitId/materialize
+   */
+  materializeRealmTagContext: async (
+    realmUnitId: string,
+    tagUnitId: string,
+  ): Promise<RealmTagContextDTO> => {
+    return apiFetch<RealmTagContextDTO>(
+      `/realm-tag-context/${encodeURIComponent(
+        realmUnitId,
+      )}/${encodeURIComponent(tagUnitId)}/materialize`,
+      { method: "POST" },
+    );
   },
 };

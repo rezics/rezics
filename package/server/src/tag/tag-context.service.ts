@@ -34,7 +34,12 @@ export async function getTagContext(
   let realmHighlights: {
     realmUnitId: string;
     realmName: string;
-    tags: string[];
+    tags: {
+      tagUnitId: string;
+      label: string;
+      score: number;
+      contextUnitId: string | null;
+    }[];
   }[] = [];
 
   if (userId) {
@@ -50,22 +55,76 @@ export async function getTagContext(
 
     if (realmIds.length > 0) {
       const realmTagUnits = await prisma.realmTagUnit.findMany({
-        where: { unitId, realmUnitId: { in: realmIds } },
+        where: options?.includeBelowThreshold
+          ? { unitId, realmUnitId: { in: realmIds } }
+          : {
+              unitId,
+              realmUnitId: { in: realmIds },
+              score: { gt: VISIBILITY_THRESHOLD },
+            },
+        orderBy: [
+          { pinned: "desc" },
+          { position: "asc" },
+          { score: "desc" },
+          { tagUnitId: "asc" },
+        ],
         include: {
-          realm: { include: { translations: true } },
+          realm: { include: { unit: { include: { translations: true } } } },
+          appliedTag: { include: { translations: true } },
         },
       });
 
-      const grouped = new Map<string, { realmName: string; tags: string[] }>();
+      const contextRows =
+        realmTagUnits.length === 0
+          ? []
+          : await prisma.realmTagContext.findMany({
+              where: {
+                OR: realmTagUnits.map((rtu) => ({
+                  realmUnitId: rtu.realmUnitId,
+                  tagUnitId: rtu.tagUnitId,
+                })),
+              },
+              select: {
+                realmUnitId: true,
+                tagUnitId: true,
+                contextUnitId: true,
+              },
+            });
+
+      const contextByPair = new Map(
+        contextRows.map((row) => [
+          `${row.realmUnitId}:${row.tagUnitId}`,
+          row.contextUnitId,
+        ]),
+      );
+
+      const grouped = new Map<
+        string,
+        {
+          realmName: string;
+          tags: {
+            tagUnitId: string;
+            label: string;
+            score: number;
+            contextUnitId: string | null;
+          }[];
+        }
+      >();
       for (const rtu of realmTagUnits) {
         const key = rtu.realmUnitId;
         if (!grouped.has(key)) {
           grouped.set(key, {
-            realmName: rtu.realm?.translations?.[0]?.title ?? key,
+            realmName: rtu.realm?.unit?.translations?.[0]?.title ?? key,
             tags: [],
           });
         }
-        grouped.get(key)!.tags.push(rtu.tagUnitId);
+        grouped.get(key)!.tags.push({
+          tagUnitId: rtu.tagUnitId,
+          label: rtu.appliedTag?.translations?.[0]?.title ?? rtu.tagUnitId,
+          score: rtu.score,
+          contextUnitId:
+            contextByPair.get(`${rtu.realmUnitId}:${rtu.tagUnitId}`) ?? null,
+        });
       }
 
       realmHighlights = Array.from(grouped.entries()).map(

@@ -100,7 +100,7 @@ export class PostService {
           ? {
               OR: [
                 {
-                  realmTagAsUnit: {
+                  realmTagApplicationsAsTargetUnit: {
                     some: {
                       realmUnitId,
                       tagUnitId: { in: tagIds },
@@ -110,7 +110,7 @@ export class PostService {
                 {
                   AND: [
                     {
-                      realmTagAsUnit: {
+                      realmTagApplicationsAsTargetUnit: {
                         none: { realmUnitId },
                       },
                     },

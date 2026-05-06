@@ -94,7 +94,7 @@ const contentInclude = {
     orderBy: { score: "desc" as const },
   },
   inRealms: true,
-  realmTagAsUnit: true,
+  realmTagApplicationsAsTargetUnit: true,
   attributions: {
     include: {
       entity: {
@@ -118,7 +118,8 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const translations: any[] = unit.translations ?? [];
   const unitTags: any[] = unit.unitTags ?? [];
   const inRealms: any[] = unit.inRealms ?? [];
-  const realmTagAsUnit: any[] = unit.realmTagAsUnit ?? [];
+  const realmTagApplicationsAsTargetUnit: any[] =
+    unit.realmTagApplicationsAsTargetUnit ?? [];
   const attributions: any[] = unit.attributions ?? [];
 
   // Flatten translations
@@ -146,7 +147,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const realmIds = inRealms.map((r: any) => r.realmUnitId);
 
   // Realm-tag compound keys
-  const realmTagKeys = realmTagAsUnit.map(
+  const realmTagKeys = realmTagApplicationsAsTargetUnit.map(
     (rt: any) => `${rt.realmUnitId}:${rt.tagUnitId}`,
   );
 
@@ -407,11 +408,11 @@ export async function patchContentRealmTagKeys(
   client: SearchClient,
   unitId: string,
 ) {
-  const realmTagAsUnit = await prisma.realmTagUnit.findMany({
+  const realmTagApplicationsAsTargetUnit = await prisma.realmTagUnit.findMany({
     where: { unitId },
   });
 
-  const realmTagKeys = realmTagAsUnit.map(
+  const realmTagKeys = realmTagApplicationsAsTargetUnit.map(
     (rt: any) => `${rt.realmUnitId}:${rt.tagUnitId}`,
   );
   await client.patchContent([{ id: unitId, realmTagKeys }]);

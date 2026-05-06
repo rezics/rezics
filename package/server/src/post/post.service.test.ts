@@ -262,7 +262,7 @@ describe("PostService.byRealm", () => {
 
     expect(firstPostFindManyArgs().where.unit.OR).toEqual([
       {
-        realmTagAsUnit: {
+        realmTagApplicationsAsTargetUnit: {
           some: {
             realmUnitId: "realm-1",
             tagUnitId: { in: ["tag-1", "tag-2"] },
@@ -272,7 +272,7 @@ describe("PostService.byRealm", () => {
       {
         AND: [
           {
-            realmTagAsUnit: {
+            realmTagApplicationsAsTargetUnit: {
               none: { realmUnitId: "realm-1" },
             },
           },

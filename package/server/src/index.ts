@@ -23,6 +23,7 @@ import { reactionBoundaryApi } from "./reaction-boundary";
 import {
   realmApi,
   realmExtraApi,
+  realmTagContextApi,
   realmTagUnitApi,
   realmTagVoteApi,
 } from "./realm";
@@ -184,6 +185,7 @@ app
   .use(zoneApi)
   .use(realmApi)
   .use(realmExtraApi)
+  .use(realmTagContextApi)
   .use(realmTagUnitApi)
   .use(realmTagVoteApi)
   .use(attributionApi)

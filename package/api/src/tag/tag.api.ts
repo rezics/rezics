@@ -119,7 +119,12 @@ export const tagApi = {
     realmHighlights: {
       realmUnitId: string;
       realmName: string;
-      tags: string[];
+      tags: {
+        tagUnitId: string;
+        label: string;
+        score: number;
+        contextUnitId: string | null;
+      }[];
     }[];
   }> => {
     return apiFetch(`/tag/for-unit/${unitId}/context`);

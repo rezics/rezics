@@ -9,6 +9,7 @@ export {
   type SeedInfraResult,
   seedContentTypeTags,
   seedDefaultRealm,
+  seedRealmTaxonomy,
   seedInfra as seedServerInfra,
 } from "./infra";
 export { initMeiliSearch } from "./init-meili-search";

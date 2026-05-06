@@ -153,14 +153,16 @@ model Unit {
   tagVotesAsTag  TagVote[] @relation("TagVoteTag")
 
   // Realm organization
-  realmContent        RealmUnit[]    @relation("RealmContent")
-  inRealms            RealmUnit[]    @relation("UnitInRealm")
-  realmTagAsRealm     RealmTagUnit[] @relation("RealmTagRealm")
-  realmTagAsTag       RealmTagUnit[] @relation("RealmTagTag")
-  realmTagAsUnit      RealmTagUnit[] @relation("RealmTagUnit")
-  realmTagVoteAsRealm RealmTagVote[] @relation("RealmTagVoteRealm")
-  realmTagVoteAsTag   RealmTagVote[] @relation("RealmTagVoteTag")
-  realmTagVoteAsUnit  RealmTagVote[] @relation("RealmTagVoteUnit")
+  realmContent RealmUnit[] @relation("RealmContent")
+  inRealms     RealmUnit[] @relation("UnitInRealm")
+
+  // Realm-scoped tag classification. The realm side is exposed through
+  // `Realm`; Unit keeps only the global tag, target content, and context
+  // content roles because TAG/content do not have dedicated extension models.
+  realmTagApplicationsAsAppliedTag RealmTagUnit[]    @relation("RealmTagApplicationAppliedTag")
+  realmTagApplicationsAsTargetUnit RealmTagUnit[]    @relation("RealmTagApplicationTargetUnit")
+  realmTagContextsAsTag            RealmTagContext[] @relation("RealmTagContextTag")
+  realmTagContextsAsContent        RealmTagContext[] @relation("RealmTagContextContent")
 
   // Attribution
   attributions Attribution[] @relation("AttributedUnit")
@@ -428,9 +430,9 @@ model Shelf {
   unitId String @id @db.Uuid
   unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
-  kindKey String? @db.VarChar(64)
-  extra   Json?
-  itemCount Int @default(0)
+  kindKey   String? @db.VarChar(64)
+  extra     Json?
+  itemCount Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -489,6 +491,12 @@ model Realm {
   updatedAt DateTime @updatedAt
 
   members RealmMember[]
+
+  /// Realm is a subreddit-like community space, not a tag or classifier. It
+  /// owns membership and community metadata; realm-scoped tag classification
+  /// lives in RealmTagUnit and RealmTagContext.
+  tagApplications RealmTagUnit[]    @relation("RealmTagApplicationRealm")
+  tagContexts     RealmTagContext[]
 }
 
 model RealmMember {
@@ -515,6 +523,9 @@ model RealmUnit {
   unitId      String   @db.Uuid
   createdAt   DateTime @default(now())
 
+  /// Community/feed membership for a target Unit in a realm. This junction is
+  /// not semantic tagging and is not a prerequisite or owner relation for
+  /// RealmTagUnit.
   realm Unit @relation("RealmContent", fields: [realmUnitId], references: [id], onDelete: Cascade)
   unit  Unit @relation("UnitInRealm", fields: [unitId], references: [id], onDelete: Cascade)
 
@@ -535,34 +546,57 @@ model RealmTagUnit {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  realm Unit @relation("RealmTagRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
-  tag   Unit @relation("RealmTagTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
-  unit  Unit @relation("RealmTagUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  /// A realm-scoped application of an existing global TAG Unit to any target
+  /// Unit. This does not create a realm-local tag and does not require the
+  /// target to be posted into the realm via RealmUnit.
+  realm      Realm          @relation("RealmTagApplicationRealm", fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  appliedTag Unit           @relation("RealmTagApplicationAppliedTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+  targetUnit Unit           @relation("RealmTagApplicationTargetUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  votes      RealmTagVote[] @relation("RealmTagApplicationVotes")
 
   @@id([realmUnitId, tagUnitId, unitId])
   @@index([realmUnitId, unitId])
   @@index([unitId, realmUnitId])
   @@index([tagUnitId, realmUnitId])
   @@index([realmUnitId, unitId, pinned, position])
-  @@index([realmUnitId, unitId, score])
+  @@index([score])
 }
 
 model RealmTagVote {
   realmUnitId String @db.Uuid
-  userId      String @db.Uuid
-  unitId      String @db.Uuid
   tagUnitId   String @db.Uuid
+  unitId      String @db.Uuid
+  userId      String @db.Uuid
   value       Int
 
   createdAt DateTime @default(now())
 
-  realm Unit @relation("RealmTagVoteRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
-  unit  Unit @relation("RealmTagVoteUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  tag   Unit @relation("RealmTagVoteTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+  /// A member vote on one RealmTagUnit application. RealmTagVote's business
+  /// target is the `(realmUnitId, tagUnitId, unitId)` application, not three
+  /// independent Unit roles.
+  application RealmTagUnit @relation("RealmTagApplicationVotes", fields: [realmUnitId, tagUnitId, unitId], references: [realmUnitId, tagUnitId, unitId], onDelete: Cascade)
 
-  @@id([realmUnitId, userId, unitId, tagUnitId])
-  @@index([realmUnitId, unitId, tagUnitId])
+  @@id([realmUnitId, tagUnitId, unitId, userId])
   @@index([userId])
+}
+
+model RealmTagContext {
+  realmUnitId   String  @db.Uuid
+  tagUnitId     String  @db.Uuid
+  contextUnitId String? @unique @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Pair-level explanatory surface for `(realmUnitId, tagUnitId)`. The pair
+  /// is the identity; `contextUnitId` is only a materialized content carrier
+  /// for explanation, examples, discussion, and history.
+  realm       Realm @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  tag         Unit  @relation("RealmTagContextTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+  contextUnit Unit? @relation("RealmTagContextContent", fields: [contextUnitId], references: [id], onDelete: SetNull)
+
+  @@id([realmUnitId, tagUnitId])
+  @@index([tagUnitId])
 }
 
 // ============================================================
@@ -683,14 +717,14 @@ model User {
 // Reaction and ReactionSummary models moved to @rezics/reaction service.
 
 model UserUnitProgress {
-  userId       String                 @db.Uuid
-  unitId       String                 @db.Uuid
-  progress     Float                  @default(0)
-  status       UserUnitProgressStatus @default(BACKLOG)
-  completedCount Int                  @default(0)
-  totalTimeMs  BigInt                 @default(0)
-  lastPosition Json?
-  extra        Json?
+  userId         String                 @db.Uuid
+  unitId         String                 @db.Uuid
+  progress       Float                  @default(0)
+  status         UserUnitProgressStatus @default(BACKLOG)
+  completedCount Int                    @default(0)
+  totalTimeMs    BigInt                 @default(0)
+  lastPosition   Json?
+  extra          Json?
 
   firstSeenAt DateTime @default(now())
   lastSeenAt  DateTime @default(now())

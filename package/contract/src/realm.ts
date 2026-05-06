@@ -4,7 +4,11 @@ import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { realmExtraSchema } from "./realm/realm-extra";
 import { unitTagDTOSchema } from "./tag";
-import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
+import {
+  publicUserSchema,
+  unitDTOSchema,
+  unitTranslationDTOSchema,
+} from "./unit";
 
 // ============================================================
 // DEFAULT REALM
@@ -95,6 +99,10 @@ export type RealmMemberDTO = (typeof realmMemberDTOSchema)["static"];
 // REALM UNIT DTO (content feed)
 // ============================================================
 
+/**
+ * RealmUnit is community/feed membership for a Unit in a realm. It is not
+ * semantic tagging and is not a prerequisite for RealmTagUnit.
+ */
 export const realmUnitDTOSchema = t.Object({
   realmUnitId: t.String(),
   unitId: t.String(),
@@ -107,6 +115,11 @@ export type RealmUnitDTO = (typeof realmUnitDTOSchema)["static"];
 // REALM TAG UNIT DTO (scoped classification)
 // ============================================================
 
+/**
+ * RealmTagUnit records a realm-scoped application of an existing global TAG
+ * Unit to a target Unit. It does not create a realm-local tag and does not
+ * require the target Unit to appear in the realm feed through RealmUnit.
+ */
 export const realmTagUnitDTOSchema = t.Object({
   realmUnitId: t.String(),
   tagUnitId: t.String(),
@@ -126,16 +139,91 @@ export type RealmTagUnitDTO = (typeof realmTagUnitDTOSchema)["static"];
 // REALM TAG VOTE DTO
 // ============================================================
 
+/**
+ * RealmTagVote is a member vote on a single RealmTagUnit application. Its
+ * identity is `(realmUnitId, tagUnitId, unitId, userId)`.
+ */
 export const realmTagVoteDTOSchema = t.Object({
   realmUnitId: t.String(),
-  userId: t.String(),
-  unitId: t.String(),
   tagUnitId: t.String(),
+  unitId: t.String(),
+  userId: t.String(),
   value: t.Number(),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
 export type RealmTagVoteDTO = (typeof realmTagVoteDTOSchema)["static"];
+
+// ============================================================
+// REALM TAG CONTEXT DTO (pair-level interpretation)
+// ============================================================
+
+/**
+ * RealmTagContext stores the explanatory surface for a `(realmUnitId,
+ * tagUnitId)` pair. The pair is the identity; `contextUnitId` is only a
+ * materialized content carrier. This DTO is not a Tag, not a Unit identity,
+ * and not a realm-local tag.
+ */
+export const realmTagContextDTOSchema = t.Object({
+  realmUnitId: t.String(),
+  tagUnitId: t.String(),
+  contextUnitId: t.Nullable(t.String()),
+  realm: t.Optional(realmDTOSchema),
+  tag: t.Optional(unitDTOSchema),
+  contextUnit: t.Optional(t.Nullable(unitDTOSchema)),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type RealmTagContextDTO =
+  (typeof realmTagContextDTOSchema)["static"];
+
+export const realmTagContextPathParamsSchema = t.Object({
+  realmUnitId: t.String(),
+  tagUnitId: t.String(),
+});
+
+export type RealmTagContextPathParams =
+  (typeof realmTagContextPathParamsSchema)["static"];
+
+export const updateRealmTagContextSchema = t.Object({
+  contextUnitId: t.Optional(t.Nullable(t.String())),
+});
+
+export type UpdateRealmTagContextInput =
+  (typeof updateRealmTagContextSchema)["static"];
+
+export const realmTagContextReadResponseSchema = t.Object({
+  context: t.Nullable(realmTagContextDTOSchema),
+});
+
+export type RealmTagContextReadResponse =
+  (typeof realmTagContextReadResponseSchema)["static"];
+
+export const realmTagContextUpdateResponseSchema = realmTagContextDTOSchema;
+export type RealmTagContextUpdateResponse =
+  (typeof realmTagContextUpdateResponseSchema)["static"];
+
+export const realmTagContextMaterializeResponseSchema =
+  realmTagContextDTOSchema;
+export type RealmTagContextMaterializeResponse =
+  (typeof realmTagContextMaterializeResponseSchema)["static"];
+
+export const realmTagContextGetContractSchema = {
+  params: realmTagContextPathParamsSchema,
+  response: realmTagContextReadResponseSchema,
+} as const;
+
+export const realmTagContextPutContractSchema = {
+  params: realmTagContextPathParamsSchema,
+  body: updateRealmTagContextSchema,
+  response: realmTagContextUpdateResponseSchema,
+} as const;
+
+export const realmTagContextMaterializeContractSchema = {
+  params: realmTagContextPathParamsSchema,
+  response: realmTagContextMaterializeResponseSchema,
+} as const;
 
 // ============================================================
 // REALM TAG UNIT MUTATIONS (pin / position / cast / create)

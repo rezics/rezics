@@ -63,3 +63,34 @@ describe("buildPostDocument", () => {
     expect(doc.realmIds).toEqual([]);
   });
 });
+
+describe("buildContentDocument realm tag keys", () => {
+  test("realmTagKeys can exist without matching realmIds", async () => {
+    process.env.DATABASE_URL ??=
+      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      id: "unit-1",
+      type: "BOOK",
+      defaultLanguage: "en",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      userId: "user-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      publishedAt: null,
+      translations: [{ language: "en", title: "Book", extra: null }],
+      unitTags: [],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [
+        { realmUnitId: "realm-1", tagUnitId: "tag-1" },
+      ],
+      attributions: [],
+      book: { textLength: 100, isLicensed: false },
+    });
+
+    expect(doc.realmIds).toEqual([]);
+    expect(doc.realmTagKeys).toEqual(["realm-1:tag-1"]);
+  });
+});

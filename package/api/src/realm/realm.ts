@@ -28,10 +28,12 @@ export {
   useDeleteRealmTagUnitMutation,
   useJoinRealmMutation,
   useLeaveRealmMutation,
+  useMaterializeRealmTagContextMutation,
   usePatchRealmTagUnitMutation,
   useRemoveMemberMutation,
   useRemoveRealmTagUnitMutation,
   useRemoveRealmUnitMutation,
+  useUpdateRealmTagContextMutation,
   useUpdateMemberRoleMutation,
   useUpdateRealmMutation,
 } from "./realm.mutations";
@@ -45,6 +47,7 @@ export {
   realmListQuery,
   realmQueries,
   realmSearchQuery,
+  realmTagContextQuery,
 } from "./realm.queries";
 // Types
 export type {
@@ -71,5 +74,9 @@ export type {
   CastRealmTagVoteInput,
   CreateRealmTagUnitInput,
   PatchRealmTagUnitInput,
+  RealmTagContextDTO,
+  RealmTagContextReadResponse,
+  RealmTagContextUpdateResponse,
   RealmTagVoteDTO,
+  UpdateRealmTagContextInput,
 } from "@rezics/contract";

@@ -16,6 +16,7 @@ export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
 import {
   patchContentRealmIdsToMeili,
   patchContentRealmTagKeysToMeili,
+  patchContentTagsToMeili,
 } from "@/meili/content/sync";
 import { patchPostFieldsToMeili } from "@/meili/post/sync";
 import {
@@ -38,6 +39,30 @@ import {
 } from "./types";
 
 export class RealmService {
+  private async assertRealmAndTagTypes(
+    realmUnitId: string,
+    tagUnitId: string,
+    tx: Pick<typeof prisma, "unit"> = prisma,
+  ): Promise<void> {
+    const [realm, tag] = await Promise.all([
+      tx.unit.findUnique({
+        where: { id: realmUnitId },
+        select: { id: true, type: true, realm: { select: { unitId: true } } },
+      }),
+      tx.unit.findUnique({
+        where: { id: tagUnitId },
+        select: { id: true, type: true },
+      }),
+    ]);
+
+    if (!realm || realm.type !== UnitType.REALM || !realm.realm) {
+      throw new Error("realmUnitId must reference an existing REALM Unit");
+    }
+    if (!tag || tag.type !== UnitType.TAG) {
+      throw new Error("tagUnitId must reference an existing TAG Unit");
+    }
+  }
+
   private async patchPostRealmIds(unitId: string): Promise<void> {
     const rows = await prisma.realmUnit.findMany({
       where: { unitId },
@@ -337,22 +362,25 @@ export class RealmService {
 
   // --- Realm tag units ---
   //
-  // RealmTagUnit and UnitTag are now independent layers. Creating a
-  // RealmTagUnit no longer cascades to UnitTag — the client is expected to
-  // double-write when the user wants both layers updated. Score and pin
-  // state on RealmTagUnit are driven by RealmTagVote, the realm-scoped
-  // analogue of TagVote.
+  // RealmTagUnit and UnitTag remain independent score layers. The standard
+  // RealmTagUnit write path contributes the caller's global TagVote once, but
+  // later RealmTagUnit deletion never deletes or decrements UnitTag.
 
   /**
    * Create a RealmTagUnit with creation-as-vote semantics.
    *
    * The caller MUST be a member of the realm; the route enforces the
    * membership check and passes through the actor's userId.
+   * Realms apply existing global tags only: `realmUnitId` must be REALM and
+   * `tagUnitId` must be TAG. This does not mint a realm-local tag and does not
+   * require RealmUnit(realmUnitId, unitId).
    *
    * - First call: writes the RealmTagUnit (score=1, voteCount=1) and a +1
    *   RealmTagVote.
    * - Subsequent distinct-member calls: insert a RealmTagVote and recompute.
    * - Idempotent for the same user: existing RealmTagVote left untouched.
+   * - The caller's global TagVote(userId, unitId, tagUnitId, +1) is created
+   *   once or preserved, then UnitTag aggregates are recomputed.
    */
   async createRealmTagUnit(
     userId: string,
@@ -361,13 +389,29 @@ export class RealmService {
     tagUnitId: string,
   ): Promise<RealmTagUnit> {
     const row = await prisma.$transaction(async (tx) => {
+      await this.assertRealmAndTagTypes(realmUnitId, tagUnitId, tx);
+
+      await tx.realmTagUnit.upsert({
+        where: {
+          realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
+        },
+        update: {},
+        create: {
+          realmUnitId,
+          tagUnitId,
+          unitId,
+          score: 0,
+          voteCount: 0,
+        },
+      });
+
       const existing = await tx.realmTagVote.findUnique({
         where: {
-          realmUnitId_userId_unitId_tagUnitId: {
+          realmUnitId_tagUnitId_unitId_userId: {
             realmUnitId,
-            userId,
-            unitId,
             tagUnitId,
+            unitId,
+            userId,
           },
         },
       });
@@ -384,24 +428,52 @@ export class RealmService {
         _count: { value: true },
       });
 
-      return tx.realmTagUnit.upsert({
+      const realmTagUnit = await tx.realmTagUnit.update({
         where: {
           realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
         },
-        update: {
-          score: agg._sum.value ?? 0,
-          voteCount: agg._count.value ?? 0,
-        },
-        create: {
-          realmUnitId,
-          tagUnitId,
-          unitId,
+        data: {
           score: agg._sum.value ?? 0,
           voteCount: agg._count.value ?? 0,
         },
       });
+
+      const globalVote = await tx.tagVote.findUnique({
+        where: {
+          userId_unitId_tagUnitId: { userId, unitId, tagUnitId },
+        },
+      });
+
+      if (!globalVote) {
+        await tx.tagVote.create({
+          data: { userId, unitId, tagUnitId, value: 1 },
+        });
+      }
+
+      const globalAgg = await tx.tagVote.aggregate({
+        where: { unitId, tagUnitId },
+        _sum: { value: true },
+        _count: { value: true },
+      });
+
+      await tx.unitTag.upsert({
+        where: { unitId_tagUnitId: { unitId, tagUnitId } },
+        update: {
+          score: globalAgg._sum.value ?? 0,
+          voteCount: globalAgg._count.value ?? 0,
+        },
+        create: {
+          unitId,
+          tagUnitId,
+          score: globalAgg._sum.value ?? 0,
+          voteCount: globalAgg._count.value ?? 0,
+        },
+      });
+
+      return realmTagUnit;
     });
 
+    await patchContentTagsToMeili(unitId);
     await patchContentRealmTagKeysToMeili(unitId);
     return row;
   }
@@ -442,15 +514,10 @@ export class RealmService {
     unitId: string,
     tagUnitId: string,
   ): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-      await tx.realmTagVote.deleteMany({
-        where: { realmUnitId, unitId, tagUnitId },
-      });
-      await tx.realmTagUnit.delete({
-        where: {
-          realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
-        },
-      });
+    await prisma.realmTagUnit.delete({
+      where: {
+        realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
+      },
     });
     await patchContentRealmTagKeysToMeili(unitId);
   }
@@ -472,7 +539,7 @@ export class RealmService {
     await prisma.$transaction(async (tx) => {
       await tx.realmTagVote.upsert({
         where: {
-          realmUnitId_userId_unitId_tagUnitId: {
+          realmUnitId_tagUnitId_unitId_userId: {
             realmUnitId,
             userId,
             unitId,
@@ -562,8 +629,9 @@ export class RealmService {
 
   /**
    * @deprecated Use {@link createRealmTagUnit} via `POST /realm-tag-units`.
-   * The old cascade-to-UnitTag path was removed; this now writes only the
-   * RealmTagUnit row with no global side-effects.
+   * Authenticated callers are routed through the same backend-owned
+   * contribution path. Unauthenticated internal callers preserve the legacy
+   * direct upsert behavior.
    */
   async addRealmTagUnit(
     realmUnitId: string,

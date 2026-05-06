@@ -1,14 +1,20 @@
 export { realmExtraApi } from "./realm-extra.api";
+export { realmTagContextApi } from "./realm-tag-context.api";
 export { realmTagUnitApi, realmTagVoteApi } from "./realm-tag-unit.api";
 export { mapRealmTagVoteToDTO } from "./realm-tag-vote.mapper";
 export { realmApi } from "./realm.api";
 export {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,
+  mapRealmTagContextToDTO,
   mapRealmTagUnitToDTO,
   mapRealmToDTO,
   mapRealmUnitToDTO,
 } from "./realm.mapper";
+export {
+  RealmTagContextService,
+  realmTagContextService,
+} from "./realm-tag-context.service";
 export {
   REALM_TAG_VISIBILITY_THRESHOLD,
   RealmService,

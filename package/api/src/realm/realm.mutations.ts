@@ -12,8 +12,11 @@ import type {
   PatchRealmTagUnitInput,
   RealmMemberDTO,
   RealmResponse,
+  RealmTagContextDTO,
+  RealmTagContextUpdateResponse,
   RealmTagUnitDTO,
   RealmUnitDTO,
+  UpdateRealmTagContextInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,
 } from "@rezics/contract";
@@ -451,6 +454,64 @@ export function useCastRealmTagVoteMutation(
   });
 }
 
+// ---- Realm-tag interpretation context mutations ----
+
+export function useUpdateRealmTagContextMutation(
+  options?: Omit<
+    UseMutationOptions<
+      RealmTagContextUpdateResponse,
+      Error,
+      {
+        realmUnitId: string;
+        tagUnitId: string;
+        input: UpdateRealmTagContextInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, tagUnitId, input }) =>
+      realmApi.updateRealmTagContext(realmUnitId, tagUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.setQueryData(
+        realmKeys.tagContext(variables.realmUnitId, variables.tagUnitId),
+        { context: data },
+      );
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useMaterializeRealmTagContextMutation(
+  options?: Omit<
+    UseMutationOptions<
+      RealmTagContextDTO,
+      Error,
+      { realmUnitId: string; tagUnitId: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, tagUnitId }) =>
+      realmApi.materializeRealmTagContext(realmUnitId, tagUnitId),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.setQueryData(
+        realmKeys.tagContext(variables.realmUnitId, variables.tagUnitId),
+        { context: data },
+      );
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 /**
  * Combined mutations export
  */
@@ -470,4 +531,6 @@ export const realmMutations = {
   usePatchRealmTagUnit: usePatchRealmTagUnitMutation,
   useDeleteRealmTagUnit: useDeleteRealmTagUnitMutation,
   useCastRealmTagVote: useCastRealmTagVoteMutation,
+  useUpdateRealmTagContext: useUpdateRealmTagContextMutation,
+  useMaterializeRealmTagContext: useMaterializeRealmTagContextMutation,
 };
