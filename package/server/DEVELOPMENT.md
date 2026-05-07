@@ -26,6 +26,25 @@ bunx prisma migrate deploy
 npx prisma generate
 ```
 
+### Auth/Main Account Boundary Cutover
+
+The `clean-auth-main-account-boundary` change is a development-stage breaking
+cutover. Main `User.emailVerifiedAt` and `User.emailVerificationSource` are
+removed; auth login email verification remains auth-owned, while main product
+email verification is represented by `EmailVerificationContract` rows.
+
+For local development data, prefer a reset after applying the schema change:
+
+```sh
+bunx prisma migrate reset
+bun run prisma:generate
+```
+
+If a local database must be kept, migrate one way by creating verified
+`EmailVerificationContract` rows for existing `User.email` values before
+dropping the old verification columns. Do not add dual-write or compatibility
+shims for this cutover.
+
 ## PostgreSQL
 
 ```sh

@@ -3,11 +3,21 @@ import {
   updateUserSchema,
   userListQuerySchema,
   userParamsSchema,
+  validateSlug,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { mapUserToDTO } from "../models/mapper";
 import { userService } from "../service/user.service";
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    (error as { code?: string }).code === "P2002"
+  );
+}
 
 export const adminRoute = new Elysia()
   .use(authMacro)
@@ -103,6 +113,67 @@ export const adminRoute = new Elysia()
       detail: {
         summary: "Admin update user",
         description: "Update user as admin",
+        tags: ["Users", "Admin"],
+      },
+    },
+  )
+  .patch(
+    "/admin/:unitId/slug",
+    async ({ identity, params, body, status }) => {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.userId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
+      const validation = validateSlug(body.slug);
+      if (!validation.ok) {
+        return status(400, {
+          error: {
+            code: "SLUG_INVALID",
+            message: validation.reason,
+          },
+        });
+      }
+
+      try {
+        const result = await userService.changeCanonicalSlugAsAdmin(
+          params.unitId,
+          validation.normalized,
+        );
+        return {
+          user: mapUserToDTO(result.user),
+          authProjection: result.authProjection,
+        };
+      } catch (error) {
+        if (isUniqueConstraintError(error)) {
+          return status(409, {
+            error: {
+              code: "SLUG_TAKEN",
+              message: "Slug is already in use",
+            },
+          });
+        }
+        throw error;
+      }
+    },
+    {
+      requireLogin: true,
+      params: userParamsSchema,
+      body: t.Object({ slug: t.String({ minLength: 1 }) }),
+      response: {
+        200: t.Any(),
+        400: t.Any(),
+        403: t.String(),
+        409: t.Any(),
+      },
+      detail: {
+        summary: "Admin update user slug",
+        description:
+          "Update canonical main user slug and project the login alias to auth.",
         tags: ["Users", "Admin"],
       },
     },

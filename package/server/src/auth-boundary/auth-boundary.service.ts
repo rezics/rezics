@@ -1,6 +1,5 @@
 import {
   type AccountSetupBody,
-  type VerifiedRegistrationFacts,
   type SlugAvailabilityResponse,
   validateSlug,
 } from "@rezics/contract";
@@ -13,6 +12,10 @@ import {
 } from "@/session/jwt/jwt.service";
 import { mapUserToDTO } from "@/user/models/mapper";
 import { userService } from "@/user/service/user.service";
+import {
+  fetchVerifiedRegistrationFacts,
+  projectSlugToAuth,
+} from "./auth-internal.client";
 
 const AUTH_PUBLIC_PREFIX = "/auth";
 const AUTH_INTERNAL_PREFIX = "/api/auth";
@@ -260,55 +263,6 @@ async function fetchAuthSessionState(request: Request) {
   return (await response.json()) as AuthSessionStateResponse;
 }
 
-async function fetchVerifiedRegistrationFacts(
-  authUserId: string,
-): Promise<VerifiedRegistrationFacts | null> {
-  if (!env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET) {
-    return null;
-  }
-
-  const url = new URL(
-    "/internal/registration/verified-facts",
-    getInternalAuthBaseUrl(),
-  );
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
-    },
-    body: JSON.stringify({ authUserId }),
-  });
-
-  if (!response.ok) return null;
-  const body = (await response.json()) as {
-    success?: boolean;
-    facts?: VerifiedRegistrationFacts;
-  };
-  return body.success && body.facts ? body.facts : null;
-}
-
-async function projectSlugToAuth(input: {
-  authUserId: string;
-  slug: string;
-}): Promise<boolean> {
-  if (!env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET) {
-    return false;
-  }
-
-  const url = new URL("/internal/users/project-slug", getInternalAuthBaseUrl());
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
-    },
-    body: JSON.stringify(input),
-  });
-
-  return response.ok;
-}
-
 export async function proxyAuthBoundaryRequest(
   request: Request,
 ): Promise<Response> {
@@ -424,9 +378,7 @@ export async function materializeMainAccountFromAuth(
     (await userService.materializeFromVerifiedAuth({
       authUserId: facts.authUserId,
       email: facts.email,
-      verifiedAt: facts.verifiedAt
-        ? new Date(facts.verifiedAt)
-        : new Date(),
+      verifiedAt: facts.verifiedAt ? new Date(facts.verifiedAt) : new Date(),
       verificationSource:
         facts.verificationSource ?? facts.trustedProviderId ?? "email-otp",
       avatar: sessionState.user.image ?? null,
@@ -461,8 +413,10 @@ export async function completeProfileSetupFromMain(
   }
 
   const setupToken =
-    readCookie(request.headers.get("cookie") ?? undefined, PROFILE_SETUP_COOKIE_NAME) ??
-    undefined;
+    readCookie(
+      request.headers.get("cookie") ?? undefined,
+      PROFILE_SETUP_COOKIE_NAME,
+    ) ?? undefined;
   if (!setupToken) {
     return jsonResponse(
       {

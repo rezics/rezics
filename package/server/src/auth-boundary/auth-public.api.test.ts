@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { Elysia } from "elysia";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
@@ -42,6 +43,16 @@ const completeProfileSetup = mock(async (_input?: unknown) => ({
   email: "reader@example.com",
   permission: { role: ["MEMBER"] },
 }));
+const changeCanonicalSlugAsAdmin = mock(
+  async (_unitId: string, slug: string) => ({
+    user: {
+      unitId: "user-1",
+      slug,
+      name: "Reader",
+    },
+    authProjection: { attempted: true, ok: true },
+  }),
+);
 const userFindUnique = mock(
   async (_args?: unknown): Promise<MainUserLookup | null> => ({
     unitId: "user-1",
@@ -78,8 +89,18 @@ mock.module("@/session/jwt/jwt.service", () => ({
   verifyRezicsSessionToken,
 }));
 
+mock.module("@/middleware", () => ({
+  authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
+    resolve: () => ({
+      identity: { userId: "admin-user", permission: { role: "ADMIN" } },
+    }),
+  }),
+  verifyAdminFromDb: mock(async () => true),
+}));
+
 mock.module("@/user/service/user.service", () => ({
   userService: {
+    changeCanonicalSlugAsAdmin,
     completeProfileSetup,
     materializeFromVerifiedAuth,
   },
@@ -127,6 +148,15 @@ beforeEach(() => {
     email: "reader@example.com",
     permission: { role: ["MEMBER"] },
   });
+  changeCanonicalSlugAsAdmin.mockReset();
+  changeCanonicalSlugAsAdmin.mockResolvedValue({
+    user: {
+      unitId: "user-1",
+      slug: "new-reader",
+      name: "Reader",
+    },
+    authProjection: { attempted: true, ok: true },
+  });
 
   userFindUnique.mockReset();
   userFindUnique.mockResolvedValue({
@@ -134,6 +164,97 @@ beforeEach(() => {
     slug: "reader",
     permission: { role: ["MEMBER"] },
     accountStatus: "MEMBER_READY",
+  });
+});
+
+describe("main admin user boundary", () => {
+  test("updates canonical user slug and returns auth projection status", async () => {
+    const { adminRoute } = await import("@/user/api/user.admin.api");
+
+    const response = await adminRoute.handle(
+      new Request("http://localhost/admin/user-1/slug", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ slug: " New-Reader " }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(changeCanonicalSlugAsAdmin).toHaveBeenCalledWith(
+      "user-1",
+      "new-reader",
+    );
+    expect(await response.json()).toMatchObject({
+      user: {
+        unitId: "user-1",
+        slug: "new-reader",
+        name: "Reader",
+      },
+      authProjection: { attempted: true, ok: true },
+    });
+  });
+
+  test("rejects invalid admin slug changes before updating main", async () => {
+    const { adminRoute } = await import("@/user/api/user.admin.api");
+
+    const response = await adminRoute.handle(
+      new Request("http://localhost/admin/user-1/slug", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ slug: "bad slug" }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(changeCanonicalSlugAsAdmin).not.toHaveBeenCalled();
+    expect(await response.json()).toMatchObject({
+      error: { code: "SLUG_INVALID" },
+    });
+  });
+
+  test("surfaces admin slug projection failure without rolling back main", async () => {
+    changeCanonicalSlugAsAdmin.mockResolvedValueOnce({
+      user: {
+        unitId: "user-1",
+        slug: "new-reader",
+        name: "Reader",
+      },
+      authProjection: { attempted: true, ok: false },
+    });
+    const { adminRoute } = await import("@/user/api/user.admin.api");
+
+    const response = await adminRoute.handle(
+      new Request("http://localhost/admin/user-1/slug", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ slug: "new-reader" }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      authProjection: { attempted: true, ok: false },
+    });
+  });
+
+  test("returns conflict when admin slug is already taken", async () => {
+    const error = new Error("duplicate") as Error & { code: string };
+    error.code = "P2002";
+    changeCanonicalSlugAsAdmin.mockRejectedValueOnce(error);
+    const { adminRoute } = await import("@/user/api/user.admin.api");
+
+    const response = await adminRoute.handle(
+      new Request("http://localhost/admin/user-1/slug", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ slug: "new-reader" }),
+      }),
+    );
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({
+      error: { code: "SLUG_TAKEN" },
+    });
   });
 });
 
@@ -310,7 +431,12 @@ describe("main auth public boundary", () => {
     );
     expect(userFindUnique).toHaveBeenCalledWith({
       where: { authUserId: "user-1" },
-      select: { unitId: true, slug: true, permission: true, accountStatus: true },
+      select: {
+        unitId: true,
+        slug: true,
+        permission: true,
+        accountStatus: true,
+      },
     });
     expect(signRezicsSessionToken).toHaveBeenCalledWith({
       userId: "user-1",
@@ -543,6 +669,56 @@ describe("main auth public boundary", () => {
     });
     expect(setupInput.verifiedAt).toBeInstanceOf(Date);
     expect((await response.json()).success).toBe(true);
+    expect(response.headers.get("set-cookie")).toContain(
+      "rezics-profile-setup-token=signed-profile-setup-session",
+    );
+    expect(signRezicsSessionToken).not.toHaveBeenCalled();
+  });
+
+  test("duplicate materialization for setup users reissues setup token", async () => {
+    userFindUnique.mockResolvedValueOnce({
+      unitId: "user-1",
+      slug: null,
+      permission: { role: ["MEMBER"] },
+      accountStatus: "PROFILE_SETUP_REQUIRED",
+    });
+    setFetch(async (input) => {
+      const url = String(input);
+      if (url.endsWith("/internal/registration/verified-facts")) {
+        return Response.json({
+          success: true,
+          facts: {
+            authUserId: "user-1",
+            email: "reader@example.com",
+            emailVerified: true,
+            verifiedAt: "2026-05-07T00:00:00.000Z",
+            verificationSource: "email-otp",
+          },
+        });
+      }
+      return Response.json({
+        user: {
+          id: "user-1",
+          email: "reader@example.com",
+          emailVerified: true,
+          image: null,
+        },
+      });
+    });
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/account/materialize", {
+        method: "POST",
+        headers: {
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(materializeFromVerifiedAuth).not.toHaveBeenCalled();
     expect(response.headers.get("set-cookie")).toContain(
       "rezics-profile-setup-token=signed-profile-setup-session",
     );

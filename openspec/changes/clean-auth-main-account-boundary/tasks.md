@@ -43,7 +43,7 @@
 - [x] 5.5 Add a server route macro for profile setup routes that accepts only `rezics-profile-setup-token`.
 - [x] 5.6 Update existing `requireLogin` macro to accept only normal member `rezics-session-token` and reject profile setup tokens.
 - [x] 5.7 Update sign-out to clear both `rezics-session-token` and `rezics-profile-setup-token`.
-- [ ] 5.8 Add focused middleware tests for member token, setup token, expired setup token, setup renewal, invalid token, and wrong-token-on-route cases.
+- [x] 5.8 Add focused middleware tests for member token, setup token, expired setup token, setup renewal, invalid token, and wrong-token-on-route cases.
 
 ## 6. Main Registration Materialization and Profile Setup
 
@@ -53,16 +53,16 @@
 - [x] 6.4 Ensure materialization issues only `rezics-profile-setup-token` and never `rezics-session-token`.
 - [x] 6.5 Implement profile setup completion with slug validation, slug uniqueness, optional name/avatar, and default name from slug.
 - [x] 6.6 Move member bootstrap work to profile setup activation: shelves, default realm membership, search sync, and member token issuance.
-- [ ] 6.7 Implement admin-only slug change in main and trigger auth slug alias projection after canonical update.
-- [ ] 6.8 Add server tests for materialization success, unverified rejection, duplicate materialization, setup token issuance, setup renewal, profile setup slug conflict, profile setup activation, and admin slug projection.
+- [x] 6.7 Implement admin-only slug change in main and trigger auth slug alias projection after canonical update.
+- [x] 6.8 Add server tests for materialization success, unverified rejection, duplicate materialization, setup token issuance, setup renewal, profile setup slug conflict, profile setup activation, and admin slug projection.
 
 ## 7. API Client and Frontend State
 
 - [ ] 7.1 Update `package/api` auth/account APIs for materialization, profile setup, setup token renewal, profile setup token state, and main email verification contracts.
 - [x] 7.2 Update frontend auth session store to model auth identity, profile setup session, member session, and account stages separately.
-- [ ] 7.3 Treat public account-stage cookies as routing hints only and confirm state through authoritative server probes.
-- [ ] 7.4 Update token refresh helpers so profile-setup-required responses route to profile setup instead of clearing useful auth state.
-- [ ] 7.5 Add API/state tests for registration verification, profile setup, setup token renewal, member-ready, stale hint cookie, and refresh rejection states.
+- [x] 7.3 Treat public account-stage cookies as routing hints only and confirm state through authoritative server probes.
+- [x] 7.4 Update token refresh helpers so profile-setup-required responses route to profile setup instead of clearing useful auth state.
+- [x] 7.5 Add API/state tests for registration verification, profile setup, setup token renewal, member-ready, stale hint cookie, and refresh rejection states.
 
 ## 8. Frontend Registration and Settings UX
 
@@ -78,17 +78,17 @@
 ## 9. Admin and Migration Cleanup
 
 - [ ] 9.1 Update admin user views to display main email semantics and avoid auth verification fields.
-- [ ] 9.2 Add admin slug update flow or server/API support for rare canonical slug changes.
+- [x] 9.2 Add admin slug update flow or server/API support for rare canonical slug changes.
 - [ ] 9.3 Remove stale tests, fixtures, API types, and UI copy that assume auth email verification columns exist on main `User`.
-- [ ] 9.4 Add a development-stage migration/reset note for removing old main verification columns and reinitializing main email verification contract data.
-- [ ] 9.5 Run `rg` checks for `emailVerifiedAt`, `emailVerificationSource`, old setup endpoint names, stale registration stage names, and duplicated SMTP sender creation.
+- [x] 9.4 Add a development-stage migration/reset note for removing old main verification columns and reinitializing main email verification contract data.
+- [x] 9.5 Run `rg` checks for `emailVerifiedAt`, `emailVerificationSource`, old setup endpoint names, stale registration stage names, and duplicated SMTP sender creation.
 
 ## 10. Validation
 
-- [ ] 10.1 Run targeted `bun test` suites for `package/email` sender utilities and rendering.
-- [ ] 10.2 Run targeted `bun test` suites for `package/auth` registration facts, verification, auth email delivery, and slug projection.
+- [x] 10.1 Run targeted `bun test` suites for `package/email` sender utilities and rendering.
+- [x] 10.2 Run targeted `bun test` suites for `package/auth` registration facts, verification, auth email delivery, and slug projection.
 - [ ] 10.3 Run targeted `bun test` suites for `package/server` auth boundary, profile setup token guard, materialization, profile setup activation, session refresh, and email verification contracts.
-- [ ] 10.4 Run targeted `bun test` suites for `package/api` auth/account API helpers and auth session state.
+- [x] 10.4 Run targeted `bun test` suites for `package/api` auth/account API helpers and auth session state.
 - [ ] 10.5 Run targeted `bun test` suites for `package/app` registration routing, complete-registration, profile setup, OAuth callback, route guards, Security login email settings, and Account/Profile Rezics email flow.
 - [ ] 10.6 Run formatting/typecheck/build commands required by affected packages.
 - [ ] 10.7 Manually verify browser flows: email registration, verification resend, login re-entry during verification, materialization, setup token renewal after expiry, profile setup slug conflict, member activation, OAuth trusted email, sign-out, session refresh after reload, login email change, and Rezics email change verification.

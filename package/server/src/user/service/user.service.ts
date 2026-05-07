@@ -17,6 +17,7 @@ import {
 import { bootstrapSystemShelves } from "@/shelf/system-shelves";
 import { emitNotificationEvent } from "@/notify-boundary/notify-boundary.client";
 import { getDefaultRealmId } from "@/infra/default-realm";
+import { projectSlugToAuth } from "@/auth-boundary/auth-internal.client";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
 import { userInclude } from "../models/types";
 
@@ -42,6 +43,14 @@ export type CompleteProfileSetupInput = {
   slug: string;
   displayName?: string;
   avatar?: string | null;
+};
+
+export type AdminSlugChangeResult = {
+  user: UserWithRelations;
+  authProjection: {
+    attempted: boolean;
+    ok: boolean;
+  };
 };
 
 /**
@@ -241,6 +250,35 @@ export class UserService {
     await syncUserToMeili(user.unitId);
 
     return user as UserWithRelations;
+  }
+
+  async changeCanonicalSlugAsAdmin(
+    unitId: string,
+    slug: string,
+  ): Promise<AdminSlugChangeResult> {
+    const user = await prisma.user.update({
+      where: { unitId },
+      data: { slug },
+      include: userInclude,
+    });
+
+    await patchUserFieldsToMeili(unitId, { slug: user.slug });
+    patchPostsAuthorToMeili(unitId, { authorSlug: user.slug }).catch(() => {});
+
+    const authProjection = user.authUserId
+      ? {
+          attempted: true,
+          ok: await projectSlugToAuth({
+            authUserId: user.authUserId,
+            slug,
+          }),
+        }
+      : { attempted: false, ok: false };
+
+    return {
+      user: user as UserWithRelations,
+      authProjection,
+    };
   }
 
   /**
