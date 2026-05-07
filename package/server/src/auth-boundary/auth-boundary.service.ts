@@ -7,6 +7,11 @@ const AUTH_PUBLIC_PREFIX = "/auth";
 const AUTH_INTERNAL_PREFIX = "/api/auth";
 const SESSION_COOKIE_NAME = "rezics-session-token";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const LOCAL_DEV_ORIGINS = [
+  "http://localhost:35001",
+  "http://localhost:35002",
+  "http://localhost:8000",
+];
 
 type AuthSessionStateResponse = {
   session?: {
@@ -122,6 +127,11 @@ function csrfRejected(request: Request): boolean {
     new URL(env.AUTH_PUBLIC_ISSUER_URL).origin,
     new URL(getPublicAuthBaseUrl()).origin,
   ]);
+  if (env.NODE_ENV !== "production") {
+    for (const localOrigin of LOCAL_DEV_ORIGINS) {
+      acceptedOrigins.add(new URL(localOrigin).origin);
+    }
+  }
 
   try {
     return !acceptedOrigins.has(new URL(origin).origin);

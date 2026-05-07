@@ -118,6 +118,28 @@ describe("main auth public boundary", () => {
     expect(init?.body).toBeInstanceOf(ReadableStream);
   });
 
+  test("allows local frontend dev origins through the auth boundary", async () => {
+    setFetch(async () => Response.json({ proxied: true }));
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/sign-in/email", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "http://localhost:35001",
+        },
+        body: JSON.stringify({ email: "reader@example.com" }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ proxied: true });
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      "http://auth.internal/api/auth/sign-in/email",
+    );
+  });
+
   test("rewrites proxied cookie paths and redirect locations to public auth paths", async () => {
     setFetch(
       async () =>
