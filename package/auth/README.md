@@ -1,10 +1,16 @@
 # @rezics/auth
 
-Standalone authentication service for the Rezics platform. Handles credentials, sessions, email verification, OAuth/OIDC protocol behavior, and auth admin APIs.
+Standalone authentication service for the Rezics platform. Handles credentials, sessions, auth login email verification, OAuth/OIDC protocol behavior, and auth admin APIs.
 
 ## Overview
 
 An Elysia-based backend service that serves as the identity provider for the platform. Built on [Better Auth](https://www.better-auth.com) with Prisma for database access, it provides standard auth flows plus admin endpoints. Rezics profile identity, slug ownership, account setup, and developer/team ownership live in the main server.
+
+`auth.User.email` is the login email. The main server's `server.User.email` is
+the Rezics product email and is not synchronized with auth login email after
+materialization. If better-auth requires `auth.User.name`, Rezics treats it as
+a technical label populated from the main canonical slug, not as a product
+display name. Product display name authority remains `server.User.name`.
 
 ## Capabilities
 

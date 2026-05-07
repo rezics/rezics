@@ -66,6 +66,97 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
     },
   )
   .post(
+    "/registration/verified-facts",
+    async ({ body, set }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: body.authUserId },
+        select: {
+          id: true,
+          email: true,
+          emailVerified: true,
+          updatedAt: true,
+          accounts: { select: { providerId: true } },
+        },
+      });
+
+      if (!user) {
+        set.status = 404;
+        return {
+          success: false,
+          error: {
+            code: "AUTH_USER_NOT_FOUND",
+            message: "Auth user was not found",
+          },
+        };
+      }
+
+      if (!user.emailVerified) {
+        set.status = 403;
+        return {
+          success: false,
+          error: {
+            code: "REGISTRATION_NOT_VERIFIED",
+            message: "Registration verification is not complete",
+          },
+        };
+      }
+
+      const trustedProviderId = user.accounts.find(
+        (account) => account.providerId !== "credential",
+      )?.providerId;
+
+      return {
+        success: true,
+        facts: {
+          authUserId: user.id,
+          email: user.email,
+          emailVerified: true,
+          verifiedAt: user.updatedAt.toISOString(),
+          verificationSource: trustedProviderId ?? "email-otp",
+          trustedProviderId,
+        },
+      };
+    },
+    {
+      body: t.Object({
+        authUserId: t.String(),
+      }),
+    },
+  )
+  .post(
+    "/users/project-slug",
+    async ({ body, set }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: body.authUserId },
+        select: { id: true },
+      });
+
+      if (!user) {
+        set.status = 404;
+        return {
+          success: false,
+          error: {
+            code: "AUTH_USER_NOT_FOUND",
+            message: "Auth user was not found",
+          },
+        };
+      }
+
+      await prisma.user.update({
+        where: { id: body.authUserId },
+        data: { name: body.slug },
+      });
+
+      return { success: true };
+    },
+    {
+      body: t.Object({
+        authUserId: t.String(),
+        slug: t.String({ minLength: 1 }),
+      }),
+    },
+  )
+  .post(
     "/registration/cleanup-stale",
     async ({ body }) => {
       const olderThanHours = body.olderThanHours ?? 24 * 7;

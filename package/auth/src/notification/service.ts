@@ -1,6 +1,5 @@
 import {
-  EmailChangeConfirm,
-  PasswordReset,
+  formatSenderAddress,
   render,
   VerificationCode,
 } from "@rezics/email";
@@ -20,21 +19,13 @@ import type {
   VerificationOTPPayload,
 } from "./types";
 
-function formatFromAddress(name: string | undefined, email: string): string {
-  if (!name?.trim()) {
-    return email;
-  }
-
-  return `${name.trim()} <${email}>`;
-}
-
 function getSender(type: "password-reset" | "verification"): string {
   const sender =
     type === "password-reset"
       ? env.AUTH_PASSWORD_RESET_FROM_EMAIL
       : env.AUTH_VERIFICATION_FROM_EMAIL;
 
-  return formatFromAddress(env.SMTP_USER_NAME, sender);
+  return formatSenderAddress({ email: sender, name: env.SMTP_USER_NAME });
 }
 
 export function createAuthNotificationService(
@@ -47,7 +38,7 @@ export function createAuthNotificationService(
     to: string,
     template: { subject: string; text: string; html?: string },
   ): Promise<void> {
-    await transport.sendMail({
+    await transport.sendOrThrow({
       from: getSender(type),
       to,
       subject: template.subject,

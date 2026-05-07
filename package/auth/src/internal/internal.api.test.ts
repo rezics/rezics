@@ -8,7 +8,7 @@ process.env.BETTER_AUTH_SECRET ??=
   "this-is-a-long-auth-secret-for-tests-123456";
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
 
-const userFindUnique = mock(async () => ({
+const userFindUnique = mock(async (_args?: unknown): Promise<any> => ({
   id: "auth-user-1",
   email: "reader@example.com",
   emailVerified: false,
@@ -16,6 +16,7 @@ const userFindUnique = mock(async () => ({
 const userFindMany = mock(async (_args?: unknown) => [
   { id: "stale-user-1", email: "stale@example.com" },
 ]);
+const userUpdate = mock(async () => ({ id: "auth-user-1", name: "reader" }));
 const userDelete = mock(async () => ({ id: "auth-user-1" }));
 const userDeleteMany = mock(async () => ({ count: 1 }));
 const deleteMany = mock(async () => ({ count: 1 }));
@@ -28,6 +29,7 @@ mock.module("../auth/prisma", () => ({
     user: {
       findUnique: userFindUnique,
       findMany: userFindMany,
+      update: userUpdate,
       delete: userDelete,
       deleteMany: userDeleteMany,
     },
@@ -60,6 +62,7 @@ describe("auth internal registration lifecycle", () => {
       { id: "stale-user-1", email: "stale@example.com" },
     ]);
     userDelete.mockClear();
+    userUpdate.mockClear();
     userDeleteMany.mockClear();
     deleteMany.mockClear();
     transaction.mockClear();
@@ -145,6 +148,94 @@ describe("auth internal registration lifecycle", () => {
     expect(findManyArgs.select).toEqual({ id: true, email: true });
     expect(userDeleteMany).toHaveBeenCalledWith({
       where: { id: { in: ["stale-user-1"] } },
+    });
+  });
+
+  test("returns verified registration facts for main materialization", async () => {
+    const updatedAt = new Date("2026-05-07T00:00:00.000Z");
+    userFindUnique.mockResolvedValueOnce({
+      id: "auth-user-1",
+      email: "reader@example.com",
+      emailVerified: true,
+      updatedAt,
+      accounts: [{ providerId: "github" }],
+    });
+
+    const { authInternalApi } = await import("./internal.api");
+
+    const response = await authInternalApi.handle(
+      new Request("http://localhost/internal/registration/verified-facts", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "internal-test-secret",
+        },
+        body: JSON.stringify({ authUserId: "auth-user-1" }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: true,
+      facts: {
+        authUserId: "auth-user-1",
+        email: "reader@example.com",
+        emailVerified: true,
+        verifiedAt: updatedAt.toISOString(),
+        verificationSource: "github",
+        trustedProviderId: "github",
+      },
+    });
+  });
+
+  test("rejects verified facts before registration verification", async () => {
+    userFindUnique.mockResolvedValueOnce({
+      id: "auth-user-1",
+      email: "reader@example.com",
+      emailVerified: false,
+      updatedAt: new Date("2026-05-07T00:00:00.000Z"),
+      accounts: [],
+    });
+
+    const { authInternalApi } = await import("./internal.api");
+
+    const response = await authInternalApi.handle(
+      new Request("http://localhost/internal/registration/verified-facts", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "internal-test-secret",
+        },
+        body: JSON.stringify({ authUserId: "auth-user-1" }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect((await response.json()).error.code).toBe(
+      "REGISTRATION_NOT_VERIFIED",
+    );
+  });
+
+  test("projects main slug into auth technical name", async () => {
+    userFindUnique.mockResolvedValueOnce({ id: "auth-user-1" });
+    const { authInternalApi } = await import("./internal.api");
+
+    const response = await authInternalApi.handle(
+      new Request("http://localhost/internal/users/project-slug", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "internal-test-secret",
+        },
+        body: JSON.stringify({ authUserId: "auth-user-1", slug: "reader" }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ success: true });
+    expect(userUpdate).toHaveBeenCalledWith({
+      where: { id: "auth-user-1" },
+      data: { name: "reader" },
     });
   });
 });

@@ -58,6 +58,7 @@
     "@elysiajs/openapi": "^1.4.14",
     "@faker-js/faker": "^10.1.0",
     "@rezics/contract": "workspace:*",
+    "@rezics/email": "workspace:*",
     "@rezics/jwt": "workspace:*",
     "@rezics/search": "workspace:*",
     "@rezics/shared": "workspace:*",

@@ -64,3 +64,23 @@ as `AUTH_INTERNAL_BASE_URL` or auth-native `/api/auth/*` paths.
 Main-owned session JWKS remain at `https://rezics.com/.well-known/jwks.json`.
 Auth/OIDC JWKS are published only through an auth-scoped public path such as
 `https://rezics.com/auth/session/jwks`.
+
+## Account Identity Ownership
+
+`auth.User.email` is the auth login email. Auth owns it for credentials,
+recovery, provider linking, auth sessions, and auth-owned verification state.
+
+`server.User.email` is the main-owned Rezics product email. Main may initialize
+it from a verified auth login email during account materialization, but it is
+not synchronized after that point. Later Rezics email changes must use
+main-owned email verification contracts such as `user.email`; auth login email
+changes must not update this column automatically.
+
+`server.User.slug` is the canonical Rezics slug. Auth may store that slug as a
+login alias or technical label, but the projection is one-way from main to
+auth.
+
+`server.User.name` is the Rezics product display name. If better-auth requires
+`auth.User.name`, that value is a technical auth label populated from the main
+slug or another documented non-product label. Product UI must render
+`server.User.name`, never `auth.User.name`.

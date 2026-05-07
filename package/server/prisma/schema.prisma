@@ -684,36 +684,72 @@ model Attribution {
  * UserType removed.
  */
 
+enum UserAccountStatus {
+  PROFILE_SETUP_REQUIRED
+  MEMBER_READY
+}
+
+enum EmailVerificationContractStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+}
+
 model User {
-  unitId                  String    @id @db.Uuid
-  authUserId              String?   @unique @db.Uuid
-  email                   String?   @db.VarChar(320)
-  emailVerifiedAt         DateTime?
-  emailVerificationSource String?   @db.VarChar(64)
-  slug                    String    @unique
-  name                    String
-  avatar                  String?
-  bio                     String?
-  description             String?
-  joinDate                DateTime?
-  permission              Json?
-  followersCount          Int       @default(0)
-  followingsCount         Int       @default(0)
-  settings                Json?
-  extra                   Json?
+  unitId         String            @id @db.Uuid
+  authUserId     String?           @unique @db.Uuid
+  /// Main-owned Rezics product email. It may be initialized from a verified
+  /// auth login email during materialization, but is not synchronized with
+  /// auth.User.email after that point.
+  email          String?           @db.VarChar(320)
+  accountStatus  UserAccountStatus @default(MEMBER_READY)
+  slug           String            @unique
+  name           String
+  avatar         String?
+  bio            String?
+  description    String?
+  joinDate       DateTime?
+  permission     Json?
+  followersCount Int               @default(0)
+  followingsCount Int              @default(0)
+  settings       Json?
+  extra          Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  followers  Follow[]   @relation("UserFollowers")
-  followings Follow[]   @relation("UserFollowings")
-  units      Unit[]     @relation("UnitForUser")
-  apiTokens  ApiToken[]
+  followers                  Follow[]                    @relation("UserFollowers")
+  followings                 Follow[]                    @relation("UserFollowings")
+  units                      Unit[]                      @relation("UnitForUser")
+  apiTokens                  ApiToken[]
 
   workLinkClaimsAsClaimer  WorkLinkClaim[]    @relation("WorkLinkClaimClaimer")
   workLinkClaimsAsResolver WorkLinkClaim[]    @relation("WorkLinkClaimResolver")
   unitProgress             UserUnitProgress[]
 
+  @@index([email])
+  @@index([accountStatus])
+}
+
+model EmailVerificationContract {
+  id             String                          @id @default(uuid()) @db.Uuid
+  contractName   String                          @db.VarChar(96)
+  ownerId        String                          @db.Uuid
+  email          String                          @db.VarChar(320)
+  status         EmailVerificationContractStatus @default(PENDING)
+  codeHash       String?
+  deliveryStatus String?                         @db.VarChar(64)
+  source         String?                         @db.VarChar(64)
+  verifiedAt     DateTime?
+  expiresAt      DateTime?
+  lastSentAt     DateTime?
+  attempts       Int                             @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([contractName, ownerId, email])
+  @@index([contractName, ownerId, status])
   @@index([email])
 }
 

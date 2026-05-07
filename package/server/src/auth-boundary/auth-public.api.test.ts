@@ -10,12 +10,16 @@ const fetchMock = mock(async (_input: RequestInfo | URL, _init?: RequestInit) =>
 );
 const getMainSessionPublicJwks = mock(async () => ({ keys: [] }));
 const signRezicsSessionToken = mock(async () => "signed-main-session");
+const signRezicsProfileSetupToken = mock(
+  async () => "signed-profile-setup-session",
+);
 const verifyRezicsSessionToken = mock(async () => null);
 
 type MainUserLookup = {
   unitId: string;
   slug: string;
   permission: { role: string[] };
+  accountStatus: "PROFILE_SETUP_REQUIRED" | "MEMBER_READY";
 };
 
 const createFromVerifiedAuth = mock(async (_input?: unknown) => ({
@@ -30,6 +34,7 @@ const userFindUnique = mock(
     unitId: "user-1",
     slug: "reader",
     permission: { role: ["MEMBER"] },
+    accountStatus: "MEMBER_READY",
   }),
 );
 
@@ -54,6 +59,7 @@ mock.module("@/env", () => ({
 
 mock.module("@/session/jwt/jwt.service", () => ({
   getMainSessionPublicJwks,
+  signRezicsProfileSetupToken,
   signRezicsSessionToken,
   verifyRezicsSessionToken,
 }));
@@ -77,6 +83,8 @@ beforeEach(() => {
 
   signRezicsSessionToken.mockReset();
   signRezicsSessionToken.mockResolvedValue("signed-main-session");
+  signRezicsProfileSetupToken.mockReset();
+  signRezicsProfileSetupToken.mockResolvedValue("signed-profile-setup-session");
   getMainSessionPublicJwks.mockReset();
   getMainSessionPublicJwks.mockResolvedValue({ keys: [] });
   verifyRezicsSessionToken.mockReset();
@@ -96,6 +104,7 @@ beforeEach(() => {
     unitId: "user-1",
     slug: "reader",
     permission: { role: ["MEMBER"] },
+    accountStatus: "MEMBER_READY",
   });
 });
 
@@ -272,7 +281,7 @@ describe("main auth public boundary", () => {
     );
     expect(userFindUnique).toHaveBeenCalledWith({
       where: { authUserId: "user-1" },
-      select: { unitId: true, slug: true, permission: true },
+      select: { unitId: true, slug: true, permission: true, accountStatus: true },
     });
     expect(signRezicsSessionToken).toHaveBeenCalledWith({
       userId: "user-1",
@@ -382,6 +391,74 @@ describe("main auth public boundary", () => {
     expect(signRezicsSessionToken).not.toHaveBeenCalled();
   });
 
+  test("renews profile setup token for materialized setup users", async () => {
+    userFindUnique.mockResolvedValueOnce({
+      unitId: "user-1",
+      slug: "reader",
+      permission: { role: ["MEMBER"] },
+      accountStatus: "PROFILE_SETUP_REQUIRED",
+    });
+    setFetch(async () =>
+      Response.json({
+        user: {
+          id: "user-1",
+          email: "reader@example.com",
+          emailVerified: true,
+        },
+      }),
+    );
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/account/profile-setup-token/renew", {
+        method: "POST",
+        headers: {
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(signRezicsProfileSetupToken).toHaveBeenCalledWith({
+      userId: "user-1",
+    });
+    expect((await response.json()).tokenState).toMatchObject({
+      active: true,
+      stage: "profile-required",
+      userId: "user-1",
+    });
+    expect(response.headers.get("set-cookie")).toContain(
+      "rezics-profile-setup-token=signed-profile-setup-session",
+    );
+  });
+
+  test("rejects setup token renewal for member-ready users", async () => {
+    setFetch(async () =>
+      Response.json({
+        user: {
+          id: "user-1",
+          email: "reader@example.com",
+          emailVerified: true,
+        },
+      }),
+    );
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/account/profile-setup-token/renew", {
+        method: "POST",
+        headers: {
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(409);
+    expect(signRezicsProfileSetupToken).not.toHaveBeenCalled();
+  });
+
   test("sets up a main account for a verified auth-only session", async () => {
     userFindUnique.mockResolvedValueOnce(null);
     setFetch(async () =>
@@ -421,8 +498,8 @@ describe("main auth public boundary", () => {
       email: string;
       displayName: string;
       slug: string;
-      emailVerifiedAt: Date;
-      emailVerificationSource: string;
+      verifiedAt: Date;
+      verificationSource: string;
       avatar: string | null;
     };
     expect(setupInput).toMatchObject({
@@ -430,10 +507,10 @@ describe("main auth public boundary", () => {
       email: "reader@example.com",
       displayName: "Reader",
       slug: "reader",
-      emailVerificationSource: "github",
+      verificationSource: "github",
       avatar: null,
     });
-    expect(setupInput.emailVerifiedAt).toBeInstanceOf(Date);
+    expect(setupInput.verifiedAt).toBeInstanceOf(Date);
     expect((await response.json()).success).toBe(true);
     expect(response.headers.get("set-cookie")).toContain(
       "rezics-session-token=signed-main-session",
@@ -562,6 +639,7 @@ describe("main auth public boundary", () => {
     );
     const cookie = response.headers.get("set-cookie") ?? "";
     expect(cookie).toContain("rezics-session-token=");
+    expect(cookie).toContain("rezics-profile-setup-token=");
     expect(cookie).toContain("Max-Age=0");
   });
 });

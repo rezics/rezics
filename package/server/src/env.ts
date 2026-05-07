@@ -70,26 +70,48 @@ export const env = createEnv({
     MAIN_SESSION_JWKS_ROTATION_SECONDS: v.optional(v.string()),
 
     /**
-     * Optional SMTP host reserved for server-side mail features.
-     * If mail delivery is enabled here, it is typically paired with `SMTP_USER` and `SMTP_PASSWORD`.
+     * SMTP host used by main product email verification flows.
+     * Main validates this value locally and passes it to `@rezics/email`.
      */
     SMTP_HOST: v.optional(v.string()),
 
     /**
-     * Optional SMTP username reserved for server-side mail features.
-     * Pair it with `SMTP_HOST` and `SMTP_PASSWORD` when configuring an SMTP transport.
+     * SMTP port used by main product email verification flows.
+     * Defaults to `465`.
+     */
+    SMTP_PORT: v.fallback(v.string(), "465"),
+
+    /**
+     * Whether main SMTP delivery uses TLS from connection start.
+     * Defaults to `true`; set to `false` for STARTTLS-style ports.
+     */
+    SMTP_SECURE: v.fallback(v.string(), "true"),
+
+    /**
+     * SMTP username used by main product email verification flows.
+     * Pair it with `SMTP_HOST` and `SMTP_PASSWORD` when configuring delivery.
      */
     SMTP_USER: v.optional(v.string()),
 
     /**
-     * Optional SMTP password reserved for server-side mail features.
+     * SMTP password used by main product email verification flows.
      * Pair it with `SMTP_HOST` and `SMTP_USER` when configuring an SMTP transport.
      */
     SMTP_PASSWORD: v.optional(v.string()),
 
     /**
-     * Optional sender display name reserved for server-side mail features.
-     * Typically used to format a sender as `Name <email>`.
+     * From email for main-owned product email verification messages.
+     */
+    MAIN_EMAIL_FROM_EMAIL: v.fallback(v.string(), "noreply@rezics.com"),
+
+    /**
+     * From display name for main-owned product email verification messages.
+     */
+    MAIN_EMAIL_FROM_NAME: v.optional(v.string()),
+
+    /**
+     * Legacy sender display name reserved for older server mail features.
+     * New main product email flows use `MAIN_EMAIL_FROM_NAME`.
      */
     SMTP_USER_NAME: v.optional(v.string()),
 

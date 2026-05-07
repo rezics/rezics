@@ -6,6 +6,7 @@ describe("rezics session token claims", () => {
   test("uses userId as the actor identity", () => {
     expect(
       Value.Check(rezicsSessionClaimsSchema, {
+        tokenType: "member-session",
         sub: "user-1",
         userId: "user-1",
         role: "MEMBER",

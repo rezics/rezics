@@ -42,7 +42,7 @@ export const adminEmailApi = new Elysia({ prefix: "/admin/email" })
       const { html, text } = await render(entry.component, body.props as any);
       const transport = createAuthMailer();
 
-      await transport.sendMail({
+      await transport.sendOrThrow({
         from: getDefaultSender(),
         to: body.to,
         subject: `[Test] ${entry.description}`,

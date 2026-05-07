@@ -1,9 +1,13 @@
 import type { RezicsSessionClaims } from "@rezics/contract";
 import { Elysia, status } from "elysia";
 import { prisma } from "#/prisma/client";
-import { verifyRezicsSessionToken } from "@/session/jwt/jwt.service";
+import {
+  verifyRezicsProfileSetupToken,
+  verifyRezicsSessionToken,
+} from "@/session/jwt/jwt.service";
 
 const SESSION_COOKIE_NAME = "rezics-session-token";
+const PROFILE_SETUP_COOKIE_NAME = "rezics-profile-setup-token";
 
 function readCookie(
   cookieHeader: string | undefined,
@@ -57,7 +61,31 @@ export const authMacro = new Elysia({ name: "macro/auth" }).macro(
       };
     },
   },
-);
+).macro("requireProfileSetup", {
+  async resolve(ctx) {
+    const { headers } = ctx as unknown as {
+      headers: Record<string, string | undefined>;
+    };
+
+    const setupToken =
+      readCookie(headers["cookie"], PROFILE_SETUP_COOKIE_NAME) ?? undefined;
+    if (!setupToken) {
+      return status(401, "Unauthorized: No profile setup token provided");
+    }
+
+    const claims = await verifyRezicsProfileSetupToken(setupToken);
+    if (!claims) {
+      return status(
+        401,
+        "Unauthorized: Profile setup token is invalid or expired",
+      );
+    }
+
+    return {
+      setupIdentity: claims,
+    };
+  },
+});
 
 export async function tryResolveIdentity(
   authorization: string | undefined,

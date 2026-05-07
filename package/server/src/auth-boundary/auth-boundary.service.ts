@@ -5,13 +5,17 @@ import {
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { env } from "@/env";
-import { signRezicsSessionToken } from "@/session/jwt/jwt.service";
+import {
+  signRezicsProfileSetupToken,
+  signRezicsSessionToken,
+} from "@/session/jwt/jwt.service";
 import { mapUserToDTO } from "@/user/models/mapper";
 import { userService } from "@/user/service/user.service";
 
 const AUTH_PUBLIC_PREFIX = "/auth";
 const AUTH_INTERNAL_PREFIX = "/api/auth";
 const SESSION_COOKIE_NAME = "rezics-session-token";
+const PROFILE_SETUP_COOKIE_NAME = "rezics-profile-setup-token";
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const LOCAL_DEV_ORIGINS = [
   "http://localhost:35001",
@@ -150,20 +154,35 @@ function csrfRejected(request: Request): boolean {
   }
 }
 
-function buildSessionCookie(token: string | null): string {
+function buildMainCookie(
+  name: typeof SESSION_COOKIE_NAME | typeof PROFILE_SETUP_COOKIE_NAME,
+  token: string | null,
+  maxAgeSeconds: number,
+): string {
   const secure =
     env.NODE_ENV === "production" ||
     env.AUTH_PUBLIC_ISSUER_URL.startsWith("https://");
-  const maxAge = token ? Number(env.MAIN_SESSION_JWT_TTL_SECONDS ?? "900") : 0;
   const parts = [
-    `${SESSION_COOKIE_NAME}=${token ?? ""}`,
+    `${name}=${token ?? ""}`,
     "Path=/",
     "HttpOnly",
     "SameSite=Lax",
-    `Max-Age=${maxAge}`,
+    `Max-Age=${token ? maxAgeSeconds : 0}`,
   ];
   if (secure) parts.push("Secure");
   return parts.join("; ");
+}
+
+function buildSessionCookie(token: string | null): string {
+  return buildMainCookie(
+    SESSION_COOKIE_NAME,
+    token,
+    Number(env.MAIN_SESSION_JWT_TTL_SECONDS ?? "900"),
+  );
+}
+
+function buildProfileSetupCookie(token: string | null): string {
+  return buildMainCookie(PROFILE_SETUP_COOKIE_NAME, token, 900);
 }
 
 function jsonResponse(
@@ -201,7 +220,7 @@ function isUniqueConstraintError(error: unknown): boolean {
 async function findMainUserForAuthUser(authUserId: string) {
   return prisma.user.findUnique({
     where: { authUserId },
-    select: { unitId: true, slug: true, permission: true },
+    select: { unitId: true, slug: true, permission: true, accountStatus: true },
   });
 }
 
@@ -341,8 +360,8 @@ export async function setupMainAccountFromAuth(
       email,
       displayName: body.displayName.trim(),
       slug: slugValidation.normalized,
-      emailVerifiedAt: new Date(),
-      emailVerificationSource:
+      verifiedAt: new Date(),
+      verificationSource:
         sessionState.authSession?.trustedProviderId ?? "email-otp",
       avatar: sessionState.user.image ?? null,
     });
@@ -405,10 +424,11 @@ export async function getMainAwareAuthSessionState(
   const mainUser = await findMainUserForAuthUser(authUserId);
   const emailVerified = Boolean(sessionState.user?.emailVerified);
   const mainUserExists = Boolean(mainUser);
-  const registrationComplete = emailVerified && mainUserExists;
+  const memberReady = mainUser?.accountStatus === "MEMBER_READY";
+  const registrationComplete = emailVerified && memberReady;
   const readinessStatus = !emailVerified
     ? "pending-verification"
-    : mainUserExists
+    : memberReady
       ? "member-ready"
       : "needs-main-setup";
 
@@ -488,6 +508,18 @@ export async function refreshMainSessionFromAuth(
     );
   }
 
+  if (user.accountStatus !== "MEMBER_READY") {
+    return jsonResponse(
+      {
+        error: {
+          code: "PROFILE_SETUP_REQUIRED",
+          message: "Profile setup is required before member session refresh",
+        },
+      },
+      403,
+    );
+  }
+
   const dbPermission = user.permission as
     | { role?: string[] }
     | null
@@ -511,6 +543,75 @@ export async function refreshMainSessionFromAuth(
   );
 }
 
+export async function renewProfileSetupSessionFromAuth(
+  request: Request,
+): Promise<Response> {
+  if (csrfRejected(request)) {
+    return csrfError("Origin is not allowed for profile setup renewal");
+  }
+
+  const sessionState = await fetchAuthSessionState(request);
+  const userId = sessionState?.user?.id;
+  if (!userId) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "AUTH_SESSION_REQUIRED",
+          message: "Auth session is invalid or expired",
+        },
+      },
+      401,
+    );
+  }
+
+  const user = await findMainUserForAuthUser(userId);
+  if (!user) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "MAIN_USER_NOT_FOUND",
+          message: "Main user has not been materialized",
+        },
+      },
+      404,
+    );
+  }
+
+  if (user.accountStatus !== "PROFILE_SETUP_REQUIRED") {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "PROFILE_SETUP_NOT_REQUIRED",
+          message: "Profile setup is not required for this user",
+        },
+      },
+      409,
+    );
+  }
+
+  const token = await signRezicsProfileSetupToken({ userId: user.unitId });
+  const expiresAt = new Date(Date.now() + 900 * 1000);
+  const headers = new Headers();
+  headers.set("set-cookie", buildProfileSetupCookie(token));
+
+  return jsonResponse(
+    {
+      success: true,
+      tokenState: {
+        active: true,
+        stage: "profile-required",
+        expiresAt: expiresAt.toISOString(),
+        userId: user.unitId,
+      },
+    },
+    200,
+    headers,
+  );
+}
+
 export async function signOutThroughAuthBoundary(
   request: Request,
 ): Promise<Response> {
@@ -521,6 +622,7 @@ export async function signOutThroughAuthBoundary(
   const response = await proxyAuthBoundaryRequest(request);
   const headers = new Headers(response.headers);
   headers.append("set-cookie", buildSessionCookie(null));
+  headers.append("set-cookie", buildProfileSetupCookie(null));
 
   return new Response(response.body, {
     status: response.status,

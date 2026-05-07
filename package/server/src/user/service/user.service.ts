@@ -32,8 +32,8 @@ export type CreateVerifiedAuthAccountInput = {
   email: string;
   displayName: string;
   slug: string;
-  emailVerifiedAt: Date;
-  emailVerificationSource: string;
+  verificationSource: string;
+  verifiedAt?: Date;
   avatar?: string | null;
 };
 
@@ -160,14 +160,35 @@ export class UserService {
           unitId: payload.authUserId,
           authUserId: payload.authUserId,
           email: payload.email,
-          emailVerifiedAt: payload.emailVerifiedAt,
-          emailVerificationSource: payload.emailVerificationSource,
+          accountStatus: "MEMBER_READY",
           slug: payload.slug,
           name: payload.displayName,
           avatar: payload.avatar ?? null,
           joinDate: new Date(),
         },
         include: userInclude,
+      });
+      await tx.emailVerificationContract.upsert({
+        where: {
+          contractName_ownerId_email: {
+            contractName: "user.email",
+            ownerId: created.unitId,
+            email: payload.email,
+          },
+        },
+        create: {
+          contractName: "user.email",
+          ownerId: created.unitId,
+          email: payload.email,
+          status: "VERIFIED",
+          source: payload.verificationSource,
+          verifiedAt: payload.verifiedAt ?? new Date(),
+        },
+        update: {
+          status: "VERIFIED",
+          source: payload.verificationSource,
+          verifiedAt: payload.verifiedAt ?? new Date(),
+        },
       });
       await bootstrapSystemShelves(created.unitId, tx);
 

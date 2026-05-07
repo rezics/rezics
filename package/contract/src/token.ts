@@ -18,6 +18,10 @@ export const NormalizedTokenName = {
    * rezics-session-token — issued by server, used as Bearer access token for rezics server
    */
   REZICS_SESSION: "rezics-session-token",
+  /**
+   * rezics-profile-setup-token — issued by server for profile setup routes only
+   */
+  REZICS_PROFILE_SETUP: "rezics-profile-setup-token",
 } as const;
 export type NormalizedTokenName =
   (typeof NormalizedTokenName)[keyof typeof NormalizedTokenName];
@@ -25,6 +29,7 @@ export type NormalizedTokenName =
 export const normalizedTokenNameSchema = t.Union([
   t.Literal(NormalizedTokenName.AUTH_SESSION),
   t.Literal(NormalizedTokenName.REZICS_SESSION),
+  t.Literal(NormalizedTokenName.REZICS_PROFILE_SETUP),
 ]);
 
 export const TokenTransportHeader = {
@@ -71,6 +76,7 @@ export type AuthSessionTokenClaims =
   (typeof authSessionTokenClaimsSchema)["static"];
 
 export const rezicsSessionClaimsSchema = t.Object({
+  tokenType: t.Literal("member-session"),
   sub: t.String(),
   userId: t.String(),
   role: tokenPermissionRoleSchema,
@@ -83,15 +89,30 @@ export const rezicsSessionClaimsSchema = t.Object({
 });
 export type RezicsSessionClaims = (typeof rezicsSessionClaimsSchema)["static"];
 
+export const rezicsProfileSetupClaimsSchema = t.Object({
+  tokenType: t.Literal("profile-setup"),
+  purpose: t.Literal("profile-setup"),
+  sub: t.String(),
+  userId: t.String(),
+  iss: t.Literal("rezics-server"),
+  exp: t.Number(),
+  iat: t.Number(),
+});
+export type RezicsProfileSetupClaims =
+  (typeof rezicsProfileSetupClaimsSchema)["static"];
+
 export const normalizedTokenHeaderMap = {
   [NormalizedTokenName.AUTH_SESSION]:
     TokenTransportHeader.AUTH_SESSION_EXCHANGE,
   [NormalizedTokenName.REZICS_SESSION]: TokenTransportHeader.AUTHORIZATION,
+  [NormalizedTokenName.REZICS_PROFILE_SETUP]:
+    TokenTransportHeader.AUTHORIZATION,
 } satisfies Record<NormalizedTokenName, TokenTransportHeader>;
 
 export const TokenContextKey = {
   AUTH_SESSION: "authSessionToken",
   REZICS_SESSION: "rezicsSessionToken",
+  REZICS_PROFILE_SETUP: "rezicsProfileSetupToken",
 } as const;
 export type TokenContextKey =
   (typeof TokenContextKey)[keyof typeof TokenContextKey];
@@ -104,6 +125,11 @@ export const normalizedTokenTransportMap = {
   },
   [NormalizedTokenName.REZICS_SESSION]: {
     tokenName: NormalizedTokenName.REZICS_SESSION,
+    headerName: TokenTransportHeader.AUTHORIZATION,
+    usesBearer: true,
+  },
+  [NormalizedTokenName.REZICS_PROFILE_SETUP]: {
+    tokenName: NormalizedTokenName.REZICS_PROFILE_SETUP,
     headerName: TokenTransportHeader.AUTHORIZATION,
     usesBearer: true,
   },

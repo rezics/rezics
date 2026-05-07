@@ -1,48 +1,48 @@
 ## 1. Boundary Documentation and Contract Shape
 
-- [ ] 1.1 Update auth/main boundary docs to define `auth.User.email` as login email and `server.User.email` as main-owned Rezics email.
-- [ ] 1.2 Document that `auth.User.name` is a technical auth label populated from main slug and must not be used as Rezics display name.
-- [ ] 1.3 Add shared contract types for account stages: anonymous, registration verification required, profile setup required, and member ready.
-- [ ] 1.4 Add shared contract schemas for verified registration facts returned from auth to main.
-- [ ] 1.5 Add shared contract schemas for profile setup token state, setup renewal, and typed profile setup errors.
+- [x] 1.1 Update auth/main boundary docs to define `auth.User.email` as login email and `server.User.email` as main-owned Rezics email.
+- [x] 1.2 Document that `auth.User.name` is a technical auth label populated from main slug and must not be used as Rezics display name.
+- [x] 1.3 Add shared contract types for account stages: anonymous, registration verification required, profile setup required, and member ready.
+- [x] 1.4 Add shared contract schemas for verified registration facts returned from auth to main.
+- [x] 1.5 Add shared contract schemas for profile setup token state, setup renewal, and typed profile setup errors.
 
 ## 2. Shared Email Sender and Server Env
 
-- [ ] 2.1 Add nodemailer sender creation utilities to `package/email` and export them from `@rezics/email`.
-- [ ] 2.2 Ensure `@rezics/email` sender utilities accept explicit config and do not read `process.env` or service env modules.
-- [ ] 2.3 Add or update `package/email` tests for sender config, sender formatting, and delivery failure propagation.
-- [ ] 2.4 Update auth email delivery to use `@rezics/email` sender utilities while keeping auth-owned env validation.
-- [ ] 2.5 Update notify email delivery to use `@rezics/email` sender utilities where it overlaps with SMTP sender creation.
-- [ ] 2.6 Complete `package/server/src/env.ts` with `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIN_EMAIL_FROM_EMAIL`, and `MAIN_EMAIL_FROM_NAME`.
-- [ ] 2.7 Complete `package/server/.env.example` with documentation for `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIN_EMAIL_FROM_EMAIL`, and `MAIN_EMAIL_FROM_NAME`.
+- [x] 2.1 Add nodemailer sender creation utilities to `package/email` and export them from `@rezics/email`.
+- [x] 2.2 Ensure `@rezics/email` sender utilities accept explicit config and do not read `process.env` or service env modules.
+- [x] 2.3 Add or update `package/email` tests for sender config, sender formatting, and delivery failure propagation.
+- [x] 2.4 Update auth email delivery to use `@rezics/email` sender utilities while keeping auth-owned env validation.
+- [x] 2.5 Update notify email delivery to use `@rezics/email` sender utilities where it overlaps with SMTP sender creation.
+- [x] 2.6 Complete `package/server/src/env.ts` with `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIN_EMAIL_FROM_EMAIL`, and `MAIN_EMAIL_FROM_NAME`.
+- [x] 2.7 Complete `package/server/.env.example` with documentation for `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIN_EMAIL_FROM_EMAIL`, and `MAIN_EMAIL_FROM_NAME`.
 
 ## 3. Main Database and Email Verification Contracts
 
-- [ ] 3.1 Update `package/server/prisma/schema.prisma` to remove `User.emailVerifiedAt` and `User.emailVerificationSource`.
-- [ ] 3.2 Add main email verification contract storage keyed by `contractName`, `ownerId`, and `email`.
-- [ ] 3.3 Add schema comments documenting that `User.email` is main-owned and not synchronized with auth login email.
-- [ ] 3.4 Add or update main user status fields needed to distinguish profile setup from member-ready users.
-- [ ] 3.5 Implement main email verification contract delivery using `@rezics/email` with server-owned env-derived config.
-- [ ] 3.6 Generate the server Prisma client and update generated imports as needed.
-- [ ] 3.7 Run repo-wide `rg` checks for removed main verification columns and update all callsites.
+- [x] 3.1 Update `package/server/prisma/schema.prisma` to remove `User.emailVerifiedAt` and `User.emailVerificationSource`.
+- [x] 3.2 Add main email verification contract storage keyed by `contractName`, `ownerId`, and `email`.
+- [x] 3.3 Add schema comments documenting that `User.email` is main-owned and not synchronized with auth login email.
+- [x] 3.4 Add or update main user status fields needed to distinguish profile setup from member-ready users.
+- [x] 3.5 Implement main email verification contract delivery using `@rezics/email` with server-owned env-derived config.
+- [x] 3.6 Generate the server Prisma client and update generated imports as needed.
+- [x] 3.7 Run repo-wide `rg` checks for removed main verification columns and update all callsites.
 
 ## 4. Auth Service Facts and Slug Projection
 
-- [ ] 4.1 Add or update auth internal response shape to expose minimal verified registration facts for main materialization.
-- [ ] 4.2 Ensure auth verification routes mutate only auth-owned verification state and do not create or update main product data.
-- [ ] 4.3 Add auth-side slug login alias or technical name update support for main-originated projection.
+- [x] 4.1 Add or update auth internal response shape to expose minimal verified registration facts for main materialization.
+- [x] 4.2 Ensure auth verification routes mutate only auth-owned verification state and do not create or update main product data.
+- [x] 4.3 Add auth-side slug login alias or technical name update support for main-originated projection.
 - [ ] 4.4 Ensure auth `User.name` is populated from main slug only as a technical label where better-auth requires it.
-- [ ] 4.5 Add auth tests for verified registration facts and slug projection update behavior.
+- [x] 4.5 Add auth tests for verified registration facts and slug projection update behavior.
 
 ## 5. Main Token and Guard Split
 
-- [ ] 5.1 Add signing and verification helpers for `rezics-profile-setup-token` with explicit setup purpose/type claims.
-- [ ] 5.2 Set default profile setup token TTL to 15 minutes and enforce expiration server-side.
-- [ ] 5.3 Add setup token renewal from a valid auth session while the user remains profile-setup-required.
-- [ ] 5.4 Update `rezics-session-token` verification to require member-session purpose/type where needed.
-- [ ] 5.5 Add a server route macro for profile setup routes that accepts only `rezics-profile-setup-token`.
-- [ ] 5.6 Update existing `requireLogin` macro to accept only normal member `rezics-session-token` and reject profile setup tokens.
-- [ ] 5.7 Update sign-out to clear both `rezics-session-token` and `rezics-profile-setup-token`.
+- [x] 5.1 Add signing and verification helpers for `rezics-profile-setup-token` with explicit setup purpose/type claims.
+- [x] 5.2 Set default profile setup token TTL to 15 minutes and enforce expiration server-side.
+- [x] 5.3 Add setup token renewal from a valid auth session while the user remains profile-setup-required.
+- [x] 5.4 Update `rezics-session-token` verification to require member-session purpose/type where needed.
+- [x] 5.5 Add a server route macro for profile setup routes that accepts only `rezics-profile-setup-token`.
+- [x] 5.6 Update existing `requireLogin` macro to accept only normal member `rezics-session-token` and reject profile setup tokens.
+- [x] 5.7 Update sign-out to clear both `rezics-session-token` and `rezics-profile-setup-token`.
 - [ ] 5.8 Add focused middleware tests for member token, setup token, expired setup token, setup renewal, invalid token, and wrong-token-on-route cases.
 
 ## 6. Main Registration Materialization and Profile Setup

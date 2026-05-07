@@ -8,6 +8,7 @@ import {
   getMainAwareAuthSessionState,
   proxyAuthBoundaryRequest,
   refreshMainSessionFromAuth,
+  renewProfileSetupSessionFromAuth,
   setupMainAccountFromAuth,
   signOutThroughAuthBoundary,
 } from "./auth-boundary.service";
@@ -47,6 +48,18 @@ export const authPublicApi = new Elysia({ prefix: "/auth" })
         summary: "Refresh main session from auth session",
         description:
           "Public main-owned auth boundary. Validates the opaque auth session through auth, verifies the main user already exists, then issues rezics-session-token.",
+        tags: ["Auth Boundary"],
+      },
+    },
+  )
+  .post(
+    "/account/profile-setup-token/renew",
+    ({ request }) => renewProfileSetupSessionFromAuth(request),
+    {
+      detail: {
+        summary: "Renew profile setup session",
+        description:
+          "Validates the opaque auth session and reissues rezics-profile-setup-token only while the main user remains profile-setup-required.",
         tags: ["Auth Boundary"],
       },
     },
