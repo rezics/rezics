@@ -1,17 +1,17 @@
 # @rezics/auth
 
-Standalone authentication and identity service for the Rezics platform. Handles user lifecycle, session management, OAuth/OIDC, organization management, and admin APIs.
+Standalone authentication service for the Rezics platform. Handles credentials, sessions, email verification, OAuth/OIDC protocol behavior, and auth admin APIs.
 
 ## Overview
 
-An Elysia-based backend service that serves as the identity provider for the platform. Built on [Better Auth](https://www.better-auth.com) with Prisma for database access, it provides standard auth flows plus admin and organization management endpoints.
+An Elysia-based backend service that serves as the identity provider for the platform. Built on [Better Auth](https://www.better-auth.com) with Prisma for database access, it provides standard auth flows plus admin endpoints. Rezics profile identity, slug ownership, account setup, and developer/team ownership live in the main server.
 
 ## Capabilities
 
-- **Core Identity** — Sign-up, sign-in, password reset, email verification via Better Auth
+- **Core Auth** — Sign-up, sign-in, password reset, email verification via Better Auth
 - **OAuth/OIDC** — OAuth provider endpoints and JWKS/JWT issuance
 - **Admin APIs** — User management, session control, role assignment, impersonation
-- **Organization APIs** — CRUD, member management, invitations, role-based permissions
+- **Pending Registration** — Auth-only temporary accounts, verification, cancellation, and stale cleanup support for main-owned setup
 - **Notifications** — Email delivery via SMTP (nodemailer); extensible for future channels
 
 ## API Endpoints
@@ -39,24 +39,11 @@ All Better Auth standard routes under `/api/auth/*`.
 | POST   | `/stop-impersonating`     | Stop impersonation       |
 | POST   | `/set-user-password`      | Reset user password      |
 
-### Organization (`/api/auth/organization/*`)
+### Pending Registration Internals
 
-| Method | Endpoint                  | Description                |
-| ------ | ------------------------- | -------------------------- |
-| POST   | `/create`                 | Create organization        |
-| POST   | `/update`                 | Update organization        |
-| POST   | `/delete`                 | Delete organization        |
-| GET    | `/get-full-organization`  | Get organization details   |
-| GET    | `/list`                   | List organizations         |
-| POST   | `/invite-member`          | Send invitation            |
-| POST   | `/accept-invitation`      | Accept invitation          |
-| POST   | `/reject-invitation`      | Reject invitation          |
-| POST   | `/cancel-invitation`      | Cancel invitation          |
-| POST   | `/remove-member`          | Remove member              |
-| POST   | `/update-member-role`     | Update member role         |
-| POST   | `/leave`                  | Leave organization         |
-| POST   | `/set-active`             | Set active organization    |
-| POST   | `/has-permission`         | Check permission           |
+Main owns public account setup under `/auth/account/*`. Auth exposes internal
+registration cleanup/cancel operations under `/internal/registration/*` for
+main to call with `x-internal-secret`.
 
 ## JWT and JWKS
 
@@ -76,7 +63,6 @@ Email delivery is configured per notification type:
 
 | Type               | Environment Variable                                       |
 | ------------------ | ---------------------------------------------------------- |
-| Invitations        | `AUTH_INVITATION_FROM_EMAIL`                               |
 | Password reset     | `AUTH_PASSWORD_RESET_FROM_EMAIL` (falls back to invitation)|
 | Verification       | `AUTH_VERIFICATION_FROM_EMAIL` (falls back to invitation)  |
 

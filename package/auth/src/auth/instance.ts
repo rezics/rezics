@@ -1,7 +1,7 @@
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth";
-import { admin, genericOAuth, jwt, organization } from "better-auth/plugins";
+import { admin, genericOAuth, jwt } from "better-auth/plugins";
 import { emailOTP } from "better-auth/plugins/email-otp";
 import { env } from "../env";
 import { createAuthNotificationService } from "../notification";
@@ -13,7 +13,7 @@ import {
   getAuthJwtIssuer,
   getAuthJwtTtlSeconds,
 } from "../session/jwt/export";
-import { ac, authRoles, organizationRoles } from "./permissions";
+import { ac, authRoles } from "./permissions";
 import { prisma } from "./prisma";
 import {
   buildSocialProviderOptions,
@@ -104,11 +104,7 @@ export const auth = betterAuth({
       resendStrategy: "rotate",
       overrideDefaultEmailVerification: true,
       sendVerificationOTP: async ({ email, otp, type }) => {
-        notificationService
-          .sendVerificationOTP({ email, otp, type })
-          .catch((err) =>
-            console.error("[email-otp] Failed to send verification OTP:", err),
-          );
+        await notificationService.sendVerificationOTP({ email, otp, type });
       },
     }),
     jwt({
@@ -136,13 +132,8 @@ export const auth = betterAuth({
             emailVerified?: boolean;
           };
         }) => {
-          const profile = await prisma.userProfile.findUnique({
-            where: { userId: user.id },
-            select: { slug: true },
-          });
           return {
             id: user.id,
-            slug: profile?.slug,
             name: user.name,
             role: user.role,
             scope: "user",
@@ -220,11 +211,6 @@ export const auth = betterAuth({
       ac,
       roles: authRoles,
       defaultRole: "user",
-    }),
-    organization({
-      ac,
-      roles: organizationRoles,
-      sendInvitationEmail: notificationService.sendInvitationEmail,
     }),
   ],
 });

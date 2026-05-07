@@ -73,7 +73,7 @@ export const env = createEnv({
     AUTH_INTERNAL_TOKEN_GATEWAY_SECRET: v.string(),
 
     /**
-     * Base URL of the main server for internal calls (e.g., user provisioning).
+     * Base URL of the main server for internal auth-boundary callbacks.
      * Defaults to 'http://localhost:3000'.
      */
     SERVER_BASE_URL: v.fallback(v.string(), "http://localhost:3000"),
@@ -134,7 +134,6 @@ export const env = createEnv({
      * Defines the 'From' address for different notification types.
      */
 
-    AUTH_INVITATION_FROM_EMAIL: v.fallback(v.string(), "noreply@rezics.com"),
     AUTH_PASSWORD_RESET_FROM_EMAIL: v.fallback(
       v.string(),
       "noreply@rezics.com",

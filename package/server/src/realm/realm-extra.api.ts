@@ -53,7 +53,10 @@ export const realmExtraApi = new Elysia()
   .get(
     "/realm/:unitId/extra/:key",
     async ({ params, headers }): Promise<RealmExtraReadResponse> => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const unitIds = await readListPublic(identity, params.unitId, params.key);
       return { realmId: params.unitId, key: params.key, unitIds };
     },

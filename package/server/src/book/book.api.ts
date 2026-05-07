@@ -92,7 +92,10 @@ export const bookApi = new Elysia({ prefix: "/book" })
   .get(
     "/list",
     async ({ headers, query }): Promise<BookListResponse> => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const admin = isAdminRole(identity);
 
       const effectiveQuery = admin
@@ -115,7 +118,10 @@ export const bookApi = new Elysia({ prefix: "/book" })
   .post(
     "/list",
     async ({ headers, body }): Promise<BookListResponse> => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const admin = isAdminRole(identity);
 
       const query = { ...body, ids: body.ids?.join(",") };

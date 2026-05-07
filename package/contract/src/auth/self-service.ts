@@ -16,18 +16,38 @@ export const authProviderSchema = t.Object({
 export type AuthProvider = (typeof authProviderSchema)["static"];
 
 export const authReadinessStatusSchema = t.Union([
-  t.Literal("needs-registration"),
-  t.Literal("ready"),
+  t.Literal("pending-verification"),
+  t.Literal("needs-main-setup"),
+  t.Literal("member-ready"),
 ]);
 export type AuthReadinessStatus = (typeof authReadinessStatusSchema)["static"];
+
+export const pendingRegistrationStepSchema = t.Union([
+  t.Literal("verify-email"),
+  t.Literal("setup-account"),
+]);
+export type PendingRegistrationStep =
+  (typeof pendingRegistrationStepSchema)["static"];
+
+export const pendingRegistrationStateSchema = t.Object({
+  active: t.Boolean(),
+  step: t.Optional(pendingRegistrationStepSchema),
+  email: t.String({ format: "email" }),
+  emailVerified: t.Boolean(),
+  requiresEmailVerification: t.Boolean(),
+  requiresMainAccountSetup: t.Boolean(),
+});
+export type PendingRegistrationState =
+  (typeof pendingRegistrationStateSchema)["static"];
 
 export const authSessionStateSchema = t.Object({
   email: t.String({ format: "email" }),
   emailVerified: t.Boolean(),
-  identitySet: t.Boolean(),
+  mainUserExists: t.Boolean(),
   registrationComplete: t.Boolean(),
   canAcquireMemberToken: t.Boolean(),
   readinessStatus: authReadinessStatusSchema,
+  pendingRegistration: pendingRegistrationStateSchema,
   hasPassword: t.Boolean(),
   canSetPassword: t.Boolean(),
   providerIds: t.Array(authProviderIdSchema),
@@ -65,11 +85,71 @@ export const sendVerificationEmailBodySchema = t.Object({
 export type SendVerificationEmailBody =
   (typeof sendVerificationEmailBodySchema)["static"];
 
+export const verificationErrorCodeSchema = t.Union([
+  t.Literal("TURNSTILE_FAILED"),
+  t.Literal("DELIVERY_FAILED"),
+  t.Literal("COOLDOWN"),
+  t.Literal("INVALID_OTP"),
+  t.Literal("EXPIRED_OTP"),
+  t.Literal("ALREADY_VERIFIED"),
+  t.Literal("MISSING_EMAIL"),
+  t.Literal("UNAUTHORIZED"),
+]);
+export type VerificationErrorCode =
+  (typeof verificationErrorCodeSchema)["static"];
+
+export const verificationErrorSchema = t.Object({
+  code: verificationErrorCodeSchema,
+  message: t.String(),
+  retryAfterSeconds: t.Optional(t.Number()),
+});
+export type VerificationError = (typeof verificationErrorSchema)["static"];
+
 export const sendVerificationEmailResponseSchema = t.Object({
   status: t.Boolean(),
+  error: t.Optional(verificationErrorSchema),
+  retryAfterSeconds: t.Optional(t.Number()),
 });
 export type SendVerificationEmailResponse =
   (typeof sendVerificationEmailResponseSchema)["static"];
+
+export const sendVerificationOtpBodySchema = t.Object({
+  email: t.String({ format: "email" }),
+  type: t.Literal("email-verification"),
+  turnstileToken: t.Optional(t.String()),
+});
+export type SendVerificationOtpBody =
+  (typeof sendVerificationOtpBodySchema)["static"];
+
+export const sendVerificationOtpResponseSchema = t.Object({
+  success: t.Boolean(),
+  error: t.Optional(verificationErrorSchema),
+  retryAfterSeconds: t.Optional(t.Number()),
+});
+export type SendVerificationOtpResponse =
+  (typeof sendVerificationOtpResponseSchema)["static"];
+
+export const verifyEmailOtpBodySchema = t.Object({
+  email: t.String({ format: "email" }),
+  otp: t.String(),
+});
+export type VerifyEmailOtpBody = (typeof verifyEmailOtpBodySchema)["static"];
+
+export const verifyEmailOtpResponseSchema = t.Object({
+  status: t.Boolean(),
+  token: t.Optional(t.Nullable(t.String())),
+  user: t.Optional(
+    t.Object({
+      id: t.String(),
+      email: t.String(),
+      emailVerified: t.Boolean(),
+      name: t.String(),
+    }),
+  ),
+  error: t.Optional(verificationErrorSchema),
+});
+export type VerifyEmailOtpResponse =
+  (typeof verifyEmailOtpResponseSchema)["static"];
 
 export const verifyEmailQuerySchema = t.Object({
   token: t.String(),
@@ -118,28 +198,9 @@ export const setPasswordResponseSchema = t.Object({
 });
 export type SetPasswordResponse = (typeof setPasswordResponseSchema)["static"];
 
-// Identity step contracts
-
-export const identityConfirmBodySchema = t.Object({
-  username: t.String({ minLength: 1 }),
-  slug: t.String({ minLength: 1 }),
+export const cancelRegistrationResponseSchema = t.Object({
+  success: t.Boolean(),
+  canceled: t.Boolean(),
 });
-export type IdentityConfirmBody = (typeof identityConfirmBodySchema)["static"];
-
-export const identityConfirmResponseSchema = t.Object({
-  ok: t.Boolean(),
-  slug: t.String(),
-});
-export type IdentityConfirmResponse =
-  (typeof identityConfirmResponseSchema)["static"];
-
-export const checkSlugQuerySchema = t.Object({
-  slug: t.String({ minLength: 1 }),
-});
-export type CheckSlugQuery = (typeof checkSlugQuerySchema)["static"];
-
-export const checkSlugResponseSchema = t.Object({
-  available: t.Boolean(),
-  reason: t.Optional(t.String()),
-});
-export type CheckSlugResponse = (typeof checkSlugResponseSchema)["static"];
+export type CancelRegistrationResponse =
+  (typeof cancelRegistrationResponseSchema)["static"];

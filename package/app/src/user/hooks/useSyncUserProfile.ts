@@ -1,7 +1,7 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useUserProfileStore } from "@/user/states";
+import { useAuthSessionStore, useUserProfileStore } from "@/user/states";
 
 /**
  * Subscribes to the `me` query and syncs its data into the Zustand
@@ -12,7 +12,11 @@ import { useUserProfileStore } from "@/user/states";
  */
 export function useSyncUserProfile() {
   const setUser = useUserProfileStore((s) => s.setUser);
-  const { data } = useQuery(userQueries.me());
+  const hasAuthSession = useAuthSessionStore((s) => s.hasAuthSession);
+  const { data } = useQuery({
+    ...userQueries.me(),
+    enabled: hasAuthSession,
+  });
 
   useEffect(() => {
     if (data) {

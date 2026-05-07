@@ -1,4 +1,4 @@
-import { describe, expect, mock, test } from "bun:test";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 process.env.NODE_ENV = "test";
 process.env.PORT = "35003";
@@ -16,7 +16,6 @@ process.env.SMTP_HOST ??= "smtp.example.com";
 process.env.SMTP_USER ??= "smtp-user";
 process.env.SMTP_PASSWORD ??= "smtp-password";
 process.env.SMTP_USER_NAME ??= "Rezics Auth";
-process.env.AUTH_INVITATION_FROM_EMAIL ??= "invite@example.com";
 process.env.AUTH_PASSWORD_RESET_FROM_EMAIL ??= "reset@example.com";
 process.env.AUTH_VERIFICATION_FROM_EMAIL ??= "verify@example.com";
 process.env.GOOGLE_CLIENT_ID ??= "google-client";
@@ -31,6 +30,7 @@ process.env.TELEGRAM_CLIENT_ID ??= "telegram-client";
 process.env.TELEGRAM_CLIENT_SECRET ??= "telegram-secret";
 
 const authHandler = mock(async () => new Response(null, { status: 204 }));
+const verifyTurnstileToken = mock(async () => ({ success: true }));
 
 mock.module("./instance", () => ({
   auth: {
@@ -58,6 +58,10 @@ mock.module("./instance", () => ({
   },
 }));
 
+mock.module("../utils/turnstileUtils", () => ({
+  verifyTurnstileToken,
+}));
+
 mock.module("@better-auth/oauth-provider", () => ({
   oauthProviderOpenIdConfigMetadata: () => async () =>
     Response.json({
@@ -74,6 +78,13 @@ mock.module("@better-auth/oauth-provider", () => ({
 }));
 
 describe("Auth discovery routes", () => {
+  beforeEach(() => {
+    authHandler.mockReset();
+    authHandler.mockResolvedValue(new Response(null, { status: 204 }));
+    verifyTurnstileToken.mockReset();
+    verifyTurnstileToken.mockResolvedValue({ success: true });
+  });
+
   test("serves openid and oauth metadata", async () => {
     const { handleOpenIdConfigRequest, handleOAuthAuthorizationServerRequest } =
       await import("./routes");
@@ -138,5 +149,92 @@ describe("Auth discovery routes", () => {
     expect(options.emailAndPassword.sendResetPassword).toBeDefined();
     expect(options.emailVerification.sendVerificationEmail).toBeDefined();
     expect(options.user.changeEmail.sendChangeEmailConfirmation).toBeDefined();
+  });
+
+  test("requires turnstile for verification OTP sends", async () => {
+    const { handleAuthRequest } = await import("./routes");
+
+    const response = await handleAuthRequest(
+      new Request(
+        "http://localhost:35003/api/auth/email-otp/send-verification-otp",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            email: "reader@example.com",
+            type: "email-verification",
+          }),
+        },
+      ),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "TURNSTILE_FAILED",
+        message: "Turnstile verification is required",
+      },
+    });
+    expect(authHandler).not.toHaveBeenCalled();
+  });
+
+  test("normalizes verification delivery failures", async () => {
+    authHandler.mockImplementationOnce(async () => {
+      throw new Error("smtp rejected");
+    });
+
+    const { handleAuthRequest } = await import("./routes");
+    const response = await handleAuthRequest(
+      new Request("http://localhost:35003/api/auth/send-verification-email", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          email: "reader@example.com",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(502);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "DELIVERY_FAILED",
+        message: "Verification message could not be delivered",
+      },
+    });
+  });
+
+  test("normalizes OTP cooldown responses", async () => {
+    authHandler.mockResolvedValueOnce(
+      Response.json(
+        { message: "Please wait before requesting another code" },
+        { status: 429, headers: { "retry-after": "30" } },
+      ),
+    );
+
+    const { handleAuthRequest } = await import("./routes");
+    const response = await handleAuthRequest(
+      new Request(
+        "http://localhost:35003/api/auth/email-otp/send-verification-otp",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            email: "reader@example.com",
+            type: "email-verification",
+            turnstileToken: "token",
+          }),
+        },
+      ),
+    );
+
+    expect(response.status).toBe(429);
+    expect(verifyTurnstileToken).toHaveBeenCalledWith("token");
+    expect(await response.json()).toEqual({
+      error: {
+        code: "COOLDOWN",
+        message: "Please wait before requesting another code",
+        retryAfterSeconds: 30,
+      },
+    });
   });
 });

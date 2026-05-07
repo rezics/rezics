@@ -1,6 +1,5 @@
 import {
   EmailChangeConfirm,
-  Invitation,
   PasswordReset,
   render,
   VerificationCode,
@@ -9,7 +8,6 @@ import { env } from "../env";
 import { createAuthMailer } from "./mailer";
 import {
   buildChangeEmailConfirmationEmail,
-  buildInvitationEmail,
   buildPasswordResetEmail,
   buildVerificationEmail,
 } from "./templates";
@@ -17,7 +15,6 @@ import type {
   AuthNotificationService,
   AuthNotificationServiceOptions,
   ChangeEmailConfirmationPayload,
-  InvitationEmailPayload,
   PasswordResetEmailPayload,
   VerificationEmailPayload,
   VerificationOTPPayload,
@@ -31,15 +28,11 @@ function formatFromAddress(name: string | undefined, email: string): string {
   return `${name.trim()} <${email}>`;
 }
 
-function getSender(
-  type: "invitation" | "password-reset" | "verification",
-): string {
+function getSender(type: "password-reset" | "verification"): string {
   const sender =
-    type === "invitation"
-      ? env.AUTH_INVITATION_FROM_EMAIL
-      : type === "password-reset"
-        ? (env.AUTH_PASSWORD_RESET_FROM_EMAIL ?? env.AUTH_INVITATION_FROM_EMAIL)
-        : (env.AUTH_VERIFICATION_FROM_EMAIL ?? env.AUTH_INVITATION_FROM_EMAIL);
+    type === "password-reset"
+      ? env.AUTH_PASSWORD_RESET_FROM_EMAIL
+      : env.AUTH_VERIFICATION_FROM_EMAIL;
 
   return formatFromAddress(env.SMTP_USER_NAME, sender);
 }
@@ -50,7 +43,7 @@ export function createAuthNotificationService(
   const transport = createAuthMailer();
 
   async function sendEmail(
-    type: "invitation" | "password-reset" | "verification",
+    type: "password-reset" | "verification",
     to: string,
     template: { subject: string; text: string; html?: string },
   ): Promise<void> {
@@ -64,14 +57,6 @@ export function createAuthNotificationService(
   }
 
   return {
-    async sendInvitationEmail(data: InvitationEmailPayload): Promise<void> {
-      const inviteBaseUrl = env.BETTER_AUTH_URL.replace(/\/$/, "");
-      const inviteLink = `${inviteBaseUrl}/accept-invitation/${data.id}`;
-      const template = buildInvitationEmail(data, inviteLink);
-
-      await sendEmail("invitation", data.email, template);
-    },
-
     async sendPasswordResetEmail(
       data: PasswordResetEmailPayload,
     ): Promise<void> {

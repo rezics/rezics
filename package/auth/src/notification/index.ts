@@ -5,7 +5,6 @@ export type {
   AuthNotificationService,
   AuthNotificationServiceOptions,
   ChangeEmailConfirmationPayload,
-  InvitationEmailPayload,
   NotificationChannel,
   PasswordResetEmailPayload,
   VerificationEmailPayload,

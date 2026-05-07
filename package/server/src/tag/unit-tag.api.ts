@@ -152,7 +152,10 @@ export const lowScoreTagsAdminApi = new Elysia({
   .get(
     "/",
     async ({ headers, query, set }) => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       if (!isAdminRole(identity)) {
         set.status = 403;
         return status(403, "Forbidden: Admin role required");

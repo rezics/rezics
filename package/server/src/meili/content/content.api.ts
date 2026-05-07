@@ -12,6 +12,7 @@ export const contentSearchApi = new Elysia().post(
   async ({ body, headers }) => {
     const identity = await tryResolveIdentity(
       (headers as Record<string, string | undefined>)["authorization"],
+      (headers as Record<string, string | undefined>)["cookie"],
     );
     const allowed = await deriveAllowedRatings(identity?.userId ?? null);
     const ratings = intersectRatings(allowed, body.ratings);

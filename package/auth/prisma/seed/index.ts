@@ -3,4 +3,4 @@ export {
   type SeedAuthUserInput,
   type SeedAuthUserResult,
 } from "./seed-auth-user";
-export { slugify, generatePassword, ensureUniqueSlug } from "./helpers";
+export { slugify, generatePassword } from "./helpers";

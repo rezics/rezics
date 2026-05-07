@@ -90,26 +90,30 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
       account.providerId === "credential" && Boolean(account.password),
   );
 
-  // Check if UserProfile exists (identity step complete)
-  const userProfile = await prisma.userProfile.findUnique({
-    where: { userId: sessionData.user.id },
-    select: { slug: true },
-  });
-  const identitySet = userProfile !== null;
   const emailVerified = sessionData.user.emailVerified;
-  const registrationComplete = identitySet && emailVerified;
-  const canAcquireMemberToken = registrationComplete;
-  const readinessStatus = registrationComplete ? "ready" : "needs-registration";
+  const mainUserExists = false;
+  const registrationComplete = false;
+  const readinessStatus = emailVerified
+    ? "needs-main-setup"
+    : "pending-verification";
 
   return Response.json({
     ...sessionData,
     authSession: {
       email: sessionData.user.email,
       emailVerified,
-      identitySet,
+      mainUserExists,
       registrationComplete,
-      canAcquireMemberToken,
+      canAcquireMemberToken: false,
       readinessStatus,
+      pendingRegistration: {
+        active: true,
+        step: emailVerified ? "setup-account" : "verify-email",
+        email: sessionData.user.email,
+        emailVerified,
+        requiresEmailVerification: !emailVerified,
+        requiresMainAccountSetup: emailVerified,
+      },
       hasPassword,
       canSetPassword: !hasPassword,
       providerIds,

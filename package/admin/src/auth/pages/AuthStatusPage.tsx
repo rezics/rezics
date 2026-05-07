@@ -116,7 +116,8 @@ function SessionRefreshCard({
 function SessionStoreCard() {
   const status = useAuthSessionStore((s) => s.status);
   const permission = useAuthSessionStore((s) => s.permission);
-  const identitySet = useAuthSessionStore((s) => s.identitySet);
+  const mainUserExists = useAuthSessionStore((s) => s.mainUserExists);
+  const needsMainSetup = useAuthSessionStore((s) => s.needsMainSetup);
   const registrationComplete = useAuthSessionStore(
     (s) => s.registrationComplete,
   );
@@ -133,7 +134,8 @@ function SessionStoreCard() {
         {permission?.role ?? "none"}
       </Badge>,
     ],
-    ["Identity Set", identitySet ? "Yes" : "No"],
+    ["Main User Exists", mainUserExists ? "Yes" : "No"],
+    ["Needs Main Setup", needsMainSetup ? "Yes" : "No"],
     ["Registration Complete", registrationComplete ? "Yes" : "No"],
     ["User ID", user?.id ?? "-"],
     ["User Name", user?.name ?? "-"],

@@ -20,6 +20,9 @@ const handleAuthRequest = mock((request: Request) => {
     search: url.search,
   });
 });
+const accountFindMany = mock(async () => [
+  { providerId: "credential", password: "hashed-password" },
+]);
 
 mock.module("../auth/routes", () => ({
   handleAuthRequest,
@@ -31,6 +34,14 @@ mock.module("../auth/routes", () => ({
     Response.json({ issuer: "http://localhost:35003" }),
 }));
 
+mock.module("../auth/prisma", () => ({
+  prisma: {
+    account: {
+      findMany: accountFindMany,
+    },
+  },
+}));
+
 mock.module("../session/jwt/routes", () => ({
   getAuthSessionJwksResponse: () =>
     Response.json({ pathname: "/api/auth/session/jwks" }),
@@ -39,6 +50,7 @@ mock.module("../session/jwt/routes", () => ({
 describe("auth openapi routes", () => {
   beforeEach(() => {
     handleAuthRequest.mockClear();
+    accountFindMany.mockClear();
   });
 
   test("exposes the browser session token endpoint", async () => {
@@ -70,6 +82,53 @@ describe("auth openapi routes", () => {
       method: "GET",
       pathname: "/api/auth/get-session",
       search: "",
+    });
+  });
+
+  test("returns pending verification state for unverified auth sessions", async () => {
+    handleAuthRequest.mockImplementationOnce(() =>
+      Response.json({
+        session: {
+          id: "session-1",
+          token: "token-1",
+          expiresAt: "2030-01-01T00:00:00.000Z",
+          userId: "auth-user-1",
+        },
+        user: {
+          id: "auth-user-1",
+          name: "Reader",
+          role: "user",
+          email: "reader@example.com",
+          emailVerified: false,
+          image: null,
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+      }),
+    );
+
+    const { sessionRouter } = await import("./session");
+
+    const response = await sessionRouter.handle(
+      new Request("http://localhost/get-session-state"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      authSession: {
+        email: "reader@example.com",
+        emailVerified: false,
+        mainUserExists: false,
+        registrationComplete: false,
+        canAcquireMemberToken: false,
+        readinessStatus: "pending-verification",
+        pendingRegistration: {
+          active: true,
+          step: "verify-email",
+          requiresEmailVerification: true,
+          requiresMainAccountSetup: false,
+        },
+      },
     });
   });
 

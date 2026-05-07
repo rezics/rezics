@@ -13,7 +13,11 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 export type AuthSessionHydrationStatus = "idle" | "loading" | "ready" | "error";
-export type AuthCapabilityLevel = "anonymous" | "member";
+export type AuthCapabilityLevel =
+  | "anonymous"
+  | "pending-verification"
+  | "needs-main-setup"
+  | "member";
 
 type AuthSessionSnapshot = {
   session: GetSessionStateResponse["session"] | null;
@@ -34,12 +38,13 @@ export type AuthSessionStoreState = {
   capabilityLevel: AuthCapabilityLevel;
   hasAuthSession: boolean;
   needsVerification: boolean;
+  needsMainSetup: boolean;
   /**
    * Main server actor userId from server-hydrated session state.
    * The field name remains `unitId` as a temporary compatibility alias.
    */
   unitId: string | null;
-  identitySet: boolean;
+  mainUserExists: boolean;
   registrationComplete: boolean;
   error: string | null;
   setPending: () => void;
@@ -53,9 +58,16 @@ function deriveState(
   status: AuthSessionHydrationStatus = "ready",
   error: string | null = null,
 ) {
-  const identitySet = Boolean(snapshot?.authSession?.identitySet);
   const emailVerified = Boolean(snapshot?.authSession?.emailVerified);
-  const registrationComplete = identitySet && emailVerified;
+  const mainUserExists = Boolean(snapshot?.authSession?.mainUserExists);
+  const needsVerification = Boolean(snapshot?.authSession && !emailVerified);
+  const needsMainSetup = Boolean(
+    snapshot?.authSession && emailVerified && !mainUserExists,
+  );
+  const registrationComplete = Boolean(
+    snapshot?.authSession?.registrationComplete ||
+      (emailVerified && mainUserExists),
+  );
   const role = snapshot?.user?.role?.toUpperCase();
   const permission =
     snapshot?.authSession?.canAcquireMemberToken || registrationComplete
@@ -68,6 +80,13 @@ function deriveState(
       : null;
   const unitId = permission ? (snapshot?.user?.id ?? null) : null;
   const hasAuthSession = permission !== null;
+  const capabilityLevel: AuthCapabilityLevel = hasAuthSession
+    ? "member"
+    : needsVerification
+      ? "pending-verification"
+      : needsMainSetup
+        ? "needs-main-setup"
+        : "anonymous";
 
   return {
     status,
@@ -75,11 +94,12 @@ function deriveState(
     user: snapshot?.user ?? null,
     authSession: snapshot?.authSession ?? null,
     permission,
-    capabilityLevel: hasAuthSession ? "member" : "anonymous",
+    capabilityLevel,
     hasAuthSession,
-    needsVerification: Boolean(snapshot?.authSession && !emailVerified),
+    needsVerification,
+    needsMainSetup,
     unitId,
-    identitySet,
+    mainUserExists,
     registrationComplete,
     error,
   };

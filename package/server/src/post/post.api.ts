@@ -36,7 +36,10 @@ export const postApi = new Elysia({ prefix: "/post" })
   .get(
     "/list",
     async ({ headers, query }): Promise<PostListResponse> => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const admin = isAdminRole(identity);
 
       const { posts, total } = query.realmUnitId
@@ -62,7 +65,10 @@ export const postApi = new Elysia({ prefix: "/post" })
   .post(
     "/list",
     async ({ headers, body }): Promise<PostListResponse> => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const admin = isAdminRole(identity);
 
       const query = { ...body, ids: body.ids?.join(",") };

@@ -11,7 +11,7 @@ A standalone React SPA built with Vite and shadcn primitives. Connects to the au
 - **User Management** — List, create, update, ban/unban users; manage sessions and roles
 - **JWT Service** — Configure and monitor JWT service metadata and key rotation
 - **Statistics** — Platform usage analytics and charts
-- **Organization Management** — Create and manage organizations, members, and invitations
+- **Developer Ownership** — Future OAuth app/team ownership is modeled in main-owned product entities, not auth organizations
 
 ## Scripts
 

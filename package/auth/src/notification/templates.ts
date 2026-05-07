@@ -1,6 +1,5 @@
 import type {
   ChangeEmailConfirmationPayload,
-  InvitationEmailPayload,
   PasswordResetEmailPayload,
   VerificationEmailPayload,
 } from "./types";
@@ -10,30 +9,6 @@ type EmailTemplate = {
   text: string;
   html?: string;
 };
-
-export function buildInvitationEmail(
-  data: InvitationEmailPayload,
-  inviteLink: string,
-): EmailTemplate {
-  const roleText = Array.isArray(data.role) ? data.role.join(", ") : data.role;
-
-  return {
-    subject: `You've been invited to join ${data.organization.name}`,
-    text: [
-      "Hello,",
-      "",
-      `${data.inviter.user.name} (${data.inviter.user.email}) invited you to join ${data.organization.name}.`,
-      `Assigned role: ${roleText}`,
-      `Accept invitation: ${inviteLink}`,
-    ].join("\n"),
-    html: [
-      "<p>Hello,</p>",
-      `<p>${data.inviter.user.name} (${data.inviter.user.email}) invited you to join ${data.organization.name}.</p>`,
-      `<p>Assigned role: ${roleText}</p>`,
-      `<p><a href="${inviteLink}">Accept invitation</a></p>`,
-    ].join(""),
-  };
-}
 
 export function buildPasswordResetEmail(
   data: PasswordResetEmailPayload,

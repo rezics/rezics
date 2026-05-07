@@ -1,12 +1,11 @@
 import { hashPassword } from "better-auth/crypto";
 import type { PrismaClient } from "../generated/client";
-import { ensureUniqueSlug, generatePassword, slugify } from "./helpers";
+import { generatePassword } from "./helpers";
 
 export interface SeedAuthUserInput {
   email: string;
   name: string;
   role?: string;
-  slug?: string;
   password?: string;
 }
 
@@ -15,7 +14,6 @@ export interface SeedAuthUserResult {
   email: string;
   name: string;
   role: string;
-  slug: string;
   password: string;
 }
 
@@ -25,8 +23,6 @@ export async function seedAuthUser(
 ): Promise<SeedAuthUserResult> {
   const role = input.role ?? "user";
   const password = input.password ?? generatePassword();
-  const desiredSlug = input.slug ?? slugify(input.name);
-  const slug = await ensureUniqueSlug(prisma, input.email, desiredSlug);
   const passwordHash = await hashPassword(password);
 
   const user = await prisma.user.upsert({
@@ -47,13 +43,6 @@ export async function seedAuthUser(
       email: true,
       role: true,
     },
-  });
-
-  const profile = await prisma.userProfile.upsert({
-    where: { userId: user.id },
-    update: { slug },
-    create: { userId: user.id, slug },
-    select: { slug: true },
   });
 
   await prisma.account.upsert({
@@ -80,7 +69,6 @@ export async function seedAuthUser(
     email: user.email,
     name: user.name,
     role: user.role,
-    slug: profile.slug,
     password,
   };
 }

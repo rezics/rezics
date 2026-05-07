@@ -16,9 +16,9 @@ import {
 } from "@/meili/user/sync";
 import { bootstrapSystemShelves } from "@/shelf/system-shelves";
 import { emitNotificationEvent } from "@/notify-boundary/notify-boundary.client";
+import { getDefaultRealmId } from "@/infra/default-realm";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
 import { userInclude } from "../models/types";
-import { syncProfileToAuth } from "./profile-sync";
 
 export type CreateUserProfileInput = {
   unitId: string;
@@ -27,16 +27,13 @@ export type CreateUserProfileInput = {
   bio?: string;
 };
 
-export type ProvisionFromJwtInput = {
-  unitId: string;
-  slug?: string;
-  name?: string;
-};
-
-export type ProvisionFromAuthContextInput = {
-  unitId: string;
+export type CreateVerifiedAuthAccountInput = {
+  authUserId: string;
+  email: string;
+  displayName: string;
   slug: string;
-  name: string;
+  emailVerifiedAt: Date;
+  emailVerificationSource: string;
   avatar?: string | null;
 };
 
@@ -148,58 +145,45 @@ export class UserService {
     return user as UserWithRelations;
   }
 
-  async provisionFromJwt(
-    payload: ProvisionFromJwtInput,
+  async createFromVerifiedAuth(
+    payload: CreateVerifiedAuthAccountInput,
   ): Promise<UserWithRelations> {
-    const slug = payload.slug?.trim() || payload.unitId;
-    const name = payload.name?.trim() || slug;
-
     const user = await prisma.$transaction(async (tx) => {
       const existing = await tx.user.findUnique({
-        where: { unitId: payload.unitId },
+        where: { authUserId: payload.authUserId },
         include: userInclude,
       });
       if (existing) return existing;
 
       const created = await tx.user.create({
         data: {
-          unitId: payload.unitId,
-          slug,
-          name,
-          joinDate: new Date(),
-        },
-        include: userInclude,
-      });
-      await bootstrapSystemShelves(payload.unitId, tx);
-      return created;
-    });
-
-    await syncUserToMeili(user.unitId);
-
-    return user as UserWithRelations;
-  }
-
-  async provisionFromAuthContext(
-    payload: ProvisionFromAuthContextInput,
-  ): Promise<UserWithRelations> {
-    const user = await prisma.$transaction(async (tx) => {
-      const existing = await tx.user.findUnique({
-        where: { unitId: payload.unitId },
-        include: userInclude,
-      });
-      if (existing) return existing;
-
-      const created = await tx.user.create({
-        data: {
-          unitId: payload.unitId,
+          unitId: payload.authUserId,
+          authUserId: payload.authUserId,
+          email: payload.email,
+          emailVerifiedAt: payload.emailVerifiedAt,
+          emailVerificationSource: payload.emailVerificationSource,
           slug: payload.slug,
-          name: payload.name,
+          name: payload.displayName,
           avatar: payload.avatar ?? null,
           joinDate: new Date(),
         },
         include: userInclude,
       });
-      await bootstrapSystemShelves(payload.unitId, tx);
+      await bootstrapSystemShelves(created.unitId, tx);
+
+      const defaultRealmId = getDefaultRealmId();
+      if (defaultRealmId) {
+        await tx.realmMember
+          .create({
+            data: {
+              realmUnitId: defaultRealmId,
+              userId: created.unitId,
+              roleKey: "member",
+            },
+          })
+          .catch(() => {});
+      }
+
       return created;
     });
 
@@ -234,14 +218,6 @@ export class UserService {
     if (bio) userPatchFields.bio = user.bio;
     if (description) userPatchFields.description = user.description;
     await patchUserFieldsToMeili(unitId, userPatchFields);
-
-    // Fire-and-forget profile sync to auth
-    syncProfileToAuth({
-      unitId,
-      name: user.name,
-      slug: user.slug,
-      avatar: user.avatar,
-    }).catch(() => {});
 
     // Fire-and-forget: partial update denormalized author info on all posts
     const authorPatchFields: Record<string, any> = {};

@@ -12,7 +12,6 @@ export function useSignInMutation() {
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: authKeys.session() });
       qc.invalidateQueries({ queryKey: authKeys.sessionState() });
-      await queryAccessToken({ requirePresence: false });
     },
   });
 }
@@ -129,12 +128,51 @@ export function useRevokeSessionMutation() {
   });
 }
 
-export function useConfirmIdentityMutation() {
+export function useSendVerificationOTPMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { username: string; slug: string }) =>
-      authApi.confirmIdentity(input),
+    mutationFn: (input: {
+      email: string;
+      type: "email-verification";
+      turnstileToken?: string;
+    }) => authApi.sendVerificationOTP(input),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
+    },
+  });
+}
+
+export function useVerifyEmailOTPMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { email: string; otp: string }) =>
+      authApi.verifyEmailOTP(input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
+    },
+  });
+}
+
+export function useSetupAccountMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { displayName: string; slug: string }) =>
+      authApi.setupAccount(input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: authKeys.session() });
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
+    },
+  });
+}
+
+export function useCancelRegistrationMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => authApi.cancelRegistration(),
+    onSuccess: () => {
+      clearAuthPresence();
+      setToken(null);
+      qc.invalidateQueries({ queryKey: authKeys.session() });
       qc.invalidateQueries({ queryKey: authKeys.sessionState() });
     },
   });
@@ -152,5 +190,8 @@ export const authMutations = {
   useAdminSetRole: useAdminSetRoleMutation,
   useAdminRemoveUser: useAdminRemoveUserMutation,
   useRevokeSession: useRevokeSessionMutation,
-  useConfirmIdentity: useConfirmIdentityMutation,
+  useSendVerificationOTP: useSendVerificationOTPMutation,
+  useVerifyEmailOTP: useVerifyEmailOTPMutation,
+  useSetupAccount: useSetupAccountMutation,
+  useCancelRegistration: useCancelRegistrationMutation,
 };

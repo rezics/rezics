@@ -85,7 +85,10 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   .get(
     "/list",
     async ({ headers, query }): Promise<RealmListResponse> => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const admin = isAdminRole(identity);
 
       const effectiveQuery = admin ? query : { ...query, isPublic: true };
@@ -106,7 +109,10 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   .post(
     "/list",
     async ({ headers, body }): Promise<RealmListResponse> => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const admin = isAdminRole(identity);
 
       const query = { ...body, ids: body.ids?.join(",") };

@@ -80,20 +80,6 @@ Object.assign(prismaMock, {
   },
 });
 
-const mockProvisionFromJwt = mock(
-  async () =>
-    ({
-      unitId: "new-user",
-      permission: null,
-    }) as any,
-);
-
-mock.module("@/user/service/user.service", () => ({
-  userService: {
-    provisionFromJwt: mockProvisionFromJwt,
-  },
-}));
-
 beforeEach(() => {
   getMainSessionPublicJwks.mockReset();
   getMainSessionPublicJwks.mockResolvedValue({
@@ -131,12 +117,6 @@ beforeEach(() => {
     unitId: "user-1",
     permission: { role: ["MEMBER"] },
   });
-
-  mockProvisionFromJwt.mockReset();
-  mockProvisionFromJwt.mockResolvedValue({
-    unitId: "new-user",
-    permission: null,
-  } as any);
 });
 
 describe("GET /session/jwks", () => {
@@ -213,7 +193,7 @@ describe("POST /session/exchange", () => {
     expect(response.status).toBe(401);
   });
 
-  test("unprovisioned verified user is auto-provisioned and gets token", async () => {
+  test("verified user without a main account returns 403", async () => {
     mockVerifyBearerToken.mockResolvedValueOnce({
       payload: {
         unitId: "new-user",
@@ -226,11 +206,6 @@ describe("POST /session/exchange", () => {
       protectedHeader: { alg: "ES256" },
     });
     mockFindUnique.mockResolvedValueOnce(null as any);
-    mockProvisionFromJwt.mockResolvedValueOnce({
-      unitId: "new-user",
-      permission: null,
-    });
-    signRezicsSessionToken.mockResolvedValueOnce("new-user-session-token");
 
     const { sessionApi } = await import("./session.api");
 
@@ -241,14 +216,8 @@ describe("POST /session/exchange", () => {
       }),
     );
 
-    expect(response.status).toBe(200);
-    const body = await response.json();
-    expect(body).toHaveProperty("token", "new-user-session-token");
-    expect(mockProvisionFromJwt).toHaveBeenCalledWith({
-      unitId: "new-user",
-      slug: "new-user",
-      name: "New User",
-    });
+    expect(response.status).toBe(403);
+    expect(signRezicsSessionToken).not.toHaveBeenCalled();
   });
 
   test("unverified unprovisioned user returns 403", async () => {

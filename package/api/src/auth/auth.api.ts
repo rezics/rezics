@@ -9,23 +9,28 @@ import type {
   AuthSession,
   AuthTokenResponse,
   AuthUser,
+  AccountSetupBody,
+  AccountSetupResponse,
   ChangeEmailBody,
   ChangeEmailResponse,
-  CheckSlugResponse,
   GetSessionStateResponse,
-  IdentityConfirmBody,
-  IdentityConfirmResponse,
+  MainCancelRegistrationResponse,
   RequestPasswordResetBody,
   RequestPasswordResetResponse,
   ResetPasswordBody,
   ResetPasswordResponse,
   SendVerificationEmailBody,
   SendVerificationEmailResponse,
+  SendVerificationOtpBody,
+  SendVerificationOtpResponse,
   SetPasswordBody,
   SetPasswordResponse,
   SignInBody,
   SignInSocialBody,
   SignInSocialResponse,
+  SlugAvailabilityResponse,
+  VerifyEmailOtpBody,
+  VerifyEmailOtpResponse,
 } from "@rezics/contract";
 import { getApiConfig } from "../config";
 
@@ -52,10 +57,13 @@ async function authFetch<T>(
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
+    const error = json?.error;
     throw new Error(
       JSON.stringify({
         status: response.status,
-        message: json?.message ?? response.statusText,
+        code: error?.code,
+        message: json?.message ?? error?.message ?? response.statusText,
+        retryAfterSeconds: error?.retryAfterSeconds,
       }),
     );
   }
@@ -132,12 +140,10 @@ export const authApi = {
     );
   },
 
-  sendVerificationOTP: async (input: {
-    email: string;
-    type: "email-verification";
-    turnstileToken?: string;
-  }): Promise<{ success: boolean }> => {
-    return authFetch<{ success: boolean }>(
+  sendVerificationOTP: async (
+    input: SendVerificationOtpBody,
+  ): Promise<SendVerificationOtpResponse> => {
+    return authFetch<SendVerificationOtpResponse>(
       "/auth/email-otp/send-verification-otp",
       {
         method: "POST",
@@ -146,15 +152,10 @@ export const authApi = {
     );
   },
 
-  verifyEmailOTP: async (input: {
-    email: string;
-    otp: string;
-  }): Promise<{
-    status: boolean;
-    token: string | null;
-    user: { id: string; email: string; emailVerified: boolean; name: string };
-  }> => {
-    return authFetch("/auth/email-otp/verify-email", {
+  verifyEmailOTP: async (
+    input: VerifyEmailOtpBody,
+  ): Promise<VerifyEmailOtpResponse> => {
+    return authFetch<VerifyEmailOtpResponse>("/auth/email-otp/verify-email", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -278,18 +279,27 @@ export const authApi = {
     });
   },
 
-  confirmIdentity: async (
-    input: IdentityConfirmBody,
-  ): Promise<IdentityConfirmResponse> => {
-    return authFetch<IdentityConfirmResponse>("/auth/identity/confirm", {
+  setupAccount: async (
+    input: AccountSetupBody,
+  ): Promise<AccountSetupResponse> => {
+    return authFetch<AccountSetupResponse>("/auth/account/setup", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
-  checkSlug: async (slug: string): Promise<CheckSlugResponse> => {
-    return authFetch<CheckSlugResponse>(
-      `/auth/identity/check-slug?slug=${encodeURIComponent(slug)}`,
+  cancelRegistration: async (): Promise<MainCancelRegistrationResponse> => {
+    return authFetch<MainCancelRegistrationResponse>(
+      "/auth/registration/cancel",
+      {
+        method: "POST",
+      },
+    );
+  },
+
+  checkAccountSlug: async (slug: string): Promise<SlugAvailabilityResponse> => {
+    return authFetch<SlugAvailabilityResponse>(
+      `/auth/account/slug-availability?slug=${encodeURIComponent(slug)}`,
     );
   },
 };

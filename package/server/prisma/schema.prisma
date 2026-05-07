@@ -685,18 +685,22 @@ model Attribution {
  */
 
 model User {
-  unitId          String    @id @db.Uuid
-  slug            String    @unique
-  name            String
-  avatar          String?
-  bio             String?
-  description     String?
-  joinDate        DateTime?
-  permission      Json?
-  followersCount  Int       @default(0)
-  followingsCount Int       @default(0)
-  settings        Json?
-  extra           Json?
+  unitId                  String    @id @db.Uuid
+  authUserId              String?   @unique @db.Uuid
+  email                   String?   @db.VarChar(320)
+  emailVerifiedAt         DateTime?
+  emailVerificationSource String?   @db.VarChar(64)
+  slug                    String    @unique
+  name                    String
+  avatar                  String?
+  bio                     String?
+  description             String?
+  joinDate                DateTime?
+  permission              Json?
+  followersCount          Int       @default(0)
+  followingsCount         Int       @default(0)
+  settings                Json?
+  extra                   Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -709,6 +713,8 @@ model User {
   workLinkClaimsAsClaimer  WorkLinkClaim[]    @relation("WorkLinkClaimClaimer")
   workLinkClaimsAsResolver WorkLinkClaim[]    @relation("WorkLinkClaimResolver")
   unitProgress             UserUnitProgress[]
+
+  @@index([email])
 }
 
 /**

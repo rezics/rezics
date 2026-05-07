@@ -8,6 +8,7 @@ import type { UserWithRelations } from "./types";
 export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
   return {
     unitId: user.unitId,
+    email: user.email ?? undefined,
     slug: user.slug,
     name: user.name,
     avatar: user.avatar || undefined,

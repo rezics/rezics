@@ -144,4 +144,31 @@ describe("refreshAuthToken", () => {
       },
     });
   });
+
+  test("preserves auth presence when main session refresh reports setup required", async () => {
+    authPresence = true;
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: {
+            code: "REGISTRATION_INCOMPLETE",
+            message: "Main account setup is required",
+          },
+        }),
+        {
+          status: 403,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      ),
+    );
+
+    const { queryAccessToken, MainSessionRefreshError } = await import("./jwt");
+
+    await expect(queryAccessToken()).rejects.toBeInstanceOf(
+      MainSessionRefreshError,
+    );
+    expect(authPresence).toBe(true);
+  });
 });

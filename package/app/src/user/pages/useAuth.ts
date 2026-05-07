@@ -14,7 +14,11 @@ export const useAuth = () => {
   const registrationComplete = useAuthSessionStore(
     (state) => state.registrationComplete,
   );
-  const identitySet = useAuthSessionStore((state) => state.identitySet);
+  const mainUserExists = useAuthSessionStore((state) => state.mainUserExists);
+  const needsVerification = useAuthSessionStore(
+    (state) => state.needsVerification,
+  );
+  const needsMainSetup = useAuthSessionStore((state) => state.needsMainSetup);
   const status = useAuthSessionStore((state) => state.status);
   const user = useUserProfileStore((state) => state.user as UserDTO | null);
 
@@ -37,7 +41,9 @@ export const useAuth = () => {
     authenticated: isAuthenticated,
     isAuthenticated,
     permission,
-    identitySet,
+    mainUserExists,
+    needsVerification,
+    needsMainSetup,
     registrationComplete,
     readyForApp: isAuthenticated && registrationComplete,
   };

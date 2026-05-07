@@ -8,7 +8,6 @@ export type SignInBody = (typeof signInBodySchema)["static"];
 
 export const signUpBodySchema = t.Object({
   name: t.String(),
-  slug: t.String(),
   email: t.String({ format: "email" }),
   password: t.String(),
 });

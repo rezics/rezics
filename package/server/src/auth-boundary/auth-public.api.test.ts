@@ -5,18 +5,33 @@ process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
 
-const fetchMock = mock(async () => Response.json({ ok: true }));
+const fetchMock = mock(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+  Response.json({ ok: true }),
+);
+const getMainSessionPublicJwks = mock(async () => ({ keys: [] }));
 const signRezicsSessionToken = mock(async () => "signed-main-session");
-const provisionFromJwt = mock(async () => ({
+const verifyRezicsSessionToken = mock(async () => null);
+
+type MainUserLookup = {
+  unitId: string;
+  slug: string;
+  permission: { role: string[] };
+};
+
+const createFromVerifiedAuth = mock(async (_input?: unknown) => ({
   unitId: "user-1",
   slug: "reader",
+  name: "Reader",
+  email: "reader@example.com",
   permission: { role: ["MEMBER"] },
 }));
-const userFindUnique = mock(async () => ({
-  unitId: "user-1",
-  slug: "reader",
-  permission: { role: ["MEMBER"] },
-}));
+const userFindUnique = mock(
+  async (_args?: unknown): Promise<MainUserLookup | null> => ({
+    unitId: "user-1",
+    slug: "reader",
+    permission: { role: ["MEMBER"] },
+  }),
+);
 
 installPrismaClientMock();
 Object.assign(prismaMock, {
@@ -32,17 +47,20 @@ mock.module("@/env", () => ({
     AUTH_INTERNAL_BASE_URL: "http://auth.internal",
     AUTH_PUBLIC_BASE_URL: "http://main.test/auth",
     AUTH_PUBLIC_ISSUER_URL: "http://main.test",
+    AUTH_INTERNAL_TOKEN_GATEWAY_SECRET: "internal-test-secret",
     MAIN_SESSION_JWT_TTL_SECONDS: "900",
   },
 }));
 
 mock.module("@/session/jwt/jwt.service", () => ({
+  getMainSessionPublicJwks,
   signRezicsSessionToken,
+  verifyRezicsSessionToken,
 }));
 
 mock.module("@/user/service/user.service", () => ({
   userService: {
-    provisionFromJwt,
+    createFromVerifiedAuth,
   },
 }));
 
@@ -59,11 +77,17 @@ beforeEach(() => {
 
   signRezicsSessionToken.mockReset();
   signRezicsSessionToken.mockResolvedValue("signed-main-session");
+  getMainSessionPublicJwks.mockReset();
+  getMainSessionPublicJwks.mockResolvedValue({ keys: [] });
+  verifyRezicsSessionToken.mockReset();
+  verifyRezicsSessionToken.mockResolvedValue(null);
 
-  provisionFromJwt.mockReset();
-  provisionFromJwt.mockResolvedValue({
+  createFromVerifiedAuth.mockReset();
+  createFromVerifiedAuth.mockResolvedValue({
     unitId: "user-1",
     slug: "reader",
+    name: "Reader",
+    email: "reader@example.com",
     permission: { role: ["MEMBER"] },
   });
 
@@ -217,10 +241,10 @@ describe("main auth public boundary", () => {
         user: {
           id: "user-1",
           name: "Reader",
+          email: "reader@example.com",
           emailVerified: true,
         },
         authSession: {
-          identitySet: true,
           registrationComplete: true,
         },
       }),
@@ -247,7 +271,7 @@ describe("main auth public boundary", () => {
       "http://auth.internal/api/auth/get-session-state",
     );
     expect(userFindUnique).toHaveBeenCalledWith({
-      where: { unitId: "user-1" },
+      where: { authUserId: "user-1" },
       select: { unitId: true, slug: true, permission: true },
     });
     expect(signRezicsSessionToken).toHaveBeenCalledWith({
@@ -294,10 +318,10 @@ describe("main auth public boundary", () => {
         user: {
           id: "user-1",
           name: "Reader",
+          email: "reader@example.com",
           emailVerified: false,
         },
         authSession: {
-          identitySet: true,
           registrationComplete: false,
         },
       }),
@@ -317,6 +341,234 @@ describe("main auth public boundary", () => {
     expect(response.status).toBe(403);
     expect(response.headers.get("set-cookie")).toBeNull();
     expect(signRezicsSessionToken).not.toHaveBeenCalled();
+  });
+
+  test("refresh rejects verified auth sessions before main setup", async () => {
+    userFindUnique.mockResolvedValueOnce(null);
+    setFetch(async () =>
+      Response.json({
+        user: {
+          id: "user-1",
+          name: "Reader",
+          email: "reader@example.com",
+          emailVerified: true,
+        },
+        authSession: {
+          registrationComplete: false,
+          readinessStatus: "needs-main-setup",
+        },
+      }),
+    );
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/session/refresh", {
+        method: "POST",
+        headers: {
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "REGISTRATION_INCOMPLETE",
+        message: "Main account setup is required before member session refresh",
+      },
+    });
+    expect(createFromVerifiedAuth).not.toHaveBeenCalled();
+    expect(signRezicsSessionToken).not.toHaveBeenCalled();
+  });
+
+  test("sets up a main account for a verified auth-only session", async () => {
+    userFindUnique.mockResolvedValueOnce(null);
+    setFetch(async () =>
+      Response.json({
+        user: {
+          id: "user-1",
+          name: "Reader",
+          email: "reader@example.com",
+          emailVerified: true,
+          image: null,
+        },
+        authSession: {
+          trustedProviderId: "github",
+        },
+      }),
+    );
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/account/setup", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque",
+        },
+        body: JSON.stringify({
+          displayName: "Reader",
+          slug: "reader",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    const setupInput = createFromVerifiedAuth.mock.calls[0]?.[0] as {
+      authUserId: string;
+      email: string;
+      displayName: string;
+      slug: string;
+      emailVerifiedAt: Date;
+      emailVerificationSource: string;
+      avatar: string | null;
+    };
+    expect(setupInput).toMatchObject({
+      authUserId: "user-1",
+      email: "reader@example.com",
+      displayName: "Reader",
+      slug: "reader",
+      emailVerificationSource: "github",
+      avatar: null,
+    });
+    expect(setupInput.emailVerifiedAt).toBeInstanceOf(Date);
+    expect((await response.json()).success).toBe(true);
+    expect(response.headers.get("set-cookie")).toContain(
+      "rezics-session-token=signed-main-session",
+    );
+  });
+
+  test("setup rejects unverified auth sessions", async () => {
+    setFetch(async () =>
+      Response.json({
+        user: {
+          id: "user-1",
+          email: "reader@example.com",
+          emailVerified: false,
+        },
+      }),
+    );
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/account/setup", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque",
+        },
+        body: JSON.stringify({
+          displayName: "Reader",
+          slug: "reader",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect((await response.json()).error.code).toBe("EMAIL_UNVERIFIED");
+    expect(createFromVerifiedAuth).not.toHaveBeenCalled();
+  });
+
+  test("setup returns slug conflict from main uniqueness", async () => {
+    userFindUnique.mockResolvedValueOnce(null);
+    createFromVerifiedAuth.mockRejectedValueOnce({ code: "P2002" });
+    setFetch(async () =>
+      Response.json({
+        user: {
+          id: "user-1",
+          email: "reader@example.com",
+          emailVerified: true,
+        },
+      }),
+    );
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/account/setup", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque",
+        },
+        body: JSON.stringify({
+          displayName: "Reader",
+          slug: "reader",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(409);
+    expect((await response.json()).error.code).toBe("SLUG_TAKEN");
+  });
+
+  test("checks slug availability against main user slugs", async () => {
+    userFindUnique.mockResolvedValueOnce(null);
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request(
+        "http://main.test/auth/account/slug-availability?slug=reader",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      available: true,
+      normalized: "reader",
+    });
+    expect(userFindUnique).toHaveBeenCalledWith({
+      where: { slug: "reader" },
+      select: { unitId: true },
+    });
+  });
+
+  test("cancel registration calls auth internal cleanup and clears browser cookies", async () => {
+    userFindUnique.mockResolvedValueOnce(null);
+    setFetch(async (url) => {
+      const requestUrl = new URL(String(url));
+      if (requestUrl.pathname === "/api/auth/get-session-state") {
+        return Response.json({
+          user: {
+            id: "user-1",
+            email: "reader@example.com",
+            emailVerified: true,
+          },
+        });
+      }
+      return Response.json({ success: true, canceled: true });
+    });
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/registration/cancel", {
+        method: "POST",
+        headers: {
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque; rezics-session-token=old",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: true,
+      canceled: true,
+    });
+    expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
+      "http://auth.internal/internal/registration/cancel",
+    );
+    expect(
+      (fetchMock.mock.calls[1]?.[1]?.headers as Record<string, string>)[
+        "x-internal-secret"
+      ],
+    ).toBe("internal-test-secret");
+    const cookie = response.headers.get("set-cookie") ?? "";
+    expect(cookie).toContain("rezics-session-token=");
+    expect(cookie).toContain("rezics_logged_in=");
   });
 
   test("refresh rejects disallowed origins", async () => {

@@ -2,7 +2,6 @@ import {
   oauthProviderAuthServerMetadata,
   oauthProviderOpenIdConfigMetadata,
 } from "@better-auth/oauth-provider";
-import { provisionUserOnServer } from "../provisioning/provision";
 import { verifyTurnstileToken } from "../utils/turnstileUtils";
 import { env } from "../env";
 import {
@@ -11,7 +10,6 @@ import {
 } from "./auth-presence";
 import { AuthPolicyError } from "./errors";
 import { auth } from "./instance";
-import { prisma } from "./prisma";
 import { enforceInternalTokenSurface } from "./token-boundary";
 
 const openIdMetadataHandler = oauthProviderOpenIdConfigMetadata(auth);
@@ -87,6 +85,24 @@ function toJsonError(status: number, code: string, message: string): Response {
   );
 }
 
+function toVerificationError(
+  status: number,
+  code: string,
+  message: string,
+  retryAfterSeconds?: number,
+): Response {
+  return Response.json(
+    {
+      error: {
+        code,
+        message,
+        ...(retryAfterSeconds ? { retryAfterSeconds } : {}),
+      },
+    },
+    { status },
+  );
+}
+
 function isSessionEstablishingPath(pathname: string): boolean {
   return (
     pathname.includes("/sign-in") ||
@@ -100,12 +116,24 @@ function isSessionClearingPath(pathname: string): boolean {
   return pathname.endsWith("/sign-out") || pathname.endsWith("/revoke-session");
 }
 
-function isVerifyEmailPath(pathname: string): boolean {
-  return pathname.includes("/verify-email");
-}
-
 function isSendVerificationOTPPath(pathname: string): boolean {
   return pathname.includes("/email-otp/send-verification-otp");
+}
+
+function isVerifyEmailOTPPath(pathname: string): boolean {
+  return pathname.includes("/email-otp/verify-email");
+}
+
+function isSendVerificationEmailPath(pathname: string): boolean {
+  return pathname.includes("/send-verification-email");
+}
+
+function isVerificationPath(pathname: string): boolean {
+  return (
+    isSendVerificationOTPPath(pathname) ||
+    isVerifyEmailOTPPath(pathname) ||
+    isSendVerificationEmailPath(pathname)
+  );
 }
 
 function isSessionCheckPath(pathname: string): boolean {
@@ -125,6 +153,104 @@ function withCookie(response: Response, cookie: string): Response {
     statusText: response.statusText,
     headers: nextHeaders,
   });
+}
+
+function extractRetryAfterSeconds(response: Response): number | undefined {
+  const retryAfter = response.headers.get("retry-after");
+  if (!retryAfter) return undefined;
+
+  const seconds = Number(retryAfter);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : undefined;
+}
+
+function getErrorMessage(body: unknown, fallback: string): string {
+  if (!body || typeof body !== "object") return fallback;
+
+  const record = body as Record<string, unknown>;
+  const error = record.error;
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object") {
+    const message = (error as Record<string, unknown>).message;
+    if (typeof message === "string") return message;
+  }
+  if (typeof record.message === "string") return record.message;
+
+  return fallback;
+}
+
+function getErrorCode(body: unknown): string | undefined {
+  if (!body || typeof body !== "object") return undefined;
+
+  const record = body as Record<string, unknown>;
+  if (typeof record.code === "string") return record.code;
+  const error = record.error;
+  if (error && typeof error === "object") {
+    const code = (error as Record<string, unknown>).code;
+    if (typeof code === "string") return code;
+  }
+
+  return undefined;
+}
+
+function mapVerificationErrorCode(
+  response: Response,
+  body: unknown,
+): { code: string; message: string; retryAfterSeconds?: number } {
+  const message = getErrorMessage(body, response.statusText);
+  const bodyCode = getErrorCode(body);
+  const lower = `${bodyCode ?? ""} ${message}`.toLowerCase();
+
+  if (bodyCode === "TURNSTILE_FAILED") {
+    return { code: "TURNSTILE_FAILED", message };
+  }
+  if (response.status === 429 || lower.includes("cooldown")) {
+    return {
+      code: "COOLDOWN",
+      message: message || "Please wait before requesting another code",
+      retryAfterSeconds: extractRetryAfterSeconds(response),
+    };
+  }
+  if (lower.includes("expired")) {
+    return { code: "EXPIRED_OTP", message };
+  }
+  if (lower.includes("invalid")) {
+    return { code: "INVALID_OTP", message };
+  }
+  if (lower.includes("already") && lower.includes("verified")) {
+    return { code: "ALREADY_VERIFIED", message };
+  }
+  if (lower.includes("email") && lower.includes("missing")) {
+    return { code: "MISSING_EMAIL", message };
+  }
+  if (response.status === 401) {
+    return { code: "UNAUTHORIZED", message };
+  }
+
+  return {
+    code: "DELIVERY_FAILED",
+    message: message || "Verification message could not be delivered",
+  };
+}
+
+async function normalizeVerificationResponse(
+  response: Response,
+  pathname: string,
+): Promise<Response> {
+  if (!isVerificationPath(pathname) || response.ok) {
+    return response;
+  }
+
+  const body = await response
+    .clone()
+    .json()
+    .catch(() => null);
+  const error = mapVerificationErrorCode(response, body);
+  return toVerificationError(
+    response.status,
+    error.code,
+    error.message,
+    error.retryAfterSeconds,
+  );
 }
 
 export async function handleAuthRequest(request: Request): Promise<Response> {
@@ -154,52 +280,41 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
       return toJsonError(400, "INVALID_REQUEST", "Invalid request body");
     }
 
-    if (body?.turnstileToken) {
-      const turnstileResult = await verifyTurnstileToken(body.turnstileToken);
-      if (!turnstileResult.success) {
-        return toJsonError(
-          403,
-          "TURNSTILE_FAILED",
-          "Turnstile verification failed",
-        );
-      }
+    if (!body?.turnstileToken) {
+      return toVerificationError(
+        403,
+        "TURNSTILE_FAILED",
+        "Turnstile verification is required",
+      );
     }
-  }
 
-  const response = await auth.handler(request);
-
-  if (
-    response.ok &&
-    (isVerifyEmailPath(pathname) ||
-      pathname.includes("/email-otp/verify-email"))
-  ) {
-    try {
-      const cloned = response.clone();
-      const body = (await cloned.json()) as {
-        user?: { id?: string; name?: string };
-      };
-      if (body.user?.id) {
-        // Only provision if UserProfile exists (identity step complete)
-        const profile = await prisma.userProfile.findUnique({
-          where: { userId: body.user.id },
-          select: { slug: true },
-        });
-        if (profile) {
-          await provisionUserOnServer({
-            unitId: body.user.id,
-            slug: profile.slug,
-            name: body.user.name ?? "",
-          });
-        }
-      }
-    } catch (error) {
-      // Best-effort: exchange fallback will handle if this fails
-      console.error(
-        "[verify-email] Provisioning after verification failed:",
-        error,
+    const turnstileResult = await verifyTurnstileToken(body.turnstileToken);
+    if (!turnstileResult.success) {
+      return toVerificationError(
+        403,
+        "TURNSTILE_FAILED",
+        "Turnstile verification failed",
       );
     }
   }
+
+  let response: Response;
+  try {
+    response = await auth.handler(request);
+  } catch (error) {
+    if (isVerificationPath(pathname)) {
+      console.error("[verification] Auth handler failed:", error);
+      return toVerificationError(
+        502,
+        "DELIVERY_FAILED",
+        "Verification message could not be delivered",
+      );
+    }
+
+    throw error;
+  }
+
+  response = await normalizeVerificationResponse(response, pathname);
 
   if (response.ok && isSessionEstablishingPath(pathname)) {
     return withCookie(response, buildAuthPresenceSetCookie(requestUrl));

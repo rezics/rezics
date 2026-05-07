@@ -1,18 +1,3 @@
-export type InvitationEmailPayload = {
-  id: string;
-  email: string;
-  role: string | string[];
-  organization: {
-    name: string;
-  };
-  inviter: {
-    user: {
-      name: string;
-      email: string;
-    };
-  };
-};
-
 export type PasswordResetEmailPayload = {
   user: {
     email: string;
@@ -56,7 +41,6 @@ export type AuthNotificationServiceOptions = {
 };
 
 export interface AuthNotificationService {
-  sendInvitationEmail(data: InvitationEmailPayload): Promise<void>;
   sendPasswordResetEmail(data: PasswordResetEmailPayload): Promise<void>;
   sendVerificationEmail(data: VerificationEmailPayload): Promise<void>;
   sendVerificationOTP(data: VerificationOTPPayload): Promise<void>;

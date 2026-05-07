@@ -92,6 +92,22 @@ export default {
         "Ihr Konto kann gastzugängliche Seiten weiterhin nutzen, aber Mitgliedsfunktionen bleiben gesperrt, bis die Registrierung abgeschlossen ist.",
       complete_registration_action: "Registrierung abschließen",
       complete_registration_prompt: "Registrierung abschließen um {{action}}",
+      complete_registration_title: "Registrierung abschließen",
+      complete_registration_intro:
+        "Schließen Sie die erforderlichen Schritte ab, um Ihr Konto einzurichten.",
+      setup_title: "Rezics-Konto erstellen",
+      setup_display_name: "Anzeigename",
+      setup_slug_label: "Slug (Ihr eindeutiger URL-Name)",
+      setup_slug_short: "Der Slug muss mindestens 6 Zeichen lang sein.",
+      setup_slug_taken: "Dieser Slug ist bereits vergeben.",
+      setup_slug_invalid: "Ungültiger Slug: {{reason}}",
+      setup_slug_available: "Verfügbar",
+      setup_slug_checking: "Verfügbarkeit wird geprüft…",
+      setup_submit: "Konto erstellen",
+      cancel_registration: "Registrierung abbrechen",
+      cancel_registration_confirm: "Registrierungsabbruch bestätigen",
+      registration_complete_redirecting:
+        "Registrierung abgeschlossen. Weiterleitung…",
       retry: "Erneut versuchen",
       providers: {
         github: "GitHub",

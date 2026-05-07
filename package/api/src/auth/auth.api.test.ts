@@ -88,10 +88,18 @@ describe("authApi", () => {
           authSession: {
             email: "reader@example.com",
             emailVerified: false,
-            identitySet: false,
+            mainUserExists: false,
             registrationComplete: false,
             canAcquireMemberToken: false,
-            readinessStatus: "needs-registration",
+            readinessStatus: "pending-verification",
+            pendingRegistration: {
+              active: true,
+              step: "verify-email",
+              email: "reader@example.com",
+              emailVerified: false,
+              requiresEmailVerification: true,
+              requiresMainAccountSetup: false,
+            },
             hasPassword: false,
             canSetPassword: true,
             providerIds: ["google"],
@@ -155,10 +163,18 @@ describe("authApi", () => {
     });
   });
 
-  test("posts verification and profile completion actions to the auth service", async () => {
+  test("posts verification and account setup actions to the main auth boundary", async () => {
     fetchMock
       .mockResolvedValueOnce(
         new Response(JSON.stringify({ status: true }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true }), {
           status: 200,
           headers: {
             "Content-Type": "application/json",
@@ -193,6 +209,10 @@ describe("authApi", () => {
     await authApi.setPassword({
       newPassword: "new-password",
     });
+    await authApi.setupAccount({
+      displayName: "Reader",
+      slug: "reader",
+    });
 
     expect(fetchMock.mock.calls[0]![0]).toBe(
       "http://api.example/auth/send-verification-email",
@@ -202,6 +222,50 @@ describe("authApi", () => {
     );
     expect(fetchMock.mock.calls[2]![0]).toBe(
       "http://api.example/auth/set-password",
+    );
+    expect(fetchMock.mock.calls[3]![0]).toBe(
+      "http://api.example/auth/account/setup",
+    );
+  });
+
+  test("checks slug availability and cancels registration through main-owned routes", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ available: true, normalized: "reader" }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true, canceled: true }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }),
+      );
+
+    const { authApi } = await import("./auth.api");
+
+    await expect(authApi.checkAccountSlug("reader")).resolves.toEqual({
+      available: true,
+      normalized: "reader",
+    });
+    await expect(authApi.cancelRegistration()).resolves.toEqual({
+      success: true,
+      canceled: true,
+    });
+
+    expect(fetchMock.mock.calls[0]![0]).toBe(
+      "http://api.example/auth/account/slug-availability?slug=reader",
+    );
+    expect(fetchMock.mock.calls[1]![0]).toBe(
+      "http://api.example/auth/registration/cancel",
     );
   });
 

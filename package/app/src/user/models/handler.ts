@@ -30,7 +30,6 @@ export const register = async (
     void avatar;
     void bio;
     await authApi.signUp({ email, password });
-    await exchangeForSessionToken();
     await hydrateAuthSessionState();
     return { token: null };
   } catch (error) {

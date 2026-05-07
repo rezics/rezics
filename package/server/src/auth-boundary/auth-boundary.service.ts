@@ -1,6 +1,13 @@
+import {
+  AUTH_PRESENCE_COOKIE_NAME,
+  type AccountSetupBody,
+  type SlugAvailabilityResponse,
+  validateSlug,
+} from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { env } from "@/env";
 import { signRezicsSessionToken } from "@/session/jwt/jwt.service";
+import { mapUserToDTO } from "@/user/models/mapper";
 import { userService } from "@/user/service/user.service";
 
 const AUTH_PUBLIC_PREFIX = "/auth";
@@ -22,12 +29,16 @@ type AuthSessionStateResponse = {
   user?: {
     id?: string;
     name?: string;
+    email?: string;
     emailVerified?: boolean;
+    image?: string | null;
   };
   authSession?: {
-    identitySet?: boolean;
+    email?: string;
+    mainUserExists?: boolean;
     registrationComplete?: boolean;
     readinessStatus?: string;
+    trustedProviderId?: string;
   };
 };
 
@@ -179,6 +190,47 @@ function csrfError(message: string): Response {
   );
 }
 
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    (error as { code?: string }).code === "P2002"
+  );
+}
+
+function buildReadableCookieClear(name: string, path = "/"): string {
+  const secure =
+    env.NODE_ENV === "production" ||
+    env.AUTH_PUBLIC_ISSUER_URL.startsWith("https://");
+  const parts = [`${name}=`, `Path=${path}`, "SameSite=Lax", "Max-Age=0"];
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
+}
+
+function appendRegistrationClearCookies(headers: Headers): void {
+  headers.append("set-cookie", buildSessionCookie(null));
+  headers.append(
+    "set-cookie",
+    buildReadableCookieClear(AUTH_PRESENCE_COOKIE_NAME),
+  );
+  headers.append(
+    "set-cookie",
+    buildReadableCookieClear("better-auth.session_token"),
+  );
+  headers.append(
+    "set-cookie",
+    buildReadableCookieClear("__Secure-better-auth.session_token"),
+  );
+}
+
+async function findMainUserForAuthUser(authUserId: string) {
+  return prisma.user.findUnique({
+    where: { authUserId },
+    select: { unitId: true, slug: true, permission: true },
+  });
+}
+
 async function fetchAuthSessionState(request: Request) {
   const url = new URL(
     `${AUTH_INTERNAL_PREFIX}/get-session-state`,
@@ -221,6 +273,275 @@ export async function proxyAuthBoundaryRequest(
   return rewriteProxyResponse(response);
 }
 
+export async function checkAccountSlugAvailability(
+  slug: string,
+): Promise<SlugAvailabilityResponse> {
+  const validation = validateSlug(slug);
+  if (!validation.ok) {
+    return {
+      available: false,
+      reason: validation.reason,
+    };
+  }
+
+  const existing = await prisma.user.findUnique({
+    where: { slug: validation.normalized },
+    select: { unitId: true },
+  });
+
+  return {
+    available: !existing,
+    normalized: validation.normalized,
+    reason: existing ? "taken" : undefined,
+  };
+}
+
+export async function setupMainAccountFromAuth(
+  request: Request,
+  body: AccountSetupBody,
+): Promise<Response> {
+  if (csrfRejected(request)) {
+    return csrfError("Origin is not allowed for account setup");
+  }
+
+  const sessionState = await fetchAuthSessionState(request);
+  const authUserId = sessionState?.user?.id;
+  const email = sessionState?.user?.email ?? sessionState?.authSession?.email;
+  if (!authUserId || !email) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "AUTH_SESSION_REQUIRED",
+          message: "Auth session is invalid or expired",
+        },
+      },
+      401,
+    );
+  }
+
+  if (!sessionState.user?.emailVerified) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "EMAIL_UNVERIFIED",
+          message: "Email verification is required before account setup",
+        },
+      },
+      403,
+    );
+  }
+
+  const existing = await findMainUserForAuthUser(authUserId);
+  if (existing) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "MAIN_USER_EXISTS",
+          message: "Main account has already been created",
+        },
+      },
+      409,
+    );
+  }
+
+  const slugValidation = validateSlug(body.slug);
+  if (!slugValidation.ok) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "SLUG_INVALID",
+          message: slugValidation.reason,
+        },
+      },
+      400,
+    );
+  }
+
+  try {
+    const user = await userService.createFromVerifiedAuth({
+      authUserId,
+      email,
+      displayName: body.displayName.trim(),
+      slug: slugValidation.normalized,
+      emailVerifiedAt: new Date(),
+      emailVerificationSource:
+        sessionState.authSession?.trustedProviderId ?? "email-otp",
+      avatar: sessionState.user.image ?? null,
+    });
+
+    const dbPermission = user.permission as
+      | { role?: string[] }
+      | null
+      | undefined;
+    const role = dbPermission?.role?.[0] ?? "MEMBER";
+    const token = await signRezicsSessionToken({
+      userId: user.unitId,
+      permission: { role },
+    });
+
+    const headers = new Headers();
+    headers.set("set-cookie", buildSessionCookie(token));
+    return jsonResponse(
+      {
+        success: true,
+        user: mapUserToDTO(user),
+      },
+      200,
+      headers,
+    );
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return jsonResponse(
+        {
+          success: false,
+          error: {
+            code: "SLUG_TAKEN",
+            message: "This slug is already taken",
+          },
+        },
+        409,
+      );
+    }
+
+    throw error;
+  }
+}
+
+export async function getMainAwareAuthSessionState(
+  request: Request,
+): Promise<Response> {
+  const sessionState = await fetchAuthSessionState(request);
+  const authUserId = sessionState?.user?.id;
+  if (!authUserId || !sessionState?.authSession) {
+    return jsonResponse(
+      {
+        error: {
+          code: "AUTH_SESSION_INVALID",
+          message: "Auth session is invalid or expired",
+        },
+      },
+      401,
+    );
+  }
+
+  const mainUser = await findMainUserForAuthUser(authUserId);
+  const emailVerified = Boolean(sessionState.user?.emailVerified);
+  const mainUserExists = Boolean(mainUser);
+  const registrationComplete = emailVerified && mainUserExists;
+  const readinessStatus = !emailVerified
+    ? "pending-verification"
+    : mainUserExists
+      ? "member-ready"
+      : "needs-main-setup";
+
+  return jsonResponse(
+    {
+      ...sessionState,
+      authSession: {
+        ...sessionState.authSession,
+        emailVerified,
+        mainUserExists,
+        registrationComplete,
+        canAcquireMemberToken: registrationComplete,
+        readinessStatus,
+        pendingRegistration: {
+          active: !registrationComplete,
+          step: !emailVerified
+            ? "verify-email"
+            : mainUserExists
+              ? undefined
+              : "setup-account",
+          email: sessionState.authSession.email ?? sessionState.user?.email,
+          emailVerified,
+          requiresEmailVerification: !emailVerified,
+          requiresMainAccountSetup: emailVerified && !mainUserExists,
+        },
+      },
+    },
+    200,
+  );
+}
+
+export async function cancelRegistrationFromAuth(
+  request: Request,
+): Promise<Response> {
+  if (csrfRejected(request)) {
+    return csrfError("Origin is not allowed for registration cancellation");
+  }
+
+  const sessionState = await fetchAuthSessionState(request);
+  const authUserId = sessionState?.user?.id;
+  if (!authUserId) {
+    const headers = new Headers();
+    appendRegistrationClearCookies(headers);
+    return jsonResponse(
+      {
+        success: true,
+        canceled: false,
+      },
+      200,
+      headers,
+    );
+  }
+
+  const existing = await findMainUserForAuthUser(authUserId);
+  if (existing) {
+    return jsonResponse(
+      {
+        success: false,
+        canceled: false,
+        error: {
+          code: "MAIN_USER_EXISTS",
+          message: "Completed accounts cannot be canceled as registration",
+        },
+      },
+      409,
+    );
+  }
+
+  if (!env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET) {
+    return jsonResponse(
+      {
+        success: false,
+        canceled: false,
+        error: {
+          code: "AUTH_INTERNAL_SECRET_MISSING",
+          message: "Auth cancellation secret is not configured",
+        },
+      },
+      500,
+    );
+  }
+
+  const response = await fetch(
+    new URL("/internal/registration/cancel", getInternalAuthBaseUrl()),
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
+      },
+      body: JSON.stringify({
+        authUserId,
+        allowVerified: Boolean(sessionState.user?.emailVerified),
+      }),
+    },
+  );
+
+  const body = await response.json().catch(() => ({
+    success: false,
+    canceled: false,
+  }));
+  const headers = new Headers();
+  appendRegistrationClearCookies(headers);
+
+  return jsonResponse(body, response.status, headers);
+}
+
 export async function refreshMainSessionFromAuth(
   request: Request,
 ): Promise<Response> {
@@ -242,39 +563,31 @@ export async function refreshMainSessionFromAuth(
     );
   }
 
-  const registrationComplete =
-    sessionState.authSession?.registrationComplete ??
-    Boolean(
-      sessionState.authSession?.identitySet && sessionState.user?.emailVerified,
-    );
-  if (!registrationComplete) {
+  if (!sessionState.user?.emailVerified) {
     return jsonResponse(
       {
         error: {
           code: "MAIN_USER_NOT_READY",
-          message: "Main user is not ready for a member session",
+          message:
+            "Email verification is required before member session refresh",
         },
       },
       403,
     );
   }
 
-  let user = await prisma.user.findUnique({
-    where: { unitId: userId },
-    select: { unitId: true, slug: true, permission: true },
-  });
-
+  const user = await findMainUserForAuthUser(userId);
   if (!user) {
-    const provisioned = await userService.provisionFromJwt({
-      unitId: userId,
-      slug: userId,
-      name: sessionState.user?.name,
-    });
-    user = {
-      unitId: provisioned.unitId,
-      slug: provisioned.slug,
-      permission: provisioned.permission,
-    };
+    return jsonResponse(
+      {
+        error: {
+          code: "REGISTRATION_INCOMPLETE",
+          message:
+            "Main account setup is required before member session refresh",
+        },
+      },
+      403,
+    );
   }
 
   const dbPermission = user.permission as

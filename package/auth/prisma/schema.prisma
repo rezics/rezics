@@ -10,35 +10,21 @@ datasource db {
 }
 
 model User {
-  id            String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id            String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   name          String
   image         String?
-  email         String       @unique
-  emailVerified Boolean      @default(false)
-  role          String       @default("user")
-  banned        Boolean      @default(false)
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  role          String    @default("user")
+  banned        Boolean   @default(false)
   banReason     String?
   banExpires    DateTime?
   sessions      Session[]
   accounts      Account[]
-  members       Member[]
-  invitations   Invitation[] @relation("InvitationInviter")
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-
-  profile UserProfile?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([email])
-}
-
-model UserProfile {
-  userId String  @id @db.Uuid
-  slug   String  @unique
-  avatar String?
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@index([slug])
 }
 
 model Session {
@@ -76,48 +62,6 @@ model Account {
   @@index([userId])
 }
 
-model Organization {
-  id          String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  name        String
-  slug        String       @unique
-  logo        String?
-  metadata    Json?
-  createdAt   DateTime     @default(now())
-  members     Member[]
-  invitations Invitation[]
-}
-
-model Member {
-  id             String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  organizationId String       @db.Uuid
-  userId         String       @db.Uuid
-  role           String
-  createdAt      DateTime     @default(now())
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([organizationId, userId])
-  @@index([organizationId])
-  @@index([userId])
-}
-
-model Invitation {
-  id             String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  organizationId String       @db.Uuid
-  email          String
-  role           String
-  status         String
-  expiresAt      DateTime
-  inviterId      String       @db.Uuid
-  createdAt      DateTime     @default(now())
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  inviter        User         @relation("InvitationInviter", fields: [inviterId], references: [id], onDelete: Cascade)
-
-  @@index([organizationId])
-  @@index([inviterId])
-  @@index([email])
-}
-
 model Verification {
   id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   identifier String
@@ -130,14 +74,14 @@ model Verification {
 }
 
 model Jwks {
-  id         String    @id
-  jwtServiceId String  @db.Uuid
-  publicJwk  Json
-  privateJwk Json
-  alg        String?
-  createdAt  DateTime  @default(now())
-  expiresAt  DateTime?
-  jwtService JwtService @relation(fields: [jwtServiceId], references: [id], onDelete: Cascade)
+  id           String     @id
+  jwtServiceId String     @db.Uuid
+  publicJwk    Json
+  privateJwk   Json
+  alg          String?
+  createdAt    DateTime   @default(now())
+  expiresAt    DateTime?
+  jwtService   JwtService @relation(fields: [jwtServiceId], references: [id], onDelete: Cascade)
 
   @@index([jwtServiceId])
   @@index([createdAt])

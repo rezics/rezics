@@ -61,7 +61,7 @@ const hydrateAuthSessionStateMock = mock(async () => ({
   user: { id: "user-1" },
   authSession: {
     canAcquireMemberToken: true,
-    identitySet: true,
+    mainUserExists: true,
     registrationComplete: true,
   },
 }));
@@ -177,17 +177,13 @@ describe("auth handlers", () => {
     expect(hydrateAuthSessionStateMock).toHaveBeenCalledTimes(1);
   });
 
-  test("registration refreshes the main cookie-backed session through main", async () => {
-    fetchMock.mockResolvedValueOnce(new Response(null, { status: 200 }));
-
+  test("registration hydrates pending auth state without refreshing main session", async () => {
     const { register } = await import("./handler");
 
     const result = await register("reader@example.com", "secret");
 
     expect(signUpMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/auth/session/refresh",
-    );
+    expect(fetchMock).not.toHaveBeenCalled();
     expect(result.token).toBeNull();
     expect(hydrateAuthSessionStateMock).toHaveBeenCalledTimes(1);
   });

@@ -1,9 +1,5 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
-import {
-  exchangeForSessionToken,
-  queryAccessToken,
-} from "@rezics/api/react-query/jwt";
 import { Spinner } from "@rezics/ui";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import {
@@ -31,7 +27,12 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { env } from "@/env";
-import { hydrateAuthSessionState } from "@/user/states";
+import {
+  clearAuthSessionState,
+  hydrateAuthSessionState,
+  useAuthSessionStore,
+  useUserProfileStore,
+} from "@/user/states";
 import { OtpInput } from "../components/OtpInput";
 import { Layout } from "../layouts/Layout";
 import { logout } from "../models/handler";
@@ -109,12 +110,12 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
   </ol>
 );
 
-// --- Step 1: Identity Form ---
+// --- Step 2: Account Setup Form ---
 
 function IdentityStep({ onComplete }: { onComplete: () => void }) {
   const { t } = useTranslation();
   const auth = useAuth();
-  const [username, setUsername] = useState(
+  const [displayName, setDisplayName] = useState(
     auth.authSession?.email?.split("@")[0] ?? "",
   );
   const [slug, setSlug] = useState("");
@@ -124,37 +125,37 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
 
   // Pre-fill from auth session (OAuth name)
   useEffect(() => {
-    if (auth.user?.name && !username) {
-      setUsername(auth.user.name);
+    if (auth.authSession && !displayName) {
+      setDisplayName(auth.authSession.email.split("@")[0] ?? "");
     }
-  }, [auth.user?.name, username]);
+  }, [auth.authSession, displayName]);
 
   // Auto-derive slug from username if user hasn't manually edited slug
   useEffect(() => {
     if (!slugTouched) {
-      setSlug(deriveSlugFromName(username));
+      setSlug(deriveSlugFromName(displayName));
     }
-  }, [username, slugTouched]);
+  }, [displayName, slugTouched]);
 
   // Slug availability check
   const { data: slugCheck, isFetching: checkingSlug } = useQuery({
-    ...authQueries.slugCheck(slug),
+    ...authQueries.slugAvailability(slug),
     enabled: slug.length >= 6,
   });
 
   const slugError = useMemo(() => {
     if (slug.length === 0) return undefined;
-    if (slug.length < 6) return "Slug must be at least 6 characters";
+    if (slug.length < 6) return t("auth.flow.setup_slug_short");
     if (slugCheck && !slugCheck.available) {
       return slugCheck.reason === "taken"
-        ? "This slug is already taken"
-        : `Invalid slug: ${slugCheck.reason}`;
+        ? t("auth.flow.setup_slug_taken")
+        : t("auth.flow.setup_slug_invalid", { reason: slugCheck.reason });
     }
     return undefined;
-  }, [slug, slugCheck]);
+  }, [slug, slugCheck, t]);
 
   const canSubmit =
-    username.trim().length > 0 &&
+    displayName.trim().length > 0 &&
     slug.length >= 6 &&
     !slugError &&
     !checkingSlug &&
@@ -164,7 +165,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
     setLoading(true);
     setError(undefined);
     try {
-      await authApi.confirmIdentity({ username: username.trim(), slug });
+      await authApi.setupAccount({ displayName: displayName.trim(), slug });
       onComplete();
     } catch (err) {
       const msg = (err as Error).message;
@@ -180,8 +181,9 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
   };
 
   const slugHelper = checkingSlug
-    ? "Checking availability..."
-    : (slugError ?? (slugCheck?.available ? "Available" : undefined));
+    ? t("auth.flow.setup_slug_checking")
+    : (slugError ??
+      (slugCheck?.available ? t("auth.flow.setup_slug_available") : undefined));
 
   return (
     <div className="flex flex-col gap-4">
@@ -192,17 +194,19 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
       )}
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="reg-username">Username</Label>
+        <Label htmlFor="reg-username">
+          {t("auth.flow.setup_display_name")}
+        </Label>
         <Input
           id="reg-username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
           required
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="reg-slug">Slug (your unique URL handle)</Label>
+        <Label htmlFor="reg-slug">{t("auth.flow.setup_slug_label")}</Label>
         <Input
           id="reg-slug"
           value={slug}
@@ -225,13 +229,13 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
       </div>
 
       <Button disabled={!canSubmit} onClick={handleSubmit} className="w-full">
-        {loading ? t("common.loading") : "Confirm Identity"}
+        {loading ? t("common.loading") : t("auth.flow.setup_submit")}
       </Button>
     </div>
   );
 }
 
-// --- Step 2: Email Verification ---
+// --- Step 1: Email Verification ---
 
 function EmailVerificationStep({
   email,
@@ -290,16 +294,10 @@ function EmailVerificationStep({
         email &&
           !loading &&
           !cooldownRemaining &&
-          (codeSent || (turnstileReady && turnstileToken)),
+          turnstileReady &&
+          turnstileToken,
       ),
-    [
-      email,
-      loading,
-      cooldownRemaining,
-      codeSent,
-      turnstileReady,
-      turnstileToken,
-    ],
+    [email, loading, cooldownRemaining, turnstileReady, turnstileToken],
   );
 
   const handleSendCode = async () => {
@@ -308,7 +306,7 @@ function EmailVerificationStep({
     setError(undefined);
     setMessage(undefined);
     try {
-      if (!codeSent && !turnstileToken) {
+      if (!turnstileToken) {
         throw new Error(t("auth.flow.verify_complete_widget"));
       }
       await authApi.sendVerificationOTP({
@@ -443,47 +441,45 @@ export const CompleteRegistrationPage: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const auth = useAuth();
-  const [justCompletedIdentity, setJustCompletedIdentity] = useState(false);
   const [justCompletedEmail, setJustCompletedEmail] = useState(false);
+  const [cancelConfirming, setCancelConfirming] = useState(false);
+  const [canceling, setCanceling] = useState(false);
+  const [cancelError, setCancelError] = useState<string>();
 
-  const identitySet = auth.identitySet || justCompletedIdentity;
   const emailVerified = auth.authSession?.emailVerified || justCompletedEmail;
+  const mainUserExists = auth.mainUserExists;
   const email = auth.authSession?.email ?? "";
   const trustedProvider = auth.authSession?.trustedProviderId;
 
   // Derive active step index for the Stepper
-  const activeStep = identitySet && emailVerified ? 2 : identitySet ? 1 : 0;
+  const activeStep = !emailVerified ? 0 : mainUserExists ? 2 : 1;
 
-  const handleIdentityComplete = useCallback(async () => {
-    setJustCompletedIdentity(true);
+  const handleAccountSetupComplete = useCallback(async () => {
     await hydrateAuthSessionState();
-  }, []);
+    navigate({ to: "/" });
+  }, [navigate]);
 
   const handleEmailComplete = useCallback(async () => {
     setJustCompletedEmail(true);
-    // Re-acquire fresh tokens (claims now include email_verified: true)
-    // instead of clearing — clearing creates a gap where the user appears logged out.
-    await queryAccessToken({ requirePresence: false });
-    await exchangeForSessionToken();
     await hydrateAuthSessionState();
   }, []);
 
   // Redirect once both steps complete
   useEffect(() => {
-    if (identitySet && emailVerified && !auth.loading) {
+    if (auth.registrationComplete && !auth.loading) {
       navigate({ to: "/" });
     }
-  }, [identitySet, emailVerified, auth.loading, navigate]);
+  }, [auth.registrationComplete, auth.loading, navigate]);
 
   // Not authenticated at all
   if (!auth.authenticated && !auth.authSession) {
     return (
       <Layout
-        title="Complete Registration"
+        title={t("auth.flow.complete_registration_title")}
         content={
           <Alert>
             <AlertDescription>
-              Please sign in first to complete your registration.
+              {t("auth.flow.onboarding_sign_in_first")}
             </AlertDescription>
           </Alert>
         }
@@ -501,54 +497,95 @@ export const CompleteRegistrationPage: FC = () => {
     navigate({ to: "/" });
   };
 
+  const handleCancelRegistration = async () => {
+    if (!cancelConfirming) {
+      setCancelConfirming(true);
+      return;
+    }
+
+    setCanceling(true);
+    setCancelError(undefined);
+    try {
+      await authApi.cancelRegistration();
+      clearAuthSessionState();
+      useAuthSessionStore.getState().reset();
+      useUserProfileStore.getState().clearProfile();
+      navigate({ to: "/" });
+    } catch (caughtError) {
+      setCancelError((caughtError as Error).message);
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   const steps: StepDefinition[] = [
     {
-      id: "identity",
-      label: "Choose your identity",
-      optional: identitySet && auth.user?.slug ? auth.user.slug : undefined,
-      completed: identitySet,
-      active: activeStep === 0,
-      content: <IdentityStep onComplete={handleIdentityComplete} />,
-    },
-    {
       id: "email",
-      label: "Verify your email",
+      label: t("auth.flow.verify_title"),
       optional: emailVerified
         ? `${email}${trustedProvider ? ` (verified by ${trustedProvider})` : ""}`
         : undefined,
       completed: !!emailVerified,
-      active: activeStep === 1,
+      active: activeStep === 0,
       content: (
         <EmailVerificationStep email={email} onComplete={handleEmailComplete} />
       ),
+    },
+    {
+      id: "account",
+      label: t("auth.flow.setup_title"),
+      optional: mainUserExists && auth.user?.slug ? auth.user.slug : undefined,
+      completed: mainUserExists,
+      active: activeStep === 1,
+      content: <IdentityStep onComplete={handleAccountSetupComplete} />,
     },
   ];
 
   return (
     <Layout
-      title="Complete Registration"
+      title={t("auth.flow.complete_registration_title")}
       content={
         <div className="flex flex-col gap-4">
           <p className="text-sm text-text-secondary">
-            Complete the steps below to finish setting up your account.
+            {t("auth.flow.complete_registration_intro")}
           </p>
 
           <VerticalStepper steps={steps} />
+
+          {cancelError && (
+            <Alert variant="destructive">
+              <AlertDescription>{cancelError}</AlertDescription>
+            </Alert>
+          )}
 
           {activeStep === 2 && (
             <Alert className="text-success-text">
               <CheckCircleIcon className="w-4 h-4" />
               <AlertDescription>
-                Registration complete! Redirecting...
+                {t("auth.flow.registration_complete_redirecting")}
               </AlertDescription>
             </Alert>
           )}
         </div>
       }
       actions={
-        <Button variant="ghost" onClick={handleLogout}>
-          {t("auth.logout")}
-        </Button>
+        mainUserExists ? (
+          <Button variant="ghost" onClick={handleLogout}>
+            {t("auth.logout")}
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            disabled={canceling}
+            onClick={handleCancelRegistration}
+          >
+            {canceling
+              ? t("common.loading")
+              : cancelConfirming
+                ? t("auth.flow.cancel_registration_confirm")
+                : t("auth.flow.cancel_registration")}
+          </Button>
+        )
       }
     />
   );

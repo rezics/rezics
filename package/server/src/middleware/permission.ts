@@ -3,6 +3,33 @@ import { Elysia, status } from "elysia";
 import { prisma } from "#/prisma/client";
 import { verifyRezicsSessionToken } from "@/session/jwt/jwt.service";
 
+const SESSION_COOKIE_NAME = "rezics-session-token";
+
+function readCookie(
+  cookieHeader: string | undefined,
+  name: string,
+): string | null {
+  if (!cookieHeader) return null;
+
+  for (const part of cookieHeader.split(";")) {
+    const [rawKey, ...rawValue] = part.trim().split("=");
+    if (rawKey === name) {
+      return decodeURIComponent(rawValue.join("="));
+    }
+  }
+
+  return null;
+}
+
+function resolveSessionToken(
+  authorization: string | undefined,
+  cookieHeader: string | undefined,
+): string | undefined {
+  return (
+    authorization ?? readCookie(cookieHeader, SESSION_COOKIE_NAME) ?? undefined
+  );
+}
+
 export const authMacro = new Elysia({ name: "macro/auth" }).macro(
   "requireLogin",
   {
@@ -12,11 +39,15 @@ export const authMacro = new Elysia({ name: "macro/auth" }).macro(
       };
 
       const authorization = headers["authorization"];
-      if (!authorization) {
-        return status(401, "Unauthorized: No authorization header provided");
+      const sessionToken = resolveSessionToken(
+        authorization,
+        headers["cookie"],
+      );
+      if (!sessionToken) {
+        return status(401, "Unauthorized: No session token provided");
       }
 
-      const claims = await verifyRezicsSessionToken(authorization);
+      const claims = await verifyRezicsSessionToken(sessionToken);
       if (!claims) {
         return status(401, "Unauthorized: Session token is invalid or expired");
       }
@@ -30,10 +61,12 @@ export const authMacro = new Elysia({ name: "macro/auth" }).macro(
 
 export async function tryResolveIdentity(
   authorization: string | undefined,
+  cookieHeader?: string,
 ): Promise<RezicsSessionClaims | null> {
-  if (!authorization) return null;
+  const sessionToken = resolveSessionToken(authorization, cookieHeader);
+  if (!sessionToken) return null;
   return (await verifyRezicsSessionToken(
-    authorization,
+    sessionToken,
   )) as RezicsSessionClaims | null;
 }
 

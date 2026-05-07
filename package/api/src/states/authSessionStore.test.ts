@@ -36,10 +36,17 @@ const readySession: GetSessionStateResponse = {
   authSession: {
     email: "reader@example.com",
     emailVerified: true,
-    identitySet: true,
+    mainUserExists: true,
     registrationComplete: true,
     canAcquireMemberToken: true,
-    readinessStatus: "ready" as const,
+    readinessStatus: "member-ready" as const,
+    pendingRegistration: {
+      active: false,
+      email: "reader@example.com",
+      emailVerified: true,
+      requiresEmailVerification: false,
+      requiresMainAccountSetup: false,
+    },
     hasPassword: true,
     canSetPassword: false,
     providerIds: ["google"],
@@ -53,11 +60,38 @@ const incompleteSession = {
   authSession: {
     ...readySession.authSession,
     emailVerified: false,
-    identitySet: false,
+    mainUserExists: false,
     registrationComplete: false,
     canAcquireMemberToken: false,
-    readinessStatus: "needs-registration" as const,
+    readinessStatus: "pending-verification" as const,
+    pendingRegistration: {
+      active: true,
+      step: "verify-email" as const,
+      email: "reader@example.com",
+      emailVerified: false,
+      requiresEmailVerification: true,
+      requiresMainAccountSetup: false,
+    },
     trustedProviderId: undefined,
+  },
+};
+
+const setupRequiredSession = {
+  ...readySession,
+  authSession: {
+    ...readySession.authSession,
+    mainUserExists: false,
+    registrationComplete: false,
+    canAcquireMemberToken: false,
+    readinessStatus: "needs-main-setup" as const,
+    pendingRegistration: {
+      active: true,
+      step: "setup-account" as const,
+      email: "reader@example.com",
+      emailVerified: true,
+      requiresEmailVerification: false,
+      requiresMainAccountSetup: true,
+    },
   },
 };
 
@@ -85,19 +119,34 @@ describe("authSessionStore", () => {
       hasAuthSession: true,
       needsVerification: false,
       registrationComplete: true,
-      identitySet: true,
+      mainUserExists: true,
     });
   });
 
-  test("derives registrationComplete from authSession state", async () => {
+  test("derives pending verification from authSession state", async () => {
     const { useAuthSessionStore } = await import("./authSessionStore");
 
     useAuthSessionStore.getState().setSessionState(incompleteSession);
 
     expect(useAuthSessionStore.getState()).toMatchObject({
+      capabilityLevel: "pending-verification",
       registrationComplete: false,
-      identitySet: false,
+      mainUserExists: false,
       needsVerification: true,
+    });
+  });
+
+  test("derives main setup required from verified auth-only state", async () => {
+    const { useAuthSessionStore } = await import("./authSessionStore");
+
+    useAuthSessionStore.getState().setSessionState(setupRequiredSession);
+
+    expect(useAuthSessionStore.getState()).toMatchObject({
+      capabilityLevel: "needs-main-setup",
+      registrationComplete: false,
+      mainUserExists: false,
+      needsVerification: false,
+      needsMainSetup: true,
     });
   });
 
@@ -113,7 +162,7 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
-      capabilityLevel: "anonymous",
+      capabilityLevel: "pending-verification",
       hasAuthSession: false,
       needsVerification: true,
       registrationComplete: false,

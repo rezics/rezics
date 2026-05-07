@@ -1,8 +1,10 @@
 import type React from "react";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useSyncUserProfile } from "@/user/hooks/useSyncUserProfile";
-import { useUserProfileStore } from "@/user/states";
+import { useAuthSessionStore, useUserProfileStore } from "@/user/states";
 import { MainLayoutFooter } from "../components/footer/MainLayoutFooter";
 import { HelpFab } from "../components/HelpWidget";
 import { Header } from "../components/header/MainLayoutHeader";
@@ -15,11 +17,24 @@ export interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   useSyncUserProfile();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const authSession = useAuthSessionStore((state) => state.authSession);
+  const registrationComplete = useAuthSessionStore(
+    (state) => state.registrationComplete,
+  );
+  const pendingRegistration = Boolean(authSession && !registrationComplete);
 
   const isAdmin =
     useUserProfileStore((state) =>
       state.user?.permission?.role?.includes("ADMIN"),
     ) ?? false;
+
+  useEffect(() => {
+    if (pendingRegistration && location.pathname !== "/complete-registration") {
+      navigate({ to: "/complete-registration", replace: true });
+    }
+  }, [location.pathname, navigate, pendingRegistration]);
 
   return (
     <div className="min-h-screen flex flex-col">

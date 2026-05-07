@@ -11,6 +11,22 @@ const DEFAULT_TOKEN_STORAGE_KEYS: Record<string, string> = {
 };
 
 export const AUTH_TOKEN_STORAGE_EVENT = "package-auth-token-storage";
+export const MAIN_SESSION_REGISTRATION_INCOMPLETE_CODES = new Set([
+  "REGISTRATION_INCOMPLETE",
+  "MAIN_USER_NOT_READY",
+]);
+
+export class MainSessionRefreshError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly code?: string,
+  ) {
+    super(message);
+    this.name = "MainSessionRefreshError";
+  }
+}
+
 export type JwtTokenStrategy = {
   authBaseUrl: string;
   storeKeyByToken: Partial<Record<NormalizedTokenNameType, string>>;
@@ -116,6 +132,23 @@ export const removeToken = (
  */
 export const isAuthenticated = (): boolean => false;
 
+async function readRefreshError(response: Response): Promise<{
+  code?: string;
+  message: string;
+}> {
+  const json = await response.json().catch(() => null);
+  const error = json?.error;
+  if (error && typeof error === "object") {
+    return {
+      code: typeof error.code === "string" ? error.code : undefined,
+      message:
+        typeof error.message === "string" ? error.message : response.statusText,
+    };
+  }
+
+  return { message: response.statusText };
+}
+
 export async function queryAccessToken(options?: {
   requirePresence?: boolean;
 }): Promise<boolean> {
@@ -135,8 +168,18 @@ export async function queryAccessToken(options?: {
   );
 
   if (!refreshTokenResponse.ok) {
-    clearAuthPresence();
-    throw new Error("Unauthorized - Please login again");
+    const error = await readRefreshError(refreshTokenResponse);
+    if (
+      !error.code ||
+      !MAIN_SESSION_REGISTRATION_INCOMPLETE_CODES.has(error.code)
+    ) {
+      clearAuthPresence();
+    }
+    throw new MainSessionRefreshError(
+      error.message || "Unauthorized - Please login again",
+      refreshTokenResponse.status,
+      error.code,
+    );
   }
   return true;
 }
@@ -164,6 +207,13 @@ export async function exchangeForSessionToken(): Promise<boolean> {
   });
 
   if (!response.ok) {
+    const error = await readRefreshError(response);
+    if (
+      !error.code ||
+      !MAIN_SESSION_REGISTRATION_INCOMPLETE_CODES.has(error.code)
+    ) {
+      clearAuthPresence();
+    }
     return false;
   }
 

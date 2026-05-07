@@ -379,6 +379,22 @@ export default {
         "Your account can browse guest-accessible pages, but member features stay locked until registration is complete.",
       complete_registration_action: "Complete Registration",
       complete_registration_prompt: "Complete registration to {{action}}",
+      complete_registration_title: "Complete Registration",
+      complete_registration_intro:
+        "Complete the required steps to finish setting up your account.",
+      setup_title: "Create your Rezics account",
+      setup_display_name: "Display name",
+      setup_slug_label: "Slug (your unique URL handle)",
+      setup_slug_short: "Slug must be at least 6 characters.",
+      setup_slug_taken: "This slug is already taken.",
+      setup_slug_invalid: "Invalid slug: {{reason}}",
+      setup_slug_available: "Available",
+      setup_slug_checking: "Checking availability...",
+      setup_submit: "Create account",
+      cancel_registration: "Cancel registration",
+      cancel_registration_confirm: "Confirm cancel registration",
+      registration_complete_redirecting:
+        "Registration complete. Redirecting...",
       retry: "Retry",
       providers: {
         github: "GitHub",

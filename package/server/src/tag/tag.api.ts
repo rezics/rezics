@@ -265,7 +265,10 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   .get(
     "/for-unit/:unitId/context",
     async ({ headers, params }) => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const unit = await unitService.getByUnitId(params.unitId);
       const isPrivileged =
         (identity && BasicAdminPermission(identity.permission)) ||
@@ -289,7 +292,10 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   .get(
     "/for-unit/:unitId",
     async ({ headers, params }): Promise<{ tags: UnitTagDTO[] }> => {
-      const identity = await tryResolveIdentity(headers["authorization"]);
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const unit = await unitService.getByUnitId(params.unitId);
       const isPrivileged =
         (identity && BasicAdminPermission(identity.permission)) ||

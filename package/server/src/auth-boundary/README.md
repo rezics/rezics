@@ -16,22 +16,26 @@ architectural summary only.
 
 | Public route | Owner | Main authorization |
 | --- | --- | --- |
-| `/auth/session/refresh` | Main | Validates the opaque auth session through auth, then checks/provisions main user readiness before issuing the main session cookie. |
+| `/auth/session/refresh` | Main | Validates the opaque auth session through auth, then checks that a main user already exists before issuing the main session cookie. |
 | `/auth/sign-out` | Mixed | Clears the main session cookie and delegates auth session invalidation to auth. |
 | `/auth/token` | Auth, internal-only | Not exposed publicly through main. |
 | `/auth/session/jwks` | Auth | Public verifier endpoint; no main role check. |
 | `/auth/oauth/*` | Auth | OAuth/OIDC protocol handling remains auth-owned. |
 | `/auth/callback/:provider` | Auth | Social callback handling remains auth-owned. |
 | `/auth/admin/*` | Auth | Auth enforces auth admin policy; main only proxies the opaque auth cookie. |
-| `/auth/organization/*` | Auth | Auth enforces organization policy; main only proxies the opaque auth cookie. |
 
 No current `/auth/*` route mutates main token wallet entries, main permission
 records, or main admin state. Future `/auth/*` routes that do so must be
 implemented in main and must use main authorization before calling auth.
 
-`/auth/session/refresh` is the only current main-domain `/auth/*` operation.
+Future OAuth application ownership, review state, and developer-team membership
+are main-owned product entities. Auth stores only the protocol client fields
+needed to execute OAuth/OIDC flows.
+
+`/auth/session/refresh` and `/auth/account/*` are current main-domain
+`/auth/*` operations.
 It does not trust browser-provided main session material; it validates the
-opaque auth session through auth, verifies or provisions the main user through
+opaque auth session through auth, verifies the main user already exists in
 the main database, and only then issues the main session cookie.
 
 `/auth/sign-out` remains the only current mixed route. The main-owned part is
