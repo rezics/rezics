@@ -1,33 +1,68 @@
-## MODIFIED Requirements
+# frontend-auth-state-separation Specification
+
+## Purpose
+
+Defines how the frontend separates auth-service identity from main member capability across `authSessionStore`, `userProfileStore`, and the `useAuth()` hook. State is hydrated from server APIs rather than parsed JWT claims, and the frontend distinguishes anonymous, pending registration, and member-ready states so UI never confuses an auth-only registrant for a fully registered Rezics member.
+
+## Requirements
 
 ### Requirement: Authentication state and profile state are managed by separate stores
 
-Frontend SHALL maintain `authSessionStore` as the client-side representation of authentication state, but browser auth state SHALL be hydrated from cookie-backed session APIs rather than local JWT parsing. `authSessionStore` SHALL derive `capabilityLevel` from server-reported main session state: `anonymous` when no valid main session exists, or `member` when a valid `rezics-session-token` cookie is accepted by main. Verification state SHALL be derived from server session state returned by auth/main APIs, not from browser-parsed `auth-session-token` claims.
+Frontend SHALL maintain `authSessionStore` as the client-side representation of
+server-hydrated auth state, and `userProfileStore` as the client-side
+representation of the main product profile. `authSessionStore` SHALL separate
+auth-service identity from main member capability:
+
+- `hasAuthIdentity` SHALL mean a valid auth-service session exists.
+- `hasMemberSession` SHALL mean main has accepted the user as a Rezics member
+  and attached server permission.
+- `registrationStage` SHALL be derived from main-aware auth session state as
+  `anonymous`, `verify-email`, `setup-account`, or `complete`.
+
+The readable auth-presence cookie SHALL be treated as a passive hydration hint,
+not as the authoritative source for `/complete-registration`.
 
 #### Scenario: Member capability derived from server session state
 
-- **WHEN** the browser has a valid `rezics-session-token` httpOnly cookie and session hydration succeeds
-- **THEN** `authSessionStore.capabilityLevel` SHALL be `"member"` and `hasAuthSession` SHALL be `true`
+- **WHEN** the browser has a valid `rezics-session-token` httpOnly cookie and
+  session hydration succeeds
+- **THEN** `authSessionStore.capabilityLevel` SHALL be `"member"`
+- **AND** `authSessionStore.hasAuthIdentity` SHALL be `true`
+- **AND** `authSessionStore.hasMemberSession` SHALL be `true`
+- **AND** user profile queries SHALL be enabled
 
-#### Scenario: Anonymous state when no main session cookie is valid
+#### Scenario: Pending auth identity is not a member session
 
-- **WHEN** no valid main session exists or session hydration fails with an unauthenticated response
-- **THEN** `authSessionStore.capabilityLevel` SHALL be `"anonymous"` regardless of any auth session cookie presence
+- **WHEN** session hydration reports a valid auth session but
+  `registrationComplete` is `false`
+- **THEN** `authSessionStore.hasAuthIdentity` SHALL be `true`
+- **AND** `authSessionStore.hasMemberSession` SHALL be `false`
+- **AND** `authSessionStore.registrationStage` SHALL be either
+  `"verify-email"` or `"setup-account"`
+- **AND** user profile queries SHALL NOT be enabled
 
-#### Scenario: Needs verification derived from session API
+#### Scenario: Anonymous state when no auth identity is valid
 
-- **WHEN** the session state API reports that the auth email is not verified
-- **THEN** `authSessionStore.needsVerification` SHALL be `true`
+- **WHEN** authoritative session hydration confirms there is no valid auth
+  session
+- **THEN** `authSessionStore.hasAuthIdentity` SHALL be `false`
+- **AND** `authSessionStore.hasMemberSession` SHALL be `false`
+- **AND** `authSessionStore.registrationStage` SHALL be `"anonymous"`
 
 ### Requirement: useAuth hook reads from separated stores
 
-`useAuth()` hook SHALL read authentication state from `authSessionStore`. User identity SHALL come from server-hydrated session state or profile APIs, and profile data SHALL come from `userProfileStore` or API queries. Frontend code SHALL NOT parse browser-stored `rezics-session-token` or `auth-session-token` JWT claims for identity, role, unit, or verification state.
+`useAuth()` hook SHALL read auth-session state from `authSessionStore` and
+profile state from `userProfileStore`. It SHALL expose auth identity and member
+readiness as distinct values so UI code does not infer login state from
+`permission !== null`.
 
-#### Scenario: useAuth returns identity from hydrated state
+#### Scenario: Pending registration is authenticated but not app-ready
 
-- **WHEN** `useAuth()` is called after session hydration succeeds
-- **THEN** the returned identity SHALL include actor `userId` and relevant session flags from server-provided state
-- **AND** it SHALL NOT depend on localStorage JWT claims
+- **WHEN** `useAuth()` reads a pending registration state
+- **THEN** `hasAuthIdentity` and `authenticated` SHALL be `true`
+- **AND** `hasMemberSession` and `readyForApp` SHALL be `false`
+- **AND** normal app chrome that requires a main user SHALL redirect to
+  `/complete-registration`
 
 ### Requirement: Frontend auth URLs target main auth boundary
 

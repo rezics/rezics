@@ -1,4 +1,10 @@
-## ADDED Requirements
+# rezics-oauth-oidc-provider Specification
+
+## Purpose
+
+Defines Rezics as an OAuth 2.1 / OIDC-compatible authorization server. Auth owns the OAuth/OIDC protocol behavior (authorization, token exchange, userinfo, revoke, client registration, social provider callbacks, account linking), and main owns the public boundary, discovery URLs, and product-side OAuth-app ownership. Auth organization is explicitly NOT used as the ownership model for Rezics OAuth applications.
+
+## Requirements
 
 ### Requirement: Rezics authorization server capability
 The auth service SHALL enable `@better-auth/oauth-provider` and SHALL provide Rezics OAuth 2.1 Authorization Server behavior with OIDC-compatible behavior. Public OAuth/OIDC clients SHALL interact through main public URLs, and discovery metadata SHALL advertise public main endpoints rather than internal auth service URLs.
@@ -59,3 +65,32 @@ OAuth/OIDC discovery metadata SHALL publish an auth-scoped JWKS URI for auth/OID
 - **WHEN** a client reads `jwks_uri` from OAuth/OIDC discovery metadata
 - **THEN** the URI SHALL point to an auth-scoped public route such as `/auth/session/jwks`
 - **AND** the keys SHALL correspond to auth/OIDC signing keys
+
+### Requirement: OAuth protocol storage remains auth-owned
+Auth SHALL continue to own OAuth/OIDC protocol behavior and storage required for authorization, token exchange, userinfo, revoke, consent, and client credentials.
+
+#### Scenario: OAuth client exchanges authorization code
+- **WHEN** a valid OAuth client posts an authorization code to `/auth/oauth/token`
+- **THEN** auth SHALL process the token exchange according to OAuth/OIDC rules
+- **AND** main SHALL NOT reimplement grant validation
+
+### Requirement: OAuth app product ownership lives in main
+Any Rezics product workflow for requesting, reviewing, owning, or managing third-party OAuth applications SHALL live in main. Auth SHALL receive only the minimal protocol client data needed to execute OAuth/OIDC flows.
+
+#### Scenario: Developer applies for OAuth app
+- **WHEN** a developer creates or requests an OAuth application in the Rezics UI
+- **THEN** main SHALL own the product record, owner relationship, review state, and authorization policy
+- **AND** auth SHALL only store or receive protocol client fields required for OAuth operation
+
+#### Scenario: OAuth app ownership changes
+- **WHEN** an app owner or team membership changes
+- **THEN** main SHALL update product ownership state
+- **AND** auth protocol records SHALL be synchronized only as needed for client validity
+
+### Requirement: Auth organization is not used for OAuth app ownership
+The system SHALL NOT use better-auth organization membership as the ownership or authorization model for Rezics OAuth applications.
+
+#### Scenario: OAuth app management is authorized
+- **WHEN** a user attempts to manage an OAuth application
+- **THEN** main SHALL authorize the action using main-owned user and developer ownership state
+- **AND** auth organization membership SHALL NOT grant or deny the action

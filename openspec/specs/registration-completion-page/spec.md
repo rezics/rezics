@@ -1,83 +1,84 @@
+# registration-completion-page Specification
+
+## Purpose
+
+Defines the `/complete-registration` page that locks pending registrants until they finish email verification and main-owned account setup. The page renders the next required step from auth/main session state, supports a non-destructive pause-registration action, and replaces the legacy `/verify-email` and `/onboarding` routes.
+
+## Requirements
+
 ### Requirement: Single registration completion page at /complete-registration
 
-The app SHALL provide a single page at `/complete-registration` that combines both registration steps: identity setup (Step 1) and email verification (Step 2). The page SHALL detect which steps are complete and render accordingly.
+The app SHALL provide a single page at `/complete-registration` that handles locked pending registration. The page SHALL render the next required step based on auth-session state: email verification first for unverified email/password users, then main account setup for verified auth users without a main `User`.
 
-#### Scenario: Both steps incomplete
+#### Scenario: Email unverified
 
-- **WHEN** a user with no `UserProfile` and `emailVerified: false` visits the page
-- **THEN** both Step 1 (identity) and Step 2 (email verification) sections SHALL be displayed
-- **AND** both SHALL be interactive and submittable independently
+- **WHEN** an auth-only registrant with `emailVerified: false` visits the page
+- **THEN** the email verification section SHALL be displayed
+- **AND** main account setup fields SHALL NOT be submittable yet
 
-#### Scenario: Only Step 1 complete
+#### Scenario: Email verified but main user missing
 
-- **WHEN** a user with a `UserProfile` but `emailVerified: false` visits the page
-- **THEN** Step 1 SHALL show as completed (displaying the locked slug)
-- **AND** Step 2 (email verification) SHALL be interactive
+- **WHEN** an auth-only registrant with trusted verified email visits the page
+- **THEN** the main account setup form SHALL be displayed
+- **AND** the form SHALL collect display name and slug
 
-#### Scenario: Only Step 2 complete
-
-- **WHEN** a user with `emailVerified: true` but no `UserProfile` visits the page
-- **THEN** Step 1 (identity) SHALL be interactive
-- **AND** Step 2 SHALL show as completed (email verified)
-
-#### Scenario: Both steps complete
+#### Scenario: Main user exists
 
 - **WHEN** a fully registered user visits `/complete-registration`
-- **THEN** the page SHALL redirect to `/` (or show a "registration complete" state)
+- **THEN** the page SHALL redirect to `/` or the requested safe target
 
 #### Scenario: User navigates away and returns
 
-- **WHEN** a user completes Step 1, navigates to browse the app, and later returns to `/complete-registration`
-- **THEN** Step 1 SHALL show as completed with the locked slug
-- **AND** Step 2 SHALL be in whatever state it was left in
+- **WHEN** a pending registrant reloads or returns to `/complete-registration`
+- **THEN** the page SHALL resume the correct verification or setup step from auth/main state
+
+#### Scenario: Auth presence cookie is missing or delayed
+
+- **WHEN** the browser reaches `/complete-registration` with a valid opaque auth session but the readable auth-presence cookie is absent, stale, or not yet readable
+- **THEN** the page SHALL perform an authoritative main-aware auth session probe without requiring the readable presence cookie
+- **AND** it SHALL render the correct pending verification or setup step when auth confirms a valid pending session
+- **AND** it SHALL show the sign-in prompt only after the probe confirms there is no valid auth session
 
 ### Requirement: Step 1 UI -- identity form
 
-The identity step SHALL display a form with username and slug fields. The slug field SHALL provide real-time availability feedback (debounced check against the auth server). The form SHALL have a "Confirm" submit button.
+The account setup step SHALL display a form with display name and slug fields. The slug field SHALL provide real-time availability feedback against main server slug availability, and final uniqueness SHALL be enforced by main `User.slug` during submission.
 
 #### Scenario: User fills and submits identity form
 
-- **WHEN** a user enters a valid username and an available slug, then clicks "Confirm"
-- **THEN** the form SHALL submit to the auth service identity endpoint
-- **AND** on success, Step 1 SHALL transition to the completed state showing the locked slug
+- **WHEN** a user enters a valid display name and available slug, then submits
+- **THEN** the form SHALL submit to the main account setup endpoint
+- **AND** on success the main `User` SHALL be created
+- **AND** the app SHALL transition to member-ready state
 
 #### Scenario: Slug conflict on submit
 
-- **WHEN** a user submits a slug that was available during typing but was taken between check and submit
-- **THEN** the form SHALL display the conflict error from the server
+- **WHEN** a user submits a slug that was available during typing but was taken before submit
+- **THEN** the form SHALL display the conflict error from main
 - **AND** the user SHALL be able to pick a different slug
 
 #### Scenario: Real-time slug validation feedback
 
 - **WHEN** a user types in the slug field
-- **THEN** the UI SHALL show format validation errors immediately (client-side)
-- **AND** the UI SHALL check availability with a debounced server call after format is valid
-- **AND** availability status SHALL be displayed inline (available/taken)
+- **THEN** the UI SHALL show format validation errors immediately
+- **AND** the UI SHALL check availability with a debounced main-server call after format is valid
+- **AND** availability status SHALL be displayed inline
 
 ### Requirement: Step 2 UI -- email verification
 
-The email verification step SHALL display the user's email and provide OTP verification controls (send code, enter code). For OAuth users with a trusted provider email, Step 2 SHALL show the email as already verified.
+The email verification step SHALL display the pending account email and provide OTP verification controls. It SHALL be the locked first step for email/password registration until email verification succeeds.
 
 #### Scenario: Email/password user verifies email
 
-- **WHEN** an email/password user interacts with Step 2
-- **THEN** the Turnstile challenge SHALL be presented first
+- **WHEN** an email/password registrant interacts with Step 2
+- **THEN** the Turnstile challenge SHALL be presented for abuse-sensitive send or resend actions
 - **AND** after passing Turnstile, the user SHALL be able to request an OTP code
-- **AND** after entering the correct code, Step 2 SHALL transition to the completed state
+- **AND** after entering the correct code, the page SHALL transition to account setup
 
-#### Scenario: OAuth user with trusted email sees verified state
+#### Scenario: Verification delivery fails
 
-- **WHEN** an OAuth user with `emailVerified: true` (from a trusted provider) views Step 2
-- **THEN** the email SHALL be displayed with a "verified by [Provider]" indicator
-- **AND** an "Edit" button SHALL be available
-
-#### Scenario: OAuth user edits verified email
-
-- **WHEN** an OAuth user clicks "Edit" on their verified email
-- **THEN** a confirmation dialog SHALL appear warning that editing requires re-verification
-- **AND** if the user confirms, the email field SHALL become editable
-- **AND** submitting a new email SHALL trigger the standard OTP verification flow
-- **AND** the account SHALL remain linked to the OAuth provider regardless
+- **WHEN** verification email or OTP delivery fails
+- **THEN** the UI SHALL show a visible recoverable error
+- **AND** the user SHALL be able to retry after the configured cooldown or pause registration
 
 ### Requirement: Completed step displays locked state
 
@@ -124,3 +125,17 @@ The `/verify-email` and `/onboarding` routes SHALL redirect to `/complete-regist
 
 - **WHEN** a user navigates to `/onboarding`
 - **THEN** they SHALL be redirected to `/complete-registration`
+
+### Requirement: Registration page provides pause action
+The completion page SHALL expose a pause-registration action while the user is auth-only and no main `User` exists.
+
+#### Scenario: User pauses from verification page
+- **WHEN** a pending registrant chooses to continue later and confirms
+- **THEN** the app SHALL sign out through the normal auth boundary
+- **AND** the app SHALL clear auth/profile state and return to anonymous navigation
+- **AND** the auth account SHALL remain available for later sign-in and registration re-entry
+
+#### Scenario: Pause is accessible and localized
+- **WHEN** the pause control is rendered
+- **THEN** it SHALL be keyboard reachable
+- **AND** its label, confirmation, and error messages SHALL use the active locale
