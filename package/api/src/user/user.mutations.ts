@@ -2,6 +2,9 @@ import type {
   UpdateUser,
   UpdateUserSettings,
   UserDTO,
+  UserEmailVerificationConfirmBody,
+  UserEmailVerificationRequestBody,
+  UserEmailVerificationResponse,
   UserSettings,
 } from "@rezics/contract";
 import {
@@ -174,6 +177,51 @@ export function useUpdateSettingsMutation(
   });
 }
 
+export function useRequestEmailVerificationMutation(
+  options?: Omit<
+    UseMutationOptions<
+      UserEmailVerificationResponse,
+      Error,
+      UserEmailVerificationRequestBody
+    >,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UserEmailVerificationRequestBody) =>
+      userApi.requestEmailVerification(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      qc.setQueryData(userKeys.emailVerification(), data.state);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useVerifyEmailContractMutation(
+  options?: Omit<
+    UseMutationOptions<
+      UserEmailVerificationResponse,
+      Error,
+      UserEmailVerificationConfirmBody
+    >,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UserEmailVerificationConfirmBody) =>
+      userApi.verifyEmailContract(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      qc.setQueryData(userKeys.emailVerification(), data.state);
+      qc.invalidateQueries({ queryKey: userKeys.meDetail() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export const userMutations = {
   useUpdateMe: useUpdateMeMutation,
   useAdminCreate: useAdminCreateUserMutation,
@@ -182,4 +230,6 @@ export const userMutations = {
   useFollow: useFollowMutation,
   useUnfollow: useUnfollowMutation,
   useUpdateSettings: useUpdateSettingsMutation,
+  useRequestEmailVerification: useRequestEmailVerificationMutation,
+  useVerifyEmailContract: useVerifyEmailContractMutation,
 };

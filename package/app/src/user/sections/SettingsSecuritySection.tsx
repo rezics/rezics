@@ -1,4 +1,5 @@
 import {
+  useChangeEmailMutation,
   useRevokeSessionMutation,
   useSetPasswordMutation,
 } from "@rezics/api/auth/auth.mutations";
@@ -27,13 +28,31 @@ export const SettingsSecuritySection: FC = () => {
   );
 
   const hasPassword = sessionState?.authSession?.hasPassword ?? false;
+  const loginEmail = sessionState?.authSession?.email ?? "";
+  const [newLoginEmail, setNewLoginEmail] = useState("");
+  const [loginEmailSuccess, setLoginEmailSuccess] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [revokingToken, setRevokingToken] = useState<string | null>(null);
 
   const setPassword = useSetPasswordMutation();
+  const changeEmail = useChangeEmailMutation();
   const revokeSession = useRevokeSessionMutation();
+
+  const handleLoginEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    changeEmail.mutate(
+      { newEmail: newLoginEmail },
+      {
+        onSuccess: () => {
+          setLoginEmailSuccess(true);
+          setNewLoginEmail("");
+          setTimeout(() => setLoginEmailSuccess(false), 3000);
+        },
+      },
+    );
+  };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +87,49 @@ export const SettingsSecuritySection: FC = () => {
 
   return (
     <div>
+      <SettingsSection
+        title="Login Email"
+        description="Manage the email used for sign-in and account recovery."
+      >
+        <p className="text-sm text-text-secondary mb-4">
+          Current login email: {loginEmail || "Unavailable"}
+        </p>
+        {loginEmailSuccess && (
+          <Alert className="mb-4 text-success-text">
+            <AlertDescription>
+              Confirmation sent to your new login email.
+            </AlertDescription>
+          </Alert>
+        )}
+        {changeEmail.error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{changeEmail.error.message}</AlertDescription>
+          </Alert>
+        )}
+        <form
+          onSubmit={handleLoginEmailSubmit}
+          className="flex items-end gap-3 max-w-xl"
+        >
+          <div className="flex-1 flex flex-col gap-1.5">
+            <Label htmlFor="new-login-email">New Login Email</Label>
+            <Input
+              id="new-login-email"
+              type="email"
+              value={newLoginEmail}
+              onChange={(e) => setNewLoginEmail(e.target.value)}
+              required
+            />
+          </div>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={changeEmail.isPending || !newLoginEmail}
+          >
+            {changeEmail.isPending ? "Sending..." : "Change Login Email"}
+          </Button>
+        </form>
+      </SettingsSection>
+
       <SettingsSection
         title={hasPassword ? "Change Password" : "Set Password"}
         description={

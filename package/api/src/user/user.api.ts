@@ -7,6 +7,10 @@ import type {
   UpdateUser,
   UpdateUserSettings,
   UserDTO,
+  UserEmailVerificationConfirmBody,
+  UserEmailVerificationRequestBody,
+  UserEmailVerificationResponse,
+  UserEmailVerificationState,
   UserSettings,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -173,6 +177,28 @@ export const userApi = {
   updateSettings: async (input: UpdateUserSettings): Promise<UserSettings> => {
     return apiFetch(`/user/me/settings`, {
       method: "PUT",
+      body: JSON.stringify(input),
+    });
+  },
+
+  getEmailVerificationState: async (): Promise<UserEmailVerificationState> => {
+    return apiFetch(`/user/me/email-verification`);
+  },
+
+  requestEmailVerification: async (
+    input: UserEmailVerificationRequestBody,
+  ): Promise<UserEmailVerificationResponse> => {
+    return apiFetch(`/user/me/email-verification`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  verifyEmailContract: async (
+    input: UserEmailVerificationConfirmBody,
+  ): Promise<UserEmailVerificationResponse> => {
+    return apiFetch(`/user/me/email-verification/verify`, {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },

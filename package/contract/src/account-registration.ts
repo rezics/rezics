@@ -122,3 +122,62 @@ export const slugAvailabilityResponseSchema = t.Object({
 });
 export type SlugAvailabilityResponse =
   (typeof slugAvailabilityResponseSchema)["static"];
+
+export const mainEmailVerificationContractStatusSchema = t.Union([
+  t.Literal("PENDING"),
+  t.Literal("VERIFIED"),
+  t.Literal("EXPIRED"),
+]);
+export type MainEmailVerificationContractStatus =
+  (typeof mainEmailVerificationContractStatusSchema)["static"];
+
+export const userEmailVerificationStateSchema = t.Object({
+  email: t.Optional(t.String({ format: "email" })),
+  verified: t.Boolean(),
+  pendingEmail: t.Optional(t.String({ format: "email" })),
+  contractStatus: t.Optional(mainEmailVerificationContractStatusSchema),
+  expiresAt: t.Optional(t.Union([t.String(), t.Date()])),
+  lastSentAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+export type UserEmailVerificationState =
+  (typeof userEmailVerificationStateSchema)["static"];
+
+export const userEmailVerificationRequestBodySchema = t.Object({
+  email: t.String({ format: "email" }),
+});
+export type UserEmailVerificationRequestBody =
+  (typeof userEmailVerificationRequestBodySchema)["static"];
+
+export const userEmailVerificationConfirmBodySchema = t.Object({
+  email: t.String({ format: "email" }),
+  code: t.String({ minLength: 1 }),
+});
+export type UserEmailVerificationConfirmBody =
+  (typeof userEmailVerificationConfirmBodySchema)["static"];
+
+export const userEmailVerificationErrorCodeSchema = t.Union([
+  t.Literal("EMAIL_ALREADY_VERIFIED"),
+  t.Literal("DELIVERY_FAILED"),
+  t.Literal("COOLDOWN"),
+  t.Literal("INVALID_CODE"),
+  t.Literal("EXPIRED_CODE"),
+  t.Literal("CONTRACT_NOT_FOUND"),
+]);
+export type UserEmailVerificationErrorCode =
+  (typeof userEmailVerificationErrorCodeSchema)["static"];
+
+export const userEmailVerificationErrorSchema = t.Object({
+  code: userEmailVerificationErrorCodeSchema,
+  message: t.String(),
+  retryAfterSeconds: t.Optional(t.Number()),
+});
+export type UserEmailVerificationError =
+  (typeof userEmailVerificationErrorSchema)["static"];
+
+export const userEmailVerificationResponseSchema = t.Object({
+  success: t.Boolean(),
+  state: t.Optional(userEmailVerificationStateSchema),
+  error: t.Optional(userEmailVerificationErrorSchema),
+});
+export type UserEmailVerificationResponse =
+  (typeof userEmailVerificationResponseSchema)["static"];

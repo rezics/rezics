@@ -1,10 +1,9 @@
+import { useSignOutMutation } from "@rezics/api/auth/auth.mutations";
 import {
-  useChangeEmailMutation,
-  useSendVerificationEmailMutation,
-  useSignOutMutation,
-} from "@rezics/api/auth/auth.mutations";
-import { authQueries } from "@rezics/api/auth/auth.queries";
-import { useDeleteMeMutation } from "@rezics/api/user/user.mutations";
+  useDeleteMeMutation,
+  useRequestEmailVerificationMutation,
+  useVerifyEmailContractMutation,
+} from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import { Spinner } from "@rezics/ui";
 import {
@@ -30,18 +29,19 @@ import { useRequireAuth } from "@/user/pages/useAuth";
 export const SettingsAccountSection: FC = () => {
   useRequireAuth();
 
-  const { data: sessionState, isLoading } = useQuery(
-    authQueries.sessionState(),
+  const { data: emailState, isLoading } = useQuery(
+    userQueries.emailVerification(),
   );
   const { data: user } = useQuery(userQueries.me());
 
   const [newEmail, setNewEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [emailSuccess, setEmailSuccess] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
 
-  const changeEmail = useChangeEmailMutation();
-  const sendVerification = useSendVerificationEmailMutation();
+  const requestEmailVerification = useRequestEmailVerificationMutation();
+  const verifyEmailContract = useVerifyEmailContractMutation();
   const deleteMe = useDeleteMeMutation();
   const signOut = useSignOutMutation();
 
@@ -53,27 +53,44 @@ export const SettingsAccountSection: FC = () => {
     );
   }
 
-  const authSession = sessionState?.authSession;
-  const currentEmail = authSession?.email ?? "";
-  const isVerified = authSession?.emailVerified ?? false;
+  const currentEmail = emailState?.email ?? "";
+  const pendingEmail = emailState?.pendingEmail ?? "";
+  const isVerified = emailState?.verified ?? false;
 
   const handleChangeEmail = (e: React.FormEvent) => {
     e.preventDefault();
-    changeEmail.mutate(
-      { newEmail },
+    requestEmailVerification.mutate(
+      { email: newEmail },
       {
-        onSuccess: () => {
-          setEmailSuccess(
-            "A verification email has been sent to your new address.",
-          );
-          setNewEmail("");
+        onSuccess: (response) => {
+          if (response.success) {
+            setEmailSuccess(
+              "A verification code has been sent to your Rezics email.",
+            );
+            setNewEmail("");
+          }
         },
       },
     );
   };
 
   const handleResendVerification = () => {
-    sendVerification.mutate({ email: currentEmail });
+    requestEmailVerification.mutate({ email: pendingEmail || currentEmail });
+  };
+
+  const handleVerifyEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    verifyEmailContract.mutate(
+      { email: pendingEmail || currentEmail, code: verificationCode },
+      {
+        onSuccess: (response) => {
+          if (response.success) {
+            setEmailSuccess("Rezics email verified.");
+            setVerificationCode("");
+          }
+        },
+      },
+    );
   };
 
   const handleDeleteAccount = () => {
@@ -90,11 +107,13 @@ export const SettingsAccountSection: FC = () => {
   return (
     <div>
       <SettingsSection
-        title="Email Address"
-        description="Manage your email address and verification status."
+        title="Rezics Email"
+        description="Manage the product email shown in Rezics. Login email belongs in Security."
       >
         <div className="flex items-center gap-2 mb-4">
-          <p className="text-base">{currentEmail}</p>
+          <p className="text-base">
+            {currentEmail || "No verified Rezics email"}
+          </p>
           {isVerified ? (
             <Badge
               variant="outline"
@@ -110,41 +129,51 @@ export const SettingsAccountSection: FC = () => {
           )}
         </div>
 
-        {!isVerified && (
+        {pendingEmail && pendingEmail !== currentEmail && (
+          <p className="text-sm text-text-secondary mb-3">
+            Pending verification: {pendingEmail}
+          </p>
+        )}
+
+        {(pendingEmail || currentEmail) && (
           <Button
             variant="outline"
             size="sm"
             onClick={handleResendVerification}
-            disabled={sendVerification.isPending}
+            disabled={requestEmailVerification.isPending}
           >
-            {sendVerification.isPending ? "Sending..." : "Resend Verification"}
+            {requestEmailVerification.isPending
+              ? "Sending..."
+              : "Send Verification Code"}
           </Button>
         )}
 
-        {sendVerification.isSuccess && (
+        {requestEmailVerification.data?.success && (
           <Alert className="mt-2 text-success-text">
-            <AlertDescription>Verification email sent.</AlertDescription>
+            <AlertDescription>Verification code sent.</AlertDescription>
+          </Alert>
+        )}
+        {requestEmailVerification.data?.error && (
+          <Alert variant="destructive" className="mt-2">
+            <AlertDescription>
+              {requestEmailVerification.data.error.message}
+            </AlertDescription>
           </Alert>
         )}
       </SettingsSection>
 
       <SettingsSection
-        title="Change Email"
-        description="Update your email address. A verification link will be sent to the new address."
+        title="Change Rezics Email"
+        description="A code will be sent to the new address. Your current Rezics email stays unchanged until verification succeeds."
       >
         {emailSuccess && (
           <Alert className="mb-4 text-success-text">
             <AlertDescription>{emailSuccess}</AlertDescription>
           </Alert>
         )}
-        {changeEmail.error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{changeEmail.error.message}</AlertDescription>
-          </Alert>
-        )}
         <form onSubmit={handleChangeEmail} className="flex items-end gap-3">
           <div className="flex-1 flex flex-col gap-1.5">
-            <Label htmlFor="new-email">New Email</Label>
+            <Label htmlFor="new-email">New Rezics Email</Label>
             <Input
               id="new-email"
               type="email"
@@ -156,11 +185,45 @@ export const SettingsAccountSection: FC = () => {
           <Button
             type="submit"
             size="sm"
-            disabled={changeEmail.isPending || !newEmail}
+            disabled={requestEmailVerification.isPending || !newEmail}
           >
-            {changeEmail.isPending ? "Updating..." : "Change Email"}
+            {requestEmailVerification.isPending ? "Sending..." : "Send Code"}
           </Button>
         </form>
+        {(pendingEmail || currentEmail) && (
+          <form
+            onSubmit={handleVerifyEmail}
+            className="flex items-end gap-3 mt-4"
+          >
+            <div className="flex-1 flex flex-col gap-1.5">
+              <Label htmlFor="verification-code">Verification Code</Label>
+              <Input
+                id="verification-code"
+                inputMode="numeric"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+              />
+            </div>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={
+                verifyEmailContract.isPending ||
+                !verificationCode ||
+                !(pendingEmail || currentEmail)
+              }
+            >
+              {verifyEmailContract.isPending ? "Verifying..." : "Verify"}
+            </Button>
+          </form>
+        )}
+        {verifyEmailContract.data?.error && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertDescription>
+              {verifyEmailContract.data.error.message}
+            </AlertDescription>
+          </Alert>
+        )}
       </SettingsSection>
 
       <DangerZone description="Once you delete your account, there is no going back. Please be certain.">

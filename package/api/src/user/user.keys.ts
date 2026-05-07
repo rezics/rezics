@@ -29,4 +29,6 @@ export const userKeys = {
     [...userKeys.detail("me"), "follow-status", targetIds] as const,
   batch: (ids: string[]) => [...userKeys.all(), "batch", ids] as const,
   settings: () => [...userKeys.all(), "me", "settings"] as const,
+  emailVerification: () =>
+    [...userKeys.all(), "me", "email-verification"] as const,
 } as const;

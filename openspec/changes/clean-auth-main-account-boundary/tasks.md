@@ -58,7 +58,7 @@
 
 ## 7. API Client and Frontend State
 
-- [ ] 7.1 Update `package/api` auth/account APIs for materialization, profile setup, setup token renewal, profile setup token state, and main email verification contracts.
+- [x] 7.1 Update `package/api` auth/account APIs for materialization, profile setup, setup token renewal, profile setup token state, and main email verification contracts.
 - [x] 7.2 Update frontend auth session store to model auth identity, profile setup session, member session, and account stages separately.
 - [x] 7.3 Treat public account-stage cookies as routing hints only and confirm state through authoritative server probes.
 - [x] 7.4 Update token refresh helpers so profile-setup-required responses route to profile setup instead of clearing useful auth state.
@@ -70,8 +70,8 @@
 - [x] 8.2 Update complete-registration flow to request main materialization after verification and then continue under profile setup token.
 - [x] 8.3 Update profile setup UI to submit slug, optional name/avatar, and default display name from slug when blank.
 - [ ] 8.4 Update OAuth callback handling for trusted provider facts, untrusted verification, materialization, and profile setup routing.
-- [ ] 8.5 Update Account/Profile settings Rezics email UX to use main email verification contracts and write only verified email to `User.email`.
-- [ ] 8.6 Move auth login email change UX to Security settings alongside password, sessions, and connected providers.
+- [x] 8.5 Update Account/Profile settings Rezics email UX to use main email verification contracts and write only verified email to `User.email`.
+- [x] 8.6 Move auth login email change UX to Security settings alongside password, sessions, and connected providers.
 - [ ] 8.7 Update frontend route guards so normal app chrome requires member-ready state.
 - [ ] 8.8 Add localized strings and accessible error/success states for login email, Rezics email, materialization, profile setup, slug conflict, email verification contract errors, setup token renewal, and stale account-stage hints.
 
@@ -87,7 +87,7 @@
 
 - [x] 10.1 Run targeted `bun test` suites for `package/email` sender utilities and rendering.
 - [x] 10.2 Run targeted `bun test` suites for `package/auth` registration facts, verification, auth email delivery, and slug projection.
-- [ ] 10.3 Run targeted `bun test` suites for `package/server` auth boundary, profile setup token guard, materialization, profile setup activation, session refresh, and email verification contracts.
+- [x] 10.3 Run targeted `bun test` suites for `package/server` auth boundary, profile setup token guard, materialization, profile setup activation, session refresh, and email verification contracts.
 - [x] 10.4 Run targeted `bun test` suites for `package/api` auth/account API helpers and auth session state.
 - [ ] 10.5 Run targeted `bun test` suites for `package/app` registration routing, complete-registration, profile setup, OAuth callback, route guards, Security login email settings, and Account/Profile Rezics email flow.
 - [ ] 10.6 Run formatting/typecheck/build commands required by affected packages.

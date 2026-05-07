@@ -89,6 +89,13 @@ export const userSettingsQuery = () =>
     staleTime: 1000 * 60 * 10,
   });
 
+export const userEmailVerificationQuery = () =>
+  queryOptions({
+    queryKey: userKeys.emailVerification(),
+    queryFn: () => userApi.getEmailVerificationState(),
+    staleTime: 1000 * 30,
+  });
+
 export const userQueries = {
   me: userMeQuery,
   list: userListQuery,
@@ -101,4 +108,5 @@ export const userQueries = {
   followStatus: userFollowStatusQuery,
   batch: userBatchQuery,
   settings: userSettingsQuery,
+  emailVerification: userEmailVerificationQuery,
 };
