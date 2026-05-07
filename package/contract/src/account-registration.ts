@@ -67,8 +67,9 @@ export const profileSetupErrorSchema = t.Object({
 export type ProfileSetupError = (typeof profileSetupErrorSchema)["static"];
 
 export const accountSetupBodySchema = t.Object({
-  displayName: t.String({ minLength: 1, maxLength: 80 }),
+  displayName: t.Optional(t.String({ minLength: 1, maxLength: 80 })),
   slug: t.String({ minLength: 1 }),
+  avatar: t.Optional(t.String()),
 });
 export type AccountSetupBody = (typeof accountSetupBodySchema)["static"];
 
@@ -76,6 +77,10 @@ export const accountSetupErrorCodeSchema = t.Union([
   t.Literal("AUTH_SESSION_REQUIRED"),
   t.Literal("EMAIL_UNVERIFIED"),
   t.Literal("MAIN_USER_EXISTS"),
+  t.Literal("MAIN_USER_NOT_FOUND"),
+  t.Literal("PROFILE_SETUP_TOKEN_REQUIRED"),
+  t.Literal("PROFILE_SETUP_TOKEN_INVALID"),
+  t.Literal("PROFILE_SETUP_NOT_REQUIRED"),
   t.Literal("SLUG_INVALID"),
   t.Literal("SLUG_TAKEN"),
 ]);
@@ -87,6 +92,14 @@ export const accountSetupErrorSchema = t.Object({
   message: t.String(),
 });
 export type AccountSetupError = (typeof accountSetupErrorSchema)["static"];
+
+export const accountMaterializationResponseSchema = t.Object({
+  success: t.Boolean(),
+  tokenState: t.Optional(profileSetupTokenStateSchema),
+  error: t.Optional(accountSetupErrorSchema),
+});
+export type AccountMaterializationResponse =
+  (typeof accountMaterializationResponseSchema)["static"];
 
 export const accountSetupResponseSchema = t.Object({
   success: t.Boolean(),

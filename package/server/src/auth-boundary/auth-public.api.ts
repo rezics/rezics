@@ -5,11 +5,12 @@ import {
 import { Elysia, status } from "elysia";
 import {
   checkAccountSlugAvailability,
+  completeProfileSetupFromMain,
   getMainAwareAuthSessionState,
+  materializeMainAccountFromAuth,
   proxyAuthBoundaryRequest,
   refreshMainSessionFromAuth,
   renewProfileSetupSessionFromAuth,
-  setupMainAccountFromAuth,
   signOutThroughAuthBoundary,
 } from "./auth-boundary.service";
 
@@ -28,14 +29,26 @@ export const authPublicApi = new Elysia({ prefix: "/auth" })
     },
   )
   .post(
-    "/account/setup",
-    ({ request, body }) => setupMainAccountFromAuth(request, body),
+    "/account/materialize",
+    ({ request }) => materializeMainAccountFromAuth(request),
+    {
+      detail: {
+        summary: "Materialize main account",
+        description:
+          "Create a minimal main Rezics user from verified auth registration facts and issue rezics-profile-setup-token.",
+        tags: ["Auth Boundary"],
+      },
+    },
+  )
+  .post(
+    "/account/profile-setup",
+    ({ request, body }) => completeProfileSetupFromMain(request, body),
     {
       body: accountSetupBodySchema,
       detail: {
-        summary: "Complete main account setup",
+        summary: "Complete profile setup",
         description:
-          "Create the main Rezics user after auth reports a trusted verified email.",
+          "Activate a materialized profile-setup user as member-ready with canonical slug and optional profile fields.",
         tags: ["Auth Boundary"],
       },
     },

@@ -1,5 +1,6 @@
 import {
   type AccountSetupBody,
+  type VerifiedRegistrationFacts,
   type SlugAvailabilityResponse,
   validateSlug,
 } from "@rezics/contract";
@@ -8,6 +9,7 @@ import { env } from "@/env";
 import {
   signRezicsProfileSetupToken,
   signRezicsSessionToken,
+  verifyRezicsProfileSetupToken,
 } from "@/session/jwt/jwt.service";
 import { mapUserToDTO } from "@/user/models/mapper";
 import { userService } from "@/user/service/user.service";
@@ -89,6 +91,22 @@ function getSetCookieValues(headers: Headers): string[] {
   if (values?.length) return values;
   const single = headers.get("set-cookie");
   return single ? [single] : [];
+}
+
+function readCookie(
+  cookieHeader: string | undefined,
+  name: string,
+): string | null {
+  if (!cookieHeader) return null;
+
+  for (const part of cookieHeader.split(";")) {
+    const [rawKey, ...rawValue] = part.trim().split("=");
+    if (rawKey === name) {
+      return decodeURIComponent(rawValue.join("="));
+    }
+  }
+
+  return null;
 }
 
 function rewriteSetCookie(cookie: string): string {
@@ -242,6 +260,55 @@ async function fetchAuthSessionState(request: Request) {
   return (await response.json()) as AuthSessionStateResponse;
 }
 
+async function fetchVerifiedRegistrationFacts(
+  authUserId: string,
+): Promise<VerifiedRegistrationFacts | null> {
+  if (!env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET) {
+    return null;
+  }
+
+  const url = new URL(
+    "/internal/registration/verified-facts",
+    getInternalAuthBaseUrl(),
+  );
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
+    },
+    body: JSON.stringify({ authUserId }),
+  });
+
+  if (!response.ok) return null;
+  const body = (await response.json()) as {
+    success?: boolean;
+    facts?: VerifiedRegistrationFacts;
+  };
+  return body.success && body.facts ? body.facts : null;
+}
+
+async function projectSlugToAuth(input: {
+  authUserId: string;
+  slug: string;
+}): Promise<boolean> {
+  if (!env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET) {
+    return false;
+  }
+
+  const url = new URL("/internal/users/project-slug", getInternalAuthBaseUrl());
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
+    },
+    body: JSON.stringify(input),
+  });
+
+  return response.ok;
+}
+
 export async function proxyAuthBoundaryRequest(
   request: Request,
 ): Promise<Response> {
@@ -289,18 +356,16 @@ export async function checkAccountSlugAvailability(
   };
 }
 
-export async function setupMainAccountFromAuth(
+export async function materializeMainAccountFromAuth(
   request: Request,
-  body: AccountSetupBody,
 ): Promise<Response> {
   if (csrfRejected(request)) {
-    return csrfError("Origin is not allowed for account setup");
+    return csrfError("Origin is not allowed for account materialization");
   }
 
   const sessionState = await fetchAuthSessionState(request);
   const authUserId = sessionState?.user?.id;
-  const email = sessionState?.user?.email ?? sessionState?.authSession?.email;
-  if (!authUserId || !email) {
+  if (!authUserId) {
     return jsonResponse(
       {
         success: false,
@@ -327,13 +392,120 @@ export async function setupMainAccountFromAuth(
   }
 
   const existing = await findMainUserForAuthUser(authUserId);
-  if (existing) {
+  if (existing?.accountStatus === "MEMBER_READY") {
     return jsonResponse(
       {
         success: false,
         error: {
           code: "MAIN_USER_EXISTS",
           message: "Main account has already been created",
+        },
+      },
+      409,
+    );
+  }
+
+  const facts = await fetchVerifiedRegistrationFacts(authUserId);
+  if (!facts) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "EMAIL_UNVERIFIED",
+          message: "Verified registration facts are not available",
+        },
+      },
+      403,
+    );
+  }
+
+  const user =
+    existing ??
+    (await userService.materializeFromVerifiedAuth({
+      authUserId: facts.authUserId,
+      email: facts.email,
+      verifiedAt: facts.verifiedAt
+        ? new Date(facts.verifiedAt)
+        : new Date(),
+      verificationSource:
+        facts.verificationSource ?? facts.trustedProviderId ?? "email-otp",
+      avatar: sessionState.user.image ?? null,
+    }));
+
+  const token = await signRezicsProfileSetupToken({ userId: user.unitId });
+  const expiresAt = new Date(Date.now() + 900 * 1000);
+  const headers = new Headers();
+  headers.set("set-cookie", buildProfileSetupCookie(token));
+
+  return jsonResponse(
+    {
+      success: true,
+      tokenState: {
+        active: true,
+        stage: "profile-required",
+        expiresAt: expiresAt.toISOString(),
+        userId: user.unitId,
+      },
+    },
+    200,
+    headers,
+  );
+}
+
+export async function completeProfileSetupFromMain(
+  request: Request,
+  body: AccountSetupBody,
+): Promise<Response> {
+  if (csrfRejected(request)) {
+    return csrfError("Origin is not allowed for profile setup");
+  }
+
+  const setupToken =
+    readCookie(request.headers.get("cookie") ?? undefined, PROFILE_SETUP_COOKIE_NAME) ??
+    undefined;
+  if (!setupToken) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "PROFILE_SETUP_TOKEN_REQUIRED",
+          message: "Profile setup token is required",
+        },
+      },
+      401,
+    );
+  }
+
+  const claims = await verifyRezicsProfileSetupToken(setupToken);
+  if (!claims) {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "PROFILE_SETUP_TOKEN_INVALID",
+          message: "Profile setup token is invalid or expired",
+        },
+      },
+      401,
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { unitId: claims.userId },
+    select: {
+      unitId: true,
+      authUserId: true,
+      accountStatus: true,
+      permission: true,
+    },
+  });
+  if (!user || user.accountStatus !== "PROFILE_SETUP_REQUIRED") {
+    return jsonResponse(
+      {
+        success: false,
+        error: {
+          code: "PROFILE_SETUP_NOT_REQUIRED",
+          message: "Profile setup is not required for this user",
         },
       },
       409,
@@ -355,33 +527,37 @@ export async function setupMainAccountFromAuth(
   }
 
   try {
-    const user = await userService.createFromVerifiedAuth({
-      authUserId,
-      email,
-      displayName: body.displayName.trim(),
+    const activated = await userService.completeProfileSetup({
+      userId: user.unitId,
       slug: slugValidation.normalized,
-      verifiedAt: new Date(),
-      verificationSource:
-        sessionState.authSession?.trustedProviderId ?? "email-otp",
-      avatar: sessionState.user.image ?? null,
+      displayName: body.displayName,
+      avatar: body.avatar,
     });
 
-    const dbPermission = user.permission as
+    if (user.authUserId) {
+      void projectSlugToAuth({
+        authUserId: user.authUserId,
+        slug: slugValidation.normalized,
+      });
+    }
+
+    const dbPermission = activated.permission as
       | { role?: string[] }
       | null
       | undefined;
     const role = dbPermission?.role?.[0] ?? "MEMBER";
     const token = await signRezicsSessionToken({
-      userId: user.unitId,
+      userId: activated.unitId,
       permission: { role },
     });
 
     const headers = new Headers();
-    headers.set("set-cookie", buildSessionCookie(token));
+    headers.append("set-cookie", buildProfileSetupCookie(null));
+    headers.append("set-cookie", buildSessionCookie(token));
     return jsonResponse(
       {
         success: true,
-        user: mapUserToDTO(user),
+        user: mapUserToDTO(activated),
       },
       200,
       headers,
@@ -446,13 +622,13 @@ export async function getMainAwareAuthSessionState(
           active: !registrationComplete,
           step: !emailVerified
             ? "verify-email"
-            : mainUserExists
+            : memberReady
               ? undefined
               : "setup-account",
           email: sessionState.authSession.email ?? sessionState.user?.email,
           emailVerified,
           requiresEmailVerification: !emailVerified,
-          requiresMainAccountSetup: emailVerified && !mainUserExists,
+          requiresMainAccountSetup: emailVerified && !memberReady,
         },
       },
     },

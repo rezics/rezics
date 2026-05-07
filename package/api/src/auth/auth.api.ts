@@ -5,6 +5,7 @@
 
 import type {
   AccountSetupBody,
+  AccountMaterializationResponse,
   AccountSetupResponse,
   AuthProvider,
   AuthResponse,
@@ -82,14 +83,12 @@ export const authApi = {
     email: string;
     password: string;
   }): Promise<AuthResponse> => {
-    const inferredName = input.email.split("@")[0]?.trim() || "Reader";
-
     return authFetch<AuthResponse>("/auth/sign-up/email", {
       method: "POST",
       body: JSON.stringify({
         email: input.email,
         password: input.password,
-        name: inferredName,
+        name: "pending-registration",
       }),
     });
   },
@@ -278,13 +277,31 @@ export const authApi = {
     });
   },
 
-  setupAccount: async (
+  materializeAccount: async (): Promise<AccountMaterializationResponse> => {
+    return authFetch<AccountMaterializationResponse>(
+      "/auth/account/materialize",
+      {
+        method: "POST",
+      },
+    );
+  },
+
+  setupProfile: async (
     input: AccountSetupBody,
   ): Promise<AccountSetupResponse> => {
-    return authFetch<AccountSetupResponse>("/auth/account/setup", {
+    return authFetch<AccountSetupResponse>("/auth/account/profile-setup", {
       method: "POST",
       body: JSON.stringify(input),
     });
+  },
+
+  renewProfileSetupToken: async (): Promise<AccountMaterializationResponse> => {
+    return authFetch<AccountMaterializationResponse>(
+      "/auth/account/profile-setup-token/renew",
+      {
+        method: "POST",
+      },
+    );
   },
 
   checkAccountSlug: async (slug: string): Promise<SlugAvailabilityResponse> => {

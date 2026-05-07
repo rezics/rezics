@@ -12,6 +12,9 @@ export async function syncUserToMeili(unitId: string): Promise<void> {
   });
 
   if (!user) return;
+  if (user.accountStatus !== "MEMBER_READY" || !user.name || !user.slug) {
+    return;
+  }
 
   const doc: UserSearchDocument = {
     id: user.unitId,

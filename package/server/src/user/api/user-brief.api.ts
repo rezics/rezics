@@ -18,8 +18,8 @@ const briefSelect = {
 
 type BriefRow = {
   unitId: string;
-  name: string;
-  slug: string;
+  name: string | null;
+  slug: string | null;
   bio: string | null;
   avatar: string | null;
 };
@@ -27,8 +27,8 @@ type BriefRow = {
 function toBrief(user: BriefRow) {
   return {
     unitId: user.unitId,
-    name: user.name,
-    slug: user.slug,
+    name: user.name ?? undefined,
+    slug: user.slug ?? undefined,
     bio: user.bio ?? undefined,
     avatar: user.avatar ?? undefined,
   };

@@ -11,7 +11,7 @@ export const userDTOSchema = t.Object({
   unitId: t.String(),
   email: t.Optional(t.String()),
   slug: t.Optional(t.String()),
-  name: t.String(),
+  name: t.Optional(t.String()),
   avatar: t.Optional(t.String()),
   bio: t.Optional(t.String()),
   description: t.Optional(t.String()),
@@ -142,7 +142,7 @@ export type UpdateUserSettings = (typeof updateUserSettingsSchema)["static"];
 
 export const userBriefSchema = t.Object({
   unitId: t.String(),
-  name: t.String(),
+  name: t.Optional(t.String()),
   slug: t.Optional(t.String()),
   bio: t.Optional(t.String()),
   avatar: t.Optional(t.String()),

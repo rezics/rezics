@@ -703,8 +703,8 @@ model User {
   /// auth.User.email after that point.
   email          String?           @db.VarChar(320)
   accountStatus  UserAccountStatus @default(MEMBER_READY)
-  slug           String            @unique
-  name           String
+  slug           String?           @unique
+  name           String?
   avatar         String?
   bio            String?
   description    String?

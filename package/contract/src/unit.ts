@@ -102,7 +102,7 @@ export const contentRatingSchema = t.Union([
 export const publicUserSchema = t.Object({
   unitId: t.String(),
   slug: t.Optional(t.String()),
-  name: t.String(),
+  name: t.Optional(t.String()),
   avatar: t.Optional(t.Nullable(t.String())),
   bio: t.Optional(t.Nullable(t.String())),
   description: t.Optional(t.Nullable(t.String())),

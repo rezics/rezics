@@ -8,6 +8,7 @@ import type {
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
+import { mapPublicUser } from "@/utils/sanitizeUser";
 import type {
   ShelfItemRow,
   ShelfListSelected,
@@ -98,7 +99,7 @@ export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
   return {
     unitId: row.unitId,
     userId: row.unit?.userId ?? undefined,
-    user: row.unit?.user ?? undefined,
+    user: mapPublicUser(row.unit?.user),
     kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(
       row.unit?.defaultLanguage,
@@ -132,7 +133,7 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
   return {
     unitId: row.unitId,
     userId: row.unit?.userId ?? undefined,
-    user: row.unit?.user ?? undefined,
+    user: mapPublicUser(row.unit?.user),
     kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(
       row.unit?.defaultLanguage,

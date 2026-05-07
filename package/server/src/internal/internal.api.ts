@@ -95,7 +95,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
       detail: {
         summary: "Provision user for internal tooling",
         description:
-          "Create or update a user record for non-registration internal tooling. Public registration uses /auth/account/setup.",
+          "Create or update a user record for non-registration internal tooling. Public registration uses /auth/account/materialize and /auth/account/profile-setup.",
         tags: ["Internal"],
       },
     },

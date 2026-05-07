@@ -9,8 +9,8 @@ export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
   return {
     unitId: user.unitId,
     email: user.email ?? undefined,
-    slug: user.slug,
-    name: user.name,
+    slug: user.slug ?? undefined,
+    name: user.name ?? undefined,
     avatar: user.avatar || undefined,
     bio: user.bio || undefined,
     description: user.description || undefined,
@@ -29,8 +29,8 @@ export function mapUserToPublicProfile(
 ): UserDTO {
   return {
     unitId: user.unitId,
-    slug: user.slug,
-    name: user.name,
+    slug: user.slug ?? undefined,
+    name: user.name ?? undefined,
     avatar: user.avatar || undefined,
     bio: user.bio || undefined,
     description: user.description || undefined,

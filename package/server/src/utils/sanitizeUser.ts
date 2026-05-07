@@ -17,6 +17,33 @@ export const publicUserSelect = {
   followingsCount: true,
 } satisfies Prisma.UserSelect;
 
+export type PublicUserSelected = {
+  unitId: string;
+  slug: string | null;
+  name: string | null;
+  avatar: string | null;
+  bio?: string | null;
+  description?: string | null;
+  followersCount?: number;
+  followingsCount?: number;
+};
+
+export function mapPublicUser(
+  user: PublicUserSelected | null | undefined,
+): PublicUser | undefined {
+  if (!user) return undefined;
+  return {
+    unitId: user.unitId,
+    slug: user.slug ?? undefined,
+    name: user.name ?? undefined,
+    avatar: user.avatar ?? null,
+    bio: user.bio ?? undefined,
+    description: user.description ?? undefined,
+    followersCount: user.followersCount,
+    followingsCount: user.followingsCount,
+  };
+}
+
 /**
  * Sanitize user data for public response — base version.
  *
@@ -25,12 +52,12 @@ export const publicUserSelect = {
 export function sanitizeUser(
   u: Pick<User, "unitId" | "name"> & Partial<Pick<User, "slug" | "avatar">>,
 ): PublicUser {
-  return {
+  return mapPublicUser({
     unitId: u.unitId,
-    slug: u.slug,
+    slug: u.slug ?? null,
     name: u.name,
-    avatar: u.avatar ?? (null as any),
-  };
+    avatar: u.avatar ?? null,
+  })!;
 }
 
 /**
@@ -39,11 +66,5 @@ export function sanitizeUser(
  * @deprecated Use `publicUserSelect` with Prisma select instead.
  */
 export function sanitizeUserWithBio(u: User): PublicUser {
-  return {
-    ...sanitizeUser(u),
-    bio: u.bio ?? undefined,
-    description: u.description ?? undefined,
-    followersCount: u.followersCount,
-    followingsCount: u.followingsCount,
-  };
+  return mapPublicUser(u)!;
 }

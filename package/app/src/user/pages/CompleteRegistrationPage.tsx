@@ -154,7 +154,6 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
   }, [slug, slugCheck, t]);
 
   const canSubmit =
-    displayName.trim().length > 0 &&
     slug.length >= 6 &&
     !slugError &&
     !checkingSlug &&
@@ -164,7 +163,10 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
     setLoading(true);
     setError(undefined);
     try {
-      await authApi.setupAccount({ displayName: displayName.trim(), slug });
+      await authApi.setupProfile({
+        ...(displayName.trim() ? { displayName: displayName.trim() } : {}),
+        slug,
+      });
       onComplete();
     } catch (err) {
       const msg = (err as Error).message;
@@ -444,6 +446,8 @@ export const CompleteRegistrationPage: FC = () => {
   const [pauseConfirming, setPauseConfirming] = useState(false);
   const [pausing, setPausing] = useState(false);
   const [pauseError, setPauseError] = useState<string>();
+  const [materializing, setMaterializing] = useState(false);
+  const [materializeError, setMaterializeError] = useState<string>();
   const authSessionStatus = useAuthSessionStore((state) => state.status);
   const registrationStage = useAuthSessionStore(selectRegistrationStage);
   const [sessionProbeStatus, setSessionProbeStatus] = useState<
@@ -470,7 +474,7 @@ export const CompleteRegistrationPage: FC = () => {
   const activeStep =
     effectiveRegistrationStage === "verify-email"
       ? 0
-      : effectiveRegistrationStage === "complete" || mainUserExists
+      : effectiveRegistrationStage === "complete"
         ? 2
         : 1;
 
@@ -481,8 +485,63 @@ export const CompleteRegistrationPage: FC = () => {
 
   const handleEmailComplete = useCallback(async () => {
     setJustCompletedEmail(true);
+    setMaterializing(true);
+    setMaterializeError(undefined);
+    try {
+      await authApi.materializeAccount();
+    } catch (caughtError) {
+      const msg = (caughtError as Error).message;
+      try {
+        const parsed = JSON.parse(msg);
+        setMaterializeError(parsed.message ?? msg);
+      } catch {
+        setMaterializeError(msg);
+      }
+    } finally {
+      setMaterializing(false);
+    }
     await hydrateAuthSessionState({ requirePresence: false });
   }, []);
+
+  useEffect(() => {
+    if (
+      !emailVerified ||
+      mainUserExists ||
+      materializing ||
+      materializeError ||
+      effectiveRegistrationStage !== "setup-account"
+    ) {
+      return;
+    }
+
+    let mounted = true;
+    setMaterializing(true);
+    void authApi
+      .materializeAccount()
+      .catch((caughtError) => {
+        const msg = (caughtError as Error).message;
+        try {
+          const parsed = JSON.parse(msg);
+          if (mounted) setMaterializeError(parsed.message ?? msg);
+        } catch {
+          if (mounted) setMaterializeError(msg);
+        }
+      })
+      .then(() => hydrateAuthSessionState({ requirePresence: false }))
+      .finally(() => {
+        if (mounted) setMaterializing(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [
+    effectiveRegistrationStage,
+    emailVerified,
+    mainUserExists,
+    materializeError,
+    materializing,
+  ]);
 
   useEffect(() => {
     if (
@@ -612,8 +671,8 @@ export const CompleteRegistrationPage: FC = () => {
       id: "account",
       label: t("auth.flow.setup_title"),
       optional: mainUserExists && auth.user?.slug ? auth.user.slug : undefined,
-      completed: mainUserExists,
-      active: activeStep === 1,
+      completed: effectiveRegistrationStage === "complete",
+      active: activeStep === 1 && !materializing,
       content: <IdentityStep onComplete={handleAccountSetupComplete} />,
     },
   ];
@@ -628,6 +687,19 @@ export const CompleteRegistrationPage: FC = () => {
           </p>
 
           <VerticalStepper steps={steps} />
+
+          {materializing && (
+            <div className="flex items-center gap-3 text-sm text-text-secondary">
+              <Spinner size="sm" />
+              <span>{t("auth.flow.verify_checking_state")}</span>
+            </div>
+          )}
+
+          {materializeError && (
+            <Alert variant="destructive">
+              <AlertDescription>{materializeError}</AlertDescription>
+            </Alert>
+          )}
 
           {pauseError && (
             <Alert variant="destructive">

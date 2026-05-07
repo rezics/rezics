@@ -95,6 +95,25 @@ const setupRequiredSession = {
   },
 };
 
+const profileSetupSession = {
+  ...readySession,
+  authSession: {
+    ...readySession.authSession,
+    mainUserExists: true,
+    registrationComplete: false,
+    canAcquireMemberToken: false,
+    readinessStatus: "needs-main-setup" as const,
+    pendingRegistration: {
+      active: true,
+      step: "setup-account" as const,
+      email: "reader@example.com",
+      emailVerified: true,
+      requiresEmailVerification: false,
+      requiresMainAccountSetup: true,
+    },
+  },
+};
+
 describe("authSessionStore", () => {
   beforeEach(async () => {
     presence = false;
@@ -135,9 +154,27 @@ describe("authSessionStore", () => {
       registrationStage: "verify-email",
       hasAuthIdentity: true,
       hasMemberSession: false,
+      hasProfileSetupSession: false,
       registrationComplete: false,
       mainUserExists: false,
       needsVerification: true,
+    });
+  });
+
+  test("derives profile setup session separately from member session", async () => {
+    const { useAuthSessionStore } = await import("./authSessionStore");
+
+    useAuthSessionStore.getState().setSessionState(profileSetupSession);
+
+    expect(useAuthSessionStore.getState()).toMatchObject({
+      capabilityLevel: "needs-main-setup",
+      registrationStage: "setup-account",
+      hasAuthIdentity: true,
+      hasProfileSetupSession: true,
+      hasMemberSession: false,
+      registrationComplete: false,
+      mainUserExists: true,
+      needsMainSetup: true,
     });
   });
 

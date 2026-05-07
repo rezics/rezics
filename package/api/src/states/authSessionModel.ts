@@ -34,6 +34,11 @@ export type AuthSessionDerivedState = {
    */
   hasAuthIdentity: boolean;
   /**
+   * Main profile setup session state. This can be true after main has
+   * materialized a minimal user but before member activation.
+   */
+  hasProfileSetupSession: boolean;
+  /**
    * Main server member session state. This is true only when main accepts the
    * user as a member and can attach server permission.
    */
@@ -111,11 +116,9 @@ export function deriveAuthSessionState(
   const emailVerified = Boolean(authSession?.emailVerified);
   const mainUserExists = Boolean(authSession?.mainUserExists);
   const needsVerification = hasAuthIdentity && !emailVerified;
+  const registrationComplete = Boolean(authSession?.registrationComplete);
   const needsMainSetup = Boolean(
-    hasAuthIdentity && emailVerified && !mainUserExists,
-  );
-  const registrationComplete = Boolean(
-    authSession?.registrationComplete || (emailVerified && mainUserExists),
+    hasAuthIdentity && emailVerified && !registrationComplete,
   );
   const role = snapshot?.user?.role?.toUpperCase();
   const permission =
@@ -139,6 +142,13 @@ export function deriveAuthSessionState(
     hasMemberSession,
     registrationStage,
   });
+  const hasProfileSetupSession = Boolean(
+    hasAuthIdentity &&
+      emailVerified &&
+      mainUserExists &&
+      !registrationComplete &&
+      registrationStage === "setup-account",
+  );
 
   return {
     status,
@@ -146,6 +156,7 @@ export function deriveAuthSessionState(
     user: snapshot?.user ?? null,
     authSession,
     hasAuthIdentity,
+    hasProfileSetupSession,
     hasMemberSession,
     permission,
     capabilityLevel,

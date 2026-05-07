@@ -1,4 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
+import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { PostWithRelations } from "./types";
 
 /**
@@ -8,7 +9,7 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
   return {
     unitId: post.unitId,
     authorUserId: post.authorUserId,
-    author: post.unit.user ?? undefined,
+    author: mapPublicUser(post.unit.user),
     targetUnitId: post.targetUnitId ?? null,
     body: post.body ?? null,
     rootPostUnitId: post.rootPostUnitId ?? null,

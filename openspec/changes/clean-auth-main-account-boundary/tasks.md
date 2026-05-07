@@ -31,7 +31,7 @@
 - [x] 4.1 Add or update auth internal response shape to expose minimal verified registration facts for main materialization.
 - [x] 4.2 Ensure auth verification routes mutate only auth-owned verification state and do not create or update main product data.
 - [x] 4.3 Add auth-side slug login alias or technical name update support for main-originated projection.
-- [ ] 4.4 Ensure auth `User.name` is populated from main slug only as a technical label where better-auth requires it.
+- [x] 4.4 Ensure auth `User.name` is populated from main slug only as a technical label where better-auth requires it.
 - [x] 4.5 Add auth tests for verified registration facts and slug projection update behavior.
 
 ## 5. Main Token and Guard Split
@@ -47,19 +47,19 @@
 
 ## 6. Main Registration Materialization and Profile Setup
 
-- [ ] 6.1 Split current main account setup into a materialization endpoint and a profile setup completion endpoint.
-- [ ] 6.2 Implement main materialization to validate auth session through auth and create a minimal `User` from verified registration facts.
-- [ ] 6.3 During materialization, initialize `User.email` from verified auth email and create or mark the `user.email` verification contract.
-- [ ] 6.4 Ensure materialization issues only `rezics-profile-setup-token` and never `rezics-session-token`.
-- [ ] 6.5 Implement profile setup completion with slug validation, slug uniqueness, optional name/avatar, and default name from slug.
-- [ ] 6.6 Move member bootstrap work to profile setup activation: shelves, default realm membership, search sync, and member token issuance.
+- [x] 6.1 Split current main account setup into a materialization endpoint and a profile setup completion endpoint.
+- [x] 6.2 Implement main materialization to validate auth session through auth and create a minimal `User` from verified registration facts.
+- [x] 6.3 During materialization, initialize `User.email` from verified auth email and create or mark the `user.email` verification contract.
+- [x] 6.4 Ensure materialization issues only `rezics-profile-setup-token` and never `rezics-session-token`.
+- [x] 6.5 Implement profile setup completion with slug validation, slug uniqueness, optional name/avatar, and default name from slug.
+- [x] 6.6 Move member bootstrap work to profile setup activation: shelves, default realm membership, search sync, and member token issuance.
 - [ ] 6.7 Implement admin-only slug change in main and trigger auth slug alias projection after canonical update.
 - [ ] 6.8 Add server tests for materialization success, unverified rejection, duplicate materialization, setup token issuance, setup renewal, profile setup slug conflict, profile setup activation, and admin slug projection.
 
 ## 7. API Client and Frontend State
 
 - [ ] 7.1 Update `package/api` auth/account APIs for materialization, profile setup, setup token renewal, profile setup token state, and main email verification contracts.
-- [ ] 7.2 Update frontend auth session store to model auth identity, profile setup session, member session, and account stages separately.
+- [x] 7.2 Update frontend auth session store to model auth identity, profile setup session, member session, and account stages separately.
 - [ ] 7.3 Treat public account-stage cookies as routing hints only and confirm state through authoritative server probes.
 - [ ] 7.4 Update token refresh helpers so profile-setup-required responses route to profile setup instead of clearing useful auth state.
 - [ ] 7.5 Add API/state tests for registration verification, profile setup, setup token renewal, member-ready, stale hint cookie, and refresh rejection states.
@@ -67,8 +67,8 @@
 ## 8. Frontend Registration and Settings UX
 
 - [ ] 8.1 Update registration pages so auth-only users remain locked in registration verification and do not call normal main product APIs.
-- [ ] 8.2 Update complete-registration flow to request main materialization after verification and then continue under profile setup token.
-- [ ] 8.3 Update profile setup UI to submit slug, optional name/avatar, and default display name from slug when blank.
+- [x] 8.2 Update complete-registration flow to request main materialization after verification and then continue under profile setup token.
+- [x] 8.3 Update profile setup UI to submit slug, optional name/avatar, and default display name from slug when blank.
 - [ ] 8.4 Update OAuth callback handling for trusted provider facts, untrusted verification, materialization, and profile setup routing.
 - [ ] 8.5 Update Account/Profile settings Rezics email UX to use main email verification contracts and write only verified email to `User.email`.
 - [ ] 8.6 Move auth login email change UX to Security settings alongside password, sessions, and connected providers.

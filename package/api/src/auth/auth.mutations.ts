@@ -157,7 +157,7 @@ export function useSetupAccountMutation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: { displayName: string; slug: string }) =>
-      authApi.setupAccount(input),
+      authApi.setupProfile(input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: authKeys.session() });
       qc.invalidateQueries({ queryKey: authKeys.sessionState() });

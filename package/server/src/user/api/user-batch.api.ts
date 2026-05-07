@@ -19,12 +19,12 @@ export const userBatchApi = new Elysia().get(
 
     const result: Record<
       string,
-      { name: string; slug: string; avatar: string | null }
+      { name?: string; slug?: string; avatar: string | null }
     > = {};
     for (const user of users) {
       result[user.unitId] = {
-        name: user.name,
-        slug: user.slug,
+        name: user.name ?? undefined,
+        slug: user.slug ?? undefined,
         avatar: user.avatar,
       };
     }

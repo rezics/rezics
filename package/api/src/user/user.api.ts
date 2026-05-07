@@ -148,7 +148,7 @@ export const userApi = {
   batch: async (
     ids: string[],
   ): Promise<
-    Record<string, { name: string; slug: string; avatar: string }>
+    Record<string, { name?: string; slug?: string; avatar: string | null }>
   > => {
     return apiFetch(`/user/batch?ids=${ids.join(",")}`);
   },

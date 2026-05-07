@@ -12,6 +12,7 @@ import type {
   RealmTagUnit,
   RealmUnit,
 } from "#/prisma/client";
+import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { RealmListSelected, RealmWithRelations } from "./types";
 
 export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
@@ -19,7 +20,7 @@ export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
     unitId: row.unitId,
     slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
-    user: row.unit?.user ?? undefined,
+    user: mapPublicUser(row.unit?.user),
     isPublic: row.isPublic,
     isOfficial: row.isOfficial,
     memberCount: row.memberCount,
@@ -36,7 +37,7 @@ export function mapRealmListRowToDTO(row: RealmListSelected): RealmDTO {
     unitId: row.unitId,
     slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
-    user: row.unit?.user ?? undefined,
+    user: mapPublicUser(row.unit?.user),
     isPublic: row.isPublic,
     isOfficial: row.isOfficial,
     memberCount: row.memberCount,

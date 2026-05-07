@@ -14,15 +14,28 @@ const signRezicsProfileSetupToken = mock(
   async () => "signed-profile-setup-session",
 );
 const verifyRezicsSessionToken = mock(async () => null);
+const verifyRezicsProfileSetupToken = mock(async () => ({
+  userId: "user-1",
+  tokenType: "profile-setup",
+  purpose: "profile-setup",
+}));
 
 type MainUserLookup = {
   unitId: string;
-  slug: string;
+  slug: string | null;
+  authUserId?: string | null;
   permission: { role: string[] };
   accountStatus: "PROFILE_SETUP_REQUIRED" | "MEMBER_READY";
 };
 
-const createFromVerifiedAuth = mock(async (_input?: unknown) => ({
+const materializeFromVerifiedAuth = mock(async (_input?: unknown) => ({
+  unitId: "user-1",
+  slug: null,
+  name: null,
+  email: "reader@example.com",
+  permission: { role: ["MEMBER"] },
+}));
+const completeProfileSetup = mock(async (_input?: unknown) => ({
   unitId: "user-1",
   slug: "reader",
   name: "Reader",
@@ -61,12 +74,14 @@ mock.module("@/session/jwt/jwt.service", () => ({
   getMainSessionPublicJwks,
   signRezicsProfileSetupToken,
   signRezicsSessionToken,
+  verifyRezicsProfileSetupToken,
   verifyRezicsSessionToken,
 }));
 
 mock.module("@/user/service/user.service", () => ({
   userService: {
-    createFromVerifiedAuth,
+    completeProfileSetup,
+    materializeFromVerifiedAuth,
   },
 }));
 
@@ -89,9 +104,23 @@ beforeEach(() => {
   getMainSessionPublicJwks.mockResolvedValue({ keys: [] });
   verifyRezicsSessionToken.mockReset();
   verifyRezicsSessionToken.mockResolvedValue(null);
+  verifyRezicsProfileSetupToken.mockReset();
+  verifyRezicsProfileSetupToken.mockResolvedValue({
+    userId: "user-1",
+    tokenType: "profile-setup",
+    purpose: "profile-setup",
+  });
 
-  createFromVerifiedAuth.mockReset();
-  createFromVerifiedAuth.mockResolvedValue({
+  materializeFromVerifiedAuth.mockReset();
+  materializeFromVerifiedAuth.mockResolvedValue({
+    unitId: "user-1",
+    slug: null,
+    name: null,
+    email: "reader@example.com",
+    permission: { role: ["MEMBER"] },
+  });
+  completeProfileSetup.mockReset();
+  completeProfileSetup.mockResolvedValue({
     unitId: "user-1",
     slug: "reader",
     name: "Reader",
@@ -387,7 +416,7 @@ describe("main auth public boundary", () => {
         message: "Main account setup is required before member session refresh",
       },
     });
-    expect(createFromVerifiedAuth).not.toHaveBeenCalled();
+    expect(materializeFromVerifiedAuth).not.toHaveBeenCalled();
     expect(signRezicsSessionToken).not.toHaveBeenCalled();
   });
 
@@ -459,10 +488,24 @@ describe("main auth public boundary", () => {
     expect(signRezicsProfileSetupToken).not.toHaveBeenCalled();
   });
 
-  test("sets up a main account for a verified auth-only session", async () => {
+  test("materializes a minimal main account for a verified auth-only session", async () => {
     userFindUnique.mockResolvedValueOnce(null);
-    setFetch(async () =>
-      Response.json({
+    setFetch(async (input) => {
+      const url = String(input);
+      if (url.endsWith("/internal/registration/verified-facts")) {
+        return Response.json({
+          success: true,
+          facts: {
+            authUserId: "user-1",
+            email: "reader@example.com",
+            emailVerified: true,
+            verifiedAt: "2026-05-07T00:00:00.000Z",
+            verificationSource: "github",
+            trustedProviderId: "github",
+          },
+        });
+      }
+      return Response.json({
         user: {
           id: "user-1",
           name: "Reader",
@@ -470,34 +513,24 @@ describe("main auth public boundary", () => {
           emailVerified: true,
           image: null,
         },
-        authSession: {
-          trustedProviderId: "github",
-        },
-      }),
-    );
+      });
+    });
 
     const { authPublicApi } = await import("./auth-public.api");
     const response = await authPublicApi.handle(
-      new Request("http://main.test/auth/account/setup", {
+      new Request("http://main.test/auth/account/materialize", {
         method: "POST",
         headers: {
-          "content-type": "application/json",
           origin: "http://main.test",
           cookie: "better-auth.session_token=opaque",
         },
-        body: JSON.stringify({
-          displayName: "Reader",
-          slug: "reader",
-        }),
       }),
     );
 
     expect(response.status).toBe(200);
-    const setupInput = createFromVerifiedAuth.mock.calls[0]?.[0] as {
+    const setupInput = materializeFromVerifiedAuth.mock.calls[0]?.[0] as {
       authUserId: string;
       email: string;
-      displayName: string;
-      slug: string;
       verifiedAt: Date;
       verificationSource: string;
       avatar: string | null;
@@ -505,19 +538,18 @@ describe("main auth public boundary", () => {
     expect(setupInput).toMatchObject({
       authUserId: "user-1",
       email: "reader@example.com",
-      displayName: "Reader",
-      slug: "reader",
       verificationSource: "github",
       avatar: null,
     });
     expect(setupInput.verifiedAt).toBeInstanceOf(Date);
     expect((await response.json()).success).toBe(true);
     expect(response.headers.get("set-cookie")).toContain(
-      "rezics-session-token=signed-main-session",
+      "rezics-profile-setup-token=signed-profile-setup-session",
     );
+    expect(signRezicsSessionToken).not.toHaveBeenCalled();
   });
 
-  test("setup rejects unverified auth sessions", async () => {
+  test("materialization rejects unverified auth sessions", async () => {
     setFetch(async () =>
       Response.json({
         user: {
@@ -530,12 +562,37 @@ describe("main auth public boundary", () => {
 
     const { authPublicApi } = await import("./auth-public.api");
     const response = await authPublicApi.handle(
-      new Request("http://main.test/auth/account/setup", {
+      new Request("http://main.test/auth/account/materialize", {
+        method: "POST",
+        headers: {
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect((await response.json()).error.code).toBe("EMAIL_UNVERIFIED");
+    expect(materializeFromVerifiedAuth).not.toHaveBeenCalled();
+  });
+
+  test("profile setup activates a materialized user", async () => {
+    userFindUnique.mockResolvedValueOnce({
+      unitId: "user-1",
+      slug: null,
+      authUserId: "user-1",
+      permission: { role: ["MEMBER"] },
+      accountStatus: "PROFILE_SETUP_REQUIRED",
+    });
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/account/profile-setup", {
         method: "POST",
         headers: {
           "content-type": "application/json",
           origin: "http://main.test",
-          cookie: "better-auth.session_token=opaque",
+          cookie: "rezics-profile-setup-token=setup-token",
         },
         body: JSON.stringify({
           displayName: "Reader",
@@ -544,32 +601,36 @@ describe("main auth public boundary", () => {
       }),
     );
 
-    expect(response.status).toBe(403);
-    expect((await response.json()).error.code).toBe("EMAIL_UNVERIFIED");
-    expect(createFromVerifiedAuth).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(completeProfileSetup).toHaveBeenCalledWith({
+      userId: "user-1",
+      slug: "reader",
+      displayName: "Reader",
+      avatar: undefined,
+    });
+    expect(response.headers.get("set-cookie")).toContain(
+      "rezics-session-token=signed-main-session",
+    );
   });
 
-  test("setup returns slug conflict from main uniqueness", async () => {
-    userFindUnique.mockResolvedValueOnce(null);
-    createFromVerifiedAuth.mockRejectedValueOnce({ code: "P2002" });
-    setFetch(async () =>
-      Response.json({
-        user: {
-          id: "user-1",
-          email: "reader@example.com",
-          emailVerified: true,
-        },
-      }),
-    );
+  test("profile setup returns slug conflict from main uniqueness", async () => {
+    userFindUnique.mockResolvedValueOnce({
+      unitId: "user-1",
+      slug: null,
+      authUserId: "user-1",
+      permission: { role: ["MEMBER"] },
+      accountStatus: "PROFILE_SETUP_REQUIRED",
+    });
+    completeProfileSetup.mockRejectedValueOnce({ code: "P2002" });
 
     const { authPublicApi } = await import("./auth-public.api");
     const response = await authPublicApi.handle(
-      new Request("http://main.test/auth/account/setup", {
+      new Request("http://main.test/auth/account/profile-setup", {
         method: "POST",
         headers: {
           "content-type": "application/json",
           origin: "http://main.test",
-          cookie: "better-auth.session_token=opaque",
+          cookie: "rezics-profile-setup-token=setup-token",
         },
         body: JSON.stringify({
           displayName: "Reader",

@@ -209,7 +209,7 @@ describe("authApi", () => {
     await authApi.setPassword({
       newPassword: "new-password",
     });
-    await authApi.setupAccount({
+    await authApi.setupProfile({
       displayName: "Reader",
       slug: "reader",
     });
@@ -224,7 +224,39 @@ describe("authApi", () => {
       "http://api.example/auth/set-password",
     );
     expect(fetchMock.mock.calls[3]![0]).toBe(
-      "http://api.example/auth/account/setup",
+      "http://api.example/auth/account/profile-setup",
+    );
+  });
+
+  test("materializes account and renews profile setup token through main boundary", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }),
+      );
+
+    const { authApi } = await import("./auth.api");
+
+    await authApi.materializeAccount();
+    await authApi.renewProfileSetupToken();
+
+    expect(fetchMock.mock.calls[0]![0]).toBe(
+      "http://api.example/auth/account/materialize",
+    );
+    expect(fetchMock.mock.calls[1]![0]).toBe(
+      "http://api.example/auth/account/profile-setup-token/renew",
     );
   });
 

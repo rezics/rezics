@@ -30,10 +30,17 @@ export type CreateUserProfileInput = {
 export type CreateVerifiedAuthAccountInput = {
   authUserId: string;
   email: string;
-  displayName: string;
-  slug: string;
   verificationSource: string;
   verifiedAt?: Date;
+  displayName?: string;
+  slug?: string;
+  avatar?: string | null;
+};
+
+export type CompleteProfileSetupInput = {
+  userId: string;
+  slug: string;
+  displayName?: string;
   avatar?: string | null;
 };
 
@@ -145,7 +152,7 @@ export class UserService {
     return user as UserWithRelations;
   }
 
-  async createFromVerifiedAuth(
+  async materializeFromVerifiedAuth(
     payload: CreateVerifiedAuthAccountInput,
   ): Promise<UserWithRelations> {
     const user = await prisma.$transaction(async (tx) => {
@@ -160,11 +167,10 @@ export class UserService {
           unitId: payload.authUserId,
           authUserId: payload.authUserId,
           email: payload.email,
-          accountStatus: "MEMBER_READY",
-          slug: payload.slug,
-          name: payload.displayName,
+          accountStatus: "PROFILE_SETUP_REQUIRED",
+          slug: payload.slug ?? null,
+          name: payload.displayName ?? null,
           avatar: payload.avatar ?? null,
-          joinDate: new Date(),
         },
         include: userInclude,
       });
@@ -190,7 +196,31 @@ export class UserService {
           verifiedAt: payload.verifiedAt ?? new Date(),
         },
       });
-      await bootstrapSystemShelves(created.unitId, tx);
+      return created;
+    });
+
+    return user as UserWithRelations;
+  }
+
+  async completeProfileSetup(
+    payload: CompleteProfileSetupInput,
+  ): Promise<UserWithRelations> {
+    const displayName = payload.displayName?.trim() || payload.slug;
+
+    const user = await prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { unitId: payload.userId },
+        data: {
+          slug: payload.slug,
+          name: displayName,
+          avatar: payload.avatar ?? undefined,
+          accountStatus: "MEMBER_READY",
+          joinDate: new Date(),
+        },
+        include: userInclude,
+      });
+
+      await bootstrapSystemShelves(updated.unitId, tx);
 
       const defaultRealmId = getDefaultRealmId();
       if (defaultRealmId) {
@@ -198,14 +228,14 @@ export class UserService {
           .create({
             data: {
               realmUnitId: defaultRealmId,
-              userId: created.unitId,
+              userId: updated.unitId,
               roleKey: "member",
             },
           })
           .catch(() => {});
       }
 
-      return created;
+      return updated;
     });
 
     await syncUserToMeili(user.unitId);

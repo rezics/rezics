@@ -1,5 +1,6 @@
 import type { BookDTO, Language, UnitTranslationDTO } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
+import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { BookWithRelations } from "./types";
 
 function pickCoverUrl(book: BookWithRelations): string | undefined {
@@ -49,7 +50,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
   return {
     unitId: book.unitId,
     userId: unit.userId,
-    user: unit.user ?? undefined,
+    user: mapPublicUser(unit.user),
     workUnitId: unit.workUnitId ?? undefined,
     status: unit.status,
     visibility: unit.visibility,
