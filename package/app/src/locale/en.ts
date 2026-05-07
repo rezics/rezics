@@ -391,8 +391,8 @@ export default {
       setup_slug_available: "Available",
       setup_slug_checking: "Checking availability...",
       setup_submit: "Create account",
-      cancel_registration: "Cancel registration",
-      cancel_registration_confirm: "Confirm cancel registration",
+      pause_registration: "Continue later",
+      pause_registration_confirm: "Sign out and continue later",
       registration_complete_redirecting:
         "Registration complete. Redirecting...",
       retry: "Retry",

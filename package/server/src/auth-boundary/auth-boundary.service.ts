@@ -1,5 +1,4 @@
 import {
-  AUTH_PRESENCE_COOKIE_NAME,
   type AccountSetupBody,
   type SlugAvailabilityResponse,
   validateSlug,
@@ -196,31 +195,6 @@ function isUniqueConstraintError(error: unknown): boolean {
     typeof error === "object" &&
     "code" in error &&
     (error as { code?: string }).code === "P2002"
-  );
-}
-
-function buildReadableCookieClear(name: string, path = "/"): string {
-  const secure =
-    env.NODE_ENV === "production" ||
-    env.AUTH_PUBLIC_ISSUER_URL.startsWith("https://");
-  const parts = [`${name}=`, `Path=${path}`, "SameSite=Lax", "Max-Age=0"];
-  if (secure) parts.push("Secure");
-  return parts.join("; ");
-}
-
-function appendRegistrationClearCookies(headers: Headers): void {
-  headers.append("set-cookie", buildSessionCookie(null));
-  headers.append(
-    "set-cookie",
-    buildReadableCookieClear(AUTH_PRESENCE_COOKIE_NAME),
-  );
-  headers.append(
-    "set-cookie",
-    buildReadableCookieClear("better-auth.session_token"),
-  );
-  headers.append(
-    "set-cookie",
-    buildReadableCookieClear("__Secure-better-auth.session_token"),
   );
 }
 
@@ -464,82 +438,6 @@ export async function getMainAwareAuthSessionState(
     },
     200,
   );
-}
-
-export async function cancelRegistrationFromAuth(
-  request: Request,
-): Promise<Response> {
-  if (csrfRejected(request)) {
-    return csrfError("Origin is not allowed for registration cancellation");
-  }
-
-  const sessionState = await fetchAuthSessionState(request);
-  const authUserId = sessionState?.user?.id;
-  if (!authUserId) {
-    const headers = new Headers();
-    appendRegistrationClearCookies(headers);
-    return jsonResponse(
-      {
-        success: true,
-        canceled: false,
-      },
-      200,
-      headers,
-    );
-  }
-
-  const existing = await findMainUserForAuthUser(authUserId);
-  if (existing) {
-    return jsonResponse(
-      {
-        success: false,
-        canceled: false,
-        error: {
-          code: "MAIN_USER_EXISTS",
-          message: "Completed accounts cannot be canceled as registration",
-        },
-      },
-      409,
-    );
-  }
-
-  if (!env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET) {
-    return jsonResponse(
-      {
-        success: false,
-        canceled: false,
-        error: {
-          code: "AUTH_INTERNAL_SECRET_MISSING",
-          message: "Auth cancellation secret is not configured",
-        },
-      },
-      500,
-    );
-  }
-
-  const response = await fetch(
-    new URL("/internal/registration/cancel", getInternalAuthBaseUrl()),
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
-      },
-      body: JSON.stringify({
-        authUserId,
-        allowVerified: Boolean(sessionState.user?.emailVerified),
-      }),
-    },
-  );
-
-  const body = await response.json().catch(() => ({
-    success: false,
-    canceled: false,
-  }));
-  const headers = new Headers();
-  appendRegistrationClearCookies(headers);
-
-  return jsonResponse(body, response.status, headers);
 }
 
 export async function refreshMainSessionFromAuth(

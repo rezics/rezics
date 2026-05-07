@@ -95,8 +95,8 @@ export default {
       setup_slug_available: "可使用",
       setup_slug_checking: "正在检查可用性…",
       setup_submit: "建立账号",
-      cancel_registration: "取消注册",
-      cancel_registration_confirm: "确认取消注册",
+      pause_registration: "稍后继续",
+      pause_registration_confirm: "退出并稍后继续",
       registration_complete_redirecting: "注册完成，正在重定向…",
       retry: "重試",
       providers: {

@@ -38,20 +38,19 @@ An auth user that has not completed email verification and main account setup SH
 - **AND** main SHALL NOT create a `User`
 - **AND** member-only product APIs SHALL remain unavailable
 
-### Requirement: Cancel registration removes the pending product path
-The system SHALL provide a cancel-registration action for auth-only pending registrants. Cancellation SHALL clear browser sessions and delete or disable the temporary auth account so the user is no longer forced through the same pending registration.
+### Requirement: Pending registration can be paused without deleting auth identity
+The system SHALL provide a pause-registration action for auth-only pending registrants. Pausing SHALL sign the browser out and clear local/main browser session state without deleting, disabling, or otherwise changing the temporary auth account.
 
-#### Scenario: User cancels pending email registration
-- **WHEN** an auth-only unverified registrant chooses cancel registration
-- **THEN** main SHALL orchestrate auth cleanup or cancellation marking
-- **AND** auth sessions for that temporary account SHALL be invalidated
-- **AND** browser auth presence and main session cookies SHALL be cleared
-- **AND** the frontend SHALL return to anonymous state
+#### Scenario: User pauses pending email registration
+- **WHEN** an auth-only unverified registrant chooses to continue later
+- **THEN** the app SHALL sign out through the normal auth boundary
+- **AND** browser auth presence, main session cookies, and frontend auth/profile state SHALL be cleared
+- **AND** the auth account and verification state SHALL remain recoverable
 
-#### Scenario: Canceled user starts again
-- **WHEN** a user whose temporary registration was canceled returns to login or register
-- **THEN** the system SHALL NOT force them back into the canceled verification flow
-- **AND** they SHALL be able to start a fresh sign-up or sign-in flow according to auth policy
+#### Scenario: Paused user signs in again
+- **WHEN** a user whose temporary registration was paused signs in again
+- **THEN** auth SHALL establish a normal auth session for the existing account
+- **AND** the app SHALL resume the pending verification or setup step
 
 ### Requirement: Pending registration re-entry is deterministic
 The system SHALL route users with existing unverified temporary auth accounts back to the verification step whenever they authenticate or attempt to register again before cleanup.

@@ -68,7 +68,7 @@ The registration flow SHALL NOT offer email editing during third-party registrat
 - **AND** they SHALL use account settings to change email through a separate verified email-change flow
 
 ### Requirement: Auth-only pending users are not guest-auth hybrids
-The app SHALL not treat auth-only pending registrants as guest-capable logged-in users. They SHALL remain inside the registration flow until completion, cancellation, sign-out, or temporary account cleanup.
+The app SHALL not treat auth-only pending registrants as guest-capable logged-in users. They SHALL remain inside the registration flow until completion, pause/sign-out, or temporary account cleanup.
 
 #### Scenario: Pending user attempts to navigate away
 - **WHEN** an auth-only pending registrant tries to access normal app routes

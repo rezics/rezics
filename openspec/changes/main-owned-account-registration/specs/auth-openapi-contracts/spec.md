@@ -12,13 +12,21 @@ Auth-facing session state contracts SHALL expose enough normalized state for the
 - **WHEN** a browser with verified email but no main user requests session state
 - **THEN** the response SHALL indicate that main account setup is required
 
-### Requirement: Auth contracts cover cancel registration support
-Auth contracts SHALL include internal or public-through-main response shapes needed for canceling or deleting a temporary registration account.
+### Requirement: Auth session state handles missing sessions without server errors
+Auth-facing session state endpoints SHALL return a typed unauthorized response when no valid auth session exists. They SHALL NOT throw internal server errors for `null` or malformed upstream session payloads.
 
-#### Scenario: Cancel registration succeeds
-- **WHEN** main calls auth to cancel a temporary account
-- **THEN** auth SHALL return a typed success response
-- **AND** sessions for the canceled account SHALL be invalidated
+#### Scenario: Missing auth session is requested
+- **WHEN** a browser without a valid auth session requests session state
+- **THEN** auth SHALL return an unauthorized typed error
+- **AND** the response SHALL NOT be a 500
+
+### Requirement: Session-state checks avoid unrelated JWT signing work
+Auth-facing session-state requests SHALL read the existing opaque browser session and pending-registration metadata without issuing a new auth JWT header or refreshing the session as a side effect.
+
+#### Scenario: Pending session state is probed
+- **WHEN** main or the frontend requests normalized session state
+- **THEN** auth SHALL not perform JWT/JWKS signing-key work merely to answer the readiness check
+- **AND** session-state latency SHALL be dominated by session/user/account reads, not signing-key bootstrap
 
 ### Requirement: Verification contracts expose delivery failures
 Verification email and OTP contracts SHALL expose recoverable error information for delivery failure, Turnstile failure, cooldown, invalid OTP, expired OTP, and already-verified states.

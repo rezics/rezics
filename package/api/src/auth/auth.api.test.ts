@@ -228,27 +228,15 @@ describe("authApi", () => {
     );
   });
 
-  test("checks slug availability and cancels registration through main-owned routes", async () => {
-    fetchMock
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({ available: true, normalized: "reader" }),
-          {
-            status: 200,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        ),
-      )
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ success: true, canceled: true }), {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }),
-      );
+  test("checks slug availability through the main-owned route", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ available: true, normalized: "reader" }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    );
 
     const { authApi } = await import("./auth.api");
 
@@ -256,16 +244,9 @@ describe("authApi", () => {
       available: true,
       normalized: "reader",
     });
-    await expect(authApi.cancelRegistration()).resolves.toEqual({
-      success: true,
-      canceled: true,
-    });
 
     expect(fetchMock.mock.calls[0]![0]).toBe(
       "http://api.example/auth/account/slug-availability?slug=reader",
-    );
-    expect(fetchMock.mock.calls[1]![0]).toBe(
-      "http://api.example/auth/registration/cancel",
     );
   });
 

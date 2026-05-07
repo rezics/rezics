@@ -108,6 +108,7 @@ export const auth = betterAuth({
       },
     }),
     jwt({
+      disableSettingJwtHeader: true,
       jwks: {
         keyPairConfig: {
           alg: "ES256",

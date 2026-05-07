@@ -376,8 +376,8 @@ export default {
       setup_slug_available: "可使用",
       setup_slug_checking: "正在檢查可用性…",
       setup_submit: "建立帳號",
-      cancel_registration: "取消註冊",
-      cancel_registration_confirm: "確認取消註冊",
+      pause_registration: "稍後繼續",
+      pause_registration_confirm: "退出並稍後繼續",
       registration_complete_redirecting: "註冊完成，正在重新導向…",
       retry: "重試",
       providers: {

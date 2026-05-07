@@ -44,10 +44,3 @@ export const slugAvailabilityResponseSchema = t.Object({
 });
 export type SlugAvailabilityResponse =
   (typeof slugAvailabilityResponseSchema)["static"];
-
-export const mainCancelRegistrationResponseSchema = t.Object({
-  success: t.Boolean(),
-  canceled: t.Boolean(),
-});
-export type MainCancelRegistrationResponse =
-  (typeof mainCancelRegistrationResponseSchema)["static"];

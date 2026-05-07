@@ -28,11 +28,9 @@ import {
 import { useTranslation } from "react-i18next";
 import { env } from "@/env";
 import {
-  clearAuthSessionState,
   hydrateAuthSessionState,
   selectRegistrationStage,
   useAuthSessionStore,
-  useUserProfileStore,
 } from "@/user/states";
 import { OtpInput } from "../components/OtpInput";
 import { Layout } from "../layouts/Layout";
@@ -443,9 +441,9 @@ export const CompleteRegistrationPage: FC = () => {
   const navigate = useNavigate();
   const auth = useAuth();
   const [justCompletedEmail, setJustCompletedEmail] = useState(false);
-  const [cancelConfirming, setCancelConfirming] = useState(false);
-  const [canceling, setCanceling] = useState(false);
-  const [cancelError, setCancelError] = useState<string>();
+  const [pauseConfirming, setPauseConfirming] = useState(false);
+  const [pausing, setPausing] = useState(false);
+  const [pauseError, setPauseError] = useState<string>();
   const authSessionStatus = useAuthSessionStore((state) => state.status);
   const registrationStage = useAuthSessionStore(selectRegistrationStage);
   const [sessionProbeStatus, setSessionProbeStatus] = useState<
@@ -520,38 +518,35 @@ export const CompleteRegistrationPage: FC = () => {
     navigate({ to: "/" });
   };
 
-  const handleCancelRegistration = async () => {
-    if (!cancelConfirming) {
-      setCancelConfirming(true);
+  const handlePauseRegistration = async () => {
+    if (!pauseConfirming) {
+      setPauseConfirming(true);
       return;
     }
 
-    setCanceling(true);
-    setCancelError(undefined);
+    setPausing(true);
+    setPauseError(undefined);
     try {
-      await authApi.cancelRegistration();
-      clearAuthSessionState();
-      useAuthSessionStore.getState().reset();
-      useUserProfileStore.getState().clearProfile();
+      await logout(true);
       navigate({ to: "/login" });
     } catch (caughtError) {
-      setCancelError((caughtError as Error).message);
+      setPauseError((caughtError as Error).message);
     } finally {
-      setCanceling(false);
+      setPausing(false);
     }
   };
 
-  const cancelRegistrationButton = (
+  const pauseRegistrationButton = (
     <Button
       variant="ghost"
-      disabled={canceling}
-      onClick={handleCancelRegistration}
+      disabled={pausing}
+      onClick={handlePauseRegistration}
     >
-      {canceling
+      {pausing
         ? t("common.loading")
-        : cancelConfirming
-          ? t("auth.flow.cancel_registration_confirm")
-          : t("auth.flow.cancel_registration")}
+        : pauseConfirming
+          ? t("auth.flow.pause_registration_confirm")
+          : t("auth.flow.pause_registration")}
     </Button>
   );
 
@@ -565,7 +560,7 @@ export const CompleteRegistrationPage: FC = () => {
             <span>{t("auth.flow.verify_checking_state")}</span>
           </div>
         }
-        actions={cancelRegistrationButton}
+        actions={pauseRegistrationButton}
       />
     );
   }
@@ -582,16 +577,15 @@ export const CompleteRegistrationPage: FC = () => {
                 {t("auth.flow.onboarding_sign_in_first")}
               </AlertDescription>
             </Alert>
-            {cancelError && (
+            {pauseError && (
               <Alert variant="destructive">
-                <AlertDescription>{cancelError}</AlertDescription>
+                <AlertDescription>{pauseError}</AlertDescription>
               </Alert>
             )}
           </div>
         }
         actions={
           <div className="flex flex-wrap justify-end gap-2">
-            {cancelRegistrationButton}
             <Button onClick={() => navigate({ to: "/login" })}>
               {t("auth.login")}
             </Button>
@@ -635,9 +629,9 @@ export const CompleteRegistrationPage: FC = () => {
 
           <VerticalStepper steps={steps} />
 
-          {cancelError && (
+          {pauseError && (
             <Alert variant="destructive">
-              <AlertDescription>{cancelError}</AlertDescription>
+              <AlertDescription>{pauseError}</AlertDescription>
             </Alert>
           )}
 
@@ -657,7 +651,7 @@ export const CompleteRegistrationPage: FC = () => {
             {t("auth.logout")}
           </Button>
         ) : (
-          cancelRegistrationButton
+          pauseRegistrationButton
         )
       }
     />

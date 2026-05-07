@@ -14,9 +14,16 @@ import { jsonRequestBody, jsonResponse } from "./docs";
 async function forwardAuthRequest(
   request: Request,
   path: string,
+  query?: Record<string, string>,
 ): Promise<Response> {
   const url = new URL(request.url);
   url.pathname = path;
+  if (query) {
+    url.search = "";
+    for (const [key, value] of Object.entries(query)) {
+      url.searchParams.set(key, value);
+    }
+  }
   return handleAuthRequest(new Request(url, request));
 }
 
@@ -24,31 +31,46 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
   const response = await forwardAuthRequest(
     request,
     `${env.AUTH_OPENAPI_ROUTER_PREFIX}/get-session`,
+    { disableRefresh: "true" },
   );
 
   if (!response.ok) {
     return response;
   }
 
-  const sessionData = (await response.json()) as Partial<{
-    session: {
-      id: string;
-      token: string;
-      expiresAt: string;
-      userId: string;
-    };
-    user: {
-      id: string;
-      name: string;
-      role: string;
-      email: string;
-      emailVerified: boolean;
-      image?: string | null;
-      createdAt: string;
-      updatedAt: string;
-    };
-  }> &
-    Record<string, unknown>;
+  const sessionData = (await response.json().catch(() => null)) as
+    | (Partial<{
+        session: {
+          id: string;
+          token: string;
+          expiresAt: string;
+          userId: string;
+        };
+        user: {
+          id: string;
+          name: string;
+          role: string;
+          email: string;
+          emailVerified: boolean;
+          image?: string | null;
+          createdAt: string;
+          updatedAt: string;
+        };
+      }> &
+        Record<string, unknown>)
+    | null;
+
+  if (!sessionData || typeof sessionData !== "object") {
+    return Response.json(
+      {
+        error: {
+          code: "AUTH_SESSION_INVALID",
+          message: "Auth session is invalid or expired",
+        },
+      },
+      { status: 401 },
+    );
+  }
 
   if (!sessionData.session || !sessionData.user?.id) {
     return Response.json(sessionData);

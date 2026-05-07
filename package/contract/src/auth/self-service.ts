@@ -197,10 +197,3 @@ export const setPasswordResponseSchema = t.Object({
   status: t.Boolean(),
 });
 export type SetPasswordResponse = (typeof setPasswordResponseSchema)["static"];
-
-export const cancelRegistrationResponseSchema = t.Object({
-  success: t.Boolean(),
-  canceled: t.Boolean(),
-});
-export type CancelRegistrationResponse =
-  (typeof cancelRegistrationResponseSchema)["static"];

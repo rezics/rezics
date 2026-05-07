@@ -4,7 +4,6 @@ import {
 } from "@rezics/contract";
 import { Elysia, status } from "elysia";
 import {
-  cancelRegistrationFromAuth,
   checkAccountSlugAvailability,
   getMainAwareAuthSessionState,
   proxyAuthBoundaryRequest,
@@ -36,18 +35,6 @@ export const authPublicApi = new Elysia({ prefix: "/auth" })
         summary: "Complete main account setup",
         description:
           "Create the main Rezics user after auth reports a trusted verified email.",
-        tags: ["Auth Boundary"],
-      },
-    },
-  )
-  .post(
-    "/registration/cancel",
-    ({ request }) => cancelRegistrationFromAuth(request),
-    {
-      detail: {
-        summary: "Cancel pending registration",
-        description:
-          "Main-owned cancellation for auth-only pending registration accounts.",
         tags: ["Auth Boundary"],
       },
     },

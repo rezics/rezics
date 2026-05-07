@@ -72,19 +72,20 @@ The email verification step SHALL display the pending account email and provide 
 
 - **WHEN** verification email or OTP delivery fails
 - **THEN** the UI SHALL show a visible recoverable error
-- **AND** the user SHALL be able to retry after the configured cooldown or cancel registration
+- **AND** the user SHALL be able to retry after the configured cooldown or pause registration
 
 ## ADDED Requirements
 
-### Requirement: Registration page provides cancel action
-The completion page SHALL expose a cancel-registration action while the user is auth-only and no main `User` exists.
+### Requirement: Registration page provides pause action
+The completion page SHALL expose a pause-registration action while the user is auth-only and no main `User` exists.
 
-#### Scenario: User cancels from verification page
-- **WHEN** a pending registrant clicks cancel registration and confirms
-- **THEN** the app SHALL call the cancel-registration API
-- **AND** the app SHALL clear auth state and return to anonymous navigation
+#### Scenario: User pauses from verification page
+- **WHEN** a pending registrant chooses to continue later and confirms
+- **THEN** the app SHALL sign out through the normal auth boundary
+- **AND** the app SHALL clear auth/profile state and return to anonymous navigation
+- **AND** the auth account SHALL remain available for later sign-in and registration re-entry
 
-#### Scenario: Cancel is accessible and localized
-- **WHEN** the cancel control is rendered
+#### Scenario: Pause is accessible and localized
+- **WHEN** the pause control is rendered
 - **THEN** it SHALL be keyboard reachable
 - **AND** its label, confirmation, and error messages SHALL use the active locale

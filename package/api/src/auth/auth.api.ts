@@ -4,17 +4,16 @@
  */
 
 import type {
+  AccountSetupBody,
+  AccountSetupResponse,
   AuthProvider,
   AuthResponse,
   AuthSession,
   AuthTokenResponse,
   AuthUser,
-  AccountSetupBody,
-  AccountSetupResponse,
   ChangeEmailBody,
   ChangeEmailResponse,
   GetSessionStateResponse,
-  MainCancelRegistrationResponse,
   RequestPasswordResetBody,
   RequestPasswordResetResponse,
   ResetPasswordBody,
@@ -286,15 +285,6 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify(input),
     });
-  },
-
-  cancelRegistration: async (): Promise<MainCancelRegistrationResponse> => {
-    return authFetch<MainCancelRegistrationResponse>(
-      "/auth/registration/cancel",
-      {
-        method: "POST",
-      },
-    );
   },
 
   checkAccountSlug: async (slug: string): Promise<SlugAvailabilityResponse> => {

@@ -10,6 +10,9 @@ process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
 process.env.AUTH_TRUSTED_ORIGINS ??= "http://localhost:3000";
 process.env.AUTH_JWT_AUDIENCE ??= "rezics";
 process.env.AUTH_JWT_ISSUER ??= "http://localhost:35003";
+process.env.SMTP_HOST ??= "smtp.test";
+process.env.SMTP_USER ??= "smtp-user";
+process.env.SMTP_PASSWORD ??= "smtp-password";
 
 const handleAuthRequest = mock((request: Request) => {
   const url = new URL(request.url);
@@ -81,7 +84,25 @@ describe("auth openapi routes", () => {
     expect(await response.json()).toEqual({
       method: "GET",
       pathname: "/api/auth/get-session",
-      search: "",
+      search: "?disableRefresh=true",
+    });
+  });
+
+  test("returns typed unauthorized response for missing session state", async () => {
+    handleAuthRequest.mockImplementationOnce(() => Response.json(null));
+
+    const { sessionRouter } = await import("./session");
+
+    const response = await sessionRouter.handle(
+      new Request("http://localhost/get-session-state"),
+    );
+
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "AUTH_SESSION_INVALID",
+        message: "Auth session is invalid or expired",
+      },
     });
   });
 

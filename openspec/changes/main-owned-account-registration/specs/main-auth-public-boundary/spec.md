@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Main owns registration orchestration routes
-Main SHALL expose public registration orchestration routes under the main-owned auth/account boundary for creating the main user after verification and canceling temporary registration.
+Main SHALL expose public registration orchestration routes under the main-owned auth/account boundary for creating the main user after verification. Pausing an incomplete registration SHALL use normal sign-out rather than a destructive registration endpoint.
 
 #### Scenario: Main account setup route is requested
 - **WHEN** a verified auth-only registrant submits display name and slug
@@ -9,11 +9,11 @@ Main SHALL expose public registration orchestration routes under the main-owned 
 - **AND** main SHALL create the main `User` if no main user exists
 - **AND** main SHALL issue `rezics-session-token`
 
-#### Scenario: Cancel registration route is requested
-- **WHEN** an auth-only registrant requests cancellation
-- **THEN** main SHALL clear main session state if present
-- **AND** main SHALL call auth internally to delete or disable the temporary auth account
-- **AND** main SHALL return a response that lets the browser clear pending auth state
+#### Scenario: Pending registration pause is requested
+- **WHEN** an auth-only registrant chooses to continue later
+- **THEN** the frontend SHALL call the normal sign-out boundary
+- **AND** main SHALL clear main session state if present
+- **AND** auth SHALL invalidate only the current browser session, not the temporary auth account
 
 ## MODIFIED Requirements
 
@@ -33,7 +33,7 @@ For auth-domain routes, main SHALL forward the opaque auth session cookie and SH
 
 ### Requirement: Mixed auth and main workflows are split or orchestrated by main
 
-Workflows that require both auth-owned and main-owned state SHALL be split into separate auth-domain and main-domain endpoints where practical. If a split is not practical, main SHALL orchestrate the workflow, perform main-owned readiness checks, and call auth internally with service context. Registration completion and cancellation are mixed workflows and SHALL be main-orchestrated.
+Workflows that require both auth-owned and main-owned state SHALL be split into separate auth-domain and main-domain endpoints where practical. If a split is not practical, main SHALL orchestrate the workflow, perform main-owned readiness checks, and call auth internally with service context. Registration completion is a mixed workflow and SHALL be main-orchestrated. Pausing registration is not a mixed workflow and SHALL use sign-out.
 
 #### Scenario: Registration completion creates main user
 - **WHEN** account setup requires verified auth state and main user creation

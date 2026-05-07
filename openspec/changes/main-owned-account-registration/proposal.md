@@ -9,10 +9,10 @@ This change moves Rezics account creation and slug ownership fully into the main
 - **BREAKING** Remove `auth.UserProfile` as the source of registration identity, slug readiness, and main-user provisioning.
 - **BREAKING** Remove auth-owned organization as a product concept; developer/team ownership for Rezics OAuth apps will be modeled in main when needed.
 - **BREAKING** Main `User` creation becomes the first moment a Rezics slug is claimed. Slug uniqueness is enforced by main `User.slug`, not by an auth-side profile table or a separate reservation table.
-- Revise email/password registration to create an auth account and immediately lock the frontend into email verification until the user verifies email, cancels registration, or the temporary auth account is deleted.
+- Revise email/password registration to create an auth account and immediately lock the frontend into email verification until the user verifies email, pauses registration through sign-out, or the temporary auth account is cleaned up.
 - After email verification, route the user to a main-owned account setup step where they choose display name and slug; main creates the `User` and bootstraps shelves, default realm membership, search sync, and the main session.
 - Revise third-party registration so provider-verified email proceeds directly to main account setup. Email editing during third-party registration is not supported; email changes happen later in account settings.
-- Add explicit cancel-registration behavior. Cancel clears the browser auth session and marks or deletes the temporary auth account so later login/register attempts re-enter the correct verification/setup state.
+- Add explicit pause-registration behavior. Pause signs the browser out and clears local/main session state without deleting the temporary auth account, so later login re-enters the correct verification/setup state.
 - Ensure repeated login/register attempts for an unverified temporary auth account return to the email verification screen until verification completes or auth cleanup deletes the temporary account.
 - Fix and harden auth email/OTP delivery and verification UX so resend, delivery errors, Turnstile failure, and already-pending accounts are visible and recoverable.
 - Update main session refresh so it verifies an already-created main `User`; it does not invent fallback slugs or create main users from auth-only state.
@@ -21,17 +21,17 @@ This change moves Rezics account creation and slug ownership fully into the main
 
 ### New Capabilities
 
-- `main-owned-account-registration`: Main-owned account creation, slug claiming, temporary auth account lifecycle, registration cancellation, and verified-email-to-main-user promotion.
+- `main-owned-account-registration`: Main-owned account creation, slug claiming, temporary auth account lifecycle, non-destructive registration pause, and verified-email-to-main-user promotion.
 
 ### Modified Capabilities
 
 - `app-auth-onboarding`: Registration and OAuth onboarding flow changes from mixed identity/email completion to verify-first, main-owned account setup.
-- `registration-completion-page`: `/complete-registration` becomes a locked registration flow for auth-only users, with cancel support and no free browsing before main user creation.
+- `registration-completion-page`: `/complete-registration` becomes a locked registration flow for auth-only users, with pause/sign-out support and no free browsing before main user creation.
 - `main-auth-public-boundary`: Main gains explicit registration orchestration endpoints and stops treating auth-owned profile/organization routes as product account surfaces.
 - `opaque-auth-session-refresh`: Main session refresh no longer provisions users using auth-only fallback data; it only issues `rezics-session-token` for existing main users.
 - `auth-user-provisioning-hook`: Auth no longer provisions main users from `UserProfile` or verification hooks.
 - `auth-organization`: Auth organization is removed as a Rezics product/account management surface.
-- `auth-openapi-contracts`: Auth contracts are updated for temporary account state, cancel registration, verification resend/error responses, and removal of auth profile/organization surfaces.
+- `auth-openapi-contracts`: Auth contracts are updated for temporary account state, robust session-state responses, verification resend/error responses, and removal of auth profile/organization surfaces.
 - `email-otp-verification`: Verification email and OTP behavior is hardened for registration locking, resend, delivery failure, and re-entry.
 - `rezics-oauth-oidc-provider`: OAuth client ownership/application flow is clarified so product ownership lives in main, while auth keeps only protocol records.
 
@@ -44,9 +44,9 @@ This change moves Rezics account creation and slug ownership fully into the main
   - Existing development data may be reset or migrated with a breaking cutover; no backward-compatible dual-write shim is required.
 - API impact:
   - Auth remains responsible for sign-in, sign-up, sign-out, provider callbacks, verification, account linking, sessions, OAuth/OIDC token/userinfo/revoke/client protocol behavior, and JWKS.
-  - Main owns registration completion, cancellation, main-user creation, main session issuance, and future developer organization/application management.
+  - Main owns registration completion, non-destructive pause behavior, main-user creation, main session issuance, and future developer organization/application management.
 - Frontend impact:
-  - Email/password registration locks the user into verification until complete or cancelled.
+  - Email/password registration locks the user into verification until complete or paused through sign-out.
   - Provider registration with verified email skips email editing and proceeds to main account setup.
   - Auth-only temporary users cannot browse as guest-auth hybrids because no main user exists yet.
 - Compatibility:

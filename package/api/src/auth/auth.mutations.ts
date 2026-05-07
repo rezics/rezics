@@ -165,19 +165,6 @@ export function useSetupAccountMutation() {
   });
 }
 
-export function useCancelRegistrationMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: () => authApi.cancelRegistration(),
-    onSuccess: () => {
-      clearAuthPresence();
-      setToken(null);
-      qc.invalidateQueries({ queryKey: authKeys.session() });
-      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
-    },
-  });
-}
-
 export const authMutations = {
   useSignIn: useSignInMutation,
   useSignUp: useSignUpMutation,
@@ -193,5 +180,4 @@ export const authMutations = {
   useSendVerificationOTP: useSendVerificationOTPMutation,
   useVerifyEmailOTP: useVerifyEmailOTPMutation,
   useSetupAccount: useSetupAccountMutation,
-  useCancelRegistration: useCancelRegistrationMutation,
 };

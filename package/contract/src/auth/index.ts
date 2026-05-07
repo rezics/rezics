@@ -1,29 +1,27 @@
 export * from "./admin";
 export * from "./oauth";
 export * from "./password";
-export * from "./session";
-export * from "./sign-in";
 export {
-  authReadinessStatusSchema,
-  authSessionStateSchema,
-  cancelRegistrationResponseSchema,
-  pendingRegistrationStateSchema,
-  pendingRegistrationStepSchema,
-  sendVerificationOtpBodySchema,
-  sendVerificationOtpResponseSchema,
-  verificationErrorCodeSchema,
-  verificationErrorSchema,
-  verifyEmailOtpBodySchema,
-  verifyEmailOtpResponseSchema,
   type AuthReadinessStatus,
   type AuthSessionState,
-  type CancelRegistrationResponse,
+  authReadinessStatusSchema,
+  authSessionStateSchema,
   type PendingRegistrationState,
   type PendingRegistrationStep,
+  pendingRegistrationStateSchema,
+  pendingRegistrationStepSchema,
   type SendVerificationOtpBody,
   type SendVerificationOtpResponse,
+  sendVerificationOtpBodySchema,
+  sendVerificationOtpResponseSchema,
   type VerificationError,
   type VerificationErrorCode,
   type VerifyEmailOtpBody,
   type VerifyEmailOtpResponse,
+  verificationErrorCodeSchema,
+  verificationErrorSchema,
+  verifyEmailOtpBodySchema,
+  verifyEmailOtpResponseSchema,
 } from "./self-service";
+export * from "./session";
+export * from "./sign-in";

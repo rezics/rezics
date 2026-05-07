@@ -526,51 +526,6 @@ describe("main auth public boundary", () => {
     });
   });
 
-  test("cancel registration calls auth internal cleanup and clears browser cookies", async () => {
-    userFindUnique.mockResolvedValueOnce(null);
-    setFetch(async (url) => {
-      const requestUrl = new URL(String(url));
-      if (requestUrl.pathname === "/api/auth/get-session-state") {
-        return Response.json({
-          user: {
-            id: "user-1",
-            email: "reader@example.com",
-            emailVerified: true,
-          },
-        });
-      }
-      return Response.json({ success: true, canceled: true });
-    });
-
-    const { authPublicApi } = await import("./auth-public.api");
-    const response = await authPublicApi.handle(
-      new Request("http://main.test/auth/registration/cancel", {
-        method: "POST",
-        headers: {
-          origin: "http://main.test",
-          cookie: "better-auth.session_token=opaque; rezics-session-token=old",
-        },
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({
-      success: true,
-      canceled: true,
-    });
-    expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
-      "http://auth.internal/internal/registration/cancel",
-    );
-    expect(
-      (fetchMock.mock.calls[1]?.[1]?.headers as Record<string, string>)[
-        "x-internal-secret"
-      ],
-    ).toBe("internal-test-secret");
-    const cookie = response.headers.get("set-cookie") ?? "";
-    expect(cookie).toContain("rezics-session-token=");
-    expect(cookie).toContain("rezics_logged_in=");
-  });
-
   test("refresh rejects disallowed origins", async () => {
     const { authPublicApi } = await import("./auth-public.api");
     const response = await authPublicApi.handle(

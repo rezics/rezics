@@ -104,8 +104,8 @@ export default {
       setup_slug_available: "Verfügbar",
       setup_slug_checking: "Verfügbarkeit wird geprüft…",
       setup_submit: "Konto erstellen",
-      cancel_registration: "Registrierung abbrechen",
-      cancel_registration_confirm: "Registrierungsabbruch bestätigen",
+      pause_registration: "Später fortfahren",
+      pause_registration_confirm: "Abmelden und später fortfahren",
       registration_complete_redirecting:
         "Registrierung abgeschlossen. Weiterleitung…",
       retry: "Erneut versuchen",

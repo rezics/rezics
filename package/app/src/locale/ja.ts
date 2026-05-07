@@ -104,8 +104,8 @@ export default {
       setup_slug_available: "利用できます",
       setup_slug_checking: "利用可否を確認中…",
       setup_submit: "アカウントを作成",
-      cancel_registration: "登録をキャンセル",
-      cancel_registration_confirm: "登録キャンセルを確認",
+      pause_registration: "後で続ける",
+      pause_registration_confirm: "サインアウトして後で続ける",
       registration_complete_redirecting: "登録が完了しました。移動しています…",
       retry: "再試行",
       providers: {

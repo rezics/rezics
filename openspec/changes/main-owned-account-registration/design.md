@@ -24,7 +24,7 @@ main /auth/*
   │
   ├─ proxy auth-owned login/session/provider/verification protocol routes
   │
-  └─ own registration orchestration, cancel, and main user creation
+  └─ own registration orchestration, pause, and main user creation
 
 auth
   ├─ credentials / provider account links
@@ -50,7 +50,7 @@ main
 - Require email verification before creating a main `User` for email/password registration.
 - Let provider registrations with trusted provider email proceed directly to main account setup.
 - Remove email editing from third-party registration; email changes happen after the main account exists.
-- Lock auth-only pending users into registration completion, while allowing explicit cancellation.
+- Lock auth-only pending users into registration completion, while allowing explicit pause/sign-out.
 - Ensure login/register re-entry for pending auth users always resumes the correct verification/setup step.
 - Fix verification email/OTP flow so delivery, resend, Turnstile, and pending-account errors are visible and testable.
 - Avoid compatibility shims; this is a development-stage breaking cutover.
@@ -89,39 +89,39 @@ After sign-up or pending-account login, the frontend will render only the regist
 
 - email verification succeeds and the user moves to main account setup,
 - main account setup succeeds and main issues `rezics-session-token`,
-- the user cancels registration,
-- auth cleanup deletes the temporary account/session.
+- the user pauses registration through sign-out,
+- auth cleanup later deletes stale temporary accounts if they never complete.
 
 Rationale:
 
 - There is no main `User` to hydrate headers, profile, shelves, permissions, or member-only APIs.
 - A locked flow is clearer than a partial logged-in header with missing data.
-- Cancel registration gives the user an explicit escape without pretending they are a full member.
+- Pause registration gives the user an explicit escape without pretending they are a full member.
 
 Alternatives considered:
 
 - Let pending users browse guest pages. Rejected because the UI would need an auth-only identity state with no main user and unclear header/profile behavior.
-- Treat pending users as anonymous after sign-up. Rejected because resend/cancel/re-entry require an auth session and pending account context.
+- Treat pending users as anonymous after sign-up. Rejected because resend/re-entry require an auth session and pending account context.
 
-### Decision: Cancel registration is a first-class main-orchestrated action
+### Decision: Pausing registration is non-destructive sign-out
 
-The frontend cancel action will call a main-owned public endpoint. Main will clear browser main session cookies if present, call auth internally to delete or mark the temporary auth account according to auth constraints, invalidate auth sessions, and return the browser to anonymous state.
+The frontend pause action will call the normal sign-out boundary. Main clears browser main session cookies if present, auth invalidates the current browser session, and the frontend clears local auth/profile state before returning to anonymous navigation.
 
-If deletion is not immediately safe because provider linking or audit constraints apply, auth may mark the account as `registrationCanceled`/disabled and schedule deletion. The user-visible result is the same: later login/register no longer gets trapped on the canceled pending account unless auth deliberately keeps it recoverable.
+The temporary auth account remains intact. Later sign-in with the same account resumes the pending verification or setup step. Stale temporary accounts are handled by scheduled/admin cleanup, not by the user-visible pause action.
 
 Rationale:
 
-- Cancel crosses product and auth boundaries, so main should own orchestration.
-- Frontend should have one clear action instead of calling auth internals directly.
+- Pause should not destroy account state or make the user restart registration.
+- The browser cannot clear httpOnly auth cookies purely in frontend state, so normal sign-out is the correct non-destructive escape hatch.
 
 Alternatives considered:
 
-- Only sign out on cancel. Rejected because the next login/register would still find the same unverified temporary account and force the user back into verification.
+- Delete or disable auth user from the user-visible pause action. Rejected because the desired product behavior is to allow the same account to continue registration later.
 - Hard-delete auth user from the frontend. Rejected because it bypasses main-owned product policy and internal auth cleanup rules.
 
 ### Decision: Login/register re-entry resumes pending registration
 
-When a user logs in or attempts to register with an email that maps to an existing unverified temporary auth account, the system will restore an auth session and return a normalized pending-registration state. The frontend will route to the locked verification screen until verification or cancellation.
+When a user logs in or attempts to register with an email that maps to an existing unverified temporary auth account, the system will restore an auth session and return a normalized pending-registration state. The frontend will route to the locked verification screen until verification, account setup, pause/sign-out, or stale-account cleanup.
 
 Rationale:
 
@@ -195,8 +195,8 @@ Alternatives considered:
 
 ## Risks / Trade-offs
 
-- [Risk] Pending auth accounts can accumulate if users never verify email. → Mitigation: add auth cleanup for old unverified temporary users and make cancel registration delete/disable them explicitly.
-- [Risk] Users may feel blocked after sign-up if email delivery fails. → Mitigation: show delivery errors, resend cooldown, alternate cancel action, and admin/test coverage for mailer behavior.
+- [Risk] Pending auth accounts can accumulate if users never verify email. → Mitigation: add auth cleanup for old unverified temporary users.
+- [Risk] Users may feel blocked after sign-up if email delivery fails. → Mitigation: show delivery errors, resend cooldown, alternate pause/sign-out action, and admin/test coverage for mailer behavior.
 - [Risk] Provider email trust differs across Google, GitHub, Reddit, and future providers. → Mitigation: auth remains the authority for `emailVerified`; untrusted/missing provider email goes through OTP before main setup.
 - [Risk] Slug conflict happens after email verification. → Mitigation: main account setup returns conflict and keeps the user on setup without losing verified auth state.
 - [Risk] Removing auth organization breaks admin pages or OpenAPI docs that still expose those endpoints. → Mitigation: update admin/API surfaces and remove auth organization routes in the same breaking cutover.
@@ -205,12 +205,12 @@ Alternatives considered:
 
 ## Migration Plan
 
-1. Add main-owned registration state contracts and account setup/cancel route specs.
+1. Add main-owned registration state contracts and account setup/pause route specs.
 2. Remove `auth.UserProfile` and auth organization usage from contracts, OpenAPI routers, frontend API clients, and admin pages.
 3. Update auth schema/migrations to remove unused profile/organization tables or leave them ignored only for one migration cycle if Prisma requires staged removal.
 4. Add main user fields needed to bind auth identity (`authUserId`, email snapshot, verification timestamp/source as needed).
 5. Implement auth pending-registration detection, verification resend/error response normalization, and cleanup for stale unverified auth accounts.
-6. Implement main account setup and cancel orchestration endpoints.
+6. Implement main account setup endpoint and non-destructive pause/sign-out behavior.
 7. Update frontend registration/login/provider callback flows to lock auth-only users into verification/setup.
 8. Update `/auth/session/refresh` and browser auth middleware so main session cookies work consistently and no fallback user creation occurs.
 9. Run focused tests across `package/auth`, `package/server`, `package/api`, and `package/app`, then remove stale onboarding/profile sync code.
@@ -221,7 +221,7 @@ Rollback strategy:
 
 ## Open Questions
 
-- Should cancel registration hard-delete unverified auth users immediately, or mark them canceled and clean them asynchronously? The user-visible flow is the same, but hard deletion may be constrained by provider account/linking records.
+- How should stale unverified auth accounts be surfaced to admins before cleanup, if at all?
 - How long should stale unverified auth accounts live before cleanup: 24 hours, 7 days, or another product policy?
 - Should provider-trusted email be stored in main as `emailVerifiedAt` plus `emailVerificationSource`, or only as `email` with auth remaining the verification authority?
 - Should Reddit be added as an external provider in the same implementation, or should this change only make the provider-linking model ready for it?
