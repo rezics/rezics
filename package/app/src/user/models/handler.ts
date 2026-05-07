@@ -16,7 +16,7 @@ import {
 export const login = async (email: string, password: string) => {
   await authApi.signIn({ email, password });
   await exchangeForSessionToken();
-  await hydrateAuthSessionState();
+  await hydrateAuthSessionState({ requirePresence: false });
   return { token: null };
 };
 
@@ -30,7 +30,7 @@ export const register = async (
     void avatar;
     void bio;
     await authApi.signUp({ email, password });
-    await hydrateAuthSessionState();
+    await hydrateAuthSessionState({ requirePresence: false });
     return { token: null };
   } catch (error) {
     console.error("Error during registration:", error);

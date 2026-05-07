@@ -1,10 +1,14 @@
-import type React from "react";
-import { useEffect } from "react";
-import type { ReactNode } from "react";
-import { Helmet } from "react-helmet-async";
 import { useLocation, useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import type { ReactNode } from "react";
+import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { useSyncUserProfile } from "@/user/hooks/useSyncUserProfile";
-import { useAuthSessionStore, useUserProfileStore } from "@/user/states";
+import {
+  selectShouldRedirectToCompleteRegistration,
+  useAuthSessionStore,
+  useUserProfileStore,
+} from "@/user/states";
 import { MainLayoutFooter } from "../components/footer/MainLayoutFooter";
 import { HelpFab } from "../components/HelpWidget";
 import { Header } from "../components/header/MainLayoutHeader";
@@ -19,11 +23,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   useSyncUserProfile();
   const navigate = useNavigate();
   const location = useLocation();
-  const authSession = useAuthSessionStore((state) => state.authSession);
-  const registrationComplete = useAuthSessionStore(
-    (state) => state.registrationComplete,
+  const pendingRegistration = useAuthSessionStore(
+    selectShouldRedirectToCompleteRegistration,
   );
-  const pendingRegistration = Boolean(authSession && !registrationComplete);
 
   const isAdmin =
     useUserProfileStore((state) =>

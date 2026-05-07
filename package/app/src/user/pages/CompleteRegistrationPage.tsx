@@ -30,6 +30,7 @@ import { env } from "@/env";
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
+  selectRegistrationStage,
   useAuthSessionStore,
   useUserProfileStore,
 } from "@/user/states";
@@ -445,24 +446,67 @@ export const CompleteRegistrationPage: FC = () => {
   const [cancelConfirming, setCancelConfirming] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const [cancelError, setCancelError] = useState<string>();
+  const authSessionStatus = useAuthSessionStore((state) => state.status);
+  const registrationStage = useAuthSessionStore(selectRegistrationStage);
+  const [sessionProbeStatus, setSessionProbeStatus] = useState<
+    "idle" | "loading" | "done"
+  >("idle");
 
-  const emailVerified = auth.authSession?.emailVerified || justCompletedEmail;
+  const effectiveRegistrationStage =
+    justCompletedEmail && registrationStage === "verify-email"
+      ? "setup-account"
+      : registrationStage;
+  const emailVerified =
+    effectiveRegistrationStage !== "verify-email" &&
+    (auth.authSession?.emailVerified || justCompletedEmail);
   const mainUserExists = auth.mainUserExists;
   const email = auth.authSession?.email ?? "";
   const trustedProvider = auth.authSession?.trustedProviderId;
+  const checkingAuthSession =
+    !auth.authSession &&
+    (auth.loading ||
+      authSessionStatus === "idle" ||
+      sessionProbeStatus !== "done");
 
   // Derive active step index for the Stepper
-  const activeStep = !emailVerified ? 0 : mainUserExists ? 2 : 1;
+  const activeStep =
+    effectiveRegistrationStage === "verify-email"
+      ? 0
+      : effectiveRegistrationStage === "complete" || mainUserExists
+        ? 2
+        : 1;
 
   const handleAccountSetupComplete = useCallback(async () => {
-    await hydrateAuthSessionState();
+    await hydrateAuthSessionState({ requirePresence: false });
     navigate({ to: "/" });
   }, [navigate]);
 
   const handleEmailComplete = useCallback(async () => {
     setJustCompletedEmail(true);
-    await hydrateAuthSessionState();
+    await hydrateAuthSessionState({ requirePresence: false });
   }, []);
+
+  useEffect(() => {
+    if (
+      auth.authSession ||
+      authSessionStatus === "loading" ||
+      sessionProbeStatus !== "idle"
+    ) {
+      return;
+    }
+
+    let mounted = true;
+    setSessionProbeStatus("loading");
+    void hydrateAuthSessionState({ requirePresence: false }).finally(() => {
+      if (mounted) {
+        setSessionProbeStatus("done");
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [auth.authSession, authSessionStatus, sessionProbeStatus]);
 
   // Redirect once both steps complete
   useEffect(() => {
@@ -470,27 +514,6 @@ export const CompleteRegistrationPage: FC = () => {
       navigate({ to: "/" });
     }
   }, [auth.registrationComplete, auth.loading, navigate]);
-
-  // Not authenticated at all
-  if (!auth.authenticated && !auth.authSession) {
-    return (
-      <Layout
-        title={t("auth.flow.complete_registration_title")}
-        content={
-          <Alert>
-            <AlertDescription>
-              {t("auth.flow.onboarding_sign_in_first")}
-            </AlertDescription>
-          </Alert>
-        }
-        actions={
-          <Button onClick={() => navigate({ to: "/login" })}>
-            {t("auth.login")}
-          </Button>
-        }
-      />
-    );
-  }
 
   const handleLogout = async () => {
     await logout();
@@ -510,13 +533,73 @@ export const CompleteRegistrationPage: FC = () => {
       clearAuthSessionState();
       useAuthSessionStore.getState().reset();
       useUserProfileStore.getState().clearProfile();
-      navigate({ to: "/" });
+      navigate({ to: "/login" });
     } catch (caughtError) {
       setCancelError((caughtError as Error).message);
     } finally {
       setCanceling(false);
     }
   };
+
+  const cancelRegistrationButton = (
+    <Button
+      variant="ghost"
+      disabled={canceling}
+      onClick={handleCancelRegistration}
+    >
+      {canceling
+        ? t("common.loading")
+        : cancelConfirming
+          ? t("auth.flow.cancel_registration_confirm")
+          : t("auth.flow.cancel_registration")}
+    </Button>
+  );
+
+  if (checkingAuthSession && !auth.authSession) {
+    return (
+      <Layout
+        title={t("auth.flow.complete_registration_title")}
+        content={
+          <div className="flex items-center gap-3 text-sm text-text-secondary">
+            <Spinner size="sm" />
+            <span>{t("auth.flow.verify_checking_state")}</span>
+          </div>
+        }
+        actions={cancelRegistrationButton}
+      />
+    );
+  }
+
+  // Not authenticated at all
+  if (!auth.authenticated && !auth.authSession) {
+    return (
+      <Layout
+        title={t("auth.flow.complete_registration_title")}
+        content={
+          <div className="flex flex-col gap-4">
+            <Alert>
+              <AlertDescription>
+                {t("auth.flow.onboarding_sign_in_first")}
+              </AlertDescription>
+            </Alert>
+            {cancelError && (
+              <Alert variant="destructive">
+                <AlertDescription>{cancelError}</AlertDescription>
+              </Alert>
+            )}
+          </div>
+        }
+        actions={
+          <div className="flex flex-wrap justify-end gap-2">
+            {cancelRegistrationButton}
+            <Button onClick={() => navigate({ to: "/login" })}>
+              {t("auth.login")}
+            </Button>
+          </div>
+        }
+      />
+    );
+  }
 
   const steps: StepDefinition[] = [
     {
@@ -574,17 +657,7 @@ export const CompleteRegistrationPage: FC = () => {
             {t("auth.logout")}
           </Button>
         ) : (
-          <Button
-            variant="ghost"
-            disabled={canceling}
-            onClick={handleCancelRegistration}
-          >
-            {canceling
-              ? t("common.loading")
-              : cancelConfirming
-                ? t("auth.flow.cancel_registration_confirm")
-                : t("auth.flow.cancel_registration")}
-          </Button>
+          cancelRegistrationButton
         )
       }
     />

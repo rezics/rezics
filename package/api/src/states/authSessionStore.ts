@@ -3,109 +3,22 @@ import {
   clearAuthPresence,
   hasAuthPresence,
 } from "@rezics/api/react-query/authPresence";
-import type {
-  AuthSession,
-  AuthUser,
-  GetSessionStateResponse,
-  Permission,
-} from "@rezics/contract";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import {
+  type AuthSessionDerivedState,
+  type AuthSessionSnapshot,
+  deriveAuthSessionState,
+} from "./authSessionModel";
 
-export type AuthSessionHydrationStatus = "idle" | "loading" | "ready" | "error";
-export type AuthCapabilityLevel =
-  | "anonymous"
-  | "pending-verification"
-  | "needs-main-setup"
-  | "member";
-
-type AuthSessionSnapshot = {
-  session: GetSessionStateResponse["session"] | null;
-  user: GetSessionStateResponse["user"] | null;
-  authSession: GetSessionStateResponse["authSession"];
-};
-
-export type AuthSessionStoreState = {
-  status: AuthSessionHydrationStatus;
-  session: AuthSession | null;
-  user: AuthUser | null;
-  authSession: GetSessionStateResponse["authSession"] | null;
-  /**
-   * Main server permission as represented by server-hydrated session state.
-   * `null` when the user has no valid main session.
-   */
-  permission: Permission | null;
-  capabilityLevel: AuthCapabilityLevel;
-  hasAuthSession: boolean;
-  needsVerification: boolean;
-  needsMainSetup: boolean;
-  /**
-   * Main server actor userId from server-hydrated session state.
-   * The field name remains `unitId` as a temporary compatibility alias.
-   */
-  unitId: string | null;
-  mainUserExists: boolean;
-  registrationComplete: boolean;
-  error: string | null;
+export type AuthSessionStoreState = AuthSessionDerivedState & {
   setPending: () => void;
   setSessionState: (state: AuthSessionSnapshot | null) => void;
   clearSessionState: () => void;
   reset: () => void;
 };
 
-function deriveState(
-  snapshot: AuthSessionSnapshot | null,
-  status: AuthSessionHydrationStatus = "ready",
-  error: string | null = null,
-) {
-  const emailVerified = Boolean(snapshot?.authSession?.emailVerified);
-  const mainUserExists = Boolean(snapshot?.authSession?.mainUserExists);
-  const needsVerification = Boolean(snapshot?.authSession && !emailVerified);
-  const needsMainSetup = Boolean(
-    snapshot?.authSession && emailVerified && !mainUserExists,
-  );
-  const registrationComplete = Boolean(
-    snapshot?.authSession?.registrationComplete ||
-      (emailVerified && mainUserExists),
-  );
-  const role = snapshot?.user?.role?.toUpperCase();
-  const permission =
-    snapshot?.authSession?.canAcquireMemberToken || registrationComplete
-      ? ({
-          role:
-            role === "ROOT" || role === "ADMIN" || role === "BLOCKED"
-              ? role
-              : "MEMBER",
-        } as Permission)
-      : null;
-  const unitId = permission ? (snapshot?.user?.id ?? null) : null;
-  const hasAuthSession = permission !== null;
-  const capabilityLevel: AuthCapabilityLevel = hasAuthSession
-    ? "member"
-    : needsVerification
-      ? "pending-verification"
-      : needsMainSetup
-        ? "needs-main-setup"
-        : "anonymous";
-
-  return {
-    status,
-    session: snapshot?.session ?? null,
-    user: snapshot?.user ?? null,
-    authSession: snapshot?.authSession ?? null,
-    permission,
-    capabilityLevel,
-    hasAuthSession,
-    needsVerification,
-    needsMainSetup,
-    unitId,
-    mainUserExists,
-    registrationComplete,
-    error,
-  };
-}
-
-const initialState = deriveState(null, "idle");
+const initialState = deriveAuthSessionState(null, "idle");
 
 export const useAuthSessionStore = create<AuthSessionStoreState>()(
   devtools(
@@ -117,9 +30,9 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
           status: "loading",
           error: null,
         })),
-      setSessionState: (state) => set(deriveState(state, "ready")),
-      clearSessionState: () => set(deriveState(null, "ready")),
-      reset: () => set(deriveState(null, "idle")),
+      setSessionState: (state) => set(deriveAuthSessionState(state, "ready")),
+      clearSessionState: () => set(deriveAuthSessionState(null, "ready")),
+      reset: () => set(deriveAuthSessionState(null, "idle")),
     }),
     { name: "authSessionStore", store: "authSessionStore" },
   ),
@@ -132,7 +45,7 @@ export async function hydrateAuthSessionState(options?: {
   const requiresPresence = options?.requirePresence ?? true;
 
   if (requiresPresence && !hasAuthPresence()) {
-    useAuthSessionStore.setState(deriveState(null, "ready"));
+    useAuthSessionStore.setState(deriveAuthSessionState(null, "ready"));
     return null;
   }
 
@@ -152,7 +65,9 @@ export async function hydrateAuthSessionState(options?: {
     const message =
       error instanceof Error ? error.message : "Unknown auth session error";
     clearAuthPresence();
-    useAuthSessionStore.setState(deriveState(null, "error", message));
+    useAuthSessionStore.setState(
+      deriveAuthSessionState(null, "error", message),
+    );
     return null;
   }
 }

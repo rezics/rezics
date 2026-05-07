@@ -115,6 +115,9 @@ function SessionRefreshCard({
 
 function SessionStoreCard() {
   const status = useAuthSessionStore((s) => s.status);
+  const hasAuthIdentity = useAuthSessionStore((s) => s.hasAuthIdentity);
+  const hasMemberSession = useAuthSessionStore((s) => s.hasMemberSession);
+  const registrationStage = useAuthSessionStore((s) => s.registrationStage);
   const permission = useAuthSessionStore((s) => s.permission);
   const mainUserExists = useAuthSessionStore((s) => s.mainUserExists);
   const needsMainSetup = useAuthSessionStore((s) => s.needsMainSetup);
@@ -127,7 +130,9 @@ function SessionStoreCard() {
 
   const rows: [string, React.ReactNode][] = [
     ["Hydration Status", status],
-    ["Authenticated", permission ? "Yes" : "No"],
+    ["Auth Identity", hasAuthIdentity ? "Yes" : "No"],
+    ["Member Session", hasMemberSession ? "Yes" : "No"],
+    ["Registration Stage", registrationStage],
     [
       "Server Permission",
       <Badge key="perm" variant="secondary">

@@ -26,6 +26,13 @@ The app SHALL provide a single page at `/complete-registration` that handles loc
 - **WHEN** a pending registrant reloads or returns to `/complete-registration`
 - **THEN** the page SHALL resume the correct verification or setup step from auth/main state
 
+#### Scenario: Auth presence cookie is missing or delayed
+
+- **WHEN** the browser reaches `/complete-registration` with a valid opaque auth session but the readable auth-presence cookie is absent, stale, or not yet readable
+- **THEN** the page SHALL perform an authoritative main-aware auth session probe without requiring the readable presence cookie
+- **AND** it SHALL render the correct pending verification or setup step when auth confirms a valid pending session
+- **AND** it SHALL show the sign-in prompt only after the probe confirms there is no valid auth session
+
 ### Requirement: Step 1 UI -- identity form
 
 The account setup step SHALL display a form with display name and slug fields. The slug field SHALL provide real-time availability feedback against main server slug availability, and final uniqueness SHALL be enforced by main `User.slug` during submission.

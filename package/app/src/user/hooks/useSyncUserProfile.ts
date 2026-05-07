@@ -1,7 +1,11 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useAuthSessionStore, useUserProfileStore } from "@/user/states";
+import {
+  selectCanFetchUserProfile,
+  useAuthSessionStore,
+  useUserProfileStore,
+} from "@/user/states";
 
 /**
  * Subscribes to the `me` query and syncs its data into the Zustand
@@ -12,10 +16,10 @@ import { useAuthSessionStore, useUserProfileStore } from "@/user/states";
  */
 export function useSyncUserProfile() {
   const setUser = useUserProfileStore((s) => s.setUser);
-  const hasAuthSession = useAuthSessionStore((s) => s.hasAuthSession);
+  const canFetchUserProfile = useAuthSessionStore(selectCanFetchUserProfile);
   const { data } = useQuery({
     ...userQueries.me(),
-    enabled: hasAuthSession,
+    enabled: canFetchUserProfile,
   });
 
   useEffect(() => {

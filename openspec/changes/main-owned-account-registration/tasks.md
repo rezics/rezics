@@ -40,6 +40,7 @@
 - [x] 4.3 Update `package/api/src/states/authSessionStore.ts` to distinguish anonymous, pending verification, verified-needs-main-setup, and member-ready states.
 - [x] 4.4 Update token refresh helpers so failed main refresh with "main user missing" routes to setup instead of clearing useful auth state incorrectly.
 - [x] 4.5 Add API/state tests for pending re-entry, cancel cleanup, refresh rejection, and member-ready transition.
+- [x] 4.6 Refactor frontend auth state into explicit auth identity, member session, and registration-stage selectors so pending registration cannot be mistaken for anonymous or member-ready state.
 
 ## 5. Frontend Registration UX
 
@@ -52,6 +53,7 @@
 - [x] 5.7 Remove inline email editing from third-party registration; keep email changes in post-registration account settings.
 - [x] 5.8 Ensure pending auth-only users cannot navigate into normal app chrome that assumes a main user exists.
 - [x] 5.9 Update localization strings and accessibility labels for verification lock, resend failure, cancel registration, setup slug conflict, and provider email messaging.
+- [x] 5.10 Ensure `/complete-registration` performs an authoritative auth-session probe when readable auth presence is absent or delayed before showing the sign-in prompt.
 
 ## 6. Admin, OAuth App Ownership, and Removed Surfaces
 

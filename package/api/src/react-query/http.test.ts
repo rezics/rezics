@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { NormalizedTokenName } from "@rezics/contract";
 import { configureApi } from "../config";
 
@@ -57,6 +57,12 @@ describe("refreshAuthToken", () => {
     globalThis.document = {
       cookie: "",
     } as Document;
+  });
+
+  afterEach(() => {
+    delete (globalThis as Partial<typeof globalThis>).window;
+    delete (globalThis as Partial<typeof globalThis>).localStorage;
+    delete (globalThis as Partial<typeof globalThis>).document;
   });
 
   test("retries 401 responses only when auth presence exists", async () => {

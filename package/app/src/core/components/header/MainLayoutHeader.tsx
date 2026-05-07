@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
 
     const authSection = (() => {
       if (auth.readyForApp && auth.user) return <AuthenticatedSection />;
-      if (auth.authenticated && !auth.registrationComplete)
+      if (auth.hasAuthIdentity && !auth.registrationComplete)
         return <PendingVerificationSection />;
       return <UnauthenticatedSection />;
     })();

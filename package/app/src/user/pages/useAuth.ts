@@ -1,8 +1,15 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
-import { useAuthSessionStore, useUserProfileStore } from "@/user/states";
+import { useEffect } from "react";
+import {
+  selectCanFetchUserProfile,
+  selectHasAuthIdentity,
+  selectHasMemberSession,
+  selectRegistrationStage,
+  useAuthSessionStore,
+  useUserProfileStore,
+} from "@/user/states";
 
 /**
  * useAuth - Authentication hook
@@ -20,32 +27,39 @@ export const useAuth = () => {
   );
   const needsMainSetup = useAuthSessionStore((state) => state.needsMainSetup);
   const status = useAuthSessionStore((state) => state.status);
+  const hasAuthIdentity = useAuthSessionStore(selectHasAuthIdentity);
+  const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
+  const registrationStage = useAuthSessionStore(selectRegistrationStage);
+  const canFetchUserProfile = useAuthSessionStore(selectCanFetchUserProfile);
   const user = useUserProfileStore((state) => state.user as UserDTO | null);
 
-  const isAuthenticated = permission !== null;
+  const isAuthenticated = hasAuthIdentity;
 
   const { data, isLoading, error } = useQuery({
     ...userQueries.me(),
-    enabled: isAuthenticated && !user,
+    enabled: canFetchUserProfile && !user,
   });
 
-  const resolvedUser = isAuthenticated ? (user ?? data ?? null) : null;
+  const resolvedUser = canFetchUserProfile ? (user ?? data ?? null) : null;
 
   return {
     user: resolvedUser,
     authSession,
     loading:
       status === "loading" ||
-      (isAuthenticated && !resolvedUser ? isLoading : false),
+      (canFetchUserProfile && !resolvedUser ? isLoading : false),
     error: error ? (error as Error).message : undefined,
     authenticated: isAuthenticated,
     isAuthenticated,
+    hasAuthIdentity,
+    hasMemberSession,
+    registrationStage,
     permission,
     mainUserExists,
     needsVerification,
     needsMainSetup,
     registrationComplete,
-    readyForApp: isAuthenticated && registrationComplete,
+    readyForApp: hasMemberSession && registrationComplete,
   };
 };
 

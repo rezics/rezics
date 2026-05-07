@@ -174,7 +174,9 @@ describe("auth handlers", () => {
       "http://api.example/auth/session/refresh",
     );
     expect(result.token).toBeNull();
-    expect(hydrateAuthSessionStateMock).toHaveBeenCalledTimes(1);
+    expect(hydrateAuthSessionStateMock).toHaveBeenCalledWith({
+      requirePresence: false,
+    });
   });
 
   test("registration hydrates pending auth state without refreshing main session", async () => {
@@ -185,7 +187,9 @@ describe("auth handlers", () => {
     expect(signUpMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).not.toHaveBeenCalled();
     expect(result.token).toBeNull();
-    expect(hydrateAuthSessionStateMock).toHaveBeenCalledTimes(1);
+    expect(hydrateAuthSessionStateMock).toHaveBeenCalledWith({
+      requirePresence: false,
+    });
   });
 
   test("clears auth-session, profile, and cached auth queries on logout", async () => {

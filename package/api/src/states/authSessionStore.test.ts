@@ -116,7 +116,9 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
       capabilityLevel: "member",
-      hasAuthSession: true,
+      registrationStage: "complete",
+      hasAuthIdentity: true,
+      hasMemberSession: true,
       needsVerification: false,
       registrationComplete: true,
       mainUserExists: true,
@@ -130,6 +132,9 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       capabilityLevel: "pending-verification",
+      registrationStage: "verify-email",
+      hasAuthIdentity: true,
+      hasMemberSession: false,
       registrationComplete: false,
       mainUserExists: false,
       needsVerification: true,
@@ -143,6 +148,9 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       capabilityLevel: "needs-main-setup",
+      registrationStage: "setup-account",
+      hasAuthIdentity: true,
+      hasMemberSession: false,
       registrationComplete: false,
       mainUserExists: false,
       needsVerification: false,
@@ -163,7 +171,9 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
       capabilityLevel: "pending-verification",
-      hasAuthSession: false,
+      registrationStage: "verify-email",
+      hasAuthIdentity: true,
+      hasMemberSession: false,
       needsVerification: true,
       registrationComplete: false,
     });
@@ -181,7 +191,31 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
       capabilityLevel: "anonymous",
-      hasAuthSession: false,
+      registrationStage: "anonymous",
+      hasAuthIdentity: false,
+      hasMemberSession: false,
+    });
+  });
+
+  test("allows explicit post-auth hydration before presence is readable", async () => {
+    presence = false;
+    getSessionStateMock.mockResolvedValueOnce(setupRequiredSession);
+
+    const { hydrateAuthSessionState, useAuthSessionStore } = await import(
+      "./authSessionStore"
+    );
+
+    await hydrateAuthSessionState({ requirePresence: false });
+
+    expect(getSessionStateMock).toHaveBeenCalledTimes(1);
+    expect(useAuthSessionStore.getState()).toMatchObject({
+      status: "ready",
+      capabilityLevel: "needs-main-setup",
+      registrationStage: "setup-account",
+      hasAuthIdentity: true,
+      hasMemberSession: false,
+      needsMainSetup: true,
+      registrationComplete: false,
     });
   });
 
@@ -199,7 +233,27 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "error",
       capabilityLevel: "anonymous",
-      hasAuthSession: false,
+      registrationStage: "anonymous",
+      hasAuthIdentity: false,
+      hasMemberSession: false,
     });
+  });
+
+  test("exports selectors that separate auth identity from member session", async () => {
+    const { useAuthSessionStore } = await import("./authSessionStore");
+    const {
+      selectCanFetchUserProfile,
+      selectHasAuthIdentity,
+      selectHasMemberSession,
+      selectShouldRedirectToCompleteRegistration,
+    } = await import("./authSessionModel");
+
+    useAuthSessionStore.getState().setSessionState(setupRequiredSession);
+    const state = useAuthSessionStore.getState();
+
+    expect(selectHasAuthIdentity(state)).toBe(true);
+    expect(selectHasMemberSession(state)).toBe(false);
+    expect(selectCanFetchUserProfile(state)).toBe(false);
+    expect(selectShouldRedirectToCompleteRegistration(state)).toBe(true);
   });
 });

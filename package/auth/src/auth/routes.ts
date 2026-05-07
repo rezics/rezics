@@ -2,8 +2,8 @@ import {
   oauthProviderAuthServerMetadata,
   oauthProviderOpenIdConfigMetadata,
 } from "@better-auth/oauth-provider";
-import { verifyTurnstileToken } from "../utils/turnstileUtils";
 import { env } from "../env";
+import { verifyTurnstileToken } from "../utils/turnstileUtils";
 import {
   buildAuthPresenceClearCookie,
   buildAuthPresenceSetCookie,
@@ -106,6 +106,7 @@ function toVerificationError(
 function isSessionEstablishingPath(pathname: string): boolean {
   return (
     pathname.includes("/sign-in") ||
+    pathname.includes("/sign-up") ||
     pathname.includes("/oauth/callback") ||
     pathname.endsWith("/token") ||
     pathname.includes("/email-otp/verify-email")

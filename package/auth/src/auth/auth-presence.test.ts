@@ -7,6 +7,9 @@ process.env.BETTER_AUTH_SECRET ??=
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_auth";
+process.env.SMTP_HOST ??= "smtp.test";
+process.env.SMTP_USER ??= "smtp-user";
+process.env.SMTP_PASSWORD ??= "smtp-password";
 
 import { AUTH_PRESENCE_COOKIE_NAME } from "@rezics/contract";
 
@@ -38,6 +41,23 @@ describe("auth presence cookies", () => {
     const { handleAuthRequest } = await import("./routes");
     const response = await handleAuthRequest(
       new Request("http://localhost:35003/token"),
+    );
+
+    expect(response.headers.get("set-cookie")).toContain(
+      `${AUTH_PRESENCE_COOKIE_NAME}=1`,
+    );
+  });
+
+  test("sets the auth presence cookie on successful sign-up", async () => {
+    authHandlerMock.mockResolvedValueOnce(
+      Response.json({ user: { id: "user-1" } }, { status: 200 }),
+    );
+
+    const { handleAuthRequest } = await import("./routes");
+    const response = await handleAuthRequest(
+      new Request("http://localhost:35003/api/auth/sign-up/email", {
+        method: "POST",
+      }),
     );
 
     expect(response.headers.get("set-cookie")).toContain(
