@@ -22,30 +22,24 @@ export const env = createEnv({
     DATABASE_URL: v.string(),
 
     /**
-     * Legacy auth service URL. Prefer AUTH_INTERNAL_BASE_URL for new code.
-     * Defaults to 'http://localhost:3001'.
-     */
-    AUTH_BASE_URL: v.fallback(v.string(), "http://localhost:3001"),
-
-    /**
      * Internal base URL used by main for service-to-service auth calls.
      */
-    AUTH_INTERNAL_BASE_URL: v.fallback(v.string(), "http://localhost:3001"),
+    AUTH_INTERNAL_BASE_URL: v.string(),
 
     /**
      * Browser-facing public auth boundary exposed by main.
      */
-    AUTH_PUBLIC_BASE_URL: v.fallback(v.string(), "http://localhost:3000/auth"),
+    AUTH_PUBLIC_BASE_URL: v.string(),
 
     /**
      * Public issuer URL for auth/OIDC metadata.
      */
-    AUTH_PUBLIC_ISSUER_URL: v.fallback(v.string(), "http://localhost:3000"),
+    AUTH_PUBLIC_ISSUER_URL: v.string(),
 
     /**
      * Shared secret for internal auth token endpoints when main must call them.
      */
-    AUTH_INTERNAL_TOKEN_GATEWAY_SECRET: v.optional(v.string()),
+    AUTH_INTERNAL_TOKEN_GATEWAY_SECRET: v.string(),
 
     /**
      * Bootstrap-only audience for auth JWT validation metadata seeding.
@@ -73,7 +67,7 @@ export const env = createEnv({
      * SMTP host used by main product email verification flows.
      * Main validates this value locally and passes it to `@rezics/email`.
      */
-    SMTP_HOST: v.optional(v.string()),
+    SMTP_HOST: v.string(),
 
     /**
      * SMTP port used by main product email verification flows.
@@ -91,13 +85,13 @@ export const env = createEnv({
      * SMTP username used by main product email verification flows.
      * Pair it with `SMTP_HOST` and `SMTP_PASSWORD` when configuring delivery.
      */
-    SMTP_USER: v.optional(v.string()),
+    SMTP_USER: v.string(),
 
     /**
      * SMTP password used by main product email verification flows.
      * Pair it with `SMTP_HOST` and `SMTP_USER` when configuring an SMTP transport.
      */
-    SMTP_PASSWORD: v.optional(v.string()),
+    SMTP_PASSWORD: v.string(),
 
     /**
      * From email for main-owned product email verification messages.
@@ -118,19 +112,17 @@ export const env = createEnv({
     /**
      * Cloudflare Turnstile secret used for server-side token verification.
      */
-    TURNSTILE_SECRET: v.optional(v.string()),
+    TURNSTILE_SECRET: v.string(),
 
     /**
      * Meilisearch host URL.
-     * Defaults to `http://localhost:7700` when omitted.
      */
-    MEILI_HOST: v.fallback(v.string(), "http://127.0.0.1:7700"),
+    MEILI_HOST: v.string(),
 
     /**
      * Meilisearch master/admin API key.
-     * Defaults to `masterKey` when omitted.
      */
-    MEILI_MASTER_KEY: v.fallback(v.string(), "masterKey"),
+    MEILI_MASTER_KEY: v.string(),
 
     /**
      * Configures the server HTTP listen port as a string value.
@@ -150,19 +142,19 @@ export const env = createEnv({
     R2_PUBLIC_URL: v.optional(v.string()),
 
     /** Base URL of the Notify service for internal calls. */
-    NOTIFY_BASE_URL: v.fallback(v.string(), "http://localhost:3002"),
+    NOTIFY_BASE_URL: v.string(),
 
     /** Shared secret for authenticating internal calls to the Notify service. */
-    NOTIFY_INTERNAL_SECRET: v.optional(v.string()),
+    NOTIFY_INTERNAL_SECRET: v.string(),
 
     /** Base URL of the Reaction service for internal calls. */
-    REACTION_BASE_URL: v.fallback(v.string(), "http://localhost:3003"),
+    REACTION_BASE_URL: v.string(),
 
     /** Shared secret for authenticating internal calls to the Reaction service. */
-    REACTION_INTERNAL_SECRET: v.optional(v.string()),
+    REACTION_INTERNAL_SECRET: v.string(),
 
     /** Shared secret for authenticating incoming internal service-to-service calls. */
-    SERVER_INTERNAL_SECRET: v.optional(v.string()),
+    SERVER_INTERNAL_SECRET: v.string(),
 
     /** Base URL of the dispatch hub for audit notifications. */
     DISPATCH_HUB_URL: v.optional(v.string()),

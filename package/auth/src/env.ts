@@ -41,12 +41,12 @@ export const env = createEnv({
     /**
      * Browser-facing auth base URL exposed by main, e.g. https://rezics.com/auth.
      */
-    AUTH_PUBLIC_BASE_URL: v.fallback(v.string(), "http://localhost:3000/auth"),
+    AUTH_PUBLIC_BASE_URL: v.string(),
 
     /**
      * Public OAuth/OIDC issuer URL, e.g. https://rezics.com.
      */
-    AUTH_PUBLIC_ISSUER_URL: v.fallback(v.string(), "http://localhost:3000"),
+    AUTH_PUBLIC_ISSUER_URL: v.string(),
 
     /**
      * Primary secret for session and internal crypto. Must be high-entropy and unique.
@@ -170,7 +170,7 @@ export const env = createEnv({
      * Turnstile (Cloudflare CAPTCHA)
      */
 
-    TURNSTILE_SECRET: v.optional(v.string()),
+    TURNSTILE_SECRET: v.string(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

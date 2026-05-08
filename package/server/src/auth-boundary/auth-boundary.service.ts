@@ -51,7 +51,7 @@ type AuthSessionStateResponse = {
 };
 
 function getInternalAuthBaseUrl(): string {
-  return env.AUTH_INTERNAL_BASE_URL || env.AUTH_BASE_URL;
+  return env.AUTH_INTERNAL_BASE_URL;
 }
 
 function getPublicAuthBaseUrl(): string {

@@ -149,7 +149,10 @@ Create `/www/wwwroot/Library.Book/server/.env.production`:
 ```bash
 NODE_ENV=production
 DATABASE_URL="postgresql://user:pass@localhost:5432/rezics_booklib?schema=public"
-AUTH_BASE_URL=https://auth.rezics.com
+AUTH_INTERNAL_BASE_URL=https://auth.rezics.com
+AUTH_PUBLIC_BASE_URL=https://book-server.rezics.com/auth
+AUTH_PUBLIC_ISSUER_URL=https://book-server.rezics.com
+AUTH_INTERNAL_TOKEN_GATEWAY_SECRET=<same-value-as-auth>
 MEILI_HOST=http://127.0.0.1:7700
 MEILI_MASTER_KEY=<your-meili-key>
 TURNSTILE_SECRET=<your-turnstile-secret>
@@ -157,6 +160,11 @@ SMTP_HOST=smtp.example.com
 SMTP_USER=support@rezics.com
 SMTP_USER_NAME="REZICS Support"
 SMTP_PASSWORD=<your-smtp-password>
+NOTIFY_BASE_URL=http://localhost:3002
+NOTIFY_INTERNAL_SECRET=<your-notify-internal-secret>
+REACTION_BASE_URL=http://localhost:3003
+REACTION_INTERNAL_SECRET=<your-reaction-internal-secret>
+SERVER_INTERNAL_SECRET=<your-server-internal-secret>
 ```
 
 Create `/www/wwwroot/Library.Book/auth/.env.production`:
@@ -165,6 +173,8 @@ Create `/www/wwwroot/Library.Book/auth/.env.production`:
 NODE_ENV=production
 DATABASE_URL="postgresql://user:pass@localhost:5432/rezics_auth?schema=public"
 BETTER_AUTH_URL=https://auth.rezics.com
+AUTH_PUBLIC_BASE_URL=https://book-server.rezics.com/auth
+AUTH_PUBLIC_ISSUER_URL=https://book-server.rezics.com
 BETTER_AUTH_SECRET=<generate-with: openssl rand -base64 32>
 AUTH_INTERNAL_TOKEN_GATEWAY_SECRET=<generate-with: openssl rand -base64 32>
 AUTH_TRUSTED_ORIGINS="https://book.rezics.com,https://admin.rezics.com"
@@ -172,6 +182,7 @@ SMTP_HOST=smtp.example.com
 SMTP_USER=support@rezics.com
 SMTP_USER_NAME="REZICS Support"
 SMTP_PASSWORD=<your-smtp-password>
+TURNSTILE_SECRET=<your-turnstile-secret>
 # OAuth providers (optional)
 # GOOGLE_CLIENT_ID=
 # GOOGLE_CLIENT_SECRET=

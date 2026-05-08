@@ -18,10 +18,7 @@ export const env = createEnv({
     REACTION_INTERNAL_SECRET: v.string(),
 
     /** Server JWKS URL for verifying rezics-session-token JWTs. */
-    SERVER_JWKS_URL: v.fallback(
-      v.string(),
-      "http://localhost:3000/.well-known/jwks.json",
-    ),
+    SERVER_JWKS_URL: v.string(),
 
     /** Expected JWT issuer for rezics-session-token. */
     SERVER_ISSUER: v.fallback(v.string(), "rezics-server"),
