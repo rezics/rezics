@@ -1,6 +1,6 @@
 import type { Prisma } from "../generated/client.js";
 import { PostKind } from "../generated/client.js";
-import { resetDatabase } from "../seed/database.js";
+import { resetDatabasePreserveInfra } from "../seed/database.js";
 import { seedInfra } from "../seed/infra/index.js";
 import { seedOrganizations, seedPeople } from "./attribution.js";
 import {
@@ -20,8 +20,8 @@ import { seedShelves } from "./shelves.js";
 import type { SeedCtx } from "./strategy.js";
 import { seedTags } from "./tags.js";
 import type { SeedPlan } from "./types.js";
-import { chunkedParallel } from "./utils.js";
 import { seedUsers } from "./users.js";
+import { chunkedParallel } from "./utils.js";
 import { seedZones } from "./zones.js";
 
 function stepTimer(label: string) {
@@ -32,6 +32,30 @@ function stepTimer(label: string) {
   };
 }
 
+async function resolveInfraOwnerUserId(ctx: SeedCtx): Promise<string> {
+  const root = await ctx.prisma.user.findFirst({
+    where: { permission: { equals: { role: ["ROOT"] } } },
+    select: { userId: true },
+  });
+  if (root) return root.userId;
+
+  const admin = await ctx.prisma.user.findFirst({
+    where: { permission: { equals: { role: ["ADMIN"] } } },
+    select: { userId: true },
+  });
+  if (admin) return admin.userId;
+
+  const factoryAdmin = await ctx.prisma.user.findUnique({
+    where: { slug: "admin" },
+    select: { userId: true },
+  });
+  if (factoryAdmin) return factoryAdmin.userId;
+
+  throw new Error(
+    "[Seed] infra owner user not found — seed users before infra",
+  );
+}
+
 export async function runFactorySeed(
   ctx: SeedCtx,
   plan: SeedPlan,
@@ -40,7 +64,7 @@ export async function runFactorySeed(
   console.log("[Seed] Starting database seeding...");
 
   let done = stepTimer("Step 1: Reset");
-  await resetDatabase(ctx.prisma);
+  await resetDatabasePreserveInfra(ctx.prisma);
   done();
 
   done = stepTimer("Step 2: Users + People + Organizations");
@@ -55,14 +79,8 @@ export async function runFactorySeed(
   done();
 
   done = stepTimer("Step 3: Infra");
-  const admin = await ctx.prisma.user.findUnique({
-    where: { slug: "admin" },
-    select: { userId: true },
-  });
-  if (!admin) {
-    throw new Error("[Seed] admin user not found — seed users first");
-  }
-  const { defaultRealmId } = await seedInfra(ctx.prisma, admin.userId);
+  const infraOwnerUserId = await resolveInfraOwnerUserId(ctx);
+  const { defaultRealmId } = await seedInfra(ctx.prisma, infraOwnerUserId);
   void defaultRealmId;
   done();
 

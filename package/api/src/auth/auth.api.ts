@@ -4,8 +4,8 @@
  */
 
 import type {
-  AccountSetupBody,
   AccountMaterializationResponse,
+  AccountSetupBody,
   AccountSetupResponse,
   AuthProvider,
   AuthResponse,

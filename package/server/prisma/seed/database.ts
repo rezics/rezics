@@ -5,7 +5,7 @@ import type { PrismaClient } from "#/prisma/generated/client.js";
 /**
  * Permission role values assigned by seed CLI.
  * Used to identify the 4 seed users in the server DB
- * (which lacks email — permission is the stable identifier).
+ * even if their profile emails change.
  */
 const SEED_PERMISSION_ROLES = [
   { role: ["ROOT"] },
@@ -46,8 +46,7 @@ export async function snapshotInfrastructure(
 ): Promise<InfraSnapshot> {
   console.log("[Snapshot] Capturing infrastructure...");
 
-  // Seed users — identified by their permission role values set by seed CLI.
-  // Server User table has no email field, so permission is the stable identifier.
+  // Seed users are identified by their permission role values set by seed CLI.
   const users = await prisma.user.findMany({
     where: {
       OR: SEED_PERMISSION_ROLES.map((perm) => ({

@@ -10,6 +10,7 @@ import {
 } from "./utils.js";
 
 const AUTH_CHUNK_SIZE = 8;
+const FACTORY_AUTH_EMAIL_DOMAIN = "@mock.rezics.local";
 
 function generateSlug(name: string): string {
   return `${name.replace(/\s+/g, "_")}_${randomUUID()}`;
@@ -31,12 +32,49 @@ interface FactoryUserPlan {
   permission?: { role: string[] };
 }
 
+async function deleteExistingFactoryAuthUsers(ctx: SeedCtx): Promise<void> {
+  const authUsers = await ctx.authPrisma.user.findMany({
+    where: { email: { endsWith: FACTORY_AUTH_EMAIL_DOMAIN } },
+    select: { id: true },
+  });
+
+  if (authUsers.length === 0) return;
+
+  const userIds = authUsers.map((user) => user.id);
+  await Promise.all([
+    ctx.authPrisma.session.deleteMany({
+      where: { userId: { in: userIds } },
+    }),
+    ctx.authPrisma.account.deleteMany({
+      where: { userId: { in: userIds } },
+    }),
+    ctx.authPrisma.oAuthRefreshToken.deleteMany({
+      where: { userId: { in: userIds } },
+    }),
+    ctx.authPrisma.oAuthAccessToken.deleteMany({
+      where: { userId: { in: userIds } },
+    }),
+    ctx.authPrisma.oAuthConsent.deleteMany({
+      where: { userId: { in: userIds } },
+    }),
+    ctx.authPrisma.oAuthClient.deleteMany({
+      where: { userId: { in: userIds } },
+    }),
+  ]);
+  await ctx.authPrisma.user.deleteMany({
+    where: { id: { in: userIds } },
+  });
+
+  console.log(`[Seed] Deleted ${authUsers.length} stale factory auth user(s).`);
+}
+
 export async function seedUsers(
   ctx: SeedCtx,
   spec: CountSpec,
 ): Promise<CreatedUser[]> {
   const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} users (cross-DB)...`);
+  await deleteExistingFactoryAuthUsers(ctx);
   const nextUsername = createUsernameGenerator();
 
   const adminPlan: FactoryUserPlan = {
