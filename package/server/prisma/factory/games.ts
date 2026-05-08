@@ -39,7 +39,7 @@ export async function seedGames(
       const unit = await ctx.prisma.unit.create({
         data: {
           type: UnitType.GAME,
-          userId: author.unitId,
+          userId: author.userId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.8)

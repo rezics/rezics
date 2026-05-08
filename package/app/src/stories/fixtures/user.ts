@@ -2,7 +2,7 @@
 import type { PublicUser } from "@rezics/contract";
 
 export const userAlice: PublicUser = {
-  unitId: "user-alice",
+  userId: "user-alice",
   name: "Alice Mei",
   avatar: "https://i.pravatar.cc/96?img=47",
   bio: "Editor of bookish journals; prefers 19th-century Russian novels and short stories.",
@@ -11,7 +11,7 @@ export const userAlice: PublicUser = {
 };
 
 export const userBen: PublicUser = {
-  unitId: "user-ben",
+  userId: "user-ben",
   name: "Ben Zhao",
   avatar: "https://i.pravatar.cc/96?img=12",
   bio: "Translator and reader, slow to recommend but loyal to favourites.",
@@ -20,7 +20,7 @@ export const userBen: PublicUser = {
 };
 
 export const userCora: PublicUser = {
-  unitId: "user-cora",
+  userId: "user-cora",
   name: "Cora Lim",
   avatar: "https://i.pravatar.cc/96?img=21",
   bio: "Speculative fiction librarian.",
@@ -29,7 +29,7 @@ export const userCora: PublicUser = {
 };
 
 export const userAnonymous: PublicUser = {
-  unitId: "user-anon",
+  userId: "user-anon",
   name: "Anonymous",
   avatar: null,
 };

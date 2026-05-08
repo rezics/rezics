@@ -22,7 +22,7 @@ export async function seedTags(
     const id = randomUUID();
     const user = faker.helpers.arrayElement(users);
     const translations = generateTranslations(UnitType.TAG);
-    return { id, userId: user.unitId, translations };
+    return { id, userId: user.userId, translations };
   });
 
   // Phase 1: Create Unit rows

@@ -23,11 +23,11 @@ export const userAdminListQuery = (query?: Record<string, unknown>) =>
     staleTime: 1000 * 60 * 1,
   });
 
-export const userDetailQuery = (unitId: string) =>
+export const userDetailQuery = (userId: string) =>
   queryOptions({
-    queryKey: userKeys.detail(unitId),
-    queryFn: () => userApi.get(unitId),
-    enabled: !!unitId,
+    queryKey: userKeys.detail(userId),
+    queryFn: () => userApi.get(userId),
+    enabled: !!userId,
     staleTime: 1000 * 60 * 10,
   });
 
@@ -39,32 +39,32 @@ export const userBySlugQuery = (userSlug: string) =>
     staleTime: 1000 * 60 * 10,
   });
 
-export const userAdminDetailQuery = (unitId: string) =>
+export const userAdminDetailQuery = (userId: string) =>
   queryOptions({
-    queryKey: userKeys.adminDetail(unitId),
-    queryFn: () => userApi.adminGet(unitId),
-    enabled: !!unitId,
+    queryKey: userKeys.adminDetail(userId),
+    queryFn: () => userApi.adminGet(userId),
+    enabled: !!userId,
     staleTime: 1000 * 60 * 2,
   });
 
 export const userFollowersQuery = (
-  unitId: string,
+  userId: string,
   query?: { page?: number; limit?: number },
 ) =>
   queryOptions({
-    queryKey: userKeys.followers(unitId, query),
-    queryFn: () => userApi.getFollowers(unitId, query),
-    enabled: !!unitId,
+    queryKey: userKeys.followers(userId, query),
+    queryFn: () => userApi.getFollowers(userId, query),
+    enabled: !!userId,
   });
 
 export const userFollowingsQuery = (
-  unitId: string,
+  userId: string,
   query?: { page?: number; limit?: number },
 ) =>
   queryOptions({
-    queryKey: userKeys.followings(unitId, query),
-    queryFn: () => userApi.getFollowings(unitId, query),
-    enabled: !!unitId,
+    queryKey: userKeys.followings(userId, query),
+    queryFn: () => userApi.getFollowings(userId, query),
+    enabled: !!userId,
   });
 
 export const userFollowStatusQuery = (targetIds: string[]) =>

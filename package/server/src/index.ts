@@ -28,7 +28,6 @@ import {
   realmTagVoteApi,
 } from "./realm";
 import { scoreApi } from "./score/score.api";
-import { sessionApi } from "./session";
 import { collectionApi, shelfApi } from "./shelf";
 import { statsAdminApi } from "./stat";
 import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";
@@ -74,13 +73,6 @@ if (isDev) {
 
 const port = env.PORT ? Number(env.PORT) : 3000;
 
-const authIssuerUrl = env.AUTH_PUBLIC_ISSUER_URL;
-const authAudience = env.AUTH_JWT_AUDIENCE ?? "rezics";
-const authJwksUrl = new URL(
-  "/auth/session/jwks",
-  env.AUTH_PUBLIC_BASE_URL,
-).toString();
-
 // Bootstrap server-local JWT service for signing rezics-session-tokens
 const serverJwksUrl = `http://localhost:${port}/.well-known/jwks.json`;
 
@@ -90,15 +82,6 @@ await bootstrapJwtServiceRecord("server-local", {
   jwksUrl: serverJwksUrl,
   jwksPath: "/.well-known/jwks.json",
   isLocalIssuer: true,
-});
-
-// Bootstrap auth-upstream JWT service for token exchange verification
-await bootstrapJwtServiceRecord("auth-upstream", {
-  issuer: authIssuerUrl,
-  audience: authAudience,
-  jwksUrl: authJwksUrl,
-  jwksPath: "/auth/session/jwks",
-  isLocalIssuer: false,
 });
 
 const devOrigins = [
@@ -119,7 +102,6 @@ app
         "content-type",
         "authorization",
         "accept",
-        "x-auth-session-token",
         "x-internal-secret",
       ],
       maxAge: 600,
@@ -209,7 +191,6 @@ app
   .use(tokenApi)
   .use(echoKvApi)
   .use(feedbackApi)
-  .use(sessionApi)
   .use(jwtServiceAdminApi)
   .use(statsAdminApi)
   .use(uploadApi)

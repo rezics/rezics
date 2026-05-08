@@ -13,8 +13,8 @@ export const userBatchApi = new Elysia().get(
     if (ids.length === 0) return {};
 
     const users = await prisma.user.findMany({
-      where: { unitId: { in: ids } },
-      select: { unitId: true, name: true, slug: true, avatar: true },
+      where: { userId: { in: ids } },
+      select: { userId: true, name: true, slug: true, avatar: true },
     });
 
     const result: Record<
@@ -22,7 +22,7 @@ export const userBatchApi = new Elysia().get(
       { name?: string; slug?: string; avatar: string | null }
     > = {};
     for (const user of users) {
-      result[user.unitId] = {
+      result[user.userId] = {
         name: user.name ?? undefined,
         slug: user.slug ?? undefined,
         avatar: user.avatar,

@@ -1,4 +1,4 @@
-import { useCurrentUnitId } from "@rezics/api/hooks";
+import { useCurrentUserId } from "@rezics/api/hooks";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import {
   scoreQueries,
@@ -35,11 +35,11 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
   realmId = getDefaultRealmId() ?? "default",
 }) => {
   const { t } = useTranslation();
-  const userUnitId = useCurrentUnitId();
-  const isAuthed = Boolean(userUnitId);
+  const userId = useCurrentUserId();
+  const isAuthed = Boolean(userId);
 
   const { data: userScores } = useQuery({
-    ...scoreQueries.userScores(userUnitId ?? "", bookUnitId),
+    ...scoreQueries.userScores(userId ?? "", bookUnitId),
     enabled: isAuthed && Boolean(bookUnitId),
   });
   const existing = userScores?.find((s) => s.realm === realmId);

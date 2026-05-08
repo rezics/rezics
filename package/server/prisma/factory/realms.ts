@@ -29,7 +29,7 @@ export async function seedRealms(
       const unit = await ctx.prisma.unit.create({
         data: {
           type: UnitType.REALM,
-          userId: owner.unitId,
+          userId: owner.userId,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: faker.date.past({ years: 2 }),
@@ -59,19 +59,19 @@ export async function seedRealms(
 
       const memberCount = randomInt(3, 20);
       const memberUsers = pickN(
-        users.filter((u) => u.unitId !== owner.unitId),
+        users.filter((u) => u.userId !== owner.userId),
         Math.min(memberCount, users.length - 1),
       );
 
       const members = [
         {
           realmUnitId: unit.id,
-          userId: owner.unitId,
+          userId: owner.userId,
           roleKey: "owner",
         },
         ...memberUsers.map((u) => ({
           realmUnitId: unit.id,
-          userId: u.unitId,
+          userId: u.userId,
           roleKey: faker.helpers.arrayElement(
             REALM_ROLE_KEYS.filter((r) => r !== "owner"),
           ),

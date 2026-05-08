@@ -12,15 +12,15 @@ const PROFILE_TABS = [
 ] as const;
 
 interface ProfileTabBarProps {
-  unitId: string;
+  userId: string;
   userSlug?: string;
 }
 
-export const ProfileTabBar: FC<ProfileTabBarProps> = ({ unitId, userSlug }) => {
+export const ProfileTabBar: FC<ProfileTabBarProps> = ({ userId, userSlug }) => {
   const navigate = useNavigate();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
-  const basePath = userSlug ? `/u/${userSlug}` : `/user/${unitId}`;
+  const basePath = userSlug ? `/u/${userSlug}` : `/user/${userId}`;
 
   const activeTab =
     PROFILE_TABS.find((tab, i) => {
@@ -44,8 +44,8 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({ unitId, userSlug }) => {
           }
 
           void navigate({
-            to: `/user/$unitId${value}`,
-            params: { unitId },
+            to: `/user/$userId${value}`,
+            params: { userId },
           });
         }}
       >

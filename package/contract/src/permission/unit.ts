@@ -3,8 +3,8 @@ import type { Permission } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
 
 function isUnitOwner(actorUserId: string, unit?: UnitDTO): boolean {
-  if (!unit?.user?.unitId) return false;
-  return actorUserId === unit.user.unitId;
+  if (!unit?.user?.userId) return false;
+  return actorUserId === unit.user.userId;
 }
 
 export function hasPermissionToUpdateUnit(

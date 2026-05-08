@@ -5,7 +5,6 @@
 
 import { getApiConfig } from "../config";
 import { apiFetch } from "../react-query/http";
-import { buildTokenHeaders } from "../react-query/jwt";
 import type {
   ReactionCreateInput,
   ReactionDeleteQuery,
@@ -26,7 +25,6 @@ async function reactionFetch<T>(
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...Object.fromEntries(new Headers(options?.headers).entries()),
-    ...buildTokenHeaders(),
   };
 
   const response = await fetch(url, {

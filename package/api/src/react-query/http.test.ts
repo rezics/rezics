@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { NormalizedTokenName } from "@rezics/contract";
 import { configureApi } from "../config";
 
 const fetchMock = mock();
@@ -86,7 +85,6 @@ describe("refreshAuthToken", () => {
     );
 
     const { apiFetch } = await import("./http");
-    const { getToken } = await import("./jwt");
 
     const result = await apiFetch<{ ok: boolean }>("/book");
 
@@ -95,7 +93,6 @@ describe("refreshAuthToken", () => {
       "http://api.example/auth/session/refresh",
     );
     expect(result).toEqual({ ok: true });
-    expect(getToken()).toBeNull();
   });
 
   test("does not probe auth token refresh when auth presence is absent", async () => {
@@ -125,13 +122,6 @@ describe("refreshAuthToken", () => {
     );
 
     const { apiFetch } = await import("./http");
-    const { setToken } = await import("./jwt");
-
-    setToken(
-      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-      NormalizedTokenName.AUTH_SESSION,
-    );
-    setToken("member-token", NormalizedTokenName.REZICS_SESSION);
 
     await apiFetch("/book", {
       headers: {
@@ -146,7 +136,7 @@ describe("refreshAuthToken", () => {
     });
     expect(fetchMock.mock.calls[0]?.[1]).not.toMatchObject({
       headers: {
-        Authorization: "Bearer member-token",
+        Authorization: expect.any(String),
       },
     });
   });

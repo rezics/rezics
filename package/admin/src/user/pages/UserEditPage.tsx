@@ -17,14 +17,14 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
 import { Page } from "@/core/layouts/Page";
-import { Route } from "@/routes/_admin/user/$unitId";
+import { Route } from "@/routes/_admin/user/$userId";
 import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
 
 export default function UserEditPage() {
-  const { unitId } = Route.useParams();
+  const { userId } = Route.useParams();
   const [error, setError] = React.useState<string | null>(null);
 
-  const detailQuery = useQuery(userQueries.adminDetail(unitId));
+  const detailQuery = useQuery(userQueries.adminDetail(userId));
 
   const updateMutation = userMutations.useAdminUpdate({
     onError: (err) =>
@@ -52,7 +52,7 @@ export default function UserEditPage() {
     e.preventDefault();
     setError(null);
     await updateMutation.mutateAsync({
-      unitId,
+      userId,
       input: {
         name: name.trim() || undefined,
         avatar: avatar.trim() || undefined,
@@ -66,7 +66,7 @@ export default function UserEditPage() {
   }
 
   return (
-    <Page title="Edit User" description={`编辑用户：${unitId}`}>
+    <Page title="Edit User" description={`编辑用户：${userId}`}>
       <Card>
         <CardContent>
           <div className="flex flex-row items-center gap-2 mb-2">

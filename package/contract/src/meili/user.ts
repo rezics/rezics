@@ -6,7 +6,7 @@ import type { UserDTO } from "../user";
  */
 export interface UserSearchDocument {
   id: string;
-  unitId: string;
+  userId: string;
   name: string;
   email?: string;
   slug?: string | null;

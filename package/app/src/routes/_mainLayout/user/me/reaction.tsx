@@ -3,11 +3,11 @@ import { useUserProfileStore } from "@/user/states";
 
 export const Route = createFileRoute("/_mainLayout/user/me/reaction")({
   beforeLoad: () => {
-    const unitId = useUserProfileStore.getState().user?.unitId;
-    if (unitId) {
+    const userId = useUserProfileStore.getState().user?.userId;
+    if (userId) {
       throw redirect({
-        to: "/user/$unitId/reactions",
-        params: { unitId },
+        to: "/user/$userId/reactions",
+        params: { userId },
       });
     }
     throw redirect({ to: "/login" });

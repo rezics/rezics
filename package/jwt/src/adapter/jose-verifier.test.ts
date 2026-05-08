@@ -95,12 +95,12 @@ describe("jose verifier", () => {
       .setExpirationTime("1h")
       .sign(key.privateKey);
 
-    const verified = await verifyTokenFromHeader(token, {
+    const verified = await verifyTokenFromHeader(`Bearer ${token}`, {
       issuer: "https://issuer.example",
       audience: "rezics",
       jwks: { keys: [key.publicJwk] },
       algorithm: JwtAlgorithm.ES256,
-      tokenName: NormalizedTokenName.AUTH_SESSION,
+      tokenName: NormalizedTokenName.REZICS_SESSION,
       requiredScope: undefined,
     });
 

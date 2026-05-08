@@ -15,7 +15,7 @@ import {
 import { tokenService } from "./token.service";
 
 const createUserProfileSchema = t.Object({
-  unitId: t.Optional(t.String()),
+  userId: t.Optional(t.String()),
   slug: t.String({
     minLength: 5,
     pattern: "^[a-zA-Z0-9](?:[a-zA-Z0-9-_]*[a-zA-Z0-9])?$",
@@ -110,7 +110,7 @@ export const userRoute = new Elysia()
 
       const created = await userService.create({
         ...body,
-        unitId: body.unitId!,
+        userId: body.userId!,
       });
       return mapUserToDTO(created);
     },
@@ -149,7 +149,7 @@ export const userRoute = new Elysia()
         throw new Error("Forbidden: token does not have user:read scope");
       }
 
-      const user = await userService.getByUnitId(userId);
+      const user = await userService.getByUserId(userId);
       return mapUserToDTO(user);
     },
     {
@@ -163,11 +163,11 @@ export const userRoute = new Elysia()
   )
 
   /**
-   * Token-authenticated: Get user by unitId
-   * GET /token/users/:unitId
+   * Token-authenticated: Get user by userId
+   * GET /token/users/:userId
    */
   .get(
-    "/users/:unitId",
+    "/users/:userId",
     async ({ headers, set, params, request }) => {
       const ip =
         request.headers.get("x-forwarded-for") ??
@@ -186,7 +186,7 @@ export const userRoute = new Elysia()
         throw new Error("Forbidden: token does not have user:read scope");
       }
 
-      const user = await userService.getByUnitId(params.unitId);
+      const user = await userService.getByUserId(params.userId);
       return mapUserToDTO(user);
     },
     {
@@ -202,10 +202,10 @@ export const userRoute = new Elysia()
 
   /**
    * Token-authenticated: Update user
-   * PUT /token/users/:unitId
+   * PUT /token/users/:userId
    */
   .put(
-    "/users/:unitId",
+    "/users/:userId",
     async ({ headers, set, params, body, request }) => {
       const ip =
         request.headers.get("x-forwarded-for") ??
@@ -225,12 +225,12 @@ export const userRoute = new Elysia()
       }
 
       const isAdmin = tokenService.hasAdminScope(scopes);
-      if (!isAdmin && userId !== params.unitId) {
+      if (!isAdmin && userId !== params.userId) {
         set.status = 403;
         throw new Error("Forbidden: you can only update your own profile");
       }
 
-      const updated = await userService.update(params.unitId, body);
+      const updated = await userService.update(params.userId, body);
       return mapUserToDTO(updated);
     },
     {

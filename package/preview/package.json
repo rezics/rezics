@@ -10,7 +10,6 @@
   "dependencies": {
     "@elysiajs/bearer": "^1.4.1",
     "@elysiajs/cors": "^1.4.0",
-    "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/openapi": "^1.4.14",
     "@rezics/server": "workspace:*",
     "@rezics/contract": "workspace:*",

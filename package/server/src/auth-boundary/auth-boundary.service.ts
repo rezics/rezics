@@ -241,7 +241,7 @@ function isUniqueConstraintError(error: unknown): boolean {
 async function findMainUserForAuthUser(authUserId: string) {
   return prisma.user.findUnique({
     where: { authUserId },
-    select: { unitId: true, slug: true, permission: true, accountStatus: true },
+    select: { userId: true, slug: true, permission: true },
   });
 }
 
@@ -300,7 +300,7 @@ export async function checkAccountSlugAvailability(
 
   const existing = await prisma.user.findUnique({
     where: { slug: validation.normalized },
-    select: { unitId: true },
+    select: { userId: true },
   });
 
   return {
@@ -346,7 +346,7 @@ export async function materializeMainAccountFromAuth(
   }
 
   const existing = await findMainUserForAuthUser(authUserId);
-  if (existing?.accountStatus === "MEMBER_READY") {
+  if (existing?.slug != null) {
     return jsonResponse(
       {
         success: false,
@@ -384,7 +384,7 @@ export async function materializeMainAccountFromAuth(
       avatar: sessionState.user.image ?? null,
     }));
 
-  const token = await signRezicsProfileSetupToken({ userId: user.unitId });
+  const token = await signRezicsProfileSetupToken({ userId: user.userId });
   const expiresAt = new Date(Date.now() + 900 * 1000);
   const headers = new Headers();
   headers.set("set-cookie", buildProfileSetupCookie(token));
@@ -396,7 +396,7 @@ export async function materializeMainAccountFromAuth(
         active: true,
         stage: "profile-required",
         expiresAt: expiresAt.toISOString(),
-        userId: user.unitId,
+        userId: user.userId,
       },
     },
     200,
@@ -445,15 +445,15 @@ export async function completeProfileSetupFromMain(
   }
 
   const user = await prisma.user.findUnique({
-    where: { unitId: claims.userId },
+    where: { userId: claims.userId },
     select: {
-      unitId: true,
+      userId: true,
       authUserId: true,
-      accountStatus: true,
+      slug: true,
       permission: true,
     },
   });
-  if (!user || user.accountStatus !== "PROFILE_SETUP_REQUIRED") {
+  if (!user || user.slug !== null) {
     return jsonResponse(
       {
         success: false,
@@ -482,7 +482,7 @@ export async function completeProfileSetupFromMain(
 
   try {
     const activated = await userService.completeProfileSetup({
-      userId: user.unitId,
+      userId: user.userId,
       slug: slugValidation.normalized,
       displayName: body.displayName,
       avatar: body.avatar,
@@ -501,7 +501,7 @@ export async function completeProfileSetupFromMain(
       | undefined;
     const role = dbPermission?.role?.[0] ?? "MEMBER";
     const token = await signRezicsSessionToken({
-      userId: activated.unitId,
+      userId: activated.userId,
       permission: { role },
     });
 
@@ -554,7 +554,7 @@ export async function getMainAwareAuthSessionState(
   const mainUser = await findMainUserForAuthUser(authUserId);
   const emailVerified = Boolean(sessionState.user?.emailVerified);
   const mainUserExists = Boolean(mainUser);
-  const memberReady = mainUser?.accountStatus === "MEMBER_READY";
+  const memberReady = mainUser?.slug != null;
   const registrationComplete = emailVerified && memberReady;
   const readinessStatus = !emailVerified
     ? "pending-verification"
@@ -638,7 +638,7 @@ export async function refreshMainSessionFromAuth(
     );
   }
 
-  if (user.accountStatus !== "MEMBER_READY") {
+  if (user.slug === null) {
     return jsonResponse(
       {
         error: {
@@ -656,7 +656,7 @@ export async function refreshMainSessionFromAuth(
     | undefined;
   const role = dbPermission?.role?.[0] ?? "MEMBER";
   const token = await signRezicsSessionToken({
-    userId: user.unitId,
+    userId: user.userId,
     permission: { role },
   });
 
@@ -665,7 +665,7 @@ export async function refreshMainSessionFromAuth(
   return jsonResponse(
     {
       authenticated: true,
-      userId: user.unitId,
+      userId: user.userId,
       role,
     },
     200,
@@ -709,7 +709,7 @@ export async function renewProfileSetupSessionFromAuth(
     );
   }
 
-  if (user.accountStatus !== "PROFILE_SETUP_REQUIRED") {
+  if (user.slug !== null) {
     return jsonResponse(
       {
         success: false,
@@ -722,7 +722,7 @@ export async function renewProfileSetupSessionFromAuth(
     );
   }
 
-  const token = await signRezicsProfileSetupToken({ userId: user.unitId });
+  const token = await signRezicsProfileSetupToken({ userId: user.userId });
   const expiresAt = new Date(Date.now() + 900 * 1000);
   const headers = new Headers();
   headers.set("set-cookie", buildProfileSetupCookie(token));
@@ -734,7 +734,7 @@ export async function renewProfileSetupSessionFromAuth(
         active: true,
         stage: "profile-required",
         expiresAt: expiresAt.toISOString(),
-        userId: user.unitId,
+        userId: user.userId,
       },
     },
     200,

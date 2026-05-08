@@ -26,7 +26,7 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   });
 
   function handleSave() {
-    const userId = user?.unitId as string;
+    const userId = user?.userId as string;
     if (!userId) {
       show("Please login first");
       return;

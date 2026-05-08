@@ -86,35 +86,35 @@
 
 ## 12. Seed restructure (cross-DB)
 
-- [ ] 12.1 Split `package/utils/src/seed/users.ts` into `seedAllAuthUsers(authPrisma, overwrite)` (phase 1, returns `Map<email, AuthSeedResult>`) and `seedAllMainUsers(serverPrisma, authResults)` (phase 2).
-- [ ] 12.2 Drop `accountStatus: "MEMBER_READY"` writes from `seedServerUser`; rename internal `unitId` argument to `userId`.
-- [ ] 12.3 Update `package/utils/src/seed/index.ts` orchestration to call phase 1, then phase 2.
-- [ ] 12.4 Extend `resetDatabase` in the seed CLI to also reset auth users, sessions, accounts, and verifications for seed users (currently only resets the server DB).
+- [x] 12.1 Split `package/utils/src/seed/users.ts` into `seedAllAuthUsers(authPrisma, overwrite)` (phase 1, returns `Map<email, AuthSeedResult>`) and `seedAllMainUsers(serverPrisma, authResults)` (phase 2).
+- [x] 12.2 Drop `accountStatus: "MEMBER_READY"` writes from `seedServerUser`; rename internal `unitId` argument to `userId`.
+- [x] 12.3 Update `package/utils/src/seed/index.ts` orchestration to call phase 1, then phase 2.
+- [x] 12.4 Extend `resetDatabase` in the seed CLI to also reset auth users, sessions, accounts, and verifications for seed users (currently only resets the server DB).
 
 ## 13. Factory mock seeding (`package/server/prisma/factory/`)
 
-- [ ] 13.1 Update `users.ts` to call `seedAuthUser(ctx.authPrisma, ...)` for each mock user before creating the main `User` row, and write the main row with `userId === authResult.userId`, `authUserId === authResult.userId`.
-- [ ] 13.2 Drop `accountStatus` writes from factory `seedUsers`; rename `unitId` field to `userId` on creation.
-- [ ] 13.3 Add `authPrisma: AuthPrismaClient` to `SeedCtx` in `package/server/prisma/factory/types.ts`; thread it through `orchestrator.ts` and `strategy.ts`.
-- [ ] 13.4 Update `package/server/prisma/factory/index.ts` and any callers of the orchestrator to construct and pass `authPrisma`.
+- [x] 13.1 Update `users.ts` to call `seedAuthUser(ctx.authPrisma, ...)` for each mock user before creating the main `User` row, and write the main row with `userId === authResult.userId`, `authUserId === authResult.userId`.
+- [x] 13.2 Drop `accountStatus` writes from factory `seedUsers`; rename `unitId` field to `userId` on creation.
+- [x] 13.3 Add `authPrisma: AuthPrismaClient` to `SeedCtx` in `package/server/prisma/factory/types.ts`; thread it through `orchestrator.ts` and `strategy.ts`.
+- [x] 13.4 Update `package/server/prisma/factory/index.ts` and any callers of the orchestrator to construct and pass `authPrisma`.
 
 ## 14. Test updates
 
-- [ ] 14.1 Delete the `/session/exchange` test cases in `package/server/src/session/session.api.test.ts` (keep the surviving file or delete if all tests target the removed route).
-- [ ] 14.2 Update `package/server/src/auth-boundary/*.test.ts` to use `userId` and slug-presence instead of `unitId` and `accountStatus`.
-- [ ] 14.3 Update `package/server/src/middleware/permission.test.ts` for `userId` arg names and `permission.role` claim consumption.
-- [ ] 14.4 Update `package/server/src/user/api/*.test.ts` for renamed DTO fields.
-- [ ] 14.5 Update `package/server/prisma/factory/presets.test.ts` for cross-seeded mock users.
-- [ ] 14.6 Add a new test asserting that `slug !== null` is the readiness gate (e.g., `/auth/session/refresh` rejects a user with `slug: null` even when the auth session is valid).
-- [ ] 14.7 Add a new test asserting a factory-seeded mock user can complete a full sign-in round-trip against the auth service and obtain a `rezics-session-token` cookie.
+- [x] 14.1 Delete the `/session/exchange` test cases in `package/server/src/session/session.api.test.ts` (keep the surviving file or delete if all tests target the removed route).
+- [x] 14.2 Update `package/server/src/auth-boundary/*.test.ts` to use `userId` and slug-presence instead of `unitId` and `accountStatus`.
+- [x] 14.3 Update `package/server/src/middleware/permission.test.ts` for `userId` arg names and `permission.role` claim consumption.
+- [x] 14.4 Update `package/server/src/user/api/*.test.ts` for renamed DTO fields.
+- [x] 14.5 Update `package/server/prisma/factory/presets.test.ts` for cross-seeded mock users.
+- [x] 14.6 Add a new test asserting that `slug !== null` is the readiness gate (e.g., `/auth/session/refresh` rejects a user with `slug: null` even when the auth session is valid).
+- [x] 14.7 Add a new test asserting a factory-seeded mock user can complete a full sign-in round-trip against the auth service and obtain a `rezics-session-token` cookie.
 
 ## 15. Verification & cleanup
 
-- [ ] 15.1 Run `bun test` per package: `package/server`, `package/auth`, `package/contract`, `package/jwt`, `package/api`, `package/utils`, factory tests.
-- [ ] 15.2 Run `tsc --noEmit` per frontend package: `package/app`, `package/admin`, `package/ui`, `package/app-shell`, `package/search`.
-- [ ] 15.3 Run `bun run check:convention` from the root.
-- [ ] 15.4 Run `bun run knip` and inspect newly-orphaned exports; delete any.
-- [ ] 15.5 Final sweeps:
+- [x] 15.1 Run `bun test` per package: `package/server`, `package/auth`, `package/contract`, `package/jwt`, `package/api`, `package/utils`, factory tests.
+- [x] 15.2 Run `tsc --noEmit` per frontend package: `package/app`, `package/admin`, `package/ui`, `package/app-shell`, `package/search`.
+- [x] 15.3 Run `bun run check:convention` from the root.
+- [x] 15.4 Run `bun run knip` and inspect newly-orphaned exports; delete any.
+- [x] 15.5 Final sweeps:
   - `rg "session/exchange" package/`
   - `rg "x-auth-session-token" package/`
   - `rg "AUTH_SESSION" package/`

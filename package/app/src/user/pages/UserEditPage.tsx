@@ -21,13 +21,13 @@ import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$unitId/edit";
+import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 import { UserLoading } from "./UserState";
 
 export interface UserEditPageProps {
   onCancel?: () => void;
   onSuccess?: (user: UserDTO) => void;
-  unitId?: string;
+  userId?: string;
 }
 
 /**
@@ -37,17 +37,17 @@ export interface UserEditPageProps {
 export const UserEditPage: FC<UserEditPageProps> = ({
   onCancel,
   onSuccess,
-  unitId,
+  userId,
 }) => {
   const routeMatch = useMatch({ from: UserEditRoute.id, shouldThrow: false });
-  const resolvedUnitId = unitId ?? routeMatch?.params.unitId;
+  const resolvedUserId = userId ?? routeMatch?.params.userId;
   const { t } = useTranslation();
   const [user, setUser] = useState<UserDTO | null>(null);
   const {
     data,
     isLoading,
     error: queryError,
-  } = useQuery(userQueries.detail(resolvedUnitId ?? ""));
+  } = useQuery(userQueries.detail(resolvedUserId ?? ""));
   const [error, setError] = useState<string | any | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -91,10 +91,10 @@ export const UserEditPage: FC<UserEditPageProps> = ({
         updateData.password = formData.password;
       }
       let updatedUser: UserDTO;
-      if (!resolvedUnitId) {
+      if (!resolvedUserId) {
         updatedUser = await userApi.updateMe(updateData);
       } else {
-        updatedUser = await userApi.update(resolvedUnitId, updateData);
+        updatedUser = await userApi.update(resolvedUserId, updateData);
       }
       setUser(updatedUser);
 

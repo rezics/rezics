@@ -20,5 +20,3 @@ export type {
 } from "./models/types";
 // Service layer for internal use
 export { UserService, userService } from "./service/user.service";
-
-export * from "./utils";

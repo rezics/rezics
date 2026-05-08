@@ -40,29 +40,29 @@ export const internalApi = new Elysia({ prefix: "/internal" })
   .post(
     "/users/provision",
     async ({ body }) => {
-      const { unitId, slug, name } = body;
-      const finalSlug = slug?.trim() || unitId;
+      const { userId, slug, name } = body;
+      const finalSlug = slug?.trim() || userId;
       const finalName = name?.trim() || finalSlug;
 
       await prisma.$transaction(async (tx) => {
         const existing = await tx.user.findUnique({
-          where: { unitId },
-          select: { unitId: true },
+          where: { userId },
+          select: { userId: true },
         });
         if (existing) return;
 
         await tx.user.create({
           data: {
-            unitId,
+            userId,
             slug: finalSlug,
             name: finalName,
             joinDate: new Date(),
           },
         });
-        await bootstrapSystemShelves(unitId, tx);
+        await bootstrapSystemShelves(userId, tx);
       });
 
-      await syncUserToMeili(unitId).catch(() => {});
+      await syncUserToMeili(userId).catch(() => {});
 
       // Fire-and-forget: join user to default realm
       const defaultRealmId = getDefaultRealmId();
@@ -71,14 +71,14 @@ export const internalApi = new Elysia({ prefix: "/internal" })
           .create({
             data: {
               realmUnitId: defaultRealmId,
-              userId: unitId,
+              userId,
               roleKey: "member",
             },
           })
           .catch((err: unknown) => {
             // Silently ignore duplicate membership or other errors
             console.log(
-              `[provision] auto-join default realm failed for ${unitId}:`,
+              `[provision] auto-join default realm failed for ${userId}:`,
               err instanceof Error ? err.message : err,
             );
           });
@@ -88,7 +88,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
     },
     {
       body: t.Object({
-        unitId: t.String(),
+        userId: t.String(),
         slug: t.Optional(t.String()),
         name: t.Optional(t.String()),
       }),

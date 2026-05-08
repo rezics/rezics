@@ -1,5 +1,5 @@
 import { getEnv } from "../lib/env";
-import { createServerPrisma } from "../lib/prisma-factory";
+import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
 
 export async function runDbCommand(argv: string[]): Promise<void> {
   const sub = argv[0];
@@ -25,19 +25,25 @@ async function runDbReset(argv: string[]): Promise<void> {
   const { resetDatabase, resetDatabasePreserveInfra } = await import(
     "@rezics/server/prisma/seed/database"
   );
+  const { resetAuthDatabase } = await import("@rezics/auth/prisma/seed");
   const env = getEnv();
-  const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
+  const serverPrisma = createServerPrisma(env.SERVER_DATABASE_URL);
+  const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
 
   try {
     if (wipeAll) {
       console.log("[Reset] Full wipe mode (--all)");
-      await resetDatabase(prisma);
+      await resetDatabase(serverPrisma);
+      await resetAuthDatabase(authPrisma);
     } else {
       console.log("[Reset] Preserving infrastructure (default)");
-      await resetDatabasePreserveInfra(prisma);
+      await resetDatabasePreserveInfra(serverPrisma);
     }
   } finally {
-    await prisma.$disconnect();
+    await Promise.all([
+      serverPrisma.$disconnect().catch(() => {}),
+      authPrisma.$disconnect().catch(() => {}),
+    ]);
   }
 }
 

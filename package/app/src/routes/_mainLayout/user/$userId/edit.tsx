@@ -5,6 +5,6 @@ const UserEditPage = lazyRouteComponent(
   "UserEditPage",
 );
 
-export const Route = createFileRoute("/_mainLayout/user/$unitId/edit")({
+export const Route = createFileRoute("/_mainLayout/user/$userId/edit")({
   component: UserEditPage,
 });

@@ -26,7 +26,7 @@ describe("auth session token e2e flow", () => {
     };
 
     const token = await new SignJWT({
-      unitId: "4f1af8b5-6c9f-4c32-8c17-9108fb6af001",
+      userId: "4f1af8b5-6c9f-4c32-8c17-9108fb6af001",
       scope: "user",
     })
       .setProtectedHeader({ alg: "ES256", kid: "rezics-active" })
@@ -36,7 +36,7 @@ describe("auth session token e2e flow", () => {
       .setExpirationTime("15m")
       .sign(privateKey);
 
-    const result = await verifyTokenFromHeader<JWTPayload>(token, {
+    const result = await verifyTokenFromHeader<JWTPayload>(`Bearer ${token}`, {
       issuer: "http://localhost:3001",
       audience: "rezics",
       jwks: { keys: [publicJwk] },

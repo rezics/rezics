@@ -6,7 +6,7 @@ import { userAlice, userBen, userCora } from "./user.ts";
 function makeRemark(overrides: Partial<PostDTO> & { unitId: string }): PostDTO {
   return {
     unitId: overrides.unitId,
-    authorUserId: userAlice.unitId,
+    authorUserId: userAlice.userId,
     author: userAlice,
     kind: "REMARK",
     body: "A short note: chapter 3's pacing reminded me of Carver.",
@@ -29,14 +29,14 @@ export const remarkLong: PostDTO = makeRemark({
 export const remarkCJK: PostDTO = makeRemark({
   unitId: "remark-cjk",
   author: userBen,
-  authorUserId: userBen.unitId,
+  authorUserId: userBen.userId,
   body: "第三章的節奏讓我想起卡佛——同樣是用沉默推動的。",
 });
 
 export const remarkLatin: PostDTO = makeRemark({
   unitId: "remark-latin",
   author: userCora,
-  authorUserId: userCora.unitId,
+  authorUserId: userCora.userId,
   body: "Short and good — the kind of book you keep in your bag for the bus.",
 });
 

@@ -128,7 +128,7 @@ model Unit {
   workClaims    WorkLinkClaim[] @relation("WorkLinkClaimWork")
 
   // Owner/creator
-  user User? @relation("UnitForUser", fields: [userId], references: [unitId])
+  user User? @relation("UnitForUser", fields: [userId], references: [userId])
 
   // Translation layer
   translations     UnitTranslation[]
@@ -261,8 +261,8 @@ model WorkLinkClaim {
 
   releaseUnit Unit  @relation("WorkLinkClaimRelease", fields: [releaseUnitId], references: [id], onDelete: Cascade)
   workUnit    Unit  @relation("WorkLinkClaimWork", fields: [workUnitId], references: [id], onDelete: Cascade)
-  claimer     User  @relation("WorkLinkClaimClaimer", fields: [claimerUserId], references: [unitId])
-  resolver    User? @relation("WorkLinkClaimResolver", fields: [resolvedBy], references: [unitId])
+  claimer     User  @relation("WorkLinkClaimClaimer", fields: [claimerUserId], references: [userId])
+  resolver    User? @relation("WorkLinkClaimResolver", fields: [resolvedBy], references: [userId])
 
   @@index([workUnitId, status])
   @@index([claimerUserId, status])
@@ -684,11 +684,6 @@ model Attribution {
  * UserType removed.
  */
 
-enum UserAccountStatus {
-  PROFILE_SETUP_REQUIRED
-  MEMBER_READY
-}
-
 enum EmailVerificationContractStatus {
   PENDING
   VERIFIED
@@ -696,22 +691,21 @@ enum EmailVerificationContractStatus {
 }
 
 model User {
-  unitId         String            @id @db.Uuid
-  authUserId     String?           @unique @db.Uuid
+  userId         String   @id @db.Uuid
+  authUserId     String?  @unique @db.Uuid
   /// Main-owned Rezics product email. It may be initialized from a verified
   /// auth login email during materialization, but is not synchronized with
   /// auth.User.email after that point.
-  email          String?           @db.VarChar(320)
-  accountStatus  UserAccountStatus @default(MEMBER_READY)
-  slug           String?           @unique
+  email          String?  @db.VarChar(320)
+  slug           String?  @unique
   name           String?
   avatar         String?
   bio            String?
   description    String?
   joinDate       DateTime?
   permission     Json?
-  followersCount Int               @default(0)
-  followingsCount Int              @default(0)
+  followersCount Int      @default(0)
+  followingsCount Int     @default(0)
   settings       Json?
   extra          Json?
 
@@ -728,7 +722,6 @@ model User {
   unitProgress             UserUnitProgress[]
 
   @@index([email])
-  @@index([accountStatus])
 }
 
 model EmailVerificationContract {
@@ -773,7 +766,7 @@ model UserUnitProgress {
   firstSeenAt DateTime @default(now())
   lastSeenAt  DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [unitId], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
   unit Unit @relation("ProgressUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   @@id([userId, unitId])
@@ -835,8 +828,8 @@ model Follow {
   followingId String   @db.Uuid
   createdAt   DateTime @default(now())
 
-  follower  User @relation("UserFollowings", fields: [followerId], references: [unitId], onDelete: Cascade)
-  following User @relation("UserFollowers", fields: [followingId], references: [unitId], onDelete: Cascade)
+  follower  User @relation("UserFollowings", fields: [followerId], references: [userId], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [userId], onDelete: Cascade)
 
   @@unique([followerId, followingId])
 }
@@ -855,7 +848,7 @@ model ApiToken {
   revoked    Boolean   @default(false)
   revokedAt  DateTime?
 
-  user User @relation(fields: [userId], references: [unitId], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@index([userId])
   @@index([tokenHash])

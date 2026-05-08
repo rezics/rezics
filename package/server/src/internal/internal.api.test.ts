@@ -7,12 +7,12 @@ process.env.DATABASE_URL ??=
 process.env.SERVER_INTERNAL_SECRET = "test-secret";
 
 const mockUserCreate = mock(async () => ({
-  unitId: "user-1",
+  userId: "user-1",
   slug: "testuser",
   name: "Test User",
 }));
 
-const mockUserFindUnique = mock(async () => null as { unitId: string } | null);
+const mockUserFindUnique = mock(async () => null as { userId: string } | null);
 const mockUnitFindUnique = mock(async () => null);
 const mockBootstrapSystemShelves = mock(async () => {});
 
@@ -79,7 +79,7 @@ describe("POST /internal/users/provision", () => {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          unitId: "user-1",
+          userId: "user-1",
           slug: "testuser",
           name: "Test User",
         }),
@@ -104,7 +104,7 @@ describe("POST /internal/users/provision", () => {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          unitId: "user-1",
+          userId: "user-1",
           slug: "testuser",
           name: "Test User",
         }),
@@ -136,7 +136,7 @@ describe("POST /internal/users/provision", () => {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          unitId: "user-1",
+          userId: "user-1",
           slug: "testuser",
           name: "Test User",
         }),
@@ -161,7 +161,7 @@ describe("POST /internal/users/provision", () => {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          unitId: "user-1",
+          userId: "user-1",
           slug: "testuser",
           name: "Test User",
         }),
@@ -172,7 +172,7 @@ describe("POST /internal/users/provision", () => {
   });
 
   test("duplicate provision is idempotent", async () => {
-    mockUserFindUnique.mockResolvedValueOnce({ unitId: "user-1" });
+    mockUserFindUnique.mockResolvedValueOnce({ userId: "user-1" });
 
     const { internalApi } = await import("./internal.api");
 
@@ -184,7 +184,7 @@ describe("POST /internal/users/provision", () => {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          unitId: "user-1",
+          userId: "user-1",
           slug: "testuser",
           name: "Test User",
         }),
@@ -205,7 +205,7 @@ describe("POST /internal/users/provision", () => {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          unitId: "user-1",
+          userId: "user-1",
           slug: "testuser",
           name: "Test User",
         }),

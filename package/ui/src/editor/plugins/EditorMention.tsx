@@ -252,7 +252,7 @@ export function MentionPanel({
       {options.length > 0 && (
         <ul className="max-h-[280px] overflow-auto py-1 list-none m-0 p-0">
           {options.map((option, idx) => (
-            <li key={option.unitId ?? idx}>
+            <li key={option.userId ?? idx}>
               <button
                 type="button"
                 className={[
@@ -272,9 +272,9 @@ export function MentionPanel({
                   <span className="text-sm font-medium truncate">
                     {option.name ?? "(unknown)"}
                   </span>
-                  {option.unitId && (
+                  {option.userId && (
                     <span className="text-xs text-rezics-fg-muted truncate">
-                      {option.unitId}
+                      {option.userId}
                     </span>
                   )}
                 </div>

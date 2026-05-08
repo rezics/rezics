@@ -57,12 +57,12 @@ export async function runFactorySeed(
   done = stepTimer("Step 3: Infra");
   const admin = await ctx.prisma.user.findUnique({
     where: { slug: "admin" },
-    select: { unitId: true },
+    select: { userId: true },
   });
   if (!admin) {
     throw new Error("[Seed] admin user not found — seed users first");
   }
-  const { defaultRealmId } = await seedInfra(ctx.prisma, admin.unitId);
+  const { defaultRealmId } = await seedInfra(ctx.prisma, admin.userId);
   void defaultRealmId;
   done();
 

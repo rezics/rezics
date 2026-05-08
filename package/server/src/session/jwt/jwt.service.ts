@@ -47,7 +47,6 @@ export async function signRezicsSessionToken(claims: {
     tokenType: "member-session",
     sub: claims.userId,
     userId: claims.userId,
-    role: claims.permission.role,
     permission: claims.permission,
   })
     .setProtectedHeader({ alg: "ES256", kid: key.kid })

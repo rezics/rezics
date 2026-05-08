@@ -35,7 +35,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   const { t } = useTranslation();
   return (
     <div>
-      <ArrowForwardIcon size={16} to={`/user/${author?.unitId}`}>
+      <ArrowForwardIcon size={16} to={`/user/${author?.userId}`}>
         <AccentBarWithText
           text={t("book.author_info.author_line", { name: author?.name })}
         />
@@ -53,7 +53,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
           />
           <div className="mt-3 w-full">
             <FollowButton
-              userId={author.unitId}
+              userId={author?.userId}
               initialFollowersCount={author.followersCount}
               showFollowersText
               fullWidth
@@ -90,7 +90,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
     <div>
       <div>
         <div className="flex mb-4">
-          <ArrowForwardIcon size={16} to={`/user/${author?.unitId}`}>
+          <ArrowForwardIcon size={16} to={`/user/${author?.userId}`}>
             <AccentBarWithText
               text={t("book.author_info.author_line", { name: author?.name })}
             />
@@ -115,7 +115,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
                 />
                 <div className="mt-2 w-full">
                   <FollowButton
-                    userId={author.unitId}
+                    userId={author?.userId}
                     initialFollowersCount={author.followersCount}
                     showFollowersText={true}
                     fullWidth
@@ -152,7 +152,7 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const canEdit = Boolean(author?.unitId);
+  const canEdit = Boolean(author?.userId);
   const shouldShowEdit = (showEditButton ?? canEdit) && canEdit;
 
   const handleEdit = () => {
@@ -160,8 +160,8 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({
       onEdit();
       return;
     }
-    if (author?.unitId) {
-      navigate({ to: `/user/${author.unitId}/edit` });
+    if (author?.userId) {
+      navigate({ to: `/user/${author?.userId}/edit` });
     }
   };
 

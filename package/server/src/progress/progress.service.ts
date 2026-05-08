@@ -100,7 +100,7 @@ export class ProgressService {
           : undefined;
 
     const createData: Prisma.UserUnitProgressCreateInput = {
-      user: { connect: { unitId: userId } },
+      user: { connect: { userId } },
       unit: { connect: { id: unitId } },
       progress: input.progress ?? 0,
       status: coercedStatus ?? UserUnitProgressStatus.BACKLOG,

@@ -20,7 +20,7 @@ import { UserError, UserLoading } from "./UserState";
 import { UserUnitsPage } from "./UserUnitsPage";
 
 export interface UserProfilePageProps {
-  unitId: string;
+  userId: string;
   isCurrentUser?: boolean;
   onEditClick?: () => void;
 }
@@ -30,7 +30,7 @@ export interface UserProfilePageProps {
  * 显示用户的详细信息，包括头像、名字、简介等
  */
 export const UserProfilePage: FC<UserProfilePageProps> = ({
-  unitId = "",
+  userId = "",
   isCurrentUser = false,
   onEditClick,
 }) => {
@@ -42,8 +42,8 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
     enabled: isCurrentUser,
   });
   const detailQuery = useQuery({
-    ...userQueries.detail(unitId),
-    enabled: !isCurrentUser && unitId !== "",
+    ...userQueries.detail(userId),
+    enabled: !isCurrentUser && userId !== "",
   });
 
   const isLoading = meQuery.isLoading || detailQuery.isLoading;
@@ -98,9 +98,9 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {!isCurrentUser && user.unitId !== currentUser?.unitId && (
+              {!isCurrentUser && user.userId !== currentUser?.userId && (
                 <FollowButton
-                  userId={user.unitId}
+                  userId={user.userId}
                   size="medium"
                   className="!mr-2"
                 />
@@ -116,10 +116,10 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           </div>
 
           <div className="mt-6">
-            {user.unitId && (
+            {user.userId && (
               <div className="mb-4">
-                <h6 className="text-base font-semibold mb-2">Unit ID</h6>
-                <p className="text-sm text-text-secondary">{user.unitId}</p>
+                <h6 className="text-base font-semibold mb-2">User ID</h6>
+                <p className="text-sm text-text-secondary">{user.userId}</p>
               </div>
             )}
             {user.email && (
@@ -144,7 +144,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           </div>
         </CardContent>
       </Card>
-      {(isCurrentUser || user.unitId === currentUser?.unitId) && (
+      {(isCurrentUser || user.userId === currentUser?.userId) && (
         <Card className="shadow-lg rounded-2xl mt-4">
           <CardContent>
             <h6 className="text-lg font-semibold inline-block">导航：</h6>
@@ -166,7 +166,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           </CardContent>
         </Card>
       )}
-      <UserUnitsPage userId={user.unitId} />
+      <UserUnitsPage userId={user.userId} />
     </div>
   );
 };

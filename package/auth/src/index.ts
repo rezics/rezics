@@ -53,7 +53,6 @@ app
         "authorization",
         "x-internal-auth-token",
         "x-internal-secret",
-        "x-auth-session-token",
       ],
       maxAge: 600,
     }),

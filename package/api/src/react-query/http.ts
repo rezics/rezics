@@ -1,27 +1,18 @@
 import { getApiConfig } from "../config";
 import { clearAuthPresence, hasAuthPresence } from "./authPresence";
 import { ApiError } from "./errors";
-import { buildTokenHeaders, exchangeForSessionToken } from "./jwt";
+import { exchangeForSessionToken } from "./jwt";
 
-/**
- * Base API URL - should be configured via environment
- */
 function getApiBaseUrl(): string {
   return getApiConfig().apiBaseUrl;
 }
 
 export type ApiRequestInit = globalThis.RequestInit;
 
-/**
- * Build request headers for business API calls.
- * Browser requests rely on httpOnly session cookies. Non-browser callers can
- * still attach a stored rezics session token through buildTokenHeaders().
- */
 function buildHeaders(options?: ApiRequestInit): Record<string, string> {
   return {
     "Content-Type": "application/json",
     ...Object.fromEntries(new Headers(options?.headers).entries()),
-    ...buildTokenHeaders(),
   };
 }
 
@@ -86,9 +77,6 @@ export async function apiFetchResponse<T>(
   };
 }
 
-/**
- * Generic fetch wrapper with error handling and JWT support
- */
 export async function apiFetch<T>(
   endpoint: string,
   options?: ApiRequestInit,

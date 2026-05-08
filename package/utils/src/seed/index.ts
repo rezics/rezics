@@ -7,7 +7,11 @@ import {
   type ServerPrismaClient,
 } from "../lib/prisma-factory";
 import { seedInfra } from "./infra";
-import { resolveRootUserId, seedAllUsers } from "./users";
+import {
+  resolveRootUserId,
+  seedAllAuthUsers,
+  seedAllMainUsers,
+} from "./users";
 
 export interface RunSeedOptions {
   seedUsers?: boolean;
@@ -33,10 +37,14 @@ export async function runSeed(opts: RunSeedOptions): Promise<void> {
           : "Seeding users...",
       );
 
-      const { rootUserId: id, results } = await seedAllUsers(
+      const authResults = await seedAllAuthUsers(
         authPrisma,
-        serverPrisma,
         !!opts.overwriteUsers,
+        serverPrisma,
+      );
+      const { rootUserId: id, results } = await seedAllMainUsers(
+        serverPrisma,
+        authResults,
       );
       rootUserId = id;
 

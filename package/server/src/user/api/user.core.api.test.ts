@@ -26,7 +26,7 @@ mock.module("@/meili/meili.service", () => ({
 }));
 
 const userStub = {
-  unitId: "user-1",
+  userId: "user-1",
   slug: "alice01",
   name: "Alice",
 };
@@ -39,7 +39,7 @@ mock.module("../service/user.service", () => ({
   userService: {
     getBySlug: async (userSlug: string) =>
       userSlug === "alice01" ? userStub : null,
-    getByUnitId: async () => userStub,
+    getByUserId: async () => userStub,
     update: async () => userStub,
     delete: async () => undefined,
   },

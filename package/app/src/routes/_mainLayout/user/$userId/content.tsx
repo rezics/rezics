@@ -5,6 +5,6 @@ const ContentTabSection = lazyRouteComponent(
   "ContentTabSection",
 );
 
-export const Route = createFileRoute("/_mainLayout/user/$unitId/content")({
+export const Route = createFileRoute("/_mainLayout/user/$userId/content")({
   component: ContentTabSection,
 });

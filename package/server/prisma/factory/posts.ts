@@ -120,7 +120,7 @@ async function seedPostKindForTarget(
     let scoreEntryId: string | undefined;
     if (needsScore && scoreEntries) {
       for (const [key, entryId] of scoreEntries) {
-        if (key.startsWith(`${author.unitId}:${targetUnitId}:`)) {
+        if (key.startsWith(`${author.userId}:${targetUnitId}:`)) {
           scoreEntryId = entryId;
           break;
         }
@@ -130,13 +130,13 @@ async function seedPostKindForTarget(
     const unit = await prisma.unit.create({
       data: {
         type: UnitType.POST,
-        userId: author.unitId,
+        userId: author.userId,
         status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
         post: {
           create: {
-            authorUserId: author.unitId,
+            authorUserId: author.userId,
             targetUnitId,
             kind,
             body,
@@ -199,7 +199,7 @@ async function seedPostKindBatch(
     let scoreEntryId: string | undefined;
     if (needsScore && scoreEntries) {
       for (const [key, entryId] of scoreEntries) {
-        if (key.startsWith(`${author.unitId}:${targetUnitId}:`)) {
+        if (key.startsWith(`${author.userId}:${targetUnitId}:`)) {
           scoreEntryId = entryId;
           break;
         }
@@ -229,7 +229,7 @@ async function seedPostKindBatch(
       data: chunk.map((r) => ({
         id: r.id,
         type: UnitType.POST,
-        userId: r.author.unitId,
+        userId: r.author.userId,
         status: r.published ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: r.publishedAt,
@@ -242,7 +242,7 @@ async function seedPostKindBatch(
     await prisma.post.createMany({
       data: chunk.map((r) => ({
         unitId: r.id,
-        authorUserId: r.author.unitId,
+        authorUserId: r.author.userId,
         targetUnitId,
         kind,
         body: r.body,
@@ -339,13 +339,13 @@ async function seedTreePostsForTarget(
         data: {
           id,
           type: UnitType.POST,
-          userId: author.unitId,
+          userId: author.userId,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: faker.date.past({ years: 1 }),
           post: {
             create: {
-              authorUserId: author.unitId,
+              authorUserId: author.userId,
               targetUnitId,
               rootPostUnitId: id,
               kind: PostKind.POST,
@@ -421,13 +421,13 @@ async function seedTreePostsForTarget(
       data: {
         id: replyId,
         type: UnitType.POST,
-        userId: author.unitId,
+        userId: author.userId,
         status: UnitStatus.PUBLISHED,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: faker.date.past({ years: 1 }),
         post: {
           create: {
-            authorUserId: author.unitId,
+            authorUserId: author.userId,
             targetUnitId,
             rootPostUnitId: parent.rootId,
             parentPostUnitId: parent.id,
@@ -552,14 +552,14 @@ export async function seedWikiTranslationGroups(
         data: {
           id: p.id,
           type: UnitType.POST,
-          userId: author.unitId,
+          userId: author.userId,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: p.language,
           translationGroupId: WIKI_GROUP_ID,
           publishedAt: new Date(),
           post: {
             create: {
-              authorUserId: author.unitId,
+              authorUserId: author.userId,
               kind: PostKind.POST,
               body: p.body,
               depth: 0,

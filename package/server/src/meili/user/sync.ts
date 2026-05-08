@@ -4,21 +4,21 @@ import { searchClient } from "../search-client";
 import type { UserSearchDocument } from "./index";
 
 /**
- * Sync a single user (by its unitId) into the Meilisearch `users` index.
+ * Sync a single user (by its userId) into the Meilisearch `users` index.
  */
-export async function syncUserToMeili(unitId: string): Promise<void> {
+export async function syncUserToMeili(userId: string): Promise<void> {
   const user = await prisma.user.findUnique({
-    where: { unitId },
+    where: { userId },
   });
 
   if (!user) return;
-  if (user.accountStatus !== "MEMBER_READY" || !user.name || !user.slug) {
+  if (!user.slug || !user.name) {
     return;
   }
 
   const doc: UserSearchDocument = {
-    id: user.unitId,
-    unitId: user.unitId,
+    id: user.userId,
+    userId: user.userId,
     name: user.name,
     slug: user.slug,
     avatar: user.avatar,
@@ -34,15 +34,15 @@ export async function syncUserToMeili(unitId: string): Promise<void> {
 }
 
 /**
- * Remove a single user (by its unitId) from the Meilisearch `users` index.
+ * Remove a single user (by its userId) from the Meilisearch `users` index.
  */
-export async function deleteUserFromMeili(unitId: string): Promise<void> {
-  await searchClient.userIndex.deleteDocuments([unitId]);
+export async function deleteUserFromMeili(userId: string): Promise<void> {
+  await searchClient.userIndex.deleteDocuments([userId]);
 }
 
 export async function patchUserFieldsToMeili(
-  unitId: string,
+  userId: string,
   fields: Record<string, any>,
 ): Promise<void> {
-  await patchUserFields(searchClient, unitId, fields);
+  await patchUserFields(searchClient, userId, fields);
 }

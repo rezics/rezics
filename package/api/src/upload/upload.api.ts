@@ -1,6 +1,5 @@
 import type { ImageUploadResponse } from "@rezics/contract";
 import { getApiConfig } from "../config";
-import { buildTokenHeaders } from "../react-query/jwt";
 
 export const uploadApi = {
   uploadImage: async (file: File): Promise<ImageUploadResponse> => {
@@ -12,9 +11,6 @@ export const uploadApi = {
       method: "POST",
       body: formData,
       credentials: "include",
-      headers: {
-        ...buildTokenHeaders(),
-      },
     });
 
     if (!response.ok) {

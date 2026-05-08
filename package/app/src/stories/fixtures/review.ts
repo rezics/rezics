@@ -6,7 +6,7 @@ import { userAlice, userBen } from "./user.ts";
 function makeReview(overrides: Partial<PostDTO> & { unitId: string }): PostDTO {
   return {
     unitId: overrides.unitId,
-    authorUserId: userAlice.unitId,
+    authorUserId: userAlice.userId,
     author: userAlice,
     kind: "REVIEW",
     body: "An honest, generous read — flawed in places, but unforgettable.",
@@ -45,7 +45,7 @@ export const reviewLong: PostDTO = makeReview({
 export const reviewCJK: PostDTO = makeReview({
   unitId: "review-cjk",
   author: userBen,
-  authorUserId: userBen.unitId,
+  authorUserId: userBen.userId,
   body: "讀第二次才發現結局並非高潮——第十七章才是，作者刻意不提示，這正是它最動人的地方。",
   extra: {
     title: "重讀的喜悅",

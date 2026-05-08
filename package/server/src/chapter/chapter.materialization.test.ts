@@ -243,7 +243,7 @@ describe("chapter materialization API permissions", () => {
       unitService: {
         getByUnitId: async () => ({
           unitId: "book-1",
-          user: { unitId: "other-user" },
+          user: { userId: "other-user" },
         }),
       },
     }));

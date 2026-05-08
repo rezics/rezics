@@ -3,9 +3,9 @@ import { useUserProfileStore } from "@/user/states";
 
 export const Route = createFileRoute("/_mainLayout/user/me/bookmark")({
   beforeLoad: () => {
-    const unitId = useUserProfileStore.getState().user?.unitId;
-    if (unitId) {
-      throw redirect({ to: "/user/$unitId", params: { unitId } });
+    const userId = useUserProfileStore.getState().user?.userId;
+    if (userId) {
+      throw redirect({ to: "/user/$userId", params: { userId } });
     }
     throw redirect({ to: "/login" });
   },

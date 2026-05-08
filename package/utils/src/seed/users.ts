@@ -52,7 +52,7 @@ export function getServerRole(input: CrossSeedUserInput): string {
 }
 
 interface SeedServerUserInput {
-  unitId: string;
+  userId: string;
   slug: string;
   email: string;
   name: string;
@@ -66,11 +66,10 @@ async function seedServerUser(
   input: SeedServerUserInput,
 ): Promise<void> {
   await prisma.user.upsert({
-    where: { unitId: input.unitId },
+    where: { userId: input.userId },
     update: {
-      authUserId: input.unitId,
+      authUserId: input.userId,
       email: input.email,
-      accountStatus: "MEMBER_READY",
       slug: input.slug,
       name: input.name,
       avatar: input.avatar,
@@ -78,10 +77,9 @@ async function seedServerUser(
       permission: input.permission as never,
     },
     create: {
-      unitId: input.unitId,
-      authUserId: input.unitId,
+      userId: input.userId,
+      authUserId: input.userId,
       email: input.email,
-      accountStatus: "MEMBER_READY",
       slug: input.slug,
       name: input.name,
       avatar: input.avatar,
@@ -101,31 +99,6 @@ function resolveSeedUserSlug(input: CrossSeedUserInput): string {
   return slug || input.email.split("@")[0]!;
 }
 
-export async function crossSeedUser(
-  authPrisma: AuthPrismaClient,
-  serverPrisma: ServerPrismaClient,
-  input: CrossSeedUserInput,
-): Promise<CrossSeedUserResult> {
-  const authResult = await seedAuthUser(authPrisma, {
-    email: input.email,
-    name: input.name,
-    role: input.role,
-    password: input.password,
-  });
-  const slug = resolveSeedUserSlug(input);
-
-  await seedServerUser(serverPrisma, {
-    unitId: authResult.userId,
-    slug,
-    email: authResult.email,
-    name: authResult.name,
-    bio: input.bio,
-    permission: input.permission,
-  });
-
-  return { ...authResult, slug };
-}
-
 // Delete server users first (FK dependency), then auth users.
 async function deleteExistingUsers(
   authPrisma: AuthPrismaClient,
@@ -143,7 +116,7 @@ async function deleteExistingUsers(
     await serverPrisma.user.deleteMany({
       where: {
         OR: [
-          { unitId: { in: userIds } },
+          { userId: { in: userIds } },
           { authUserId: { in: userIds } },
           { email: { in: emails } },
         ],
@@ -156,25 +129,59 @@ async function deleteExistingUsers(
   }
 }
 
+export type AuthSeedResults = Map<string, SeedAuthUserResult>;
+
+export async function seedAllAuthUsers(
+  authPrisma: AuthPrismaClient,
+  overwrite: boolean,
+  serverPrisma?: ServerPrismaClient,
+): Promise<AuthSeedResults> {
+  if (overwrite && serverPrisma) {
+    await deleteExistingUsers(authPrisma, serverPrisma);
+  }
+
+  const results: AuthSeedResults = new Map();
+  for (const input of SEED_USERS) {
+    const authResult = await seedAuthUser(authPrisma, {
+      email: input.email,
+      name: input.name,
+      role: input.role,
+      password: input.password,
+    });
+    results.set(input.email, authResult);
+  }
+  return results;
+}
+
 export interface SeedAllUsersResult {
   rootUserId: string;
   results: Array<{ result: CrossSeedUserResult; serverRole: string }>;
 }
 
-export async function seedAllUsers(
-  authPrisma: AuthPrismaClient,
+export async function seedAllMainUsers(
   serverPrisma: ServerPrismaClient,
-  overwrite: boolean,
+  authResults: AuthSeedResults,
 ): Promise<SeedAllUsersResult> {
-  if (overwrite) {
-    await deleteExistingUsers(authPrisma, serverPrisma);
-  }
-
   let rootUserId: string | undefined;
   const results: SeedAllUsersResult["results"] = [];
 
   for (const input of SEED_USERS) {
-    const result = await crossSeedUser(authPrisma, serverPrisma, input);
+    const authResult = authResults.get(input.email);
+    if (!authResult) {
+      throw new Error(`Auth result missing for seed user ${input.email}`);
+    }
+    const slug = resolveSeedUserSlug(input);
+
+    await seedServerUser(serverPrisma, {
+      userId: authResult.userId,
+      slug,
+      email: authResult.email,
+      name: authResult.name,
+      bio: input.bio,
+      permission: input.permission,
+    });
+
+    const result: CrossSeedUserResult = { ...authResult, slug };
     const serverRole = getServerRole(input);
     results.push({ result, serverRole });
     if (input.email === ROOT_EMAIL) {
@@ -200,8 +207,8 @@ export async function resolveRootUserId(
   if (!authRoot) return null;
 
   const serverRoot = await serverPrisma.user.findUnique({
-    where: { unitId: authRoot.id },
-    select: { unitId: true },
+    where: { userId: authRoot.id },
+    select: { userId: true },
   });
-  return serverRoot?.unitId ?? null;
+  return serverRoot?.userId ?? null;
 }

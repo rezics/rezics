@@ -51,22 +51,22 @@ export const ProfileOverviewPage: FC = () => {
         <StatItem
           label="Shelves"
           count={shelvesCountQuery.data?.total}
-          to={`/user/${unitId}/shelves`}
+          to={`/user/${userId}/shelves`}
         />
         <StatItem
           label="Content"
           count={reviewsCountQuery.data?.total}
-          to={`/user/${unitId}/content`}
+          to={`/user/${userId}/content`}
         />
         <StatItem
           label="Followers"
           count={user.followersCount ?? 0}
-          to={`/user/${unitId}/followers`}
+          to={`/user/${userId}/followers`}
         />
         <StatItem
           label="Following"
           count={user.followingsCount ?? 0}
-          to={`/user/${unitId}/followers?filter=following`}
+          to={`/user/${userId}/followers?filter=following`}
         />
       </div>
 

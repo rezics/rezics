@@ -9,7 +9,7 @@ export function hasPermissionToUpdateTag(
 ): boolean {
   if (isBlocked(permission)) return false;
   if (BasicAdminPermission(permission)) return true;
-  if (actorUserId === unit?.user?.unitId) return true;
+  if (actorUserId === unit?.user?.userId) return true;
   return true;
 }
 

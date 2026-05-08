@@ -15,20 +15,20 @@ import { cn } from "@/shared/utils/css-util";
 interface MiniAdminActionBarProps {
   editionURL: string;
   textColor?: string;
-  userUnitId?: string;
+  userId?: string;
   resource?: EditableResource;
 }
 
 export function MiniAdminActionBar({
   editionURL,
   textColor,
-  userUnitId,
+  userId,
   resource = "post",
 }: MiniAdminActionBarProps) {
   const { t } = useTranslation();
   const canEdit = useCanEdit({
     resource,
-    ownerUnit: userUnitId ? { user: { unitId: userUnitId } } : undefined,
+    ownerUnit: userId ? { user: { userId } } : undefined,
   });
   const navigate = useNavigate();
 

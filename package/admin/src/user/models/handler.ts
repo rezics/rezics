@@ -1,9 +1,6 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authKeys } from "@rezics/api/auth/auth.keys";
-import {
-  clearAllTokens,
-  exchangeForSessionToken,
-} from "@rezics/api/react-query/jwt";
+import { exchangeForSessionToken } from "@rezics/api/react-query/jwt";
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
@@ -27,7 +24,6 @@ export async function adminLogin(email: string, password: string) {
   const role = useAuthSessionStore.getState().user?.role;
   if (!(role === "admin" || role === "owner")) {
     await authApi.signOut();
-    clearAllTokens();
     clearAuthSessionState();
     throw new Error("You are not authorized to access this page");
   }
@@ -40,7 +36,6 @@ export async function adminLogin(email: string, password: string) {
  */
 export async function adminLogout() {
   await authApi.signOut();
-  clearAllTokens();
   useAuthSessionStore.getState().reset();
   clearAuthSessionState();
   qc.removeQueries({ queryKey: authKeys.all() });

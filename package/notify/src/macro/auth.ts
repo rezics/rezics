@@ -25,7 +25,7 @@ export const authMacro = new Elysia({ name: "macro/notify-auth" }).macro(
 
       try {
         const result = await verifier(raw);
-        const userId = result.payload.unitId || result.payload.sub;
+        const userId = result.payload.userId || result.payload.sub;
         if (!userId) {
           return new Response("Unauthorized: Missing user identity", {
             status: 401,
@@ -46,7 +46,7 @@ export async function verifyJwtToken(
 ): Promise<{ userId: string } | null> {
   try {
     const result = await verifier(`Bearer ${token}`);
-    const userId = result.payload.unitId || result.payload.sub;
+    const userId = result.payload.userId || result.payload.sub;
     if (!userId) return null;
     return { userId };
   } catch {

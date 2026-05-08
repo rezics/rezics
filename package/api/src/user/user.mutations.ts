@@ -50,7 +50,7 @@ export function useAdminCreateUserMutation(
     mutationFn: (input: AdminCreateUserInput) => userApi.adminCreate(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      qc.setQueryData(userKeys.adminDetail(data.unitId), data);
+      qc.setQueryData(userKeys.adminDetail(data.userId), data);
       qc.invalidateQueries({ queryKey: userKeys.adminLists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -59,17 +59,17 @@ export function useAdminCreateUserMutation(
 
 export function useAdminUpdateUserMutation(
   options?: Omit<
-    UseMutationOptions<UserDTO, Error, { unitId: string; input: UpdateUser }>,
+    UseMutationOptions<UserDTO, Error, { userId: string; input: UpdateUser }>,
     "mutationFn"
   >,
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ unitId, input }) =>
-      userApi.adminUpdate(unitId, input as any),
+    mutationFn: ({ userId, input }) =>
+      userApi.adminUpdate(userId, input as any),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      qc.setQueryData(userKeys.adminDetail(variables.unitId), data);
+      qc.setQueryData(userKeys.adminDetail(variables.userId), data);
       qc.invalidateQueries({ queryKey: userKeys.adminLists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

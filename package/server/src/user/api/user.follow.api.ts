@@ -8,10 +8,10 @@ import { userService } from "../service/user.service";
 export const followRoute = new Elysia()
   .use(authMacro)
   .get(
-    "/:unitId/followers",
+    "/:userId/followers",
     async ({ params, query }) => {
       const { users, total } = await userService.getFollowers(
-        params.unitId,
+        params.userId,
         query,
       );
       return { users: users.map(mapUserToPublicProfile), total };
@@ -30,10 +30,10 @@ export const followRoute = new Elysia()
     },
   )
   .get(
-    "/:unitId/followings",
+    "/:userId/followings",
     async ({ params, query }) => {
       const { users, total } = await userService.getFollowings(
-        params.unitId,
+        params.userId,
         query,
       );
       return { users: users.map(mapUserToPublicProfile), total };
@@ -52,9 +52,9 @@ export const followRoute = new Elysia()
     },
   )
   .get(
-    "/:unitId",
+    "/:userId",
     async ({ params }): Promise<UserDTO> => {
-      const user = await userService.getByUnitId(params.unitId);
+      const user = await userService.getByUserId(params.userId);
       return mapUserToPublicProfile(user);
     },
     {

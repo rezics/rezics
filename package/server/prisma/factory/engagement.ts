@@ -54,7 +54,7 @@ async function seedFavorites(
       data: {
         id: shelfId,
         type: UnitType.SHELF,
-        userId: user.unitId,
+        userId: user.userId,
         status: UnitStatus.PUBLISHED,
         visibility: UnitVisibility.PRIVATE,
         publishedAt: new Date(),
@@ -116,17 +116,17 @@ async function seedFollows(
   for (const user of users) {
     const followCount = ctx.draw(spec);
     const targets = pickN(
-      users.filter((u) => u.unitId !== user.unitId),
+      users.filter((u) => u.userId !== user.userId),
       Math.min(followCount, users.length - 1),
     );
     for (const target of targets) {
-      const key = `${user.unitId}:${target.unitId}`;
+      const key = `${user.userId}:${target.userId}`;
       if (seen.has(key)) continue;
       seen.add(key);
       data.push({
         id: randomUUID(),
-        followerId: user.unitId,
-        followingId: target.unitId,
+        followerId: user.userId,
+        followingId: target.userId,
       });
     }
   }
@@ -153,8 +153,8 @@ async function seedFollows(
   }
 
   const usersToUpdate = users.filter((user) => {
-    const fc = followerCounts.get(user.unitId);
-    const gc = followingCounts.get(user.unitId);
+    const fc = followerCounts.get(user.userId);
+    const gc = followingCounts.get(user.userId);
     return Boolean(fc || gc);
   });
 
@@ -164,10 +164,10 @@ async function seedFollows(
     await Promise.all(
       slice.map((user) =>
         ctx.prisma.user.update({
-          where: { unitId: user.unitId },
+          where: { userId: user.userId },
           data: {
-            followersCount: followerCounts.get(user.unitId) ?? 0,
-            followingsCount: followingCounts.get(user.unitId) ?? 0,
+            followersCount: followerCounts.get(user.userId) ?? 0,
+            followingsCount: followingCounts.get(user.userId) ?? 0,
           },
         }),
       ),

@@ -71,10 +71,10 @@ export default function UserListPage() {
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<UserDTO>[] = [
       {
-        id: "unitId",
-        header: "Unit ID",
+        id: "userId",
+        header: "User ID",
         minWidth: 220,
-        cell: (u) => <span className="text-sm font-mono">{u.unitId}</span>,
+        cell: (u) => <span className="text-sm font-mono">{u.userId}</span>,
       },
       {
         id: "email",
@@ -127,7 +127,7 @@ export default function UserListPage() {
             size="sm"
             variant="outline"
             render={(props) => (
-              <Link to={`/user/${u.unitId}`} {...props}>
+              <Link to="/user/$userId" params={{ userId: u.userId }} {...props}>
                 Edit
               </Link>
             )}
@@ -202,7 +202,7 @@ export default function UserListPage() {
             <PaginatedTable<UserDTO>
               columns={columns}
               rows={users}
-              getRowId={(u) => u.unitId}
+              getRowId={(u) => u.userId}
               count={total}
               page={page}
               rowsPerPage={limit}

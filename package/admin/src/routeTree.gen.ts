@@ -23,7 +23,7 @@ import { Route as AdminRealmIndexRouteImport } from './routes/_admin/realm/index
 import { Route as AdminBookIndexRouteImport } from './routes/_admin/book/index'
 import { Route as AdminUserMeiliRouteImport } from './routes/_admin/user/meili'
 import { Route as AdminUserCreateRouteImport } from './routes/_admin/user/create'
-import { Route as AdminUserUnitIdRouteImport } from './routes/_admin/user/$unitId'
+import { Route as AdminUserUserIdRouteImport } from './routes/_admin/user/$userId'
 import { Route as AdminUnitMeiliRouteImport } from './routes/_admin/unit/meili'
 import { Route as AdminUnitCreateRouteImport } from './routes/_admin/unit/create'
 import { Route as AdminUnitUnitIdRouteImport } from './routes/_admin/unit/$unitId'
@@ -105,9 +105,9 @@ const AdminUserCreateRoute = AdminUserCreateRouteImport.update({
   path: '/user/create',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminUserUnitIdRoute = AdminUserUnitIdRouteImport.update({
-  id: '/user/$unitId',
-  path: '/user/$unitId',
+const AdminUserUserIdRoute = AdminUserUserIdRouteImport.update({
+  id: '/user/$userId',
+  path: '/user/$userId',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminUnitMeiliRoute = AdminUnitMeiliRouteImport.update({
@@ -184,7 +184,7 @@ export interface FileRoutesByFullPath {
   '/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/unit/create': typeof AdminUnitCreateRoute
   '/unit/meili': typeof AdminUnitMeiliRoute
-  '/user/$unitId': typeof AdminUserUnitIdRoute
+  '/user/$userId': typeof AdminUserUserIdRoute
   '/user/create': typeof AdminUserCreateRoute
   '/user/meili': typeof AdminUserMeiliRoute
   '/book/': typeof AdminBookIndexRoute
@@ -211,7 +211,7 @@ export interface FileRoutesByTo {
   '/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/unit/create': typeof AdminUnitCreateRoute
   '/unit/meili': typeof AdminUnitMeiliRoute
-  '/user/$unitId': typeof AdminUserUnitIdRoute
+  '/user/$userId': typeof AdminUserUserIdRoute
   '/user/create': typeof AdminUserCreateRoute
   '/user/meili': typeof AdminUserMeiliRoute
   '/book': typeof AdminBookIndexRoute
@@ -240,7 +240,7 @@ export interface FileRoutesById {
   '/_admin/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/_admin/unit/create': typeof AdminUnitCreateRoute
   '/_admin/unit/meili': typeof AdminUnitMeiliRoute
-  '/_admin/user/$unitId': typeof AdminUserUnitIdRoute
+  '/_admin/user/$userId': typeof AdminUserUserIdRoute
   '/_admin/user/create': typeof AdminUserCreateRoute
   '/_admin/user/meili': typeof AdminUserMeiliRoute
   '/_admin/book/': typeof AdminBookIndexRoute
@@ -269,7 +269,7 @@ export interface FileRouteTypes {
     | '/unit/$unitId'
     | '/unit/create'
     | '/unit/meili'
-    | '/user/$unitId'
+    | '/user/$userId'
     | '/user/create'
     | '/user/meili'
     | '/book/'
@@ -296,7 +296,7 @@ export interface FileRouteTypes {
     | '/unit/$unitId'
     | '/unit/create'
     | '/unit/meili'
-    | '/user/$unitId'
+    | '/user/$userId'
     | '/user/create'
     | '/user/meili'
     | '/book'
@@ -324,7 +324,7 @@ export interface FileRouteTypes {
     | '/_admin/unit/$unitId'
     | '/_admin/unit/create'
     | '/_admin/unit/meili'
-    | '/_admin/user/$unitId'
+    | '/_admin/user/$userId'
     | '/_admin/user/create'
     | '/_admin/user/meili'
     | '/_admin/book/'
@@ -439,11 +439,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUserCreateRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/user/$unitId': {
-      id: '/_admin/user/$unitId'
-      path: '/user/$unitId'
-      fullPath: '/user/$unitId'
-      preLoaderRoute: typeof AdminUserUnitIdRouteImport
+    '/_admin/user/$userId': {
+      id: '/_admin/user/$userId'
+      path: '/user/$userId'
+      fullPath: '/user/$userId'
+      preLoaderRoute: typeof AdminUserUserIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/unit/meili': {
@@ -543,7 +543,7 @@ interface AdminRouteChildren {
   AdminUnitUnitIdRoute: typeof AdminUnitUnitIdRoute
   AdminUnitCreateRoute: typeof AdminUnitCreateRoute
   AdminUnitMeiliRoute: typeof AdminUnitMeiliRoute
-  AdminUserUnitIdRoute: typeof AdminUserUnitIdRoute
+  AdminUserUserIdRoute: typeof AdminUserUserIdRoute
   AdminUserCreateRoute: typeof AdminUserCreateRoute
   AdminUserMeiliRoute: typeof AdminUserMeiliRoute
   AdminBookIndexRoute: typeof AdminBookIndexRoute
@@ -570,7 +570,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUnitUnitIdRoute: AdminUnitUnitIdRoute,
   AdminUnitCreateRoute: AdminUnitCreateRoute,
   AdminUnitMeiliRoute: AdminUnitMeiliRoute,
-  AdminUserUnitIdRoute: AdminUserUnitIdRoute,
+  AdminUserUserIdRoute: AdminUserUserIdRoute,
   AdminUserCreateRoute: AdminUserCreateRoute,
   AdminUserMeiliRoute: AdminUserMeiliRoute,
   AdminBookIndexRoute: AdminBookIndexRoute,

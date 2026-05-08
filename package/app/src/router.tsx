@@ -53,8 +53,8 @@ export { Route as tagBookFullRoute } from "@/routes/_mainLayout/tag/book/$bookId
 export { Route as tagDomainRoute } from "@/routes/_mainLayout/tag/domain/$unitId/route";
 export { Route as tagDomainTitleRoute } from "@/routes/_mainLayout/tag/domain/$unitId/title/$title";
 export { Route as unitRoute } from "@/routes/_mainLayout/unit/id/$unitId";
-export { Route as userRoute } from "@/routes/_mainLayout/user/$unitId";
-export { Route as userEditRoute } from "@/routes/_mainLayout/user/$unitId/edit";
+export { Route as userRoute } from "@/routes/_mainLayout/user/$userId";
+export { Route as userEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 export { Route as bookEditChapterRoute } from "@/routes/book_/$bookId/edit/$chapterId";
 export { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
 

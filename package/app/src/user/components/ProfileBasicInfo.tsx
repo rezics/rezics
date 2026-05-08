@@ -11,17 +11,17 @@ import FollowButton from "@/engagement/components/FollowButton";
 interface ProfileBasicInfoProps {
   user: UserDTO;
   isCurrentUser: boolean;
-  unitId: string;
+  userId: string;
 }
 
 export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
   user,
   isCurrentUser,
-  unitId,
+  userId,
 }) => {
   const canEdit = useCanEdit({
     resource: "unit",
-    ownerUnit: { user: { unitId: user.unitId } },
+    ownerUnit: { user: { userId: user.userId } },
   });
   const shelvesCountQuery = useQuery({
     ...contentSearchQueryOptions({
@@ -63,7 +63,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           <div className="flex items-center gap-1">
             <h6 className="text-base font-semibold">{user.name}</h6>
             {canEdit && (
-              <Link to="/user/$unitId/edit" params={{ unitId }}>
+              <Link to="/user/$userId/edit" params={{ userId }}>
                 <Button
                   size="icon"
                   variant="ghost"
@@ -97,7 +97,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           {!isCurrentUser && (
             <div className="mt-3">
               <FollowButton
-                userId={user.unitId}
+                userId={user.userId}
                 size="small"
                 variant="contained"
               />
@@ -138,14 +138,14 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
 
         <div className="w-full">
           {canEdit ? (
-            <Link to="/user/$unitId/edit" params={{ unitId }} className="block">
+            <Link to="/user/$userId/edit" params={{ userId }} className="block">
               <Button variant="outline" size="sm" className="w-full">
                 Edit profile
               </Button>
             </Link>
           ) : (
             <FollowButton
-              userId={user.unitId}
+              userId={user.userId}
               size="medium"
               variant="contained"
               fullWidth
@@ -159,22 +159,22 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           <StatLink
             label="Shelves"
             count={shelvesCountQuery.data?.total}
-            to={`/user/${unitId}/shelves`}
+            to={`/user/${userId}/shelves`}
           />
           <StatLink
             label="Content"
             count={reviewsCountQuery.data?.total}
-            to={`/user/${unitId}/content`}
+            to={`/user/${userId}/content`}
           />
           <StatLink
             label="Followers"
             count={user.followersCount ?? 0}
-            to={`/user/${unitId}/followers`}
+            to={`/user/${userId}/followers`}
           />
           <StatLink
             label="Following"
             count={user.followingsCount ?? 0}
-            to={`/user/${unitId}/followers?filter=following`}
+            to={`/user/${userId}/followers?filter=following`}
           />
         </div>
       </div>

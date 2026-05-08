@@ -133,11 +133,11 @@ export function UnitPageById({ unitId }: { unitId: string }) {
                     <TooltipTrigger
                       render={(props) => (
                         <TextLink
-                          to={unit.user.slug ? "/u/$userSlug" : "/user/$unitId"}
+                          to={unit.user.slug ? "/u/$userSlug" : "/user/$userId"}
                           params={
                             unit.user.slug
                               ? { userSlug: unit.user.slug }
-                              : { unitId: unit.user.unitId }
+                              : { unitId: unit.user.userId }
                           }
                           className="text-sm font-medium"
                           {...props}

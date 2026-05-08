@@ -22,7 +22,7 @@ import type { UserFilterOptions, UserWithRelations } from "../models/types";
 import { userInclude } from "../models/types";
 
 export type CreateUserProfileInput = {
-  unitId: string;
+  userId: string;
   slug: string;
   avatar?: string;
   bio?: string;
@@ -111,11 +111,11 @@ export class UserService {
   }
 
   /**
-   * Get user by unitId
+   * Get user by userId
    */
-  async getByUnitId(unitId: string): Promise<UserWithRelations> {
+  async getByUserId(userId: string): Promise<UserWithRelations> {
     const user = await prisma.user.findUniqueOrThrow({
-      where: { unitId },
+      where: { userId },
       include: userInclude,
     });
 
@@ -138,12 +138,12 @@ export class UserService {
    * Create new user
    */
   async create(req: CreateUserProfileInput): Promise<UserWithRelations> {
-    const { unitId, slug, avatar, bio } = req;
+    const { userId, slug, avatar, bio } = req;
 
     const user = await prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
         data: {
-          unitId,
+          userId,
           slug,
           name: slug,
           avatar: avatar ?? null,
@@ -152,11 +152,11 @@ export class UserService {
         },
         include: userInclude,
       });
-      await bootstrapSystemShelves(unitId, tx);
+      await bootstrapSystemShelves(userId, tx);
       return created;
     });
 
-    await syncUserToMeili(user.unitId);
+    await syncUserToMeili(user.userId);
 
     return user as UserWithRelations;
   }
@@ -173,10 +173,9 @@ export class UserService {
 
       const created = await tx.user.create({
         data: {
-          unitId: payload.authUserId,
+          userId: payload.authUserId,
           authUserId: payload.authUserId,
           email: payload.email,
-          accountStatus: "PROFILE_SETUP_REQUIRED",
           slug: payload.slug ?? null,
           name: payload.displayName ?? null,
           avatar: payload.avatar ?? null,
@@ -187,13 +186,13 @@ export class UserService {
         where: {
           contractName_ownerId_email: {
             contractName: "user.email",
-            ownerId: created.unitId,
+            ownerId: created.userId,
             email: payload.email,
           },
         },
         create: {
           contractName: "user.email",
-          ownerId: created.unitId,
+          ownerId: created.userId,
           email: payload.email,
           status: "VERIFIED",
           source: payload.verificationSource,
@@ -218,18 +217,17 @@ export class UserService {
 
     const user = await prisma.$transaction(async (tx) => {
       const updated = await tx.user.update({
-        where: { unitId: payload.userId },
+        where: { userId: payload.userId },
         data: {
           slug: payload.slug,
           name: displayName,
           avatar: payload.avatar ?? undefined,
-          accountStatus: "MEMBER_READY",
           joinDate: new Date(),
         },
         include: userInclude,
       });
 
-      await bootstrapSystemShelves(updated.unitId, tx);
+      await bootstrapSystemShelves(updated.userId, tx);
 
       const defaultRealmId = getDefaultRealmId();
       if (defaultRealmId) {
@@ -237,7 +235,7 @@ export class UserService {
           .create({
             data: {
               realmUnitId: defaultRealmId,
-              userId: updated.unitId,
+              userId: updated.userId,
               roleKey: "member",
             },
           })
@@ -247,23 +245,23 @@ export class UserService {
       return updated;
     });
 
-    await syncUserToMeili(user.unitId);
+    await syncUserToMeili(user.userId);
 
     return user as UserWithRelations;
   }
 
   async changeCanonicalSlugAsAdmin(
-    unitId: string,
+    userId: string,
     slug: string,
   ): Promise<AdminSlugChangeResult> {
     const user = await prisma.user.update({
-      where: { unitId },
+      where: { userId },
       data: { slug },
       include: userInclude,
     });
 
-    await patchUserFieldsToMeili(unitId, { slug: user.slug });
-    patchPostsAuthorToMeili(unitId, { authorSlug: user.slug }).catch(() => {});
+    await patchUserFieldsToMeili(userId, { slug: user.slug });
+    patchPostsAuthorToMeili(userId, { authorSlug: user.slug }).catch(() => {});
 
     const authProjection = user.authUserId
       ? {
@@ -284,7 +282,7 @@ export class UserService {
   /**
    * Update user
    */
-  async update(unitId: string, req: UpdateUser): Promise<UserWithRelations> {
+  async update(userId: string, req: UpdateUser): Promise<UserWithRelations> {
     const { name, avatar, bio, description } = req;
 
     const updateData: Prisma.UserUpdateInput = {
@@ -295,7 +293,7 @@ export class UserService {
     };
 
     const user = await prisma.user.update({
-      where: { unitId },
+      where: { userId },
       data: updateData,
       include: userInclude,
     });
@@ -306,30 +304,30 @@ export class UserService {
     if (avatar) userPatchFields.avatar = user.avatar;
     if (bio) userPatchFields.bio = user.bio;
     if (description) userPatchFields.description = user.description;
-    await patchUserFieldsToMeili(unitId, userPatchFields);
+    await patchUserFieldsToMeili(userId, userPatchFields);
 
     // Fire-and-forget: partial update denormalized author info on all posts
     const authorPatchFields: Record<string, any> = {};
     if (name) authorPatchFields.authorName = user.name;
     if (avatar) authorPatchFields.authorAvatar = user.avatar;
-    patchPostsAuthorToMeili(unitId, authorPatchFields).catch(() => {});
+    patchPostsAuthorToMeili(userId, authorPatchFields).catch(() => {});
 
     return user as UserWithRelations;
   }
 
   /**
-   * Delete user by unitId
+   * Delete user by userId
    */
-  async delete(unitId: string): Promise<void> {
-    await prisma.user.delete({ where: { unitId } });
-    await deleteUserFromMeili(unitId);
+  async delete(userId: string): Promise<void> {
+    await prisma.user.delete({ where: { userId } });
+    await deleteUserFromMeili(userId);
   }
 
   /**
-   * Check if user exists by unitId
+   * Check if user exists by userId
    */
-  async exists(unitId: string): Promise<boolean> {
-    const count = await prisma.user.count({ where: { unitId } });
+  async exists(userId: string): Promise<boolean> {
+    const count = await prisma.user.count({ where: { userId } });
     return count > 0;
   }
 
@@ -361,12 +359,12 @@ export class UserService {
       });
 
       await tx.user.update({
-        where: { unitId: followerId },
+        where: { userId: followerId },
         data: { followingsCount: { increment: 1 } },
       });
 
       await tx.user.update({
-        where: { unitId: followingId },
+        where: { userId: followingId },
         data: { followersCount: { increment: 1 } },
       });
     });
@@ -407,12 +405,12 @@ export class UserService {
       });
 
       await tx.user.update({
-        where: { unitId: followerId },
+        where: { userId: followerId },
         data: { followingsCount: { decrement: 1 } },
       });
 
       await tx.user.update({
-        where: { unitId: followingId },
+        where: { userId: followingId },
         data: { followersCount: { decrement: 1 } },
       });
     });
@@ -459,10 +457,10 @@ export class UserService {
 
     const users = await prisma.user.findMany({
       where: {
-        unitId: { in: targetIds },
+        userId: { in: targetIds },
       },
       select: {
-        unitId: true,
+        userId: true,
         followersCount: true,
       },
     });
@@ -473,7 +471,7 @@ export class UserService {
       result[id] = 0;
     });
     users.forEach((user) => {
-      result[user.unitId] = user.followersCount ?? 0;
+      result[user.userId] = user.followersCount ?? 0;
     });
 
     return result;

@@ -30,7 +30,7 @@ export const ProfileLayout: FC = () => {
   };
   const currentUser = useUserProfileStore((s) => s.user);
   const isCurrentUser = routeUnitId
-    ? currentUser?.unitId === routeUnitId
+    ? currentUser?.userId === routeUnitId
     : userSlug
       ? currentUser?.slug === userSlug
       : false;
@@ -77,7 +77,7 @@ export const ProfileLayout: FC = () => {
     );
   }
 
-  const unitId = user.unitId;
+  const unitId = user.userId;
 
   return (
     <ProfileContext.Provider value={{ user, isCurrentUser, unitId }}>

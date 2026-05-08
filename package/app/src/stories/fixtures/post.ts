@@ -5,7 +5,7 @@ import { userAlice, userBen, userCora } from "./user.ts";
 function makePost(overrides: Partial<PostDTO> & { unitId: string }): PostDTO {
   return {
     unitId: overrides.unitId,
-    authorUserId: overrides.authorUserId ?? userAlice.unitId,
+    authorUserId: overrides.authorUserId ?? userAlice.userId,
     author: overrides.author ?? userAlice,
     body: "A short reflection that fits in a single line.",
     depth: 0,
@@ -28,14 +28,14 @@ export const postFlat: PostDTO[] = [
   makePost({
     unitId: "post-flat-2",
     author: userBen,
-    authorUserId: userBen.unitId,
+    authorUserId: userBen.userId,
     body: "Disagree on the ending, but the prose is undeniable.",
     replyCount: 1,
   }),
   makePost({
     unitId: "post-flat-3",
     author: userCora,
-    authorUserId: userCora.unitId,
+    authorUserId: userCora.userId,
     body: "Will re-read in a year and revisit this thread.",
   }),
 ];
@@ -66,7 +66,7 @@ function buildThreaded(maxDepth: number): PostDTO[] {
       makePost({
         unitId: `post-threaded-${maxDepth}d-${depth}`,
         author: depth % 2 === 0 ? userAlice : userBen,
-        authorUserId: depth % 2 === 0 ? userAlice.unitId : userBen.unitId,
+        authorUserId: depth % 2 === 0 ? userAlice.userId : userBen.userId,
         depth,
         parentPostUnitId:
           depth === 0 ? null : `post-threaded-${maxDepth}d-${depth - 1}`,

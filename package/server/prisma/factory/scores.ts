@@ -68,13 +68,13 @@ export async function seedScores(
       const id = randomUUID();
       entries.push({
         id,
-        userId: user.unitId,
+        userId: user.userId,
         unitId: work.id,
         realm: defaultRealmId,
         value,
         fields: undefined,
       });
-      scoreEntries.set(`${user.unitId}:${work.id}:${defaultRealmId}`, id);
+      scoreEntries.set(`${user.userId}:${work.id}:${defaultRealmId}`, id);
 
       if (storyRealm && faker.datatype.boolean({ probability: 0.3 })) {
         const storyId = randomUUID();
@@ -89,13 +89,13 @@ export async function seedScores(
         }
         entries.push({
           id: storyId,
-          userId: user.unitId,
+          userId: user.userId,
           unitId: work.id,
           realm: storyRealm.id,
           value: storyValue,
           fields: fields as Prisma.InputJsonValue,
         });
-        scoreEntries.set(`${user.unitId}:${work.id}:${storyRealm.id}`, storyId);
+        scoreEntries.set(`${user.userId}:${work.id}:${storyRealm.id}`, storyId);
       }
     }
 

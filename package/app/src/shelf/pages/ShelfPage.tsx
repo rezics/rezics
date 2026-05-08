@@ -68,7 +68,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
 
   const hydration = useHydratedShelfItems(items);
   const currentUser = useUserProfileStore((s) => s.user);
-  const isOwner = !!currentUser && currentUser.unitId === shelf?.userId;
+  const isOwner = !!currentUser && currentUser.userId === shelf?.userId;
   const cleanupMutation = useCleanupOrphansMutation();
 
   const orphanRefs = useMemo(

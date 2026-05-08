@@ -55,7 +55,7 @@ export async function readUserSystemShelves(
   client: PrismaClientLike = prisma,
 ): Promise<UserExtra["shelves"]> {
   const user = await client.user.findUnique({
-    where: { unitId: userId },
+    where: { userId },
     select: { extra: true },
   });
   if (!user) return {};
@@ -69,7 +69,7 @@ export async function patchUserSystemShelf(
   client: PrismaClientLike = prisma,
 ): Promise<void> {
   const user = await client.user.findUnique({
-    where: { unitId: userId },
+    where: { userId },
     select: { extra: true },
   });
   if (!user) {
@@ -86,7 +86,7 @@ export async function patchUserSystemShelf(
   };
 
   await client.user.update({
-    where: { unitId: userId },
+    where: { userId },
     data: { extra: nextExtra as Prisma.InputJsonValue },
   });
 }

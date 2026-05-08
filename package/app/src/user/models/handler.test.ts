@@ -36,7 +36,7 @@ const getContextTokenMock = mock(async () => ({
   token: "context-token",
   claims: {
     id: "user-1",
-    unitId: "user-1",
+    userId: "user-1",
     sub: "user-1",
     slug: "reader",
     name: "Reader",
@@ -46,7 +46,7 @@ const getContextTokenMock = mock(async () => ({
   },
 }));
 const ensureMock = mock(async () => ({
-  user: { unitId: "user-1", name: "Reader" },
+  user: { userId: "user-1", name: "Reader" },
   alreadyCreated: false,
 }));
 const issueSessionTokenMock = mock(async () => ({ token: "member-token" }));

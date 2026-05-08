@@ -4,16 +4,10 @@ import { t } from "elysia";
  * <issuer>-<token-type>
  *
  * @example
- * auth-session-token — issued by auth, used as exchange/refresh token
  * rezics-session-token — issued by server, used as Bearer access token
  */
 
 export const NormalizedTokenName = {
-  /**
-   * auth-session-token — issued by auth, auth server session token
-   * for rezics server used as exchange/refresh token
-   */
-  AUTH_SESSION: "auth-session-token",
   /**
    * rezics-session-token — issued by server, used as Bearer access token for rezics server
    */
@@ -27,13 +21,11 @@ export type NormalizedTokenName =
   (typeof NormalizedTokenName)[keyof typeof NormalizedTokenName];
 
 export const normalizedTokenNameSchema = t.Union([
-  t.Literal(NormalizedTokenName.AUTH_SESSION),
   t.Literal(NormalizedTokenName.REZICS_SESSION),
   t.Literal(NormalizedTokenName.REZICS_PROFILE_SETUP),
 ]);
 
 export const TokenTransportHeader = {
-  AUTH_SESSION_EXCHANGE: "x-auth-session-token",
   AUTHORIZATION: "Authorization",
 } as const;
 export type TokenTransportHeader =
@@ -59,27 +51,10 @@ export const tokenPermissionRoleSchema = t.Union([
 ]);
 export type TokenPermissionRole = (typeof tokenPermissionRoleSchema)["static"];
 
-export const authSessionTokenClaimsSchema = t.Object({
-  unitId: t.Optional(t.String()),
-  sub: t.Optional(t.String()),
-  slug: t.Optional(t.String()),
-  name: t.Optional(t.String()),
-  role: t.Optional(t.String()),
-  scope: t.Optional(t.Union([t.String(), t.Array(t.String())])),
-  email_verified: t.Optional(t.Literal(false)),
-  exp: t.Optional(t.Number()),
-  iat: t.Optional(t.Number()),
-  iss: t.Optional(t.String()),
-  aud: t.Optional(t.Union([t.String(), t.Array(t.String())])),
-});
-export type AuthSessionTokenClaims =
-  (typeof authSessionTokenClaimsSchema)["static"];
-
 export const rezicsSessionClaimsSchema = t.Object({
   tokenType: t.Literal("member-session"),
   sub: t.String(),
   userId: t.String(),
-  role: tokenPermissionRoleSchema,
   permission: t.Object({
     role: tokenPermissionRoleSchema,
   }),
@@ -102,15 +77,12 @@ export type RezicsProfileSetupClaims =
   (typeof rezicsProfileSetupClaimsSchema)["static"];
 
 export const normalizedTokenHeaderMap = {
-  [NormalizedTokenName.AUTH_SESSION]:
-    TokenTransportHeader.AUTH_SESSION_EXCHANGE,
   [NormalizedTokenName.REZICS_SESSION]: TokenTransportHeader.AUTHORIZATION,
   [NormalizedTokenName.REZICS_PROFILE_SETUP]:
     TokenTransportHeader.AUTHORIZATION,
 } satisfies Record<NormalizedTokenName, TokenTransportHeader>;
 
 export const TokenContextKey = {
-  AUTH_SESSION: "authSessionToken",
   REZICS_SESSION: "rezicsSessionToken",
   REZICS_PROFILE_SETUP: "rezicsProfileSetupToken",
 } as const;
@@ -118,11 +90,6 @@ export type TokenContextKey =
   (typeof TokenContextKey)[keyof typeof TokenContextKey];
 
 export const normalizedTokenTransportMap = {
-  [NormalizedTokenName.AUTH_SESSION]: {
-    tokenName: NormalizedTokenName.AUTH_SESSION,
-    headerName: TokenTransportHeader.AUTH_SESSION_EXCHANGE,
-    usesBearer: false,
-  },
   [NormalizedTokenName.REZICS_SESSION]: {
     tokenName: NormalizedTokenName.REZICS_SESSION,
     headerName: TokenTransportHeader.AUTHORIZATION,

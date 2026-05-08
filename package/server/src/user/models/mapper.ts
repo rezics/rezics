@@ -7,7 +7,7 @@ import type { UserWithRelations } from "./types";
  */
 export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
   return {
-    unitId: user.unitId,
+    userId: user.userId,
     email: user.email ?? undefined,
     slug: user.slug ?? undefined,
     name: user.name ?? undefined,
@@ -28,7 +28,7 @@ export function mapUserToPublicProfile(
   user: User | UserWithRelations,
 ): UserDTO {
   return {
-    unitId: user.unitId,
+    userId: user.userId,
     slug: user.slug ?? undefined,
     name: user.name ?? undefined,
     avatar: user.avatar || undefined,

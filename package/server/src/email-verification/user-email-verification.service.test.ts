@@ -164,7 +164,7 @@ describe("user email verification contracts", () => {
       },
     });
     expect(userUpdate).toHaveBeenCalledWith({
-      where: { unitId: "user-1" },
+      where: { userId: "user-1" },
       data: { email: "new@example.com" },
     });
     expect(contractUpdate).toHaveBeenCalledWith(

@@ -41,11 +41,11 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
       {excerpt.user && (
         <div className="flex items-center gap-3">
           <Link
-            to={excerpt.user.slug ? "/u/$userSlug" : "/user/$unitId"}
+            to={excerpt.user.slug ? "/u/$userSlug" : "/user/$userId"}
             params={
               excerpt.user.slug
                 ? { userSlug: excerpt.user.slug }
-                : { unitId: excerpt.user.unitId ?? "" }
+                : { userId: excerpt.user.userId ?? "" }
             }
             className="flex items-center gap-3"
           >

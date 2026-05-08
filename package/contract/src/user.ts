@@ -8,7 +8,7 @@ import type { ContentRating } from "./unit";
 // ============================================================
 
 export const userDTOSchema = t.Object({
-  unitId: t.String(),
+  userId: t.String(),
   email: t.Optional(t.String()),
   slug: t.Optional(t.String()),
   name: t.Optional(t.String()),
@@ -53,7 +53,7 @@ export const userListBodySchema = t.Object({
 export type UserListBody = (typeof userListBodySchema)["static"];
 
 export const userParamsSchema = t.Object({
-  unitId: t.String(),
+  userId: t.String(),
 });
 
 export type UserParams = (typeof userParamsSchema)["static"];
@@ -141,7 +141,7 @@ export type UpdateUserSettings = (typeof updateUserSettingsSchema)["static"];
 // ============================================================
 
 export const userBriefSchema = t.Object({
-  unitId: t.String(),
+  userId: t.String(),
   name: t.Optional(t.String()),
   slug: t.Optional(t.String()),
   bio: t.Optional(t.String()),
@@ -151,7 +151,7 @@ export const userBriefSchema = t.Object({
 export type UserBrief = (typeof userBriefSchema)["static"];
 
 export const userBriefBatchRequestSchema = t.Object({
-  unitIds: t.Array(t.String(), { maxItems: 200 }),
+  userIds: t.Array(t.String(), { maxItems: 200 }),
 });
 
 export type UserBriefBatchRequest =

@@ -51,7 +51,7 @@ export const adminRoute = new Elysia()
     },
   )
   .get(
-    "/admin/:unitId",
+    "/admin/:userId",
     async ({ identity, params, status }) => {
       if (
         identity.permission.role !== "ADMIN" &&
@@ -62,7 +62,7 @@ export const adminRoute = new Elysia()
       const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
-      const user = await userService.getByUnitId(params.unitId);
+      const user = await userService.getByUserId(params.userId);
       return mapUserToDTO(user);
     },
     {
@@ -80,7 +80,7 @@ export const adminRoute = new Elysia()
     },
   )
   .put(
-    "/admin/:unitId",
+    "/admin/:userId",
     async ({ identity, params, body, status }) => {
       if (
         identity.permission.role !== "ADMIN" &&
@@ -98,7 +98,7 @@ export const adminRoute = new Elysia()
         description: body.description,
       };
 
-      const user = await userService.update(params.unitId, userReq);
+      const user = await userService.update(params.userId, userReq);
 
       return mapUserToDTO(user);
     },
@@ -118,7 +118,7 @@ export const adminRoute = new Elysia()
     },
   )
   .patch(
-    "/admin/:unitId/slug",
+    "/admin/:userId/slug",
     async ({ identity, params, body, status }) => {
       if (
         identity.permission.role !== "ADMIN" &&
@@ -141,7 +141,7 @@ export const adminRoute = new Elysia()
 
       try {
         const result = await userService.changeCanonicalSlugAsAdmin(
-          params.unitId,
+          params.userId,
           validation.normalized,
         );
         return {
@@ -179,7 +179,7 @@ export const adminRoute = new Elysia()
     },
   )
   .delete(
-    "/admin/:unitId",
+    "/admin/:userId",
     async ({ identity, params, status }) => {
       if (
         identity.permission.role !== "ADMIN" &&
@@ -190,7 +190,7 @@ export const adminRoute = new Elysia()
       const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
-      await userService.delete(params.unitId);
+      await userService.delete(params.userId);
 
       return { message: "User deleted successfully" };
     },

@@ -9,7 +9,7 @@ import { prisma } from "#/prisma/client";
 import { notFound } from "@/utils/errors";
 
 const briefSelect = {
-  unitId: true,
+  userId: true,
   name: true,
   slug: true,
   bio: true,
@@ -17,7 +17,7 @@ const briefSelect = {
 } as const;
 
 type BriefRow = {
-  unitId: string;
+  userId: string;
   name: string | null;
   slug: string | null;
   bio: string | null;
@@ -26,7 +26,7 @@ type BriefRow = {
 
 function toBrief(user: BriefRow) {
   return {
-    unitId: user.unitId,
+    userId: user.userId,
     name: user.name ?? undefined,
     slug: user.slug ?? undefined,
     bio: user.bio ?? undefined,
@@ -36,10 +36,10 @@ function toBrief(user: BriefRow) {
 
 export const userBriefApi = new Elysia({ prefix: "/user/brief" })
   .get(
-    "/:unitId",
+    "/:userId",
     async ({ params }) => {
       const user = await prisma.user.findUnique({
-        where: { unitId: params.unitId },
+        where: { userId: params.userId },
         select: briefSelect,
       });
       if (!user) throw notFound("User");
@@ -49,9 +49,9 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
       params: userParamsSchema,
       response: userBriefSchema,
       detail: {
-        summary: "Get user brief by unitId",
+        summary: "Get user brief by userId",
         description:
-          "Returns a lightweight user object (unitId, name, slug, bio, avatar) for card/mention contexts.",
+          "Returns a lightweight user object (userId, name, slug, bio, avatar) for card/mention contexts.",
         tags: ["Users"],
       },
     },
@@ -59,9 +59,9 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
   .post(
     "/",
     async ({ body }) => {
-      if (body.unitIds.length === 0) return { users: [] };
+      if (body.userIds.length === 0) return { users: [] };
       const users = await prisma.user.findMany({
-        where: { unitId: { in: body.unitIds } },
+        where: { userId: { in: body.userIds } },
         select: briefSelect,
       });
       return { users: users.map(toBrief) };
@@ -72,7 +72,7 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
       detail: {
         summary: "Batch fetch user briefs",
         description:
-          "Returns an array of user briefs for the given unitIds. Missing unitIds are silently omitted.",
+          "Returns an array of user briefs for the given userIds. Missing userIds are silently omitted.",
         tags: ["Users"],
       },
     },

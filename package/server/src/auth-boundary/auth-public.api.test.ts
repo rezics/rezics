@@ -22,31 +22,30 @@ const verifyRezicsProfileSetupToken = mock(async () => ({
 }));
 
 type MainUserLookup = {
-  unitId: string;
+  userId: string;
   slug: string | null;
   authUserId?: string | null;
   permission: { role: string[] };
-  accountStatus: "PROFILE_SETUP_REQUIRED" | "MEMBER_READY";
 };
 
 const materializeFromVerifiedAuth = mock(async (_input?: unknown) => ({
-  unitId: "user-1",
+  userId: "user-1",
   slug: null,
   name: null,
   email: "reader@example.com",
   permission: { role: ["MEMBER"] },
 }));
 const completeProfileSetup = mock(async (_input?: unknown) => ({
-  unitId: "user-1",
+  userId: "user-1",
   slug: "reader",
   name: "Reader",
   email: "reader@example.com",
   permission: { role: ["MEMBER"] },
 }));
 const changeCanonicalSlugAsAdmin = mock(
-  async (_unitId: string, slug: string) => ({
+  async (_userId: string, slug: string) => ({
     user: {
-      unitId: "user-1",
+      userId: "user-1",
       slug,
       name: "Reader",
     },
@@ -55,10 +54,9 @@ const changeCanonicalSlugAsAdmin = mock(
 );
 const userFindUnique = mock(
   async (_args?: unknown): Promise<MainUserLookup | null> => ({
-    unitId: "user-1",
+    userId: "user-1",
     slug: "reader",
     permission: { role: ["MEMBER"] },
-    accountStatus: "MEMBER_READY",
   }),
 );
 
@@ -134,7 +132,7 @@ beforeEach(() => {
 
   materializeFromVerifiedAuth.mockReset();
   materializeFromVerifiedAuth.mockResolvedValue({
-    unitId: "user-1",
+    userId: "user-1",
     slug: null,
     name: null,
     email: "reader@example.com",
@@ -142,7 +140,7 @@ beforeEach(() => {
   });
   completeProfileSetup.mockReset();
   completeProfileSetup.mockResolvedValue({
-    unitId: "user-1",
+    userId: "user-1",
     slug: "reader",
     name: "Reader",
     email: "reader@example.com",
@@ -151,7 +149,7 @@ beforeEach(() => {
   changeCanonicalSlugAsAdmin.mockReset();
   changeCanonicalSlugAsAdmin.mockResolvedValue({
     user: {
-      unitId: "user-1",
+      userId: "user-1",
       slug: "new-reader",
       name: "Reader",
     },
@@ -160,10 +158,9 @@ beforeEach(() => {
 
   userFindUnique.mockReset();
   userFindUnique.mockResolvedValue({
-    unitId: "user-1",
+    userId: "user-1",
     slug: "reader",
     permission: { role: ["MEMBER"] },
-    accountStatus: "MEMBER_READY",
   });
 });
 
@@ -186,7 +183,7 @@ describe("main admin user boundary", () => {
     );
     expect(await response.json()).toMatchObject({
       user: {
-        unitId: "user-1",
+        userId: "user-1",
         slug: "new-reader",
         name: "Reader",
       },
@@ -215,7 +212,7 @@ describe("main admin user boundary", () => {
   test("surfaces admin slug projection failure without rolling back main", async () => {
     changeCanonicalSlugAsAdmin.mockResolvedValueOnce({
       user: {
-        unitId: "user-1",
+        userId: "user-1",
         slug: "new-reader",
         name: "Reader",
       },
@@ -432,10 +429,9 @@ describe("main auth public boundary", () => {
     expect(userFindUnique).toHaveBeenCalledWith({
       where: { authUserId: "user-1" },
       select: {
-        unitId: true,
+        userId: true,
         slug: true,
         permission: true,
-        accountStatus: true,
       },
     });
     expect(signRezicsSessionToken).toHaveBeenCalledWith({
@@ -546,12 +542,55 @@ describe("main auth public boundary", () => {
     expect(signRezicsSessionToken).not.toHaveBeenCalled();
   });
 
+  test("refresh rejects materialized users whose slug is still null (slug !== null is the readiness gate)", async () => {
+    userFindUnique.mockResolvedValueOnce({
+      userId: "user-1",
+      slug: null,
+      authUserId: "user-1",
+      permission: { role: ["MEMBER"] },
+    });
+    setFetch(async () =>
+      Response.json({
+        user: {
+          id: "user-1",
+          name: "Reader",
+          email: "reader@example.com",
+          emailVerified: true,
+        },
+        authSession: {
+          registrationComplete: false,
+          readinessStatus: "needs-main-setup",
+        },
+      }),
+    );
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/session/refresh", {
+        method: "POST",
+        headers: {
+          origin: "http://main.test",
+          cookie: "better-auth.session_token=opaque",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      error: {
+        code: "PROFILE_SETUP_REQUIRED",
+        message: "Profile setup is required before member session refresh",
+      },
+    });
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(signRezicsSessionToken).not.toHaveBeenCalled();
+  });
+
   test("renews profile setup token for materialized setup users", async () => {
     userFindUnique.mockResolvedValueOnce({
-      unitId: "user-1",
-      slug: "reader",
+      userId: "user-1",
+      slug: null,
       permission: { role: ["MEMBER"] },
-      accountStatus: "PROFILE_SETUP_REQUIRED",
     });
     setFetch(async () =>
       Response.json({
@@ -677,10 +716,9 @@ describe("main auth public boundary", () => {
 
   test("duplicate materialization for setup users reissues setup token", async () => {
     userFindUnique.mockResolvedValueOnce({
-      unitId: "user-1",
+      userId: "user-1",
       slug: null,
       permission: { role: ["MEMBER"] },
-      accountStatus: "PROFILE_SETUP_REQUIRED",
     });
     setFetch(async (input) => {
       const url = String(input);
@@ -754,11 +792,10 @@ describe("main auth public boundary", () => {
 
   test("profile setup activates a materialized user", async () => {
     userFindUnique.mockResolvedValueOnce({
-      unitId: "user-1",
+      userId: "user-1",
       slug: null,
       authUserId: "user-1",
       permission: { role: ["MEMBER"] },
-      accountStatus: "PROFILE_SETUP_REQUIRED",
     });
 
     const { authPublicApi } = await import("./auth-public.api");
@@ -791,11 +828,10 @@ describe("main auth public boundary", () => {
 
   test("profile setup returns slug conflict from main uniqueness", async () => {
     userFindUnique.mockResolvedValueOnce({
-      unitId: "user-1",
+      userId: "user-1",
       slug: null,
       authUserId: "user-1",
       permission: { role: ["MEMBER"] },
-      accountStatus: "PROFILE_SETUP_REQUIRED",
     });
     completeProfileSetup.mockRejectedValueOnce({ code: "P2002" });
 
@@ -836,7 +872,7 @@ describe("main auth public boundary", () => {
     });
     expect(userFindUnique).toHaveBeenCalledWith({
       where: { slug: "reader" },
-      select: { unitId: true },
+      select: { userId: true },
     });
   });
 

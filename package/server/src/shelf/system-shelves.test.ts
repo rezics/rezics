@@ -85,7 +85,7 @@ describe("system shelves", () => {
     expect(shelfId).toBe("existing-active");
     expect(mocks.unitCreate).not.toHaveBeenCalled();
     expect(mocks.userUpdate).toHaveBeenCalledWith({
-      where: { unitId: "user-1" },
+      where: { userId: "user-1" },
       data: {
         extra: {
           shelves: {

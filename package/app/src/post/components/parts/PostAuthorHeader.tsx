@@ -26,7 +26,7 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
       className="flex items-center gap-2"
       onClick={(e) => e.stopPropagation()}
     >
-      <Link to="/user/$unitId" params={{ unitId: post.author?.unitId ?? "" }}>
+      <Link to="/user/$userId" params={{ userId: post.author?.userId ?? "" }}>
         <Avatar style={{ width: avatarSize, height: avatarSize }}>
           <AvatarImage src={post.author?.avatar ?? ""} />
           <AvatarFallback>

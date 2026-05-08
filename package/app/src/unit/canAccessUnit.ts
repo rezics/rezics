@@ -5,7 +5,7 @@ export type ViewerRef = { userId?: string | null } | null | undefined;
 export function canAccessUnit(unit: UnitDTO, viewer: ViewerRef): boolean {
   if (unit.status === "DELETED") return false;
 
-  const ownerUserId = unit.user?.unitId ?? null;
+  const ownerUserId = unit.user?.userId ?? null;
   const viewerUserId = viewer?.userId ?? null;
   const isOwner = !!ownerUserId && ownerUserId === viewerUserId;
 

@@ -34,7 +34,7 @@ export const userInclude = {
  * JWT Payload type
  */
 export const jwtPayloadSchema = t.Object({
-  unitId: t.String(),
+  userId: t.String(),
   slug: t.Optional(t.String()),
   scope: t.Union([t.String(), t.Array(t.String())]),
   /**

@@ -9,7 +9,7 @@ import {
 } from "@rezics/server/prisma/factory";
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
-import { createServerPrisma } from "../lib/prisma-factory";
+import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
 import { tweakPlan } from "./interactive";
 import { getPreset, listPresetNames, PRESETS } from "./presets";
 
@@ -154,10 +154,14 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
 
   const env = getEnv();
   const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
+  const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
   try {
-    const ctx = makeSeedCtx(prisma, preset.mode);
+    const ctx = makeSeedCtx(prisma, authPrisma, preset.mode);
     await runFactorySeed(ctx, plan);
   } finally {
-    await prisma.$disconnect();
+    await Promise.all([
+      prisma.$disconnect().catch(() => {}),
+      authPrisma.$disconnect().catch(() => {}),
+    ]);
   }
 }

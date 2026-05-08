@@ -4,5 +4,5 @@ export type {
   OwnerBearing,
   UseCanEditArgs,
 } from "./useCanEdit";
-export { useCurrentUnitId } from "./useCurrentUnitId";
+export { useCurrentUserId } from "./useCurrentUserId";
 export { useServerPermission } from "./useServerPermission";

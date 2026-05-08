@@ -2,10 +2,7 @@ import {
   clearAuthPresence,
   hasAuthPresence,
 } from "@rezics/api/react-query/authPresence";
-import {
-  clearAllTokens,
-  exchangeForSessionToken,
-} from "@rezics/api/react-query/jwt";
+import { exchangeForSessionToken } from "@rezics/api/react-query/jwt";
 import { useEffect } from "react";
 import {
   clearAuthSessionState,
@@ -46,7 +43,6 @@ export function AuthProvider() {
       try {
         clearTimer();
         clearAuthPresence();
-        clearAllTokens();
         clearAuthSessionState();
       } finally {
         isHandlingExpiry = false;

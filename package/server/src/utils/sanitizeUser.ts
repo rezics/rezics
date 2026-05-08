@@ -7,7 +7,7 @@ import type { Prisma, User } from "#/prisma/client";
  * instead of `user: true` + post-query sanitizeUser().
  */
 export const publicUserSelect = {
-  unitId: true,
+  userId: true,
   slug: true,
   name: true,
   avatar: true,
@@ -18,7 +18,7 @@ export const publicUserSelect = {
 } satisfies Prisma.UserSelect;
 
 export type PublicUserSelected = {
-  unitId: string;
+  userId: string;
   slug: string | null;
   name: string | null;
   avatar: string | null;
@@ -33,7 +33,7 @@ export function mapPublicUser(
 ): PublicUser | undefined {
   if (!user) return undefined;
   return {
-    unitId: user.unitId,
+    userId: user.userId,
     slug: user.slug ?? undefined,
     name: user.name ?? undefined,
     avatar: user.avatar ?? null,
@@ -50,10 +50,10 @@ export function mapPublicUser(
  * @deprecated Use `publicUserSelect` with Prisma select instead.
  */
 export function sanitizeUser(
-  u: Pick<User, "unitId" | "name"> & Partial<Pick<User, "slug" | "avatar">>,
+  u: Pick<User, "userId" | "name"> & Partial<Pick<User, "slug" | "avatar">>,
 ): PublicUser {
   return mapPublicUser({
-    unitId: u.unitId,
+    userId: u.userId,
     slug: u.slug ?? null,
     name: u.name,
     avatar: u.avatar ?? null,

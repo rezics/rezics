@@ -37,7 +37,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
     const map = new Map<string, PublicUser>();
     for (const b of books) {
       const u = b.user;
-      if (u && !map.has(u.unitId)) map.set(u.unitId, u);
+      if (u && !map.has(u.userId)) map.set(u.userId, u);
       if (map.size >= maxAuthors) break;
     }
     return Array.from(map.values()).slice(0, maxAuthors);
@@ -61,7 +61,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {authors.map((a) => (
           <div
-            key={a.unitId}
+            key={a.userId}
             className="flex items-center gap-3 p-3 rounded border bg-white"
           >
             <Avatar>

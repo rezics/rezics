@@ -9,8 +9,8 @@ export function hasPermissionToUpdateShelf(
 ): boolean {
   if (isBlocked(permission)) return false;
   if (BasicAdminPermission(permission)) return true;
-  if (!unit?.user?.unitId) return false;
-  return actorUserId === unit.user.unitId;
+  if (!unit?.user?.userId) return false;
+  return actorUserId === unit.user.userId;
 }
 
 export function hasPermissionToDeleteShelf(

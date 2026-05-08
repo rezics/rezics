@@ -43,8 +43,8 @@ const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
     }
 
     const user = await prisma.user.findUnique({
-      where: { unitId: userId },
-      select: { unitId: true, permission: true },
+      where: { userId },
+      select: { userId: true, permission: true },
     });
 
     if (!user) {
@@ -59,7 +59,7 @@ const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
     const role = dbPermission?.role?.[0] ?? "MEMBER";
 
     const token = await signRezicsSessionToken({
-      userId: user.unitId,
+      userId: user.userId,
       permission: { role },
     });
 

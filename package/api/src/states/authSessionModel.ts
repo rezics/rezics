@@ -55,7 +55,7 @@ export type AuthSessionDerivedState = {
   /**
    * Main server actor userId from server-hydrated session state.
    */
-  unitId: string | null;
+  userId: string | null;
   mainUserExists: boolean;
   registrationComplete: boolean;
   error: string | null;
@@ -163,7 +163,7 @@ export function deriveAuthSessionState(
     registrationStage,
     needsVerification,
     needsMainSetup,
-    unitId: hasMemberSession ? (snapshot?.user?.id ?? null) : null,
+    userId: hasMemberSession ? (snapshot?.user?.id ?? null) : null,
     mainUserExists,
     registrationComplete,
     error,

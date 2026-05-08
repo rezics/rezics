@@ -6,6 +6,6 @@ import { useAuthSessionStore } from "../states/authSessionStore";
  *
  * Returns `null` when the user has no valid main session.
  */
-export function useCurrentUnitId(): string | null {
-  return useAuthSessionStore((s) => s.unitId);
+export function useCurrentUserId(): string | null {
+  return useAuthSessionStore((s) => s.userId);
 }

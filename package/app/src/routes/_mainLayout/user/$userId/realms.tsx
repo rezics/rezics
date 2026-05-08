@@ -5,6 +5,6 @@ const RealmsTabSection = lazyRouteComponent(
   "RealmsTabSection",
 );
 
-export const Route = createFileRoute("/_mainLayout/user/$unitId/realms")({
+export const Route = createFileRoute("/_mainLayout/user/$userId/realms")({
   component: RealmsTabSection,
 });

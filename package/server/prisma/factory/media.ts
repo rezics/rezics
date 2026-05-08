@@ -40,7 +40,7 @@ export async function seedMedia(
       const unit = await ctx.prisma.unit.create({
         data: {
           type: UnitType.MEDIA,
-          userId: author.unitId,
+          userId: author.userId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.8)

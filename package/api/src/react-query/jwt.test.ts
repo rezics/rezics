@@ -1,67 +1,37 @@
-import { beforeEach, describe, expect, test } from "bun:test";
-import { NormalizedTokenName } from "@rezics/contract";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { configureApi } from "../config";
 
-type MemoryStorage = {
-  getItem(key: string): string | null;
-  setItem(key: string, value: string): void;
-  removeItem(key: string): void;
-  clear(): void;
-};
+const fetchMock = mock();
 
-function createMemoryStorage(): MemoryStorage {
-  const store = new Map<string, string>();
-
-  return {
-    getItem(key) {
-      return store.get(key) ?? null;
-    },
-    setItem(key, value) {
-      store.set(key, value);
-    },
-    removeItem(key) {
-      store.delete(key);
-    },
-    clear() {
-      store.clear();
-    },
-  };
-}
-
-function createToken(payload: Record<string, unknown>) {
-  const encoded = Buffer.from(JSON.stringify(payload))
-    .toString("base64url")
-    .replace(/=/g, "");
-  return `header.${encoded}.signature`;
-}
-
-describe("jwt token storage", () => {
+describe("session refresh", () => {
   beforeEach(() => {
+    fetchMock.mockReset();
     configureApi({
       apiBaseUrl: "http://api.example",
       authBaseUrl: "http://api.example",
     });
-    globalThis.localStorage = createMemoryStorage() as Storage;
-    globalThis.window = {
-      dispatchEvent: () => true,
-    } as unknown as Window & typeof globalThis;
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
   });
 
-  test("does not persist browser auth or member session tokens", async () => {
-    const jwt = await import("./jwt");
+  test("exchangeForSessionToken posts to /auth/session/refresh with credentials", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(null, {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
 
-    const authToken = createToken({ sub: "user-1", slug: "reader" });
-    const sessionToken = createToken({
-      userId: "user-1",
-      role: "MEMBER",
+    const { exchangeForSessionToken } = await import("./jwt");
+    const ok = await exchangeForSessionToken();
+
+    expect(ok).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://api.example/auth/session/refresh",
+    );
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+      method: "POST",
+      credentials: "include",
     });
-
-    jwt.setToken(authToken, NormalizedTokenName.AUTH_SESSION);
-    jwt.setToken(sessionToken, NormalizedTokenName.REZICS_SESSION);
-
-    expect(jwt.getToken(NormalizedTokenName.AUTH_SESSION)).toBeNull();
-    expect(jwt.getToken(NormalizedTokenName.REZICS_SESSION)).toBeNull();
-    expect(localStorage.getItem(NormalizedTokenName.AUTH_SESSION)).toBeNull();
-    expect(localStorage.getItem(NormalizedTokenName.REZICS_SESSION)).toBeNull();
   });
 });

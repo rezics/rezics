@@ -20,7 +20,7 @@ export const UserPage: FC<UserPageProps> = ({ isCurrentUser = false }) => {
     from: userRoute.id,
     shouldThrow: false,
   });
-  const unitId = isCurrentUser ? undefined : routeMatch?.params.unitId;
+  const routeUserId = isCurrentUser ? undefined : routeMatch?.params.userId;
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useUserProfileStore((state) => state.user);
 
@@ -36,7 +36,7 @@ export const UserPage: FC<UserPageProps> = ({ isCurrentUser = false }) => {
     setIsEditing(false);
     // Optionally refresh the profile or show success message
   };
-  const userId = unitId || currentUser?.unitId;
+  const userId = routeUserId || currentUser?.userId;
 
   // If in edit mode and is current user, show edit form
   if (
@@ -47,7 +47,7 @@ export const UserPage: FC<UserPageProps> = ({ isCurrentUser = false }) => {
       <UserEditPage
         onCancel={handleCancelEdit}
         onSuccess={handleEditSuccess}
-        unitId={userId}
+        userId={userId}
       />
     );
   }
@@ -55,7 +55,7 @@ export const UserPage: FC<UserPageProps> = ({ isCurrentUser = false }) => {
   // Otherwise show profile
   return (
     <UserProfilePage
-      unitId={userId || ""}
+      userId={userId || ""}
       isCurrentUser={isCurrentUser}
       onEditClick={handleEditClick}
     />

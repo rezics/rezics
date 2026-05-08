@@ -42,7 +42,7 @@ function FollowUserList({ users }: { users: SimpleUser[] }) {
   return (
     <ul className="divide-y divide-border-whisper">
       {users.map((user) => (
-        <li key={user.unitId} className="flex items-center gap-3 py-3">
+        <li key={user.userId} className="flex items-center gap-3 py-3">
           <Avatar>
             <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
             <AvatarFallback>
@@ -51,7 +51,7 @@ function FollowUserList({ users }: { users: SimpleUser[] }) {
           </Avatar>
           <div className="flex-1 min-w-0">
             <span className="block text-sm font-medium text-text-primary">
-              {user.name || user.slug || user.unitId}
+              {user.name || user.slug || user.userId}
             </span>
             {user.slug && (
               <span className="block text-sm text-text-secondary">
@@ -72,8 +72,8 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   const navigate = useNavigate();
   const currentUser = useUserProfileStore((state) => state.user);
   const resolvedUnitId = useMemo(
-    () => unitId || (isCurrentUser ? currentUser?.unitId : unitId),
-    [unitId, isCurrentUser, currentUser?.unitId],
+    () => unitId || (isCurrentUser ? currentUser?.userId : unitId),
+    [unitId, isCurrentUser, currentUser?.userId],
   );
 
   const [tab, setTab] = useState<"following" | "followers">("following");

@@ -8,7 +8,7 @@ function makeExcerpt(overrides: Partial<UnitDTO> & { id: string }): UnitDTO {
     id: overrides.id,
     type: "EXCERPT",
     user: userAlice,
-    userId: userAlice.unitId,
+    userId: userAlice.userId,
     defaultLanguage: LANGUAGES.EN,
     extra: {
       source: { title: "The Quiet Library, ch. 4" },
@@ -45,7 +45,7 @@ export const excerptLong: UnitDTO = makeExcerpt({
 export const excerptCJK: UnitDTO = makeExcerpt({
   id: "excerpt-cjk",
   user: userBen,
-  userId: userBen.unitId,
+  userId: userBen.userId,
   defaultLanguage: LANGUAGES.ZH_HANT,
   translations: [
     {

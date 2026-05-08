@@ -4,7 +4,7 @@ import { CountSpecSchema, ModeSchema } from "./strategy.js";
 import type { CountSpec, Mode } from "./strategy.js";
 
 export interface CreatedUser {
-  unitId: string;
+  userId: string;
   name: string;
   slug: string;
 }

@@ -107,9 +107,9 @@ function isAdminRole(identity: RezicsSessionClaims | null): boolean {
 
 export { isAdminRole };
 
-export async function verifyAdminFromDb(unitId: string): Promise<boolean> {
+export async function verifyAdminFromDb(userId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
-    where: { unitId },
+    where: { userId },
     select: { permission: true },
   });
   if (!user) return false;
@@ -118,9 +118,9 @@ export async function verifyAdminFromDb(unitId: string): Promise<boolean> {
   return roles.includes("ADMIN") || roles.includes("ROOT");
 }
 
-export async function verifyRootFromDb(unitId: string): Promise<boolean> {
+export async function verifyRootFromDb(userId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
-    where: { unitId },
+    where: { userId },
     select: { permission: true },
   });
   if (!user) return false;

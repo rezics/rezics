@@ -34,7 +34,7 @@ export const shelfListSelect = {
       defaultLanguage: true,
       createdAt: true,
       updatedAt: true,
-      user: { select: { unitId: true, slug: true, name: true, avatar: true } },
+      user: { select: { userId: true, slug: true, name: true, avatar: true } },
       translations: true,
       unitTags: { orderBy: { score: "desc" as const } },
     },

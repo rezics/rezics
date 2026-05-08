@@ -993,15 +993,15 @@ export async function syncAllUsers(client: SearchClient) {
     const users: any[] = await prisma.user.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
-      orderBy: { unitId: "asc" },
+      cursor: cursor ? { userId: cursor } : undefined,
+      orderBy: { userId: "asc" },
     });
 
     if (users.length === 0) break;
 
     const formatted: UserSearchDocument[] = users.map((u) => ({
-      id: u.unitId,
-      unitId: u.unitId,
+      id: u.userId,
+      userId: u.userId,
       name: u.name,
       email: u.email,
       slug: u.slug,
@@ -1018,7 +1018,7 @@ export async function syncAllUsers(client: SearchClient) {
     console.log("syncAllUsers: added batch", addResult);
 
     total += formatted.length;
-    cursor = users[users.length - 1]!.unitId;
+    cursor = users[users.length - 1]!.userId;
   }
 
   return { message: "syncAllUsers success", totalSynced: total };

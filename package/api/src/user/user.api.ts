@@ -46,8 +46,8 @@ export const userApi = {
     return apiFetch(`/user/admin${qs}`);
   },
 
-  adminGet: async (unitId: string): Promise<UserDTO> => {
-    return apiFetch(`/user/admin/${unitId}`);
+  adminGet: async (userId: string): Promise<UserDTO> => {
+    return apiFetch(`/user/admin/${userId}`);
   },
 
   /**
@@ -70,28 +70,28 @@ export const userApi = {
   /**
    * Admin: update user.
    */
-  adminUpdate: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {
-    return apiFetch(`/user/admin/${unitId}`, {
+  adminUpdate: async (userId: string, input: UpdateUser): Promise<UserDTO> => {
+    return apiFetch(`/user/admin/${userId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
   },
 
   adminUpdateSlug: async (
-    unitId: string,
+    userId: string,
     input: { slug: string },
   ): Promise<{
     user: UserDTO;
     authProjection: { attempted: boolean; ok: boolean };
   }> => {
-    return apiFetch(`/user/admin/${unitId}/slug`, {
+    return apiFetch(`/user/admin/${userId}/slug`, {
       method: "PATCH",
       body: JSON.stringify(input),
     });
   },
 
-  get: async (unitId: string): Promise<UserDTO> => {
-    return apiFetch(`/user/${unitId}`);
+  get: async (userId: string): Promise<UserDTO> => {
+    return apiFetch(`/user/${userId}`);
   },
 
   getBySlug: async (userSlug: string): Promise<UserDTO> => {
@@ -105,8 +105,8 @@ export const userApi = {
     });
   },
 
-  update: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {
-    return apiFetch(`/user/${unitId}`, {
+  update: async (userId: string, input: UpdateUser): Promise<UserDTO> => {
+    return apiFetch(`/user/${userId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -116,8 +116,8 @@ export const userApi = {
     return apiFetch(`/user/me`, { method: "DELETE" });
   },
 
-  delete: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch(`/user/${unitId}`, { method: "DELETE" });
+  delete: async (userId: string): Promise<{ message: string }> => {
+    return apiFetch(`/user/${userId}`, { method: "DELETE" });
   },
 
   follow: async (targetId: string): Promise<{ message: string }> => {
@@ -147,19 +147,19 @@ export const userApi = {
   },
 
   getFollowers: async (
-    unitId: string,
+    userId: string,
     query?: { page?: number; limit?: number },
   ): Promise<{ users: UserDTO[]; total: number }> => {
     const qs = query ? `?${new URLSearchParams(query as any).toString()}` : "";
-    return apiFetch(`/user/${unitId}/followers${qs}`);
+    return apiFetch(`/user/${userId}/followers${qs}`);
   },
 
   getFollowings: async (
-    unitId: string,
+    userId: string,
     query?: { page?: number; limit?: number },
   ): Promise<{ users: UserDTO[]; total: number }> => {
     const qs = query ? `?${new URLSearchParams(query as any).toString()}` : "";
-    return apiFetch(`/user/${unitId}/followings${qs}`);
+    return apiFetch(`/user/${userId}/followings${qs}`);
   },
 
   batch: async (

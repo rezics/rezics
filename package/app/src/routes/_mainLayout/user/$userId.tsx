@@ -5,6 +5,6 @@ const ProfileLayout = lazyRouteComponent(
   "ProfileLayout",
 );
 
-export const Route = createFileRoute("/_mainLayout/user/$unitId")({
+export const Route = createFileRoute("/_mainLayout/user/$userId")({
   component: ProfileLayout,
 });

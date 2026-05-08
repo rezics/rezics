@@ -67,8 +67,8 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
               <TooltipTrigger
                 render={(props) => (
                   <TextLink
-                    to="/user/$unitId"
-                    params={{ unitId: review.author?.unitId ?? "" }}
+                    to="/user/$userId"
+                    params={{ userId: review.author?.userId ?? "" }}
                     {...props}
                   >
                     <span className="text-lg font-bold text-text-brand">

@@ -9,7 +9,13 @@ process.env.AUTH_BASE_URL ??= "http://localhost:3001";
 
 mock.module("@/middleware/permission", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
-    resolve: () => ({ identity: { unitId: "test", role: "MEMBER" } }),
+    resolve: () => ({
+      identity: {
+        sub: "test",
+        userId: "test",
+        permission: { role: "MEMBER" },
+      },
+    }),
   }),
   tryResolveIdentity: async () => null,
   isAdminRole: () => false,

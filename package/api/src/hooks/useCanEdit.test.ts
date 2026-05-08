@@ -7,7 +7,7 @@ const ownedUnit: UnitDTO = {
   type: "book",
   userId: "user-owner",
   user: {
-    unitId: "owner-user-id",
+    userId: "owner-user-id",
     slug: "owner",
     name: "Owner",
   } as UnitDTO["user"],

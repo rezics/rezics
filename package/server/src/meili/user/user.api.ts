@@ -58,7 +58,7 @@ export async function searchUsers(
   const idList = parseIdsCsv(opts.ids);
   if (idList && idList.length > 0) {
     const quoted = idList.map((id) => `"${escapeValue(id)}"`).join(", ");
-    filter.push(`unitId IN [${quoted}]`);
+    filter.push(`userId IN [${quoted}]`);
   }
 
   const pageNum = Math.max(Number(opts.page ?? 1), 1);

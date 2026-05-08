@@ -8,7 +8,7 @@ function makeShelf(
 ): ShelfDTO {
   return {
     unitId: overrides.unitId,
-    userId: userAlice.unitId,
+    userId: userAlice.userId,
     user: userAlice,
     coverUrl: `https://picsum.photos/seed/${overrides.unitId}/640/360`,
     items: [],
