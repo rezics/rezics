@@ -1,6 +1,7 @@
 import {
   type SeedAuthUserResult,
   seedAuthUser,
+  slugify,
 } from "@rezics/auth/prisma/seed";
 import type {
   AuthPrismaClient,
@@ -53,6 +54,7 @@ export function getServerRole(input: CrossSeedUserInput): string {
 interface SeedServerUserInput {
   unitId: string;
   slug: string;
+  email: string;
   name: string;
   avatar?: string;
   bio?: string;
@@ -66,10 +68,20 @@ async function seedServerUser(
   await prisma.user.upsert({
     where: { unitId: input.unitId },
     update: {
+      authUserId: input.unitId,
+      email: input.email,
+      accountStatus: "MEMBER_READY",
+      slug: input.slug,
+      name: input.name,
+      avatar: input.avatar,
+      bio: input.bio,
       permission: input.permission as never,
     },
     create: {
       unitId: input.unitId,
+      authUserId: input.unitId,
+      email: input.email,
+      accountStatus: "MEMBER_READY",
       slug: input.slug,
       name: input.name,
       avatar: input.avatar,
@@ -80,31 +92,41 @@ async function seedServerUser(
   });
 }
 
+export type CrossSeedUserResult = SeedAuthUserResult & {
+  slug: string;
+};
+
+function resolveSeedUserSlug(input: CrossSeedUserInput): string {
+  const slug = input.slug ?? slugify(input.name);
+  return slug || input.email.split("@")[0]!;
+}
+
 export async function crossSeedUser(
   authPrisma: AuthPrismaClient,
   serverPrisma: ServerPrismaClient,
   input: CrossSeedUserInput,
-): Promise<SeedAuthUserResult> {
+): Promise<CrossSeedUserResult> {
   const authResult = await seedAuthUser(authPrisma, {
     email: input.email,
     name: input.name,
     role: input.role,
-    slug: input.slug,
     password: input.password,
   });
+  const slug = resolveSeedUserSlug(input);
 
   await seedServerUser(serverPrisma, {
     unitId: authResult.userId,
-    slug: authResult.slug,
+    slug,
+    email: authResult.email,
     name: authResult.name,
     bio: input.bio,
     permission: input.permission,
   });
 
-  return authResult;
+  return { ...authResult, slug };
 }
 
-// Delete server users first (FK dependency), then auth profiles, then auth users.
+// Delete server users first (FK dependency), then auth users.
 async function deleteExistingUsers(
   authPrisma: AuthPrismaClient,
   serverPrisma: ServerPrismaClient,
@@ -119,10 +141,13 @@ async function deleteExistingUsers(
   if (authUsers.length > 0) {
     const userIds = authUsers.map((u) => u.id);
     await serverPrisma.user.deleteMany({
-      where: { unitId: { in: userIds } },
-    });
-    await authPrisma.userProfile.deleteMany({
-      where: { userId: { in: userIds } },
+      where: {
+        OR: [
+          { unitId: { in: userIds } },
+          { authUserId: { in: userIds } },
+          { email: { in: emails } },
+        ],
+      },
     });
     await authPrisma.user.deleteMany({
       where: { id: { in: userIds } },
@@ -133,7 +158,7 @@ async function deleteExistingUsers(
 
 export interface SeedAllUsersResult {
   rootUserId: string;
-  results: Array<{ result: SeedAuthUserResult; serverRole: string }>;
+  results: Array<{ result: CrossSeedUserResult; serverRole: string }>;
 }
 
 export async function seedAllUsers(
