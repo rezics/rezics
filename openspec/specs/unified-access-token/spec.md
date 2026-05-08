@@ -2,40 +2,47 @@
 
 ### Requirement: Single access token replaces all service tokens
 
-System SHALL use a single JWT access token — `rezics-session-token` — issued by the server as the sole bearer credential for all resource services (Server, Notify, Search, Reaction). The `auth-session-token` issued by auth SHALL serve as an exchange/refresh token used exclusively to obtain the `rezics-session-token` via `POST /session/exchange`. The `auth-session-token` SHALL NOT be sent via `Authorization: Bearer`.
+System SHALL use a single JWT access token — `rezics-session-token` — issued by the server as the sole bearer credential for all resource services (Server, Notify, Search, Reaction). The browser obtains and refreshes this token exclusively through the cookie-boundary endpoint `POST /auth/session/refresh`, which validates the auth session httpOnly cookie via internal call to auth. The auth-owned `auth-session-token` JWT SHALL NOT be used as a header-based exchange or refresh credential at any boundary; it is no longer issued for browser flows. Auth session authority is conveyed by the opaque auth session cookie only. Header-based session credentials (`x-auth-session-token`) SHALL NOT be defined, sent, accepted, or listed in CORS `allowedHeaders`.
 
 #### Scenario: All services validate rezics-session-token
 
 - **WHEN** any service (server, notify, search, reaction) receives an API request
-- **THEN** it validates the `Authorization: Bearer` token as a `rezics-session-token` against the server's JWKS endpoint
+- **THEN** it validates the `Authorization: Bearer` token (or cookie) as a `rezics-session-token` against the server's JWKS endpoint
 
-#### Scenario: auth-session-token is only used for exchange
+#### Scenario: rezics-session-token is obtained via cookie boundary
 
 - **WHEN** the frontend needs to obtain or refresh a `rezics-session-token`
-- **THEN** it presents the `auth-session-token` via the `x-auth-session-token` header to `POST /session/exchange` on the server
+- **THEN** it calls `POST /auth/session/refresh` with credentials-included so the auth session httpOnly cookie is forwarded
+- **AND** it SHALL NOT send any `x-auth-session-token` header
+
+#### Scenario: Header-based session credential is rejected everywhere
+
+- **WHEN** any consumer sends an `x-auth-session-token` header to any service
+- **THEN** the header SHALL be ignored and SHALL NOT appear in any service's CORS `allowedHeaders`
 
 ### Requirement: Access token carries enriched claims for provisioning and gating
 
-Auth service's `definePayload` SHALL produce JWT claims including `id` (auth user ID as sub), `slug`, `name`, `scope`, and conditionally `email_verified: false` when unverified. These claims are used by the server's exchange endpoint to validate identity. Resource servers read claims from the `rezics-session-token` (issued by server), not directly from the `auth-session-token`.
+Auth service produces an internal session representation that, when consulted by the cookie-boundary refresh endpoint, supplies `userId`, `email`, `email_verified`, and any provider/identity facts the boundary needs to materialize or refresh a main user. These facts SHALL flow through internal service-to-service calls (not through a JWT presented by the browser). The browser SHALL NOT depend on, decode, or read claims from any `auth-session-token` JWT.
 
-#### Scenario: Auth identity token carries profile claims for exchange
+#### Scenario: Cookie boundary reads auth identity through internal call
 
-- **WHEN** auth issues an `auth-session-token`
-- **THEN** the JWT payload includes `id`, `slug`, `name`, `scope`, and conditionally `email_verified`
+- **WHEN** main needs auth identity facts during `/auth/session/refresh`
+- **THEN** main SHALL call auth internally (through the configured private channel) to obtain the validated session and identity
+- **AND** the browser SHALL NOT receive or decode an `auth-session-token` JWT
 
 ## REMOVED Requirements
 
 ### Requirement: AUTH_CONTEXT token type is removed
 
-**Reason**: Already removed in `pure-oauth-auth` change. No further action.
-**Migration**: N/A — already completed.
+**Reason**: Already removed in `pure-oauth-auth` change.
+**Migration**: N/A — already completed. Restated here only for completeness; unchanged by this change.
 
 ### Requirement: REZICS_SESSION token type is removed
 
-**Reason**: The `rezics-session-token` is being re-introduced with different semantics — issued by server via exchange endpoint, not by auth. The old removal (from `pure-oauth-auth`) stands; the new token is defined in the `server-access-token` capability.
-**Migration**: The new `rezics-session-token` uses the same name but is architecturally distinct. Contract types are redefined under `server-access-token`.
+**Reason**: Restated for completeness; the active definition lives in `server-access-token`. This change does not reintroduce or further redefine the legacy token name.
+**Migration**: Refer to `server-access-token` for the canonical `rezics-session-token` definition.
 
 ### Requirement: Conditional email_verified claim semantics
 
-**Reason**: Resource servers no longer read `email_verified` from the `auth-session-token` directly. Verification gating, if needed, is handled during the token exchange flow — the server can check the claim on the `auth-session-token` when issuing the `rezics-session-token` and refuse to issue if unverified.
-**Migration**: Verification checks move to the exchange endpoint or remain as a frontend-only gate.
+**Reason**: With the JWT-in-header pathway deleted, the browser never receives an `auth-session-token` JWT and never reads `email_verified` from it. Verification gating happens at the cookie boundary, which consults auth's validated session state directly.
+**Migration**: Verification checks live in `materializeMainAccountFromAuth` / `refreshMainSessionFromAuth`, which read auth's current session state via internal call.

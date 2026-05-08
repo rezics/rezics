@@ -2,12 +2,12 @@
 
 ### Requirement: AuthProvider accepts a configurable token array
 
-AuthProvider SHALL accept `tokens` parameter specifying which token names to manage. The default configuration SHALL include `AUTH_SESSION` and `REZICS_SESSION`. The ordering defines the dependency chain: `AUTH_SESSION` is refreshed first (via session cookie), then `REZICS_SESSION` (via exchange using the refreshed `AUTH_SESSION`). AuthProvider SHALL be exported from `@rezics/api` (not `@rezics/app-shell`).
+AuthProvider SHALL accept a `tokens` parameter specifying which token names to manage. The default configuration SHALL include exactly one token: `REZICS_SESSION`. There SHALL be no `AUTH_SESSION` entry — auth session validity is conveyed by the auth session httpOnly cookie, which the browser does not parse. AuthProvider SHALL be exported from `@rezics/api`.
 
-#### Scenario: AuthProvider managed two tokens with dependency ordering
+#### Scenario: AuthProvider managed one token by default
 
 - **WHEN** AuthProvider initializes with default configuration
-- **THEN** it manages `AUTH_SESSION` and `REZICS_SESSION` tokens, refreshing them in dependency order
+- **THEN** it manages exactly one token: `REZICS_SESSION`, refreshed via the cookie boundary
 
 #### Scenario: AuthProvider imported from @rezics/api
 
@@ -16,64 +16,64 @@ AuthProvider SHALL accept `tokens` parameter specifying which token names to man
 
 ### Requirement: AuthProvider refreshes tokens proactively before expiry
 
-AuthProvider SHALL schedule token refresh before JWT expiration with configurable refresh buffer (default 60 seconds). Each token has its own independent refresh schedule. When `REZICS_SESSION` needs refresh, AuthProvider SHALL first ensure `AUTH_SESSION` is valid, refreshing it if needed.
+AuthProvider SHALL schedule `REZICS_SESSION` refresh before its JWT expiration with a configurable refresh buffer (default 60 seconds). Each refresh call SHALL hit `POST /auth/session/refresh` with credentials-included so the auth session cookie is forwarded. There is no separate `AUTH_SESSION` token to coordinate; auth session refresh is implicit in the cookie roundtrip.
 
-#### Scenario: REZICS_SESSION refresh triggers AUTH_SESSION check
+#### Scenario: Proactive REZICS_SESSION refresh
 
-- **WHEN** `REZICS_SESSION` is approaching expiry and `AUTH_SESSION` is also expired
-- **THEN** AuthProvider refreshes `AUTH_SESSION` first (via session cookie), then exchanges it for a new `REZICS_SESSION`
+- **WHEN** `REZICS_SESSION` is approaching expiry
+- **THEN** AuthProvider calls `POST /auth/session/refresh` with credentials-included
+- **AND** the response sets a fresh `rezics-session-token` httpOnly cookie
 
-#### Scenario: REZICS_SESSION refresh with valid AUTH_SESSION
+#### Scenario: Refresh fails when auth session has expired
 
-- **WHEN** `REZICS_SESSION` is approaching expiry and `AUTH_SESSION` is still valid
-- **THEN** AuthProvider exchanges the existing `AUTH_SESSION` for a new `REZICS_SESSION` without refreshing `AUTH_SESSION`
+- **WHEN** `POST /auth/session/refresh` returns 401 because the auth session cookie is invalid
+- **THEN** AuthProvider transitions `REZICS_SESSION` to dormant
+- **AND** the user is treated as anonymous
 
 ### Requirement: AuthProvider is stateless and side-effect free to consumers
 
-AuthProvider SHALL NOT maintain Zustand/Jotai/React context state. Sole observable effect SHALL be writing tokens to localStorage and dispatching storage events. Consumers read tokens from localStorage or from stores that observe localStorage events.
+AuthProvider SHALL NOT maintain Zustand/Jotai/React context state. Its sole observable effects SHALL be (a) issuing the cookie-boundary refresh call to keep the `rezics-session-token` cookie fresh and (b) optionally caching the latest token body for non-browser callers via a localStorage key, dispatching a storage event when it does so. Browser code SHALL NOT depend on the localStorage cache for cookie-authenticated requests.
 
-#### Scenario: Token refresh updates localStorage
+#### Scenario: Cookie-only browser path
 
-- **WHEN** AuthProvider refreshes a token
-- **THEN** the new token is written to localStorage and a `package-auth-token-storage` custom event is dispatched
+- **WHEN** AuthProvider runs in a normal browser environment
+- **THEN** it relies on the `rezics-session-token` httpOnly cookie for authentication
+- **AND** it SHALL NOT inject a localStorage bearer for browser API calls
 
 ### Requirement: AuthProvider reacts to failure type
 
-AuthProvider SHALL distinguish between retryable failures (network errors, 5xx) and non-retryable failures (401, 403, 404). On non-retryable failure for `AUTH_SESSION`, both tokens enter dormant state. On non-retryable failure for `REZICS_SESSION` only, `REZICS_SESSION` enters dormant while `AUTH_SESSION` continues refreshing.
+AuthProvider SHALL distinguish between retryable failures (network errors, 5xx) and non-retryable failures (401, 403, 404). On non-retryable failure for `REZICS_SESSION` refresh, the user SHALL be transitioned to anonymous state (the auth session cookie is implicitly invalid).
 
-#### Scenario: AUTH_SESSION non-retryable failure makes both dormant
+#### Scenario: REZICS_SESSION non-retryable failure → anonymous
 
-- **WHEN** `AUTH_SESSION` refresh fails with 401 (session expired)
-- **THEN** both `AUTH_SESSION` and `REZICS_SESSION` enter dormant state (user must re-login)
+- **WHEN** `POST /auth/session/refresh` returns 401
+- **THEN** AuthProvider sets `REZICS_SESSION` dormant
+- **AND** the user must re-authenticate to obtain a new auth session cookie
 
 ### Requirement: AuthProvider recovers on visibility change
 
-When document becomes visible after hidden, AuthProvider SHALL check all managed tokens and refresh any expired/missing. This ensures tokens are fresh after the user returns from a background tab.
+When the document becomes visible after being hidden, AuthProvider SHALL re-evaluate `REZICS_SESSION` freshness and refresh via the cookie boundary if expired or missing.
 
-#### Scenario: Returning from background refreshes expired tokens
+#### Scenario: Returning from background refreshes expired token
 
-- **WHEN** the browser tab becomes visible and the `REZICS_SESSION` has expired
-- **THEN** AuthProvider refreshes `AUTH_SESSION` if needed, then exchanges for a new `REZICS_SESSION`
+- **WHEN** the browser tab becomes visible and the cached `REZICS_SESSION` token has expired
+- **THEN** AuthProvider calls `POST /auth/session/refresh` to obtain a new `rezics-session-token` cookie
 
 ### Requirement: AuthProvider does not perform user provisioning
 
-AuthProvider SHALL NOT call `ensure()` or user provisioning endpoint. Provisioning is the responsibility of the auth `user.create.after` hook (for verified-at-creation users) and the verify-email middleware (for deferred email/password users). When the AuthProvider refresh cycle detects that `email_verified: false` has been removed from a refreshed identity token, the exchange guard in `exchangeForSessionToken()` will automatically allow the exchange to proceed on the next refresh cycle.
+AuthProvider SHALL NOT call any user-provisioning endpoint. Provisioning is the responsibility of the auth `afterSignUp` hook (when configured) and the cookie-boundary `materializeMainAccountFromAuth` flow. No frontend-side exchange guard SHALL be needed; `POST /auth/session/refresh` itself enforces verification and member-readiness checks server-side.
 
 #### Scenario: AuthProvider skips provisioning
 
-- **WHEN** AuthProvider refreshes tokens for a newly registered user
-- **THEN** it does not call any provisioning endpoint (provisioning happens via the auth service hooks/middleware)
-
-#### Scenario: AuthProvider auto-unblocks exchange after verification
-
-- **WHEN** AuthProvider refreshes `AUTH_SESSION` and the new token no longer has `email_verified: false`
-- **THEN** the next `REZICS_SESSION` refresh succeeds because `exchangeForSessionToken()` no longer short-circuits
+- **WHEN** AuthProvider refreshes `REZICS_SESSION` for a newly registered user
+- **THEN** it SHALL NOT call any provisioning endpoint
+- **AND** the cookie-boundary refresh response indicates whether the user is member-ready
 
 ### Requirement: authSessionStore hydrates permission from session token
 
-When `authSessionStore` hydrates from a refreshed `REZICS_SESSION` token, it SHALL parse the token's `permission` claim and expose it as the `permission` field. It SHALL NOT derive or expose `capabilityLevel`.
+When `authSessionStore` hydrates from a refreshed `REZICS_SESSION` token, it SHALL parse the token's `permission` claim and expose it as the `permission` field. It SHALL NOT derive or expose `capabilityLevel` from any other source. It SHALL NOT read the deprecated top-level `role` claim (which no longer exists).
 
 #### Scenario: Store hydrates permission after token refresh
 
-- **WHEN** AuthProvider writes a new `REZICS_SESSION` token to localStorage
-- **THEN** `authSessionStore` reads the token's `permission` claim and updates its `permission` field accordingly
+- **WHEN** AuthProvider's cookie refresh writes a new `REZICS_SESSION` representation
+- **THEN** `authSessionStore` reads the token's `permission.role` and updates its `permission` field accordingly
