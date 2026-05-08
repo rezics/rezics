@@ -66,20 +66,20 @@
 
 ## 8. Frontend Registration and Settings UX
 
-- [ ] 8.1 Update registration pages so auth-only users remain locked in registration verification and do not call normal main product APIs.
+- [x] 8.1 Update registration pages so auth-only users remain locked in registration verification and do not call normal main product APIs.
 - [x] 8.2 Update complete-registration flow to request main materialization after verification and then continue under profile setup token.
 - [x] 8.3 Update profile setup UI to submit slug, optional name/avatar, and default display name from slug when blank.
-- [ ] 8.4 Update OAuth callback handling for trusted provider facts, untrusted verification, materialization, and profile setup routing.
+- [x] 8.4 Update OAuth callback handling for trusted provider facts, untrusted verification, materialization, and profile setup routing.
 - [x] 8.5 Update Account/Profile settings Rezics email UX to use main email verification contracts and write only verified email to `User.email`.
 - [x] 8.6 Move auth login email change UX to Security settings alongside password, sessions, and connected providers.
-- [ ] 8.7 Update frontend route guards so normal app chrome requires member-ready state.
-- [ ] 8.8 Add localized strings and accessible error/success states for login email, Rezics email, materialization, profile setup, slug conflict, email verification contract errors, setup token renewal, and stale account-stage hints.
+- [x] 8.7 Update frontend route guards so normal app chrome requires member-ready state.
+- [x] 8.8 Add localized strings and accessible error/success states for login email, Rezics email, materialization, profile setup, slug conflict, email verification contract errors, setup token renewal, and stale account-stage hints.
 
 ## 9. Admin and Migration Cleanup
 
-- [ ] 9.1 Update admin user views to display main email semantics and avoid auth verification fields.
+- [x] 9.1 Update admin user views to display main email semantics and avoid auth verification fields.
 - [x] 9.2 Add admin slug update flow or server/API support for rare canonical slug changes.
-- [ ] 9.3 Remove stale tests, fixtures, API types, and UI copy that assume auth email verification columns exist on main `User`.
+- [x] 9.3 Remove stale tests, fixtures, API types, and UI copy that assume auth email verification columns exist on main `User`.
 - [x] 9.4 Add a development-stage migration/reset note for removing old main verification columns and reinitializing main email verification contract data.
 - [x] 9.5 Run `rg` checks for `emailVerifiedAt`, `emailVerificationSource`, old setup endpoint names, stale registration stage names, and duplicated SMTP sender creation.
 
@@ -89,6 +89,6 @@
 - [x] 10.2 Run targeted `bun test` suites for `package/auth` registration facts, verification, auth email delivery, and slug projection.
 - [x] 10.3 Run targeted `bun test` suites for `package/server` auth boundary, profile setup token guard, materialization, profile setup activation, session refresh, and email verification contracts.
 - [x] 10.4 Run targeted `bun test` suites for `package/api` auth/account API helpers and auth session state.
-- [ ] 10.5 Run targeted `bun test` suites for `package/app` registration routing, complete-registration, profile setup, OAuth callback, route guards, Security login email settings, and Account/Profile Rezics email flow.
+- [x] 10.5 Run targeted `bun test` suites for `package/app` registration routing, complete-registration, profile setup, OAuth callback, route guards, Security login email settings, and Account/Profile Rezics email flow.
 - [ ] 10.6 Run formatting/typecheck/build commands required by affected packages.
 - [ ] 10.7 Manually verify browser flows: email registration, verification resend, login re-entry during verification, materialization, setup token renewal after expiry, profile setup slug conflict, member activation, OAuth trusted email, sign-out, session refresh after reload, login email change, and Rezics email change verification.

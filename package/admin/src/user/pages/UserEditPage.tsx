@@ -106,7 +106,7 @@ export default function UserEditPage() {
               ) : null}
 
               <p className="text-sm text-text-secondary mb-4">
-                Email: <strong>{detailQuery.data?.email ?? "-"}</strong>
+                Rezics Email: <strong>{detailQuery.data?.email ?? "-"}</strong>
               </p>
 
               <form onSubmit={onSubmit}>

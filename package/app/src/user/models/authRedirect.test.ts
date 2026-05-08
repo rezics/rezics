@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   buildOAuthCallbackTargets,
   resolvePostAuthDestination,
+  shouldRenderNormalAppChrome,
 } from "./authRedirect";
 
 describe("authRedirect", () => {
@@ -29,5 +30,35 @@ describe("authRedirect", () => {
       newUserCallbackURL: "https://rezics.example/complete-registration",
       errorCallbackURL: "https://rezics.example/register",
     });
+  });
+
+  test("keeps normal app chrome available to anonymous public browsing", () => {
+    expect(
+      shouldRenderNormalAppChrome({
+        hasAuthIdentity: false,
+        hasMemberSession: false,
+        registrationComplete: false,
+      }),
+    ).toBe(true);
+  });
+
+  test("blocks normal app chrome for incomplete auth identities", () => {
+    expect(
+      shouldRenderNormalAppChrome({
+        hasAuthIdentity: true,
+        hasMemberSession: false,
+        registrationComplete: false,
+      }),
+    ).toBe(false);
+  });
+
+  test("allows normal app chrome only after member activation", () => {
+    expect(
+      shouldRenderNormalAppChrome({
+        hasAuthIdentity: true,
+        hasMemberSession: true,
+        registrationComplete: true,
+      }),
+    ).toBe(true);
   });
 });

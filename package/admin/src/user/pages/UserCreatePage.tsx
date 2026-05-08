@@ -75,7 +75,7 @@ export default function UserCreatePage() {
           <form onSubmit={onSubmit}>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-email">Email</Label>
+                <Label htmlFor="ucp-email">Rezics Email</Label>
                 <Input
                   id="ucp-email"
                   value={email}
@@ -134,7 +134,7 @@ export default function UserCreatePage() {
               </div>
               <p className="text-xs text-text-secondary">
                 注意：这里是 Admin 创建用户，不需要验证码；后端会自动做 slug
-                校验、email/slug 唯一性校验并哈希密码。
+                校验、Rezics Email/slug 唯一性校验并哈希密码。
               </p>
             </div>
           </form>

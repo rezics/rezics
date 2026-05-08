@@ -78,7 +78,7 @@ export default function UserListPage() {
       },
       {
         id: "email",
-        header: "Email",
+        header: "Rezics Email",
         minWidth: 240,
         cell: (u) => (
           <span className="text-sm whitespace-nowrap">{u.email ?? "-"}</span>
@@ -156,7 +156,7 @@ export default function UserListPage() {
               </Label>
               <Input
                 id="user-search"
-                placeholder="q/email/slug..."
+                placeholder="q/rezics-email/slug..."
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {

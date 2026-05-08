@@ -4,7 +4,10 @@ import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSyncUserProfile } from "@/user/hooks/useSyncUserProfile";
+import { shouldRenderNormalAppChrome } from "@/user/models/authRedirect";
 import {
+  selectHasAuthIdentity,
+  selectHasMemberSession,
   selectShouldRedirectToCompleteRegistration,
   useAuthSessionStore,
   useUserProfileStore,
@@ -26,6 +29,16 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const pendingRegistration = useAuthSessionStore(
     selectShouldRedirectToCompleteRegistration,
   );
+  const hasAuthIdentity = useAuthSessionStore(selectHasAuthIdentity);
+  const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
+  const registrationComplete = useAuthSessionStore(
+    (state) => state.registrationComplete,
+  );
+  const canRenderChrome = shouldRenderNormalAppChrome({
+    hasAuthIdentity,
+    hasMemberSession,
+    registrationComplete,
+  });
 
   const isAdmin =
     useUserProfileStore((state) =>
@@ -37,6 +50,17 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       navigate({ to: "/complete-registration", replace: true });
     }
   }, [location.pathname, navigate, pendingRegistration]);
+
+  if (!canRenderChrome) {
+    return (
+      <div className="min-h-screen bg-surface-canvas">
+        <Helmet>
+          <title>REZICS | 账号设置</title>
+        </Helmet>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

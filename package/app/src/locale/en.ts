@@ -330,21 +330,21 @@ export default {
       providers_divider: "or continue with",
       providers_loading: "Loading sign-in providers…",
       continue_with_provider: "Continue with {{provider}}",
-      onboarding_title: "Finish Onboarding",
-      onboarding_sign_in_first: "Sign in first to complete account onboarding.",
+      onboarding_title: "Complete Registration",
+      onboarding_sign_in_first: "Sign in first to complete registration.",
       onboarding_social_only:
-        "This onboarding page is only used for social sign-in accounts.",
-      onboarding_complete: "Your onboarding is already complete.",
+        "This registration page is only used before member activation.",
+      onboarding_complete: "Your registration is already complete.",
       onboarding_intro:
-        "Social sign-in needs a usable email before the app can treat your account as member-ready. Password is optional.",
+        "Complete email verification and profile setup before member access is available.",
       onboarding_trusted_email:
         "This email is trusted by your provider. Edit it only if you want to verify a different address.",
       onboarding_editable_email:
         "Changing email will require verification before member access is available.",
       onboarding_optional_password:
         "Leave password blank if you want to keep this account social-only for now.",
-      onboarding_saved: "Onboarding details saved.",
-      onboarding_submit: "Complete Onboarding",
+      onboarding_saved: "Registration details saved.",
+      onboarding_submit: "Complete Registration",
       onboarding_saving: "Saving…",
       verify_title: "Verify Email",
       verify_sign_in_first:
@@ -409,6 +409,62 @@ export default {
   // ANCHOR User
   user: {
     open_profile: "Open Profile",
+  },
+
+  settings: {
+    account: {
+      rezics_email_title: "Rezics Email",
+      rezics_email_description:
+        "Manage the product email shown in Rezics. Login email belongs in Security.",
+      rezics_email_empty: "No verified Rezics email",
+      rezics_email_code_sent:
+        "A verification code has been sent to your Rezics email.",
+      rezics_email_verified: "Rezics email verified.",
+      verified: "Verified",
+      unverified: "Unverified",
+      pending_verification: "Pending verification: {{email}}",
+      sending: "Sending...",
+      send_verification_code: "Send Verification Code",
+      verification_code_sent: "Verification code sent.",
+      change_rezics_email_title: "Change Rezics Email",
+      change_rezics_email_description:
+        "A code will be sent to the new address. Your current Rezics email stays unchanged until verification succeeds.",
+      new_rezics_email: "New Rezics Email",
+      send_code: "Send Code",
+      verification_code: "Verification Code",
+      verifying: "Verifying...",
+      verify: "Verify",
+    },
+    security: {
+      login_email_title: "Login Email",
+      login_email_description:
+        "Manage the email used for sign-in and account recovery.",
+      current_login_email: "Current login email: {{email}}",
+      unavailable: "Unavailable",
+      login_email_confirmation_sent:
+        "Confirmation sent to your new login email.",
+      new_login_email: "New Login Email",
+      sending: "Sending...",
+      change_login_email: "Change Login Email",
+      change_password_title: "Change Password",
+      set_password_title: "Set Password",
+      change_password_description:
+        "Update your password to keep your account secure.",
+      set_password_description:
+        "You signed up with a social provider. Set a password to also sign in with email.",
+      password_changed: "Password changed successfully.",
+      password_set: "Password set successfully.",
+      new_password: "New Password",
+      confirm_password: "Confirm Password",
+      passwords_do_not_match: "Passwords do not match",
+      saving: "Saving...",
+      change_password: "Change Password",
+      set_password: "Set Password",
+      active_sessions_title: "Active Sessions",
+      active_sessions_description:
+        "Manage your active sessions. You can revoke sessions you no longer recognize.",
+      no_active_sessions: "No active sessions found.",
+    },
   },
 
   // ANCHOR Unit

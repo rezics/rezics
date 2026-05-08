@@ -15,12 +15,14 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { SessionListItem } from "@/user/components/SessionListItem";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
 export const SettingsSecuritySection: FC = () => {
   useRequireAuth();
+  const { t } = useTranslation();
 
   const { data: sessionState } = useQuery(authQueries.sessionState());
   const { data: sessionsData, isLoading: sessionsLoading } = useQuery(
@@ -88,21 +90,23 @@ export const SettingsSecuritySection: FC = () => {
   return (
     <div>
       <SettingsSection
-        title="Login Email"
-        description="Manage the email used for sign-in and account recovery."
+        title={t("settings.security.login_email_title")}
+        description={t("settings.security.login_email_description")}
       >
         <p className="text-sm text-text-secondary mb-4">
-          Current login email: {loginEmail || "Unavailable"}
+          {t("settings.security.current_login_email", {
+            email: loginEmail || t("settings.security.unavailable"),
+          })}
         </p>
         {loginEmailSuccess && (
-          <Alert className="mb-4 text-success-text">
+          <Alert className="mb-4 text-success-text" aria-live="polite">
             <AlertDescription>
-              Confirmation sent to your new login email.
+              {t("settings.security.login_email_confirmation_sent")}
             </AlertDescription>
           </Alert>
         )}
         {changeEmail.error && (
-          <Alert variant="destructive" className="mb-4">
+          <Alert variant="destructive" className="mb-4" aria-live="assertive">
             <AlertDescription>{changeEmail.error.message}</AlertDescription>
           </Alert>
         )}
@@ -111,7 +115,9 @@ export const SettingsSecuritySection: FC = () => {
           className="flex items-end gap-3 max-w-xl"
         >
           <div className="flex-1 flex flex-col gap-1.5">
-            <Label htmlFor="new-login-email">New Login Email</Label>
+            <Label htmlFor="new-login-email">
+              {t("settings.security.new_login_email")}
+            </Label>
             <Input
               id="new-login-email"
               type="email"
@@ -125,35 +131,45 @@ export const SettingsSecuritySection: FC = () => {
             size="sm"
             disabled={changeEmail.isPending || !newLoginEmail}
           >
-            {changeEmail.isPending ? "Sending..." : "Change Login Email"}
+            {changeEmail.isPending
+              ? t("settings.security.sending")
+              : t("settings.security.change_login_email")}
           </Button>
         </form>
       </SettingsSection>
 
       <SettingsSection
-        title={hasPassword ? "Change Password" : "Set Password"}
+        title={
+          hasPassword
+            ? t("settings.security.change_password_title")
+            : t("settings.security.set_password_title")
+        }
         description={
           hasPassword
-            ? "Update your password to keep your account secure."
-            : "You signed up with a social provider. Set a password to also sign in with email."
+            ? t("settings.security.change_password_description")
+            : t("settings.security.set_password_description")
         }
       >
         {passwordSuccess && (
-          <Alert className="mb-4 text-success-text">
+          <Alert className="mb-4 text-success-text" aria-live="polite">
             <AlertDescription>
-              Password {hasPassword ? "changed" : "set"} successfully.
+              {hasPassword
+                ? t("settings.security.password_changed")
+                : t("settings.security.password_set")}
             </AlertDescription>
           </Alert>
         )}
         {setPassword.error && (
-          <Alert variant="destructive" className="mb-4">
+          <Alert variant="destructive" className="mb-4" aria-live="assertive">
             <AlertDescription>{setPassword.error.message}</AlertDescription>
           </Alert>
         )}
 
         <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-md">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="new-password">New Password</Label>
+            <Label htmlFor="new-password">
+              {t("settings.security.new_password")}
+            </Label>
             <Input
               id="new-password"
               type="password"
@@ -164,7 +180,9 @@ export const SettingsSecuritySection: FC = () => {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Label htmlFor="confirm-password">
+              {t("settings.security.confirm_password")}
+            </Label>
             <Input
               id="confirm-password"
               type="password"
@@ -174,7 +192,9 @@ export const SettingsSecuritySection: FC = () => {
               className={passwordMismatch ? "border-border-error" : ""}
             />
             {passwordMismatch && (
-              <p className="text-sm text-error-text">Passwords do not match</p>
+              <p className="text-sm text-error-text" aria-live="assertive">
+                {t("settings.security.passwords_do_not_match")}
+              </p>
             )}
           </div>
           <Button
@@ -183,17 +203,17 @@ export const SettingsSecuritySection: FC = () => {
             disabled={setPassword.isPending || !newPassword || passwordMismatch}
           >
             {setPassword.isPending
-              ? "Saving..."
+              ? t("settings.security.saving")
               : hasPassword
-                ? "Change Password"
-                : "Set Password"}
+                ? t("settings.security.change_password")
+                : t("settings.security.set_password")}
           </Button>
         </form>
       </SettingsSection>
 
       <SettingsSection
-        title="Active Sessions"
-        description="Manage your active sessions. You can revoke sessions you no longer recognize."
+        title={t("settings.security.active_sessions_title")}
+        description={t("settings.security.active_sessions_description")}
         divider={false}
       >
         {sessionsLoading ? (
@@ -216,7 +236,7 @@ export const SettingsSecuritySection: FC = () => {
           </div>
         ) : (
           <p className="text-sm text-text-secondary">
-            No active sessions found.
+            {t("settings.security.no_active_sessions")}
           </p>
         )}
       </SettingsSection>
