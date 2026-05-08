@@ -1,12 +1,12 @@
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
-import type React from "react";
-import { useTranslation } from "react-i18next";
+import { Link } from "@tanstack/react-router";
 import {
   BookOpen as MenuBookOutlinedIcon,
   Film as MovieOutlinedIcon,
   Gamepad2 as SportsEsportsOutlinedIcon,
 } from "lucide-react";
+import type React from "react";
+import { useTranslation } from "react-i18next";
 
 const libraries = [
   {
@@ -18,26 +18,25 @@ const libraries = [
   {
     key: "game_library",
     icon: SportsEsportsOutlinedIcon,
-    to: "#",
-    active: false,
+    to: "/game",
+    active: true,
   },
-  { key: "media_library", icon: MovieOutlinedIcon, to: "#", active: false },
+  {
+    key: "media_library",
+    icon: MovieOutlinedIcon,
+    to: "/media",
+    active: true,
+  },
 ] as const;
 
 export const LibraryCardsSection: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {libraries.map((lib) => (
-        <Card key={lib.key} className="border-0 shadow-none">
-          <button
-            type="button"
-            onClick={() => lib.active && navigate({ to: lib.to })}
-            disabled={!lib.active}
-            className="w-full text-left disabled:opacity-60 disabled:cursor-not-allowed"
-          >
+        <Link key={lib.key} to={lib.to}>
+          <Card key={lib.key} className="border-0 shadow-none">
             <CardContent>
               <div className="flex flex-row items-center gap-4">
                 <lib.icon
@@ -58,8 +57,8 @@ export const LibraryCardsSection: React.FC = () => {
                 </div>
               </div>
             </CardContent>
-          </button>
-        </Card>
+          </Card>
+        </Link>
       ))}
     </div>
   );

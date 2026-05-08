@@ -28,6 +28,8 @@ import { Route as MainLayoutShelfIndexRouteImport } from './routes/_mainLayout/s
 import { Route as MainLayoutSearchIndexRouteImport } from './routes/_mainLayout/search/index'
 import { Route as MainLayoutReviewIndexRouteImport } from './routes/_mainLayout/review/index'
 import { Route as MainLayoutRealmIndexRouteImport } from './routes/_mainLayout/realm/index'
+import { Route as MainLayoutMediaIndexRouteImport } from './routes/_mainLayout/media/index'
+import { Route as MainLayoutGameIndexRouteImport } from './routes/_mainLayout/game/index'
 import { Route as MainLayoutFeedbackIndexRouteImport } from './routes/_mainLayout/feedback/index'
 import { Route as MainLayoutBookIndexRouteImport } from './routes/_mainLayout/book/index'
 import { Route as MainLayoutUserUserIdRouteImport } from './routes/_mainLayout/user/$userId'
@@ -200,6 +202,16 @@ const MainLayoutReviewIndexRoute = MainLayoutReviewIndexRouteImport.update({
 const MainLayoutRealmIndexRoute = MainLayoutRealmIndexRouteImport.update({
   id: '/realm/',
   path: '/realm/',
+  getParentRoute: () => MainLayoutRoute,
+} as any)
+const MainLayoutMediaIndexRoute = MainLayoutMediaIndexRouteImport.update({
+  id: '/media/',
+  path: '/media/',
+  getParentRoute: () => MainLayoutRoute,
+} as any)
+const MainLayoutGameIndexRoute = MainLayoutGameIndexRouteImport.update({
+  id: '/game/',
+  path: '/game/',
   getParentRoute: () => MainLayoutRoute,
 } as any)
 const MainLayoutFeedbackIndexRoute = MainLayoutFeedbackIndexRouteImport.update({
@@ -678,6 +690,8 @@ export interface FileRoutesByFullPath {
   '/user/$userId': typeof MainLayoutUserUserIdRouteWithChildren
   '/book/': typeof MainLayoutBookIndexRoute
   '/feedback/': typeof MainLayoutFeedbackIndexRoute
+  '/game/': typeof MainLayoutGameIndexRoute
+  '/media/': typeof MainLayoutMediaIndexRoute
   '/realm/': typeof MainLayoutRealmIndexRoute
   '/review/': typeof MainLayoutReviewIndexRoute
   '/search/': typeof MainLayoutSearchIndexRoute
@@ -771,6 +785,8 @@ export interface FileRoutesByTo {
   '/tag/$unitId': typeof MainLayoutTagUnitIdRoute
   '/book': typeof MainLayoutBookIndexRoute
   '/feedback': typeof MainLayoutFeedbackIndexRoute
+  '/game': typeof MainLayoutGameIndexRoute
+  '/media': typeof MainLayoutMediaIndexRoute
   '/realm': typeof MainLayoutRealmIndexRoute
   '/review': typeof MainLayoutReviewIndexRoute
   '/search': typeof MainLayoutSearchIndexRoute
@@ -866,6 +882,8 @@ export interface FileRoutesById {
   '/_mainLayout/user/$userId': typeof MainLayoutUserUserIdRouteWithChildren
   '/_mainLayout/book/': typeof MainLayoutBookIndexRoute
   '/_mainLayout/feedback/': typeof MainLayoutFeedbackIndexRoute
+  '/_mainLayout/game/': typeof MainLayoutGameIndexRoute
+  '/_mainLayout/media/': typeof MainLayoutMediaIndexRoute
   '/_mainLayout/realm/': typeof MainLayoutRealmIndexRoute
   '/_mainLayout/review/': typeof MainLayoutReviewIndexRoute
   '/_mainLayout/search/': typeof MainLayoutSearchIndexRoute
@@ -966,6 +984,8 @@ export interface FileRouteTypes {
     | '/user/$userId'
     | '/book/'
     | '/feedback/'
+    | '/game/'
+    | '/media/'
     | '/realm/'
     | '/review/'
     | '/search/'
@@ -1059,6 +1079,8 @@ export interface FileRouteTypes {
     | '/tag/$unitId'
     | '/book'
     | '/feedback'
+    | '/game'
+    | '/media'
     | '/realm'
     | '/review'
     | '/search'
@@ -1153,6 +1175,8 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/$userId'
     | '/_mainLayout/book/'
     | '/_mainLayout/feedback/'
+    | '/_mainLayout/game/'
+    | '/_mainLayout/media/'
     | '/_mainLayout/realm/'
     | '/_mainLayout/review/'
     | '/_mainLayout/search/'
@@ -1360,6 +1384,20 @@ declare module '@tanstack/react-router' {
       path: '/realm'
       fullPath: '/realm/'
       preLoaderRoute: typeof MainLayoutRealmIndexRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/media/': {
+      id: '/_mainLayout/media/'
+      path: '/media'
+      fullPath: '/media/'
+      preLoaderRoute: typeof MainLayoutMediaIndexRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/game/': {
+      id: '/_mainLayout/game/'
+      path: '/game'
+      fullPath: '/game/'
+      preLoaderRoute: typeof MainLayoutGameIndexRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/feedback/': {
@@ -2100,6 +2138,8 @@ interface MainLayoutRouteChildren {
   MainLayoutUserUserIdRoute: typeof MainLayoutUserUserIdRouteWithChildren
   MainLayoutBookIndexRoute: typeof MainLayoutBookIndexRoute
   MainLayoutFeedbackIndexRoute: typeof MainLayoutFeedbackIndexRoute
+  MainLayoutGameIndexRoute: typeof MainLayoutGameIndexRoute
+  MainLayoutMediaIndexRoute: typeof MainLayoutMediaIndexRoute
   MainLayoutRealmIndexRoute: typeof MainLayoutRealmIndexRoute
   MainLayoutReviewIndexRoute: typeof MainLayoutReviewIndexRoute
   MainLayoutSearchIndexRoute: typeof MainLayoutSearchIndexRoute
@@ -2160,6 +2200,8 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutUserUserIdRoute: MainLayoutUserUserIdRouteWithChildren,
   MainLayoutBookIndexRoute: MainLayoutBookIndexRoute,
   MainLayoutFeedbackIndexRoute: MainLayoutFeedbackIndexRoute,
+  MainLayoutGameIndexRoute: MainLayoutGameIndexRoute,
+  MainLayoutMediaIndexRoute: MainLayoutMediaIndexRoute,
   MainLayoutRealmIndexRoute: MainLayoutRealmIndexRoute,
   MainLayoutReviewIndexRoute: MainLayoutReviewIndexRoute,
   MainLayoutSearchIndexRoute: MainLayoutSearchIndexRoute,
