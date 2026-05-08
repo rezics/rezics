@@ -78,9 +78,9 @@ export async function seedUsers(
   const nextUsername = createUsernameGenerator();
 
   const adminPlan: FactoryUserPlan = {
-    name: "Admin",
-    slug: "admin",
-    email: "factory-admin@mock.rezics.local",
+    name: "Factory Admin",
+    slug: "factory-admin",
+    email: `factory-admin${randomUUID().slice(0, 8)}@mock.rezics.local`,
     bio: generateParagraph(1, 2),
     description: generateParagraph(5, 10),
     joinDate: faker.date.past({ years: 4 }),
