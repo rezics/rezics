@@ -4,31 +4,27 @@
 TBD - created by archiving change app-auth-onboarding-rework. Update Purpose after archive.
 ## Requirements
 ### Requirement: Email registration uses a dedicated verification-first flow
-
-The main app SHALL provide an email/password registration flow that requires only email and password, creates an auth account through the auth service, and then locks the user into email verification before any main `User` is created. After email verification succeeds, the app SHALL route the user to main-owned account setup where display name and slug are submitted to create the Rezics user.
+The main app SHALL provide an email/password registration flow that requires only email and password, creates an auth account through the auth service, and then locks the user into registration verification before any main `User` is created. After registration verification succeeds, the app SHALL request main account materialization, then route the user to profile setup where slug and optional profile fields are submitted before member activation.
 
 #### Scenario: Successful email registration redirects to locked verification
-
 - **WHEN** an unauthenticated user submits a valid email and password on the main app registration page
 - **THEN** the app SHALL call the auth service email sign-up flow through the main public auth boundary
 - **AND** the app SHALL hydrate auth-session state for the new temporary auth user
-- **AND** the app SHALL render the locked email verification step
+- **AND** the app SHALL render the locked registration verification step
 - **AND** the app SHALL NOT try to acquire a main member session yet
 
 #### Scenario: Registration does not require slug
-
 - **WHEN** the main app renders the primary registration flow
 - **THEN** it SHALL NOT require `slug` as an input needed to create the auth account
 - **AND** validation, copy, and submission payloads SHALL reflect email-and-password registration only
 
-#### Scenario: Verified email proceeds to main account setup
-
-- **WHEN** the user completes email verification
-- **THEN** the app SHALL route to the main account setup step
-- **AND** the user SHALL choose display name and slug before the main `User` is created
+#### Scenario: Verified registration proceeds to materialization and profile setup
+- **WHEN** the user completes registration verification
+- **THEN** the app SHALL request main user materialization
+- **AND** the app SHALL route to profile setup after main issues `rezics-profile-setup-token`
+- **AND** the user SHALL choose a Rezics slug before member activation
 
 #### Scenario: Registration errors are shown accessibly
-
 - **WHEN** the auth service rejects an email registration attempt
 - **THEN** the registration page SHALL present the error in visible text
 - **AND** the submit control SHALL recover from the loading state
@@ -48,25 +44,21 @@ The main app login and registration entry points SHALL expose third-party OAuth 
 - **THEN** the auth surface SHALL present a visible error message
 
 ### Requirement: OAuth sign-ins redirect to complete-registration for new users
+The main app SHALL route newly authenticated OAuth users to `/complete-registration` where they complete registration verification when needed, request main materialization when auth has trusted registration facts, and complete profile setup before member activation. The separate `/onboarding` page remains removed.
 
-The main app SHALL route newly authenticated OAuth users to `/complete-registration` where they confirm display name and slug after auth has established whether provider email is trusted. The separate `/onboarding` page remains removed.
-
-#### Scenario: Trusted provider email enters account setup
-
-- **WHEN** an OAuth sign-in completes for a new user and auth reports `emailVerified = true`
+#### Scenario: Trusted provider email enters materialization and profile setup
+- **WHEN** an OAuth sign-in completes for a new user and auth reports trusted verified registration facts
 - **THEN** the user SHALL be redirected to `/complete-registration`
-- **AND** the account setup fields SHALL be pre-filled from provider data where available
-- **AND** the user SHALL choose a Rezics slug before main creates the `User`
+- **AND** the app SHALL request main user materialization
+- **AND** the user SHALL choose a Rezics slug during profile setup before member activation
 
 #### Scenario: Untrusted provider email enters verification first
-
 - **WHEN** an OAuth sign-in completes without a trusted verified email
-- **THEN** the user SHALL be routed to email verification before main account setup
-- **AND** main SHALL NOT create a `User` until email is trusted
+- **THEN** the user SHALL be routed to registration verification before main materialization
+- **AND** main SHALL NOT create a `User` until registration verification is trusted
 
 #### Scenario: Existing OAuth user logs in normally
-
-- **WHEN** an OAuth sign-in completes for an existing user with a main `User`
+- **WHEN** an OAuth sign-in completes for an existing member-ready user
 - **THEN** the user SHALL be redirected to the app or callback URL without visiting `/complete-registration`
 
 ### Requirement: Third-party registration does not edit email inline
@@ -83,12 +75,17 @@ The registration flow SHALL NOT offer email editing during third-party registrat
 - **AND** they SHALL use account settings to change email through a separate verified email-change flow
 
 ### Requirement: Auth-only pending users are not guest-auth hybrids
-The app SHALL not treat auth-only pending registrants as guest-capable logged-in users. They SHALL remain inside the registration flow until completion, pause/sign-out, or temporary account cleanup.
+The app SHALL not treat auth-only pending registrants as guest-capable logged-in users. They SHALL remain inside the registration flow until verification, pause/sign-out, or temporary account cleanup.
 
 #### Scenario: Pending user attempts to navigate away
 - **WHEN** an auth-only pending registrant tries to access normal app routes
 - **THEN** the app SHALL redirect or return them to `/complete-registration`
 - **AND** member profile/header data SHALL NOT be requested as if a main user exists
+
+#### Scenario: Pending user attempts member API
+- **WHEN** an auth-only pending registrant triggers a member-only action
+- **THEN** the app SHALL route them back to registration verification
+- **AND** it SHALL NOT call the member-only main product API as a logged-in member
 
 ### Requirement: Email verification uses a dedicated protected page
 
@@ -112,22 +109,19 @@ The main app SHALL provide a dedicated verification page for authenticated users
 - **THEN** the verification page SHALL redirect the user to the requested target or a safe default page
 
 ### Requirement: Unverified registered users remain limited to guest-level capabilities
+Unverified auth-only registrants SHALL remain limited to the locked registration verification flow. They SHALL NOT be treated as member-ready and SHALL NOT receive main product API capability until registration verification and profile setup are complete.
 
-The main app SHALL treat registered users who have not completed required verification or onboarding as guest-capable users rather than as member-ready users.
-
-#### Scenario: Unverified account can browse guest-visible surfaces
-
-- **WHEN** a registered but unverified user navigates to a page or API that is already available to guests
-- **THEN** the app SHALL allow the same guest-level access
+#### Scenario: Unverified account stays in registration verification
+- **WHEN** a registered but unverified auth-only user navigates to a normal app route
+- **THEN** the app SHALL redirect to the registration verification flow
+- **AND** it SHALL NOT load member profile, shelves, realm membership, or normal app chrome
 
 #### Scenario: Unverified account cannot use member-only APIs
-
 - **WHEN** a registered but unverified user attempts to access member-only service endpoints
-- **THEN** the app SHALL behave as if no member JWT is available
+- **THEN** the app SHALL behave as if no member session is available
 - **AND** downstream services SHALL continue to deny member-only access
 
-#### Scenario: Verification completion unlocks member capability
-
-- **WHEN** a registered user completes verification and any required onboarding
+#### Scenario: Profile completion unlocks member capability
+- **WHEN** a registered user completes registration verification and profile setup
 - **THEN** the app SHALL proceed to the member-ready flow
-- **AND** it SHALL be able to obtain the business JWT required for member APIs
+- **AND** it SHALL be able to obtain the `rezics-session-token` required for member APIs
