@@ -153,11 +153,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
     return undefined;
   }, [slug, slugCheck, t]);
 
-  const canSubmit =
-    slug.length >= 6 &&
-    !slugError &&
-    !checkingSlug &&
-    !loading;
+  const canSubmit = slug.length >= 6 && !slugError && !checkingSlug && !loading;
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -403,14 +399,21 @@ function EmailVerificationStep({
         </Alert>
       )}
 
-      <Button disabled={!canSend} onClick={handleSendCode} className="w-full">
-        {codeSent
-          ? cooldownRemaining > 0
-            ? t("auth.flow.verify_resend_cooldown", {
-                seconds: cooldownRemaining,
-              })
-            : t("auth.flow.verify_resend_code")
-          : t("auth.flow.verify_send_code")}
+      <Button
+        disabled={!canSend}
+        onClick={handleSendCode}
+        className="w-full gap-2"
+      >
+        {loading && <Spinner size="sm" />}
+        {loading
+          ? t("auth.flow.verify_sending_code")
+          : codeSent
+            ? cooldownRemaining > 0
+              ? t("auth.flow.verify_resend_cooldown", {
+                  seconds: cooldownRemaining,
+                })
+              : t("auth.flow.verify_resend_code")
+            : t("auth.flow.verify_send_code")}
       </Button>
 
       <Separator />

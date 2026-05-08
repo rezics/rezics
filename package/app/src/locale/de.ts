@@ -42,6 +42,7 @@ export default {
       new_to_app: "Neu bei REZICS?",
       create_account: "Konto erstellen",
       forgot_password: "Passwort vergessen?",
+      reset_link_sending: "Link zum Zurücksetzen wird gesendet…",
       already_have_account: "Haben Sie bereits ein Konto?",
       sign_in_instead: "Anmelden",
       providers_divider: "oder fortfahren mit",
@@ -87,6 +88,13 @@ export default {
       verify_complete_widget:
         "Schließen Sie das Verifizierungs-Widget ab, bevor Sie eine weitere E-Mail anfordern.",
       verify_checking_state: "Verifizierungsstatus wird geprüft…",
+      verify_send_code: "Code senden",
+      verify_sending_code: "Code wird gesendet…",
+      verify_submit_code: "Verifizieren",
+      verify_code_sent_to: "Ein 6-stelliger Code wurde gesendet an",
+      verify_code_expires: "Der Code läuft in 5 Minuten ab.",
+      verify_code_incomplete:
+        "Bitte geben Sie den vollständigen 6-stelligen Code ein.",
       verify_banner_action: "Registrierung abschließen",
       verify_banner_message:
         "Ihr Konto kann gastzugängliche Seiten weiterhin nutzen, aber Mitgliedsfunktionen bleiben gesperrt, bis die Registrierung abgeschlossen ist.",

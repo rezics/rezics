@@ -1,4 +1,5 @@
 import { authApi } from "@rezics/api/auth/auth.api";
+import { Spinner } from "@rezics/ui";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { type FC, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Layout } from "../layouts/Layout.tsx";
 import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { validateEmail, validatePassword } from "../models/validate.ts";
@@ -24,6 +26,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   isModal = false,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const query = useMemo(() => {
@@ -162,9 +165,13 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         type="button"
         disabled={loading}
         onClick={resetToken ? handleResetPassword : handleRequestReset}
+        className="gap-2"
       >
+        {loading && <Spinner size="sm" />}
         {loading
-          ? "Loading..."
+          ? resetToken
+            ? t("common.loading")
+            : t("auth.flow.reset_link_sending")
           : resetToken
             ? "Reset Password"
             : "Send Reset Link"}

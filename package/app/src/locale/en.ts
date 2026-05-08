@@ -325,6 +325,7 @@ export default {
       new_to_app: "New to ReZICS?",
       create_account: "Create an account",
       forgot_password: "Forgot password?",
+      reset_link_sending: "Sending reset link…",
       already_have_account: "Already have an account?",
       sign_in_instead: "Sign in",
       providers_divider: "or continue with",
@@ -369,6 +370,7 @@ export default {
         "Complete the verification widget before requesting another email.",
       verify_checking_state: "Checking verification state…",
       verify_send_code: "Send Code",
+      verify_sending_code: "Sending code…",
       verify_submit_code: "Verify",
       verify_code_sent_to: "A 6-digit code was sent to",
       verify_code_expires: "The code expires in 5 minutes.",
@@ -464,6 +466,22 @@ export default {
       active_sessions_description:
         "Manage your active sessions. You can revoke sessions you no longer recognize.",
       no_active_sessions: "No active sessions found.",
+    },
+    content_rating: {
+      section_title: "Content rating",
+      section_description:
+        "Baseline ratings are always on. Opt in to age-restricted tiers to see them in search and listings.",
+      always_on: "Always on",
+      saved: "Preferences saved.",
+      description: {
+        R_18: "Adult content.",
+        R_18G: "Explicit adult content.",
+      },
+      opt_in_modal: {
+        title: "Confirm age-restricted content",
+        body: "By enabling {{rating}} you confirm you are of legal age in your jurisdiction and consent to viewing this content.",
+        confirm: "I confirm",
+      },
     },
   },
 
@@ -904,25 +922,6 @@ export default {
       R_15: "R-15",
       R_18: "R-18",
       R_18G: "R-18G",
-    },
-  },
-
-  settings: {
-    content_rating: {
-      section_title: "Content rating",
-      section_description:
-        "Baseline ratings are always on. Opt in to age-restricted tiers to see them in search and listings.",
-      always_on: "Always on",
-      saved: "Preferences saved.",
-      description: {
-        R_18: "Adult content.",
-        R_18G: "Explicit adult content.",
-      },
-      opt_in_modal: {
-        title: "Confirm age-restricted content",
-        body: "By enabling {{rating}} you confirm you are of legal age in your jurisdiction and consent to viewing this content.",
-        confirm: "I confirm",
-      },
     },
   },
 

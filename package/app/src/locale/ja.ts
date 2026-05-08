@@ -42,6 +42,7 @@ export default {
       new_to_app: "REZICS は初めてですか？",
       create_account: "アカウントを作成",
       forgot_password: "パスワードをお忘れですか？",
+      reset_link_sending: "リセットリンクを送信中…",
       already_have_account: "すでにアカウントをお持ちですか？",
       sign_in_instead: "ログインする",
       providers_divider: "または次の方法で続行",
@@ -87,6 +88,12 @@ export default {
       verify_complete_widget:
         "再送信を行う前に、確認ウィジェットを完了してください。",
       verify_checking_state: "確認状態を確認中…",
+      verify_send_code: "コードを送信",
+      verify_sending_code: "コードを送信中…",
+      verify_submit_code: "確認",
+      verify_code_sent_to: "6桁の確認コードを送信しました:",
+      verify_code_expires: "コードは5分後に期限切れになります。",
+      verify_code_incomplete: "6桁の確認コードをすべて入力してください。",
       verify_banner_action: "登録を完了",
       verify_banner_message:
         "このアカウントは引き続きゲスト向けページを閲覧できますが、登録が完了するまでメンバー機能はロックされたままです。",

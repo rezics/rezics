@@ -130,7 +130,9 @@ export const SettingsSecuritySection: FC = () => {
             type="submit"
             size="sm"
             disabled={changeEmail.isPending || !newLoginEmail}
+            className="gap-2"
           >
+            {changeEmail.isPending && <Spinner size="sm" />}
             {changeEmail.isPending
               ? t("settings.security.sending")
               : t("settings.security.change_login_email")}

@@ -143,7 +143,9 @@ export const SettingsAccountSection: FC = () => {
             size="sm"
             onClick={handleResendVerification}
             disabled={requestEmailVerification.isPending}
+            className="gap-2"
           >
+            {requestEmailVerification.isPending && <Spinner size="sm" />}
             {requestEmailVerification.isPending
               ? t("settings.account.sending")
               : t("settings.account.send_verification_code")}
@@ -192,7 +194,9 @@ export const SettingsAccountSection: FC = () => {
             type="submit"
             size="sm"
             disabled={requestEmailVerification.isPending || !newEmail}
+            className="gap-2"
           >
+            {requestEmailVerification.isPending && <Spinner size="sm" />}
             {requestEmailVerification.isPending
               ? t("settings.account.sending")
               : t("settings.account.send_code")}
