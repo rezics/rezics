@@ -61,7 +61,7 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 ### ✅ DO — list-row card with whisper border
 
 ```tsx
-<ul className="divide-y divide-rezics-color-border-whisper">
+<ul className="divide-y divide-border-whisper">
   {posts.map((p) => (
     <li key={p.id} className="py-6">
       {/* row content */}
@@ -241,7 +241,7 @@ Use the icon libraries; they integrate with `currentColor` and UnoCSS sizing cla
 <div className="bg-surface-base text-text-primary p-4 rounded-md">...</div>
 
 {/* CSS vars (raw style or :root) */}
-<div style={{ background: 'var(--rezics-color-surface-base)' }}>...</div>
+<div style={{ background: 'var(--colors-surface-base)' }}>...</div>
 ```
 
 ### ❌ DON'T — hex literals
@@ -264,8 +264,8 @@ Hex literals lock you out of dark mode and break the token contract.
 
 ```tsx
 {/* RIGHT — auto-resolves to #C4433A light / #fa7882 dark */}
-<p style={{ color: 'var(--rezics-color-text-brand)' }}>Brand label</p>
-<span className="text-brand">Brand label</span>
+<p style={{ color: 'var(--colors-text-brand)' }}>Brand label</p>
+<span className="text-text-brand">Brand label</span>
 ```
 
 ---

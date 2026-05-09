@@ -1,11 +1,18 @@
 ## Section 1
+- [ ] Unit 等級的 版權 copyright 字段，string 或者 array 用戶可以選擇 用戶默認的/realm默認（realm優先）的 copyright 協議，類似於 github 的那種版權協議，cc-by-4.0 這種，不過我們需要確認下各種協議的slug，要固定下來
+- [ ] UnitTag 表是否要重命名到 TagUnit 比較好？
 - [ ] EXCERPT 前端 單 url 解析的話，如何在有兩個unitId 的時候正確定位，比如 章節定位到章節？
+- [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 後端如果可行的化，最好同時返回slug，比如 book info page tag 查詢的時候，最好同時返回 slug，然後前端先渲染 slug，再用unit 去查 tags，這樣好歹比 顯示 unitIds 好看
 - [ ] 章節數量，加入 book info
 - [ ] https://better-auth.com/docs/infrastructure/plugins/dashboard
 - [ ] 年齡分級機制調整
 - [ ]  meilisearch 需要調整，支持專門的 tag，realm-tag 索引系統 
 - [ ]  20260419120000_infra_slugs 不應該存在
+
+## 搜索
+- [ ] Suggest / autocomplete（header 下拉建議）：本身要新 endpoint、prefix 索引或快取層，與聯邦搜尋正交。建議獨立 search-suggest。
+- [ ] 空查詢的探索/熱門/最近（discovery state）：要 trending/recent 統計來源，跟搜尋管線無關。獨立做。
 
 ## Section 2
 - [ ] 還是考慮遷移到 paraglide-js

@@ -347,7 +347,7 @@ Tokens flow from `tokens.ts` → CSS vars + UnoCSS theme. The two call sites res
 
 ```tsx
 // Do
-<div className="bg-surface text-text-primary p-4 rounded-md" />
+<div className="bg-surface-canvas text-text-primary p-4 rounded-md" />
 <div style={{ background: 'var(--colors-surface-base)' }} />
 
 // Don't
@@ -356,7 +356,7 @@ Tokens flow from `tokens.ts` → CSS vars + UnoCSS theme. The two call sites res
 // Don't — #f4606c as text fails AA
 <p style={{ color: '#f4606c' }}>Brand label</p>
 // Do — auto-resolves to AA-safe text-brand (#C4433A light / #fa7882 dark)
-<p className="text-brand">Brand label</p>
+<p className="text-text-brand">Brand label</p>
 ```
 
 ---
@@ -431,7 +431,7 @@ Tokens auto-switch via `<html class="dark">`. Never branch on theme mode in comp
 
 ```tsx
 // Do — works in both modes, no branching
-<div className="bg-surface-base text-primary">
+<div className="bg-surface-base text-text-primary">
   <p>Auto light/dark.</p>
 </div>
 

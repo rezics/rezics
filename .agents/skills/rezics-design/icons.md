@@ -11,7 +11,7 @@ This file is the canonical reference for the rezics icon system. Read this **bef
 5. **No emoji in UI chrome.** Emoji are content (user posts, comments). Affordances — close, menu, expand, star, check, arrows — are icons.
 6. **Named imports only:** `import { Star } from "lucide-react"`, `import { GithubIcon } from "@rezics/icons"`. Never barrel imports.
 7. **Sizing via UnoCSS classes:** `w-4 h-4` (body), `w-5 h-5` (UI affordances), `w-6 h-6` (emphasized buttons). Avoid the numeric `size={…}` prop.
-8. **Color via `currentColor`.** Override with `text-*` UnoCSS classes pointing to `--rezics-color-*` tokens — never hex. Exception: colored `*Icon` brand variants from `@rezics/icons` paint their own canonical brand colors and ignore `text-*` overrides; use `*GrayIcon` variants when token-driven color is required.
+8. **Color via `currentColor`.** Override with `text-*` UnoCSS classes pointing to `--colors-*` tokens — never hex. Exception: colored `*Icon` brand variants from `@rezics/icons` paint their own canonical brand colors and ignore `text-*` overrides; use `*GrayIcon` variants when token-driven color is required.
 
 ## Picking a non-brand icon
 
@@ -80,19 +80,19 @@ If a brand glyph is needed that `@rezics/icons` does not yet export, add the SVG
 <Search className="w-4 h-4" />
 
 // UI affordance with explicit token color
-<Bell className="w-5 h-5 text-[var(--rezics-color-text-secondary)]" />
+<Bell className="w-5 h-5 text-[var(--colors-text-secondary)]" />
 
 // Filled rating star (see RatingInput)
 <Star
   className="w-5 h-5"
   fill="currentColor"
-  style={{ color: "var(--rezics-color-brand-fill)" }}
+  style={{ color: "var(--colors-brand-fill)" }}
 />
 
 // Outlined rating star
 <Star
   className="w-5 h-5"
-  style={{ color: "var(--rezics-color-text-tertiary)" }}
+  style={{ color: "var(--colors-text-tertiary)" }}
 />
 ```
 

@@ -20,7 +20,7 @@ export const AccentBar: React.FC<AccentBarProps> = ({
     <span
       className={clsx(
         "inline-block flex-shrink-0 align-middle",
-        color ? undefined : "bg-brand",
+        color ? undefined : "bg-brand-fill",
         className,
       )}
       style={{

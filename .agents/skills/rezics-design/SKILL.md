@@ -34,13 +34,13 @@ fixed `--padding-*` tokens, not as a runtime toolbar.
 
 ## Top-Level Rules (always apply)
 
-1. **Brand color**: 轮回红 `#f4606c` (`--rezics-color-brand-fill`). It is a fill color, never a text color. For brand-tinted text, use `text-brand` (`#C4433A` light / `#fa7882` dark) — already contrast-verified.
+1. **Brand color**: 轮回红 `#f4606c` (`--colors-brand-fill`). It is a fill color, never a text color. For brand-tinted text, use `text-text-brand` (`#C4433A` light / `#fa7882` dark) — already contrast-verified.
 2. **Background**: warm parchment `#f5f4ed` (light) / warm dark stone `#1a1a18` (dark). Not pure white, not pure black.
 3. **Borderless by default**: cards, sections, panels do NOT get bordered card chrome. Use whitespace and `border-whisper` (`rgba(0,0,0,0.08)`) for containment. Reserve shadows for modal-tier surfaces only.
 4. **shadcn-or-custom**. Pick from `@rezics/ui/shadcn` first; these primitives are vendored from the `base-luma` registry under Path P, with `carousel.tsx` and `sidebar.tsx` as explicit exceptions. Reach for rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local) only when shadcn lacks the component. See `component-selection.md` for the decision tree, `openspec/specs/ui-component-foundation/spec.md` for the spec, and `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` for the migration boundary.
 5. **No emoji icons in UI chrome**. Use `lucide-react` (default) or `@tabler/icons-react` (named fallback when lucide lacks the glyph). Emoji are content (user posts), not interface vocabulary.
 6. **No raw `<a href>`**. Always use `<SafeLink href={url}>` from `@rezics/ui` (enforced by `bun run check:convention` R5).
-7. **Tokens, not hex literals**. `bg-brand`, `text-text-primary`, `var(--rezics-color-surface-canvas)` — never `bg-[#f4606c]` or `color: #1d1d1f`.
+7. **Tokens, not hex literals**. `bg-brand-fill`, `text-text-primary`, `var(--colors-surface-canvas)` — never `bg-[#f4606c]` or `color: #1d1d1f`.
 8. **Type sizing is `clamp()` viewport-responsive**. Use the scale (`text-xs` → `text-3xl`, plus `text-reader` for book content). Don't hardcode `font-size: 14px`.
 9. **Line-height is mandatory**: book reader = `1.60`, body = `1.55`, UI = `1.40`, dense = `1.30`. Never set lower.
 10. **Both light and dark modes are first-class**. Every color decision must work in both. Mode switches via `<html data-theme="dark">` (canonical) or `html.dark` (transitional alias).
@@ -61,7 +61,7 @@ fixed `--padding-*` tokens, not as a runtime toolbar.
 | Form input                        | shadcn `<Input>` + `<Label>` (borderless)    | Compose `<textarea>` for multi-line if needed |
 | Modal                             | shadcn `<Dialog>`                             | shadcn `<Sheet>` for side drawers, vaul for mobile bottom sheet |
 | Color for success/error/warning   | `text-success`, `text-error`, `text-warning` | `*-fill` for icon-only badges              |
-| Brand-tinted text                 | `text-brand`                                  | NEVER `color: #f4606c` directly            |
+| Brand-tinted text                 | `text-text-brand`                             | NEVER `color: #f4606c` directly            |
 | Toast / Snackbar                  | `sonner`                                     | —                                          |
 
 ---
@@ -72,7 +72,7 @@ For full details, load `tokens.md`.
 
 - **Surfaces**: `surface-canvas` / `-base` / `-elevated` / `-subtle` / `-sunken`
 - **Text**: `text-primary` / `-secondary` / `-tertiary` / `-disabled` / `-on-brand` / `-brand`
-- **Brand**: `brand-fill` / `-fill-hover` / `-fill-active` / `text-brand` (light/dark variants auto-switch)
+- **Brand**: `brand-fill` / `-fill-hover` / `-fill-active` / `text-text-brand` (light/dark variants auto-switch)
 - **Semantic**: `success-fill` / `success-text`, same for `warning` / `error` / `info`
 - **Borders**: `border-whisper` (default) / `-defined` / `-strong` / `-focus` / `-error`
 - **Spacing**: UnoCSS `p-N` = `N × 4px` (Tailwind v4). Common steps: `p-2` (8px) / `p-4` (16px) / `p-6` (24px) / `p-8` (32px) / `p-12` (48px) / `p-16` (64px) / `p-24` (96px) / `p-32` (128px).
@@ -85,8 +85,8 @@ For full details, load `tokens.md`.
 
 | Context           | Form                                             |
 | ----------------- | ------------------------------------------------ |
-| UnoCSS classes    | `bg-brand`, `text-text-primary`, `p-4`           |
-| Raw CSS / `<style>` | `var(--rezics-color-brand-fill)`                  |
+| UnoCSS classes    | `bg-brand-fill`, `text-text-primary`, `p-4`      |
+| Raw CSS / `<style>` | `var(--colors-brand-fill)`                       |
 | Inline dynamic    | `style={{ '--rezics-local-color': computed }}` then reference via UnoCSS class |
 
 Both forms resolve to the same underlying value because tokens flow:
