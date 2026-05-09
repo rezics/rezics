@@ -7,11 +7,12 @@ import { DescriptionBox } from "@/user/components/DescriptionBox";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
 export const ProfileOverviewPage: FC = () => {
-  const { user, unitId } = useProfileContext();
+  const { user, userId } = useProfileContext();
 
   // MOCK: pinned items — first 6 published units by this user
   const pinnedQuery = useQuery(
     contentSearchQueryOptions({
+      userId,
       sort: { field: "publishedAt", order: "desc" },
       limit: 6,
     }),
@@ -20,6 +21,7 @@ export const ProfileOverviewPage: FC = () => {
   // MOCK: recent activity — latest published units
   const recentQuery = useQuery(
     contentSearchQueryOptions({
+      userId,
       sort: { field: "updatedAt", order: "desc" },
       limit: 10,
     }),
@@ -27,6 +29,7 @@ export const ProfileOverviewPage: FC = () => {
 
   const shelvesCountQuery = useQuery({
     ...contentSearchQueryOptions({
+      userId,
       type: ["SHELF"],
       sort: { field: "createdAt", order: "desc" },
       limit: 0,
@@ -35,6 +38,7 @@ export const ProfileOverviewPage: FC = () => {
 
   const reviewsCountQuery = useQuery({
     ...contentSearchQueryOptions({
+      userId,
       type: ["POST"],
       sort: { field: "createdAt", order: "desc" },
       limit: 0,
@@ -51,22 +55,22 @@ export const ProfileOverviewPage: FC = () => {
         <StatItem
           label="Shelves"
           count={shelvesCountQuery.data?.total}
-          to={`/user/${unitId}/shelves`}
+          to={`/user/${userId}/shelves`}
         />
         <StatItem
           label="Content"
           count={reviewsCountQuery.data?.total}
-          to={`/user/${unitId}/content`}
+          to={`/user/${userId}/content`}
         />
         <StatItem
           label="Followers"
           count={user.followersCount ?? 0}
-          to={`/user/${unitId}/followers`}
+          to={`/user/${userId}/followers`}
         />
         <StatItem
           label="Following"
           count={user.followingsCount ?? 0}
-          to={`/user/${unitId}/followers?filter=following`}
+          to={`/user/${userId}/followers?filter=following`}
         />
       </div>
 
@@ -124,8 +128,9 @@ const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
 
   return (
     <Link
-      to={item.slug ? "/unit/$unitSlug" : "/unit/id/$unitId"}
-      params={item.slug ? { unitSlug: item.slug } : { unitId: item.id }}
+      to="/unit/id/$unitId"
+      params={{ unitId: item.id }}
+      search={{ view: "auto" }}
       className="no-underline"
     >
       <div className="border border-gray-200 rounded-lg p-3 hover:border-gray-400 transition-colors">

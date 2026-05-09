@@ -22,12 +22,12 @@ import type {
   RealmTagContextUpdateResponse,
   RealmTagUnitDTO,
   RealmUnitDTO,
-  UpdateRealmTagContextInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,
+  UpdateRealmTagContextInput,
 } from "@rezics/contract";
-import { apiFetch } from "../react-query/http";
 import { authApi } from "../auth/auth.api";
+import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { RealmFilters } from "./realm.types";
 
@@ -37,6 +37,10 @@ import type { RealmFilters } from "./realm.types";
 export const realmApi = {
   mine: async (): Promise<RealmListResponse> => {
     return apiFetch<RealmListResponse>("/realm/me");
+  },
+
+  byMember: async (userId: string): Promise<RealmListResponse> => {
+    return apiFetch<RealmListResponse>(`/realm/member/${userId}`);
   },
 
   // ---- CRUD ----

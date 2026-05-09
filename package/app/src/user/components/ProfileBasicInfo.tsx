@@ -1,8 +1,8 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { UserDTO } from "@rezics/contract";
-import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
 import type { FC } from "react";
@@ -25,6 +25,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
   });
   const shelvesCountQuery = useQuery({
     ...contentSearchQueryOptions({
+      userId,
       type: ["SHELF"],
       sort: { field: "createdAt", order: "desc" },
       limit: 0,
@@ -33,6 +34,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
 
   const reviewsCountQuery = useQuery({
     ...contentSearchQueryOptions({
+      userId,
       type: ["POST"],
       sort: { field: "createdAt", order: "desc" },
       limit: 0,
@@ -99,7 +101,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
               <FollowButton
                 userId={user.userId}
                 size="small"
-                variant="contained"
+                variant="default"
               />
             </div>
           )}
@@ -147,7 +149,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
             <FollowButton
               userId={user.userId}
               size="medium"
-              variant="contained"
+              variant="default"
               fullWidth
             />
           )}

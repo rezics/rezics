@@ -82,6 +82,7 @@ export type ContentSearchDocument = Static<typeof ContentSearchDocumentSchema>;
 export const ContentSearchOptionsSchema = t.Object({
   keyword: t.Optional(t.String()),
   type: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+  userId: t.Optional(t.String()),
   postKind: t.Optional(t.Array(postKindLiterals)),
   tags: t.Optional(t.Array(TagRefSchema)),
   tagIds: t.Optional(t.Array(t.String())),

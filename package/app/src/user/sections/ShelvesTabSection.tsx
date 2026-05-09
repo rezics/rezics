@@ -16,13 +16,20 @@ const SORT_OPTIONS = [
 ];
 
 export const ShelvesTabSection: FC = () => {
-  const { unitId } = useProfileContext();
+  const { userId } = useProfileContext();
   const [kindKey, setKindKey] = useState("all");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
   });
 
-  const { data, isLoading } = useQuery(shelfQueries.byUser(unitId));
+  const [sortField, sortOrder] = (filters.sort ?? "createdAt:desc").split(":");
+  const shelfFilters = {
+    sort: { field: sortField, order: sortOrder },
+  };
+
+  const { data, isLoading } = useQuery(
+    shelfQueries.byUser(userId, shelfFilters),
+  );
 
   const shelves: ShelfDTO[] = (data as any)?.shelves ?? data ?? [];
 
@@ -106,7 +113,7 @@ const ShelfCard: FC<{ shelf: ShelfDTO }> = ({ shelf }) => {
       params={{ shelfId: shelf.unitId }}
       className="no-underline"
     >
-      <div className="border border-gray-200 rounded-lg p-4 hover:border-gray-400 transition-colors h-full flex flex-col">
+      <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors h-full flex flex-col">
         {shelf.coverUrl && (
           <img
             src={shelf.coverUrl}

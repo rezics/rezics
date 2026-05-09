@@ -46,7 +46,9 @@ export const FilterBar: FC<FilterBarProps> = ({
       <Select
         key={dd.key}
         value={values[dd.key] ?? ""}
-        onValueChange={(value) => onChange(dd.key, value)}
+        onValueChange={(value) => {
+          if (value != null) onChange(dd.key, value);
+        }}
       >
         <SelectTrigger className="min-w-[120px] h-9">
           <SelectValue placeholder={dd.label} />

@@ -11,7 +11,7 @@ import { ProfileShell } from "./ProfileShell";
 interface ProfileContextValue {
   user: UserDTO;
   isCurrentUser: boolean;
-  unitId: string;
+  userId: string;
 }
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
@@ -77,20 +77,20 @@ export const ProfileLayout: FC = () => {
     );
   }
 
-  const unitId = user.userId;
-
   return (
-    <ProfileContext.Provider value={{ user, isCurrentUser, unitId }}>
+    <ProfileContext.Provider
+      value={{ user, isCurrentUser, userId: user.userId }}
+    >
       <div className="w-full max-w-12/16 mx-auto">
         <div className="flex flex-col md:flex-row md:gap-12 px-4 pb-12">
           <aside className="w-full md:w-[280px] md:shrink-0">
             <ProfileBasicInfo
               user={user}
               isCurrentUser={isCurrentUser}
-              unitId={unitId}
+              userId={user.userId}
             />
           </aside>
-          <ProfileShell unitId={unitId} userSlug={user.slug ?? userSlug} />
+          <ProfileShell userId={user.userId} userSlug={user.slug ?? userSlug} />
         </div>
       </div>
     </ProfileContext.Provider>

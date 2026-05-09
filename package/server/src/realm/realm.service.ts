@@ -13,6 +13,7 @@ import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 
 /** Score at or below this threshold hides a RealmTagUnit from regular users. */
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
+
 import {
   patchContentRealmIdsToMeili,
   patchContentRealmTagKeysToMeili,
@@ -669,6 +670,7 @@ export class RealmService {
   }
   async listByMember(
     userId: string,
+    options: { publicOnly?: boolean } = {},
   ): Promise<{ realms: RealmDTO[]; total: number }> {
     const members = await prisma.realmMember.findMany({
       where: { userId },
@@ -678,13 +680,18 @@ export class RealmService {
     const realmIds = members.map((m) => m.realmUnitId);
     if (realmIds.length === 0) return { realms: [], total: 0 };
 
+    const where = {
+      unitId: { in: realmIds },
+      ...(options.publicOnly ? { isPublic: true } : {}),
+    };
+
     const [realms, total] = await Promise.all([
       prisma.realm.findMany({
-        where: { unitId: { in: realmIds } },
+        where,
         include: realmInclude,
         orderBy: { unit: { createdAt: "desc" } },
       }),
-      prisma.realm.count({ where: { unitId: { in: realmIds } } }),
+      prisma.realm.count({ where }),
     ]);
 
     return {

@@ -1,7 +1,7 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
 import FollowButton from "@/engagement/components/FollowButton";
@@ -12,7 +12,7 @@ import {
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
 export const FollowersTabSection: FC = () => {
-  const { user, unitId, isCurrentUser } = useProfileContext();
+  const { user, userId, isCurrentUser } = useProfileContext();
   const [filter, setFilter] = useState("followers");
   const [page, setPage] = useState(1);
   const limit = 20;
@@ -27,12 +27,12 @@ export const FollowersTabSection: FC = () => {
   ];
 
   const followersQuery = useQuery({
-    ...userQueries.followers(unitId, { page, limit }),
+    ...userQueries.followers(userId, { page, limit }),
     enabled: filter === "followers",
   });
 
   const followingsQuery = useQuery({
-    ...userQueries.followings(unitId, { page, limit }),
+    ...userQueries.followings(userId, { page, limit }),
     enabled: filter === "following",
   });
 
@@ -84,25 +84,27 @@ export const FollowersTabSection: FC = () => {
 
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-4">
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-1 text-sm border rounded disabled:opacity-50"
               >
                 Previous
-              </button>
+              </Button>
               <span className="text-sm text-text-secondary">
                 Page {page} of {totalPages}
               </span>
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page >= totalPages}
-                className="px-3 py-1 text-sm border rounded disabled:opacity-50"
               >
                 Next
-              </button>
+              </Button>
             </div>
           )}
         </>
@@ -115,7 +117,7 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
   user,
   showFollowButton,
 }) => (
-  <div className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+  <div className="flex items-center gap-3 p-3 border border-border-whisper rounded-lg hover:border-border-defined transition-colors">
     <Link
       to="/user/$userId"
       params={{ userId: user.userId }}

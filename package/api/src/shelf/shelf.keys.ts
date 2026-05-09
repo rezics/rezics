@@ -6,7 +6,8 @@ export const shelfKeys = {
   list: (filters?: ShelfFilters) => [...shelfKeys.lists(), filters] as const,
   details: () => [...shelfKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...shelfKeys.details(), unitId] as const,
-  byUser: (userId: string) => [...shelfKeys.all(), "user", userId] as const,
+  byUser: (userId: string, filters?: ShelfFilters) =>
+    [...shelfKeys.all(), "user", userId, filters] as const,
   mine: () => [...shelfKeys.all(), "mine"] as const,
   items: (unitId: string) => [...shelfKeys.all(), "items", unitId] as const,
   itemsPage: (unitId: string, query?: ShelfItemsQuery) =>

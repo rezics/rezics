@@ -1,8 +1,7 @@
-import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
 import { realmQueries } from "@rezics/api/realm/realm.queries";
-import type { RealmDTO, RealmSearchDocument } from "@rezics/contract";
-import { Badge } from "@rezics/ui/shadcn";
+import type { RealmDTO } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
 import {
@@ -39,35 +38,22 @@ function mapJoinedRealmToListItem(realm: RealmDTO): RealmListItemModel {
   };
 }
 
-function mapSearchRealmToListItem(
-  realm: RealmSearchDocument,
-): RealmListItemModel {
-  const primaryTranslation = realm.translations[0];
-
-  return {
-    unitId: realm.id,
-    title: primaryTranslation?.title ?? realm.titles[0] ?? realm.id,
-    description: primaryTranslation?.description ?? realm.descriptions[0] ?? "",
-    memberCount: realm.memberCount,
-    isOfficial: realm.isOfficial,
-    isPublic: realm.isPublic,
-  };
-}
-
 export const RealmsTabSection: FC = () => {
-  const { unitId, isCurrentUser } = useProfileContext();
+  const { userId } = useProfileContext();
   const [filter, setFilter] = useState("joined");
 
-  // For "joined" — use myRealms (returns realms the current user is a member of)
   const joinedQuery = useQuery({
-    ...realmQueries.mine(),
-    enabled: filter === "joined" && isCurrentUser,
+    ...realmQueries.byMember(userId),
+    enabled: filter === "joined",
   });
 
-  // For "created" — use realm search filtered by userId
-  const createdQuery = useRealmSearchQuery({
-    sort: { field: "createdAt", order: "desc" },
-    limit: 50,
+  const createdQuery = useQuery({
+    ...realmQueries.list({
+      userId,
+      sort: { field: "createdAt", order: "desc" },
+      limit: 50,
+    }),
+    enabled: filter === "created",
   });
 
   const activeQuery = filter === "joined" ? joinedQuery : createdQuery;
@@ -82,9 +68,7 @@ export const RealmsTabSection: FC = () => {
   const joinedRealms =
     joinedQuery.data?.realms.map(mapJoinedRealmToListItem) ?? [];
   const createdRealms =
-    createdQuery.data?.items
-      .filter((realm) => realm.userId === unitId)
-      .map(mapSearchRealmToListItem) ?? [];
+    createdQuery.data?.realms.map(mapJoinedRealmToListItem) ?? [];
 
   const realms = filter === "joined" ? joinedRealms : createdRealms;
   const emptyMessage =
@@ -130,7 +114,7 @@ const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
       params={{ realmId: realm.unitId }}
       className="no-underline"
     >
-      <div className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+      <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">

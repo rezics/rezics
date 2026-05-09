@@ -76,13 +76,18 @@ export const myRealmsQuery = () =>
     staleTime: 1000 * 60 * 2,
   });
 
+export const realmsByMemberQuery = (userId: string) =>
+  queryOptions({
+    queryKey: realmKeys.byMember(userId),
+    queryFn: () => realmApi.byMember(userId),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
+  });
+
 /**
  * Query options for the pair-level realm tag interpretation context.
  */
-export const realmTagContextQuery = (
-  realmUnitId: string,
-  tagUnitId: string,
-) =>
+export const realmTagContextQuery = (realmUnitId: string, tagUnitId: string) =>
   queryOptions({
     queryKey: realmKeys.tagContext(realmUnitId, tagUnitId),
     queryFn: () => realmApi.getRealmTagContext(realmUnitId, tagUnitId),
@@ -95,6 +100,7 @@ export const realmQueries = {
   search: realmSearchQuery,
   infiniteList: realmInfiniteListQuery,
   mine: myRealmsQuery,
+  byMember: realmsByMemberQuery,
   myMembership: myRealmMembershipQuery,
   tagContext: realmTagContextQuery,
 };

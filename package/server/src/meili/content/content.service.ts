@@ -24,6 +24,10 @@ export async function searchContent(
     }
   }
 
+  if (opts.userId) {
+    filter.push(`userId = "${opts.userId}"`);
+  }
+
   // Post kind filter (only meaningful when type includes POST)
   if (opts.postKind?.length) {
     if (opts.postKind.length === 1) {

@@ -31,7 +31,7 @@ const SIZE_MAP: Record<LegacyButtonSize, ButtonSize> = {
 };
 
 type FollowButtonProps = {
-  /** 目标用户的 unitId */
+  /** Target user's userId. */
   userId: string | undefined;
   /**
    * 初始粉丝数，用于本地即时更新显示。

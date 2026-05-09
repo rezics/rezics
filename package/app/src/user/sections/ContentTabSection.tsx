@@ -1,10 +1,8 @@
-import {
-  postSearchQueryOptions,
-  usePostSearchQuery,
-} from "@rezics/api/meili/meili.queries";
+import { postSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
@@ -31,7 +29,7 @@ const SORT_OPTIONS = [
 
 export const ContentTabSection: FC = () => {
   const { t } = useTranslation();
-  const { unitId } = useProfileContext();
+  const { userId } = useProfileContext();
   const [kind, setKind] = useState("REVIEW");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
@@ -42,7 +40,7 @@ export const ContentTabSection: FC = () => {
   const [sortField, sortOrder] = (filters.sort ?? "createdAt:desc").split(":");
 
   const searchOpts: PostSearchOptions = {
-    authorUserId: unitId,
+    authorUserId: userId,
     kind,
     keyword: filters.q || undefined,
     sort: {
@@ -114,25 +112,27 @@ export const ContentTabSection: FC = () => {
 
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-4">
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => setOffset(Math.max(0, offset - limit))}
                 disabled={offset === 0}
-                className="px-3 py-1 text-sm border rounded disabled:opacity-50"
               >
                 Previous
-              </button>
+              </Button>
               <span className="text-sm text-text-secondary">
                 Page {currentPage + 1} of {totalPages}
               </span>
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => setOffset(offset + limit)}
                 disabled={currentPage + 1 >= totalPages}
-                className="px-3 py-1 text-sm border rounded disabled:opacity-50"
               >
                 Next
-              </button>
+              </Button>
             </div>
           )}
         </>
@@ -149,8 +149,10 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
       ? `${"★".repeat(Math.round(post.scoreValue / 2))}${"☆".repeat(5 - Math.round(post.scoreValue / 2))}`
       : null;
 
+  const targetUnitId = post.targetUnitId;
+
   return (
-    <div className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+    <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors">
       <div className="flex items-start gap-3">
         <Avatar className="w-8 h-8">
           <AvatarImage
@@ -166,17 +168,27 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
             {scoreDisplay && (
               <span className="text-sm text-amber-500">{scoreDisplay}</span>
             )}
-            {targetTitle && (
-              <span className="text-sm text-text-secondary">
-                on {targetTitle}
-              </span>
-            )}
+            {targetTitle &&
+              (targetUnitId ? (
+                <Link
+                  to="/unit/id/$unitId"
+                  params={{ unitId: targetUnitId }}
+                  search={{ view: "auto" }}
+                  className="text-sm text-text-secondary no-underline hover:text-text-primary"
+                >
+                  on {targetTitle}
+                </Link>
+              ) : (
+                <span className="text-sm text-text-secondary">
+                  on {targetTitle}
+                </span>
+              ))}
             <span className="text-xs text-text-secondary">{date}</span>
           </div>
           {post.body && (
             <p className="text-sm mt-1 line-clamp-3">{post.body}</p>
           )}
-          <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+          <div className="flex items-center gap-3 mt-2 text-xs text-text-secondary">
             {post.replyCount > 0 && <span>{post.replyCount} replies</span>}
           </div>
         </div>

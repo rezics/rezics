@@ -46,6 +46,30 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     },
   )
   .get(
+    "/member/:userId",
+    async ({ params, headers }): Promise<RealmListResponse> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
+      const canSeePrivate =
+        identity?.userId === params.userId || isAdminRole(identity);
+      const { realms, total } = await realmService.listByMember(params.userId, {
+        publicOnly: !canSeePrivate,
+      });
+      return { realms, total };
+    },
+    {
+      params: t.Object({ userId: t.String() }),
+      detail: {
+        summary: "Realms joined by user",
+        description:
+          "Get realms where a user is a member. Public callers see only public realms.",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .get(
     "/by-slug/:slug",
     async ({
       params,

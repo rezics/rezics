@@ -19,7 +19,7 @@ export const shelfDetailQuery = (unitId: string) =>
 
 export const shelvesByUserQuery = (userId: string, filters?: ShelfFilters) =>
   queryOptions({
-    queryKey: shelfKeys.byUser(userId),
+    queryKey: shelfKeys.byUser(userId, filters),
     queryFn: () => shelfApi.getByUserId(userId, filters),
     enabled: !!userId,
     staleTime: 1000 * 60 * 5,
