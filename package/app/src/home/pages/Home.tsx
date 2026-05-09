@@ -1,7 +1,7 @@
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { HomeSearch } from "@/search";
-import { cn } from "@/shared/utils/css-util";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { BookCarousel } from "../components/HomeCarousel";
 import { ActiveRealmsSection } from "../sections/ActiveRealmsSection";
@@ -18,12 +18,7 @@ export const Home: React.FC<HomeProps> = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div
-      className={cn(
-        "mx-auto mt-2 mb-16 max-w-[1280px] space-y-12",
-        isMobile ? "w-full" : "w-14/16",
-      )}
-    >
+    <MainContentContainer className="mb-16 space-y-12 pt-6 md:pt-8">
       <section>
         {isMobile && (
           <div className="mb-4">
@@ -32,12 +27,8 @@ export const Home: React.FC<HomeProps> = () => {
         )}
         <div className="w-full">
           <div className="space-y-2 mb-4">
-            <p className="text-xs uppercase tracking-[0.35em] text-text-primary">
-              {t("page.home.hero.kicker")}
-            </p>
             <h1 className="text-2xl font-semibold leading-snug">
               <span className="text-brand">
-                {" "}
                 {t("page.home.hero.title_highlight")}
               </span>
             </h1>
@@ -54,7 +45,7 @@ export const Home: React.FC<HomeProps> = () => {
       <AnnouncementBarSection />
       <TrendingShelfSection />
       <TrendingReviews />
-      <NewBookSection limit={5} />
-    </div>
+      <NewBookSection limit={12} />
+    </MainContentContainer>
   );
 };

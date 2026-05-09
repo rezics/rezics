@@ -1,3 +1,4 @@
+import { bookQueries } from "@rezics/api/book/book";
 import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import {
   type BookDTO,
@@ -5,6 +6,7 @@ import {
   DEFAULT_LANGUAGE,
   type ShelfDTO,
 } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 export type SimpleQueryState<T> = {
@@ -15,38 +17,15 @@ export type SimpleQueryState<T> = {
 };
 
 export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
-  const { data, isLoading, error } = useContentSearch({
-    type: "BOOK",
-    limit,
-    sort: { field: "createdAt", order: "desc" },
-  });
+  const { data, isLoading, error } = useQuery(
+    bookQueries.list({
+      start: 0,
+      limit: Math.max(limit, 12),
+      sort: { type: "createdAt", order: "desc" },
+    }),
+  );
 
-  const items = useMemo<BookDTO[]>(() => {
-    return ((data?.items ?? []) as ContentSearchDocument[]).map((doc) => ({
-      unitId: doc.id,
-      defaultLanguage: doc.defaultLanguage,
-      translations:
-        doc.translations ??
-        (doc.titles[0]
-          ? [
-              {
-                unitId: doc.id,
-                language: doc.defaultLanguage ?? DEFAULT_LANGUAGE,
-                title: doc.titles[0],
-                subtitle: null,
-                summary: doc.summaries[0] ?? null,
-                description: doc.descriptions[0] ?? null,
-              },
-            ]
-          : []),
-      coverUrl: doc.coverUrl,
-      rating: doc.rating,
-      isLicensed: doc.isLicensed,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
-    })) as BookDTO[];
-  }, [data]);
-
+  const items = data?.books ?? [];
   const total: number | undefined = data?.total;
 
   return { items, total, isLoading, error };

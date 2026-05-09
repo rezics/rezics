@@ -13,6 +13,7 @@ import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 
 import { useBookLanguage } from "../hooks/useBookLanguage";
 
@@ -63,7 +64,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
 
   return (
     <div id="book-detail">
-      <div className="mt-4 mb-12 mx-auto max-w-screen-xl">
+      <MainContentContainer width="wide" className="mt-4 mb-12">
         <div className="flex flex-row items-center gap-4 mb-4">
           <div className="flex-1 min-w-0">
             <Tabs value={activeTab} onValueChange={handleTabChange}>
@@ -107,7 +108,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
           <div
             className={`col-span-12 ${hasSidebar ? "lg:col-span-9" : "lg:col-span-12"}`}
           >
-            <div className="px-2 sm:px-6 pt-4">{children}</div>
+            <div className="pt-4">{children}</div>
           </div>
 
           {hasSidebar && (
@@ -116,7 +117,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
             </div>
           )}
         </div>
-      </div>
+      </MainContentContainer>
     </div>
   );
 };

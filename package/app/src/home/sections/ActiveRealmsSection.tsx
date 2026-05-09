@@ -1,6 +1,7 @@
-import { Button } from "@rezics/ui/shadcn";
-import { Spinner } from "@rezics/ui";
 import { realmListQuery } from "@rezics/api/realm/realm";
+import { Spinner } from "@rezics/ui";
+import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -38,11 +39,23 @@ export const ActiveRealmsSection: React.FC = () => {
       {isLoading ? (
         <Spinner size="sm" />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {realms.map((realm) => (
-            <RealmCard key={realm.unitId} realm={realm} />
-          ))}
-        </div>
+        <>
+          <div className="sm:hidden">
+            <DomainCarousel
+              items={realms}
+              itemKey={(realm) => realm.unitId}
+              itemClassName="pl-4 basis-[86%] xsm:basis-[62%]"
+              showArrows={false}
+              ariaLabel={t("page.home.sections.active_realms.title")}
+              renderItem={(realm) => <RealmCard realm={realm} />}
+            />
+          </div>
+          <div className="hidden sm:grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {realms.map((realm) => (
+              <RealmCard key={realm.unitId} realm={realm} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

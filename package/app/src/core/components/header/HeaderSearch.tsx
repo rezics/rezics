@@ -149,7 +149,7 @@ export function HeaderSearch({ className }: { className?: string }) {
   return (
     <form
       className={cn(
-        "flex h-9 w-full max-w-xl items-center gap-2 rounded-full bg-surface-elevated px-3",
+        "flex h-9 w-full max-w-xl items-center gap-2 rounded-full bg-surface-elevated px-4 md:px-5",
         "border border-border-whisper focus-within:border-border-focus",
         className,
       )}

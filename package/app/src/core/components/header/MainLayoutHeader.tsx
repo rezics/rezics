@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
             <h1 className="text-3xl font-bold text-brand-fill m-0">REZICS</h1>
           </Link>
 
-          <div className="flex flex-1 min-w-0 justify-end md:justify-center">
+          <div className="flex flex-1 min-w-0 justify-end md:justify-center md:px-4">
             <HeaderSearch />
           </div>
 

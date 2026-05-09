@@ -32,34 +32,36 @@ const libraries = [
 export const LibraryCardsSection: React.FC = () => {
   const { t } = useTranslation();
 
+  const renderLibraryCard = (lib: (typeof libraries)[number]) => (
+    <Link key={lib.key} to={lib.to} className="min-w-0">
+      <Card size="sm" className="h-full border-0 shadow-none">
+        <CardContent className="px-2 sm:px-4">
+          <div className="flex min-w-0 flex-col items-center gap-2 text-center sm:flex-row sm:gap-4 sm:text-left">
+            <lib.icon
+              className="h-6 w-6 shrink-0 sm:h-8 sm:w-8"
+              color={
+                lib.active ? "currentColor" : "var(--colors-text-disabled)"
+              }
+            />
+            <div className="min-w-0">
+              <h6 className="m-0 truncate text-xs font-semibold leading-tight sm:text-base">
+                {t(`page.home.sections.library_cards.${lib.key}`)}
+              </h6>
+              {!lib.active && (
+                <Badge variant="outline" className="text-xs">
+                  {t("page.home.sections.library_cards.coming_soon")}
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {libraries.map((lib) => (
-        <Link key={lib.key} to={lib.to}>
-          <Card key={lib.key} className="border-0 shadow-none">
-            <CardContent>
-              <div className="flex flex-row items-center gap-4">
-                <lib.icon
-                  size={32}
-                  color={
-                    lib.active ? "currentColor" : "var(--colors-text-disabled)"
-                  }
-                />
-                <div>
-                  <h6 className="text-base font-semibold m-0">
-                    {t(`page.home.sections.library_cards.${lib.key}`)}
-                  </h6>
-                  {!lib.active && (
-                    <Badge variant="outline" className="text-xs">
-                      {t("page.home.sections.library_cards.coming_soon")}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
+    <div className="grid grid-cols-3 gap-2 sm:gap-4">
+      {libraries.map(renderLibraryCard)}
     </div>
   );
 };
