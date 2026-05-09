@@ -14,6 +14,15 @@ import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { mapUserToDTO } from "../models/mapper";
 import { userService } from "../service/user.service";
 
+function isRecordNotFoundError(error: unknown): boolean {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    (error as { code?: string }).code === "P2025"
+  );
+}
+
 export const coreRoute = new Elysia()
   .use(authMacro)
   .get(
@@ -110,6 +119,28 @@ export const coreRoute = new Elysia()
       detail: {
         summary: "Update current user",
         description: "Update current authenticated user profile",
+        tags: ["Users"],
+      },
+    },
+  )
+  .get(
+    "/:userId",
+    async ({ params, set }) => {
+      try {
+        const user = await userService.getByUserId(params.userId);
+        return mapUserToDTO(user);
+      } catch (error) {
+        if (!isRecordNotFoundError(error)) throw error;
+
+        set.status = 404;
+        return { error: { code: "NOT_FOUND", message: "User not found" } };
+      }
+    },
+    {
+      params: userParamsSchema,
+      detail: {
+        summary: "Get user by ID",
+        description: "Look up a user profile by canonical userId",
         tags: ["Users"],
       },
     },

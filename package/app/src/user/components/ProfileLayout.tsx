@@ -24,13 +24,13 @@ export function useProfileContext(): ProfileContextValue {
 }
 
 export const ProfileLayout: FC = () => {
-  const { unitId: routeUnitId, userSlug } = useParams({ strict: false }) as {
-    unitId?: string;
+  const { userId: routeUserId, userSlug } = useParams({ strict: false }) as {
+    userId?: string;
     userSlug?: string;
   };
   const currentUser = useUserProfileStore((s) => s.user);
-  const isCurrentUser = routeUnitId
-    ? currentUser?.userId === routeUnitId
+  const isCurrentUser = routeUserId
+    ? currentUser?.userId === routeUserId
     : userSlug
       ? currentUser?.slug === userSlug
       : false;
@@ -40,18 +40,18 @@ export const ProfileLayout: FC = () => {
     enabled: isCurrentUser,
   });
   const detailQuery = useQuery({
-    ...userQueries.detail(routeUnitId ?? ""),
-    enabled: !isCurrentUser && !!routeUnitId,
+    ...userQueries.detail(routeUserId ?? ""),
+    enabled: !isCurrentUser && !!routeUserId,
   });
   const slugQuery = useQuery({
     ...userQueries.bySlug(userSlug ?? ""),
-    enabled: !isCurrentUser && !routeUnitId && !!userSlug,
+    enabled: !isCurrentUser && !routeUserId && !!userSlug,
   });
 
   const user = (
     isCurrentUser
       ? meQuery.data
-      : routeUnitId
+      : routeUserId
         ? detailQuery.data
         : slugQuery.data
   ) as UserDTO | undefined;

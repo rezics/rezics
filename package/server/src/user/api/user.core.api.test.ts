@@ -39,7 +39,10 @@ mock.module("../service/user.service", () => ({
   userService: {
     getBySlug: async (userSlug: string) =>
       userSlug === "alice01" ? userStub : null,
-    getByUserId: async () => userStub,
+    getByUserId: async (userId: string) => {
+      if (userId === "user-1") return userStub;
+      throw { code: "P2025" };
+    },
     update: async () => userStub,
     delete: async () => undefined,
   },
@@ -61,6 +64,23 @@ describe("GET /user/by-slug/:userSlug", () => {
     const res = await coreRoute.handle(
       new Request("http://localhost/by-slug/missing-user"),
     );
+
+    expect(res.status).toBe(404);
+  });
+});
+
+describe("GET /user/:userId", () => {
+  test("returns user profile from the userId namespace", async () => {
+    const { coreRoute } = await import("./user.core.api");
+    const res = await coreRoute.handle(new Request("http://localhost/user-1"));
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(userStub);
+  });
+
+  test("returns 404 when userId does not exist", async () => {
+    const { coreRoute } = await import("./user.core.api");
+    const res = await coreRoute.handle(new Request("http://localhost/missing"));
 
     expect(res.status).toBe(404);
   });
