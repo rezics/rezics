@@ -101,6 +101,8 @@ export class SearchClient {
         "isLocked",
         "rootPostUnitId",
         "parentPostUnitId",
+        "rootTargetUnitId",
+        "rootTargetUnitType",
       ],
       sortableAttributes: ["createdAt", "updatedAt", "replyCount"],
     });

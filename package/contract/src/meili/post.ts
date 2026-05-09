@@ -18,6 +18,8 @@ export const PostSearchDocumentSchema = t.Object({
 
   // Foreign keys (filterable)
   targetUnitId: t.Union([t.String(), t.Null()]),
+  rootTargetUnitId: t.Union([t.String(), t.Null()]),
+  rootTargetUnitType: t.Union([t.String(), t.Null()]),
   realmIds: t.Array(t.String()),
   rootPostUnitId: t.Union([t.String(), t.Null()]),
   parentPostUnitId: t.Union([t.String(), t.Null()]),
@@ -50,6 +52,8 @@ export const PostSearchOptionsSchema = t.Object({
   keyword: t.Optional(t.String()),
   kind: t.Optional(t.String()),
   targetUnitId: t.Optional(t.String()),
+  rootTargetUnitId: t.Optional(t.String()),
+  rootTargetUnitType: t.Optional(t.String()),
   realmUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   rootPostUnitId: t.Optional(t.String()),

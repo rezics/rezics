@@ -200,6 +200,7 @@ export class PostService {
     const realmIdsToWrite = [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
 
+    let targetUnitTypeFromChapterCheck: string | null = null;
     if (kind === PostKindEnum.CHAPTER) {
       if (!targetUnitId) {
         throw new Error(
@@ -215,11 +216,14 @@ export class PostService {
           `Post(kind=CHAPTER) targetUnitId must reference a Unit(type=BOOK); got ${target?.type ?? "missing"}`,
         );
       }
+      targetUnitTypeFromChapterCheck = target.type;
     }
 
     let depth = 0;
     let rootPostUnitId: string | undefined;
     let sortPath: string | undefined;
+    let rootTargetUnitId: string | null = null;
+    let rootTargetUnitType: string | null = null;
 
     if (parentPostUnitId) {
       const parent = await prisma.post.findUniqueOrThrow({
@@ -230,6 +234,8 @@ export class PostService {
           depth: true,
           sortPath: true,
           isLocked: true,
+          rootTargetUnitId: true,
+          rootTargetUnitType: true,
         },
       });
 
@@ -240,6 +246,19 @@ export class PostService {
       rootPostUnitId = parent.rootPostUnitId ?? parent.unitId;
       depth = parent.depth + 1;
       sortPath = await this.generateSortPath(parentPostUnitId);
+      rootTargetUnitId = parent.rootTargetUnitId ?? null;
+      rootTargetUnitType = parent.rootTargetUnitType ?? null;
+    } else if (targetUnitId) {
+      rootTargetUnitId = targetUnitId;
+      if (targetUnitTypeFromChapterCheck) {
+        rootTargetUnitType = targetUnitTypeFromChapterCheck;
+      } else {
+        const target = await prisma.unit.findUnique({
+          where: { id: targetUnitId },
+          select: { type: true },
+        });
+        rootTargetUnitType = target?.type ?? null;
+      }
     }
 
     const post = await prisma.$transaction(async (tx) => {
@@ -255,6 +274,8 @@ export class PostService {
         unitId: unit.id,
         authorUserId,
         targetUnitId: targetUnitId ?? undefined,
+        rootTargetUnitId: rootTargetUnitId ?? undefined,
+        rootTargetUnitType: rootTargetUnitType ?? undefined,
         body,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,

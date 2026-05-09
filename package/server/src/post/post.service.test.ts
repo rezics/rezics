@@ -5,23 +5,27 @@ process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
 
-const unitCreateMock = mock(async () => ({ id: "post-1" }));
-const unitFindUniqueMock = mock(async () => null);
-const unitFindManyMock = mock(async (args: any) =>
+const unitCreateMock = mock(async (): Promise<any> => ({ id: "post-1" }));
+const unitFindUniqueMock = mock(async (): Promise<any> => null);
+const unitFindManyMock = mock(async (args: any): Promise<any> =>
   (args.where.id.in as string[]).map((id) => ({ id })),
 );
-const postCreateMock = mock(async () => ({ unitId: "post-1" }));
-const postUpdateMock = mock(async () => ({ unitId: "post-1" }));
-const postFindManyMock = mock(async () => []);
+const postCreateMock = mock(async (): Promise<any> => ({ unitId: "post-1" }));
+const postUpdateMock = mock(async (): Promise<any> => ({ unitId: "post-1" }));
+const postFindManyMock = mock(async (): Promise<any[]> => []);
 const postCountMock = mock(async () => 0);
-const postFindUniqueMock = mock(async () => null);
-const postFindUniqueOrThrowMock = mock(async () => ({
-  unitId: "parent-1",
-  rootPostUnitId: "root-1",
-  depth: 0,
-  sortPath: "0001",
-  isLocked: false,
-}));
+const postFindUniqueMock = mock(async (): Promise<any> => null);
+const postFindUniqueOrThrowMock = mock(
+  async (): Promise<any> => ({
+    unitId: "parent-1",
+    rootPostUnitId: "root-1",
+    depth: 0,
+    sortPath: "0001",
+    isLocked: false,
+    rootTargetUnitId: null,
+    rootTargetUnitType: null,
+  }),
+);
 const postFindFirstMock = mock(async () => null);
 const realmUnitCreateMock = mock(async (args: any) => {
   if (args.data.realmUnitId === "missing-realm") {
@@ -293,5 +297,142 @@ describe("PostService.byRealm", () => {
     const args = firstPostFindManyArgs();
     expect(args.skip).toBe(10);
     expect(args.take).toBe(5);
+  });
+});
+
+describe("PostService.create rootTargetUnit derivation", () => {
+  const service = new PostService();
+
+  function createDataArg() {
+    return (postCreateMock.mock.calls as any[])[0]?.[0]?.data as any;
+  }
+
+  test("top-level REVIEW carries its own targetUnitId as rootTargetUnitId with type from Unit", async () => {
+    resetMocks();
+    unitFindUniqueMock.mockResolvedValueOnce({ type: "BOOK" });
+
+    await service.create(
+      { body: "great", kind: "REVIEW", targetUnitId: "book-B" },
+      "user-1",
+    );
+
+    expect(unitFindUniqueMock).toHaveBeenCalledWith({
+      where: { id: "book-B" },
+      select: { type: true },
+    });
+    const data = createDataArg();
+    expect(data.targetUnitId).toBe("book-B");
+    expect(data.rootTargetUnitId).toBe("book-B");
+    expect(data.rootTargetUnitType).toBe("BOOK");
+  });
+
+  test("top-level REMARK with game target derives GAME type", async () => {
+    resetMocks();
+    unitFindUniqueMock.mockResolvedValueOnce({ type: "GAME" });
+
+    await service.create(
+      { body: "thoughts", kind: "REMARK", targetUnitId: "game-G" },
+      "user-1",
+    );
+
+    const data = createDataArg();
+    expect(data.rootTargetUnitId).toBe("game-G");
+    expect(data.rootTargetUnitType).toBe("GAME");
+  });
+
+  test("top-level POST with no targetUnitId leaves both fields undefined", async () => {
+    resetMocks();
+
+    await service.create({ body: "free-form" }, "user-1");
+
+    const data = createDataArg();
+    expect(data.targetUnitId).toBeUndefined();
+    expect(data.rootTargetUnitId).toBeUndefined();
+    expect(data.rootTargetUnitType).toBeUndefined();
+    // No Unit lookup needed when there is no target.
+    expect(unitFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  test("reply inherits rootTargetUnit fields from parent without extra Unit lookup", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "parent-1",
+      rootPostUnitId: "root-1",
+      depth: 0,
+      sortPath: "0001",
+      isLocked: false,
+      rootTargetUnitId: "book-B",
+      rootTargetUnitType: "BOOK",
+    });
+
+    await service.create(
+      { body: "reply", parentPostUnitId: "parent-1" },
+      "user-1",
+    );
+
+    const data = createDataArg();
+    expect(data.rootTargetUnitId).toBe("book-B");
+    expect(data.rootTargetUnitType).toBe("BOOK");
+    expect(unitFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  test("nested reply still inherits root target from its parent", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "comment-1",
+      rootPostUnitId: "root-1",
+      depth: 1,
+      sortPath: "0001.0001",
+      isLocked: false,
+      rootTargetUnitId: "book-B",
+      rootTargetUnitType: "BOOK",
+    });
+
+    await service.create(
+      { body: "nested", parentPostUnitId: "comment-1" },
+      "user-1",
+    );
+
+    const data = createDataArg();
+    expect(data.rootTargetUnitId).toBe("book-B");
+    expect(data.rootTargetUnitType).toBe("BOOK");
+  });
+
+  test("CHAPTER kind reuses the Unit type read from the BOOK validation (single Unit lookup)", async () => {
+    resetMocks();
+    unitFindUniqueMock.mockResolvedValueOnce({ type: "BOOK" });
+
+    await service.create(
+      { body: "ch1", kind: "CHAPTER", targetUnitId: "book-B" },
+      "user-1",
+    );
+
+    expect(unitFindUniqueMock).toHaveBeenCalledTimes(1);
+    const data = createDataArg();
+    expect(data.rootTargetUnitId).toBe("book-B");
+    expect(data.rootTargetUnitType).toBe("BOOK");
+  });
+});
+
+describe("PostService.update immutability", () => {
+  const service = new PostService();
+
+  test("update writes only body/isLocked/extra; rootTarget* fields are not in the update payload", async () => {
+    resetMocks();
+    const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
+    Object.assign(prismaMock.post, { update: directPostUpdateMock });
+
+    await service.update("post-1", { body: "edited", isLocked: true });
+
+    expect(directPostUpdateMock).toHaveBeenCalledTimes(1);
+    const args = (directPostUpdateMock.mock.calls as any[])[0]?.[0];
+    expect(args.where).toEqual({ unitId: "post-1" });
+    expect(args.data).toEqual({ body: "edited", isLocked: true });
+    expect(args.data.targetUnitId).toBeUndefined();
+    expect(args.data.rootTargetUnitId).toBeUndefined();
+    expect(args.data.rootTargetUnitType).toBeUndefined();
+
+    // Restore the shared mock so subsequent tests see the standard behavior.
+    Object.assign(prismaMock.post, { update: postUpdateMock });
   });
 });

@@ -13,6 +13,12 @@ export async function searchPosts(
   if (opts.targetUnitId) {
     filter.push(`targetUnitId = "${opts.targetUnitId}"`);
   }
+  if (opts.rootTargetUnitId) {
+    filter.push(`rootTargetUnitId = "${opts.rootTargetUnitId}"`);
+  }
+  if (opts.rootTargetUnitType) {
+    filter.push(`rootTargetUnitType = "${opts.rootTargetUnitType}"`);
+  }
   if (opts.realmUnitId) {
     filter.push(`realmIds = "${opts.realmUnitId}"`);
   }

@@ -694,6 +694,8 @@ export function buildPostDocument(post: any): PostSearchDocument {
         ? post.updatedAt.toISOString()
         : post.updatedAt,
     targetUnitId: post.targetUnitId ?? null,
+    rootTargetUnitId: post.rootTargetUnitId ?? null,
+    rootTargetUnitType: post.rootTargetUnitType ?? null,
     realmIds: inRealms.map((realm) => realm.realmUnitId),
     rootPostUnitId: post.rootPostUnitId ?? null,
     parentPostUnitId: post.parentPostUnitId ?? null,
@@ -810,6 +812,43 @@ export async function syncAllPostRealmIds(client: SearchClient) {
   }
 
   return { message: "syncAllPostRealmIds success", totalSynced: total };
+}
+
+export async function syncAllPostRootTargets(client: SearchClient) {
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const posts: any[] = await prisma.post.findMany({
+      where: {
+        unit: { status: "PUBLISHED" },
+      },
+      select: {
+        unitId: true,
+        rootTargetUnitId: true,
+        rootTargetUnitType: true,
+      },
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (posts.length === 0) break;
+
+    await client.patchPosts(
+      posts.map((post) => ({
+        id: post.unitId,
+        rootTargetUnitId: post.rootTargetUnitId ?? null,
+        rootTargetUnitType: post.rootTargetUnitType ?? null,
+      })),
+    );
+
+    total += posts.length;
+    cursor = posts[posts.length - 1]!.unitId;
+  }
+
+  return { message: "syncAllPostRootTargets success", totalSynced: total };
 }
 
 export async function syncPostsByAuthor(client: SearchClient, userId: string) {

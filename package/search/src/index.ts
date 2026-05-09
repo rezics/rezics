@@ -32,6 +32,7 @@ export {
   syncAllFeedbacks,
   syncAllPosts,
   syncAllPostRealmIds,
+  syncAllPostRootTargets,
   syncAllRealms,
   syncAllUsers,
   syncProgress,

@@ -388,8 +388,10 @@ model Post {
 
   authorUserId String @db.Uuid
 
-  targetUnitId String? @db.Uuid
-  scoreEntryId String? @db.Uuid
+  targetUnitId       String? @db.Uuid
+  rootTargetUnitId   String? @db.Uuid
+  rootTargetUnitType String? @db.VarChar(32)
+  scoreEntryId       String? @db.Uuid
 
   body String?
 
@@ -423,6 +425,7 @@ model Post {
   @@index([parentPostUnitId, createdAt])
   @@index([kind, createdAt])
   @@index([scoreEntryId])
+  @@index([rootTargetUnitId, createdAt])
 }
 
 /**
