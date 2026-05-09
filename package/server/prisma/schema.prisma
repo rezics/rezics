@@ -75,7 +75,7 @@ enum PostKind {
    */
   EXCERPT
   /**
-   * Casual and unrestricted user remark.
+   * Remark: casual and unrestricted user review.
    * No word limit
    */
   REMARK
@@ -691,31 +691,31 @@ enum EmailVerificationContractStatus {
 }
 
 model User {
-  userId         String   @id @db.Uuid
-  authUserId     String?  @unique @db.Uuid
+  userId          String    @id @db.Uuid
+  authUserId      String?   @unique @db.Uuid
   /// Main-owned Rezics product email. It may be initialized from a verified
   /// auth login email during materialization, but is not synchronized with
   /// auth.User.email after that point.
-  email          String?  @db.VarChar(320)
-  slug           String?  @unique
-  name           String?
-  avatar         String?
-  bio            String?
-  description    String?
-  joinDate       DateTime?
-  permission     Json?
-  followersCount Int      @default(0)
-  followingsCount Int     @default(0)
-  settings       Json?
-  extra          Json?
+  email           String?   @db.VarChar(320)
+  slug            String?   @unique
+  name            String?
+  avatar          String?
+  bio             String?
+  description     String?
+  joinDate        DateTime?
+  permission      Json?
+  followersCount  Int       @default(0)
+  followingsCount Int       @default(0)
+  settings        Json?
+  extra           Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  followers                  Follow[]                    @relation("UserFollowers")
-  followings                 Follow[]                    @relation("UserFollowings")
-  units                      Unit[]                      @relation("UnitForUser")
-  apiTokens                  ApiToken[]
+  followers  Follow[]   @relation("UserFollowers")
+  followings Follow[]   @relation("UserFollowings")
+  units      Unit[]     @relation("UnitForUser")
+  apiTokens  ApiToken[]
 
   workLinkClaimsAsClaimer  WorkLinkClaim[]    @relation("WorkLinkClaimClaimer")
   workLinkClaimsAsResolver WorkLinkClaim[]    @relation("WorkLinkClaimResolver")
