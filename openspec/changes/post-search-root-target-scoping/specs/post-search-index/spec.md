@@ -1,0 +1,157 @@
+## MODIFIED Requirements
+
+### Requirement: Posts Meilisearch index exists with correct settings
+
+The system SHALL maintain a Meilisearch index named `posts` with primary key `id`. The index SHALL be configured with searchable attributes in priority order: `body`, `targetTitles`, `authorName`. Filterable attributes SHALL include: `kind`, `targetUnitId`, `realmIds`, `authorUserId`, `depth`, `isLocked`, `rootPostUnitId`, `parentPostUnitId`, `rootTargetUnitId`, `rootTargetUnitType`. Sortable attributes SHALL include: `createdAt`, `updatedAt`, `replyCount`.
+
+The previously-used singular filterable attribute `realmUnitId` SHALL be replaced by the multi-value `realmIds` to reflect that a post may belong to multiple realms via the `RealmUnit` junction (see `realm-post-junction` capability).
+
+The new `rootTargetUnitId` and `rootTargetUnitType` filterable attributes SHALL enable Book/Game/Media-scoped post search to return the full reply tree (root posts and all descendants) via a single equality filter, without query-time expansion of root post id lists.
+
+#### Scenario: Posts index initialized
+
+- **WHEN** the posts index initialization endpoint is called
+- **THEN** a Meilisearch index named `posts` SHALL exist with primary key `id`
+- **AND** searchable attributes SHALL be `["body", "targetTitles", "authorName"]`
+- **AND** filterable attributes SHALL include `kind`, `targetUnitId`, `realmIds`, `authorUserId`, `depth`, `isLocked`, `rootPostUnitId`, `parentPostUnitId`, `rootTargetUnitId`, `rootTargetUnitType`
+- **AND** filterable attributes SHALL NOT include the legacy singular `realmUnitId`
+- **AND** sortable attributes SHALL include `createdAt`, `updatedAt`, `replyCount`
+
+### Requirement: Post document contains denormalized data for list rendering
+
+Each post document SHALL contain: `id` (unit UUID), `body`, `kind`, `depth`, `sortPath`, `isLocked`, `replyCount`, `directReplyCount`, `lastReplyAt`, `createdAt`, `updatedAt`, `targetUnitId`, `realmIds`, `rootPostUnitId`, `parentPostUnitId`, `authorUserId`, `scoreEntryId`, `rootTargetUnitId`, `rootTargetUnitType`. Additionally, it SHALL contain denormalized fields: `authorName`, `authorSlug`, `authorAvatar` (from User), `targetTitles` (array of title strings from the target unit's translations), `targetType` (UnitType of target), `targetCoverUrl` (cover from type extension), `scoreValue` and `scoreFields` (from linked ScoreEntry if present).
+
+The `realmIds` field SHALL be a string array sourced from `RealmUnit` rows where `RealmUnit.unitId = post.unitId`. An empty array SHALL be used when the post belongs to no realm. The previously-existing singular `realmUnitId` field SHALL be removed from the document shape.
+
+The `rootTargetUnitId` field SHALL hold the `targetUnitId` of this post's root post (the post identified by `rootPostUnitId`). For a top-level post (where `rootPostUnitId` equals the post's own `unitId`), `rootTargetUnitId` SHALL equal the post's own `targetUnitId`. The field SHALL be null when the root post has no target. The `rootTargetUnitType` field SHALL hold the `Unit.type` of the unit referenced by `rootTargetUnitId`, or null when `rootTargetUnitId` is null.
+
+#### Scenario: Post document includes author info
+
+- **GIVEN** a post authored by a user with name "Alice", slug "alice", avatar "/img/alice.png"
+- **WHEN** the post is synced to Meilisearch
+- **THEN** the document SHALL have `authorName: "Alice"`, `authorSlug: "alice"`, `authorAvatar: "/img/alice.png"`
+
+#### Scenario: Post document includes target unit info
+
+- **GIVEN** a review post targeting a book with translations "My Book" (en) and "我的书" (zh), coverUrl "/covers/book.jpg"
+- **WHEN** the post is synced to Meilisearch
+- **THEN** the document SHALL have `targetTitles: ["My Book", "我的书"]`, `targetType: "BOOK"`, `targetCoverUrl: "/covers/book.jpg"`
+
+#### Scenario: Post document includes score data
+
+- **GIVEN** a review post linked to a ScoreEntry with value 8 and fields `{ story: 9, art: 7 }`
+- **WHEN** the post is synced to Meilisearch
+- **THEN** the document SHALL have `scoreValue: 8`, `scoreFields: { story: 9, art: 7 }`
+
+#### Scenario: Post without target or score
+
+- **GIVEN** a remark post with no targetUnitId and no scoreEntryId
+- **WHEN** the post is synced to Meilisearch
+- **THEN** `targetTitles`, `targetType`, `targetCoverUrl`, `scoreValue`, `scoreFields` SHALL be null or absent
+
+#### Scenario: Cross-posted post has multiple realm IDs
+
+- **GIVEN** a post `p1` with `RealmUnit` rows for `realm-A`, `realm-B`, `realm-C`
+- **WHEN** `p1` is synced to Meilisearch
+- **THEN** the document SHALL have `realmIds: ["realm-A", "realm-B", "realm-C"]` (order is implementation-defined)
+
+#### Scenario: Post in no realm has empty realmIds
+
+- **GIVEN** a post with no `RealmUnit` rows
+- **WHEN** the post is synced
+- **THEN** the document SHALL have `realmIds: []`
+
+#### Scenario: Top-level review document includes rootTargetUnitId equal to its own targetUnitId
+
+- **GIVEN** a top-level REVIEW post `R` with `targetUnitId = "book-B"` and `rootPostUnitId = R.unitId`
+- **WHEN** `R` is synced to Meilisearch
+- **THEN** the document SHALL have `rootTargetUnitId: "book-B"` and `rootTargetUnitType: "BOOK"`
+
+#### Scenario: Reply document inherits rootTargetUnitId from its root post
+
+- **GIVEN** a comment `C1` whose root post is REVIEW `R` with `targetUnitId = "book-B"`
+- **WHEN** `C1` is synced to Meilisearch
+- **THEN** the document SHALL have `rootTargetUnitId: "book-B"` and `rootTargetUnitType: "BOOK"`
+- **AND** this SHALL hold regardless of `C1`'s own `targetUnitId` (which typically points to `R`)
+
+#### Scenario: Nested reply preserves rootTargetUnitId
+
+- **GIVEN** a reply `C2` whose `parentPostUnitId = C1` and whose root post is REVIEW `R` targeting `"book-B"`
+- **WHEN** `C2` is synced to Meilisearch
+- **THEN** the document SHALL have `rootTargetUnitId: "book-B"` and `rootTargetUnitType: "BOOK"`
+
+#### Scenario: Top-level post with no target has null rootTargetUnitId
+
+- **GIVEN** a top-level POST kind with `targetUnitId = null` (free-form realm post)
+- **WHEN** the post is synced to Meilisearch
+- **THEN** the document SHALL have `rootTargetUnitId: null` and `rootTargetUnitType: null`
+
+## ADDED Requirements
+
+### Requirement: Posts can be filtered by rootTargetUnitId for unit-scoped search
+
+The post search service SHALL accept an optional `rootTargetUnitId` filter and an optional `rootTargetUnitType` filter on the `posts` index. When `rootTargetUnitId` is provided, the search SHALL return posts (root posts and all descendants) whose root post's target equals the given unit id. When `rootTargetUnitType` is provided, the search SHALL return posts whose root target's unit type matches the given value.
+
+The filter SHALL be expressed as a single equality predicate on Meilisearch (`rootTargetUnitId = "<id>"`), without expanding root post ids in the application layer.
+
+#### Scenario: Book-scoped post search returns root posts and replies
+
+- **GIVEN** Book `B` with REVIEW `R` (`targetUnitId = B`), comment `C1` replying to `R`, and reply `C2` replying to `C1`
+- **AND** all three are indexed with `rootTargetUnitId = B`
+- **WHEN** a search is performed with `rootTargetUnitId = "B"`
+- **THEN** the result SHALL include `R`, `C1`, and `C2`
+
+#### Scenario: Book-scoped search excludes posts targeting a different book
+
+- **GIVEN** Book `B1` with REVIEW `R1` and Book `B2` with REVIEW `R2`
+- **WHEN** a search is performed with `rootTargetUnitId = "B1"`
+- **THEN** the result SHALL include `R1` and its descendants
+- **AND** SHALL NOT include `R2` or its descendants
+
+#### Scenario: Filter by root target unit type
+
+- **WHEN** a search is performed with `rootTargetUnitType = "BOOK"`
+- **THEN** the result SHALL include only posts whose root target is a Unit of type `BOOK`
+
+#### Scenario: rootTargetUnitId filter combined with keyword search
+
+- **GIVEN** Book `B` with multiple posts, some containing the keyword "spoiler"
+- **WHEN** a search is performed with keyword `"spoiler"` and `rootTargetUnitId = "B"`
+- **THEN** the result SHALL include only posts under Book `B` that match the keyword
+
+### Requirement: rootTargetUnitId is backfilled and partially resynced for existing posts
+
+The system SHALL provide an idempotent backfill process that derives `rootTargetUnitId` and `rootTargetUnitType` for every existing post and writes both fields into Postgres, then a partial Meilisearch resync that pushes only those two fields onto every existing document.
+
+The backfill SHALL derive `rootTargetUnitId` from `Post.rootPostUnitId → Post.targetUnitId` and `rootTargetUnitType` from the `Unit.type` of that target. The backfill SHALL be safe to rerun.
+
+The partial resync SHALL update only the two new fields on existing Meilisearch documents (analogous to the existing `syncAllPostRealmIds` partial-resync helper) and SHALL NOT trigger a full document rebuild.
+
+#### Scenario: Backfill populates rootTargetUnitId for existing posts
+
+- **GIVEN** a Postgres `Post` table populated before this change, where every post has null `rootTargetUnitId`
+- **WHEN** the backfill script runs to completion
+- **THEN** every post `P` whose root post has a non-null `targetUnitId` SHALL have `P.rootTargetUnitId` set to that value
+- **AND** every such post SHALL have `P.rootTargetUnitType` set to the `Unit.type` of that target
+
+#### Scenario: Backfill leaves orphan top-level posts null
+
+- **GIVEN** a top-level post with `targetUnitId = null`
+- **WHEN** the backfill runs
+- **THEN** `rootTargetUnitId` SHALL remain null
+- **AND** `rootTargetUnitType` SHALL remain null
+
+#### Scenario: Backfill is idempotent
+
+- **GIVEN** the backfill has already run once
+- **WHEN** the backfill runs a second time
+- **THEN** no row values SHALL change
+- **AND** the script SHALL complete without error
+
+#### Scenario: Partial resync updates only new fields on existing documents
+
+- **GIVEN** existing Meilisearch post documents indexed before this change
+- **AND** the Postgres backfill has completed
+- **WHEN** the partial resync helper runs
+- **THEN** every existing document SHALL be updated with the current `rootTargetUnitId` and `rootTargetUnitType` from Postgres
+- **AND** other fields on the document SHALL remain unchanged
