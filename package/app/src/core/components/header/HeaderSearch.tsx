@@ -1,6 +1,12 @@
 import { realmDetailQuery } from "@rezics/api/realm/realm";
 import { userQueries } from "@rezics/api/user/user";
-import { Button, Input } from "@rezics/ui/shadcn";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  Input,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search as SearchIcon } from "lucide-react";
@@ -77,6 +83,9 @@ function useHeaderSearchPresentation(pathname: string) {
     return {
       kind: "scoped" as const,
       badge: `r/${title}`,
+      avatar: null,
+      fallback: null,
+      showAvatar: false,
       placeholder: "搜尋此 realm",
     };
   }
@@ -96,6 +105,9 @@ function useHeaderSearchPresentation(pathname: string) {
     return {
       kind: "scoped" as const,
       badge: `u/${handle}`,
+      avatar: user?.avatar ?? null,
+      fallback: handle.charAt(0).toUpperCase(),
+      showAvatar: true,
       placeholder: "搜尋此使用者",
     };
   }
@@ -103,6 +115,9 @@ function useHeaderSearchPresentation(pathname: string) {
   return {
     kind: "general" as const,
     badge: null,
+    avatar: null,
+    fallback: null,
+    showAvatar: false,
     placeholder: pathname.startsWith("/book")
       ? "搜尋書籍、書評、書單..."
       : "Find anything",
@@ -149,7 +164,7 @@ export function HeaderSearch({ className }: { className?: string }) {
   return (
     <form
       className={cn(
-        "flex h-9 w-full max-w-xl items-center gap-2 rounded-full bg-surface-elevated px-4 md:px-5",
+        "flex h-10 w-full max-w-[560px] items-center gap-2 rounded-full bg-surface-elevated px-4 md:px-5",
         "border border-border-whisper focus-within:border-border-focus",
         className,
       )}
@@ -160,8 +175,22 @@ export function HeaderSearch({ className }: { className?: string }) {
     >
       {leading}
       {presentation.badge && (
-        <span className="max-w-36 shrink-0 truncate rounded-full bg-surface-subtle px-2 py-0.5 text-xs leading-tight text-text-secondary">
-          {presentation.badge}
+        <span className="flex h-8 max-w-40 shrink-0 items-center gap-1.5 truncate rounded-full bg-surface-subtle px-2 text-xs leading-dense text-text-secondary">
+          {presentation.showAvatar && (
+            <Avatar size="sm" className="rounded-full">
+              {presentation.avatar && (
+                <AvatarImage
+                  src={presentation.avatar}
+                  alt={presentation.badge}
+                  className="rounded-full"
+                />
+              )}
+              <AvatarFallback className="rounded-full">
+                {presentation.fallback}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          <span className="min-w-0 truncate">{presentation.badge}</span>
         </span>
       )}
       <Input
@@ -169,7 +198,7 @@ export function HeaderSearch({ className }: { className?: string }) {
         onChange={(event) => setValue(event.target.value)}
         placeholder={presentation.placeholder}
         aria-label={t("accessibility.search")}
-        className="h-8 min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+        className="h-9 min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
       />
     </form>
   );
