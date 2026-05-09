@@ -4,12 +4,11 @@ import React from "react";
 import { AuthenticatedSection } from "@/core/sections/header/AuthenticatedSection.tsx";
 import { PendingVerificationSection } from "@/core/sections/header/PendingVerificationSection.tsx";
 import { UnauthenticatedSection } from "@/core/sections/header/UnauthenticatedSection.tsx";
-import { HomeSearch } from "@/search";
 import { cn } from "@/shared/utils/css-util";
-import { useIsMobile } from "@/shared/utils/use-media-query";
 import { useAuth } from "@/user/pages/useAuth";
 import { useLayoutStore } from "../../states/layoutStore.ts";
 import { DrawerToggler } from "./DrawerToggler.tsx";
+import { HeaderSearch } from "./HeaderSearch.tsx";
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -26,7 +25,6 @@ export const Header: React.FC<HeaderProps> = React.memo(
     const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
     const drawerWidth = useLayoutStore((s) => s.drawerWidth);
     const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
-    const isMobile = useIsMobile();
 
     const isHomePage = useRouterState({
       select: (s) => s.location.pathname === "/",
@@ -58,7 +56,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
           width: isOffsetByDrawer ? `calc(100% - ${drawerWidth}px)` : "100%",
         }}
       >
-        <div className="flex items-center min-h-16 px-3 md:px-6 gap-2">
+        <div className="flex h-[49px] items-center gap-2 px-3 md:h-14 md:px-6">
           <DrawerToggler
             handleDrawerToggleInner={handleDrawerToggle}
             layoutType={layoutType}
@@ -74,10 +72,8 @@ export const Header: React.FC<HeaderProps> = React.memo(
             <h1 className="text-3xl font-bold text-brand-fill m-0">REZICS</h1>
           </Link>
 
-          <div className="flex-1 min-w-0 flex justify-center">
-            {!isMobile && isHomePage && (
-              <HomeSearch className="w-full max-w-md" />
-            )}
+          <div className="flex flex-1 min-w-0 justify-end md:justify-center">
+            <HeaderSearch />
           </div>
 
           {authSection}
