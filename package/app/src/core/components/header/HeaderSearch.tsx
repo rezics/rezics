@@ -2,11 +2,11 @@ import { realmDetailQuery } from "@rezics/api/realm/realm";
 import { userQueries } from "@rezics/api/user/user";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useRouterState } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search as SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHomeSearchNavigate } from "@/search";
+import { buildSearchPath } from "@/search";
 import LogoIcon from "@/shared/assets/logo.svg?react";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -115,11 +115,12 @@ export function HeaderSearch({ className }: { className?: string }) {
   const isMobile = useIsMobile();
   const isHomePage = pathname === "/";
   const presentation = useHeaderSearchPresentation(pathname);
-  const { navigateByKeyword } = useHomeSearchNavigate();
+  const navigate = useNavigate();
   const [value, setValue] = useState("");
 
   const submit = () => {
-    navigateByKeyword(value);
+    const base = pathname.startsWith("/book") ? "/book/search" : "/search";
+    navigate({ to: buildSearchPath({ keyword: value }, base) });
   };
 
   if (isMobile) {
@@ -131,7 +132,7 @@ export function HeaderSearch({ className }: { className?: string }) {
         variant="ghost"
         className={cn("h-9 w-9 shrink-0 text-text-primary", className)}
         aria-label={t("accessibility.search")}
-        onClick={() => navigateByKeyword("")}
+        onClick={submit}
       >
         <SearchIcon className="h-5 w-5" />
       </Button>

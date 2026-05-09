@@ -4,12 +4,11 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
+import { Plus as AddIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
 import { CreateMenuItem } from "./CreateMenuItem";
-import { Plus as AddIcon } from "lucide-react";
 
 export const CreateMenu: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -23,12 +22,12 @@ export const CreateMenu: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="h-10 rounded-full gap-1 bg-transparent px-4"
+            className="h-9 rounded-full gap-1 bg-transparent px-2 md:h-10 md:px-4"
             aria-label="create menu"
             {...props}
           >
             <AddIcon className="w-5 h-5" />
-            <span>{t("common.create")}</span>
+            <span className="hidden md:inline">{t("common.create")}</span>
           </Button>
         )}
       />

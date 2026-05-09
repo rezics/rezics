@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
           width: isOffsetByDrawer ? `calc(100% - ${drawerWidth}px)` : "100%",
         }}
       >
-        <div className="flex h-[49px] items-center gap-2 px-3 md:h-14 md:px-6">
+        <div className="flex h-[49px] items-center gap-1 px-2 md:h-14 md:gap-2 md:px-6">
           <DrawerToggler
             handleDrawerToggleInner={handleDrawerToggle}
             layoutType={layoutType}
