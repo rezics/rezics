@@ -9,7 +9,8 @@ type SearchRouteParams = {
   category?: SearchCategory;
 };
 
-function GlobalSearchPage() {
+function RealmScopedSearchPage() {
+  const { realmId } = Route.useParams();
   const { q, category } = Route.useSearch();
   const navigate = useNavigate();
 
@@ -20,12 +21,13 @@ function GlobalSearchPage() {
 
   return (
     <FederatedSearchPage
-      scope={{ kind: "global" }}
+      scope={{ kind: "realm", realmId }}
       initialQuery={initialQuery}
       initialCategory={category ?? "all"}
       onCategoryChange={(next) => {
         navigate({
-          to: "/search",
+          to: "/realm/$realmId/search",
+          params: { realmId },
           search: (prev: SearchRouteParams) => ({
             ...prev,
             category: next === "all" ? undefined : next,
@@ -36,7 +38,7 @@ function GlobalSearchPage() {
   );
 }
 
-export const Route = createFileRoute("/_mainLayout/search/")({
+export const Route = createFileRoute("/_mainLayout/realm/$realmId/search")({
   validateSearch: (search: Record<string, unknown>): SearchRouteParams => ({
     q: typeof search.q === "string" ? search.q : undefined,
     category:
@@ -44,5 +46,5 @@ export const Route = createFileRoute("/_mainLayout/search/")({
         ? search.category
         : undefined,
   }),
-  component: GlobalSearchPage,
+  component: RealmScopedSearchPage,
 });

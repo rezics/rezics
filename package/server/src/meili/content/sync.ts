@@ -1,4 +1,5 @@
 import {
+  patchContentContainedUnitIds,
   patchContentCredits,
   patchContentMetadata,
   patchContentRealmIds,
@@ -57,4 +58,10 @@ export async function patchContentMetadataToMeili(
   fields: Record<string, any>,
 ): Promise<void> {
   await patchContentMetadata(searchClient, unitId, fields);
+}
+
+export async function patchContentContainedUnitIdsToMeili(
+  shelfUnitId: string,
+): Promise<void> {
+  await patchContentContainedUnitIds(searchClient, shelfUnitId);
 }

@@ -15,11 +15,7 @@ export function mapUserSearchDocToDTO(doc: UserSearchDocument): UserDTO {
     followersCount: doc.followersCount ?? undefined,
     followingsCount: doc.followingsCount ?? undefined,
     permission: doc.permission,
-    joinDate: doc.joinDate
-      ? typeof doc.joinDate === "string"
-        ? doc.joinDate
-        : doc.joinDate.toISOString()
-      : undefined,
+    joinDate: doc.joinDate ?? undefined,
   };
 }
 
@@ -39,10 +35,6 @@ export function mapUserSearchDocToPublicProfile(
     description: doc.description ?? undefined,
     followersCount: doc.followersCount ?? undefined,
     followingsCount: doc.followingsCount ?? undefined,
-    joinDate: doc.joinDate
-      ? typeof doc.joinDate === "string"
-        ? doc.joinDate
-        : doc.joinDate.toISOString()
-      : undefined,
+    joinDate: doc.joinDate ?? undefined,
   };
 }

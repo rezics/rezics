@@ -1,6 +1,7 @@
 import type { SearchQuery } from "@rezics/contract";
 import { describe, expect, it } from "bun:test";
 import {
+  buildSearchParams,
   mergeAppend,
   mergeEffective,
   mergeOverwrite,
@@ -146,5 +147,42 @@ describe("mergeEffective", () => {
   it("implicit type merges with user type", () => {
     const eff = mergeEffective({ type: ["BOOK"] }, { type: ["GAME"] });
     expect(eff.type).toEqual(["BOOK", "GAME"]);
+  });
+});
+
+describe("buildSearchParams", () => {
+  it("omits category=all from URL", () => {
+    const params = buildSearchParams({ keyword: "magic" }, "all");
+    expect(params.get("q")).toBe("magic");
+    expect(params.get("category")).toBeNull();
+  });
+
+  it("includes non-default category", () => {
+    const params = buildSearchParams({ keyword: "epic" }, "reviews");
+    expect(params.get("q")).toBe("epic");
+    expect(params.get("category")).toBe("reviews");
+  });
+
+  it("emits q via SO-style serialization (tags + keyword)", () => {
+    const params = buildSearchParams(
+      { tags: [{ slug: "fantasy" }], keyword: "saga" },
+      "books",
+    );
+    expect(params.get("q")).toBe("[fantasy] saga");
+    expect(params.get("category")).toBe("books");
+  });
+
+  it("omits q when query is empty", () => {
+    const params = buildSearchParams({}, "all");
+    expect(params.get("q")).toBeNull();
+    expect(params.toString()).toBe("");
+  });
+
+  it("category round-trips after patch (mergeAppend simulating patch)", () => {
+    let query: SearchQuery = {};
+    query = mergeAppend(query, { keyword: "rpg" });
+    const params = buildSearchParams(query, "remarks");
+    expect(params.get("q")).toBe("rpg");
+    expect(params.get("category")).toBe("remarks");
   });
 });

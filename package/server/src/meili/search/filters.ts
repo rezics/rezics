@@ -1,0 +1,219 @@
+import type {
+  ContentRating,
+  PostKind,
+  SearchCategory,
+  SearchQuery,
+  SearchScope,
+} from "@rezics/contract";
+
+// ANCHOR: shared filter builders for federated search
+//
+// These builders are pure functions that accept a `SearchQuery` plus the
+// route-derived `SearchScope` (and pre-resolved tag/realm ids when relevant)
+// and return a Meilisearch filter expression as a string array.
+//
+// The federated endpoint (`POST /meili/search/federated`) is the single
+// caller; each sub-query for a permitted index is built via one of these.
+// They are pure so they can be unit-tested without a Prisma client or live
+// Meilisearch instance.
+
+export interface FilterContext {
+  // Tag ids resolved upstream from `query.tags` (SlugRef[]).
+  resolvedTagIds?: string[];
+  // Realm unitId resolved upstream from `query.realm` (SlugRef).
+  resolvedRealmId?: string | null;
+  // Allowed ratings derived from the caller session (already intersected
+  // with `query.ratings` if provided). Pass null/undefined for "no rating
+  // restriction" (e.g., admin contexts); pass an empty array for "no
+  // ratings allowed" — the builder will reject all content.
+  allowedRatings?: ContentRating[] | null;
+}
+
+export interface ContentBuildOpts {
+  // Hint that scopes the content sub-query to either the BOOK-side
+  // surfaces or the SHELF subset. Drives `type =` filters and the book
+  // scope's `containedUnitIds` join.
+  contentSubtype?: "books" | "shelves";
+  // Top-level category hint passed by the federated orchestrator.
+  categoryHint?: SearchCategory;
+}
+
+export interface PostBuildOpts {
+  // Maps category to a `kind =` literal; supersedes `query.kind`/`postKind`.
+  postCategory?: "reviews" | "excerpts" | "remarks" | "posts";
+  categoryHint?: SearchCategory;
+}
+
+const POST_CATEGORY_TO_KIND: Record<NonNullable<PostBuildOpts["postCategory"]>, PostKind> = {
+  reviews: "REVIEW",
+  excerpts: "EXCERPT",
+  remarks: "REMARK",
+  posts: "POST",
+};
+
+function quoteList(values: readonly string[]): string {
+  return values.map((v) => `"${v}"`).join(", ");
+}
+
+// ANCHOR: buildContentFilter
+// Maps SearchScope onto the content index per the strict-membership table:
+//   global → no scope filter
+//   book   → contentSubtype must be "shelves" (BOOK/GAME/MEDIA/LINK excluded)
+//          → containedUnitIds = unitId AND type = "SHELF"
+//   realm  → realmIds = realmId
+//   user   → userId = userId
+
+export function buildContentFilter(
+  query: SearchQuery,
+  scope: SearchScope,
+  ctx: FilterContext = {},
+  opts: ContentBuildOpts = {},
+): string[] {
+  const filter: string[] = [];
+
+  // 1. Type filter
+  if (opts.contentSubtype === "shelves") {
+    filter.push(`type = "SHELF"`);
+  } else if (opts.contentSubtype === "books") {
+    // BOOK-side content surfaces (BOOK | GAME | MEDIA | LINK)
+    filter.push(`type IN ["BOOK", "GAME", "MEDIA", "LINK"]`);
+  } else if (query.type?.length) {
+    if (query.type.length === 1) {
+      filter.push(`type = "${query.type[0]}"`);
+    } else {
+      filter.push(`type IN [${quoteList(query.type)}]`);
+    }
+  }
+
+  // 2. Scope filter
+  if (scope.kind === "book") {
+    filter.push(`containedUnitIds = "${scope.unitId}"`);
+  } else if (scope.kind === "realm") {
+    filter.push(`realmIds = "${scope.realmId}"`);
+  } else if (scope.kind === "user") {
+    filter.push(`userId = "${scope.userId}"`);
+  }
+
+  // 3. Resolved realm tag (from query.realm SlugRef)
+  if (ctx.resolvedRealmId && scope.kind !== "realm") {
+    filter.push(`realmIds = "${ctx.resolvedRealmId}"`);
+  }
+
+  // 4. Tag IDs (already resolved from SlugRefs)
+  for (const tagId of ctx.resolvedTagIds ?? []) {
+    filter.push(`tagIds = "${tagId}"`);
+  }
+
+  // 5. Languages
+  if (query.languages?.length) {
+    for (const lang of query.languages) {
+      filter.push(`languages = "${lang}"`);
+    }
+  }
+
+  // 6. Ratings — intersect query.ratings with allowedRatings if both provided
+  const requested = query.ratings ?? null;
+  const allowed = ctx.allowedRatings ?? null;
+  let effectiveRatings: ContentRating[] | null = null;
+  if (requested && allowed) {
+    const allowedSet = new Set(allowed);
+    effectiveRatings = requested.filter((r) => allowedSet.has(r));
+  } else if (requested) {
+    effectiveRatings = requested;
+  } else if (allowed) {
+    effectiveRatings = allowed;
+  }
+  if (effectiveRatings && effectiveRatings.length > 0) {
+    filter.push(`rating IN [${quoteList(effectiveRatings)}]`);
+  }
+
+  // 7. License
+  if (query.isLicensed === true) filter.push("isLicensed = true");
+  else if (query.isLicensed === false) filter.push("isLicensed = false");
+
+  // 8. Text length
+  if (query.textLength) {
+    if (typeof query.textLength.min === "number") {
+      filter.push(`textLength >= ${query.textLength.min}`);
+    }
+    if (typeof query.textLength.max === "number") {
+      filter.push(`textLength <= ${query.textLength.max}`);
+    }
+  }
+
+  // 9. NSFW (default: exclude). Honors explicit `nsfw: true` to include.
+  if (query.nsfw !== true) {
+    filter.push("nsfw = false");
+  }
+
+  // 10. Visibility — content search is always public-only.
+  filter.push('visibility = "PUBLIC"');
+
+  return filter;
+}
+
+// ANCHOR: buildPostFilter
+// Scope mapping for posts:
+//   global → no scope filter
+//   book   → rootTargetUnitId = unitId
+//   realm  → realmIds = realmId
+//   user   → authorUserId = userId
+
+export function buildPostFilter(
+  query: SearchQuery,
+  scope: SearchScope,
+  _ctx: FilterContext = {},
+  opts: PostBuildOpts = {},
+): string[] {
+  const filter: string[] = [];
+
+  // 1. Kind filter — category-implied wins; otherwise honor query.kind / query.postKind
+  if (opts.postCategory) {
+    filter.push(`kind = "${POST_CATEGORY_TO_KIND[opts.postCategory]}"`);
+  } else if (query.kind) {
+    filter.push(`kind = "${query.kind}"`);
+  } else if (query.postKind?.length) {
+    if (query.postKind.length === 1) {
+      filter.push(`kind = "${query.postKind[0]}"`);
+    } else {
+      filter.push(`kind IN [${quoteList(query.postKind)}]`);
+    }
+  }
+
+  // 2. Scope filter
+  if (scope.kind === "book") {
+    filter.push(`rootTargetUnitId = "${scope.unitId}"`);
+  } else if (scope.kind === "realm") {
+    filter.push(`realmIds = "${scope.realmId}"`);
+  } else if (scope.kind === "user") {
+    filter.push(`authorUserId = "${scope.userId}"`);
+  }
+
+  // 3. Locked posts excluded by default (per content-search-api default filters).
+  filter.push("isLocked = false");
+
+  return filter;
+}
+
+// ANCHOR: buildRealmFilter
+// Realm scope is meaningless on the realms index (you don't search for realms
+// inside a single realm). Only `global` permits this index per strict membership.
+
+export function buildRealmFilter(
+  _query: SearchQuery,
+  _scope: SearchScope,
+): string[] {
+  // Default visibility filter for realms: public only.
+  return ["isPublic = true"];
+}
+
+// ANCHOR: buildUserFilter
+// User scope is meaningless on the users index. Only `global` permits this
+// index per strict membership. The legacy users handler applies no filters.
+
+export function buildUserFilter(
+  _query: SearchQuery,
+  _scope: SearchScope,
+): string[] {
+  return [];
+}

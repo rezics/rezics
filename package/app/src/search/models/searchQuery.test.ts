@@ -54,6 +54,28 @@ describe("parseSearchString", () => {
       keyword: "test",
     });
   });
+
+  test("parses kind:review token to canonical REVIEW", () => {
+    const result = parseSearchString("kind:review epic");
+    expect(result.kind).toBe("REVIEW");
+    expect(result.keyword).toBe("epic");
+  });
+
+  test("parses kind:excerpts (plural) to EXCERPT", () => {
+    const result = parseSearchString("kind:excerpts");
+    expect(result.kind).toBe("EXCERPT");
+  });
+
+  test("kind is single-valued, last wins", () => {
+    const result = parseSearchString("kind:review kind:excerpt");
+    expect(result.kind).toBe("EXCERPT");
+  });
+
+  test("unknown kind value is silently dropped", () => {
+    const result = parseSearchString("kind:bogus hello");
+    expect(result.kind).toBeUndefined();
+    expect(result.keyword).toBe("hello");
+  });
 });
 
 describe("serializeSearchString", () => {
@@ -68,6 +90,10 @@ describe("serializeSearchString", () => {
 
   test("serializes empty query", () => {
     expect(serializeSearchString({})).toBe("");
+  });
+
+  test("serializes kind back to kind:VALUE", () => {
+    expect(serializeSearchString({ kind: "REVIEW" })).toBe("kind:REVIEW");
   });
 });
 

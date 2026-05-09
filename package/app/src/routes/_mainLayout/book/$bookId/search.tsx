@@ -9,7 +9,8 @@ type SearchRouteParams = {
   category?: SearchCategory;
 };
 
-function GlobalSearchPage() {
+function BookScopedSearchPage() {
+  const { bookId } = Route.useParams();
   const { q, category } = Route.useSearch();
   const navigate = useNavigate();
 
@@ -20,12 +21,13 @@ function GlobalSearchPage() {
 
   return (
     <FederatedSearchPage
-      scope={{ kind: "global" }}
+      scope={{ kind: "book", unitId: bookId }}
       initialQuery={initialQuery}
       initialCategory={category ?? "all"}
       onCategoryChange={(next) => {
         navigate({
-          to: "/search",
+          to: "/book/$bookId/search",
+          params: { bookId },
           search: (prev: SearchRouteParams) => ({
             ...prev,
             category: next === "all" ? undefined : next,
@@ -36,7 +38,7 @@ function GlobalSearchPage() {
   );
 }
 
-export const Route = createFileRoute("/_mainLayout/search/")({
+export const Route = createFileRoute("/_mainLayout/book/$bookId/search")({
   validateSearch: (search: Record<string, unknown>): SearchRouteParams => ({
     q: typeof search.q === "string" ? search.q : undefined,
     category:
@@ -44,5 +46,5 @@ export const Route = createFileRoute("/_mainLayout/search/")({
         ? search.category
         : undefined,
   }),
-  component: GlobalSearchPage,
+  component: BookScopedSearchPage,
 });

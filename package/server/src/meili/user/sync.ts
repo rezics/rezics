@@ -26,7 +26,7 @@ export async function syncUserToMeili(userId: string): Promise<void> {
     description: user.description,
     followersCount: user.followersCount,
     followingsCount: user.followingsCount,
-    joinDate: user.joinDate,
+    joinDate: user.joinDate ? user.joinDate.toISOString() : null,
     permission: (user.permission ?? null) as any,
   };
 

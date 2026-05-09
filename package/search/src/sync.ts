@@ -106,7 +106,7 @@ const contentInclude = {
   book: true,
   game: { include: { platforms: true } },
   media: true,
-  shelf: true,
+  shelf: { include: { items: { select: { itemRef: true } } } },
   link: true,
   post: true,
 } as const;
@@ -175,6 +175,14 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const postKind = unit.post?.kind ?? null;
   const textLength = unit.book?.textLength ?? null;
 
+  // Shelf membership: list of unit ids contained in this shelf (SHELF type only)
+  const containedUnitIds: string[] | undefined =
+    unit.type === UnitType.SHELF
+      ? ((unit.shelf?.items ?? []) as { itemRef: string }[]).map(
+          (i) => i.itemRef,
+        )
+      : undefined;
+
   return {
     id: unit.id,
     type: unit.type,
@@ -210,6 +218,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     defaultLanguage: unit.defaultLanguage ?? null,
     coverUrl,
     userId: unit.userId ?? null,
+    ...(containedUnitIds !== undefined ? { containedUnitIds } : {}),
     linkUrl,
     linkSiteName,
     translations: translations.map((tr: any) => ({
@@ -424,6 +433,23 @@ export async function patchContentMetadata(
   fields: Record<string, any>,
 ) {
   await client.patchContent([{ id: unitId, ...fields }]);
+}
+
+/**
+ * Recompute the post-state `containedUnitIds` for a SHELF unit and push a
+ * partial update to Meilisearch. The caller is responsible for invoking this
+ * after every ShelfItem insert/delete on the shelf.
+ */
+export async function patchContentContainedUnitIds(
+  client: SearchClient,
+  shelfUnitId: string,
+) {
+  const items = await prisma.shelfItem.findMany({
+    where: { shelfUnitId },
+    select: { itemRef: true },
+  });
+  const containedUnitIds = items.map((i) => i.itemRef);
+  await client.patchContent([{ id: shelfUnitId, containedUnitIds }]);
 }
 
 // ANCHOR: Post partial sync functions
@@ -814,6 +840,50 @@ export async function syncAllPostRealmIds(client: SearchClient) {
   return { message: "syncAllPostRealmIds success", totalSynced: total };
 }
 
+export async function syncAllContainedUnitIds(client: SearchClient) {
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const shelves: any[] = await prisma.unit.findMany({
+      where: {
+        type: UnitType.SHELF,
+        status: "PUBLISHED",
+      },
+      select: {
+        id: true,
+        shelf: {
+          select: {
+            items: {
+              select: { itemRef: true },
+            },
+          },
+        },
+      },
+      orderBy: { id: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: cursor } : undefined,
+    });
+
+    if (shelves.length === 0) break;
+
+    await client.patchContent(
+      shelves.map((unit) => ({
+        id: unit.id,
+        containedUnitIds: (unit.shelf?.items ?? []).map(
+          (i: { itemRef: string }) => i.itemRef,
+        ),
+      })),
+    );
+
+    total += shelves.length;
+    cursor = shelves[shelves.length - 1]!.id;
+  }
+
+  return { message: "syncAllContainedUnitIds success", totalSynced: total };
+}
+
 export async function syncAllPostRootTargets(client: SearchClient) {
   let cursor: string | undefined;
   let total = 0;
@@ -1049,7 +1119,10 @@ export async function syncAllUsers(client: SearchClient) {
       description: u.description,
       followersCount: u.followersCount,
       followingsCount: u.followingsCount,
-      joinDate: u.joinDate,
+      joinDate:
+        u.joinDate instanceof Date
+          ? u.joinDate.toISOString()
+          : (u.joinDate ?? null),
       permission: (u.permission ?? null) as any,
     }));
 

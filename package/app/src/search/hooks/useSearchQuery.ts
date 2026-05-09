@@ -1,9 +1,12 @@
 import type {
   ContentSearchOptions,
+  SearchCategory,
   SearchQuery,
+  SearchScope,
   TagRef,
 } from "@rezics/contract";
 import { useCallback, useMemo, useState } from "react";
+import { serializeSearchString } from "../models/searchQuery";
 import { toContentSearchOptions } from "../models/toContentSearchOptions";
 
 export type QueryMiddleware = (keyword: string) => Partial<SearchQuery>;
@@ -12,6 +15,8 @@ export interface UseSearchQueryOptions {
   initial?: SearchQuery;
   implicitInitial?: SearchQuery;
   middleware?: QueryMiddleware;
+  scope?: SearchScope;
+  initialCategory?: SearchCategory;
 }
 
 type BindableField = Exclude<keyof SearchQuery, never>;
@@ -20,6 +25,9 @@ export interface UseSearchQueryReturn {
   query: SearchQuery;
   user: SearchQuery;
   implicit: SearchQuery;
+  scope: SearchScope;
+  category: SearchCategory;
+  setCategory: (next: SearchCategory) => void;
   patch: (p: Partial<SearchQuery>) => void;
   set: (p: Partial<SearchQuery>) => void;
   bind: <F extends BindableField>(
@@ -30,6 +38,7 @@ export interface UseSearchQueryReturn {
   };
   reset: () => void;
   toOptions: () => ContentSearchOptions;
+  toSearchParams: () => URLSearchParams;
   middleware?: QueryMiddleware;
 }
 
@@ -107,6 +116,17 @@ export function mergeOverwrite(
   return { ...prev, ...patch };
 }
 
+export function buildSearchParams(
+  query: SearchQuery,
+  category: SearchCategory,
+): URLSearchParams {
+  const params = new URLSearchParams();
+  const q = serializeSearchString(query);
+  if (q) params.set("q", q);
+  if (category !== "all") params.set("category", category);
+  return params;
+}
+
 export function mergeEffective(
   implicit: SearchQuery,
   user: SearchQuery,
@@ -143,10 +163,18 @@ export function mergeEffective(
   return out;
 }
 
+const DEFAULT_SCOPE: SearchScope = { kind: "global" };
+
 export function useSearchQuery(
   options: UseSearchQueryOptions = {},
 ): UseSearchQueryReturn {
-  const { initial, implicitInitial, middleware } = options;
+  const {
+    initial,
+    implicitInitial,
+    middleware,
+    scope = DEFAULT_SCOPE,
+    initialCategory = "all",
+  } = options;
 
   const implicit = useMemo<SearchQuery>(
     () => implicitInitial ?? {},
@@ -154,6 +182,7 @@ export function useSearchQuery(
   );
 
   const [user, setUser] = useState<SearchQuery>(initial ?? {});
+  const [category, setCategory] = useState<SearchCategory>(initialCategory);
 
   const query = useMemo(() => mergeEffective(implicit, user), [implicit, user]);
 
@@ -177,19 +206,29 @@ export function useSearchQuery(
 
   const reset = useCallback(() => {
     setUser(initial ?? {});
-  }, [initial]);
+    setCategory(initialCategory);
+  }, [initial, initialCategory]);
 
   const toOptions = useCallback(() => toContentSearchOptions(query), [query]);
+
+  const toSearchParams = useCallback(
+    () => buildSearchParams(query, category),
+    [query, category],
+  );
 
   return {
     query,
     user,
     implicit,
+    scope,
+    category,
+    setCategory,
     patch,
     set,
     bind,
     reset,
     toOptions,
+    toSearchParams,
     middleware,
   };
 }

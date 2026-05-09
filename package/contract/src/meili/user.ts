@@ -1,23 +1,32 @@
-import type { UserDTO } from "../user";
+import type { Static } from "elysia";
+import { t } from "elysia";
 
-/**
- * Shape of a user document stored in the Meilisearch `users` index.
- * UserType removed — no more AUTHOR/PRESS/PRODUCER distinction.
- */
-export interface UserSearchDocument {
-  id: string;
-  userId: string;
-  name: string;
-  email?: string;
-  slug?: string | null;
-  avatar?: string | null;
-  bio?: string | null;
-  description?: string | null;
-  followersCount?: number | null;
-  followingsCount?: number | null;
-  joinDate?: string | Date | null;
-  permission?: UserDTO["permission"];
-}
+// ANCHOR: User Search Document
+// UserType removed — no more AUTHOR/PRESS/PRODUCER distinction.
+
+export const UserSearchDocumentSchema = t.Object({
+  id: t.String(),
+  userId: t.String(),
+  name: t.String(),
+  email: t.Optional(t.String()),
+  slug: t.Optional(t.Union([t.String(), t.Null()])),
+  avatar: t.Optional(t.Union([t.String(), t.Null()])),
+  bio: t.Optional(t.Union([t.String(), t.Null()])),
+  description: t.Optional(t.Union([t.String(), t.Null()])),
+  followersCount: t.Optional(t.Union([t.Number(), t.Null()])),
+  followingsCount: t.Optional(t.Union([t.Number(), t.Null()])),
+  joinDate: t.Optional(t.Union([t.String(), t.Null()])),
+  permission: t.Optional(
+    t.Object(
+      {
+        role: t.Array(t.String()),
+      },
+      { additionalProperties: true },
+    ),
+  ),
+});
+
+export type UserSearchDocument = Static<typeof UserSearchDocumentSchema>;
 
 export interface UserSearchResult {
   users: UserSearchDocument[];

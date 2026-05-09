@@ -12,7 +12,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search as SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { buildSearchPath } from "@/search";
+import { buildHeaderSubmitPath } from "./buildHeaderSubmitPath";
 import LogoIcon from "@/shared/assets/logo.svg?react";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -134,8 +134,7 @@ export function HeaderSearch({ className }: { className?: string }) {
   const [value, setValue] = useState("");
 
   const submit = () => {
-    const base = pathname.startsWith("/book") ? "/book/search" : "/search";
-    navigate({ to: buildSearchPath({ keyword: value }, base) });
+    navigate({ to: buildHeaderSubmitPath(pathname, value) });
   };
 
   if (isMobile) {

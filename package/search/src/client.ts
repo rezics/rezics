@@ -58,6 +58,7 @@ export class SearchClient {
         "isLicensed",
         "textLength",
         "userId",
+        "containedUnitIds",
       ],
       sortableAttributes: ["createdAt", "updatedAt", "publishedAt"],
     });

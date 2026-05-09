@@ -35,6 +35,9 @@ export const ContentSearchDocumentSchema = t.Object({
   // filter keys formatted as "{realmUnitId}:{tagUnitId}", not display labels.
   realmTagKeys: t.Array(t.String()),
 
+  // Filterable: shelf membership (only populated for type === "SHELF" documents)
+  containedUnitIds: t.Optional(t.Array(t.String())),
+
   // Filterable: metadata
   languages: t.Array(t.String()),
   rating: contentRatingSchema,

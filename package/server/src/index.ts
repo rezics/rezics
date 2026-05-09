@@ -15,7 +15,7 @@ import { initSeedTagsCache } from "./infra/seed-tags";
 import { internalApi } from "./internal/internal.api";
 import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
 import { linkApi } from "./link";
-import { meiliApi } from "./meili";
+import { federatedSearchApi, meiliApi } from "./meili";
 import { postApi } from "./post";
 import { progressApi } from "./progress";
 import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
@@ -174,6 +174,7 @@ app
   .use(userApi)
   .use(userBriefApi)
   .use(meiliApi)
+  .use(federatedSearchApi)
   .use(unitApi)
   .use(workLinkApi)
   .use(workLinkClaimApi)

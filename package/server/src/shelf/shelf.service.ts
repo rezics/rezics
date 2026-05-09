@@ -20,6 +20,7 @@ import {
   UnitType,
   UnitVisibility,
 } from "#/prisma/client";
+import { patchContentContainedUnitIdsToMeili } from "@/meili/content/sync";
 import { AppError } from "@/utils/errors";
 import {
   generateBetween,
@@ -38,6 +39,17 @@ import { isSystemKindKey } from "./system-shelves";
 import { shelfInclude, shelfListSelect } from "./types";
 
 const REBALANCE_WINDOW = 50;
+
+async function syncContainedUnitIdsToMeili(shelfUnitId: string): Promise<void> {
+  try {
+    await patchContentContainedUnitIdsToMeili(shelfUnitId);
+  } catch (error) {
+    console.error("[shelf] containedUnitIds meili sync failed", {
+      shelfUnitId,
+      error,
+    });
+  }
+}
 
 export class ShelfService {
   private buildWhere(options: ShelfListQuery): Prisma.ShelfWhereInput {
@@ -375,6 +387,7 @@ export class ShelfService {
     const projection = await buildShelfItemProjection(shelfUnitId, [
       req.itemRef,
     ]);
+    await syncContainedUnitIdsToMeili(shelfUnitId);
     return mapShelfItemToDTO(item, projection.get(req.itemRef));
   }
 
@@ -390,6 +403,7 @@ export class ShelfService {
         });
       }
     });
+    await syncContainedUnitIdsToMeili(shelfUnitId);
   }
 
   async reorderItem(
@@ -531,10 +545,12 @@ export class ShelfService {
     reviewUnitId: string,
     fallbackKind?: ShelfItemKind,
   ): Promise<ShelfItemDTO> {
+    let didCreateSlot = false;
     const item = await prisma.$transaction(async (tx) => {
       const existing = await tx.shelfItem.findUnique({
         where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
       });
+      if (!existing) didCreateSlot = true;
 
       if (!existing) {
         const kind = fallbackKind ?? (await this.deriveKind(itemRef));
@@ -592,6 +608,9 @@ export class ShelfService {
     });
 
     const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
+    if (didCreateSlot) {
+      await syncContainedUnitIdsToMeili(shelfUnitId);
+    }
     return mapShelfItemToDTO(item, projection.get(itemRef));
   }
 
@@ -669,6 +688,9 @@ export class ShelfService {
       }
       return deleted;
     });
+    if (result.count > 0) {
+      await syncContainedUnitIdsToMeili(shelfUnitId);
+    }
     return { deleted: result.count };
   }
 }

@@ -1,4 +1,17 @@
-import type { ContentRating, SearchQuery } from "@rezics/contract";
+import type { ContentRating, PostKind, SearchQuery } from "@rezics/contract";
+
+const KIND_TOKENS: Record<string, PostKind> = {
+  review: "REVIEW",
+  reviews: "REVIEW",
+  excerpt: "EXCERPT",
+  excerpts: "EXCERPT",
+  remark: "REMARK",
+  remarks: "REMARK",
+  post: "POST",
+  posts: "POST",
+  chapter: "CHAPTER",
+  chapters: "CHAPTER",
+};
 
 const RATING_TOKENS: Record<string, ContentRating> = {
   general: "GENERAL",
@@ -28,6 +41,7 @@ const FILTER_REGEX = /(\w+):("[^"]*"|\S+)/g;
  *   licensed:yes|no → licensed toggle
  *   in:slug         → realm scope
  *   sort:value      → sort order
+ *   kind:value      → post kind (review/excerpt/remark/post/chapter; last-wins)
  *   everything else → keyword
  */
 export function parseSearchString(input: string): SearchQuery {
@@ -77,6 +91,14 @@ export function parseSearchString(input: string): SearchQuery {
       case "sort":
         result.sort = rawValue;
         break;
+      case "kind": {
+        const kind = KIND_TOKENS[rawValue.toLowerCase()];
+        if (kind) {
+          // Single-valued, last-wins. Unknown values are silently dropped.
+          result.kind = kind;
+        }
+        break;
+      }
     }
 
     remaining = remaining.replace(m[0], "");
@@ -131,6 +153,10 @@ export function serializeSearchString(query: SearchQuery): string {
 
   if (query.sort) {
     parts.push(`sort:${query.sort}`);
+  }
+
+  if (query.kind) {
+    parts.push(`kind:${query.kind}`);
   }
 
   if (query.keyword) {

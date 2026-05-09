@@ -27,6 +27,8 @@ export * from "./realm/realm-extra";
 export * from "./schema";
 export * from "./score";
 export * from "./search";
+export * from "./search/scope";
+export * from "./search/federated";
 export * from "./seed-tags";
 export * from "./shelf";
 export * from "./slug";

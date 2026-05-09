@@ -157,3 +157,61 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.realmTagKeys).toEqual(["realm-1:tag-1"]);
   });
 });
+
+describe("buildContentDocument containedUnitIds", () => {
+  const baseUnit = {
+    defaultLanguage: "en",
+    visibility: "PUBLIC",
+    rating: "GENERAL",
+    userId: "user-1",
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+    publishedAt: null,
+    unitTags: [],
+    inRealms: [],
+    realmTagApplicationsAsTargetUnit: [],
+    attributions: [],
+  };
+
+  test("SHELF unit with three items projects all three ids", async () => {
+    process.env.DATABASE_URL ??=
+      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      ...baseUnit,
+      id: "shelf-1",
+      type: "SHELF",
+      translations: [{ language: "en", title: "My Shelf", extra: null }],
+      shelf: {
+        items: [
+          { itemRef: "u-a" },
+          { itemRef: "u-b" },
+          { itemRef: "u-c" },
+        ],
+      },
+    });
+
+    expect((doc as { containedUnitIds?: string[] }).containedUnitIds).toEqual([
+      "u-a",
+      "u-b",
+      "u-c",
+    ]);
+  });
+
+  test("BOOK unit omits containedUnitIds entirely", async () => {
+    process.env.DATABASE_URL ??=
+      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      ...baseUnit,
+      id: "book-1",
+      type: "BOOK",
+      translations: [{ language: "en", title: "Book", extra: null }],
+      book: { textLength: 100, isLicensed: false },
+    });
+
+    expect((doc as { containedUnitIds?: string[] }).containedUnitIds).toBeUndefined();
+  });
+});
