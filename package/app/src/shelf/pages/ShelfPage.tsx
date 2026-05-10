@@ -12,6 +12,10 @@ import {
   Button,
   Checkbox,
   Label,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
   ToggleGroup,
   ToggleGroupItem,
 } from "@rezics/ui/shadcn";
@@ -24,6 +28,7 @@ import {
   LayoutGrid as ViewQuiltIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useUserProfileStore } from "@/user/states";
@@ -70,6 +75,7 @@ const MASONRY_COLUMN_CLASS =
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [viewModeOverride, setViewModeOverride] = useState<{
     unitId: string;
     value: ShelfView | undefined;
@@ -151,6 +157,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const showSortScopeToggle =
     (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
     sortMode !== "manual";
+  const nestedViewLabel = t("shelf.view_modes.nested");
+  const flatViewLabel = t("shelf.view_modes.flat");
+  const masonryViewLabel = t("shelf.view_modes.masonry");
   const streamKeyPrefix = `${effectiveViewMode}:${sortMode}:${
     sortPrimeOnly ? "prime" : "all"
   }`;
@@ -211,81 +220,120 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           )}
         </div>
 
-        <div className="flex flex-row flex-wrap items-center gap-2">
-          <span className="text-sm text-text-secondary">View</span>
-          <ToggleGroup
-            value={[effectiveViewMode]}
-            onValueChange={(values) => {
-              const value = lastSingleToggleValue(values);
-              if (!isShelfView(value)) return;
-              setViewModeOverride({ unitId, value });
-            }}
-            size="sm"
-          >
-            <ToggleGroupItem value="nested" aria-label="Nested view">
-              <ViewAgendaIcon className="h-4 w-4" />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="flat" aria-label="Flat view">
-              <ViewListIcon className="h-4 w-4" />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="masonry" aria-label="Masonry view">
-              <ViewQuiltIcon className="h-4 w-4" />
-            </ToggleGroupItem>
-          </ToggleGroup>
-
-          <span className="text-sm text-text-secondary">Sort</span>
-          <ToggleGroup
-            value={[sortMode]}
-            onValueChange={(values) => {
-              const value = lastSingleToggleValue(values);
-              if (!isShelfSortMode(value)) return;
-              setSortMode(value);
-            }}
-            size="sm"
-          >
-            <ToggleGroupItem value="manual">Manual</ToggleGroupItem>
-            <ToggleGroupItem value="time">Time</ToggleGroupItem>
-            <ToggleGroupItem value="title">Title</ToggleGroupItem>
-          </ToggleGroup>
-          {showSortScopeToggle && (
-            <Label className="flex items-center gap-2 text-sm">
-              <Checkbox
-                checked={sortPrimeOnly}
-                onCheckedChange={(checked) =>
-                  setSortPrimeOnly(checked === true)
-                }
-              />
-              Sort prime only
-            </Label>
-          )}
-          {hydration.orphanItemRefs.length > 0 && (
-            <>
-              <span
-                className="text-xs"
-                style={{
-                  color: "var(--colors-semantic-warning-fill, #f59e0b)",
-                }}
-              >
-                {hydration.orphanItemRefs.length} orphan
-                {hydration.orphanItemRefs.length === 1 ? "" : "s"}
-              </span>
-              {isOwner && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={cleanupMutation.isPending}
-                  onClick={() =>
-                    cleanupMutation.mutate({
-                      shelfUnitId: unitId,
-                      input: { orphanItemRefs: hydration.orphanItemRefs },
-                    })
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-text-secondary">Sort</span>
+            <ToggleGroup
+              value={[sortMode]}
+              onValueChange={(values) => {
+                const value = lastSingleToggleValue(values);
+                if (!isShelfSortMode(value)) return;
+                setSortMode(value);
+              }}
+              size="sm"
+            >
+              <ToggleGroupItem value="manual">Manual</ToggleGroupItem>
+              <ToggleGroupItem value="time">Time</ToggleGroupItem>
+              <ToggleGroupItem value="title">Title</ToggleGroupItem>
+            </ToggleGroup>
+            {showSortScopeToggle && (
+              <Label className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={sortPrimeOnly}
+                  onCheckedChange={(checked) =>
+                    setSortPrimeOnly(checked === true)
                   }
+                />
+                Sort prime only
+              </Label>
+            )}
+            {hydration.orphanItemRefs.length > 0 && (
+              <>
+                <span
+                  className="text-xs"
+                  style={{
+                    color: "var(--colors-semantic-warning-fill, #f59e0b)",
+                  }}
                 >
-                  Clean up
-                </Button>
-              )}
-            </>
-          )}
+                  {hydration.orphanItemRefs.length} orphan
+                  {hydration.orphanItemRefs.length === 1 ? "" : "s"}
+                </span>
+                {isOwner && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={cleanupMutation.isPending}
+                    onClick={() =>
+                      cleanupMutation.mutate({
+                        shelfUnitId: unitId,
+                        input: { orphanItemRefs: hydration.orphanItemRefs },
+                      })
+                    }
+                  >
+                    Clean up
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-sm text-text-secondary">View</span>
+            <TooltipProvider>
+              <ToggleGroup
+                value={[effectiveViewMode]}
+                onValueChange={(values) => {
+                  const value = lastSingleToggleValue(values);
+                  if (!isShelfView(value)) return;
+                  setViewModeOverride({ unitId, value });
+                }}
+                size="sm"
+              >
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <ToggleGroupItem
+                        value="nested"
+                        aria-label={nestedViewLabel}
+                        {...props}
+                      >
+                        <ViewAgendaIcon className="h-4 w-4" />
+                      </ToggleGroupItem>
+                    )}
+                  />
+                  <TooltipContent side="top">{nestedViewLabel}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <ToggleGroupItem
+                        value="flat"
+                        aria-label={flatViewLabel}
+                        {...props}
+                      >
+                        <ViewListIcon className="h-4 w-4" />
+                      </ToggleGroupItem>
+                    )}
+                  />
+                  <TooltipContent side="top">{flatViewLabel}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <ToggleGroupItem
+                        value="masonry"
+                        aria-label={masonryViewLabel}
+                        {...props}
+                      >
+                        <ViewQuiltIcon className="h-4 w-4" />
+                      </ToggleGroupItem>
+                    )}
+                  />
+                  <TooltipContent side="top">{masonryViewLabel}</TooltipContent>
+                </Tooltip>
+              </ToggleGroup>
+            </TooltipProvider>
+          </div>
         </div>
 
         {itemsQuery.isLoading ? (

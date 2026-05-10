@@ -571,6 +571,11 @@ export default {
     a11y: {
       book_review: "書評",
     },
+    view_modes: {
+      nested: "巢狀檢視",
+      flat: "列表檢視",
+      masonry: "瀑布流檢視",
+    },
     discussion: {
       composer: {
         placeholder: "展開討論",

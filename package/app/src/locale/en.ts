@@ -662,6 +662,11 @@ export default {
     a11y: {
       book_review: "Book review",
     },
+    view_modes: {
+      nested: "Nested view",
+      flat: "Flat view",
+      masonry: "Masonry view",
+    },
     discussion: {
       composer: {
         placeholder: "Start a discussion",
