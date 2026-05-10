@@ -27,7 +27,6 @@ function makePost(
     targetUnitId: SHELF_ID,
     directReplyCount: 0,
     replyCount: 0,
-    reactionSummaries: [],
     createdAt: nowIso,
     updatedAt: nowIso,
   };

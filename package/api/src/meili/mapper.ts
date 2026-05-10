@@ -15,7 +15,6 @@ export function mapUnitToReviewDTO(unit: any): any {
     rating: unit.metadata?.rating,
     created_at: unit.createdAt,
     user: unit.user,
-    reactionSummaries: unit.reactionSummaries,
     metadata: unit.metadata,
   };
 }
@@ -43,7 +42,6 @@ export function mapUnitToReadlistDTO(unit: any): any {
     content: unit.content ?? "",
     coverUrl: metadata.coverUrl,
     creator: unit.user,
-    reactionSummaries: unit.reactionSummaries,
     books: items
       .filter((i: any) => i.bookUnitId)
       .map((i: any) => ({ unitId: i.bookUnitId })),

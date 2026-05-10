@@ -51,9 +51,6 @@ export const bookDTOSchema = t.Object({
   // Attribution
   attributions: t.Optional(t.Array(attributionBriefSchema)),
 
-  // Engagement
-  reactionSummaries: t.Optional(t.Any()),
-
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
   publishedAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),

@@ -93,7 +93,6 @@ export const shelfDTOSchema = t.Object({
   itemCount: t.Optional(t.Number()),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   items: t.Optional(t.Array(shelfItemDTOSchema)),
-  reactionSummaries: t.Optional(t.Any()),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });

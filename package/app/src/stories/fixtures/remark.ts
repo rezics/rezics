@@ -14,7 +14,6 @@ function makeRemark(overrides: Partial<PostDTO> & { unitId: string }): PostDTO {
     directReplyCount: 0,
     createdAt: "2024-04-12T11:00:00.000Z",
     updatedAt: "2024-04-12T11:00:00.000Z",
-    reactionSummaries: [],
     ...overrides,
   } as PostDTO;
 }

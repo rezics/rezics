@@ -15,11 +15,22 @@ export {
 // Query Configurations
 export {
   batchReactionSummaryQuery,
+  batchUserReactionsQuery,
   reactionMyQuery,
   reactionQueries,
   reactionSummaryQuery,
   useBatchReactionSummary,
+  useBatchUserReactions,
 } from "./reaction.queries";
+export {
+  useReactionData,
+  type UseReactionDataReturn,
+} from "./useReactionData";
+export {
+  useReactionHydration,
+  type UseReactionHydrationOptions,
+  type UseReactionHydrationReturn,
+} from "./useReactionHydration";
 // Types
 export type {
   ReactionCreateInput,

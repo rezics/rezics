@@ -1,8 +1,10 @@
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useMemo } from "react";
 import type React from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import {
@@ -31,10 +33,13 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
 
   const reactionPost: ReactionBarPost = {
     unitId: excerpt.id,
-    reactionSummaries: (excerpt as unknown as { reactionSummaries?: unknown[] })
-      .reactionSummaries,
     replyCount: (excerpt as unknown as { replyCount?: number }).replyCount,
   };
+  const hydrationIds = useMemo(
+    () => (excerpt.id ? [excerpt.id] : []),
+    [excerpt.id],
+  );
+  useReactionHydration(hydrationIds);
 
   return (
     <div className="flex flex-col gap-4">

@@ -22,7 +22,6 @@ function makeReview(overrides: Partial<PostDTO> & { unitId: string }): PostDTO {
     directReplyCount: 3,
     createdAt: "2024-04-12T09:00:00.000Z",
     updatedAt: "2024-04-12T09:00:00.000Z",
-    reactionSummaries: [],
     ...overrides,
   } as PostDTO;
 }

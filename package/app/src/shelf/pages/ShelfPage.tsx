@@ -5,6 +5,7 @@ import {
   useCleanupOrphansMutation,
   useHydratedShelfItems,
 } from "@rezics/api/shelf";
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -96,6 +97,24 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
       ),
     [stream, orphanRefs],
   );
+
+  const reactionTargetIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (shelf?.unitId) ids.add(shelf.unitId);
+    for (const entry of visibleStream) {
+      if (entry.kind === "review") {
+        if (entry.review.unitId) ids.add(entry.review.unitId);
+      } else {
+        const primary = entry.enriched.primary as
+          | { unitId?: string; id?: string }
+          | undefined;
+        const id = primary?.unitId ?? primary?.id;
+        if (id) ids.add(id);
+      }
+    }
+    return [...ids];
+  }, [shelf?.unitId, visibleStream]);
+  useReactionHydration(reactionTargetIds);
 
   const showSortScopeToggle =
     (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&

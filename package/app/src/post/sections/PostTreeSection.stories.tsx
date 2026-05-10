@@ -26,7 +26,6 @@ function makePost(
     targetUnitId: ROOT_ID,
     directReplyCount: 0,
     replyCount: 0,
-    reactionSummaries: [],
     createdAt: nowIso,
     updatedAt: nowIso,
   };

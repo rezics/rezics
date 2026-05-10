@@ -84,7 +84,6 @@ export const postDTOSchema = t.Object({
   isLocked: t.Optional(t.Boolean()),
   scoreEntryId: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(postExtraSchema)),
-  reactionSummaries: t.Optional(t.Any()),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });

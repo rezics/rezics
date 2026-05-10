@@ -1,3 +1,4 @@
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
@@ -10,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
+import { useMemo } from "react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
@@ -35,6 +37,11 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
     : "";
   const authorName = review.author?.name ?? "";
   const authorInitial = authorName.charAt(0).toUpperCase();
+  const hydrationIds = useMemo(
+    () => (review.unitId ? [review.unitId] : []),
+    [review.unitId],
+  );
+  useReactionHydration(hydrationIds);
 
   return (
     <div className="flex flex-col gap-8">

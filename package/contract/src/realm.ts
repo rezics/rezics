@@ -73,7 +73,6 @@ export const realmDTOSchema = t.Object({
   memberCount: t.Number(),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
-  reactionSummaries: t.Optional(t.Any()),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });

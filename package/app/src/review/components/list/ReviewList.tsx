@@ -1,4 +1,6 @@
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
+import { useMemo } from "react";
 import type React from "react";
 import { ReviewCard } from "../item/ReviewCard";
 
@@ -19,6 +21,11 @@ export const ReviewList: React.FC<ReviewListProps> = ({
   reviews,
   spacing = 0,
 }) => {
+  const targetIds = useMemo(
+    () => reviews.map((r) => r.unitId).filter(Boolean) as string[],
+    [reviews],
+  );
+  useReactionHydration(targetIds);
   const gapClass =
     typeof spacing === "number"
       ? (SPACING_CLASS_BY_NUMBER[spacing] ?? "gap-4")

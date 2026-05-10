@@ -57,7 +57,6 @@ function makePost(body: string): PostDTO {
     authorUserId: "fixture-user",
     kind: PostKind.POST,
     body,
-    reactionSummaries: [],
   } as PostDTO;
 }
 

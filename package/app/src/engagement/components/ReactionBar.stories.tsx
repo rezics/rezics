@@ -1,17 +1,19 @@
+import { reactionKeys } from "@rezics/api/reaction/reaction.keys";
+import type {
+  ReactionMyResponse,
+  ReactionSummaryResponse,
+} from "@rezics/api/reaction/reaction.types";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import type { Action } from "../types";
 import { ReactionBar, type ReactionBarPolicy } from "./ReactionBar";
 
 const samplePost = {
   unitId: "fixture-post-1",
-  reactionSummaries: [
-    { reaction: "like", count: 42 },
-    { reaction: "dislike", count: 5 },
-  ],
   replyCount: 3,
-  userReactions: ["like"],
 };
 
 const samplePolicy: ReactionBarPolicy = {
@@ -19,10 +21,44 @@ const samplePolicy: ReactionBarPolicy = {
 };
 
 const contentAsArtifactActions: Action[] = ["vote", "reply", "shelf", "share"];
-const discussionCardActions: Action[] = ["vote", "reply", "share"];
+const discussionCardActions: Action[] = ["vote", "reply", "share", "more"];
 const discussionCardOverflow: Action[] = ["shelf"];
-const threadRowActions: Action[] = ["vote", "reply"];
+const threadRowActions: Action[] = ["vote", "reply", "more"];
 const threadRowOverflow: Action[] = ["share", "shelf"];
+
+/**
+ * Pre-populate the React Query cache with summary + my-reaction batches for
+ * the demo unitId so `<ReactionBar>` renders the same hydrated state it would
+ * in production. Mirrors the section-level `useReactionHydration` call.
+ */
+function useHydrateDemoReactions(
+  unitIds: string[],
+  summary: ReactionSummaryResponse["summaries"],
+  userReactions: ReactionMyResponse["reactionsByTarget"],
+) {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    queryClient.setQueryData<ReactionSummaryResponse>(
+      reactionKeys.summaryBatch(unitIds),
+      { summaries: summary },
+    );
+    queryClient.setQueryData<ReactionMyResponse>(
+      reactionKeys.myBatch(unitIds),
+      { userId: "fixture-user", reactionsByTarget: userReactions },
+    );
+  }, [queryClient, unitIds, summary, userReactions]);
+}
+
+const HydratedReactionBar: React.FC<
+  React.ComponentProps<typeof ReactionBar>
+> = (props) => {
+  useHydrateDemoReactions(
+    [samplePost.unitId],
+    { [samplePost.unitId]: { like: 42, dislike: 5 } },
+    { [samplePost.unitId]: ["like"] },
+  );
+  return <ReactionBar {...props} />;
+};
 
 const meta = {
   title: "App/Engagement/ReactionBar",
@@ -34,7 +70,7 @@ type Story = StoryObj<typeof meta>;
 
 export const PlainSm: Story = {
   render: () => (
-    <ReactionBar
+    <HydratedReactionBar
       size="sm"
       variant="plain"
       post={samplePost}
@@ -47,7 +83,7 @@ export const PlainSm: Story = {
 
 export const PlainMd: Story = {
   render: () => (
-    <ReactionBar
+    <HydratedReactionBar
       size="md"
       variant="plain"
       post={samplePost}
@@ -60,7 +96,7 @@ export const PlainMd: Story = {
 
 export const PlainLg: Story = {
   render: () => (
-    <ReactionBar
+    <HydratedReactionBar
       size="lg"
       variant="plain"
       post={samplePost}
@@ -72,7 +108,7 @@ export const PlainLg: Story = {
 
 export const PillSm: Story = {
   render: () => (
-    <ReactionBar
+    <HydratedReactionBar
       size="sm"
       variant="pill"
       post={samplePost}
@@ -85,7 +121,7 @@ export const PillSm: Story = {
 
 export const PillMd: Story = {
   render: () => (
-    <ReactionBar
+    <HydratedReactionBar
       size="md"
       variant="pill"
       post={samplePost}
@@ -98,7 +134,7 @@ export const PillMd: Story = {
 
 export const PillLg: Story = {
   render: () => (
-    <ReactionBar
+    <HydratedReactionBar
       size="lg"
       variant="pill"
       post={samplePost}
@@ -122,7 +158,7 @@ export const PillInCard: Story = {
             A short snippet of the post body to give the bar a real surface to
             sit against.
           </p>
-          <ReactionBar
+          <HydratedReactionBar
             size="md"
             variant="pill"
             post={samplePost}
@@ -146,7 +182,7 @@ export const PlainInHero: Story = {
       className="flex max-w-[640px] justify-end rounded-lg p-6 text-white"
       style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
     >
-      <ReactionBar
+      <HydratedReactionBar
         size="md"
         variant="plain"
         post={samplePost}

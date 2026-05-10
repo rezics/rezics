@@ -21,7 +21,6 @@ function makeRealm(
         description: "A community for readers who linger and re-read.",
       },
     ],
-    reactionSummaries: [],
     createdAt: "2024-02-01T00:00:00.000Z",
     updatedAt: "2024-04-12T00:00:00.000Z",
     ...overrides,

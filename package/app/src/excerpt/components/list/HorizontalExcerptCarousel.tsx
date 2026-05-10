@@ -1,4 +1,6 @@
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { UnitDTO } from "@rezics/contract";
+import { useMemo } from "react";
 import type * as React from "react";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import ExcerptCard from "../item/ExcerptCard";
@@ -11,6 +13,12 @@ export interface HorizontalExcerptCarouselProps {
 export const HorizontalExcerptCarousel: React.FC<
   HorizontalExcerptCarouselProps
 > = ({ excerptList, className }) => {
+  const targetIds = useMemo(
+    () => excerptList.map((u) => u.id).filter(Boolean) as string[],
+    [excerptList],
+  );
+  useReactionHydration(targetIds);
+
   if (!excerptList.length) {
     return null;
   }

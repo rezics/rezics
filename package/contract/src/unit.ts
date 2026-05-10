@@ -170,7 +170,6 @@ export const unitDTOSchema = t.Object({
   ...baseUnitSchema.properties,
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   supportLanguages: t.Optional(t.Array(unitSupportLanguageDTOSchema)),
-  reactionSummaries: t.Optional(t.Any()),
 });
 
 export type UnitDTO = (typeof unitDTOSchema)["static"];

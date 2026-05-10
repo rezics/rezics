@@ -1,5 +1,7 @@
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
+import { useMemo } from "react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { RemarkCard } from "../item/RemarkCard";
@@ -22,6 +24,11 @@ export const RemarkList: React.FC<RemarkListProps> = ({
   spacing = 2,
 }) => {
   const { t } = useTranslation();
+  const targetIds = useMemo(
+    () => posts.map((p) => p.unitId).filter(Boolean) as string[],
+    [posts],
+  );
+  useReactionHydration(targetIds);
 
   if (posts.length === 0) {
     return <EmptyState title={t("remark.list.empty.title")} />;

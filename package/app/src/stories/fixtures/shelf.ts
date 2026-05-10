@@ -20,7 +20,6 @@ function makeShelf(
         description: "Books I want to read by year-end.",
       },
     ],
-    reactionSummaries: [],
     createdAt: "2024-03-01T00:00:00.000Z",
     updatedAt: "2024-03-15T00:00:00.000Z",
     ...overrides,

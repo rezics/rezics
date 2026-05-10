@@ -1,10 +1,10 @@
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
-import { useBatchReactionSummary } from "@rezics/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO, PostSearchDocument } from "@rezics/contract";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
@@ -75,41 +75,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
     [baseReviews],
   );
 
-  const { data: reactionSummaryBatch } =
-    useBatchReactionSummary(currentTargetIds);
-
-  const [reviews, setReviews] = useState<Review[]>([]);
-
-  useEffect(() => {
-    if (!baseReviews || baseReviews.length === 0) {
-      setReviews([]);
-      return;
-    }
-
-    if (!reactionSummaryBatch) {
-      setReviews(baseReviews);
-      return;
-    }
-
-    const merged = baseReviews.map((review) => {
-      const summaryMap = reactionSummaryBatch.summaries[review.unitId];
-      if (!summaryMap) return review;
-
-      const reactionSummaries = Object.entries(summaryMap).map(
-        ([reaction, count]) => ({
-          reaction,
-          count,
-        }),
-      );
-
-      return {
-        ...review,
-        reactionSummaries,
-      };
-    });
-
-    setReviews(merged);
-  }, [baseReviews, reactionSummaryBatch]);
+  useReactionHydration(currentTargetIds);
 
   const totalItems: number = data?.total ?? 0;
 
@@ -126,7 +92,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
     <div className="mx-auto max-w-7xl p-4 mt-4">
       <UniversalPaginator<Review>
         ref={ref}
-        data={reviews}
+        data={baseReviews}
         totalExternalItems={totalItems}
         itemsPerPage={10}
         externalItemsPerPage={EXTERNAL_PAGE_SIZE}
@@ -134,7 +100,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
         sortOrder={undefined as any}
         onSortChange={() => {}}
         requestData={handleNeedMoreData}
-        isLoading={isLoading && reviews.length === 0}
+        isLoading={isLoading && baseReviews.length === 0}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         sortControl={

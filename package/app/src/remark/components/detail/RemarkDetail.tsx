@@ -1,9 +1,11 @@
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import {
   ThumbsDown as ThumbDownIcon,
   ThumbsUp as ThumbUpIcon,
 } from "lucide-react";
+import { useMemo } from "react";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
@@ -22,6 +24,11 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
   const rating = (remark.extra as { rating?: number } | null)?.rating;
   const isRecommended = !!(rating && rating >= 3);
   const bookUnitId = remark.targetUnitId;
+  const hydrationIds = useMemo(
+    () => (remark.unitId ? [remark.unitId] : []),
+    [remark.unitId],
+  );
+  useReactionHydration(hydrationIds);
 
   return (
     <div className="flex flex-col gap-4">

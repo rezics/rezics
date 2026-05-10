@@ -21,7 +21,6 @@ function makeExcerpt(overrides: Partial<UnitDTO> & { id: string }): UnitDTO {
           "A library is a collection of possible futures, arranged on shelves we may never reach.",
       },
     ],
-    reactionSummaries: [],
     createdAt: "2024-04-12T10:00:00.000Z",
     updatedAt: "2024-04-12T10:00:00.000Z",
     ...overrides,

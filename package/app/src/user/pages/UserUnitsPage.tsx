@@ -9,7 +9,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rezics/ui/shadcn";
-import { useBatchReactionSummary } from "@rezics/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
 import { UnitType } from "@rezics/contract";
 import {
@@ -42,26 +42,6 @@ const ShelfListView: React.FC<{ shelves: ShelfDTO[] }> = ({ shelves }) => {
 type TabKey = "shelf" | "review" | "remark" | "excerpt" | "book";
 
 const EXTERNAL_PAGE_SIZE = 50;
-
-function mergeReactionSummaries<T extends { id?: string; unitId?: string }>(
-  items: T[],
-  summaries: Record<string, Record<string, number>> | undefined,
-  idField: "id" | "unitId",
-): T[] {
-  if (!summaries) return items;
-  return items.map((item) => {
-    const key = item[idField];
-    if (!key) return item;
-    const summaryMap = summaries[key];
-    if (!summaryMap) return item;
-    return {
-      ...item,
-      reactionSummaries: Object.entries(summaryMap).map(
-        ([reaction, count]) => ({ reaction, count }),
-      ),
-    };
-  });
-}
 
 export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const ref = useRef<UniversalPaginatorHandle>(null);
@@ -100,16 +80,11 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     [shelfDataRaw],
   );
 
-  const { data: shelfReactionBatch } = useBatchReactionSummary(shelfTargetIds);
+  useReactionHydration(shelfTargetIds);
 
   const shelves = useMemo(
-    () =>
-      mergeReactionSummaries(
-        (shelfDataRaw?.items ?? []) as unknown as ShelfDTO[],
-        shelfReactionBatch?.summaries,
-        "id",
-      ),
-    [shelfDataRaw, shelfReactionBatch],
+    () => (shelfDataRaw?.items ?? []) as unknown as ShelfDTO[],
+    [shelfDataRaw],
   );
 
   const totalShelves: number = shelfDataRaw?.total ?? 0;
@@ -168,17 +143,11 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     [activeReviewLikeData],
   );
 
-  const { data: reviewReactionBatch } =
-    useBatchReactionSummary(reviewTargetIds);
+  useReactionHydration(reviewTargetIds);
 
   const reviews = useMemo(
-    () =>
-      mergeReactionSummaries(
-        (activeReviewLikeData?.items ?? []) as unknown as PostDTO[],
-        reviewReactionBatch?.summaries,
-        "unitId",
-      ),
-    [activeReviewLikeData, reviewReactionBatch],
+    () => (activeReviewLikeData?.items ?? []) as unknown as PostDTO[],
+    [activeReviewLikeData],
   );
 
   const totalReviews: number =

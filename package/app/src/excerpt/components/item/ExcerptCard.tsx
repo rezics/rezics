@@ -52,8 +52,6 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
 
   const reactionPost: ReactionBarPost = {
     unitId: excerptId ?? "",
-    reactionSummaries: (excerpt as unknown as { reactionSummaries?: unknown[] })
-      .reactionSummaries,
     replyCount: (excerpt as unknown as { replyCount?: number }).replyCount,
   };
 

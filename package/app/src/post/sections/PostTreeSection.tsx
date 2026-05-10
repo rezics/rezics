@@ -1,9 +1,10 @@
 import { postThreadQuery } from "@rezics/api/post/post";
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { PostReply } from "../components/item/PostReply";
 import { ReplyComposer } from "../forms/ReplyComposer";
 import { usePostTreeCollapse } from "../hooks/usePostTreeCollapse";
@@ -32,6 +33,11 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     postThreadQuery(rootPostUnitId, { mode: "threaded", maxDepth }),
   );
   const posts = data?.posts ?? [];
+  const allUnitIds = useMemo(
+    () => posts.map((p) => p.unitId).filter(Boolean) as string[],
+    [posts],
+  );
+  useReactionHydration(allUnitIds);
   const { isCollapsed, toggleCollapse, visiblePosts } =
     usePostTreeCollapse(posts);
 

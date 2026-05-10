@@ -1,1 +1,0 @@
-// 编写 reactionStore， 因为全局公用唯一 unitID 所以 store 为 unitId key 架构，值是一个对象，为 userId 为键对应 true，意思就是先用 unitId 查询对象存在性，再用 userId 查询对应user 是否点赞，这个缓存非常重要，如果有可能的话，我希望他和 reactionMutations 直接绑定，总值，渲染的时候，应当基于 reactionStore

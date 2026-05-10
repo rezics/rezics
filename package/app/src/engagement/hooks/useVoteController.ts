@@ -2,62 +2,71 @@ import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
 } from "@rezics/api/reaction/reaction.mutations";
-import { useEffect, useState } from "react";
+import { useAuthModal } from "@/user/components/useAuthModal";
+import { useAuth } from "@/user/pages/useAuth";
+import { decideVoteAction, type VoteValue } from "./voteAction";
 
-export type VoteValue = "like" | "dislike" | null;
+export { decideVoteAction };
+export type { VoteAction, VoteValue } from "./voteAction";
 
 export type UseVoteControllerArgs = {
   targetUnitId: string;
-  initialScore: number;
-  initialUserVote?: VoteValue;
+  /** Current user vote derived from the React Query cache by the caller. */
+  userVote: VoteValue;
 };
 
 export type UseVoteControllerReturn = {
-  score: number;
-  userVote: VoteValue;
   toggleUp: () => void;
   toggleDown: () => void;
+  /** Modal helper. Consumers MUST render `auth.AuthModal({})` to surface the login UI. */
+  auth: ReturnType<typeof useAuthModal>;
 };
 
 export function useVoteController({
   targetUnitId,
-  initialScore,
-  initialUserVote = null,
+  userVote,
 }: UseVoteControllerArgs): UseVoteControllerReturn {
-  const [userVote, setUserVote] = useState<VoteValue>(initialUserVote);
-  const [score, setScore] = useState<number>(initialScore);
-
-  useEffect(() => {
-    setUserVote(initialUserVote);
-  }, [initialUserVote]);
-
-  useEffect(() => {
-    setScore(initialScore);
-  }, [initialScore]);
-
+  const { isAuthenticated } = useAuth();
+  const auth = useAuthModal("login");
   const createReaction = useCreateReactionMutation();
   const deleteReaction = useDeleteReactionMutation();
 
   const apply = (next: VoteValue) => {
-    const prev = userVote;
-    if (prev === next) return;
-    const delta =
-      (next === "like" ? 1 : next === "dislike" ? -1 : 0) -
-      (prev === "like" ? 1 : prev === "dislike" ? -1 : 0);
-    setUserVote(next);
-    setScore((s) => s + delta);
-    if (prev) {
-      deleteReaction.mutate({ targetId: targetUnitId, reaction: prev });
-    }
-    if (next) {
-      createReaction.mutate({ targetId: targetUnitId, reaction: next });
+    const action = decideVoteAction({ isAuthenticated, userVote, next });
+    switch (action.kind) {
+      case "auth-required":
+        auth.openLogin();
+        return;
+      case "noop":
+        return;
+      case "delete":
+        deleteReaction.mutate({
+          targetId: targetUnitId,
+          reaction: action.reaction,
+        });
+        return;
+      case "create":
+        createReaction.mutate({
+          targetId: targetUnitId,
+          reaction: action.reaction,
+        });
+        return;
+      case "swap":
+        deleteReaction.mutate({
+          targetId: targetUnitId,
+          reaction: action.remove,
+        });
+        createReaction.mutate({
+          targetId: targetUnitId,
+          reaction: action.add,
+        });
+        return;
     }
   };
 
   return {
-    score,
-    userVote,
     toggleUp: () => apply(userVote === "like" ? null : "like"),
     toggleDown: () => apply(userVote === "dislike" ? null : "dislike"),
+    auth,
   };
 }

@@ -5,7 +5,10 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { reactionApi } from "./reaction.api";
 import { normalizeIds, reactionKeys } from "./reaction.keys";
-import type { ReactionSummaryResponse } from "./reaction.types";
+import type {
+  ReactionMyResponse,
+  ReactionSummaryResponse,
+} from "./reaction.types";
 
 /**
  * Query options for getting summary by target
@@ -60,8 +63,44 @@ export const useBatchReactionSummary = (
   });
 };
 
+/**
+ * Query options for fetching the current user's reactions for a batch of targets.
+ * Normalises `targetIds` (sort + dedupe) for stable cache keys.
+ */
+export const batchUserReactionsQuery = (targetIds: readonly string[]) => {
+  const normalized = normalizeIds(targetIds);
+  return queryOptions({
+    queryKey: reactionKeys.myBatch(normalized),
+    queryFn: () => reactionApi.my(normalized),
+    enabled: normalized.length > 0,
+    staleTime: 1000 * 60 * 1,
+  });
+};
+
+/**
+ * Hook wrapper around the batch user-reactions query.
+ *
+ * Caller passes `enabled` (typically derived from auth state) — when not
+ * authenticated this MUST be false so logged-out users do not generate 401
+ * traffic. The hook is otherwise auto-disabled when no IDs are supplied.
+ */
+export const useBatchUserReactions = (
+  targetIds: readonly string[],
+  options?: { enabled?: boolean },
+) => {
+  const normalized = normalizeIds(targetIds);
+  const enabled = (options?.enabled ?? true) && normalized.length > 0;
+  return useQuery<ReactionMyResponse>({
+    queryKey: reactionKeys.myBatch(normalized),
+    queryFn: () => reactionApi.my(normalized),
+    enabled,
+    staleTime: 1000 * 60 * 1,
+  });
+};
+
 export const reactionQueries = {
   summary: reactionSummaryQuery,
   my: reactionMyQuery,
   summaryBatch: batchReactionSummaryQuery,
+  myBatch: batchUserReactionsQuery,
 };

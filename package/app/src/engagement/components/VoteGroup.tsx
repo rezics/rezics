@@ -1,15 +1,14 @@
+import { useReactionData } from "@rezics/api/reaction/reaction";
 import { Button } from "@rezics/ui/shadcn";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
-import { useVoteController, type VoteValue } from "../hooks/useVoteController";
+import { useVoteController } from "../hooks/useVoteController";
 import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
 
 export type VoteGroupProps = {
   targetUnitId: string;
-  initialScore: number;
-  initialUserVote?: VoteValue;
   /** Override the size from context. Rarely needed; prefer setting on the bar. */
   size?: EngagementSize;
 };
@@ -46,17 +45,21 @@ function sizeToTextClass(size: EngagementSize): string {
 
 export const VoteGroup: React.FC<VoteGroupProps> = ({
   targetUnitId,
-  initialScore,
-  initialUserVote = null,
   size: sizeProp,
 }) => {
   const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const variant = ctx.variant;
-  const { score, userVote, toggleUp, toggleDown } = useVoteController({
+  const { summary, userReactions, isHydrated } = useReactionData(targetUnitId);
+  const score = (summary.like ?? 0) - (summary.dislike ?? 0);
+  const userVote: "like" | "dislike" | null = userReactions.includes("like")
+    ? "like"
+    : userReactions.includes("dislike")
+      ? "dislike"
+      : null;
+  const { toggleUp, toggleDown, auth } = useVoteController({
     targetUnitId,
-    initialScore,
-    initialUserVote,
+    userVote,
   });
 
   const handleUp = (event: React.MouseEvent) => {
@@ -73,16 +76,25 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
   const textClass = sizeToTextClass(size);
   const buttonSizeClass = size === "sm" ? "p-0.5" : "p-1";
 
-  const upActive = userVote === "like";
-  const downActive = userVote === "dislike";
+  const upActive = isHydrated && userVote === "like";
+  const downActive = isHydrated && userVote === "dislike";
 
   const groupClass =
     variant === "pill"
       ? "rounded-[var(--radius-pill,999px)] bg-black/5 dark:bg-white/5 px-1 py-0.5"
       : "";
 
+  const scoreLabelClass = !isHydrated
+    ? "text-text-secondary"
+    : userVote === "like"
+      ? "font-semibold text-sentiment-positive-text"
+      : userVote === "dislike"
+        ? "font-semibold text-sentiment-negative-text"
+        : "text-text-secondary";
+
   return (
     <div className={cn("flex flex-row items-center gap-0.5", groupClass)}>
+      {auth.AuthModal({})}
       <Button
         variant="ghost"
         size="icon"
@@ -104,14 +116,10 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
         className={cn(
           "min-w-[2ch] text-center tabular-nums",
           textClass,
-          userVote === "like"
-            ? "font-semibold text-sentiment-positive-text"
-            : userVote === "dislike"
-              ? "font-semibold text-sentiment-negative-text"
-              : "text-text-secondary",
+          scoreLabelClass,
         )}
       >
-        {formatScore(score)}
+        {isHydrated ? formatScore(score) : "—"}
       </span>
       <Button
         variant="ghost"

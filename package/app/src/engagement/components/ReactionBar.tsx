@@ -1,7 +1,6 @@
 import type React from "react";
 import { useMemo } from "react";
 import { cn } from "@/shared/utils/css-util";
-import { parseReactionSummaries } from "@/shared/utils/reaction-summaries-parser";
 import type {
   Action,
   ActionPolicy,
@@ -20,9 +19,7 @@ import { VoteGroup } from "./VoteGroup";
 
 export type ReactionBarPost = {
   unitId: string;
-  reactionSummaries?: unknown[];
   replyCount?: number;
-  userReactions?: string[];
 };
 
 export type ReactionBarPolicy = {
@@ -56,22 +53,6 @@ export type ReactionBarProps = {
   className?: string;
 };
 
-function deriveVoteState(post: ReactionBarPost): {
-  score: number;
-  userVote: "like" | "dislike" | null;
-} {
-  const { likes = 0, dislikes = 0 } = parseReactionSummaries(
-    (post.reactionSummaries ?? []) as any[],
-  );
-  const userReactions = post.userReactions ?? [];
-  const userVote: "like" | "dislike" | null = userReactions.includes("like")
-    ? "like"
-    : userReactions.includes("dislike")
-      ? "dislike"
-      : null;
-  return { score: (likes ?? 0) - (dislikes ?? 0), userVote };
-}
-
 function resolvePolicy(
   actions: Action[] | undefined,
   overflow: Action[] | undefined,
@@ -97,7 +78,6 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   className,
 }) => {
   const { visible, hidden } = resolvePolicy(actions, overflow, actionPolicy);
-  const { score, userVote } = deriveVoteState(post);
   const shareHref = policy.getShareHref(post);
   const shareTitle = policy.getShareTitle?.(post);
 
@@ -154,14 +134,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
         {visible.map((token) => {
           switch (token) {
             case "vote":
-              return (
-                <VoteGroup
-                  key="vote"
-                  targetUnitId={post.unitId}
-                  initialScore={score}
-                  initialUserVote={userVote}
-                />
-              );
+              return <VoteGroup key="vote" targetUnitId={post.unitId} />;
             case "reply":
               return (
                 <ReplyAction
@@ -184,6 +157,14 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
                 />
               );
             case "more":
+              return (
+                <OverflowMenu
+                  key="more"
+                  items={hidden}
+                  size={size}
+                  onInvoke={handleOverflowInvoke}
+                />
+              );
             case "funny":
             case "award":
               return null;
@@ -191,13 +172,6 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
               return null;
           }
         })}
-        {hidden.length > 0 && (
-          <OverflowMenu
-            items={hidden}
-            size={size}
-            onInvoke={handleOverflowInvoke}
-          />
-        )}
       </div>
     </ReactionBarProvider>
   );
