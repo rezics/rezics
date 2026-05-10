@@ -1,6 +1,6 @@
+import { describe, expect, test } from "bun:test";
 import type { EnrichedShelfItem } from "@rezics/api/shelf";
 import type { BookDTO, PostDTO, ShelfItemDTO } from "@rezics/contract";
-import { describe, expect, test } from "bun:test";
 import { deriveShelfStream, type ShelfStreamEntry } from "./shelfStream";
 
 function makeItem(overrides: Partial<ShelfItemDTO>): ShelfItemDTO {
@@ -203,5 +203,31 @@ describe("deriveShelfStream — sort scope and layout invariants", () => {
     const b = deriveShelfStream(items, "flat", "title", true);
     expect(a).toEqual(b);
     expect(a).not.toBe(b);
+  });
+
+  test("title sort has deterministic fallback when titles match", () => {
+    const tiedItems: EnrichedShelfItem[] = [
+      primeEntry("book-c", "Same", { position: "c" }),
+      primeEntry("book-a", "Same", { position: "a" }),
+      primeEntry("book-b", "Same", { position: "b" }),
+    ];
+
+    const first = deriveShelfStream(tiedItems, "flat", "title", true);
+    const second = deriveShelfStream(tiedItems, "flat", "title", true);
+
+    expect(idsOf(first)).toEqual(["book-a", "book-b", "book-c"]);
+    expect(idsOf(second)).toEqual(idsOf(first));
+  });
+
+  test("time sort has deterministic fallback when timestamps are missing", () => {
+    const tiedItems: EnrichedShelfItem[] = [
+      primeEntry("book-c", "Cherry", { position: "c" }),
+      primeEntry("book-a", "Apple", { position: "a" }),
+      primeEntry("book-b", "Banana", { position: "b" }),
+    ];
+
+    const stream = deriveShelfStream(tiedItems, "masonry", "time", true);
+
+    expect(idsOf(stream)).toEqual(["book-a", "book-b", "book-c"]);
   });
 });

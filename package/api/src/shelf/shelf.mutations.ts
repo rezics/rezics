@@ -19,6 +19,13 @@ import {
 import { collectionApi, shelfApi } from "./shelf.api";
 import { collectionKeys, shelfKeys } from "./shelf.keys";
 
+function invalidateShelfCollections(
+  queryClient: ReturnType<typeof useQueryClient>,
+) {
+  queryClient.invalidateQueries({ queryKey: shelfKeys.lists() });
+  queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
+}
+
 export function useCreateShelfMutation(
   options?: Omit<
     UseMutationOptions<ShelfResponse, Error, CreateShelfInput>,
@@ -30,8 +37,7 @@ export function useCreateShelfMutation(
     mutationFn: (input: CreateShelfInput) => shelfApi.create(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: shelfKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
+      invalidateShelfCollections(queryClient);
       queryClient.setQueryData(shelfKeys.detail(data.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -54,8 +60,7 @@ export function useUpdateShelfMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(shelfKeys.detail(variables.unitId), data);
-      queryClient.invalidateQueries({ queryKey: shelfKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
+      invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -73,8 +78,7 @@ export function useDeleteShelfMutation(
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       queryClient.removeQueries({ queryKey: shelfKeys.detail(unitId) });
-      queryClient.invalidateQueries({ queryKey: shelfKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
+      invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });
@@ -102,6 +106,7 @@ export function useAddShelfItemMutation(
       queryClient.invalidateQueries({
         queryKey: shelfKeys.items(variables.shelfUnitId),
       });
+      invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -133,6 +138,7 @@ export function useReorderShelfItemMutation(
       queryClient.invalidateQueries({
         queryKey: shelfKeys.items(variables.shelfUnitId),
       });
+      invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -160,6 +166,7 @@ export function useRemoveShelfItemMutation(
       queryClient.invalidateQueries({
         queryKey: shelfKeys.items(variables.shelfUnitId),
       });
+      invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -187,6 +194,7 @@ export function useAttachReviewMutation(
       queryClient.invalidateQueries({
         queryKey: shelfKeys.items(variables.shelfUnitId),
       });
+      invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -214,6 +222,7 @@ export function useDetachReviewMutation(
       queryClient.invalidateQueries({
         queryKey: shelfKeys.items(variables.shelfUnitId),
       });
+      invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -245,6 +254,7 @@ export function useSetShelfItemTagsMutation(
       queryClient.invalidateQueries({
         queryKey: shelfKeys.items(variables.shelfUnitId),
       });
+      invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -293,7 +303,7 @@ export function useCollectMutation(
       queryClient.invalidateQueries({
         queryKey: collectionKeys.status(variables.targetId),
       });
-      queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
+      invalidateShelfCollections(queryClient);
       for (const shelfId of data.savedTo) {
         queryClient.invalidateQueries({
           queryKey: shelfKeys.detail(shelfId),

@@ -186,7 +186,6 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       return shelfService.getShelfItems(params.unitId, query);
     },
     {
-      requireLogin: true,
       params: shelfParamsSchema,
       query: shelfItemsQuerySchema,
       detail: {

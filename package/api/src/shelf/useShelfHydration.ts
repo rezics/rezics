@@ -199,34 +199,38 @@ export function useShelfHydration(items: ShelfItemDTO[]): ShelfHydrationResult {
     })),
   });
 
-  const buckets: BucketResult[] = grouped.map((g, i) => {
-    const r = results[i];
-    const base = {
-      primaryItemRefs: g.primaryItemRefs,
-      ids: g.ids,
-      isLoading: r?.isLoading ?? false,
-      isError: r?.isError ?? false,
-    };
-    if (g.bucket === "book") {
-      return {
-        bucket: "book",
-        ...base,
-        data: r?.data as BookDTO[] | undefined,
-      };
-    }
-    if (g.bucket === "post") {
-      return {
-        bucket: "post",
-        ...base,
-        data: r?.data as PostDTO[] | undefined,
-      };
-    }
-    return {
-      bucket: "tag",
-      ...base,
-      data: r?.data as TagListEntryDTO[] | undefined,
-    };
-  });
+  const buckets: BucketResult[] = useMemo(
+    () =>
+      grouped.map((g, i) => {
+        const r = results[i];
+        const base = {
+          primaryItemRefs: g.primaryItemRefs,
+          ids: g.ids,
+          isLoading: r?.isLoading ?? false,
+          isError: r?.isError ?? false,
+        };
+        if (g.bucket === "book") {
+          return {
+            bucket: "book",
+            ...base,
+            data: r?.data as BookDTO[] | undefined,
+          };
+        }
+        if (g.bucket === "post") {
+          return {
+            bucket: "post",
+            ...base,
+            data: r?.data as PostDTO[] | undefined,
+          };
+        }
+        return {
+          bucket: "tag",
+          ...base,
+          data: r?.data as TagListEntryDTO[] | undefined,
+        };
+      }),
+    [grouped, results],
+  );
 
   const orphanItemRefs = useMemo(() => {
     const orphans: string[] = [];
@@ -240,7 +244,7 @@ export function useShelfHydration(items: ShelfItemDTO[]): ShelfHydrationResult {
     return orphans;
   }, [buckets]);
 
-  const isLoading = buckets.some((b) => b.isLoading);
+  const isLoading = useMemo(() => buckets.some((b) => b.isLoading), [buckets]);
 
   return { buckets, orphanItemRefs, isLoading };
 }

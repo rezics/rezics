@@ -19,6 +19,7 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "shelf", ownerUnit: shelf });
   const shelfId = shelf.unitId;
+  const itemsCount = shelf.itemCount ?? shelf.items?.length ?? 0;
 
   return (
     <div>
@@ -40,9 +41,7 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
         <p className="mt-2 text-base text-text-secondary">{description}</p>
       )}
       <div className="mt-2">
-        <span className="text-xs text-text-secondary">
-          {shelf.items?.length ?? 0} items
-        </span>
+        <span className="text-xs text-text-secondary">{itemsCount} items</span>
         {shelf.user?.name && (
           <span className="ml-4 text-xs text-text-secondary">
             by {shelf.user.name}

@@ -1,3 +1,4 @@
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ShelfSortMode, ShelfView } from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
@@ -5,7 +6,6 @@ import {
   useCleanupOrphansMutation,
   useHydratedShelfItems,
 } from "@rezics/api/shelf";
-import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -16,9 +16,9 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import {
-  LayoutGrid as ViewQuiltIcon,
   LayoutList as ViewAgendaIcon,
   List as ViewListIcon,
+  LayoutGrid as ViewQuiltIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
@@ -44,6 +44,18 @@ function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
   return LEGACY_VIEW_MODE_MAP[raw];
 }
 
+function lastSingleToggleValue(values: readonly string[]): string | undefined {
+  return values.at(-1);
+}
+
+function isShelfView(value: string | undefined): value is ShelfView {
+  return value === "nested" || value === "flat" || value === "masonry";
+}
+
+function isShelfSortMode(value: string | undefined): value is ShelfSortMode {
+  return value === "manual" || value === "time" || value === "title";
+}
+
 // MOCK: masonry layout uses CSS column-count as a placeholder until the real
 // masonry primitive lands. The column breaks are browser-driven and not
 // height-balanced; the emitted stream and the enum value are real.
@@ -51,7 +63,10 @@ const MASONRY_COLUMN_CLASS =
   "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
-  const [viewMode, setViewMode] = useState<ShelfView>("nested");
+  const [viewModeOverride, setViewModeOverride] = useState<{
+    unitId: string;
+    value: ShelfView | undefined;
+  }>({ unitId, value: undefined });
   const [sortMode, setSortMode] = useState<ShelfSortMode>("manual");
   const [sortPrimeOnly, setSortPrimeOnly] = useState<boolean>(true);
 
@@ -65,7 +80,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const savedViewMode = normalizePersistedViewMode(
     (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
   );
-  const effectiveViewMode = savedViewMode ?? viewMode;
+  const selectedViewMode =
+    viewModeOverride.unitId === unitId ? viewModeOverride.value : undefined;
+  const effectiveViewMode = selectedViewMode ?? savedViewMode ?? "nested";
 
   const hydration = useHydratedShelfItems(items);
   const currentUser = useUserProfileStore((s) => s.user);
@@ -119,6 +136,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const showSortScopeToggle =
     (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
     sortMode !== "manual";
+  const streamKeyPrefix = `${effectiveViewMode}:${sortMode}:${
+    sortPrimeOnly ? "prime" : "all"
+  }`;
 
   if (detailQuery.isLoading) {
     return (
@@ -138,9 +158,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               {shelf?.itemCount ?? 0} items
             </span>
             <ToggleGroup
-              type="single"
-              value={effectiveViewMode}
-              onValueChange={(v) => v && setViewMode(v as ShelfView)}
+              value={[effectiveViewMode]}
+              onValueChange={(values) => {
+                const value = lastSingleToggleValue(values);
+                if (!isShelfView(value)) return;
+                setViewModeOverride({ unitId, value });
+              }}
               size="sm"
             >
               <ToggleGroupItem value="nested" aria-label="Nested view">
@@ -159,9 +182,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
         <div className="flex flex-row flex-wrap items-center gap-2">
           <span className="text-sm text-text-secondary">Sort</span>
           <ToggleGroup
-            type="single"
-            value={sortMode}
-            onValueChange={(v) => v && setSortMode(v as ShelfSortMode)}
+            value={[sortMode]}
+            onValueChange={(values) => {
+              const value = lastSingleToggleValue(values);
+              if (!isShelfSortMode(value)) return;
+              setSortMode(value);
+            }}
             size="sm"
           >
             <ToggleGroupItem value="manual">Manual</ToggleGroupItem>
@@ -213,6 +239,10 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           <div className="flex justify-center py-8">
             <Spinner size="sm" />
           </div>
+        ) : itemsQuery.isError ? (
+          <p className="py-8 text-center text-error">
+            Failed to load shelf items
+          </p>
         ) : visibleStream.length === 0 ? (
           <p className="py-8 text-center text-text-secondary">
             No items in this shelf
@@ -223,8 +253,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               <ShelfItemRenderer
                 key={
                   entry.kind === "prime"
-                    ? `p:${entry.enriched.item.itemRef}`
-                    : `r:${entry.parentItemRef}:${entry.review.unitId}`
+                    ? `${streamKeyPrefix}:p:${entry.enriched.item.itemRef}`
+                    : `${streamKeyPrefix}:r:${entry.parentItemRef}:${entry.review.unitId}`
                 }
                 entry={entry}
                 viewMode={effectiveViewMode}
@@ -237,8 +267,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               <ShelfItemRenderer
                 key={
                   entry.kind === "prime"
-                    ? `p:${entry.enriched.item.itemRef}`
-                    : `r:${entry.parentItemRef}:${entry.review.unitId}`
+                    ? `${streamKeyPrefix}:p:${entry.enriched.item.itemRef}`
+                    : `${streamKeyPrefix}:r:${entry.parentItemRef}:${entry.review.unitId}`
                 }
                 entry={entry}
                 viewMode={effectiveViewMode}
