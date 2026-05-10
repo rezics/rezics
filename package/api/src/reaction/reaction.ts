@@ -21,6 +21,8 @@ export {
   reactionSummaryQuery,
   useBatchReactionSummary,
   useBatchUserReactions,
+  useGivenReactionsInfinite,
+  useReceivedReactionsInfinite,
 } from "./reaction.queries";
 export {
   useReactionData,
@@ -36,6 +38,12 @@ export type {
   ReactionCreateInput,
   ReactionDeleteQuery,
   ReactionDTO,
+  ReactionHistoryActor,
+  ReactionHistoryGivenItem,
+  ReactionHistoryPage,
+  ReactionHistoryQuery,
+  ReactionHistoryReceivedItem,
+  ReactionHistoryTarget,
   ReactionMyResponse,
   ReactionSummaryResponse,
 } from "./reaction.types";

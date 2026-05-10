@@ -9,6 +9,10 @@ import type {
   ReactionCreateInput,
   ReactionDeleteQuery,
   ReactionDTO,
+  ReactionHistoryGivenItem,
+  ReactionHistoryPage,
+  ReactionHistoryQuery,
+  ReactionHistoryReceivedItem,
   ReactionMyResponse,
   ReactionSummaryResponse,
 } from "./reaction.types";
@@ -94,5 +98,41 @@ export const reactionApi = {
     return apiFetch<{ deleted: boolean }>(`/reaction?${qs.toString()}`, {
       method: "DELETE",
     });
+  },
+
+  /**
+   * List a profile's given reaction events (hydrated, paginated).
+   * Routed through the main server, NOT directly to the reaction service.
+   */
+  given: async (
+    userId: string,
+    query: ReactionHistoryQuery = {},
+  ): Promise<ReactionHistoryPage<ReactionHistoryGivenItem>> => {
+    const qs = new URLSearchParams();
+    if (query.reactions) qs.set("reactions", query.reactions);
+    if (query.cursor) qs.set("cursor", query.cursor);
+    if (query.limit !== undefined) qs.set("limit", String(query.limit));
+    const search = qs.toString();
+    return apiFetch<ReactionHistoryPage<ReactionHistoryGivenItem>>(
+      `/profile/${encodeURIComponent(userId)}/reaction/given${search ? `?${search}` : ""}`,
+    );
+  },
+
+  /**
+   * List a profile's received reaction events (hydrated, paginated).
+   * Routed through the main server, NOT directly to the reaction service.
+   */
+  received: async (
+    userId: string,
+    query: ReactionHistoryQuery = {},
+  ): Promise<ReactionHistoryPage<ReactionHistoryReceivedItem>> => {
+    const qs = new URLSearchParams();
+    if (query.reactions) qs.set("reactions", query.reactions);
+    if (query.cursor) qs.set("cursor", query.cursor);
+    if (query.limit !== undefined) qs.set("limit", String(query.limit));
+    const search = qs.toString();
+    return apiFetch<ReactionHistoryPage<ReactionHistoryReceivedItem>>(
+      `/profile/${encodeURIComponent(userId)}/reaction/received${search ? `?${search}` : ""}`,
+    );
   },
 };

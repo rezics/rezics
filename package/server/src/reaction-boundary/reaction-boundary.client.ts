@@ -1,4 +1,7 @@
 import type {
+  GivenResponse,
+  InternalByUserBody,
+  InternalByUserResponse,
   InternalCreateResponse,
   InternalRemoveResponse,
 } from "@rezics/contract/reaction";
@@ -33,6 +36,27 @@ async function postInternal<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function getPublic<T>(
+  path: string,
+  query: Record<string, string | number | undefined>,
+): Promise<T> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined) continue;
+    params.append(key, String(value));
+  }
+  const qs = params.toString();
+  const url = `${baseUrl}${path}${qs ? `?${qs}` : ""}`;
+  const res = await fetch(url, { method: "GET" });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(
+      `[reaction-boundary-client] ${path} failed: ${res.status} ${text}`,
+    );
+  }
+  return res.json() as Promise<T>;
+}
+
 /**
  * Create a reaction via the reaction service's internal API.
  * Returns the reaction DTO and whether it was newly created.
@@ -62,6 +86,30 @@ export async function removeReaction(
     targetId,
     reaction,
   });
+}
+
+/**
+ * List a user's own reaction events via the reaction service's public endpoint.
+ * Used by the profile Given view; the main server is responsible for any
+ * privacy gating before calling this.
+ */
+export async function listGivenReactions(query: {
+  userId: string;
+  reactions?: string;
+  cursor?: string;
+  limit?: number;
+}): Promise<GivenResponse> {
+  return getPublic<GivenResponse>("/reaction/given", query);
+}
+
+/**
+ * List reactions on a given target id set via the reaction service's internal
+ * endpoint. Used by the profile Received view.
+ */
+export async function listByUser(
+  body: InternalByUserBody,
+): Promise<InternalByUserResponse> {
+  return postInternal<InternalByUserResponse>("/internal/by-user", body);
 }
 
 /**

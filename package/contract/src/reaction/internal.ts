@@ -32,3 +32,28 @@ export const internalRemoveResponseSchema = t.Object({
 });
 export type InternalRemoveResponse =
   (typeof internalRemoveResponseSchema)["static"];
+
+/** POST /internal/by-user request body. */
+export const internalByUserBodySchema = t.Object({
+  targetIds: t.Array(t.String()),
+  reactions: t.Optional(t.Array(t.String())),
+  excludeUserId: t.Optional(t.String()),
+  cursor: t.Optional(t.String()),
+  limit: t.Optional(t.Number()),
+});
+export type InternalByUserBody = (typeof internalByUserBodySchema)["static"];
+
+const internalReactionRowSchema = t.Object({
+  id: t.String(),
+  userId: t.String(),
+  targetId: t.String(),
+  reaction: t.String(),
+  createdAt: t.String(),
+});
+
+export const internalByUserResponseSchema = t.Object({
+  items: t.Array(internalReactionRowSchema),
+  nextCursor: t.Union([t.String(), t.Null()]),
+});
+export type InternalByUserResponse =
+  (typeof internalByUserResponseSchema)["static"];

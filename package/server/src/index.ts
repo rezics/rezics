@@ -19,6 +19,7 @@ import { federatedSearchApi, meiliApi } from "./meili";
 import { postApi } from "./post";
 import { progressApi } from "./progress";
 import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
+import { profileReactionHistoryApi } from "./profile-reaction-history";
 import { reactionBoundaryApi } from "./reaction-boundary";
 import {
   realmApi,
@@ -188,6 +189,7 @@ app
   .use(scoreApi)
   .use(internalApi)
   .use(reactionBoundaryApi)
+  .use(profileReactionHistoryApi)
   .use(dispatchApi)
   .use(tokenApi)
   .use(echoKvApi)

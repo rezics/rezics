@@ -1,26 +1,65 @@
+import {
+  useGivenReactionsInfinite,
+  useReceivedReactionsInfinite,
+} from "@rezics/api/reaction/reaction.queries";
 import type { FC } from "react";
+import { useState } from "react";
 import {
   type ChipDefinition,
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
+import { useProfileContext } from "@/user/components/ProfileLayout";
+import { ReactionList } from "@/user/components/ReactionList";
 
-// MOCK: reaction history tabs — disabled until backend endpoint is available
+type Mode = "given" | "received";
+
 const FILTER_CHIPS: ChipDefinition[] = [
-  { value: "given", label: "Given", disabled: true },
-  { value: "received", label: "Received", disabled: true },
+  { value: "given", label: "Given" },
+  { value: "received", label: "Received" },
 ];
 
-// MOCK: reactions tab placeholder — backend reaction history API not yet available
-export const ReactionsTabSection: FC = () => (
-  <div className="flex flex-col gap-4 py-4">
-    <InnerFilterPanel
-      chips={FILTER_CHIPS}
-      activeValue=""
-      onChipChange={() => {}}
-    />
+export const ReactionsTabSection: FC = () => {
+  const { userId } = useProfileContext();
+  const [mode, setMode] = useState<Mode>("given");
 
-    <p className="text-sm text-text-secondary py-12 text-center">
-      Reaction history is coming soon
-    </p>
-  </div>
-);
+  const givenQuery = useGivenReactionsInfinite(userId, {
+    enabled: mode === "given",
+  });
+  const receivedQuery = useReceivedReactionsInfinite(userId, {
+    enabled: mode === "received",
+  });
+
+  return (
+    <div className="flex flex-col gap-4 py-4">
+      <InnerFilterPanel
+        chips={FILTER_CHIPS}
+        activeValue={mode}
+        onChipChange={(value) => setMode(value as Mode)}
+      />
+
+      {mode === "given" ? (
+        <ReactionList
+          mode="given"
+          items={givenQuery.data?.pages.flatMap((p) => p.items) ?? []}
+          isLoading={givenQuery.isLoading}
+          isFetchingNextPage={givenQuery.isFetchingNextPage}
+          hasNextPage={Boolean(givenQuery.hasNextPage)}
+          fetchNextPage={() => givenQuery.fetchNextPage()}
+          error={(givenQuery.error as Error | null) ?? null}
+          refetch={() => givenQuery.refetch()}
+        />
+      ) : (
+        <ReactionList
+          mode="received"
+          items={receivedQuery.data?.pages.flatMap((p) => p.items) ?? []}
+          isLoading={receivedQuery.isLoading}
+          isFetchingNextPage={receivedQuery.isFetchingNextPage}
+          hasNextPage={Boolean(receivedQuery.hasNextPage)}
+          fetchNextPage={() => receivedQuery.fetchNextPage()}
+          error={(receivedQuery.error as Error | null) ?? null}
+          refetch={() => receivedQuery.refetch()}
+        />
+      )}
+    </div>
+  );
+};

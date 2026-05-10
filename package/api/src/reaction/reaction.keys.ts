@@ -18,4 +18,18 @@ export const reactionKeys = {
   my: (targetId: string) => [...reactionKeys.mine(), { targetId }] as const,
   myBatch: (targetIds: readonly string[]) =>
     [...reactionKeys.mine(), "batch", normalizeIds(targetIds)] as const,
+
+  histories: () => [...reactionKeys.all(), "history"] as const,
+  given: (userId: string, reactions?: string) =>
+    [
+      ...reactionKeys.histories(),
+      "given",
+      { userId, reactions: reactions ?? null },
+    ] as const,
+  received: (userId: string, reactions?: string) =>
+    [
+      ...reactionKeys.histories(),
+      "received",
+      { userId, reactions: reactions ?? null },
+    ] as const,
 } as const;
