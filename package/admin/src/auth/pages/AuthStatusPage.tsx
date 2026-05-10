@@ -53,7 +53,7 @@ function SessionRefreshCard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const permission = useAuthSessionStore((s) => s.permission);
+  const permission = useAuthSessionStore((s) => s.rezics.permission);
   const status: SessionStatus = permission ? "active" : "missing";
 
   async function handleRefresh() {
@@ -115,17 +115,21 @@ function SessionRefreshCard({
 
 function SessionStoreCard() {
   const status = useAuthSessionStore((s) => s.status);
-  const hasAuthIdentity = useAuthSessionStore((s) => s.hasAuthIdentity);
-  const hasMemberSession = useAuthSessionStore((s) => s.hasMemberSession);
-  const registrationStage = useAuthSessionStore((s) => s.registrationStage);
-  const permission = useAuthSessionStore((s) => s.permission);
-  const mainUserExists = useAuthSessionStore((s) => s.mainUserExists);
-  const needsMainSetup = useAuthSessionStore((s) => s.needsMainSetup);
-  const registrationComplete = useAuthSessionStore(
-    (s) => s.registrationComplete,
+  const hasAuthIdentity = useAuthSessionStore((s) => s.auth.hasIdentity);
+  const hasMemberSession = useAuthSessionStore(
+    (s) => s.rezics.hasMemberSession,
   );
-  const user = useAuthSessionStore((s) => s.user);
-  const session = useAuthSessionStore((s) => s.session);
+  const registrationStage = useAuthSessionStore((s) => s.registration.stage);
+  const permission = useAuthSessionStore((s) => s.rezics.permission);
+  const mainUserExists = useAuthSessionStore((s) => s.rezics.mainUserExists);
+  const needsMainSetup = useAuthSessionStore(
+    (s) => s.registration.needsMainSetup,
+  );
+  const registrationComplete = useAuthSessionStore(
+    (s) => s.registration.complete,
+  );
+  const user = useAuthSessionStore((s) => s.auth.user);
+  const session = useAuthSessionStore((s) => s.auth.session);
   const error = useAuthSessionStore((s) => s.error);
 
   const rows: [string, React.ReactNode][] = [

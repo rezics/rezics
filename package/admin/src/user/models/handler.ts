@@ -21,7 +21,7 @@ export async function adminLogin(email: string, password: string) {
   }
 
   await hydrateAuthSessionState();
-  const role = useAuthSessionStore.getState().user?.role;
+  const role = useAuthSessionStore.getState().auth.role;
   if (!(role === "admin" || role === "owner")) {
     await authApi.signOut();
     clearAuthSessionState();

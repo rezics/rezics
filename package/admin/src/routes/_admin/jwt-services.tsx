@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_admin/jwt-services")({
     if (useAuthSessionStore.getState().status === "idle") {
       await hydrateAuthSessionState({ requirePresence: false });
     }
-    const role = useAuthSessionStore.getState().user?.role ?? null;
+    const role = useAuthSessionStore.getState().auth.role;
     if (role !== "owner") {
       throw redirect({ to: "/", replace: true });
     }

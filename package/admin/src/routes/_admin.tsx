@@ -27,9 +27,9 @@ export const Route = createFileRoute("/_admin")({
       await hydrateAuthSessionState({ requirePresence: false });
     }
 
-    const { permission, user } = useAuthSessionStore.getState();
+    const { auth, rezics } = useAuthSessionStore.getState();
 
-    if (permission && isAdminRole(user?.role)) {
+    if (rezics.permission && isAdminRole(auth.role)) {
       return;
     }
 

@@ -21,43 +21,40 @@ export type AuthSessionSnapshot = {
   session: GetSessionStateResponse["session"] | null;
   user: GetSessionStateResponse["user"] | null;
   authSession: GetSessionStateResponse["authSession"];
+  rezicsUserId?: GetSessionStateResponse["rezicsUserId"] | null;
+  rezicsPermission?: GetSessionStateResponse["rezicsPermission"] | null;
+};
+
+export type AuthSessionAuthState = {
+  session: AuthSession | null;
+  user: AuthUser | null;
+  role: string | null;
+  hasIdentity: boolean;
+};
+
+export type RezicsSessionState = {
+  userId: string | null;
+  permission: Permission | null;
+  hasMemberSession: boolean;
+  hasProfileSetupSession: boolean;
+  mainUserExists: boolean;
+};
+
+export type AuthRegistrationState = {
+  stage: AuthRegistrationStage;
+  emailVerified: boolean;
+  complete: boolean;
+  needsVerification: boolean;
+  needsMainSetup: boolean;
 };
 
 export type AuthSessionDerivedState = {
   status: AuthSessionHydrationStatus;
-  session: AuthSession | null;
-  user: AuthUser | null;
+  auth: AuthSessionAuthState;
+  rezics: RezicsSessionState;
+  registration: AuthRegistrationState;
   authSession: GetSessionStateResponse["authSession"] | null;
-  /**
-   * Auth service identity/session state. This can be true before the user has
-   * a main Rezics member session.
-   */
-  hasAuthIdentity: boolean;
-  /**
-   * Main profile setup session state. This can be true after main has
-   * materialized a minimal user but before member activation.
-   */
-  hasProfileSetupSession: boolean;
-  /**
-   * Main server member session state. This is true only when main accepts the
-   * user as a member and can attach server permission.
-   */
-  hasMemberSession: boolean;
-  /**
-   * Main server permission as represented by server-hydrated session state.
-   * `null` when the user has no valid main session.
-   */
-  permission: Permission | null;
   capabilityLevel: AuthCapabilityLevel;
-  registrationStage: AuthRegistrationStage;
-  needsVerification: boolean;
-  needsMainSetup: boolean;
-  /**
-   * Main server actor userId from server-hydrated session state.
-   */
-  userId: string | null;
-  mainUserExists: boolean;
-  registrationComplete: boolean;
   error: string | null;
 };
 
@@ -120,15 +117,9 @@ export function deriveAuthSessionState(
   const needsMainSetup = Boolean(
     hasAuthIdentity && emailVerified && !registrationComplete,
   );
-  const role = snapshot?.user?.role?.toUpperCase();
   const permission =
     authSession?.canAcquireMemberToken || registrationComplete
-      ? ({
-          role:
-            role === "ROOT" || role === "ADMIN" || role === "BLOCKED"
-              ? role
-              : "MEMBER",
-        } as Permission)
+      ? (snapshot?.rezicsPermission ?? null)
       : null;
   const hasMemberSession = permission !== null;
   const registrationStage = deriveRegistrationStage({
@@ -152,42 +143,50 @@ export function deriveAuthSessionState(
 
   return {
     status,
-    session: snapshot?.session ?? null,
-    user: snapshot?.user ?? null,
+    auth: {
+      session: snapshot?.session ?? null,
+      user: snapshot?.user ?? null,
+      role: snapshot?.user?.role ?? null,
+      hasIdentity: hasAuthIdentity,
+    },
+    rezics: {
+      userId: hasMemberSession ? (snapshot?.rezicsUserId ?? null) : null,
+      permission,
+      hasMemberSession,
+      hasProfileSetupSession,
+      mainUserExists,
+    },
+    registration: {
+      stage: registrationStage,
+      emailVerified,
+      complete: registrationComplete,
+      needsVerification,
+      needsMainSetup,
+    },
     authSession,
-    hasAuthIdentity,
-    hasProfileSetupSession,
-    hasMemberSession,
-    permission,
     capabilityLevel,
-    registrationStage,
-    needsVerification,
-    needsMainSetup,
-    userId: hasMemberSession ? (snapshot?.user?.id ?? null) : null,
-    mainUserExists,
-    registrationComplete,
     error,
   };
 }
 
 export const selectHasAuthIdentity = (state: AuthSessionDerivedState) =>
-  state.hasAuthIdentity;
+  state.auth.hasIdentity;
 
 export const selectHasMemberSession = (state: AuthSessionDerivedState) =>
-  state.hasMemberSession;
+  state.rezics.hasMemberSession;
 
 export const selectRegistrationStage = (state: AuthSessionDerivedState) =>
-  state.registrationStage;
+  state.registration.stage;
 
 export const selectIsPendingRegistration = (state: AuthSessionDerivedState) =>
-  state.registrationStage === "verify-email" ||
-  state.registrationStage === "setup-account";
+  state.registration.stage === "verify-email" ||
+  state.registration.stage === "setup-account";
 
 export const selectShouldRedirectToCompleteRegistration =
   selectIsPendingRegistration;
 
 export const selectCanFetchUserProfile = (state: AuthSessionDerivedState) =>
-  state.hasMemberSession;
+  state.rezics.hasMemberSession;
 
 export const selectIsMemberReady = (state: AuthSessionDerivedState) =>
-  state.hasMemberSession && state.registrationComplete;
+  state.rezics.hasMemberSession && state.registration.complete;

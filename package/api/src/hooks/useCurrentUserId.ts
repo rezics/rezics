@@ -7,5 +7,5 @@ import { useAuthSessionStore } from "../states/authSessionStore";
  * Returns `null` when the user has no valid main session.
  */
 export function useCurrentUserId(): string | null {
-  return useAuthSessionStore((s) => s.userId);
+  return useAuthSessionStore((s) => s.rezics.userId);
 }

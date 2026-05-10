@@ -13,5 +13,5 @@ import { useAuthSessionStore } from "../states/authSessionStore";
  * (unauthenticated).
  */
 export function useServerPermission(): Permission | null {
-  return useAuthSessionStore((s) => s.permission);
+  return useAuthSessionStore((s) => s.rezics.permission);
 }

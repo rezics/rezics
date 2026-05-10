@@ -61,11 +61,26 @@ const MANY_POSTS: PostDTO[] = Array.from({ length: 12 }).map((_, i) =>
 function useMockAuthed(authed: boolean) {
   useEffect(() => {
     useAuthSessionStore.setState({
-      permission: authed ? { role: "MEMBER" } : null,
-      hasAuthIdentity: authed,
-      hasMemberSession: authed,
-      registrationComplete: authed,
-      registrationStage: authed ? "complete" : "anonymous",
+      auth: {
+        session: null,
+        user: null,
+        role: null,
+        hasIdentity: authed,
+      },
+      rezics: {
+        userId: authed ? "story-user" : null,
+        permission: authed ? { role: "MEMBER" } : null,
+        hasMemberSession: authed,
+        hasProfileSetupSession: false,
+        mainUserExists: authed,
+      },
+      registration: {
+        stage: authed ? "complete" : "anonymous",
+        emailVerified: authed,
+        complete: authed,
+        needsVerification: false,
+        needsMainSetup: false,
+      },
       capabilityLevel: authed ? "member" : "anonymous",
       status: "ready",
     });

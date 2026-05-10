@@ -77,7 +77,7 @@ export const LoginPage: FC<LoginPageProps> = ({
     if (!hasError) {
       const authSessionState = useAuthSessionStore.getState();
       const destination = resolvePostAuthDestination({
-        registrationComplete: authSessionState.registrationComplete,
+        registrationComplete: authSessionState.registration.complete,
       });
       onClose?.();
       navigate({ to: destination });

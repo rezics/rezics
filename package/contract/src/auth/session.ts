@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { permissionSchema } from "../permission";
 import { authSessionStateSchema } from "./self-service";
 import { authSessionSchema, authUserSchema } from "./sign-in";
 
@@ -16,6 +17,8 @@ export const getSessionStateResponseSchema = t.Object({
   session: authSessionSchema,
   user: authUserSchema,
   authSession: authSessionStateSchema,
+  rezicsUserId: t.Optional(t.Nullable(t.String())),
+  rezicsPermission: t.Optional(t.Nullable(permissionSchema)),
 });
 export type GetSessionStateResponse =
   (typeof getSessionStateResponseSchema)["static"];

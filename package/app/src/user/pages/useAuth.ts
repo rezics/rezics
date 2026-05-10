@@ -17,15 +17,19 @@ import {
  */
 export const useAuth = () => {
   const authSession = useAuthSessionStore((state) => state.authSession);
-  const permission = useAuthSessionStore((state) => state.permission);
+  const permission = useAuthSessionStore((state) => state.rezics.permission);
   const registrationComplete = useAuthSessionStore(
-    (state) => state.registrationComplete,
+    (state) => state.registration.complete,
   );
-  const mainUserExists = useAuthSessionStore((state) => state.mainUserExists);
+  const mainUserExists = useAuthSessionStore(
+    (state) => state.rezics.mainUserExists,
+  );
   const needsVerification = useAuthSessionStore(
-    (state) => state.needsVerification,
+    (state) => state.registration.needsVerification,
   );
-  const needsMainSetup = useAuthSessionStore((state) => state.needsMainSetup);
+  const needsMainSetup = useAuthSessionStore(
+    (state) => state.registration.needsMainSetup,
+  );
   const status = useAuthSessionStore((state) => state.status);
   const hasAuthIdentity = useAuthSessionStore(selectHasAuthIdentity);
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);

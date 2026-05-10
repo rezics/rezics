@@ -444,6 +444,71 @@ describe("main auth public boundary", () => {
     expect(cookie).toContain("SameSite=Lax");
   });
 
+  test("session state keeps auth role separate from Rezics permission", async () => {
+    userFindUnique.mockResolvedValueOnce({
+      userId: "main-root-user",
+      slug: "root",
+      authUserId: "auth-owner-user",
+      permission: { role: ["ROOT"] },
+    });
+    setFetch(async () =>
+      Response.json({
+        session: {
+          id: "session-1",
+          token: "opaque",
+          expiresAt: "2026-03-10T00:00:00.000Z",
+          userId: "auth-owner-user",
+        },
+        user: {
+          id: "auth-owner-user",
+          name: "Root",
+          role: "owner",
+          email: "root@example.com",
+          emailVerified: true,
+          createdAt: "2026-03-10T00:00:00.000Z",
+          updatedAt: "2026-03-10T00:00:00.000Z",
+        },
+        authSession: {
+          email: "root@example.com",
+          emailVerified: true,
+          mainUserExists: true,
+          registrationComplete: true,
+          canAcquireMemberToken: true,
+          readinessStatus: "member-ready",
+          pendingRegistration: {
+            active: false,
+            email: "root@example.com",
+            emailVerified: true,
+            requiresEmailVerification: false,
+            requiresMainAccountSetup: false,
+          },
+          hasPassword: true,
+          canSetPassword: false,
+          providerIds: [],
+        },
+      }),
+    );
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/get-session-state", {
+        headers: {
+          cookie: "better-auth.session_token=opaque",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      user: {
+        id: "auth-owner-user",
+        role: "owner",
+      },
+      rezicsUserId: "main-root-user",
+      rezicsPermission: { role: "ROOT" },
+    });
+  });
+
   test("refresh rejects invalid auth session without setting main session cookie", async () => {
     setFetch(async () =>
       Response.json(

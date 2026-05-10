@@ -53,6 +53,8 @@ const readySession: GetSessionStateResponse = {
     primaryProviderId: "google",
     trustedProviderId: "google",
   },
+  rezicsUserId: "user-1",
+  rezicsPermission: { role: "MEMBER" },
 };
 
 const incompleteSession = {
@@ -135,12 +137,43 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
       capabilityLevel: "member",
-      registrationStage: "complete",
-      hasAuthIdentity: true,
-      hasMemberSession: true,
-      needsVerification: false,
-      registrationComplete: true,
-      mainUserExists: true,
+      auth: {
+        role: "user",
+        hasIdentity: true,
+      },
+      rezics: {
+        userId: "user-1",
+        permission: { role: "MEMBER" },
+        hasMemberSession: true,
+        mainUserExists: true,
+      },
+      registration: {
+        stage: "complete",
+        needsVerification: false,
+        complete: true,
+      },
+    });
+  });
+
+  test("keeps auth role separate from Rezics permission", async () => {
+    const { useAuthSessionStore } = await import("./authSessionStore");
+
+    useAuthSessionStore.getState().setSessionState({
+      ...readySession,
+      user: {
+        ...readySession.user,
+        role: "owner",
+      },
+      rezicsPermission: { role: "ROOT" },
+    });
+
+    expect(useAuthSessionStore.getState()).toMatchObject({
+      auth: {
+        role: "owner",
+      },
+      rezics: {
+        permission: { role: "ROOT" },
+      },
     });
   });
 
@@ -151,13 +184,19 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       capabilityLevel: "pending-verification",
-      registrationStage: "verify-email",
-      hasAuthIdentity: true,
-      hasMemberSession: false,
-      hasProfileSetupSession: false,
-      registrationComplete: false,
-      mainUserExists: false,
-      needsVerification: true,
+      auth: {
+        hasIdentity: true,
+      },
+      rezics: {
+        hasMemberSession: false,
+        hasProfileSetupSession: false,
+        mainUserExists: false,
+      },
+      registration: {
+        stage: "verify-email",
+        complete: false,
+        needsVerification: true,
+      },
     });
   });
 
@@ -168,13 +207,19 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       capabilityLevel: "needs-main-setup",
-      registrationStage: "setup-account",
-      hasAuthIdentity: true,
-      hasProfileSetupSession: true,
-      hasMemberSession: false,
-      registrationComplete: false,
-      mainUserExists: true,
-      needsMainSetup: true,
+      auth: {
+        hasIdentity: true,
+      },
+      rezics: {
+        hasProfileSetupSession: true,
+        hasMemberSession: false,
+        mainUserExists: true,
+      },
+      registration: {
+        stage: "setup-account",
+        complete: false,
+        needsMainSetup: true,
+      },
     });
   });
 
@@ -185,13 +230,19 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       capabilityLevel: "needs-main-setup",
-      registrationStage: "setup-account",
-      hasAuthIdentity: true,
-      hasMemberSession: false,
-      registrationComplete: false,
-      mainUserExists: false,
-      needsVerification: false,
-      needsMainSetup: true,
+      auth: {
+        hasIdentity: true,
+      },
+      rezics: {
+        hasMemberSession: false,
+        mainUserExists: false,
+      },
+      registration: {
+        stage: "setup-account",
+        complete: false,
+        needsVerification: false,
+        needsMainSetup: true,
+      },
     });
   });
 
@@ -208,11 +259,17 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
       capabilityLevel: "pending-verification",
-      registrationStage: "verify-email",
-      hasAuthIdentity: true,
-      hasMemberSession: false,
-      needsVerification: true,
-      registrationComplete: false,
+      auth: {
+        hasIdentity: true,
+      },
+      rezics: {
+        hasMemberSession: false,
+      },
+      registration: {
+        stage: "verify-email",
+        needsVerification: true,
+        complete: false,
+      },
     });
   });
 
@@ -228,9 +285,15 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
       capabilityLevel: "anonymous",
-      registrationStage: "anonymous",
-      hasAuthIdentity: false,
-      hasMemberSession: false,
+      auth: {
+        hasIdentity: false,
+      },
+      rezics: {
+        hasMemberSession: false,
+      },
+      registration: {
+        stage: "anonymous",
+      },
     });
   });
 
@@ -248,11 +311,17 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
       capabilityLevel: "needs-main-setup",
-      registrationStage: "setup-account",
-      hasAuthIdentity: true,
-      hasMemberSession: false,
-      needsMainSetup: true,
-      registrationComplete: false,
+      auth: {
+        hasIdentity: true,
+      },
+      rezics: {
+        hasMemberSession: false,
+      },
+      registration: {
+        stage: "setup-account",
+        needsMainSetup: true,
+        complete: false,
+      },
     });
   });
 
@@ -270,9 +339,15 @@ describe("authSessionStore", () => {
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "error",
       capabilityLevel: "anonymous",
-      registrationStage: "anonymous",
-      hasAuthIdentity: false,
-      hasMemberSession: false,
+      auth: {
+        hasIdentity: false,
+      },
+      rezics: {
+        hasMemberSession: false,
+      },
+      registration: {
+        stage: "anonymous",
+      },
     });
   });
 

@@ -32,7 +32,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const hasAuthIdentity = useAuthSessionStore(selectHasAuthIdentity);
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
   const registrationComplete = useAuthSessionStore(
-    (state) => state.registrationComplete,
+    (state) => state.registration.complete,
   );
   const canRenderChrome = shouldRenderNormalAppChrome({
     hasAuthIdentity,

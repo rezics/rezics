@@ -1,10 +1,13 @@
 export {
   type AuthCapabilityLevel,
+  type AuthRegistrationState,
   type AuthRegistrationStage,
+  type AuthSessionAuthState,
   type AuthSessionDerivedState,
   type AuthSessionHydrationStatus,
   type AuthSessionSnapshot,
   type AuthSessionStoreState,
+  type RezicsSessionState,
   clearAuthSessionState,
   deriveAuthSessionState,
   hydrateAuthSessionState,

@@ -47,7 +47,7 @@ export function AdminNav({
   onNavigate?: () => void;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const currentRole = useAuthSessionStore((state) => state.user?.role ?? null);
+  const currentRole = useAuthSessionStore((state) => state.auth.role);
 
   const initialOpenGroups = React.useMemo(() => {
     const open: Record<string, boolean> = {};

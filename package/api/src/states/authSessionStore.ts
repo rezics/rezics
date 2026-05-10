@@ -57,6 +57,8 @@ export async function hydrateAuthSessionState(options?: {
       session: serverState.session ?? null,
       user: serverState.user ?? null,
       authSession: serverState.authSession,
+      rezicsUserId: serverState.rezicsUserId ?? null,
+      rezicsPermission: serverState.rezicsPermission ?? null,
     };
 
     useAuthSessionStore.getState().setSessionState(sessionState);

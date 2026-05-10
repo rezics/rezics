@@ -1,9 +1,12 @@
 export {
   type AuthCapabilityLevel,
+  type AuthRegistrationState,
   type AuthRegistrationStage,
+  type AuthSessionAuthState,
   type AuthSessionDerivedState,
   type AuthSessionHydrationStatus,
   type AuthSessionSnapshot,
+  type RezicsSessionState,
   deriveAuthSessionState,
   selectCanFetchUserProfile,
   selectHasAuthIdentity,
