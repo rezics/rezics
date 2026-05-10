@@ -1,5 +1,6 @@
 import type { Permission, UnitDTO } from "@rezics/contract";
 import {
+  BasicAdminPermission,
   hasPermissionToUpdateBook,
   hasPermissionToUpdateChapter,
   hasPermissionToUpdatePost,
@@ -36,7 +37,9 @@ export function computeCanEdit(
   resource: EditableResource,
   ownerUnit: OwnerBearing,
 ): boolean {
-  if (!permission || !actorUserId) return false;
+  if (!permission) return false;
+  if (BasicAdminPermission(permission)) return true;
+  if (!actorUserId) return false;
 
   const unit = ownerUnit as UnitDTO | undefined;
 

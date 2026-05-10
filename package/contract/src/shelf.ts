@@ -24,6 +24,7 @@ export const shelfItemKindSchema = t.Union([
   t.Literal("quote"),
   t.Literal("post"),
   t.Literal("chapter"),
+  t.Literal("shelf"),
   t.Literal("tag"),
   t.Literal("realm"),
   t.Literal("image"),

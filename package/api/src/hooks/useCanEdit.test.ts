@@ -40,6 +40,12 @@ describe("computeCanEdit", () => {
     ).toBe(true);
   });
 
+  test("ADMIN role → true even before actor id hydration", () => {
+    expect(computeCanEdit(permission("ADMIN"), null, "shelf", undefined)).toBe(
+      true,
+    );
+  });
+
   test("ROOT role → true regardless of owner", () => {
     expect(
       computeCanEdit(permission("ROOT"), "other-user", "shelf", ownedUnit),

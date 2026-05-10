@@ -1,3 +1,4 @@
+import { useCanEdit } from "@rezics/api/hooks";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ShelfSortMode, ShelfView } from "@rezics/api/shelf";
 import {
@@ -15,14 +16,19 @@ import {
   ToggleGroupItem,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import {
+  Pencil as EditIcon,
   LayoutList as ViewAgendaIcon,
   List as ViewListIcon,
   LayoutGrid as ViewQuiltIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { ReactionBar, type ReactionBarPost } from "@/engagement";
+import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
+import { shelfDetailActions, shelfPolicy } from "../models/shelfPolicy";
 import { deriveShelfStream } from "../models/shelfStream";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
 
@@ -63,6 +69,7 @@ const MASONRY_COLUMN_CLASS =
   "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
+  const navigate = useNavigate();
   const [viewModeOverride, setViewModeOverride] = useState<{
     unitId: string;
     value: ShelfView | undefined;
@@ -75,7 +82,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
 
   const shelf = detailQuery.data;
   const items = itemsQuery.data?.items ?? [];
-  const title = shelf?.translations?.[0]?.title ?? "Shelf";
+  const translation = shelf ? getTranslation(shelf.translations) : undefined;
+  const title = translation?.title ?? "Shelf";
+  const description = translation?.description ?? "";
 
   const savedViewMode = normalizePersistedViewMode(
     (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
@@ -87,6 +96,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const hydration = useHydratedShelfItems(items);
   const currentUser = useUserProfileStore((s) => s.user);
   const isOwner = !!currentUser && currentUser.userId === shelf?.userId;
+  const canEditShelf = useCanEdit({ resource: "shelf", ownerUnit: shelf });
   const cleanupMutation = useCleanupOrphansMutation();
 
   const orphanRefs = useMemo(
@@ -133,6 +143,11 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   }, [shelf?.unitId, visibleStream]);
   useReactionHydration(reactionTargetIds);
 
+  const reactionPost = useMemo<ReactionBarPost | null>(
+    () => (shelf?.unitId ? { unitId: shelf.unitId } : null),
+    [shelf?.unitId],
+  );
+
   const showSortScopeToggle =
     (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
     sortMode !== "manual";
@@ -151,35 +166,73 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <div className="flex flex-col gap-6">
-        <div className="flex flex-row items-center justify-between">
-          <h1 className="text-2xl font-semibold">{title}</h1>
-          <div className="flex flex-row items-center gap-2">
-            <span className="text-sm text-text-secondary">
-              {shelf?.itemCount ?? 0} items
-            </span>
-            <ToggleGroup
-              value={[effectiveViewMode]}
-              onValueChange={(values) => {
-                const value = lastSingleToggleValue(values);
-                if (!isShelfView(value)) return;
-                setViewModeOverride({ unitId, value });
-              }}
-              size="sm"
-            >
-              <ToggleGroupItem value="nested" aria-label="Nested view">
-                <ViewAgendaIcon className="h-4 w-4" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="flat" aria-label="Flat view">
-                <ViewListIcon className="h-4 w-4" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="masonry" aria-label="Masonry view">
-                <ViewQuiltIcon className="h-4 w-4" />
-              </ToggleGroupItem>
-            </ToggleGroup>
+        <div className="flex flex-col gap-5 border-b border-border-whisper pb-5 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl font-semibold leading-[1.3]">{title}</h1>
+            {description && (
+              <p className="mt-2 max-w-2xl text-base text-text-secondary">
+                {description}
+              </p>
+            )}
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
+              <span>{shelf?.itemCount ?? 0} items</span>
+              {shelf?.user?.name && <span>by {shelf.user.name}</span>}
+            </div>
           </div>
+
+          {(reactionPost || (canEditShelf && shelf?.unitId)) && (
+            <div className="flex flex-col gap-2 md:items-end">
+              {canEditShelf && shelf?.unitId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-text-secondary hover:text-text-primary"
+                  onClick={() =>
+                    navigate({
+                      to: "/shelf/$shelfId/edit",
+                      params: { shelfId: shelf.unitId },
+                    })
+                  }
+                >
+                  <EditIcon className="h-4 w-4" />
+                  Edit shelf
+                </Button>
+              )}
+              {reactionPost && (
+                <ReactionBar
+                  size="lg"
+                  post={reactionPost}
+                  policy={shelfPolicy}
+                  actions={shelfDetailActions}
+                  className="md:justify-end"
+                />
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-row flex-wrap items-center gap-2">
+          <span className="text-sm text-text-secondary">View</span>
+          <ToggleGroup
+            value={[effectiveViewMode]}
+            onValueChange={(values) => {
+              const value = lastSingleToggleValue(values);
+              if (!isShelfView(value)) return;
+              setViewModeOverride({ unitId, value });
+            }}
+            size="sm"
+          >
+            <ToggleGroupItem value="nested" aria-label="Nested view">
+              <ViewAgendaIcon className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="flat" aria-label="Flat view">
+              <ViewListIcon className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="masonry" aria-label="Masonry view">
+              <ViewQuiltIcon className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+
           <span className="text-sm text-text-secondary">Sort</span>
           <ToggleGroup
             value={[sortMode]}

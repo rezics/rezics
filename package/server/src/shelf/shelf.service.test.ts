@@ -83,7 +83,23 @@ describe("ShelfService", () => {
     await shelfService.addItem("shelf-1", { itemRef: "book-1", kind: "book" });
 
     expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledTimes(1);
-    expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledWith("shelf-1");
+    expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledWith(
+      "shelf-1",
+    );
+  });
+
+  test("addItem rejects direct self-containment", async () => {
+    const { shelfService } = await import("./shelf.service");
+
+    await expect(
+      shelfService.addItem("shelf-1", { itemRef: "shelf-1", kind: "shelf" }),
+    ).rejects.toThrow(/cannot contain itself/);
+  });
+
+  test("mapUnitToKind maps shelves to shelf items", async () => {
+    const { mapUnitToKind } = await import("./shelf.service");
+
+    expect(mapUnitToKind("SHELF" as any, null)).toBe("shelf");
   });
 
   test("removeItem syncs containedUnitIds to Meilisearch after the canonical delete", async () => {
@@ -105,6 +121,8 @@ describe("ShelfService", () => {
     await shelfService.removeItem("shelf-1", "book-1");
 
     expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledTimes(1);
-    expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledWith("shelf-1");
+    expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledWith(
+      "shelf-1",
+    );
   });
 });

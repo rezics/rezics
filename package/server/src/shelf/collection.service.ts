@@ -6,6 +6,7 @@ import type {
   ToggleFavoriteResponse,
 } from "@rezics/contract";
 import { PostKind, prisma, UnitType } from "#/prisma/client";
+import { AppError } from "@/utils/errors";
 import { generateBetween } from "./fractional-index";
 import { mapUnitToKind } from "./shelf.service";
 import { getOrCreateSystemShelf } from "./system-shelves";
@@ -85,6 +86,10 @@ export class CollectionService {
 
     await prisma.$transaction(async (tx) => {
       for (const shelfId of shelfIds) {
+        if (shelfId === resolved.itemRef) {
+          throw new AppError(400, "A shelf cannot contain itself");
+        }
+
         const shelf = await tx.shelf.findFirst({
           where: { unitId: shelfId, unit: { userId } },
         });
@@ -179,6 +184,10 @@ export class CollectionService {
   ): Promise<ToggleFavoriteResponse> {
     const favShelfId = await this.getFavoritesShelfId(userId);
     const resolved = await this.resolveTarget(targetId, false);
+
+    if (favShelfId === resolved.itemRef) {
+      throw new AppError(400, "A shelf cannot contain itself");
+    }
 
     const existing = await prisma.shelfItem.findUnique({
       where: {

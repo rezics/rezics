@@ -3,7 +3,13 @@ import type {
   ShelfView,
   TagListEntryDTO,
 } from "@rezics/api/shelf";
-import type { BookDTO, PostDTO, UnitDTO, UnitTagDTO } from "@rezics/contract";
+import type {
+  BookDTO,
+  PostDTO,
+  ShelfDTO,
+  UnitDTO,
+  UnitTagDTO,
+} from "@rezics/contract";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { HorizontalBookCard } from "@/book-library/components/item/HorizontalBookCard";
@@ -14,6 +20,7 @@ import { ReviewCard } from "@/review/components/item/ReviewCard";
 import { getBookAuthorName } from "@/shared/utils/translation-helpers";
 import { SingleTagChip } from "@/tag/components/TagList";
 import type { ShelfStreamEntry } from "../models/shelfStream";
+import { ShelfCard } from "./ShelfCard";
 import { ShelfItemCard } from "./ShelfItemCard";
 
 interface ShelfItemRendererProps {
@@ -69,6 +76,11 @@ function renderPrimary(
       const post = primary as PostDTO | undefined;
       if (!post) return null;
       return <PostCard post={post} />;
+    }
+    case "shelf": {
+      const shelf = primary as ShelfDTO | undefined;
+      if (!shelf) return null;
+      return <ShelfCard shelf={shelf} />;
     }
     case "tag": {
       const tag = primary as TagListEntryDTO | undefined;

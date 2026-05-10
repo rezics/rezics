@@ -556,6 +556,11 @@ export async function getMainAwareAuthSessionState(
   const mainUserExists = Boolean(mainUser);
   const memberReady = mainUser?.slug != null;
   const registrationComplete = emailVerified && memberReady;
+  const dbPermission = mainUser?.permission as
+    | { role?: string[] }
+    | null
+    | undefined;
+  const role = dbPermission?.role?.[0] ?? sessionState.user?.role ?? "MEMBER";
   const readinessStatus = !emailVerified
     ? "pending-verification"
     : memberReady
@@ -565,6 +570,12 @@ export async function getMainAwareAuthSessionState(
   return jsonResponse(
     {
       ...sessionState,
+      user: sessionState.user
+        ? {
+            ...sessionState.user,
+            role,
+          }
+        : sessionState.user,
       authSession: {
         ...sessionState.authSession,
         emailVerified,

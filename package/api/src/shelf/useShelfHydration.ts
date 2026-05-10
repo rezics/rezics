@@ -1,6 +1,7 @@
 import type {
   BookDTO,
   PostDTO,
+  ShelfDTO,
   ShelfItemDTO,
   ShelfItemKind,
 } from "@rezics/contract";
@@ -12,8 +13,9 @@ import { postApi } from "../post/post.api";
 import { postKeys } from "../post/post.keys";
 import { tagApi } from "../tag/tag.api";
 import { tagKeys } from "../tag/tag.keys";
+import { shelfApi } from "./shelf.api";
 
-type HydrationBucket = "book" | "post" | "tag";
+type HydrationBucket = "book" | "post" | "shelf" | "tag";
 
 const KIND_TO_BUCKET: Record<ShelfItemKind, HydrationBucket | null> = {
   book: "book",
@@ -21,6 +23,7 @@ const KIND_TO_BUCKET: Record<ShelfItemKind, HydrationBucket | null> = {
   quote: "post",
   post: "post",
   chapter: null,
+  shelf: "shelf",
   tag: "tag",
   realm: null,
   image: null,
@@ -64,6 +67,14 @@ export type BucketResult =
       data?: TagListEntryDTO[];
       isLoading: boolean;
       isError: boolean;
+    }
+  | {
+      bucket: "shelf";
+      primaryItemRefs: string[];
+      ids: string[];
+      data?: ShelfDTO[];
+      isLoading: boolean;
+      isError: boolean;
     };
 
 export interface ShelfHydrationResult {
@@ -75,7 +86,7 @@ export interface ShelfHydrationResult {
   isLoading: boolean;
 }
 
-export type ShelfPrimaryDTO = BookDTO | PostDTO | TagListEntryDTO;
+export type ShelfPrimaryDTO = BookDTO | PostDTO | ShelfDTO | TagListEntryDTO;
 
 export interface EnrichedShelfItem {
   item: ShelfItemDTO;
@@ -94,7 +105,9 @@ type FetchedBucketData<B extends HydrationBucket> = B extends "book"
   ? BookDTO[]
   : B extends "post"
     ? PostDTO[]
-    : TagListEntryDTO[];
+    : B extends "shelf"
+      ? ShelfDTO[]
+      : TagListEntryDTO[];
 
 async function fetchBucket<B extends HydrationBucket>(
   bucket: B,
@@ -109,13 +122,17 @@ async function fetchBucket<B extends HydrationBucket>(
     const res = await postApi.list({ ids: ids.join(","), limit: ids.length });
     return res.posts as FetchedBucketData<B>;
   }
+  if (bucket === "shelf") {
+    const res = await shelfApi.list({ ids: ids.join(","), limit: ids.length });
+    return res.shelves as FetchedBucketData<B>;
+  }
   const res = await tagApi.list({ ids: ids.join(","), limit: ids.length });
   return res.tags as unknown as FetchedBucketData<B>;
 }
 
 function seedCache(
   bucket: HydrationBucket,
-  unit: BookDTO | PostDTO | TagListEntryDTO,
+  unit: BookDTO | PostDTO | ShelfDTO | TagListEntryDTO,
   setQueryData: ReturnType<typeof useQueryClient>["setQueryData"],
 ) {
   if (bucket === "book") setQueryData(bookKeys.detail(unit.unitId), unit);
@@ -223,6 +240,13 @@ export function useShelfHydration(items: ShelfItemDTO[]): ShelfHydrationResult {
             data: r?.data as PostDTO[] | undefined,
           };
         }
+        if (g.bucket === "shelf") {
+          return {
+            bucket: "shelf",
+            ...base,
+            data: r?.data as ShelfDTO[] | undefined,
+          };
+        }
         return {
           bucket: "tag",
           ...base,
@@ -263,6 +287,7 @@ export function useHydratedShelfItems(
   const enriched = useMemo<EnrichedShelfItem[]>(() => {
     const bookMap = new Map<string, BookDTO>();
     const postMap = new Map<string, PostDTO>();
+    const shelfMap = new Map<string, ShelfDTO>();
     const tagMap = new Map<string, TagListEntryDTO>();
 
     for (const b of buckets) {
@@ -271,6 +296,8 @@ export function useHydratedShelfItems(
         for (const dto of b.data) bookMap.set(dto.unitId, dto);
       } else if (b.bucket === "post") {
         for (const dto of b.data) postMap.set(dto.unitId, dto);
+      } else if (b.bucket === "shelf") {
+        for (const dto of b.data) shelfMap.set(dto.unitId, dto);
       } else {
         for (const dto of b.data) tagMap.set(dto.unitId, dto);
       }
@@ -281,6 +308,7 @@ export function useHydratedShelfItems(
       let primary: ShelfPrimaryDTO | undefined;
       if (primaryBucket === "book") primary = bookMap.get(item.itemRef);
       else if (primaryBucket === "post") primary = postMap.get(item.itemRef);
+      else if (primaryBucket === "shelf") primary = shelfMap.get(item.itemRef);
       else if (primaryBucket === "tag") primary = tagMap.get(item.itemRef);
 
       const attachedReviews = item.reviewIds

@@ -296,6 +296,10 @@ export class ShelfService {
     shelfUnitId: string,
     req: AddShelfItemInput,
   ): Promise<ShelfItemDTO> {
+    if (shelfUnitId === req.itemRef) {
+      throw new AppError(400, "A shelf cannot contain itself");
+    }
+
     const kind = req.kind ?? (await this.deriveKind(req.itemRef));
 
     const last = await prisma.shelfItem.findFirst({
@@ -712,6 +716,8 @@ export function mapUnitToKind(
       return "tag";
     case UnitType.REALM:
       return "realm";
+    case UnitType.SHELF:
+      return "shelf";
     case UnitType.LINK:
       return "link";
     case UnitType.GAME:
