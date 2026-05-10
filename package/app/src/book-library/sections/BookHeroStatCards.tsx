@@ -55,10 +55,8 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
     enabled: Boolean(bookId),
   });
 
-  // MOCK: total counts — preview endpoints return only a small page, not a
-  // total. Falls back to the page length until counts land on the API.
-  const reviewCount = reviewData?.posts?.length ?? 0;
-  const shelfCount = shelfData?.shelves?.length ?? 0;
+  const reviewCount = reviewData?.total ?? reviewData?.posts?.length ?? 0;
+  const shelfCount = shelfData?.total ?? shelfData?.shelves?.length ?? 0;
   const tagCount = tagsData?.tags?.length ?? 0;
 
   type StatDef = {
