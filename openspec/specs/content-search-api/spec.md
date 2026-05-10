@@ -12,13 +12,13 @@ All content search queries SHALL be routed through a server API endpoint. The fr
 
 ### Requirement: Search endpoint accepts typed ContentSearchOptions
 
-The server SHALL expose a content search endpoint that accepts `ContentSearchOptions` with the following fields: `keyword` (free text), `type` (UnitType filter), `tagIds` (global tag UUIDs), `realmId` (realm UUID), `realmTagIds` (tag UUIDs scoped to the specified realm), `languages` (language codes), `nsfw` (boolean, default false), `isLicensed` (boolean), `sort` (field + order), `offset`, and `limit`.
+The server SHALL expose a content search endpoint that accepts `ContentSearchOptions` with the following fields: `keyword` (free text), `type` (UnitType filter), `tagIds` (global tag UUIDs), `realmId` (realm UUID), `realmTagIds` (tag UUIDs scoped to the specified realm), `languages` (language codes), `ratings` (ContentRating array), `isLicensed` (boolean), `sort` (field + order), `offset`, and `limit`.
 
 #### Scenario: Search with keyword only
 
 - **WHEN** the endpoint receives `{ keyword: "fantasy" }`
 - **THEN** it SHALL query the content index with "fantasy" as the search text
-- **AND** apply default filters (nsfw = false)
+- **AND** apply default filters including the caller's allowed `rating IN [...]` set
 
 #### Scenario: Search with realm and scoped tags
 
@@ -55,21 +55,21 @@ The server search endpoint SHALL return a `ContentSearchResult` containing: `ite
 - **WHEN** a search query returns a book with translations in "zh-CN" and "en"
 - **THEN** the `ContentSearchDocument` in the result SHALL include `translations: [{ language: "zh-CN", title: "...", ... }, { language: "en", title: "...", ... }]`
 
-### Requirement: Default nsfw filter excludes nsfw content
+### Requirement: Default rating filter excludes disallowed content
 
-When `nsfw` is not specified or is `false` in search options, the server SHALL automatically add `nsfw = false` to the Meilisearch filter. When `nsfw` is explicitly `true`, only nsfw content SHALL be returned.
+When `ratings` is not specified, the server SHALL automatically add a `rating IN [...]` Meilisearch filter derived from the caller's allowed rating set. When `ratings` is specified, the server SHALL intersect the requested set with the caller's allowed set before querying Meilisearch.
 
-#### Scenario: Default search excludes nsfw
+#### Scenario: Default search filters to allowed ratings
 
-- **WHEN** a search is performed without specifying `nsfw`
-- **THEN** the filter SHALL include `nsfw = false`
-- **AND** no nsfw documents SHALL appear in results
+- **WHEN** a search is performed without specifying `ratings`
+- **THEN** the filter SHALL include the caller's allowed `rating IN [...]` set
+- **AND** no documents outside that allowed set SHALL appear in results
 
-#### Scenario: Explicit nsfw search
+#### Scenario: Explicit ratings are intersected with allowed ratings
 
-- **WHEN** a search is performed with `{ nsfw: true }`
-- **THEN** the filter SHALL include `nsfw = true`
-- **AND** only nsfw documents SHALL appear in results
+- **WHEN** a search is performed with `{ ratings: ["GENERAL", "R_18"] }`
+- **THEN** the filter SHALL include only ratings that are also allowed for the caller
+- **AND** SHALL NOT widen the result set beyond the caller's allowed ratings
 
 ### Requirement: Sort defaults to relevance with temporal fallback
 

@@ -71,7 +71,7 @@ The `@rezics/search` package SHALL expose a `syncAllContainedUnitIds(client: Sea
 
 ### Requirement: Index filterable attributes cover all filter dimensions
 
-The content index SHALL configure the following as filterable attributes: `type`, `tagIds`, `realmIds`, `realmTagKeys`, `languages`, `nsfw`, `visibility`, `isLicensed`, `userId`, `containedUnitIds`.
+The content index SHALL configure the following as filterable attributes: `type`, `tagIds`, `realmIds`, `realmTagKeys`, `languages`, `rating`, `visibility`, `isLicensed`, `userId`, `containedUnitIds`.
 
 #### Scenario: Filter by type
 

@@ -26,7 +26,6 @@ export const SearchQuerySchema = t.Object({
   realm: t.Optional(SlugRefSchema),
   sort: t.Optional(t.String()),
   textLength: t.Optional(TextLengthRangeSchema),
-  nsfw: t.Optional(t.Boolean()),
 });
 
 export type SearchQuery = Static<typeof SearchQuerySchema>;

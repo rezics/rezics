@@ -10,7 +10,7 @@ The `@rezics/contract` package SHALL export a `SearchQuery` type that represents
 | `tags`      | `SlugRef[]?`  | Tag filters extracted from `[slug]` tokens     |
 | `type`      | `string[]?`   | Content type filters from `type:value` tokens  |
 | `languages` | `string[]?`   | Language filters from `lang:value` tokens      |
-| `nsfw`      | `boolean?`    | NSFW filter from `nsfw:yes\|no`                |
+| `ratings`   | `ContentRating[]?` | Rating filters from `rating:value` tokens |
 | `isLicensed`| `boolean?`    | Licensed filter from `licensed:yes\|no`        |
 | `realm`     | `SlugRef?`    | Realm scope from `in:realm-slug`               |
 | `sort`      | `string?`     | Sort preference from `sort:value`              |
@@ -29,7 +29,7 @@ The `search` feature in `package/app` SHALL export a `parseSearchString(input: s
 | `[slug]`            | Tag filter by slug   | `[light-novel]`            |
 | `type:value`        | Content type         | `type:book`                |
 | `lang:value`        | Language             | `lang:ja`                  |
-| `nsfw:yes\|no`      | NSFW toggle          | `nsfw:no`                  |
+| `rating:value`      | Content rating       | `rating:r15`               |
 | `licensed:yes\|no`  | Licensed toggle      | `licensed:yes`             |
 | `in:slug`           | Realm scope          | `in:my-realm`              |
 | `sort:value`        | Sort order           | `sort:newest`              |

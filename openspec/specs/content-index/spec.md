@@ -126,7 +126,7 @@ The content index SHALL configure searchable attributes in priority order: `titl
 
 ### Requirement: Index filterable attributes cover all filter dimensions
 
-The content index SHALL configure the following as filterable attributes: `type`, `tagIds`, `realmIds`, `realmTagKeys`, `languages`, `nsfw`, `visibility`, `isLicensed`.
+The content index SHALL configure the following as filterable attributes: `type`, `tagIds`, `realmIds`, `realmTagKeys`, `languages`, `rating`, `visibility`, `isLicensed`.
 
 #### Scenario: Filter by type
 

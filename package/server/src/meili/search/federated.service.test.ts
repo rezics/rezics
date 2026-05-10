@@ -255,7 +255,7 @@ describe("federatedSearch", () => {
     expect(calls[0]!.filter).toContain('realmIds = "r-1"');
   });
 
-  test("nsfw=false default applies to content sub-queries when query.nsfw is omitted", async () => {
+  test("allowed ratings default applies to content sub-queries", async () => {
     const { client, multi } = makeFakeClient();
     const opts: FederatedSearchOptions = {
       scope: { kind: "global" },
@@ -263,14 +263,16 @@ describe("federatedSearch", () => {
       query: { keyword: "test" },
     };
 
-    await federatedSearch(client, opts);
+    await federatedSearch(client, opts, {
+      allowedRatings: ["GENERAL", "R_15"],
+    });
 
     const contentQueries = multi[0]!.queries.filter(
       (q) => q.indexUid === "content",
     );
     expect(contentQueries.length).toBeGreaterThan(0);
     for (const q of contentQueries) {
-      expect(q.filter).toContain("nsfw = false");
+      expect(q.filter).toContain('rating IN ["GENERAL", "R_15"]');
     }
   });
 

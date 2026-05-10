@@ -11,7 +11,7 @@ The `@rezics/contract` package SHALL export a `SearchQuery` type that represents
 | `type`       | `string[]?`   | Content type filters from `type:value` tokens  |
 | `kind`       | `string?`     | Post-kind filter from `kind:value` tokens (one of `review`, `excerpt`, `remark`, `chapter`, `post`, normalized to canonical `PostKind` value) |
 | `languages`  | `string[]?`   | Language filters from `lang:value` tokens      |
-| `nsfw`       | `boolean?`    | NSFW filter from `nsfw:yes\|no`                |
+| `ratings`    | `ContentRating[]?` | Rating filters from `rating:value` tokens |
 | `isLicensed` | `boolean?`    | Licensed filter from `licensed:yes\|no`        |
 | `realm`      | `SlugRef?`    | Realm scope from `in:realm-slug`               |
 | `sort`       | `string?`     | Sort preference from `sort:value`              |

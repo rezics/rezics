@@ -236,7 +236,7 @@ The Tag API SHALL be rewritten to operate on Unit + UnitTranslation records for 
 
 ### Requirement: Unit API rewritten for new type enum and no text columns
 
-The Unit API SHALL reflect the updated Unit model: no `title` or `content` columns, updated `UnitType` enum (`BOOK`, `GAME`, `MEDIA`, `POST`, `TAG`, `REALM`, `SHELF`, `CHAPTER`, `IMAGE`, `VIDEO`, `QUOTE`), and new fields (`workUnitId`, `defaultLanguage`, `isLanguageNeutral`, `visibility`, `nsfw`). Unit queries SHALL join UnitTranslation for display text.
+The Unit API SHALL reflect the updated Unit model: no `title` or `content` columns, updated `UnitType` enum (`BOOK`, `GAME`, `MEDIA`, `POST`, `TAG`, `REALM`, `SHELF`, `CHAPTER`, `IMAGE`, `VIDEO`, `QUOTE`), and new fields (`workUnitId`, `defaultLanguage`, `isLanguageNeutral`, `visibility`, `rating`). Unit queries SHALL join UnitTranslation for display text.
 
 #### Scenario: Get a unit with translation
 

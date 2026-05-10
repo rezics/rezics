@@ -141,12 +141,7 @@ export function buildContentFilter(
     }
   }
 
-  // 9. NSFW (default: exclude). Honors explicit `nsfw: true` to include.
-  if (query.nsfw !== true) {
-    filter.push("nsfw = false");
-  }
-
-  // 10. Visibility — content search is always public-only.
+  // 9. Visibility — content search is always public-only.
   filter.push('visibility = "PUBLIC"');
 
   return filter;

@@ -51,8 +51,8 @@ The search package SHALL provide partial sync functions that fetch only the rele
 
 #### Scenario: Metadata update sends caller-provided values
 
-- **WHEN** `patchContentMetadata(client, unitId, { coverUrl: "/new.jpg", nsfw: true })` is called
-- **THEN** the function SHALL send a partial update with only `coverUrl` and `nsfw`
+- **WHEN** `patchContentMetadata(client, unitId, { coverUrl: "/new.jpg", rating: "R_18" })` is called
+- **THEN** the function SHALL send a partial update with only `coverUrl` and `rating`
 - **AND** SHALL NOT perform any database query
 
 ### Requirement: Partial sync functions exist for fan-out post updates

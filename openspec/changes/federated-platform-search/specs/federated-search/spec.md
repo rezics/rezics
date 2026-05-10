@@ -168,13 +168,13 @@ The server SHALL read federation weights from a single configuration object (e.g
 
 ### Requirement: Default filters are applied to every sub-query
 
-Every content sub-query in the federated orchestrator SHALL apply the default filters required by `content-search-api`: `nsfw = false` (unless explicitly overridden by `query`), `visibility = "PUBLIC"`, and a ratings filter derived from the caller's allowed-ratings set. Post sub-queries SHALL apply `isLocked = false` and exclude soft-deleted posts (per `post-search-index`).
+Every content sub-query in the federated orchestrator SHALL apply the default filters required by `content-search-api`: `visibility = "PUBLIC"` and a ratings filter derived from the caller's allowed-ratings set. Post sub-queries SHALL apply `isLocked = false` and exclude soft-deleted posts (per `post-search-index`).
 
-#### Scenario: NSFW exclusion applies in federated path
+#### Scenario: Rating exclusion applies in federated path
 
-- **GIVEN** `{ scope: { kind: "global" }, category: "all", query: { keyword: "test" } }` with no `nsfw` field
+- **GIVEN** `{ scope: { kind: "global" }, category: "all", query: { keyword: "test" } }` with no `ratings` field
 - **WHEN** the endpoint orchestrates the content sub-query
-- **THEN** the filter SHALL include `nsfw = false`
+- **THEN** the filter SHALL include the caller's allowed `rating IN [...]` set
 
 #### Scenario: Locked posts are excluded
 

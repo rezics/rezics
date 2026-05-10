@@ -103,7 +103,7 @@ The server SHALL provide a public endpoint to fetch a zone by slug. The response
 
 ### Requirement: ZoneFilters schema is a subset of ContentSearchOptions
 
-The `ZoneFilters` type SHALL be a strict subset of `ContentSearchOptions` fields. It SHALL support: `type` (string or string array), `tags` (SlugRef array), `realmId` (string), `nsfw` (boolean), `isLicensed` (boolean), and `languages` (string array). The `ZoneFilters` type SHALL be defined as a Typebox schema in `@rezics/contract`.
+The `ZoneFilters` type SHALL be a strict subset of `ContentSearchOptions` fields. It SHALL support: `type` (string or string array), `tags` (SlugRef array), `realmId` (string), `ratings` (ContentRating array), `isLicensed` (boolean), and `languages` (string array). The `ZoneFilters` type SHALL be defined as a Typebox schema in `@rezics/contract`.
 
 #### Scenario: ZoneFilters validates correctly
 

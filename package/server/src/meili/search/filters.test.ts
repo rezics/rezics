@@ -10,9 +10,9 @@ import {
 const emptyQuery: SearchQuery = {};
 
 describe("buildContentFilter", () => {
-  test("global scope with bare query yields nsfw + visibility defaults", () => {
+  test("global scope with bare query yields visibility default", () => {
     const filter = buildContentFilter(emptyQuery, { kind: "global" });
-    expect(filter).toEqual(["nsfw = false", 'visibility = "PUBLIC"']);
+    expect(filter).toEqual(['visibility = "PUBLIC"']);
   });
 
   test("book scope with shelves subtype emits SHELF type + containedUnitIds", () => {
@@ -34,11 +34,6 @@ describe("buildContentFilter", () => {
     const scope: SearchScope = { kind: "user", userId: "u-3" };
     const filter = buildContentFilter(emptyQuery, scope);
     expect(filter).toContain('userId = "u-3"');
-  });
-
-  test("nsfw=true suppresses the nsfw=false default", () => {
-    const filter = buildContentFilter({ nsfw: true }, { kind: "global" });
-    expect(filter).not.toContain("nsfw = false");
   });
 
   test("ratings: requested intersected with allowed", () => {

@@ -156,7 +156,7 @@ Each content type SHALL have a search sub-route: `/book/search`, `/shelf/search`
 
 ### Requirement: Search page filtering capabilities
 
-Each search page SHALL support full Meilisearch-powered filtering including keyword search, tag filtering, NSFW content filtering, sort order selection, and language filtering.
+Each search page SHALL support full Meilisearch-powered filtering including keyword search, tag filtering, content rating filtering, sort order selection, and language filtering.
 
 #### Scenario: Keyword search filters results
 
@@ -168,10 +168,10 @@ Each search page SHALL support full Meilisearch-powered filtering including keyw
 - **WHEN** a user selects one or more tags on a search page
 - **THEN** the results SHALL be filtered to only include items matching the selected tags
 
-#### Scenario: NSFW filter controls content visibility
+#### Scenario: Rating filter controls content visibility
 
-- **WHEN** a user toggles the NSFW filter on a search page
-- **THEN** the results SHALL include or exclude NSFW content accordingly
+- **WHEN** a user changes the rating filter on a search page
+- **THEN** the results SHALL include only content matching the selected and allowed ratings
 
 #### Scenario: Sort order changes result ordering
 
