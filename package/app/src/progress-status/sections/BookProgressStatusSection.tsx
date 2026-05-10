@@ -2,6 +2,7 @@ import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
 import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
 import { BacklogRemoveConfirmModal } from "../components/BacklogRemoveConfirmModal";
 import { CompletedConfirmModal } from "../components/CompletedConfirmModal";
@@ -9,6 +10,7 @@ import { ReasonModal } from "../components/ReasonModal";
 import { StatusOverflowMenu } from "../components/StatusOverflowMenu";
 import {
   HERO_STATUS_ITEM_CLASS,
+  StatusPrimaryActionButton,
   StatusToggleGroup,
 } from "../components/StatusToggleGroup";
 import { useReasonPostMutations } from "../hooks/useReasonPostMutations";
@@ -35,9 +37,50 @@ function isReasonStatus(
   return status === "PAUSED" || status === "DROPPED";
 }
 
+function usesChineseProgressLayout(language: string | undefined) {
+  return language?.toLowerCase().startsWith("zh") ?? false;
+}
+
+function getDefaultPrimaryAction(status: UserUnitProgressStatus | null): {
+  status: ToggleGroupStatus;
+  labelKey: string;
+  fallback: string;
+} {
+  if (!status) {
+    return {
+      status: "BACKLOG",
+      labelKey: "book.hero.actions.want_to_read",
+      fallback: "Want to read",
+    };
+  }
+
+  if (status === "ACTIVE") {
+    return {
+      status: "COMPLETED",
+      labelKey: "book.hero.actions.mark_as_read",
+      fallback: "Mark as read",
+    };
+  }
+
+  if (status === "COMPLETED") {
+    return {
+      status: "COMPLETED",
+      labelKey: "book.hero.actions.read_again",
+      fallback: "Read again",
+    };
+  }
+
+  return {
+    status: "ACTIVE",
+    labelKey: "book.hero.actions.start_reading",
+    fallback: "Start reading",
+  };
+}
+
 export function BookProgressStatusSection({
   bookUnitId,
 }: BookProgressStatusSectionProps) {
+  const { i18n } = useTranslation();
   const progress = useUnitProgress(bookUnitId);
   const currentStatus: UserUnitProgressStatus | null =
     progress.data?.status ?? null;
@@ -217,23 +260,42 @@ export function BookProgressStatusSection({
     modal.kind === "reason" && modal.status && isReasonStatus(modal.status)
       ? modal.status
       : null;
+  const isChineseLayout = usesChineseProgressLayout(
+    i18n.resolvedLanguage ?? i18n.language,
+  );
+  const primaryAction = getDefaultPrimaryAction(currentStatus);
 
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className="grid w-full grid-cols-4 overflow-hidden rounded-full border border-white/25 bg-transparent divide-x divide-white/15">
-        <StatusToggleGroup
-          value={toggleValue}
-          onValueChange={handleSelect}
-          disabled={isPending}
-          className="col-span-3 grid-cols-3 divide-x divide-white/15"
-          itemClassName={HERO_STATUS_ITEM_CLASS}
-        />
+        {isChineseLayout ? (
+          <StatusToggleGroup
+            value={toggleValue}
+            onValueChange={handleSelect}
+            disabled={isPending}
+            className="col-span-3 grid-cols-3 divide-x divide-white/15"
+            itemClassName={HERO_STATUS_ITEM_CLASS}
+          />
+        ) : (
+          <StatusPrimaryActionButton
+            status={primaryAction.status}
+            labelKey={primaryAction.labelKey}
+            fallback={primaryAction.fallback}
+            onClick={() => handleSelect(primaryAction.status)}
+            disabled={isPending}
+            className="col-span-3"
+          />
+        )}
         <StatusOverflowMenu
+          onSelectBacklog={() => handleSelect("BACKLOG")}
+          onSelectActive={() => handleSelect("ACTIVE")}
+          onSelectCompleted={() => handleSelect("COMPLETED")}
           onSelectPaused={handlePaused}
           onSelectDropped={handleDropped}
           onRemoveProgress={handleRemoveProgress}
           disabled={isPending}
           isActive={currentStatus === "PAUSED" || currentStatus === "DROPPED"}
+          showPrimaryStatuses={!isChineseLayout}
         />
       </div>
 

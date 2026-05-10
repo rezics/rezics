@@ -522,6 +522,9 @@ export default {
         paused: "Paused",
         read: "Read",
         dropped: "Dropped",
+        start_reading: "Start reading",
+        mark_as_read: "Mark as read",
+        read_again: "Read again",
       },
     },
     copyright_notice: {

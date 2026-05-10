@@ -434,6 +434,9 @@ export default {
         paused: "擱置",
         read: "已讀",
         dropped: "放棄",
+        start_reading: "開始閱讀",
+        mark_as_read: "標為已讀",
+        read_again: "再讀一次",
       },
     },
     copyright_notice: {

@@ -6,7 +6,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
-import { MoreHorizontal, Pause, Trash2, X } from "lucide-react";
+import {
+  BookmarkPlus,
+  CircleCheck,
+  MoreHorizontal,
+  Pause,
+  PlayCircle,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   READ_STATUS_I18N_KEYS,
@@ -18,20 +26,28 @@ function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 type StatusOverflowMenuProps = {
+  onSelectBacklog?: () => void;
+  onSelectActive?: () => void;
+  onSelectCompleted?: () => void;
   onSelectPaused: () => void;
   onSelectDropped: () => void;
   onRemoveProgress: () => void;
   disabled?: boolean;
   isActive?: boolean;
+  showPrimaryStatuses?: boolean;
   className?: string;
 };
 
 export function StatusOverflowMenu({
+  onSelectBacklog,
+  onSelectActive,
+  onSelectCompleted,
   onSelectPaused,
   onSelectDropped,
   onRemoveProgress,
   disabled,
   isActive,
+  showPrimaryStatuses = false,
   className,
 }: StatusOverflowMenuProps) {
   const { t } = useTranslation();
@@ -57,6 +73,32 @@ export function StatusOverflowMenu({
         )}
       />
       <DropdownMenuContent align="end">
+        {showPrimaryStatuses && (
+          <>
+            <DropdownMenuItem onClick={onSelectBacklog}>
+              <BookmarkPlus className="w-4 h-4 mr-2" />
+              {t(
+                READ_STATUS_I18N_KEYS.BACKLOG,
+                READ_STATUS_LABELS_ZH_HANT.BACKLOG,
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onSelectActive}>
+              <PlayCircle className="w-4 h-4 mr-2" />
+              {t(
+                READ_STATUS_I18N_KEYS.ACTIVE,
+                READ_STATUS_LABELS_ZH_HANT.ACTIVE,
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onSelectCompleted}>
+              <CircleCheck className="w-4 h-4 mr-2" />
+              {t(
+                READ_STATUS_I18N_KEYS.COMPLETED,
+                READ_STATUS_LABELS_ZH_HANT.COMPLETED,
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem onClick={onSelectPaused}>
           <Pause className="w-4 h-4 mr-2" />
           {t(READ_STATUS_I18N_KEYS.PAUSED, READ_STATUS_LABELS_ZH_HANT.PAUSED)}
