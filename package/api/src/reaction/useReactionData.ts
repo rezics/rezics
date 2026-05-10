@@ -74,6 +74,10 @@ export function useReactionData(unitId: string): UseReactionDataReturn {
     return cache.subscribe((event) => {
       const key = event?.query?.queryKey as readonly unknown[] | undefined;
       if (!key || key[0] !== "reactions") return;
+      if (event.type !== "updated") return;
+      if (event.action.type !== "success" && event.action.type !== "setState") {
+        return;
+      }
       setVersion((v) => v + 1);
     });
   }, [queryClient]);
