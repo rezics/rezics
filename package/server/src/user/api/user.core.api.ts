@@ -88,7 +88,7 @@ export const coreRoute = new Elysia()
     "/me",
     async ({ identity }) => {
       const user = await userService.getByUserId(identity.userId);
-      return mapUserToDTO(user);
+      return mapUserToDTO(user, { includePrivate: true });
     },
     {
       requireLogin: true,
@@ -111,7 +111,7 @@ export const coreRoute = new Elysia()
       };
 
       const user = await userService.update(identity.userId, userReq);
-      return mapUserToDTO(user);
+      return mapUserToDTO(user, { includePrivate: true });
     },
     {
       requireLogin: true,

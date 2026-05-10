@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import {
   contentStructurePathLastPositionSchema,
   chapterLastPositionSchema,
+  progressExtraSchema,
   SYSTEM_SHELF_KIND_KEYS,
   unitProgressListResponseSchema,
   unitProgressRowDTOSchema,
@@ -42,7 +43,7 @@ describe("progress contract schemas", () => {
           chapterUnitId: "chapter-1",
         },
         addTimeMs: 1000,
-        extra: { device: "web" },
+        extra: { paused: { reasonPostUnitIds: ["post-1"] } },
       }),
     ).toBe(true);
     expect(Value.Check(unitProgressUpsertBodySchema, { progress: 1.1 })).toBe(
@@ -113,6 +114,68 @@ describe("progress contract schemas", () => {
         nextCursor: null,
       }),
     ).toBe(true);
+  });
+
+  test("progressExtraSchema accepts narrow shapes and rejects unknown keys", () => {
+    expect(Value.Check(progressExtraSchema, {})).toBe(true);
+    expect(
+      Value.Check(progressExtraSchema, {
+        paused: { reasonPostUnitIds: ["p-1", "p-2"] },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(progressExtraSchema, {
+        dropped: { reasonPostUnitIds: [] },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(progressExtraSchema, {
+        paused: { reasonPostUnitIds: ["p-1"] },
+        dropped: { reasonPostUnitIds: ["p-2"] },
+      }),
+    ).toBe(true);
+
+    // Unknown top-level keys rejected
+    expect(
+      Value.Check(progressExtraSchema, {
+        device: "web",
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(progressExtraSchema, {
+        paused: { reasonPostUnitIds: ["p-1"] },
+        legacy: { foo: 1 },
+      }),
+    ).toBe(false);
+    // Unknown sub-keys rejected
+    expect(
+      Value.Check(progressExtraSchema, {
+        paused: { reasonPostUnitIds: ["p-1"], extra: 1 },
+      }),
+    ).toBe(false);
+    // Wrong types rejected
+    expect(
+      Value.Check(progressExtraSchema, {
+        paused: { reasonPostUnitIds: [123] },
+      }),
+    ).toBe(false);
+  });
+
+  test("upsert body accepts null extra and empty extra", () => {
+    expect(Value.Check(unitProgressUpsertBodySchema, { extra: null })).toBe(
+      true,
+    );
+    expect(Value.Check(unitProgressUpsertBodySchema, { extra: {} })).toBe(true);
+    expect(
+      Value.Check(unitProgressUpsertBodySchema, {
+        extra: { paused: { reasonPostUnitIds: [] } },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(unitProgressUpsertBodySchema, {
+        extra: { device: "web" },
+      }),
+    ).toBe(false);
   });
 
   test("validates user extra shelves map", () => {

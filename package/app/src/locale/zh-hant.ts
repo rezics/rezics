@@ -773,6 +773,46 @@ export default {
     unknown_error: "未知錯誤",
     expand_all: "全部展開",
     collapse_all: "全部摺疊",
+    retry: "重試",
+  },
+
+  progress_status: {
+    overflow: {
+      aria: "更多狀態選項",
+      dropped: "棄",
+      remove_progress: "移除進度",
+    },
+    chapter_picker: {
+      placeholder: "選擇章節",
+      none: "未指定",
+    },
+    active_modal: {
+      title: "更新閱讀進度",
+      description: "拖動滑桿更新進度百分比，並可選定目前章節。",
+      progress_label: "進度",
+      chapter_label: "目前章節",
+    },
+    reason_modal: {
+      title_paused: "擱置原因",
+      title_dropped: "棄讀原因",
+      desc_paused: "說說你為什麼擱置這本書？",
+      desc_dropped: "說說你為什麼棄讀這本書？",
+      placeholder: "輸入你的想法…",
+      private: "僅自己可見",
+      history: "查看過去紀錄",
+      skip: "跳過",
+      append: "新增",
+    },
+    completed_modal: {
+      title: "再讀一次？",
+      description: "確認後會把已讀次數 +1，並把進度設為 100%。",
+    },
+    toast: {
+      progress_failed: "進度更新失敗",
+      shelf_failed: "書架更新失敗",
+      both_failed: "進度與書架更新失敗",
+      generic_retry: "操作失敗，請重試",
+    },
   },
 
   // Form & Editor

@@ -873,6 +873,47 @@ export default {
     saving: "Saving...",
   },
 
+  progress_status: {
+    overflow: {
+      aria: "More status options",
+      dropped: "Drop",
+      remove_progress: "Remove progress",
+    },
+    chapter_picker: {
+      placeholder: "Select chapter",
+      none: "Unspecified",
+    },
+    active_modal: {
+      title: "Update reading progress",
+      description:
+        "Drag the slider to update the progress percentage and optionally select the current chapter.",
+      progress_label: "Progress",
+      chapter_label: "Current chapter",
+    },
+    reason_modal: {
+      title_paused: "Pause reason",
+      title_dropped: "Drop reason",
+      desc_paused: "Why are you pausing this book?",
+      desc_dropped: "Why are you dropping this book?",
+      placeholder: "Share your thoughts…",
+      private: "Only visible to me",
+      history: "View past entries",
+      skip: "Skip",
+      append: "Add new",
+    },
+    completed_modal: {
+      title: "Read again?",
+      description:
+        "Confirming will increment your read count by 1 and set progress to 100%.",
+    },
+    toast: {
+      progress_failed: "Progress update failed",
+      shelf_failed: "Shelf update failed",
+      both_failed: "Progress and shelf updates failed",
+      generic_retry: "Operation failed, please retry",
+    },
+  },
+
   // Form & Editor
   editor: {
     bold: "Bold",

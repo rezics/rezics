@@ -145,6 +145,35 @@ describe("ProgressService", () => {
     expect(mockUpsert).not.toHaveBeenCalled();
   });
 
+  test("accepts narrow paused extra", async () => {
+    const { progressService } = await import("./progress.service");
+
+    await progressService.upsert("user-1", "unit-1", {
+      status: "PAUSED",
+      extra: { paused: { reasonPostUnitIds: ["post-1"] } },
+    });
+
+    const args = firstArg(mockUpsert);
+    expect(args.create.extra).toEqual({
+      paused: { reasonPostUnitIds: ["post-1"] },
+    });
+    expect(args.update.extra).toEqual({
+      paused: { reasonPostUnitIds: ["post-1"] },
+    });
+  });
+
+  test("rejects extra with unknown top-level key", async () => {
+    const { progressService } = await import("./progress.service");
+
+    await expect(
+      progressService.upsert("user-1", "unit-1", {
+        // biome-ignore lint/suspicious/noExplicitAny: testing unsafe shape
+        extra: { foo: { bar: 1 } } as any,
+      }),
+    ).rejects.toThrow(/extra/);
+    expect(mockUpsert).not.toHaveBeenCalled();
+  });
+
   test("coerces completed status when progress reaches 1 without explicit status", async () => {
     mockFindUnique.mockResolvedValue({
       status: UserUnitProgressStatus.ACTIVE,

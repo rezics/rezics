@@ -82,13 +82,35 @@ export const unitLastPositionSchema = t.Union([
 
 export type UnitLastPosition = (typeof unitLastPositionSchema)["static"];
 
+export const progressExtraSchema = t.Object(
+  {
+    paused: t.Optional(
+      t.Object(
+        { reasonPostUnitIds: t.Array(t.String()) },
+        { additionalProperties: false },
+      ),
+    ),
+    dropped: t.Optional(
+      t.Object(
+        { reasonPostUnitIds: t.Array(t.String()) },
+        { additionalProperties: false },
+      ),
+    ),
+  },
+  { additionalProperties: false },
+);
+
+export type ProgressExtra = (typeof progressExtraSchema)["static"];
+
+export const PROGRESS_EXTRA_KNOWN_KEYS = ["paused", "dropped"] as const;
+
 export const unitProgressUpsertBodySchema = t.Object({
   progress: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
   status: t.Optional(userUnitProgressStatusSchema),
   completedCount: t.Optional(t.Integer({ minimum: 0 })),
   lastPosition: t.Optional(t.Nullable(unitLastPositionSchema)),
   addTimeMs: t.Optional(t.Integer({ minimum: 0 })),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  extra: t.Optional(t.Nullable(progressExtraSchema)),
 });
 
 export type UnitProgressUpsertBody =
@@ -110,7 +132,7 @@ export const unitProgressRowDTOSchema = t.Object({
   lastPosition: t.Nullable(unitLastPositionSchema),
   firstSeenAt: t.String(),
   lastSeenAt: t.String(),
-  extra: t.Nullable(t.Record(t.String(), t.Any())),
+  extra: t.Nullable(progressExtraSchema),
 });
 
 export type UnitProgressRowDTO = (typeof unitProgressRowDTOSchema)["static"];

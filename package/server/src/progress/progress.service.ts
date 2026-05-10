@@ -1,4 +1,5 @@
 import {
+  PROGRESS_EXTRA_KNOWN_KEYS,
   userUnitProgressStatusValues,
   type UnitProgressListResponse,
   type UnitProgressStatsResponse,
@@ -53,6 +54,17 @@ function validateInput(input: ProgressUpsertInput): void {
 
   if (input.completedCount !== undefined && input.completedCount < 0) {
     throw new AppError(400, "completedCount must be non-negative");
+  }
+
+  if (input.extra !== undefined && input.extra !== null) {
+    if (typeof input.extra !== "object" || Array.isArray(input.extra)) {
+      throw new AppError(400, "extra must be an object");
+    }
+    for (const key of Object.keys(input.extra)) {
+      if (!PROGRESS_EXTRA_KNOWN_KEYS.includes(key as never)) {
+        throw new AppError(400, `extra contains unknown key: ${key}`);
+      }
+    }
   }
 }
 

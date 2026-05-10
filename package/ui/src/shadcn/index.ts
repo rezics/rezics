@@ -48,6 +48,11 @@ export {
 } from "./chart";
 export { Checkbox } from "./checkbox";
 export {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./collapsible";
+export {
   Command,
   CommandDialog,
   CommandEmpty,
@@ -189,6 +194,7 @@ export {
   tabsListVariants,
   TabsTrigger,
 } from "./tabs";
+export { Textarea } from "./textarea";
 export { ThemeSwitch } from "./theme-switch";
 export { Toggle, toggleVariants } from "./toggle";
 export { ToggleGroup, ToggleGroupItem } from "./toggle-group";

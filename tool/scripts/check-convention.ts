@@ -73,10 +73,12 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
 ]);
 
 // Singular domain folder names that are permitted even when their plural form
-// is on PLURAL_CONTAINER_ALLOWLIST, because the two carry distinct semantics.
-// Example: `token/` is the JWT/auth-token domain; `tokens/` is the design-token
-// container. Both must coexist.
-const SINGULAR_DOMAIN_EXCEPTIONS = new Set(["token"]);
+// is on PLURAL_CONTAINER_ALLOWLIST, or when the heuristic incorrectly flags a
+// compound whose head noun is genuinely singular but ends in `s` (e.g.
+// "status"). Example: `token/` is the JWT/auth-token domain; `tokens/` is the
+// design-token container. `progress-status/` is the progress-status feature
+// folder — "status" is singular but the heuristic flags any `s` ending.
+const SINGULAR_DOMAIN_EXCEPTIONS = new Set(["token", "progress-status"]);
 
 const ROUTE_PREFIX_ALLOWLIST = new Set([
   "stats",

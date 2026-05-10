@@ -34,7 +34,7 @@ export const adminRoute = new Elysia()
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const { users, total } = await userService.list(query as any);
-      return { users: users.map(mapUserToDTO), total };
+      return { users: users.map((u) => mapUserToDTO(u)), total };
     },
     {
       requireLogin: true,
