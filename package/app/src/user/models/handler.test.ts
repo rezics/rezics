@@ -3,11 +3,13 @@ import { configureApi } from "@rezics/api/config";
 
 // Required for @rezics/app env.ts validation
 process.env.VITE_API_URL ??= "http://api.example";
+process.env.VITE_REACTION_SERVICE_URL ??= "http://reaction.example";
 process.env.VITE_TURNSTILE_SITE_KEY ??= "turnstile-test-key";
 
 configureApi({
   apiBaseUrl: "http://api.example",
   authBaseUrl: "http://api.example",
+  reactionServiceUrl: "http://reaction.example",
 });
 
 const fetchMock = mock();

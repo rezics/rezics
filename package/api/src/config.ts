@@ -1,13 +1,14 @@
 export interface ApiConfig {
   apiBaseUrl: string;
   authBaseUrl: string;
-  reactionServiceUrl?: string;
+  reactionServiceUrl: string;
   appVersion?: string;
 }
 
 let config: ApiConfig = {
   apiBaseUrl: "",
   authBaseUrl: "",
+  reactionServiceUrl: "",
   appVersion: undefined,
 };
 

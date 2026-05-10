@@ -9,6 +9,7 @@ describe("session refresh", () => {
     configureApi({
       apiBaseUrl: "http://api.example",
       authBaseUrl: "http://api.example",
+      reactionServiceUrl: "http://reaction.example",
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
   });

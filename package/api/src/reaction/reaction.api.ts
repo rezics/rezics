@@ -14,7 +14,7 @@ import type {
 } from "./reaction.types";
 
 function getReactionBaseUrl(): string {
-  return getApiConfig().reactionServiceUrl ?? getApiConfig().apiBaseUrl;
+  return getApiConfig().reactionServiceUrl;
 }
 
 async function reactionFetch<T>(

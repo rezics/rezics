@@ -16,6 +16,7 @@ import { configureApi } from '@rezics/api/config';
 configureApi({
   apiBaseUrl: 'https://api.example.com',
   authBaseUrl: 'https://auth.example.com',
+  reactionServiceUrl: 'https://reaction.example.com',
 });
 ```
 

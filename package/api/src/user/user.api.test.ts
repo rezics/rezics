@@ -6,6 +6,7 @@ const fetchMock = mock();
 configureApi({
   apiBaseUrl: "http://api.example",
   authBaseUrl: "http://api.example",
+  reactionServiceUrl: "http://reaction.example",
 });
 
 describe("userApi email verification", () => {
