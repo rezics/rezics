@@ -761,6 +761,7 @@ model UserUnitProgress {
   unitId         String                 @db.Uuid
   progress       Float                  @default(0)
   status         UserUnitProgressStatus @default(BACKLOG)
+  isDeleted      Boolean                @default(false)
   completedCount Int                    @default(0)
   totalTimeMs    BigInt                 @default(0)
   lastPosition   Json?
@@ -775,6 +776,7 @@ model UserUnitProgress {
   @@id([userId, unitId])
   @@index([userId, lastSeenAt(sort: Desc)])
   @@index([unitId, status])
+  @@index([userId, isDeleted, lastSeenAt(sort: Desc)])
 }
 
 /**

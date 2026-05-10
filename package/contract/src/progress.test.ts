@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
-  contentStructurePathLastPositionSchema,
   chapterLastPositionSchema,
+  contentStructurePathLastPositionSchema,
   progressExtraSchema,
   SYSTEM_SHELF_KIND_KEYS,
+  unitLastPositionSchema,
   unitProgressListResponseSchema,
   unitProgressRowDTOSchema,
   unitProgressUpsertBodySchema,
-  unitLastPositionSchema,
   userExtraSchema,
   userUnitProgressStatusValues,
 } from "./progress";
@@ -99,6 +99,7 @@ describe("progress contract schemas", () => {
       unitId: "unit-1",
       progress: 1,
       status: "COMPLETED",
+      isDeleted: false,
       completedCount: 1,
       totalTimeMs: 123,
       lastPosition: null,

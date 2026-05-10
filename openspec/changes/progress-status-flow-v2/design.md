@@ -174,25 +174,26 @@ If the `PUT` rejects, the count snaps back and an error toast shows. The shelf s
 
 | Current | Click | Behavior |
 |---------|-------|----------|
-| `BACKLOG` | 想讀 | no-op (toggle stays selected) |
+| `BACKLOG` | 想讀 | open remove confirmation; confirm soft-deletes progress and removes the backlog shelf item |
 | `ACTIVE` | 在讀 | open `ActiveProgressModal` to edit progress / lastPosition |
-| `PAUSED` | 擱置 | open `ReasonModal` (paused variant) on the existing array |
+| `PAUSED` | 擱置 (overflow) | open `ReasonModal` (paused variant) on the existing array |
 | `DROPPED` | 棄 | open `ReasonModal` (dropped variant) on the existing array |
 | `COMPLETED` | 已讀 | open `CompletedConfirmModal`; confirm = `completedCount += 1` (re-read) |
 
-This means every status except `BACKLOG` is "click to edit current state". The `+1` re-read path is the natural way to log multiple completions.
+This means every selected status has an explicit second-click affordance. `BACKLOG` is the lightweight opt-out path, but it uses a confirmation because it hides the progress row and removes the mirrored shelf item. The `+1` re-read path is the natural way to log multiple completions.
 
 ### D9. Overflow menu placement for `DROPPED` and "Remove progress"
 
-`DROPPED` is rare; promoting it to a fifth toggle slot would crowd the row. Place it behind a `⋯` overflow `DropdownMenu` next to the toggle group:
+`PAUSED` and `DROPPED` are less frequent and reason-driven, so keep the primary row compact. Place a `⋯` overflow `DropdownMenu` as the fourth slot in the segmented control:
 
 ```
-[想讀] [在讀] [擱置] [已讀]   [⋯]
-                              ├─ 棄 (DROPPED)
-                              └─ 移除進度 (DELETE /me/units/:id/progress)
+[想讀] [在讀] [已讀] [⋯]
+                      ├─ 擱置 (PAUSED)
+                      ├─ 棄 (DROPPED)
+                      └─ 移除進度 (DELETE /me/units/:id/progress)
 ```
 
-"Remove progress" calls the existing `DELETE` endpoint. It is shelf-aware: it issues a `remove` op against whichever mirrored shelf currently owns the unit (`backlog` or `active`), and **leaves `completed` untouched** (add-only).
+"Remove progress" calls the existing `DELETE` endpoint, whose implementation is a soft delete on `UserUnitProgress`. It is shelf-aware: it issues a `remove` op against whichever mirrored shelf currently owns the unit (`backlog` or `active`), and **leaves `completed` untouched** (add-only).
 
 ### D10. `lastPosition` / chapter picker
 

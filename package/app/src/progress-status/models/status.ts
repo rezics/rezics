@@ -39,7 +39,6 @@ export const READ_STATUS_I18N_KEYS = {
 export const TOGGLE_GROUP_STATUSES = [
   "BACKLOG",
   "ACTIVE",
-  "PAUSED",
   "COMPLETED",
 ] as const satisfies readonly ReadStatus[];
 

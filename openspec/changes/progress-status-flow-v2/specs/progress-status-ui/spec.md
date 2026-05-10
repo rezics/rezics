@@ -18,25 +18,26 @@ The frontend SHALL house all `UserUnitProgress` status-control UI in a dedicated
 
 ### Requirement: Status toggle group plus overflow menu
 
-The status control SHALL render four primary toggles for `BACKLOG` (想讀), `ACTIVE` (在讀), `PAUSED` (擱置), and `COMPLETED` (已讀), plus an overflow menu (`⋯`) that exposes `DROPPED` (棄) and "Remove progress" actions. The overflow menu SHALL be visually attached to the toggle row and SHALL use `lucide-react` icons by default.
+The status control SHALL render three primary toggles for `BACKLOG` (想讀), `ACTIVE` (在讀), and `COMPLETED` (已讀), plus an overflow menu (`⋯`) that exposes `PAUSED` (擱置), `DROPPED` (棄), and "Remove progress" actions. The overflow trigger SHALL render as the fourth slot in the same visual row and SHALL use `lucide-react` icons by default.
 
 #### Scenario: Selected toggle reflects current status
 
 - **WHEN** the viewer's `UserUnitProgress.status` is `ACTIVE`
 - **THEN** the "在讀" toggle SHALL render in the selected (`data-state=on`) state
 - **AND** the other three toggles SHALL render unselected
-- **AND** if `status` is `DROPPED`, none of the four toggles SHALL be selected and the overflow menu SHALL surface the `DROPPED` state visually (e.g., active dot or label)
+- **AND** if `status` is `PAUSED` or `DROPPED`, none of the three toggles SHALL be selected and the overflow menu SHALL surface the overflow-held state visually (e.g., active dot or label)
 
 #### Scenario: Overflow menu exposes Dropped and Remove progress
 
 - **WHEN** the user opens the `⋯` overflow menu
-- **THEN** the menu SHALL list at least: `棄` (DROPPED) and `移除進度` (Remove progress)
+- **THEN** the menu SHALL list at least: `擱置` (PAUSED), `棄` (DROPPED), and `移除進度` (Remove progress)
+- **AND** activating `擱置` SHALL initiate a `PAUSED` transition
 - **AND** activating `棄` SHALL initiate a `DROPPED` transition
 - **AND** activating `移除進度` SHALL call `DELETE /me/units/:unitId/progress` and remove shelf membership from any mirrored shelf currently containing the unit
 
-### Requirement: BACKLOG transition has no modal
+### Requirement: BACKLOG transition and removal
 
-The system SHALL transition to `BACKLOG` synchronously without opening a modal. The transition SHALL be a frontend dual-write: a `PUT /me/units/:unitId/progress` setting `status: "BACKLOG"`, and shelf operations per the transition rules.
+The system SHALL transition to `BACKLOG` synchronously without opening a modal when the current status is not already `BACKLOG`. That transition SHALL be a frontend dual-write: a `PUT /me/units/:unitId/progress` setting `status: "BACKLOG"`, and shelf operations per the transition rules. If the current status is already `BACKLOG`, clicking `想讀` SHALL open a confirmation modal for soft removal.
 
 #### Scenario: Direct BACKLOG add from no-row
 
@@ -45,11 +46,15 @@ The system SHALL transition to `BACKLOG` synchronously without opening a modal. 
 - **AND** no modal SHALL be displayed
 - **AND** the toggle SHALL update optimistically to the selected state
 
-#### Scenario: Re-click BACKLOG is a no-op
+#### Scenario: Re-click BACKLOG confirms soft removal
 
 - **WHEN** the current status is `BACKLOG` and the user clicks `想讀`
-- **THEN** no network request SHALL be issued
-- **AND** no modal SHALL be displayed
+- **THEN** the client SHALL open a confirmation modal
+- **WHEN** the user confirms
+- **THEN** the client SHALL invoke `DELETE /me/units/:unitId/progress`
+- **AND** the backend SHALL soft-delete the `UserUnitProgress` row rather than physically deleting it
+- **AND** the client SHALL remove the unit from the user's `backlog` system shelf
+- **AND** the visible toggle selection SHALL clear
 
 ### Requirement: ACTIVE modal edits progress and last position
 
@@ -127,7 +132,7 @@ The reason modal SHALL render the `reasonPostUnitIds` array with the newest entr
 
 ### Requirement: COMPLETED confirm modal with optimistic +1
 
-Selecting `COMPLETED` SHALL open a confirm modal that displays the current `completedCount` and a brand-color `+1` preview. On confirm, the client SHALL optimistically animate the count from `n → n+1`, fade the `+1` symbol, then close the modal, while the underlying `PUT /me/units/:unitId/progress` runs with `{ status: "COMPLETED", completedCount: n + 1 }` and the dual-write shelf side-effect runs in parallel. Cancellation SHALL leave all stored state unchanged.
+Selecting `COMPLETED` SHALL open a confirm modal that displays the current `completedCount` and a brand-color `+1` preview. On confirm, the client SHALL optimistically animate the count from `n → n+1`, fade the `+1` symbol, then close the modal, while the underlying `PUT /me/units/:unitId/progress` runs with `{ status: "COMPLETED", completedCount: n + 1 }` and the dual-write shelf side-effect runs in parallel. Cancellation SHALL leave all stored state unchanged. If a previously soft-deleted progress row exists, the update SHALL restore it.
 
 #### Scenario: First completion increments count by one
 

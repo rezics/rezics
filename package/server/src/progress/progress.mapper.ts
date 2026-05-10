@@ -17,7 +17,9 @@ function sanitizeExtra(raw: unknown): ProgressExtra | null {
       value &&
       typeof value === "object" &&
       !Array.isArray(value) &&
-      Array.isArray((value as { reasonPostUnitIds?: unknown }).reasonPostUnitIds)
+      Array.isArray(
+        (value as { reasonPostUnitIds?: unknown }).reasonPostUnitIds,
+      )
     ) {
       const ids = (value as { reasonPostUnitIds: unknown[] }).reasonPostUnitIds;
       if (ids.every((id) => typeof id === "string")) {
@@ -34,6 +36,7 @@ export function mapProgressToDTO(row: UserUnitProgress): UnitProgressRowDTO {
     unitId: row.unitId,
     progress: row.progress,
     status: row.status,
+    isDeleted: row.isDeleted,
     completedCount: row.completedCount,
     totalTimeMs: Number(row.totalTimeMs),
     lastPosition: (row.lastPosition as UnitLastPosition | null) ?? null,

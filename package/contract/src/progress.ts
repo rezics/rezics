@@ -127,6 +127,7 @@ export const unitProgressRowDTOSchema = t.Object({
   unitId: t.String(),
   progress: t.Number({ minimum: 0, maximum: 1 }),
   status: userUnitProgressStatusSchema,
+  isDeleted: t.Boolean(),
   completedCount: t.Number({ minimum: 0 }),
   totalTimeMs: t.Number({ minimum: 0 }),
   lastPosition: t.Nullable(unitLastPositionSchema),

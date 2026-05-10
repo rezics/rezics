@@ -28,6 +28,7 @@ async function main(): Promise<void> {
 
   while (true) {
     const rows = await prisma.userUnitProgress.findMany({
+      where: { isDeleted: false },
       orderBy: [{ userId: "asc" }, { unitId: "asc" }],
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,

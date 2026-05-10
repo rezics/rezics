@@ -84,3 +84,10 @@
 - [ ] 12.2 Force a network failure on the shelf write and verify the partial-failure toast appears with a working `Retry`.
 - [ ] 12.3 Verify the `+1` animation order in COMPLETED confirm and that `prefers-reduced-motion` skips the interpolation.
 - [ ] 12.4 Verify reason posts: first PAUSED creates a public post, edit-in-place modifies it, `新增` appends a new id to the array, history disclosure shows older posts.
+
+## 13. Soft-delete and hero polish follow-up
+
+- [x] 13.1 Replace hard deletion of `UserUnitProgress` with `isDeleted` soft deletion and restore on later upsert.
+- [x] 13.2 Exclude soft-deleted progress from `GET /me/units/:unitId/progress`, list responses, and progress search backfill.
+- [x] 13.3 Add confirmation for second-click `想讀`; confirmation soft-deletes progress and removes the backlog shelf item.
+- [x] 13.4 Restyle the hero status row so the three primary status toggles and `⋯` trigger render as one four-slot transparent control with readable inverse text.

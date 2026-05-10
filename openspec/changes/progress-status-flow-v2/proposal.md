@@ -5,7 +5,7 @@ The current `UserUnitProgress` interaction in `BookHeroActionBar.tsx` is a thin 
 ## What Changes
 
 - Extract `UserUnitProgressStatus` UI from `BookHeroActionBar` into a new `progress-status` feature folder under `package/app/src/`, following the standard feature layout (`models/`, `hooks/`, `states/`, `components/`, `sections/`, `index.ts`).
-- Add `DROPPED` to the user-facing status control via an overflow menu (alongside "remove progress"); the four primary toggle slots remain `BACKLOG` / `ACTIVE` / `PAUSED` / `COMPLETED`.
+- Move reason-driven statuses into overflow: the primary toggle slots are `BACKLOG` / `ACTIVE` / `COMPLETED`, while the overflow menu exposes `PAUSED`, `DROPPED`, and "remove progress".
 - Per-status modal flows:
   - `BACKLOG` (想讀): no modal — direct write.
   - `ACTIVE` (在讀): modal with progress slider (1% granularity) and a chapter picker fed by `BookContentStructure.nodes`.

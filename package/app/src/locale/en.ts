@@ -513,6 +513,17 @@ export default {
     remark: "Remark",
     excerpts: "Excerpts",
     reviews_of_book: "Reviews for {{title}}",
+    hero: {
+      actions: {
+        add_to_shelf: "Add to shelf",
+        edit_details: "Edit book details",
+        want_to_read: "Want to read",
+        reading: "Reading",
+        paused: "Paused",
+        read: "Read",
+        dropped: "Dropped",
+      },
+    },
     copyright_notice: {
       body: "Cover artwork and bibliographic metadata are the property of their respective publishers, authors, and copyright holders.",
       fair_use:
@@ -876,6 +887,7 @@ export default {
   progress_status: {
     overflow: {
       aria: "More status options",
+      paused: "Paused",
       dropped: "Drop",
       remove_progress: "Remove progress",
     },
@@ -905,6 +917,12 @@ export default {
       title: "Read again?",
       description:
         "Confirming will increment your read count by 1 and set progress to 100%.",
+    },
+    remove_backlog_modal: {
+      title: "Remove from want to read?",
+      description:
+        "This hides the reading status and removes the book from your want-to-read shelf. If you mark it again later, the stored progress data will be restored.",
+      confirm: "Remove want to read",
     },
     toast: {
       progress_failed: "Progress update failed",

@@ -10,6 +10,7 @@ const baseRow = {
   unitId: "unit-1",
   progress: 0,
   status: UserUnitProgressStatus.BACKLOG,
+  isDeleted: false,
   completedCount: 0,
   totalTimeMs: 0n,
   lastPosition: null,
@@ -19,9 +20,9 @@ const baseRow = {
 };
 
 const mockUpsert = mock(async () => baseRow);
-const mockFindUnique = mock(async () => baseRow);
+const mockFindUnique = mock(async (): Promise<any> => baseRow);
 const mockFindMany = mock(async () => [] as (typeof baseRow)[]);
-const mockDeleteMany = mock(async () => ({ count: 0 }));
+const mockUpdateMany = mock(async () => ({ count: 0 }));
 const mockSyncProgress = mock(async () => undefined);
 const mockRemoveProgress = mock(async () => undefined);
 const mockProgressSearch = mock(async () => ({
@@ -46,7 +47,7 @@ Object.assign(prismaMock, {
     upsert: mockUpsert,
     findUnique: mockFindUnique,
     findMany: mockFindMany,
-    deleteMany: mockDeleteMany,
+    updateMany: mockUpdateMany,
   },
 });
 
@@ -63,7 +64,7 @@ describe("ProgressService", () => {
     mockUpsert.mockClear();
     mockFindUnique.mockClear();
     mockFindMany.mockClear();
-    mockDeleteMany.mockClear();
+    mockUpdateMany.mockClear();
     mockSyncProgress.mockClear();
     mockRemoveProgress.mockClear();
     mockProgressSearch.mockClear();
@@ -88,6 +89,7 @@ describe("ProgressService", () => {
     });
     expect(args.create.progress).toBe(0);
     expect(args.create.status).toBe("BACKLOG");
+    expect(args.create.isDeleted).toBe(false);
     expect(args.create.completedCount).toBe(0);
     expect(args.create.totalTimeMs).toBe(2500n);
     expect(args.create.lastPosition).toBeNull();
@@ -105,6 +107,7 @@ describe("ProgressService", () => {
 
     const update = firstArg(mockUpsert).update;
     expect(update.progress).toBe(0.42);
+    expect(update.isDeleted).toBe(false);
     expect(update.totalTimeMs).toEqual({ increment: 100n });
     expect(update.status).toBeUndefined();
     expect(update.completedCount).toBeUndefined();
@@ -167,8 +170,7 @@ describe("ProgressService", () => {
 
     await expect(
       progressService.upsert("user-1", "unit-1", {
-        // biome-ignore lint/suspicious/noExplicitAny: testing unsafe shape
-        extra: { foo: { bar: 1 } } as any,
+        extra: { foo: { bar: 1 } } as never,
       }),
     ).rejects.toThrow(/extra/);
     expect(mockUpsert).not.toHaveBeenCalled();
@@ -262,13 +264,17 @@ describe("ProgressService", () => {
     expect(args.update.status).toBe("DROPPED");
   });
 
-  test("delete is idempotent through deleteMany scoped by user and unit", async () => {
+  test("delete soft-deletes progress and removes it from search", async () => {
     const { progressService } = await import("./progress.service");
 
     await progressService.delete("user-1", "unit-1");
 
-    expect(mockDeleteMany).toHaveBeenCalledWith({
+    expect(mockUpdateMany).toHaveBeenCalledWith({
       where: { userId: "user-1", unitId: "unit-1" },
+      data: {
+        isDeleted: true,
+        lastSeenAt: expect.any(Date),
+      },
     });
     expect(mockRemoveProgress).toHaveBeenCalledWith(
       expect.anything(),
@@ -288,7 +294,7 @@ describe("ProgressService", () => {
     const result = await progressService.list("user-1", { limit: 1 });
 
     const args = firstArg(mockFindMany);
-    expect(args.where).toEqual({ userId: "user-1" });
+    expect(args.where).toEqual({ userId: "user-1", isDeleted: false });
     expect(args.orderBy).toEqual([{ lastSeenAt: "desc" }, { unitId: "desc" }]);
     expect(args.take).toBe(2);
     expect(result.rows).toHaveLength(1);

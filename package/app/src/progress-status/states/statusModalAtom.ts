@@ -5,7 +5,12 @@ import type {
 import { atom } from "jotai";
 import type { ReasonPostVisibility } from "../hooks/useReasonPostMutations";
 
-export type StatusModalKind = "active" | "reason" | "completed" | null;
+export type StatusModalKind =
+  | "active"
+  | "reason"
+  | "completed"
+  | "removeBacklog"
+  | null;
 
 export type StatusModalDraft = {
   progress?: number;

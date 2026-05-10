@@ -425,6 +425,17 @@ export default {
     remark: "短評",
     excerpts: "原文摘錄",
     reviews_of_book: "{{title}}的書評",
+    hero: {
+      actions: {
+        add_to_shelf: "加入書架",
+        edit_details: "編輯書籍詳情",
+        want_to_read: "想讀",
+        reading: "在讀",
+        paused: "擱置",
+        read: "已讀",
+        dropped: "放棄",
+      },
+    },
     copyright_notice: {
       body: "封面圖像與書目元資料之版權，歸屬於原出版商、作者及版權所有者。",
       fair_use:
@@ -779,6 +790,7 @@ export default {
   progress_status: {
     overflow: {
       aria: "更多狀態選項",
+      paused: "擱置",
       dropped: "棄",
       remove_progress: "移除進度",
     },
@@ -806,6 +818,12 @@ export default {
     completed_modal: {
       title: "再讀一次？",
       description: "確認後會把已讀次數 +1，並把進度設為 100%。",
+    },
+    remove_backlog_modal: {
+      title: "移除想讀？",
+      description:
+        "確認後會隱藏這筆閱讀狀態，並從想讀書架移除這本書。之後重新標記狀態時，原本的進度資料會被保留並恢復。",
+      confirm: "移除想讀",
     },
     toast: {
       progress_failed: "進度更新失敗",

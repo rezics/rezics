@@ -1,8 +1,8 @@
 import {
   PROGRESS_EXTRA_KNOWN_KEYS,
-  userUnitProgressStatusValues,
   type UnitProgressListResponse,
   type UnitProgressStatsResponse,
+  userUnitProgressStatusValues,
 } from "@rezics/contract";
 import {
   PROGRESS_BUCKET_COUNT,
@@ -116,6 +116,7 @@ export class ProgressService {
       unit: { connect: { id: unitId } },
       progress: input.progress ?? 0,
       status: coercedStatus ?? UserUnitProgressStatus.BACKLOG,
+      isDeleted: false,
       completedCount:
         completedCount ??
         (coercedStatus === UserUnitProgressStatus.COMPLETED ? 1 : 0),
@@ -131,6 +132,7 @@ export class ProgressService {
 
     const updateData: Prisma.UserUnitProgressUpdateInput = {
       lastSeenAt: now,
+      isDeleted: false,
       ...(input.progress !== undefined ? { progress: input.progress } : {}),
       ...(coercedStatus !== undefined ? { status: coercedStatus } : {}),
       ...(completedCount !== undefined ? { completedCount } : {}),
@@ -159,9 +161,11 @@ export class ProgressService {
   }
 
   async get(userId: string, unitId: string): Promise<UserUnitProgress | null> {
-    return prisma.userUnitProgress.findUnique({
-      where: { userId_unitId: { userId, unitId } },
-    });
+    return prisma.userUnitProgress
+      .findUnique({
+        where: { userId_unitId: { userId, unitId } },
+      })
+      .then((row) => (row?.isDeleted ? null : row));
   }
 
   async list(
@@ -182,6 +186,7 @@ export class ProgressService {
     const rows = await prisma.userUnitProgress.findMany({
       where: {
         userId,
+        isDeleted: false,
         ...(cursor && cursorDate
           ? {
               OR: [
@@ -215,8 +220,12 @@ export class ProgressService {
   }
 
   async delete(userId: string, unitId: string): Promise<void> {
-    await prisma.userUnitProgress.deleteMany({
+    await prisma.userUnitProgress.updateMany({
       where: { userId, unitId },
+      data: {
+        isDeleted: true,
+        lastSeenAt: new Date(),
+      },
     });
 
     void removeProgress(searchClient, userId, unitId);
@@ -229,8 +238,8 @@ export class ProgressService {
       limit: 0,
     });
     const facets = response.facetDistribution ?? {};
-    const statusFacet = facets["status"] as Record<string, number> | undefined;
-    const bucketFacet = facets["progressBucket"] as
+    const statusFacet = facets.status as Record<string, number> | undefined;
+    const bucketFacet = facets.progressBucket as
       | Record<string, number>
       | undefined;
     const statusCounts = Object.fromEntries(

@@ -8,6 +8,7 @@ const baseRow = {
   unitId: "unit-1",
   progress: 0,
   status: UserUnitProgressStatus.BACKLOG,
+  isDeleted: false,
   completedCount: 0,
   totalTimeMs: 0n,
   lastPosition: null,
@@ -41,7 +42,9 @@ describe("mapProgressToDTO", () => {
   test("returns empty object when stored extra is unrecognized", () => {
     const row: UserUnitProgress = {
       ...baseRow,
-      extra: { totallyUnknown: { foo: 1 } } as unknown as UserUnitProgress["extra"],
+      extra: {
+        totallyUnknown: { foo: 1 },
+      } as unknown as UserUnitProgress["extra"],
     };
 
     expect(mapProgressToDTO(row).extra).toEqual({});

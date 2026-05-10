@@ -1,40 +1,53 @@
 import { ToggleGroup, ToggleGroupItem } from "@rezics/ui/shadcn";
-import {
-  BookmarkPlus,
-  CircleCheck,
-  Pause,
-  PlayCircle,
-} from "lucide-react";
+import { BookmarkPlus, CircleCheck, PlayCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { TOGGLE_GROUP_STATUSES, type ToggleGroupStatus } from "../models/status";
+import {
+  TOGGLE_GROUP_STATUSES,
+  type ToggleGroupStatus,
+} from "../models/status";
 
-const STATUS_ICONS: Record<ToggleGroupStatus, React.ComponentType<{ className?: string }>> = {
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
+
+const STATUS_ICONS: Record<
+  ToggleGroupStatus,
+  React.ComponentType<{ className?: string }>
+> = {
   BACKLOG: BookmarkPlus,
   ACTIVE: PlayCircle,
-  PAUSED: Pause,
   COMPLETED: CircleCheck,
 };
 
-const STATUS_I18N: Record<ToggleGroupStatus, { key: string; fallback: string }> = {
+const STATUS_I18N: Record<
+  ToggleGroupStatus,
+  { key: string; fallback: string }
+> = {
   BACKLOG: { key: "book.hero.actions.want_to_read", fallback: "想讀" },
   ACTIVE: { key: "book.hero.actions.reading", fallback: "在讀" },
-  PAUSED: { key: "book.hero.actions.paused", fallback: "擱置" },
   COMPLETED: { key: "book.hero.actions.read", fallback: "已讀" },
 };
 
-const ITEM_CLASS =
-  "rounded-full text-text-muted border border-border-whisper hover:bg-surface-hover data-[state=on]:bg-surface-elevated data-[state=on]:text-text-primary data-[state=on]:border-border text-xs py-1";
+export const HERO_STATUS_ITEM_CLASS =
+  "h-9 w-full min-w-0 shrink rounded-none border-0 bg-transparent px-2 py-1 text-xs text-white/90 hover:bg-white/10 hover:text-white data-[state=on]:bg-white/15 data-[state=on]:text-white";
+
+const DEFAULT_ITEM_CLASS =
+  "h-9 w-full min-w-0 shrink rounded-full border border-border-whisper bg-transparent px-2 py-1 text-xs text-text-secondary hover:bg-muted hover:text-text-primary data-[state=on]:border-border-defined data-[state=on]:bg-muted data-[state=on]:text-text-primary";
 
 type StatusToggleGroupProps = {
   value: ToggleGroupStatus | null;
   onValueChange: (value: ToggleGroupStatus) => void;
   disabled?: boolean;
+  className?: string;
+  itemClassName?: string;
 };
 
 export function StatusToggleGroup({
   value,
   onValueChange,
   disabled,
+  className,
+  itemClassName,
 }: StatusToggleGroupProps) {
   const { t } = useTranslation();
   return (
@@ -47,7 +60,7 @@ export function StatusToggleGroup({
         onValueChange(picked as ToggleGroupStatus);
       }}
       disabled={disabled}
-      className="w-full grid grid-cols-2 sm:grid-cols-4"
+      className={cx("grid w-full grid-cols-4", className)}
     >
       {TOGGLE_GROUP_STATUSES.map((status) => {
         const Icon = STATUS_ICONS[status];
@@ -56,7 +69,7 @@ export function StatusToggleGroup({
           <ToggleGroupItem
             key={status}
             value={status}
-            className={ITEM_CLASS}
+            className={itemClassName ?? DEFAULT_ITEM_CLASS}
             aria-label={t(label.key, label.fallback)}
           >
             <Icon className="w-3.5 h-3.5 mr-1" />

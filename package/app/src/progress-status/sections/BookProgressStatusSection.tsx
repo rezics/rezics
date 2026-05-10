@@ -1,12 +1,16 @@
-import type { UserUnitProgressStatus } from "@rezics/contract";
 import { useUnitProgress } from "@rezics/api/progress/progress.queries";
+import type { UserUnitProgressStatus } from "@rezics/contract";
 import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
+import { BacklogRemoveConfirmModal } from "../components/BacklogRemoveConfirmModal";
 import { CompletedConfirmModal } from "../components/CompletedConfirmModal";
 import { ReasonModal } from "../components/ReasonModal";
 import { StatusOverflowMenu } from "../components/StatusOverflowMenu";
-import { StatusToggleGroup } from "../components/StatusToggleGroup";
+import {
+  HERO_STATUS_ITEM_CLASS,
+  StatusToggleGroup,
+} from "../components/StatusToggleGroup";
 import { useReasonPostMutations } from "../hooks/useReasonPostMutations";
 import { useStatusTransition } from "../hooks/useStatusTransition";
 import {
@@ -14,10 +18,7 @@ import {
   getReasonPostIds,
   type ReasonStatus,
 } from "../models/extra";
-import {
-  isToggleGroupStatus,
-  type ToggleGroupStatus,
-} from "../models/status";
+import { isToggleGroupStatus, type ToggleGroupStatus } from "../models/status";
 import {
   closeStatusModalAtom,
   openStatusModalAtom,
@@ -28,7 +29,9 @@ export type BookProgressStatusSectionProps = {
   bookUnitId: string;
 };
 
-function isReasonStatus(status: UserUnitProgressStatus): status is ReasonStatus {
+function isReasonStatus(
+  status: UserUnitProgressStatus,
+): status is ReasonStatus {
   return status === "PAUSED" || status === "DROPPED";
 }
 
@@ -53,7 +56,10 @@ export function BookProgressStatusSection({
   const handleSelect = useCallback(
     (next: ToggleGroupStatus) => {
       if (next === "BACKLOG") {
-        if (currentStatus === "BACKLOG") return;
+        if (currentStatus === "BACKLOG") {
+          openModal({ kind: "removeBacklog", status: "BACKLOG" });
+          return;
+        }
         void transition({ to: "BACKLOG" });
         return;
       }
@@ -68,10 +74,6 @@ export function BookProgressStatusSection({
         });
         return;
       }
-      if (next === "PAUSED") {
-        openModal({ kind: "reason", status: "PAUSED" });
-        return;
-      }
       if (next === "COMPLETED") {
         openModal({ kind: "completed", status: "COMPLETED" });
         return;
@@ -84,8 +86,16 @@ export function BookProgressStatusSection({
     openModal({ kind: "reason", status: "DROPPED" });
   }, [openModal]);
 
+  const handlePaused = useCallback(() => {
+    openModal({ kind: "reason", status: "PAUSED" });
+  }, [openModal]);
+
   const handleRemoveProgress = useCallback(() => {
     void removeProgress();
+  }, [removeProgress]);
+
+  const handleRemoveBacklogConfirm = useCallback(async () => {
+    await removeProgress();
   }, [removeProgress]);
 
   const handleActiveSave = useCallback(
@@ -210,16 +220,20 @@ export function BookProgressStatusSection({
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <div className="flex items-stretch gap-2">
+      <div className="grid w-full grid-cols-4 overflow-hidden rounded-full border border-white/25 bg-transparent divide-x divide-white/15">
         <StatusToggleGroup
           value={toggleValue}
           onValueChange={handleSelect}
           disabled={isPending}
+          className="col-span-3 grid-cols-3 divide-x divide-white/15"
+          itemClassName={HERO_STATUS_ITEM_CLASS}
         />
         <StatusOverflowMenu
+          onSelectPaused={handlePaused}
           onSelectDropped={handleDropped}
           onRemoveProgress={handleRemoveProgress}
           disabled={isPending}
+          isActive={currentStatus === "PAUSED" || currentStatus === "DROPPED"}
         />
       </div>
 
@@ -254,6 +268,13 @@ export function BookProgressStatusSection({
         currentCount={progress.data?.completedCount ?? 0}
         onCancel={closeModal}
         onConfirm={handleCompletedConfirm}
+        isPending={isPending}
+      />
+
+      <BacklogRemoveConfirmModal
+        open={modal.kind === "removeBacklog"}
+        onCancel={closeModal}
+        onConfirm={handleRemoveBacklogConfirm}
         isPending={isPending}
       />
     </div>

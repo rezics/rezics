@@ -2,7 +2,7 @@
 
 ### Requirement: Progress fact source schema
 
-The system SHALL persist a single `UserUnitProgress` row per `(userId, unitId)` pair as the canonical fact source for that user's interaction with that unit. The row MUST carry: a fractional `progress` value in the closed interval `[0, 1]`, a `status` enum (`BACKLOG` | `ACTIVE` | `PAUSED` | `COMPLETED` | `DROPPED`), a `completedCount` non-negative integer, a cumulative `totalTimeMs` non-negative integer, an opaque `lastPosition` string (nullable), `firstSeenAt` and `lastSeenAt` timestamps, and an `extra` JSON payload constrained to a per-status domain map (the `ProgressExtra` shape). The pair `(userId, unitId)` MUST be the primary key.
+The system SHALL persist a single `UserUnitProgress` row per `(userId, unitId)` pair as the canonical fact source for that user's interaction with that unit. The row MUST carry: a fractional `progress` value in the closed interval `[0, 1]`, a `status` enum (`BACKLOG` | `ACTIVE` | `PAUSED` | `COMPLETED` | `DROPPED`), an `isDeleted` boolean used for soft deletion, a `completedCount` non-negative integer, a cumulative `totalTimeMs` non-negative integer, an opaque `lastPosition` string (nullable), `firstSeenAt` and `lastSeenAt` timestamps, and an `extra` JSON payload constrained to a per-status domain map (the `ProgressExtra` shape). The pair `(userId, unitId)` MUST be the primary key.
 
 The `extra` payload SHALL conform to the following narrow schema (Typebox in `@rezics/contract`):
 
@@ -55,7 +55,7 @@ System-shelf membership that mirrors progress status SHALL be maintained exclusi
 - The `completed` system shelf SHALL be add-only with respect to status. When a user transitions into `COMPLETED` for the first time the frontend SHALL add the unit; subsequent transitions out of `COMPLETED` SHALL NOT remove it. Re-entering `COMPLETED` (re-read) is naturally idempotent against the shelf primary key.
 - The `PAUSED` and `DROPPED` statuses SHALL NOT have any system-shelf membership. Frontends SHALL NOT create or expect a `paused` or `dropped` system shelf.
 
-The "Remove progress" action (`DELETE /me/units/:unitId/progress`) SHALL ALSO be paired by the frontend with shelf operations: a `remove` against any mirrored shelf currently containing the unit, and SHALL leave the `completed` shelf untouched.
+The "Remove progress" action (`DELETE /me/units/:unitId/progress`) SHALL soft-delete the row by setting `isDeleted = true` rather than physically deleting it. It SHALL ALSO be paired by the frontend with shelf operations: a `remove` against any mirrored shelf currently containing the unit, and SHALL leave the `completed` shelf untouched. Any subsequent progress upsert SHALL set `isDeleted = false` and restore the row.
 
 #### Scenario: Progress upsert does not write to shelf
 
