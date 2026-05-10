@@ -1,5 +1,12 @@
 import nodemailer, { type Transporter } from "nodemailer";
+import type SMTPPool from "nodemailer/lib/smtp-pool";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
+
+export type SmtpTransportOptions = SMTPTransport.Options & {
+  pool?: boolean;
+  maxConnections?: number;
+  maxMessages?: number;
+};
 
 export interface SmtpTransportConfig {
   host: string;
@@ -64,21 +71,29 @@ function normalizeFromAddress(
   return typeof from === "string" ? from : formatSenderAddress(from);
 }
 
-function createTransporter(config: SmtpTransportConfig): Transporter {
-  const options = {
+export function buildSmtpTransportOptions(
+  config: SmtpTransportConfig,
+): SmtpTransportOptions {
+  return {
     host: config.host,
     port: config.port ?? 587,
     secure: config.secure ?? false,
     auth: config.auth,
-    pool: config.pool,
-    maxConnections: config.maxConnections,
-    maxMessages: config.maxMessages,
+    pool: config.pool ?? true,
+    maxConnections: config.maxConnections ?? 5,
+    maxMessages: config.maxMessages ?? 100,
     tls:
       config.rejectUnauthorized === undefined
         ? undefined
         : { rejectUnauthorized: config.rejectUnauthorized },
-  } as SMTPTransport.Options;
-  return nodemailer.createTransport(options);
+  };
+}
+
+function createTransporter(config: SmtpTransportConfig): Transporter {
+  const options = buildSmtpTransportOptions(config);
+  return options.pool
+    ? nodemailer.createTransport(options as SMTPPool.Options)
+    : nodemailer.createTransport(options as SMTPTransport.Options);
 }
 
 function toDeliveryFailure(error: unknown): EmailDeliveryFailure {

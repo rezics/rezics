@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { createEmailSender, formatSenderAddress } from "./sender";
+import {
+  buildSmtpTransportOptions,
+  createEmailSender,
+  formatSenderAddress,
+} from "./sender";
 
 function createTransporter(sendMail: (message: unknown) => Promise<void>) {
   return {
@@ -55,6 +59,25 @@ describe("email sender", () => {
         html: undefined,
       },
     ]);
+  });
+
+  test("applies pool defaults when caller omits them", () => {
+    const options = buildSmtpTransportOptions({ host: "smtp.example.com" });
+    expect(options.pool).toBe(true);
+    expect(options.maxConnections).toBe(5);
+    expect(options.maxMessages).toBe(100);
+  });
+
+  test("preserves caller-specified pool overrides", () => {
+    const options = buildSmtpTransportOptions({
+      host: "smtp.example.com",
+      pool: false,
+      maxConnections: 1,
+      maxMessages: 10,
+    });
+    expect(options.pool).toBe(false);
+    expect(options.maxConnections).toBe(1);
+    expect(options.maxMessages).toBe(10);
   });
 
   test("propagates delivery failures as typed errors", async () => {

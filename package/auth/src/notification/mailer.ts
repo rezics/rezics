@@ -29,9 +29,6 @@ export function createAuthMailer(defaultFromEmail?: string): EmailSender {
         user: env.SMTP_USER,
         pass: env.SMTP_PASSWORD,
       },
-      pool: true,
-      maxConnections: 3,
-      maxMessages: 50,
       rejectUnauthorized: true,
     },
   });

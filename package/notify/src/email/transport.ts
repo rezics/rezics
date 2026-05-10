@@ -20,6 +20,7 @@ function getSmtpSender() {
   if (smtpSender) return smtpSender;
   if (!env.SMTP_HOST) return null;
 
+  // Pool/maxConnections/maxMessages come from @rezics/email defaults.
   smtpSender = createEmailSender({
     defaultFrom: {
       email: env.SMTP_FROM ?? "no-reply@rezics.com",
