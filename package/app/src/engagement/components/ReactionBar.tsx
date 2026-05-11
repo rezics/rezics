@@ -50,6 +50,8 @@ export type ReactionBarProps = {
   onReplyInvoke?: () => void;
   /** Render mode for the Reply atom. `"count"` shows number when > 0, `"label"` always shows "Reply". */
   replyMode?: "count" | "label";
+  /** Extra caller-owned items rendered in the overflow menu. */
+  overflowContent?: React.ReactNode;
   className?: string;
 };
 
@@ -75,9 +77,17 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   variant = "plain",
   onReplyInvoke,
   replyMode = "count",
+  overflowContent,
   className,
 }) => {
   const { visible, hidden } = resolvePolicy(actions, overflow, actionPolicy);
+  const hasOverflowContent =
+    overflowContent !== undefined && overflowContent !== null;
+  const hasOverflow = hidden.length > 0 || hasOverflowContent;
+  const visibleActions =
+    hasOverflow && !visible.includes("more")
+      ? [...visible, "more" as Action]
+      : visible;
   const shareHref = policy.getShareHref(post);
   const shareTitle = policy.getShareTitle?.(post);
 
@@ -131,7 +141,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
         )}
         onClick={handleBarClick}
       >
-        {visible.map((token) => {
+        {visibleActions.map((token) => {
           switch (token) {
             case "vote":
               return <VoteGroup key="vote" targetUnitId={post.unitId} />;
@@ -163,7 +173,9 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
                   items={hidden}
                   size={size}
                   onInvoke={handleOverflowInvoke}
-                />
+                >
+                  {overflowContent}
+                </OverflowMenu>
               );
             case "funny":
             case "award":

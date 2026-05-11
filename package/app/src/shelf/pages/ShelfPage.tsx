@@ -11,13 +11,19 @@ import { Spinner } from "@rezics/ui";
 import {
   Button,
   Checkbox,
+  DropdownMenuItem,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  ToggleGroup,
+  ToggleGroupItem,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  ToggleGroup,
-  ToggleGroupItem,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -31,6 +37,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { useMediaQuery } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import { shelfDetailActions, shelfPolicy } from "../models/shelfPolicy";
@@ -67,11 +74,24 @@ function isShelfSortMode(value: string | undefined): value is ShelfSortMode {
   return value === "manual" || value === "time" || value === "title";
 }
 
+function requireShelfSortMode(value: ShelfSortMode | null): ShelfSortMode {
+  if (value === null) {
+    throw new Error("Shelf sort mode select emitted null");
+  }
+  return value;
+}
+
 // MOCK: masonry layout uses CSS column-count as a placeholder until the real
 // masonry primitive lands. The column breaks are browser-driven and not
 // height-balanced; the emitted stream and the enum value are real.
 const MASONRY_COLUMN_CLASS =
   "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
+
+const SORT_OPTIONS: { value: ShelfSortMode; label: string }[] = [
+  { value: "manual", label: "Manual" },
+  { value: "time", label: "Time" },
+  { value: "title", label: "Title" },
+];
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
   const navigate = useNavigate();
@@ -82,6 +102,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   }>({ unitId, value: undefined });
   const [sortMode, setSortMode] = useState<ShelfSortMode>("manual");
   const [sortPrimeOnly, setSortPrimeOnly] = useState<boolean>(true);
+  const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
   const detailQuery = useQuery(shelfDetailQuery(unitId));
   const itemsQuery = useQuery(shelfItemsQuery(unitId));
@@ -163,6 +184,16 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const streamKeyPrefix = `${effectiveViewMode}:${sortMode}:${
     sortPrimeOnly ? "prime" : "all"
   }`;
+  const selectedSortLabel =
+    SORT_OPTIONS.find((option) => option.value === sortMode)?.label ?? "Manual";
+
+  const handleEditShelf = () => {
+    if (!shelf?.unitId) return;
+    navigate({
+      to: "/shelf/$shelfId/edit",
+      params: { shelfId: shelf.unitId },
+    });
+  };
 
   if (detailQuery.isLoading) {
     return (
@@ -190,18 +221,13 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
 
           {(reactionPost || (canEditShelf && shelf?.unitId)) && (
-            <div className="flex flex-col gap-2 md:items-end">
-              {canEditShelf && shelf?.unitId && (
+            <div className="flex flex-row items-center gap-2 self-start md:flex-col md:items-end">
+              {canEditShelf && shelf?.unitId && !isCompactLayout && (
                 <Button
                   variant="ghost"
                   size="sm"
                   className="gap-1.5 text-text-secondary hover:text-text-primary"
-                  onClick={() =>
-                    navigate({
-                      to: "/shelf/$shelfId/edit",
-                      params: { shelfId: shelf.unitId },
-                    })
-                  }
+                  onClick={handleEditShelf}
                 >
                   <EditIcon className="h-4 w-4" />
                   Edit shelf
@@ -209,11 +235,21 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               )}
               {reactionPost && (
                 <ReactionBar
-                  size="lg"
                   post={reactionPost}
                   policy={shelfPolicy}
                   actions={shelfDetailActions}
-                  className="md:justify-end"
+                  className="flex-nowrap md:justify-end"
+                  overflowContent={
+                    isCompactLayout && canEditShelf && shelf?.unitId ? (
+                      <DropdownMenuItem
+                        onClick={handleEditShelf}
+                        className="gap-2"
+                      >
+                        <EditIcon className="h-4 w-4" />
+                        <span>Edit shelf</span>
+                      </DropdownMenuItem>
+                    ) : null
+                  }
                 />
               )}
             </div>
@@ -221,8 +257,27 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span className="text-sm text-text-secondary">Sort</span>
+            <div className="sm:hidden">
+              <Select<ShelfSortMode>
+                value={sortMode}
+                onValueChange={(value) => {
+                  setSortMode(requireShelfSortMode(value));
+                }}
+              >
+                <SelectTrigger size="sm" className="min-w-[118px]">
+                  <SelectValue>{selectedSortLabel}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <ToggleGroup
               value={[sortMode]}
               onValueChange={(values) => {
@@ -231,20 +286,23 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 setSortMode(value);
               }}
               size="sm"
+              className="hidden sm:flex"
             >
-              <ToggleGroupItem value="manual">Manual</ToggleGroupItem>
-              <ToggleGroupItem value="time">Time</ToggleGroupItem>
-              <ToggleGroupItem value="title">Title</ToggleGroupItem>
+              {SORT_OPTIONS.map((option) => (
+                <ToggleGroupItem key={option.value} value={option.value}>
+                  {option.label}
+                </ToggleGroupItem>
+              ))}
             </ToggleGroup>
             {showSortScopeToggle && (
-              <Label className="flex items-center gap-2 text-sm">
+              <Label className="flex min-w-0 items-center gap-2 text-sm">
                 <Checkbox
                   checked={sortPrimeOnly}
                   onCheckedChange={(checked) =>
                     setSortPrimeOnly(checked === true)
                   }
                 />
-                Sort prime only
+                <span className="whitespace-nowrap">Sort prime only</span>
               </Label>
             )}
             {hydration.orphanItemRefs.length > 0 && (

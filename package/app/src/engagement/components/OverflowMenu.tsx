@@ -18,6 +18,7 @@ export type OverflowMenuProps = {
   items: Action[];
   size?: EngagementSize;
   onInvoke: (action: Action) => void;
+  children?: React.ReactNode;
 };
 
 type MenuDescriptor = { label: string; icon: React.ReactNode };
@@ -43,12 +44,13 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
   items,
   size = "md",
   onInvoke,
+  children,
 }) => {
   const visible = items.filter(
     (token) => DESCRIPTORS[token] !== undefined,
   ) as Action[];
 
-  if (visible.length === 0) return null;
+  if (visible.length === 0 && !children) return null;
 
   const handleSelect = (event: Event | React.MouseEvent, action: Action) => {
     if ("stopPropagation" in event) event.stopPropagation();
@@ -90,6 +92,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
             </DropdownMenuItem>
           );
         })}
+        {children}
       </DropdownMenuContent>
     </DropdownMenu>
   );
