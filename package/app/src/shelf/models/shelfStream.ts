@@ -1,10 +1,10 @@
 import type {
   EnrichedShelfItem,
-  ShelfSortMode,
+  ShelfSortState,
   ShelfView,
   TagListEntryDTO,
 } from "@rezics/api/shelf";
-import type { PostDTO } from "@rezics/contract";
+import type { PostDTO, ShelfItemDTO } from "@rezics/contract";
 import { titleOf } from "./titleOf";
 
 export type ShelfStreamEntry =
@@ -12,11 +12,13 @@ export type ShelfStreamEntry =
   | {
       kind: "review";
       parentItemRef: string;
+      parentItem: ShelfItemDTO;
       review: PostDTO;
     }
   | {
       kind: "tag";
       parentItemRef: string;
+      parentItem: ShelfItemDTO;
       tag: TagListEntryDTO;
     };
 
@@ -41,15 +43,45 @@ function entryTime(entry: ShelfStreamEntry): number {
     return t ? new Date(t).getTime() : 0;
   }
   if (entry.kind === "review") {
-    const t = entry.review.createdAt;
+    const t = entry.parentItem.createdAt;
     return t ? new Date(t).getTime() : 0;
   }
-  return 0;
+  const t = entry.parentItem.createdAt;
+  return t ? new Date(t).getTime() : 0;
 }
 
 function comparePosition(a: string, b: string): number {
   if (a === b) return 0;
   return a < b ? -1 : 1;
+}
+
+function maybeReverse(value: number, order: ShelfSortState["order"]): number {
+  return order === "desc" ? -value : value;
+}
+
+function compareByOrder(
+  a: string,
+  b: string,
+  order: ShelfSortState["order"],
+): number {
+  return maybeReverse(comparePosition(a, b), order);
+}
+
+function compareTime(
+  aTime: number,
+  bTime: number,
+  order: ShelfSortState["order"],
+): number {
+  const value = aTime - bTime;
+  return order === "desc" ? -value : value;
+}
+
+function compareTitle(
+  a: string,
+  b: string,
+  order: ShelfSortState["order"],
+): number {
+  return maybeReverse(titleCollator.compare(a, b), order);
 }
 
 function primeTieBreaker(a: EnrichedShelfItem, b: EnrichedShelfItem): number {
@@ -82,20 +114,24 @@ function entryTieBreaker(a: ShelfStreamEntry, b: ShelfStreamEntry): number {
 function comparePrimeByMode(
   a: EnrichedShelfItem,
   b: EnrichedShelfItem,
-  mode: ShelfSortMode,
+  sort: ShelfSortState,
 ): number {
-  if (mode === "manual") {
-    return primeTieBreaker(a, b);
+  if (sort.field === "manual") {
+    return (
+      compareByOrder(a.item.position, b.item.position, sort.order) ||
+      titleCollator.compare(a.item.itemRef, b.item.itemRef)
+    );
   }
-  if (mode === "time") {
+  if (sort.field === "addedAt") {
     const aT = a.item.createdAt ? new Date(a.item.createdAt).getTime() : 0;
     const bT = b.item.createdAt ? new Date(b.item.createdAt).getTime() : 0;
-    return bT - aT || primeTieBreaker(a, b);
+    return compareTime(aT, bT, sort.order) || primeTieBreaker(a, b);
   }
   return (
-    titleCollator.compare(
+    compareTitle(
       titleOf(a.item, a.primary),
       titleOf(b.item, b.primary),
+      sort.order,
     ) || primeTieBreaker(a, b)
   );
 }
@@ -103,38 +139,48 @@ function comparePrimeByMode(
 function compareEntryByMode(
   a: ShelfStreamEntry,
   b: ShelfStreamEntry,
-  mode: ShelfSortMode,
+  sort: ShelfSortState,
 ): number {
-  if (mode === "manual") {
+  if (sort.field === "manual") {
     // Reviews have no position of their own; manual sort keeps prime order
     // with reviews pinned adjacent to their prime. Callers that reach this
     // branch have already flattened, so fall back to a stable comparison.
     if (a.kind === "prime" && b.kind === "prime") {
-      return primeTieBreaker(a.enriched, b.enriched);
+      return (
+        compareByOrder(
+          a.enriched.item.position,
+          b.enriched.item.position,
+          sort.order,
+        ) || entryTieBreaker(a, b)
+      );
     }
     return entryTieBreaker(a, b);
   }
-  if (mode === "time") {
-    return entryTime(b) - entryTime(a) || entryTieBreaker(a, b);
+  if (sort.field === "addedAt") {
+    return (
+      compareTime(entryTime(a), entryTime(b), sort.order) ||
+      entryTieBreaker(a, b)
+    );
   }
   return (
-    titleCollator.compare(entryTitle(a), entryTitle(b)) || entryTieBreaker(a, b)
+    compareTitle(entryTitle(a), entryTitle(b), sort.order) ||
+    entryTieBreaker(a, b)
   );
 }
 
 function sortedPrimes(
   enriched: EnrichedShelfItem[],
-  mode: ShelfSortMode,
+  sort: ShelfSortState,
 ): EnrichedShelfItem[] {
   const arr = [...enriched];
-  arr.sort((a, b) => comparePrimeByMode(a, b, mode));
+  arr.sort((a, b) => comparePrimeByMode(a, b, sort));
   return arr;
 }
 
 export function deriveShelfStream(
   enriched: EnrichedShelfItem[],
   mode: ShelfView,
-  sort: ShelfSortMode,
+  sort: ShelfSortState,
   sortPrimeOnly: boolean,
 ): ShelfStreamEntry[] {
   if (mode === "nested") {
@@ -144,7 +190,7 @@ export function deriveShelfStream(
     }));
   }
 
-  if (sort === "manual" || sortPrimeOnly) {
+  if (sort.field === "manual" || sortPrimeOnly) {
     const out: ShelfStreamEntry[] = [];
     for (const e of sortedPrimes(enriched, sort)) {
       out.push({ kind: "prime", enriched: e });
@@ -152,6 +198,7 @@ export function deriveShelfStream(
         out.push({
           kind: "review",
           parentItemRef: e.item.itemRef,
+          parentItem: e.item,
           review,
         });
       }
@@ -159,6 +206,7 @@ export function deriveShelfStream(
         out.push({
           kind: "tag",
           parentItemRef: e.item.itemRef,
+          parentItem: e.item,
           tag,
         });
       }
@@ -173,6 +221,7 @@ export function deriveShelfStream(
       flat.push({
         kind: "review",
         parentItemRef: e.item.itemRef,
+        parentItem: e.item,
         review,
       });
     }
@@ -180,6 +229,7 @@ export function deriveShelfStream(
       flat.push({
         kind: "tag",
         parentItemRef: e.item.itemRef,
+        parentItem: e.item,
         tag,
       });
     }

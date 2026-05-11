@@ -31,7 +31,6 @@ import {
 } from "./fractional-index";
 
 export const SHELF_ITEM_BATCH_OP_CAP = 200;
-const CROSS_PAGE_PAGE_SIZE = 100;
 import {
   buildShelfItemProjection,
   mapShelfDetailToDTO,
@@ -810,7 +809,12 @@ export class ShelfService {
               break;
             }
             case "reorderToPage": {
-              const skip = (op.toPage - 1) * CROSS_PAGE_PAGE_SIZE;
+              const pageSize = Math.max(
+                1,
+                Math.min(Number(op.pageSize ?? 20), 100),
+              );
+              const order = op.order === "desc" ? "desc" : "asc";
+              const skip = (op.toPage - 1) * pageSize;
               if (skip < 0) {
                 results.push({
                   status: "failed",
@@ -819,12 +823,15 @@ export class ShelfService {
                 });
                 continue;
               }
-              const first = await tx.shelfItem.findFirst({
-                where: { shelfUnitId },
-                orderBy: { position: "asc" },
-                skip,
+              const rows = await tx.shelfItem.findMany({
+                where: { shelfUnitId, itemRef: { not: op.itemRef } },
+                orderBy: { position: order },
+                skip: Math.max(0, skip - 1),
+                take: skip === 0 ? 1 : 2,
                 select: { position: true },
               });
+              const previousVisual = skip === 0 ? undefined : rows[0];
+              const first = skip === 0 ? rows[0] : rows[1];
               if (!first) {
                 results.push({
                   status: "failed",
@@ -833,7 +840,10 @@ export class ShelfService {
                 });
                 continue;
               }
-              const newPosition = generateBetween(undefined, first.position);
+              const newPosition =
+                order === "desc"
+                  ? generateBetween(first.position, previousVisual?.position)
+                  : generateBetween(previousVisual?.position, first.position);
               const updated = await tx.shelfItem.update({
                 where: {
                   shelfUnitId_itemRef: { shelfUnitId, itemRef: op.itemRef },

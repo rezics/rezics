@@ -3,6 +3,7 @@ import {
   appendAfter,
   betweenNeighbors,
   prependBefore,
+  visualReorderBounds,
 } from "./positionMath";
 
 describe("positionMath", () => {
@@ -59,5 +60,32 @@ describe("positionMath", () => {
     for (let i = 1; i < keys.length; i++) {
       expect(keys[i]! > keys[i - 1]!).toBe(true);
     }
+  });
+
+  test("visualReorderBounds maps ascending visual neighbors directly", () => {
+    const rows = [{ position: "a" }, { position: "m" }, { position: "z" }];
+
+    expect(visualReorderBounds(rows, 1, "asc")).toEqual({
+      before: "a",
+      after: "z",
+    });
+  });
+
+  test("visualReorderBounds reverses neighbors for descending manual order", () => {
+    const rows = [{ position: "z" }, { position: "m" }, { position: "a" }];
+
+    expect(visualReorderBounds(rows, 1, "desc")).toEqual({
+      before: "a",
+      after: "z",
+    });
+  });
+
+  test("visualReorderBounds handles descending top insertion", () => {
+    const rows = [{ position: "m" }, { position: "a" }];
+
+    expect(visualReorderBounds(rows, 0, "desc")).toEqual({
+      before: "a",
+      after: undefined,
+    });
   });
 });

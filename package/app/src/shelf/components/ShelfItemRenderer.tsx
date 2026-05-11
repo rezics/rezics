@@ -19,6 +19,7 @@ import { PostCard } from "@/post";
 import { ReviewCard } from "@/review/components/item/ReviewCard";
 import { getBookAuthorName } from "@/shared/utils/translation-helpers";
 import { SingleTagChip } from "@/tag/components/TagList";
+import { shelfEntryToUnitCardSummary, UnitCard } from "@/unit";
 import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfCard } from "./ShelfCard";
 import { ShelfItemCard } from "./ShelfItemCard";
@@ -135,12 +136,12 @@ export function ShelfItemRenderer({
   editControls,
 }: ShelfItemRendererProps) {
   let content: React.ReactNode;
-  if (entry.kind === "review") {
+  if (viewMode === "unit") {
+    content = <UnitCard summary={shelfEntryToUnitCardSummary(entry)} />;
+  } else if (entry.kind === "review") {
     content = <ReviewCard review={entry.review} />;
   } else if (entry.kind === "tag") {
-    content = (
-      <SingleTagChip tag={entry.tag as unknown as UnitTagDTO} />
-    );
+    content = <SingleTagChip tag={entry.tag as unknown as UnitTagDTO} />;
   } else if (viewMode === "nested") {
     content = <NestedPrimeCard enriched={entry.enriched} />;
   } else {

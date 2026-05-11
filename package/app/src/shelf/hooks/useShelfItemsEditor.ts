@@ -1,5 +1,6 @@
 import { useBatchUpdateShelfItemsMutation } from "@rezics/api/shelf/shelf.mutations";
 import { shelfItemsQuery } from "@rezics/api/shelf/shelf.queries";
+import type { ShelfSortOrder } from "@rezics/api/shelf";
 import type {
   ShelfItemBatchOp,
   ShelfItemBatchResult,
@@ -49,7 +50,12 @@ export interface UseShelfItemsEditor {
   lastResult: SaveResult | null;
   enqueueAdd: (input: AddInput) => void;
   enqueueReorder: (itemRef: string, between: ReorderBetween) => void;
-  enqueueCrossPageMove: (itemRef: string, toPage: number) => void;
+  enqueueCrossPageMove: (
+    itemRef: string,
+    toPage: number,
+    pageSize: number,
+    order: ShelfSortOrder,
+  ) => void;
   enqueueDelete: (itemRef: string) => void;
   enqueueSetTags: (itemRef: string, tagIds: string[]) => void;
   save: () => Promise<SaveResult>;
@@ -109,13 +115,20 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
   );
 
   const enqueueCrossPageMove = useCallback(
-    (itemRef: string, toPage: number) => {
+    (
+      itemRef: string,
+      toPage: number,
+      pageSize: number,
+      order: ShelfSortOrder,
+    ) => {
       setLog((current) =>
         enqueue(current, {
           op: "reorderToPage",
           itemRef,
           toPage,
           edge: "first",
+          pageSize,
+          order,
         }),
       );
     },

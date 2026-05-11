@@ -322,8 +322,7 @@ export const shelfItemBatchAddOpSchema = t.Object({
   reviewIds: t.Optional(t.Array(t.String())),
 });
 
-export type ShelfItemBatchAddOp =
-  (typeof shelfItemBatchAddOpSchema)["static"];
+export type ShelfItemBatchAddOp = (typeof shelfItemBatchAddOpSchema)["static"];
 
 export const shelfItemBatchReorderOpSchema = t.Object({
   op: t.Literal("reorder"),
@@ -339,6 +338,8 @@ export const shelfItemBatchReorderToPageOpSchema = t.Object({
   itemRef: t.String(),
   toPage: t.Number(),
   edge: t.Literal("first"),
+  pageSize: t.Optional(t.Number()),
+  order: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
 });
 
 export type ShelfItemBatchReorderToPageOp =

@@ -1,6 +1,11 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type { ShelfSortMode, ShelfView } from "@rezics/api/shelf";
+import type {
+  ShelfSortField,
+  ShelfSortOrder,
+  ShelfSortState,
+  ShelfView,
+} from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
   shelfItemsQuery,
@@ -32,6 +37,7 @@ import {
   LayoutList as ViewAgendaIcon,
   List as ViewListIcon,
   LayoutGrid as ViewQuiltIcon,
+  Rows3 as ViewUnitIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -58,6 +64,7 @@ const LEGACY_VIEW_MODE_MAP: Record<string, ShelfView> = {
   nested: "nested",
   flat: "flat",
   masonry: "masonry",
+  unit: "unit",
 };
 
 function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
@@ -70,18 +77,30 @@ function lastSingleToggleValue(values: readonly string[]): string | undefined {
 }
 
 function isShelfView(value: string | undefined): value is ShelfView {
-  return value === "nested" || value === "flat" || value === "masonry";
+  return (
+    value === "nested" ||
+    value === "flat" ||
+    value === "masonry" ||
+    value === "unit"
+  );
 }
 
-function isShelfSortMode(value: string | undefined): value is ShelfSortMode {
-  return value === "manual" || value === "time" || value === "title";
-}
-
-function requireShelfSortMode(value: ShelfSortMode | null): ShelfSortMode {
+function requireShelfSortField(value: ShelfSortField | null): ShelfSortField {
   if (value === null) {
-    throw new Error("Shelf sort mode select emitted null");
+    throw new Error("Shelf sort field select emitted null");
   }
   return value;
+}
+
+function requireShelfSortOrder(value: ShelfSortOrder | null): ShelfSortOrder {
+  if (value === null) {
+    throw new Error("Shelf sort order select emitted null");
+  }
+  return value;
+}
+
+function defaultOrderForField(field: ShelfSortField): ShelfSortOrder {
+  return field === "title" ? "asc" : "desc";
 }
 
 // MOCK: masonry layout uses CSS column-count as a placeholder until the real
@@ -90,10 +109,15 @@ function requireShelfSortMode(value: ShelfSortMode | null): ShelfSortMode {
 const MASONRY_COLUMN_CLASS =
   "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
 
-const SORT_OPTIONS: { value: ShelfSortMode; label: string }[] = [
+const SORT_FIELD_OPTIONS: { value: ShelfSortField; label: string }[] = [
   { value: "manual", label: "Manual" },
-  { value: "time", label: "Time" },
+  { value: "addedAt", label: "Added" },
   { value: "title", label: "Title" },
+];
+
+const SORT_ORDER_OPTIONS: { value: ShelfSortOrder; label: string }[] = [
+  { value: "desc", label: "Desc" },
+  { value: "asc", label: "Asc" },
 ];
 
 function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
@@ -111,7 +135,10 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     unitId: string;
     value: ShelfView | undefined;
   }>({ unitId, value: undefined });
-  const [sortMode, setSortMode] = useState<ShelfSortMode>("manual");
+  const [sortState, setSortState] = useState<ShelfSortState>({
+    field: "manual",
+    order: "desc",
+  });
   const [sortPrimeOnly, setSortPrimeOnly] = useState<boolean>(true);
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
@@ -147,10 +174,10 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
       deriveShelfStream(
         hydration.enriched,
         effectiveViewMode,
-        sortMode,
+        sortState,
         sortPrimeOnly,
       ),
-    [hydration.enriched, effectiveViewMode, sortMode, sortPrimeOnly],
+    [hydration.enriched, effectiveViewMode, sortState, sortPrimeOnly],
   );
 
   const visibleStream = useMemo(
@@ -189,16 +216,23 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   );
 
   const showSortScopeToggle =
-    (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
-    sortMode !== "manual";
+    (effectiveViewMode === "flat" ||
+      effectiveViewMode === "masonry" ||
+      effectiveViewMode === "unit") &&
+    sortState.field !== "manual";
   const nestedViewLabel = t("shelf.view_modes.nested");
   const flatViewLabel = t("shelf.view_modes.flat");
   const masonryViewLabel = t("shelf.view_modes.masonry");
-  const streamKeyPrefix = `${effectiveViewMode}:${sortMode}:${
-    sortPrimeOnly ? "prime" : "all"
-  }`;
+  const unitViewLabel = t("shelf.view_modes.unit", "Unit cards");
+  const streamKeyPrefix = `${effectiveViewMode}:${sortState.field}:${
+    sortState.order
+  }:${sortPrimeOnly ? "prime" : "all"}`;
   const selectedSortLabel =
-    SORT_OPTIONS.find((option) => option.value === sortMode)?.label ?? "Manual";
+    SORT_FIELD_OPTIONS.find((option) => option.value === sortState.field)
+      ?.label ?? "Manual";
+  const selectedOrderLabel =
+    SORT_ORDER_OPTIONS.find((option) => option.value === sortState.order)
+      ?.label ?? "Desc";
 
   const handleEditShelf = () => {
     if (!shelf?.unitId) return;
@@ -272,18 +306,42 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span className="text-sm text-text-secondary">Sort</span>
-            <div className="sm:hidden">
-              <Select<ShelfSortMode>
-                value={sortMode}
+            <div className="flex items-center gap-2">
+              <Select<ShelfSortField>
+                value={sortState.field}
                 onValueChange={(value) => {
-                  setSortMode(requireShelfSortMode(value));
+                  const field = requireShelfSortField(value);
+                  setSortState({
+                    field,
+                    order: defaultOrderForField(field),
+                  });
                 }}
               >
                 <SelectTrigger size="sm" className="min-w-[118px]">
                   <SelectValue>{selectedSortLabel}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {SORT_OPTIONS.map((option) => (
+                  {SORT_FIELD_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select<ShelfSortOrder>
+                value={sortState.order}
+                onValueChange={(value) =>
+                  setSortState((current) => ({
+                    ...current,
+                    order: requireShelfSortOrder(value),
+                  }))
+                }
+              >
+                <SelectTrigger size="sm" className="min-w-[92px]">
+                  <SelectValue>{selectedOrderLabel}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_ORDER_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -291,22 +349,6 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 </SelectContent>
               </Select>
             </div>
-            <ToggleGroup
-              value={[sortMode]}
-              onValueChange={(values) => {
-                const value = lastSingleToggleValue(values);
-                if (!isShelfSortMode(value)) return;
-                setSortMode(value);
-              }}
-              size="sm"
-              className="hidden sm:flex"
-            >
-              {SORT_OPTIONS.map((option) => (
-                <ToggleGroupItem key={option.value} value={option.value}>
-                  {option.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
             {showSortScopeToggle && (
               <Label className="flex min-w-0 items-center gap-2 text-sm">
                 <Checkbox
@@ -320,12 +362,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
             )}
             {hydration.orphanItemRefs.length > 0 && (
               <>
-                <span
-                  className="text-xs"
-                  style={{
-                    color: "var(--colors-semantic-warning-fill, #f59e0b)",
-                  }}
-                >
+                <span className="text-xs text-warning-text">
                   {hydration.orphanItemRefs.length} orphan
                   {hydration.orphanItemRefs.length === 1 ? "" : "s"}
                 </span>
@@ -401,6 +438,21 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                     )}
                   />
                   <TooltipContent side="top">{masonryViewLabel}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <ToggleGroupItem
+                        value="unit"
+                        aria-label={unitViewLabel}
+                        {...props}
+                      >
+                        <ViewUnitIcon className="h-4 w-4" />
+                        <span className="hidden sm:inline">Unit</span>
+                      </ToggleGroupItem>
+                    )}
+                  />
+                  <TooltipContent side="top">{unitViewLabel}</TooltipContent>
                 </Tooltip>
               </ToggleGroup>
             </TooltipProvider>

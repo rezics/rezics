@@ -1,7 +1,7 @@
-import { Spinner } from "@rezics/ui";
 import type { UnitDTO } from "@rezics/contract";
 import type { ReactNode } from "react";
-import { getTranslation } from "@/shared/utils/translation-helpers";
+import { UnitCard } from "../UnitCard";
+import { candidateToUnitCardSummary } from "../../models/unitCardSummary";
 import type { Candidate } from "../../models/types";
 
 interface UnitCandidateRowProps {
@@ -10,15 +10,7 @@ interface UnitCandidateRowProps {
   isLoading?: boolean;
   language?: string;
   action?: ReactNode;
-}
-
-function displayTitle(unit: UnitDTO, language?: string): string | undefined {
-  const tr = getTranslation(
-    unit.translations,
-    language,
-    unit.defaultLanguage ?? undefined,
-  );
-  return tr?.title ?? undefined;
+  onPreview?: (candidate: Candidate, unit?: UnitDTO) => void;
 }
 
 export function UnitCandidateRow({
@@ -27,26 +19,19 @@ export function UnitCandidateRow({
   isLoading,
   language,
   action,
+  onPreview,
 }: UnitCandidateRowProps) {
-  const title = unit ? displayTitle(unit, language) : undefined;
+  const summary = candidateToUnitCardSummary(candidate, unit, {
+    language,
+    fallbackTitle: isLoading ? "Loading..." : candidate.identifier,
+  });
   return (
-    <li className="flex items-center justify-between gap-2 py-2 px-2 rounded hover:bg-surface-subtle">
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-surface-elevated text-text-secondary border border-border-whisper shrink-0">
-          {candidate.kind}
-        </span>
-        <div className="flex flex-col min-w-0 flex-1">
-          <span className="text-sm truncate">
-            {isLoading ? <Spinner size="sm" /> : (title ?? candidate.identifier)}
-          </span>
-          <span className="text-xs text-text-secondary truncate">
-            {candidate.identifierType === "slug"
-              ? `slug: ${candidate.identifier}`
-              : `id: ${candidate.identifier}`}
-          </span>
-        </div>
-      </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
+    <li
+      className="list-none py-1"
+      onMouseEnter={() => onPreview?.(candidate, unit)}
+      onFocus={() => onPreview?.(candidate, unit)}
+    >
+      <UnitCard summary={summary} variant="compact" action={action} />
     </li>
   );
 }

@@ -16,8 +16,9 @@ interface ShelfEditPageProps {
 }
 
 function normalizeViewMode(raw: unknown): ShelfView {
-  if (raw === "flat" || raw === "nested" || raw === "masonry") return raw;
-  return "nested";
+  if (raw === "flat" || raw === "nested" || raw === "masonry" || raw === "unit")
+    return raw;
+  return "unit";
 }
 
 export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
@@ -30,7 +31,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
-  const [viewMode, setViewMode] = useState<ShelfView>("nested");
+  const [viewMode, setViewMode] = useState<ShelfView>("unit");
 
   useEffect(() => {
     if (translation) {
@@ -50,12 +51,16 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
 
   const metadataDirty = useMemo(() => {
     if (!shelf) return false;
+    const savedViewMode = normalizeViewMode(
+      (shelf.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
+    );
     return (
       title !== (translation?.title ?? "") ||
       description !== (translation?.description ?? "") ||
-      coverUrl !== (shelf.coverUrl ?? "")
+      coverUrl !== (shelf.coverUrl ?? "") ||
+      viewMode !== savedViewMode
     );
-  }, [shelf, translation, title, description, coverUrl]);
+  }, [shelf, translation, title, description, coverUrl, viewMode]);
 
   const isDirty = metadataDirty || editor.dirty;
 
@@ -73,6 +78,11 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
       input: {
         title,
         coverUrl: coverUrl || null,
+        extra: {
+          ...((shelf?.extra as Record<string, unknown> | null | undefined) ??
+            {}),
+          viewMode,
+        },
       },
     });
   };

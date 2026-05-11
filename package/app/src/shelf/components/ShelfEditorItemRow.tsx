@@ -12,6 +12,9 @@ interface ShelfEditorItemRowProps {
   itemRef: string;
   viewMode: ShelfView;
   sortable: boolean;
+  canMoveCrossPage: boolean;
+  canDelete: boolean;
+  showAddedAt: boolean;
   onDelete: (itemRef: string) => void;
   onMoveCrossPage: (itemRef: string) => void;
 }
@@ -22,6 +25,9 @@ export function ShelfEditorItemRow({
   itemRef,
   viewMode,
   sortable,
+  canMoveCrossPage,
+  canDelete,
+  showAddedAt,
   onDelete,
   onMoveCrossPage,
 }: ShelfEditorItemRowProps) {
@@ -39,6 +45,7 @@ export function ShelfEditorItemRow({
     transition,
     opacity: isDragging ? 0.6 : undefined,
   };
+  const hasControls = sortable || canMoveCrossPage || canDelete;
 
   const controls = (
     <>
@@ -53,34 +60,64 @@ export function ShelfEditorItemRow({
           <GripVertical className="h-4 w-4" />
         </button>
       )}
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        aria-label="Move to another page"
-        onClick={() => onMoveCrossPage(itemRef)}
-      >
-        <MoveRight className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        aria-label="Delete"
-        onClick={() => onDelete(itemRef)}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
+      {canMoveCrossPage && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label="Move to another page"
+          onClick={() => onMoveCrossPage(itemRef)}
+        >
+          <MoveRight className="h-4 w-4" />
+        </Button>
+      )}
+      {canDelete && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label="Delete"
+          onClick={() => onDelete(itemRef)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
     </>
   );
 
+  const addedAt = formatAddedAt(entryAddedAt(entry));
+
   return (
-    <div ref={setNodeRef} style={style} className="py-1">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={viewMode === "unit" ? "py-1" : "py-2"}
+    >
+      {showAddedAt && addedAt && viewMode !== "unit" && (
+        <div className="mb-1 text-xs leading-dense text-text-tertiary">
+          Added {addedAt}
+        </div>
+      )}
       <ShelfItemRenderer
         entry={entry}
         viewMode={viewMode}
-        editControls={controls}
+        editControls={hasControls ? controls : undefined}
       />
     </div>
   );
+}
+
+function entryAddedAt(entry: ShelfStreamEntry): string | Date | undefined {
+  if (entry.kind === "prime") return entry.enriched.item.createdAt;
+  return entry.parentItem.createdAt;
+}
+
+function formatAddedAt(value: string | Date | undefined): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }

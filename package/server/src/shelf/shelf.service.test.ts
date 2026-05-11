@@ -253,9 +253,9 @@ describe("ShelfService", () => {
       $transaction: async (fn: any) =>
         fn({
           shelfItem: {
-            findFirst: async ({ skip }: any) => {
-              if (skip === 0) return { position: "m" };
-              return null;
+            findMany: async ({ skip, take }: any) => {
+              if (skip === 0 && take === 1) return [{ position: "m" }];
+              return [];
             },
             update: async ({ data }: any) => ({
               shelfUnitId: "shelf-1",
@@ -284,12 +284,26 @@ describe("ShelfService", () => {
 
     const { shelfService } = await import("./shelf.service");
     const results = await shelfService.applyBatch("shelf-1", [
-      { op: "reorderToPage", itemRef: "moved", toPage: 1, edge: "first" },
+      {
+        op: "reorderToPage",
+        itemRef: "moved",
+        toPage: 1,
+        edge: "first",
+        pageSize: 20,
+        order: "asc",
+      },
     ]);
     expect(results[0]!.status).toBe("ok");
 
     const oor = await shelfService.applyBatch("shelf-1", [
-      { op: "reorderToPage", itemRef: "moved", toPage: 99, edge: "first" },
+      {
+        op: "reorderToPage",
+        itemRef: "moved",
+        toPage: 99,
+        edge: "first",
+        pageSize: 20,
+        order: "asc",
+      },
     ]);
     expect(oor[0]!.status).toBe("failed");
   });

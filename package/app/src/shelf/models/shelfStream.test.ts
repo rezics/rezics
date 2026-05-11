@@ -3,6 +3,13 @@ import type { EnrichedShelfItem } from "@rezics/api/shelf";
 import type { BookDTO, PostDTO, ShelfItemDTO } from "@rezics/contract";
 import { deriveShelfStream, type ShelfStreamEntry } from "./shelfStream";
 
+const manualAsc = { field: "manual", order: "asc" } as const;
+const manualDesc = { field: "manual", order: "desc" } as const;
+const addedAtAsc = { field: "addedAt", order: "asc" } as const;
+const addedAtDesc = { field: "addedAt", order: "desc" } as const;
+const titleAsc = { field: "title", order: "asc" } as const;
+const titleDesc = { field: "title", order: "desc" } as const;
+
 function makeItem(overrides: Partial<ShelfItemDTO>): ShelfItemDTO {
   return {
     shelfUnitId: "s1",
@@ -80,7 +87,7 @@ describe("deriveShelfStream — nested mode", () => {
       primeEntry("book-c", "Cherry", { position: "c" }),
     ];
 
-    const stream = deriveShelfStream(items, "nested", "manual", true);
+    const stream = deriveShelfStream(items, "nested", manualAsc, true);
 
     expect(stream).toHaveLength(3);
     expect(stream.every((e) => e.kind === "prime")).toBe(true);
@@ -102,7 +109,7 @@ describe("deriveShelfStream — flat emission", () => {
       primeEntry("book-c", "Cherry", { position: "c" }),
     ];
 
-    const stream = deriveShelfStream(items, "flat", "manual", true);
+    const stream = deriveShelfStream(items, "flat", manualAsc, true);
 
     expect(stream).toHaveLength(6);
     expect(idsOf(stream)).toEqual([
@@ -128,7 +135,7 @@ describe("deriveShelfStream — flat emission", () => {
       primeEntry("book-c", "Cherry", { position: "c" }),
     ];
 
-    const stream = deriveShelfStream(items, "flat", "title", true);
+    const stream = deriveShelfStream(items, "flat", titleAsc, true);
 
     expect(idsOf(stream)).toEqual([
       "book-a",
@@ -152,7 +159,7 @@ describe("deriveShelfStream — flat emission", () => {
       primeEntry("book-c", "Cherry", { position: "c" }),
     ];
 
-    const stream = deriveShelfStream(items, "flat", "title", false);
+    const stream = deriveShelfStream(items, "flat", titleAsc, false);
 
     expect(idsOf(stream)).toEqual([
       "r-b1",
@@ -178,8 +185,8 @@ describe("deriveShelfStream — sort scope and layout invariants", () => {
   ];
 
   test("manual sort ignores sortPrimeOnly (both flag values produce identical output)", () => {
-    const withOn = deriveShelfStream(items, "flat", "manual", true);
-    const withOff = deriveShelfStream(items, "flat", "manual", false);
+    const withOn = deriveShelfStream(items, "flat", manualAsc, true);
+    const withOff = deriveShelfStream(items, "flat", manualAsc, false);
     expect(idsOf(withOn)).toEqual(idsOf(withOff));
     expect(idsOf(withOn)).toEqual([
       "book-a",
@@ -191,7 +198,7 @@ describe("deriveShelfStream — sort scope and layout invariants", () => {
   });
 
   test("flat and masonry produce identical stream order for the same inputs", () => {
-    for (const sort of ["manual", "time", "title"] as const) {
+    for (const sort of [manualAsc, addedAtDesc, titleAsc] as const) {
       for (const scope of [true, false]) {
         const flat = deriveShelfStream(items, "flat", sort, scope);
         const masonry = deriveShelfStream(items, "masonry", sort, scope);
@@ -201,8 +208,8 @@ describe("deriveShelfStream — sort scope and layout invariants", () => {
   });
 
   test("derivation is pure — two calls return deep-equal arrays", () => {
-    const a = deriveShelfStream(items, "flat", "title", true);
-    const b = deriveShelfStream(items, "flat", "title", true);
+    const a = deriveShelfStream(items, "flat", titleAsc, true);
+    const b = deriveShelfStream(items, "flat", titleAsc, true);
     expect(a).toEqual(b);
     expect(a).not.toBe(b);
   });
@@ -214,22 +221,87 @@ describe("deriveShelfStream — sort scope and layout invariants", () => {
       primeEntry("book-b", "Same", { position: "b" }),
     ];
 
-    const first = deriveShelfStream(tiedItems, "flat", "title", true);
-    const second = deriveShelfStream(tiedItems, "flat", "title", true);
+    const first = deriveShelfStream(tiedItems, "flat", titleAsc, true);
+    const second = deriveShelfStream(tiedItems, "flat", titleAsc, true);
 
     expect(idsOf(first)).toEqual(["book-a", "book-b", "book-c"]);
     expect(idsOf(second)).toEqual(idsOf(first));
   });
 
-  test("time sort has deterministic fallback when timestamps are missing", () => {
+  test("added-time sort has deterministic fallback when timestamps are missing", () => {
     const tiedItems: EnrichedShelfItem[] = [
       primeEntry("book-c", "Cherry", { position: "c" }),
       primeEntry("book-a", "Apple", { position: "a" }),
       primeEntry("book-b", "Banana", { position: "b" }),
     ];
 
-    const stream = deriveShelfStream(tiedItems, "masonry", "time", true);
+    const stream = deriveShelfStream(tiedItems, "masonry", addedAtDesc, true);
 
     expect(idsOf(stream)).toEqual(["book-a", "book-b", "book-c"]);
+  });
+
+  test("manual descending renders larger positions first", () => {
+    const stream = deriveShelfStream(items, "flat", manualDesc, true);
+
+    expect(idsOf(stream)).toEqual([
+      "book-c",
+      "book-b",
+      "r-b1",
+      "book-a",
+      "r-a1",
+    ]);
+  });
+
+  test("addedAt ascending and descending use shelf item creation time", () => {
+    const datedItems: EnrichedShelfItem[] = [
+      primeEntry("book-a", "Apple", {
+        position: "a",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      }),
+      primeEntry("book-c", "Cherry", {
+        position: "c",
+        createdAt: "2026-01-03T00:00:00.000Z",
+      }),
+      primeEntry("book-b", "Banana", {
+        position: "b",
+        createdAt: "2026-01-02T00:00:00.000Z",
+      }),
+    ];
+
+    expect(
+      idsOf(deriveShelfStream(datedItems, "flat", addedAtAsc, true)),
+    ).toEqual(["book-a", "book-b", "book-c"]);
+    expect(
+      idsOf(deriveShelfStream(datedItems, "flat", addedAtDesc, true)),
+    ).toEqual(["book-c", "book-b", "book-a"]);
+  });
+
+  test("title descending reverses title order with deterministic fallbacks", () => {
+    const stream = deriveShelfStream(items, "flat", titleDesc, true);
+
+    expect(idsOf(stream)).toEqual([
+      "book-c",
+      "book-b",
+      "r-b1",
+      "book-a",
+      "r-a1",
+    ]);
+  });
+
+  test("unit mode emits prime and attached entries with parent metadata", () => {
+    const stream = deriveShelfStream(items, "unit", manualAsc, true);
+
+    expect(stream).toHaveLength(5);
+    expect(idsOf(stream)).toEqual([
+      "book-a",
+      "r-a1",
+      "book-b",
+      "r-b1",
+      "book-c",
+    ]);
+    const review = stream.find((entry) => entry.kind === "review");
+    expect(review?.kind === "review" ? review.parentItem.itemRef : null).toBe(
+      "book-a",
+    );
   });
 });
