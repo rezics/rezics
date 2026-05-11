@@ -34,8 +34,8 @@ bun run knip             # Detect unused exports/dependencies (root)
 
 ### Package Map
 
-| Package              | Role                                                              |
-| -------------------- | ----------------------------------------------------------------- |
+| Package             | Role                                                              |
+| ------------------- | ----------------------------------------------------------------- |
 | `@rezics/server`    | Main Elysia API server (PostgreSQL via Prisma)                    |
 | `@rezics/auth`      | Authentication service (better-auth, separate DB + Prisma schema) |
 | `@rezics/jwt`       | Shared JWT/JWKS utilities (jose)                                  |
@@ -114,3 +114,11 @@ This project is in active development. Do not add backward-compatible aliases, l
 - Prefer reading local files and fetching docs over answering from memory
 - Use `rg` for all codebase text search (recursive and `.gitignore`-aware by default)
 - Use bash as a last resort; never run destructive commands without explicit confirmation
+
+### Visual QA
+
+For UI changes, prefer human-led visual review. Provide the local URL, Storybook story, or screenshot path and ask the project owner to verify design polish.
+
+Use automated browser/screenshot checks only for smoke coverage: non-blank render, no overlays, no console errors, reachable interactions, and obvious responsive breakage.
+
+Human feedback is the source of truth for aesthetics unless deeper visual QA is explicitly requested.
