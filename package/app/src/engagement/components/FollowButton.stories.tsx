@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
+import { withRouter } from "@/stories/decorators/withRouter";
 import { FollowButton } from "./FollowButton";
 
 const meta = {
   title: "Domain/Engagement/FollowButton",
   component: FollowButton,
+  decorators: [withRouter],
   args: { userId: "user-alice", initialFollowersCount: 124 },
 } satisfies Meta<typeof FollowButton>;
 

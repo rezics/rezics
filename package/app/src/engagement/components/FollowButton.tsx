@@ -7,10 +7,12 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 
 import { cn } from "@/shared/utils/css-util";
+import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 
 type ButtonVariant =
   | "default"
@@ -33,6 +35,8 @@ const SIZE_MAP: Record<LegacyButtonSize, ButtonSize> = {
 type FollowButtonProps = {
   /** Target user's userId. */
   userId: string | undefined;
+  /** 初始关注状态；真实状态加载后会同步覆盖。 */
+  initialIsFollowing?: boolean;
   /**
    * 初始粉丝数，用于本地即时更新显示。
    * 若不传，则仅展示「是否关注」状态，不显示统计。
@@ -58,6 +62,7 @@ function normalizeSize(size: ButtonSize | LegacyButtonSize): ButtonSize {
 
 export const FollowButton: React.FC<FollowButtonProps> = ({
   userId,
+  initialIsFollowing,
   initialFollowersCount,
   showFollowersText = false,
   size = "sm",
@@ -65,15 +70,27 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   fullWidth = false,
   className,
 }) => {
+  const navigate = useNavigate();
+  const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
+  const authSessionLoading = useAuthSessionStore(
+    (state) => state.status === "loading",
+  );
   const [localFollowers, setLocalFollowers] = useState<number | undefined>(
     initialFollowersCount,
+  );
+  const [localIsFollowing, setLocalIsFollowing] = useState<boolean | undefined>(
+    initialIsFollowing,
   );
 
   useEffect(() => {
     setLocalFollowers(initialFollowersCount);
   }, [initialFollowersCount]);
 
-  const enabled = !!userId;
+  useEffect(() => {
+    setLocalIsFollowing(userId ? initialIsFollowing : undefined);
+  }, [initialIsFollowing, userId]);
+
+  const enabled = !!userId && hasMemberSession;
 
   const { data: followStatus, isLoading: statusLoading } = useQuery({
     ...userQueries.followStatus(userId ? [userId] : []),
@@ -83,16 +100,30 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   const followMutation = userMutations.useFollow();
   const unfollowMutation = userMutations.useUnfollow();
 
+  useEffect(() => {
+    if (!userId || !followStatus) return;
+    setLocalIsFollowing(!!followStatus[userId]);
+  }, [followStatus, userId]);
+
   const isFollowing = useMemo(
-    () => (userId && followStatus ? !!followStatus[userId] : false),
-    [followStatus, userId],
+    () => localIsFollowing ?? false,
+    [localIsFollowing],
   );
+  const hasFollowState = typeof localIsFollowing === "boolean";
 
   const loading =
-    statusLoading || followMutation.isPending || unfollowMutation.isPending;
+    authSessionLoading ||
+    (statusLoading && !hasFollowState) ||
+    followMutation.isPending ||
+    unfollowMutation.isPending;
 
   const handleClick = async () => {
     if (!userId || loading) return;
+
+    if (!hasMemberSession) {
+      navigate({ to: "/login" });
+      return;
+    }
 
     const willUnfollow = isFollowing;
     const delta = willUnfollow ? -1 : 1;
@@ -101,6 +132,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     if (hasLocalCount) {
       setLocalFollowers((prev) => (prev ?? 0) + delta);
     }
+    setLocalIsFollowing(!willUnfollow);
 
     try {
       if (willUnfollow) {
@@ -113,6 +145,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
       if (hasLocalCount) {
         setLocalFollowers((prev) => (prev ?? 0) - delta);
       }
+      setLocalIsFollowing(willUnfollow);
     }
   };
 
@@ -124,7 +157,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     <Button
       variant={variant}
       size={normalizedSize}
-      disabled={!enabled || loading}
+      disabled={!userId || loading}
       onClick={handleClick}
       className={cn(
         normalizedSize === "sm" ? "py-1" : "py-2",

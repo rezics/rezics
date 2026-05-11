@@ -56,6 +56,32 @@ The user hover preview SHALL render a compact public profile summary from the us
 - **WHEN** the preview receives a long username, slug, bio, or description
 - **THEN** the trigger and preview SHALL truncate or clamp the text so it does not overflow or overlap adjacent UI
 
+### Requirement: Preview layout exposes profile navigation and follow action
+
+The hover preview content SHALL place the user's avatar and follow action on the first row. The display name and slug SHALL render below that row. The avatar, display name, and slug inside the preview SHALL each navigate to the user's profile route when clicked.
+
+#### Scenario: Avatar and follow action share the first row
+
+- **WHEN** a preview is rendered for a user with a usable public user identifier
+- **THEN** the preview SHALL render the avatar and follow action in the first row
+- **AND** the display name and slug SHALL render below that row rather than beside the avatar
+
+#### Scenario: Preview identity fields navigate to profile
+
+- **WHEN** a user clicks the preview avatar, display name, or slug
+- **THEN** the app SHALL navigate to that user's profile route
+
+#### Scenario: Follow state renders as following
+
+- **WHEN** the follow action resolves that the current viewer follows the previewed user
+- **THEN** the action SHALL render the followed state as `Following`
+
+#### Scenario: Logged-out follow action redirects to login
+
+- **WHEN** a logged-out viewer clicks the preview follow action
+- **THEN** the app SHALL navigate to the login route
+- **AND** the preview SHALL NOT issue a follow mutation for that click
+
 ### Requirement: Preview composition uses shadcn Base Popover
 
 The hover preview SHALL be composed from the existing shadcn Base Popover exported by `@rezics/ui/shadcn`. The implementation SHALL NOT introduce a new third-party overlay dependency and SHALL NOT edit vendored shadcn primitive source under `package/ui/src/shadcn/` for this behavior.
@@ -108,11 +134,11 @@ Post-kind presentation atoms that adopt user hover previews SHALL render from us
 - **THEN** it SHALL pass the `PostDTO.author` or equivalent supplied public user data into the preview component
 - **AND** it SHALL NOT call `useQuery`, `useMutation`, or a profile-fetching hook
 
-#### Scenario: Follow action is not forced into pure presentation
+#### Scenario: Preview owns follow action without moving state into presentation atom
 
 - **WHEN** a presentation atom renders a user hover preview without owning authenticated interaction state
-- **THEN** the preview MAY omit a follow action
-- **AND** the absence of that action SHALL NOT block the identity preview behavior
+- **THEN** the presentation atom SHALL NOT add follow query or mutation hooks
+- **AND** the preview component MAY compose the existing engagement follow button for the supplied user identifier
 
 ### Requirement: Storybook covers interaction states
 
