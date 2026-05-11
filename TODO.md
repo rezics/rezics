@@ -1,22 +1,18 @@
 ## Section 1
 - [ ] Unit 等級的 版權 copyright 字段，string 或者 array 用戶可以選擇 用戶默認的/realm默認（realm優先）的 copyright 協議，類似於 github 的那種版權協議，cc-by-4.0 這種，不過我們需要確認下各種協議的slug，要固定下來
-- [ ] 重大性能問題的調研，大量api使用list，list里有total，確認他們都是高性能api，而不是psql統計
+- [ ] 
 - [ ] UnitTag 表是否要重命名到 TagUnit 比較好？
-- [ ] EXCERPT 前端 單 url 解析的話，如何在有兩個unitId 的時候正確定位，比如 章節定位到章節？
 - [ ] meilisearch 可能的性能問題的全面分析
-- [ ] 後端如果可行的化，最好同時返回slug，比如 book info page tag 查詢的時候，最好同時返回 slug，然後前端先渲染 slug，再用unit 去查 tags，這樣好歹比 顯示 unitIds 好看
 - [ ] 章節數量，加入 book info
 - [ ] https://better-auth.com/docs/infrastructure/plugins/dashboard
-- [ ] 年齡分級機制調整
-- [ ]  meilisearch 需要調整，支持專門的 tag，realm-tag 索引系統 
 
 ## 搜索
 - [ ] Suggest / autocomplete（header 下拉建議）：本身要新 endpoint、prefix 索引或快取層，與聯邦搜尋正交。建議獨立 search-suggest。
 - [ ] 空查詢的探索/熱門/最近（discovery state）：要 trending/recent 統計來源，跟搜尋管線無關。獨立做。
 
 ## Section 2
+- [ ] award 支持兩種獎勵點數和現金獎勵
 - [ ] 還是考慮遷移到 paraglide-js
-- [ ] 權限模型還是不正確，jwt 驗證通過之後，還需要查數據庫校驗啊
 - [ ] 編輯器也有問題，回覆了也無法成功
 - [ ] tanstack query 能不能通過中間件讓list查詢能夠做到全部支持的id級別的緩存，意思就是比如 book list query1 查詢了 id1,id2,id3. query2 查詢 id2,id3,id4. 然後 能夠自動復用 query1 的 id2, id3 的結果，我需要網絡調查，以及如果不支持，看看要怎麼實現一個通用的支持
 - [ ] You could consider tools that empower authors to engage with feedback and improve their work. For example, a dashboard where authors can track reviews, filter critiques by themes (e.g., plot, style, pacing), or highlight top feedback. You might also add revision tools or prompts based on reader suggestions, and perhaps even a feature for authors to respond or engage with reviewers—fostering a strong feedback loop. Tools that make feedback actionable will keep both authors and reviewers engaged!
