@@ -41,7 +41,10 @@ import { useMediaQuery } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import { shelfDetailActions, shelfPolicy } from "../models/shelfPolicy";
-import { deriveShelfStream, type ShelfStreamEntry } from "../models/shelfStream";
+import {
+  deriveShelfStream,
+  type ShelfStreamEntry,
+} from "../models/shelfStream";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
 
 interface ShelfPageProps {
@@ -94,7 +97,8 @@ const SORT_OPTIONS: { value: ShelfSortMode; label: string }[] = [
 ];
 
 function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
-  if (entry.kind === "prime") return `${prefix}:p:${entry.enriched.item.itemRef}`;
+  if (entry.kind === "prime")
+    return `${prefix}:p:${entry.enriched.item.itemRef}`;
   if (entry.kind === "review")
     return `${prefix}:r:${entry.parentItemRef}:${entry.review.unitId}`;
   return `${prefix}:t:${entry.parentItemRef}:${entry.tag.unitId}`;

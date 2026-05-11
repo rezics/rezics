@@ -1,7 +1,21 @@
 import { useHydratedShelfItems } from "@rezics/api/shelf";
 import type { ShelfSortMode, ShelfView } from "@rezics/api/shelf";
-import type { ShelfDTO } from "@rezics/contract";
-import { Button } from "@rezics/ui/shadcn";
+import type { ShelfDTO, ShelfItemKind } from "@rezics/contract";
+import {
+  Button,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  ToggleGroup,
+  ToggleGroupItem,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
 import {
   closestCenter,
   DndContext,
@@ -13,21 +27,32 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  LayoutGrid as ViewQuiltIcon,
+  LayoutList as ViewAgendaIcon,
+  List as ViewListIcon,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { UnitPicker, type Candidate } from "@/unit";
-import type { ShelfItemKind } from "@rezics/contract";
 import { CrossPageMoveModal } from "../components/CrossPageMoveModal";
 import { ShelfEditorItemRow } from "../components/ShelfEditorItemRow";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
-import { deriveShelfStream, type ShelfStreamEntry } from "../models/shelfStream";
+import {
+  deriveShelfStream,
+  type ShelfStreamEntry,
+} from "../models/shelfStream";
 
 const PAGE_SIZE = 20;
 
 interface ShelfEditorItemsSectionProps {
   shelf: ShelfDTO;
   viewMode: ShelfView;
+  onViewModeChange: (viewMode: ShelfView) => void;
   editor: ReturnType<typeof useShelfItemsEditor>;
 }
 
@@ -60,9 +85,25 @@ function entryItemRef(entry: ShelfStreamEntry): string {
   return entry.tag.unitId;
 }
 
+function lastSingleToggleValue(values: readonly string[]): string | undefined {
+  return values.at(-1);
+}
+
+function isShelfView(value: string | undefined): value is ShelfView {
+  return value === "nested" || value === "flat" || value === "masonry";
+}
+
+function requireShelfSortMode(value: ShelfSortMode | null): ShelfSortMode {
+  if (value === null) {
+    throw new Error("Shelf sort mode select emitted null");
+  }
+  return value;
+}
+
 export function ShelfEditorItemsSection({
   shelf,
   viewMode,
+  onViewModeChange,
   editor,
 }: ShelfEditorItemsSectionProps) {
   const { t } = useTranslation();
@@ -82,7 +123,9 @@ export function ShelfEditorItemsSection({
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 150, tolerance: 5 },
+    }),
     useSensor(KeyboardSensor),
   );
 
@@ -139,31 +182,19 @@ export function ShelfEditorItemsSection({
   const sortableIds = visibleStream
     .filter((e) => e.kind === "prime")
     .map((e) => entryItemRef(e));
+  const selectedSortLabel =
+    SORT_OPTIONS.find((option) => option.value === sortMode)?.label ??
+    SORT_OPTIONS[0]!.label;
+  const nestedViewLabel = t("shelf.view_modes.nested");
+  const flatViewLabel = t("shelf.view_modes.flat");
+  const masonryViewLabel = t("shelf.view_modes.masonry");
 
   return (
     <div className="flex flex-col gap-4">
       <hr className="border-border-whisper" />
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">
-          {t("shelf.edit.items_heading", "Items")}
-        </h2>
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-text-secondary">
-            {t("shelf.edit.sort_by", "Sort")}
-          </label>
-          <select
-            value={sortMode}
-            onChange={(e) => setSortMode(e.target.value as ShelfSortMode)}
-            className="text-sm border border-border-whisper rounded px-2 py-1 bg-transparent"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <h2 className="text-lg font-semibold">
+        {t("shelf.edit.items_heading", "Items")}
+      </h2>
 
       <UnitPicker
         workContextUnitId={shelf.unitId}
@@ -178,6 +209,87 @@ export function ShelfEditorItemsSection({
           </Button>
         )}
       />
+
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <Label className="text-sm text-text-secondary">
+            {t("shelf.edit.sort_by", "Sort")}
+          </Label>
+          <Select<ShelfSortMode>
+            value={sortMode}
+            onValueChange={(value) => setSortMode(requireShelfSortMode(value))}
+          >
+            <SelectTrigger size="sm" className="min-w-[128px]">
+              <SelectValue>{selectedSortLabel}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="ml-auto flex items-center gap-2">
+          <Label className="text-sm text-text-secondary">View</Label>
+          <TooltipProvider>
+            <ToggleGroup
+              value={[viewMode]}
+              onValueChange={(values) => {
+                const value = lastSingleToggleValue(values);
+                if (!isShelfView(value)) return;
+                onViewModeChange(value);
+              }}
+              size="sm"
+            >
+              <Tooltip>
+                <TooltipTrigger
+                  render={(props) => (
+                    <ToggleGroupItem
+                      value="nested"
+                      aria-label={nestedViewLabel}
+                      {...props}
+                    >
+                      <ViewAgendaIcon className="h-4 w-4" />
+                    </ToggleGroupItem>
+                  )}
+                />
+                <TooltipContent side="top">{nestedViewLabel}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger
+                  render={(props) => (
+                    <ToggleGroupItem
+                      value="flat"
+                      aria-label={flatViewLabel}
+                      {...props}
+                    >
+                      <ViewListIcon className="h-4 w-4" />
+                    </ToggleGroupItem>
+                  )}
+                />
+                <TooltipContent side="top">{flatViewLabel}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger
+                  render={(props) => (
+                    <ToggleGroupItem
+                      value="masonry"
+                      aria-label={masonryViewLabel}
+                      {...props}
+                    >
+                      <ViewQuiltIcon className="h-4 w-4" />
+                    </ToggleGroupItem>
+                  )}
+                />
+                <TooltipContent side="top">{masonryViewLabel}</TooltipContent>
+              </Tooltip>
+            </ToggleGroup>
+          </TooltipProvider>
+        </div>
+      </div>
 
       {editor.isLoading ? (
         <div className="py-4 text-sm text-text-secondary">

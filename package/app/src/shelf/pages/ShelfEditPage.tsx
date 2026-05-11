@@ -5,6 +5,7 @@ import { Spinner } from "@rezics/ui";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useBlocker, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
@@ -29,6 +30,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
+  const [viewMode, setViewMode] = useState<ShelfView>("nested");
 
   useEffect(() => {
     if (translation) {
@@ -37,6 +39,14 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
       setCoverUrl(shelf?.coverUrl ?? "");
     }
   }, [translation, shelf?.coverUrl]);
+
+  useEffect(() => {
+    setViewMode(
+      normalizeViewMode(
+        (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
+      ),
+    );
+  }, [shelf?.extra]);
 
   const metadataDirty = useMemo(() => {
     if (!shelf) return false;
@@ -52,9 +62,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   useBlocker({
     shouldBlockFn: () => {
       if (!isDirty) return false;
-      return !window.confirm(
-        "You have unsaved changes. Leave anyway?",
-      );
+      return !window.confirm("You have unsaved changes. Leave anyway?");
     },
     enableBeforeUnload: () => isDirty,
   });
@@ -77,13 +85,22 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
     );
   }
 
-  const viewMode = normalizeViewMode(
-    (shelf.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
-  );
-
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">Edit Shelf</h1>
+      <div className="mb-6 flex items-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Back to shelf"
+          onClick={() =>
+            navigate({ to: "/shelf/$shelfId", params: { shelfId } })
+          }
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <h1 className="text-2xl font-semibold">Edit Shelf</h1>
+      </div>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
@@ -132,6 +149,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
         <ShelfEditorItemsSection
           shelf={shelf}
           viewMode={viewMode}
+          onViewModeChange={setViewMode}
           editor={editor}
         />
       </div>
