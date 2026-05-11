@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 
 import { configureApi } from "@rezics/api/config";
-import { env } from "@/env";
+import { adminRuntime, env } from "@/env";
 import App from "./App";
 import { initI18n } from "./providers/i18n";
 
@@ -12,6 +12,9 @@ import { initI18n } from "./providers/i18n";
 configureApi({
   apiBaseUrl: env.VITE_API_URL,
   authBaseUrl: env.VITE_API_URL,
+  authAdminBaseUrl:
+    env.VITE_AUTH_ADMIN_URL ??
+    (adminRuntime.appEnv === "development" ? "http://localhost:3001" : ""),
 });
 initI18n();
 

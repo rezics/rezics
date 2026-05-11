@@ -1,7 +1,7 @@
 import {
   createEmailSender,
-  formatSenderAddress,
   type EmailSender,
+  formatSenderAddress,
 } from "@rezics/email";
 import { env } from "../env";
 

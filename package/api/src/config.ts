@@ -1,6 +1,7 @@
 export interface ApiConfig {
   apiBaseUrl: string;
   authBaseUrl: string;
+  authAdminBaseUrl?: string;
   reactionServiceUrl: string;
   appVersion?: string;
 }

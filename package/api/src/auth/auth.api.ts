@@ -39,11 +39,26 @@ function getAuthBaseUrl(): string {
   return config.authBaseUrl || config.apiBaseUrl;
 }
 
+function getAuthAdminBaseUrl(): string {
+  const config = getApiConfig();
+  return config.authAdminBaseUrl || getAuthBaseUrl();
+}
+
 async function authFetch<T>(
   endpoint: string,
   options?: RequestInit,
 ): Promise<T> {
-  const url = `${getAuthBaseUrl()}${endpoint}`;
+  return fetchJson<T>(`${getAuthBaseUrl()}${endpoint}`, options);
+}
+
+async function authAdminFetch<T>(
+  endpoint: string,
+  options?: RequestInit,
+): Promise<T> {
+  return fetchJson<T>(`${getAuthAdminBaseUrl()}${endpoint}`, options);
+}
+
+async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const existingHeaders = new Headers(options?.headers);
   const response = await fetch(url, {
     ...options,
@@ -240,7 +255,7 @@ export const authApi = {
   },
 
   adminEmailTemplates: async () => {
-    return authFetch<
+    return authAdminFetch<
       {
         name: string;
         description: string;
@@ -257,7 +272,7 @@ export const authApi = {
     props: Record<string, unknown>;
     to: string;
   }) => {
-    return authFetch<{ success: boolean; to: string }>(
+    return authAdminFetch<{ success: boolean; to: string }>(
       "/admin/email/send-test",
       {
         method: "POST",
@@ -266,8 +281,18 @@ export const authApi = {
     );
   },
 
+  adminEmailPreview: async (input: {
+    template: string;
+    props: Record<string, unknown>;
+  }) => {
+    return authAdminFetch<{ html: string }>("/admin/email/preview", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
   adminEmailSmtpTest: async () => {
-    return authFetch<{
+    return authAdminFetch<{
       connected: boolean;
       host?: string;
       port?: string;

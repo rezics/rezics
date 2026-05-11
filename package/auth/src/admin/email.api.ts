@@ -31,6 +31,25 @@ export const adminEmailApi = new Elysia({ prefix: "/admin/email" })
     }));
   })
   .post(
+    "/preview",
+    async ({ body, set }) => {
+      const entry = templateRegistry.find((e) => e.name === body.template);
+      if (!entry) {
+        set.status = 400;
+        return { error: `Unknown template: ${body.template}` };
+      }
+
+      const { html } = await render(entry.component, body.props as any);
+      return { html };
+    },
+    {
+      body: t.Object({
+        template: t.String(),
+        props: t.Record(t.String(), t.Any()),
+      }),
+    },
+  )
+  .post(
     "/send-test",
     async ({ body, set }) => {
       const entry = templateRegistry.find((e) => e.name === body.template);
