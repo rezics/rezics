@@ -1,13 +1,13 @@
-import { Input, Label } from "@rezics/ui/shadcn";
-import { Spinner } from "@rezics/ui";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitDTO } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
+import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Candidate } from "../../models/types";
 import { useUnitCandidates } from "../../hooks/useUnitCandidates";
+import type { Candidate } from "../../models/types";
 import { UnitCandidateRow } from "./UnitCandidateRow";
 
 export interface UnitPickerProps {
@@ -36,7 +36,7 @@ export function UnitPicker({
   const fieldId = inputId ?? "unit-picker-input";
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 border-b border-border-whisper pb-2">
       <div className="flex flex-col gap-1">
         <Label htmlFor={fieldId}>
           {label ?? t("unit_picker.url_label", "Unit URL")}
@@ -47,7 +47,10 @@ export function UnitPicker({
           onChange={(e) => setInput(e.target.value)}
           placeholder={
             placeholder ??
-            t("unit_picker.url_placeholder", "Paste a unit, chapter, or book URL")
+            t(
+              "unit_picker.url_placeholder",
+              "Paste a unit, chapter, or book URL",
+            )
           }
         />
       </div>

@@ -3,6 +3,7 @@ import type {
   ShelfItemBatchAddOp,
   ShelfItemBatchDeleteOp,
   ShelfItemBatchReorderOp,
+  ShelfItemBatchReorderToPageOp,
   ShelfItemBatchSetTagsOp,
 } from "@rezics/contract";
 import {
@@ -37,6 +38,16 @@ const deleteOp = (itemRef: string): ShelfItemBatchDeleteOp => ({
   itemRef,
 });
 
+const reorderToPageOp = (
+  itemRef: string,
+  toPage: number,
+): ShelfItemBatchReorderToPageOp => ({
+  op: "reorderToPage",
+  itemRef,
+  toPage,
+  edge: "first",
+});
+
 const setTagsOp = (
   itemRef: string,
   tagIds: string[],
@@ -69,6 +80,15 @@ describe("itemOpLog", () => {
     log = enqueue(log, reorderOp("u1", "a2"));
     expect(log.entries).toHaveLength(1);
     expect((log.entries[0]!.op as ShelfItemBatchReorderOp).position).toBe("a2");
+  });
+
+  test("reorder variants on same ref keep only the latest", () => {
+    let log = emptyLog;
+    log = enqueue(log, reorderOp("u1", "a1"));
+    log = enqueue(log, reorderToPageOp("u1", 3));
+    log = enqueue(log, reorderOp("u1", "a2"));
+    expect(log.entries).toHaveLength(1);
+    expect(log.entries[0]!.op).toEqual(reorderOp("u1", "a2"));
   });
 
   test("two setTags on same ref keep only the latest", () => {

@@ -15,10 +15,10 @@ import {
   dirty,
   emptyLog,
   enqueue,
-  markFailed,
-  pendingCount,
   type ItemOpEntry,
   type ItemOpLog,
+  markFailed,
+  pendingCount,
 } from "../states/itemOpLog";
 
 export interface AddInput {
@@ -64,6 +64,11 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
   const [log, setLog] = useState<ItemOpLog>(emptyLog);
   const [lastResult, setLastResult] = useState<SaveResult | null>(null);
   const batchMutation = useBatchUpdateShelfItemsMutation();
+
+  const optimisticItems = useMemo(
+    () => applyLiveOps(serverItems, log),
+    [serverItems, log],
+  );
 
   const lastPosition = useMemo(() => {
     if (serverItems.length === 0) return undefined;
@@ -187,7 +192,7 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
 
   return {
     log,
-    items: serverItems,
+    items: optimisticItems,
     isLoading,
     dirty: dirty(log),
     pendingCount: pendingCount(log),
@@ -213,4 +218,56 @@ function lastPositionOfPendingAdds(log: ItemOpLog): string | undefined {
     }
   }
   return last;
+}
+
+function applyLiveOps(
+  serverItems: ShelfItemDTO[],
+  log: ItemOpLog,
+): ShelfItemDTO[] {
+  let items = serverItems.map((item) => ({ ...item }));
+
+  for (const entry of log.entries) {
+    if (entry.failedReason) continue;
+    const { op } = entry;
+
+    if (op.op === "add") {
+      const existingIndex = items.findIndex(
+        (item) => item.itemRef === op.itemRef,
+      );
+      const nextItem: ShelfItemDTO = {
+        shelfUnitId: "",
+        itemRef: op.itemRef,
+        kind: op.kind,
+        position: op.position,
+        reviewIds: op.reviewIds ?? [],
+        tagIds: op.tagIds ?? [],
+      };
+      if (existingIndex >= 0) {
+        items[existingIndex] = { ...items[existingIndex]!, ...nextItem };
+      } else {
+        items = [...items, nextItem];
+      }
+      continue;
+    }
+
+    if (op.op === "delete") {
+      items = items.filter((item) => item.itemRef !== op.itemRef);
+      continue;
+    }
+
+    if (op.op === "reorder") {
+      items = items.map((item) =>
+        item.itemRef === op.itemRef ? { ...item, position: op.position } : item,
+      );
+      continue;
+    }
+
+    if (op.op === "setTags") {
+      items = items.map((item) =>
+        item.itemRef === op.itemRef ? { ...item, tagIds: op.tagIds } : item,
+      );
+    }
+  }
+
+  return items;
 }

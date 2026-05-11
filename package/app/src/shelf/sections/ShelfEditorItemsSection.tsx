@@ -1,5 +1,20 @@
-import { useHydratedShelfItems } from "@rezics/api/shelf";
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import type { ShelfSortMode, ShelfView } from "@rezics/api/shelf";
+import { useHydratedShelfItems } from "@rezics/api/shelf";
 import type { ShelfDTO, ShelfItemKind } from "@rezics/contract";
 import {
   Button,
@@ -17,31 +32,16 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import {
-  closestCenter,
-  DndContext,
-  type DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import {
-  LayoutGrid as ViewQuiltIcon,
   LayoutList as ViewAgendaIcon,
   List as ViewListIcon,
+  LayoutGrid as ViewQuiltIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { UnitPicker, type Candidate } from "@/unit";
+import { type Candidate, UnitPicker } from "@/unit";
 import { CrossPageMoveModal } from "../components/CrossPageMoveModal";
 import { ShelfEditorItemRow } from "../components/ShelfEditorItemRow";
-import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
+import type { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 import {
   deriveShelfStream,
   type ShelfStreamEntry,

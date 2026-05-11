@@ -1,5 +1,5 @@
-import { shelfDetailQuery } from "@rezics/api/shelf";
 import type { ShelfView } from "@rezics/api/shelf";
+import { shelfDetailQuery } from "@rezics/api/shelf";
 import { useUpdateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
 import { Spinner } from "@rezics/ui";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
@@ -8,8 +8,8 @@ import { useBlocker, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
+import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
 
 interface ShelfEditPageProps {
   shelfId: string;
