@@ -4,6 +4,8 @@ import type {
   ReorderShelfItemInput,
   ShelfDetailDTO,
   ShelfDTO,
+  ShelfItemBatchOp,
+  ShelfItemBatchResult,
   ShelfItemDTO,
   ShelfItemKind,
   ShelfItemsQuery,
@@ -27,6 +29,9 @@ import {
   POSITION_LENGTH_THRESHOLD,
   rebalance,
 } from "./fractional-index";
+
+export const SHELF_ITEM_BATCH_OP_CAP = 200;
+const CROSS_PAGE_PAGE_SIZE = 100;
 import {
   buildShelfItemProjection,
   mapShelfDetailToDTO,
@@ -673,6 +678,280 @@ export class ShelfService {
 
     const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
     return mapShelfItemToDTO(item, projection.get(itemRef));
+  }
+
+  async applyBatch(
+    shelfUnitId: string,
+    ops: ShelfItemBatchOp[],
+  ): Promise<ShelfItemBatchResult[]> {
+    if (ops.length > SHELF_ITEM_BATCH_OP_CAP) {
+      throw new AppError(
+        413,
+        `Batch exceeds maximum of ${SHELF_ITEM_BATCH_OP_CAP} ops per request`,
+      );
+    }
+
+    const results: ShelfItemBatchResult[] = [];
+    const touchedRefs = new Set<string>();
+    let mutated = false;
+
+    await prisma.$transaction(async (tx) => {
+      for (const op of ops) {
+        try {
+          switch (op.op) {
+            case "add": {
+              if (shelfUnitId === op.itemRef) {
+                results.push({
+                  status: "failed",
+                  op,
+                  reason: "A shelf cannot contain itself",
+                });
+                continue;
+              }
+              const created = await tx.shelfItem.createMany({
+                data: [
+                  {
+                    shelfUnitId,
+                    itemRef: op.itemRef,
+                    kind: op.kind,
+                    position: op.position,
+                  },
+                ],
+                skipDuplicates: true,
+              });
+              if (created.count > 0) {
+                await tx.shelf.update({
+                  where: { unitId: shelfUnitId },
+                  data: { itemCount: { increment: 1 } },
+                });
+                mutated = true;
+              }
+              await tx.shelfUnit.upsert({
+                where: {
+                  shelfUnitId_itemRef_unitId_role: {
+                    shelfUnitId,
+                    itemRef: op.itemRef,
+                    unitId: op.itemRef,
+                    role: "primary",
+                  },
+                },
+                create: {
+                  shelfUnitId,
+                  itemRef: op.itemRef,
+                  unitId: op.itemRef,
+                  role: "primary",
+                },
+                update: {},
+              });
+              for (const reviewId of op.reviewIds ?? []) {
+                await tx.shelfUnit.upsert({
+                  where: {
+                    shelfUnitId_itemRef_unitId_role: {
+                      shelfUnitId,
+                      itemRef: op.itemRef,
+                      unitId: reviewId,
+                      role: "review",
+                    },
+                  },
+                  create: {
+                    shelfUnitId,
+                    itemRef: op.itemRef,
+                    unitId: reviewId,
+                    role: "review",
+                  },
+                  update: {},
+                });
+              }
+              for (const tagId of op.tagIds ?? []) {
+                await tx.shelfUnit.upsert({
+                  where: {
+                    shelfUnitId_itemRef_unitId_role: {
+                      shelfUnitId,
+                      itemRef: op.itemRef,
+                      unitId: tagId,
+                      role: "tag",
+                    },
+                  },
+                  create: {
+                    shelfUnitId,
+                    itemRef: op.itemRef,
+                    unitId: tagId,
+                    role: "tag",
+                  },
+                  update: {},
+                });
+              }
+              const slot = await tx.shelfItem.findUniqueOrThrow({
+                where: {
+                  shelfUnitId_itemRef: { shelfUnitId, itemRef: op.itemRef },
+                },
+              });
+              touchedRefs.add(op.itemRef);
+              results.push({
+                status: "ok",
+                op,
+                item: mapShelfItemToDTO(slot, undefined),
+              });
+              break;
+            }
+            case "reorder": {
+              const updated = await tx.shelfItem.update({
+                where: {
+                  shelfUnitId_itemRef: { shelfUnitId, itemRef: op.itemRef },
+                },
+                data: { position: op.position },
+              });
+              touchedRefs.add(op.itemRef);
+              results.push({
+                status: "ok",
+                op,
+                item: mapShelfItemToDTO(updated, undefined),
+              });
+              break;
+            }
+            case "reorderToPage": {
+              const skip = (op.toPage - 1) * CROSS_PAGE_PAGE_SIZE;
+              if (skip < 0) {
+                results.push({
+                  status: "failed",
+                  op,
+                  reason: `Invalid page ${op.toPage}`,
+                });
+                continue;
+              }
+              const first = await tx.shelfItem.findFirst({
+                where: { shelfUnitId },
+                orderBy: { position: "asc" },
+                skip,
+                select: { position: true },
+              });
+              if (!first) {
+                results.push({
+                  status: "failed",
+                  op,
+                  reason: `Page ${op.toPage} is out of range`,
+                });
+                continue;
+              }
+              const newPosition = generateBetween(undefined, first.position);
+              const updated = await tx.shelfItem.update({
+                where: {
+                  shelfUnitId_itemRef: { shelfUnitId, itemRef: op.itemRef },
+                },
+                data: { position: newPosition },
+              });
+              touchedRefs.add(op.itemRef);
+              results.push({
+                status: "ok",
+                op,
+                item: mapShelfItemToDTO(updated, undefined),
+              });
+              break;
+            }
+            case "delete": {
+              const deleted = await tx.shelfItem.deleteMany({
+                where: { shelfUnitId, itemRef: op.itemRef },
+              });
+              if (deleted.count > 0) {
+                await tx.shelf.update({
+                  where: { unitId: shelfUnitId },
+                  data: { itemCount: { decrement: deleted.count } },
+                });
+                mutated = true;
+              }
+              results.push({ status: "ok", op });
+              break;
+            }
+            case "setTags": {
+              const existing = await tx.shelfUnit.findMany({
+                where: { shelfUnitId, itemRef: op.itemRef, role: "tag" },
+                select: { unitId: true },
+              });
+              const existingSet = new Set(existing.map((e) => e.unitId));
+              const nextSet = new Set(op.tagIds);
+              const toAdd = [...nextSet].filter((id) => !existingSet.has(id));
+              const toRemove = [...existingSet].filter(
+                (id) => !nextSet.has(id),
+              );
+              if (toRemove.length > 0) {
+                await tx.shelfUnit.deleteMany({
+                  where: {
+                    shelfUnitId,
+                    itemRef: op.itemRef,
+                    role: "tag",
+                    unitId: { in: toRemove },
+                  },
+                });
+              }
+              for (const unitId of toAdd) {
+                await tx.shelfUnit.create({
+                  data: {
+                    shelfUnitId,
+                    itemRef: op.itemRef,
+                    unitId,
+                    role: "tag",
+                  },
+                });
+              }
+              const slot = await tx.shelfItem.findUniqueOrThrow({
+                where: {
+                  shelfUnitId_itemRef: { shelfUnitId, itemRef: op.itemRef },
+                },
+              });
+              touchedRefs.add(op.itemRef);
+              results.push({
+                status: "ok",
+                op,
+                item: mapShelfItemToDTO(slot, undefined),
+              });
+              break;
+            }
+            default: {
+              const unknown = op as { op: string };
+              results.push({
+                status: "failed",
+                op,
+                reason: `Unknown op: ${unknown.op}`,
+              });
+            }
+          }
+        } catch (err) {
+          results.push({
+            status: "failed",
+            op,
+            reason: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
+    });
+
+    if (touchedRefs.size > 0) {
+      const refs = [...touchedRefs];
+      const projection = await buildShelfItemProjection(shelfUnitId, refs);
+      for (let i = 0; i < results.length; i += 1) {
+        const r = results[i]!;
+        if (r.status === "ok" && r.item && touchedRefs.has(r.op.itemRef)) {
+          const fresh = await prisma.shelfItem.findUnique({
+            where: {
+              shelfUnitId_itemRef: { shelfUnitId, itemRef: r.op.itemRef },
+            },
+          });
+          if (fresh) {
+            results[i] = {
+              status: "ok",
+              op: r.op,
+              item: mapShelfItemToDTO(fresh, projection.get(r.op.itemRef)),
+            };
+          }
+        }
+      }
+    }
+
+    if (mutated) {
+      await syncContainedUnitIdsToMeili(shelfUnitId);
+    }
+
+    return results;
   }
 
   async cleanupOrphans(

@@ -1,6 +1,7 @@
 import type {
   ShelfDetailDTO,
   ShelfDTO,
+  ShelfItemBatchResponse,
   ShelfItemDTO,
   ShelfListResponse,
   ShelfSummaryDTO,
@@ -14,6 +15,7 @@ import {
   hasPermissionToUpdateShelf,
   reorderShelfItemSchema,
   setShelfItemTagsSchema,
+  shelfItemBatchRequestSchema,
   shelfItemsQuerySchema,
   shelfListBodySchema,
   shelfListQuerySchema,
@@ -379,6 +381,37 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       detail: {
         summary: "Set shelf item tags",
         description: "Replace the tagIds array on a shelf item",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .patch(
+    "/:unitId/items/batch",
+    async ({ params, body, identity, set }): Promise<ShelfItemBatchResponse> => {
+      const target = await unitService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.userId,
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to modify this shelf",
+        );
+      }
+      const results = await shelfService.applyBatch(params.unitId, body.ops);
+      return { results };
+    },
+    {
+      requireLogin: true,
+      params: shelfParamsSchema,
+      body: shelfItemBatchRequestSchema,
+      detail: {
+        summary: "Apply a batch of shelf item ops",
+        description:
+          "Apply an ordered op log of add/reorder/reorderToPage/delete/setTags ops in a single transaction. Returns per-op results.",
         tags: ["Shelves"],
       },
     },

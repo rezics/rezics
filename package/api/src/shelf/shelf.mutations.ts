@@ -6,6 +6,8 @@ import type {
   CreateShelfInput,
   ReorderShelfItemInput,
   SetShelfItemTagsInput,
+  ShelfItemBatchOp,
+  ShelfItemBatchResponse,
   ShelfItemDTO,
   ShelfResponse,
   ToggleFavoriteResponse,
@@ -260,6 +262,34 @@ export function useSetShelfItemTagsMutation(
   });
 }
 
+export function useBatchUpdateShelfItemsMutation(
+  options?: Omit<
+    UseMutationOptions<
+      ShelfItemBatchResponse,
+      Error,
+      { shelfUnitId: string; ops: ShelfItemBatchOp[] }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ shelfUnitId, ops }) =>
+      shelfApi.batchUpdateItems(shelfUnitId, ops),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: shelfKeys.detail(variables.shelfUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: shelfKeys.items(variables.shelfUnitId),
+      });
+      invalidateShelfCollections(queryClient);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export function useCleanupOrphansMutation(
   options?: Omit<
     UseMutationOptions<
@@ -347,6 +377,7 @@ export const shelfMutations = {
   useAttachReview: useAttachReviewMutation,
   useDetachReview: useDetachReviewMutation,
   useSetItemTags: useSetShelfItemTagsMutation,
+  useBatchUpdateItems: useBatchUpdateShelfItemsMutation,
   useCleanupOrphans: useCleanupOrphansMutation,
 };
 

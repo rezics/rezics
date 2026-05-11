@@ -59,9 +59,11 @@ function primeEntry(
 }
 
 function idsOf(stream: ShelfStreamEntry[]): string[] {
-  return stream.map((e) =>
-    e.kind === "prime" ? e.enriched.item.itemRef : e.review.unitId,
-  );
+  return stream.map((e) => {
+    if (e.kind === "prime") return e.enriched.item.itemRef;
+    if (e.kind === "review") return e.review.unitId;
+    return e.tag.unitId;
+  });
 }
 
 describe("deriveShelfStream — nested mode", () => {

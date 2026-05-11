@@ -26,6 +26,12 @@ import { ShelfItemCard } from "./ShelfItemCard";
 interface ShelfItemRendererProps {
   entry: ShelfStreamEntry;
   viewMode: ShelfView;
+  /**
+   * Optional left-column controls (drag handle, move, delete) for editor use.
+   * Rendered on the primary row in flat/nested mode and on each attached
+   * review row in flat mode. Never rendered inside a nested card's tab area.
+   */
+  editControls?: React.ReactNode;
 }
 
 function renderPrimary(
@@ -123,14 +129,34 @@ function NestedPrimeCard({ enriched }: { enriched: EnrichedShelfItem }) {
   );
 }
 
-export function ShelfItemRenderer({ entry, viewMode }: ShelfItemRendererProps) {
+export function ShelfItemRenderer({
+  entry,
+  viewMode,
+  editControls,
+}: ShelfItemRendererProps) {
+  let content: React.ReactNode;
   if (entry.kind === "review") {
-    return <ReviewCard review={entry.review} />;
+    content = <ReviewCard review={entry.review} />;
+  } else if (entry.kind === "tag") {
+    content = (
+      <SingleTagChip tag={entry.tag as unknown as UnitTagDTO} />
+    );
+  } else if (viewMode === "nested") {
+    content = <NestedPrimeCard enriched={entry.enriched} />;
+  } else {
+    content = <>{renderPrimary(entry.enriched, viewMode)}</>;
   }
 
-  if (viewMode === "nested") {
-    return <NestedPrimeCard enriched={entry.enriched} />;
+  if (!editControls) {
+    return content;
   }
 
-  return <>{renderPrimary(entry.enriched, viewMode)}</>;
+  return (
+    <div className="flex items-stretch gap-2">
+      <div className="flex flex-col items-center justify-start gap-1 shrink-0 pt-1">
+        {editControls}
+      </div>
+      <div className="min-w-0 flex-1">{content}</div>
+    </div>
+  );
 }

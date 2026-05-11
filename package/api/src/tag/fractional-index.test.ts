@@ -3,7 +3,7 @@ import {
   generateKeyBetween,
   positionForNewBottomPin,
   positionForNewTopPin,
-} from "./fractional-index";
+} from "../shared/fractional-index";
 
 describe("generateKeyBetween", () => {
   test("returns mid key when both sides omitted", () => {

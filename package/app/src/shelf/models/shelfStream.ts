@@ -2,6 +2,7 @@ import type {
   EnrichedShelfItem,
   ShelfSortMode,
   ShelfView,
+  TagListEntryDTO,
 } from "@rezics/api/shelf";
 import type { PostDTO } from "@rezics/contract";
 import { titleOf } from "./titleOf";
@@ -12,6 +13,11 @@ export type ShelfStreamEntry =
       kind: "review";
       parentItemRef: string;
       review: PostDTO;
+    }
+  | {
+      kind: "tag";
+      parentItemRef: string;
+      tag: TagListEntryDTO;
     };
 
 const titleCollator = new Intl.Collator(undefined, {
@@ -23,7 +29,10 @@ function entryTitle(entry: ShelfStreamEntry): string {
   if (entry.kind === "prime") {
     return titleOf(entry.enriched.item, entry.enriched.primary);
   }
-  return entry.review.extra?.title ?? entry.parentItemRef;
+  if (entry.kind === "review") {
+    return entry.review.extra?.title ?? entry.parentItemRef;
+  }
+  return entry.tag.label ?? entry.parentItemRef;
 }
 
 function entryTime(entry: ShelfStreamEntry): number {
@@ -31,8 +40,11 @@ function entryTime(entry: ShelfStreamEntry): number {
     const t = entry.enriched.item.createdAt;
     return t ? new Date(t).getTime() : 0;
   }
-  const t = entry.review.createdAt;
-  return t ? new Date(t).getTime() : 0;
+  if (entry.kind === "review") {
+    const t = entry.review.createdAt;
+    return t ? new Date(t).getTime() : 0;
+  }
+  return 0;
 }
 
 function comparePosition(a: string, b: string): number {
@@ -47,15 +59,24 @@ function primeTieBreaker(a: EnrichedShelfItem, b: EnrichedShelfItem): number {
   );
 }
 
-function entryTieBreaker(a: ShelfStreamEntry, b: ShelfStreamEntry): number {
-  const aRef = a.kind === "prime" ? a.enriched.item.itemRef : a.parentItemRef;
-  const bRef = b.kind === "prime" ? b.enriched.item.itemRef : b.parentItemRef;
-  const parentCompare = titleCollator.compare(aRef, bRef);
-  if (parentCompare !== 0) return parentCompare;
+function entryRefId(entry: ShelfStreamEntry): string {
+  if (entry.kind === "prime") return entry.enriched.item.itemRef;
+  if (entry.kind === "review") return entry.review.unitId;
+  return entry.tag.unitId;
+}
 
-  const aId = a.kind === "prime" ? a.enriched.item.itemRef : a.review.unitId;
-  const bId = b.kind === "prime" ? b.enriched.item.itemRef : b.review.unitId;
-  return titleCollator.compare(aId, bId);
+function entryParentRef(entry: ShelfStreamEntry): string {
+  if (entry.kind === "prime") return entry.enriched.item.itemRef;
+  return entry.parentItemRef;
+}
+
+function entryTieBreaker(a: ShelfStreamEntry, b: ShelfStreamEntry): number {
+  const parentCompare = titleCollator.compare(
+    entryParentRef(a),
+    entryParentRef(b),
+  );
+  if (parentCompare !== 0) return parentCompare;
+  return titleCollator.compare(entryRefId(a), entryRefId(b));
 }
 
 function comparePrimeByMode(
@@ -134,6 +155,13 @@ export function deriveShelfStream(
           review,
         });
       }
+      for (const tag of e.attachedTags) {
+        out.push({
+          kind: "tag",
+          parentItemRef: e.item.itemRef,
+          tag,
+        });
+      }
     }
     return out;
   }
@@ -146,6 +174,13 @@ export function deriveShelfStream(
         kind: "review",
         parentItemRef: e.item.itemRef,
         review,
+      });
+    }
+    for (const tag of e.attachedTags) {
+      flat.push({
+        kind: "tag",
+        parentItemRef: e.item.itemRef,
+        tag,
       });
     }
   }

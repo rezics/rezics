@@ -310,6 +310,99 @@ export type CleanupShelfOrphansInput =
   (typeof cleanupShelfOrphansSchema)["static"];
 
 // ============================================================
+// SHELF ITEM BATCH OPS
+// ============================================================
+
+export const shelfItemBatchAddOpSchema = t.Object({
+  op: t.Literal("add"),
+  itemRef: t.String(),
+  kind: shelfItemKindSchema,
+  position: t.String(),
+  tagIds: t.Optional(t.Array(t.String())),
+  reviewIds: t.Optional(t.Array(t.String())),
+});
+
+export type ShelfItemBatchAddOp =
+  (typeof shelfItemBatchAddOpSchema)["static"];
+
+export const shelfItemBatchReorderOpSchema = t.Object({
+  op: t.Literal("reorder"),
+  itemRef: t.String(),
+  position: t.String(),
+});
+
+export type ShelfItemBatchReorderOp =
+  (typeof shelfItemBatchReorderOpSchema)["static"];
+
+export const shelfItemBatchReorderToPageOpSchema = t.Object({
+  op: t.Literal("reorderToPage"),
+  itemRef: t.String(),
+  toPage: t.Number(),
+  edge: t.Literal("first"),
+});
+
+export type ShelfItemBatchReorderToPageOp =
+  (typeof shelfItemBatchReorderToPageOpSchema)["static"];
+
+export const shelfItemBatchDeleteOpSchema = t.Object({
+  op: t.Literal("delete"),
+  itemRef: t.String(),
+});
+
+export type ShelfItemBatchDeleteOp =
+  (typeof shelfItemBatchDeleteOpSchema)["static"];
+
+export const shelfItemBatchSetTagsOpSchema = t.Object({
+  op: t.Literal("setTags"),
+  itemRef: t.String(),
+  tagIds: t.Array(t.String()),
+});
+
+export type ShelfItemBatchSetTagsOp =
+  (typeof shelfItemBatchSetTagsOpSchema)["static"];
+
+export const shelfItemBatchOpSchema = t.Union([
+  shelfItemBatchAddOpSchema,
+  shelfItemBatchReorderOpSchema,
+  shelfItemBatchReorderToPageOpSchema,
+  shelfItemBatchDeleteOpSchema,
+  shelfItemBatchSetTagsOpSchema,
+]);
+
+export type ShelfItemBatchOp = (typeof shelfItemBatchOpSchema)["static"];
+
+export const shelfItemBatchRequestSchema = t.Object({
+  ops: t.Array(shelfItemBatchOpSchema),
+  baseVersion: t.Optional(t.String()),
+});
+
+export type ShelfItemBatchRequest =
+  (typeof shelfItemBatchRequestSchema)["static"];
+
+export const shelfItemBatchResultSchema = t.Union([
+  t.Object({
+    status: t.Literal("ok"),
+    op: shelfItemBatchOpSchema,
+    item: t.Optional(shelfItemDTOSchema),
+  }),
+  t.Object({
+    status: t.Literal("failed"),
+    op: shelfItemBatchOpSchema,
+    reason: t.String(),
+  }),
+]);
+
+export type ShelfItemBatchResult =
+  (typeof shelfItemBatchResultSchema)["static"];
+
+export const shelfItemBatchResponseSchema = t.Object({
+  results: t.Array(shelfItemBatchResultSchema),
+});
+
+export type ShelfItemBatchResponse =
+  (typeof shelfItemBatchResponseSchema)["static"];
+
+// ============================================================
 // COLLECTION API
 // ============================================================
 

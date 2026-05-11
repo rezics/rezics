@@ -1,20 +1,29 @@
 import { shelfDetailQuery } from "@rezics/api/shelf";
+import type { ShelfView } from "@rezics/api/shelf";
 import { useUpdateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
 import { Spinner } from "@rezics/ui";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useBlocker, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
+import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 
 interface ShelfEditPageProps {
   shelfId: string;
+}
+
+function normalizeViewMode(raw: unknown): ShelfView {
+  if (raw === "flat" || raw === "nested" || raw === "masonry") return raw;
+  return "nested";
 }
 
 export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const navigate = useNavigate();
   const { data: shelf, isLoading } = useQuery(shelfDetailQuery(shelfId));
   const updateMutation = useUpdateShelfMutation();
+  const editor = useShelfItemsEditor(shelfId);
 
   const translation = shelf ? getTranslation(shelf.translations) : null;
   const [title, setTitle] = useState("");
@@ -29,29 +38,48 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
     }
   }, [translation, shelf?.coverUrl]);
 
-  const handleSave = () => {
-    updateMutation.mutate(
-      {
-        unitId: shelfId,
-        input: {
-          title,
-          coverUrl: coverUrl || null,
-        },
-      },
-      {
-        onSuccess: () =>
-          navigate({ to: "/shelf/$shelfId", params: { shelfId } }),
-      },
+  const metadataDirty = useMemo(() => {
+    if (!shelf) return false;
+    return (
+      title !== (translation?.title ?? "") ||
+      description !== (translation?.description ?? "") ||
+      coverUrl !== (shelf.coverUrl ?? "")
     );
+  }, [shelf, translation, title, description, coverUrl]);
+
+  const isDirty = metadataDirty || editor.dirty;
+
+  useBlocker({
+    shouldBlockFn: () => {
+      if (!isDirty) return false;
+      return !window.confirm(
+        "You have unsaved changes. Leave anyway?",
+      );
+    },
+    enableBeforeUnload: () => isDirty,
+  });
+
+  const handleSave = () => {
+    updateMutation.mutate({
+      unitId: shelfId,
+      input: {
+        title,
+        coverUrl: coverUrl || null,
+      },
+    });
   };
 
-  if (isLoading) {
+  if (isLoading || !shelf) {
     return (
       <div className="flex justify-center py-12">
         <Spinner />
       </div>
     );
   }
+
+  const viewMode = normalizeViewMode(
+    (shelf.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
+  );
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
@@ -93,10 +121,19 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           >
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={updateMutation.isPending}>
+          <Button
+            onClick={handleSave}
+            disabled={updateMutation.isPending || !metadataDirty}
+          >
             Save
           </Button>
         </div>
+
+        <ShelfEditorItemsSection
+          shelf={shelf}
+          viewMode={viewMode}
+          editor={editor}
+        />
       </div>
     </div>
   );

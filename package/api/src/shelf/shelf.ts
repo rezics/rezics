@@ -10,6 +10,7 @@ export {
   shelfMutations,
   useAddShelfItemMutation,
   useAttachReviewMutation,
+  useBatchUpdateShelfItemsMutation,
   useCleanupOrphansMutation,
   useCollectMutation,
   useCreateShelfMutation,

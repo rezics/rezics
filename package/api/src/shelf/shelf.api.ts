@@ -8,6 +8,8 @@ import type {
   ReorderShelfItemInput,
   SetShelfItemTagsInput,
   ShelfDetailDTO,
+  ShelfItemBatchOp,
+  ShelfItemBatchResponse,
   ShelfItemDTO,
   ShelfListResponse,
   ShelfResponse,
@@ -155,6 +157,19 @@ export const shelfApi = {
       method: "POST",
       body: JSON.stringify(input),
     });
+  },
+
+  batchUpdateItems: async (
+    shelfUnitId: string,
+    ops: ShelfItemBatchOp[],
+  ): Promise<ShelfItemBatchResponse> => {
+    return apiFetch<ShelfItemBatchResponse>(
+      `/shelf/${shelfUnitId}/items/batch`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ ops }),
+      },
+    );
   },
 };
 

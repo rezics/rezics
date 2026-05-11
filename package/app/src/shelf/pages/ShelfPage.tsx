@@ -41,7 +41,7 @@ import { useMediaQuery } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import { shelfDetailActions, shelfPolicy } from "../models/shelfPolicy";
-import { deriveShelfStream } from "../models/shelfStream";
+import { deriveShelfStream, type ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
 
 interface ShelfPageProps {
@@ -92,6 +92,13 @@ const SORT_OPTIONS: { value: ShelfSortMode; label: string }[] = [
   { value: "time", label: "Time" },
   { value: "title", label: "Title" },
 ];
+
+function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
+  if (entry.kind === "prime") return `${prefix}:p:${entry.enriched.item.itemRef}`;
+  if (entry.kind === "review")
+    return `${prefix}:r:${entry.parentItemRef}:${entry.review.unitId}`;
+  return `${prefix}:t:${entry.parentItemRef}:${entry.tag.unitId}`;
+}
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
   const navigate = useNavigate();
@@ -158,12 +165,14 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     for (const entry of visibleStream) {
       if (entry.kind === "review") {
         if (entry.review.unitId) ids.add(entry.review.unitId);
-      } else {
+      } else if (entry.kind === "prime") {
         const primary = entry.enriched.primary as
           | { unitId?: string; id?: string }
           | undefined;
         const id = primary?.unitId ?? primary?.id;
         if (id) ids.add(id);
+      } else if (entry.tag.unitId) {
+        ids.add(entry.tag.unitId);
       }
     }
     return [...ids];
@@ -410,11 +419,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           <div className={MASONRY_COLUMN_CLASS}>
             {visibleStream.map((entry) => (
               <ShelfItemRenderer
-                key={
-                  entry.kind === "prime"
-                    ? `${streamKeyPrefix}:p:${entry.enriched.item.itemRef}`
-                    : `${streamKeyPrefix}:r:${entry.parentItemRef}:${entry.review.unitId}`
-                }
+                key={streamEntryKey(streamKeyPrefix, entry)}
                 entry={entry}
                 viewMode={effectiveViewMode}
               />
@@ -424,11 +429,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           <div className="flex flex-col gap-2">
             {visibleStream.map((entry) => (
               <ShelfItemRenderer
-                key={
-                  entry.kind === "prime"
-                    ? `${streamKeyPrefix}:p:${entry.enriched.item.itemRef}`
-                    : `${streamKeyPrefix}:r:${entry.parentItemRef}:${entry.review.unitId}`
-                }
+                key={streamEntryKey(streamKeyPrefix, entry)}
                 entry={entry}
                 viewMode={effectiveViewMode}
               />
