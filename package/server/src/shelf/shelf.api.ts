@@ -72,7 +72,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       params: shelfParamsSchema,
       detail: {
         summary: "Get shelf",
-        description: "Get a single shelf with metadata and first page of units",
+        description: "Get a single shelf with metadata",
         tags: ["Shelves"],
       },
     },

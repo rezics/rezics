@@ -1,7 +1,8 @@
 import type { Prisma } from "#/prisma/client";
 import { publicUserSelect } from "@/utils/sanitizeUser";
 
-// Prisma include for shelf detail (with units in position order and relations).
+// Prisma include for shelf metadata. Shelf items are paged separately through
+// `GET /shelf/:unitId/units`.
 export const shelfInclude = {
   unit: {
     include: {
@@ -10,13 +11,9 @@ export const shelfInclude = {
       unitTags: { orderBy: { score: "desc" as const } },
     },
   },
-  units: {
-    orderBy: { position: "asc" as const },
-  },
-  relations: true,
 } satisfies Prisma.ShelfInclude;
 
-export type ShelfWithRelations = Prisma.ShelfGetPayload<{
+export type ShelfWithMetadata = Prisma.ShelfGetPayload<{
   include: typeof shelfInclude;
 }>;
 

@@ -13,7 +13,7 @@ import type {
   ShelfListSelected,
   ShelfUnitRelationRow,
   ShelfUnitRow,
-  ShelfWithRelations,
+  ShelfWithMetadata,
 } from "./types";
 
 type ShelfTranslationLike = {
@@ -63,7 +63,7 @@ export function mapShelfUnitRelationToDTO(
   };
 }
 
-export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
+export function mapShelfToDTO(row: ShelfWithMetadata): ShelfDTO {
   return {
     unitId: row.unitId,
     userId: row.unit?.userId ?? undefined,
@@ -77,15 +77,13 @@ export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
     itemCount: row.itemCount,
     translations: (row.unit?.translations ??
       []) as unknown as ShelfDTO["translations"],
-    units: (row.units ?? []).map(mapShelfUnitToDTO),
-    relations: (row.relations ?? []).map(mapShelfUnitRelationToDTO),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
 }
 
 export function mapShelfDetailToDTO(
-  row: ShelfWithRelations,
+  row: ShelfWithMetadata,
   itemCount: number,
 ): ShelfDetailDTO {
   return {
