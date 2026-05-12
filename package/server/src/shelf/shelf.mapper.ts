@@ -4,7 +4,7 @@ import type {
   ShelfItemDTO,
   ShelfItemKind,
   ShelfSummaryDTO,
-  ShelfUnitRole,
+  ShelfItemUnitRole,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
@@ -46,7 +46,7 @@ export type ShelfItemProjection = {
 };
 
 /**
- * Fetch ShelfUnit rows for a page of slots and group by (itemRef, role) into
+ * Fetch ShelfItemUnit rows for a page of slots and group by (itemRef, role) into
  * per-slot `reviewIds` / `tagIds` arrays. Returns a Map keyed by itemRef so
  * `mapShelfItemToDTO` can attach the projection.
  */
@@ -57,7 +57,7 @@ export async function buildShelfItemProjection(
   const out = new Map<string, ShelfItemProjection>();
   if (itemRefs.length === 0) return out;
 
-  const rows = await prisma.shelfUnit.findMany({
+  const rows = await prisma.shelfItemUnit.findMany({
     where: {
       shelfUnitId,
       itemRef: { in: itemRefs },
@@ -71,7 +71,7 @@ export async function buildShelfItemProjection(
   for (const row of rows) {
     const bucket = out.get(row.itemRef);
     if (!bucket) continue;
-    const role = row.role as ShelfUnitRole;
+    const role = row.role as ShelfItemUnitRole;
     if (role === "review") bucket.reviewIds.push(row.unitId);
     else if (role === "tag") bucket.tagIds.push(row.unitId);
   }

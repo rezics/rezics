@@ -35,7 +35,7 @@ export class CollectionService {
    *
    * - If `targetId` is a REVIEW post with a `targetUnitId`, the slot is the
    *   target work (the book the review is about) and the review's own unit id
-   *   is threaded back so it can be written as a role='review' ShelfUnit row.
+   *   is threaded back so it can be written as a role='review' ShelfItemUnit row.
    * - Otherwise the target is used directly.
    */
   private async resolveTarget(
@@ -128,7 +128,7 @@ export class CollectionService {
               data: { itemCount: { increment: 1 } },
             });
           }
-          await tx.shelfUnit.upsert({
+          await tx.shelfItemUnit.upsert({
             where: {
               shelfUnitId_itemRef_unitId_role: {
                 shelfUnitId: shelfId,
@@ -149,7 +149,7 @@ export class CollectionService {
         }
 
         if (resolved.reviewUnitId) {
-          await tx.shelfUnit.upsert({
+          await tx.shelfItemUnit.upsert({
             where: {
               shelfUnitId_itemRef_unitId_role: {
                 shelfUnitId: shelfId,
@@ -238,7 +238,7 @@ export class CollectionService {
           data: { itemCount: { increment: 1 } },
         });
       }
-      await tx.shelfUnit.upsert({
+      await tx.shelfItemUnit.upsert({
         where: {
           shelfUnitId_itemRef_unitId_role: {
             shelfUnitId: favShelfId,
@@ -256,7 +256,7 @@ export class CollectionService {
         update: {},
       });
       if (resolved.reviewUnitId) {
-        await tx.shelfUnit.upsert({
+        await tx.shelfItemUnit.upsert({
           where: {
             shelfUnitId_itemRef_unitId_role: {
               shelfUnitId: favShelfId,
@@ -294,7 +294,7 @@ export class CollectionService {
     const lookupUnitId = resolved.reviewUnitId ?? resolved.itemRef;
     const lookupRole = resolved.reviewUnitId ? "review" : "primary";
 
-    const rows = await prisma.shelfUnit.findMany({
+    const rows = await prisma.shelfItemUnit.findMany({
       where: {
         unitId: lookupUnitId,
         role: lookupRole,

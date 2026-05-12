@@ -115,7 +115,7 @@ export async function seedShelves(
         kind: string;
         position: string;
       }> = [];
-      const shelfUnitRows: Array<{
+      const shelfItemUnitRows: Array<{
         shelfUnitId: string;
         itemRef: string;
         unitId: string;
@@ -131,7 +131,7 @@ export async function seedShelves(
           kind: unitTypeToShelfKind(work.type),
           position,
         });
-        shelfUnitRows.push({
+        shelfItemUnitRows.push({
           shelfUnitId: unit.id,
           itemRef: work.id,
           unitId: work.id,
@@ -146,7 +146,7 @@ export async function seedShelves(
           );
           if (randomBoolean(0.6)) {
             for (const review of pickN(candidateReviews, attachCount)) {
-              shelfUnitRows.push({
+              shelfItemUnitRows.push({
                 shelfUnitId: unit.id,
                 itemRef: work.id,
                 unitId: review.id,
@@ -159,8 +159,8 @@ export async function seedShelves(
 
       if (shelfItemRows.length > 0) {
         await ctx.prisma.shelfItem.createMany({ data: shelfItemRows });
-        await ctx.prisma.shelfUnit.createMany({
-          data: shelfUnitRows,
+        await ctx.prisma.shelfItemUnit.createMany({
+          data: shelfItemUnitRows,
           skipDuplicates: true,
         });
       }

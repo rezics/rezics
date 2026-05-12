@@ -315,7 +315,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       detail: {
         summary: "Attach review to shelf item",
         description:
-          "Insert a role='review' ShelfUnit row bound to the slot (creates the slot if needed)",
+          "Insert a role='review' ShelfItemUnit row bound to the slot (creates the slot if needed)",
         tags: ["Shelves"],
       },
     },
@@ -387,7 +387,12 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   )
   .patch(
     "/:unitId/items/batch",
-    async ({ params, body, identity, set }): Promise<ShelfItemBatchResponse> => {
+    async ({
+      params,
+      body,
+      identity,
+      set,
+    }): Promise<ShelfItemBatchResponse> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
         !hasPermissionToUpdateShelf(

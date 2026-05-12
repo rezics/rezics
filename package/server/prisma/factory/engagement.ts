@@ -83,7 +83,7 @@ async function seedFavorites(
         position,
       };
     });
-    const shelfUnitRows = unique.map((target) => ({
+    const shelfItemUnitRows = unique.map((target) => ({
       shelfUnitId: shelfId,
       itemRef: target.id,
       unitId: target.id,
@@ -95,8 +95,8 @@ async function seedFavorites(
         data: shelfItemRows,
         skipDuplicates: true,
       });
-      await ctx.prisma.shelfUnit.createMany({
-        data: shelfUnitRows,
+      await ctx.prisma.shelfItemUnit.createMany({
+        data: shelfItemUnitRows,
         skipDuplicates: true,
       });
     }

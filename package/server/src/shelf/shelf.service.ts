@@ -331,7 +331,7 @@ export class ShelfService {
         where: { shelfUnitId_itemRef: { shelfUnitId, itemRef: req.itemRef } },
       });
 
-      await tx.shelfUnit.upsert({
+      await tx.shelfItemUnit.upsert({
         where: {
           shelfUnitId_itemRef_unitId_role: {
             shelfUnitId,
@@ -350,7 +350,7 @@ export class ShelfService {
       });
 
       for (const reviewId of req.reviewIds ?? []) {
-        await tx.shelfUnit.upsert({
+        await tx.shelfItemUnit.upsert({
           where: {
             shelfUnitId_itemRef_unitId_role: {
               shelfUnitId,
@@ -370,7 +370,7 @@ export class ShelfService {
       }
 
       for (const tagId of req.tagIds ?? []) {
-        await tx.shelfUnit.upsert({
+        await tx.shelfItemUnit.upsert({
           where: {
             shelfUnitId_itemRef_unitId_role: {
               shelfUnitId,
@@ -545,7 +545,7 @@ export class ShelfService {
     };
   }
 
-  // --- ShelfUnit role attachments ---
+  // --- ShelfItemUnit role attachments ---
 
   async attachReview(
     shelfUnitId: string,
@@ -578,7 +578,7 @@ export class ShelfService {
             data: { itemCount: { increment: 1 } },
           });
         }
-        await tx.shelfUnit.upsert({
+        await tx.shelfItemUnit.upsert({
           where: {
             shelfUnitId_itemRef_unitId_role: {
               shelfUnitId,
@@ -592,7 +592,7 @@ export class ShelfService {
         });
       }
 
-      await tx.shelfUnit.upsert({
+      await tx.shelfItemUnit.upsert({
         where: {
           shelfUnitId_itemRef_unitId_role: {
             shelfUnitId,
@@ -627,7 +627,7 @@ export class ShelfService {
     itemRef: string,
     reviewUnitId: string,
   ): Promise<ShelfItemDTO> {
-    await prisma.shelfUnit.deleteMany({
+    await prisma.shelfItemUnit.deleteMany({
       where: { shelfUnitId, itemRef, unitId: reviewUnitId, role: "review" },
     });
 
@@ -644,7 +644,7 @@ export class ShelfService {
     tagIds: string[],
   ): Promise<ShelfItemDTO> {
     const item = await prisma.$transaction(async (tx) => {
-      const existing = await tx.shelfUnit.findMany({
+      const existing = await tx.shelfItemUnit.findMany({
         where: { shelfUnitId, itemRef, role: "tag" },
         select: { unitId: true },
       });
@@ -655,7 +655,7 @@ export class ShelfService {
       const toRemove = [...existingSet].filter((id) => !nextSet.has(id));
 
       if (toRemove.length > 0) {
-        await tx.shelfUnit.deleteMany({
+        await tx.shelfItemUnit.deleteMany({
           where: {
             shelfUnitId,
             itemRef,
@@ -665,7 +665,7 @@ export class ShelfService {
         });
       }
       for (const unitId of toAdd) {
-        await tx.shelfUnit.create({
+        await tx.shelfItemUnit.create({
           data: { shelfUnitId, itemRef, unitId, role: "tag" },
         });
       }
@@ -725,7 +725,7 @@ export class ShelfService {
                 });
                 mutated = true;
               }
-              await tx.shelfUnit.upsert({
+              await tx.shelfItemUnit.upsert({
                 where: {
                   shelfUnitId_itemRef_unitId_role: {
                     shelfUnitId,
@@ -743,7 +743,7 @@ export class ShelfService {
                 update: {},
               });
               for (const reviewId of op.reviewIds ?? []) {
-                await tx.shelfUnit.upsert({
+                await tx.shelfItemUnit.upsert({
                   where: {
                     shelfUnitId_itemRef_unitId_role: {
                       shelfUnitId,
@@ -762,7 +762,7 @@ export class ShelfService {
                 });
               }
               for (const tagId of op.tagIds ?? []) {
-                await tx.shelfUnit.upsert({
+                await tx.shelfItemUnit.upsert({
                   where: {
                     shelfUnitId_itemRef_unitId_role: {
                       shelfUnitId,
@@ -873,7 +873,7 @@ export class ShelfService {
               break;
             }
             case "setTags": {
-              const existing = await tx.shelfUnit.findMany({
+              const existing = await tx.shelfItemUnit.findMany({
                 where: { shelfUnitId, itemRef: op.itemRef, role: "tag" },
                 select: { unitId: true },
               });
@@ -884,7 +884,7 @@ export class ShelfService {
                 (id) => !nextSet.has(id),
               );
               if (toRemove.length > 0) {
-                await tx.shelfUnit.deleteMany({
+                await tx.shelfItemUnit.deleteMany({
                   where: {
                     shelfUnitId,
                     itemRef: op.itemRef,
@@ -894,7 +894,7 @@ export class ShelfService {
                 });
               }
               for (const unitId of toAdd) {
-                await tx.shelfUnit.create({
+                await tx.shelfItemUnit.create({
                   data: {
                     shelfUnitId,
                     itemRef: op.itemRef,

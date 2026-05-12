@@ -2,7 +2,7 @@
 
 ### Requirement: ShelfItem is a utilitarian render-only slot
 
-`ShelfItem` SHALL be treated as a purely utilitarian model serving the single read path "open shelf S → list its slots in position order". It SHALL NOT carry reverse-lookup indexes, it SHALL NOT store per-item unit-id arrays, and it SHALL NOT be consulted for cross-shelf membership queries. All shelf ↔ unit membership reverse lookups SHALL go through the `ShelfUnit` junction instead.
+`ShelfItem` SHALL be treated as a purely utilitarian model serving the single read path "open shelf S → list its slots in position order". It SHALL NOT carry reverse-lookup indexes, it SHALL NOT store per-item unit-id arrays, and it SHALL NOT be consulted for cross-shelf membership queries. All shelf ↔ unit membership reverse lookups SHALL go through the `ShelfItemUnit` junction instead.
 
 The `ShelfItem` model SHALL contain exactly these fields:
 
@@ -24,12 +24,12 @@ The `ShelfItem` model SHALL declare exactly one index: `@@index([shelfUnitId, po
 
 - **WHEN** reviewing the Prisma schema for `ShelfItem`
 - **THEN** the model SHALL NOT contain `reviewIds: String[]` or `tagIds: String[]`
-- **AND** any unit-id association (primary, review, tag, future roles) SHALL be stored in `ShelfUnit` rows
+- **AND** any unit-id association (primary, review, tag, future roles) SHALL be stored in `ShelfItemUnit` rows
 
-#### Scenario: Reverse lookups route through ShelfUnit
+#### Scenario: Reverse lookups route through ShelfItemUnit
 
 - **WHEN** the system needs to answer "which shelves contain unit U"
-- **THEN** the query SHALL target `ShelfUnit` (e.g. `WHERE unitId = U`)
+- **THEN** the query SHALL target `ShelfItemUnit` (e.g. `WHERE unitId = U`)
 - **AND** SHALL NOT query `ShelfItem.itemRef` for reverse-lookup purposes
 
 ### Requirement: ShelfItem fractional-index position
@@ -40,7 +40,7 @@ Each `ShelfItem` SHALL have a `position` field of type `String` (max 64 characte
 
 - **WHEN** a new item is added to a shelf with existing items
 - **THEN** the system SHALL generate a new `position` string lexicographically greater than the current maximum position in that shelf
-- **AND** the insert SHALL be a single-row INSERT on `ShelfItem` (plus the dual `ShelfUnit` `role='primary'` write; see `shelf-unit-junction`) with no modifications to other rows
+- **AND** the insert SHALL be a single-row INSERT on `ShelfItem` (plus the dual `ShelfItemUnit` `role='primary'` write; see `shelf-item-unit-junction`) with no modifications to other rows
 
 #### Scenario: Prepend item to shelf
 
@@ -90,7 +90,7 @@ When a newly-generated `position` would exceed a configured length threshold (de
 
 - **WHEN** the Unit referenced by a `ShelfItem`'s `itemRef` is deleted externally
 - **THEN** the `ShelfItem` row SHALL remain
-- **AND** the corresponding `ShelfUnit` row with `role='primary'` SHALL be cascade-deleted (per the `ShelfUnit` cascade rules)
+- **AND** the corresponding `ShelfItemUnit` row with `role='primary'` SHALL be cascade-deleted (per the `ShelfItemUnit` cascade rules)
 - **AND** the `ShelfItem` SHALL be treated as an orphan until author-triggered cleanup
 
 ### Requirement: ShelfItem composite primary key on itemRef

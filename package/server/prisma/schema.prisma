@@ -178,8 +178,8 @@ model Unit {
   rootPosts       Post[] @relation("PostRoot")
   parentPosts     Post[] @relation("PostParent")
 
-  // Shelf↔unit junction membership (primary/review/tag)
-  shelfUnits   ShelfUnit[]
+  // ShelfItem-scoped unit links (primary/review/tag)
+  shelfItemUnits ShelfItemUnit[]
   userProgress UserUnitProgress[] @relation("ProgressUnit")
 
   @@unique([translationGroupId, defaultLanguage])
@@ -444,8 +444,8 @@ model Shelf {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  items      ShelfItem[]
-  shelfUnits ShelfUnit[]
+  items          ShelfItem[]
+  shelfItemUnits ShelfItemUnit[]
 }
 
 model ShelfItem {
@@ -457,14 +457,14 @@ model ShelfItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  shelf      Shelf       @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
-  shelfUnits ShelfUnit[]
+  shelf          Shelf           @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
+  shelfItemUnits ShelfItemUnit[]
 
   @@id([shelfUnitId, itemRef])
   @@index([shelfUnitId, position])
 }
 
-model ShelfUnit {
+model ShelfItemUnit {
   shelfUnitId String @db.Uuid
   itemRef     String @db.Uuid
   unitId      String @db.Uuid

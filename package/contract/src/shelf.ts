@@ -37,36 +37,36 @@ export const shelfItemKindSchema = t.Union([
 export type ShelfItemKind = (typeof shelfItemKindSchema)["static"];
 
 // ============================================================
-// SHELF UNIT ROLE
+// SHELF ITEM UNIT ROLE
 // ============================================================
 
-export const shelfUnitRoleSchema = t.Union([
+export const shelfItemUnitRoleSchema = t.Union([
   t.Literal("primary"),
   t.Literal("review"),
   t.Literal("tag"),
 ]);
 
-export type ShelfUnitRole = (typeof shelfUnitRoleSchema)["static"];
+export type ShelfItemUnitRole = (typeof shelfItemUnitRoleSchema)["static"];
 
 // ============================================================
-// SHELF UNIT DTO (junction row)
+// SHELF ITEM UNIT DTO (junction row)
 // ============================================================
 
-export const shelfUnitDTOSchema = t.Object({
+export const shelfItemUnitDTOSchema = t.Object({
   shelfUnitId: t.String(),
   itemRef: t.String(),
   unitId: t.String(),
-  role: shelfUnitRoleSchema,
+  role: shelfItemUnitRoleSchema,
 });
 
-export type ShelfUnitDTO = (typeof shelfUnitDTOSchema)["static"];
+export type ShelfItemUnitDTO = (typeof shelfItemUnitDTOSchema)["static"];
 
 // ============================================================
 // SHELF ITEM DTO
 // ============================================================
 
-// `reviewIds` / `tagIds` are server-projected from ShelfUnit rows for read
-// convenience; authoritative storage is the ShelfUnit junction table.
+// `reviewIds` / `tagIds` are server-projected from ShelfItemUnit rows for read
+// convenience; authoritative storage is the ShelfItemUnit junction table.
 export const shelfItemDTOSchema = t.Object({
   shelfUnitId: t.String(),
   itemRef: t.String(),

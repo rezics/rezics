@@ -33,16 +33,16 @@ A `ShelfItem` SHALL link a `Shelf` to any `Unit` via a composite primary key of 
 - `position: String @db.VarChar(64)` — fractional-index key for manual ordering.
 - `createdAt: DateTime`, `updatedAt: DateTime`.
 
-The `itemRef` MAY reference any Unit type — reviews collected as independent units, books, games, media, links, or any other Unit. `ShelfItem` SHALL NOT carry `sortOrder`, `keywords`, `label`, `extra`, `reviewIds`, `tagIds`, or a `data: Json` field. Per-item review and tag attachments SHALL live in the `ShelfUnit` junction model (see capability `shelf-unit-junction`), not on the `ShelfItem` row itself.
+The `itemRef` MAY reference any Unit type — reviews collected as independent units, books, games, media, links, or any other Unit. `ShelfItem` SHALL NOT carry `sortOrder`, `keywords`, `label`, `extra`, `reviewIds`, `tagIds`, or a `data: Json` field. Per-item review and tag attachments SHALL live in the `ShelfItemUnit` junction model (see capability `shelf-item-unit-junction`), not on the `ShelfItem` row itself.
 
-Adding a unit to a shelf SHALL be a single transaction that inserts both a `ShelfItem` row and a `ShelfUnit` row with `role='primary'` pointing to the same `itemRef`.
+Adding a unit to a shelf SHALL be a single transaction that inserts both a `ShelfItem` row and a `ShelfItemUnit` row with `role='primary'` pointing to the same `itemRef`.
 
 #### Scenario: Add a book to a shelf
 
 - **GIVEN** a Shelf `shelf-1` and a Unit `book-1` of type `BOOK`
 - **WHEN** the user adds `book-1` to `shelf-1`
 - **THEN** a `ShelfItem` SHALL be created with `shelfUnitId = "shelf-1"`, `itemRef = "book-1"`, `kind = "book"`, and a generated `position` string
-- **AND** a `ShelfUnit` row SHALL be created with `(shelfUnitId = "shelf-1", itemRef = "book-1", unitId = "book-1", role = "primary")` in the same transaction
+- **AND** a `ShelfItemUnit` row SHALL be created with `(shelfUnitId = "shelf-1", itemRef = "book-1", unitId = "book-1", role = "primary")` in the same transaction
 - **AND** no FK constraint SHALL tie `ShelfItem.itemRef` to `Unit.id`
 
 #### Scenario: Add an item with per-item tags
@@ -50,7 +50,7 @@ Adding a unit to a shelf SHALL be a single transaction that inserts both a `Shel
 - **GIVEN** a Shelf `shelf-1`, a Unit `book-1`, and Tag unit ids `[T1, T2]`
 - **WHEN** the user adds `book-1` to `shelf-1` with tags `[T1, T2]`
 - **THEN** one `ShelfItem` row SHALL be created as above
-- **AND** three `ShelfUnit` rows SHALL be created: one `role='primary'` and two `role='tag'` (one per tag unit id)
+- **AND** three `ShelfItemUnit` rows SHALL be created: one `role='primary'` and two `role='tag'` (one per tag unit id)
 - **AND** the `ShelfItem` row itself SHALL NOT contain a `tagIds` field
 
 #### Scenario: Prevent duplicate items in a shelf
@@ -59,11 +59,11 @@ Adding a unit to a shelf SHALL be a single transaction that inserts both a `Shel
 - **WHEN** the user attempts to add `book-1` to `shelf-1` again
 - **THEN** the composite primary key `@@id([shelfUnitId, itemRef])` SHALL reject the insert
 - **AND** no duplicate `ShelfItem` row SHALL be created
-- **AND** no duplicate `ShelfUnit` `role='primary'` row SHALL be created
+- **AND** no duplicate `ShelfItemUnit` `role='primary'` row SHALL be created
 
 #### Scenario: itemRef is not indexed on ShelfItem for reverse lookup
 
 - **WHEN** the system needs to answer "which shelves contain unit X"
-- **THEN** the query SHALL target the `ShelfUnit` junction via `WHERE unitId = X`
+- **THEN** the query SHALL target the `ShelfItemUnit` junction via `WHERE unitId = X`
 - **AND** SHALL NOT query `ShelfItem.itemRef` for the reverse lookup
 - **AND** `ShelfItem` SHALL NOT declare `@@index([itemRef])`

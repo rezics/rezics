@@ -25,7 +25,7 @@ The frontend SHALL group the returned `ShelfItem[]` by the list endpoint associa
 
 ### Requirement: Attachments hydrate through the same pipeline
 
-The per-slot `reviewIds: string[]` and `tagIds: string[]` arrays returned by the shelf items endpoint (projected from `ShelfUnit`) are unit ids. The frontend SHALL hydrate them through the same kind-grouped batch-list pipeline used for primary slots, rather than through a dedicated attachment-fetch path.
+The per-slot `reviewIds: string[]` and `tagIds: string[]` arrays returned by the shelf items endpoint (projected from `ShelfItemUnit`) are unit ids. The frontend SHALL hydrate them through the same kind-grouped batch-list pipeline used for primary slots, rather than through a dedicated attachment-fetch path.
 
 #### Scenario: Reviews and tags join the same batch
 
@@ -76,7 +76,7 @@ The frontend SHALL provide three sort modes for shelf items: `manual` (default �
 
 ### Requirement: Orphan detection and author-triggered cleanup
 
-The frontend SHALL detect orphaned slots (rows whose primary `itemRef` fails hydration, typically because the referenced Unit was deleted externally) and hide them from the rendered list. On the author's next save action of any kind (add, remove, reorder, attach review, detach review, set tags), the frontend SHALL include the list of orphaned `itemRef` values in the request, and the backend SHALL delete those `ShelfItem` rows — the cascade to `ShelfUnit` handles the rest.
+The frontend SHALL detect orphaned slots (rows whose primary `itemRef` fails hydration, typically because the referenced Unit was deleted externally) and hide them from the rendered list. On the author's next save action of any kind (add, remove, reorder, attach review, detach review, set tags), the frontend SHALL include the list of orphaned `itemRef` values in the request, and the backend SHALL delete those `ShelfItem` rows — the cascade to `ShelfItemUnit` handles the rest.
 
 #### Scenario: Hydration failure hides orphaned slot
 
@@ -89,7 +89,7 @@ The frontend SHALL detect orphaned slots (rows whose primary `itemRef` fails hyd
 - **WHEN** the shelf author saves any change while two orphaned itemRefs are tracked
 - **THEN** the save request SHALL include both orphaned `itemRef` values
 - **AND** the backend SHALL delete the corresponding `ShelfItem` rows in the same transaction as the save
-- **AND** cascading FKs SHALL delete the orphaned `ShelfUnit` rows bound to those slots
+- **AND** cascading FKs SHALL delete the orphaned `ShelfItemUnit` rows bound to those slots
 
 #### Scenario: Non-author viewer does not trigger cleanup
 

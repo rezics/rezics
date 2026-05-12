@@ -65,16 +65,16 @@ describe("ShelfService", () => {
           shelf: {
             update: async () => ({}),
           },
-          shelfUnit: {
+          shelfItemUnit: {
             upsert: async () => ({}),
           },
         }),
     });
 
-    // buildShelfItemProjection reads shelfUnit + unit; its mapper tolerates undefined.
+    // buildShelfItemProjection reads shelfItemUnit + unit; its mapper tolerates undefined.
     Object.assign(prismaMock, {
       ...prismaMock,
-      shelfUnit: {
+      shelfItemUnit: {
         findMany: async () => [],
       },
     });
@@ -161,7 +161,7 @@ describe("ShelfService", () => {
           shelf: {
             update: async () => ({}),
           },
-          shelfUnit: {
+          shelfItemUnit: {
             upsert: async () => ({}),
             findMany: async () => [],
             deleteMany: async () => ({ count: 0 }),
@@ -178,7 +178,7 @@ describe("ShelfService", () => {
           updatedAt: new Date(),
         }),
       },
-      shelfUnit: {
+      shelfItemUnit: {
         findMany: async () => [],
       },
     });
@@ -222,7 +222,7 @@ describe("ShelfService", () => {
             }),
           },
           shelf: { update: async () => ({}) },
-          shelfUnit: {
+          shelfItemUnit: {
             upsert: async () => ({}),
             findMany: async () => [],
           },
@@ -230,7 +230,7 @@ describe("ShelfService", () => {
       shelfItem: {
         findUnique: async () => null,
       },
-      shelfUnit: { findMany: async () => [] },
+      shelfItemUnit: { findMany: async () => [] },
     });
 
     const { shelfService } = await import("./shelf.service");
@@ -267,7 +267,7 @@ describe("ShelfService", () => {
             }),
           },
           shelf: { update: async () => ({}) },
-          shelfUnit: { findMany: async () => [] },
+          shelfItemUnit: { findMany: async () => [] },
         }),
       shelfItem: {
         findUnique: async () => ({
@@ -279,7 +279,7 @@ describe("ShelfService", () => {
           updatedAt: new Date(),
         }),
       },
-      shelfUnit: { findMany: async () => [] },
+      shelfItemUnit: { findMany: async () => [] },
     });
 
     const { shelfService } = await import("./shelf.service");

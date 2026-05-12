@@ -143,7 +143,7 @@ The system SHALL extend the `User` model with an `extra Json?` column. Within `e
 
 ### Requirement: Progress and shelf are orthogonal stores
 
-The system SHALL treat `UserUnitProgress` and `Shelf` / `ShelfItem` / `ShelfUnit` as independent stores. A write to `UserUnitProgress` MUST NOT create, modify, or delete any shelf row as a side effect. A write to a shelf row (collect, uncollect, reorder, kindKey change) MUST NOT create, modify, or delete any `UserUnitProgress` row as a side effect. Cross-user aggregate queries over progress state (e.g. how many users have a unit in a given status) SHALL be answered by the Meilisearch projection of `UserUnitProgress` (built by a sibling change), never by aggregating shelf membership.
+The system SHALL treat `UserUnitProgress` and `Shelf` / `ShelfItem` / `ShelfItemUnit` as independent stores. A write to `UserUnitProgress` MUST NOT create, modify, or delete any shelf row as a side effect. A write to a shelf row (collect, uncollect, reorder, kindKey change) MUST NOT create, modify, or delete any `UserUnitProgress` row as a side effect. Cross-user aggregate queries over progress state (e.g. how many users have a unit in a given status) SHALL be answered by the Meilisearch projection of `UserUnitProgress` (built by a sibling change), never by aggregating shelf membership.
 
 System-shelf membership that mirrors progress status SHALL be maintained exclusively by the frontend as a dual-write against the existing shelf API:
 
@@ -156,7 +156,7 @@ The "Remove progress" action (`DELETE /me/units/:unitId/progress`) SHALL soft-de
 #### Scenario: Progress upsert does not write to shelf
 
 - **WHEN** an authenticated user calls `PUT /me/units/:unitId/progress` with any combination of fields, including the case where the upsert coerces `status` to `COMPLETED`
-- **THEN** the system writes only to the `UserUnitProgress` row and makes no insert, update, or delete on any `Shelf`, `ShelfItem`, or `ShelfUnit` row
+- **THEN** the system writes only to the `UserUnitProgress` row and makes no insert, update, or delete on any `Shelf`, `ShelfItem`, or `ShelfItemUnit` row
 
 #### Scenario: Shelf collect does not write to progress
 
