@@ -25,6 +25,7 @@ import { useHydratedShelfItems } from "@rezics/api/shelf";
 import type { ShelfDTO, ShelfItemKind } from "@rezics/contract";
 import {
   Button,
+  Checkbox,
   Label,
   Select,
   SelectContent,
@@ -39,10 +40,13 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import {
+  Eye,
   LayoutList as ViewAgendaIcon,
   List as ViewListIcon,
+  ListChecks,
+  Pencil,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   type Candidate,
@@ -52,6 +56,7 @@ import {
 } from "@/unit";
 import { CrossPageMoveModal } from "../components/CrossPageMoveModal";
 import { ShelfEditorItemRow } from "../components/ShelfEditorItemRow";
+import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import type { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 import { visualReorderBounds } from "../models/positionMath";
 import { canUseShelfReorder } from "../models/reorderAvailability";
@@ -61,6 +66,8 @@ import {
 } from "../models/shelfStream";
 
 const PAGE_SIZE = 20;
+
+type EditorMode = "edit" | "multi-select" | "preview";
 
 interface ShelfEditorItemsSectionProps {
   shelf: ShelfDTO;
@@ -113,6 +120,12 @@ function isEditorShelfView(
   return value === "nested" || value === "flat";
 }
 
+function isEditorMode(value: string | undefined): value is EditorMode {
+  return (
+    value === "edit" || value === "multi-select" || value === "preview"
+  );
+}
+
 function requireShelfSortField(value: ShelfSortField | null): ShelfSortField {
   if (value === null) {
     throw new Error("Shelf sort field select emitted null");
@@ -145,10 +158,22 @@ export function ShelfEditorItemsSection({
   const [page, setPage] = useState(1);
   const [moveTargetRef, setMoveTargetRef] = useState<string | null>(null);
   const [activeDragRef, setActiveDragRef] = useState<string | null>(null);
+  const [mode, setMode] = useState<EditorMode>("edit");
+  const [selectedRefs, setSelectedRefs] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [sortPrimeOnly, setSortPrimeOnly] = useState(true);
+
+  useEffect(() => {
+    if (mode !== "multi-select" && selectedRefs.size > 0) {
+      setSelectedRefs(new Set());
+    }
+  }, [mode, selectedRefs.size]);
 
   const stream = useMemo(
-    () => deriveShelfStream(hydration.enriched, viewMode, sortState, true),
-    [hydration.enriched, viewMode, sortState],
+    () =>
+      deriveShelfStream(hydration.enriched, viewMode, sortState, sortPrimeOnly),
+    [hydration.enriched, viewMode, sortState, sortPrimeOnly],
   );
 
   const totalPages = Math.max(1, Math.ceil(stream.length / PAGE_SIZE));
@@ -163,7 +188,9 @@ export function ShelfEditorItemsSection({
     useSensor(KeyboardSensor),
   );
 
-  const canReorder = canUseShelfReorder(true, sortState);
+  const canReorder = canUseShelfReorder(mode === "edit", sortState);
+  const showSortPrimeOnlyToggle =
+    viewMode === "flat" && sortState.field !== "manual";
 
   function handleAddCandidate(candidate: Candidate) {
     editor.enqueueAdd({
@@ -174,6 +201,22 @@ export function ShelfEditorItemsSection({
 
   function handleDelete(itemRef: string) {
     editor.enqueueDelete(itemRef);
+  }
+
+  function handleToggleSelected(itemRef: string) {
+    setSelectedRefs((current) => {
+      const next = new Set(current);
+      if (next.has(itemRef)) next.delete(itemRef);
+      else next.add(itemRef);
+      return next;
+    });
+  }
+
+  function handleBulkDelete() {
+    for (const ref of selectedRefs) {
+      editor.enqueueDelete(ref);
+    }
+    setSelectedRefs(new Set());
   }
 
   function handleMoveOpen(itemRef: string) {
@@ -240,10 +283,22 @@ export function ShelfEditorItemsSection({
     : undefined;
   const nestedViewLabel = t("shelf.view_modes.nested");
   const flatViewLabel = t("shelf.view_modes.flat");
+  const editModeLabel = t("shelf.edit.mode_edit", "Edit");
+  const multiSelectModeLabel = t("shelf.edit.mode_multi_select", "Select");
+  const previewModeLabel = t("shelf.edit.mode_preview", "Preview");
+  const isPreview = mode === "preview";
+  const isMultiSelect = mode === "multi-select";
   const listItems = (
     <ul className="flex flex-col">
       {visibleStream.map((entry) => {
         const ref = entryItemRef(entry);
+        if (isPreview) {
+          return (
+            <li key={ref} className="list-none py-1">
+              <ShelfItemRenderer entry={entry} viewMode={viewMode} />
+            </li>
+          );
+        }
         return (
           <li key={ref} className="list-none">
             <ShelfEditorItemRow
@@ -253,11 +308,17 @@ export function ShelfEditorItemsSection({
               viewMode={viewMode}
               sortable={canReorder && entry.kind === "prime"}
               canMoveCrossPage={
-                canReorder && totalPages > 1 && entry.kind === "prime"
+                !isMultiSelect &&
+                canReorder &&
+                totalPages > 1 &&
+                entry.kind === "prime"
               }
-              canDelete={entry.kind === "prime"}
+              canDelete={!isMultiSelect && entry.kind === "prime"}
               onDelete={handleDelete}
               onMoveCrossPage={handleMoveOpen}
+              multiSelect={isMultiSelect && entry.kind === "prime"}
+              selected={selectedRefs.has(ref)}
+              onToggleSelected={handleToggleSelected}
             />
           </li>
         );
@@ -272,10 +333,12 @@ export function ShelfEditorItemsSection({
         {t("shelf.edit.items_heading", "Items")}
       </h2>
 
-      <UnitAddPicker
-        actionLabel={t("shelf.edit.add", "Add")}
-        onSelectCandidate={handleAddCandidate}
-      />
+      {mode === "edit" && (
+        <UnitAddPicker
+          actionLabel={t("shelf.edit.add", "Add")}
+          onSelectCandidate={handleAddCandidate}
+        />
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <div className="flex min-w-0 items-center gap-2">
@@ -323,50 +386,132 @@ export function ShelfEditorItemsSection({
               ))}
             </SelectContent>
           </Select>
+          {showSortPrimeOnlyToggle && (
+            <label className="flex items-center gap-2 text-sm text-text-secondary">
+              <Checkbox
+                checked={sortPrimeOnly}
+                onCheckedChange={(next) => setSortPrimeOnly(Boolean(next))}
+              />
+              {t("shelf.edit.sort_prime_only", "Group attached")}
+            </label>
+          )}
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          <Label className="text-sm text-text-secondary">View</Label>
-          <TooltipProvider>
-            <ToggleGroup
-              value={[viewMode]}
-              onValueChange={(values) => {
-                const value = lastSingleToggleValue(values);
-                if (!isEditorShelfView(value)) return;
-                onViewModeChange(value);
-              }}
+        <div className="ml-auto flex items-center gap-3">
+          {isMultiSelect && selectedRefs.size > 0 && (
+            <Button
+              type="button"
+              variant="destructive"
               size="sm"
+              onClick={handleBulkDelete}
             >
-              <Tooltip>
-                <TooltipTrigger
-                  render={(props) => (
-                    <ToggleGroupItem
-                      value="nested"
-                      aria-label={nestedViewLabel}
-                      {...props}
-                    >
-                      <ViewAgendaIcon className="h-4 w-4" />
-                    </ToggleGroupItem>
-                  )}
-                />
-                <TooltipContent side="top">{nestedViewLabel}</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger
-                  render={(props) => (
-                    <ToggleGroupItem
-                      value="flat"
-                      aria-label={flatViewLabel}
-                      {...props}
-                    >
-                      <ViewListIcon className="h-4 w-4" />
-                    </ToggleGroupItem>
-                  )}
-                />
-                <TooltipContent side="top">{flatViewLabel}</TooltipContent>
-              </Tooltip>
-            </ToggleGroup>
-          </TooltipProvider>
+              {t("shelf.edit.delete_selected", "Delete {{n}}", {
+                n: selectedRefs.size,
+              })}
+            </Button>
+          )}
+          <div className="flex items-center gap-2">
+            <Label className="text-sm text-text-secondary">Mode</Label>
+            <TooltipProvider>
+              <ToggleGroup
+                value={[mode]}
+                onValueChange={(values) => {
+                  const value = lastSingleToggleValue(values);
+                  if (!isEditorMode(value)) return;
+                  setMode(value);
+                }}
+                size="sm"
+              >
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <ToggleGroupItem
+                        value="edit"
+                        aria-label={editModeLabel}
+                        {...props}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </ToggleGroupItem>
+                    )}
+                  />
+                  <TooltipContent side="top">{editModeLabel}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <ToggleGroupItem
+                        value="multi-select"
+                        aria-label={multiSelectModeLabel}
+                        {...props}
+                      >
+                        <ListChecks className="h-4 w-4" />
+                      </ToggleGroupItem>
+                    )}
+                  />
+                  <TooltipContent side="top">
+                    {multiSelectModeLabel}
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <ToggleGroupItem
+                        value="preview"
+                        aria-label={previewModeLabel}
+                        {...props}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </ToggleGroupItem>
+                    )}
+                  />
+                  <TooltipContent side="top">{previewModeLabel}</TooltipContent>
+                </Tooltip>
+              </ToggleGroup>
+            </TooltipProvider>
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm text-text-secondary">View</Label>
+            <TooltipProvider>
+              <ToggleGroup
+                value={[viewMode]}
+                onValueChange={(values) => {
+                  const value = lastSingleToggleValue(values);
+                  if (!isEditorShelfView(value)) return;
+                  onViewModeChange(value);
+                }}
+                size="sm"
+              >
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <ToggleGroupItem
+                        value="nested"
+                        aria-label={nestedViewLabel}
+                        {...props}
+                      >
+                        <ViewAgendaIcon className="h-4 w-4" />
+                      </ToggleGroupItem>
+                    )}
+                  />
+                  <TooltipContent side="top">{nestedViewLabel}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={(props) => (
+                      <ToggleGroupItem
+                        value="flat"
+                        aria-label={flatViewLabel}
+                        {...props}
+                      >
+                        <ViewListIcon className="h-4 w-4" />
+                      </ToggleGroupItem>
+                    )}
+                  />
+                  <TooltipContent side="top">{flatViewLabel}</TooltipContent>
+                </Tooltip>
+              </ToggleGroup>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
 

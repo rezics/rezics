@@ -19,6 +19,11 @@ export interface UnitCardTranslationMeta {
   overrideTitle?: string;
 }
 
+export interface UnitCardAttachmentCounts {
+  reviews: number;
+  tags: number;
+}
+
 export interface UnitCardSummary {
   unitId: string;
   kind: string;
@@ -29,6 +34,7 @@ export interface UnitCardSummary {
   author?: UnitCardAuthor | null;
   addedAt?: string | Date | null;
   translationMeta?: UnitCardTranslationMeta;
+  attachmentCounts?: UnitCardAttachmentCounts;
 }
 
 export interface UnitCardSummaryOptions {
@@ -71,6 +77,8 @@ export type HydratedShelfEntryLike =
       enriched: {
         item: ShelfItemDTO;
         primary: unknown;
+        attachedReviews?: readonly unknown[];
+        attachedTags?: readonly unknown[];
       };
     }
   | {
@@ -171,6 +179,17 @@ export function shelfEntryToUnitCardSummary(
     });
   }
 
+  const attachmentCounts = pickAttachmentCounts(
+    entry.enriched.attachedReviews?.length ?? 0,
+    entry.enriched.attachedTags?.length ?? 0,
+  );
+  return withAttachmentCounts(primeSummary(entry, options), attachmentCounts);
+}
+
+function primeSummary(
+  entry: Extract<HydratedShelfEntryLike, { kind: "prime" }>,
+  options: UnitCardSummaryOptions,
+): UnitCardSummary {
   const { item, primary } = entry.enriched;
   const baseOptions = {
     ...options,
@@ -226,6 +245,22 @@ export function shelfEntryToUnitCardSummary(
     imageUrl: null,
     addedAt: baseOptions.addedAt,
   };
+}
+
+function pickAttachmentCounts(
+  reviews: number,
+  tags: number,
+): UnitCardAttachmentCounts | undefined {
+  if (reviews <= 0 && tags <= 0) return undefined;
+  return { reviews, tags };
+}
+
+function withAttachmentCounts(
+  summary: UnitCardSummary,
+  attachmentCounts: UnitCardAttachmentCounts | undefined,
+): UnitCardSummary {
+  if (!attachmentCounts) return summary;
+  return { ...summary, attachmentCounts };
 }
 
 export function resolveUnitWorkContext(

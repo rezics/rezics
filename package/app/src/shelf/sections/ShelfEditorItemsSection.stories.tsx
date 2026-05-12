@@ -323,3 +323,11 @@ export const FlatViewMode: Story = {
 export const SinglePendingOp: Story = {
   args: { itemCount: 5, viewMode: "nested", enqueue: "single" },
 };
+
+export const MultiSelectMode: Story = {
+  args: { itemCount: 5, viewMode: "nested", mixed: true },
+};
+
+export const PreviewMode: Story = {
+  args: { itemCount: 5, viewMode: "nested", mixed: true },
+};

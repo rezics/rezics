@@ -105,6 +105,92 @@ describe("shelfEntryToUnitCardSummary", () => {
     });
   });
 
+  test("populates attachmentCounts for prime entries with attached reviews and tags", () => {
+    const item: ShelfItemDTO = {
+      shelfUnitId: "shelf-1",
+      itemRef: "book-1",
+      kind: "book",
+      position: "a",
+      reviewIds: ["review-1", "review-2", "review-3"],
+      tagIds: ["tag-1", "tag-2"],
+      createdAt: "2026-02-01T00:00:00.000Z",
+    };
+    const book = {
+      unitId: "book-1",
+      coverUrl: null,
+      translations: [
+        { unitId: "book-1", language: "en", title: "Shelf Book" },
+      ],
+    } as BookDTO;
+
+    const summary = shelfEntryToUnitCardSummary({
+      kind: "prime",
+      enriched: {
+        item,
+        primary: book,
+        attachedReviews: [{}, {}, {}],
+        attachedTags: [{}, {}],
+      },
+    });
+
+    expect(summary.attachmentCounts).toEqual({ reviews: 3, tags: 2 });
+  });
+
+  test("omits attachmentCounts when prime entry has no attachments", () => {
+    const item: ShelfItemDTO = {
+      shelfUnitId: "shelf-1",
+      itemRef: "book-1",
+      kind: "book",
+      position: "a",
+      reviewIds: [],
+      tagIds: [],
+      createdAt: "2026-02-01T00:00:00.000Z",
+    };
+    const book = {
+      unitId: "book-1",
+      coverUrl: null,
+      translations: [{ unitId: "book-1", language: "en", title: "Bare Book" }],
+    } as BookDTO;
+
+    const summary = shelfEntryToUnitCardSummary({
+      kind: "prime",
+      enriched: { item, primary: book },
+    });
+
+    expect(summary.attachmentCounts).toBeUndefined();
+  });
+
+  test("review and tag entries never carry attachmentCounts", () => {
+    const parentItem = {
+      shelfUnitId: "shelf-1",
+      itemRef: "book-1",
+      kind: "book",
+      position: "a",
+      reviewIds: ["review-1"],
+      tagIds: ["tag-1"],
+      createdAt: "2026-02-01T00:00:00.000Z",
+    } satisfies ShelfItemDTO;
+
+    const reviewSummary = shelfEntryToUnitCardSummary({
+      kind: "review",
+      parentItem,
+      review: {
+        unitId: "review-1",
+        authorUserId: "user-1",
+        body: "Review body",
+        extra: { title: "Review title" },
+      } as PostDTO,
+    });
+    expect(reviewSummary.attachmentCounts).toBeUndefined();
+
+    const tagSummary = shelfEntryToUnitCardSummary({
+      kind: "tag",
+      parentItem,
+      tag: { unitId: "tag-1", label: "Tag" },
+    });
+    expect(tagSummary.attachmentCounts).toBeUndefined();
+  });
+
   test("maps attached review entries from parent shelf metadata", () => {
     const parentItem = {
       shelfUnitId: "shelf-1",

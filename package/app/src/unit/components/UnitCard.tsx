@@ -26,6 +26,7 @@ export function UnitCard({
   const addedAt = formatAddedAt(summary.addedAt);
   const author = authorSlot ?? renderAuthor(summary);
   const translationMeta = renderTranslationMeta(summary);
+  const attachments = renderAttachmentCounts(summary);
 
   return (
     <article
@@ -94,9 +95,17 @@ export function UnitCard({
               {t("unit_card.added_at", "Added {{date}}", { date: addedAt })}
             </time>
           )}
-          {!isCompact && translationMeta && (
+          {attachments && (
             <>
               {(author || addedAt) && <span aria-hidden="true">·</span>}
+              <span className="shrink-0">{attachments}</span>
+            </>
+          )}
+          {!isCompact && translationMeta && (
+            <>
+              {(author || addedAt || attachments) && (
+                <span aria-hidden="true">·</span>
+              )}
               <span className="min-w-0 truncate">{translationMeta}</span>
             </>
           )}
@@ -127,6 +136,19 @@ function renderAuthor(summary: UnitCardSummary) {
   const name = summary.author?.name?.trim();
   if (!name) return null;
   return <span className="min-w-0 truncate text-text-secondary">{name}</span>;
+}
+
+function renderAttachmentCounts(summary: UnitCardSummary): string | null {
+  const counts = summary.attachmentCounts;
+  if (!counts) return null;
+  const parts: string[] = [];
+  if (counts.reviews > 0) {
+    parts.push(`${counts.reviews} ${counts.reviews === 1 ? "review" : "reviews"}`);
+  }
+  if (counts.tags > 0) {
+    parts.push(`${counts.tags} ${counts.tags === 1 ? "tag" : "tags"}`);
+  }
+  return parts.length > 0 ? parts.join(" · ") : null;
 }
 
 function renderTranslationMeta(summary: UnitCardSummary): string | null {
