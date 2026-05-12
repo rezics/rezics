@@ -34,11 +34,12 @@ export function filterBySortPathPrefix(
     }
   }
   if (collapsedSortPaths.length === 0) return posts;
+  collapsedSortPaths.sort((a, b) => a.length - b.length);
 
   return posts.filter((post) => {
     if (!post.sortPath) return true;
-    if (collapsedIds.has(post.unitId)) return true;
     for (const prefix of collapsedSortPaths) {
+      if (post.sortPath === prefix) return true;
       if (
         post.sortPath.length > prefix.length &&
         post.sortPath.startsWith(prefix)

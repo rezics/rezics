@@ -27,10 +27,10 @@ export const CollapseToggle: React.FC<CollapseToggleProps> = ({
       onMouseLeave={() => setHovered(false)}
       data-hovered={hovered ? "true" : undefined}
       className={[
-        "inline-flex items-center justify-center w-5 h-5 rounded-full border p-0 transition-colors duration-100 ease-in-out",
+        "inline-flex items-center justify-center w-5 h-5 rounded-full border bg-surface-canvas p-0 transition-colors duration-100 ease-in-out",
         hovered
           ? "border-brand-fill text-text-brand"
-          : "border-border-whisper text-text-secondary",
+          : "border-border-whisper text-text-tertiary",
       ].join(" ")}
     >
       {isCollapsed ? <AddIcon size={14} /> : <RemoveIcon size={14} />}

@@ -41,6 +41,6 @@ export const Compact: Story = {
   args: { indentLevel: 2, hasChildren: false },
 };
 
-export const Empty: Story = {
+export const CollapsedSubtree: Story = {
   args: { indentLevel: 0, initialCollapsed: true, hasChildren: true },
 };

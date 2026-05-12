@@ -31,8 +31,12 @@ export const PostReply: React.FC<PostReplyProps> = ({
   onReply,
   replyComposerSlot,
 }) => {
-  const paddingLeft = indentLevel * INDENT_UNIT_PX;
   const hasChildren = (post.directReplyCount ?? 0) > 0;
+  const showRail = indentLevel > 0 || hasChildren;
+  const paddingLeft = showRail
+    ? Math.max(INDENT_UNIT_PX, indentLevel * INDENT_UNIT_PX)
+    : indentLevel * INDENT_UNIT_PX;
+  const railLeftPx = paddingLeft - INDENT_UNIT_PX / 2;
 
   return (
     <ThreadingHoverProvider>
@@ -40,44 +44,38 @@ export const PostReply: React.FC<PostReplyProps> = ({
         className="relative py-2"
         style={{ paddingLeft: `${paddingLeft}px` }}
       >
-        {indentLevel > 0 && (
+        {showRail && (
           <ThreadingRail
-            leftPx={paddingLeft - 10}
+            leftPx={railLeftPx}
             isCollapsed={isCollapsed}
             onToggleCollapse={onToggleCollapse}
+            toggleSlot={
+              hasChildren ? (
+                <CollapseToggle
+                  isCollapsed={isCollapsed}
+                  onToggle={onToggleCollapse}
+                />
+              ) : null
+            }
           />
         )}
-        <div className="flex items-start gap-2">
-          {hasChildren ? (
-            <div className="mt-1">
-              <CollapseToggle
-                isCollapsed={isCollapsed}
-                onToggle={onToggleCollapse}
-              />
-            </div>
-          ) : (
-            <div className="w-5 h-5 mt-1" />
-          )}
+        <div className="flex items-start">
           <div className="flex-1 flex flex-col gap-1">
             <PostAuthorHeader post={post} size="compact" />
-            {!isCollapsed && (
-              <>
-                <PostBodyMarkdown
-                  body={post.body ?? ""}
-                  clamp={{ maxLines: 4 }}
-                  className="text-sm"
-                />
-                <ReactionBar
-                  size="sm"
-                  post={post}
-                  policy={postPolicy}
-                  actions={postReplyRowActions}
-                  overflow={postReplyRowOverflow}
-                  onReplyInvoke={onReply}
-                />
-                {replyComposerSlot}
-              </>
-            )}
+            <PostBodyMarkdown
+              body={post.body ?? ""}
+              clamp={{ maxLines: 4 }}
+              className="text-sm"
+            />
+            <ReactionBar
+              size="sm"
+              post={post}
+              policy={postPolicy}
+              actions={postReplyRowActions}
+              overflow={postReplyRowOverflow}
+              onReplyInvoke={onReply}
+            />
+            {replyComposerSlot}
           </div>
         </div>
       </div>

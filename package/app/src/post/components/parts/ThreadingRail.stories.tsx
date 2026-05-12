@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
 import { ThreadingHoverProvider } from "./ThreadingContext";
+import { CollapseToggle } from "./CollapseToggle";
 import { ThreadingRail } from "./ThreadingRail";
 
 function Row({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
@@ -13,6 +14,12 @@ function Row({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
           leftPx={30}
           isCollapsed={collapsed}
           onToggleCollapse={() => setCollapsed((c) => !c)}
+          toggleSlot={
+            <CollapseToggle
+              isCollapsed={collapsed}
+              onToggle={() => setCollapsed((c) => !c)}
+            />
+          }
         />
         <div className="text-text-secondary">
           Hover the 12 px rail zone to see the stroke highlight.

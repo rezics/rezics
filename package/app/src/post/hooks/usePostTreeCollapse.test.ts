@@ -98,4 +98,24 @@ describe("usePostTreeCollapse helpers", () => {
       filterBySortPathPrefix(posts, collapsed).map((p) => p.unitId),
     ).toEqual(["a"]);
   });
+
+  it("keeps nested collapsed state while an ancestor subtree is hidden", () => {
+    const posts = [
+      makePost({ unitId: "a", sortPath: "01" }),
+      makePost({ unitId: "b", sortPath: "01.01" }),
+      makePost({ unitId: "c", sortPath: "01.01.01" }),
+      makePost({ unitId: "d", sortPath: "01.01.01.01" }),
+    ];
+    const collapsed = new Set(["a", "c"]);
+
+    expect(
+      filterBySortPathPrefix(posts, collapsed).map((p) => p.unitId),
+    ).toEqual(["a"]);
+
+    collapsed.delete("a");
+
+    expect(
+      filterBySortPathPrefix(posts, collapsed).map((p) => p.unitId),
+    ).toEqual(["a", "b", "c"]);
+  });
 });
