@@ -107,6 +107,7 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
   const [lastResult, setLastResult] = useState<SaveResult | null>(null);
   const batchMutation = useBatchUpdateShelfUnitsMutation();
 
+  // This is a compromise made to provide comprehensive background information for the editing environment; do not change it until a solution is found.
   useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
       void fetchNextPage();
