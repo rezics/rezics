@@ -41,13 +41,42 @@ export class PostService {
     if (query.authorUserId) where.authorUserId = query.authorUserId;
     if (query.kind) where.kind = query.kind;
 
-    if (typeof query.maxDepth === "number") {
-      where.depth = { lte: query.maxDepth };
-    }
-
     const idList = parseIdsCsv(query.ids);
     if (idList && idList.length > 0) {
       where.unitId = { in: idList };
+    }
+
+    if (query.subtreeRootPostUnitId) {
+      const anchor = await prisma.post.findUniqueOrThrow({
+        where: { unitId: query.subtreeRootPostUnitId },
+        select: {
+          unitId: true,
+          rootPostUnitId: true,
+          depth: true,
+          sortPath: true,
+        },
+      });
+      const rootPostUnitId = anchor.rootPostUnitId ?? anchor.unitId;
+      where.rootPostUnitId = rootPostUnitId;
+      where.unitId = { not: anchor.unitId };
+
+      if (anchor.sortPath) {
+        where.OR = [
+          { sortPath: { startsWith: `${anchor.sortPath}.` } },
+          { sortPath: { startsWith: `${anchor.sortPath}/` } },
+        ];
+      } else if (rootPostUnitId !== anchor.unitId) {
+        throw new AppError(
+          400,
+          "Cannot query a post subtree when the anchor post has no sortPath",
+        );
+      }
+
+      if (typeof query.maxDepth === "number") {
+        where.depth = { lte: anchor.depth + query.maxDepth };
+      }
+    } else if (typeof query.maxDepth === "number") {
+      where.depth = { lte: query.maxDepth };
     }
 
     const isThreaded = query.mode === "threaded";

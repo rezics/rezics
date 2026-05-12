@@ -31,6 +31,7 @@ export {
   postListQuery,
   postQueries,
   postRepliesQuery,
+  postSubtreeQuery,
   postsByAuthorQuery,
   postsByRealmQuery,
   postsByTargetQuery,

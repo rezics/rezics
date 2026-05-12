@@ -22,7 +22,8 @@ export const postApi = {
   /**
    * List posts with optional filters
    * Supports: targetUnitId, realmUnitId, rootPostUnitId, parentPostUnitId,
-   * authorUserId, kind, mode, maxDepth, sort, start, cursor, limit
+   * subtreeRootPostUnitId, authorUserId, kind, mode, maxDepth, sort, start,
+   * cursor, limit
    */
   list: async (filters?: PostFilters): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(`/post/list${buildQueryString(filters)}`);
@@ -68,6 +69,23 @@ export const postApi = {
   ): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(
       `/post/list${buildQueryString({ rootPostUnitId, ...filters })}`,
+    );
+  },
+
+  /**
+   * Get descendant subtree under a post within a root thread.
+   */
+  getSubtree: async (
+    rootPostUnitId: string,
+    subtreeRootPostUnitId: string,
+    filters?: PostFilters,
+  ): Promise<PostListResponse> => {
+    return apiFetch<PostListResponse>(
+      `/post/list${buildQueryString({
+        ...filters,
+        rootPostUnitId,
+        subtreeRootPostUnitId,
+      })}`,
     );
   },
 

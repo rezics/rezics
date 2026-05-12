@@ -106,6 +106,8 @@ export const postListQuerySchema = t.Object({
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
   rootPostUnitId: t.Optional(t.String()),
+  /** Post Unit ID to use as the anchor for descendant subtree queries. */
+  subtreeRootPostUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
@@ -147,6 +149,8 @@ export const postListBodySchema = t.Object({
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
   rootPostUnitId: t.Optional(t.String()),
+  /** Post Unit ID to use as the anchor for descendant subtree queries. */
+  subtreeRootPostUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),

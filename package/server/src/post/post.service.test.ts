@@ -300,6 +300,75 @@ describe("PostService.byRealm", () => {
   });
 });
 
+describe("PostService.list subtree queries", () => {
+  const service = new PostService();
+
+  test("queries descendants by anchor sortPath and relative maxDepth", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "reply-2",
+      rootPostUnitId: "root-1",
+      depth: 2,
+      sortPath: "0001.0002",
+    });
+
+    await service.list({
+      subtreeRootPostUnitId: "reply-2",
+      mode: "threaded",
+      maxDepth: 2,
+    });
+
+    expect(postFindUniqueOrThrowMock).toHaveBeenCalledWith({
+      where: { unitId: "reply-2" },
+      select: {
+        unitId: true,
+        rootPostUnitId: true,
+        depth: true,
+        sortPath: true,
+      },
+    });
+    expect(firstPostFindManyArgs().where).toMatchObject({
+      unit: { status: "PUBLISHED" },
+      rootPostUnitId: "root-1",
+      unitId: { not: "reply-2" },
+      depth: { lte: 4 },
+    });
+    expect(firstPostFindManyArgs().where.OR).toEqual([
+      { sortPath: { startsWith: "0001.0002." } },
+      { sortPath: { startsWith: "0001.0002/" } },
+    ]);
+    expect(firstPostFindManyArgs().orderBy).toEqual([
+      { sortPath: "asc" },
+      { createdAt: "asc" },
+    ]);
+  });
+
+  test("allows root anchor without sortPath by querying the whole root thread", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "root-1",
+      rootPostUnitId: "root-1",
+      depth: 0,
+      sortPath: null,
+    });
+
+    await service.list({
+      subtreeRootPostUnitId: "root-1",
+      mode: "threaded",
+      maxDepth: 3,
+    });
+
+    expect(firstPostFindManyArgs().where).toMatchObject({
+      unit: { status: "PUBLISHED" },
+      rootPostUnitId: "root-1",
+      unitId: { not: "root-1" },
+      depth: { lte: 3 },
+    });
+    expect(firstPostFindManyArgs().where.sortPath).toBeUndefined();
+    expect(firstPostFindManyArgs().where.OR).toBeUndefined();
+  });
+});
+
 describe("PostService.create rootTargetUnit derivation", () => {
   const service = new PostService();
 

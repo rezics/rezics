@@ -1,5 +1,6 @@
 import { postThreadQuery } from "@rezics/api/post/post";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
+import type { PostDTO } from "@rezics/contract";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
@@ -23,22 +24,26 @@ interface PostTreeSectionProps {
   onReply?: (postUnitId: string) => void;
 }
 
+interface PostTreeListProps {
+  posts: PostDTO[];
+  rootPostUnitId: string;
+  maxDepth?: number;
+  visualMaxDepth?: number;
+  baseDepth?: number;
+  onReply?: (postUnitId: string) => void;
+}
+
 const DEFAULT_MAX_DEPTH = 5;
 const DEFAULT_VISUAL_MAX_DEPTH = 4;
 
-export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
+export const PostTreeList: React.FC<PostTreeListProps> = ({
+  posts,
   rootPostUnitId,
   maxDepth = DEFAULT_MAX_DEPTH,
   visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
+  baseDepth = 0,
   onReply,
 }) => {
-  const { data, isLoading } = useQuery(
-    postThreadQuery(rootPostUnitId, { mode: "threaded", maxDepth }),
-  );
-  const posts = useMemo(
-    () => excludeRootPost(data?.posts ?? [], rootPostUnitId),
-    [data?.posts, rootPostUnitId],
-  );
   const allUnitIds = useMemo(
     () => posts.map((p) => p.unitId).filter(Boolean) as string[],
     [posts],
@@ -76,21 +81,14 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     });
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-6">
-        <Spinner size="sm" />
-      </div>
-    );
-  }
-
   return (
     <div>
       {visiblePosts.map((post) => {
         const depth = post.depth ?? 0;
-        const indentLevel = Math.min(depth, visualMaxDepth);
+        const displayDepth = Math.max(0, depth - baseDepth);
+        const indentLevel = Math.min(displayDepth, visualMaxDepth);
         const atMaxDepth =
-          depth === maxDepth && (post.directReplyCount ?? 0) > 0;
+          displayDepth === maxDepth && (post.directReplyCount ?? 0) > 0;
         const composerOpen = openComposers.has(post.unitId);
 
         return (
@@ -136,5 +134,38 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
         );
       })}
     </div>
+  );
+};
+
+export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
+  rootPostUnitId,
+  maxDepth = DEFAULT_MAX_DEPTH,
+  visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
+  onReply,
+}) => {
+  const { data, isLoading } = useQuery(
+    postThreadQuery(rootPostUnitId, { mode: "threaded", maxDepth }),
+  );
+  const posts = useMemo(
+    () => excludeRootPost(data?.posts ?? [], rootPostUnitId),
+    [data?.posts, rootPostUnitId],
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-6">
+        <Spinner size="sm" />
+      </div>
+    );
+  }
+
+  return (
+    <PostTreeList
+      posts={posts}
+      rootPostUnitId={rootPostUnitId}
+      maxDepth={maxDepth}
+      visualMaxDepth={visualMaxDepth}
+      onReply={onReply}
+    />
   );
 };
