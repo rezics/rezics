@@ -347,7 +347,7 @@ export function ShelfEditorItemsSection({
               canDelete={!isMultiSelect && canEditEntryOrder}
               onDelete={handleDelete}
               onMoveCrossPage={handleMoveOpen}
-              multiSelect={isMultiSelect && canEditEntryOrder}
+              multiSelect={isMultiSelect}
               selected={selectedIds.has(id)}
               onToggleSelected={handleToggleSelected}
             />

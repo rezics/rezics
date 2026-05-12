@@ -63,11 +63,13 @@ export function ShelfEditorItemRow({
   let controls: React.ReactNode;
   if (multiSelect) {
     controls = (
-      <Checkbox
-        aria-label="Select for bulk action"
-        checked={selected ?? false}
-        onCheckedChange={() => onToggleSelected?.(unitId)}
-      />
+      <div className="flex h-8 w-8 items-center justify-center">
+        <Checkbox
+          aria-label="Select for bulk action"
+          checked={selected ?? false}
+          onCheckedChange={() => onToggleSelected?.(unitId)}
+        />
+      </div>
     );
   } else {
     controls = (
