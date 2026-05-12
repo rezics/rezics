@@ -114,6 +114,8 @@ const SORT_ORDER_OPTIONS: { value: ShelfSortOrder; label: string }[] = [
   { value: "asc", label: "Asc" },
 ];
 
+const PAGE_SIZE = 20;
+
 function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
   if (entry.kind === "root") return `${prefix}:r:${entry.unit.unit.unitId}`;
   if (entry.kind === "child")
@@ -133,6 +135,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     order: "desc",
   });
   const [sortPrimeOnly, setSortPrimeOnly] = useState<boolean>(true);
+  const [pageState, setPageState] = useState({ unitId, page: 1 });
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
   const detailQuery = useQuery(shelfDetailQuery(unitId));
@@ -175,12 +178,6 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const canEditShelf = useCanEdit({ resource: "shelf", ownerUnit: shelf });
   const cleanupMutation = useCleanupOrphansMutation();
 
-  useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage();
-    }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
   const orphanIds = useMemo(
     () => new Set(hydration.orphanUnitIds),
     [hydration.orphanUnitIds],
@@ -204,10 +201,36 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     ],
   );
 
-  const visibleStream = useMemo(
+  const filteredStream = useMemo(
     () => stream.filter((e) => !orphanIds.has(e.unit.unit.unitId)),
     [stream, orphanIds],
   );
+  const totalItemCount = Math.max(filteredStream.length, shelf?.itemCount ?? 0);
+  const totalPages = Math.max(1, Math.ceil(totalItemCount / PAGE_SIZE));
+  const page = pageState.unitId === unitId ? pageState.page : 1;
+  const pageStart = (page - 1) * PAGE_SIZE;
+  const visibleStream = filteredStream.slice(pageStart, pageStart + PAGE_SIZE);
+  const waitingForPageData =
+    hasNextPage &&
+    pageStart >= filteredStream.length &&
+    filteredStream.length > 0;
+
+  useEffect(() => {
+    setPageState((current) => {
+      const currentPage = current.unitId === unitId ? current.page : 1;
+      const nextPage = Math.min(currentPage, totalPages);
+      if (current.unitId === unitId && current.page === nextPage) {
+        return current;
+      }
+      return { unitId, page: nextPage };
+    });
+  }, [totalPages, unitId]);
+
+  useEffect(() => {
+    if (waitingForPageData && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [fetchNextPage, isFetchingNextPage, waitingForPageData]);
 
   const reactionTargetIds = useMemo(() => {
     const ids = new Set<string>();
@@ -264,8 +287,25 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <div className="flex flex-col gap-6">
+    <div className="w-full">
+      {shelf?.coverUrl && (
+        <div className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80">
+          <img
+            src={shelf.coverUrl}
+            alt={`${title} cover`}
+            className="h-full w-full object-cover"
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent, var(--colors-surface-canvas))",
+            }}
+          />
+        </div>
+      )}
+
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
         <div className="flex flex-col gap-5 border-b border-border-whisper pb-5 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-semibold leading-[1.3]">{title}</h1>
@@ -457,9 +497,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
         </div>
 
-        {isItemsLoading ||
-        isFetchingNextPage ||
-        (hasNextPage && !isItemsError) ? (
+        {isItemsLoading || waitingForPageData || isFetchingNextPage ? (
           <div className="flex justify-center py-8">
             <Spinner size="sm" />
           </div>
@@ -490,6 +528,46 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 viewMode={effectiveViewMode}
               />
             ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 py-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={page === 1}
+              onClick={() =>
+                setPageState((current) => ({
+                  unitId,
+                  page: Math.max(
+                    1,
+                    (current.unitId === unitId ? current.page : page) - 1,
+                  ),
+                }))
+              }
+            >
+              {t("common.prev", "Prev")}
+            </Button>
+            <span className="text-sm text-text-secondary">
+              {page} / {totalPages}
+            </span>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={page === totalPages}
+              onClick={() =>
+                setPageState((current) => ({
+                  unitId,
+                  page: Math.min(
+                    totalPages,
+                    (current.unitId === unitId ? current.page : page) + 1,
+                  ),
+                }))
+              }
+            >
+              {t("common.next", "Next")}
+            </Button>
           </div>
         )}
 
