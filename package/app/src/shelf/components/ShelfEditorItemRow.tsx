@@ -14,7 +14,6 @@ interface ShelfEditorItemRowProps {
   sortable: boolean;
   canMoveCrossPage: boolean;
   canDelete: boolean;
-  showAddedAt: boolean;
   onDelete: (itemRef: string) => void;
   onMoveCrossPage: (itemRef: string) => void;
 }
@@ -27,7 +26,6 @@ export function ShelfEditorItemRow({
   sortable,
   canMoveCrossPage,
   canDelete,
-  showAddedAt,
   onDelete,
   onMoveCrossPage,
 }: ShelfEditorItemRowProps) {
@@ -85,39 +83,14 @@ export function ShelfEditorItemRow({
     </>
   );
 
-  const addedAt = formatAddedAt(entryAddedAt(entry));
-
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={viewMode === "unit" ? "py-1" : "py-2"}
-    >
-      {showAddedAt && addedAt && viewMode !== "unit" && (
-        <div className="mb-1 text-xs leading-dense text-text-tertiary">
-          Added {addedAt}
-        </div>
-      )}
+    <div ref={setNodeRef} style={style} className="py-1">
       <ShelfItemRenderer
         entry={entry}
         viewMode={viewMode}
         editControls={hasControls ? controls : undefined}
+        editing
       />
     </div>
   );
-}
-
-function entryAddedAt(entry: ShelfStreamEntry): string | Date | undefined {
-  if (entry.kind === "prime") return entry.enriched.item.createdAt;
-  return entry.parentItem.createdAt;
-}
-
-function formatAddedAt(value: string | Date | undefined): string | null {
-  if (!value) return null;
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }

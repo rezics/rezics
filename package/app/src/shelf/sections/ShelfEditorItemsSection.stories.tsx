@@ -71,7 +71,7 @@ function makeNestedShelf(): ShelfDTO {
       },
     ],
     itemCount: 3,
-    extra: { viewMode: "unit" },
+    extra: { viewMode: "nested" },
   } as unknown as ShelfDTO;
 }
 
@@ -317,15 +317,7 @@ export const DirtyWithPendingOps: Story = {
 };
 
 export const FlatViewMode: Story = {
-  args: { itemCount: 5, viewMode: "flat" },
-};
-
-export const MasonryViewMode: Story = {
-  args: { itemCount: 5, viewMode: "masonry" },
-};
-
-export const UnitViewMode: Story = {
-  args: { itemCount: 5, viewMode: "unit", mixed: true },
+  args: { itemCount: 5, viewMode: "flat", mixed: true },
 };
 
 export const SinglePendingOp: Story = {

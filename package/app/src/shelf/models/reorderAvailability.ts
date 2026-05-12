@@ -1,8 +1,8 @@
-import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
+import type { ShelfSortState } from "@rezics/api/shelf";
 
 export function canUseShelfReorder(
-  viewMode: ShelfView,
+  editing: boolean,
   sort: ShelfSortState,
 ): boolean {
-  return viewMode === "unit" && sort.field === "manual";
+  return editing && sort.field === "manual";
 }

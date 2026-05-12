@@ -41,8 +41,6 @@ import {
 import {
   LayoutList as ViewAgendaIcon,
   List as ViewListIcon,
-  LayoutGrid as ViewQuiltIcon,
-  Rows3 as ViewUnitIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -109,13 +107,10 @@ function lastSingleToggleValue(values: readonly string[]): string | undefined {
   return values.at(-1);
 }
 
-function isShelfView(value: string | undefined): value is ShelfView {
-  return (
-    value === "nested" ||
-    value === "flat" ||
-    value === "masonry" ||
-    value === "unit"
-  );
+function isEditorShelfView(
+  value: string | undefined,
+): value is "nested" | "flat" {
+  return value === "nested" || value === "flat";
 }
 
 function requireShelfSortField(value: ShelfSortField | null): ShelfSortField {
@@ -168,7 +163,7 @@ export function ShelfEditorItemsSection({
     useSensor(KeyboardSensor),
   );
 
-  const canReorder = canUseShelfReorder(viewMode, sortState);
+  const canReorder = canUseShelfReorder(true, sortState);
 
   function handleAddCandidate(candidate: Candidate) {
     editor.enqueueAdd({
@@ -245,8 +240,6 @@ export function ShelfEditorItemsSection({
     : undefined;
   const nestedViewLabel = t("shelf.view_modes.nested");
   const flatViewLabel = t("shelf.view_modes.flat");
-  const masonryViewLabel = t("shelf.view_modes.masonry");
-  const unitViewLabel = t("shelf.view_modes.unit", "Unit cards");
   const listItems = (
     <ul className="flex flex-col">
       {visibleStream.map((entry) => {
@@ -263,7 +256,6 @@ export function ShelfEditorItemsSection({
                 canReorder && totalPages > 1 && entry.kind === "prime"
               }
               canDelete={entry.kind === "prime"}
-              showAddedAt={sortState.field === "addedAt"}
               onDelete={handleDelete}
               onMoveCrossPage={handleMoveOpen}
             />
@@ -340,7 +332,7 @@ export function ShelfEditorItemsSection({
               value={[viewMode]}
               onValueChange={(values) => {
                 const value = lastSingleToggleValue(values);
-                if (!isShelfView(value)) return;
+                if (!isEditorShelfView(value)) return;
                 onViewModeChange(value);
               }}
               size="sm"
@@ -372,35 +364,6 @@ export function ShelfEditorItemsSection({
                   )}
                 />
                 <TooltipContent side="top">{flatViewLabel}</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger
-                  render={(props) => (
-                    <ToggleGroupItem
-                      value="masonry"
-                      aria-label={masonryViewLabel}
-                      {...props}
-                    >
-                      <ViewQuiltIcon className="h-4 w-4" />
-                    </ToggleGroupItem>
-                  )}
-                />
-                <TooltipContent side="top">{masonryViewLabel}</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger
-                  render={(props) => (
-                    <ToggleGroupItem
-                      value="unit"
-                      aria-label={unitViewLabel}
-                      {...props}
-                    >
-                      <ViewUnitIcon className="h-4 w-4" />
-                      <span className="hidden sm:inline">Unit</span>
-                    </ToggleGroupItem>
-                  )}
-                />
-                <TooltipContent side="top">{unitViewLabel}</TooltipContent>
               </Tooltip>
             </ToggleGroup>
           </TooltipProvider>

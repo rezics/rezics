@@ -32,14 +32,14 @@ export function UnitCard({
       aria-labelledby={titleId}
       className={cn(
         "flex w-full min-w-0 items-stretch gap-3 rounded-md border border-border-whisper bg-surface-base px-3 py-3 text-text-primary focus-within:ring-2 focus-within:ring-border-focus",
-        isCompact ? "h-20" : "h-28",
+        isCompact ? "h-20" : "h-36",
         className,
       )}
     >
       <div
         className={cn(
           "shrink-0 overflow-hidden rounded-sm bg-surface-subtle text-text-tertiary",
-          isCompact ? "h-14 w-10" : "h-20 w-14",
+          isCompact ? "h-14 w-10" : "h-28 w-20",
         )}
       >
         {summary.imageUrl ? (
@@ -81,7 +81,7 @@ export function UnitCard({
         </div>
 
         {!isCompact && summary.contentPreview && (
-          <p className="line-clamp-2 text-sm leading-ui text-text-secondary">
+          <p className="line-clamp-3 text-sm leading-ui text-text-secondary">
             {summary.contentPreview}
           </p>
         )}

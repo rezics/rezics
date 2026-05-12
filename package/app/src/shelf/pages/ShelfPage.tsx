@@ -37,7 +37,6 @@ import {
   LayoutList as ViewAgendaIcon,
   List as ViewListIcon,
   LayoutGrid as ViewQuiltIcon,
-  Rows3 as ViewUnitIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -64,7 +63,6 @@ const LEGACY_VIEW_MODE_MAP: Record<string, ShelfView> = {
   nested: "nested",
   flat: "flat",
   masonry: "masonry",
-  unit: "unit",
 };
 
 function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
@@ -77,12 +75,7 @@ function lastSingleToggleValue(values: readonly string[]): string | undefined {
 }
 
 function isShelfView(value: string | undefined): value is ShelfView {
-  return (
-    value === "nested" ||
-    value === "flat" ||
-    value === "masonry" ||
-    value === "unit"
-  );
+  return value === "nested" || value === "flat" || value === "masonry";
 }
 
 function requireShelfSortField(value: ShelfSortField | null): ShelfSortField {
@@ -216,14 +209,11 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   );
 
   const showSortScopeToggle =
-    (effectiveViewMode === "flat" ||
-      effectiveViewMode === "masonry" ||
-      effectiveViewMode === "unit") &&
+    (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
     sortState.field !== "manual";
   const nestedViewLabel = t("shelf.view_modes.nested");
   const flatViewLabel = t("shelf.view_modes.flat");
   const masonryViewLabel = t("shelf.view_modes.masonry");
-  const unitViewLabel = t("shelf.view_modes.unit", "Unit cards");
   const streamKeyPrefix = `${effectiveViewMode}:${sortState.field}:${
     sortState.order
   }:${sortPrimeOnly ? "prime" : "all"}`;
@@ -438,21 +428,6 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                     )}
                   />
                   <TooltipContent side="top">{masonryViewLabel}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={(props) => (
-                      <ToggleGroupItem
-                        value="unit"
-                        aria-label={unitViewLabel}
-                        {...props}
-                      >
-                        <ViewUnitIcon className="h-4 w-4" />
-                        <span className="hidden sm:inline">Unit</span>
-                      </ToggleGroupItem>
-                    )}
-                  />
-                  <TooltipContent side="top">{unitViewLabel}</TooltipContent>
                 </Tooltip>
               </ToggleGroup>
             </TooltipProvider>

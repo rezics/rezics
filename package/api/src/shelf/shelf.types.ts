@@ -46,7 +46,7 @@ export type {
 
 export type ShelfFormData = CreateShelfInput;
 export type ShelfFilters = Partial<ShelfListQuery>;
-export type ShelfView = "nested" | "flat" | "masonry" | "unit";
+export type ShelfView = "nested" | "flat" | "masonry";
 
 export type ShelfSortField = "manual" | "addedAt" | "title";
 export type ShelfSortOrder = "asc" | "desc";

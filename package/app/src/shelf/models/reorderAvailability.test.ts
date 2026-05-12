@@ -1,26 +1,22 @@
 import { describe, expect, test } from "bun:test";
-import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
+import type { ShelfSortState } from "@rezics/api/shelf";
 import { canUseShelfReorder } from "./reorderAvailability";
 
 const manual = { field: "manual", order: "desc" } satisfies ShelfSortState;
 const addedAt = { field: "addedAt", order: "desc" } satisfies ShelfSortState;
+const title = { field: "title", order: "asc" } satisfies ShelfSortState;
 
 describe("canUseShelfReorder", () => {
-  test("allows reorder only in unit view with manual sort", () => {
-    expect(canUseShelfReorder("unit", manual)).toBe(true);
+  test("allows reorder only in edit mode with manual sort", () => {
+    expect(canUseShelfReorder(true, manual)).toBe(true);
   });
 
-  test("blocks reorder for rich views even with manual sort", () => {
-    for (const viewMode of [
-      "nested",
-      "flat",
-      "masonry",
-    ] satisfies ShelfView[]) {
-      expect(canUseShelfReorder(viewMode, manual)).toBe(false);
-    }
+  test("blocks reorder outside edit mode", () => {
+    expect(canUseShelfReorder(false, manual)).toBe(false);
   });
 
   test("blocks reorder for non-manual sort fields", () => {
-    expect(canUseShelfReorder("unit", addedAt)).toBe(false);
+    expect(canUseShelfReorder(true, addedAt)).toBe(false);
+    expect(canUseShelfReorder(true, title)).toBe(false);
   });
 });

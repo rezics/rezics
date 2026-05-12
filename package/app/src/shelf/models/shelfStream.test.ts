@@ -288,8 +288,8 @@ describe("deriveShelfStream — sort scope and layout invariants", () => {
     ]);
   });
 
-  test("unit mode emits prime and attached entries with parent metadata", () => {
-    const stream = deriveShelfStream(items, "unit", manualAsc, true);
+  test("flat mode emits prime and attached entries with parent metadata", () => {
+    const stream = deriveShelfStream(items, "flat", manualAsc, true);
 
     expect(stream).toHaveLength(5);
     expect(idsOf(stream)).toEqual([

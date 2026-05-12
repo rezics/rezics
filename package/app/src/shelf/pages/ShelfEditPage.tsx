@@ -16,9 +16,8 @@ interface ShelfEditPageProps {
 }
 
 function normalizeViewMode(raw: unknown): ShelfView {
-  if (raw === "flat" || raw === "nested" || raw === "masonry" || raw === "unit")
-    return raw;
-  return "unit";
+  if (raw === "flat" || raw === "nested") return raw;
+  return "nested";
 }
 
 export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
@@ -31,7 +30,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
-  const [viewMode, setViewMode] = useState<ShelfView>("unit");
+  const [viewMode, setViewMode] = useState<ShelfView>("nested");
 
   useEffect(() => {
     if (translation) {

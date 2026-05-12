@@ -33,6 +33,12 @@ interface ShelfItemRendererProps {
    * review row in flat mode. Never rendered inside a nested card's tab area.
    */
   editControls?: React.ReactNode;
+  /**
+   * When true, all entries render as fixed-height `UnitCard`s regardless of
+   * viewMode. Used by the shelf editor so curators get uniform, drag-friendly
+   * rows. The viewMode still controls stream shape (flat vs nested).
+   */
+  editing?: boolean;
 }
 
 function renderPrimary(
@@ -134,9 +140,10 @@ export function ShelfItemRenderer({
   entry,
   viewMode,
   editControls,
+  editing,
 }: ShelfItemRendererProps) {
   let content: React.ReactNode;
-  if (viewMode === "unit") {
+  if (editing) {
     content = <UnitCard summary={shelfEntryToUnitCardSummary(entry)} />;
   } else if (entry.kind === "review") {
     content = <ReviewCard review={entry.review} />;
