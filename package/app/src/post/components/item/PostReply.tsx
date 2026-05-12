@@ -15,47 +15,69 @@ import { ThreadingRail } from "../parts/ThreadingRail";
 interface PostReplyProps {
   post: PostDTO;
   indentLevel: number;
+  ancestorLines?: Array<{ level: number; isLast: boolean }>;
   isCollapsed: boolean;
+  hasThreadChildren?: boolean;
+  hasVisibleDescendants?: boolean;
   onToggleCollapse: () => void;
   onReply?: () => void;
   replyComposerSlot?: React.ReactNode;
 }
 
-const INDENT_UNIT_PX = 20;
+const INDENT_UNIT_PX = 32;
+const RAIL_HITBOX_PX = 12;
+const TOGGLE_SIZE_PX = 20;
+const CONTENT_GAP_PX = 8;
+const TOGGLE_TOP_PX = 12;
+const TOGGLE_CENTER_Y_PX = TOGGLE_TOP_PX + TOGGLE_SIZE_PX / 2;
+const CONTENT_START_PX = TOGGLE_SIZE_PX + CONTENT_GAP_PX;
+
+function railLeftPxForLevel(level: number): number {
+  return level * INDENT_UNIT_PX + (TOGGLE_SIZE_PX - RAIL_HITBOX_PX) / 2;
+}
 
 export const PostReply: React.FC<PostReplyProps> = ({
   post,
   indentLevel,
+  ancestorLines = [],
   isCollapsed,
+  hasThreadChildren,
+  hasVisibleDescendants,
   onToggleCollapse,
   onReply,
   replyComposerSlot,
 }) => {
-  const hasChildren = (post.directReplyCount ?? 0) > 0;
-  const showRail = indentLevel > 0 || hasChildren;
-  const paddingLeft = showRail
-    ? Math.max(INDENT_UNIT_PX, indentLevel * INDENT_UNIT_PX)
-    : indentLevel * INDENT_UNIT_PX;
-  const railLeftPx = paddingLeft - INDENT_UNIT_PX / 2;
+  const hasChildren = hasThreadChildren ?? (post.directReplyCount ?? 0) > 0;
+  const showOwnRail = hasChildren && hasVisibleDescendants && !isCollapsed;
+  const contentLeftPx = indentLevel * INDENT_UNIT_PX + CONTENT_START_PX;
+  const railLeftPx = railLeftPxForLevel(indentLevel);
 
   return (
     <ThreadingHoverProvider>
       <div
         className="relative py-2"
-        style={{ paddingLeft: `${paddingLeft}px` }}
+        style={{ paddingLeft: `${contentLeftPx}px` }}
       >
-        {showRail && (
+        {ancestorLines.map(({ level, isLast }) => (
+          <ThreadingRail
+            key={level}
+            leftPx={railLeftPxForLevel(level)}
+            lineEndPx={isLast ? TOGGLE_CENTER_Y_PX : 0}
+            roundedEnd={isLast}
+          />
+        ))}
+        {hasChildren && (
           <ThreadingRail
             leftPx={railLeftPx}
             isCollapsed={isCollapsed}
             onToggleCollapse={onToggleCollapse}
+            showLine={showOwnRail}
+            lineStartPx={TOGGLE_CENTER_Y_PX}
             toggleSlot={
-              hasChildren ? (
-                <CollapseToggle
-                  isCollapsed={isCollapsed}
-                  onToggle={onToggleCollapse}
-                />
-              ) : null
+              <CollapseToggle
+                isCollapsed={isCollapsed}
+                onToggle={onToggleCollapse}
+              />
             }
           />
         )}
