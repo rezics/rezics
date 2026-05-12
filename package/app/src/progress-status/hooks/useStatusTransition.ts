@@ -68,7 +68,7 @@ export function useStatusTransition(
           input: { unitId, kind: "book" },
         });
       } else {
-        await removeShelfUnit.mutateAsync({ shelfId, childUnitId: unitId });
+        await removeShelfUnit.mutateAsync({ shelfId, shelfUnitId: unitId });
       }
     },
     [addShelfUnit, getShelfId, removeShelfUnit, unitId],
@@ -183,33 +183,34 @@ export function useStatusTransition(
     [currentStatus, dispatchShelfOps, handlePartialFailure, updateProgress],
   );
 
-  const removeProgress = useCallback(async (): Promise<StatusTransitionFailure> => {
-    const ops = planRemoveProgress(currentStatus);
+  const removeProgress =
+    useCallback(async (): Promise<StatusTransitionFailure> => {
+      const ops = planRemoveProgress(currentStatus);
 
-    const runDelete = async () => {
-      await deleteProgress.mutateAsync();
-    };
+      const runDelete = async () => {
+        await deleteProgress.mutateAsync();
+      };
 
-    const [progressResult, shelfFailedOps] = await Promise.all([
-      runDelete().then(
-        () => ({ ok: true as const }),
-        (error) => ({ ok: false as const, error }),
-      ),
-      dispatchShelfOps(ops),
-    ]);
+      const [progressResult, shelfFailedOps] = await Promise.all([
+        runDelete().then(
+          () => ({ ok: true as const }),
+          (error) => ({ ok: false as const, error }),
+        ),
+        dispatchShelfOps(ops),
+      ]);
 
-    const progressFailed = !progressResult.ok;
-    const shelfFailed = shelfFailedOps.length > 0;
+      const progressFailed = !progressResult.ok;
+      const shelfFailed = shelfFailedOps.length > 0;
 
-    handlePartialFailure(
-      progressFailed,
-      shelfFailedOps,
-      () => dispatchShelfOps(shelfFailedOps).then(() => undefined),
-      () => runDelete(),
-    );
+      handlePartialFailure(
+        progressFailed,
+        shelfFailedOps,
+        () => dispatchShelfOps(shelfFailedOps).then(() => undefined),
+        () => runDelete(),
+      );
 
-    return { progress: progressFailed, shelf: shelfFailed };
-  }, [currentStatus, deleteProgress, dispatchShelfOps, handlePartialFailure]);
+      return { progress: progressFailed, shelf: shelfFailed };
+    }, [currentStatus, deleteProgress, dispatchShelfOps, handlePartialFailure]);
 
   const isPending = useMemo(
     () =>

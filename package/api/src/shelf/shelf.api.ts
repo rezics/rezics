@@ -90,11 +90,11 @@ export const shelfApi = {
 
   reorderUnit: async (
     shelfId: string,
-    childUnitId: string,
+    shelfUnitId: string,
     input: ReorderShelfUnitInput,
   ): Promise<ShelfUnitDTO> => {
     return apiFetch<ShelfUnitDTO>(
-      `/shelf/${shelfId}/units/${childUnitId}/position`,
+      `/shelf/${shelfId}/units/${shelfUnitId}/position`,
       {
         method: "PATCH",
         body: JSON.stringify(input),
@@ -104,21 +104,21 @@ export const shelfApi = {
 
   removeUnit: async (
     shelfId: string,
-    childUnitId: string,
+    shelfUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/shelf/${shelfId}/units/${childUnitId}`,
+      `/shelf/${shelfId}/units/${shelfUnitId}`,
       { method: "DELETE" },
     );
   },
 
   attachReview: async (
     shelfId: string,
-    parentUnitId: string,
+    shelfUnitId: string,
     reviewUnitId: string,
   ): Promise<ShelfUnitRelationDTO> => {
     return apiFetch<ShelfUnitRelationDTO>(
-      `/shelf/${shelfId}/units/${parentUnitId}/reviews`,
+      `/shelf/${shelfId}/units/${shelfUnitId}/reviews`,
       {
         method: "POST",
         body: JSON.stringify({ reviewUnitId }),
@@ -128,22 +128,22 @@ export const shelfApi = {
 
   detachReview: async (
     shelfId: string,
-    parentUnitId: string,
+    shelfUnitId: string,
     reviewUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/shelf/${shelfId}/units/${parentUnitId}/reviews/${reviewUnitId}`,
+      `/shelf/${shelfId}/units/${shelfUnitId}/reviews/${reviewUnitId}`,
       { method: "DELETE" },
     );
   },
 
   setChildren: async (
     shelfId: string,
-    parentUnitId: string,
+    shelfUnitId: string,
     input: SetShelfUnitChildrenInput,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/shelf/${shelfId}/units/${parentUnitId}/children`,
+      `/shelf/${shelfId}/units/${shelfUnitId}/children`,
       {
         method: "PUT",
         body: JSON.stringify(input),
@@ -165,13 +165,10 @@ export const shelfApi = {
     shelfId: string,
     ops: ShelfUnitBatchOp[],
   ): Promise<ShelfUnitBatchResponse> => {
-    return apiFetch<ShelfUnitBatchResponse>(
-      `/shelf/${shelfId}/units/batch`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({ ops }),
-      },
-    );
+    return apiFetch<ShelfUnitBatchResponse>(`/shelf/${shelfId}/units/batch`, {
+      method: "PATCH",
+      body: JSON.stringify({ ops }),
+    });
   },
 };
 

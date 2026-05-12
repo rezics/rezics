@@ -31,18 +31,18 @@ import { shelfService } from "./shelf.service";
 
 const shelfUnitRouteParamsSchema = t.Object({
   unitId: t.String(),
-  childUnitId: t.String(),
+  shelfUnitId: t.String(),
 });
 
 const reviewDetachParamsSchema = t.Object({
   unitId: t.String(),
-  parentUnitId: t.String(),
+  shelfUnitId: t.String(),
   reviewUnitId: t.String(),
 });
 
 const childrenRouteParamsSchema = t.Object({
   unitId: t.String(),
-  parentUnitId: t.String(),
+  shelfUnitId: t.String(),
 });
 
 export const shelfApi = new Elysia({ prefix: "/shelf" })
@@ -235,7 +235,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     },
   )
   .patch(
-    "/:unitId/units/:childUnitId/position",
+    "/:unitId/units/:shelfUnitId/position",
     async ({ params, body, identity, set }): Promise<ShelfUnitDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
@@ -250,11 +250,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
           "Forbidden: you do not have permission to modify this shelf",
         );
       }
-      return shelfService.reorderUnit(
-        params.unitId,
-        params.childUnitId,
-        body,
-      );
+      return shelfService.reorderUnit(params.unitId, params.shelfUnitId, body);
     },
     {
       requireLogin: true,
@@ -269,7 +265,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     },
   )
   .delete(
-    "/:unitId/units/:childUnitId",
+    "/:unitId/units/:shelfUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
@@ -284,7 +280,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
           "Forbidden: you do not have permission to modify this shelf",
         );
       }
-      await shelfService.removeUnit(params.unitId, params.childUnitId);
+      await shelfService.removeUnit(params.unitId, params.shelfUnitId);
       return { message: "Unit removed from shelf" };
     },
     {
@@ -298,7 +294,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     },
   )
   .post(
-    "/:unitId/units/:parentUnitId/reviews",
+    "/:unitId/units/:shelfUnitId/reviews",
     async ({ params, body, identity, set }): Promise<ShelfUnitRelationDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
@@ -315,7 +311,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       }
       return shelfService.attachReview(
         params.unitId,
-        params.parentUnitId,
+        params.shelfUnitId,
         body.reviewUnitId,
       );
     },
@@ -332,7 +328,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     },
   )
   .delete(
-    "/:unitId/units/:parentUnitId/reviews/:reviewUnitId",
+    "/:unitId/units/:shelfUnitId/reviews/:reviewUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
@@ -349,7 +345,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       }
       await shelfService.detachReview(
         params.unitId,
-        params.parentUnitId,
+        params.shelfUnitId,
         params.reviewUnitId,
       );
       return { message: "Review detached" };
@@ -365,7 +361,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
     },
   )
   .put(
-    "/:unitId/units/:parentUnitId/children",
+    "/:unitId/units/:shelfUnitId/children",
     async ({ params, body, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
@@ -382,7 +378,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       }
       await shelfService.setChildren(
         params.unitId,
-        params.parentUnitId,
+        params.shelfUnitId,
         body.role,
         body.childUnitIds,
       );

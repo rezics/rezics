@@ -124,7 +124,7 @@ export function useReorderShelfUnitMutation(
       Error,
       {
         shelfId: string;
-        childUnitId: string;
+        shelfUnitId: string;
         input: ReorderShelfUnitInput;
       }
     >,
@@ -133,8 +133,8 @@ export function useReorderShelfUnitMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfId, childUnitId, input }) =>
-      shelfApi.reorderUnit(shelfId, childUnitId, input),
+    mutationFn: ({ shelfId, shelfUnitId, input }) =>
+      shelfApi.reorderUnit(shelfId, shelfUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       invalidateShelfDetail(queryClient, variables.shelfId);
@@ -149,15 +149,15 @@ export function useRemoveShelfUnitMutation(
     UseMutationOptions<
       { message: string },
       Error,
-      { shelfId: string; childUnitId: string }
+      { shelfId: string; shelfUnitId: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfId, childUnitId }) =>
-      shelfApi.removeUnit(shelfId, childUnitId),
+    mutationFn: ({ shelfId, shelfUnitId }) =>
+      shelfApi.removeUnit(shelfId, shelfUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       invalidateShelfDetail(queryClient, variables.shelfId);
@@ -172,15 +172,15 @@ export function useAttachReviewMutation(
     UseMutationOptions<
       ShelfUnitRelationDTO,
       Error,
-      { shelfId: string; parentUnitId: string; reviewUnitId: string }
+      { shelfId: string; shelfUnitId: string; reviewUnitId: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfId, parentUnitId, reviewUnitId }) =>
-      shelfApi.attachReview(shelfId, parentUnitId, reviewUnitId),
+    mutationFn: ({ shelfId, shelfUnitId, reviewUnitId }) =>
+      shelfApi.attachReview(shelfId, shelfUnitId, reviewUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       invalidateShelfDetail(queryClient, variables.shelfId);
@@ -195,15 +195,15 @@ export function useDetachReviewMutation(
     UseMutationOptions<
       { message: string },
       Error,
-      { shelfId: string; parentUnitId: string; reviewUnitId: string }
+      { shelfId: string; shelfUnitId: string; reviewUnitId: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfId, parentUnitId, reviewUnitId }) =>
-      shelfApi.detachReview(shelfId, parentUnitId, reviewUnitId),
+    mutationFn: ({ shelfId, shelfUnitId, reviewUnitId }) =>
+      shelfApi.detachReview(shelfId, shelfUnitId, reviewUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       invalidateShelfDetail(queryClient, variables.shelfId);
@@ -220,7 +220,7 @@ export function useSetShelfUnitChildrenMutation(
       Error,
       {
         shelfId: string;
-        parentUnitId: string;
+        shelfUnitId: string;
         input: SetShelfUnitChildrenInput;
       }
     >,
@@ -229,8 +229,8 @@ export function useSetShelfUnitChildrenMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfId, parentUnitId, input }) =>
-      shelfApi.setChildren(shelfId, parentUnitId, input),
+    mutationFn: ({ shelfId, shelfUnitId, input }) =>
+      shelfApi.setChildren(shelfId, shelfUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       invalidateShelfDetail(queryClient, variables.shelfId);
