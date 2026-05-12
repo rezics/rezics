@@ -1,21 +1,12 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@rezics/ui/shadcn";
 import { useMemo } from "react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
 import { ReactionBar } from "@/engagement";
+import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { reviewDetailActions, reviewPolicy } from "../../models/reviewPolicy";
 
 interface ReviewDetailProps {
@@ -32,11 +23,6 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
   const { t } = useTranslation();
   const rating = (review.extra as { rating?: number } | null)?.rating;
   const title = (review.extra as { title?: string } | null)?.title;
-  const dateStr = review.createdAt
-    ? new Date(String(review.createdAt)).toLocaleDateString()
-    : "";
-  const authorName = review.author?.name ?? "";
-  const authorInitial = authorName.charAt(0).toUpperCase();
   const hydrationIds = useMemo(
     () => (review.unitId ? [review.unitId] : []),
     [review.unitId],
@@ -58,42 +44,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
         )}
       </div>
 
-      <div className="flex items-start gap-4">
-        <Avatar
-          className="h-14 w-14 rounded-md"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {review.author?.avatar && (
-            <AvatarImage src={review.author.avatar} alt={authorName} />
-          )}
-          <AvatarFallback>{authorInitial}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger
-                render={(props) => (
-                  <TextLink
-                    to="/user/$userId"
-                    params={{ userId: review.author?.userId ?? "" }}
-                    {...props}
-                  >
-                    <span className="text-lg font-bold text-text-brand">
-                      {authorName}
-                    </span>
-                  </TextLink>
-                )}
-              />
-              <TooltipContent side="top">
-                {t("review.open_user_interface")}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          {dateStr && (
-            <div className="text-xs text-text-secondary">{dateStr}</div>
-          )}
-        </div>
-      </div>
+      <PostAuthorHeader post={review} />
 
       <div>
         <MarkdownContent content={review.body ?? ""} />
