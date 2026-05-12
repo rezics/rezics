@@ -41,12 +41,12 @@ import {
 } from "@rezics/ui/shadcn";
 import {
   Eye,
-  LayoutList as ViewAgendaIcon,
-  List as ViewListIcon,
   ListChecks,
   Pencil,
+  LayoutList as ViewAgendaIcon,
+  List as ViewListIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   type Candidate,
@@ -59,7 +59,10 @@ import { ShelfEditorItemRow } from "../components/ShelfEditorItemRow";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
 import type { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 import { visualReorderBounds } from "../models/positionMath";
-import { canUseShelfReorder } from "../models/reorderAvailability";
+import {
+  canReorderShelfStreamEntry,
+  canUseShelfReorder,
+} from "../models/reorderAvailability";
 import {
   deriveShelfStream,
   type ShelfStreamEntry,
@@ -108,6 +111,13 @@ function entryUnitId(entry: ShelfStreamEntry): string {
   return entry.unit.unit.unitId;
 }
 
+function streamEntryRowId(entry: ShelfStreamEntry): string {
+  if (entry.kind === "child") {
+    return `${entry.parentUnitId}:${entry.unit.unit.unitId}`;
+  }
+  return entry.unit.unit.unitId;
+}
+
 function lastSingleToggleValue(values: readonly string[]): string | undefined {
   return values.at(-1);
 }
@@ -119,9 +129,7 @@ function isEditorShelfView(
 }
 
 function isEditorMode(value: string | undefined): value is EditorMode {
-  return (
-    value === "edit" || value === "multi-select" || value === "preview"
-  );
+  return value === "edit" || value === "multi-select" || value === "preview";
 }
 
 function requireShelfSortField(value: ShelfSortField | null): ShelfSortField {
@@ -157,10 +165,9 @@ export function ShelfEditorItemsSection({
   const [moveTargetId, setMoveTargetId] = useState<string | null>(null);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [mode, setMode] = useState<EditorMode>("edit");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [sortPrimeOnly, setSortPrimeOnly] = useState(true);
+  const sortPrimeOnlyId = useId();
 
   useEffect(() => {
     if (mode !== "multi-select" && selectedIds.size > 0) {
@@ -177,13 +184,7 @@ export function ShelfEditorItemsSection({
         sortState,
         sortPrimeOnly,
       ),
-    [
-      hydration.enriched,
-      editor.relations,
-      viewMode,
-      sortState,
-      sortPrimeOnly,
-    ],
+    [hydration.enriched, editor.relations, viewMode, sortState, sortPrimeOnly],
   );
 
   const totalPages = Math.max(1, Math.ceil(stream.length / PAGE_SIZE));
@@ -254,17 +255,20 @@ export function ShelfEditorItemsSection({
     if (!canReorder) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const rootRows = visibleStream
-      .filter((entry) => entry.kind === "root" || entry.kind === "peer")
+    const sortableRows = visibleStream
+      .filter((entry) =>
+        canReorderShelfStreamEntry(true, sortState, viewMode, entry),
+      )
       .map((entry) => ({
-        id: entryUnitId(entry),
+        id: streamEntryRowId(entry),
+        unitId: entryUnitId(entry),
         position: entry.unit.unit.position,
       }));
-    const oldIndex = rootRows.findIndex((entry) => entry.id === active.id);
-    const newIndex = rootRows.findIndex((entry) => entry.id === over.id);
+    const oldIndex = sortableRows.findIndex((entry) => entry.id === active.id);
+    const newIndex = sortableRows.findIndex((entry) => entry.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
 
-    const reordered = [...rootRows];
+    const reordered = [...sortableRows];
     const [moved] = reordered.splice(oldIndex, 1);
     reordered.splice(newIndex, 0, moved!);
 
@@ -274,13 +278,15 @@ export function ShelfEditorItemsSection({
       sortState.order,
     );
 
-    editor.enqueueReorder(String(active.id), { before, after });
+    editor.enqueueReorder(moved!.unitId, { before, after });
   }
 
   const sortableIds = canReorder
     ? visibleStream
-        .filter((e) => e.kind === "root" || e.kind === "peer")
-        .map((e) => entryUnitId(e))
+        .filter((entry) =>
+          canReorderShelfStreamEntry(true, sortState, viewMode, entry),
+        )
+        .map((entry) => streamEntryRowId(entry))
     : [];
   const selectedSortLabel =
     SORT_FIELD_OPTIONS.find((option) => option.value === sortState.field)
@@ -289,7 +295,7 @@ export function ShelfEditorItemsSection({
     SORT_ORDER_OPTIONS.find((option) => option.value === sortState.order)
       ?.label ?? SORT_ORDER_OPTIONS[0]!.label;
   const activeDragEntry = activeDragId
-    ? visibleStream.find((entry) => entryUnitId(entry) === activeDragId)
+    ? visibleStream.find((entry) => streamEntryRowId(entry) === activeDragId)
     : undefined;
   const nestedViewLabel = t("shelf.view_modes.nested");
   const flatViewLabel = t("shelf.view_modes.flat");
@@ -302,32 +308,38 @@ export function ShelfEditorItemsSection({
     <ul className="flex flex-col">
       {visibleStream.map((entry) => {
         const id = entryUnitId(entry);
-        const isRootOrPeer = entry.kind === "root" || entry.kind === "peer";
+        const rowId = streamEntryRowId(entry);
+        const canEditEntryOrder = canReorderShelfStreamEntry(
+          mode === "edit",
+          sortState,
+          viewMode,
+          entry,
+        );
         if (isPreview) {
           return (
-            <li key={id} className="list-none py-1">
+            <li key={rowId} className="list-none py-1">
               <ShelfItemRenderer entry={entry} viewMode={viewMode} />
             </li>
           );
         }
         return (
-          <li key={id} className="list-none">
+          <li key={rowId} className="list-none">
             <ShelfEditorItemRow
               entry={entry}
-              rowId={id}
+              rowId={rowId}
               unitId={id}
               viewMode={viewMode}
-              sortable={canReorder && isRootOrPeer}
+              sortable={canEditEntryOrder}
               canMoveCrossPage={
                 !isMultiSelect &&
-                canReorder &&
+                canEditEntryOrder &&
                 totalPages > 1 &&
-                isRootOrPeer
+                mode === "edit"
               }
-              canDelete={!isMultiSelect && isRootOrPeer}
+              canDelete={!isMultiSelect && canEditEntryOrder}
               onDelete={handleDelete}
               onMoveCrossPage={handleMoveOpen}
-              multiSelect={isMultiSelect && isRootOrPeer}
+              multiSelect={isMultiSelect && canEditEntryOrder}
               selected={selectedIds.has(id)}
               onToggleSelected={handleToggleSelected}
             />
@@ -398,13 +410,17 @@ export function ShelfEditorItemsSection({
             </SelectContent>
           </Select>
           {showSortPrimeOnlyToggle && (
-            <label className="flex items-center gap-2 text-sm text-text-secondary">
+            <Label
+              htmlFor={sortPrimeOnlyId}
+              className="flex items-center gap-2 text-sm text-text-secondary"
+            >
               <Checkbox
+                id={sortPrimeOnlyId}
                 checked={sortPrimeOnly}
                 onCheckedChange={(next) => setSortPrimeOnly(Boolean(next))}
               />
               {t("shelf.edit.sort_prime_only", "Group attached")}
-            </label>
+            </Label>
           )}
         </div>
 
