@@ -26,6 +26,7 @@ interface PostReplyProps {
   hasThreadChildren?: boolean;
   hasVisibleDescendants?: boolean;
   onToggleCollapse: () => void;
+  onToggleAncestorCollapse?: (postUnitId: string) => void;
   onThreadHoverChange?: (postUnitId: string, hovered: boolean) => void;
   onReply?: () => void;
   replyComposerSlot?: React.ReactNode;
@@ -53,6 +54,7 @@ export const PostReply: React.FC<PostReplyProps> = ({
   hasThreadChildren,
   hasVisibleDescendants,
   onToggleCollapse,
+  onToggleAncestorCollapse,
   onThreadHoverChange,
   onReply,
   replyComposerSlot,
@@ -74,6 +76,14 @@ export const PostReply: React.FC<PostReplyProps> = ({
             leftPx={railLeftPxForLevel(line.level)}
             highlighted={highlightedThreadUnitId === line.postUnitId}
             useSharedHover={false}
+            onToggleCollapse={
+              onToggleAncestorCollapse
+                ? () => onToggleAncestorCollapse(line.postUnitId)
+                : undefined
+            }
+            onHoverChange={(hovered) =>
+              onThreadHoverChange?.(line.postUnitId, hovered)
+            }
           />
         ))}
         {parentLine ? (
@@ -86,6 +96,14 @@ export const PostReply: React.FC<PostReplyProps> = ({
             continuesAfterElbow={parentLine.continuesAfterElbow}
             highlighted={highlightedThreadUnitId === parentLine.postUnitId}
             useSharedHover={false}
+            onToggleCollapse={
+              onToggleAncestorCollapse
+                ? () => onToggleAncestorCollapse(parentLine.postUnitId)
+                : undefined
+            }
+            onHoverChange={(hovered) =>
+              onThreadHoverChange?.(parentLine.postUnitId, hovered)
+            }
           />
         ) : null}
         {hasChildren && (

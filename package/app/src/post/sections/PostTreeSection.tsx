@@ -151,6 +151,7 @@ export const PostTreeList: React.FC<PostTreeListProps> = ({
               hasThreadChildren={hasThreadChildren}
               hasVisibleDescendants={hasVisibleDescendants}
               onToggleCollapse={() => toggleCollapse(post.unitId)}
+              onToggleAncestorCollapse={toggleCollapse}
               onThreadHoverChange={handleThreadHoverChange}
               onReply={() => handleReplyClick(post.unitId)}
               replyComposerSlot={

@@ -75,6 +75,7 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
         }}
         onMouseEnter={() => handleHoverChange(true)}
         onMouseLeave={() => handleHoverChange(false)}
+        onClick={onToggleCollapse ? handleClick : undefined}
       >
         {showLine && elbowWidthPx === 0 ? (
           <div
