@@ -8,9 +8,9 @@ import type {
 } from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
-  shelfItemsQuery,
+  shelfUnitsQuery,
   useCleanupOrphansMutation,
-  useHydratedShelfItems,
+  useHydratedShelfUnits,
 } from "@rezics/api/shelf";
 import { Spinner } from "@rezics/ui";
 import {
@@ -114,11 +114,11 @@ const SORT_ORDER_OPTIONS: { value: ShelfSortOrder; label: string }[] = [
 ];
 
 function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
-  if (entry.kind === "prime")
-    return `${prefix}:p:${entry.enriched.item.itemRef}`;
-  if (entry.kind === "review")
-    return `${prefix}:r:${entry.parentItemRef}:${entry.review.unitId}`;
-  return `${prefix}:t:${entry.parentItemRef}:${entry.tag.unitId}`;
+  if (entry.kind === "root")
+    return `${prefix}:r:${entry.unit.unit.unitId}`;
+  if (entry.kind === "child")
+    return `${prefix}:c:${entry.parentUnitId}:${entry.unit.unit.unitId}`;
+  return `${prefix}:p:${entry.unit.unit.unitId}`;
 }
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
@@ -136,10 +136,11 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
   const detailQuery = useQuery(shelfDetailQuery(unitId));
-  const itemsQuery = useQuery(shelfItemsQuery(unitId));
+  const itemsQuery = useQuery(shelfUnitsQuery(unitId));
 
   const shelf = detailQuery.data;
-  const items = itemsQuery.data?.items ?? [];
+  const units = itemsQuery.data?.units ?? [];
+  const relations = itemsQuery.data?.relations ?? [];
   const translation = shelf ? getTranslation(shelf.translations) : undefined;
   const title = translation?.title ?? "Shelf";
   const description = translation?.description ?? "";
@@ -151,53 +152,43 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     viewModeOverride.unitId === unitId ? viewModeOverride.value : undefined;
   const effectiveViewMode = selectedViewMode ?? savedViewMode ?? "nested";
 
-  const hydration = useHydratedShelfItems(items);
+  const hydration = useHydratedShelfUnits(units);
   const currentUser = useUserProfileStore((s) => s.user);
   const isOwner = !!currentUser && currentUser.userId === shelf?.userId;
   const canEditShelf = useCanEdit({ resource: "shelf", ownerUnit: shelf });
   const cleanupMutation = useCleanupOrphansMutation();
 
-  const orphanRefs = useMemo(
-    () => new Set(hydration.orphanItemRefs),
-    [hydration.orphanItemRefs],
+  const orphanIds = useMemo(
+    () => new Set(hydration.orphanUnitIds),
+    [hydration.orphanUnitIds],
   );
 
   const stream = useMemo(
     () =>
       deriveShelfStream(
         hydration.enriched,
+        relations,
         effectiveViewMode,
         sortState,
         sortPrimeOnly,
       ),
-    [hydration.enriched, effectiveViewMode, sortState, sortPrimeOnly],
+    [hydration.enriched, relations, effectiveViewMode, sortState, sortPrimeOnly],
   );
 
   const visibleStream = useMemo(
-    () =>
-      stream.filter((e) =>
-        e.kind === "prime"
-          ? !orphanRefs.has(e.enriched.item.itemRef)
-          : !orphanRefs.has(e.parentItemRef),
-      ),
-    [stream, orphanRefs],
+    () => stream.filter((e) => !orphanIds.has(e.unit.unit.unitId)),
+    [stream, orphanIds],
   );
 
   const reactionTargetIds = useMemo(() => {
     const ids = new Set<string>();
     if (shelf?.unitId) ids.add(shelf.unitId);
     for (const entry of visibleStream) {
-      if (entry.kind === "review") {
-        if (entry.review.unitId) ids.add(entry.review.unitId);
-      } else if (entry.kind === "prime") {
-        const primary = entry.enriched.primary as
-          | { unitId?: string; id?: string }
-          | undefined;
-        const id = primary?.unitId ?? primary?.id;
-        if (id) ids.add(id);
-      } else if (entry.tag.unitId) {
-        ids.add(entry.tag.unitId);
-      }
+      const data = entry.unit.data as
+        | { unitId?: string; id?: string }
+        | undefined;
+      const id = data?.unitId ?? data?.id ?? entry.unit.unit.unitId;
+      if (id) ids.add(id);
     }
     return [...ids];
   }, [shelf?.unitId, visibleStream]);
@@ -350,11 +341,11 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 <span className="whitespace-nowrap">Sort prime only</span>
               </Label>
             )}
-            {hydration.orphanItemRefs.length > 0 && (
+            {hydration.orphanUnitIds.length > 0 && (
               <>
                 <span className="text-xs text-warning-text">
-                  {hydration.orphanItemRefs.length} orphan
-                  {hydration.orphanItemRefs.length === 1 ? "" : "s"}
+                  {hydration.orphanUnitIds.length} orphan
+                  {hydration.orphanUnitIds.length === 1 ? "" : "s"}
                 </span>
                 {isOwner && (
                   <Button
@@ -363,8 +354,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                     disabled={cleanupMutation.isPending}
                     onClick={() =>
                       cleanupMutation.mutate({
-                        shelfUnitId: unitId,
-                        input: { orphanItemRefs: hydration.orphanItemRefs },
+                        shelfId: unitId,
+                        input: { orphanUnitIds: hydration.orphanUnitIds },
                       })
                     }
                   >

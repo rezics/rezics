@@ -1,27 +1,27 @@
-import type { BookDTO, PostDTO, ShelfItemDTO } from "@rezics/contract";
+import type { BookDTO, PostDTO, ShelfUnitDTO } from "@rezics/contract";
 
 interface TagLike {
   translations?: { language?: string; title?: string | null }[];
   label?: string;
 }
 
-export function titleOf(item: ShelfItemDTO, cached: unknown): string {
-  switch (item.kind) {
+export function titleOf(unit: ShelfUnitDTO, cached: unknown): string {
+  switch (unit.kind) {
     case "book": {
       const book = cached as BookDTO | undefined;
-      return book?.translations?.[0]?.title ?? item.itemRef;
+      return book?.translations?.[0]?.title ?? unit.unitId;
     }
     case "review":
     case "quote":
     case "post": {
       const post = cached as PostDTO | undefined;
-      return post?.extra?.title ?? item.itemRef;
+      return post?.extra?.title ?? unit.unitId;
     }
     case "tag": {
       const tag = cached as TagLike | undefined;
-      return tag?.translations?.[0]?.title ?? tag?.label ?? item.itemRef;
+      return tag?.translations?.[0]?.title ?? tag?.label ?? unit.unitId;
     }
     default:
-      return item.itemRef;
+      return unit.unitId;
   }
 }

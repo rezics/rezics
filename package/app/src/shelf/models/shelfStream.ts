@@ -1,54 +1,41 @@
 import type {
-  EnrichedShelfItem,
+  EnrichedShelfUnit,
   ShelfSortState,
   ShelfView,
-  TagListEntryDTO,
 } from "@rezics/api/shelf";
-import type { PostDTO, ShelfItemDTO } from "@rezics/contract";
+import type {
+  ShelfUnitDTO,
+  ShelfUnitRelationDTO,
+} from "@rezics/contract";
 import { titleOf } from "./titleOf";
 
+export interface ShelfStreamRootEntry {
+  kind: "root";
+  unit: EnrichedShelfUnit;
+  /** Children grouped under this root (review/tag), pre-sorted. */
+  children: EnrichedShelfUnit[];
+}
+
+export interface ShelfStreamChildEntry {
+  kind: "child";
+  unit: EnrichedShelfUnit;
+  parentUnitId: string;
+}
+
+export interface ShelfStreamPeerEntry {
+  kind: "peer";
+  unit: EnrichedShelfUnit;
+}
+
 export type ShelfStreamEntry =
-  | { kind: "prime"; enriched: EnrichedShelfItem }
-  | {
-      kind: "review";
-      parentItemRef: string;
-      parentItem: ShelfItemDTO;
-      review: PostDTO;
-    }
-  | {
-      kind: "tag";
-      parentItemRef: string;
-      parentItem: ShelfItemDTO;
-      tag: TagListEntryDTO;
-    };
+  | ShelfStreamRootEntry
+  | ShelfStreamChildEntry
+  | ShelfStreamPeerEntry;
 
 const titleCollator = new Intl.Collator(undefined, {
   numeric: true,
   sensitivity: "base",
 });
-
-function entryTitle(entry: ShelfStreamEntry): string {
-  if (entry.kind === "prime") {
-    return titleOf(entry.enriched.item, entry.enriched.primary);
-  }
-  if (entry.kind === "review") {
-    return entry.review.extra?.title ?? entry.parentItemRef;
-  }
-  return entry.tag.label ?? entry.parentItemRef;
-}
-
-function entryTime(entry: ShelfStreamEntry): number {
-  if (entry.kind === "prime") {
-    const t = entry.enriched.item.createdAt;
-    return t ? new Date(t).getTime() : 0;
-  }
-  if (entry.kind === "review") {
-    const t = entry.parentItem.createdAt;
-    return t ? new Date(t).getTime() : 0;
-  }
-  const t = entry.parentItem.createdAt;
-  return t ? new Date(t).getTime() : 0;
-}
 
 function comparePosition(a: string, b: string): number {
   if (a === b) return 0;
@@ -59,181 +46,181 @@ function maybeReverse(value: number, order: ShelfSortState["order"]): number {
   return order === "desc" ? -value : value;
 }
 
-function compareByOrder(
-  a: string,
-  b: string,
-  order: ShelfSortState["order"],
-): number {
-  return maybeReverse(comparePosition(a, b), order);
-}
-
-function compareTime(
-  aTime: number,
-  bTime: number,
-  order: ShelfSortState["order"],
-): number {
-  const value = aTime - bTime;
-  return order === "desc" ? -value : value;
-}
-
-function compareTitle(
-  a: string,
-  b: string,
-  order: ShelfSortState["order"],
-): number {
-  return maybeReverse(titleCollator.compare(a, b), order);
-}
-
-function primeTieBreaker(a: EnrichedShelfItem, b: EnrichedShelfItem): number {
+function tieBreak(a: EnrichedShelfUnit, b: EnrichedShelfUnit): number {
   return (
-    comparePosition(a.item.position, b.item.position) ||
-    titleCollator.compare(a.item.itemRef, b.item.itemRef)
+    comparePosition(a.unit.position, b.unit.position) ||
+    titleCollator.compare(a.unit.unitId, b.unit.unitId)
   );
 }
 
-function entryRefId(entry: ShelfStreamEntry): string {
-  if (entry.kind === "prime") return entry.enriched.item.itemRef;
-  if (entry.kind === "review") return entry.review.unitId;
-  return entry.tag.unitId;
-}
-
-function entryParentRef(entry: ShelfStreamEntry): string {
-  if (entry.kind === "prime") return entry.enriched.item.itemRef;
-  return entry.parentItemRef;
-}
-
-function entryTieBreaker(a: ShelfStreamEntry, b: ShelfStreamEntry): number {
-  const parentCompare = titleCollator.compare(
-    entryParentRef(a),
-    entryParentRef(b),
-  );
-  if (parentCompare !== 0) return parentCompare;
-  return titleCollator.compare(entryRefId(a), entryRefId(b));
-}
-
-function comparePrimeByMode(
-  a: EnrichedShelfItem,
-  b: EnrichedShelfItem,
+function compareByMode(
+  a: EnrichedShelfUnit,
+  b: EnrichedShelfUnit,
   sort: ShelfSortState,
 ): number {
   if (sort.field === "manual") {
     return (
-      compareByOrder(a.item.position, b.item.position, sort.order) ||
-      titleCollator.compare(a.item.itemRef, b.item.itemRef)
+      maybeReverse(comparePosition(a.unit.position, b.unit.position), sort.order) ||
+      titleCollator.compare(a.unit.unitId, b.unit.unitId)
     );
   }
   if (sort.field === "addedAt") {
-    const aT = a.item.createdAt ? new Date(a.item.createdAt).getTime() : 0;
-    const bT = b.item.createdAt ? new Date(b.item.createdAt).getTime() : 0;
-    return compareTime(aT, bT, sort.order) || primeTieBreaker(a, b);
+    const aT = a.unit.createdAt ? new Date(a.unit.createdAt).getTime() : 0;
+    const bT = b.unit.createdAt ? new Date(b.unit.createdAt).getTime() : 0;
+    return maybeReverse(aT - bT, sort.order) || tieBreak(a, b);
   }
   return (
-    compareTitle(
-      titleOf(a.item, a.primary),
-      titleOf(b.item, b.primary),
+    maybeReverse(
+      titleCollator.compare(titleOfUnit(a), titleOfUnit(b)),
       sort.order,
-    ) || primeTieBreaker(a, b)
+    ) || tieBreak(a, b)
   );
 }
 
-function compareEntryByMode(
-  a: ShelfStreamEntry,
-  b: ShelfStreamEntry,
-  sort: ShelfSortState,
-): number {
-  if (sort.field === "manual") {
-    // Reviews have no position of their own; manual sort keeps prime order
-    // with reviews pinned adjacent to their prime. Callers that reach this
-    // branch have already flattened, so fall back to a stable comparison.
-    if (a.kind === "prime" && b.kind === "prime") {
-      return (
-        compareByOrder(
-          a.enriched.item.position,
-          b.enriched.item.position,
-          sort.order,
-        ) || entryTieBreaker(a, b)
-      );
-    }
-    return entryTieBreaker(a, b);
-  }
-  if (sort.field === "addedAt") {
-    return (
-      compareTime(entryTime(a), entryTime(b), sort.order) ||
-      entryTieBreaker(a, b)
-    );
-  }
-  return (
-    compareTitle(entryTitle(a), entryTitle(b), sort.order) ||
-    entryTieBreaker(a, b)
-  );
+function titleOfUnit(e: EnrichedShelfUnit): string {
+  return titleOf(e.unit, e.data);
 }
 
-function sortedPrimes(
-  enriched: EnrichedShelfItem[],
+function sortedClone(
+  units: EnrichedShelfUnit[],
   sort: ShelfSortState,
-): EnrichedShelfItem[] {
-  const arr = [...enriched];
-  arr.sort((a, b) => comparePrimeByMode(a, b, sort));
+): EnrichedShelfUnit[] {
+  const arr = [...units];
+  arr.sort((a, b) => compareByMode(a, b, sort));
   return arr;
 }
 
+interface DerivationParts {
+  byId: Map<string, EnrichedShelfUnit>;
+  childByParent: Map<string, EnrichedShelfUnit[]>;
+  childIds: Set<string>;
+  roots: EnrichedShelfUnit[];
+}
+
+function partition(
+  units: EnrichedShelfUnit[],
+  relations: ShelfUnitRelationDTO[],
+): DerivationParts {
+  const byId = new Map<string, EnrichedShelfUnit>();
+  for (const e of units) byId.set(e.unit.unitId, e);
+
+  const childByParent = new Map<string, EnrichedShelfUnit[]>();
+  const childIds = new Set<string>();
+  for (const rel of relations) {
+    childIds.add(rel.childUnitId);
+    const child = byId.get(rel.childUnitId);
+    if (!child) continue;
+    let bucket = childByParent.get(rel.parentUnitId);
+    if (!bucket) {
+      bucket = [];
+      childByParent.set(rel.parentUnitId, bucket);
+    }
+    if (!bucket.includes(child)) bucket.push(child);
+  }
+
+  const roots: EnrichedShelfUnit[] = [];
+  for (const e of units) {
+    if (!childIds.has(e.unit.unitId)) roots.push(e);
+  }
+
+  return { byId, childByParent, childIds, roots };
+}
+
+/**
+ * Pure derivation of the rendered stream from ShelfUnit + ShelfUnitRelation.
+ *
+ * - Roots = units that do not appear as `childUnitId` in any relation.
+ * - In nested mode: returns root entries; consumers render attached children
+ *   inside each root via `entry.children`.
+ * - In flat/masonry + `sortPrimeOnly=true`: roots sorted first, each root's
+ *   children sorted by the same comparator, emitted immediately after the root.
+ * - In flat/masonry + `sortPrimeOnly=false`: every ShelfUnit is emitted once as
+ *   a peer, all participating in one comparator.
+ *
+ * Multi-step cycles in the relation graph cannot infinitely recurse because
+ * the nested entry shape is one level deep (children only); two-step cycles
+ * just render each affected unit under its parent(s) and not as a root.
+ */
 export function deriveShelfStream(
-  enriched: EnrichedShelfItem[],
+  units: EnrichedShelfUnit[],
+  relations: ShelfUnitRelationDTO[],
   mode: ShelfView,
   sort: ShelfSortState,
   sortPrimeOnly: boolean,
 ): ShelfStreamEntry[] {
+  const { childByParent, roots } = partition(units, relations);
+
   if (mode === "nested") {
-    return sortedPrimes(enriched, sort).map((e) => ({
-      kind: "prime" as const,
-      enriched: e,
+    return sortedClone(roots, sort).map((root) => ({
+      kind: "root" as const,
+      unit: root,
+      children: sortedClone(
+        childByParent.get(root.unit.unitId) ?? [],
+        sort,
+      ),
     }));
   }
 
-  if (sort.field === "manual" || sortPrimeOnly) {
+  if (sortPrimeOnly) {
     const out: ShelfStreamEntry[] = [];
-    for (const e of sortedPrimes(enriched, sort)) {
-      out.push({ kind: "prime", enriched: e });
-      for (const review of e.attachedReviews) {
+    for (const root of sortedClone(roots, sort)) {
+      out.push({ kind: "root", unit: root, children: [] });
+      const kids = sortedClone(childByParent.get(root.unit.unitId) ?? [], sort);
+      for (const child of kids) {
         out.push({
-          kind: "review",
-          parentItemRef: e.item.itemRef,
-          parentItem: e.item,
-          review,
-        });
-      }
-      for (const tag of e.attachedTags) {
-        out.push({
-          kind: "tag",
-          parentItemRef: e.item.itemRef,
-          parentItem: e.item,
-          tag,
+          kind: "child",
+          unit: child,
+          parentUnitId: root.unit.unitId,
         });
       }
     }
     return out;
   }
 
-  const flat: ShelfStreamEntry[] = [];
-  for (const e of enriched) {
-    flat.push({ kind: "prime", enriched: e });
-    for (const review of e.attachedReviews) {
-      flat.push({
-        kind: "review",
-        parentItemRef: e.item.itemRef,
-        parentItem: e.item,
-        review,
-      });
-    }
-    for (const tag of e.attachedTags) {
-      flat.push({
-        kind: "tag",
-        parentItemRef: e.item.itemRef,
-        parentItem: e.item,
-        tag,
-      });
-    }
+  return sortedClone(units, sort).map((unit) => ({
+    kind: "peer" as const,
+    unit,
+  }));
+}
+
+/**
+ * Convenience helper for legacy callsites that operated on a single
+ * `ShelfUnitDTO` list and need to find a unit by id.
+ */
+export function shelfUnitsById(
+  units: EnrichedShelfUnit[],
+): Map<string, EnrichedShelfUnit> {
+  const m = new Map<string, EnrichedShelfUnit>();
+  for (const e of units) m.set(e.unit.unitId, e);
+  return m;
+}
+
+export function findChildren(
+  units: EnrichedShelfUnit[],
+  relations: ShelfUnitRelationDTO[],
+  parentUnitId: string,
+  role?: ShelfUnitRelationDTO["role"],
+): EnrichedShelfUnit[] {
+  const byId = shelfUnitsById(units);
+  const out: EnrichedShelfUnit[] = [];
+  for (const rel of relations) {
+    if (rel.parentUnitId !== parentUnitId) continue;
+    if (role && rel.role !== role) continue;
+    const child = byId.get(rel.childUnitId);
+    if (child && !out.includes(child)) out.push(child);
   }
-  flat.sort((a, b) => compareEntryByMode(a, b, sort));
-  return flat;
+  return out;
+}
+
+// Lightweight rehydration helper for callsites that have a plain unit list and
+// need the partition utilities for tests.
+export function partitionForTest(
+  units: EnrichedShelfUnit[],
+  relations: ShelfUnitRelationDTO[],
+): { roots: ShelfUnitDTO[]; childIds: Set<string> } {
+  const { roots, childIds } = partition(units, relations);
+  return {
+    roots: roots.map((r) => r.unit),
+    childIds,
+  };
 }

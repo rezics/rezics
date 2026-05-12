@@ -2,10 +2,11 @@ export { collectionApi } from "./collection.api";
 export { CollectionService, collectionService } from "./collection.service";
 export { shelfApi } from "./shelf.api";
 export {
-  mapShelfItemToDTO,
   mapShelfListRowToDTO,
   mapShelfSummaryToDTO,
   mapShelfToDTO,
+  mapShelfUnitRelationToDTO,
+  mapShelfUnitToDTO,
 } from "./shelf.mapper";
 export { ShelfService, shelfService } from "./shelf.service";
 export {

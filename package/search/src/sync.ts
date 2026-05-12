@@ -106,7 +106,7 @@ const contentInclude = {
   book: true,
   game: { include: { platforms: true } },
   media: true,
-  shelf: { include: { items: { select: { itemRef: true } } } },
+  shelf: { include: { units: { select: { unitId: true } } } },
   link: true,
   post: true,
 } as const;
@@ -178,8 +178,8 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   // Shelf membership: list of unit ids contained in this shelf (SHELF type only)
   const containedUnitIds: string[] | undefined =
     unit.type === UnitType.SHELF
-      ? ((unit.shelf?.items ?? []) as { itemRef: string }[]).map(
-          (i) => i.itemRef,
+      ? ((unit.shelf?.units ?? []) as { unitId: string }[]).map(
+          (i) => i.unitId,
         )
       : undefined;
 
@@ -438,18 +438,18 @@ export async function patchContentMetadata(
 /**
  * Recompute the post-state `containedUnitIds` for a SHELF unit and push a
  * partial update to Meilisearch. The caller is responsible for invoking this
- * after every ShelfItem insert/delete on the shelf.
+ * after every ShelfUnit insert/delete on the shelf.
  */
 export async function patchContentContainedUnitIds(
   client: SearchClient,
-  shelfUnitId: string,
+  shelfId: string,
 ) {
-  const items = await prisma.shelfItem.findMany({
-    where: { shelfUnitId },
-    select: { itemRef: true },
+  const units = await prisma.shelfUnit.findMany({
+    where: { shelfId },
+    select: { unitId: true },
   });
-  const containedUnitIds = items.map((i) => i.itemRef);
-  await client.patchContent([{ id: shelfUnitId, containedUnitIds }]);
+  const containedUnitIds = units.map((u) => u.unitId);
+  await client.patchContent([{ id: shelfId, containedUnitIds }]);
 }
 
 // ANCHOR: Post partial sync functions
@@ -854,8 +854,8 @@ export async function syncAllContainedUnitIds(client: SearchClient) {
         id: true,
         shelf: {
           select: {
-            items: {
-              select: { itemRef: true },
+            units: {
+              select: { unitId: true },
             },
           },
         },
@@ -871,8 +871,8 @@ export async function syncAllContainedUnitIds(client: SearchClient) {
     await client.patchContent(
       shelves.map((unit) => ({
         id: unit.id,
-        containedUnitIds: (unit.shelf?.items ?? []).map(
-          (i: { itemRef: string }) => i.itemRef,
+        containedUnitIds: (unit.shelf?.units ?? []).map(
+          (i: { unitId: string }) => i.unitId,
         ),
       })),
     );

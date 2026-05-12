@@ -2,8 +2,8 @@ import type {
   BookDTO,
   PostDTO,
   ShelfDTO,
-  ShelfItemDTO,
-  ShelfItemKind,
+  ShelfUnitDTO,
+  ShelfUnitKind,
 } from "@rezics/contract";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -17,7 +17,7 @@ import { shelfApi } from "./shelf.api";
 
 type HydrationBucket = "book" | "post" | "shelf" | "tag";
 
-const KIND_TO_BUCKET: Record<ShelfItemKind, HydrationBucket | null> = {
+const KIND_TO_BUCKET: Record<ShelfUnitKind, HydrationBucket | null> = {
   book: "book",
   review: "post",
   quote: "post",
@@ -33,9 +33,7 @@ const KIND_TO_BUCKET: Record<ShelfItemKind, HydrationBucket | null> = {
   link: null,
 };
 
-// Runtime shape returned by the server's `mapTagUnitToDTO`. The wire-typed
-// `UnitTagDTO` (scored junction) does not match; aligning the contract is
-// out of scope for this change.
+// Runtime shape returned by the server's `mapTagUnitToDTO`.
 export interface TagListEntryDTO {
   unitId: string;
   slug?: string;
@@ -46,58 +44,51 @@ export interface TagListEntryDTO {
 export type BucketResult =
   | {
       bucket: "book";
-      primaryItemRefs: string[];
-      ids: string[];
+      unitIds: string[];
       data?: BookDTO[];
       isLoading: boolean;
       isError: boolean;
     }
   | {
       bucket: "post";
-      primaryItemRefs: string[];
-      ids: string[];
+      unitIds: string[];
       data?: PostDTO[];
       isLoading: boolean;
       isError: boolean;
     }
   | {
       bucket: "tag";
-      primaryItemRefs: string[];
-      ids: string[];
+      unitIds: string[];
       data?: TagListEntryDTO[];
       isLoading: boolean;
       isError: boolean;
     }
   | {
       bucket: "shelf";
-      primaryItemRefs: string[];
-      ids: string[];
+      unitIds: string[];
       data?: ShelfDTO[];
       isLoading: boolean;
       isError: boolean;
     };
 
 export interface ShelfHydrationResult {
-  /** Per-kind bucket status (useful for progressive rendering). */
   buckets: BucketResult[];
-  /** Primary itemRefs whose underlying unit was not returned by its batch call. */
-  orphanItemRefs: string[];
-  /** Overall loading flag — true while any bucket is still loading. */
+  /** Unit ids whose underlying unit was not returned by its batch call. */
+  orphanUnitIds: string[];
   isLoading: boolean;
 }
 
 export type ShelfPrimaryDTO = BookDTO | PostDTO | ShelfDTO | TagListEntryDTO;
 
-export interface EnrichedShelfItem {
-  item: ShelfItemDTO;
-  primary: ShelfPrimaryDTO | undefined;
-  attachedReviews: PostDTO[];
-  attachedTags: TagListEntryDTO[];
+export interface EnrichedShelfUnit {
+  unit: ShelfUnitDTO;
+  /** Hydrated DTO for this shelf unit, if any. */
+  data: ShelfPrimaryDTO | undefined;
 }
 
-export interface HydratedShelfItemsResult {
-  enriched: EnrichedShelfItem[];
-  orphanItemRefs: string[];
+export interface HydratedShelfUnitsResult {
+  enriched: EnrichedShelfUnit[];
+  orphanUnitIds: string[];
   isLoading: boolean;
 }
 
@@ -142,21 +133,20 @@ function seedCache(
 
 interface Group {
   bucket: HydrationBucket;
-  primaryItemRefs: string[];
-  ids: string[];
+  unitIds: string[];
 }
 
 /**
- * Hydrate a page of shelf items: groups by kind into batched list calls,
- * folds `reviewIds` into the post batch and `tagIds` into the tag batch,
+ * Hydrate a page of shelf units: groups by kind into batched list calls,
  * seeds each package's detail cache via `queryClient.setQueryData`, and
- * reports primary itemRefs whose underlying unit was not returned.
+ * reports unit ids whose underlying unit was not returned.
  */
-export function useShelfHydration(items: ShelfItemDTO[]): ShelfHydrationResult {
+export function useShelfHydration(
+  units: ShelfUnitDTO[],
+): ShelfHydrationResult {
   const queryClient = useQueryClient();
 
   const grouped: Group[] = useMemo(() => {
-    const primaryByBucket = new Map<HydrationBucket, string[]>();
     const idsByBucket = new Map<HydrationBucket, Set<string>>();
 
     const ensureIds = (bucket: HydrationBucket) => {
@@ -167,52 +157,31 @@ export function useShelfHydration(items: ShelfItemDTO[]): ShelfHydrationResult {
       }
       return set;
     };
-    const ensurePrimary = (bucket: HydrationBucket) => {
-      let list = primaryByBucket.get(bucket);
-      if (!list) {
-        list = [];
-        primaryByBucket.set(bucket, list);
-      }
-      return list;
-    };
 
-    for (const item of items) {
-      const primaryBucket = KIND_TO_BUCKET[item.kind];
-      if (primaryBucket) {
-        ensurePrimary(primaryBucket).push(item.itemRef);
-        ensureIds(primaryBucket).add(item.itemRef);
-      }
-      for (const reviewId of item.reviewIds) {
-        ensureIds("post").add(reviewId);
-      }
-      for (const tagId of item.tagIds) {
-        ensureIds("tag").add(tagId);
-      }
+    for (const unit of units) {
+      const bucket = KIND_TO_BUCKET[unit.kind];
+      if (bucket) ensureIds(bucket).add(unit.unitId);
     }
 
     const out: Group[] = [];
     for (const [bucket, idSet] of idsByBucket) {
-      out.push({
-        bucket,
-        primaryItemRefs: primaryByBucket.get(bucket) ?? [],
-        ids: Array.from(idSet),
-      });
+      out.push({ bucket, unitIds: Array.from(idSet) });
     }
     return out;
-  }, [items]);
+  }, [units]);
 
   const results = useQueries({
-    queries: grouped.map(({ bucket, ids }) => ({
-      queryKey: ["shelf-hydration", bucket, [...ids].sort().join(",")],
+    queries: grouped.map(({ bucket, unitIds }) => ({
+      queryKey: ["shelf-hydration", bucket, [...unitIds].sort().join(",")],
       queryFn: async () => {
-        const data = await fetchBucket(bucket, ids);
+        const data = await fetchBucket(bucket, unitIds);
         for (const unit of data) {
           seedCache(bucket, unit, queryClient.setQueryData.bind(queryClient));
         }
         return data;
       },
       staleTime: 1000 * 60 * 5,
-      enabled: ids.length > 0,
+      enabled: unitIds.length > 0,
     })),
   });
 
@@ -221,8 +190,7 @@ export function useShelfHydration(items: ShelfItemDTO[]): ShelfHydrationResult {
       grouped.map((g, i) => {
         const r = results[i];
         const base = {
-          primaryItemRefs: g.primaryItemRefs,
-          ids: g.ids,
+          unitIds: g.unitIds,
           isLoading: r?.isLoading ?? false,
           isError: r?.isError ?? false,
         };
@@ -256,13 +224,13 @@ export function useShelfHydration(items: ShelfItemDTO[]): ShelfHydrationResult {
     [grouped, results],
   );
 
-  const orphanItemRefs = useMemo(() => {
+  const orphanUnitIds = useMemo(() => {
     const orphans: string[] = [];
     for (const b of buckets) {
       if (b.isLoading || b.isError || !b.data) continue;
       const found = new Set(b.data.map((u) => u.unitId));
-      for (const ref of b.primaryItemRefs) {
-        if (!found.has(ref)) orphans.push(ref);
+      for (const id of b.unitIds) {
+        if (!found.has(id)) orphans.push(id);
       }
     }
     return orphans;
@@ -270,21 +238,18 @@ export function useShelfHydration(items: ShelfItemDTO[]): ShelfHydrationResult {
 
   const isLoading = useMemo(() => buckets.some((b) => b.isLoading), [buckets]);
 
-  return { buckets, orphanItemRefs, isLoading };
+  return { buckets, orphanUnitIds, isLoading };
 }
 
 /**
- * Wraps `useShelfHydration` and maps bucket results into per-item enriched
- * shapes: each item gets its primary DTO and its attached review/tag DTOs
- * resolved from the same batch. Consumers render purely from this shape
- * and never read the query cache directly.
+ * Maps each `ShelfUnit` to its hydrated DTO from the kind-grouped batch.
  */
-export function useHydratedShelfItems(
-  items: ShelfItemDTO[],
-): HydratedShelfItemsResult {
-  const { buckets, orphanItemRefs, isLoading } = useShelfHydration(items);
+export function useHydratedShelfUnits(
+  units: ShelfUnitDTO[],
+): HydratedShelfUnitsResult {
+  const { buckets, orphanUnitIds, isLoading } = useShelfHydration(units);
 
-  const enriched = useMemo<EnrichedShelfItem[]>(() => {
+  const enriched = useMemo<EnrichedShelfUnit[]>(() => {
     const bookMap = new Map<string, BookDTO>();
     const postMap = new Map<string, PostDTO>();
     const shelfMap = new Map<string, ShelfDTO>();
@@ -303,24 +268,16 @@ export function useHydratedShelfItems(
       }
     }
 
-    return items.map((item) => {
-      const primaryBucket = KIND_TO_BUCKET[item.kind];
-      let primary: ShelfPrimaryDTO | undefined;
-      if (primaryBucket === "book") primary = bookMap.get(item.itemRef);
-      else if (primaryBucket === "post") primary = postMap.get(item.itemRef);
-      else if (primaryBucket === "shelf") primary = shelfMap.get(item.itemRef);
-      else if (primaryBucket === "tag") primary = tagMap.get(item.itemRef);
-
-      const attachedReviews = item.reviewIds
-        .map((id) => postMap.get(id))
-        .filter((p): p is PostDTO => p != null);
-      const attachedTags = item.tagIds
-        .map((id) => tagMap.get(id))
-        .filter((t): t is TagListEntryDTO => t != null);
-
-      return { item, primary, attachedReviews, attachedTags };
+    return units.map((unit) => {
+      const bucket = KIND_TO_BUCKET[unit.kind];
+      let data: ShelfPrimaryDTO | undefined;
+      if (bucket === "book") data = bookMap.get(unit.unitId);
+      else if (bucket === "post") data = postMap.get(unit.unitId);
+      else if (bucket === "shelf") data = shelfMap.get(unit.unitId);
+      else if (bucket === "tag") data = tagMap.get(unit.unitId);
+      return { unit, data };
     });
-  }, [items, buckets]);
+  }, [units, buckets]);
 
-  return { enriched, orphanItemRefs, isLoading };
+  return { enriched, orphanUnitIds, isLoading };
 }

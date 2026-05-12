@@ -1,11 +1,13 @@
-import { useBatchUpdateShelfItemsMutation } from "@rezics/api/shelf/shelf.mutations";
-import { shelfItemsQuery } from "@rezics/api/shelf/shelf.queries";
+import { useBatchUpdateShelfUnitsMutation } from "@rezics/api/shelf/shelf.mutations";
+import { shelfUnitsQuery } from "@rezics/api/shelf/shelf.queries";
 import type { ShelfSortOrder } from "@rezics/api/shelf";
 import type {
-  ShelfItemBatchOp,
-  ShelfItemBatchResult,
-  ShelfItemDTO,
-  ShelfItemKind,
+  ShelfUnitBatchOp,
+  ShelfUnitBatchResult,
+  ShelfUnitDTO,
+  ShelfUnitKind,
+  ShelfUnitRelationDTO,
+  ShelfUnitRelationRole,
 } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
@@ -23,10 +25,23 @@ import {
 } from "../states/itemOpLog";
 
 export interface AddInput {
-  itemRef: string;
-  kind: ShelfItemKind;
-  tagIds?: string[];
-  reviewIds?: string[];
+  unitId: string;
+  kind: ShelfUnitKind;
+}
+
+export interface AttachInput {
+  parentUnitId: string;
+  childUnitId: string;
+  childKind: ShelfUnitKind;
+  role: ShelfUnitRelationRole;
+  position?: string;
+}
+
+export interface SetChildrenInput {
+  parentUnitId: string;
+  role: ShelfUnitRelationRole;
+  childUnitIds: string[];
+  childKind?: ShelfUnitKind;
 }
 
 export interface ReorderBetween {
@@ -35,68 +50,77 @@ export interface ReorderBetween {
 }
 
 export interface SaveResult {
-  results: ShelfItemBatchResult[];
+  results: ShelfUnitBatchResult[];
   okCount: number;
   failedCount: number;
 }
 
 export interface UseShelfItemsEditor {
   log: ItemOpLog;
-  items: ShelfItemDTO[];
+  units: ShelfUnitDTO[];
+  relations: ShelfUnitRelationDTO[];
   isLoading: boolean;
   dirty: boolean;
   pendingCount: number;
   saving: boolean;
   lastResult: SaveResult | null;
   enqueueAdd: (input: AddInput) => void;
-  enqueueReorder: (itemRef: string, between: ReorderBetween) => void;
+  enqueueReorder: (unitId: string, between: ReorderBetween) => void;
   enqueueCrossPageMove: (
-    itemRef: string,
+    unitId: string,
     toPage: number,
     pageSize: number,
     order: ShelfSortOrder,
   ) => void;
-  enqueueDelete: (itemRef: string) => void;
-  enqueueSetTags: (itemRef: string, tagIds: string[]) => void;
+  enqueueDelete: (unitId: string) => void;
+  enqueueAttach: (input: AttachInput) => void;
+  enqueueDetach: (
+    parentUnitId: string,
+    childUnitId: string,
+    role: ShelfUnitRelationRole,
+  ) => void;
+  enqueueSetChildren: (input: SetChildrenInput) => void;
   save: () => Promise<SaveResult>;
   retryFailed: () => Promise<SaveResult>;
   discard: () => void;
 }
 
-export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
-  const { data, isLoading } = useQuery(shelfItemsQuery(shelfUnitId));
-  const serverItems = data?.items ?? [];
+export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
+  const { data, isLoading } = useQuery(shelfUnitsQuery(shelfId));
+  const serverUnits = useMemo(() => data?.units ?? [], [data?.units]);
+  const serverRelations = useMemo(
+    () => data?.relations ?? [],
+    [data?.relations],
+  );
 
   const [log, setLog] = useState<ItemOpLog>(emptyLog);
   const [lastResult, setLastResult] = useState<SaveResult | null>(null);
-  const batchMutation = useBatchUpdateShelfItemsMutation();
+  const batchMutation = useBatchUpdateShelfUnitsMutation();
 
-  const optimisticItems = useMemo(
-    () => applyLiveOps(serverItems, log),
-    [serverItems, log],
+  const { units: optimisticUnits, relations: optimisticRelations } = useMemo(
+    () => applyLiveOps(serverUnits, serverRelations, log, shelfId),
+    [serverUnits, serverRelations, log, shelfId],
   );
 
   const lastPosition = useMemo(() => {
-    if (serverItems.length === 0) return undefined;
-    let last = serverItems[0]!.position;
-    for (const it of serverItems) {
-      if (it.position > last) last = it.position;
+    if (serverUnits.length === 0) return undefined;
+    let last = serverUnits[0]!.position;
+    for (const u of serverUnits) {
+      if (u.position > last) last = u.position;
     }
     return last;
-  }, [serverItems]);
+  }, [serverUnits]);
 
   const enqueueAdd = useCallback(
     (input: AddInput) => {
       setLog((current) => {
         const pendingTop = lastPositionOfPendingAdds(current) ?? lastPosition;
         const position = appendAfter(pendingTop);
-        const op: ShelfItemBatchOp = {
+        const op: ShelfUnitBatchOp = {
           op: "add",
-          itemRef: input.itemRef,
+          unitId: input.unitId,
           kind: input.kind,
           position,
-          ...(input.tagIds ? { tagIds: input.tagIds } : {}),
-          ...(input.reviewIds ? { reviewIds: input.reviewIds } : {}),
         };
         return enqueue(current, op);
       });
@@ -105,10 +129,10 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
   );
 
   const enqueueReorder = useCallback(
-    (itemRef: string, between: ReorderBetween) => {
+    (unitId: string, between: ReorderBetween) => {
       const position = betweenNeighbors(between.before, between.after);
       setLog((current) =>
-        enqueue(current, { op: "reorder", itemRef, position }),
+        enqueue(current, { op: "reorder", unitId, position }),
       );
     },
     [],
@@ -116,7 +140,7 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
 
   const enqueueCrossPageMove = useCallback(
     (
-      itemRef: string,
+      unitId: string,
       toPage: number,
       pageSize: number,
       order: ShelfSortOrder,
@@ -124,7 +148,7 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
       setLog((current) =>
         enqueue(current, {
           op: "reorderToPage",
-          itemRef,
+          unitId,
           toPage,
           edge: "first",
           pageSize,
@@ -135,12 +159,51 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
     [],
   );
 
-  const enqueueDelete = useCallback((itemRef: string) => {
-    setLog((current) => enqueue(current, { op: "delete", itemRef }));
+  const enqueueDelete = useCallback((unitId: string) => {
+    setLog((current) => enqueue(current, { op: "delete", unitId }));
   }, []);
 
-  const enqueueSetTags = useCallback((itemRef: string, tagIds: string[]) => {
-    setLog((current) => enqueue(current, { op: "setTags", itemRef, tagIds }));
+  const enqueueAttach = useCallback((input: AttachInput) => {
+    setLog((current) =>
+      enqueue(current, {
+        op: "attach",
+        parentUnitId: input.parentUnitId,
+        childUnitId: input.childUnitId,
+        childKind: input.childKind,
+        role: input.role,
+        ...(input.position !== undefined ? { position: input.position } : {}),
+      }),
+    );
+  }, []);
+
+  const enqueueDetach = useCallback(
+    (
+      parentUnitId: string,
+      childUnitId: string,
+      role: ShelfUnitRelationRole,
+    ) => {
+      setLog((current) =>
+        enqueue(current, {
+          op: "detach",
+          parentUnitId,
+          childUnitId,
+          role,
+        }),
+      );
+    },
+    [],
+  );
+
+  const enqueueSetChildren = useCallback((input: SetChildrenInput) => {
+    setLog((current) =>
+      enqueue(current, {
+        op: "setChildren",
+        parentUnitId: input.parentUnitId,
+        role: input.role,
+        childUnitIds: input.childUnitIds,
+        ...(input.childKind ? { childKind: input.childKind } : {}),
+      }),
+    );
   }, []);
 
   const submitOps = useCallback(
@@ -152,7 +215,7 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
       }
       const ops = entries.map((e) => e.op);
       const response = await batchMutation.mutateAsync({
-        shelfUnitId,
+        shelfId,
         ops,
       });
       const succeededIds = new Set<string>();
@@ -180,7 +243,7 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
       setLastResult(result);
       return result;
     },
-    [batchMutation, shelfUnitId],
+    [batchMutation, shelfId],
   );
 
   const save = useCallback(async (): Promise<SaveResult> => {
@@ -205,7 +268,8 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
 
   return {
     log,
-    items: optimisticItems,
+    units: optimisticUnits,
+    relations: optimisticRelations,
     isLoading,
     dirty: dirty(log),
     pendingCount: pendingCount(log),
@@ -215,7 +279,9 @@ export function useShelfItemsEditor(shelfUnitId: string): UseShelfItemsEditor {
     enqueueReorder,
     enqueueCrossPageMove,
     enqueueDelete,
-    enqueueSetTags,
+    enqueueAttach,
+    enqueueDetach,
+    enqueueSetChildren,
     save,
     retryFailed,
     discard,
@@ -234,53 +300,124 @@ function lastPositionOfPendingAdds(log: ItemOpLog): string | undefined {
 }
 
 function applyLiveOps(
-  serverItems: ShelfItemDTO[],
+  serverUnits: ShelfUnitDTO[],
+  serverRelations: ShelfUnitRelationDTO[],
   log: ItemOpLog,
-): ShelfItemDTO[] {
-  let items = serverItems.map((item) => ({ ...item }));
+  shelfId: string,
+): { units: ShelfUnitDTO[]; relations: ShelfUnitRelationDTO[] } {
+  let units = serverUnits.map((u) => ({ ...u }));
+  let relations = serverRelations.map((r) => ({ ...r }));
+
+  function ensureUnit(unitId: string, kind: ShelfUnitKind, position?: string) {
+    const idx = units.findIndex((u) => u.unitId === unitId);
+    if (idx >= 0) return;
+    const finalPosition = position ?? appendAfter(maxPositionOf(units));
+    units = [
+      ...units,
+      { shelfId, unitId, kind, position: finalPosition },
+    ];
+  }
 
   for (const entry of log.entries) {
     if (entry.failedReason) continue;
     const { op } = entry;
 
     if (op.op === "add") {
-      const existingIndex = items.findIndex(
-        (item) => item.itemRef === op.itemRef,
-      );
-      const nextItem: ShelfItemDTO = {
-        shelfUnitId: "",
-        itemRef: op.itemRef,
+      const idx = units.findIndex((u) => u.unitId === op.unitId);
+      const next: ShelfUnitDTO = {
+        shelfId,
+        unitId: op.unitId,
         kind: op.kind,
         position: op.position,
-        reviewIds: op.reviewIds ?? [],
-        tagIds: op.tagIds ?? [],
       };
-      if (existingIndex >= 0) {
-        items[existingIndex] = { ...items[existingIndex]!, ...nextItem };
-      } else {
-        items = [...items, nextItem];
-      }
+      if (idx >= 0) units[idx] = { ...units[idx]!, ...next };
+      else units = [...units, next];
       continue;
     }
 
     if (op.op === "delete") {
-      items = items.filter((item) => item.itemRef !== op.itemRef);
-      continue;
-    }
-
-    if (op.op === "reorder") {
-      items = items.map((item) =>
-        item.itemRef === op.itemRef ? { ...item, position: op.position } : item,
+      units = units.filter((u) => u.unitId !== op.unitId);
+      relations = relations.filter(
+        (r) =>
+          r.parentUnitId !== op.unitId && r.childUnitId !== op.unitId,
       );
       continue;
     }
 
-    if (op.op === "setTags") {
-      items = items.map((item) =>
-        item.itemRef === op.itemRef ? { ...item, tagIds: op.tagIds } : item,
+    if (op.op === "reorder" || op.op === "reorderToPage") {
+      if (op.op === "reorder") {
+        units = units.map((u) =>
+          u.unitId === op.unitId ? { ...u, position: op.position } : u,
+        );
+      }
+      // reorderToPage: server-resolved; no optimistic position
+      continue;
+    }
+
+    if (op.op === "attach") {
+      ensureUnit(op.childUnitId, op.childKind, op.position);
+      const exists = relations.some(
+        (r) =>
+          r.parentUnitId === op.parentUnitId &&
+          r.childUnitId === op.childUnitId &&
+          r.role === op.role,
       );
+      if (!exists) {
+        relations = [
+          ...relations,
+          {
+            shelfId,
+            parentUnitId: op.parentUnitId,
+            childUnitId: op.childUnitId,
+            role: op.role,
+          },
+        ];
+      }
+      continue;
+    }
+
+    if (op.op === "detach") {
+      relations = relations.filter(
+        (r) =>
+          !(
+            r.parentUnitId === op.parentUnitId &&
+            r.childUnitId === op.childUnitId &&
+            r.role === op.role
+          ),
+      );
+      continue;
+    }
+
+    if (op.op === "setChildren") {
+      for (const childId of op.childUnitIds) {
+        ensureUnit(childId, op.childKind ?? ("post" as ShelfUnitKind));
+      }
+      relations = relations.filter(
+        (r) =>
+          !(r.parentUnitId === op.parentUnitId && r.role === op.role),
+      );
+      for (const childId of op.childUnitIds) {
+        relations = [
+          ...relations,
+          {
+            shelfId,
+            parentUnitId: op.parentUnitId,
+            childUnitId: childId,
+            role: op.role,
+          },
+        ];
+      }
+      continue;
     }
   }
 
-  return items;
+  return { units, relations };
+}
+
+function maxPositionOf(units: ShelfUnitDTO[]): string | undefined {
+  let last: string | undefined;
+  for (const u of units) {
+    if (!last || u.position > last) last = u.position;
+  }
+  return last;
 }

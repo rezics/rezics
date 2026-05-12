@@ -2,7 +2,8 @@ import type {
   BookDTO,
   PostDTO,
   ShelfDTO,
-  ShelfItemDTO,
+  ShelfUnitDTO,
+  ShelfUnitRelationDTO,
 } from "@rezics/contract";
 import { shelfKeys } from "@rezics/api/shelf/shelf.keys";
 import type { ShelfView } from "@rezics/api/shelf";
@@ -22,7 +23,7 @@ import { ShelfEditorItemsSection } from "./ShelfEditorItemsSection";
 const SHELF_ID = "fixture-shelf-1";
 
 // MOCK: story-only shelf + book fixtures so the section renders without
-// network. The real flow loads these via shelfItemsQuery and the hydration
+// network. The real flow loads these via shelfUnitsQuery and the hydration
 // useQueries cache; we pre-populate both.
 function makeBook(idx: number): BookDTO {
   const id = `fixture-book-${idx}`;
@@ -84,16 +85,27 @@ function makeTag() {
   };
 }
 
-function makeItem(idx: number): ShelfItemDTO {
-  const ref = `fixture-book-${idx}`;
+function makeUnit(
+  unitId: string,
+  kind: ShelfUnitDTO["kind"],
+  position: string,
+  createdAt?: string,
+): ShelfUnitDTO {
   return {
-    shelfUnitId: SHELF_ID,
-    itemRef: ref,
-    kind: "book",
-    position: String(idx).padStart(4, "0"),
-    reviewIds: [],
-    tagIds: [],
+    shelfId: SHELF_ID,
+    unitId,
+    kind,
+    position,
+    ...(createdAt ? { createdAt } : {}),
   };
+}
+
+function makeBookUnit(idx: number): ShelfUnitDTO {
+  return makeUnit(
+    `fixture-book-${idx}`,
+    "book",
+    String(idx).padStart(4, "0"),
+  );
 }
 
 function makeShelf(): ShelfDTO {
@@ -108,7 +120,8 @@ function makeShelf(): ShelfDTO {
 }
 
 interface SeedOptions {
-  items: ShelfItemDTO[];
+  units: ShelfUnitDTO[];
+  relations: ShelfUnitRelationDTO[];
   books: BookDTO[];
   posts?: PostDTO[];
   shelves?: ShelfDTO[];
@@ -116,7 +129,8 @@ interface SeedOptions {
 }
 
 function useSeededShelf({
-  items,
+  units,
+  relations,
   books,
   posts = [],
   shelves = [],
@@ -124,8 +138,9 @@ function useSeededShelf({
 }: SeedOptions) {
   const qc = useQueryClient();
   useEffect(() => {
-    qc.setQueryData(shelfKeys.itemsPage(SHELF_ID, undefined), {
-      items,
+    qc.setQueryData(shelfKeys.unitsPage(SHELF_ID, undefined), {
+      units,
+      relations,
       hasMore: false,
     });
     const ids = books.map((b) => b.unitId);
@@ -148,7 +163,7 @@ function useSeededShelf({
       ["shelf-hydration", "tag", [...tagIds].sort().join(",")],
       tags,
     );
-  }, [qc, items, books, posts, shelves, tags]);
+  }, [qc, units, relations, books, posts, shelves, tags]);
 }
 
 interface StoryShellProps {
@@ -159,37 +174,51 @@ interface StoryShellProps {
 }
 
 function StoryShell({ itemCount, viewMode, enqueue, mixed }: StoryShellProps) {
-  const items = useMemo(() => {
-    if (!mixed)
-      return Array.from({ length: itemCount }, (_, i) => makeItem(i + 1));
+  const units = useMemo<ShelfUnitDTO[]>(() => {
+    if (!mixed) {
+      return Array.from({ length: itemCount }, (_, i) => makeBookUnit(i + 1));
+    }
     return [
-      makeItem(1),
-      {
-        ...makeItem(2),
-        itemRef: "fixture-review-1",
-        kind: "review",
-        createdAt: "2026-02-01T00:00:00.000Z",
-      },
-      {
-        ...makeItem(3),
-        itemRef: "fixture-shelf-nested",
-        kind: "shelf",
-        createdAt: "2026-02-02T00:00:00.000Z",
-      },
-      {
-        ...makeItem(4),
-        itemRef: "fixture-tag-1",
-        kind: "tag",
-        createdAt: "2026-02-03T00:00:00.000Z",
-      },
-      {
-        ...makeItem(5),
-        reviewIds: ["fixture-review-attached"],
-        tagIds: ["fixture-tag-1"],
-        createdAt: "2026-02-04T00:00:00.000Z",
-      },
-    ] satisfies ShelfItemDTO[];
+      makeBookUnit(1),
+      makeUnit(
+        "fixture-review-1",
+        "review",
+        "0002",
+        "2026-02-01T00:00:00.000Z",
+      ),
+      makeUnit(
+        "fixture-shelf-nested",
+        "shelf",
+        "0003",
+        "2026-02-02T00:00:00.000Z",
+      ),
+      makeUnit("fixture-tag-1", "tag", "0004", "2026-02-03T00:00:00.000Z"),
+      makeBookUnit(5),
+      makeUnit(
+        "fixture-review-attached",
+        "review",
+        "0005~00",
+        "2026-02-04T00:00:00.000Z",
+      ),
+    ];
   }, [itemCount, mixed]);
+  const relations = useMemo<ShelfUnitRelationDTO[]>(() => {
+    if (!mixed) return [];
+    return [
+      {
+        shelfId: SHELF_ID,
+        parentUnitId: "fixture-book-5",
+        childUnitId: "fixture-review-attached",
+        role: "review",
+      },
+      {
+        shelfId: SHELF_ID,
+        parentUnitId: "fixture-book-5",
+        childUnitId: "fixture-tag-1",
+        role: "tag",
+      },
+    ];
+  }, [mixed]);
   const books = useMemo(
     () =>
       mixed
@@ -209,7 +238,7 @@ function StoryShell({ itemCount, viewMode, enqueue, mixed }: StoryShellProps) {
   );
   const shelves = useMemo(() => (mixed ? [makeNestedShelf()] : []), [mixed]);
   const tags = useMemo(() => (mixed ? [makeTag()] : []), [mixed]);
-  useSeededShelf({ items, books, posts, shelves, tags });
+  useSeededShelf({ units, relations, books, posts, shelves, tags });
 
   const editor = useShelfItemsEditor(SHELF_ID);
   const shelf = useMemo(() => makeShelf(), []);
@@ -221,24 +250,24 @@ function StoryShell({ itemCount, viewMode, enqueue, mixed }: StoryShellProps) {
 
   useEffect(() => {
     if (!enqueue) return;
-    if (editor.items.length === 0) return;
+    if (editor.units.length === 0) return;
     if (editor.pendingCount > 0) return;
     if (enqueue === "single") {
-      editor.enqueueDelete(editor.items[0]!.itemRef);
+      editor.enqueueDelete(editor.units[0]!.unitId);
       return;
     }
     if (enqueue === "dirtyMany") {
-      editor.enqueueDelete(editor.items[0]!.itemRef);
-      if (editor.items[1])
-        editor.enqueueReorder(editor.items[1].itemRef, {
-          before: editor.items[2]?.position,
-          after: editor.items[3]?.position,
+      editor.enqueueDelete(editor.units[0]!.unitId);
+      if (editor.units[1])
+        editor.enqueueReorder(editor.units[1].unitId, {
+          before: editor.units[2]?.position,
+          after: editor.units[3]?.position,
         });
-      if (editor.items[2]) editor.enqueueDelete(editor.items[2].itemRef);
+      if (editor.units[2]) editor.enqueueDelete(editor.units[2].unitId);
       return;
     }
     if (enqueue === "failedRetry") {
-      editor.enqueueDelete(editor.items[0]!.itemRef);
+      editor.enqueueDelete(editor.units[0]!.unitId);
     }
   }, [enqueue, editor]);
 

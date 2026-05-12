@@ -1,16 +1,19 @@
 import type {
-  AddShelfItemInput,
+  AddShelfUnitInput,
   CreateShelfInput,
-  ReorderShelfItemInput,
+  ReorderShelfUnitInput,
   ShelfDetailDTO,
   ShelfDTO,
-  ShelfItemBatchOp,
-  ShelfItemBatchResult,
-  ShelfItemDTO,
-  ShelfItemKind,
-  ShelfItemsQuery,
   ShelfListQuery,
   ShelfSummaryDTO,
+  ShelfUnitBatchOp,
+  ShelfUnitBatchResult,
+  ShelfUnitDTO,
+  ShelfUnitKind,
+  ShelfUnitRelationDTO,
+  ShelfUnitRelationRole,
+  ShelfUnitsQuery,
+  ShelfUnitsResponse,
   UpdateShelfInput,
 } from "@rezics/contract";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
@@ -32,27 +35,79 @@ import {
 
 export const SHELF_ITEM_BATCH_OP_CAP = 200;
 import {
-  buildShelfItemProjection,
   mapShelfDetailToDTO,
-  mapShelfItemToDTO,
   mapShelfListRowToDTO,
   mapShelfSummaryToDTO,
   mapShelfToDTO,
+  mapShelfUnitRelationToDTO,
+  mapShelfUnitToDTO,
 } from "./shelf.mapper";
 import { isSystemKindKey } from "./system-shelves";
 import { shelfInclude, shelfListSelect } from "./types";
 
 const REBALANCE_WINDOW = 50;
 
-async function syncContainedUnitIdsToMeili(shelfUnitId: string): Promise<void> {
+async function syncContainedUnitIdsToMeili(shelfId: string): Promise<void> {
   try {
-    await patchContentContainedUnitIdsToMeili(shelfUnitId);
+    await patchContentContainedUnitIdsToMeili(shelfId);
   } catch (error) {
     console.error("[shelf] containedUnitIds meili sync failed", {
-      shelfUnitId,
+      shelfId,
       error,
     });
   }
+}
+
+type Tx = Prisma.TransactionClient;
+
+async function nextShelfPosition(
+  tx: Tx | typeof prisma,
+  shelfId: string,
+): Promise<string> {
+  const last = await tx.shelfUnit.findFirst({
+    where: { shelfId },
+    orderBy: { position: "desc" },
+    select: { position: true },
+  });
+  return generateBetween(last?.position, undefined);
+}
+
+async function ensureShelfUnit(
+  tx: Tx,
+  shelfId: string,
+  unitId: string,
+  kind: ShelfUnitKind,
+  explicitPosition?: string,
+): Promise<{ created: boolean }> {
+  const position = explicitPosition ?? (await nextShelfPosition(tx, shelfId));
+  const created = await tx.shelfUnit.createMany({
+    data: [{ shelfId, unitId, kind, position }],
+    skipDuplicates: true,
+  });
+  if (created.count > 0) {
+    await tx.shelf.update({
+      where: { unitId: shelfId },
+      data: { itemCount: { increment: created.count } },
+    });
+  }
+  return { created: created.count > 0 };
+}
+
+async function deleteShelfUnit(
+  tx: Tx,
+  shelfId: string,
+  unitId: string,
+): Promise<number> {
+  const deleted = await tx.shelfUnit.deleteMany({
+    where: { shelfId, unitId },
+  });
+  if (deleted.count > 0) {
+    await tx.shelf.update({
+      where: { unitId: shelfId },
+      data: { itemCount: { decrement: deleted.count } },
+    });
+  }
+  return deleted.count;
 }
 
 export class ShelfService {
@@ -67,9 +122,9 @@ export class ShelfService {
       and.push({ kindKey: options.kindKey });
     }
 
-    if (options.containsItemRef?.trim()) {
+    if (options.containsUnitId?.trim()) {
       and.push({
-        items: { some: { itemRef: options.containsItemRef } },
+        units: { some: { unitId: options.containsUnitId } },
       });
     }
 
@@ -278,13 +333,12 @@ export class ShelfService {
     await prisma.unit.delete({ where: { id: unitId } });
   }
 
-  // --- Shelf item operations ---
+  // --- Shelf unit operations ---
 
   /**
-   * Derive the ShelfItem kind for a unit at write time.
-   * Looks up Unit.type, and for POST units also checks Post.kind.
+   * Derive the ShelfUnit kind for a unit at write time.
    */
-  async deriveKind(unitId: string): Promise<ShelfItemKind> {
+  async deriveKind(unitId: string): Promise<ShelfUnitKind> {
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
       select: {
@@ -296,148 +350,52 @@ export class ShelfService {
     return mapUnitToKind(unit.type, unit.post?.kind ?? null);
   }
 
-  async addItem(
-    shelfUnitId: string,
-    req: AddShelfItemInput,
-  ): Promise<ShelfItemDTO> {
-    if (shelfUnitId === req.itemRef) {
+  async addUnit(
+    shelfId: string,
+    req: AddShelfUnitInput,
+  ): Promise<ShelfUnitDTO> {
+    if (shelfId === req.unitId) {
       throw new AppError(400, "A shelf cannot contain itself");
     }
 
-    const kind = req.kind ?? (await this.deriveKind(req.itemRef));
+    const kind = req.kind ?? (await this.deriveKind(req.unitId));
 
-    const last = await prisma.shelfItem.findFirst({
-      where: { shelfUnitId },
-      orderBy: { position: "desc" },
-      select: { position: true },
+    const row = await prisma.$transaction(async (tx) => {
+      await ensureShelfUnit(tx, shelfId, req.unitId, kind);
+      return tx.shelfUnit.findUniqueOrThrow({
+        where: { shelfId_unitId: { shelfId, unitId: req.unitId } },
+      });
     });
 
-    const position = generateBetween(last?.position, undefined);
-
-    const item = await prisma.$transaction(async (tx) => {
-      const created = await tx.shelfItem.createMany({
-        data: [{ shelfUnitId, itemRef: req.itemRef, kind, position }],
-        skipDuplicates: true,
-      });
-
-      if (created.count > 0) {
-        await tx.shelf.update({
-          where: { unitId: shelfUnitId },
-          data: { itemCount: { increment: 1 } },
-        });
-      }
-
-      const slot = await tx.shelfItem.findUniqueOrThrow({
-        where: { shelfUnitId_itemRef: { shelfUnitId, itemRef: req.itemRef } },
-      });
-
-      await tx.shelfItemUnit.upsert({
-        where: {
-          shelfUnitId_itemRef_unitId_role: {
-            shelfUnitId,
-            itemRef: req.itemRef,
-            unitId: req.itemRef,
-            role: "primary",
-          },
-        },
-        create: {
-          shelfUnitId,
-          itemRef: req.itemRef,
-          unitId: req.itemRef,
-          role: "primary",
-        },
-        update: {},
-      });
-
-      for (const reviewId of req.reviewIds ?? []) {
-        await tx.shelfItemUnit.upsert({
-          where: {
-            shelfUnitId_itemRef_unitId_role: {
-              shelfUnitId,
-              itemRef: req.itemRef,
-              unitId: reviewId,
-              role: "review",
-            },
-          },
-          create: {
-            shelfUnitId,
-            itemRef: req.itemRef,
-            unitId: reviewId,
-            role: "review",
-          },
-          update: {},
-        });
-      }
-
-      for (const tagId of req.tagIds ?? []) {
-        await tx.shelfItemUnit.upsert({
-          where: {
-            shelfUnitId_itemRef_unitId_role: {
-              shelfUnitId,
-              itemRef: req.itemRef,
-              unitId: tagId,
-              role: "tag",
-            },
-          },
-          create: {
-            shelfUnitId,
-            itemRef: req.itemRef,
-            unitId: tagId,
-            role: "tag",
-          },
-          update: {},
-        });
-      }
-
-      return slot;
-    });
-
-    const projection = await buildShelfItemProjection(shelfUnitId, [
-      req.itemRef,
-    ]);
-    await syncContainedUnitIdsToMeili(shelfUnitId);
-    return mapShelfItemToDTO(item, projection.get(req.itemRef));
+    await syncContainedUnitIdsToMeili(shelfId);
+    return mapShelfUnitToDTO(row);
   }
 
-  async removeItem(shelfUnitId: string, itemRef: string): Promise<void> {
+  async removeUnit(shelfId: string, unitId: string): Promise<void> {
     await prisma.$transaction(async (tx) => {
-      const deleted = await tx.shelfItem.deleteMany({
-        where: { shelfUnitId, itemRef },
-      });
-      if (deleted.count > 0) {
-        await tx.shelf.update({
-          where: { unitId: shelfUnitId },
-          data: { itemCount: { decrement: deleted.count } },
-        });
-      }
+      await deleteShelfUnit(tx, shelfId, unitId);
     });
-    await syncContainedUnitIdsToMeili(shelfUnitId);
+    await syncContainedUnitIdsToMeili(shelfId);
   }
 
-  async reorderItem(
-    shelfUnitId: string,
-    itemRef: string,
-    input: ReorderShelfItemInput,
-  ): Promise<ShelfItemDTO> {
+  async reorderUnit(
+    shelfId: string,
+    unitId: string,
+    input: ReorderShelfUnitInput,
+  ): Promise<ShelfUnitDTO> {
     const [before, after] = await Promise.all([
-      input.beforeItemRef
-        ? prisma.shelfItem.findUnique({
+      input.beforeUnitId
+        ? prisma.shelfUnit.findUnique({
             where: {
-              shelfUnitId_itemRef: {
-                shelfUnitId,
-                itemRef: input.beforeItemRef,
-              },
+              shelfId_unitId: { shelfId, unitId: input.beforeUnitId },
             },
             select: { position: true },
           })
         : Promise.resolve(null),
-      input.afterItemRef
-        ? prisma.shelfItem.findUnique({
+      input.afterUnitId
+        ? prisma.shelfUnit.findUnique({
             where: {
-              shelfUnitId_itemRef: {
-                shelfUnitId,
-                itemRef: input.afterItemRef,
-              },
+              shelfId_unitId: { shelfId, unitId: input.afterUnitId },
             },
             select: { position: true },
           })
@@ -448,241 +406,244 @@ export class ShelfService {
 
     if (candidate.length > POSITION_LENGTH_THRESHOLD) {
       return await this.rebalanceWindow(
-        shelfUnitId,
-        itemRef,
-        input.beforeItemRef,
-        input.afterItemRef,
+        shelfId,
+        unitId,
+        input.beforeUnitId,
+        input.afterUnitId,
       );
     }
 
-    const item = await prisma.shelfItem.update({
-      where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
+    const row = await prisma.shelfUnit.update({
+      where: { shelfId_unitId: { shelfId, unitId } },
       data: { position: candidate },
     });
-
-    const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
-    return mapShelfItemToDTO(item, projection.get(itemRef));
+    return mapShelfUnitToDTO(row);
   }
 
   private async rebalanceWindow(
-    shelfUnitId: string,
-    movedItemRef: string,
-    beforeItemRef: string | undefined,
-    afterItemRef: string | undefined,
-  ): Promise<ShelfItemDTO> {
-    const rows = await prisma.shelfItem.findMany({
-      where: { shelfUnitId },
+    shelfId: string,
+    movedUnitId: string,
+    beforeUnitId: string | undefined,
+    afterUnitId: string | undefined,
+  ): Promise<ShelfUnitDTO> {
+    const rows = await prisma.shelfUnit.findMany({
+      where: { shelfId },
       orderBy: { position: "asc" },
       take: REBALANCE_WINDOW,
-      select: { itemRef: true },
+      select: { unitId: true },
     });
 
-    const refs = rows.map((r) => r.itemRef).filter((r) => r !== movedItemRef);
-    let insertAt = refs.length;
-    if (beforeItemRef) {
-      const idx = refs.indexOf(beforeItemRef);
+    const ids = rows.map((r) => r.unitId).filter((r) => r !== movedUnitId);
+    let insertAt = ids.length;
+    if (beforeUnitId) {
+      const idx = ids.indexOf(beforeUnitId);
       if (idx >= 0) insertAt = idx + 1;
-    } else if (afterItemRef) {
-      const idx = refs.indexOf(afterItemRef);
+    } else if (afterUnitId) {
+      const idx = ids.indexOf(afterUnitId);
       if (idx >= 0) insertAt = idx;
       else insertAt = 0;
     } else {
-      insertAt = refs.length;
+      insertAt = ids.length;
     }
-    refs.splice(insertAt, 0, movedItemRef);
+    ids.splice(insertAt, 0, movedUnitId);
 
-    const newPositions = rebalance(refs.length);
+    const newPositions = rebalance(ids.length);
 
     await prisma.$transaction(
-      refs.map((ref, idx) =>
-        prisma.shelfItem.update({
-          where: { shelfUnitId_itemRef: { shelfUnitId, itemRef: ref } },
+      ids.map((id, idx) =>
+        prisma.shelfUnit.update({
+          where: { shelfId_unitId: { shelfId, unitId: id } },
           data: { position: newPositions[idx]! },
         }),
       ),
     );
 
-    const moved = await prisma.shelfItem.findUniqueOrThrow({
-      where: { shelfUnitId_itemRef: { shelfUnitId, itemRef: movedItemRef } },
+    const moved = await prisma.shelfUnit.findUniqueOrThrow({
+      where: { shelfId_unitId: { shelfId, unitId: movedUnitId } },
     });
-    const projection = await buildShelfItemProjection(shelfUnitId, [
-      movedItemRef,
-    ]);
-    return mapShelfItemToDTO(moved, projection.get(movedItemRef));
+    return mapShelfUnitToDTO(moved);
   }
 
-  async getShelfItems(
-    shelfUnitId: string,
-    query: ShelfItemsQuery = {},
-  ): Promise<{ items: ShelfItemDTO[]; hasMore: boolean }> {
+  async getShelfUnits(
+    shelfId: string,
+    query: ShelfUnitsQuery = {},
+  ): Promise<ShelfUnitsResponse> {
     const limit = Math.max(1, Math.min(Number(query.limit ?? 100), 100));
 
     const cursor = query.cursor
-      ? {
-          shelfUnitId_itemRef: { shelfUnitId, itemRef: query.cursor },
-        }
+      ? { shelfId_unitId: { shelfId, unitId: query.cursor } }
       : undefined;
 
-    const items = await prisma.shelfItem.findMany({
-      where: { shelfUnitId },
+    const units = await prisma.shelfUnit.findMany({
+      where: { shelfId },
       orderBy: { position: "asc" },
       cursor,
       skip: cursor ? 1 : 0,
       take: limit + 1,
     });
 
-    const hasMore = items.length > limit;
-    const page = hasMore ? items.slice(0, limit) : items;
+    const hasMore = units.length > limit;
+    const page = hasMore ? units.slice(0, limit) : units;
+    const unitIds = page.map((p) => p.unitId);
 
-    const projection = await buildShelfItemProjection(
-      shelfUnitId,
-      page.map((p) => p.itemRef),
-    );
+    const relations =
+      unitIds.length > 0
+        ? await prisma.shelfUnitRelation.findMany({
+            where: {
+              shelfId,
+              OR: [
+                { parentUnitId: { in: unitIds } },
+                { childUnitId: { in: unitIds } },
+              ],
+            },
+          })
+        : [];
 
     return {
-      items: page.map((p) => mapShelfItemToDTO(p, projection.get(p.itemRef))),
+      units: page.map(mapShelfUnitToDTO),
+      relations: relations.map(mapShelfUnitRelationToDTO),
       hasMore,
     };
   }
 
-  // --- ShelfItemUnit role attachments ---
+  // --- ShelfUnitRelation operations ---
 
   async attachReview(
-    shelfUnitId: string,
-    itemRef: string,
+    shelfId: string,
+    parentUnitId: string,
     reviewUnitId: string,
-    fallbackKind?: ShelfItemKind,
-  ): Promise<ShelfItemDTO> {
-    let didCreateSlot = false;
-    const item = await prisma.$transaction(async (tx) => {
-      const existing = await tx.shelfItem.findUnique({
-        where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-      });
-      if (!existing) didCreateSlot = true;
+    reviewKind: ShelfUnitKind = "review",
+  ): Promise<ShelfUnitRelationDTO> {
+    if (parentUnitId === reviewUnitId) {
+      throw new AppError(400, "self_relation_forbidden");
+    }
 
-      if (!existing) {
-        const kind = fallbackKind ?? (await this.deriveKind(itemRef));
-        const last = await tx.shelfItem.findFirst({
-          where: { shelfUnitId },
-          orderBy: { position: "desc" },
-          select: { position: true },
-        });
-        const position = generateBetween(last?.position, undefined);
-        const created = await tx.shelfItem.createMany({
-          data: [{ shelfUnitId, itemRef, kind, position }],
-          skipDuplicates: true,
-        });
-        if (created.count > 0) {
-          await tx.shelf.update({
-            where: { unitId: shelfUnitId },
-            data: { itemCount: { increment: 1 } },
-          });
-        }
-        await tx.shelfItemUnit.upsert({
-          where: {
-            shelfUnitId_itemRef_unitId_role: {
-              shelfUnitId,
-              itemRef,
-              unitId: itemRef,
-              role: "primary",
-            },
-          },
-          create: { shelfUnitId, itemRef, unitId: itemRef, role: "primary" },
-          update: {},
-        });
+    let didCreateChild = false;
+    const relation = await prisma.$transaction(async (tx) => {
+      const parent = await tx.shelfUnit.findUnique({
+        where: { shelfId_unitId: { shelfId, unitId: parentUnitId } },
+      });
+      if (!parent) {
+        const parentKind = await this.deriveKind(parentUnitId);
+        await ensureShelfUnit(tx, shelfId, parentUnitId, parentKind);
       }
 
-      await tx.shelfItemUnit.upsert({
+      const child = await tx.shelfUnit.findUnique({
+        where: { shelfId_unitId: { shelfId, unitId: reviewUnitId } },
+      });
+      if (!child) {
+        const r = await ensureShelfUnit(tx, shelfId, reviewUnitId, reviewKind);
+        didCreateChild = r.created;
+      }
+
+      return tx.shelfUnitRelation.upsert({
         where: {
-          shelfUnitId_itemRef_unitId_role: {
-            shelfUnitId,
-            itemRef,
-            unitId: reviewUnitId,
+          shelfId_parentUnitId_childUnitId_role: {
+            shelfId,
+            parentUnitId,
+            childUnitId: reviewUnitId,
             role: "review",
           },
         },
         create: {
-          shelfUnitId,
-          itemRef,
-          unitId: reviewUnitId,
+          shelfId,
+          parentUnitId,
+          childUnitId: reviewUnitId,
           role: "review",
         },
         update: {},
       });
-
-      return tx.shelfItem.findUniqueOrThrow({
-        where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-      });
     });
 
-    const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
-    if (didCreateSlot) {
-      await syncContainedUnitIdsToMeili(shelfUnitId);
-    }
-    return mapShelfItemToDTO(item, projection.get(itemRef));
+    if (didCreateChild) await syncContainedUnitIdsToMeili(shelfId);
+    return mapShelfUnitRelationToDTO(relation);
   }
 
   async detachReview(
-    shelfUnitId: string,
-    itemRef: string,
+    shelfId: string,
+    parentUnitId: string,
     reviewUnitId: string,
-  ): Promise<ShelfItemDTO> {
-    await prisma.shelfItemUnit.deleteMany({
-      where: { shelfUnitId, itemRef, unitId: reviewUnitId, role: "review" },
+  ): Promise<void> {
+    await prisma.shelfUnitRelation.deleteMany({
+      where: {
+        shelfId,
+        parentUnitId,
+        childUnitId: reviewUnitId,
+        role: "review",
+      },
     });
-
-    const item = await prisma.shelfItem.findUniqueOrThrow({
-      where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-    });
-    const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
-    return mapShelfItemToDTO(item, projection.get(itemRef));
   }
 
-  async setItemTags(
-    shelfUnitId: string,
-    itemRef: string,
-    tagIds: string[],
-  ): Promise<ShelfItemDTO> {
-    const item = await prisma.$transaction(async (tx) => {
-      const existing = await tx.shelfItemUnit.findMany({
-        where: { shelfUnitId, itemRef, role: "tag" },
-        select: { unitId: true },
+  /**
+   * Reconcile the children of a parent for a single role to exactly the supplied list.
+   * Auto-creates child ShelfUnit rows if needed; end-of-shelf position rule.
+   */
+  async setChildren(
+    shelfId: string,
+    parentUnitId: string,
+    role: ShelfUnitRelationRole,
+    childUnitIds: string[],
+    childKind?: ShelfUnitKind,
+  ): Promise<void> {
+    if (childUnitIds.some((id) => id === parentUnitId)) {
+      throw new AppError(400, "self_relation_forbidden");
+    }
+
+    let didCreate = false;
+    await prisma.$transaction(async (tx) => {
+      const parent = await tx.shelfUnit.findUnique({
+        where: { shelfId_unitId: { shelfId, unitId: parentUnitId } },
       });
-      const existingSet = new Set(existing.map((e) => e.unitId));
-      const nextSet = new Set(tagIds);
+      if (!parent) {
+        const parentKind = await this.deriveKind(parentUnitId);
+        await ensureShelfUnit(tx, shelfId, parentUnitId, parentKind);
+      }
+
+      for (const childId of childUnitIds) {
+        const existing = await tx.shelfUnit.findUnique({
+          where: { shelfId_unitId: { shelfId, unitId: childId } },
+        });
+        if (!existing) {
+          const kind = childKind ?? (await this.deriveKind(childId));
+          const r = await ensureShelfUnit(tx, shelfId, childId, kind);
+          didCreate = didCreate || r.created;
+        }
+      }
+
+      const existingRelations = await tx.shelfUnitRelation.findMany({
+        where: { shelfId, parentUnitId, role },
+        select: { childUnitId: true },
+      });
+      const existingSet = new Set(existingRelations.map((r) => r.childUnitId));
+      const nextSet = new Set(childUnitIds);
 
       const toAdd = [...nextSet].filter((id) => !existingSet.has(id));
       const toRemove = [...existingSet].filter((id) => !nextSet.has(id));
 
       if (toRemove.length > 0) {
-        await tx.shelfItemUnit.deleteMany({
+        await tx.shelfUnitRelation.deleteMany({
           where: {
-            shelfUnitId,
-            itemRef,
-            role: "tag",
-            unitId: { in: toRemove },
+            shelfId,
+            parentUnitId,
+            role,
+            childUnitId: { in: toRemove },
           },
         });
       }
-      for (const unitId of toAdd) {
-        await tx.shelfItemUnit.create({
-          data: { shelfUnitId, itemRef, unitId, role: "tag" },
+      for (const childId of toAdd) {
+        await tx.shelfUnitRelation.create({
+          data: { shelfId, parentUnitId, childUnitId: childId, role },
         });
       }
-
-      return tx.shelfItem.findUniqueOrThrow({
-        where: { shelfUnitId_itemRef: { shelfUnitId, itemRef } },
-      });
     });
 
-    const projection = await buildShelfItemProjection(shelfUnitId, [itemRef]);
-    return mapShelfItemToDTO(item, projection.get(itemRef));
+    if (didCreate) await syncContainedUnitIdsToMeili(shelfId);
   }
 
   async applyBatch(
-    shelfUnitId: string,
-    ops: ShelfItemBatchOp[],
-  ): Promise<ShelfItemBatchResult[]> {
+    shelfId: string,
+    ops: ShelfUnitBatchOp[],
+  ): Promise<ShelfUnitBatchResult[]> {
     if (ops.length > SHELF_ITEM_BATCH_OP_CAP) {
       throw new AppError(
         413,
@@ -690,8 +651,8 @@ export class ShelfService {
       );
     }
 
-    const results: ShelfItemBatchResult[] = [];
-    const touchedRefs = new Set<string>();
+    const results: ShelfUnitBatchResult[] = [];
+    const touchedUnitIds = new Set<string>();
     let mutated = false;
 
     await prisma.$transaction(async (tx) => {
@@ -699,7 +660,7 @@ export class ShelfService {
         try {
           switch (op.op) {
             case "add": {
-              if (shelfUnitId === op.itemRef) {
+              if (shelfId === op.unitId) {
                 results.push({
                   status: "failed",
                   op,
@@ -707,11 +668,11 @@ export class ShelfService {
                 });
                 continue;
               }
-              const created = await tx.shelfItem.createMany({
+              const created = await tx.shelfUnit.createMany({
                 data: [
                   {
-                    shelfUnitId,
-                    itemRef: op.itemRef,
+                    shelfId,
+                    unitId: op.unitId,
                     kind: op.kind,
                     position: op.position,
                   },
@@ -720,91 +681,32 @@ export class ShelfService {
               });
               if (created.count > 0) {
                 await tx.shelf.update({
-                  where: { unitId: shelfUnitId },
+                  where: { unitId: shelfId },
                   data: { itemCount: { increment: 1 } },
                 });
                 mutated = true;
               }
-              await tx.shelfItemUnit.upsert({
-                where: {
-                  shelfUnitId_itemRef_unitId_role: {
-                    shelfUnitId,
-                    itemRef: op.itemRef,
-                    unitId: op.itemRef,
-                    role: "primary",
-                  },
-                },
-                create: {
-                  shelfUnitId,
-                  itemRef: op.itemRef,
-                  unitId: op.itemRef,
-                  role: "primary",
-                },
-                update: {},
+              const row = await tx.shelfUnit.findUniqueOrThrow({
+                where: { shelfId_unitId: { shelfId, unitId: op.unitId } },
               });
-              for (const reviewId of op.reviewIds ?? []) {
-                await tx.shelfItemUnit.upsert({
-                  where: {
-                    shelfUnitId_itemRef_unitId_role: {
-                      shelfUnitId,
-                      itemRef: op.itemRef,
-                      unitId: reviewId,
-                      role: "review",
-                    },
-                  },
-                  create: {
-                    shelfUnitId,
-                    itemRef: op.itemRef,
-                    unitId: reviewId,
-                    role: "review",
-                  },
-                  update: {},
-                });
-              }
-              for (const tagId of op.tagIds ?? []) {
-                await tx.shelfItemUnit.upsert({
-                  where: {
-                    shelfUnitId_itemRef_unitId_role: {
-                      shelfUnitId,
-                      itemRef: op.itemRef,
-                      unitId: tagId,
-                      role: "tag",
-                    },
-                  },
-                  create: {
-                    shelfUnitId,
-                    itemRef: op.itemRef,
-                    unitId: tagId,
-                    role: "tag",
-                  },
-                  update: {},
-                });
-              }
-              const slot = await tx.shelfItem.findUniqueOrThrow({
-                where: {
-                  shelfUnitId_itemRef: { shelfUnitId, itemRef: op.itemRef },
-                },
-              });
-              touchedRefs.add(op.itemRef);
+              touchedUnitIds.add(op.unitId);
               results.push({
                 status: "ok",
                 op,
-                item: mapShelfItemToDTO(slot, undefined),
+                unit: mapShelfUnitToDTO(row),
               });
               break;
             }
             case "reorder": {
-              const updated = await tx.shelfItem.update({
-                where: {
-                  shelfUnitId_itemRef: { shelfUnitId, itemRef: op.itemRef },
-                },
+              const row = await tx.shelfUnit.update({
+                where: { shelfId_unitId: { shelfId, unitId: op.unitId } },
                 data: { position: op.position },
               });
-              touchedRefs.add(op.itemRef);
+              touchedUnitIds.add(op.unitId);
               results.push({
                 status: "ok",
                 op,
-                item: mapShelfItemToDTO(updated, undefined),
+                unit: mapShelfUnitToDTO(row),
               });
               break;
             }
@@ -823,8 +725,8 @@ export class ShelfService {
                 });
                 continue;
               }
-              const rows = await tx.shelfItem.findMany({
-                where: { shelfUnitId, itemRef: { not: op.itemRef } },
+              const rows = await tx.shelfUnit.findMany({
+                where: { shelfId, unitId: { not: op.unitId } },
                 orderBy: { position: order },
                 skip: Math.max(0, skip - 1),
                 take: skip === 0 ? 1 : 2,
@@ -844,27 +746,25 @@ export class ShelfService {
                 order === "desc"
                   ? generateBetween(first.position, previousVisual?.position)
                   : generateBetween(previousVisual?.position, first.position);
-              const updated = await tx.shelfItem.update({
-                where: {
-                  shelfUnitId_itemRef: { shelfUnitId, itemRef: op.itemRef },
-                },
+              const row = await tx.shelfUnit.update({
+                where: { shelfId_unitId: { shelfId, unitId: op.unitId } },
                 data: { position: newPosition },
               });
-              touchedRefs.add(op.itemRef);
+              touchedUnitIds.add(op.unitId);
               results.push({
                 status: "ok",
                 op,
-                item: mapShelfItemToDTO(updated, undefined),
+                unit: mapShelfUnitToDTO(row),
               });
               break;
             }
             case "delete": {
-              const deleted = await tx.shelfItem.deleteMany({
-                where: { shelfUnitId, itemRef: op.itemRef },
+              const deleted = await tx.shelfUnit.deleteMany({
+                where: { shelfId, unitId: op.unitId },
               });
               if (deleted.count > 0) {
                 await tx.shelf.update({
-                  where: { unitId: shelfUnitId },
+                  where: { unitId: shelfId },
                   data: { itemCount: { decrement: deleted.count } },
                 });
                 mutated = true;
@@ -872,48 +772,130 @@ export class ShelfService {
               results.push({ status: "ok", op });
               break;
             }
-            case "setTags": {
-              const existing = await tx.shelfItemUnit.findMany({
-                where: { shelfUnitId, itemRef: op.itemRef, role: "tag" },
-                select: { unitId: true },
+            case "attach": {
+              if (op.parentUnitId === op.childUnitId) {
+                results.push({
+                  status: "failed",
+                  op,
+                  reason: "self_relation_forbidden",
+                });
+                continue;
+              }
+              const existingChild = await tx.shelfUnit.findUnique({
+                where: {
+                  shelfId_unitId: { shelfId, unitId: op.childUnitId },
+                },
               });
-              const existingSet = new Set(existing.map((e) => e.unitId));
-              const nextSet = new Set(op.tagIds);
+              if (!existingChild) {
+                const r = await ensureShelfUnit(
+                  tx,
+                  shelfId,
+                  op.childUnitId,
+                  op.childKind,
+                  op.position,
+                );
+                if (r.created) mutated = true;
+              }
+              const relation = await tx.shelfUnitRelation.upsert({
+                where: {
+                  shelfId_parentUnitId_childUnitId_role: {
+                    shelfId,
+                    parentUnitId: op.parentUnitId,
+                    childUnitId: op.childUnitId,
+                    role: op.role,
+                  },
+                },
+                create: {
+                  shelfId,
+                  parentUnitId: op.parentUnitId,
+                  childUnitId: op.childUnitId,
+                  role: op.role,
+                },
+                update: {},
+              });
+              touchedUnitIds.add(op.childUnitId);
+              const childRow = await tx.shelfUnit.findUnique({
+                where: {
+                  shelfId_unitId: { shelfId, unitId: op.childUnitId },
+                },
+              });
+              results.push({
+                status: "ok",
+                op,
+                unit: childRow ? mapShelfUnitToDTO(childRow) : undefined,
+                relation: mapShelfUnitRelationToDTO(relation),
+              });
+              break;
+            }
+            case "detach": {
+              await tx.shelfUnitRelation.deleteMany({
+                where: {
+                  shelfId,
+                  parentUnitId: op.parentUnitId,
+                  childUnitId: op.childUnitId,
+                  role: op.role,
+                },
+              });
+              results.push({ status: "ok", op });
+              break;
+            }
+            case "setChildren": {
+              if (op.childUnitIds.some((id) => id === op.parentUnitId)) {
+                results.push({
+                  status: "failed",
+                  op,
+                  reason: "self_relation_forbidden",
+                });
+                continue;
+              }
+              for (const childId of op.childUnitIds) {
+                const existing = await tx.shelfUnit.findUnique({
+                  where: { shelfId_unitId: { shelfId, unitId: childId } },
+                });
+                if (!existing) {
+                  const kind =
+                    op.childKind ?? (await this.deriveKind(childId));
+                  const r = await ensureShelfUnit(tx, shelfId, childId, kind);
+                  if (r.created) mutated = true;
+                }
+              }
+              const existingRelations = await tx.shelfUnitRelation.findMany({
+                where: {
+                  shelfId,
+                  parentUnitId: op.parentUnitId,
+                  role: op.role,
+                },
+                select: { childUnitId: true },
+              });
+              const existingSet = new Set(
+                existingRelations.map((r) => r.childUnitId),
+              );
+              const nextSet = new Set(op.childUnitIds);
               const toAdd = [...nextSet].filter((id) => !existingSet.has(id));
               const toRemove = [...existingSet].filter(
                 (id) => !nextSet.has(id),
               );
               if (toRemove.length > 0) {
-                await tx.shelfItemUnit.deleteMany({
+                await tx.shelfUnitRelation.deleteMany({
                   where: {
-                    shelfUnitId,
-                    itemRef: op.itemRef,
-                    role: "tag",
-                    unitId: { in: toRemove },
+                    shelfId,
+                    parentUnitId: op.parentUnitId,
+                    role: op.role,
+                    childUnitId: { in: toRemove },
                   },
                 });
               }
-              for (const unitId of toAdd) {
-                await tx.shelfItemUnit.create({
+              for (const childId of toAdd) {
+                await tx.shelfUnitRelation.create({
                   data: {
-                    shelfUnitId,
-                    itemRef: op.itemRef,
-                    unitId,
-                    role: "tag",
+                    shelfId,
+                    parentUnitId: op.parentUnitId,
+                    childUnitId: childId,
+                    role: op.role,
                   },
                 });
               }
-              const slot = await tx.shelfItem.findUniqueOrThrow({
-                where: {
-                  shelfUnitId_itemRef: { shelfUnitId, itemRef: op.itemRef },
-                },
-              });
-              touchedRefs.add(op.itemRef);
-              results.push({
-                status: "ok",
-                op,
-                item: mapShelfItemToDTO(slot, undefined),
-              });
+              results.push({ status: "ok", op });
               break;
             }
             default: {
@@ -935,54 +917,56 @@ export class ShelfService {
       }
     });
 
-    if (touchedRefs.size > 0) {
-      const refs = [...touchedRefs];
-      const projection = await buildShelfItemProjection(shelfUnitId, refs);
+    if (touchedUnitIds.size > 0) {
       for (let i = 0; i < results.length; i += 1) {
         const r = results[i]!;
-        if (r.status === "ok" && r.item && touchedRefs.has(r.op.itemRef)) {
-          const fresh = await prisma.shelfItem.findUnique({
-            where: {
-              shelfUnitId_itemRef: { shelfUnitId, itemRef: r.op.itemRef },
-            },
-          });
-          if (fresh) {
-            results[i] = {
-              status: "ok",
-              op: r.op,
-              item: mapShelfItemToDTO(fresh, projection.get(r.op.itemRef)),
-            };
+        if (
+          r.status === "ok" &&
+          (r.op.op === "add" || r.op.op === "reorder" || r.op.op === "reorderToPage")
+        ) {
+          const opUnitId = r.op.unitId;
+          if (touchedUnitIds.has(opUnitId)) {
+            const fresh = await prisma.shelfUnit.findUnique({
+              where: { shelfId_unitId: { shelfId, unitId: opUnitId } },
+            });
+            if (fresh) {
+              results[i] = {
+                status: "ok",
+                op: r.op,
+                unit: mapShelfUnitToDTO(fresh),
+              };
+            }
           }
         }
       }
     }
 
     if (mutated) {
-      await syncContainedUnitIdsToMeili(shelfUnitId);
+      await syncContainedUnitIdsToMeili(shelfId);
     }
 
     return results;
   }
 
   async cleanupOrphans(
-    shelfUnitId: string,
-    orphanItemRefs: string[],
+    shelfId: string,
+    orphanUnitIds: string[],
   ): Promise<{ deleted: number }> {
-    if (orphanItemRefs.length === 0) return { deleted: 0 };
+    if (orphanUnitIds.length === 0) return { deleted: 0 };
     const result = await prisma.$transaction(async (tx) => {
-      const deleted = await tx.shelfItem.deleteMany({
-        where: { shelfUnitId, itemRef: { in: orphanItemRefs } },
+      const deleted = await tx.shelfUnit.deleteMany({
+        where: { shelfId, unitId: { in: orphanUnitIds } },
       });
       if (deleted.count > 0) {
         await tx.shelf.update({
-          where: { unitId: shelfUnitId },
+          where: { unitId: shelfId },
           data: { itemCount: { decrement: deleted.count } },
         });
       }
       return deleted;
     });
     if (result.count > 0) {
-      await syncContainedUnitIdsToMeili(shelfUnitId);
+      await syncContainedUnitIdsToMeili(shelfId);
     }
     return { deleted: result.count };
   }
@@ -991,7 +975,7 @@ export class ShelfService {
 export function mapUnitToKind(
   type: UnitType,
   postKind: PostKind | null,
-): ShelfItemKind {
+): ShelfUnitKind {
   if (type === UnitType.POST) {
     if (postKind === PostKind.CHAPTER) return "chapter";
     if (postKind === PostKind.REVIEW) return "review";
@@ -1018,7 +1002,7 @@ export function mapUnitToKind(
     case UnitType.VIDEO:
       return "video";
     default:
-      return type.toString().toLowerCase() as ShelfItemKind;
+      return type.toString().toLowerCase() as ShelfUnitKind;
   }
 }
 

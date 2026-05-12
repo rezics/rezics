@@ -24,7 +24,7 @@ export const collectionApi = new Elysia({ prefix: "/collect" })
       detail: {
         summary: "Collect a unit",
         description:
-          "Save a unit to multiple shelves. Reviews auto-collect the target work (review id is appended to the slot's reviewIds).",
+          "Save a unit to multiple shelves. Reviews auto-collect the target work and add a role='review' ShelfUnitRelation to the review child.",
         tags: ["Collection"],
       },
     },

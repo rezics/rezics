@@ -1,20 +1,20 @@
-import type { ShelfItemDTO } from "@rezics/api/shelf";
+import type { ShelfUnitDTO } from "@rezics/api/shelf";
 import { Badge } from "@rezics/ui/shadcn";
 
 interface ShelfItemCardProps {
-  item: ShelfItemDTO;
+  unit: ShelfUnitDTO;
 }
 
-export function ShelfItemCard({ item }: ShelfItemCardProps) {
+export function ShelfItemCard({ unit }: ShelfItemCardProps) {
   const shortRef =
-    item.itemRef.length > 12
-      ? `${item.itemRef.slice(0, 8)}…${item.itemRef.slice(-4)}`
-      : item.itemRef;
+    unit.unitId.length > 12
+      ? `${unit.unitId.slice(0, 8)}…${unit.unitId.slice(-4)}`
+      : unit.unitId;
 
   return (
     <div className="flex flex-row items-center gap-2 px-2 py-1">
       <Badge variant="outline" className="text-xs">
-        {item.kind}
+        {unit.kind}
       </Badge>
       <span className="text-xs text-text-secondary whitespace-nowrap">
         {shortRef}

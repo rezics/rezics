@@ -1,15 +1,16 @@
 import type {
-  AddShelfItemInput,
+  AddShelfUnitInput,
   CleanupShelfOrphansInput,
   CollectInput,
   CollectResponse,
   CreateShelfInput,
-  ReorderShelfItemInput,
-  SetShelfItemTagsInput,
-  ShelfItemBatchOp,
-  ShelfItemBatchResponse,
-  ShelfItemDTO,
+  ReorderShelfUnitInput,
+  SetShelfUnitChildrenInput,
   ShelfResponse,
+  ShelfUnitBatchOp,
+  ShelfUnitBatchResponse,
+  ShelfUnitDTO,
+  ShelfUnitRelationDTO,
   ToggleFavoriteResponse,
   UpdateShelfInput,
 } from "@rezics/contract";
@@ -26,6 +27,14 @@ function invalidateShelfCollections(
 ) {
   queryClient.invalidateQueries({ queryKey: shelfKeys.lists() });
   queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
+}
+
+function invalidateShelfDetail(
+  queryClient: ReturnType<typeof useQueryClient>,
+  shelfId: string,
+) {
+  queryClient.invalidateQueries({ queryKey: shelfKeys.detail(shelfId) });
+  queryClient.invalidateQueries({ queryKey: shelfKeys.units(shelfId) });
 }
 
 export function useCreateShelfMutation(
@@ -86,43 +95,37 @@ export function useDeleteShelfMutation(
   });
 }
 
-export function useAddShelfItemMutation(
+export function useAddShelfUnitMutation(
   options?: Omit<
     UseMutationOptions<
-      ShelfItemDTO,
+      ShelfUnitDTO,
       Error,
-      { shelfUnitId: string; input: AddShelfItemInput }
+      { shelfId: string; input: AddShelfUnitInput }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, input }) =>
-      shelfApi.addItem(shelfUnitId, input),
+    mutationFn: ({ shelfId, input }) => shelfApi.addUnit(shelfId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.detail(variables.shelfUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.items(variables.shelfUnitId),
-      });
+      invalidateShelfDetail(queryClient, variables.shelfId);
       invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useReorderShelfItemMutation(
+export function useReorderShelfUnitMutation(
   options?: Omit<
     UseMutationOptions<
-      ShelfItemDTO,
+      ShelfUnitDTO,
       Error,
       {
-        shelfUnitId: string;
-        itemRef: string;
-        input: ReorderShelfItemInput;
+        shelfId: string;
+        childUnitId: string;
+        input: ReorderShelfUnitInput;
       }
     >,
     "mutationFn"
@@ -130,44 +133,34 @@ export function useReorderShelfItemMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, itemRef, input }) =>
-      shelfApi.reorderItem(shelfUnitId, itemRef, input),
+    mutationFn: ({ shelfId, childUnitId, input }) =>
+      shelfApi.reorderUnit(shelfId, childUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.detail(variables.shelfUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.items(variables.shelfUnitId),
-      });
+      invalidateShelfDetail(queryClient, variables.shelfId);
       invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useRemoveShelfItemMutation(
+export function useRemoveShelfUnitMutation(
   options?: Omit<
     UseMutationOptions<
       { message: string },
       Error,
-      { shelfUnitId: string; itemRef: string }
+      { shelfId: string; childUnitId: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, itemRef }) =>
-      shelfApi.removeItem(shelfUnitId, itemRef),
+    mutationFn: ({ shelfId, childUnitId }) =>
+      shelfApi.removeUnit(shelfId, childUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.detail(variables.shelfUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.items(variables.shelfUnitId),
-      });
+      invalidateShelfDetail(queryClient, variables.shelfId);
       invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -177,25 +170,20 @@ export function useRemoveShelfItemMutation(
 export function useAttachReviewMutation(
   options?: Omit<
     UseMutationOptions<
-      ShelfItemDTO,
+      ShelfUnitRelationDTO,
       Error,
-      { shelfUnitId: string; itemRef: string; reviewUnitId: string }
+      { shelfId: string; parentUnitId: string; reviewUnitId: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, itemRef, reviewUnitId }) =>
-      shelfApi.attachReview(shelfUnitId, itemRef, reviewUnitId),
+    mutationFn: ({ shelfId, parentUnitId, reviewUnitId }) =>
+      shelfApi.attachReview(shelfId, parentUnitId, reviewUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.detail(variables.shelfUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.items(variables.shelfUnitId),
-      });
+      invalidateShelfDetail(queryClient, variables.shelfId);
       invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -205,40 +193,35 @@ export function useAttachReviewMutation(
 export function useDetachReviewMutation(
   options?: Omit<
     UseMutationOptions<
-      ShelfItemDTO,
+      { message: string },
       Error,
-      { shelfUnitId: string; itemRef: string; reviewUnitId: string }
+      { shelfId: string; parentUnitId: string; reviewUnitId: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, itemRef, reviewUnitId }) =>
-      shelfApi.detachReview(shelfUnitId, itemRef, reviewUnitId),
+    mutationFn: ({ shelfId, parentUnitId, reviewUnitId }) =>
+      shelfApi.detachReview(shelfId, parentUnitId, reviewUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.detail(variables.shelfUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.items(variables.shelfUnitId),
-      });
+      invalidateShelfDetail(queryClient, variables.shelfId);
       invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useSetShelfItemTagsMutation(
+export function useSetShelfUnitChildrenMutation(
   options?: Omit<
     UseMutationOptions<
-      ShelfItemDTO,
+      { message: string },
       Error,
       {
-        shelfUnitId: string;
-        itemRef: string;
-        input: SetShelfItemTagsInput;
+        shelfId: string;
+        parentUnitId: string;
+        input: SetShelfUnitChildrenInput;
       }
     >,
     "mutationFn"
@@ -246,44 +229,33 @@ export function useSetShelfItemTagsMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, itemRef, input }) =>
-      shelfApi.setItemTags(shelfUnitId, itemRef, input),
+    mutationFn: ({ shelfId, parentUnitId, input }) =>
+      shelfApi.setChildren(shelfId, parentUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.detail(variables.shelfUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.items(variables.shelfUnitId),
-      });
+      invalidateShelfDetail(queryClient, variables.shelfId);
       invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useBatchUpdateShelfItemsMutation(
+export function useBatchUpdateShelfUnitsMutation(
   options?: Omit<
     UseMutationOptions<
-      ShelfItemBatchResponse,
+      ShelfUnitBatchResponse,
       Error,
-      { shelfUnitId: string; ops: ShelfItemBatchOp[] }
+      { shelfId: string; ops: ShelfUnitBatchOp[] }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, ops }) =>
-      shelfApi.batchUpdateItems(shelfUnitId, ops),
+    mutationFn: ({ shelfId, ops }) => shelfApi.batchUpdateUnits(shelfId, ops),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.detail(variables.shelfUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.items(variables.shelfUnitId),
-      });
+      invalidateShelfDetail(queryClient, variables.shelfId);
       invalidateShelfCollections(queryClient);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -295,23 +267,17 @@ export function useCleanupOrphansMutation(
     UseMutationOptions<
       { deleted: number },
       Error,
-      { shelfUnitId: string; input: CleanupShelfOrphansInput }
+      { shelfId: string; input: CleanupShelfOrphansInput }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ shelfUnitId, input }) =>
-      shelfApi.cleanupOrphans(shelfUnitId, input),
+    mutationFn: ({ shelfId, input }) => shelfApi.cleanupOrphans(shelfId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.detail(variables.shelfUnitId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: shelfKeys.items(variables.shelfUnitId),
-      });
+      invalidateShelfDetail(queryClient, variables.shelfId);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -335,12 +301,7 @@ export function useCollectMutation(
       });
       invalidateShelfCollections(queryClient);
       for (const shelfId of data.savedTo) {
-        queryClient.invalidateQueries({
-          queryKey: shelfKeys.detail(shelfId),
-        });
-        queryClient.invalidateQueries({
-          queryKey: shelfKeys.items(shelfId),
-        });
+        invalidateShelfDetail(queryClient, shelfId);
       }
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -371,13 +332,13 @@ export const shelfMutations = {
   useCreate: useCreateShelfMutation,
   useUpdate: useUpdateShelfMutation,
   useDelete: useDeleteShelfMutation,
-  useAddItem: useAddShelfItemMutation,
-  useReorderItem: useReorderShelfItemMutation,
-  useRemoveItem: useRemoveShelfItemMutation,
+  useAddUnit: useAddShelfUnitMutation,
+  useReorderUnit: useReorderShelfUnitMutation,
+  useRemoveUnit: useRemoveShelfUnitMutation,
   useAttachReview: useAttachReviewMutation,
   useDetachReview: useDetachReviewMutation,
-  useSetItemTags: useSetShelfItemTagsMutation,
-  useBatchUpdateItems: useBatchUpdateShelfItemsMutation,
+  useSetChildren: useSetShelfUnitChildrenMutation,
+  useBatchUpdateUnits: useBatchUpdateShelfUnitsMutation,
   useCleanupOrphans: useCleanupOrphansMutation,
 };
 

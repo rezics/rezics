@@ -19,6 +19,18 @@ mock.module("@/meili/content/sync", () => ({
 
 Object.assign(prismaMock, {});
 
+function makeShelfUnitRow(overrides: Record<string, unknown> = {}) {
+  return {
+    shelfId: "shelf-1",
+    unitId: "book-1",
+    kind: "book",
+    position: "a0",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+}
+
 describe("ShelfService", () => {
   test("rejects reserved system shelf kind keys on create", async () => {
     const { shelfService } = await import("./shelf.service");
@@ -31,56 +43,26 @@ describe("ShelfService", () => {
     ).rejects.toThrow(/reserved/);
   });
 
-  test("addItem syncs containedUnitIds to Meilisearch after the canonical write", async () => {
+  test("addUnit syncs containedUnitIds to Meilisearch after the canonical write", async () => {
     patchContentContainedUnitIdsToMeiliMock.mockClear();
 
     Object.assign(prismaMock, {
       unit: {
         findUnique: async () => ({ type: "BOOK", post: null }),
       },
-      shelfItem: {
-        findFirst: async () => null,
-        findUniqueOrThrow: async () => ({
-          shelfUnitId: "shelf-1",
-          itemRef: "book-1",
-          kind: "book",
-          position: "a0",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }),
-      },
       $transaction: async (fn: any) =>
         fn({
-          shelfItem: {
+          shelfUnit: {
+            findFirst: async () => null,
             createMany: async () => ({ count: 1 }),
-            findUniqueOrThrow: async () => ({
-              shelfUnitId: "shelf-1",
-              itemRef: "book-1",
-              kind: "book",
-              position: "a0",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            }),
+            findUniqueOrThrow: async () => makeShelfUnitRow(),
           },
-          shelf: {
-            update: async () => ({}),
-          },
-          shelfItemUnit: {
-            upsert: async () => ({}),
-          },
+          shelf: { update: async () => ({}) },
         }),
-    });
-
-    // buildShelfItemProjection reads shelfItemUnit + unit; its mapper tolerates undefined.
-    Object.assign(prismaMock, {
-      ...prismaMock,
-      shelfItemUnit: {
-        findMany: async () => [],
-      },
     });
 
     const { shelfService } = await import("./shelf.service");
-    await shelfService.addItem("shelf-1", { itemRef: "book-1", kind: "book" });
+    await shelfService.addUnit("shelf-1", { unitId: "book-1", kind: "book" });
 
     expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledTimes(1);
     expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledWith(
@@ -88,15 +70,15 @@ describe("ShelfService", () => {
     );
   });
 
-  test("addItem rejects direct self-containment", async () => {
+  test("addUnit rejects direct self-containment", async () => {
     const { shelfService } = await import("./shelf.service");
 
     await expect(
-      shelfService.addItem("shelf-1", { itemRef: "shelf-1", kind: "shelf" }),
+      shelfService.addUnit("shelf-1", { unitId: "shelf-1", kind: "shelf" }),
     ).rejects.toThrow(/cannot contain itself/);
   });
 
-  test("mapUnitToKind maps shelves to shelf items", async () => {
+  test("mapUnitToKind maps SHELF to shelf kind", async () => {
     const { mapUnitToKind } = await import("./shelf.service");
 
     expect(mapUnitToKind("SHELF" as any, null)).toBe("shelf");
@@ -109,7 +91,7 @@ describe("ShelfService", () => {
 
     const ops = Array.from({ length: SHELF_ITEM_BATCH_OP_CAP + 1 }, (_, i) => ({
       op: "delete" as const,
-      itemRef: `i-${i}`,
+      unitId: `i-${i}`,
     }));
 
     let status = 0;
@@ -129,65 +111,35 @@ describe("ShelfService", () => {
     Object.assign(prismaMock, {
       $transaction: async (fn: any) =>
         fn({
-          shelfItem: {
-            createMany: async (_args: any) => {
+          shelfUnit: {
+            createMany: async () => {
               applied.push("createMany");
               return { count: 1 };
             },
-            deleteMany: async (_args: any) => {
+            deleteMany: async () => {
               applied.push("deleteMany");
               return { count: 1 };
             },
-            update: async (_args: any) => {
+            update: async () => {
               applied.push("update");
-              return {
-                shelfUnitId: "shelf-1",
-                itemRef: "b-1",
-                kind: "book",
-                position: "z0",
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              };
+              return makeShelfUnitRow({ unitId: "b-1", position: "z0" });
             },
-            findUniqueOrThrow: async (_args: any) => ({
-              shelfUnitId: "shelf-1",
-              itemRef: "b-1",
-              kind: "book",
-              position: "a0",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            }),
+            findUniqueOrThrow: async () =>
+              makeShelfUnitRow({ unitId: "b-1" }),
           },
-          shelf: {
-            update: async () => ({}),
-          },
-          shelfItemUnit: {
-            upsert: async () => ({}),
-            findMany: async () => [],
-            deleteMany: async () => ({ count: 0 }),
-            create: async () => ({}),
-          },
+          shelf: { update: async () => ({}) },
         }),
-      shelfItem: {
-        findUnique: async () => ({
-          shelfUnitId: "shelf-1",
-          itemRef: "b-1",
-          kind: "book",
-          position: "z0",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }),
-      },
-      shelfItemUnit: {
-        findMany: async () => [],
+      shelfUnit: {
+        findUnique: async () =>
+          makeShelfUnitRow({ unitId: "b-1", position: "z0" }),
       },
     });
 
     const { shelfService } = await import("./shelf.service");
     const results = await shelfService.applyBatch("shelf-1", [
-      { op: "delete", itemRef: "old" },
-      { op: "add", itemRef: "b-1", kind: "book", position: "a0" },
-      { op: "reorder", itemRef: "b-1", position: "z0" },
+      { op: "delete", unitId: "old" },
+      { op: "add", unitId: "b-1", kind: "book", position: "a0" },
+      { op: "reorder", unitId: "b-1", position: "z0" },
     ]);
 
     expect(results).toHaveLength(3);
@@ -207,36 +159,22 @@ describe("ShelfService", () => {
     Object.assign(prismaMock, {
       $transaction: async (fn: any) =>
         fn({
-          shelfItem: {
+          shelfUnit: {
             deleteMany: async () => ({ count: 1 }),
             update: async () => {
               throw new Error("Record to update not found");
             },
-            findUniqueOrThrow: async () => ({
-              shelfUnitId: "shelf-1",
-              itemRef: "x",
-              kind: "book",
-              position: "a0",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            }),
+            findUniqueOrThrow: async () => makeShelfUnitRow({ unitId: "x" }),
           },
           shelf: { update: async () => ({}) },
-          shelfItemUnit: {
-            upsert: async () => ({}),
-            findMany: async () => [],
-          },
         }),
-      shelfItem: {
-        findUnique: async () => null,
-      },
-      shelfItemUnit: { findMany: async () => [] },
+      shelfUnit: { findUnique: async () => null },
     });
 
     const { shelfService } = await import("./shelf.service");
     const results = await shelfService.applyBatch("shelf-1", [
-      { op: "delete", itemRef: "x" },
-      { op: "reorder", itemRef: "missing", position: "a1" },
+      { op: "delete", unitId: "x" },
+      { op: "reorder", unitId: "missing", position: "a1" },
     ]);
 
     expect(results[0]!.status).toBe("ok");
@@ -252,41 +190,27 @@ describe("ShelfService", () => {
     Object.assign(prismaMock, {
       $transaction: async (fn: any) =>
         fn({
-          shelfItem: {
+          shelfUnit: {
             findMany: async ({ skip, take }: any) => {
               if (skip === 0 && take === 1) return [{ position: "m" }];
               return [];
             },
-            update: async ({ data }: any) => ({
-              shelfUnitId: "shelf-1",
-              itemRef: "moved",
-              kind: "book",
-              position: data.position,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            }),
+            update: async ({ data }: any) =>
+              makeShelfUnitRow({ unitId: "moved", position: data.position }),
           },
           shelf: { update: async () => ({}) },
-          shelfItemUnit: { findMany: async () => [] },
         }),
-      shelfItem: {
-        findUnique: async () => ({
-          shelfUnitId: "shelf-1",
-          itemRef: "moved",
-          kind: "book",
-          position: "a",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }),
+      shelfUnit: {
+        findUnique: async () =>
+          makeShelfUnitRow({ unitId: "moved", position: "a" }),
       },
-      shelfItemUnit: { findMany: async () => [] },
     });
 
     const { shelfService } = await import("./shelf.service");
     const results = await shelfService.applyBatch("shelf-1", [
       {
         op: "reorderToPage",
-        itemRef: "moved",
+        unitId: "moved",
         toPage: 1,
         edge: "first",
         pageSize: 20,
@@ -298,7 +222,7 @@ describe("ShelfService", () => {
     const oor = await shelfService.applyBatch("shelf-1", [
       {
         op: "reorderToPage",
-        itemRef: "moved",
+        unitId: "moved",
         toPage: 99,
         edge: "first",
         pageSize: 20,
@@ -308,23 +232,44 @@ describe("ShelfService", () => {
     expect(oor[0]!.status).toBe("failed");
   });
 
-  test("removeItem syncs containedUnitIds to Meilisearch after the canonical delete", async () => {
+  test("applyBatch attach op rejects self-relation", async () => {
+    Object.assign(prismaMock, {
+      $transaction: async (fn: any) =>
+        fn({
+          shelfUnit: { findUnique: async () => null },
+          shelfUnitRelation: { upsert: async () => ({}) },
+        }),
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    const results = await shelfService.applyBatch("shelf-1", [
+      {
+        op: "attach",
+        parentUnitId: "u-1",
+        childUnitId: "u-1",
+        childKind: "review",
+        role: "review",
+      },
+    ]);
+    expect(results[0]!.status).toBe("failed");
+    if (results[0]!.status === "failed") {
+      expect(results[0]!.reason).toBe("self_relation_forbidden");
+    }
+  });
+
+  test("removeUnit syncs containedUnitIds to Meilisearch after the canonical delete", async () => {
     patchContentContainedUnitIdsToMeiliMock.mockClear();
 
     Object.assign(prismaMock, {
       $transaction: async (fn: any) =>
         fn({
-          shelfItem: {
-            deleteMany: async () => ({ count: 1 }),
-          },
-          shelf: {
-            update: async () => ({}),
-          },
+          shelfUnit: { deleteMany: async () => ({ count: 1 }) },
+          shelf: { update: async () => ({}) },
         }),
     });
 
     const { shelfService } = await import("./shelf.service");
-    await shelfService.removeItem("shelf-1", "book-1");
+    await shelfService.removeUnit("shelf-1", "book-1");
 
     expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledTimes(1);
     expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledWith(

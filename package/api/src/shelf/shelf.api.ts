@@ -1,25 +1,27 @@
 import type {
-  AddShelfItemInput,
+  AddShelfUnitInput,
   CleanupShelfOrphansInput,
   CollectInput,
   CollectionStatusResponse,
   CollectResponse,
   CreateShelfInput,
-  ReorderShelfItemInput,
-  SetShelfItemTagsInput,
+  ReorderShelfUnitInput,
+  SetShelfUnitChildrenInput,
   ShelfDetailDTO,
-  ShelfItemBatchOp,
-  ShelfItemBatchResponse,
-  ShelfItemDTO,
   ShelfListResponse,
   ShelfResponse,
   ShelfSummaryDTO,
+  ShelfUnitBatchOp,
+  ShelfUnitBatchResponse,
+  ShelfUnitDTO,
+  ShelfUnitRelationDTO,
+  ShelfUnitsResponse,
   ToggleFavoriteResponse,
   UpdateShelfInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
-import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
+import type { ShelfFilters, ShelfUnitsQuery } from "./shelf.types";
 
 export const shelfApi = {
   list: async (filters?: ShelfFilters): Promise<ShelfListResponse> => {
@@ -68,31 +70,31 @@ export const shelfApi = {
     });
   },
 
-  // Shelf items
-  listItems: async (
-    shelfUnitId: string,
-    query?: ShelfItemsQuery,
-  ): Promise<{ items: ShelfItemDTO[]; hasMore: boolean }> => {
-    return apiFetch(`/shelf/${shelfUnitId}/items${buildQueryString(query)}`);
+  // Shelf units
+  listUnits: async (
+    shelfId: string,
+    query?: ShelfUnitsQuery,
+  ): Promise<ShelfUnitsResponse> => {
+    return apiFetch(`/shelf/${shelfId}/units${buildQueryString(query)}`);
   },
 
-  addItem: async (
-    shelfUnitId: string,
-    input: AddShelfItemInput,
-  ): Promise<ShelfItemDTO> => {
-    return apiFetch<ShelfItemDTO>(`/shelf/${shelfUnitId}/items`, {
+  addUnit: async (
+    shelfId: string,
+    input: AddShelfUnitInput,
+  ): Promise<ShelfUnitDTO> => {
+    return apiFetch<ShelfUnitDTO>(`/shelf/${shelfId}/units`, {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
-  reorderItem: async (
-    shelfUnitId: string,
-    itemRef: string,
-    input: ReorderShelfItemInput,
-  ): Promise<ShelfItemDTO> => {
-    return apiFetch<ShelfItemDTO>(
-      `/shelf/${shelfUnitId}/items/${itemRef}/position`,
+  reorderUnit: async (
+    shelfId: string,
+    childUnitId: string,
+    input: ReorderShelfUnitInput,
+  ): Promise<ShelfUnitDTO> => {
+    return apiFetch<ShelfUnitDTO>(
+      `/shelf/${shelfId}/units/${childUnitId}/position`,
       {
         method: "PATCH",
         body: JSON.stringify(input),
@@ -100,23 +102,23 @@ export const shelfApi = {
     );
   },
 
-  removeItem: async (
-    shelfUnitId: string,
-    itemRef: string,
+  removeUnit: async (
+    shelfId: string,
+    childUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/shelf/${shelfUnitId}/items/${itemRef}`,
+      `/shelf/${shelfId}/units/${childUnitId}`,
       { method: "DELETE" },
     );
   },
 
   attachReview: async (
-    shelfUnitId: string,
-    itemRef: string,
+    shelfId: string,
+    parentUnitId: string,
     reviewUnitId: string,
-  ): Promise<ShelfItemDTO> => {
-    return apiFetch<ShelfItemDTO>(
-      `/shelf/${shelfUnitId}/items/${itemRef}/reviews`,
+  ): Promise<ShelfUnitRelationDTO> => {
+    return apiFetch<ShelfUnitRelationDTO>(
+      `/shelf/${shelfId}/units/${parentUnitId}/reviews`,
       {
         method: "POST",
         body: JSON.stringify({ reviewUnitId }),
@@ -125,23 +127,23 @@ export const shelfApi = {
   },
 
   detachReview: async (
-    shelfUnitId: string,
-    itemRef: string,
+    shelfId: string,
+    parentUnitId: string,
     reviewUnitId: string,
-  ): Promise<ShelfItemDTO> => {
-    return apiFetch<ShelfItemDTO>(
-      `/shelf/${shelfUnitId}/items/${itemRef}/reviews/${reviewUnitId}`,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/shelf/${shelfId}/units/${parentUnitId}/reviews/${reviewUnitId}`,
       { method: "DELETE" },
     );
   },
 
-  setItemTags: async (
-    shelfUnitId: string,
-    itemRef: string,
-    input: SetShelfItemTagsInput,
-  ): Promise<ShelfItemDTO> => {
-    return apiFetch<ShelfItemDTO>(
-      `/shelf/${shelfUnitId}/items/${itemRef}/tags`,
+  setChildren: async (
+    shelfId: string,
+    parentUnitId: string,
+    input: SetShelfUnitChildrenInput,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/shelf/${shelfId}/units/${parentUnitId}/children`,
       {
         method: "PUT",
         body: JSON.stringify(input),
@@ -150,21 +152,21 @@ export const shelfApi = {
   },
 
   cleanupOrphans: async (
-    shelfUnitId: string,
+    shelfId: string,
     input: CleanupShelfOrphansInput,
   ): Promise<{ deleted: number }> => {
-    return apiFetch<{ deleted: number }>(`/shelf/${shelfUnitId}/cleanup`, {
+    return apiFetch<{ deleted: number }>(`/shelf/${shelfId}/cleanup`, {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
-  batchUpdateItems: async (
-    shelfUnitId: string,
-    ops: ShelfItemBatchOp[],
-  ): Promise<ShelfItemBatchResponse> => {
-    return apiFetch<ShelfItemBatchResponse>(
-      `/shelf/${shelfUnitId}/items/batch`,
+  batchUpdateUnits: async (
+    shelfId: string,
+    ops: ShelfUnitBatchOp[],
+  ): Promise<ShelfUnitBatchResponse> => {
+    return apiFetch<ShelfUnitBatchResponse>(
+      `/shelf/${shelfId}/units/batch`,
       {
         method: "PATCH",
         body: JSON.stringify({ ops }),

@@ -4,7 +4,7 @@ import type {
   PostDTO,
   PublicUser,
   ShelfDTO,
-  ShelfItemDTO,
+  ShelfUnitDTO,
   UnitDTO,
   UnitTranslationDTO,
 } from "@rezics/contract";
@@ -69,27 +69,6 @@ type TagLike =
       unitId?: string;
       label?: string | null;
       translations?: { language?: string; title?: string | null }[];
-    };
-
-export type HydratedShelfEntryLike =
-  | {
-      kind: "prime";
-      enriched: {
-        item: ShelfItemDTO;
-        primary: unknown;
-        attachedReviews?: readonly unknown[];
-        attachedTags?: readonly unknown[];
-      };
-    }
-  | {
-      kind: "review";
-      parentItem: ShelfItemDTO;
-      review: PostDTO;
-    }
-  | {
-      kind: "tag";
-      parentItem: ShelfItemDTO;
-      tag: TagLike;
     };
 
 export interface UnitWorkContext {
@@ -158,109 +137,71 @@ export function candidateToUnitCardSummary(
   };
 }
 
-export function shelfEntryToUnitCardSummary(
-  entry: HydratedShelfEntryLike,
+/**
+ * Map a ShelfUnit + its hydrated DTO into a UnitCardSummary.
+ */
+export function shelfUnitToUnitCardSummary(
+  shelfUnit: ShelfUnitDTO,
+  data: unknown,
   options: UnitCardSummaryOptions = {},
+  attachmentCounts?: UnitCardAttachmentCounts,
 ): UnitCardSummary {
-  if (entry.kind === "review") {
-    return postToSummary(entry.review, {
-      ...options,
-      addedAt: options.addedAt ?? entry.parentItem.createdAt ?? null,
-      fallbackKind: "review",
-      fallbackTitle: entry.parentItem.itemRef,
-    });
-  }
-
-  if (entry.kind === "tag") {
-    return tagToSummary(entry.tag, {
-      ...options,
-      addedAt: options.addedAt ?? entry.parentItem.createdAt ?? null,
-      fallbackTitle: entry.parentItem.itemRef,
-    });
-  }
-
-  const attachmentCounts = pickAttachmentCounts(
-    entry.enriched.attachedReviews?.length ?? 0,
-    entry.enriched.attachedTags?.length ?? 0,
-  );
-  return withAttachmentCounts(primeSummary(entry, options), attachmentCounts);
-}
-
-function primeSummary(
-  entry: Extract<HydratedShelfEntryLike, { kind: "prime" }>,
-  options: UnitCardSummaryOptions,
-): UnitCardSummary {
-  const { item, primary } = entry.enriched;
-  const baseOptions = {
+  const baseOptions: UnitCardSummaryOptions = {
     ...options,
-    addedAt: options.addedAt ?? item.createdAt ?? null,
-    fallbackKind: item.kind,
-    fallbackTitle: item.itemRef,
+    addedAt: options.addedAt ?? shelfUnit.createdAt ?? null,
+    fallbackKind: shelfUnit.kind,
+    fallbackTitle: shelfUnit.unitId,
   };
 
-  if (item.kind === "book" && isBook(primary)) {
-    return unitDtoToUnitCardSummary(
+  let summary: UnitCardSummary;
+
+  if (shelfUnit.kind === "book" && isBook(data)) {
+    summary = unitDtoToUnitCardSummary(
       {
-        unitId: primary.unitId,
+        unitId: data.unitId,
         type: "book",
-        user: primary.user,
-        defaultLanguage: primary.defaultLanguage,
-        translations: primary.translations,
-        coverUrl: primary.coverUrl,
-        createdAt: primary.createdAt,
+        user: data.user,
+        defaultLanguage: data.defaultLanguage,
+        translations: data.translations,
+        coverUrl: data.coverUrl,
+        createdAt: data.createdAt,
       },
       baseOptions,
     );
-  }
-
-  if (
-    (item.kind === "review" || item.kind === "quote" || item.kind === "post") &&
-    isPost(primary)
+  } else if (
+    (shelfUnit.kind === "review" ||
+      shelfUnit.kind === "quote" ||
+      shelfUnit.kind === "post") &&
+    isPost(data)
   ) {
-    return postToSummary(primary, baseOptions);
-  }
-
-  if (item.kind === "shelf" && isShelf(primary)) {
-    return unitDtoToUnitCardSummary(
+    summary = postToSummary(data, baseOptions);
+  } else if (shelfUnit.kind === "shelf" && isShelf(data)) {
+    summary = unitDtoToUnitCardSummary(
       {
-        unitId: primary.unitId,
+        unitId: data.unitId,
         type: "shelf",
-        user: primary.user,
-        translations: primary.translations,
-        coverUrl: primary.coverUrl,
-        createdAt: primary.createdAt,
+        user: data.user,
+        translations: data.translations,
+        coverUrl: data.coverUrl,
+        createdAt: data.createdAt,
       },
       baseOptions,
     );
+  } else if (shelfUnit.kind === "tag" && isTag(data)) {
+    summary = tagToSummary(data, baseOptions);
+  } else {
+    summary = {
+      unitId: shelfUnit.unitId,
+      kind: normalizeKind(shelfUnit.kind),
+      title: shelfUnit.unitId,
+      imageUrl: null,
+      addedAt: baseOptions.addedAt,
+    };
   }
 
-  if (item.kind === "tag" && isTag(primary)) {
-    return tagToSummary(primary, baseOptions);
-  }
-
-  return {
-    unitId: item.itemRef,
-    kind: normalizeKind(item.kind),
-    title: item.itemRef,
-    imageUrl: null,
-    addedAt: baseOptions.addedAt,
-  };
-}
-
-function pickAttachmentCounts(
-  reviews: number,
-  tags: number,
-): UnitCardAttachmentCounts | undefined {
-  if (reviews <= 0 && tags <= 0) return undefined;
-  return { reviews, tags };
-}
-
-function withAttachmentCounts(
-  summary: UnitCardSummary,
-  attachmentCounts: UnitCardAttachmentCounts | undefined,
-): UnitCardSummary {
-  if (!attachmentCounts) return summary;
-  return { ...summary, attachmentCounts };
+  return attachmentCounts
+    ? { ...summary, attachmentCounts }
+    : summary;
 }
 
 export function resolveUnitWorkContext(

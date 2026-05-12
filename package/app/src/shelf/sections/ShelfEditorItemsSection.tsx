@@ -21,8 +21,8 @@ import type {
   ShelfSortState,
   ShelfView,
 } from "@rezics/api/shelf";
-import { useHydratedShelfItems } from "@rezics/api/shelf";
-import type { ShelfDTO, ShelfItemKind } from "@rezics/contract";
+import { useHydratedShelfUnits } from "@rezics/api/shelf";
+import type { ShelfDTO, ShelfUnitKind } from "@rezics/contract";
 import {
   Button,
   Checkbox,
@@ -50,7 +50,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   type Candidate,
-  shelfEntryToUnitCardSummary,
+  shelfUnitToUnitCardSummary,
   UnitAddPicker,
   UnitCard,
 } from "@/unit";
@@ -87,7 +87,7 @@ const SORT_ORDER_OPTIONS: { value: ShelfSortOrder; label: string }[] = [
   { value: "asc", label: "Asc" },
 ];
 
-function candidateKindToShelfItemKind(kind: string): ShelfItemKind {
+function candidateKindToShelfUnitKind(kind: string): ShelfUnitKind {
   switch (kind) {
     case "book":
       return "book";
@@ -104,10 +104,8 @@ function candidateKindToShelfItemKind(kind: string): ShelfItemKind {
   }
 }
 
-function entryItemRef(entry: ShelfStreamEntry): string {
-  if (entry.kind === "prime") return entry.enriched.item.itemRef;
-  if (entry.kind === "review") return entry.review.unitId;
-  return entry.tag.unitId;
+function entryUnitId(entry: ShelfStreamEntry): string {
+  return entry.unit.unit.unitId;
 }
 
 function lastSingleToggleValue(values: readonly string[]): string | undefined {
@@ -150,30 +148,42 @@ export function ShelfEditorItemsSection({
   editor,
 }: ShelfEditorItemsSectionProps) {
   const { t } = useTranslation();
-  const hydration = useHydratedShelfItems(editor.items);
+  const hydration = useHydratedShelfUnits(editor.units);
   const [sortState, setSortState] = useState<ShelfSortState>({
     field: "manual",
     order: "desc",
   });
   const [page, setPage] = useState(1);
-  const [moveTargetRef, setMoveTargetRef] = useState<string | null>(null);
-  const [activeDragRef, setActiveDragRef] = useState<string | null>(null);
+  const [moveTargetId, setMoveTargetId] = useState<string | null>(null);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [mode, setMode] = useState<EditorMode>("edit");
-  const [selectedRefs, setSelectedRefs] = useState<Set<string>>(
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(
     () => new Set(),
   );
   const [sortPrimeOnly, setSortPrimeOnly] = useState(true);
 
   useEffect(() => {
-    if (mode !== "multi-select" && selectedRefs.size > 0) {
-      setSelectedRefs(new Set());
+    if (mode !== "multi-select" && selectedIds.size > 0) {
+      setSelectedIds(new Set());
     }
-  }, [mode, selectedRefs.size]);
+  }, [mode, selectedIds.size]);
 
   const stream = useMemo(
     () =>
-      deriveShelfStream(hydration.enriched, viewMode, sortState, sortPrimeOnly),
-    [hydration.enriched, viewMode, sortState, sortPrimeOnly],
+      deriveShelfStream(
+        hydration.enriched,
+        editor.relations,
+        viewMode,
+        sortState,
+        sortPrimeOnly,
+      ),
+    [
+      hydration.enriched,
+      editor.relations,
+      viewMode,
+      sortState,
+      sortPrimeOnly,
+    ],
   );
 
   const totalPages = Math.max(1, Math.ceil(stream.length / PAGE_SIZE));
@@ -194,67 +204,67 @@ export function ShelfEditorItemsSection({
 
   function handleAddCandidate(candidate: Candidate) {
     editor.enqueueAdd({
-      itemRef: candidate.identifier,
-      kind: candidateKindToShelfItemKind(String(candidate.kind)),
+      unitId: candidate.identifier,
+      kind: candidateKindToShelfUnitKind(String(candidate.kind)),
     });
   }
 
-  function handleDelete(itemRef: string) {
-    editor.enqueueDelete(itemRef);
+  function handleDelete(unitId: string) {
+    editor.enqueueDelete(unitId);
   }
 
-  function handleToggleSelected(itemRef: string) {
-    setSelectedRefs((current) => {
+  function handleToggleSelected(unitId: string) {
+    setSelectedIds((current) => {
       const next = new Set(current);
-      if (next.has(itemRef)) next.delete(itemRef);
-      else next.add(itemRef);
+      if (next.has(unitId)) next.delete(unitId);
+      else next.add(unitId);
       return next;
     });
   }
 
   function handleBulkDelete() {
-    for (const ref of selectedRefs) {
-      editor.enqueueDelete(ref);
+    for (const id of selectedIds) {
+      editor.enqueueDelete(id);
     }
-    setSelectedRefs(new Set());
+    setSelectedIds(new Set());
   }
 
-  function handleMoveOpen(itemRef: string) {
-    setMoveTargetRef(itemRef);
+  function handleMoveOpen(unitId: string) {
+    setMoveTargetId(unitId);
   }
 
   function handleMovePick(toPage: number) {
-    if (moveTargetRef) {
+    if (moveTargetId) {
       editor.enqueueCrossPageMove(
-        moveTargetRef,
+        moveTargetId,
         toPage,
         PAGE_SIZE,
         sortState.order,
       );
     }
-    setMoveTargetRef(null);
+    setMoveTargetId(null);
   }
 
   function handleDragStart(event: DragStartEvent) {
-    setActiveDragRef(String(event.active.id));
+    setActiveDragId(String(event.active.id));
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    setActiveDragRef(null);
+    setActiveDragId(null);
     if (!canReorder) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const primeRows = visibleStream
-      .filter((entry) => entry.kind === "prime")
+    const rootRows = visibleStream
+      .filter((entry) => entry.kind === "root" || entry.kind === "peer")
       .map((entry) => ({
-        id: entryItemRef(entry),
-        position: entry.enriched.item.position,
+        id: entryUnitId(entry),
+        position: entry.unit.unit.position,
       }));
-    const oldIndex = primeRows.findIndex((entry) => entry.id === active.id);
-    const newIndex = primeRows.findIndex((entry) => entry.id === over.id);
+    const oldIndex = rootRows.findIndex((entry) => entry.id === active.id);
+    const newIndex = rootRows.findIndex((entry) => entry.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
 
-    const reordered = [...primeRows];
+    const reordered = [...rootRows];
     const [moved] = reordered.splice(oldIndex, 1);
     reordered.splice(newIndex, 0, moved!);
 
@@ -269,8 +279,8 @@ export function ShelfEditorItemsSection({
 
   const sortableIds = canReorder
     ? visibleStream
-        .filter((e) => e.kind === "prime")
-        .map((e) => entryItemRef(e))
+        .filter((e) => e.kind === "root" || e.kind === "peer")
+        .map((e) => entryUnitId(e))
     : [];
   const selectedSortLabel =
     SORT_FIELD_OPTIONS.find((option) => option.value === sortState.field)
@@ -278,8 +288,8 @@ export function ShelfEditorItemsSection({
   const selectedOrderLabel =
     SORT_ORDER_OPTIONS.find((option) => option.value === sortState.order)
       ?.label ?? SORT_ORDER_OPTIONS[0]!.label;
-  const activeDragEntry = activeDragRef
-    ? visibleStream.find((entry) => entryItemRef(entry) === activeDragRef)
+  const activeDragEntry = activeDragId
+    ? visibleStream.find((entry) => entryUnitId(entry) === activeDragId)
     : undefined;
   const nestedViewLabel = t("shelf.view_modes.nested");
   const flatViewLabel = t("shelf.view_modes.flat");
@@ -291,33 +301,34 @@ export function ShelfEditorItemsSection({
   const listItems = (
     <ul className="flex flex-col">
       {visibleStream.map((entry) => {
-        const ref = entryItemRef(entry);
+        const id = entryUnitId(entry);
+        const isRootOrPeer = entry.kind === "root" || entry.kind === "peer";
         if (isPreview) {
           return (
-            <li key={ref} className="list-none py-1">
+            <li key={id} className="list-none py-1">
               <ShelfItemRenderer entry={entry} viewMode={viewMode} />
             </li>
           );
         }
         return (
-          <li key={ref} className="list-none">
+          <li key={id} className="list-none">
             <ShelfEditorItemRow
               entry={entry}
-              rowId={ref}
-              itemRef={ref}
+              rowId={id}
+              unitId={id}
               viewMode={viewMode}
-              sortable={canReorder && entry.kind === "prime"}
+              sortable={canReorder && isRootOrPeer}
               canMoveCrossPage={
                 !isMultiSelect &&
                 canReorder &&
                 totalPages > 1 &&
-                entry.kind === "prime"
+                isRootOrPeer
               }
-              canDelete={!isMultiSelect && entry.kind === "prime"}
+              canDelete={!isMultiSelect && isRootOrPeer}
               onDelete={handleDelete}
               onMoveCrossPage={handleMoveOpen}
-              multiSelect={isMultiSelect && entry.kind === "prime"}
-              selected={selectedRefs.has(ref)}
+              multiSelect={isMultiSelect && isRootOrPeer}
+              selected={selectedIds.has(id)}
               onToggleSelected={handleToggleSelected}
             />
           </li>
@@ -398,7 +409,7 @@ export function ShelfEditorItemsSection({
         </div>
 
         <div className="ml-auto flex items-center gap-3">
-          {isMultiSelect && selectedRefs.size > 0 && (
+          {isMultiSelect && selectedIds.size > 0 && (
             <Button
               type="button"
               variant="destructive"
@@ -406,7 +417,7 @@ export function ShelfEditorItemsSection({
               onClick={handleBulkDelete}
             >
               {t("shelf.edit.delete_selected", "Delete {{n}}", {
-                n: selectedRefs.size,
+                n: selectedIds.size,
               })}
             </Button>
           )}
@@ -530,7 +541,7 @@ export function ShelfEditorItemsSection({
           modifiers={[restrictToVerticalAxis]}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          onDragCancel={() => setActiveDragRef(null)}
+          onDragCancel={() => setActiveDragId(null)}
         >
           <SortableContext
             items={sortableIds}
@@ -541,7 +552,10 @@ export function ShelfEditorItemsSection({
           <DragOverlay dropAnimation={null}>
             {activeDragEntry ? (
               <UnitCard
-                summary={shelfEntryToUnitCardSummary(activeDragEntry)}
+                summary={shelfUnitToUnitCardSummary(
+                  activeDragEntry.unit.unit,
+                  activeDragEntry.unit.data,
+                )}
                 className="bg-surface-elevated"
               />
             ) : null}
@@ -594,8 +608,8 @@ export function ShelfEditorItemsSection({
       )}
 
       <CrossPageMoveModal
-        open={moveTargetRef !== null}
-        onOpenChange={(open) => !open && setMoveTargetRef(null)}
+        open={moveTargetId !== null}
+        onOpenChange={(open) => !open && setMoveTargetId(null)}
         pageCount={totalPages}
         currentPage={page}
         onPick={handleMovePick}

@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import type { EnrichedShelfItem } from "@rezics/api/shelf";
-import type { BookDTO, PostDTO, ShelfItemDTO } from "@rezics/contract";
+import type { EnrichedShelfUnit } from "@rezics/api/shelf";
+import type {
+  BookDTO,
+  PostDTO,
+  ShelfUnitDTO,
+  ShelfUnitRelationDTO,
+} from "@rezics/contract";
 import { deriveShelfStream, type ShelfStreamEntry } from "./shelfStream";
 
 const manualAsc = { field: "manual", order: "asc" } as const;
@@ -10,14 +15,12 @@ const addedAtDesc = { field: "addedAt", order: "desc" } as const;
 const titleAsc = { field: "title", order: "asc" } as const;
 const titleDesc = { field: "title", order: "desc" } as const;
 
-function makeItem(overrides: Partial<ShelfItemDTO>): ShelfItemDTO {
+function makeUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {
   return {
-    shelfUnitId: "s1",
-    itemRef: "ref-1",
+    shelfId: "s1",
+    unitId: "u-1",
     kind: "book",
     position: "a",
-    reviewIds: [],
-    tagIds: [],
     ...overrides,
   };
 }
@@ -29,87 +32,215 @@ function makeBook(unitId: string, title: string): BookDTO {
   } as unknown as BookDTO;
 }
 
-function makeReview(
-  unitId: string,
-  title: string,
-  createdAt?: string,
-): PostDTO {
+function makeReviewPost(unitId: string, title: string): PostDTO {
   return {
     unitId,
     authorUserId: "u1",
     extra: { title },
-    ...(createdAt ? { createdAt } : {}),
   } as unknown as PostDTO;
 }
 
-function primeEntry(
-  itemRef: string,
-  title: string,
-  opts: {
-    position?: string;
-    createdAt?: string;
-    reviews?: PostDTO[];
-  } = {},
-): EnrichedShelfItem {
-  return {
-    item: makeItem({
-      itemRef,
-      kind: "book",
-      position: opts.position ?? "a",
-      reviewIds: (opts.reviews ?? []).map((r) => r.unitId),
-      ...(opts.createdAt ? { createdAt: opts.createdAt } : {}),
-    }),
-    primary: makeBook(itemRef, title),
-    attachedReviews: opts.reviews ?? [],
-    attachedTags: [],
-  };
+interface RootSpec {
+  unitId: string;
+  title: string;
+  position?: string;
+  createdAt?: string;
+  reviews?: { unitId: string; title: string }[];
+}
+
+function buildScene(roots: RootSpec[]): {
+  units: EnrichedShelfUnit[];
+  relations: ShelfUnitRelationDTO[];
+} {
+  const units: EnrichedShelfUnit[] = [];
+  const relations: ShelfUnitRelationDTO[] = [];
+
+  for (const root of roots) {
+    units.push({
+      unit: makeUnit({
+        shelfId: "s1",
+        unitId: root.unitId,
+        kind: "book",
+        position: root.position ?? "a",
+        ...(root.createdAt ? { createdAt: root.createdAt } : {}),
+      }),
+      data: makeBook(root.unitId, root.title),
+    });
+
+    for (const [index, review] of (root.reviews ?? []).entries()) {
+      const reviewPosition = `${root.position ?? "a"}~${String(index).padStart(2, "0")}`;
+      units.push({
+        unit: makeUnit({
+          shelfId: "s1",
+          unitId: review.unitId,
+          kind: "review",
+          position: reviewPosition,
+          ...(root.createdAt ? { createdAt: root.createdAt } : {}),
+        }),
+        data: makeReviewPost(review.unitId, review.title),
+      });
+      relations.push({
+        shelfId: "s1",
+        parentUnitId: root.unitId,
+        childUnitId: review.unitId,
+        role: "review",
+      });
+    }
+  }
+
+  return { units, relations };
 }
 
 function idsOf(stream: ShelfStreamEntry[]): string[] {
-  return stream.map((e) => {
-    if (e.kind === "prime") return e.enriched.item.itemRef;
-    if (e.kind === "review") return e.review.unitId;
-    return e.tag.unitId;
-  });
+  return stream.map((entry) => entry.unit.unit.unitId);
 }
 
 describe("deriveShelfStream — nested mode", () => {
-  test("emits exactly N entries for N items regardless of review count", () => {
-    const items: EnrichedShelfItem[] = [
-      primeEntry("book-a", "Apple", {
+  test("emits exactly one root entry per root regardless of children", () => {
+    const { units, relations } = buildScene([
+      {
+        unitId: "book-a",
+        title: "Apple",
         position: "a",
-        reviews: [makeReview("r-a1", "Zebra"), makeReview("r-a2", "Zulu")],
-      }),
-      primeEntry("book-b", "Banana", {
+        reviews: [
+          { unitId: "r-a1", title: "Zebra" },
+          { unitId: "r-a2", title: "Zulu" },
+        ],
+      },
+      {
+        unitId: "book-b",
+        title: "Banana",
         position: "b",
-        reviews: [makeReview("r-b1", "Alpha")],
-      }),
-      primeEntry("book-c", "Cherry", { position: "c" }),
-    ];
+        reviews: [{ unitId: "r-b1", title: "Alpha" }],
+      },
+      { unitId: "book-c", title: "Cherry", position: "c" },
+    ]);
 
-    const stream = deriveShelfStream(items, "nested", manualAsc, true);
+    const stream = deriveShelfStream(
+      units,
+      relations,
+      "nested",
+      manualAsc,
+      true,
+    );
 
     expect(stream).toHaveLength(3);
-    expect(stream.every((e) => e.kind === "prime")).toBe(true);
+    expect(stream.every((entry) => entry.kind === "root")).toBe(true);
     expect(idsOf(stream)).toEqual(["book-a", "book-b", "book-c"]);
+    const first = stream[0]!;
+    if (first.kind === "root") {
+      expect(first.children.map((c) => c.unit.unitId)).toEqual([
+        "r-a1",
+        "r-a2",
+      ]);
+    }
+  });
+
+  test("multi-parent child appears under each parent in nested mode", () => {
+    const { units, relations } = buildScene([
+      { unitId: "book-a", title: "Apple", position: "a" },
+      { unitId: "book-b", title: "Banana", position: "b" },
+    ]);
+    units.push({
+      unit: makeUnit({
+        shelfId: "s1",
+        unitId: "r-shared",
+        kind: "review",
+        position: "a~00",
+      }),
+      data: makeReviewPost("r-shared", "Shared"),
+    });
+    relations.push(
+      {
+        shelfId: "s1",
+        parentUnitId: "book-a",
+        childUnitId: "r-shared",
+        role: "review",
+      },
+      {
+        shelfId: "s1",
+        parentUnitId: "book-b",
+        childUnitId: "r-shared",
+        role: "review",
+      },
+    );
+
+    const stream = deriveShelfStream(
+      units,
+      relations,
+      "nested",
+      manualAsc,
+      true,
+    );
+
+    expect(idsOf(stream)).toEqual(["book-a", "book-b"]);
+    const [a, b] = stream;
+    if (a?.kind === "root" && b?.kind === "root") {
+      expect(a.children.map((c) => c.unit.unitId)).toEqual(["r-shared"]);
+      expect(b.children.map((c) => c.unit.unitId)).toEqual(["r-shared"]);
+    }
+  });
+
+  test("two-step cycle (A ↔ B as each other's children) renders no roots", () => {
+    const units: EnrichedShelfUnit[] = [
+      {
+        unit: makeUnit({ unitId: "book-a", kind: "book", position: "a" }),
+        data: makeBook("book-a", "Apple"),
+      },
+      {
+        unit: makeUnit({ unitId: "book-b", kind: "book", position: "b" }),
+        data: makeBook("book-b", "Banana"),
+      },
+    ];
+    const relations: ShelfUnitRelationDTO[] = [
+      {
+        shelfId: "s1",
+        parentUnitId: "book-a",
+        childUnitId: "book-b",
+        role: "review",
+      },
+      {
+        shelfId: "s1",
+        parentUnitId: "book-b",
+        childUnitId: "book-a",
+        role: "review",
+      },
+    ];
+
+    const stream = deriveShelfStream(
+      units,
+      relations,
+      "nested",
+      manualAsc,
+      true,
+    );
+
+    expect(stream).toHaveLength(0);
   });
 });
 
 describe("deriveShelfStream — flat emission", () => {
-  test("flat mode emits N + M entries in prime-adjacent order when sortPrimeOnly = true", () => {
-    const items: EnrichedShelfItem[] = [
-      primeEntry("book-a", "Apple", {
+  test("flat + sortPrimeOnly=true emits root then its children in order", () => {
+    const { units, relations } = buildScene([
+      {
+        unitId: "book-a",
+        title: "Apple",
         position: "a",
-        reviews: [makeReview("r-a1", "Zebra"), makeReview("r-a2", "Zulu")],
-      }),
-      primeEntry("book-b", "Banana", {
+        reviews: [
+          { unitId: "r-a1", title: "Zebra" },
+          { unitId: "r-a2", title: "Zulu" },
+        ],
+      },
+      {
+        unitId: "book-b",
+        title: "Banana",
         position: "b",
-        reviews: [makeReview("r-b1", "Alpha")],
-      }),
-      primeEntry("book-c", "Cherry", { position: "c" }),
-    ];
+        reviews: [{ unitId: "r-b1", title: "Alpha" }],
+      },
+      { unitId: "book-c", title: "Cherry", position: "c" },
+    ]);
 
-    const stream = deriveShelfStream(items, "flat", manualAsc, true);
+    const stream = deriveShelfStream(units, relations, "flat", manualAsc, true);
 
     expect(stream).toHaveLength(6);
     expect(idsOf(stream)).toEqual([
@@ -122,73 +253,135 @@ describe("deriveShelfStream — flat emission", () => {
     ]);
   });
 
-  test("flat + title sort + sortPrimeOnly=true keeps each review immediately after its prime", () => {
-    const items: EnrichedShelfItem[] = [
-      primeEntry("book-b", "Banana", {
+  test("flat + sortPrimeOnly=false (all-entry) emits every unit once", () => {
+    const { units, relations } = buildScene([
+      {
+        unitId: "book-b",
+        title: "Banana",
         position: "b",
-        reviews: [makeReview("r-b1", "Alpha")],
-      }),
-      primeEntry("book-a", "Apple", {
+        reviews: [{ unitId: "r-b1", title: "Alpha" }],
+      },
+      {
+        unitId: "book-a",
+        title: "Apple",
         position: "a",
-        reviews: [makeReview("r-a1", "Zebra")],
-      }),
-      primeEntry("book-c", "Cherry", { position: "c" }),
-    ];
+        reviews: [{ unitId: "r-a1", title: "Zebra" }],
+      },
+      { unitId: "book-c", title: "Cherry", position: "c" },
+    ]);
 
-    const stream = deriveShelfStream(items, "flat", titleAsc, true);
+    const stream = deriveShelfStream(
+      units,
+      relations,
+      "flat",
+      titleAsc,
+      false,
+    );
 
+    expect(stream).toHaveLength(5);
+    expect(stream.every((entry) => entry.kind === "peer")).toBe(true);
+    // titles: Alpha, Apple, Banana, Cherry, Zebra
     expect(idsOf(stream)).toEqual([
-      "book-a",
-      "r-a1",
-      "book-b",
       "r-b1",
+      "book-a",
+      "book-b",
       "book-c",
+      "r-a1",
     ]);
   });
 
-  test("flat + title sort + sortPrimeOnly=false interleaves reviews and primes by title", () => {
-    const items: EnrichedShelfItem[] = [
-      primeEntry("book-b", "Banana", {
-        position: "b",
-        reviews: [makeReview("r-b1", "Alpha")],
-      }),
-      primeEntry("book-a", "Apple", {
-        position: "a",
-        reviews: [makeReview("r-a1", "Zebra")],
-      }),
-      primeEntry("book-c", "Cherry", { position: "c" }),
-    ];
-
-    const stream = deriveShelfStream(items, "flat", titleAsc, false);
-
-    expect(idsOf(stream)).toEqual([
-      "r-b1",
-      "book-a",
-      "book-b",
-      "book-c",
-      "r-a1",
+  test("flat all-entry shows multi-parent child only once", () => {
+    const { units, relations } = buildScene([
+      { unitId: "book-a", title: "Apple", position: "a" },
+      { unitId: "book-b", title: "Banana", position: "b" },
     ]);
+    units.push({
+      unit: makeUnit({
+        unitId: "r-shared",
+        kind: "review",
+        position: "a~00",
+      }),
+      data: makeReviewPost("r-shared", "Shared"),
+    });
+    relations.push(
+      {
+        shelfId: "s1",
+        parentUnitId: "book-a",
+        childUnitId: "r-shared",
+        role: "review",
+      },
+      {
+        shelfId: "s1",
+        parentUnitId: "book-b",
+        childUnitId: "r-shared",
+        role: "review",
+      },
+    );
+
+    const stream = deriveShelfStream(
+      units,
+      relations,
+      "flat",
+      manualAsc,
+      false,
+    );
+
+    const sharedAppearances = stream.filter(
+      (entry) => entry.unit.unit.unitId === "r-shared",
+    );
+    expect(sharedAppearances).toHaveLength(1);
+    expect(stream).toHaveLength(3);
   });
 });
 
-describe("deriveShelfStream — sort scope and layout invariants", () => {
-  const items: EnrichedShelfItem[] = [
-    primeEntry("book-b", "Banana", {
-      position: "b",
-      reviews: [makeReview("r-b1", "Alpha")],
-    }),
-    primeEntry("book-a", "Apple", {
-      position: "a",
-      reviews: [makeReview("r-a1", "Zebra")],
-    }),
-    primeEntry("book-c", "Cherry", { position: "c" }),
-  ];
+describe("deriveShelfStream — sort scope and invariants", () => {
+  function defaultScene(): {
+    units: EnrichedShelfUnit[];
+    relations: ShelfUnitRelationDTO[];
+  } {
+    return buildScene([
+      {
+        unitId: "book-b",
+        title: "Banana",
+        position: "b",
+        reviews: [{ unitId: "r-b1", title: "Alpha" }],
+      },
+      {
+        unitId: "book-a",
+        title: "Apple",
+        position: "a",
+        reviews: [{ unitId: "r-a1", title: "Zebra" }],
+      },
+      { unitId: "book-c", title: "Cherry", position: "c" },
+    ]);
+  }
 
-  test("manual sort ignores sortPrimeOnly (both flag values produce identical output)", () => {
-    const withOn = deriveShelfStream(items, "flat", manualAsc, true);
-    const withOff = deriveShelfStream(items, "flat", manualAsc, false);
-    expect(idsOf(withOn)).toEqual(idsOf(withOff));
+  test("manual sort yields the same prime-anchored stream regardless of sortPrimeOnly flag", () => {
+    const { units, relations } = defaultScene();
+    const withOn = deriveShelfStream(
+      units,
+      relations,
+      "flat",
+      manualAsc,
+      true,
+    );
+    const withOff = deriveShelfStream(
+      units,
+      relations,
+      "flat",
+      manualAsc,
+      false,
+    );
+    // sortPrimeOnly=true keeps children right after their root.
     expect(idsOf(withOn)).toEqual([
+      "book-a",
+      "r-a1",
+      "book-b",
+      "r-b1",
+      "book-c",
+    ]);
+    // sortPrimeOnly=false emits all peers by position.
+    expect(idsOf(withOff)).toEqual([
       "book-a",
       "r-a1",
       "book-b",
@@ -198,50 +391,65 @@ describe("deriveShelfStream — sort scope and layout invariants", () => {
   });
 
   test("flat and masonry produce identical stream order for the same inputs", () => {
+    const { units, relations } = defaultScene();
     for (const sort of [manualAsc, addedAtDesc, titleAsc] as const) {
       for (const scope of [true, false]) {
-        const flat = deriveShelfStream(items, "flat", sort, scope);
-        const masonry = deriveShelfStream(items, "masonry", sort, scope);
+        const flat = deriveShelfStream(units, relations, "flat", sort, scope);
+        const masonry = deriveShelfStream(
+          units,
+          relations,
+          "masonry",
+          sort,
+          scope,
+        );
         expect(idsOf(masonry)).toEqual(idsOf(flat));
       }
     }
   });
 
   test("derivation is pure — two calls return deep-equal arrays", () => {
-    const a = deriveShelfStream(items, "flat", titleAsc, true);
-    const b = deriveShelfStream(items, "flat", titleAsc, true);
+    const { units, relations } = defaultScene();
+    const a = deriveShelfStream(units, relations, "flat", titleAsc, true);
+    const b = deriveShelfStream(units, relations, "flat", titleAsc, true);
     expect(a).toEqual(b);
     expect(a).not.toBe(b);
   });
 
   test("title sort has deterministic fallback when titles match", () => {
-    const tiedItems: EnrichedShelfItem[] = [
-      primeEntry("book-c", "Same", { position: "c" }),
-      primeEntry("book-a", "Same", { position: "a" }),
-      primeEntry("book-b", "Same", { position: "b" }),
-    ];
+    const { units, relations } = buildScene([
+      { unitId: "book-c", title: "Same", position: "c" },
+      { unitId: "book-a", title: "Same", position: "a" },
+      { unitId: "book-b", title: "Same", position: "b" },
+    ]);
 
-    const first = deriveShelfStream(tiedItems, "flat", titleAsc, true);
-    const second = deriveShelfStream(tiedItems, "flat", titleAsc, true);
+    const first = deriveShelfStream(
+      units,
+      relations,
+      "flat",
+      titleAsc,
+      true,
+    );
+    const second = deriveShelfStream(
+      units,
+      relations,
+      "flat",
+      titleAsc,
+      true,
+    );
 
     expect(idsOf(first)).toEqual(["book-a", "book-b", "book-c"]);
     expect(idsOf(second)).toEqual(idsOf(first));
   });
 
-  test("added-time sort has deterministic fallback when timestamps are missing", () => {
-    const tiedItems: EnrichedShelfItem[] = [
-      primeEntry("book-c", "Cherry", { position: "c" }),
-      primeEntry("book-a", "Apple", { position: "a" }),
-      primeEntry("book-b", "Banana", { position: "b" }),
-    ];
-
-    const stream = deriveShelfStream(tiedItems, "masonry", addedAtDesc, true);
-
-    expect(idsOf(stream)).toEqual(["book-a", "book-b", "book-c"]);
-  });
-
   test("manual descending renders larger positions first", () => {
-    const stream = deriveShelfStream(items, "flat", manualDesc, true);
+    const { units, relations } = defaultScene();
+    const stream = deriveShelfStream(
+      units,
+      relations,
+      "flat",
+      manualDesc,
+      true,
+    );
 
     expect(idsOf(stream)).toEqual([
       "book-c",
@@ -252,32 +460,45 @@ describe("deriveShelfStream — sort scope and layout invariants", () => {
     ]);
   });
 
-  test("addedAt ascending and descending use shelf item creation time", () => {
-    const datedItems: EnrichedShelfItem[] = [
-      primeEntry("book-a", "Apple", {
+  test("addedAt ascending and descending use shelf unit creation time", () => {
+    const { units, relations } = buildScene([
+      {
+        unitId: "book-a",
+        title: "Apple",
         position: "a",
         createdAt: "2026-01-01T00:00:00.000Z",
-      }),
-      primeEntry("book-c", "Cherry", {
+      },
+      {
+        unitId: "book-c",
+        title: "Cherry",
         position: "c",
         createdAt: "2026-01-03T00:00:00.000Z",
-      }),
-      primeEntry("book-b", "Banana", {
+      },
+      {
+        unitId: "book-b",
+        title: "Banana",
         position: "b",
         createdAt: "2026-01-02T00:00:00.000Z",
-      }),
-    ];
+      },
+    ]);
 
     expect(
-      idsOf(deriveShelfStream(datedItems, "flat", addedAtAsc, true)),
+      idsOf(deriveShelfStream(units, relations, "flat", addedAtAsc, true)),
     ).toEqual(["book-a", "book-b", "book-c"]);
     expect(
-      idsOf(deriveShelfStream(datedItems, "flat", addedAtDesc, true)),
+      idsOf(deriveShelfStream(units, relations, "flat", addedAtDesc, true)),
     ).toEqual(["book-c", "book-b", "book-a"]);
   });
 
   test("title descending reverses title order with deterministic fallbacks", () => {
-    const stream = deriveShelfStream(items, "flat", titleDesc, true);
+    const { units, relations } = defaultScene();
+    const stream = deriveShelfStream(
+      units,
+      relations,
+      "flat",
+      titleDesc,
+      true,
+    );
 
     expect(idsOf(stream)).toEqual([
       "book-c",
@@ -288,20 +509,15 @@ describe("deriveShelfStream — sort scope and layout invariants", () => {
     ]);
   });
 
-  test("flat mode emits prime and attached entries with parent metadata", () => {
-    const stream = deriveShelfStream(items, "flat", manualAsc, true);
+  test("flat mode children entries carry parentUnitId metadata", () => {
+    const { units, relations } = defaultScene();
+    const stream = deriveShelfStream(units, relations, "flat", manualAsc, true);
 
-    expect(stream).toHaveLength(5);
-    expect(idsOf(stream)).toEqual([
-      "book-a",
-      "r-a1",
-      "book-b",
-      "r-b1",
-      "book-c",
-    ]);
-    const review = stream.find((entry) => entry.kind === "review");
-    expect(review?.kind === "review" ? review.parentItem.itemRef : null).toBe(
-      "book-a",
-    );
+    const child = stream.find((entry) => entry.kind === "child");
+    expect(child).toBeTruthy();
+    if (child?.kind === "child") {
+      expect(child.parentUnitId).toBe("book-a");
+      expect(child.unit.unit.unitId).toBe("r-a1");
+    }
   });
 });

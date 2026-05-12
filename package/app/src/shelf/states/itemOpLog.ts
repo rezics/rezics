@@ -1,8 +1,8 @@
-import type { ShelfItemBatchOp } from "@rezics/contract";
+import type { ShelfUnitBatchOp } from "@rezics/contract";
 
 export interface ItemOpEntry {
   id: string;
-  op: ShelfItemBatchOp;
+  op: ShelfUnitBatchOp;
   failedReason?: string;
 }
 
@@ -13,11 +13,28 @@ export interface ItemOpLog {
 
 export const emptyLog: ItemOpLog = { entries: [], nextSeq: 1 };
 
-function itemRefOf(op: ShelfItemBatchOp): string {
-  return op.itemRef;
+/**
+ * Coalescing key for an op: relation-shaped ops (`attach`/`detach`/`setChildren`)
+ * key by `(parent, child, role)` or `(parent, role)`; unit-shaped ops key by `unitId`.
+ */
+function unitKeyOf(op: ShelfUnitBatchOp): string | null {
+  switch (op.op) {
+    case "add":
+    case "reorder":
+    case "reorderToPage":
+    case "delete":
+      return op.unitId;
+    case "attach":
+    case "detach":
+      return `${op.parentUnitId}|${op.childUnitId}|${op.role}`;
+    case "setChildren":
+      return `${op.parentUnitId}|${op.role}`;
+    default:
+      return null;
+  }
 }
 
-export function enqueue(log: ItemOpLog, op: ShelfItemBatchOp): ItemOpLog {
+export function enqueue(log: ItemOpLog, op: ShelfUnitBatchOp): ItemOpLog {
   const id = `op-${log.nextSeq}`;
   const next: ItemOpLog = {
     entries: [...log.entries, { id, op }],
@@ -27,16 +44,15 @@ export function enqueue(log: ItemOpLog, op: ShelfItemBatchOp): ItemOpLog {
 }
 
 /**
- * Reduce the entry list using these rules (applied right-to-left so the
- * latest op wins):
+ * Reduce the entry list (applied right-to-left so latest op wins):
  *
- * - `add` then `delete` on the same itemRef → drop both
- * - `reorder` then later `reorder` on same itemRef → keep only the latest
- * - `reorderToPage` then later `reorder*` on same itemRef → keep only the latest
- * - `setTags` then later `setTags` on same itemRef → keep only the latest
+ * - `add` then `delete` on the same unitId → drop both
+ * - `reorder` then later `reorder*` on same unitId → keep only the latest
+ * - `reorderToPage` then later `reorder*` on same unitId → keep only the latest
+ * - `setChildren` then later `setChildren` on same `(parent, role)` → latest only
+ * - `attach` then later `detach` on same `(parent, child, role)` → drop both
  *
- * Failed entries are skipped by coalescing — they remain in the log as-is so
- * the user can retry them.
+ * Failed entries are skipped by coalescing.
  */
 export function coalesce(log: ItemOpLog): ItemOpLog {
   const live = log.entries.filter((e) => !e.failedReason);
@@ -45,37 +61,53 @@ export function coalesce(log: ItemOpLog): ItemOpLog {
   const reversed = [...live].reverse();
   const kept: ItemOpEntry[] = [];
   const seenReorderRef = new Set<string>();
-  const seenSetTagsRef = new Set<string>();
+  const seenSetChildrenRef = new Set<string>();
   const droppedAddRef = new Set<string>();
   const seenDeleteRef = new Set<string>();
+  const seenAttachKey = new Set<string>();
+  const droppedDetachKey = new Set<string>();
 
   for (const entry of reversed) {
-    const ref = itemRefOf(entry.op);
+    const key = unitKeyOf(entry.op);
+    if (key === null) continue;
     const kind = entry.op.op;
 
     if (kind === "delete") {
-      if (seenDeleteRef.has(ref)) continue;
-      seenDeleteRef.add(ref);
+      if (seenDeleteRef.has(key)) continue;
+      seenDeleteRef.add(key);
       kept.push(entry);
       continue;
     }
     if (kind === "add") {
-      if (seenDeleteRef.has(ref)) {
-        droppedAddRef.add(ref);
+      if (seenDeleteRef.has(key)) {
+        droppedAddRef.add(key);
         continue;
       }
       kept.push(entry);
       continue;
     }
     if (kind === "reorder" || kind === "reorderToPage") {
-      if (seenReorderRef.has(ref)) continue;
-      seenReorderRef.add(ref);
+      if (seenReorderRef.has(key)) continue;
+      seenReorderRef.add(key);
       kept.push(entry);
       continue;
     }
-    if (kind === "setTags") {
-      if (seenSetTagsRef.has(ref)) continue;
-      seenSetTagsRef.add(ref);
+    if (kind === "setChildren") {
+      if (seenSetChildrenRef.has(key)) continue;
+      seenSetChildrenRef.add(key);
+      kept.push(entry);
+      continue;
+    }
+    if (kind === "detach") {
+      seenAttachKey.add(key);
+      kept.push(entry);
+      continue;
+    }
+    if (kind === "attach") {
+      if (seenAttachKey.has(key)) {
+        droppedDetachKey.add(key);
+        continue;
+      }
       kept.push(entry);
       continue;
     }
@@ -84,8 +116,10 @@ export function coalesce(log: ItemOpLog): ItemOpLog {
   const cleaned = kept
     .reverse()
     .filter((e) => {
-      const ref = itemRefOf(e.op);
-      if (e.op.op === "delete" && droppedAddRef.has(ref)) return false;
+      const key = unitKeyOf(e.op);
+      if (key === null) return true;
+      if (e.op.op === "delete" && droppedAddRef.has(key)) return false;
+      if (e.op.op === "detach" && droppedDetachKey.has(key)) return false;
       return true;
     });
 

@@ -73,31 +73,25 @@ async function seedFavorites(
     });
 
     let prevPos: string | undefined;
-    const shelfItemRows = unique.map((target) => {
+    const shelfUnitRows = unique.map((target) => {
       const position = generateBetween(prevPos, undefined);
       prevPos = position;
       return {
-        shelfUnitId: shelfId,
-        itemRef: target.id,
+        shelfId,
+        unitId: target.id,
         kind: unitTypeToShelfKind(target.type),
         position,
       };
     });
-    const shelfItemUnitRows = unique.map((target) => ({
-      shelfUnitId: shelfId,
-      itemRef: target.id,
-      unitId: target.id,
-      role: "primary",
-    }));
 
-    if (shelfItemRows.length > 0) {
-      await ctx.prisma.shelfItem.createMany({
-        data: shelfItemRows,
+    if (shelfUnitRows.length > 0) {
+      await ctx.prisma.shelfUnit.createMany({
+        data: shelfUnitRows,
         skipDuplicates: true,
       });
-      await ctx.prisma.shelfItemUnit.createMany({
-        data: shelfItemUnitRows,
-        skipDuplicates: true,
+      await ctx.prisma.shelf.update({
+        where: { unitId: shelfId },
+        data: { itemCount: shelfUnitRows.length },
       });
     }
   }

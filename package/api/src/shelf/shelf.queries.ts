@@ -1,7 +1,7 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { collectionApi, shelfApi } from "./shelf.api";
 import { collectionKeys, shelfKeys } from "./shelf.keys";
-import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
+import type { ShelfFilters, ShelfUnitsQuery } from "./shelf.types";
 
 export const shelfListQuery = (filters?: ShelfFilters) =>
   queryOptions({
@@ -32,10 +32,10 @@ export const userShelvesQuery = () =>
     staleTime: 1000 * 60 * 2,
   });
 
-export const shelfItemsQuery = (unitId: string, query?: ShelfItemsQuery) =>
+export const shelfUnitsQuery = (unitId: string, query?: ShelfUnitsQuery) =>
   queryOptions({
-    queryKey: shelfKeys.itemsPage(unitId, query),
-    queryFn: () => shelfApi.listItems(unitId, query),
+    queryKey: shelfKeys.unitsPage(unitId, query),
+    queryFn: () => shelfApi.listUnits(unitId, query),
     enabled: !!unitId,
     staleTime: 1000 * 60 * 2,
   });
@@ -68,7 +68,7 @@ export const shelfQueries = {
   detail: shelfDetailQuery,
   byUser: shelvesByUserQuery,
   mine: userShelvesQuery,
-  items: shelfItemsQuery,
+  units: shelfUnitsQuery,
   infiniteList: shelfInfiniteListQuery,
 };
 

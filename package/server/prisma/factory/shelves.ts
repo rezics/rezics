@@ -109,33 +109,27 @@ export async function seedShelves(
       const selectedWorks = pickN(works, itemCount);
 
       let prevPos: string | undefined;
-      const shelfItemRows: Array<{
-        shelfUnitId: string;
-        itemRef: string;
+      const shelfUnitRows: Array<{
+        shelfId: string;
+        unitId: string;
         kind: string;
         position: string;
       }> = [];
-      const shelfItemUnitRows: Array<{
-        shelfUnitId: string;
-        itemRef: string;
-        unitId: string;
+      const shelfUnitRelationRows: Array<{
+        shelfId: string;
+        parentUnitId: string;
+        childUnitId: string;
         role: string;
       }> = [];
 
       for (const work of selectedWorks) {
         const position = generateBetween(prevPos, undefined);
         prevPos = position;
-        shelfItemRows.push({
-          shelfUnitId: unit.id,
-          itemRef: work.id,
+        shelfUnitRows.push({
+          shelfId: unit.id,
+          unitId: work.id,
           kind: unitTypeToShelfKind(work.type),
           position,
-        });
-        shelfItemUnitRows.push({
-          shelfUnitId: unit.id,
-          itemRef: work.id,
-          unitId: work.id,
-          role: "primary",
         });
 
         const candidateReviews = reviewsByTarget.get(work.id);
@@ -146,10 +140,18 @@ export async function seedShelves(
           );
           if (randomBoolean(0.6)) {
             for (const review of pickN(candidateReviews, attachCount)) {
-              shelfItemUnitRows.push({
-                shelfUnitId: unit.id,
-                itemRef: work.id,
+              const reviewPosition = generateBetween(prevPos, undefined);
+              prevPos = reviewPosition;
+              shelfUnitRows.push({
+                shelfId: unit.id,
                 unitId: review.id,
+                kind: "review",
+                position: reviewPosition,
+              });
+              shelfUnitRelationRows.push({
+                shelfId: unit.id,
+                parentUnitId: work.id,
+                childUnitId: review.id,
                 role: "review",
               });
             }
@@ -157,11 +159,20 @@ export async function seedShelves(
         }
       }
 
-      if (shelfItemRows.length > 0) {
-        await ctx.prisma.shelfItem.createMany({ data: shelfItemRows });
-        await ctx.prisma.shelfItemUnit.createMany({
-          data: shelfItemUnitRows,
+      if (shelfUnitRows.length > 0) {
+        await ctx.prisma.shelfUnit.createMany({
+          data: shelfUnitRows,
           skipDuplicates: true,
+        });
+        if (shelfUnitRelationRows.length > 0) {
+          await ctx.prisma.shelfUnitRelation.createMany({
+            data: shelfUnitRelationRows,
+            skipDuplicates: true,
+          });
+        }
+        await ctx.prisma.shelf.update({
+          where: { unitId: unit.id },
+          data: { itemCount: shelfUnitRows.length },
         });
       }
 

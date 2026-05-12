@@ -2,7 +2,16 @@ import type { ShelfView } from "@rezics/api/shelf";
 import { shelfDetailQuery } from "@rezics/api/shelf";
 import { useUpdateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
 import { Spinner } from "@rezics/ui";
-import { Button, Input, Label } from "@rezics/ui/shadcn";
+import {
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useBlocker, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
@@ -16,9 +25,15 @@ interface ShelfEditPageProps {
 }
 
 function normalizeViewMode(raw: unknown): ShelfView {
-  if (raw === "flat" || raw === "nested") return raw;
+  if (raw === "flat" || raw === "nested" || raw === "masonry") return raw;
   return "nested";
 }
+
+const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
+  { value: "nested", label: "Nested" },
+  { value: "flat", label: "Flat" },
+  { value: "masonry", label: "Masonry" },
+];
 
 export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const navigate = useNavigate();
@@ -30,7 +45,14 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
-  const [viewMode, setViewMode] = useState<ShelfView>("nested");
+
+  /** Persisted default shelf view — edited via metadata form. */
+  const [defaultViewMode, setDefaultViewMode] = useState<ShelfView>("nested");
+
+  /** Local items-editor preview view — does NOT dirty metadata. */
+  const [editorPreviewView, setEditorPreviewView] = useState<ShelfView>(
+    "nested",
+  );
 
   useEffect(() => {
     if (translation) {
@@ -41,11 +63,11 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   }, [translation, shelf?.coverUrl]);
 
   useEffect(() => {
-    setViewMode(
-      normalizeViewMode(
-        (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
-      ),
+    const saved = normalizeViewMode(
+      (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,
     );
+    setDefaultViewMode(saved);
+    setEditorPreviewView(saved);
   }, [shelf?.extra]);
 
   const metadataDirty = useMemo(() => {
@@ -57,9 +79,9 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
       title !== (translation?.title ?? "") ||
       description !== (translation?.description ?? "") ||
       coverUrl !== (shelf.coverUrl ?? "") ||
-      viewMode !== savedViewMode
+      defaultViewMode !== savedViewMode
     );
-  }, [shelf, translation, title, description, coverUrl, viewMode]);
+  }, [shelf, translation, title, description, coverUrl, defaultViewMode]);
 
   const isDirty = metadataDirty || editor.dirty;
 
@@ -80,7 +102,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
         extra: {
           ...((shelf?.extra as Record<string, unknown> | null | undefined) ??
             {}),
-          viewMode,
+          viewMode: defaultViewMode,
         },
       },
     });
@@ -138,6 +160,32 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
             onChange={(e) => setCoverUrl(e.target.value)}
           />
         </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="edit-shelf-default-view">Default view</Label>
+          <Select<ShelfView>
+            value={defaultViewMode}
+            onValueChange={(value) =>
+              value && setDefaultViewMode(value as ShelfView)
+            }
+          >
+            <SelectTrigger id="edit-shelf-default-view" className="w-full">
+              <SelectValue>
+                {VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode)
+                  ?.label ?? "Nested"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {VIEW_MODE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-xs text-text-secondary">
+            The shelf detail page opens in this view by default.
+          </span>
+        </div>
         <div className="flex flex-row justify-end gap-4">
           <Button
             variant="ghost"
@@ -157,8 +205,8 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
 
         <ShelfEditorItemsSection
           shelf={shelf}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
+          viewMode={editorPreviewView}
+          onViewModeChange={setEditorPreviewView}
           editor={editor}
         />
       </div>

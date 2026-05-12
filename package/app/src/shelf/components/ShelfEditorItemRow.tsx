@@ -9,23 +9,23 @@ import { ShelfItemRenderer } from "./ShelfItemRenderer";
 interface ShelfEditorItemRowProps {
   entry: ShelfStreamEntry;
   rowId: string;
-  itemRef: string;
+  unitId: string;
   viewMode: ShelfView;
   sortable: boolean;
   canMoveCrossPage: boolean;
   canDelete: boolean;
-  onDelete: (itemRef: string) => void;
-  onMoveCrossPage: (itemRef: string) => void;
+  onDelete: (unitId: string) => void;
+  onMoveCrossPage: (unitId: string) => void;
   multiSelect?: boolean;
   selected?: boolean;
-  onToggleSelected?: (itemRef: string) => void;
+  onToggleSelected?: (unitId: string) => void;
   preview?: boolean;
 }
 
 export function ShelfEditorItemRow({
   entry,
   rowId,
-  itemRef,
+  unitId,
   viewMode,
   sortable,
   canMoveCrossPage,
@@ -66,7 +66,7 @@ export function ShelfEditorItemRow({
       <Checkbox
         aria-label="Select for bulk action"
         checked={selected ?? false}
-        onCheckedChange={() => onToggleSelected?.(itemRef)}
+        onCheckedChange={() => onToggleSelected?.(unitId)}
       />
     );
   } else {
@@ -89,7 +89,7 @@ export function ShelfEditorItemRow({
             variant="ghost"
             size="sm"
             aria-label="Move to another page"
-            onClick={() => onMoveCrossPage(itemRef)}
+            onClick={() => onMoveCrossPage(unitId)}
           >
             <MoveRight className="h-4 w-4" />
           </Button>
@@ -100,7 +100,7 @@ export function ShelfEditorItemRow({
             variant="ghost"
             size="sm"
             aria-label="Delete"
-            onClick={() => onDelete(itemRef)}
+            onClick={() => onDelete(unitId)}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import type {
-  ShelfItemBatchAddOp,
-  ShelfItemBatchDeleteOp,
-  ShelfItemBatchReorderOp,
-  ShelfItemBatchReorderToPageOp,
-  ShelfItemBatchSetTagsOp,
+  ShelfUnitBatchAddOp,
+  ShelfUnitBatchAttachOp,
+  ShelfUnitBatchDeleteOp,
+  ShelfUnitBatchDetachOp,
+  ShelfUnitBatchReorderOp,
+  ShelfUnitBatchReorderToPageOp,
+  ShelfUnitBatchSetChildrenOp,
 } from "@rezics/contract";
 import {
   clear,
@@ -17,44 +19,66 @@ import {
   pendingCount,
 } from "./itemOpLog";
 
-const addOp = (itemRef: string, position = "a0"): ShelfItemBatchAddOp => ({
+const addOp = (unitId: string, position = "a0"): ShelfUnitBatchAddOp => ({
   op: "add",
-  itemRef,
+  unitId,
   kind: "post",
   position,
 });
 
 const reorderOp = (
-  itemRef: string,
+  unitId: string,
   position: string,
-): ShelfItemBatchReorderOp => ({
+): ShelfUnitBatchReorderOp => ({
   op: "reorder",
-  itemRef,
+  unitId,
   position,
 });
 
-const deleteOp = (itemRef: string): ShelfItemBatchDeleteOp => ({
+const deleteOp = (unitId: string): ShelfUnitBatchDeleteOp => ({
   op: "delete",
-  itemRef,
+  unitId,
 });
 
 const reorderToPageOp = (
-  itemRef: string,
+  unitId: string,
   toPage: number,
-): ShelfItemBatchReorderToPageOp => ({
+): ShelfUnitBatchReorderToPageOp => ({
   op: "reorderToPage",
-  itemRef,
+  unitId,
   toPage,
   edge: "first",
 });
 
-const setTagsOp = (
-  itemRef: string,
-  tagIds: string[],
-): ShelfItemBatchSetTagsOp => ({
-  op: "setTags",
-  itemRef,
-  tagIds,
+const attachOp = (
+  parentUnitId: string,
+  childUnitId: string,
+): ShelfUnitBatchAttachOp => ({
+  op: "attach",
+  parentUnitId,
+  childUnitId,
+  childKind: "review",
+  role: "review",
+});
+
+const detachOp = (
+  parentUnitId: string,
+  childUnitId: string,
+): ShelfUnitBatchDetachOp => ({
+  op: "detach",
+  parentUnitId,
+  childUnitId,
+  role: "review",
+});
+
+const setChildrenOp = (
+  parentUnitId: string,
+  childUnitIds: string[],
+): ShelfUnitBatchSetChildrenOp => ({
+  op: "setChildren",
+  parentUnitId,
+  role: "tag",
+  childUnitIds,
 });
 
 describe("itemOpLog", () => {
@@ -66,7 +90,7 @@ describe("itemOpLog", () => {
     expect(dirty(log)).toBe(true);
   });
 
-  test("add then delete on same ref collapses to no-op", () => {
+  test("add then delete on same unitId collapses to no-op", () => {
     let log = emptyLog;
     log = enqueue(log, addOp("u1"));
     log = enqueue(log, deleteOp("u1"));
@@ -74,15 +98,15 @@ describe("itemOpLog", () => {
     expect(dirty(log)).toBe(false);
   });
 
-  test("two reorders on same ref keep only the latest", () => {
+  test("two reorders on same unitId keep only the latest", () => {
     let log = emptyLog;
     log = enqueue(log, reorderOp("u1", "a1"));
     log = enqueue(log, reorderOp("u1", "a2"));
     expect(log.entries).toHaveLength(1);
-    expect((log.entries[0]!.op as ShelfItemBatchReorderOp).position).toBe("a2");
+    expect((log.entries[0]!.op as ShelfUnitBatchReorderOp).position).toBe("a2");
   });
 
-  test("reorder variants on same ref keep only the latest", () => {
+  test("reorder variants on same unitId keep only the latest", () => {
     let log = emptyLog;
     log = enqueue(log, reorderOp("u1", "a1"));
     log = enqueue(log, reorderToPageOp("u1", 3));
@@ -91,15 +115,21 @@ describe("itemOpLog", () => {
     expect(log.entries[0]!.op).toEqual(reorderOp("u1", "a2"));
   });
 
-  test("two setTags on same ref keep only the latest", () => {
+  test("attach then detach on same (parent, child, role) collapses", () => {
     let log = emptyLog;
-    log = enqueue(log, setTagsOp("u1", ["t1"]));
-    log = enqueue(log, setTagsOp("u1", ["t2", "t3"]));
+    log = enqueue(log, attachOp("p1", "c1"));
+    log = enqueue(log, detachOp("p1", "c1"));
+    expect(log.entries).toHaveLength(0);
+  });
+
+  test("two setChildren on same (parent, role) keep only the latest", () => {
+    let log = emptyLog;
+    log = enqueue(log, setChildrenOp("p1", ["c1"]));
+    log = enqueue(log, setChildrenOp("p1", ["c2", "c3"]));
     expect(log.entries).toHaveLength(1);
-    expect((log.entries[0]!.op as ShelfItemBatchSetTagsOp).tagIds).toEqual([
-      "t2",
-      "t3",
-    ]);
+    expect(
+      (log.entries[0]!.op as ShelfUnitBatchSetChildrenOp).childUnitIds,
+    ).toEqual(["c2", "c3"]);
   });
 
   test("clear empties live entries", () => {

@@ -1,9 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import type { BookDTO, PostDTO, ShelfItemDTO, UnitDTO } from "@rezics/contract";
+import type {
+  BookDTO,
+  PostDTO,
+  ShelfUnitDTO,
+  UnitDTO,
+} from "@rezics/contract";
 import {
   candidateToUnitCardSummary,
   resolveUnitWorkContext,
-  shelfEntryToUnitCardSummary,
+  shelfUnitToUnitCardSummary,
   unitDtoToUnitCardSummary,
 } from "./unitCardSummary";
 
@@ -67,17 +72,20 @@ describe("unitDtoToUnitCardSummary", () => {
   });
 });
 
-describe("shelfEntryToUnitCardSummary", () => {
-  test("maps a hydrated shelf book entry with shelf added time", () => {
-    const item: ShelfItemDTO = {
-      shelfUnitId: "shelf-1",
-      itemRef: "book-1",
-      kind: "book",
-      position: "a",
-      reviewIds: [],
-      tagIds: [],
-      createdAt: "2026-02-01T00:00:00.000Z",
-    };
+function makeShelfUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {
+  return {
+    shelfId: "shelf-1",
+    unitId: "u-1",
+    kind: "book",
+    position: "a",
+    createdAt: "2026-02-01T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+describe("shelfUnitToUnitCardSummary", () => {
+  test("maps a hydrated shelf book unit with shelf added time", () => {
+    const unit = makeShelfUnit({ unitId: "book-1", kind: "book" });
     const book: BookDTO = {
       unitId: "book-1",
       coverUrl: null,
@@ -91,10 +99,7 @@ describe("shelfEntryToUnitCardSummary", () => {
       ],
     } as BookDTO;
 
-    const summary = shelfEntryToUnitCardSummary({
-      kind: "prime",
-      enriched: { item, primary: book },
-    });
+    const summary = shelfUnitToUnitCardSummary(unit, book);
 
     expect(summary).toMatchObject({
       unitId: "book-1",
@@ -105,16 +110,8 @@ describe("shelfEntryToUnitCardSummary", () => {
     });
   });
 
-  test("populates attachmentCounts for prime entries with attached reviews and tags", () => {
-    const item: ShelfItemDTO = {
-      shelfUnitId: "shelf-1",
-      itemRef: "book-1",
-      kind: "book",
-      position: "a",
-      reviewIds: ["review-1", "review-2", "review-3"],
-      tagIds: ["tag-1", "tag-2"],
-      createdAt: "2026-02-01T00:00:00.000Z",
-    };
+  test("attachmentCounts is forwarded when provided", () => {
+    const unit = makeShelfUnit({ unitId: "book-1", kind: "book" });
     const book = {
       unitId: "book-1",
       coverUrl: null,
@@ -123,84 +120,29 @@ describe("shelfEntryToUnitCardSummary", () => {
       ],
     } as BookDTO;
 
-    const summary = shelfEntryToUnitCardSummary({
-      kind: "prime",
-      enriched: {
-        item,
-        primary: book,
-        attachedReviews: [{}, {}, {}],
-        attachedTags: [{}, {}],
-      },
+    const summary = shelfUnitToUnitCardSummary(unit, book, undefined, {
+      reviews: 3,
+      tags: 2,
     });
 
     expect(summary.attachmentCounts).toEqual({ reviews: 3, tags: 2 });
   });
 
-  test("omits attachmentCounts when prime entry has no attachments", () => {
-    const item: ShelfItemDTO = {
-      shelfUnitId: "shelf-1",
-      itemRef: "book-1",
-      kind: "book",
-      position: "a",
-      reviewIds: [],
-      tagIds: [],
-      createdAt: "2026-02-01T00:00:00.000Z",
-    };
+  test("omits attachmentCounts when none provided", () => {
+    const unit = makeShelfUnit({ unitId: "book-1", kind: "book" });
     const book = {
       unitId: "book-1",
       coverUrl: null,
       translations: [{ unitId: "book-1", language: "en", title: "Bare Book" }],
     } as BookDTO;
 
-    const summary = shelfEntryToUnitCardSummary({
-      kind: "prime",
-      enriched: { item, primary: book },
-    });
+    const summary = shelfUnitToUnitCardSummary(unit, book);
 
     expect(summary.attachmentCounts).toBeUndefined();
   });
 
-  test("review and tag entries never carry attachmentCounts", () => {
-    const parentItem = {
-      shelfUnitId: "shelf-1",
-      itemRef: "book-1",
-      kind: "book",
-      position: "a",
-      reviewIds: ["review-1"],
-      tagIds: ["tag-1"],
-      createdAt: "2026-02-01T00:00:00.000Z",
-    } satisfies ShelfItemDTO;
-
-    const reviewSummary = shelfEntryToUnitCardSummary({
-      kind: "review",
-      parentItem,
-      review: {
-        unitId: "review-1",
-        authorUserId: "user-1",
-        body: "Review body",
-        extra: { title: "Review title" },
-      } as PostDTO,
-    });
-    expect(reviewSummary.attachmentCounts).toBeUndefined();
-
-    const tagSummary = shelfEntryToUnitCardSummary({
-      kind: "tag",
-      parentItem,
-      tag: { unitId: "tag-1", label: "Tag" },
-    });
-    expect(tagSummary.attachmentCounts).toBeUndefined();
-  });
-
-  test("maps attached review entries from parent shelf metadata", () => {
-    const parentItem = {
-      shelfUnitId: "shelf-1",
-      itemRef: "book-1",
-      kind: "book",
-      position: "a",
-      reviewIds: ["review-1"],
-      tagIds: [],
-      createdAt: "2026-02-01T00:00:00.000Z",
-    } satisfies ShelfItemDTO;
+  test("maps a review shelf unit using post body and extra.title", () => {
+    const unit = makeShelfUnit({ unitId: "review-1", kind: "review" });
     const review: PostDTO = {
       unitId: "review-1",
       authorUserId: "user-1",
@@ -209,11 +151,7 @@ describe("shelfEntryToUnitCardSummary", () => {
       extra: { title: "Review title" },
     };
 
-    const summary = shelfEntryToUnitCardSummary({
-      kind: "review",
-      parentItem,
-      review,
-    });
+    const summary = shelfUnitToUnitCardSummary(unit, review);
 
     expect(summary).toMatchObject({
       unitId: "review-1",
@@ -222,6 +160,19 @@ describe("shelfEntryToUnitCardSummary", () => {
       contentPreview: "Review body",
       addedAt: "2026-02-01T00:00:00.000Z",
       author: { userId: "user-1", name: "Reviewer" },
+    });
+  });
+
+  test("unhydrated shelf unit falls back to unitId as title", () => {
+    const unit = makeShelfUnit({ unitId: "book-x", kind: "book" });
+
+    const summary = shelfUnitToUnitCardSummary(unit, undefined);
+
+    expect(summary).toMatchObject({
+      unitId: "book-x",
+      kind: "book",
+      title: "book-x",
+      addedAt: "2026-02-01T00:00:00.000Z",
     });
   });
 });

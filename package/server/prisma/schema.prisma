@@ -178,8 +178,6 @@ model Unit {
   rootPosts       Post[] @relation("PostRoot")
   parentPosts     Post[] @relation("PostParent")
 
-  // ShelfItem-scoped unit links (primary/review/tag)
-  shelfItemUnits ShelfItemUnit[]
   userProgress UserUnitProgress[] @relation("ProgressUnit")
 
   @@unique([translationGroupId, defaultLanguage])
@@ -444,40 +442,42 @@ model Shelf {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  items          ShelfItem[]
-  shelfItemUnits ShelfItemUnit[]
+  units     ShelfUnit[]
+  relations ShelfUnitRelation[]
 }
 
-model ShelfItem {
-  shelfUnitId String @db.Uuid
-  itemRef     String @db.Uuid
-  kind        String @db.VarChar(32)
-  position    String @db.VarChar(64) // Fractional Indexing
+model ShelfUnit {
+  shelfId  String @db.Uuid
+  unitId   String @db.Uuid
+  kind     String @db.VarChar(32)
+  position String @db.VarChar(64) // Fractional Indexing
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  shelf          Shelf           @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
-  shelfItemUnits ShelfItemUnit[]
+  shelf            Shelf               @relation(fields: [shelfId], references: [unitId], onDelete: Cascade)
+  parentRelations  ShelfUnitRelation[] @relation("ShelfUnitRelationParent")
+  childRelations   ShelfUnitRelation[] @relation("ShelfUnitRelationChild")
 
-  @@id([shelfUnitId, itemRef])
-  @@index([shelfUnitId, position])
+  @@id([shelfId, unitId])
+  @@index([shelfId, position])
 }
 
-model ShelfItemUnit {
-  shelfUnitId String @db.Uuid
-  itemRef     String @db.Uuid
-  unitId      String @db.Uuid
-  role        String @db.VarChar(32)
+model ShelfUnitRelation {
+  shelfId      String @db.Uuid
+  parentUnitId String @db.Uuid
+  childUnitId  String @db.Uuid
+  role         String @db.VarChar(32)
 
-  shelf Shelf     @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
-  slot  ShelfItem @relation(fields: [shelfUnitId, itemRef], references: [shelfUnitId, itemRef], onDelete: Cascade)
-  unit  Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  shelf  Shelf     @relation(fields: [shelfId], references: [unitId], onDelete: Cascade)
+  parent ShelfUnit @relation("ShelfUnitRelationParent", fields: [shelfId, parentUnitId], references: [shelfId, unitId], onDelete: Cascade)
+  child  ShelfUnit @relation("ShelfUnitRelationChild", fields: [shelfId, childUnitId], references: [shelfId, unitId], onDelete: Cascade)
 
-  @@id([shelfUnitId, itemRef, unitId, role])
-  @@index([unitId])
-  @@index([unitId, role])
-  @@index([shelfUnitId, role])
+  @@id([shelfId, parentUnitId, childUnitId, role])
+  @@index([shelfId, parentUnitId, role])
+  @@index([shelfId, childUnitId])
+  @@index([childUnitId, role])
+  @@index([parentUnitId, role])
 }
 
 /**

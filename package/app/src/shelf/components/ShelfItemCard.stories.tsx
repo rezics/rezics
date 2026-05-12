@@ -6,12 +6,12 @@ const meta = {
   title: "Domain/Shelf/ShelfItemCard",
   component: ShelfItemCard,
   args: {
-    item: {
-      shelfUnitId: "shelf-1",
+    unit: {
+      shelfId: "shelf-1",
+      unitId: "book-quiet-library",
       kind: "book",
-      itemRef: "book-quiet-library",
-      sortOrder: 0,
-    } as never,
+      position: "a0",
+    },
   },
 } satisfies Meta<typeof ShelfItemCard>;
 
@@ -22,22 +22,22 @@ export const Default: Story = {};
 
 export const LongContent: Story = {
   args: {
-    item: {
-      shelfUnitId: "shelf-1",
+    unit: {
+      shelfId: "shelf-1",
+      unitId: "review-with-a-very-long-identifier-string-to-truncate",
       kind: "review",
-      itemRef: "review-with-a-very-long-identifier-string-to-truncate",
-      sortOrder: 1,
-    } as never,
+      position: "a1",
+    },
   },
 };
 
 export const Compact: Story = {
   args: {
-    item: {
-      shelfUnitId: "shelf-1",
+    unit: {
+      shelfId: "shelf-1",
+      unitId: "fiction",
       kind: "tag",
-      itemRef: "fiction",
-      sortOrder: 2,
-    } as never,
+      position: "a2",
+    },
   },
 };

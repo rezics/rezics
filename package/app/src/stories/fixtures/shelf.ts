@@ -11,7 +11,8 @@ function makeShelf(
     userId: userAlice.userId,
     user: userAlice,
     coverUrl: `https://picsum.photos/seed/${overrides.unitId}/640/360`,
-    items: [],
+    units: [],
+    relations: [],
     translations: [
       {
         unitId: overrides.unitId,
@@ -41,20 +42,36 @@ export const shelfEmpty: ShelfDTO = makeShelf({
 
 export const shelfFew: ShelfDTO = makeShelf({
   unitId: "shelf-few",
-  items: [
-    { shelfUnitId: "shelf-few", unitId: "book-1", sortOrder: 0 } as never,
-    { shelfUnitId: "shelf-few", unitId: "book-2", sortOrder: 1 } as never,
-    { shelfUnitId: "shelf-few", unitId: "book-3", sortOrder: 2 } as never,
+  units: [
+    {
+      shelfId: "shelf-few",
+      unitId: "book-1",
+      kind: "book",
+      position: "a0",
+    },
+    {
+      shelfId: "shelf-few",
+      unitId: "book-2",
+      kind: "book",
+      position: "a1",
+    },
+    {
+      shelfId: "shelf-few",
+      unitId: "book-3",
+      kind: "book",
+      position: "a2",
+    },
   ],
 });
 
 export const shelfMany: ShelfDTO = makeShelf({
   unitId: "shelf-many",
-  items: Array.from({ length: 24 }, (_, index) => ({
-    shelfUnitId: "shelf-many",
+  units: Array.from({ length: 24 }, (_, index) => ({
+    shelfId: "shelf-many",
     unitId: `book-${index}`,
-    sortOrder: index,
-  })) as never,
+    kind: "book" as const,
+    position: `a${String(index).padStart(2, "0")}`,
+  })),
 });
 
 export const shelfLongDescription: ShelfDTO = makeShelf({

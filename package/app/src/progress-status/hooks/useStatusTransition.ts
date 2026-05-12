@@ -8,8 +8,8 @@ import {
   useUpdateUnitProgress,
 } from "@rezics/api/progress/progress.mutations";
 import {
-  useAddShelfItemMutation,
-  useRemoveShelfItemMutation,
+  useAddShelfUnitMutation,
+  useRemoveShelfUnitMutation,
 } from "@rezics/api/shelf/shelf.mutations";
 import { useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -51,27 +51,27 @@ export function useStatusTransition(
 
   const updateProgress = useUpdateUnitProgress(unitId);
   const deleteProgress = useDeleteUnitProgress(unitId);
-  const addShelfItem = useAddShelfItemMutation();
-  const removeShelfItem = useRemoveShelfItemMutation();
+  const addShelfUnit = useAddShelfUnitMutation();
+  const removeShelfUnit = useRemoveShelfUnitMutation();
 
   const inFlightRetries = useRef(new Set<string>());
 
   const runShelfOp = useCallback(
     async (op: ShelfOp) => {
-      const shelfUnitId = getShelfId(op.shelfKey);
-      if (!shelfUnitId) {
+      const shelfId = getShelfId(op.shelfKey);
+      if (!shelfId) {
         throw new Error(`No shelf id for ${op.shelfKey}`);
       }
       if (op.kind === "add") {
-        await addShelfItem.mutateAsync({
-          shelfUnitId,
-          input: { itemRef: unitId, kind: "book" },
+        await addShelfUnit.mutateAsync({
+          shelfId,
+          input: { unitId, kind: "book" },
         });
       } else {
-        await removeShelfItem.mutateAsync({ shelfUnitId, itemRef: unitId });
+        await removeShelfUnit.mutateAsync({ shelfId, childUnitId: unitId });
       }
     },
-    [addShelfItem, getShelfId, removeShelfItem, unitId],
+    [addShelfUnit, getShelfId, removeShelfUnit, unitId],
   );
 
   const showRetryToast = useCallback(
@@ -215,12 +215,12 @@ export function useStatusTransition(
     () =>
       updateProgress.isPending ||
       deleteProgress.isPending ||
-      addShelfItem.isPending ||
-      removeShelfItem.isPending,
+      addShelfUnit.isPending ||
+      removeShelfUnit.isPending,
     [
-      addShelfItem.isPending,
+      addShelfUnit.isPending,
       deleteProgress.isPending,
-      removeShelfItem.isPending,
+      removeShelfUnit.isPending,
       updateProgress.isPending,
     ],
   );

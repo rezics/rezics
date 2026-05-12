@@ -4,17 +4,17 @@ import { searchClient } from "@/meili/search-client";
 const BATCH_SIZE = 5000;
 
 interface BackfillRow {
-  shelfUnitId: string;
+  shelfId: string;
   items: string[] | null;
 }
 
 async function fetchBatch(cursor: string | null): Promise<BackfillRow[]> {
   if (cursor === null) {
     return prisma.$queryRaw<BackfillRow[]>`
-      SELECT u.id AS "shelfUnitId",
-             ARRAY_REMOVE(ARRAY_AGG(si."itemRef"), NULL) AS "items"
+      SELECT u.id AS "shelfId",
+             ARRAY_REMOVE(ARRAY_AGG(su."unitId"), NULL) AS "items"
       FROM "Unit" u
-      LEFT JOIN "ShelfItem" si ON si."shelfUnitId" = u.id
+      LEFT JOIN "ShelfUnit" su ON su."shelfId" = u.id
       WHERE u.type = 'SHELF'
         AND u.status = 'PUBLISHED'
       GROUP BY u.id
@@ -23,10 +23,10 @@ async function fetchBatch(cursor: string | null): Promise<BackfillRow[]> {
     `;
   }
   return prisma.$queryRaw<BackfillRow[]>`
-    SELECT u.id AS "shelfUnitId",
-           ARRAY_REMOVE(ARRAY_AGG(si."itemRef"), NULL) AS "items"
+    SELECT u.id AS "shelfId",
+           ARRAY_REMOVE(ARRAY_AGG(su."unitId"), NULL) AS "items"
     FROM "Unit" u
-    LEFT JOIN "ShelfItem" si ON si."shelfUnitId" = u.id
+    LEFT JOIN "ShelfUnit" su ON su."shelfId" = u.id
     WHERE u.type = 'SHELF'
       AND u.status = 'PUBLISHED'
       AND u.id > ${cursor}::uuid
@@ -47,13 +47,13 @@ try {
 
     await searchClient.patchContent(
       batch.map((row) => ({
-        id: row.shelfUnitId,
+        id: row.shelfId,
         containedUnitIds: row.items ?? [],
       })),
     );
 
     total += batch.length;
-    cursor = batch[batch.length - 1]!.shelfUnitId;
+    cursor = batch[batch.length - 1]!.shelfId;
     batchIndex += 1;
     console.log(
       `[backfill-contained-unit-ids] batch ${batchIndex}: synced=${batch.length} total=${total}`,

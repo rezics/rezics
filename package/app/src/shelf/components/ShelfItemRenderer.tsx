@@ -1,5 +1,5 @@
 import type {
-  EnrichedShelfItem,
+  EnrichedShelfUnit,
   ShelfView,
   TagListEntryDTO,
 } from "@rezics/api/shelf";
@@ -19,7 +19,7 @@ import { PostCard } from "@/post";
 import { ReviewCard } from "@/review/components/item/ReviewCard";
 import { getBookAuthorName } from "@/shared/utils/translation-helpers";
 import { SingleTagChip } from "@/tag/components/TagList";
-import { shelfEntryToUnitCardSummary, UnitCard } from "@/unit";
+import { shelfUnitToUnitCardSummary, UnitCard } from "@/unit";
 import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfCard } from "./ShelfCard";
 import { ShelfItemCard } from "./ShelfItemCard";
@@ -29,32 +29,29 @@ interface ShelfItemRendererProps {
   viewMode: ShelfView;
   /**
    * Optional left-column controls (drag handle, move, delete) for editor use.
-   * Rendered on the primary row in flat/nested mode and on each attached
-   * review row in flat mode. Never rendered inside a nested card's tab area.
    */
   editControls?: React.ReactNode;
   /**
    * When true, all entries render as fixed-height `UnitCard`s regardless of
-   * viewMode. Used by the shelf editor so curators get uniform, drag-friendly
-   * rows. The viewMode still controls stream shape (flat vs nested).
+   * viewMode.
    */
   editing?: boolean;
 }
 
-function renderPrimary(
-  enriched: EnrichedShelfItem,
+function renderUnit(
+  enriched: EnrichedShelfUnit,
   viewMode: ShelfView,
 ): React.ReactNode {
-  const { item, primary } = enriched;
-  switch (item.kind) {
+  const { unit, data } = enriched;
+  switch (unit.kind) {
     case "book": {
-      const book = primary as BookDTO | undefined;
-      if (!book) return null;
-      const title = book.translations?.[0]?.title ?? item.itemRef;
+      const book = data as BookDTO | undefined;
+      if (!book) return <ShelfItemCard unit={unit} />;
+      const title = book.translations?.[0]?.title ?? unit.unitId;
       const description = book.translations?.[0]?.description ?? undefined;
       const author = getBookAuthorName(book) || undefined;
       const coverUrl = book.coverUrl ?? "";
-      const href = `/book/${item.itemRef}`;
+      const href = `/book/${unit.unitId}`;
       if (viewMode === "masonry") {
         return (
           <BookCard
@@ -76,41 +73,47 @@ function renderPrimary(
       );
     }
     case "review": {
-      const post = primary as PostDTO | undefined;
-      if (!post) return null;
+      const post = data as PostDTO | undefined;
+      if (!post) return <ShelfItemCard unit={unit} />;
       return <ReviewCard review={post} />;
     }
     case "quote": {
-      const post = primary as PostDTO | undefined;
-      if (!post) return null;
+      const post = data as PostDTO | undefined;
+      if (!post) return <ShelfItemCard unit={unit} />;
       return <ExcerptCard excerpt={post as unknown as UnitDTO} />;
     }
     case "post": {
-      const post = primary as PostDTO | undefined;
-      if (!post) return null;
+      const post = data as PostDTO | undefined;
+      if (!post) return <ShelfItemCard unit={unit} />;
       return <PostCard post={post} />;
     }
     case "shelf": {
-      const shelf = primary as ShelfDTO | undefined;
-      if (!shelf) return null;
+      const shelf = data as ShelfDTO | undefined;
+      if (!shelf) return <ShelfItemCard unit={unit} />;
       return <ShelfCard shelf={shelf} />;
     }
     case "tag": {
-      const tag = primary as TagListEntryDTO | undefined;
-      if (!tag) return null;
+      const tag = data as TagListEntryDTO | undefined;
+      if (!tag) return <ShelfItemCard unit={unit} />;
       return <SingleTagChip tag={tag as unknown as UnitTagDTO} />;
     }
     default:
-      return <ShelfItemCard item={item} />;
+      return <ShelfItemCard unit={unit} />;
   }
 }
 
-function NestedPrimeCard({ enriched }: { enriched: EnrichedShelfItem }) {
+function NestedRootCard({
+  root,
+  children,
+}: {
+  root: EnrichedShelfUnit;
+  children: EnrichedShelfUnit[];
+}) {
   const [tab, setTab] = useState("0");
-  const primary = renderPrimary(enriched, "nested");
-  const reviews = enriched.attachedReviews;
+  const primary = renderUnit(root, "nested");
+  const reviewChildren = children.filter((c) => c.unit.kind === "review");
 
-  if (reviews.length === 0) {
+  if (reviewChildren.length === 0) {
     return <>{primary}</>;
   }
 
@@ -122,15 +125,22 @@ function NestedPrimeCard({ enriched }: { enriched: EnrichedShelfItem }) {
       <div>
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="overflow-x-auto">
-            {reviews.map((review, idx) => (
-              <TabsTrigger key={review.unitId} value={String(idx)}>
-                {(review.extra as { title?: string } | undefined)?.title ??
-                  `Review ${idx + 1}`}
-              </TabsTrigger>
-            ))}
+            {reviewChildren.map((c, idx) => {
+              const post = c.data as PostDTO | undefined;
+              return (
+                <TabsTrigger key={c.unit.unitId} value={String(idx)}>
+                  {(post?.extra as { title?: string } | undefined)?.title ??
+                    `Review ${idx + 1}`}
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
         </Tabs>
-        {reviews[activeIdx] && <ReviewCard review={reviews[activeIdx]} />}
+        {reviewChildren[activeIdx]?.data && (
+          <ReviewCard
+            review={reviewChildren[activeIdx]!.data as PostDTO}
+          />
+        )}
       </div>
     </div>
   );
@@ -144,15 +154,17 @@ export function ShelfItemRenderer({
 }: ShelfItemRendererProps) {
   let content: React.ReactNode;
   if (editing) {
-    content = <UnitCard summary={shelfEntryToUnitCardSummary(entry)} />;
-  } else if (entry.kind === "review") {
-    content = <ReviewCard review={entry.review} />;
-  } else if (entry.kind === "tag") {
-    content = <SingleTagChip tag={entry.tag as unknown as UnitTagDTO} />;
-  } else if (viewMode === "nested") {
-    content = <NestedPrimeCard enriched={entry.enriched} />;
+    content = (
+      <UnitCard
+        summary={shelfUnitToUnitCardSummary(entry.unit.unit, entry.unit.data)}
+      />
+    );
+  } else if (entry.kind === "root" && viewMode === "nested") {
+    content = (
+      <NestedRootCard root={entry.unit} children={entry.children ?? []} />
+    );
   } else {
-    content = <>{renderPrimary(entry.enriched, viewMode)}</>;
+    content = <>{renderUnit(entry.unit, viewMode)}</>;
   }
 
   if (!editControls) {

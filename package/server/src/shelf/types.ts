@@ -1,7 +1,7 @@
 import type { Prisma } from "#/prisma/client";
 import { publicUserSelect } from "@/utils/sanitizeUser";
 
-// Prisma include for shelf detail (with items in position order; no Unit expand)
+// Prisma include for shelf detail (with units in position order and relations).
 export const shelfInclude = {
   unit: {
     include: {
@@ -10,16 +10,17 @@ export const shelfInclude = {
       unitTags: { orderBy: { score: "desc" as const } },
     },
   },
-  items: {
+  units: {
     orderBy: { position: "asc" as const },
   },
+  relations: true,
 } satisfies Prisma.ShelfInclude;
 
 export type ShelfWithRelations = Prisma.ShelfGetPayload<{
   include: typeof shelfInclude;
 }>;
 
-// Lighter select for list queries (no items)
+// Lighter select for list queries (no units/relations)
 export const shelfListSelect = {
   unitId: true,
   kindKey: true,
@@ -45,6 +46,5 @@ export type ShelfListSelected = Prisma.ShelfGetPayload<{
   select: typeof shelfListSelect;
 }>;
 
-// ShelfItem rows are returned as thin rows — no Unit join, no attachment expand.
-// Attachments (reviewIds / tagIds) are fetched separately via ShelfItemUnit projection.
-export type ShelfItemRow = Prisma.ShelfItemGetPayload<{}>;
+export type ShelfUnitRow = Prisma.ShelfUnitGetPayload<{}>;
+export type ShelfUnitRelationRow = Prisma.ShelfUnitRelationGetPayload<{}>;

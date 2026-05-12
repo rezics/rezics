@@ -184,10 +184,10 @@ describe("buildContentDocument containedUnitIds", () => {
       type: "SHELF",
       translations: [{ language: "en", title: "My Shelf", extra: null }],
       shelf: {
-        items: [
-          { itemRef: "u-a" },
-          { itemRef: "u-b" },
-          { itemRef: "u-c" },
+        units: [
+          { unitId: "u-a" },
+          { unitId: "u-b" },
+          { unitId: "u-c" },
         ],
       },
     });

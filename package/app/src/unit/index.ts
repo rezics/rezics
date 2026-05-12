@@ -14,7 +14,7 @@ export type {
 export {
   candidateToUnitCardSummary,
   resolveUnitWorkContext,
-  shelfEntryToUnitCardSummary,
+  shelfUnitToUnitCardSummary,
   unitDtoToUnitCardSummary,
 } from "./models/unitCardSummary";
 export type { Candidate } from "./models/types";

@@ -1,4 +1,4 @@
-import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
+import type { ShelfFilters, ShelfUnitsQuery } from "./shelf.types";
 
 export const shelfKeys = {
   all: () => ["shelves"] as const,
@@ -9,9 +9,9 @@ export const shelfKeys = {
   byUser: (userId: string, filters?: ShelfFilters) =>
     [...shelfKeys.all(), "user", userId, filters] as const,
   mine: () => [...shelfKeys.all(), "mine"] as const,
-  items: (unitId: string) => [...shelfKeys.all(), "items", unitId] as const,
-  itemsPage: (unitId: string, query?: ShelfItemsQuery) =>
-    [...shelfKeys.items(unitId), query] as const,
+  units: (unitId: string) => [...shelfKeys.all(), "units", unitId] as const,
+  unitsPage: (unitId: string, query?: ShelfUnitsQuery) =>
+    [...shelfKeys.units(unitId), query] as const,
 } as const;
 
 export const collectionKeys = {

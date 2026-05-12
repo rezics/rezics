@@ -61,7 +61,7 @@ export async function patchContentMetadataToMeili(
 }
 
 export async function patchContentContainedUnitIdsToMeili(
-  shelfUnitId: string,
+  shelfId: string,
 ): Promise<void> {
-  await patchContentContainedUnitIds(searchClient, shelfUnitId);
+  await patchContentContainedUnitIds(searchClient, shelfId);
 }
