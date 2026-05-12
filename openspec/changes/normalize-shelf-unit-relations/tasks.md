@@ -1,11 +1,13 @@
 ## 1. Schema And Migration
 
-- [ ] 1.1 Update `package/server/prisma/schema.prisma` to rename `ShelfItem` to `ShelfUnit` with `(shelfUnitId, unitId)` primary key and `@@index([shelfUnitId, position])`.
-- [ ] 1.2 Update `package/server/prisma/schema.prisma` to rename `ShelfItemUnit` to `ShelfUnitRelation` with `(shelfUnitId, parentUnitId, childUnitId, role)` primary key and parent/child FKs to `ShelfUnit`.
+- [ ] 1.1 Update `package/server/prisma/schema.prisma` to rename `ShelfItem` to `ShelfUnit` with `(shelfId, unitId)` primary key and `@@index([shelfId, position])`. The owning-shelf FK column is `shelfId` (references `Shelf.unitId`), not `shelfUnitId`.
+- [ ] 1.2 Update `package/server/prisma/schema.prisma` to rename `ShelfItemUnit` to `ShelfUnitRelation` with `(shelfId, parentUnitId, childUnitId, role)` primary key and parent/child FKs to `ShelfUnit(shelfId, unitId)`. Do NOT add a unique constraint on `(shelfId, childUnitId, role)` — multi-parent is intentionally allowed.
 - [ ] 1.3 Add relation indexes for parent-child reads, child root detection, and role-based reverse lookup.
 - [ ] 1.4 Create a Prisma migration that moves existing shelf rows into `ShelfUnit`, drops redundant `role='primary'` rows, and converts old review/tag rows into `ShelfUnitRelation` rows.
-- [ ] 1.5 Generate deterministic initial `ShelfUnit.position` values for migrated attached children and document the placement rule in the migration.
-- [ ] 1.6 Run Prisma generation for `package/server` and update generated-client assumptions in tests.
+- [ ] 1.5 Generate deterministic initial `ShelfUnit.position` values for migrated attached children per the rule in `design.md` Migration Plan step 5 (`keyBetween(parent.position, nextRoot.position)` slot-divided by ordered children). Cover the multi-parent case in migration tests.
+- [ ] 1.6 Recompute `Shelf.itemCount` post-migration as the count of `ShelfUnit` rows per shelf, and wire write-time `++`/`--` maintenance into the service layer (insert/delete of `ShelfUnit` only; relation writes do not change `itemCount`).
+- [ ] 1.7 Add service-layer validation that rejects `ShelfUnitRelation` writes where `parentUnitId === childUnitId`.
+- [ ] 1.8 Run Prisma generation for `package/server` and update generated-client assumptions in tests.
 
 ## 2. Contract And API Types
 
@@ -51,11 +53,11 @@
 
 ## 7. Tests And Validation
 
-- [ ] 7.1 Update server shelf service tests for schema rename, attach/detach semantics, batch ops, and collection review auto-attachment.
-- [ ] 7.2 Update app shelf stream tests for grouped sorting, all-entry sorting, manual position sorting, and duplicate-prevention.
-- [ ] 7.3 Update item op log tests for `unitId`-based add/delete/reorder and relation ops.
+- [ ] 7.1 Update server shelf service tests for schema rename, attach/detach semantics, batch ops, collection review auto-attachment, multi-parent attachment, self-relation rejection, and `Shelf.itemCount` write-time maintenance (including the case where an attach creates a new child `ShelfUnit`).
+- [ ] 7.2 Update app shelf stream tests for grouped sorting, all-entry sorting, manual position sorting, multi-parent child rendering (same child under multiple parents in nested/grouped flat, single peer in flat-all-entry), and two-step cycle defence in the nested renderer.
+- [ ] 7.3 Update item op log tests for `unitId`-based add/delete/reorder, attach with and without `position`, `setChildren` upsert behavior, and relation ops.
 - [ ] 7.4 Run targeted contract tests for `package/contract/src/shelf.ts`.
 - [ ] 7.5 Run targeted server tests for `package/server/src/shelf`.
 - [ ] 7.6 Run targeted app tests for `package/app/src/shelf`.
-- [ ] 7.7 Run `rg "ShelfItem|ShelfItemUnit|reviewIds|tagIds|itemRef" package/contract package/api/src/shelf package/server/src/shelf package/app/src/shelf` and resolve remaining canonical-model references.
+- [ ] 7.7 Run `rg "ShelfItem|ShelfItemUnit|reviewIds|tagIds|itemRef|shelfUnitId" package/contract package/api/src/shelf package/server/src/shelf package/app/src/shelf` and resolve remaining legacy-name references.
 - [ ] 7.8 Run `openspec validate normalize-shelf-unit-relations --strict`.

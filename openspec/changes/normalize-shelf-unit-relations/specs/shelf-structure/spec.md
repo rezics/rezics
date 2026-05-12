@@ -6,20 +6,22 @@
 
 The `ShelfUnit` model SHALL contain exactly these fields:
 
-- `shelfUnitId: String @db.Uuid` — owning shelf
+- `shelfId: String @db.Uuid` — owning shelf (references `Shelf.unitId`)
 - `unitId: String @db.Uuid` — contained unit id and render identity
 - `kind: String @db.VarChar(32)` — render discriminator
 - `position: String @db.VarChar(64)` — fractional index
 - `createdAt: DateTime`, `updatedAt: DateTime`
 
-The composite primary key SHALL be `@@id([shelfUnitId, unitId])`. The model SHALL declare an index `@@index([shelfUnitId, position])`.
+The composite primary key SHALL be `@@id([shelfId, unitId])`. The model SHALL declare an index `@@index([shelfId, position])`.
+
+The owning-shelf column SHALL be named `shelfId`, not `shelfUnitId`, to avoid lexical collision with the model name `ShelfUnit`.
 
 #### Scenario: Schema declares ShelfUnit with composite PK
 
 - **WHEN** reviewing the Prisma schema
 - **THEN** a `ShelfUnit` model SHALL exist with the fields listed above
-- **AND** the composite PK SHALL be `@@id([shelfUnitId, unitId])`
-- **AND** the model SHALL declare `@@index([shelfUnitId, position])`
+- **AND** the composite PK SHALL be `@@id([shelfId, unitId])`
+- **AND** the model SHALL declare `@@index([shelfId, position])`
 
 #### Scenario: Attached review has its own ShelfUnit
 
@@ -59,10 +61,34 @@ A given unit SHALL appear at most once per shelf as a `ShelfUnit`.
 
 #### Scenario: Duplicate unit rejected
 
-- **GIVEN** a shelf already contains `ShelfUnit(shelfUnitId = S, unitId = U)`
+- **GIVEN** a shelf already contains `ShelfUnit(shelfId = S, unitId = U)`
 - **WHEN** the system attempts to insert another `ShelfUnit` with the same `(S, U)`
 - **THEN** the PK constraint SHALL reject the insert
 - **AND** no second row SHALL be created
+
+### Requirement: Shelf.itemCount tracks ShelfUnit count at write time
+
+`Shelf.itemCount` SHALL equal the number of `ShelfUnit` rows where `shelfId = shelf.unitId`. The counter SHALL be maintained at write time: inserting a `ShelfUnit` row increments it by one, deleting a `ShelfUnit` row decrements it by one. Writing or deleting a `ShelfUnitRelation` row SHALL NOT change `itemCount`. Read paths SHALL NOT issue runtime `COUNT(*)` queries against `ShelfUnit` to populate `itemCount`.
+
+#### Scenario: Adding a unit increments itemCount
+
+- **GIVEN** shelf `S` has `itemCount = 5`
+- **WHEN** a new `ShelfUnit(S, U)` row is inserted
+- **THEN** `Shelf.itemCount` for `S` SHALL become `6`
+- **AND** no `COUNT(*)` query SHALL be issued
+
+#### Scenario: Attaching a child does not change itemCount
+
+- **GIVEN** shelf `S` has `itemCount = 6` and contains `ShelfUnit(S, B)` and `ShelfUnit(S, R)`
+- **WHEN** a `ShelfUnitRelation(S, B, R, 'review')` row is inserted
+- **THEN** `Shelf.itemCount` SHALL remain `6`
+
+#### Scenario: Creating an attached-only child increments itemCount
+
+- **GIVEN** shelf `S` has `itemCount = 5` and contains `ShelfUnit(S, B)`
+- **WHEN** review `R` is attached to `B`, requiring `ShelfUnit(S, R)` to be created
+- **THEN** `Shelf.itemCount` SHALL become `6` because one new `ShelfUnit` row was inserted
+- **AND** the subsequent `ShelfUnitRelation` insert SHALL NOT further change `itemCount`
 
 ## REMOVED Requirements
 
@@ -86,6 +112,6 @@ A given unit SHALL appear at most once per shelf as a `ShelfUnit`.
 
 ### Requirement: ShelfItem composite primary key on itemRef
 
-**Reason**: The composite key is renamed from `(shelfUnitId, itemRef)` to `(shelfUnitId, unitId)`.
+**Reason**: The composite key is renamed from `(shelfUnitId, itemRef)` to `(shelfId, unitId)`.
 
 **Migration**: Preserve uniqueness while moving to the new key.

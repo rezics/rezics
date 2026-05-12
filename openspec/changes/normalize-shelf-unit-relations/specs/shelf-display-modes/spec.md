@@ -12,12 +12,21 @@ In `"nested"` mode, the stream SHALL be derived from `ShelfUnit[]` and `ShelfUni
 - **AND** `R1` and `R2` SHALL be reachable as attached content inside that card
 - **AND** no independent root card SHALL be emitted for `R1` or `R2`
 
-#### Scenario: Child unit is not rendered twice
+#### Scenario: Child unit is not rendered as a root
 
-- **GIVEN** shelf unit `R1` exists in the shelf and appears as `childUnitId` in a relation
+- **GIVEN** shelf unit `R1` exists in the shelf and appears as `childUnitId` in at least one relation
 - **WHEN** the grouped stream is derived
-- **THEN** `R1` SHALL be emitted only under its parent
+- **THEN** `R1` SHALL be emitted only under its parent(s)
 - **AND** `R1` SHALL NOT appear in the root list
+
+#### Scenario: Multi-parent child renders under each parent
+
+- **GIVEN** shelf unit `T` is the `childUnitId` of relations `(B1, T, 'tag')` and `(B2, T, 'tag')`
+- **WHEN** the nested stream is derived
+- **THEN** `B1`'s card SHALL emit `T` in its attached content
+- **AND** `B2`'s card SHALL emit `T` in its attached content
+- **AND** `T` SHALL NOT appear as a root entry
+- **AND** every rendered instance of `T` SHALL refer to the same `ShelfUnit(T)` row with the same `position` and the same hydrated DTO
 
 ### Requirement: Flat mode emits primes and attachments as peer entries
 
@@ -29,6 +38,13 @@ In `"flat"` mode, the emitted stream SHALL contain `ShelfUnit` entries. When `so
 - **WHEN** flat mode renders with `sortPrimeOnly = false`
 - **THEN** the stream SHALL contain `B`, `R1`, and `R2` exactly once each
 - **AND** all three entries SHALL participate in the same comparator
+
+#### Scenario: Flat all-entry mode emits multi-parent child only once
+
+- **GIVEN** shelf unit `T` is the `childUnitId` of relations under both `B1` and `B2`
+- **WHEN** flat mode renders with `sortPrimeOnly = false`
+- **THEN** the stream SHALL contain `T` exactly once
+- **AND** the number of incoming relations on `T` SHALL NOT multiply its appearance
 
 #### Scenario: Flat grouped mode keeps children under sorted root
 

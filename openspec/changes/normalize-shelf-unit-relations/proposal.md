@@ -72,10 +72,12 @@ Affected packages:
 
 Migration needs:
 
-- Existing `ShelfItem` rows become `ShelfUnit` rows.
+- Existing `ShelfItem` rows become `ShelfUnit` rows; `itemRef` becomes `unitId`; the owning-shelf FK column is renamed `shelfUnitId → shelfId`.
 - Existing `ShelfItemUnit(role='primary')` rows are removed as redundant relation data.
 - Existing `ShelfItemUnit(role='review' | 'tag')` rows become `ShelfUnitRelation` rows, and their child units must be represented as `ShelfUnit` rows with generated initial positions.
-- Initial generated positions for migrated attached children should be deterministic and placed near their parent group, after which `ShelfUnit.position` is the sole manual order source.
+- Initial generated positions for migrated attached children are deterministic and placed between the parent's `position` and the next root's `position`; the full rule is in `design.md` Migration Plan step 5. After migration `ShelfUnit.position` is the sole manual order source.
+- `Shelf.itemCount` is recomputed once post-migration and thereafter maintained as a write-time counter that tracks the number of `ShelfUnit` rows in the shelf (relation writes do not affect it).
+- The same `unitId` MAY appear as the `childUnitId` of multiple `ShelfUnitRelation` rows in one shelf (multi-parent). Migrations preserve such configurations without deduplication.
 
 Backward compatibility:
 

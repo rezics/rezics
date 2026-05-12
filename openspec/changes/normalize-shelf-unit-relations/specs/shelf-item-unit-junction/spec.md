@@ -6,23 +6,24 @@ The system SHALL provide a `ShelfUnitRelation` model as the authoritative parent
 
 `ShelfUnitRelation` SHALL contain exactly these fields:
 
-- `shelfUnitId: String @db.Uuid` — owning shelf
+- `shelfId: String @db.Uuid` — owning shelf (references `Shelf.unitId`)
 - `parentUnitId: String @db.Uuid` — parent `ShelfUnit.unitId`
 - `childUnitId: String @db.Uuid` — child `ShelfUnit.unitId`
 - `role: String @db.VarChar(32)` — relation role discriminator (`review | tag | ...`)
 
-The composite primary key SHALL be `@@id([shelfUnitId, parentUnitId, childUnitId, role])`.
+The composite primary key SHALL be `@@id([shelfId, parentUnitId, childUnitId, role])`. The PK intentionally allows the same `childUnitId` to appear under multiple `parentUnitId` values within one shelf.
 
 #### Scenario: Schema declares ShelfUnitRelation with composite PK
 
 - **WHEN** reviewing the Prisma schema
 - **THEN** a `ShelfUnitRelation` model SHALL exist with the fields listed above
-- **AND** the composite PK SHALL be `@@id([shelfUnitId, parentUnitId, childUnitId, role])`
+- **AND** the composite PK SHALL be `@@id([shelfId, parentUnitId, childUnitId, role])`
 - **AND** no `position` column SHALL exist on `ShelfUnitRelation`
+- **AND** no additional uniqueness constraint on `(shelfId, childUnitId, role)` SHALL exist that would forbid multi-parent attachment
 
 ### Requirement: ShelfUnitRelation cascade semantics
 
-`ShelfUnitRelation` SHALL reference both parent and child rows through `(shelfUnitId, unitId)` foreign keys to `ShelfUnit`. Deleting a shelf unit SHALL cascade relation rows where it is either parent or child.
+`ShelfUnitRelation` SHALL reference both parent and child rows through `(shelfId, unitId)` foreign keys to `ShelfUnit`. Deleting a shelf unit SHALL cascade relation rows where it is either parent or child.
 
 #### Scenario: Deleting a parent removes its relations
 
@@ -44,13 +45,49 @@ The composite primary key SHALL be `@@id([shelfUnitId, parentUnitId, childUnitId
 #### Scenario: Fetch children for parent
 
 - **WHEN** the system queries children of parent `B` in shelf `S`
-- **THEN** the query SHALL target `ShelfUnitRelation` with `WHERE shelfUnitId = S AND parentUnitId = B`
+- **THEN** the query SHALL target `ShelfUnitRelation` with `WHERE shelfId = S AND parentUnitId = B`
 - **AND** a B-tree index SHALL support that lookup
 
 #### Scenario: Detect root units
 
 - **WHEN** the frontend or server computes root shelf units
 - **THEN** it SHALL treat units appearing as `childUnitId` in `ShelfUnitRelation` for the same shelf as non-root units
+
+### Requirement: Multi-parent attachment is allowed
+
+A `ShelfUnit` MAY be the child of multiple `ShelfUnitRelation` rows in the same shelf, including under different roles and including the same role with different parents. The system SHALL NOT reject inserts on the basis that the child already has another parent in the shelf.
+
+#### Scenario: Same tag attached to two parents
+
+- **GIVEN** shelf `S` contains `ShelfUnit(B1)`, `ShelfUnit(B2)`, and `ShelfUnit(T)`
+- **WHEN** `T` is attached to `B1` and then attached to `B2` with `role = 'tag'`
+- **THEN** both relation rows SHALL exist: `(S, B1, T, 'tag')` and `(S, B2, T, 'tag')`
+- **AND** neither insert SHALL be rejected as duplicate
+- **AND** `ShelfUnit(S, T)` SHALL remain a single row
+
+#### Scenario: Same review attached to two parents
+
+- **GIVEN** shelf `S` contains `ShelfUnit(B1)`, `ShelfUnit(B2)`, and `ShelfUnit(R)`
+- **WHEN** `R` is attached to `B1` with `role = 'review'` and then attached to `B2` with `role = 'review'`
+- **THEN** both relation rows SHALL exist and be retrievable
+
+### Requirement: Self-relation forbidden
+
+The service layer SHALL reject any `ShelfUnitRelation` write where `parentUnitId === childUnitId`. Self-relation has no rendering meaning and would cause infinite recursion in nested-mode expansion.
+
+Multi-step cycles (`A → B → A`) are NOT rejected at write time at this stage; the renderer is responsible for tracking the visited set per traversal so a cycle is rendered at most once.
+
+#### Scenario: Self-relation rejected
+
+- **WHEN** the system attempts to insert `ShelfUnitRelation(S, U, U, role)` for any `role`
+- **THEN** the service SHALL reject the write with a validation error
+- **AND** no row SHALL be created
+
+#### Scenario: Two-step cycle not rejected
+
+- **WHEN** the system inserts `ShelfUnitRelation(S, A, B, 'review')` followed by `ShelfUnitRelation(S, B, A, 'review')`
+- **THEN** both inserts SHALL succeed
+- **AND** the nested-mode renderer SHALL render each unit at most once per traversal
 
 ### Requirement: Relation role vocabulary
 

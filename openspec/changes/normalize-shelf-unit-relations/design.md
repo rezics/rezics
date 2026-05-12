@@ -16,7 +16,7 @@ The change spans `package/server`, `package/contract`, `package/api`, and `packa
 - Make every rendered shelf unit sortable through one field: `ShelfUnit.position`.
 - Keep relation rows free of ordering semantics.
 - Prevent duplicate rendering of attached children.
-- Preserve efficient shelf reads with B-tree indexes on `(shelfUnitId, position)` and relation lookups by parent/child.
+- Preserve efficient shelf reads with B-tree indexes on `(shelfId, position)` and relation lookups by parent/child.
 - Simplify frontend stream derivation by hydrating a unified shelf unit list and applying relations afterward.
 - Move persisted default shelf view editing into the metadata area while keeping editor view switching local.
 
@@ -33,41 +33,76 @@ The change spans `package/server`, `package/contract`, `package/api`, and `packa
 
 `ShelfUnit` will contain:
 
-- `shelfUnitId`
+- `shelfId`
 - `unitId`
 - `kind`
 - `position`
 - `createdAt`
 - `updatedAt`
 
-The primary key will be `(shelfUnitId, unitId)`. A unit can appear at most once in a shelf. The `kind` field remains a write-time render discriminator.
+The primary key will be `(shelfId, unitId)`. A unit can appear at most once in a shelf. The `kind` field remains a write-time render discriminator.
+
+The owning-shelf foreign key is named `shelfId` even though Shelf is a Unit-extension whose PK column is `Shelf.unitId`. The shorter `shelfId` name is chosen to avoid the lexical collision with the model name `ShelfUnit` (the previous `shelfUnitId` reads like a row identity, not an owning-shelf reference).
 
 Alternatives considered:
 
 - Keep `ShelfItem.itemRef`: rejected because `itemRef` still reads like a slot pointer and does not make attached rows feel first-class.
 - Add position to `ShelfItemUnit`: rejected because relation rows would mix edge semantics with item ordering.
+- Keep the column name `shelfUnitId`: rejected because after renaming the model to `ShelfUnit`, `shelfUnitId` reads ambiguously as "this row's id" rather than "owning shelf id".
 
 ### Decision: Rename the edge table to `ShelfUnitRelation`
 
 `ShelfUnitRelation` will contain:
 
-- `shelfUnitId`
+- `shelfId`
 - `parentUnitId`
 - `childUnitId`
 - `role`
 
-The parent and child will both reference `ShelfUnit(shelfUnitId, unitId)` with cascade delete. The relation primary key will be `(shelfUnitId, parentUnitId, childUnitId, role)`.
+The parent and child will both reference `ShelfUnit(shelfId, unitId)` with cascade delete. The relation primary key will be `(shelfId, parentUnitId, childUnitId, role)`. The PK intentionally allows the same `childUnitId` to appear under multiple `parentUnitId` values within one shelf — see `Decision: Multi-parent attachment is allowed`.
 
 Indexes should support:
 
-- children for a parent: `(shelfUnitId, parentUnitId, role)`
-- parent lookup for duplicate-prevention/root detection: `(shelfUnitId, childUnitId)`
+- children for a parent: `(shelfId, parentUnitId, role)`
+- root detection (is this unit a child of anything in this shelf?): `(shelfId, childUnitId)`
 - reverse lookup for collection status: `(childUnitId, role)` and `(parentUnitId, role)` only if the server needs cross-shelf status queries by role
 
 Alternatives considered:
 
 - Keep `role='primary'`: rejected as redundant. Containment is represented by `ShelfUnit`; only parent-child relationships need relation rows.
 - Generic `UnitEdge`: rejected because shelf relations are shelf-scoped and must reference shelf-contained rows, not arbitrary global units.
+
+### Decision: Multi-parent attachment is allowed
+
+The same `ShelfUnit` MAY be the child of multiple `ShelfUnitRelation` rows within the same shelf. This is intentional for tags (one tag legitimately labels many parents) and is also allowed for reviews and any future role.
+
+Consequences:
+
+- Nested mode and grouped flat mode (`sortPrimeOnly = true`) render the shared child once under each parent that lists it. Each rendered instance is the same `ShelfUnit` (same `unitId`, same `position`, same hydrated DTO).
+- Flat all-entry mode (`sortPrimeOnly = false`) emits each `ShelfUnit` exactly once regardless of how many incoming relations it has.
+- Root detection remains `roots = units.filter(u => !childUnitIds.has(u.unitId))`; a unit with any incoming relation is not a root, even if it has many incoming relations.
+
+The service SHALL forbid only self-relation (`parentUnitId === childUnitId`) because it is semantically meaningless and would cause infinite recursion in nested rendering. Multi-step cycles (`A→B→A`) are not forbidden at this stage; the renderer must defend against rendering loops by tracking the visited set during nested expansion.
+
+Alternatives considered:
+
+- Forbid multi-parent at PK or unique-constraint level: rejected because tag-as-label has no natural single-parent meaning.
+- Forbid all cycles at write time: deferred. Cycles are theoretically possible but not produced by current UX; rendering-side defence is cheaper than a write-time graph walk.
+
+### Decision: `Shelf.itemCount` is a write-time materialized counter
+
+`Shelf.itemCount` SHALL equal the count of `ShelfUnit` rows where `shelfId = shelf.unitId`, maintained at write time:
+
+- `ShelfUnit` insert → `itemCount += 1`
+- `ShelfUnit` delete → `itemCount -= 1`
+- `ShelfUnitRelation` writes do not affect `itemCount`
+
+Read paths SHALL NOT issue runtime `COUNT(*)` queries against `ShelfUnit` to populate `itemCount`. If drift is suspected, a reconciliation job MAY recompute via a single `SELECT count(*) ... GROUP BY shelfId`, but this is operational, not a normal read.
+
+Alternatives considered:
+
+- Runtime `COUNT(*)` on each shelf read: rejected for cost.
+- DB trigger maintenance: acceptable but deferred to service-layer maintenance for testability; the requirement specifies the invariant, not the mechanism.
 
 ### Decision: DTOs return units and relations
 
@@ -89,11 +124,11 @@ The frontend stream derivation will compute:
 
 - `childUnitIds = Set(rel.childUnitId)`
 - `roots = units.filter(unit => !childUnitIds.has(unit.unitId))`
-- `childrenByParent = Map(parentUnitId, ShelfUnit[])`
+- `childrenByParent = Map(parentUnitId, ShelfUnit[])` — a `ShelfUnit` MAY appear in multiple entries of this map when its `unitId` is the `childUnitId` of multiple relations.
 
-Nested/grouped modes render roots once, then each root's children once. Flat all-entry mode renders all units once. A unit that appears as a child must not also appear as a root in grouped streams.
+Nested/grouped modes render roots once, then each root's children once **per parent**. Flat all-entry mode renders each `ShelfUnit` once. A unit that appears as a child does not also appear as a root in grouped streams.
 
-If a unit has multiple parents in the same shelf, the implementation should treat that as invalid data for grouped rendering and choose a deterministic single parent while surfacing a test-covered cleanup path. The service should prevent creating multiple parent relations for the same child and role unless a future spec explicitly allows it.
+Children of a parent SHALL be ordered by their own `ShelfUnit.position` under the active sort state, not by relation insertion order.
 
 ### Decision: Sorting applies to shelf units, not relations
 
@@ -120,24 +155,30 @@ The items editor will keep a local `editorViewMode` for previewing nested/flat p
 
 ## Risks / Trade-offs
 
-- Data migration may create many new `ShelfUnit` rows for currently attached review/tag ids. → Generate deterministic positions in a transaction and test migration with duplicate attachments.
-- Existing `itemCount` may change semantics if attached children become units. → Define `itemCount` as total `ShelfUnit` rows and expose root counts separately only if needed later.
-- Relation cycles would break grouped rendering. → Service validation must reject self-relations and cycles at write time for the current parent-child edge.
-- A child with multiple parents could render ambiguously. → Enforce one parent relation per child per shelf for attachment roles.
+- Data migration may create many new `ShelfUnit` rows for currently attached review/tag ids. → Generate deterministic positions in a transaction (see Migration Plan) and test migration with the same child attached to multiple parents.
+- `itemCount` semantics widen: every attached child counts. → Define `itemCount` as the count of all `ShelfUnit` rows and maintain it as a write-time counter on insert/delete; document that root-only counts are not exposed at this stage.
+- Self-relation would cause infinite recursion in nested rendering. → Reject `parentUnitId === childUnitId` at the service layer.
+- Multi-step cycles (`A→B→A`) are not write-time rejected. → Nested derivation tracks a visited set per traversal so a cycle is rendered at most once and surfaces as a test fixture rather than a crash.
+- Multi-parent attachment is allowed and visually duplicates the child under each parent. → Test fixtures cover the same child under multiple parents in nested and grouped flat modes.
 - Removing projected arrays is a broad frontend change. → Update contract, API hydration, app stream tests, and stories in one cutover.
-- Initial migrated child positions are synthetic. → Document that after migration `ShelfUnit.position` is authoritative and user reorders can refine it.
+- Initial migrated child positions are synthetic. → Document that after migration `ShelfUnit.position` is authoritative and user reorders refine it.
 
 ## Migration Plan
 
-1. Add the Prisma migration that renames or recreates `ShelfItem` as `ShelfUnit` and `ShelfItemUnit` as `ShelfUnitRelation`.
-2. Migrate existing primary `ShelfItem` rows to `ShelfUnit` rows.
-3. Drop redundant `role='primary'` relation rows.
-4. For each old `role='review' | 'tag'` row, ensure a child `ShelfUnit` exists for `unitId`, generate an initial `position`, and create a `ShelfUnitRelation` from the old slot's `itemRef` to the child unit id.
-5. Update contract schemas and regenerate Prisma client.
-6. Update server services, mappers, collection flows, and tests.
-7. Update API package types, mutations, and hydration.
-8. Update app stream derivation, edit page, shelf page, and tests.
-9. Run targeted package tests and migration validation.
+1. Add the Prisma migration that renames or recreates `ShelfItem` as `ShelfUnit` (with `shelfId` PK column) and `ShelfItemUnit` as `ShelfUnitRelation` (with `shelfId` PK column).
+2. Migrate existing primary `ShelfItem` rows to `ShelfUnit` rows by copying `itemRef → unitId`, preserving `position`, `kind`, and timestamps.
+3. Drop redundant `role='primary'` relation rows from the old `ShelfItemUnit` data.
+4. For each old `role='review' | 'tag'` row, ensure a child `ShelfUnit` exists for `unitId` and create a `ShelfUnitRelation(shelfId, parentUnitId=itemRef, childUnitId=unitId, role)`.
+5. Generate deterministic initial `ShelfUnit.position` values for migrated attached children using the following rule:
+   - For each migrated parent `P` with attached children `[c1, c2, …, cN]` (ordered first by `role` ascending, then by `unitId` ascending for determinism), let `pNext` be the position of the next root `ShelfUnit` in the same shelf (or `null` if `P` is the last root).
+   - Compute `slots = N` evenly-spaced fractional positions strictly between `P.position` and `pNext` using `keyBetween` repeatedly. Assign in order.
+   - If a migrated child is attached to multiple parents, place it once near its first encountered parent (deterministic by parent ordering above); subsequent encounters reuse the existing `ShelfUnit`.
+6. Recompute `Shelf.itemCount` for every shelf as the post-migration `COUNT(*)` of `ShelfUnit` rows. After migration, `itemCount` SHALL be maintained as a write-time counter.
+7. Update contract schemas and regenerate Prisma client.
+8. Update server services, mappers, collection flows, and tests.
+9. Update API package types, mutations, and hydration.
+10. Update app stream derivation, edit page, shelf page, and tests.
+11. Run targeted package tests, migration validation, and `openspec validate normalize-shelf-unit-relations --strict`.
 
 Rollback strategy:
 
@@ -145,6 +186,5 @@ Rollback strategy:
 
 ## Open Questions
 
-- Should detaching the final relation for a child leave the child as a root shelf unit, or should the UI offer a combined "detach and remove from shelf" action?
-- Should `itemCount` on shelf summaries count all `ShelfUnit` rows, or should a separate root count be exposed for display?
-- Should relation `role='tag'` remain for tag attachments, or should tags eventually move to the generic tag application system for shelf units?
+- Should detaching the final relation for a child leave the child as a root shelf unit, or should the UI offer a combined "detach and remove from shelf" action? (Current spec keeps the child; UX may refine later.)
+- Should multi-step cycles (`A→B→A`) be rejected at write time eventually, or is renderer-side defence enough long-term?
