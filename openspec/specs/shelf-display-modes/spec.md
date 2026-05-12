@@ -23,43 +23,67 @@ unless a surface explicitly chooses the curation-focused `"unit"` view.
 
 ### Requirement: Nested mode renders reviews as tabs inside the prime card
 
-In `"nested"` mode, each `ShelfItem` SHALL render as a single card whose body shows the prime unit's content, and any `role='review'` attachments for that slot SHALL be presented as tabs inside the same card. The stream emitted in nested mode SHALL contain exactly one card per shelf item — attached reviews SHALL NOT appear as independent siblings.
+In `"nested"` mode, the stream SHALL be derived from `ShelfUnit[]` and `ShelfUnitRelation[]`. Root units are units that do not appear as `childUnitId` in a relation for the same shelf. Each root unit SHALL render as one card. Child units linked by `role='review'` SHALL be presented inside the parent card as tabs or equivalent attached content. A child unit SHALL NOT also render as a root card.
 
-#### Scenario: Item with two attached reviews renders one card
+#### Scenario: Item with two attached reviews renders one root card
 
-- **GIVEN** a shelf item for book `B` with two `role='review'` attachments `R1` and `R2`
+- **GIVEN** shelf unit `B` has review child units `R1` and `R2`
 - **WHEN** the shelf is rendered in `"nested"` mode
-- **THEN** one card SHALL be emitted for `B`
-- **AND** `R1` and `R2` SHALL be reachable as tabs inside that card
-- **AND** no independent card SHALL be emitted for `R1` or `R2`
+- **THEN** one root card SHALL be emitted for `B`
+- **AND** `R1` and `R2` SHALL be reachable as attached content inside that card
+- **AND** no independent root card SHALL be emitted for `R1` or `R2`
 
-#### Scenario: Item with no attached reviews
+#### Scenario: Child unit is not rendered as a root
 
-- **GIVEN** a shelf item for book `B` with zero review attachments
-- **WHEN** the shelf is rendered in `"nested"` mode
-- **THEN** one card SHALL be emitted for `B`
-- **AND** the card SHALL render the prime content without a tab strip
+- **GIVEN** shelf unit `R1` exists in the shelf and appears as `childUnitId` in at least one relation
+- **WHEN** the grouped stream is derived
+- **THEN** `R1` SHALL be emitted only under its parent(s)
+- **AND** `R1` SHALL NOT appear in the root list
+
+#### Scenario: Multi-parent child renders under each parent
+
+- **GIVEN** shelf unit `T` is the `childUnitId` of relations `(B1, T, 'tag')` and `(B2, T, 'tag')`
+- **WHEN** the nested stream is derived
+- **THEN** `B1`'s card SHALL emit `T` in its attached content
+- **AND** `B2`'s card SHALL emit `T` in its attached content
+- **AND** `T` SHALL NOT appear as a root entry
+- **AND** every rendered instance of `T` SHALL refer to the same `ShelfUnit(T)` row with the same `position` and the same hydrated DTO
 
 ### Requirement: Flat mode emits primes and attachments as peer entries
 
-In `"flat"` mode, the emitted item stream SHALL contain the prime entry followed by one peer entry per `role='review'` attachment for that slot. Each entry SHALL render as an independent row-style card. Masonry layout SHALL NOT be used in flat mode.
+In `"flat"` mode, the emitted stream SHALL contain `ShelfUnit` entries. When `sortPrimeOnly = false`, every `ShelfUnit` SHALL be emitted once as a peer and sorted by the active sort state. When `sortPrimeOnly = true`, root units SHALL be sorted first and each root's child units SHALL be emitted immediately after that root, with children sorted by the same sort state.
 
-#### Scenario: Item with two reviews emits three peer entries in prime-adjacent order
+#### Scenario: Flat all-entry mode renders every unit once
 
-- **GIVEN** a shelf item for book `B` with two reviews `R1`, `R2`
-- **WHEN** the shelf is rendered in `"flat"` mode and sort-scope is prime-only
-- **THEN** the emitted stream SHALL contain, in order: `B`, `R1`, `R2`
-- **AND** `R1` and `R2` SHALL be rendered as independent row-style cards, not as tabs
+- **GIVEN** shelf units `B`, `R1`, and `R2`, where `R1` and `R2` are children of `B`
+- **WHEN** flat mode renders with `sortPrimeOnly = false`
+- **THEN** the stream SHALL contain `B`, `R1`, and `R2` exactly once each
+- **AND** all three entries SHALL participate in the same comparator
+
+#### Scenario: Flat all-entry mode emits multi-parent child only once
+
+- **GIVEN** shelf unit `T` is the `childUnitId` of relations under both `B1` and `B2`
+- **WHEN** flat mode renders with `sortPrimeOnly = false`
+- **THEN** the stream SHALL contain `T` exactly once
+- **AND** the number of incoming relations on `T` SHALL NOT multiply its appearance
+
+#### Scenario: Flat grouped mode keeps children under sorted root
+
+- **GIVEN** shelf unit `B` has child units `R1` and `R2`
+- **WHEN** flat mode renders with `sortPrimeOnly = true`
+- **THEN** `B` SHALL be emitted as a root entry
+- **AND** `R1` and `R2` SHALL be emitted immediately under `B`
+- **AND** neither child SHALL appear again as a peer root
 
 ### Requirement: Masonry mode uses the flat emission with masonry layout
 
-In `"masonry"` mode, the emitted item stream SHALL be identical to the stream produced by `"flat"` mode for the same input and the same sort-scope, and only the visual layout SHALL differ: entries SHALL be placed in a masonry/waterfall grid rather than linear rows. The masonry layout implementation MAY be mocked until the real masonry primitive lands; the emission rule and the enum value SHALL be real.
+In `"masonry"` mode, the emitted item stream SHALL be identical to the stream produced by `"flat"` mode for the same `ShelfUnit[]`, `ShelfUnitRelation[]`, sort state, and `sortPrimeOnly` value. Only the visual layout SHALL differ.
 
 #### Scenario: Flat and masonry produce the same stream order for the same input
 
-- **GIVEN** a shelf with items `B` (two reviews `R1`, `R2`) and `C` (one review `R3`)
+- **GIVEN** a shelf with roots and attached children
 - **WHEN** the shelf is rendered first in `"flat"` mode and then in `"masonry"` mode with the same sort state
-- **THEN** the sequence of rendered entity ids SHALL be identical between the two renders
+- **THEN** the sequence of rendered unit ids SHALL be identical between the two renders
 - **AND** only the layout container SHALL differ
 
 #### Scenario: Masonry layout is annotated as MOCK until the primitive lands
@@ -70,36 +94,37 @@ In `"masonry"` mode, the emitted item stream SHALL be identical to the stream pr
 
 ### Requirement: Sort-scope toggle governs which entries participate in the comparator
 
-The shelf-detail view SHALL expose a boolean option `sortPrimeOnly` with default value `true`. The named value `sortPrimeOnly` SHALL be the canonical identifier — the name SHALL reflect the inclusion criterion (primary-role entries only) rather than being framed as a negation, so future non-primary roles can be added without renaming the flag.
+The shelf-detail view SHALL expose a boolean option `sortPrimeOnly` with default value `true`.
 
-When `sortPrimeOnly = true`, the sort comparator SHALL be applied only to prime (primary-role) entries; attached reviews and any future non-primary roles SHALL keep their prime-adjacent position in the emitted stream regardless of the active sort. When `sortPrimeOnly = false`, every entry in the emitted stream — primes and attachments alike — SHALL participate in the comparator as a peer.
+When `sortPrimeOnly = true`, sorting SHALL be grouped: the comparator SHALL sort root units first, then sort each root's child units by the same sort state before emitting them under the root. When `sortPrimeOnly = false`, every `ShelfUnit` in the shelf SHALL participate in the comparator as a peer and SHALL render once.
 
-The `manual` sort mode SHALL ignore `sortPrimeOnly` because no comparator runs.
+The `manual` sort mode SHALL use `ShelfUnit.position` in both modes.
 
-#### Scenario: Title sort with sortPrimeOnly = true keeps reviews next to their prime
+#### Scenario: Title sort with sortPrimeOnly true sorts roots and children separately
 
-- **GIVEN** primes `Apple`, `Banana`, `Cherry` with reviews `Apple→"Zebra"`, `Banana→"Alpha"`
+- **GIVEN** roots `Apple` and `Banana`, with child reviews titled `"Zebra"` and `"Alpha"` under `Apple`
 - **WHEN** the user selects title sort with `sortPrimeOnly = true` in flat mode
-- **THEN** the emitted stream SHALL be in the order: `Apple`, `"Zebra"`, `Banana`, `"Alpha"`, `Cherry`
-- **AND** each review SHALL appear immediately after its prime regardless of its own title
+- **THEN** roots SHALL be sorted by root title
+- **AND** `"Alpha"` SHALL appear before `"Zebra"` within Apple's child group
+- **AND** neither child SHALL interleave with root `Banana`
 
-#### Scenario: Title sort with sortPrimeOnly = false interleaves reviews with primes
+#### Scenario: Title sort with sortPrimeOnly false interleaves all units
 
-- **GIVEN** primes `Apple`, `Banana`, `Cherry` with reviews `Apple→"Zebra"`, `Banana→"Alpha"`
+- **GIVEN** roots `Apple`, `Banana`, and child reviews titled `"Zebra"` and `"Alpha"`
 - **WHEN** the user selects title sort with `sortPrimeOnly = false` in flat mode
-- **THEN** the emitted stream SHALL be sorted by title across all five entries
-- **AND** the resulting order SHALL be: `"Alpha"`, `Apple`, `Banana`, `Cherry`, `"Zebra"`
+- **THEN** all units SHALL be sorted together by title
+- **AND** `"Alpha"` MAY appear before `Apple`
 
-#### Scenario: Manual sort ignores the toggle
+#### Scenario: Manual sort uses ShelfUnit position
 
-- **GIVEN** a shelf with any items and any value of `sortPrimeOnly`
+- **GIVEN** a shelf with root and child units
 - **WHEN** the user selects `manual` sort
-- **THEN** entries SHALL be emitted in persisted `position` order
-- **AND** the value of `sortPrimeOnly` SHALL have no effect on the stream
+- **THEN** every sorted segment SHALL be ordered by `ShelfUnit.position`
+- **AND** no relation order SHALL be used
 
 ### Requirement: Sort-scope toggle visibility
 
-The UI control for `sortPrimeOnly` SHALL be visible only when the active view mode is `"flat"` or `"masonry"` AND the active sort mode is not `"manual"`. In `"nested"` mode the control SHALL be hidden because attached reviews are rendered as tabs and never participate in the item stream. Under `"manual"` sort the control SHALL be hidden because no comparator runs. When hidden, the stored preference SHALL be preserved and re-applied when the control becomes visible again.
+The UI control for `sortPrimeOnly` SHALL be visible only when the active view mode is `"flat"` or `"masonry"` AND the active sort mode is not `"manual"`. In `"nested"` mode the control SHALL be hidden because attached children are rendered inside their parent and never participate as peers in the item stream. Under `"manual"` sort the control SHALL be hidden because the manual comparator uses `ShelfUnit.position` directly. When hidden, the stored preference SHALL be preserved and re-applied when the control becomes visible again.
 
 #### Scenario: Nested mode hides the sort-scope toggle
 
@@ -149,35 +174,27 @@ The view-mode preference SHALL be persisted at `shelf.extra.viewMode` using one 
 
 ### Requirement: Item-stream derivation is a pure function of items, mode, sort, and scope
 
-The ordered stream of rendered entries SHALL be derived by a pure function
-whose inputs are: the hydrated shelf items, the active view mode, the active
-sort state, and the `sortPrimeOnly` flag. The active sort state SHALL include a
-field and an order. The function SHALL NOT read React Query state or component
-state directly. The function SHALL be unit-testable in isolation from the React
-tree.
+The ordered stream of rendered entries SHALL be derived by a pure function whose inputs are: hydrated shelf units, shelf unit relations, active view mode, active sort state, and the `sortPrimeOnly` flag. The function SHALL NOT read React Query state or component state directly. The function SHALL be unit-testable in isolation from the React tree.
 
 #### Scenario: Derivation is deterministic and side-effect free
 
-- **GIVEN** a fixed set of hydrated shelf items and fixed
-  `(mode, sort, sortPrimeOnly)` inputs
+- **GIVEN** fixed shelf units, fixed relations, and fixed `(mode, sort, sortPrimeOnly)` inputs
 - **WHEN** the derivation runs twice in any order
-- **THEN** both runs SHALL return arrays of equal length whose entries compare
-  deeply equal in order
+- **THEN** both runs SHALL return arrays of equal length whose entries compare deeply equal in order
 - **AND** the function SHALL NOT call any hook, query, or side-effectful API
 
-#### Scenario: Nested mode derivation emits one entry per shelf item
+#### Scenario: Nested mode derivation emits one root entry per unattached root
 
-- **GIVEN** a shelf with `N` items and any number of review attachments
+- **GIVEN** a shelf with `N` root units and `M` child units
 - **WHEN** the derivation runs with `mode = "nested"`
+- **THEN** the emitted root array SHALL have length exactly `N`
+- **AND** child units SHALL be reachable through parent entry metadata
+
+#### Scenario: Flat all-entry derivation emits every shelf unit once
+
+- **GIVEN** a shelf with `N` total shelf units
+- **WHEN** the derivation runs with `mode = "flat"` and `sortPrimeOnly = false`
 - **THEN** the emitted array SHALL have length exactly `N`
-
-#### Scenario: Flat mode derivation emits one entry per prime plus one per attached review
-
-- **GIVEN** a shelf whose items have a total of `N` primes and `M` attached
-  reviews across them
-- **WHEN** the derivation runs with `mode = "flat"` or `mode = "masonry"` and
-  `sortPrimeOnly = true`
-- **THEN** the emitted array SHALL have length exactly `N + M`
 
 #### Scenario: Unit mode derivation emits fixed-height unit entries
 
@@ -185,7 +202,7 @@ tree.
 - **WHEN** the derivation runs with `mode = "unit"`
 - **THEN** the emitted entries SHALL be renderable by the unit feature summary
   card model
-- **AND** the derivation SHALL preserve enough shelf item metadata to render
+- **AND** the derivation SHALL preserve enough shelf unit metadata to render
   added time and reorder controls in the editor
 
 ### Requirement: Unit mode renders fixed-height unit cards
@@ -211,31 +228,24 @@ row dimensions over rich full-content presentation.
 
 ### Requirement: Shelf sort state supports field and order
 
-Shelf sorting SHALL be represented as a field plus an order. The supported
-fields SHALL include `manual`, `addedAt`, and `title`. The supported orders
-SHALL be `asc` and `desc`. The `addedAt` field SHALL sort by
-`ShelfItem.createdAt`.
+Shelf sorting SHALL be represented as a field plus an order. The supported fields SHALL include `manual`, `addedAt`, and `title`. The supported orders SHALL be `asc` and `desc`. The `addedAt` field SHALL sort by `ShelfUnit.createdAt`.
 
-#### Scenario: Added-time sort uses shelf item creation time
+#### Scenario: Added-time sort uses shelf unit creation time
 
 - **WHEN** the active sort is `{ field: "addedAt", order: "desc" }`
-- **THEN** items with later `ShelfItem.createdAt` values SHALL render before
-  older shelf items
-- **AND** the sort SHALL NOT use the underlying book, post, review, or unit
-  creation time as the primary timestamp
+- **THEN** units with later `ShelfUnit.createdAt` values SHALL render before older shelf units
+- **AND** the sort SHALL NOT use relation creation time as the primary timestamp
 
-#### Scenario: Manual descending renders newer appended positions first
+#### Scenario: Manual descending renders larger positions first
 
 - **WHEN** the active sort is `{ field: "manual", order: "desc" }`
-- **THEN** items with lexicographically larger fractional positions SHALL render
-  before smaller positions
+- **THEN** units with lexicographically larger fractional positions SHALL render before smaller positions
 
 #### Scenario: Title sort supports both directions
 
 - **WHEN** the active sort field is `title`
 - **THEN** `order = "asc"` SHALL render titles in ascending collated order
-- **AND** `order = "desc"` SHALL render the reverse title order with the same
-  deterministic tie breakers
+- **AND** `order = "desc"` SHALL render the reverse title order with the same deterministic tie breakers
 
 ### Requirement: Unit mode coordinates manual sorting affordances
 

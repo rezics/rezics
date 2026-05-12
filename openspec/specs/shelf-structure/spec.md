@@ -1,72 +1,58 @@
 ## ADDED Requirements
 
-### Requirement: ShelfItem is a utilitarian render-only slot
+### Requirement: ShelfUnit is a sortable shelf-contained unit
 
-`ShelfItem` SHALL be treated as a purely utilitarian model serving the single read path "open shelf S → list its slots in position order". It SHALL NOT carry reverse-lookup indexes, it SHALL NOT store per-item unit-id arrays, and it SHALL NOT be consulted for cross-shelf membership queries. All shelf ↔ unit membership reverse lookups SHALL go through the `ShelfItemUnit` junction instead.
+`ShelfUnit` SHALL represent every unit contained by a shelf, including units that are displayed as attached children. `ShelfUnit` SHALL be the single source of truth for shelf containment and manual ordering.
 
-The `ShelfItem` model SHALL contain exactly these fields:
+The `ShelfUnit` model SHALL contain exactly these fields:
 
-- `shelfUnitId: String @db.Uuid` — owning shelf
-- `itemRef: String @db.Uuid` — primary unit pointer and slot identity (no FK to `Unit`)
+- `shelfId: String @db.Uuid` — owning shelf (references `Shelf.unitId`)
+- `unitId: String @db.Uuid` — contained unit id and render identity
 - `kind: String @db.VarChar(32)` — render discriminator
 - `position: String @db.VarChar(64)` — fractional index
 - `createdAt: DateTime`, `updatedAt: DateTime`
 
-The `ShelfItem` model SHALL declare exactly one index: `@@index([shelfUnitId, position])`. It SHALL NOT declare `@@index([itemRef])` or any GIN index.
+The composite primary key SHALL be `@@id([shelfId, unitId])`. The model SHALL declare an index `@@index([shelfId, position])`.
 
-#### Scenario: ShelfItem has no reverse-lookup index
+The owning-shelf column SHALL be named `shelfId`, not `shelfUnitId`, to avoid lexical collision with the model name `ShelfUnit`.
 
-- **WHEN** reviewing the Prisma schema for `ShelfItem`
-- **THEN** the only index declared SHALL be `@@index([shelfUnitId, position])`
-- **AND** no `@@index([itemRef])`, no `@@index([reviewIds], type: Gin)`, no `@@index([tagIds], type: Gin)` SHALL appear on `ShelfItem`
+#### Scenario: Schema declares ShelfUnit with composite PK
 
-#### Scenario: ShelfItem carries no unit-id arrays
+- **WHEN** reviewing the Prisma schema
+- **THEN** a `ShelfUnit` model SHALL exist with the fields listed above
+- **AND** the composite PK SHALL be `@@id([shelfId, unitId])`
+- **AND** the model SHALL declare `@@index([shelfId, position])`
 
-- **WHEN** reviewing the Prisma schema for `ShelfItem`
-- **THEN** the model SHALL NOT contain `reviewIds: String[]` or `tagIds: String[]`
-- **AND** any unit-id association (primary, review, tag, future roles) SHALL be stored in `ShelfItemUnit` rows
+#### Scenario: Attached review has its own ShelfUnit
 
-#### Scenario: Reverse lookups route through ShelfItemUnit
+- **WHEN** review `R` is attached under book `B` in shelf `S`
+- **THEN** shelf `S` SHALL contain a `ShelfUnit` row for `R`
+- **AND** that row SHALL have its own `position`
 
-- **WHEN** the system needs to answer "which shelves contain unit U"
-- **THEN** the query SHALL target `ShelfItemUnit` (e.g. `WHERE unitId = U`)
-- **AND** SHALL NOT query `ShelfItem.itemRef` for reverse-lookup purposes
+### Requirement: ShelfUnit fractional-index position
 
-### Requirement: ShelfItem fractional-index position
+Each `ShelfUnit` SHALL have a `position` field of type `String` (max 64 characters) that encodes a fractional index. The system SHALL order units within a shelf by comparing `position` strings lexicographically. Manual sorting SHALL use only `ShelfUnit.position`.
 
-Each `ShelfItem` SHALL have a `position` field of type `String` (max 64 characters) that encodes a fractional index. The system SHALL order items within a shelf by comparing `position` strings lexicographically. A compound index `@@index([shelfUnitId, position])` SHALL exist to support ordered reads.
+#### Scenario: Append unit to shelf
 
-#### Scenario: Append item to shelf
-
-- **WHEN** a new item is added to a shelf with existing items
+- **WHEN** a new unit is added to a shelf with existing units
 - **THEN** the system SHALL generate a new `position` string lexicographically greater than the current maximum position in that shelf
-- **AND** the insert SHALL be a single-row INSERT on `ShelfItem` (plus the dual `ShelfItemUnit` `role='primary'` write; see `shelf-item-unit-junction`) with no modifications to other rows
-
-#### Scenario: Prepend item to shelf
-
-- **WHEN** a new item is added and placed at the start of the shelf
-- **THEN** the system SHALL generate a `position` string lexicographically less than the current minimum position
-
-#### Scenario: Insert item between two existing items
-
-- **WHEN** an item is inserted between positions `P_a` and `P_b`
-- **THEN** the system SHALL generate a `position` string `P_new` such that `P_a < P_new < P_b` lexicographically
-- **AND** no existing row SHALL be modified
+- **AND** the insert SHALL create one `ShelfUnit` row without modifying other `ShelfUnit` rows
 
 #### Scenario: Drag-drop reorder
 
-- **WHEN** the author reorders an existing item to a new location between two other items
-- **THEN** the system SHALL UPDATE only the moved item's `position` to a value between the new neighbors' positions
-- **AND** no other rows SHALL be modified
+- **WHEN** the author reorders an existing unit to a new location between two other units
+- **THEN** the system SHALL UPDATE only the moved unit's `position` to a value between the new neighbors' positions
+- **AND** no relation row SHALL be consulted for manual ordering
 
 ### Requirement: Position-key density rebalancing
 
-When a newly-generated `position` would exceed a configured length threshold (default 16 characters), the system SHALL perform an n-reorder: read a window of surrounding items, redistribute their positions evenly across the lex range, and UPDATE them in a single transaction.
+When a newly-generated `position` would exceed a configured length threshold (default 16 characters), the system SHALL perform an n-reorder: read a window of surrounding units, redistribute their positions evenly across the lex range, and UPDATE them in a single transaction.
 
 #### Scenario: Rebalance triggered by key growth
 
 - **WHEN** the system attempts to generate a new position and the candidate key length would exceed the threshold
-- **THEN** the system SHALL select a window of surrounding items (default 50)
+- **THEN** the system SHALL select a window of surrounding units (default 50)
 - **AND** SHALL reassign evenly-spaced positions across that window
 - **AND** SHALL apply the updates in a single transaction
 
@@ -76,45 +62,62 @@ When a newly-generated `position` would exceed a configured length threshold (de
 - **THEN** no rebalance SHALL be performed
 - **AND** the insert SHALL complete as a single-row INSERT
 
-### Requirement: ShelfItem itemRef without foreign key
+### Requirement: ShelfUnit unitId without foreign key
 
-`ShelfItem` SHALL use `itemRef: String @db.Uuid` as the reference to its primary unit and as slot identity. The column SHALL NOT declare a foreign key relation to `Unit`. The column SHALL NOT be indexed on `ShelfItem` for reverse lookup purposes.
+`ShelfUnit` SHALL use `unitId: String @db.Uuid` as the contained unit id. The column SHALL NOT declare a foreign key relation to `Unit` so that deleted units can be detected as orphans and cleaned by the shelf domain.
 
-#### Scenario: Add item references primary unit by id
+#### Scenario: External Unit deletion leaves an orphan ShelfUnit
 
-- **WHEN** a unit with id `U` is added to a shelf
-- **THEN** the `ShelfItem` row SHALL have `itemRef = U`
-- **AND** no FK constraint SHALL link `itemRef` to `Unit.id`
+- **WHEN** the Unit referenced by a `ShelfUnit.unitId` is deleted externally
+- **THEN** the `ShelfUnit` row SHALL remain until shelf orphan cleanup runs
+- **AND** the frontend SHALL hide the orphan after hydration fails
 
-#### Scenario: External Unit deletion does not cascade to ShelfItem
+### Requirement: ShelfUnit composite primary key prevents duplicates
 
-- **WHEN** the Unit referenced by a `ShelfItem`'s `itemRef` is deleted externally
-- **THEN** the `ShelfItem` row SHALL remain
-- **AND** the corresponding `ShelfItemUnit` row with `role='primary'` SHALL be cascade-deleted (per the `ShelfItemUnit` cascade rules)
-- **AND** the `ShelfItem` SHALL be treated as an orphan until author-triggered cleanup
+A given unit SHALL appear at most once per shelf as a `ShelfUnit`.
 
-### Requirement: ShelfItem composite primary key on itemRef
+#### Scenario: Duplicate unit rejected
 
-The `ShelfItem` composite primary key SHALL be `@@id([shelfUnitId, itemRef])`. A given primary unit SHALL appear at most once per shelf.
-
-#### Scenario: Duplicate item rejected
-
-- **GIVEN** a shelf already contains itemRef `U`
-- **WHEN** the system attempts to insert another `ShelfItem` with the same `(shelfUnitId, U)`
+- **GIVEN** a shelf already contains `ShelfUnit(shelfId = S, unitId = U)`
+- **WHEN** the system attempts to insert another `ShelfUnit` with the same `(S, U)`
 - **THEN** the PK constraint SHALL reject the insert
 - **AND** no second row SHALL be created
 
+### Requirement: Shelf.itemCount tracks ShelfUnit count at write time
+
+`Shelf.itemCount` SHALL equal the number of `ShelfUnit` rows where `shelfId = shelf.unitId`. The counter SHALL be maintained at write time: inserting a `ShelfUnit` row increments it by one, deleting a `ShelfUnit` row decrements it by one. Writing or deleting a `ShelfUnitRelation` row SHALL NOT change `itemCount`. Read paths SHALL NOT issue runtime `COUNT(*)` queries against `ShelfUnit` to populate `itemCount`.
+
+#### Scenario: Adding a unit increments itemCount
+
+- **GIVEN** shelf `S` has `itemCount = 5`
+- **WHEN** a new `ShelfUnit(S, U)` row is inserted
+- **THEN** `Shelf.itemCount` for `S` SHALL become `6`
+- **AND** no `COUNT(*)` query SHALL be issued
+
+#### Scenario: Attaching a child does not change itemCount
+
+- **GIVEN** shelf `S` has `itemCount = 6` and contains `ShelfUnit(S, B)` and `ShelfUnit(S, R)`
+- **WHEN** a `ShelfUnitRelation(S, B, R, 'review')` row is inserted
+- **THEN** `Shelf.itemCount` SHALL remain `6`
+
+#### Scenario: Creating an attached-only child increments itemCount
+
+- **GIVEN** shelf `S` has `itemCount = 5` and contains `ShelfUnit(S, B)`
+- **WHEN** review `R` is attached to `B`, requiring `ShelfUnit(S, R)` to be created
+- **THEN** `Shelf.itemCount` SHALL become `6` because one new `ShelfUnit` row was inserted
+- **AND** the subsequent `ShelfUnitRelation` insert SHALL NOT further change `itemCount`
+
 ### Requirement: Pagination by position
 
-The API SHALL return shelf items ordered by `position ASC` and SHALL support pagination with a default page size of 100.
+The API SHALL return shelf units ordered by `position ASC` and SHALL support pagination with a default page size of 100.
 
-#### Scenario: Shelf with fewer than 100 items
+#### Scenario: Shelf with fewer than 100 units
 
-- **WHEN** a client requests items from a shelf with 50 items and no pagination params
-- **THEN** all 50 items SHALL be returned ordered by `position` ASC
+- **WHEN** a client requests units from a shelf with 50 units and no pagination params
+- **THEN** all 50 units SHALL be returned ordered by `position` ASC
 
 #### Scenario: Shelf larger than the page size
 
-- **WHEN** a client requests the next page of a 200-item shelf
-- **THEN** the API SHALL return the next 100 items in `position` ASC order
-- **AND** the response SHALL indicate whether more items remain
+- **WHEN** a client requests the next page of a 200-unit shelf
+- **THEN** the API SHALL return the next 100 units in `position` ASC order
+- **AND** the response SHALL indicate whether more units remain
