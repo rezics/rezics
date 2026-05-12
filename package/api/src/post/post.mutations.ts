@@ -51,6 +51,18 @@ export function useCreatePostMutation(
         queryClient.invalidateQueries({
           queryKey: postKeys.allReplies(variables.parentPostUnitId),
         });
+        queryClient.invalidateQueries({
+          queryKey: postKeys.detail(variables.parentPostUnitId),
+        });
+
+        const rootPostUnitId =
+          data.rootPostUnitId ?? variables.parentPostUnitId;
+        queryClient.invalidateQueries({
+          queryKey: postKeys.threads(rootPostUnitId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: postKeys.detail(rootPostUnitId),
+        });
       }
 
       // Pre-populate detail cache

@@ -45,6 +45,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
         ref={composerRef}
         mode="progressive"
         targetUnitId={remark.unitId}
+        parentPostUnitId={remark.unitId}
       />
       <PostTreeSection rootPostUnitId={remark.unitId} />
     </div>

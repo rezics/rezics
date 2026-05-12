@@ -77,6 +77,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
           ref={composerRef}
           mode="progressive"
           targetUnitId={review.unitId}
+          parentPostUnitId={review.unitId}
         />
 
         <PostTreeSection rootPostUnitId={review.unitId} />

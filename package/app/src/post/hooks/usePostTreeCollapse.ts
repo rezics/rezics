@@ -3,6 +3,13 @@ import { useCallback, useMemo, useState } from "react";
 
 const DEFAULT_COLLAPSE_DEPTH = 2;
 
+export function excludeRootPost(
+  posts: PostDTO[],
+  rootPostUnitId: string,
+): PostDTO[] {
+  return posts.filter((post) => post.unitId !== rootPostUnitId);
+}
+
 export function seedCollapsedIds(
   posts: PostDTO[],
   defaultCollapseDepth = DEFAULT_COLLAPSE_DEPTH,

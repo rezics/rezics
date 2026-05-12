@@ -7,7 +7,10 @@ import type React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { PostReply } from "../components/item/PostReply";
 import { ReplyComposer } from "../forms/ReplyComposer";
-import { usePostTreeCollapse } from "../hooks/usePostTreeCollapse";
+import {
+  excludeRootPost,
+  usePostTreeCollapse,
+} from "../hooks/usePostTreeCollapse";
 
 interface PostTreeSectionProps {
   rootPostUnitId: string;
@@ -32,7 +35,10 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   const { data, isLoading } = useQuery(
     postThreadQuery(rootPostUnitId, { mode: "threaded", maxDepth }),
   );
-  const posts = data?.posts ?? [];
+  const posts = useMemo(
+    () => excludeRootPost(data?.posts ?? [], rootPostUnitId),
+    [data?.posts, rootPostUnitId],
+  );
   const allUnitIds = useMemo(
     () => posts.map((p) => p.unitId).filter(Boolean) as string[],
     [posts],

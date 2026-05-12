@@ -10,6 +10,11 @@ import { useAuthSessionStore } from "@/user/states";
 import { ShelfDiscussionSection } from "./ShelfDiscussionSection";
 
 const SHELF_ID = "fixture-shelf-1";
+const SHELF_POST_FILTERS = {
+  kind: undefined,
+  limit: 20,
+  parentPostUnitId: undefined,
+};
 
 function makePost(
   overrides: Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">,
@@ -91,10 +96,9 @@ function SeededAuthedEmpty() {
   const qc = useQueryClient();
   useMockAuthed(true);
   useEffect(() => {
-    qc.setQueryData(
-      postKeys.thread(SHELF_ID, { mode: "threaded", maxDepth: 5 }),
-      { posts: [] },
-    );
+    qc.setQueryData(postKeys.byTarget(SHELF_ID, SHELF_POST_FILTERS), {
+      posts: [],
+    });
   }, [qc]);
   return (
     <div className="p-4">
@@ -107,10 +111,9 @@ function SeededAuthedPopulated() {
   const qc = useQueryClient();
   useMockAuthed(true);
   useEffect(() => {
-    qc.setQueryData(
-      postKeys.thread(SHELF_ID, { mode: "threaded", maxDepth: 5 }),
-      { posts: POPULATED_POSTS },
-    );
+    qc.setQueryData(postKeys.byTarget(SHELF_ID, SHELF_POST_FILTERS), {
+      posts: POPULATED_POSTS,
+    });
   }, [qc]);
   return (
     <div className="p-4">
@@ -123,10 +126,9 @@ function SeededAuthedMany() {
   const qc = useQueryClient();
   useMockAuthed(true);
   useEffect(() => {
-    qc.setQueryData(
-      postKeys.thread(SHELF_ID, { mode: "threaded", maxDepth: 5 }),
-      { posts: MANY_POSTS },
-    );
+    qc.setQueryData(postKeys.byTarget(SHELF_ID, SHELF_POST_FILTERS), {
+      posts: MANY_POSTS,
+    });
   }, [qc]);
   return (
     <div className="p-4">
@@ -139,10 +141,9 @@ function SeededUnauthenticated() {
   const qc = useQueryClient();
   useMockAuthed(false);
   useEffect(() => {
-    qc.setQueryData(
-      postKeys.thread(SHELF_ID, { mode: "threaded", maxDepth: 5 }),
-      { posts: POPULATED_POSTS },
-    );
+    qc.setQueryData(postKeys.byTarget(SHELF_ID, SHELF_POST_FILTERS), {
+      posts: POPULATED_POSTS,
+    });
   }, [qc]);
   return (
     <div className="p-4">

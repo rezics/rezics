@@ -1,10 +1,7 @@
-import { postThreadQuery } from "@rezics/api/post/post";
-import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { PostTreeSection, ReplyComposer } from "@/post";
+import { PostListSection, ReplyComposer } from "@/post";
 import { useAuthModal } from "@/user/components/useAuthModal";
 import { useAuth } from "@/user/pages/useAuth";
 
@@ -15,17 +12,10 @@ interface ShelfDiscussionSectionProps {
 
 export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
   shelfUnitId,
-  maxDepth = 5,
 }) => {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const auth = useAuthModal("login");
-
-  const { data } = useQuery(
-    postThreadQuery(shelfUnitId, { mode: "threaded", maxDepth }),
-  );
-  const posts = data?.posts ?? [];
-  const isEmpty = posts.length === 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -52,11 +42,7 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
         </div>
       )}
 
-      {isEmpty ? (
-        <EmptyState title={t("shelf.discussion.empty.title")} />
-      ) : (
-        <PostTreeSection rootPostUnitId={shelfUnitId} maxDepth={maxDepth} />
-      )}
+      <PostListSection targetUnitId={shelfUnitId} />
     </div>
   );
 };
