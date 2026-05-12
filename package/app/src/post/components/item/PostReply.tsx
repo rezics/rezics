@@ -15,11 +15,18 @@ import { ThreadingRail } from "../parts/ThreadingRail";
 interface PostReplyProps {
   post: PostDTO;
   indentLevel: number;
-  ancestorLines?: Array<{ level: number; isLast: boolean }>;
+  parentLine?: {
+    level: number;
+    postUnitId: string;
+    continuesAfterElbow: boolean;
+  };
+  continuationLines?: Array<{ level: number; postUnitId: string }>;
+  highlightedThreadUnitId?: string;
   isCollapsed: boolean;
   hasThreadChildren?: boolean;
   hasVisibleDescendants?: boolean;
   onToggleCollapse: () => void;
+  onThreadHoverChange?: (postUnitId: string, hovered: boolean) => void;
   onReply?: () => void;
   replyComposerSlot?: React.ReactNode;
 }
@@ -39,11 +46,14 @@ function railLeftPxForLevel(level: number): number {
 export const PostReply: React.FC<PostReplyProps> = ({
   post,
   indentLevel,
-  ancestorLines = [],
+  parentLine,
+  continuationLines = [],
+  highlightedThreadUnitId,
   isCollapsed,
   hasThreadChildren,
   hasVisibleDescendants,
   onToggleCollapse,
+  onThreadHoverChange,
   onReply,
   replyComposerSlot,
 }) => {
@@ -58,14 +68,26 @@ export const PostReply: React.FC<PostReplyProps> = ({
         className="relative py-2"
         style={{ paddingLeft: `${contentLeftPx}px` }}
       >
-        {ancestorLines.map(({ level, isLast }) => (
+        {continuationLines.map((line) => (
           <ThreadingRail
-            key={level}
-            leftPx={railLeftPxForLevel(level)}
-            lineEndPx={isLast ? TOGGLE_CENTER_Y_PX : 0}
-            roundedEnd={isLast}
+            key={`${line.level}-${line.postUnitId}`}
+            leftPx={railLeftPxForLevel(line.level)}
+            highlighted={highlightedThreadUnitId === line.postUnitId}
+            useSharedHover={false}
           />
         ))}
+        {parentLine ? (
+          <ThreadingRail
+            leftPx={railLeftPxForLevel(parentLine.level)}
+            elbowWidthPx={
+              Math.max(0, indentLevel - parentLine.level) * INDENT_UNIT_PX
+            }
+            elbowTopPx={TOGGLE_CENTER_Y_PX}
+            continuesAfterElbow={parentLine.continuesAfterElbow}
+            highlighted={highlightedThreadUnitId === parentLine.postUnitId}
+            useSharedHover={false}
+          />
+        ) : null}
         {hasChildren && (
           <ThreadingRail
             leftPx={railLeftPx}
@@ -73,6 +95,9 @@ export const PostReply: React.FC<PostReplyProps> = ({
             onToggleCollapse={onToggleCollapse}
             showLine={showOwnRail}
             lineStartPx={TOGGLE_CENTER_Y_PX}
+            onHoverChange={(hovered) =>
+              onThreadHoverChange?.(post.unitId, hovered)
+            }
             toggleSlot={
               <CollapseToggle
                 isCollapsed={isCollapsed}
