@@ -1,4 +1,8 @@
-## REMOVED Requirements
+## Purpose
+
+Defines the migration from legacy domain-specific routes to unified Unit-backed server routes, including the Post API that replaces separate comment and review APIs.
+
+## Removed Requirements
 
 ### Requirement: Comment API routes
 
@@ -18,7 +22,7 @@
 
 **Migration**: All endpoints under `/readlist` (create readlist, add/remove books, reorder, list user readlists) are replaced by Shelf API endpoints. `SeriesBook` data migrates to `ShelfItem` with `label` and `sortOrder`. Clients must switch to Shelf API contracts.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Post API provides unified comment, review, and discussion routes
 
@@ -46,6 +50,14 @@ The server SHALL expose a Post API under the `/post` prefix that handles creatio
 
 - **WHEN** a client sends `GET /post?rootPostUnitId=<id>&threaded=true`
 - **THEN** the server SHALL return posts ordered by `sortPath` for Reddit-style thread display
+
+#### Scenario: List a descendant subtree from an arbitrary reply
+
+- **WHEN** a client sends `GET /post/list?rootPostUnitId=<root-id>&subtreeRootPostUnitId=<reply-id>&mode=threaded&maxDepth=2`
+- **THEN** the server SHALL treat `<reply-id>` as the subtree anchor and return only descendants of that reply
+- AND the server SHALL NOT include the anchor reply itself in the returned posts
+- AND `maxDepth` SHALL be interpreted relative to the anchor reply's depth
+- AND the returned posts SHALL be ordered by `sortPath` for threaded display
 
 #### Scenario: Update a post body
 

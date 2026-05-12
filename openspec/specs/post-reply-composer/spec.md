@@ -135,6 +135,12 @@ Reply-button surfaces SHALL ONLY use ReplyComposer in reply mode (with `targetUn
 - **THEN** the top progressive composer receives focus and expands
 - **AND** no second composer mounts
 
+#### Scenario: Focal-post composer creates a child reply
+
+- **WHEN** a user submits the top progressive composer on a post, review, remark, or continue-thread detail page
+- **THEN** the create-post call SHALL include `parentPostUnitId` set to the focal post's unit id
+- AND the submitted post SHALL appear in the focal post's reply tree without requiring a page refresh
+
 #### Scenario: Clicking reply on a thread row mounts an inline expanded composer
 
 - **WHEN** a user on `/post/:rootId` clicks "Reply" inside a reply row at depth 3
@@ -180,4 +186,3 @@ When mounted with `mode="progressive"`, the composer SHALL initially render as a
 - **WHEN** the user focuses the progressive composer
 - **THEN** the control expands to the full editor region
 - **AND** the body input retains focus
-

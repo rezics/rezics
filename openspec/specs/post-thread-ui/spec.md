@@ -1,3 +1,7 @@
+## Purpose
+
+Defines the threaded reply tree presentation for post detail surfaces, including threading rails, collapse controls, depth capping, and continue-thread subtree rendering.
+
 ## Requirements
 
 ### Requirement: Threading rail connects parent to children
@@ -75,3 +79,20 @@ The visual indentation cap `VISUAL_MAX_DEPTH = 4` from `post-presentation-archit
 - **WHEN** `PostReply` renders a reply at `post.depth: 5` and `VISUAL_MAX_DEPTH: 4`
 - **THEN** the row uses `indentLevel: 4` and its rail aligns with other depth-4 rows
 - **AND** no fifth vertical rail column appears
+
+### Requirement: Continue thread pages render server-side subtrees
+
+When a thread reaches its display depth cap, the continue-thread route (`/post/:rootPostUnitId/continue/:unitId`) SHALL render the selected reply as the focal post and SHALL request that reply's descendant subtree from the Post API using `subtreeRootPostUnitId`. The page SHALL NOT treat `unitId` as a new `rootPostUnitId`, because descendants retain the original root thread id.
+
+The rendered subtree SHALL visually rebase indentation relative to the focal reply so the first descendant starts at the local root depth instead of preserving the absolute depth from the original root thread.
+
+#### Scenario: Continue thread queries descendants under the anchor
+- **WHEN** a user opens `/post/root-1/continue/reply-2`
+- **THEN** the page fetches the focal post `reply-2`
+- AND the page fetches the descendant subtree with `rootPostUnitId = root-1` and `subtreeRootPostUnitId = reply-2`
+- AND the page SHALL NOT fetch a thread with `rootPostUnitId = reply-2`
+
+#### Scenario: Continue thread does not duplicate the focal reply
+- **WHEN** the subtree query returns descendants for `reply-2`
+- **THEN** the focal reply is rendered once as the page's main post
+- AND the reply tree below it contains only descendants, not `reply-2` itself
