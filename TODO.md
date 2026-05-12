@@ -4,7 +4,7 @@
 - [ ] UnitTag 表是否要重命名到 TagUnit 比較好？
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info
-- [ ] https://better-auth.com/docs/infrastructure/plugins/dashboard
+- [ ] 將 所有app路由讓AI過一邊，實際上試試大併發的情況，分析請求上可能的任何性能問題，這是一個非常大的change，tasks集合，需要分段執行
 
 ## 搜索
 - [ ] Suggest / autocomplete（header 下拉建議）：本身要新 endpoint、prefix 索引或快取層，與聯邦搜尋正交。建議獨立 search-suggest。
@@ -12,6 +12,7 @@
 
 ## Section 2
 - [ ] award 支持兩種獎勵點數和現金獎勵
+- [ ] https://www.usebruno.com/
 - [ ] 還是考慮遷移到 paraglide-js
 - [ ] 編輯器也有問題，回覆了也無法成功
 - [ ] tanstack query 能不能通過中間件讓list查詢能夠做到全部支持的id級別的緩存，意思就是比如 book list query1 查詢了 id1,id2,id3. query2 查詢 id2,id3,id4. 然後 能夠自動復用 query1 的 id2, id3 的結果，我需要網絡調查，以及如果不支持，看看要怎麼實現一個通用的支持
@@ -24,14 +25,13 @@
 - [ ] 似乎有的時候會彈出完成註冊，校驗完成註冊的接口 應該不能用來覆蓋 slug
 - [ ] book content index 並不需要章節存在，所以如果沒有 unitId 前端應該給交互，可以創建 chapter
 - [ ] post 不需要 translation 直接使用 unit translation 只不過他專門索引 不同 trans 的 release id, 就是 翻譯是 不同 unit 維護
-- [ ] UnitTranslation  sourceReleaseUnitId  我覺得這個名詞不夠準確，因爲這描述了 work，但是他可以提供 wiki 的功能
 - [ ] 快照其實是正確的，用快照的話，bot更新可以不觸發新版本
-- [ ] 我需要整理spc规范嘛？
 - [ ] 有沒有一個將所有 test 收集起來並以文檔展示，也方便測試的工具？
 - [ ] R2 暫時對於所有非書籍封面，或者非管理員不開放（就是論壇圖片全部走圖床）
 - [ ] 登錄流程仍然需要優化，主要是代碼上的，比如不需要觸發頁面刷新，純穩定的邏輯
 - [ ] oauth 靜默綁定，不修了，添加 更豐富的 user setting page 吧
 - 如果有这样一系列的网站，他们 除了 Homepage，aboutPage，或者一些特殊 page 不一样，以及 layout 不一样以外，公用 完全一样的代码，包括 比如 /book/unitId or ……，最适合的架构是怎样？ 
 - routes 通过虚拟文件路由似乎就能够做到跨package继承哦
+- 設計參考https://better-auth.com/docs/infrastructure/plugins/dashboard
 
 login page 太窄了，左侧可以添加图片之类的以美观，参考https://www.deviantart.com/join/

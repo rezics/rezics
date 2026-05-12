@@ -2,6 +2,7 @@ import type {
   AddShelfUnitInput,
   CleanupShelfOrphansInput,
   CollectInput,
+  CollectionStatusBatchResponse,
   CollectionStatusResponse,
   CollectResponse,
   CreateShelfInput,
@@ -189,5 +190,14 @@ export const collectionApi = {
 
   status: async (targetId: string): Promise<CollectionStatusResponse> => {
     return apiFetch<CollectionStatusResponse>(`/collect/status/${targetId}`);
+  },
+
+  statusBatch: async (
+    targetIds: string[],
+  ): Promise<CollectionStatusBatchResponse> => {
+    return apiFetch<CollectionStatusBatchResponse>("/collect/status/batch", {
+      method: "POST",
+      body: JSON.stringify({ targetIds }),
+    });
   },
 };

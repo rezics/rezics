@@ -478,3 +478,17 @@ export const collectionStatusResponseSchema = t.Object({
 
 export type CollectionStatusResponse =
   (typeof collectionStatusResponseSchema)["static"];
+
+export const collectionStatusBatchRequestSchema = t.Object({
+  targetIds: t.Array(t.String()),
+});
+
+export type CollectionStatusBatchRequest =
+  (typeof collectionStatusBatchRequestSchema)["static"];
+
+export const collectionStatusBatchResponseSchema = t.Object({
+  statusesByTarget: t.Record(t.String(), collectionStatusResponseSchema),
+});
+
+export type CollectionStatusBatchResponse =
+  (typeof collectionStatusBatchResponseSchema)["static"];

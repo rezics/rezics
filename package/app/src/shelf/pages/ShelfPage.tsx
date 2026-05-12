@@ -8,8 +8,9 @@ import type {
 } from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
-  shelfUnitsQuery,
+  shelfUnitsInfiniteQuery,
   useCleanupOrphansMutation,
+  useCollectionStatusHydration,
   useHydratedShelfUnits,
 } from "@rezics/api/shelf";
 import { Spinner } from "@rezics/ui";
@@ -30,7 +31,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Pencil as EditIcon,
@@ -38,7 +39,7 @@ import {
   List as ViewListIcon,
   LayoutGrid as ViewQuiltIcon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -114,8 +115,7 @@ const SORT_ORDER_OPTIONS: { value: ShelfSortOrder; label: string }[] = [
 ];
 
 function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
-  if (entry.kind === "root")
-    return `${prefix}:r:${entry.unit.unit.unitId}`;
+  if (entry.kind === "root") return `${prefix}:r:${entry.unit.unit.unitId}`;
   if (entry.kind === "child")
     return `${prefix}:c:${entry.parentUnitId}:${entry.unit.unit.unitId}`;
   return `${prefix}:p:${entry.unit.unit.unitId}`;
@@ -136,11 +136,28 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
   const detailQuery = useQuery(shelfDetailQuery(unitId));
-  const itemsQuery = useQuery(shelfUnitsQuery(unitId));
+  const itemsQuery = useInfiniteQuery(
+    shelfUnitsInfiniteQuery(unitId, { limit: 100 }),
+  );
+  const {
+    data: itemsData,
+    fetchNextPage,
+    hasNextPage,
+    isError: isItemsError,
+    isFetchingNextPage,
+    isLoading: isItemsLoading,
+  } = itemsQuery;
 
   const shelf = detailQuery.data;
-  const units = itemsQuery.data?.units ?? [];
-  const relations = itemsQuery.data?.relations ?? [];
+  const units = useMemo(
+    () => itemsData?.pages.flatMap((page) => page.units) ?? [],
+    [itemsData?.pages],
+  );
+  const relations = useMemo(
+    () =>
+      dedupeRelations(itemsData?.pages.flatMap((page) => page.relations) ?? []),
+    [itemsData?.pages],
+  );
   const translation = shelf ? getTranslation(shelf.translations) : undefined;
   const title = translation?.title ?? "Shelf";
   const description = translation?.description ?? "";
@@ -158,6 +175,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const canEditShelf = useCanEdit({ resource: "shelf", ownerUnit: shelf });
   const cleanupMutation = useCleanupOrphansMutation();
 
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
   const orphanIds = useMemo(
     () => new Set(hydration.orphanUnitIds),
     [hydration.orphanUnitIds],
@@ -172,7 +195,13 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
         sortState,
         sortPrimeOnly,
       ),
-    [hydration.enriched, relations, effectiveViewMode, sortState, sortPrimeOnly],
+    [
+      hydration.enriched,
+      relations,
+      effectiveViewMode,
+      sortState,
+      sortPrimeOnly,
+    ],
   );
 
   const visibleStream = useMemo(
@@ -193,6 +222,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     return [...ids];
   }, [shelf?.unitId, visibleStream]);
   useReactionHydration(reactionTargetIds);
+  useCollectionStatusHydration(reactionTargetIds, {
+    enabled: !!currentUser,
+  });
 
   const reactionPost = useMemo<ReactionBarPost | null>(
     () => (shelf?.unitId ? { unitId: shelf.unitId } : null),
@@ -425,11 +457,13 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
         </div>
 
-        {itemsQuery.isLoading ? (
+        {isItemsLoading ||
+        isFetchingNextPage ||
+        (hasNextPage && !isItemsError) ? (
           <div className="flex justify-center py-8">
             <Spinner size="sm" />
           </div>
-        ) : itemsQuery.isError ? (
+        ) : isItemsError ? (
           <p className="py-8 text-center text-error">
             Failed to load shelf items
           </p>
@@ -463,4 +497,18 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
       </div>
     </div>
   );
+}
+
+function dedupeRelations<
+  T extends { parentUnitId: string; childUnitId: string; role: string },
+>(relations: T[]): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const relation of relations) {
+    const key = `${relation.parentUnitId}:${relation.childUnitId}:${relation.role}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(relation);
+  }
+  return out;
 }

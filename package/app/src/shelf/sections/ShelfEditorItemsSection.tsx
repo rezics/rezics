@@ -151,6 +151,7 @@ function defaultOrderForField(field: ShelfSortField): ShelfSortOrder {
 }
 
 export function ShelfEditorItemsSection({
+  shelf,
   viewMode,
   onViewModeChange,
   editor,
@@ -187,9 +188,16 @@ export function ShelfEditorItemsSection({
     [hydration.enriched, editor.relations, viewMode, sortState, sortPrimeOnly],
   );
 
-  const totalPages = Math.max(1, Math.ceil(stream.length / PAGE_SIZE));
+  const totalItemCount = Math.max(stream.length, shelf.itemCount ?? 0);
+  const totalPages = Math.max(1, Math.ceil(totalItemCount / PAGE_SIZE));
   const pageStart = (page - 1) * PAGE_SIZE;
   const visibleStream = stream.slice(pageStart, pageStart + PAGE_SIZE);
+  const waitingForPageData =
+    editor.hasMoreUnits && pageStart >= stream.length && stream.length > 0;
+
+  useEffect(() => {
+    setPage((current) => Math.min(current, totalPages));
+  }, [totalPages]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
@@ -543,6 +551,10 @@ export function ShelfEditorItemsSection({
       </div>
 
       {editor.isLoading ? (
+        <div className="py-4 text-sm text-text-secondary">
+          {t("common.loading", "Loading…")}
+        </div>
+      ) : waitingForPageData || editor.isLoadingMoreUnits ? (
         <div className="py-4 text-sm text-text-secondary">
           {t("common.loading", "Loading…")}
         </div>

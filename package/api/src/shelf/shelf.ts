@@ -26,13 +26,16 @@ export {
 // Query Configurations
 export {
   collectionQueries,
+  collectionStatusBatchQuery,
   collectionStatusQuery,
   shelfDetailQuery,
   shelfInfiniteListQuery,
   shelfListQuery,
   shelfQueries,
+  shelfUnitsInfiniteQuery,
   shelfUnitsQuery,
   shelvesByUserQuery,
+  useCollectionStatusHydration,
   userShelvesQuery,
 } from "./shelf.queries";
 // Types
@@ -40,6 +43,7 @@ export type {
   AddShelfUnitInput,
   CleanupShelfOrphansInput,
   CollectInput,
+  CollectionStatusBatchResponse,
   CollectionStatusResponse,
   CollectResponse,
   CreateShelfInput,

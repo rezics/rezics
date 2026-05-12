@@ -1,6 +1,6 @@
-import { useBatchUpdateShelfUnitsMutation } from "@rezics/api/shelf/shelf.mutations";
-import { shelfUnitsQuery } from "@rezics/api/shelf/shelf.queries";
 import type { ShelfSortOrder } from "@rezics/api/shelf";
+import { useBatchUpdateShelfUnitsMutation } from "@rezics/api/shelf/shelf.mutations";
+import { shelfUnitsInfiniteQuery } from "@rezics/api/shelf/shelf.queries";
 import type {
   ShelfUnitBatchOp,
   ShelfUnitBatchResult,
@@ -9,8 +9,8 @@ import type {
   ShelfUnitRelationDTO,
   ShelfUnitRelationRole,
 } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { appendAfter, betweenNeighbors } from "../models/positionMath";
 import {
   clear,
@@ -60,6 +60,9 @@ export interface UseShelfItemsEditor {
   units: ShelfUnitDTO[];
   relations: ShelfUnitRelationDTO[];
   isLoading: boolean;
+  hasMoreUnits: boolean;
+  isLoadingMoreUnits: boolean;
+  loadMoreUnits: () => Promise<void>;
   dirty: boolean;
   pendingCount: number;
   saving: boolean;
@@ -86,16 +89,34 @@ export interface UseShelfItemsEditor {
 }
 
 export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
-  const { data, isLoading } = useQuery(shelfUnitsQuery(shelfId));
-  const serverUnits = useMemo(() => data?.units ?? [], [data?.units]);
+  const unitsQuery = useInfiniteQuery(
+    shelfUnitsInfiniteQuery(shelfId, { limit: 100 }),
+  );
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    unitsQuery;
+  const serverUnits = useMemo(
+    () => data?.pages.flatMap((page) => page.units) ?? [],
+    [data?.pages],
+  );
   const serverRelations = useMemo(
-    () => data?.relations ?? [],
-    [data?.relations],
+    () => dedupeRelations(data?.pages.flatMap((page) => page.relations) ?? []),
+    [data?.pages],
   );
 
   const [log, setLog] = useState<ItemOpLog>(emptyLog);
   const [lastResult, setLastResult] = useState<SaveResult | null>(null);
   const batchMutation = useBatchUpdateShelfUnitsMutation();
+
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const loadMoreUnits = useCallback(async () => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    await fetchNextPage();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const { units: optimisticUnits, relations: optimisticRelations } = useMemo(
     () => applyLiveOps(serverUnits, serverRelations, log, shelfId),
@@ -271,6 +292,9 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
     units: optimisticUnits,
     relations: optimisticRelations,
     isLoading,
+    hasMoreUnits: hasNextPage,
+    isLoadingMoreUnits: isFetchingNextPage,
+    loadMoreUnits,
     dirty: dirty(log),
     pendingCount: pendingCount(log),
     saving: batchMutation.isPending,
@@ -286,6 +310,20 @@ export function useShelfItemsEditor(shelfId: string): UseShelfItemsEditor {
     retryFailed,
     discard,
   };
+}
+
+function dedupeRelations(
+  relations: ShelfUnitRelationDTO[],
+): ShelfUnitRelationDTO[] {
+  const seen = new Set<string>();
+  const out: ShelfUnitRelationDTO[] = [];
+  for (const relation of relations) {
+    const key = `${relation.parentUnitId}:${relation.childUnitId}:${relation.role}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(relation);
+  }
+  return out;
 }
 
 function lastPositionOfPendingAdds(log: ItemOpLog): string | undefined {
@@ -312,10 +350,7 @@ function applyLiveOps(
     const idx = units.findIndex((u) => u.unitId === unitId);
     if (idx >= 0) return;
     const finalPosition = position ?? appendAfter(maxPositionOf(units));
-    units = [
-      ...units,
-      { shelfId, unitId, kind, position: finalPosition },
-    ];
+    units = [...units, { shelfId, unitId, kind, position: finalPosition }];
   }
 
   for (const entry of log.entries) {
@@ -338,8 +373,7 @@ function applyLiveOps(
     if (op.op === "delete") {
       units = units.filter((u) => u.unitId !== op.unitId);
       relations = relations.filter(
-        (r) =>
-          r.parentUnitId !== op.unitId && r.childUnitId !== op.unitId,
+        (r) => r.parentUnitId !== op.unitId && r.childUnitId !== op.unitId,
       );
       continue;
     }
@@ -393,8 +427,7 @@ function applyLiveOps(
         ensureUnit(childId, op.childKind ?? ("post" as ShelfUnitKind));
       }
       relations = relations.filter(
-        (r) =>
-          !(r.parentUnitId === op.parentUnitId && r.role === op.role),
+        (r) => !(r.parentUnitId === op.parentUnitId && r.role === op.role),
       );
       for (const childId of op.childUnitIds) {
         relations = [
@@ -407,7 +440,6 @@ function applyLiveOps(
           },
         ];
       }
-      continue;
     }
   }
 

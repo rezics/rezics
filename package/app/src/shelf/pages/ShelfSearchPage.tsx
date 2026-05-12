@@ -1,6 +1,7 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { KeywordInput } from "@/search/components/primitive";
@@ -28,6 +29,11 @@ export function ShelfSearchPage() {
     () => (data?.items ?? []) as unknown as ShelfDTO[],
     [data],
   );
+  const total = data?.total ?? 0;
+  const currentPage = Math.floor(offset / limit) + 1;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const hasPreviousPage = offset > 0;
+  const hasNextPage = offset + limit < total;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
@@ -49,11 +55,36 @@ export function ShelfSearchPage() {
       ) : shelves.length === 0 ? (
         <p className="py-8 text-center text-text-secondary">No shelves found</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {shelves.map((shelf) => (
-            <ShelfCard key={shelf.unitId} shelf={shelf} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {shelves.map((shelf) => (
+              <ShelfCard key={shelf.unitId} shelf={shelf} />
+            ))}
+          </div>
+          {(hasPreviousPage || hasNextPage) && (
+            <div className="mt-6 flex items-center justify-center gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={!hasPreviousPage || isLoading}
+                onClick={() => setOffset((value) => Math.max(0, value - limit))}
+              >
+                Prev
+              </Button>
+              <span className="text-sm text-text-secondary">
+                {currentPage} / {totalPages}
+              </span>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={!hasNextPage || isLoading}
+                onClick={() => setOffset((value) => value + limit)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

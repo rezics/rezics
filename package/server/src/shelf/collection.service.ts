@@ -1,5 +1,6 @@
 import type {
   CollectInput,
+  CollectionStatusBatchResponse,
   CollectionStatusResponse,
   CollectResponse,
   ShelfUnitKind,
@@ -12,6 +13,7 @@ import { mapUnitToKind } from "./shelf.service";
 import { getOrCreateSystemShelf } from "./system-shelves";
 
 const FAVORITES_KIND_KEY = "favorites";
+const COLLECTION_STATUS_BATCH_CAP = 100;
 
 interface ResolvedTarget {
   /** Unit id of the parent shelf unit (the target work, or the target itself). */
@@ -21,6 +23,12 @@ interface ResolvedTarget {
   /** If the original targetId is a review post, its unit id and kind; else undefined. */
   reviewUnitId?: string;
   reviewKind?: ShelfUnitKind;
+}
+
+interface BatchResolvedTarget {
+  targetId: string;
+  parentUnitId: string;
+  reviewUnitId?: string;
 }
 
 export class CollectionService {
@@ -354,6 +362,188 @@ export class CollectionService {
     }));
 
     return { isFavorited, shelves };
+  }
+
+  async getCollectionStatusBatch(
+    userId: string,
+    targetIds: string[],
+  ): Promise<CollectionStatusBatchResponse> {
+    const normalizedTargetIds = Array.from(
+      new Set(targetIds.map((id) => id.trim()).filter(Boolean)),
+    );
+
+    if (normalizedTargetIds.length > COLLECTION_STATUS_BATCH_CAP) {
+      throw new AppError(
+        400,
+        `Collection status batch is limited to ${COLLECTION_STATUS_BATCH_CAP} targets`,
+      );
+    }
+
+    const statusesByTarget: CollectionStatusBatchResponse["statusesByTarget"] =
+      Object.fromEntries(
+        normalizedTargetIds.map((targetId) => [
+          targetId,
+          { isFavorited: false, shelves: [] },
+        ]),
+      );
+
+    if (normalizedTargetIds.length === 0) {
+      return { statusesByTarget };
+    }
+
+    const units = await prisma.unit.findMany({
+      where: { id: { in: normalizedTargetIds } },
+      select: {
+        id: true,
+        type: true,
+        post: { select: { kind: true, targetUnitId: true } },
+      },
+    });
+
+    const reviewTargetIds = new Set<string>();
+    for (const unit of units) {
+      if (
+        unit.type === UnitType.POST &&
+        unit.post?.kind === PostKind.REVIEW &&
+        unit.post.targetUnitId
+      ) {
+        reviewTargetIds.add(unit.post.targetUnitId);
+      }
+    }
+
+    const reviewTargets =
+      reviewTargetIds.size > 0
+        ? await prisma.unit.findMany({
+            where: { id: { in: [...reviewTargetIds] } },
+            select: {
+              id: true,
+              type: true,
+              post: { select: { kind: true } },
+            },
+          })
+        : [];
+    const reviewTargetById = new Map(reviewTargets.map((u) => [u.id, u]));
+
+    const resolvedTargets: BatchResolvedTarget[] = units.map((unit) => {
+      if (
+        unit.type === UnitType.POST &&
+        unit.post?.kind === PostKind.REVIEW &&
+        unit.post.targetUnitId
+      ) {
+        const target = reviewTargetById.get(unit.post.targetUnitId);
+        if (target) {
+          return {
+            targetId: unit.id,
+            parentUnitId: target.id,
+            reviewUnitId: unit.id,
+          };
+        }
+      }
+
+      return {
+        targetId: unit.id,
+        parentUnitId: unit.id,
+      };
+    });
+
+    const favShelfId = await this.getFavoritesShelfId(userId);
+    const parentUnitIds = [
+      ...new Set(
+        resolvedTargets
+          .filter((target) => !target.reviewUnitId)
+          .map((target) => target.parentUnitId),
+      ),
+    ];
+    const reviewUnitIds = [
+      ...new Set(
+        resolvedTargets
+          .map((target) => target.reviewUnitId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+
+    const [directRows, reviewRows] = await Promise.all([
+      parentUnitIds.length > 0
+        ? prisma.shelfUnit.findMany({
+            where: {
+              unitId: { in: parentUnitIds },
+              shelf: { unit: { userId } },
+            },
+            select: { unitId: true, shelfId: true },
+          })
+        : [],
+      reviewUnitIds.length > 0
+        ? prisma.shelfUnitRelation.findMany({
+            where: {
+              childUnitId: { in: reviewUnitIds },
+              role: "review",
+              shelf: { unit: { userId } },
+            },
+            select: { childUnitId: true, shelfId: true },
+          })
+        : [],
+    ]);
+
+    const directShelfIdsByUnitId = new Map<string, string[]>();
+    for (const row of directRows) {
+      const ids = directShelfIdsByUnitId.get(row.unitId) ?? [];
+      ids.push(row.shelfId);
+      directShelfIdsByUnitId.set(row.unitId, ids);
+    }
+
+    const reviewShelfIdsByUnitId = new Map<string, string[]>();
+    for (const row of reviewRows) {
+      const ids = reviewShelfIdsByUnitId.get(row.childUnitId) ?? [];
+      ids.push(row.shelfId);
+      reviewShelfIdsByUnitId.set(row.childUnitId, ids);
+    }
+
+    const allShelfIds = new Set<string>();
+    for (const target of resolvedTargets) {
+      const shelfIds = target.reviewUnitId
+        ? (reviewShelfIdsByUnitId.get(target.reviewUnitId) ?? [])
+        : (directShelfIdsByUnitId.get(target.parentUnitId) ?? []);
+      for (const shelfId of shelfIds) allShelfIds.add(shelfId);
+    }
+
+    const shelfRows =
+      allShelfIds.size > 0
+        ? await prisma.shelf.findMany({
+            where: { unitId: { in: [...allShelfIds] } },
+            select: {
+              unitId: true,
+              unit: {
+                select: {
+                  translations: {
+                    where: { language: "en" },
+                    select: { title: true },
+                  },
+                },
+              },
+            },
+          })
+        : [];
+    const shelfTitleById = new Map(
+      shelfRows.map((s) => [
+        s.unitId,
+        s.unit?.translations?.[0]?.title ?? null,
+      ]),
+    );
+
+    for (const target of resolvedTargets) {
+      const shelfIds = target.reviewUnitId
+        ? (reviewShelfIdsByUnitId.get(target.reviewUnitId) ?? [])
+        : (directShelfIdsByUnitId.get(target.parentUnitId) ?? []);
+      statusesByTarget[target.targetId] = {
+        isFavorited: shelfIds.includes(favShelfId),
+        shelves: shelfIds.map((shelfId) => ({
+          id: shelfId,
+          title: shelfTitleById.get(shelfId) ?? null,
+        })),
+      };
+    }
+
+    return { statusesByTarget };
   }
 }
 

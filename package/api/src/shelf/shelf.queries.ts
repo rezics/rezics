@@ -1,7 +1,19 @@
-import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import {
+  infiniteQueryOptions,
+  queryOptions,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useEffect } from "react";
 import { collectionApi, shelfApi } from "./shelf.api";
-import { collectionKeys, shelfKeys } from "./shelf.keys";
+import {
+  collectionKeys,
+  normalizeCollectionIds,
+  shelfKeys,
+} from "./shelf.keys";
 import type { ShelfFilters, ShelfUnitsQuery } from "./shelf.types";
+
+const COLLECTION_STATUS_BATCH_LIMIT = 100;
 
 export const shelfListQuery = (filters?: ShelfFilters) =>
   queryOptions({
@@ -40,6 +52,23 @@ export const shelfUnitsQuery = (unitId: string, query?: ShelfUnitsQuery) =>
     staleTime: 1000 * 60 * 2,
   });
 
+export const shelfUnitsInfiniteQuery = (
+  unitId: string,
+  query?: Omit<ShelfUnitsQuery, "cursor">,
+) =>
+  infiniteQueryOptions({
+    queryKey: shelfKeys.unitsPage(unitId, query),
+    queryFn: ({ pageParam }) =>
+      shelfApi.listUnits(unitId, { ...query, cursor: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.hasMore) return undefined;
+      return lastPage.units.at(-1)?.unitId;
+    },
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 2,
+  });
+
 export const shelfInfiniteListQuery = (filters?: Omit<ShelfFilters, "start">) =>
   infiniteQueryOptions({
     queryKey: shelfKeys.list(filters),
@@ -63,15 +92,56 @@ export const collectionStatusQuery = (targetId: string) =>
     staleTime: 1000 * 60 * 1,
   });
 
+export const collectionStatusBatchQuery = (targetIds: readonly string[]) => {
+  const normalized = normalizeCollectionIds(targetIds).slice(
+    0,
+    COLLECTION_STATUS_BATCH_LIMIT,
+  );
+  return queryOptions({
+    queryKey: collectionKeys.statusBatch(normalized),
+    queryFn: () => collectionApi.statusBatch(normalized),
+    enabled: normalized.length > 0,
+    staleTime: 1000 * 60 * 1,
+  });
+};
+
+export function useCollectionStatusHydration(
+  targetIds: readonly string[],
+  options?: { enabled?: boolean },
+) {
+  const queryClient = useQueryClient();
+  const normalized = normalizeCollectionIds(targetIds).slice(
+    0,
+    COLLECTION_STATUS_BATCH_LIMIT,
+  );
+  const query = useQuery({
+    ...collectionStatusBatchQuery(normalized),
+    enabled: (options?.enabled ?? true) && normalized.length > 0,
+  });
+
+  useEffect(() => {
+    if (!query.data) return;
+    for (const [targetId, status] of Object.entries(
+      query.data.statusesByTarget,
+    )) {
+      queryClient.setQueryData(collectionKeys.status(targetId), status);
+    }
+  }, [query.data, queryClient]);
+
+  return query;
+}
+
 export const shelfQueries = {
   list: shelfListQuery,
   detail: shelfDetailQuery,
   byUser: shelvesByUserQuery,
   mine: userShelvesQuery,
   units: shelfUnitsQuery,
+  infiniteUnits: shelfUnitsInfiniteQuery,
   infiniteList: shelfInfiniteListQuery,
 };
 
 export const collectionQueries = {
   status: collectionStatusQuery,
+  statusBatch: collectionStatusBatchQuery,
 };

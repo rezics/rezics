@@ -1,10 +1,12 @@
 import type {
+  CollectionStatusBatchResponse,
   CollectionStatusResponse,
   CollectResponse,
   ToggleFavoriteResponse,
 } from "@rezics/contract";
 import {
   collectInputSchema,
+  collectionStatusBatchRequestSchema,
   toggleFavoriteInputSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -41,6 +43,25 @@ export const collectionApi = new Elysia({ prefix: "/collect" })
         summary: "Toggle favorite",
         description:
           "Add or remove a unit from the user's Favorites shelf. Reviews resolve to the target work.",
+        tags: ["Collection"],
+      },
+    },
+  )
+  .post(
+    "/status/batch",
+    async ({ body, identity }): Promise<CollectionStatusBatchResponse> => {
+      return collectionService.getCollectionStatusBatch(
+        identity.userId,
+        body.targetIds,
+      );
+    },
+    {
+      requireLogin: true,
+      body: collectionStatusBatchRequestSchema,
+      detail: {
+        summary: "Collection status batch",
+        description:
+          "Check collection status for multiple units in one request",
         tags: ["Collection"],
       },
     },

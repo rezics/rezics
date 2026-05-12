@@ -296,9 +296,7 @@ export function useCollectMutation(
     mutationFn: (input: CollectInput) => collectionApi.collect(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: collectionKeys.status(variables.targetId),
-      });
+      queryClient.invalidateQueries({ queryKey: collectionKeys.all() });
       invalidateShelfCollections(queryClient);
       for (const shelfId of data.savedTo) {
         invalidateShelfDetail(queryClient, shelfId);
@@ -319,9 +317,7 @@ export function useToggleFavoriteMutation(
     mutationFn: (targetId: string) => collectionApi.toggleFavorite(targetId),
     ...options,
     onSuccess: (data, targetId, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: collectionKeys.status(targetId),
-      });
+      queryClient.invalidateQueries({ queryKey: collectionKeys.all() });
       queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
       options?.onSuccess?.(data, targetId, onMutateResult, context);
     },

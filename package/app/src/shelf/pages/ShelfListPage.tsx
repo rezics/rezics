@@ -1,17 +1,21 @@
-import { shelfListQuery } from "@rezics/api/shelf";
+import { shelfInfiniteListQuery } from "@rezics/api/shelf";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ShelfCard } from "../components/ShelfCard";
 
 export function ShelfListPage() {
   const navigate = useNavigate();
-  const { data, isLoading } = useQuery(
-    shelfListQuery({ sort: { field: "createdAt", order: "desc" }, limit: 20 }),
-  );
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery(
+      shelfInfiniteListQuery({
+        sort: { field: "createdAt", order: "desc" },
+        limit: 20,
+      }),
+    );
 
-  const shelves = data?.shelves ?? [];
+  const shelves = data?.pages.flatMap((page) => page.shelves) ?? [];
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
@@ -37,11 +41,24 @@ export function ShelfListPage() {
       ) : shelves.length === 0 ? (
         <p className="py-8 text-center text-text-secondary">No shelves yet</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {shelves.map((shelf) => (
-            <ShelfCard key={shelf.unitId} shelf={shelf} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {shelves.map((shelf) => (
+              <ShelfCard key={shelf.unitId} shelf={shelf} />
+            ))}
+          </div>
+          {hasNextPage && (
+            <div className="mt-6 flex justify-center">
+              <Button
+                variant="ghost"
+                disabled={isFetchingNextPage}
+                onClick={() => void fetchNextPage()}
+              >
+                {isFetchingNextPage ? "Loading..." : "Load more"}
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
