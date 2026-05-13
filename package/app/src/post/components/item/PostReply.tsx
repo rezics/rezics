@@ -113,6 +113,7 @@ export const PostReply: React.FC<PostReplyProps> = ({
             onToggleCollapse={onToggleCollapse}
             showLine={showOwnRail}
             lineStartPx={TOGGLE_CENTER_Y_PX}
+            highlighted={highlightedThreadUnitId === post.unitId}
             onHoverChange={(hovered) =>
               onThreadHoverChange?.(post.unitId, hovered)
             }
@@ -120,6 +121,7 @@ export const PostReply: React.FC<PostReplyProps> = ({
               <CollapseToggle
                 isCollapsed={isCollapsed}
                 onToggle={onToggleCollapse}
+                highlighted={highlightedThreadUnitId === post.unitId}
               />
             }
           />
