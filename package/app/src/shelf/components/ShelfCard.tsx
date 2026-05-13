@@ -10,7 +10,12 @@ interface ShelfCardProps {
   className?: string;
 }
 
+type ShelfCardLinkable = ShelfDTO & {
+  id?: string | null;
+};
+
 export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
+  const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? "";
   const description = translation?.description ?? "";
@@ -20,7 +25,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
     <Card
       className={cn(
         "gap-0 overflow-hidden rounded-md border-0 py-0 shadow-none ring-0",
-        shelf.unitId && "cursor-pointer",
+        shelfId && "cursor-pointer",
         className,
       )}
     >
@@ -70,14 +75,14 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
     </Card>
   );
 
-  if (!shelf.unitId) {
+  if (!shelfId) {
     return card;
   }
 
   return (
     <Link
       to="/shelf/$shelfId"
-      params={{ shelfId: shelf.unitId }}
+      params={{ shelfId }}
       className="block no-underline"
     >
       {card}
