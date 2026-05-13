@@ -103,6 +103,52 @@ function buildDeepThread(depth: number): PostDTO[] {
 
 const THREADED_10DEEP_POSTS = buildDeepThread(10);
 
+const CONTINUOUS_RAIL_POSTS: PostDTO[] = [
+  makePost({
+    unitId: "outer",
+    depth: 1,
+    sortPath: "001",
+    directReplyCount: 4,
+    body: "Outer reply with several visible children.",
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
+  makePost({
+    unitId: "outer-1",
+    depth: 2,
+    sortPath: "001/001",
+    parentPostUnitId: "outer",
+    body: "First child on the continuous outer rail.",
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
+  makePost({
+    unitId: "outer-2",
+    depth: 2,
+    sortPath: "001/002",
+    parentPostUnitId: "outer",
+    directReplyCount: 1,
+    body: "Second child, with a collapsed nested branch.",
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
+  makePost({
+    unitId: "outer-2-1",
+    depth: 3,
+    sortPath: "001/002/001",
+    parentPostUnitId: "outer-2",
+    body: "Nested child hidden by default collapse.",
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
+  makePost({
+    unitId: "outer-3",
+    depth: 2,
+    sortPath: "001/003",
+    parentPostUnitId: "outer",
+    body: "Third child should not show a rail seam above it.",
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
+  makePost({
+    unitId: "outer-4",
+    depth: 2,
+    sortPath: "001/004",
+    parentPostUnitId: "outer",
+    body: "Last child ends the continuous outer rail.",
+  } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
+];
+
 function Seeded({ posts }: { posts: PostDTO[] }) {
   const qc = useQueryClient();
   useEffect(() => {
@@ -145,4 +191,8 @@ export const Threaded3Deep: Story = {
 
 export const Threaded10Deep: Story = {
   render: () => <Seeded posts={THREADED_10DEEP_POSTS} />,
+};
+
+export const ContinuousOuterRail: Story = {
+  render: () => <Seeded posts={CONTINUOUS_RAIL_POSTS} />,
 };

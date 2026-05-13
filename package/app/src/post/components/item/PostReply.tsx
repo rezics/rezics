@@ -30,6 +30,8 @@ interface PostReplyProps {
   onThreadHoverChange?: (postUnitId: string, hovered: boolean) => void;
   onReply?: () => void;
   replyComposerSlot?: React.ReactNode;
+  renderAncestorRails?: boolean;
+  renderOwnRail?: boolean;
 }
 
 const INDENT_UNIT_PX = 32;
@@ -40,7 +42,12 @@ const TOGGLE_TOP_PX = 12;
 const TOGGLE_CENTER_Y_PX = TOGGLE_TOP_PX + TOGGLE_SIZE_PX / 2;
 const CONTENT_START_PX = TOGGLE_SIZE_PX + CONTENT_GAP_PX;
 
-function railLeftPxForLevel(level: number): number {
+export const postReplyThreadingMetrics = {
+  indentUnitPx: INDENT_UNIT_PX,
+  toggleCenterYPx: TOGGLE_CENTER_Y_PX,
+};
+
+export function railLeftPxForLevel(level: number): number {
   return level * INDENT_UNIT_PX + (TOGGLE_SIZE_PX - RAIL_HITBOX_PX) / 2;
 }
 
@@ -58,9 +65,12 @@ export const PostReply: React.FC<PostReplyProps> = ({
   onThreadHoverChange,
   onReply,
   replyComposerSlot,
+  renderAncestorRails = true,
+  renderOwnRail = true,
 }) => {
   const hasChildren = hasThreadChildren ?? (post.directReplyCount ?? 0) > 0;
-  const showOwnRail = hasChildren && hasVisibleDescendants && !isCollapsed;
+  const showOwnRail =
+    renderOwnRail && hasChildren && hasVisibleDescendants && !isCollapsed;
   const contentLeftPx = indentLevel * INDENT_UNIT_PX + CONTENT_START_PX;
   const railLeftPx = railLeftPxForLevel(indentLevel);
 
@@ -70,23 +80,25 @@ export const PostReply: React.FC<PostReplyProps> = ({
         className="relative py-2"
         style={{ paddingLeft: `${contentLeftPx}px` }}
       >
-        {continuationLines.map((line) => (
-          <ThreadingRail
-            key={`${line.level}-${line.postUnitId}`}
-            leftPx={railLeftPxForLevel(line.level)}
-            highlighted={highlightedThreadUnitId === line.postUnitId}
-            useSharedHover={false}
-            onToggleCollapse={
-              onToggleAncestorCollapse
-                ? () => onToggleAncestorCollapse(line.postUnitId)
-                : undefined
-            }
-            onHoverChange={(hovered) =>
-              onThreadHoverChange?.(line.postUnitId, hovered)
-            }
-          />
-        ))}
-        {parentLine ? (
+        {renderAncestorRails
+          ? continuationLines.map((line) => (
+              <ThreadingRail
+                key={`${line.level}-${line.postUnitId}`}
+                leftPx={railLeftPxForLevel(line.level)}
+                highlighted={highlightedThreadUnitId === line.postUnitId}
+                useSharedHover={false}
+                onToggleCollapse={
+                  onToggleAncestorCollapse
+                    ? () => onToggleAncestorCollapse(line.postUnitId)
+                    : undefined
+                }
+                onHoverChange={(hovered) =>
+                  onThreadHoverChange?.(line.postUnitId, hovered)
+                }
+              />
+            ))
+          : null}
+        {renderAncestorRails && parentLine ? (
           <ThreadingRail
             leftPx={railLeftPxForLevel(parentLine.level)}
             elbowWidthPx={

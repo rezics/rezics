@@ -44,3 +44,64 @@ export const ExpandedRow: Story = {
 export const CollapsedRow: Story = {
   render: () => <Row initialCollapsed />,
 };
+
+export const RoundedElbowContinuation: Story = {
+  render: () => (
+    <ThreadingHoverProvider>
+      <div className="relative h-[160px] pl-24 py-8">
+        <ThreadingRail
+          leftPx={30}
+          elbowWidthPx={64}
+          elbowTopPx={22}
+          continuesAfterElbow
+          onToggleCollapse={() => undefined}
+        />
+        <div className="text-sm text-text-secondary">
+          Rounded branch with a continuing ancestor rail.
+        </div>
+      </div>
+    </ThreadingHoverProvider>
+  ),
+};
+
+export const LongRoundedElbowContinuation: Story = {
+  render: () => (
+    <ThreadingHoverProvider>
+      <div className="relative h-[360px] pl-24 py-8">
+        <ThreadingRail
+          leftPx={30}
+          elbowWidthPx={64}
+          elbowTopPx={22}
+          continuesAfterElbow
+          onToggleCollapse={() => undefined}
+        />
+        <div className="text-sm text-text-secondary">
+          Long ancestor rail with a rounded branch.
+        </div>
+      </div>
+    </ThreadingHoverProvider>
+  ),
+};
+
+export const StackedRowContinuation: Story = {
+  render: () => (
+    <ThreadingHoverProvider>
+      <div className="pl-24 py-8">
+        {[0, 1, 2, 3].map((row) => (
+          <div key={row} className="relative h-[72px]">
+            <ThreadingRail
+              leftPx={30}
+              elbowWidthPx={row === 1 ? 64 : 0}
+              elbowTopPx={22}
+              continuesAfterElbow={row === 1}
+              onToggleCollapse={() => undefined}
+            />
+            <div className="text-sm text-text-secondary">
+              Row {row + 1}
+            </div>
+          </div>
+        ))}
+      </div>
+    </ThreadingHoverProvider>
+  ),
+};

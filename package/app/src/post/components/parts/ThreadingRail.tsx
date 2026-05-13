@@ -1,4 +1,5 @@
 import type React from "react";
+import { useId } from "react";
 import { useThreadingHover } from "./ThreadingContext";
 
 export interface ThreadingRailProps {
@@ -38,6 +39,7 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
   useSharedHover = true,
   onHoverChange,
 }) => {
+  const maskId = `threading-rail-mask-${useId().replaceAll(":", "")}`;
   const { hovered, setHovered } = useThreadingHover();
 
   const handleClick = (event: React.MouseEvent) => {
@@ -52,6 +54,9 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
   const strokeClass = isActive ? "text-brand-fill" : "text-border-whisper";
   const elbowRadius = Math.min(10, Math.max(0, elbowTopPx - 2), elbowWidthPx);
   const elbowVerticalEndPx = Math.max(0, elbowTopPx - elbowRadius);
+  const verticalMaskHeight = continuesAfterElbow
+    ? "100%"
+    : Math.max(0, elbowVerticalEndPx);
   const elbowPath =
     elbowWidthPx > 0
       ? [
@@ -80,24 +85,13 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
         {showLine && elbowWidthPx === 0 ? (
           <div
             className={[
-              "absolute left-1/2 top-0 h-full border-l-2 transition-colors duration-100 ease-in-out",
-              isActive ? "border-brand-fill" : "border-border-whisper",
+              "absolute left-1/2 top-0 h-full w-0.5 transition-colors duration-100 ease-in-out",
+              isActive ? "bg-brand-fill" : "bg-border-whisper",
             ].join(" ")}
           />
         ) : null}
         {showLine && elbowWidthPx > 0 ? (
           <>
-            <div
-              className={[
-                "absolute left-1/2 top-0 border-l-2 transition-colors duration-100 ease-in-out",
-                isActive ? "border-brand-fill" : "border-border-whisper",
-              ].join(" ")}
-              style={{
-                height: continuesAfterElbow
-                  ? "100%"
-                  : `${elbowVerticalEndPx}px`,
-              }}
-            />
             <svg
               aria-hidden="true"
               className={[
@@ -105,17 +99,51 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
                 strokeClass,
               ].join(" ")}
               fill="none"
-              height={elbowTopPx}
+              height={continuesAfterElbow ? "100%" : elbowTopPx}
               style={{
                 width: `${elbowWidthPx}px`,
               }}
               width={elbowWidthPx}
             >
-              <path
-                d={elbowPath}
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth={2}
+              <defs>
+                <mask
+                  id={maskId}
+                  maskUnits="userSpaceOnUse"
+                  x={-1}
+                  y={-1}
+                  width={elbowWidthPx + 2}
+                  height={continuesAfterElbow ? "100%" : elbowTopPx + 2}
+                >
+                  <rect
+                    x={-1}
+                    y={-1}
+                    width={elbowWidthPx + 2}
+                    height={continuesAfterElbow ? "100%" : elbowTopPx + 2}
+                    fill="black"
+                  />
+                  <rect
+                    x={0}
+                    y={0}
+                    width={2}
+                    height={verticalMaskHeight}
+                    fill="white"
+                  />
+                  <path
+                    d={elbowPath}
+                    stroke="white"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
+                </mask>
+              </defs>
+              <rect
+                x={-1}
+                y={-1}
+                width={elbowWidthPx + 2}
+                height={continuesAfterElbow ? "100%" : elbowTopPx + 2}
+                fill="currentColor"
+                mask={`url(#${maskId})`}
               />
             </svg>
           </>
@@ -123,7 +151,7 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
       </div>
       {toggleSlot ? (
         <div
-          className="absolute top-3 z-10 -translate-x-1/2"
+          className="absolute top-3 z-20 -translate-x-1/2"
           style={{ left: `${leftPx + 6}px` }}
           onMouseEnter={() => handleHoverChange(true)}
           onMouseLeave={() => handleHoverChange(false)}
@@ -139,7 +167,7 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
           onMouseEnter={() => handleHoverChange(true)}
           onMouseLeave={() => handleHoverChange(false)}
           data-hovered={isActive ? "true" : undefined}
-          className="absolute top-8 bottom-0 w-3 cursor-pointer focus-visible:outline-2 focus-visible:outline-brand-fill focus-visible:outline-offset-1"
+          className="absolute top-8 bottom-0 z-20 w-3 cursor-pointer focus-visible:outline-2 focus-visible:outline-brand-fill focus-visible:outline-offset-1"
           style={{ left: `${leftPx}px` }}
         />
       ) : null}
