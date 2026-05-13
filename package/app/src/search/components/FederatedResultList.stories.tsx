@@ -48,7 +48,7 @@ const sampleReview: PostSearchDocument = {
   body: "This book is excellent and full of magic.",
   kind: "REVIEW",
   depth: 0,
-  sortPath: "01",
+  sortPath: "0001",
   isLocked: false,
   replyCount: 2,
   directReplyCount: 2,

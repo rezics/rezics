@@ -332,11 +332,8 @@ describe("PostService.list subtree queries", () => {
       rootPostUnitId: "root-1",
       unitId: { not: "reply-2" },
       depth: { lte: 4 },
+      sortPath: { startsWith: "0001.0002." },
     });
-    expect(firstPostFindManyArgs().where.OR).toEqual([
-      { sortPath: { startsWith: "0001.0002." } },
-      { sortPath: { startsWith: "0001.0002/" } },
-    ]);
     expect(firstPostFindManyArgs().orderBy).toEqual([
       { sortPath: "asc" },
       { createdAt: "asc" },
@@ -365,7 +362,6 @@ describe("PostService.list subtree queries", () => {
       depth: { lte: 3 },
     });
     expect(firstPostFindManyArgs().where.sortPath).toBeUndefined();
-    expect(firstPostFindManyArgs().where.OR).toBeUndefined();
   });
 });
 

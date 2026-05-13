@@ -36,7 +36,7 @@ const FLAT_POSTS: PostDTO[] = Array.from({ length: 4 }).map((_, i) =>
   makePost({
     unitId: `flat-${i + 1}`,
     depth: 1,
-    sortPath: String(i + 1).padStart(3, "0"),
+    sortPath: String(i + 1).padStart(4, "0"),
     body: `Top-level reply ${i + 1}.`,
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
 );
@@ -45,14 +45,14 @@ const THREADED_3DEEP_POSTS: PostDTO[] = [
   makePost({
     unitId: "fix-1",
     depth: 1,
-    sortPath: "001",
+    sortPath: "0001",
     directReplyCount: 2,
     body: "Top-level reply with two children.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-1-1",
     depth: 2,
-    sortPath: "001/001",
+    sortPath: "0001.0001",
     parentPostUnitId: "fix-1",
     directReplyCount: 1,
     body: "Depth-2 child, default collapsed.",
@@ -60,21 +60,21 @@ const THREADED_3DEEP_POSTS: PostDTO[] = [
   makePost({
     unitId: "fix-1-1-1",
     depth: 3,
-    sortPath: "001/001/001",
+    sortPath: "0001.0001.0001",
     parentPostUnitId: "fix-1-1",
     body: "Deep descendant hidden by default collapse.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-1-2",
     depth: 2,
-    sortPath: "001/002",
+    sortPath: "0001.0002",
     parentPostUnitId: "fix-1",
     body: "Sibling of the first depth-2 node.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-2",
     depth: 1,
-    sortPath: "002",
+    sortPath: "0002",
     body: "Second top-level reply with no children.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
 ];
@@ -85,7 +85,7 @@ function buildDeepThread(depth: number): PostDTO[] {
   let path = "";
   for (let i = 1; i <= depth; i += 1) {
     const id = `deep-${i}`;
-    path = path ? `${path}/001` : "001";
+    path = path ? `${path}.0001` : "0001";
     posts.push(
       makePost({
         unitId: id,
@@ -107,21 +107,21 @@ const CONTINUOUS_RAIL_POSTS: PostDTO[] = [
   makePost({
     unitId: "outer",
     depth: 1,
-    sortPath: "001",
+    sortPath: "0001",
     directReplyCount: 4,
     body: "Outer reply with several visible children.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "outer-1",
     depth: 2,
-    sortPath: "001/001",
+    sortPath: "0001.0001",
     parentPostUnitId: "outer",
     body: "First child on the continuous outer rail.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "outer-2",
     depth: 2,
-    sortPath: "001/002",
+    sortPath: "0001.0002",
     parentPostUnitId: "outer",
     directReplyCount: 1,
     body: "Second child, with a collapsed nested branch.",
@@ -129,21 +129,21 @@ const CONTINUOUS_RAIL_POSTS: PostDTO[] = [
   makePost({
     unitId: "outer-2-1",
     depth: 3,
-    sortPath: "001/002/001",
+    sortPath: "0001.0002.0001",
     parentPostUnitId: "outer-2",
     body: "Nested child hidden by default collapse.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "outer-3",
     depth: 2,
-    sortPath: "001/003",
+    sortPath: "0001.0003",
     parentPostUnitId: "outer",
     body: "Third child should not show a rail seam above it.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "outer-4",
     depth: 2,
-    sortPath: "001/004",
+    sortPath: "0001.0004",
     parentPostUnitId: "outer",
     body: "Last child ends the continuous outer rail.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),

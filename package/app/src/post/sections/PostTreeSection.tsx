@@ -41,7 +41,7 @@ interface PostTreeListProps {
 
 const DEFAULT_MAX_DEPTH = 5;
 const DEFAULT_VISUAL_MAX_DEPTH = 4;
-const THREAD_INDENT_PX = 44;
+const THREAD_INDENT_PX = 32;
 const AVATAR_SIZE_PX = 32;
 const AVATAR_CENTER_PX = AVATAR_SIZE_PX / 2;
 const RAIL_STROKE_PX = 2;
@@ -50,7 +50,8 @@ const ROW_TOP_PADDING_PX = 4;
 const RAIL_GAP_PX = 4;
 const RAIL_TOP_PX = ROW_TOP_PADDING_PX + AVATAR_SIZE_PX + RAIL_GAP_PX;
 const AVATAR_CENTER_Y_PX = ROW_TOP_PADDING_PX + AVATAR_CENTER_PX;
-const ELBOW_RADIUS_PX = 10;
+const ELBOW_RADIUS_PX = 8;
+const RAIL_AVATAR_GAP_PX = 4;
 const TOGGLE_TOP_PX = RAIL_TOP_PX + 8;
 
 export const PostTreeList: React.FC<PostTreeListProps> = ({
@@ -253,7 +254,7 @@ function PostTreeNode({
         </div>
 
         {node.atMaxDepth ? (
-          <div className="pb-2 pl-11">
+          <div className="pb-2 pl-8">
             <TextLink
               to="/post/$rootPostUnitId/continue/$unitId"
               params={{
@@ -278,9 +279,17 @@ function PostTreeNode({
               const railBottom = isLastChild
                 ? `calc(100% - ${AVATAR_CENTER_Y_PX}px)`
                 : 0;
-              const innerRailHeight = isLastChild
-                ? `${AVATAR_CENTER_Y_PX - ELBOW_RADIUS_PX}px`
-                : "100%";
+              const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
+              const lastChildLineHeightPx =
+                AVATAR_CENTER_Y_PX - ELBOW_RADIUS_PX;
+              const elbowHorizontalExtentPx =
+                THREAD_INDENT_PX - AVATAR_CENTER_PX - RAIL_AVATAR_GAP_PX;
+              const elbowLeftPx = isLastChild
+                ? railCenterLeftPx - RAIL_STROKE_PX / 2
+                : railCenterLeftPx + RAIL_STROKE_PX / 2;
+              const elbowWidthPx = isLastChild
+                ? elbowHorizontalExtentPx + RAIL_STROKE_PX
+                : elbowHorizontalExtentPx;
 
               return (
                 <div key={child.post.unitId} className="relative">
@@ -299,38 +308,34 @@ function PostTreeNode({
                         onClick={handleRailToggle}
                         onMouseEnter={handleRailEnter}
                         onMouseLeave={handleRailLeave}
-                      >
-                        <span
-                          aria-hidden="true"
-                          className={[
-                            "absolute left-1/2 top-0 -translate-x-1/2 transition-colors duration-100 ease-in-out",
-                            railFillClass,
-                          ].join(" ")}
-                          style={{
-                            width: `${RAIL_STROKE_PX}px`,
-                            height: innerRailHeight,
-                          }}
-                        />
-                      </button>
-                      <svg
+                      />
+                      <span
                         aria-hidden="true"
-                        width={THREAD_INDENT_PX}
-                        height={ELBOW_RADIUS_PX}
-                        className="pointer-events-none absolute transition-colors duration-100 ease-in-out"
+                        className={[
+                          "pointer-events-none absolute -translate-x-1/2 transition-colors duration-100 ease-in-out",
+                          railFillClass,
+                        ].join(" ")}
                         style={{
-                          left: `${-THREAD_INDENT_PX + AVATAR_CENTER_PX}px`,
-                          top: `${AVATAR_CENTER_Y_PX - ELBOW_RADIUS_PX}px`,
-                          overflow: "visible",
-                          color: railColorVar,
+                          left: `${railCenterLeftPx}px`,
+                          top: 0,
+                          ...(isLastChild
+                            ? { height: `${lastChildLineHeightPx}px` }
+                            : { bottom: 0 }),
+                          width: `${RAIL_STROKE_PX}px`,
                         }}
-                      >
-                        <path
-                          d={`M 0 0 A ${ELBOW_RADIUS_PX} ${ELBOW_RADIUS_PX} 0 0 0 ${ELBOW_RADIUS_PX} ${ELBOW_RADIUS_PX} H ${THREAD_INDENT_PX}`}
-                          stroke="currentColor"
-                          strokeWidth={RAIL_STROKE_PX}
-                          fill="none"
-                        />
-                      </svg>
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute box-border border-0 border-l-2 border-b-2 border-solid transition-colors duration-100 ease-in-out"
+                        style={{
+                          left: `${elbowLeftPx}px`,
+                          top: `${AVATAR_CENTER_Y_PX - ELBOW_RADIUS_PX}px`,
+                          width: `${elbowWidthPx}px`,
+                          height: `${ELBOW_RADIUS_PX + RAIL_STROKE_PX / 2}px`,
+                          borderBottomLeftRadius: `${ELBOW_RADIUS_PX}px`,
+                          borderColor: railColorVar,
+                        }}
+                      />
                     </>
                   ) : null}
                   <PostTreeNode

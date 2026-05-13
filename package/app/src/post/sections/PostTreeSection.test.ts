@@ -29,16 +29,10 @@ describe("PostTreeSection helpers", () => {
   });
 
   describe("getChildBranchPrefix", () => {
-    it("handles dot-separated sortPaths (server format)", () => {
+    it("returns the child segment under the parent", () => {
       const xxx = makePost("xxx", "0001");
       const bbb = makePost("bbb", "0001.0001.0001");
       expect(getChildBranchPrefix(xxx, bbb)).toBe("0001.0001");
-    });
-
-    it("handles slash-separated sortPaths (factory format)", () => {
-      const xxx = makePost("xxx", "0001");
-      const bbb = makePost("bbb", "0001/0001/0001");
-      expect(getChildBranchPrefix(xxx, bbb)).toBe("0001/0001");
     });
 
     it("returns undefined when post is not a descendant", () => {

@@ -61,10 +61,7 @@ export class PostService {
       where.unitId = { not: anchor.unitId };
 
       if (anchor.sortPath) {
-        where.OR = [
-          { sortPath: { startsWith: `${anchor.sortPath}.` } },
-          { sortPath: { startsWith: `${anchor.sortPath}/` } },
-        ];
+        where.sortPath = { startsWith: `${anchor.sortPath}.` };
       } else if (rootPostUnitId !== anchor.unitId) {
         throw new AppError(
           400,

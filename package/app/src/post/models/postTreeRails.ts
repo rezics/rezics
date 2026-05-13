@@ -1,6 +1,6 @@
 import type { PostDTO } from "@rezics/contract";
 
-const SORT_PATH_SEPARATOR_RE = /[./]/;
+const SORT_PATH_SEPARATOR = ".";
 
 export function isDescendantPost(parent: PostDTO, post: PostDTO): boolean {
   if (!parent.sortPath || !post.sortPath) return false;
@@ -82,12 +82,11 @@ export function getChildBranchPrefix(
   if (!parent.sortPath || !post.sortPath || !isDescendantPost(parent, post)) {
     return undefined;
   }
-  const parentSegments = parent.sortPath.split(SORT_PATH_SEPARATOR_RE);
-  const postSegments = post.sortPath.split(SORT_PATH_SEPARATOR_RE);
+  const parentSegments = parent.sortPath.split(SORT_PATH_SEPARATOR);
+  const postSegments = post.sortPath.split(SORT_PATH_SEPARATOR);
   const childSegment = postSegments[parentSegments.length];
   if (!childSegment) return undefined;
-  const separator = post.sortPath[parent.sortPath.length] ?? ".";
-  return `${parent.sortPath}${separator}${childSegment}`;
+  return `${parent.sortPath}${SORT_PATH_SEPARATOR}${childSegment}`;
 }
 
 export function hasLaterSiblingBranch(

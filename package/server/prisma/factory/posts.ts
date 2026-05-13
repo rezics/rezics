@@ -333,7 +333,7 @@ async function seedTreePostsForTarget(
     async (_, index) => {
       const author = faker.helpers.arrayElement(users);
       const id = randomUUID();
-      const sortPath = String(index).padStart(5, "0");
+      const sortPath = String(index + 1).padStart(4, "0");
 
       const unit = await ctx.prisma.unit.create({
         data: {
@@ -382,7 +382,7 @@ async function seedTreePostsForTarget(
 
   const replyParents: ParentSlot[] = rootIds.map((id, i) => ({
     id,
-    sortPath: String(i).padStart(5, "0"),
+    sortPath: String(i + 1).padStart(4, "0"),
     depth: 0,
     rootId: id,
     childCount: 0,
@@ -412,8 +412,8 @@ async function seedTreePostsForTarget(
 
     const author = faker.helpers.arrayElement(users);
     const replyId = randomUUID();
-    const sortPath = `${parent.sortPath}/${String(parent.childCount).padStart(
-      5,
+    const sortPath = `${parent.sortPath}.${String(parent.childCount + 1).padStart(
+      4,
       "0",
     )}`;
 
