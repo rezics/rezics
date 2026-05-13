@@ -526,6 +526,15 @@ export default {
         mark_as_read: "Mark as read",
         read_again: "Read again",
       },
+      meta: {
+        author: "Author",
+        co_author: "Co-author",
+        translator: "Translator",
+        illustrator: "Illustrator",
+        editor: "Editor",
+        publisher: "Publisher",
+        producer: "Producer",
+      },
     },
     copyright_notice: {
       body: "Cover artwork and bibliographic metadata are the property of their respective publishers, authors, and copyright holders.",

@@ -3,6 +3,7 @@ import { tagQueries } from "@rezics/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
@@ -10,8 +11,9 @@ import { useTranslation } from "react-i18next";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import {
   getBookCoverUrl,
-  getEntityTranslation,
+  getEntityTranslationsByRole,
   getTranslation,
+  type EntityTranslation,
 } from "@/shared/utils/translation-helpers";
 
 import { useBookLanguage } from "../hooks/useBookLanguage";
@@ -32,7 +34,33 @@ interface BookHeroSectionProps {
 }
 
 type BriefPart = { id: string; text: string };
-type MetaRow = { key: string; label: string; name: string };
+type MetaRow = { key: string; label: string; credits: EntityTranslation[] };
+
+const CREDIT_ROLES = [
+  { role: "author", labelKey: "book.hero.meta.author", fallback: "作者" },
+  {
+    role: "co-author",
+    labelKey: "book.hero.meta.co_author",
+    fallback: "共同作者",
+  },
+  {
+    role: "translator",
+    labelKey: "book.hero.meta.translator",
+    fallback: "譯者",
+  },
+  {
+    role: "illustrator",
+    labelKey: "book.hero.meta.illustrator",
+    fallback: "繪者",
+  },
+  { role: "editor", labelKey: "book.hero.meta.editor", fallback: "編輯" },
+  {
+    role: "publisher",
+    labelKey: "book.hero.meta.publisher",
+    fallback: "出版",
+  },
+  { role: "producer", labelKey: "book.hero.meta.producer", fallback: "製作" },
+] as const;
 
 export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   bookInfo,
@@ -55,21 +83,6 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   const summary =
     selectedTranslation?.summary ?? selectedTranslation?.description ?? "";
   const coverUrl = getBookCoverUrl(bookInfo);
-  const author = getEntityTranslation(
-    bookInfo?.attributions,
-    "author",
-    selectedLang,
-  );
-  const publisher = getEntityTranslation(
-    bookInfo?.attributions,
-    "publisher",
-    selectedLang,
-  );
-  const producer = getEntityTranslation(
-    bookInfo?.attributions,
-    "producer",
-    selectedLang,
-  );
 
   const { data: tagsData } = useQuery(tagQueries.forUnit(bookId));
   const unitTags = tagsData?.tags ?? [];
@@ -109,28 +122,23 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
     briefParts.push({ id: "isbn", text: `ISBN ${bookInfo.isbn13}` });
   }
 
-  const metaRows: MetaRow[] = [];
-  if (author?.name) {
-    metaRows.push({
-      key: "author",
-      label: t("book.hero.meta.author", "作者"),
-      name: author.name,
-    });
-  }
-  if (publisher?.name) {
-    metaRows.push({
-      key: "publisher",
-      label: t("book.hero.meta.publisher", "出版"),
-      name: publisher.name,
-    });
-  }
-  if (producer?.name) {
-    metaRows.push({
-      key: "producer",
-      label: t("book.hero.meta.producer", "製作"),
-      name: producer.name,
-    });
-  }
+  const metaRows: MetaRow[] = CREDIT_ROLES.flatMap((config) => {
+    const credits = getEntityTranslationsByRole(
+      bookInfo?.attributions,
+      config.role,
+      selectedLang,
+    ).filter((credit) => credit.name);
+
+    if (credits.length === 0) return [];
+
+    return [
+      {
+        key: config.role,
+        label: t(config.labelKey, config.fallback),
+        credits,
+      },
+    ];
+  });
 
   return (
     <div className="relative overflow-hidden bg-black">
@@ -213,7 +221,32 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
                       <dt className="text-white font-semibold text-sm w-16 shrink-0">
                         {row.label}
                       </dt>
-                      <dd className="text-white/85 text-sm">{row.name}</dd>
+                      <dd className="text-white/85 text-sm flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                        {row.credits.map((credit, index) => (
+                          <span key={credit.entityId} className="inline-flex">
+                            {index > 0 && (
+                              <span
+                                aria-hidden="true"
+                                className="mr-2 text-white/35"
+                              >
+                                /
+                              </span>
+                            )}
+                            {credit.unitId ? (
+                              <Link
+                                to="/unit/id/$unitId"
+                                params={{ unitId: credit.unitId }}
+                                search={{ view: "unit" }}
+                                className="text-white/90 underline underline-offset-4 decoration-white/30 transition-colors hover:text-white hover:decoration-white/70"
+                              >
+                                {credit.name}
+                              </Link>
+                            ) : (
+                              credit.name
+                            )}
+                          </span>
+                        ))}
+                      </dd>
                     </div>
                   ))}
                 </dl>

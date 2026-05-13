@@ -140,14 +140,19 @@ export function getBookCoverUrl(book: BookDTO | null | undefined): string {
 export function getAttributionsByRole(
   attributions: BookDTO["attributions"],
   role: string,
-): Array<{ entityId: string; name: string; role: string; sortOrder?: number }> {
+): NonNullable<BookDTO["attributions"]> {
   if (!attributions) return [];
   return attributions.filter((a) => a.role === role);
 }
 
 export type EntityTranslation = {
+  entityId: string;
+  unitId: string;
+  role: string;
   name: string;
   bio?: string;
+  kind?: string | null;
+  slug?: string | null;
 };
 
 /**
@@ -164,21 +169,32 @@ export function getEntityTranslation(
   role: string,
   language?: string,
 ): EntityTranslation | undefined {
+  return getEntityTranslationsByRole(attributions, role, language)[0];
+}
+
+export function getEntityTranslationsByRole(
+  attributions: BookDTO["attributions"],
+  role: string,
+  language?: string,
+): EntityTranslation[] {
   const matches = getAttributionsByRole(attributions, role);
-  if (matches.length === 0) return undefined;
+  if (matches.length === 0) return [];
 
-  const first = matches[0] as (typeof matches)[number] & {
-    entity?: {
-      translations?: UnitTranslationDTO[];
+  return matches.map((match) => {
+    const translations = match.entity?.translations as
+      | UnitTranslationDTO[]
+      | undefined;
+    const tr = getTranslation(translations, language);
+    return {
+      entityId: match.entityId,
+      unitId: match.entity?.unitId ?? match.entityId,
+      role: match.role,
+      name: tr?.title ?? match.name,
+      bio: tr?.description ?? undefined,
+      kind: match.entity?.kind ?? undefined,
+      slug: match.entity?.slug ?? undefined,
     };
-  };
-  const translations = first.entity?.translations;
-  const tr = getTranslation(translations, language);
-
-  return {
-    name: tr?.title ?? first.name,
-    bio: tr?.description ?? undefined,
-  };
+  });
 }
 
 /**

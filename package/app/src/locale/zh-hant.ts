@@ -438,6 +438,15 @@ export default {
         mark_as_read: "標為已讀",
         read_again: "再讀一次",
       },
+      meta: {
+        author: "作者",
+        co_author: "共同作者",
+        translator: "譯者",
+        illustrator: "繪者",
+        editor: "編輯",
+        publisher: "出版",
+        producer: "製作",
+      },
     },
     copyright_notice: {
       body: "封面圖像與書目元資料之版權，歸屬於原出版商、作者及版權所有者。",
