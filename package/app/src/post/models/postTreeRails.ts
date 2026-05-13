@@ -18,6 +18,53 @@ export function getDisplayDepth(
   return Math.min(Math.max(0, (post.depth ?? 0) - baseDepth), visualMaxDepth);
 }
 
+export interface PostTreeNodeModel {
+  post: PostDTO;
+  displayDepth: number;
+  atMaxDepth: boolean;
+  children: PostTreeNodeModel[];
+}
+
+export function buildPostTreeNodes({
+  posts,
+  baseDepth,
+  maxDepth,
+  visualMaxDepth,
+}: {
+  posts: PostDTO[];
+  baseDepth: number;
+  maxDepth: number;
+  visualMaxDepth: number;
+}): PostTreeNodeModel[] {
+  const nodesByPostUnitId = new Map<string, PostTreeNodeModel>();
+  const roots: PostTreeNodeModel[] = [];
+
+  posts.forEach((post, index) => {
+    const displayDepth = getDisplayDepth(post, baseDepth, visualMaxDepth);
+    const node = {
+      post,
+      displayDepth,
+      atMaxDepth:
+        Math.max(0, (post.depth ?? 0) - baseDepth) === maxDepth &&
+        (post.directReplyCount ?? 0) > 0,
+      children: [],
+    };
+    nodesByPostUnitId.set(post.unitId, node);
+
+    const parent = findNearestVisibleAncestor(posts.slice(0, index), post);
+    const parentNode = parent
+      ? nodesByPostUnitId.get(parent.unitId)
+      : undefined;
+    if (parentNode) {
+      parentNode.children.push(node);
+      return;
+    }
+    roots.push(node);
+  });
+
+  return roots;
+}
+
 export function findNearestVisibleAncestor(
   posts: PostDTO[],
   post: PostDTO,

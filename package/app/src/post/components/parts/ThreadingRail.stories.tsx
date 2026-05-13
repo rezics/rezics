@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
-
-import { ThreadingHoverProvider } from "./ThreadingContext";
 import { CollapseToggle } from "./CollapseToggle";
+import { ThreadingHoverProvider } from "./ThreadingContext";
 import { ThreadingRail } from "./ThreadingRail";
 
 function Row({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
@@ -22,7 +21,7 @@ function Row({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
           }
         />
         <div className="text-text-secondary">
-          Hover the 12 px rail zone to see the stroke highlight.
+          Hover the rail gutter to see the CSS line highlight.
         </div>
       </div>
     </ThreadingHoverProvider>
@@ -57,7 +56,7 @@ export const RoundedElbowContinuation: Story = {
           onToggleCollapse={() => undefined}
         />
         <div className="text-sm text-text-secondary">
-          Rounded branch with a continuing ancestor rail.
+          Border-radius branch with a continuing ancestor rail.
         </div>
       </div>
     </ThreadingHoverProvider>
@@ -76,7 +75,7 @@ export const LongRoundedElbowContinuation: Story = {
           onToggleCollapse={() => undefined}
         />
         <div className="text-sm text-text-secondary">
-          Long ancestor rail with a rounded branch.
+          Long ancestor rail with a rounded CSS branch.
         </div>
       </div>
     </ThreadingHoverProvider>
@@ -96,9 +95,7 @@ export const StackedRowContinuation: Story = {
               continuesAfterElbow={row === 1}
               onToggleCollapse={() => undefined}
             />
-            <div className="text-sm text-text-secondary">
-              Row {row + 1}
-            </div>
+            <div className="text-sm text-text-secondary">Row {row + 1}</div>
           </div>
         ))}
       </div>

@@ -1,7 +1,8 @@
-import type { PostDTO } from "@rezics/contract";
 import { describe, expect, it } from "bun:test";
+import type { PostDTO } from "@rezics/contract";
 import { excludeRootPost } from "../hooks/usePostTreeCollapse";
 import {
+  buildPostTreeNodes,
   getChildBranchPrefix,
   getContinuationLines,
   hasLaterSiblingBranch,
@@ -84,6 +85,46 @@ describe("PostTreeSection helpers", () => {
         parentLineLevel: 1,
       });
       expect(lines).toEqual([]);
+    });
+  });
+
+  describe("buildPostTreeNodes", () => {
+    it("builds a nested DOM tree from flat threaded posts", () => {
+      const aaa = makePost("aaa", "0001", 1);
+      const bbb = makePost("bbb", "0001.0001", 2);
+      const ccc = makePost("ccc", "0001.0001.0001", 3);
+      const ddd = makePost("ddd", "0001.0002", 2);
+      const eee = makePost("eee", "0002", 1);
+
+      const tree = buildPostTreeNodes({
+        posts: [aaa, bbb, ccc, ddd, eee],
+        baseDepth: 0,
+        maxDepth: 5,
+        visualMaxDepth: 4,
+      });
+
+      expect(tree.map((node) => node.post.unitId)).toEqual(["aaa", "eee"]);
+      expect(tree[0]?.children.map((node) => node.post.unitId)).toEqual([
+        "bbb",
+        "ddd",
+      ]);
+      expect(tree[0]?.children[0]?.children[0]?.post.unitId).toBe("ccc");
+    });
+
+    it("caps display depth while preserving nested descendants", () => {
+      const aaa = makePost("aaa", "0001", 1);
+      const bbb = makePost("bbb", "0001.0001", 2);
+      const ccc = makePost("ccc", "0001.0001.0001", 3);
+
+      const tree = buildPostTreeNodes({
+        posts: [aaa, bbb, ccc],
+        baseDepth: 0,
+        maxDepth: 5,
+        visualMaxDepth: 2,
+      });
+
+      expect(tree[0]?.children[0]?.children[0]?.displayDepth).toBe(2);
+      expect(tree[0]?.children[0]?.children[0]?.post.unitId).toBe("ccc");
     });
   });
 });

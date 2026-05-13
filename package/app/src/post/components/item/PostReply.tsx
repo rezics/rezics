@@ -8,156 +8,41 @@ import {
 } from "../../models/postPolicy";
 import { PostAuthorHeader } from "../parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "../parts/PostBodyMarkdown";
-import { CollapseToggle } from "../parts/CollapseToggle";
-import { ThreadingHoverProvider } from "../parts/ThreadingContext";
-import { ThreadingRail } from "../parts/ThreadingRail";
 
 interface PostReplyProps {
   post: PostDTO;
-  indentLevel: number;
-  parentLine?: {
-    level: number;
-    postUnitId: string;
-    continuesAfterElbow: boolean;
-  };
-  continuationLines?: Array<{ level: number; postUnitId: string }>;
-  highlightedThreadUnitId?: string;
-  isCollapsed: boolean;
-  hasThreadChildren?: boolean;
-  hasVisibleDescendants?: boolean;
-  onToggleCollapse: () => void;
-  onToggleAncestorCollapse?: (postUnitId: string) => void;
-  onThreadHoverChange?: (postUnitId: string, hovered: boolean) => void;
   onReply?: () => void;
   replyComposerSlot?: React.ReactNode;
-  renderAncestorRails?: boolean;
-  renderOwnRail?: boolean;
-}
-
-const INDENT_UNIT_PX = 32;
-const RAIL_HITBOX_PX = 12;
-const TOGGLE_SIZE_PX = 20;
-const CONTENT_GAP_PX = 8;
-const TOGGLE_TOP_PX = 12;
-const TOGGLE_CENTER_Y_PX = TOGGLE_TOP_PX + TOGGLE_SIZE_PX / 2;
-const CONTENT_START_PX = TOGGLE_SIZE_PX + CONTENT_GAP_PX;
-
-export const postReplyThreadingMetrics = {
-  indentUnitPx: INDENT_UNIT_PX,
-  toggleCenterYPx: TOGGLE_CENTER_Y_PX,
-};
-
-export function railLeftPxForLevel(level: number): number {
-  return level * INDENT_UNIT_PX + (TOGGLE_SIZE_PX - RAIL_HITBOX_PX) / 2;
+  showAvatar?: boolean;
 }
 
 export const PostReply: React.FC<PostReplyProps> = ({
   post,
-  indentLevel,
-  parentLine,
-  continuationLines = [],
-  highlightedThreadUnitId,
-  isCollapsed,
-  hasThreadChildren,
-  hasVisibleDescendants,
-  onToggleCollapse,
-  onToggleAncestorCollapse,
-  onThreadHoverChange,
   onReply,
   replyComposerSlot,
-  renderAncestorRails = true,
-  renderOwnRail = true,
+  showAvatar = true,
 }) => {
-  const hasChildren = hasThreadChildren ?? (post.directReplyCount ?? 0) > 0;
-  const showOwnRail =
-    renderOwnRail && hasChildren && hasVisibleDescendants && !isCollapsed;
-  const contentLeftPx = indentLevel * INDENT_UNIT_PX + CONTENT_START_PX;
-  const railLeftPx = railLeftPxForLevel(indentLevel);
+  const contentIndentClass = showAvatar ? "pl-10" : "";
 
   return (
-    <ThreadingHoverProvider>
-      <div
-        className="relative py-2"
-        style={{ paddingLeft: `${contentLeftPx}px` }}
-      >
-        {renderAncestorRails
-          ? continuationLines.map((line) => (
-              <ThreadingRail
-                key={`${line.level}-${line.postUnitId}`}
-                leftPx={railLeftPxForLevel(line.level)}
-                highlighted={highlightedThreadUnitId === line.postUnitId}
-                useSharedHover={false}
-                onToggleCollapse={
-                  onToggleAncestorCollapse
-                    ? () => onToggleAncestorCollapse(line.postUnitId)
-                    : undefined
-                }
-                onHoverChange={(hovered) =>
-                  onThreadHoverChange?.(line.postUnitId, hovered)
-                }
-              />
-            ))
-          : null}
-        {renderAncestorRails && parentLine ? (
-          <ThreadingRail
-            leftPx={railLeftPxForLevel(parentLine.level)}
-            elbowWidthPx={
-              Math.max(0, indentLevel - parentLine.level) * INDENT_UNIT_PX
-            }
-            elbowTopPx={TOGGLE_CENTER_Y_PX}
-            continuesAfterElbow={parentLine.continuesAfterElbow}
-            highlighted={highlightedThreadUnitId === parentLine.postUnitId}
-            useSharedHover={false}
-            onToggleCollapse={
-              onToggleAncestorCollapse
-                ? () => onToggleAncestorCollapse(parentLine.postUnitId)
-                : undefined
-            }
-            onHoverChange={(hovered) =>
-              onThreadHoverChange?.(parentLine.postUnitId, hovered)
-            }
-          />
-        ) : null}
-        {hasChildren && (
-          <ThreadingRail
-            leftPx={railLeftPx}
-            isCollapsed={isCollapsed}
-            onToggleCollapse={onToggleCollapse}
-            showLine={showOwnRail}
-            lineStartPx={TOGGLE_CENTER_Y_PX}
-            highlighted={highlightedThreadUnitId === post.unitId}
-            onHoverChange={(hovered) =>
-              onThreadHoverChange?.(post.unitId, hovered)
-            }
-            toggleSlot={
-              <CollapseToggle
-                isCollapsed={isCollapsed}
-                onToggle={onToggleCollapse}
-                highlighted={highlightedThreadUnitId === post.unitId}
-              />
-            }
-          />
-        )}
-        <div className="flex items-start">
-          <div className="flex-1 flex flex-col gap-1">
-            <PostAuthorHeader post={post} size="compact" />
-            <PostBodyMarkdown
-              body={post.body ?? ""}
-              clamp={{ maxLines: 4 }}
-              className="text-sm"
-            />
-            <ReactionBar
-              size="sm"
-              post={post}
-              policy={postPolicy}
-              actions={postReplyRowActions}
-              overflow={postReplyRowOverflow}
-              onReplyInvoke={onReply}
-            />
-            {replyComposerSlot}
-          </div>
-        </div>
+    <div className="flex min-w-0 flex-col gap-1 py-1">
+      <PostAuthorHeader post={post} size="compact" showAvatar={showAvatar} />
+      <div className={`flex min-w-0 flex-col gap-1 ${contentIndentClass}`}>
+        <PostBodyMarkdown
+          body={post.body ?? ""}
+          clamp={{ maxLines: 4 }}
+          className="text-sm"
+        />
+        <ReactionBar
+          size="sm"
+          post={post}
+          policy={postPolicy}
+          actions={postReplyRowActions}
+          overflow={postReplyRowOverflow}
+          onReplyInvoke={onReply}
+        />
+        {replyComposerSlot}
       </div>
-    </ThreadingHoverProvider>
+    </div>
   );
 };

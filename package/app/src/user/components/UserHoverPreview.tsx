@@ -36,6 +36,8 @@ export interface UserHoverPreviewProps {
   avatarClassName?: string;
   nameClassName?: string;
   contentClassName?: string;
+  showAvatar?: boolean;
+  showName?: boolean;
   defaultOpen?: boolean;
 }
 
@@ -49,6 +51,8 @@ export function UserHoverPreview({
   avatarClassName,
   nameClassName,
   contentClassName,
+  showAvatar = true,
+  showName = true,
   defaultOpen = false,
 }: UserHoverPreviewProps) {
   const idPrefix = useId();
@@ -68,22 +72,26 @@ export function UserHoverPreview({
   if (!userId) {
     return (
       <span className={cn("inline-flex min-w-0 items-center gap-2", className)}>
-        <PreviewAvatar
-          avatar={user.avatar}
-          displayName={displayName}
-          fallback={avatarFallback}
-          size={size}
-          className={avatarClassName}
-        />
-        <span
-          className={cn(
-            "min-w-0 truncate text-text-primary",
-            getNameClassName(size),
-            nameClassName,
-          )}
-        >
-          {displayName}
-        </span>
+        {showAvatar ? (
+          <PreviewAvatar
+            avatar={user.avatar}
+            displayName={displayName}
+            fallback={avatarFallback}
+            size={size}
+            className={avatarClassName}
+          />
+        ) : null}
+        {showName ? (
+          <span
+            className={cn(
+              "min-w-0 truncate text-text-primary",
+              getNameClassName(size),
+              nameClassName,
+            )}
+          >
+            {displayName}
+          </span>
+        ) : null}
       </span>
     );
   }
@@ -104,52 +112,56 @@ export function UserHoverPreview({
   return (
     <Popover open={open} triggerId={triggerId} onOpenChange={handleOpenChange}>
       <span className={cn("inline-flex min-w-0 items-center gap-2", className)}>
-        <PopoverTrigger
-          id={avatarTriggerId}
-          openOnHover
-          delay={hoverDelay}
-          closeDelay={hoverCloseDelay}
-          onFocus={() => openFromTriggerFocus(avatarTriggerId)}
-          onMouseEnter={() => setTriggerId(avatarTriggerId)}
-          render={
-            <Link
-              to="/user/$userId"
-              params={profileParams}
-              aria-label={`Open ${displayName}'s profile`}
-              className="inline-flex shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+        {showAvatar ? (
+          <PopoverTrigger
+            id={avatarTriggerId}
+            openOnHover
+            delay={hoverDelay}
+            closeDelay={hoverCloseDelay}
+            onFocus={() => openFromTriggerFocus(avatarTriggerId)}
+            onMouseEnter={() => setTriggerId(avatarTriggerId)}
+            render={
+              <Link
+                to="/user/$userId"
+                params={profileParams}
+                aria-label={`Open ${displayName}'s profile`}
+                className="inline-flex shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+              />
+            }
+          >
+            <PreviewAvatar
+              avatar={user.avatar}
+              displayName={displayName}
+              fallback={avatarFallback}
+              size={size}
+              className={avatarClassName}
             />
-          }
-        >
-          <PreviewAvatar
-            avatar={user.avatar}
-            displayName={displayName}
-            fallback={avatarFallback}
-            size={size}
-            className={avatarClassName}
-          />
-        </PopoverTrigger>
+          </PopoverTrigger>
+        ) : null}
 
-        <PopoverTrigger
-          id={nameTriggerId}
-          openOnHover
-          delay={hoverDelay}
-          closeDelay={hoverCloseDelay}
-          onFocus={() => openFromTriggerFocus(nameTriggerId)}
-          onMouseEnter={() => setTriggerId(nameTriggerId)}
-          render={
-            <Link
-              to="/user/$userId"
-              params={profileParams}
-              className={cn(
-                "inline-flex min-w-0 max-w-48 items-center truncate text-text-primary no-underline underline-offset-4 outline-none hover:underline focus-visible:underline focus-visible:ring-2 focus-visible:ring-ring/30",
-                getNameClassName(size),
-                nameClassName,
-              )}
-            />
-          }
-        >
-          {displayName}
-        </PopoverTrigger>
+        {showName ? (
+          <PopoverTrigger
+            id={nameTriggerId}
+            openOnHover
+            delay={hoverDelay}
+            closeDelay={hoverCloseDelay}
+            onFocus={() => openFromTriggerFocus(nameTriggerId)}
+            onMouseEnter={() => setTriggerId(nameTriggerId)}
+            render={
+              <Link
+                to="/user/$userId"
+                params={profileParams}
+                className={cn(
+                  "inline-flex min-w-0 max-w-48 items-center truncate text-text-primary no-underline underline-offset-4 outline-none hover:underline focus-visible:underline focus-visible:ring-2 focus-visible:ring-ring/30",
+                  getNameClassName(size),
+                  nameClassName,
+                )}
+              />
+            }
+          >
+            {displayName}
+          </PopoverTrigger>
+        ) : null}
       </span>
 
       <PopoverContent
@@ -259,7 +271,7 @@ function PreviewAvatar({
     <Avatar
       className={cn(
         "rounded-md",
-        size === "compact" ? "size-6" : "size-9",
+        size === "compact" ? "size-8" : "size-9",
         className,
       )}
     >
