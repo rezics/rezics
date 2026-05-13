@@ -5,6 +5,7 @@
     "dev": "bun run dev-script/dev.ts",
     "prisma:regenerate": "bun run dev-script/prisma-regenerate.ts",
     "prisma:migrate": "bun run dev-script/prisma-migrate.ts",
+    "prisma:reset-db": "bun run dev-script/prisma-reset-db.ts",
     "install-services": "bun run install-services/install-services.ts",
     "deploy": "bun run deploy-script/deploy-script.ts",
     "generate-barrel": "bun run scripts/generate-barrel.ts",
