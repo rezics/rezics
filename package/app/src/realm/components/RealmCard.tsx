@@ -1,6 +1,6 @@
 import type { RealmDTO } from "@rezics/contract";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
@@ -9,19 +9,15 @@ interface RealmCardProps {
 }
 
 export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
-  const navigate = useNavigate();
   const translation = getTranslation(realm.translations);
   const title = translation?.title ?? "Untitled Realm";
   const description = translation?.description ?? "";
 
-  const handleOpen = () =>
-    navigate({ to: "/realm/$realmId", params: { realmId: realm.unitId } });
-
   return (
     <Card className="cursor-pointer border-0 shadow-none">
-      <button
-        type="button"
-        onClick={handleOpen}
+      <Link
+        to="/realm/$realmId"
+        params={{ realmId: realm.unitId }}
         className="block w-full text-left"
       >
         <CardContent>
@@ -48,7 +44,7 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
             )}
           </div>
         </CardContent>
-      </button>
+      </Link>
     </Card>
   );
 };

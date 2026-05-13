@@ -1,9 +1,9 @@
-import { Button } from "@rezics/ui/shadcn";
+import { buttonVariants } from "@rezics/ui/shadcn";
 import { Spinner } from "@rezics/ui";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,7 +21,6 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
 }) => {
   const { t } = useTranslation();
   const resolvedTitle = title ?? t("page.home.sections.trending_shelves");
-  const navigate = useNavigate();
   const { data, isLoading, error } = useQuery(
     contentSearchQueryOptions({ type: "SHELF", offset: 0, limit }),
   );
@@ -45,9 +44,9 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
     <div className="w-full @container">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
-        <Button variant="ghost" onClick={() => navigate({ to: "/shelf" })}>
+        <Link to="/shelf" className={buttonVariants({ variant: "ghost" })}>
           More
-        </Button>
+        </Link>
       </div>
 
       {isLoading && <Spinner size="sm" />}

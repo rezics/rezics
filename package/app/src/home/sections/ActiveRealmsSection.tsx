@@ -1,9 +1,9 @@
 import { realmListQuery } from "@rezics/api/realm/realm";
 import { Spinner } from "@rezics/ui";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
-import { Button } from "@rezics/ui/shadcn";
+import { buttonVariants } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
@@ -11,7 +11,6 @@ import { RealmCard } from "@/realm/components/RealmCard";
 
 export const ActiveRealmsSection: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { data, isLoading, error } = useQuery(
     realmListQuery({
       isPublic: true,
@@ -32,9 +31,9 @@ export const ActiveRealmsSection: React.FC = () => {
         <h2 className="font-semibold">
           {t("page.home.sections.active_realms.title")}
         </h2>
-        <Button variant="ghost" onClick={() => navigate({ to: "/realm" })}>
+        <Link to="/realm" className={buttonVariants({ variant: "ghost" })}>
           {t("page.home.sections.active_realms.more")}
-        </Button>
+        </Link>
       </div>
       {isLoading ? (
         <Spinner size="sm" />

@@ -1,6 +1,6 @@
 import type { ShelfDTO } from "@rezics/contract";
 import { Card, CardContent } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -11,28 +11,18 @@ interface ShelfCardProps {
 }
 
 export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
-  const navigate = useNavigate();
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? "";
   const description = translation?.description ?? "";
   const itemsCount = shelf.itemCount ?? shelf.items?.length ?? 0;
 
-  const handleOpenShelf = () => {
-    if (!shelf.unitId) return;
-    navigate({
-      to: "/shelf/$shelfId",
-      params: { shelfId: shelf.unitId },
-    });
-  };
-
-  return (
+  const card = (
     <Card
       className={cn(
         "gap-0 overflow-hidden rounded-md border-0 py-0 shadow-none ring-0",
         shelf.unitId && "cursor-pointer",
         className,
       )}
-      onClick={handleOpenShelf}
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-border-whisper">
         {shelf.coverUrl ? (
@@ -78,5 +68,19 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
         </div>
       </CardContent>
     </Card>
+  );
+
+  if (!shelf.unitId) {
+    return card;
+  }
+
+  return (
+    <Link
+      to="/shelf/$shelfId"
+      params={{ shelfId: shelf.unitId }}
+      className="block no-underline"
+    >
+      {card}
+    </Link>
   );
 };
