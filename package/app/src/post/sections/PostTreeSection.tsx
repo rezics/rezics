@@ -5,7 +5,7 @@ import { Spinner } from "@rezics/ui";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { PostReply } from "../components/item/PostReply";
 import { CollapseToggle } from "../components/parts/CollapseToggle";
 import { ThreadingHoverProvider } from "../components/parts/ThreadingContext";
@@ -326,40 +326,13 @@ function ChildrenRail({
   onRailLeave,
   onRailToggle,
 }: ChildrenRailProps) {
-  const lastChildRef = useRef<HTMLDivElement | null>(null);
-  const [lastChildHeight, setLastChildHeight] = useState<number | null>(null);
-
-  useLayoutEffect(() => {
-    const el = lastChildRef.current;
-    if (!el) {
-      setLastChildHeight(null);
-      return;
-    }
-    const measure = () => setLastChildHeight(el.offsetHeight);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [childrenNodes.length]);
-
   const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
   const elbowHorizontalExtentPx =
     THREAD_INDENT_PX - AVATAR_CENTER_PX - RAIL_AVATAR_GAP_PX;
   const lineLeftPx = railCenterLeftPx - RAIL_STROKE_PX / 2;
   const railLeftPx = railCenterLeftPx - RAIL_HITBOX_PX / 2;
-
-  const lineBottomPx =
-    lastChildHeight !== null
-      ? Math.max(0, lastChildHeight - AVATAR_CENTER_Y_PX)
-      : 0;
-
-  const arcStartX = RAIL_STROKE_PX / 2;
-  const arcEndX = arcStartX + ELBOW_RADIUS_PX;
-  const arcEndY = ELBOW_RADIUS_PX;
-  const stubEndX = arcStartX + elbowHorizontalExtentPx;
-  const svgWidth = stubEndX + RAIL_STROKE_PX / 2;
-  const svgHeight = ELBOW_RADIUS_PX + RAIL_STROKE_PX / 2;
-  const arcPath = `M ${arcStartX} 0 A ${ELBOW_RADIUS_PX} ${ELBOW_RADIUS_PX} 0 0 0 ${arcEndX} ${arcEndY} L ${stubEndX} ${arcEndY}`;
+  const curveWidthPx = elbowHorizontalExtentPx + RAIL_STROKE_PX;
+  const curveHeightPx = AVATAR_CENTER_Y_PX;
 
   return (
     <div
@@ -375,7 +348,7 @@ function ChildrenRail({
             style={{
               left: `${railLeftPx}px`,
               top: 0,
-              bottom: `${lineBottomPx}px`,
+              bottom: 0,
               width: `${RAIL_HITBOX_PX}px`,
             }}
             onClick={onRailToggle}
@@ -388,7 +361,7 @@ function ChildrenRail({
             style={{
               left: `${lineLeftPx}px`,
               top: 0,
-              bottom: `${lineBottomPx}px`,
+              bottom: 0,
               width: `${RAIL_STROKE_PX}px`,
               borderColor: railColorVar,
             }}
@@ -398,33 +371,34 @@ function ChildrenRail({
       {childrenNodes.map((child, idx) => {
         const isLastChild = idx === childrenNodes.length - 1;
         return (
-          <div
-            key={child.post.unitId}
-            className="relative"
-            ref={isLastChild ? lastChildRef : undefined}
-          >
+          <div key={child.post.unitId} className="relative">
             {canIndentChildren ? (
-              <svg
-                aria-hidden="true"
-                className="pointer-events-none absolute transition-colors duration-100 ease-in-out"
-                width={svgWidth}
-                height={svgHeight}
-                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-                style={{
-                  left: `${lineLeftPx}px`,
-                  top: `${AVATAR_CENTER_Y_PX - ELBOW_RADIUS_PX}px`,
-                  color: railColorVar,
-                  overflow: "visible",
-                }}
-              >
-                <path
-                  d={arcPath}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={RAIL_STROKE_PX}
-                  strokeLinecap="butt"
+              <>
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute box-border border-0 border-l-2 border-b-2 border-solid transition-colors duration-100 ease-in-out"
+                  style={{
+                    left: `${lineLeftPx}px`,
+                    top: 0,
+                    width: `${curveWidthPx}px`,
+                    height: `${curveHeightPx}px`,
+                    borderBottomLeftRadius: `${ELBOW_RADIUS_PX}px`,
+                    borderColor: railColorVar,
+                  }}
                 />
-              </svg>
+                {isLastChild ? (
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute bg-background"
+                    style={{
+                      left: `${lineLeftPx}px`,
+                      top: `${AVATAR_CENTER_Y_PX}px`,
+                      bottom: 0,
+                      width: `${RAIL_STROKE_PX}px`,
+                    }}
+                  />
+                ) : null}
+              </>
             ) : null}
             <PostTreeNode
               node={child}
