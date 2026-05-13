@@ -5,7 +5,7 @@ import { Spinner } from "@rezics/ui";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { PostReply } from "../components/item/PostReply";
 import { CollapseToggle } from "../components/parts/CollapseToggle";
 import { ThreadingHoverProvider } from "../components/parts/ThreadingContext";
@@ -268,95 +268,180 @@ function PostTreeNode({
         ) : null}
 
         {hasVisibleChildren ? (
-          <div
-            className="relative"
-            style={{ marginLeft: canIndentChildren ? THREAD_INDENT_PX : 0 }}
-          >
-            {node.children.map((child, idx) => {
-              const isLastChild = idx === node.children.length - 1;
-              const railLeftPx =
-                -THREAD_INDENT_PX + AVATAR_CENTER_PX - RAIL_HITBOX_PX / 2;
-              const railBottom = isLastChild
-                ? `calc(100% - ${AVATAR_CENTER_Y_PX}px)`
-                : 0;
-              const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
-              const lastChildLineHeightPx =
-                AVATAR_CENTER_Y_PX - ELBOW_RADIUS_PX;
-              const elbowHorizontalExtentPx =
-                THREAD_INDENT_PX - AVATAR_CENTER_PX - RAIL_AVATAR_GAP_PX;
-              const elbowLeftPx = isLastChild
-                ? railCenterLeftPx - RAIL_STROKE_PX / 2
-                : railCenterLeftPx + RAIL_STROKE_PX / 2;
-              const elbowWidthPx = isLastChild
-                ? elbowHorizontalExtentPx + RAIL_STROKE_PX
-                : elbowHorizontalExtentPx;
-
-              return (
-                <div key={child.post.unitId} className="relative">
-                  {canIndentChildren ? (
-                    <>
-                      <button
-                        type="button"
-                        aria-label="Collapse thread"
-                        className="absolute z-10 cursor-pointer appearance-none border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-brand-fill focus-visible:outline-offset-1"
-                        style={{
-                          left: `${railLeftPx}px`,
-                          top: 0,
-                          bottom: railBottom,
-                          width: `${RAIL_HITBOX_PX}px`,
-                        }}
-                        onClick={handleRailToggle}
-                        onMouseEnter={handleRailEnter}
-                        onMouseLeave={handleRailLeave}
-                      />
-                      <span
-                        aria-hidden="true"
-                        className={[
-                          "pointer-events-none absolute -translate-x-1/2 transition-colors duration-100 ease-in-out",
-                          railFillClass,
-                        ].join(" ")}
-                        style={{
-                          left: `${railCenterLeftPx}px`,
-                          top: 0,
-                          ...(isLastChild
-                            ? { height: `${lastChildLineHeightPx}px` }
-                            : { bottom: 0 }),
-                          width: `${RAIL_STROKE_PX}px`,
-                        }}
-                      />
-                      <div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute box-border border-0 border-l-2 border-b-2 border-solid transition-colors duration-100 ease-in-out"
-                        style={{
-                          left: `${elbowLeftPx}px`,
-                          top: `${AVATAR_CENTER_Y_PX - ELBOW_RADIUS_PX}px`,
-                          width: `${elbowWidthPx}px`,
-                          height: `${ELBOW_RADIUS_PX + RAIL_STROKE_PX / 2}px`,
-                          borderBottomLeftRadius: `${ELBOW_RADIUS_PX}px`,
-                          borderColor: railColorVar,
-                        }}
-                      />
-                    </>
-                  ) : null}
-                  <PostTreeNode
-                    node={child}
-                    rootPostUnitId={rootPostUnitId}
-                    visualMaxDepth={visualMaxDepth}
-                    isCollapsed={isCollapsed}
-                    toggleCollapse={toggleCollapse}
-                    openComposers={openComposers}
-                    highlightedThreadUnitId={highlightedThreadUnitId}
-                    onReplyClick={onReplyClick}
-                    onComposerDone={onComposerDone}
-                    onThreadHoverChange={onThreadHoverChange}
-                  />
-                </div>
-              );
-            })}
-          </div>
+          <ChildrenRail
+            childrenNodes={node.children}
+            rootPostUnitId={rootPostUnitId}
+            visualMaxDepth={visualMaxDepth}
+            canIndentChildren={canIndentChildren}
+            isCollapsed={isCollapsed}
+            toggleCollapse={toggleCollapse}
+            openComposers={openComposers}
+            highlightedThreadUnitId={highlightedThreadUnitId}
+            onReplyClick={onReplyClick}
+            onComposerDone={onComposerDone}
+            onThreadHoverChange={onThreadHoverChange}
+            railColorVar={railColorVar}
+            onRailEnter={handleRailEnter}
+            onRailLeave={handleRailLeave}
+            onRailToggle={handleRailToggle}
+          />
         ) : null}
       </div>
     </ThreadingHoverProvider>
+  );
+}
+
+interface ChildrenRailProps {
+  childrenNodes: PostTreeNodeModel[];
+  rootPostUnitId: string;
+  visualMaxDepth: number;
+  canIndentChildren: boolean;
+  isCollapsed: (postUnitId: string) => boolean;
+  toggleCollapse: (postUnitId: string) => void;
+  openComposers: Set<string>;
+  highlightedThreadUnitId?: string;
+  onReplyClick: (postUnitId: string) => void;
+  onComposerDone: (postUnitId: string) => void;
+  onThreadHoverChange: (postUnitId: string, hovered: boolean) => void;
+  railColorVar: string;
+  onRailEnter: () => void;
+  onRailLeave: () => void;
+  onRailToggle: (event: React.MouseEvent) => void;
+}
+
+function ChildrenRail({
+  childrenNodes,
+  rootPostUnitId,
+  visualMaxDepth,
+  canIndentChildren,
+  isCollapsed,
+  toggleCollapse,
+  openComposers,
+  highlightedThreadUnitId,
+  onReplyClick,
+  onComposerDone,
+  onThreadHoverChange,
+  railColorVar,
+  onRailEnter,
+  onRailLeave,
+  onRailToggle,
+}: ChildrenRailProps) {
+  const lastChildRef = useRef<HTMLDivElement | null>(null);
+  const [lastChildHeight, setLastChildHeight] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const el = lastChildRef.current;
+    if (!el) {
+      setLastChildHeight(null);
+      return;
+    }
+    const measure = () => setLastChildHeight(el.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [childrenNodes.length]);
+
+  const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
+  const elbowHorizontalExtentPx =
+    THREAD_INDENT_PX - AVATAR_CENTER_PX - RAIL_AVATAR_GAP_PX;
+  const lineLeftPx = railCenterLeftPx - RAIL_STROKE_PX / 2;
+  const railLeftPx = railCenterLeftPx - RAIL_HITBOX_PX / 2;
+
+  const lineBottomPx =
+    lastChildHeight !== null
+      ? Math.max(0, lastChildHeight - AVATAR_CENTER_Y_PX)
+      : 0;
+
+  const arcStartX = RAIL_STROKE_PX / 2;
+  const arcEndX = arcStartX + ELBOW_RADIUS_PX;
+  const arcEndY = ELBOW_RADIUS_PX;
+  const stubEndX = arcStartX + elbowHorizontalExtentPx;
+  const svgWidth = stubEndX + RAIL_STROKE_PX / 2;
+  const svgHeight = ELBOW_RADIUS_PX + RAIL_STROKE_PX / 2;
+  const arcPath = `M ${arcStartX} 0 A ${ELBOW_RADIUS_PX} ${ELBOW_RADIUS_PX} 0 0 0 ${arcEndX} ${arcEndY} L ${stubEndX} ${arcEndY}`;
+
+  return (
+    <div
+      className="relative"
+      style={{ marginLeft: canIndentChildren ? THREAD_INDENT_PX : 0 }}
+    >
+      {canIndentChildren ? (
+        <>
+          <button
+            type="button"
+            aria-label="Collapse thread"
+            className="absolute z-10 cursor-pointer appearance-none border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-brand-fill focus-visible:outline-offset-1"
+            style={{
+              left: `${railLeftPx}px`,
+              top: 0,
+              bottom: `${lineBottomPx}px`,
+              width: `${RAIL_HITBOX_PX}px`,
+            }}
+            onClick={onRailToggle}
+            onMouseEnter={onRailEnter}
+            onMouseLeave={onRailLeave}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute box-border border-0 border-l-2 border-solid transition-colors duration-100 ease-in-out"
+            style={{
+              left: `${lineLeftPx}px`,
+              top: 0,
+              bottom: `${lineBottomPx}px`,
+              width: `${RAIL_STROKE_PX}px`,
+              borderColor: railColorVar,
+            }}
+          />
+        </>
+      ) : null}
+      {childrenNodes.map((child, idx) => {
+        const isLastChild = idx === childrenNodes.length - 1;
+        return (
+          <div
+            key={child.post.unitId}
+            className="relative"
+            ref={isLastChild ? lastChildRef : undefined}
+          >
+            {canIndentChildren ? (
+              <svg
+                aria-hidden="true"
+                className="pointer-events-none absolute transition-colors duration-100 ease-in-out"
+                width={svgWidth}
+                height={svgHeight}
+                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+                style={{
+                  left: `${lineLeftPx}px`,
+                  top: `${AVATAR_CENTER_Y_PX - ELBOW_RADIUS_PX}px`,
+                  color: railColorVar,
+                  overflow: "visible",
+                }}
+              >
+                <path
+                  d={arcPath}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={RAIL_STROKE_PX}
+                  strokeLinecap="butt"
+                />
+              </svg>
+            ) : null}
+            <PostTreeNode
+              node={child}
+              rootPostUnitId={rootPostUnitId}
+              visualMaxDepth={visualMaxDepth}
+              isCollapsed={isCollapsed}
+              toggleCollapse={toggleCollapse}
+              openComposers={openComposers}
+              highlightedThreadUnitId={highlightedThreadUnitId}
+              onReplyClick={onReplyClick}
+              onComposerDone={onComposerDone}
+              onThreadHoverChange={onThreadHoverChange}
+            />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
