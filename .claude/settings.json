@@ -1,5 +1,6 @@
 {
   "includeCoAuthoredBy": false,
+  "showThinkingSummaries": true,
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
