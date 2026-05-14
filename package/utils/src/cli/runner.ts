@@ -1,10 +1,10 @@
 import * as p from "@clack/prompts";
 import { runDbCommand } from "../db/command";
 import { runFactoryCommand } from "../factory/command";
-import { runSeedCommand } from "../seed/command";
 import { sweepStaleEditDirs } from "../lib/startup-sweep";
+import { runSeedCommand } from "../seed/command";
 
-type DefaultTarget = "users" | "infra" | "factory";
+type DefaultTarget = "seed" | "factory" | "reset-root";
 
 export async function runCli(argv: string[]): Promise<void> {
   sweepStaleEditDirs();
@@ -25,80 +25,80 @@ export async function runCli(argv: string[]): Promise<void> {
     return;
   }
 
+  if (first === "reset-root") {
+    p.intro("Rezics Reset Root");
+    const { runResetRoot } = await import("../seed/index");
+    await runResetRoot();
+    p.outro("Done!");
+    return;
+  }
+
   if (first === "db") {
     await runDbCommand(rest);
     return;
   }
 
-  // Default interactive flow — multiselect across users / infra / factory.
-  // Preserves the original `bun run seed` behavior.
+  // Default interactive flow for `bun run seed`.
   const flagPreset = argv.find((a) => a.startsWith("--preset="));
+  const flagPlanFile = argv.find((a) => a.startsWith("--plan-file="));
+  const flagOnly = argv.find((a) => a.startsWith("--only="));
   const flagNoInteractive = argv.includes("--no-interactive");
 
-  if (flagPreset || flagNoInteractive) {
+  if (flagPreset || flagPlanFile || flagOnly) {
     p.intro("Rezics Seed");
     await runFactoryCommand(argv);
     p.outro("Done!");
     return;
   }
 
+  if (flagNoInteractive) {
+    p.intro("Rezics Seed");
+    const { runSeed } = await import("../seed/index");
+    await runSeed();
+    p.outro("Done!");
+    return;
+  }
+
   p.intro("Rezics Seed");
 
-  const targets = await p.multiselect<DefaultTarget>({
-    message: "What would you like to seed?",
+  const target = await p.select<DefaultTarget>({
+    message: "What would you like to run?",
     options: [
-      { value: "users", label: "Users", hint: "root, admin, user, blocked" },
       {
-        value: "infra",
-        label: "Infrastructure",
-        hint: "seed tags, default realm",
+        value: "seed",
+        label: "Seed",
+        hint: "reset auth/server, then seed users and infrastructure",
       },
       {
         value: "factory",
         label: "Factory data",
-        hint: "books, posts, shelves, …",
+        hint: "reset auth/server, seed baseline, then books/posts/shelves",
+      },
+      {
+        value: "reset-root",
+        label: "Reset root",
+        hint: "repair root user and reset its password",
       },
     ],
   });
 
-  if (p.isCancel(targets)) {
+  if (p.isCancel(target)) {
     p.cancel("Seed cancelled.");
     process.exit(0);
   }
-  if (targets.length === 0) {
-    p.cancel("Nothing selected.");
-    process.exit(0);
-  }
 
-  const wantUsers = targets.includes("users");
-  const wantInfra = targets.includes("infra");
-  const wantFactory = targets.includes("factory");
-
-  let overwriteUsers = false;
-  if (wantUsers) {
-    const confirmOverwrite = await p.confirm({
-      message:
-        "Overwrite existing seed users? This will delete and re-create all 4 seed users.",
-      initialValue: false,
-    });
-    if (p.isCancel(confirmOverwrite)) {
-      p.cancel("Seed cancelled.");
-      process.exit(0);
-    }
-    overwriteUsers = confirmOverwrite;
-  }
-
-  if (wantUsers || wantInfra) {
+  if (target === "seed") {
     const { runSeed } = await import("../seed/index");
-    await runSeed({
-      seedUsers: wantUsers,
-      seedInfra: wantInfra,
-      overwriteUsers,
-    });
+    await runSeed();
   }
 
-  if (wantFactory) {
+  if (target === "factory") {
     await runFactoryCommand([]);
+  }
+
+  if (target === "reset-root") {
+    const { runResetRoot } = await import("../seed/index");
+    await runResetRoot();
   }
 
   p.outro("Done!");

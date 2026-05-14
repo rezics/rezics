@@ -9,6 +9,7 @@ import type {
 } from "../lib/prisma-factory";
 
 export const ROOT_EMAIL = "root@rezics.com";
+export const ROOT_SLUG = "root-user";
 
 export interface CrossSeedUserInput {
   email: string;
@@ -25,6 +26,7 @@ export const SEED_USERS: CrossSeedUserInput[] = [
     email: ROOT_EMAIL,
     name: "Root User",
     role: "owner",
+    slug: ROOT_SLUG,
     permission: { role: ["ROOT"] },
   },
   {
@@ -99,47 +101,11 @@ function resolveSeedUserSlug(input: CrossSeedUserInput): string {
   return slug || input.email.split("@")[0]!;
 }
 
-// Delete server users first (FK dependency), then auth users.
-async function deleteExistingUsers(
-  authPrisma: AuthPrismaClient,
-  serverPrisma: ServerPrismaClient,
-) {
-  const emails = SEED_USERS.map((u) => u.email);
-
-  const authUsers = await authPrisma.user.findMany({
-    where: { email: { in: emails } },
-    select: { id: true },
-  });
-
-  if (authUsers.length > 0) {
-    const userIds = authUsers.map((u) => u.id);
-    await serverPrisma.user.deleteMany({
-      where: {
-        OR: [
-          { userId: { in: userIds } },
-          { authUserId: { in: userIds } },
-          { email: { in: emails } },
-        ],
-      },
-    });
-    await authPrisma.user.deleteMany({
-      where: { id: { in: userIds } },
-    });
-    console.log(`  Deleted ${authUsers.length} existing seed user(s).`);
-  }
-}
-
 export type AuthSeedResults = Map<string, SeedAuthUserResult>;
 
 export async function seedAllAuthUsers(
   authPrisma: AuthPrismaClient,
-  overwrite: boolean,
-  serverPrisma?: ServerPrismaClient,
 ): Promise<AuthSeedResults> {
-  if (overwrite && serverPrisma) {
-    await deleteExistingUsers(authPrisma, serverPrisma);
-  }
-
   const results: AuthSeedResults = new Map();
   for (const input of SEED_USERS) {
     const authResult = await seedAuthUser(authPrisma, {
@@ -196,19 +162,81 @@ export async function seedAllMainUsers(
   return { rootUserId, results };
 }
 
-export async function resolveRootUserId(
+export interface ResetRootUserResult {
+  result: CrossSeedUserResult;
+  serverRole: string;
+}
+
+export async function resetRootUser(
   authPrisma: AuthPrismaClient,
   serverPrisma: ServerPrismaClient,
-): Promise<string | null> {
-  const authRoot = await authPrisma.user.findUnique({
-    where: { email: ROOT_EMAIL },
-    select: { id: true },
-  });
-  if (!authRoot) return null;
+): Promise<ResetRootUserResult> {
+  const rootInput = SEED_USERS.find((user) => user.email === ROOT_EMAIL);
+  if (!rootInput) throw new Error("Root seed user definition is missing.");
 
-  const serverRoot = await serverPrisma.user.findUnique({
-    where: { userId: authRoot.id },
-    select: { userId: true },
+  const authResult = await seedAuthUser(authPrisma, {
+    email: rootInput.email,
+    name: rootInput.name,
+    role: rootInput.role,
+    password: rootInput.password,
   });
-  return serverRoot?.userId ?? null;
+
+  const [byUserId, byAuthUserId, bySlug] = await Promise.all([
+    serverPrisma.user.findUnique({
+      where: { userId: authResult.userId },
+      select: { userId: true },
+    }),
+    serverPrisma.user.findUnique({
+      where: { authUserId: authResult.userId },
+      select: { userId: true },
+    }),
+    serverPrisma.user.findUnique({
+      where: { slug: ROOT_SLUG },
+      select: { userId: true },
+    }),
+  ]);
+
+  const candidates = [byUserId, byAuthUserId, bySlug].filter(
+    (user): user is { userId: string } => user !== null,
+  );
+  const candidateIds = [...new Set(candidates.map((user) => user.userId))];
+
+  if (candidateIds.length > 1) {
+    throw new Error(
+      `Cannot reset root automatically: found conflicting root-like server users (${candidateIds.join(
+        ", ",
+      )}). Resolve the duplicate rows manually, then rerun reset-root.`,
+    );
+  }
+
+  const slug = resolveSeedUserSlug(rootInput);
+  const targetUserId = candidateIds[0];
+  const data = {
+    userId: authResult.userId,
+    authUserId: authResult.userId,
+    email: authResult.email,
+    slug,
+    name: authResult.name,
+    bio: rootInput.bio,
+    permission: rootInput.permission as never,
+  };
+
+  if (targetUserId) {
+    await serverPrisma.user.update({
+      where: { userId: targetUserId },
+      data,
+    });
+  } else {
+    await serverPrisma.user.create({
+      data: {
+        ...data,
+        joinDate: new Date(),
+      },
+    });
+  }
+
+  return {
+    result: { ...authResult, slug },
+    serverRole: getServerRole(rootInput),
+  };
 }

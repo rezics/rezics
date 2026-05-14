@@ -1,7 +1,5 @@
 import type { Prisma } from "../generated/client.js";
 import { PostKind } from "../generated/client.js";
-import { resetDatabasePreserveInfra } from "../seed/database.js";
-import { seedInfra } from "../seed/infra/index.js";
 import { seedOrganizations, seedPeople } from "./attribution.js";
 import {
   seedBooks,
@@ -32,30 +30,6 @@ function stepTimer(label: string) {
   };
 }
 
-async function resolveInfraOwnerUserId(ctx: SeedCtx): Promise<string> {
-  const root = await ctx.prisma.user.findFirst({
-    where: { permission: { equals: { role: ["ROOT"] } } },
-    select: { userId: true },
-  });
-  if (root) return root.userId;
-
-  const admin = await ctx.prisma.user.findFirst({
-    where: { permission: { equals: { role: ["ADMIN"] } } },
-    select: { userId: true },
-  });
-  if (admin) return admin.userId;
-
-  const factoryAdmin = await ctx.prisma.user.findUnique({
-    where: { slug: "admin" },
-    select: { userId: true },
-  });
-  if (factoryAdmin) return factoryAdmin.userId;
-
-  throw new Error(
-    "[Seed] infra owner user not found — seed users before infra",
-  );
-}
-
 export async function runFactorySeed(
   ctx: SeedCtx,
   plan: SeedPlan,
@@ -63,11 +37,7 @@ export async function runFactorySeed(
   console.time("seed:total");
   console.log("[Seed] Starting database seeding...");
 
-  let done = stepTimer("Step 1: Reset");
-  await resetDatabasePreserveInfra(ctx.prisma);
-  done();
-
-  done = stepTimer("Step 2: Users + People + Organizations");
+  let done = stepTimer("Step 1: Users + People + Organizations");
   const users = await seedUsers(ctx, plan.users);
   const [people, organizations] = await Promise.all([
     seedPeople(ctx, plan.personEntities),
@@ -78,18 +48,12 @@ export async function runFactorySeed(
   );
   done();
 
-  done = stepTimer("Step 3: Infra");
-  const infraOwnerUserId = await resolveInfraOwnerUserId(ctx);
-  const { defaultRealmId } = await seedInfra(ctx.prisma, infraOwnerUserId);
-  void defaultRealmId;
-  done();
-
-  done = stepTimer("Step 4: Tags");
+  done = stepTimer("Step 2: Tags");
   const tags = await seedTags(ctx, plan.tags, users);
   console.log(`[Seed]   ${tags.length} random tags`);
   done();
 
-  done = stepTimer("Step 5: Books + Games + Media");
+  done = stepTimer("Step 3: Books + Games + Media");
   const [books, games, mediaItems] = await Promise.all([
     seedBooks(ctx, plan.books, users, people, organizations, tags),
     seedGames(ctx, plan.games, users, people, organizations, tags),
@@ -106,12 +70,12 @@ export async function runFactorySeed(
   );
   done();
 
-  done = stepTimer("Step 6: Realms");
+  done = stepTimer("Step 4: Realms");
   const realms = await seedRealms(ctx, plan.realms, users, allWorkIds);
   console.log(`[Seed]   ${realms.length} realms`);
   done();
 
-  done = stepTimer("Step 7: Scores");
+  done = stepTimer("Step 5: Scores");
   const { scoreEntries } = await seedScores(
     ctx,
     plan.scoresPerWork,
@@ -122,7 +86,7 @@ export async function runFactorySeed(
   console.log(`[Seed]   ${scoreEntries.size} score entries`);
   done();
 
-  done = stepTimer("Step 8: Posts");
+  done = stepTimer("Step 6: Posts");
   const posts = await seedPostsForWorks(
     ctx,
     plan.postsPerWork,
@@ -134,7 +98,7 @@ export async function runFactorySeed(
   console.log(`[Seed]   ${posts.length} posts`);
   done();
 
-  done = stepTimer("Step 8b: Wiki translation groups");
+  done = stepTimer("Step 7: Wiki translation groups");
   const wikiGroup = await seedWikiTranslationGroups(ctx.prisma, users);
   if (wikiGroup) {
     console.log(
@@ -143,7 +107,7 @@ export async function runFactorySeed(
   }
   done();
 
-  done = stepTimer("Step 8c: Pinboard");
+  done = stepTimer("Step 8: Pinboard");
   await seedPinboard(ctx, realms, posts);
   done();
 

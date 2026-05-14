@@ -20,25 +20,17 @@ export async function runDbCommand(argv: string[]): Promise<void> {
   }
 }
 
-async function runDbReset(argv: string[]): Promise<void> {
-  const wipeAll = argv.includes("--all");
-  const { resetDatabase, resetDatabasePreserveInfra } = await import(
-    "@rezics/server/prisma/seed/database"
-  );
+async function runDbReset(_argv: string[]): Promise<void> {
+  const { resetDatabase } = await import("@rezics/server/prisma/seed/database");
   const { resetAuthDatabase } = await import("@rezics/auth/prisma/seed");
   const env = getEnv();
   const serverPrisma = createServerPrisma(env.SERVER_DATABASE_URL);
   const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
 
   try {
-    if (wipeAll) {
-      console.log("[Reset] Full wipe mode (--all)");
-      await resetDatabase(serverPrisma);
-      await resetAuthDatabase(authPrisma);
-    } else {
-      console.log("[Reset] Preserving infrastructure (default)");
-      await resetDatabasePreserveInfra(serverPrisma);
-    }
+    console.log("[Reset] Full wipe mode");
+    await resetDatabase(serverPrisma);
+    await resetAuthDatabase(authPrisma);
   } finally {
     await Promise.all([
       serverPrisma.$disconnect().catch(() => {}),

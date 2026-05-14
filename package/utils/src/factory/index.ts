@@ -10,6 +10,7 @@ import {
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
 import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
+import { seedBaseline } from "../seed/index";
 import { tweakPlan } from "./interactive";
 import { getPreset, listPresetNames, PRESETS } from "./presets";
 
@@ -92,7 +93,8 @@ function summarizePlan(plan: SeedPlan): string {
 async function confirmRun(plan: SeedPlan, mode: string): Promise<void> {
   p.log.info(`Mode: ${mode}\n  ${summarizePlan(plan)}`);
   const ok = await p.confirm({
-    message: "Reset DB and run factory seed with this plan?",
+    message:
+      "Reset auth and server databases, seed users/infrastructure, then run factory seed with this plan?",
     initialValue: true,
   });
   if (p.isCancel(ok) || !ok) {
@@ -156,6 +158,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
   const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
   try {
+    await seedBaseline(authPrisma, prisma);
     const ctx = makeSeedCtx(prisma, authPrisma, preset.mode);
     await runFactorySeed(ctx, plan);
   } finally {
