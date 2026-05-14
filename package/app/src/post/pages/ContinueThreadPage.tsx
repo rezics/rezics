@@ -7,7 +7,7 @@ import type React from "react";
 import { PostCard } from "../components/item/PostCard";
 import { ReplyComposer } from "../forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
-import { PostTreeList } from "../sections/PostTreeSection";
+import { PostTreeList } from "../sections/PostTreeList";
 
 export const ContinueThreadPage: React.FC = () => {
   const { rootPostUnitId, unitId } = useParams({ strict: false }) as {
