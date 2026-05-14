@@ -65,6 +65,7 @@
     "PGPASSWORD",
     "PGPORT",
     "PGUSER",
+    "pinboard",
     "PKCE",
     "plpgsql",
     "pnpx",

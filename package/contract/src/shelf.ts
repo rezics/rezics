@@ -14,6 +14,12 @@ export const shelfExtraSchema = t.Object({
 
 export type ShelfExtra = (typeof shelfExtraSchema)["static"];
 
+export const shelfCoverImageSpec = {
+  aspectRatio: "16 / 9",
+  width: 16,
+  height: 9,
+} as const;
+
 // ============================================================
 // SHELF UNIT KIND
 // ============================================================

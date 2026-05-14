@@ -1,4 +1,4 @@
-import type { ShelfDTO } from "@rezics/contract";
+import { type ShelfDTO, shelfCoverImageSpec } from "@rezics/contract";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
@@ -29,7 +29,10 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
         className,
       )}
     >
-      <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-border-whisper">
+      <div
+        className="relative w-full overflow-hidden border-b border-border-whisper"
+        style={{ aspectRatio: shelfCoverImageSpec.aspectRatio }}
+      >
         {shelf.coverUrl ? (
           <img
             src={shelf.coverUrl}

@@ -13,6 +13,7 @@ import {
   useCollectionStatusHydration,
   useHydratedShelfUnits,
 } from "@rezics/api/shelf";
+import { shelfCoverImageSpec } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -289,11 +290,21 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   return (
     <div className="w-full">
       {shelf?.coverUrl && (
-        <div className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-80">
+        <div
+          className="relative mx-auto w-full max-w-5xl overflow-hidden"
+          style={{ aspectRatio: shelfCoverImageSpec.aspectRatio }}
+        >
           <img
             src={shelf.coverUrl}
             alt={`${title} cover`}
             className="h-full w-full object-cover"
+          />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--colors-surface-canvas) 58%, transparent) 45%, var(--colors-surface-canvas) 88%)",
+            }}
           />
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
@@ -302,59 +313,112 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 "linear-gradient(to bottom, transparent, var(--colors-surface-canvas))",
             }}
           />
+          <div className="absolute inset-0 z-10 flex flex-col justify-end gap-4 p-4 sm:p-6 md:flex-row md:items-end md:justify-between md:gap-5 md:p-8">
+            <div className="min-w-0 flex-1">
+              <h1 className="line-clamp-2 text-2xl font-semibold leading-[1.3] text-text-primary">
+                {title}
+              </h1>
+              {description && (
+                <p className="mt-2 line-clamp-2 max-w-2xl text-base text-text-secondary">
+                  {description}
+                </p>
+              )}
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
+                <span>{shelf?.itemCount ?? 0} items</span>
+                {shelf?.user?.name && <span>by {shelf.user.name}</span>}
+              </div>
+            </div>
+
+            {(reactionPost || (canEditShelf && shelf?.unitId)) && (
+              <div className="flex flex-row items-center gap-2 self-start md:flex-col md:items-end md:self-end">
+                {canEditShelf && shelf?.unitId && !isCompactLayout && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 text-text-secondary hover:text-text-primary"
+                    onClick={handleEditShelf}
+                  >
+                    <EditIcon className="h-4 w-4" />
+                    Edit shelf
+                  </Button>
+                )}
+                {reactionPost && (
+                  <ReactionBar
+                    post={reactionPost}
+                    policy={shelfPolicy}
+                    actions={shelfDetailActions}
+                    className="flex-nowrap md:justify-end"
+                    overflowContent={
+                      isCompactLayout && canEditShelf && shelf?.unitId ? (
+                        <DropdownMenuItem
+                          onClick={handleEditShelf}
+                          className="gap-2"
+                        >
+                          <EditIcon className="h-4 w-4" />
+                          <span>Edit shelf</span>
+                        </DropdownMenuItem>
+                      ) : null
+                    }
+                  />
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
-        <div className="flex flex-col gap-5 border-b border-border-whisper pb-5 md:flex-row md:items-start md:justify-between">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-semibold leading-[1.3]">{title}</h1>
-            {description && (
-              <p className="mt-2 max-w-2xl text-base text-text-secondary">
-                {description}
-              </p>
-            )}
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
-              <span>{shelf?.itemCount ?? 0} items</span>
-              {shelf?.user?.name && <span>by {shelf.user.name}</span>}
+        {!shelf?.coverUrl && (
+          <div className="flex flex-col gap-5 border-b border-border-whisper pb-5 md:flex-row md:items-start md:justify-between">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl font-semibold leading-[1.3]">{title}</h1>
+              {description && (
+                <p className="mt-2 max-w-2xl text-base text-text-secondary">
+                  {description}
+                </p>
+              )}
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
+                <span>{shelf?.itemCount ?? 0} items</span>
+                {shelf?.user?.name && <span>by {shelf.user.name}</span>}
+              </div>
             </div>
-          </div>
 
-          {(reactionPost || (canEditShelf && shelf?.unitId)) && (
-            <div className="flex flex-row items-center gap-2 self-start md:flex-col md:items-end">
-              {canEditShelf && shelf?.unitId && !isCompactLayout && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1.5 text-text-secondary hover:text-text-primary"
-                  onClick={handleEditShelf}
-                >
-                  <EditIcon className="h-4 w-4" />
-                  Edit shelf
-                </Button>
-              )}
-              {reactionPost && (
-                <ReactionBar
-                  post={reactionPost}
-                  policy={shelfPolicy}
-                  actions={shelfDetailActions}
-                  className="flex-nowrap md:justify-end"
-                  overflowContent={
-                    isCompactLayout && canEditShelf && shelf?.unitId ? (
-                      <DropdownMenuItem
-                        onClick={handleEditShelf}
-                        className="gap-2"
-                      >
-                        <EditIcon className="h-4 w-4" />
-                        <span>Edit shelf</span>
-                      </DropdownMenuItem>
-                    ) : null
-                  }
-                />
-              )}
-            </div>
-          )}
-        </div>
+            {(reactionPost || (canEditShelf && shelf?.unitId)) && (
+              <div className="flex flex-row items-center gap-2 self-start md:flex-col md:items-end">
+                {canEditShelf && shelf?.unitId && !isCompactLayout && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 text-text-secondary hover:text-text-primary"
+                    onClick={handleEditShelf}
+                  >
+                    <EditIcon className="h-4 w-4" />
+                    Edit shelf
+                  </Button>
+                )}
+                {reactionPost && (
+                  <ReactionBar
+                    post={reactionPost}
+                    policy={shelfPolicy}
+                    actions={shelfDetailActions}
+                    className="flex-nowrap md:justify-end"
+                    overflowContent={
+                      isCompactLayout && canEditShelf && shelf?.unitId ? (
+                        <DropdownMenuItem
+                          onClick={handleEditShelf}
+                          className="gap-2"
+                        >
+                          <EditIcon className="h-4 w-4" />
+                          <span>Edit shelf</span>
+                        </DropdownMenuItem>
+                      ) : null
+                    }
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
