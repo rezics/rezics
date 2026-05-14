@@ -2,7 +2,7 @@
 
 **Status**: Draft plan, pre-proposal
 **Date**: 2026-05-14
-**Scope**: Wire the Shelf feature into a fully usable state, then graduate the slug subsystem to support user / realm namespaced slugs by promoting User into the Unit graph.
+**Scope**: Wire the Shelf feature into a fully usable state, then graduate the Unit graph by promoting User into Unit (for unitId reuse and Follow/Subscription unification) and graduate the slug subsystem to per-type scopes that keep User, Realm, Tag, Zone, and Entity in independent uniqueness universes.
 
 ---
 
@@ -14,9 +14,15 @@ The Shelf feature is functionally near-complete on the API surface but blocked b
 
 2. **Broken tag chain**: `CollectionModal` filters shelves by seed tags (`book`/`game`/`media`/`post`/`link`) via `shelf.tags`, but neither `ShelfEditPage` nor `NewShelfPage` exposes a tag picker. The filter has no upstream feed. Today this only works for seed-generated demo shelves where `tagIds` were populated at creation time.
 
-3. **Shelf has no slug**: Current `unit-slug` spec explicitly rejects slugs on `SHELF`. There is no addressable identity for `@alice/favorites`. Every URL must be UUID-based. This blocks the "Shelf cache via SlugRef" pattern that the rest of the slug system already uses for TAG/REALM/ZONE.
+3. **User is not a Unit, and Shelf has no slug**. Two intertwined structural gaps:
 
-The third gap is the deepest — solving it surfaces a pre-existing architectural debt: **User is not a Unit**. `User.slug` and `Unit.slug` live in two parallel uniqueness universes, and `contract/public-route.ts` actively documents `/u/:slug` and `/unit/:slug` as non-overlapping namespaces. Any user-namespaced slug (`@alice/...`) cannot have a clean single-FK design while this duality stands.
+   **3a. User is not part of the Unit graph.** `User.userId` and `Unit.id` are in separate identity universes. This blocks two things:
+   - Any reference that wants to point "owner / subject / mention" uniformly at a Unit must still special-case User.
+   - Subscription cannot be unified into a single `Subscription(subscriberUnitId, targetUnitId, kind)` shape because subscriber side (`User`) and target side (`Unit`) have asymmetric identity. Today's `Follow` is therefore user→user only and cannot extend to realm / book / tag / shelf targets without forking into multiple per-domain tables.
+
+   **3b. Shelf and other owner-scoped units cannot carry slugs.** Current `unit-slug` spec rejects slugs on `SHELF`. There is no addressable identity for `alice/favorites`. Every URL must be UUID-based. This blocks the "Shelf cache via SlugRef" pattern that the rest of the slug system already uses for TAG / REALM / ZONE.
+
+   Additionally, even for top-level slugs, `User.slug` and `Unit.slug` live in two parallel uniqueness universes. The current `public-short-routes` spec documents `/u/:slug` and `/unit/:slug` as non-overlapping namespaces. With User joining the Unit graph, this duality must be reconciled — by graduating the slug subsystem to **per-type scopes** so that USER, REALM, TAG, ZONE, ENTITY each get an independent uniqueness universe inside the same Unit table.
 
 This plan addresses all three, with an explicit execution order chosen so that the largest architectural lift (L3) eliminates the work needed for L1.
 
@@ -25,19 +31,20 @@ This plan addresses all three, with an explicit execution order chosen so that t
 ## 2. Execution Order
 
 ```
-   L2 (tag chain)  →  L3 (user-as-unit + namespace slug)  →  L1 (system shelf access)
-   ─────────────      ───────────────────────────────────     ───────────────────────
-   Independent        The big architectural lift              Becomes a thin client
-   UX cleanup;        — unlocks namespace addressing          consumer of L3's slug
-   ships today        for shelves & beyond                    system, NOT its own
-                                                              endpoint
+   L2 (tag chain)  →  L3 (user-as-unit + scoped slug)  →  L1 (system shelf access)
+   ─────────────      ──────────────────────────────       ───────────────────────
+   Independent        Two orthogonal commitments:           Becomes a thin client
+   UX cleanup;        (a) User-as-Unit                       consumer of L3's slug
+   ships today        (b) per-type slug scopes               system, NOT its own
+                      Bundled because both touch User        endpoint
+                      identity and Unit slug topology
 ```
 
 **Why this order:**
 
 - L2 is independent and ships value immediately. It does not touch identity / slug architecture.
-- L3 is the architectural foundation. Doing it before L1 means L1's "expose system shelves to the frontend" reduces from a custom endpoint to "use the slug system; the shelf is at `@me/favorites`".
-- L1 last collapses to standard `/shelf/by-slug/:owner/:slug` resolution + SlugRef caching, with zero new domain endpoints needed.
+- L3 is the architectural foundation. Doing it before L1 means L1's "expose system shelves to the frontend" reduces from a custom endpoint to "use the slug system; the shelf is at `/u/:userSlug/shelf/favorites`".
+- L1 last collapses to standard `/shelf/by-slug/:userSlug/:slug` resolution + SlugRef caching, with zero new domain endpoints needed.
 
 ---
 
@@ -69,27 +76,31 @@ This plan addresses all three, with an explicit execution order chosen so that t
 
 ---
 
-## 4. L3 — User-as-Unit + Namespace Slug
+## 4. L3 — User-as-Unit + Per-Type Slug Scopes
 
-This is the architectural cornerstone. Two intertwined commitments:
+This is the architectural cornerstone. **Two orthogonal commitments bundled together** because both touch User identity and the Unit slug topology in the same migration window:
 
 1. **User becomes a Unit type-extension** (`User.unitId @id`, with a corresponding `Unit { type: USER }` row sharing the same UUID).
-2. **Slug subsystem gains namespace structure** via a new `slugScope` column and a small `SlugScope` lookup table for named infra namespaces.
+   - **Primary motivation**: unified `unitId` for owner / reference / mention / attribution, and the architectural prerequisite for `Follow` graduating into a generic `Subscription(subscriberUnitId, targetUnitId, kind)`. This benefit is **independent of slug topology** — it would be worth doing even if slug shape didn't change.
+
+2. **The slug subsystem gains per-type scope structure** via a new `slugScope` column on Unit and a small `SlugScope` lookup table. **Five named infra scopes**: `user`, `realm`, `tag`, `zone`, `entity`. **No `master` scope** — USER and REALM live in separate uniqueness universes; the same slug (e.g., `alice`) may in principle exist as both a user and a realm, with cross-scope policy decided independently by product (see 6.9).
+   - **Why bundled with User-as-Unit**: putting USER under a `user` scope only makes sense once User is a Unit. The two changes co-modify schema atomically.
 
 ### 4.1 Scope Topology (Final)
 
 ```
-SlugScope table (seed):
+SlugScope table (seed — 5 rows):
   ┌─────────┬────────────────────────────────────────┐
   │ slug    │ Houses                                 │
   ├─────────┼────────────────────────────────────────┤
-  │ master  │ Identity: USER + REALM (shared)        │
+  │ user    │ USER                                   │
+  │ realm   │ REALM                                  │
   │ tag     │ TAG                                    │
   │ zone    │ ZONE                                   │
   │ entity  │ ENTITY (authors, characters)           │
   └─────────┴────────────────────────────────────────┘
 
-Owner-scoped slugs (slugScope = ownerUnitId):
+Owner-scoped slugs (slugScope = ownerUnitId, NOT a SlugScope row):
   ┌─────────────────────┬──────────────────────────────────────┐
   │ Under USER          │ SHELF (future: LIST, etc.)          │
   │ Under REALM         │ SHELF (future: events, themes)      │
@@ -97,27 +108,53 @@ Owner-scoped slugs (slugScope = ownerUnitId):
 
 (slugScope, slug) is unique. Multiple types may live under one owner
 but cannot collide on the same slug — same-name multi-type is mutually
-exclusive by design.
+exclusive by design (see 6.7).
 
 No slug: BOOK, GAME, MEDIA, POST, IMAGE, VIDEO, QUOTE, LINK, CHAPTER.
 ```
 
 ### 4.2 URL Alignment
 
-```
-/@alice              → master/alice (type=USER)
-/@bookclub           → master/bookclub (type=REALM)
-/@alice/favorites    → master/alice → alice.id/favorites
-/@bookclub/2026-q1   → master/bookclub → club.id/2026-q1
-/tag/fantasy         → tag/fantasy
-/zone/featured       → zone/featured
-/e/mark-twain        → entity/mark-twain
+**Convention**: **short prefix = slug, long prefix = unitId**. The two prefix families never mix purposes; a URL can be classified at a glance.
 
-Legacy (kept, redirect-canonical or alias):
-/u/:slug             → master/:slug
-/unit/:slug          → master/:slug
-/unit/id/:unitId     → direct PK
 ```
+Slug-by-type (short prefix, slug only — never accepts UUID):
+  /u/:userSlug                user profile / 专页
+  /u/:userSlug/profile        explicit profile card
+  /u/:userSlug/settings       user backstage (self only)
+  /u/:userSlug/shelf/:slug    user-owned shelf (owner-scoped)
+  /u/:userSlug/post/:slug     user-authored post
+  /r/:realmSlug               realm
+  /r/:realmSlug/post/:slug    realm-hosted post
+  /r/:realmSlug/shelf/:slug   realm-owned shelf (future)
+  /t/:tagSlug                 tag
+  /z/:zoneSlug                zone
+  /e/:entitySlug              entity (author / character — gated, see 6.2)
+
+UnitId-by-type (long prefix, UUID only — never accepts slug):
+  /user/:unitId               user by UUID
+  /realm/:unitId              realm by UUID
+  /tag/:unitId                tag by UUID
+  /zone/:unitId               zone by UUID
+  /entity/:unitId             entity by UUID
+
+Universal unitId fallback:
+  /unit/:unitId               any Unit by UUID; may type-redirect when type is known
+
+System routes (root reserved):
+  /login /api /settings /admin /help ...
+
+Removed in this change:
+  /@:slug                     — @ prefix not introduced
+  /unit/:slug                 — /unit no longer resolves slugs
+```
+
+Rationale:
+
+- `/u/alice` is unambiguously a slug. If `alice` is not a registered user slug → 404.
+- `/user/01abc...` is unambiguously a UUID. If not a USER Unit → 404.
+- `/unit/01abc...` is the generic UUID lookup that may redirect to its typed long-prefix route once the type is read.
+- Owner sub-resources always use a **type prefix** segment (`shelf/`, `post/`, …) so that the owner's reserved-word table stays small and future types coexist without renaming.
 
 ### 4.3 Schema (Final Form)
 
@@ -133,20 +170,20 @@ model Unit {
   id         String   @id @default(uuidv7()) @db.Uuid
   type       UnitType
   slug       String?
-  slugScope  String   @db.Uuid              // NOT NULL
-  userId     String?  @db.Uuid              // creator (unchanged)
+  slugScope  String   @db.Uuid              // NOT NULL — points to a SlugScope.unitId OR another Unit (owner-scope)
+  userId     String?  @db.Uuid              // creator (unchanged semantics)
   // ... existing fields
 
   @@unique([slugScope, slug])
 }
 
-model SlugScope {                            // new
-  slug    String @id                          // 'master' 'tag' 'zone' 'entity'
-  unitId  String @db.Uuid @unique
+model SlugScope {                            // new — 5 seeded rows
+  slug    String @id                          // 'user' 'realm' 'tag' 'zone' 'entity'
+  unitId  String @db.Uuid @unique            // the SCOPE-type Unit for this scope
 }
 
 model User {
-  unitId      String  @id @db.Uuid           // renamed from userId
+  unitId      String  @id @db.Uuid           // renamed from userId; = Unit.id where type=USER
   authUserId  String? @unique
   email       String?
   name        String?
@@ -154,16 +191,16 @@ model User {
   bio         String?
   permission  Json?
   settings    Json?
-  // slug field removed (moved to Unit.slug under slugScope=master)
-  // followersCount / followingsCount: stays for now, decided
-  //   alongside subscription unification (see open todos)
+  // slug field removed (moved to Unit.slug under slugScope = userScope.unitId)
+  // followersCount / followingsCount stays for now — decided alongside
+  //   subscription unification (see 6.1)
   // ... rest of User extension fields
 }
 ```
 
 **Key properties**:
 
-- `slugScope` is **NOT NULL**, always points to a real `Unit.id` (an infra `SlugScope` row's `unitId`, or any other Unit acting as namespace owner).
+- `slugScope` is **NOT NULL**, always points to a real `Unit.id`. For top-level identity (USER / REALM / TAG / ZONE / ENTITY), it points to one of the five `SlugScope` rows' `unitId`. For owner-scoped sub-resources (a shelf under alice), it points directly to the owner unit's id.
 - `Unit.slug` is nullable. Most units have no slug; uniqueness on `(slugScope, slug)` does not fire when `slug IS NULL` because Postgres treats `NULL ≠ NULL`. A single composite unique index is sufficient — no partial indexes required.
 - `slugScope` has **no FK constraint**, consistent with the existing precedent in `ShelfUnit.unitId` / `ShelfItem.itemRef` (see `shelf-structure` spec).
 - `SCOPE` placeholder units have `slug = NULL` and `slugScope = self.id` (harmless self-reference because `NULL` slugs do not participate in the unique constraint).
@@ -171,7 +208,7 @@ model User {
 ### 4.4 Seed Flow (Bootstrap)
 
 ```ts
-for (const scopeName of ['master', 'tag', 'zone', 'entity']) {
+for (const scopeName of ['user', 'realm', 'tag', 'zone', 'entity']) {
   const unit = await prisma.unit.create({
     data: { type: 'SCOPE', slug: null, slugScope: PLACEHOLDER }
   });
@@ -189,32 +226,50 @@ for (const scopeName of ['master', 'tag', 'zone', 'entity']) {
 {
   "seedTags":    { "book": "<uuid>", "game": "<uuid>", ... },
   "defaultRealmId": "<uuid>",
-  "slugScopes":  { "master": "<uuid>", "tag": "<uuid>", "zone": "<uuid>", "entity": "<uuid>" }
+  "slugScopes": {
+    "user":   "<uuid>",
+    "realm":  "<uuid>",
+    "tag":    "<uuid>",
+    "zone":   "<uuid>",
+    "entity": "<uuid>"
+  }
 }
 ```
 
 ### 4.5 API Surface
 
-**Typed by-slug endpoints** (scope is hidden from client):
+**Typed by-slug endpoints** (scope is implicit in the endpoint path; short-prefix family):
 
 ```
-GET /user/by-slug/:slug                     // implicit master, asserts type=USER
-GET /realm/by-slug/:slug                    // implicit master, asserts type=REALM
-GET /tag/by-slug/:slug                      // implicit tag scope
-GET /zone/by-slug/:slug                     // implicit zone scope
-GET /entity/by-slug/:slug                   // implicit entity scope
-GET /shelf/by-slug/:ownerSlug/:slug         // master → ownerUnitId → /:slug
+GET /user/by-slug/:slug                     // user scope
+GET /realm/by-slug/:slug                    // realm scope
+GET /tag/by-slug/:slug                      // tag scope
+GET /zone/by-slug/:slug                     // zone scope
+GET /entity/by-slug/:slug                   // entity scope
+GET /shelf/by-slug/:userSlug/:slug          // user → ownerUnitId → /:slug
+                                            // (realm variant for realm-owned shelves)
 ```
 
-**Generic resolver** (for URL parsing utilities):
+**Typed by-id endpoints** (long-prefix mirrors):
+
+```
+GET /user/:unitId
+GET /realm/:unitId
+GET /tag/:unitId
+GET /zone/:unitId
+GET /entity/:unitId
+GET /unit/:unitId   // generic
+```
+
+**Generic slug resolver** (for URL parsing utilities):
 
 ```
 POST /slug/resolve
-  body: { scope: 'master' | 'tag' | 'zone' | 'entity' | <ownerUnitId>, slug: string }
+  body: { scope: 'user' | 'realm' | 'tag' | 'zone' | 'entity' | <ownerUnitId>, slug: string }
   resp: { unitId: string, type: UnitType }
 ```
 
-**Client** never directly passes `scopeId` strings. Either uses typed endpoints (preferred) or hands a known scope name to the generic resolver.
+**Client** never directly passes raw scope UUIDs. Either uses typed endpoints (preferred) or hands a known scope name to the generic resolver.
 
 ### 4.6 Migration
 
@@ -222,45 +277,50 @@ POST /slug/resolve
 
 1. Add `USER` and `SCOPE` to `UnitType` enum.
 2. For each existing `User` row, create a `Unit { id = User.userId, type = USER, slug = null }`. This is back-fill: the UUIDv7 already on User becomes Unit.id.
-3. Rename `User.userId` → `User.unitId` (PK rename + FK rename in Follow, ApiToken, ownership references on Unit). Where the rename would touch too many call sites in one commit, keep a transitional alias field, but no runtime dual-write.
-4. Move existing `User.slug` values into the corresponding `Unit.slug` (with `slugScope = master.unitId`). Drop `User.slug`.
-5. Decide bio/name migration: keep on `User` extension for now; UnitTranslation adoption can be a follow-on change.
+3. Rename `User.userId` → `User.unitId` (PK rename + FK rename in Follow, ApiToken, ownership references on Unit). Where the rename would touch too many call sites in one commit, keep the FK column name `userId` on related tables (it semantically still references a user); only the User PK field is renamed. No runtime dual-write.
+4. Move existing `User.slug` values into the corresponding `Unit.slug` (with `slugScope = userScope.unitId`). Drop `User.slug`.
+5. Decide bio / name migration: keep on `User` extension for now; UnitTranslation adoption can be a follow-on change.
+6. Repeal `user-domain-decoupling`'s "User PK is `userId`" and "User SHALL NOT be a Unit subtype" requirements. The rest of that spec (attribution decoupling, `accountStatus` removal) is preserved.
 
 **Phase 3b — SlugScope structure**:
 
 1. Add `SlugScope` table and `Unit.slugScope` column.
-2. Seed the four scope placeholder units.
-3. Backfill `Unit.slugScope = master.unitId` for every existing slug-bearing Unit (TAG/REALM/ZONE/USER) and `master.unitId` for non-slug-bearing Units too (uniform default).
+2. Seed the five scope placeholder units (`user`, `realm`, `tag`, `zone`, `entity`).
+3. Backfill `Unit.slugScope = <typeScope>.unitId` for every existing slug-bearing Unit (TAG / REALM / ZONE / USER), matching the unit's type to its scope. For non-slug-bearing Units that have an owner, backfill to owner-unit-id; otherwise default to a sensible scope placeholder. Exact backfill rule belongs in the L3 change's design.
 4. Apply `@@unique([slugScope, slug])`.
 5. Drop the legacy global unique on `Unit.slug`.
 
 **Phase 3c — URL & route surface**:
 
-1. Add `/@:slug` and `/@:slug/:childSlug` routes.
-2. Keep `/u/:slug` and `/unit/:slug` as legacy aliases that resolve into the same master scope.
-3. Add `/tag/:slug` (already present?), `/zone/:slug`, `/e/:slug` typed routes.
-4. Add `/shelf/by-slug/:owner/:slug` resolver.
+1. Ensure short-prefix slug routes exist: `/u/:slug`, `/r/:slug`, `/t/:slug`, `/z/:slug`, `/e/:slug`. Some already exist; the rest are added.
+2. Add long-prefix UUID routes: `/user/:unitId`, `/realm/:unitId`, `/tag/:unitId`, `/zone/:unitId`, `/entity/:unitId`.
+3. Keep `/unit/:unitId` as the universal UUID fallback.
+4. **Remove** `/unit/:slug` (currently described in `public-short-routes`). The spec is rewritten in this change.
+5. Add `/u/:userSlug/shelf/:slug` and `/r/:realmSlug/shelf/:slug` for owner-scoped shelf access.
+6. Owner sub-resource URLs always use a type-prefix segment (`shelf/`, `post/`, …) to keep the owner reserved-word set small and to allow future types to coexist.
 
 ### 4.7 Specs Touched
 
-- `unit-slug` — remove SHELF/USER from rejection list; introduce scope concept.
-- `slug-validation` — extend reserved-word rules to a two-layer model: global reserved (in master scope) + per-scope reserved.
-- `slug-ref` — extend `SlugRef` shape: `{ scope?: string, slug: string, unitId?: string }`.
-- `typed-slug-lookup` — add new endpoints; extend `/infra/bootstrap` shape (spec currently declares the shape stable — must update that requirement).
-- `public-route` — replace the explicit "Unit.slug never resolves User.slug" duality with the unified master-scope rule.
-- `account-identity-boundary` — reconcile User identity with Unit identity (the new invariant `User.unitId ≡ Unit.id where type=USER`).
+- `unit-slug` — remove SHELF / USER from rejection list; introduce per-type scope concept.
+- `slug-validation` — extend reserved-word rules to a two-layer model: per-scope reserved (one list per `SlugScope`) + per-owner reserved (`profile`, `settings`, `shelf`, `post`, etc. under user / realm).
+- `slug-ref` — extend `SlugRef` shape: `{ scope: 'user' | 'realm' | 'tag' | 'zone' | 'entity' | <ownerUnitId>, slug: string, unitId?: string }`.
+- `typed-slug-lookup` — add new endpoints; extend `/infra/bootstrap` shape (spec currently declares the shape stable — must update that requirement to include `slugScopes`).
+- `public-short-routes` — rewrite around the short=slug / long=unitId convention; remove `/unit/:slug`; document the five short-prefix + five long-prefix + generic `/unit/:unitId` table.
+- `account-identity-boundary` — reconcile User identity with Unit identity. New invariant: `User.unitId ≡ Unit.id where type=USER`. The "User.slug is canonical" requirement migrates to "Unit.slug under userScope is canonical".
+- `user-domain-decoupling` — repeal the "User PK is `userId`" and "User SHALL NOT be a Unit subtype" requirements; preserve the rest.
 - `attribution` — verify references still resolve under the renamed PK.
-- `profile-*` — verify URLs and resolution still work; opportunistic adoption of `/@:slug`.
-- `shelf-collection` — extend with namespaced slug addressability.
+- `profile-*` — verify URLs and resolution still work; nothing changes externally since `/u/:userSlug` was already canonical.
+- `shelf-collection` — extend with owner-scoped slug addressability.
 
 ### 4.8 Risk & Estimate
 
 **Risks**:
 
-- **Userid → unitId rename surface**: hundreds of call sites. Mitigation: keep the column name `userId` on relations (it semantically still references the user), only rename the User PK field.
+- **`User.userId` → `User.unitId` rename surface**: hundreds of call sites. Mitigation: keep the column name `userId` on FK columns of related tables (the column semantically still references a user); only rename the User PK field. Frontend DTO field rename (`user.userId` → `user.unitId`) is the larger user-visible side; plan a clean cutover.
 - **Bootstrap ordering**: SlugScope rows must exist before any other slug-bearing Unit is created. Mitigation: run as part of `prisma/seed/` infra bootstrap, not factory.
 - **Legacy by-slug behaviour**: existing `GET /tag/by-slug/:slug` etc. must keep working through the cutover. The migration backfills the scope column atomically before flipping the unique index.
-- **External URLs**: `/u/:userSlug` is in the wild. Keep it as an alias forever; do not break it.
+- **Short/long URL split discipline**: developers may be tempted to add `/u/:unitId` "for convenience" or `/user/:slug` mistakenly. The split is the spec; needs convention enforcement (lint or `check:convention` rule).
+- **External URLs**: existing `/u/:userSlug` is the canonical and stays canonical. `/unit/:slug` was internal-only — its removal is acceptable.
 
 **Estimate**: 1.5–2 weeks of focused work + migration window.
 
@@ -276,7 +336,7 @@ At user creation (or first access):
     shelf = Unit.create({
       type: SHELF,
       slug: kindKey,
-      slugScope: user.unitId,     // user is the namespace owner
+      slugScope: user.unitId,     // the user is the namespace owner
     })
     Shelf.create({ unitId: shelf.id, kindKey })
 ```
@@ -284,9 +344,8 @@ At user creation (or first access):
 **Client resolution** becomes a normal SlugRef cache:
 
 ```ts
-// Hypothetical hook
 const { data: favoritesShelfId } = useSlugRef({
-  scope: '@me',                   // resolves to current viewer's unitId
+  scope: viewer.unitId,           // viewer's unitId as owner-scope value
   slug: 'favorites',
 });
 ```
@@ -294,7 +353,7 @@ const { data: favoritesShelfId } = useSlugRef({
 Or, equivalently, through a typed endpoint:
 
 ```
-GET /shelf/by-slug/@me/favorites
+GET /shelf/by-slug/:userSlug/favorites
 ```
 
 `User.extra.shelves` map becomes a server-internal cache (no longer needed by the frontend) or can be removed entirely if the slug index is sufficient. The current `getOrCreateSystemShelf` flow remains as the write-path provisioner — but its return value (a unitId) is now also addressable by slug.
@@ -302,7 +361,7 @@ GET /shelf/by-slug/@me/favorites
 **No new endpoint required.** This is what makes the L2 → L3 → L1 ordering valuable: the L1 deliverable evaporates into "use the slug system".
 
 **Specs touched**:
-- `shelf-collection` — clarify that system shelves have well-known slugs under the user namespace.
+- `shelf-collection` — clarify that system shelves have well-known slugs under the user owner scope.
 
 **Estimate**: 0.5–1 day (mostly: bootstrap mints slugs, frontend hook composes SlugRef, retire any custom endpoint draft).
 
@@ -314,7 +373,7 @@ These items were identified during planning but deliberately left undecided. Eac
 
 ### 6.1 Subscription Domain Unification
 
-Current `Follow` model is User → User only. Most Unit types likely need subscription:
+Current `Follow` model is User → User only. With User-as-Unit (L3) in place, the architectural prerequisite for unification is met. Most Unit types likely need subscription:
 - Book → notify on new chapters
 - Realm → activity feed
 - Shelf → notify on owner additions
@@ -325,7 +384,7 @@ Current `Follow` model is User → User only. Most Unit types likely need subscr
 **Option B**: Generic `Subscription { subscriberUnitId, targetUnitId, kind }`, retiring `Follow` and possibly `RealmMembership`.
 **Option C**: Defer until after L3 ships, then dedicated `engagement-subscription` explore.
 
-Decision: **C**. Until then, `User.followersCount` / `User.followingsCount` stay on the User extension table, not promoted to `Unit`.
+Decision: **C**. L3 is the enabler; the dedicated proposal lives downstream. Until then, `User.followersCount` / `User.followingsCount` stay on the User extension table, not promoted to `Unit`.
 
 ### 6.2 ENTITY Slug Activation
 
@@ -340,13 +399,13 @@ When a user changes their slug:
 
 This belongs in the L3 proposal but should not block the architectural commitment.
 
-### 6.4 Master Scope Placeholder Metadata
+### 6.4 SlugScope Placeholder Metadata
 
-Should the master `SCOPE` placeholder Unit carry `UnitTranslation` rows for display purposes (e.g., admin tools showing "Master namespace")? Probably no until ops asks. Leave the column nullable and ignore.
+Should the five `SCOPE` placeholder Units carry `UnitTranslation` rows for display purposes (e.g., admin tools showing "User scope namespace")? Probably no until ops asks. Leave the column nullable and ignore.
 
 ### 6.5 Client SlugScopes Cache TTL
 
-Once `/infra/bootstrap` returns the four scope UUIDs:
+Once `/infra/bootstrap` returns the five scope UUIDs:
 - These UUIDs never change after seed.
 - Cache permanently in client (localStorage + memory).
 - Invalidate only on app version bump (deploy-stamped cache key).
@@ -361,7 +420,7 @@ Decision: lighter path. Document the convention; do not enforce.
 
 ### 6.7 Same-Name Multi-Type under Owner
 
-`(slugScope, slug)` is unique → under a user, `favorites` cannot be both a SHELF and a future LIST. This is the agreed constraint. If product later wants per-type same-name (e.g., a user has both a shelf "books" and a list "books"), reopen with `(slugScope, slug, type)` migration.
+`(slugScope, slug)` is unique → under a user, `favorites` cannot be both a SHELF and a future LIST. This is the agreed constraint. If product later wants per-type same-name (e.g., a user has both a shelf "books" and a list "books"), reopen with `(slugScope, slug, type)` migration. The URL convention `/u/:userSlug/shelf/:slug` and `/u/:userSlug/list/:slug` keeps the surface unambiguous regardless.
 
 ### 6.8 L2 Tag Picker Cardinality
 
@@ -371,6 +430,16 @@ Single-select vs multi-select chips on `ShelfEditPage`:
 
 Decision deferred to L2 proposal. Lean: multi.
 
+### 6.9 Cross-Scope Slug Collisions Between USER and REALM
+
+With per-type scopes, `alice` can in principle exist both as a USER slug and a REALM slug — they live in independent uniqueness universes. The plan does **not** decide policy here; it provides the substrate. Open questions for a follow-on:
+
+- Are they both simultaneously addressable as `/u/alice` and `/r/alice`? Structurally: yes.
+- Should registration warn or block when a same-slug counterpart already exists in another scope?
+- Should there be a "claim" or "linked-identity" mechanism (e.g., a user can mark a realm with the same slug as theirs)?
+
+Defer to a product-policy proposal; the slug substrate is policy-neutral.
+
 ---
 
 ## 7. Cross-cutting Considerations
@@ -379,8 +448,10 @@ Decision deferred to L2 proposal. Lean: multi.
 
 This project's `CLAUDE.md` states it is in active development and disallows backwards-compatible aliases unless explicitly granted. This plan grants the following exceptions, justified by external URL stability:
 
-- `/u/:slug` and `/unit/:slug` are kept as **resolution-equivalent aliases** to `/@:slug`. They are not legacy paths to be removed.
+- `/u/:userSlug` and `/r/:realmSlug` are the canonical, already-current short-prefix routes. Their **internal resolution** is being upgraded (now backed by the per-type slug scope), but their **URL shape** is preserved.
 - `User.userId` field rename (Phase 3a) follows the "one clean breaking cutover" rule; no dual-read window.
+- `/unit/:slug` is removed without alias. Internal callers are migrated to typed slug routes; no external URL is known to depend on it.
+- `/@:slug` is not introduced and not aliased; the `@` prefix is not part of the public URL surface.
 
 ### 7.2 Performance
 
@@ -390,7 +461,7 @@ This project's `CLAUDE.md` states it is in active development and disallows back
 
 ### 7.3 Search Indexing
 
-Meili currently indexes `userId` and `realmIds` etc. With User-as-Unit, `userId` and `unitId` are the same UUID for USER units — search documents need no rekeying. New: searchable `slug` field on Unit documents (with scope context) for `/slug/resolve`-style autocompletion.
+Meili currently indexes `userId` and `realmIds` etc. With User-as-Unit, `userId` and `unitId` are the same UUID for USER units — search documents need no rekeying. New: searchable `slug` field on Unit documents (with scope context) for `/slug/resolve`-style autocompletion. Results surface across all five scopes uniformly.
 
 ---
 
@@ -403,9 +474,9 @@ When ready to start work, create three independent OpenSpec changes in this orde
    Independent of all other work.
 
 2. **`user-namespace-slug`** (L3) — the big one
-   Specs touched: `unit-slug`, `slug-validation`, `slug-ref`, `typed-slug-lookup`, `public-route`, `account-identity-boundary`, `attribution`, `profile-*`, `shelf-collection`
-   Includes User-as-Unit migration, SlugScope table, namespace slug schema and routes.
+   Specs touched: `unit-slug`, `slug-validation`, `slug-ref`, `typed-slug-lookup`, `public-short-routes`, `account-identity-boundary`, `user-domain-decoupling`, `attribution`, `profile-*`, `shelf-collection`
+   Includes: User-as-Unit migration, SlugScope table (five scopes), per-type slug scope schema, short=slug / long=unitId URL convention, removal of `/unit/:slug`.
 
 3. **`shelf-system-slugs`** (L1, after L3 ships)
    Specs touched: `shelf-collection` (clarification only)
-   Mints `favorites`/`backlog`/`active`/`completed` slugs under each user at bootstrap; replaces `User.extra.shelves` frontend exposure question.
+   Mints `favorites` / `backlog` / `active` / `completed` slugs under each user at bootstrap; replaces `User.extra.shelves` frontend exposure question.
