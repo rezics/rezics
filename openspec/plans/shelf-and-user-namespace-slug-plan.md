@@ -278,7 +278,7 @@ POST /slug/resolve
 1. Add `USER` and `SCOPE` to `UnitType` enum.
 2. For each existing `User` row, create a `Unit { id = User.userId, type = USER, slug = null }`. This is back-fill: the UUIDv7 already on User becomes Unit.id.
 3. Rename `User.userId` → `User.unitId` (PK rename + FK rename in Follow, ApiToken, ownership references on Unit). Where the rename would touch too many call sites in one commit, keep the FK column name `userId` on related tables (it semantically still references a user); only the User PK field is renamed. No runtime dual-write.
-4. Move existing `User.slug` values into the corresponding `Unit.slug` (with `slugScope = userScope.unitId`). Drop `User.slug`.
+4. Move existing `User.slug` values into the corresponding `Unit.slug` (with `slugScope = userScope.unitId`). Drop `User.slug`. Post-migration, slugs are immutable per §6.3 — `userService.update` and any admin path SHALL reject `slug` updates with a typed error.
 5. Decide bio / name migration: keep on `User` extension for now; UnitTranslation adoption can be a follow-on change.
 6. Repeal `user-domain-decoupling`'s "User PK is `userId`" and "User SHALL NOT be a Unit subtype" requirements. The rest of that spec (attribution decoupling, `accountStatus` removal) is preserved.
 
@@ -367,9 +367,9 @@ GET /shelf/by-slug/:userSlug/favorites
 
 ---
 
-## 6. Open Todos (Carried into Proposals)
+## 6. Decisions and Carried Items
 
-These items were identified during planning but deliberately left undecided. Each must be resolved when the matching proposal is created.
+Items identified during planning. Most are now **decided** (explicitly labelled below) and proposals SHALL respect those commitments. A small number remain deferred to follow-on product work and are labelled accordingly. Items not marked "Decided" are explicitly out of scope for v1.
 
 ### 6.1 Subscription Domain Unification
 
@@ -384,59 +384,69 @@ These items were identified during planning but deliberately left undecided. Eac
 
 Hard dependency: this L3 change must ship first (`User.unitId` is the prerequisite for `subscriberUnitId`).
 
-### 6.2 ENTITY Slug Activation
+### 6.2 ENTITY Slug Activation — Decided
 
-L3 seeds the `entity` scope but should not yet allow `ENTITY` slug creation, because the product relationship between `USER` and `ENTITY` (verified claim / authorship) is not finalised. Seed the scope; gate write access behind a feature flag or a follow-on proposal.
+L3 seeds the `entity` scope with write access **disabled at the service layer** (any `ENTITY` slug-creation attempt is rejected with a typed error). The USER↔ENTITY product relationship (verified claim / authorship) is not finalised and SHALL NOT block L3 from shipping.
 
-### 6.3 User Slug Rename Migration Strategy
+A separate follow-on change `entity-slug-activation` flips writes on shortly after L3 stabilises. That change owns:
+- the entity-creation flow (admin tools and/or user-facing path);
+- whatever USER↔ENTITY claim / authorship policy product wants;
+- the reserved-word list (if any) for the entity scope.
 
-When a user changes their slug:
-- Old URLs break unless aliased.
-- Decisions needed: alias table? Retention period? 301 vs 404 vs 410?
-- SEO and outbound-link stability are at stake.
+It is queued as #4 in the proposal sequence (§8) and runs in parallel with #3 and #5 once L3 ships.
 
-This belongs in the L3 proposal but should not block the architectural commitment.
+### 6.3 User Slug Rename Policy — Decided
 
-### 6.4 SlugScope Placeholder Metadata
+User slugs are **immutable in v1**. Once a user's `Unit.slug` is set (at signup or first-time slug assignment), no rename surface is exposed:
 
-Should the five `SCOPE` placeholder Units carry `UnitTranslation` rows for display purposes (e.g., admin tools showing "User scope namespace")? Probably no until ops asks. Leave the column nullable and ignore.
+- No `userService.update` path accepts a `slug` field.
+- No admin override in v1 (kept intentionally simple; operational need would itself become its own follow-on change carrying the full alias / redirect design).
+- No `UserSlugAlias` table, no 301 redirect, no 410 gone — old URLs cannot exist because the slug never changes.
 
-### 6.5 Client SlugScopes Cache TTL
+**Rationale:** the project is in active development with a small user surface. Immutability eliminates the entire alias / SEO / outbound-link-stability surface area and keeps `(slugScope, slug)` strictly write-once for the USER scope. The constraint is a v1 product decision, not a substrate limit — the schema fully supports a future rename when product signals demand it.
 
-Once `/infra/bootstrap` returns the five scope UUIDs:
-- These UUIDs never change after seed.
-- Cache permanently in client (localStorage + memory).
-- Invalidate only on app version bump (deploy-stamped cache key).
+### 6.4 SlugScope Placeholder Metadata — Decided
 
-### 6.6 User Field Semantics on USER Units
+The five `SCOPE` placeholder Units do not carry `UnitTranslation` rows. Their slugs are infra constants (`user`, `realm`, `tag`, `zone`, `entity`), not user-facing display strings. If ops tooling later wants a friendly label, the translation can be added without a migration — the substrate stays untouched.
 
-Many `Unit` columns are not meaningful for `type=USER`: `workUnitId`, `rating`, `visibility`, `status`. Two paths:
-- Leave them nullable with implicit defaults (lighter).
-- Add a per-type validator in `unit-slug` style ("type-gated" rule) to reject meaningless values.
+### 6.5 Client SlugScopes Cache TTL — Decided
 
-Decision: lighter path. Document the convention; do not enforce.
+`/infra/bootstrap`'s `slugScopes` map (five UUIDs) is cached permanently on the client (localStorage + in-memory mirror). Invalidation is keyed to the app version stamp; a redeploy that bumps the stamp invalidates the cache. No TTL is set — the UUIDs do not rotate after seed.
 
-### 6.7 Same-Name Multi-Type under Owner
+### 6.6 User Field Semantics on USER Units — Decided
 
-`(slugScope, slug)` is unique → under a user, `favorites` cannot be both a SHELF and a future LIST. This is the agreed constraint. If product later wants per-type same-name (e.g., a user has both a shelf "books" and a list "books"), reopen with `(slugScope, slug, type)` migration. The URL convention `/u/:userSlug/shelf/:slug` and `/u/:userSlug/list/:slug` keeps the surface unambiguous regardless.
+Lighter path. `Unit` columns not meaningful for `type=USER` (`workUnitId`, `rating`, `visibility`, `status`) remain nullable with implicit defaults. No per-type validator is added at the schema layer. The convention is documented in `account-identity-boundary` and not enforced. Future ranking / personalization work decides whether it needs USER-typed Unit fields.
 
-### 6.8 L2 Tag Picker Cardinality
+### 6.7 Same-Name Multi-Type under Owner — Decided
 
-Single-select vs multi-select chips on `ShelfEditPage`:
-- Single: cleaner UX, but a shelf cannot mix book + game content cleanly.
-- Multi: matches `CollectionModal`'s filter semantics (`tag IN seedTags`).
+`(slugScope, slug)` is unique. Under a user, `favorites` cannot be both a SHELF and a future LIST. If product later wants per-type same-name (a user with both a shelf "books" and a list "books"), reopen with a `(slugScope, slug, type)` migration. The URL convention `/u/:userSlug/shelf/:slug` and `/u/:userSlug/list/:slug` keeps the surface unambiguous regardless.
 
-Decision deferred to L2 proposal. Lean: multi.
+### 6.8 L2 Tag Picker Cardinality — Decided
 
-### 6.9 Cross-Scope Slug Collisions Between USER and REALM
+Multi-select chips on `ShelfEditPage` and `NewShelfPage`. Matches `CollectionModal`'s filter semantics (`tag IN seedTags`) and lets a shelf mix book + game content cleanly. The L2 proposal owns the picker UX (chip group component, no upper bound enforced, zero selections allowed).
 
-With per-type scopes, `alice` can in principle exist both as a USER slug and a REALM slug — they live in independent uniqueness universes. The plan does **not** decide policy here; it provides the substrate. Open questions for a follow-on:
+### 6.9 Cross-Scope Slug Collisions Between USER and REALM — Deferred
+
+With per-type scopes, `alice` can in principle exist both as a USER slug and a REALM slug — they live in independent uniqueness universes. The plan provides the substrate; it does **not** decide policy.
+
+Open product questions for a follow-on:
 
 - Are they both simultaneously addressable as `/u/alice` and `/r/alice`? Structurally: yes.
 - Should registration warn or block when a same-slug counterpart already exists in another scope?
 - Should there be a "claim" or "linked-identity" mechanism (e.g., a user can mark a realm with the same slug as theirs)?
 
-Defer to a product-policy proposal; the slug substrate is policy-neutral.
+Explicitly out of scope for L3. The slug substrate is policy-neutral; layering policy on top is a separate change.
+
+### 6.10 Shelf Custom Slugs — Decided (v1)
+
+In v1, only **contract-defined system shelf** `kindKey`s (`favorites`, `backlog`, `active`, `completed`) carry slugs. User-created shelves (via `NewShelfPage`) have `Unit.slug = NULL` and are addressed exclusively via `/unit/:unitId` (or any UUID-bearing internal route).
+
+- L3 schema **permits** `SHELF` under the user owner-scope — the substrate is in place.
+- L1 (`shelf-system-slugs`) mints only the four well-known slugs at user bootstrap.
+- `NewShelfPage` / `ShelfEditPage` do **not** expose a slug input. Server-side, `shelfService.create` and `.update` reject any non-null `slug` for user-created shelves with a typed error.
+- `/u/:userSlug/shelf/:slug` therefore resolves only the four system slugs in v1; user-created shelves return 404 on that surface.
+
+**Rationale:** mirrors the user-slug immutability stance (§6.3) — constrain the slug write surface heavily in v1, defer expansion until product signal demands it. Future opening of user-chosen shelf slugs is a product decision, not a substrate change.
 
 ---
 
@@ -448,13 +458,15 @@ This project's `CLAUDE.md` states it is in active development and disallows back
 
 - `/u/:userSlug` and `/r/:realmSlug` are the canonical, already-current short-prefix routes. Their **internal resolution** is being upgraded (now backed by the per-type slug scope), but their **URL shape** is preserved.
 - `User.userId` field rename (Phase 3a) follows the "one clean breaking cutover" rule; no dual-read window.
+- User slugs are **immutable post-set** in v1 per §6.3. No alias table, no rename API, no 301/410 redirect surface.
+- User-created shelves remain slug-less in v1 per §6.10; only the four contract-defined system shelves carry slugs.
 - `/unit/:slug` is removed without alias. Internal callers are migrated to typed slug routes; no external URL is known to depend on it.
 - `/@:slug` is not introduced and not aliased; the `@` prefix is not part of the public URL surface.
 
 ### 7.2 Performance
 
 - `(slugScope, slug)` composite unique on `Unit` adds one B-tree index. Storage cost ~35B per entry × N rows. Negligible.
-- Slug rename is O(1) under the UUID-scope model. Username changes do not cascade.
+- User slugs are immutable in v1 (§6.3) so rename cost is not an active concern. The composite index is still O(1) for the eventual rename surface if/when it is opened in a follow-on.
 - The `slug → unitId` resolution path is the single most cacheable hop in the system and is what SlugRef was designed for.
 
 ### 7.3 Search Indexing
@@ -465,20 +477,29 @@ Meili currently indexes `userId` and `realmIds` etc. With User-as-Unit, `userId`
 
 ## 8. Proposal Sequence
 
-When ready to start work, create three independent OpenSpec changes in this order:
+Five OpenSpec changes. L2 is independent; L3 unblocks the rest; #3, #4, #5 are all post-L3 and can run in parallel.
 
 1. **`shelf-tag-pinned-chain`** (L2)
    Specs touched: `profile-shelves-tab`, `shelf-seed-tags`
-   Independent of all other work.
+   Independent of all other work. Tag picker is multi-select per §6.8.
 
 2. **`user-namespace-slug`** (L3) — the big one
    Specs touched: `unit-slug`, `slug-validation`, `slug-ref`, `typed-slug-lookup`, `public-short-routes`, `account-identity-boundary`, `user-domain-decoupling`, `attribution`, `profile-*`, `shelf-collection`
-   Includes: User-as-Unit migration, SlugScope table (five scopes), per-type slug scope schema, short=slug / long=unitId URL convention, removal of `/unit/:slug`.
+   Includes: User-as-Unit migration, SlugScope table (five scopes), per-type slug scope schema, short=slug / long=unitId URL convention, removal of `/unit/:slug`. Enforces:
+   - ENTITY scope **seeded write-disabled** at the service layer (§6.2).
+   - User slugs **immutable** post-set; no rename API, no alias (§6.3).
+   - User-created shelves remain **slug-less**; only contract-defined system slugs accepted (§6.10).
 
 3. **`shelf-system-slugs`** (L1, after L3 ships)
    Specs touched: `shelf-collection` (clarification only)
-   Mints `favorites` / `backlog` / `active` / `completed` slugs under each user at bootstrap; replaces `User.extra.shelves` frontend exposure question.
+   Mints `favorites` / `backlog` / `active` / `completed` slugs under each user at bootstrap; replaces the `User.extra.shelves` frontend exposure question. Reaffirms the §6.10 constraint that user-created shelves stay slug-less.
 
-4. **`engagement-subscription`** (downstream of L3, in parallel with L1 once L3 ships)
+4. **`entity-slug-activation`** (after L3 stabilises, in parallel with #3 and #5)
+   Specs touched: `unit-slug` (re-allow ENTITY writes), `slug-validation` (entity-scope reserved words if any)
+   Flips the ENTITY scope from write-disabled (L3 default) to writable, and ships the entity-creation flow plus any USER↔ENTITY claim / authorship policy product wants. Resolves §6.2.
+
+5. **`engagement-subscription`** (after L3 ships, in parallel with #3 and #4)
    Specs touched: NEW `engagement-subscription`; MODIFIED `notification-feed`, `profile-followers-tab`, `realm-membership-me`
    Replaces `Follow` with a generic `Subscription(subscriberUnitId → targetUnitId, channels[])` edge; introduces fan-out recipient resolution for notifications; dual-track with `RealmMember`; adds denormalized `Unit.subscriberCount`. Proposal already drafted at `openspec/changes/engagement-subscription/`; cannot apply until L3 lands.
+
+**Not yet scoped:** the cross-service protocol for delivering broadcast recipients from `package/server` (where `Subscription` lives) to `package/notify` (where `Notification` rows and SSE streams live) is a separate concern from §6.1's `Subscription` model. It is queued for design discussion immediately after this plan is committed; the resulting change is expected to slot into this sequence as a prerequisite of #5.
