@@ -66,19 +66,29 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
     <div id="book-detail">
       <MainContentContainer width="wide" className="mt-4 mb-12">
         <div className="flex flex-row items-center gap-4 mb-4">
-          <div className="flex-1 min-w-0">
-            <Tabs value={activeTab} onValueChange={handleTabChange}>
-              <TabsList variant="line">
-                <TabsTrigger value="info">
+          <div className="flex-1 min-w-0 max-w-full overflow-hidden">
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="max-w-full"
+            >
+              <TabsList
+                variant="line"
+                className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory sm:w-fit sm:overflow-visible"
+              >
+                <TabsTrigger value="info" className="flex-none snap-start">
                   {t("page.book.tabs.overview")}
                 </TabsTrigger>
-                <TabsTrigger value="review">
+                <TabsTrigger value="review" className="flex-none snap-start">
                   {t("page.book.tabs.review_shelf")}
                 </TabsTrigger>
-                <TabsTrigger value="content">
+                <TabsTrigger value="content" className="flex-none snap-start">
                   {t("page.book.tabs.content")}
                 </TabsTrigger>
-                <TabsTrigger value="discussion">
+                <TabsTrigger
+                  value="discussion"
+                  className="flex-none snap-start"
+                >
                   {t("page.book.tabs.community")}
                 </TabsTrigger>
               </TabsList>
