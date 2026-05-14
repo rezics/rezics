@@ -1,42 +1,23 @@
-import { postThreadQuery } from "@rezics/api/post/post";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
-import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { PostReply } from "../components/item/PostReply";
 import { CollapseToggle } from "../components/parts/CollapseToggle";
 import { ThreadingHoverProvider } from "../components/parts/ThreadingContext";
 import { ReplyComposer } from "../forms/ReplyComposer";
-import {
-  excludeRootPost,
-  usePostTreeCollapse,
-} from "../hooks/usePostTreeCollapse";
+import { usePostTreeCollapse } from "../hooks/usePostTreeCollapse";
 import {
   buildPostTreeNodes,
   type PostTreeNodeModel,
 } from "../models/postTreeRails";
 
-interface PostTreeSectionProps {
-  rootPostUnitId: string;
-  maxDepth?: number;
-  visualMaxDepth?: number;
-  /**
-   * When supplied, overrides the built-in "mount an inline composer" behaviour
-   * (used by surfaces that need to navigate or otherwise intercept replies).
-   */
-  onReply?: (postUnitId: string) => void;
-}
-
-interface PostTreeListProps {
+interface PostTreeRoundedRailLabProps {
   posts: PostDTO[];
   rootPostUnitId: string;
   maxDepth?: number;
   visualMaxDepth?: number;
-  baseDepth?: number;
-  onReply?: (postUnitId: string) => void;
 }
 
 const DEFAULT_MAX_DEPTH = 5;
@@ -49,16 +30,19 @@ const RAIL_HITBOX_PX = 12;
 const ROW_TOP_PADDING_PX = 4;
 const RAIL_GAP_PX = 4;
 const RAIL_TOP_PX = ROW_TOP_PADDING_PX + AVATAR_SIZE_PX + RAIL_GAP_PX;
+const AVATAR_CENTER_Y_PX = ROW_TOP_PADDING_PX + AVATAR_CENTER_PX;
+const RAIL_CAP_RADIUS_PX = RAIL_STROKE_PX;
+const TERMINAL_RAIL_HEIGHT_PX =
+  AVATAR_CENTER_Y_PX - RAIL_STROKE_PX - RAIL_CAP_RADIUS_PX;
+const BRANCH_RADIUS_PX = 8;
 const TOGGLE_TOP_PX = RAIL_TOP_PX + 8;
 
-export const PostTreeList: React.FC<PostTreeListProps> = ({
+export function PostTreeRoundedRailLab({
   posts,
   rootPostUnitId,
   maxDepth = DEFAULT_MAX_DEPTH,
   visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
-  baseDepth = 0,
-  onReply,
-}) => {
+}: PostTreeRoundedRailLabProps) {
   const allUnitIds = useMemo(
     () => posts.map((p) => p.unitId).filter(Boolean) as string[],
     [posts],
@@ -78,28 +62,21 @@ export const PostTreeList: React.FC<PostTreeListProps> = ({
     () =>
       buildPostTreeNodes({
         posts: visiblePosts,
-        baseDepth,
+        baseDepth: 0,
         maxDepth,
         visualMaxDepth,
       }),
-    [baseDepth, maxDepth, visiblePosts, visualMaxDepth],
+    [maxDepth, visiblePosts, visualMaxDepth],
   );
 
-  const handleReplyClick = useCallback(
-    (postUnitId: string) => {
-      if (onReply) {
-        onReply(postUnitId);
-        return;
-      }
-      setOpenComposers((prev) => {
-        if (prev.has(postUnitId)) return prev;
-        const next = new Set(prev);
-        next.add(postUnitId);
-        return next;
-      });
-    },
-    [onReply],
-  );
+  const handleReplyClick = useCallback((postUnitId: string) => {
+    setOpenComposers((prev) => {
+      if (prev.has(postUnitId)) return prev;
+      const next = new Set(prev);
+      next.add(postUnitId);
+      return next;
+    });
+  }, []);
 
   const handleComposerDone = useCallback((postUnitId: string) => {
     setOpenComposers((prev) => {
@@ -121,9 +98,9 @@ export const PostTreeList: React.FC<PostTreeListProps> = ({
   );
 
   return (
-    <div className="relative">
+    <div className="relative p-4" data-rounded-rail-lab>
       {treeNodes.map((node) => (
-        <PostTreeNode
+        <RoundedRailNode
           key={node.post.unitId}
           node={node}
           rootPostUnitId={rootPostUnitId}
@@ -139,9 +116,9 @@ export const PostTreeList: React.FC<PostTreeListProps> = ({
       ))}
     </div>
   );
-};
+}
 
-function PostTreeNode({
+function RoundedRailNode({
   node,
   rootPostUnitId,
   visualMaxDepth,
@@ -207,7 +184,7 @@ function PostTreeNode({
               <span
                 aria-hidden="true"
                 className={[
-                  "absolute left-1/2 top-0 h-full -translate-x-1/2 transition-colors duration-100 ease-in-out",
+                  "absolute left-1/2 top-0 h-full -translate-x-1/2 rounded-full transition-colors duration-100 ease-in-out",
                   railFillClass,
                 ].join(" ")}
                 style={{ width: `${RAIL_STROKE_PX}px` }}
@@ -265,7 +242,7 @@ function PostTreeNode({
         ) : null}
 
         {hasVisibleChildren ? (
-          <ChildrenRail
+          <RoundedChildrenRail
             childrenNodes={node.children}
             rootPostUnitId={rootPostUnitId}
             visualMaxDepth={visualMaxDepth}
@@ -288,7 +265,7 @@ function PostTreeNode({
   );
 }
 
-interface ChildrenRailProps {
+interface RoundedChildrenRailProps {
   childrenNodes: PostTreeNodeModel[];
   rootPostUnitId: string;
   visualMaxDepth: number;
@@ -306,7 +283,7 @@ interface ChildrenRailProps {
   onRailToggle: (event: React.MouseEvent) => void;
 }
 
-function ChildrenRail({
+function RoundedChildrenRail({
   childrenNodes,
   rootPostUnitId,
   visualMaxDepth,
@@ -322,10 +299,11 @@ function ChildrenRail({
   onRailEnter,
   onRailLeave,
   onRailToggle,
-}: ChildrenRailProps) {
+}: RoundedChildrenRailProps) {
   const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
   const lineLeftPx = railCenterLeftPx - RAIL_STROKE_PX / 2;
   const railLeftPx = railCenterLeftPx - RAIL_HITBOX_PX / 2;
+  const branchWidthPx = THREAD_INDENT_PX;
 
   return (
     <div
@@ -348,23 +326,45 @@ function ChildrenRail({
             onMouseEnter={onRailEnter}
             onMouseLeave={onRailLeave}
           />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute box-border border-0 border-l-2 border-solid transition-colors duration-100 ease-in-out"
-            style={{
-              left: `${lineLeftPx}px`,
-              top: 0,
-              bottom: 0,
-              width: `${RAIL_STROKE_PX}px`,
-              borderColor: railColorVar,
-            }}
-          />
         </>
       ) : null}
-      {childrenNodes.map((child) => {
+      {childrenNodes.map((child, index) => {
+        const isLastChild = index === childrenNodes.length - 1;
+
         return (
           <div key={child.post.unitId} className="relative">
-            <PostTreeNode
+            {canIndentChildren ? (
+              <>
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute rounded-full transition-colors duration-100 ease-in-out"
+                  style={{
+                    left: `${lineLeftPx}px`,
+                    top: 0,
+                    bottom: isLastChild ? undefined : 0,
+                    height: isLastChild
+                      ? `${TERMINAL_RAIL_HEIGHT_PX}px`
+                      : undefined,
+                    width: `${RAIL_STROKE_PX}px`,
+                    borderRadius: `${RAIL_CAP_RADIUS_PX}px`,
+                    backgroundColor: railColorVar,
+                  }}
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute box-border border-0 border-b-2 border-solid transition-colors duration-100 ease-in-out"
+                  style={{
+                    left: `${lineLeftPx}px`,
+                    top: 0,
+                    width: `${branchWidthPx}px`,
+                    height: `${AVATAR_CENTER_Y_PX}px`,
+                    borderBottomLeftRadius: `${BRANCH_RADIUS_PX}px`,
+                    borderColor: railColorVar,
+                  }}
+                />
+              </>
+            ) : null}
+            <RoundedRailNode
               node={child}
               rootPostUnitId={rootPostUnitId}
               visualMaxDepth={visualMaxDepth}
@@ -382,36 +382,3 @@ function ChildrenRail({
     </div>
   );
 }
-
-export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
-  rootPostUnitId,
-  maxDepth = DEFAULT_MAX_DEPTH,
-  visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
-  onReply,
-}) => {
-  const { data, isLoading } = useQuery(
-    postThreadQuery(rootPostUnitId, { mode: "threaded", maxDepth }),
-  );
-  const posts = useMemo(
-    () => excludeRootPost(data?.posts ?? [], rootPostUnitId),
-    [data?.posts, rootPostUnitId],
-  );
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-6">
-        <Spinner size="sm" />
-      </div>
-    );
-  }
-
-  return (
-    <PostTreeList
-      posts={posts}
-      rootPostUnitId={rootPostUnitId}
-      maxDepth={maxDepth}
-      visualMaxDepth={visualMaxDepth}
-      onReply={onReply}
-    />
-  );
-};

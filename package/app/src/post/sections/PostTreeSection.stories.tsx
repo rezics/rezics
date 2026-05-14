@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { PostTreeSection } from "./PostTreeSection";
+import { PostTreeRoundedRailLab } from "./PostTreeRoundedRailLab";
 
 const ROOT_ID = "fixture-root-1";
 
@@ -168,6 +169,9 @@ function Seeded({ posts }: { posts: PostDTO[] }) {
 const meta = {
   title: "App/Post/PostTreeSection",
   component: PostTreeSection,
+  args: {
+    rootPostUnitId: ROOT_ID,
+  },
 } satisfies Meta<typeof PostTreeSection>;
 
 export default meta;
@@ -195,4 +199,13 @@ export const Threaded10Deep: Story = {
 
 export const ContinuousOuterRail: Story = {
   render: () => <Seeded posts={CONTINUOUS_RAIL_POSTS} />,
+};
+
+export const RoundedRailLab: Story = {
+  render: () => (
+    <PostTreeRoundedRailLab
+      posts={CONTINUOUS_RAIL_POSTS}
+      rootPostUnitId={ROOT_ID}
+    />
+  ),
 };
