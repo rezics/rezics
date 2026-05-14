@@ -5,8 +5,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
+import { PostTreeList } from "./PostTreeList";
 import { PostTreeSection } from "./PostTreeSection";
-import { PostTreeRoundedRailLab } from "./PostTreeRoundedRailLab";
 
 const ROOT_ID = "fixture-root-1";
 
@@ -203,9 +203,8 @@ export const ContinuousOuterRail: Story = {
 
 export const RoundedRailLab: Story = {
   render: () => (
-    <PostTreeRoundedRailLab
-      posts={CONTINUOUS_RAIL_POSTS}
-      rootPostUnitId={ROOT_ID}
-    />
+    <div className="p-4">
+      <PostTreeList posts={CONTINUOUS_RAIL_POSTS} rootPostUnitId={ROOT_ID} />
+    </div>
   ),
 };
