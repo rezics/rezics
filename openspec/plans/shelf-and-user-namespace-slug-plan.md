@@ -373,18 +373,16 @@ These items were identified during planning but deliberately left undecided. Eac
 
 ### 6.1 Subscription Domain Unification
 
-Current `Follow` model is User → User only. With User-as-Unit (L3) in place, the architectural prerequisite for unification is met. Most Unit types likely need subscription:
-- Book → notify on new chapters
-- Realm → activity feed
-- Shelf → notify on owner additions
-- Tag → notify on new tagged content
-- Post → notify on replies
+**Resolved.** The dedicated change `engagement-subscription` (see `openspec/changes/engagement-subscription/`) carries the full design and specs. Summary of architectural commitments captured there:
 
-**Option A**: Keep `Follow` for users only; introduce per-domain subscription tables.
-**Option B**: Generic `Subscription { subscriberUnitId, targetUnitId, kind }`, retiring `Follow` and possibly `RealmMembership`.
-**Option C**: Defer until after L3 ships, then dedicated `engagement-subscription` explore.
+- Generic `Subscription(subscriberUnitId, targetUnitId, channels: String[])` edge replaces `Follow`.
+- `RealmMember` stays as the orthogonal **permission** edge; realm join is a two-write transaction (member + subscription), leave is the inverse, mute affects subscription only.
+- `channels` uses dot-namespaced strings with three wildcard tiers (`'*'`, `'<category>.*'`, `'<category>.<event>'`); JSON-shaped channels were considered and rejected on fan-out query-cost grounds.
+- Notification fan-out: broadcast recipients resolved via `Subscription` query; direct-recipient path (mention, reply parent, DM peer) preserved.
+- Denormalized `Unit.subscriberCount` introduced as a popularity baseline for downstream hotness work; the hotness formula itself stays out of scope.
+- `User.followersCount` / `User.followingsCount` stay on the User extension and are recomputed from `Subscription` aggregates.
 
-Decision: **C**. L3 is the enabler; the dedicated proposal lives downstream. Until then, `User.followersCount` / `User.followingsCount` stay on the User extension table, not promoted to `Unit`.
+Hard dependency: this L3 change must ship first (`User.unitId` is the prerequisite for `subscriberUnitId`).
 
 ### 6.2 ENTITY Slug Activation
 
@@ -480,3 +478,7 @@ When ready to start work, create three independent OpenSpec changes in this orde
 3. **`shelf-system-slugs`** (L1, after L3 ships)
    Specs touched: `shelf-collection` (clarification only)
    Mints `favorites` / `backlog` / `active` / `completed` slugs under each user at bootstrap; replaces `User.extra.shelves` frontend exposure question.
+
+4. **`engagement-subscription`** (downstream of L3, in parallel with L1 once L3 ships)
+   Specs touched: NEW `engagement-subscription`; MODIFIED `notification-feed`, `profile-followers-tab`, `realm-membership-me`
+   Replaces `Follow` with a generic `Subscription(subscriberUnitId → targetUnitId, channels[])` edge; introduces fan-out recipient resolution for notifications; dual-track with `RealmMember`; adds denormalized `Unit.subscriberCount`. Proposal already drafted at `openspec/changes/engagement-subscription/`; cannot apply until L3 lands.
