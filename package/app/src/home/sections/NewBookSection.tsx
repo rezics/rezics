@@ -52,16 +52,20 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="mb-4">
-        <Tabs value={tab} onValueChange={(value) => setTab(value as TabKey)}>
-          <TabsList>
-            <TabsTrigger value="latest">
+      <div className="mb-4 max-w-full overflow-hidden">
+        <Tabs
+          value={tab}
+          onValueChange={(value) => setTab(value as TabKey)}
+          className="max-w-full"
+        >
+          <TabsList className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory sm:w-fit sm:overflow-visible">
+            <TabsTrigger value="latest" className="flex-none snap-start">
               {t("page.home.sections.new_book.tab_latest_serial")}
             </TabsTrigger>
-            <TabsTrigger value="new">
+            <TabsTrigger value="new" className="flex-none snap-start">
               {t("page.home.sections.new_book.tab_new_on_shelf")}
             </TabsTrigger>
-            <TabsTrigger value="completed">
+            <TabsTrigger value="completed" className="flex-none snap-start">
               {t("page.home.sections.new_book.tab_recently_completed")}
             </TabsTrigger>
           </TabsList>
