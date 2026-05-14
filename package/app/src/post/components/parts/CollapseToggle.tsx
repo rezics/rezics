@@ -18,6 +18,7 @@ export const CollapseToggle: React.FC<CollapseToggleProps> = ({
 
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
+    setHovered(false);
     onToggle();
   };
 

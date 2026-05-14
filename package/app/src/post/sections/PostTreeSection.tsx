@@ -180,6 +180,7 @@ function PostTreeNode({
 
   const handleRailToggle = (event: React.MouseEvent) => {
     event.stopPropagation();
+    onThreadHoverChange(post.unitId, false);
     toggleCollapse(post.unitId);
   };
   const handleRailEnter = () => onThreadHoverChange(post.unitId, true);
