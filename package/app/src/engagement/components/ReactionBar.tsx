@@ -1,6 +1,7 @@
 import type React from "react";
 import { useMemo } from "react";
 import { cn } from "@/shared/utils/css-util";
+import { useAuthGuard } from "@/user/hooks/useAuthGuard";
 import type {
   Action,
   ActionPolicy,
@@ -80,6 +81,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   overflowContent,
   className,
 }) => {
+  const authGuard = useAuthGuard();
   const { visible, hidden } = resolvePolicy(actions, overflow, actionPolicy);
   const hasOverflowContent =
     overflowContent !== undefined && overflowContent !== null;
@@ -94,7 +96,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   const handleOverflowInvoke = (token: Action) => {
     switch (token) {
       case "reply":
-        onReplyInvoke?.();
+        if (authGuard.requireAuth()) onReplyInvoke?.();
         break;
       default:
         // share / shelf require their popover roots; if they appear in
@@ -151,7 +153,9 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
                   key="reply"
                   replyCount={post.replyCount ?? 0}
                   mode={replyMode}
-                  onInvoke={onReplyInvoke}
+                  onInvoke={() => {
+                    if (authGuard.requireAuth()) onReplyInvoke?.();
+                  }}
                 />
               );
             case "share":
@@ -184,6 +188,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
               return null;
           }
         })}
+        {authGuard.AuthModal({})}
       </div>
     </ReactionBarProvider>
   );

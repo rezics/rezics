@@ -15,6 +15,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthGuard } from "@/user/hooks/useAuthGuard";
 
 export type ReplyComposerMode = "progressive" | "expanded";
 
@@ -263,6 +265,8 @@ export const ReplyComposer = forwardRef<
   ReplyComposerHandle,
   ReplyComposerProps
 >(function ReplyComposer(props, ref) {
+  const { t } = useTranslation();
+  const authGuard = useAuthGuard();
   const {
     mode,
     placeholder = "Add a reply…",
@@ -309,11 +313,12 @@ export const ReplyComposer = forwardRef<
     ref,
     () => ({
       focus: () => {
+        if (!authGuard.requireAuth()) return;
         setExpanded(true);
         focusEditor();
       },
     }),
-    [focusEditor],
+    [authGuard.requireAuth, focusEditor],
   );
 
   useEffect(() => {
@@ -334,6 +339,7 @@ export const ReplyComposer = forwardRef<
   };
 
   const handleSubmit = () => {
+    if (!authGuard.requireAuth()) return;
     const trimmed = body.trim();
     if (!trimmed) return;
     const activeRealmUnitIds = realmUnitIds ?? [];
@@ -366,6 +372,7 @@ export const ReplyComposer = forwardRef<
   };
 
   const handleProgressiveFocus = () => {
+    if (!authGuard.requireAuth()) return;
     setExpanded(true);
   };
 
@@ -379,15 +386,34 @@ export const ReplyComposer = forwardRef<
 
   if (mode === "progressive" && !expanded) {
     return (
-      // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents parent row click propagation around the input.
-      // biome-ignore lint/a11y/useKeyWithClickEvents: the wrapper itself is not an activation target.
-      <div ref={triggerRef} onClick={(e) => e.stopPropagation()}>
-        <Input
-          placeholder={placeholder}
-          onFocus={handleProgressiveFocus}
-          onClick={handleProgressiveFocus}
-        />
-      </div>
+      <>
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: this only prevents parent row click propagation around the input. */}
+        {/* biome-ignore lint/a11y/useKeyWithClickEvents: the wrapper itself is not an activation target. */}
+        <div ref={triggerRef} onClick={(e) => e.stopPropagation()}>
+          <Input
+            placeholder={placeholder}
+            onFocus={handleProgressiveFocus}
+            onClick={handleProgressiveFocus}
+          />
+        </div>
+        {authGuard.AuthModal({})}
+      </>
+    );
+  }
+
+  if (!authGuard.isAuthenticated) {
+    return (
+      <>
+        <div className="flex items-center justify-between gap-4 rounded-md bg-surface-subtle p-4">
+          <p className="text-sm leading-ui text-text-secondary">
+            {t("shelf.discussion.signInPrompt")}
+          </p>
+          <Button size="sm" onClick={authGuard.openLogin}>
+            {t("auth.login")}
+          </Button>
+        </div>
+        {authGuard.AuthModal({})}
+      </>
     );
   }
 
@@ -425,6 +451,7 @@ export const ReplyComposer = forwardRef<
           {mutation.isPending ? "Posting…" : isRealmPostMode ? "Post" : "Reply"}
         </Button>
       </div>
+      {authGuard.AuthModal({})}
     </div>
   );
 });
