@@ -10,7 +10,9 @@ Hotness ranking has no popularity input; rating-style `ScoreEntry`/`ScoreAggrega
 
 The architectural blocker — User and Unit being in different identity universes — is removed by `user-namespace-slug` (L3): once `User.unitId ≡ Unit.id where type=USER`, both ends of an attention edge are typed as `Unit.id`, and a generic `Subscription(subscriberUnitId → targetUnitId)` is structurally feasible across every Unit type.
 
-This design specifies that generic edge.
+The boundary blocker — notify being unreachable from the browser and `/internal/event` being shaped for single-recipient hardcoded events — is removed by `notify-broadcast-boundary`: it lands the `notifyBoundary.broadcast(event)` helper signature whose `resolveRecipients(event)` body returns `event.directRecipients` only in v1 and is deliberately stub-shaped so that this change can extend it with the Subscription query without reshaping the contract; it also lands `KIND_REGISTRY` (which this change adds new entries to), the `Domain=.rezics.com` cookie scope (which the new DM and notification hooks rely on), and the WS cookie-auth path (which the DM stream client uses).
+
+This design specifies the generic edge, the resolver body extension, the DM permission migration to subscription, and the DM inbox UI.
 
 ## Goals / Non-Goals
 
@@ -146,34 +148,58 @@ isValidChannel(targetType, channel) =
 
 **Rationale:** colocating registry with contract types means both backend service validation and frontend channel-picker UI consume the same source of truth. Adding a channel for an existing UnitType is a one-line registry addition; no migration.
 
-### D4. Fan-out resolver lives in a single backend helper; direct-recipient path is preserved
+### D4. Fan-out resolver extends the helper from `notify-broadcast-boundary`; direct-recipient path is preserved
 
+`notify-broadcast-boundary` lands the helper:
+
+```ts
+// package/server/src/notify-boundary/notify-boundary.client.ts (already exists post-prereq)
+export async function broadcast(event: {
+  kind: string;
+  sourceUnitId: string;
+  directRecipients?: string[];
+  actorId?: string;
+  extra?: Json;
+}) { ... }
+
+async function resolveRecipients(event): Promise<string[]> {
+  // v1 (notify-broadcast-boundary): direct recipients only
+  return Array.from(new Set(event.directRecipients ?? []));
+}
 ```
-EventBus.emit({
-  kind: 'chapter.new',
-  sourceUnitId: bookId,
-  directRecipients?: [],            // optional: pre-known recipients (mention, reply parent, DM peer)
-  payload: { chapterId, ... }
-})
 
-resolveRecipients(event) =
-  directRecipients
-  ∪ SELECT subscriberUnitId
-    FROM Subscription
-    WHERE targetUnitId = sourceUnitId
-      AND (channels @> ARRAY[event.kind]
-           OR channels @> ARRAY[categoryOf(event.kind) + '.*']
-           OR channels @> ARRAY['*'])
+This change replaces the body of `resolveRecipients` (signature unchanged):
+
+```ts
+// package/server/src/notify-boundary/notify-boundary.client.ts (this change)
+async function resolveRecipients(event): Promise<string[]> {
+  const direct = new Set(event.directRecipients ?? []);
+  const broadcastRecipients = await prisma.$queryRaw<{ subscriberUnitId: string }[]>`
+    SELECT "subscriberUnitId"
+    FROM "Subscription"
+    WHERE "targetUnitId" = ${event.sourceUnitId}
+      AND (
+        channels @> ARRAY[${event.kind}]::text[]
+        OR channels @> ARRAY[${categoryOf(event.kind) + '.*'}]::text[]
+        OR channels @> ARRAY['*']::text[]
+      )
+  `;
+  for (const row of broadcastRecipients) direct.add(row.subscriberUnitId);
+  return Array.from(direct);
+}
 ```
 
-The resolver returns the recipient set; `notification-feed`'s INSERT path is unchanged from there.
+`categoryOf('chapter.new') === 'chapter'`. Helper that splits on the first `.` and returns the prefix.
 
-**Rationale:** keeps notification persistence and SSE stream behavior untouched (those specs need only a small addendum about where recipients come from). Per-domain producers stop owning fan-out — they emit a typed event and let the resolver do the routing.
+The resolver returns the recipient set; `broadcast` then forwards `{ ...event, recipientIds }` to notify's `POST /internal/event` per the contract owned by `notify-broadcast-boundary`. The `notification-feed`'s INSERT path is unchanged from there.
+
+**Rationale:** keeps notification persistence and SSE stream behavior untouched. Per-domain producers stop owning fan-out — they emit a typed event and let the resolver do the routing. The contract reshape (kind, sourceUnitId, recipientIds[]) lives in `notify-broadcast-boundary`; this change extends only the resolver body, which is a clean contract extension point.
 
 **Alternatives considered:**
 
 - *Embed fan-out inside each domain service*: rejected — the duplication problem the change is meant to solve.
 - *Materialized fan-out table (precompute (target, event) → [recipient])*: rejected — write amplification per subscription, and the live query is fast enough with GIN.
+- *Move resolution into notify*: rejected — Subscription lives in the server DB; cross-DB query or replication is far worse than the resolver-on-server pattern. This was settled in `notify-broadcast-boundary`.
 
 ### D5. Realm dual-track: join writes both, leave removes both, mute affects only Subscription
 
@@ -237,6 +263,73 @@ POST   /realm/:id/unmute                → subscription-only insert
 ```
 
 `profile-followers-tab` reads come from `GET /subscription/me?targetType=USER` (followings) and a new `GET /user/:id/followers` (which is `Subscription WHERE targetUnitId=:id AND target.type=USER`).
+
+### D7a. DM permission gate migrates from `Follow` to `Subscription`
+
+The current DM gate in `package/server/src/notify-boundary/dm-boundary.api.ts`:
+
+```ts
+const follow = await prisma.follow.findUnique({
+  where: { followerId_followingId: { followerId: senderId, followingId: recipientId } }
+});
+if (!follow) { set.status = 403; return { error: 'You must follow the recipient ...' }; }
+```
+
+becomes vacuous when `Follow` retires. The replacement check uses `Subscription`:
+
+```ts
+// after
+const sub = await prisma.subscription.findUnique({
+  where: { subscriberUnitId_targetUnitId: {
+    subscriberUnitId: senderUnitId,
+    targetUnitId: recipientUnitId,
+  } }
+});
+const allowsDm = sub && (
+  sub.channels.includes('*') ||
+  sub.channels.includes('dm.*') ||
+  sub.channels.includes('dm.message')
+);
+if (!allowsDm) { set.status = 403; return { error: 'You must subscribe to the recipient ...' }; }
+```
+
+`dm.*` and `dm.message` are added to the `USER` entry of `CHANNEL_REGISTRY`:
+
+```ts
+USER: {
+  categories: ['post', 'review', 'dm'] as const,
+  events: ['post.new', 'review.new', 'dm.message'] as const,
+},
+```
+
+Since the default subscribe channel set is `['*']` (per OQ1 in the original design), every existing follow that's backfilled into a `Subscription` with `channels=['*']` automatically continues to satisfy the DM gate. No silent regression.
+
+**Rationale:** this collapses two semantics ("I follow you" and "I'll let you DM me") into one edge with channel filtering. Future v2 nuance (a "DM-only allow-list" without full subscription) is expressible as `channels=['dm.message']` without changing the schema.
+
+**Alternatives considered:**
+
+- *Mutual subscription required (both directions)*: rejected for v1 — keeps the existing one-way "you must follow me to message me" semantics. v2 could tighten if abuse signals warrant.
+- *Separate `DmAllowList` table*: rejected — duplicates the `Subscription` substrate without semantic benefit.
+
+### D7b. DM inbox UI scope
+
+The DM inbox lands in `package/app` under `/inbox/dm/*`:
+
+- `/inbox/dm` — conversation list (calls `GET notify/dm/conversations`)
+- `/inbox/dm/:conversationId` — message thread (calls `GET notify/dm/conversations/:id/messages` with pagination)
+- Send box composes against server's `POST /dm/send` (which checks the new subscription gate, then forwards to notify's `POST /internal/dm`)
+- WS client mounted on the layout opens `WS /dm` cookie-authenticated per `notify-broadcast-boundary`; incoming messages invalidate the conversation and message queries (or optimistically prepend)
+
+`package/api/src/dm/` adds: `useConversations`, `useMessages(conversationId)`, `useSendDm`, `useDmStream`. Hook patterns mirror the notification hooks landed in `notify-broadcast-boundary`.
+
+**Rationale for landing here, not in `notify-broadcast-boundary`:** the DM permission gate depends on `Subscription`, which doesn't exist yet at `notify-broadcast-boundary` time. The UI without a working permission check would be misleading; bundling them keeps the scope coherent.
+
+**Out of scope for v1 inbox:**
+
+- Group conversations (notify's data model is bilateral only).
+- Message edits, reactions, attachments.
+- Read receipts beyond the existing `readAt` server field — rendering is best-effort.
+- Search across messages.
 
 ### D8. `subscriberCount` denormalization
 
