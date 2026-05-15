@@ -26,7 +26,7 @@ The change also rewrites the public URL surface around a single convention — *
 - Land User-as-Unit in one breaking cutover: rename `User.userId` → `User.unitId`, backfill `Unit { type: USER }` rows, add `USER` and `SCOPE` enum variants.
 - Introduce the `SlugScope` table, the `Unit.slugScope` column, and the composite `(slugScope, slug)` unique. Seed five infrastructure scope rows.
 - Migrate `User.slug` values into `Unit.slug` under the user scope and drop `User.slug`. User slugs become immutable in v1.
-- Rewrite the public URL surface: short=slug / long=unitId; remove `/unit/:slug`; add the long-prefix UUID family; add `/u/:userSlug/shelf/:slug` and `/r/:realmSlug/shelf/:slug` for owner-scoped shelves.
+- Rewrite the public URL surface: short=slug / long=unitId; remove `/unit/:slug`; add the long-prefix UUID family; add `/u/:userSlug/shelf/:slug` for user-owned shelves. `/r/:realmSlug/shelf/:slug` remains the documented future extension shape, but is not opened by this change.
 - Add typed by-slug endpoints for `user`, `entity`, and owner-scoped shelf; add a generic `POST /slug/resolve` resolver; extend `/infra/bootstrap` with `slugScopes`.
 - Extend `SlugRef` to carry `scope` (named scope or owner unit id).
 - Gate ENTITY slug writes at the service layer (typed-error rejection) so the substrate is in place but no entity can be slug-created until `entity-slug-activation` ships.
@@ -37,7 +37,7 @@ The change also rewrites the public URL surface around a single convention — *
 - Mint system shelf slugs — owned by the follow-on `shelf-system-slugs` (L1).
 - Enable entity slug writes or ship the entity-creation flow — owned by `entity-slug-activation`.
 - Introduce `Subscription` or retire `Follow` — owned by `engagement-subscription`.
-- Decide cross-scope policy when `alice` exists as both a user and a realm slug (§6.9 of the plan) — substrate is policy-neutral; product decision deferred.
+- Add any protective cross-scope claim / warning / ownership policy when `alice` exists as both a user and a realm slug. This change decides the baseline resolution semantics only: cross-scope same-name slugs are allowed and imply no relationship.
 - User slug rename / alias / 301 / 410 surface — explicitly out of scope for v1 (§6.3).
 - User-created shelf custom slugs — substrate permits, write surface stays closed (§6.10).
 - Cross-service protocol for delivering broadcast recipients from `package/server` to `package/notify` — separate design discussion (§8 footnote).
@@ -141,6 +141,24 @@ The change also rewrites the public URL surface around a single convention — *
 
 **Why**: A flat global reserved list cannot express "`shelf` is reserved as a path segment under a user, but `shelf` is a perfectly fine slug in the tag scope." The two-layer model fits the URL surface cleanly.
 
+### D14: USER and REALM same-name slugs are allowed but unrelated
+
+**Decision**: The L3 baseline allows the same normalized slug to exist independently in the USER and REALM named scopes. For example, `alice` MAY resolve as both `/u/alice` and `/r/alice`. The two records are not linked by slug equality: there is no ownership, affiliation, claim, redirect, fallback, or verification semantics implied by the shared text.
+
+Routes SHALL resolve exactly one scope. `/u/alice` queries only the USER scope; `/r/alice` queries only the REALM scope. If `/u/alice` is missing and `/r/alice` exists, `/u/alice` still returns 404. If both exist, both are addressable through their own prefixes.
+
+Protective product policy is explicitly deferred. A follow-on change MAY add warnings, creation-time checks, claim flows, or same-slug linking between USER and REALM, but that policy SHALL layer above this substrate and SHALL NOT require changing the `(slugScope, slug)` model.
+
+**Why**: This is the point of per-type scopes: distinct public prefixes carry distinct identity namespaces. Reintroducing a hard USER/REALM mutual exclusion would partially recreate the global namespace pressure this change removes. The short-prefix route table gives enough context for users and systems to distinguish the two resources, while leaving product free to add softer protection later.
+
+### D15: Owner soft-delete keeps owner-scoped slug namespaces reserved
+
+**Decision**: Owner-scoped slugs use the owner's `Unit.id` as `slugScope`. In the current product stage, USER and REALM hard deletion is not supported; deletion is a marker/state change only. Therefore owner-scoped namespaces are not released by this change, and no cascading cleanup or slug reuse path is introduced for user-owned shelves.
+
+If a future change supports hard deletion or slug release, it MUST define the release policy explicitly: whether owner-scoped child slugs are tombstoned, reassigned, anonymized, deleted, or made available for reuse.
+
+**Why**: The absence of an FK on `Unit.slugScope` does not create an orphaning problem while owners are never physically deleted. Treating deletion as a soft marker preserves URL stability and matches the v1 stance that user slugs are immutable and not released.
+
 ## Risks / Trade-offs
 
 - **`User.userId` → `User.unitId` rename surface** → Mitigation: column-name preservation on FK tables (D11) cuts the rename to the User PK field plus the user-facing DTO. Frontend cutover is the largest user-visible side; planned as one breaking commit, no dual-read window.
@@ -148,7 +166,7 @@ The change also rewrites the public URL surface around a single convention — *
 - **Backfill of existing slug-bearing Units** → Mitigation: deterministic mapping `Unit.type → scope` for TAG / REALM / ZONE / USER. Non-slug-bearing Units with an owner get owner-id backfill; otherwise default to a sensible scope placeholder. Backfill runs atomically with the unique-index swap so no row exists outside its new scope window.
 - **Short/long URL split discipline** — developers may be tempted to add `/u/:unitId` "for convenience" or `/user/:slug` mistakenly → Mitigation: convention enforcement via `bun run check:convention` (new rule R-N catching mixed-identifier route params). Document in `CONTRIBUTING.md` once the spec lands.
 - **`/unit/:slug` removal breaks any caller that uses it** → Mitigation: grep the monorepo for `/unit/${` and `/unit/:unitSlug` references during implementation; migrate internal callers to typed by-slug routes. The plan explicitly accepts this as an internal-only break.
-- **Same-name USER/REALM collisions (§6.9)** — substrate allows `alice` to exist in both scopes; product policy is deferred → Mitigation: out-of-scope here; document the gap in `account-identity-boundary`. Registration UI may layer a "warn if same slug exists in another scope" check as a separate change without substrate work.
+- **Same-name USER/REALM collisions (§6.9)** — substrate allows `alice` to exist in both scopes and treats the two identities as unrelated → Mitigation: D14 makes exact-scope resolution mandatory; any warning / claim / linked-identity policy is a separate product change without substrate work.
 - **Meili search rekey** — USER documents already key on `userId` (a UUID); since `unitId == userId` post-migration, no rekey is required → Mitigation: verify by running the Meili sync end-to-end on a staging dataset before flip.
 - **`/infra/bootstrap` shape break** — existing clients that cache the response on disk will see new keys → Mitigation: D10 — the client invalidates on app version stamp bump. Older clients tolerate unknown keys (Typebox parses additional fields without rejecting).
 
@@ -182,7 +200,7 @@ The migration runs in three phases inside a single deploy window. All steps are 
 2. Add long-prefix UUID routes: `/user/:unitId`, `/realm/:unitId`, `/tag/:unitId`, `/zone/:unitId`, `/entity/:unitId`. Each rejects slug-shaped input.
 3. Keep `/unit/:unitId` as the universal UUID fallback.
 4. **Remove** `/unit/:slug` (currently `/unit/:unitSlug`). Internal callers grep'd and migrated to typed by-slug routes during implementation.
-5. Add `/u/:userSlug/shelf/:slug`. The route exists, but the resolver returns 404 for any non-system-shelf slug in v1 (system shelves don't exist until `shelf-system-slugs` ships, so initially this is a 404-only route).
+5. Add `/u/:userSlug/shelf/:slug`. The route exists, but the resolver returns 404 for any non-system-shelf slug in v1 (system shelves don't exist until `shelf-system-slugs` ships, so initially this is a 404-only route). Do not open `/r/:realmSlug/shelf/:slug` in this change; it remains the future extension shape for realm-owned shelves.
 6. Add the generic `POST /slug/resolve` endpoint.
 7. Add typed by-slug endpoints `/user/by-slug/:slug`, `/entity/by-slug/:slug`, and `/shelf/by-slug/:userSlug/:slug`. Confirm the existing `/realm/by-slug/:slug`, `/tag/by-slug/:slug`, `/zone/by-slug/:slug` still work post-migration; their backing query now goes through `(slugScope, slug)` with the scope inferred from the endpoint path.
 
