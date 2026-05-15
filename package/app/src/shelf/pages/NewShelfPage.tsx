@@ -3,6 +3,7 @@ import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 
 export function NewShelfPage() {
   const navigate = useNavigate();
@@ -10,11 +11,13 @@ export function NewShelfPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
+  const [pinnedTagIds, setPinnedTagIds] = useState<string[]>([]);
 
   const handleCreate = () => {
     createMutation.mutate(
       {
         coverUrl: coverUrl || undefined,
+        tagIds: pinnedTagIds.length ? pinnedTagIds : undefined,
         translations: [
           {
             language: DEFAULT_LANGUAGE,
@@ -63,6 +66,14 @@ export function NewShelfPage() {
             id="new-shelf-cover"
             value={coverUrl}
             onChange={(e) => setCoverUrl(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>Content type</Label>
+          <SeedTagChipGroup
+            value={pinnedTagIds}
+            onChange={setPinnedTagIds}
+            disabled={createMutation.isPending}
           />
         </div>
         <div className="flex flex-row justify-end">

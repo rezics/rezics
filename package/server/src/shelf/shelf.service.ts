@@ -2,6 +2,8 @@ import type {
   AddShelfUnitInput,
   CreateShelfInput,
   ReorderShelfUnitInput,
+  SeedTagName,
+  SetPinnedTagsResponse,
   ShelfDetailDTO,
   ShelfDTO,
   ShelfListQuery,
@@ -16,7 +18,11 @@ import type {
   ShelfUnitsResponse,
   UpdateShelfInput,
 } from "@rezics/contract";
-import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
+import {
+  parseIdsCsv,
+  SEED_TAG_NAMES,
+  withCoverUrl,
+} from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
   PostKind,
@@ -25,6 +31,7 @@ import {
   UnitType,
   UnitVisibility,
 } from "#/prisma/client";
+import { getSeedTagId } from "@/infra/seed-tags";
 import { patchContentContainedUnitIdsToMeili } from "@/meili/content/sync";
 import { AppError } from "@/utils/errors";
 import {
@@ -108,6 +115,25 @@ async function deleteShelfUnit(
     });
   }
   return deleted.count;
+}
+
+function getSeedTagIdSet(): Set<string> {
+  const ids = new Set<string>();
+  for (const name of SEED_TAG_NAMES as readonly SeedTagName[]) {
+    const id = getSeedTagId(name);
+    if (id) ids.add(id);
+  }
+  return ids;
+}
+
+function assertOnlySeedTags(ids: readonly string[]): void {
+  if (ids.length === 0) return;
+  const allowed = getSeedTagIdSet();
+  for (const id of ids) {
+    if (!allowed.has(id)) {
+      throw new AppError(400, "invalid-pin-target");
+    }
+  }
 }
 
 export class ShelfService {
@@ -205,6 +231,10 @@ export class ShelfService {
       );
     }
 
+    if (tagIds?.length) {
+      assertOnlySeedTags(tagIds);
+    }
+
     const baseTranslations = translations?.length
       ? translations
       : title || coverUrl !== undefined
@@ -253,6 +283,7 @@ export class ShelfService {
                   tagUnitId,
                   score: 0,
                   voteCount: 0,
+                  pinned: true,
                 })),
               },
             }
@@ -331,6 +362,72 @@ export class ShelfService {
 
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({ where: { id: unitId } });
+  }
+
+  async setPinnedTags(
+    shelfUnitId: string,
+    pinnedTagIds: readonly string[],
+    actorUserId: string,
+  ): Promise<SetPinnedTagsResponse> {
+    const shelf = await prisma.shelf.findUnique({
+      where: { unitId: shelfUnitId },
+      select: { unit: { select: { userId: true } } },
+    });
+    if (!shelf) {
+      throw new AppError(404, `Shelf not found: ${shelfUnitId}`);
+    }
+    if (shelf.unit?.userId !== actorUserId) {
+      throw new AppError(
+        403,
+        "Forbidden: you do not have permission to update this shelf",
+      );
+    }
+
+    assertOnlySeedTags(pinnedTagIds);
+
+    const desired = new Set(pinnedTagIds);
+
+    const tags = await prisma.$transaction(async (tx) => {
+      const existing = await tx.unitTag.findMany({
+        where: { unitId: shelfUnitId, pinned: true },
+        select: { tagUnitId: true },
+      });
+      const existingSet = new Set(existing.map((r) => r.tagUnitId));
+
+      const toAdd = [...desired].filter((id) => !existingSet.has(id));
+      const toRemove = [...existingSet].filter((id) => !desired.has(id));
+
+      if (toRemove.length > 0) {
+        await tx.unitTag.deleteMany({
+          where: {
+            unitId: shelfUnitId,
+            tagUnitId: { in: toRemove },
+            pinned: true,
+          },
+        });
+      }
+      if (toAdd.length > 0) {
+        await tx.unitTag.createMany({
+          data: toAdd.map((tagUnitId) => ({
+            unitId: shelfUnitId,
+            tagUnitId,
+            score: 0,
+            voteCount: 0,
+            pinned: true,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      const rows = await tx.unitTag.findMany({
+        where: { unitId: shelfUnitId, pinned: true },
+        select: { tagUnitId: true, score: true },
+        orderBy: { score: "desc" },
+      });
+      return rows.map((r) => ({ tagUnitId: r.tagUnitId, score: r.score }));
+    });
+
+    return { tags };
   }
 
   // --- Shelf unit operations ---

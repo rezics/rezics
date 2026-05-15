@@ -7,6 +7,8 @@ import type {
   CollectResponse,
   CreateShelfInput,
   ReorderShelfUnitInput,
+  SetPinnedTagsInput,
+  SetPinnedTagsResponse,
   SetShelfUnitChildrenInput,
   ShelfDetailDTO,
   ShelfListResponse,
@@ -169,6 +171,16 @@ export const shelfApi = {
     return apiFetch<ShelfUnitBatchResponse>(`/shelf/${shelfId}/units/batch`, {
       method: "PATCH",
       body: JSON.stringify({ ops }),
+    });
+  },
+
+  setPinnedTags: async (
+    shelfId: string,
+    input: SetPinnedTagsInput,
+  ): Promise<SetPinnedTagsResponse> => {
+    return apiFetch<SetPinnedTagsResponse>(`/shelf/${shelfId}/pinned-tags`, {
+      method: "PUT",
+      body: JSON.stringify(input),
     });
   },
 };

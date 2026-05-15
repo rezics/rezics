@@ -5,6 +5,8 @@ import type {
   CollectResponse,
   CreateShelfInput,
   ReorderShelfUnitInput,
+  SetPinnedTagsInput,
+  SetPinnedTagsResponse,
   SetShelfUnitChildrenInput,
   ShelfResponse,
   ShelfUnitBatchOp,
@@ -262,6 +264,28 @@ export function useBatchUpdateShelfUnitsMutation(
   });
 }
 
+export function useSetShelfPinnedTagsMutation(
+  options?: Omit<
+    UseMutationOptions<
+      SetPinnedTagsResponse,
+      Error,
+      { shelfId: string; input: SetPinnedTagsInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ shelfId, input }) => shelfApi.setPinnedTags(shelfId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateShelfDetail(queryClient, variables.shelfId);
+      invalidateShelfCollections(queryClient);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export function useCleanupOrphansMutation(
   options?: Omit<
     UseMutationOptions<
@@ -335,6 +359,7 @@ export const shelfMutations = {
   useDetachReview: useDetachReviewMutation,
   useSetChildren: useSetShelfUnitChildrenMutation,
   useBatchUpdateUnits: useBatchUpdateShelfUnitsMutation,
+  useSetPinnedTags: useSetShelfPinnedTagsMutation,
   useCleanupOrphans: useCleanupOrphansMutation,
 };
 

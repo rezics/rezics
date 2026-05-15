@@ -3,6 +3,20 @@ import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 installPrismaClientMock();
 
+const SEED_TAG_ID_BY_NAME: Record<string, string> = {
+  book: "11111111-1111-1111-1111-111111111111",
+  game: "22222222-2222-2222-2222-222222222222",
+  media: "33333333-3333-3333-3333-333333333333",
+  post: "44444444-4444-4444-4444-444444444444",
+  link: "55555555-5555-5555-5555-555555555555",
+};
+
+mock.module("@/infra/seed-tags", () => ({
+  getSeedTagId: (name: string) => SEED_TAG_ID_BY_NAME[name] ?? null,
+  initSeedTagsCache: async () => undefined,
+  getSeedTagsSnapshot: () => ({ ...SEED_TAG_ID_BY_NAME }),
+}));
+
 const patchContentContainedUnitIdsToMeiliMock = mock(async () => undefined);
 
 mock.module("@/meili/content/sync", () => ({
@@ -255,6 +269,281 @@ describe("ShelfService", () => {
     if (results[0]!.status === "failed") {
       expect(results[0]!.reason).toBe("self_relation_forbidden");
     }
+  });
+
+  test("create persists tagIds as pinned UnitTag rows", async () => {
+    const captured: { unitTagsCreate?: any[] } = {};
+    Object.assign(prismaMock, {
+      unit: {
+        create: async ({ data }: any) => {
+          captured.unitTagsCreate = data?.unitTags?.create;
+          return { id: "shelf-new" };
+        },
+      },
+      shelf: {
+        create: async () => ({
+          unitId: "shelf-new",
+          extra: null,
+          itemCount: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          unit: {
+            userId: "u1",
+            user: null,
+            defaultLanguage: "en",
+            translations: [],
+            unitTags: [],
+          },
+        }),
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.create(
+      {
+        title: "My Shelf",
+        tagIds: [SEED_TAG_ID_BY_NAME.book!, SEED_TAG_ID_BY_NAME.media!],
+      },
+      "u1",
+    );
+
+    expect(captured.unitTagsCreate).toBeDefined();
+    expect(captured.unitTagsCreate).toHaveLength(2);
+    expect(captured.unitTagsCreate![0]!.pinned).toBe(true);
+    expect(captured.unitTagsCreate![1]!.pinned).toBe(true);
+  });
+
+  test("create rejects non-seed tagIds", async () => {
+    Object.assign(prismaMock, {});
+
+    const { shelfService } = await import("./shelf.service");
+    let status = 0;
+    let message = "";
+    try {
+      await shelfService.create(
+        {
+          title: "My Shelf",
+          tagIds: ["99999999-9999-9999-9999-999999999999"],
+        },
+        "u1",
+      );
+    } catch (err) {
+      status = (err as { statusCode?: number }).statusCode ?? 0;
+      message = (err as Error).message;
+    }
+    expect(status).toBe(400);
+    expect(message).toBe("invalid-pin-target");
+  });
+
+  test("setPinnedTags inserts added rows only (insert-only diff)", async () => {
+    const calls: { op: string; payload?: any }[] = [];
+    Object.assign(prismaMock, {
+      shelf: {
+        findUnique: async () => ({ unit: { userId: "u1" } }),
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          unitTag: {
+            findMany: async ({ select }: any) => {
+              if (select?.tagUnitId && !select.score) {
+                return []; // initial existing
+              }
+              return [
+                {
+                  tagUnitId: SEED_TAG_ID_BY_NAME.book,
+                  score: 0,
+                },
+              ];
+            },
+            deleteMany: async (args: any) => {
+              calls.push({ op: "deleteMany", payload: args });
+              return { count: 0 };
+            },
+            createMany: async (args: any) => {
+              calls.push({ op: "createMany", payload: args });
+              return { count: args.data?.length ?? 0 };
+            },
+          },
+        }),
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    const result = await shelfService.setPinnedTags(
+      "shelf-1",
+      [SEED_TAG_ID_BY_NAME.book!],
+      "u1",
+    );
+
+    expect(calls.find((c) => c.op === "createMany")).toBeDefined();
+    expect(calls.find((c) => c.op === "deleteMany")).toBeUndefined();
+    expect(result.tags).toHaveLength(1);
+    expect(result.tags[0]!.tagUnitId).toBe(SEED_TAG_ID_BY_NAME.book!);
+  });
+
+  test("setPinnedTags deletes removed rows only (delete-only diff)", async () => {
+    const calls: { op: string; payload?: any }[] = [];
+    Object.assign(prismaMock, {
+      shelf: {
+        findUnique: async () => ({ unit: { userId: "u1" } }),
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          unitTag: {
+            findMany: async ({ select }: any) => {
+              if (select?.tagUnitId && !select.score) {
+                return [
+                  { tagUnitId: SEED_TAG_ID_BY_NAME.book },
+                  { tagUnitId: SEED_TAG_ID_BY_NAME.media },
+                ];
+              }
+              return [{ tagUnitId: SEED_TAG_ID_BY_NAME.book, score: 0 }];
+            },
+            deleteMany: async (args: any) => {
+              calls.push({ op: "deleteMany", payload: args });
+              return { count: args.where.tagUnitId.in.length };
+            },
+            createMany: async (args: any) => {
+              calls.push({ op: "createMany", payload: args });
+              return { count: 0 };
+            },
+          },
+        }),
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.setPinnedTags(
+      "shelf-1",
+      [SEED_TAG_ID_BY_NAME.book!],
+      "u1",
+    );
+
+    const del = calls.find((c) => c.op === "deleteMany");
+    expect(del).toBeDefined();
+    expect(del!.payload.where.tagUnitId.in).toEqual([SEED_TAG_ID_BY_NAME.media!]);
+    expect(calls.find((c) => c.op === "createMany")).toBeUndefined();
+  });
+
+  test("setPinnedTags performs mixed-diff insert + delete", async () => {
+    const calls: { op: string; payload?: any }[] = [];
+    Object.assign(prismaMock, {
+      shelf: {
+        findUnique: async () => ({ unit: { userId: "u1" } }),
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          unitTag: {
+            findMany: async ({ select }: any) => {
+              if (select?.tagUnitId && !select.score) {
+                return [{ tagUnitId: SEED_TAG_ID_BY_NAME.book }];
+              }
+              return [{ tagUnitId: SEED_TAG_ID_BY_NAME.game, score: 0 }];
+            },
+            deleteMany: async (args: any) => {
+              calls.push({ op: "deleteMany", payload: args });
+              return { count: 1 };
+            },
+            createMany: async (args: any) => {
+              calls.push({ op: "createMany", payload: args });
+              return { count: args.data?.length ?? 0 };
+            },
+          },
+        }),
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.setPinnedTags(
+      "shelf-1",
+      [SEED_TAG_ID_BY_NAME.game!],
+      "u1",
+    );
+
+    const del = calls.find((c) => c.op === "deleteMany");
+    const create = calls.find((c) => c.op === "createMany");
+    expect(del!.payload.where.tagUnitId.in).toEqual([SEED_TAG_ID_BY_NAME.book!]);
+    expect(create!.payload.data.map((r: any) => r.tagUnitId)).toEqual([
+      SEED_TAG_ID_BY_NAME.game!,
+    ]);
+  });
+
+  test("setPinnedTags is idempotent — same set yields no row churn", async () => {
+    const calls: string[] = [];
+    Object.assign(prismaMock, {
+      shelf: {
+        findUnique: async () => ({ unit: { userId: "u1" } }),
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          unitTag: {
+            findMany: async ({ select }: any) => {
+              if (select?.tagUnitId && !select.score) {
+                return [{ tagUnitId: SEED_TAG_ID_BY_NAME.book }];
+              }
+              return [{ tagUnitId: SEED_TAG_ID_BY_NAME.book, score: 0 }];
+            },
+            deleteMany: async () => {
+              calls.push("deleteMany");
+              return { count: 0 };
+            },
+            createMany: async () => {
+              calls.push("createMany");
+              return { count: 0 };
+            },
+          },
+        }),
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.setPinnedTags(
+      "shelf-1",
+      [SEED_TAG_ID_BY_NAME.book!],
+      "u1",
+    );
+    expect(calls).toEqual([]);
+  });
+
+  test("setPinnedTags rejects non-owner", async () => {
+    Object.assign(prismaMock, {
+      shelf: {
+        findUnique: async () => ({ unit: { userId: "owner" } }),
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    let status = 0;
+    try {
+      await shelfService.setPinnedTags(
+        "shelf-1",
+        [SEED_TAG_ID_BY_NAME.book!],
+        "intruder",
+      );
+    } catch (err) {
+      status = (err as { statusCode?: number }).statusCode ?? 0;
+    }
+    expect(status).toBe(403);
+  });
+
+  test("setPinnedTags rejects non-seed identifiers", async () => {
+    Object.assign(prismaMock, {
+      shelf: {
+        findUnique: async () => ({ unit: { userId: "u1" } }),
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    let status = 0;
+    let message = "";
+    try {
+      await shelfService.setPinnedTags(
+        "shelf-1",
+        ["99999999-9999-9999-9999-999999999999"],
+        "u1",
+      );
+    } catch (err) {
+      status = (err as { statusCode?: number }).statusCode ?? 0;
+      message = (err as Error).message;
+    }
+    expect(status).toBe(400);
+    expect(message).toBe("invalid-pin-target");
   });
 
   test("removeUnit syncs containedUnitIds to Meilisearch after the canonical delete", async () => {

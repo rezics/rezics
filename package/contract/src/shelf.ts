@@ -255,6 +255,28 @@ export const updateShelfSchema = t.Object({
 export type UpdateShelfInput = (typeof updateShelfSchema)["static"];
 
 // ============================================================
+// SHELF PINNED TAGS
+// ============================================================
+
+export const setPinnedTagsBodySchema = t.Object({
+  pinnedTagIds: t.Array(t.String({ format: "uuid" })),
+});
+
+export type SetPinnedTagsInput = (typeof setPinnedTagsBodySchema)["static"];
+
+export const setPinnedTagsResponseSchema = t.Object({
+  tags: t.Array(
+    t.Object({
+      tagUnitId: t.String(),
+      score: t.Number(),
+    }),
+  ),
+});
+
+export type SetPinnedTagsResponse =
+  (typeof setPinnedTagsResponseSchema)["static"];
+
+// ============================================================
 // SHELF UNIT CRUD
 // ============================================================
 

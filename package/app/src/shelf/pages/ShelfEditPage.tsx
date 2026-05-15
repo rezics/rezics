@@ -1,6 +1,9 @@
 import type { ShelfView } from "@rezics/api/shelf";
 import { shelfDetailQuery } from "@rezics/api/shelf";
-import { useUpdateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
+import {
+  useSetShelfPinnedTagsMutation,
+  useUpdateShelfMutation,
+} from "@rezics/api/shelf/shelf.mutations";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -17,6 +20,7 @@ import { useBlocker, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
 
@@ -39,7 +43,20 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const navigate = useNavigate();
   const { data: shelf, isLoading } = useQuery(shelfDetailQuery(shelfId));
   const updateMutation = useUpdateShelfMutation();
+  const setPinnedTagsMutation = useSetShelfPinnedTagsMutation();
   const editor = useShelfItemsEditor(shelfId);
+
+  const pinnedTagIds = useMemo(
+    () => shelf?.tags?.map((t) => t.tagUnitId) ?? [],
+    [shelf?.tags],
+  );
+
+  const handlePinnedTagsChange = (next: string[]) => {
+    setPinnedTagsMutation.mutate({
+      shelfId,
+      input: { pinnedTagIds: next },
+    });
+  };
 
   const translation = shelf ? getTranslation(shelf.translations) : null;
   const [title, setTitle] = useState("");
@@ -159,6 +176,20 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
             value={coverUrl}
             onChange={(e) => setCoverUrl(e.target.value)}
           />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>Content type</Label>
+          <SeedTagChipGroup
+            value={pinnedTagIds}
+            onChange={handlePinnedTagsChange}
+            disabled={setPinnedTagsMutation.isPending}
+          />
+          {setPinnedTagsMutation.isError && (
+            <span className="text-xs text-error-text">
+              {setPinnedTagsMutation.error?.message ??
+                "Failed to update content type"}
+            </span>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-shelf-default-view">Default view</Label>

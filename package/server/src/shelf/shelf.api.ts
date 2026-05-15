@@ -1,4 +1,5 @@
 import type {
+  SetPinnedTagsResponse,
   ShelfDetailDTO,
   ShelfDTO,
   ShelfListResponse,
@@ -16,6 +17,7 @@ import {
   hasPermissionToDeleteShelf,
   hasPermissionToUpdateShelf,
   reorderShelfUnitSchema,
+  setPinnedTagsBodySchema,
   setShelfUnitChildrenSchema,
   shelfListBodySchema,
   shelfListQuerySchema,
@@ -155,6 +157,49 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
       detail: {
         summary: "Update shelf",
         description: "Update an existing shelf by unit ID",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .put(
+    "/:unitId/pinned-tags",
+    async ({
+      params,
+      body,
+      identity,
+      set,
+    }): Promise<SetPinnedTagsResponse> => {
+      const target = await unitService.getByUnitId(params.unitId);
+      if (!target) {
+        set.status = 404;
+        throw new Error(`Shelf not found: ${params.unitId}`);
+      }
+      if (
+        !hasPermissionToUpdateShelf(
+          identity.permission,
+          identity.userId,
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to update this shelf",
+        );
+      }
+      return shelfService.setPinnedTags(
+        params.unitId,
+        body.pinnedTagIds,
+        identity.userId,
+      );
+    },
+    {
+      requireLogin: true,
+      params: shelfParamsSchema,
+      body: setPinnedTagsBodySchema,
+      detail: {
+        summary: "Set shelf pinned seed tags",
+        description:
+          "Replace the shelf's set of pinned seed-tag UnitTag rows. Only seed-tag UUIDs are accepted; non-seed identifiers are rejected.",
         tags: ["Shelves"],
       },
     },

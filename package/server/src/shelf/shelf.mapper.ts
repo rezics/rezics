@@ -89,10 +89,12 @@ export function mapShelfDetailToDTO(
   return {
     ...mapShelfToDTO(row),
     itemCount,
-    tags: row.unit?.unitTags?.map((t) => ({
-      tagUnitId: t.tagUnitId,
-      score: t.score,
-    })),
+    tags: row.unit?.unitTags
+      ?.filter((t) => t.pinned)
+      .map((t) => ({
+        tagUnitId: t.tagUnitId,
+        score: t.score,
+      })),
   };
 }
 
@@ -127,9 +129,11 @@ export function mapShelfSummaryToDTO(row: ShelfListSelected): ShelfSummaryDTO {
     ),
     title,
     itemCount: row.itemCount,
-    tags: row.unit?.unitTags?.map((t) => ({
-      tagUnitId: t.tagUnitId,
-      score: t.score,
-    })),
+    tags: row.unit?.unitTags
+      ?.filter((t) => t.pinned)
+      .map((t) => ({
+        tagUnitId: t.tagUnitId,
+        score: t.score,
+      })),
   };
 }

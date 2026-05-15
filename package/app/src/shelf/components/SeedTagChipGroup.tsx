@@ -1,0 +1,74 @@
+import { getSeedTagId } from "@rezics/api/infra/bootstrap";
+import {
+  SEED_TAG_NAMES,
+  SEED_TAG_TITLES,
+  type SeedTagName,
+} from "@rezics/contract";
+import { Badge } from "@rezics/ui/shadcn";
+import { useMemo } from "react";
+
+export interface SeedTagChipGroupProps {
+  value: string[];
+  onChange: (next: string[]) => void;
+  disabled?: boolean;
+}
+
+export function SeedTagChipGroup({
+  value,
+  onChange,
+  disabled = false,
+}: SeedTagChipGroupProps) {
+  const chips = useMemo(
+    () =>
+      SEED_TAG_NAMES.map((name) => {
+        const tagId = getSeedTagId(name);
+        return tagId
+          ? { name, tagId, label: SEED_TAG_TITLES[name] }
+          : null;
+      }).filter(
+        (c): c is { name: SeedTagName; tagId: string; label: string } =>
+          c !== null,
+      ),
+    [],
+  );
+
+  const selected = useMemo(() => new Set(value), [value]);
+
+  const toggle = (tagId: string) => {
+    if (disabled) return;
+    const next = new Set(selected);
+    if (next.has(tagId)) next.delete(tagId);
+    else next.add(tagId);
+    onChange([...next]);
+  };
+
+  return (
+    <div
+      className="flex flex-wrap gap-2"
+      role="group"
+      aria-label="Content type tags"
+    >
+      {chips.map(({ name, tagId, label }) => {
+        const isSelected = selected.has(tagId);
+        return (
+          <Badge
+            key={name}
+            variant={isSelected ? "default" : "outline"}
+            className={
+              disabled
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer"
+            }
+            aria-pressed={isSelected}
+            aria-disabled={disabled || undefined}
+            onClick={() => toggle(tagId)}
+          >
+            {label}
+          </Badge>
+        );
+      })}
+    </div>
+  );
+}
+
+export default SeedTagChipGroup;
