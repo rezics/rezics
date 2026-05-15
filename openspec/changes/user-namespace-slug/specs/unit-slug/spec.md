@@ -109,7 +109,7 @@ Once a slug has been set on a unit, non-admin users SHALL NOT be able to modify 
 
 ### Requirement: Slug can be set at creation or later
 
-The slug MAY be provided when creating a slug-eligible Unit (TAG, REALM, ZONE, USER, or system SHELF under owner scope), or it MAY be set in a subsequent update for non-USER types. Both paths SHALL apply the same validation rules (format, scope-aware uniqueness, scope-and-owner reserved words).
+The slug MAY be provided when creating a slug-eligible Unit (TAG, REALM, ZONE, USER, or system SHELF under owner scope), or it MAY be set in a subsequent update for non-USER types. Both paths SHALL apply the same validation rules (format, scope-aware uniqueness lookup, and the single unified reserved-word list per `slug-validation`).
 
 #### Scenario: Slug provided at creation
 

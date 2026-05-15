@@ -1,34 +1,61 @@
 ## ADDED Requirements
 
-### Requirement: Scope-aware reserved-word layers
+### Requirement: Unified reserved-word list across all slug scopes
 
-Slug validation SHALL apply reserved-word checks in two layers:
+Slug validation SHALL apply a **single unified reserved-word list** across every scope (`user`, `realm`, `tag`, `zone`, `entity`, and any owner-scope identified by an owner Unit id). A word reserved in any scope is reserved in every scope. The list SHALL live in `@rezics/contract` as a single exported constant and SHALL be the only reserved-word source consulted by `validateSlug`.
 
-1. **Per-scope reserved words.** Each `SlugScope` (`user`, `realm`, `tag`, `zone`, `entity`) SHALL have its own reserved set declared in `@rezics/contract`. The five sets MAY overlap but SHALL be independently maintained so a word that is reserved in one scope (e.g., `admin` in user scope) need not be reserved in another (e.g., a tag named `admin` MAY be admissible if product wants it).
-2. **Per-owner reserved words.** When validating a slug whose `slugScope` is an owner Unit (not a `SlugScope` placeholder), the reserved set SHALL additionally include the type-prefix path segments used under that owner's URL family (e.g., `profile`, `settings`, `shelf`, `post`, `list`). This prevents an owner sub-resource slug from colliding with the owner's reserved path segments.
+The unified list SHALL include:
 
-`validateSlug` SHALL accept a `scope` argument (named scope or owner unit id) and SHALL pull the appropriate layered reserved set when validating. Callers that omit `scope` SHALL fall back to a conservative "union of all reserved sets" check.
+1. Platform navigation and route keywords.
+2. Auth, account, and role identifiers.
+3. Technical and brand terms.
+4. Common confusable words.
+5. **Owner-path segments** (`profile`, `settings`, `shelf`, `post`, `list`, and any future owner sub-resource type-prefix). These were previously modeled as a separate per-owner layer; they are now part of the same flat list.
+6. **System slug values** that the platform mints on behalf of users (`favorites`, `backlog`, `active`, `completed`, and any future contract-defined system slug). Users SHALL NOT be able to manually claim these slugs in any scope.
 
-#### Scenario: User-scope reserved word rejected
+`validateSlug` SHALL accept a `scope` argument and apply the same unified list regardless of which scope is passed. The `scope` argument continues to drive **uniqueness lookup** against `(slugScope, slug)`, but it does NOT drive reserved-word selection.
 
-- **WHEN** `validateSlug("admin", { scope: 'user' })` is called
-- **THEN** the result SHALL indicate the slug is reserved under the user scope
+#### Scenario: System slug name rejected in any scope
 
-#### Scenario: Word reserved in user scope is admissible in tag scope
+- **WHEN** `validateSlug("favorites", { scope: 'user' })` is called
+- **THEN** the result SHALL fail with `reserved`
+- **AND** `validateSlug("favorites", { scope: 'realm' })` SHALL also fail with `reserved`
+- **AND** `validateSlug("favorites", { scope: <ownerUserUnitId> })` SHALL also fail with `reserved`
 
-- **GIVEN** the tag-scope reserved set does not contain `"profile"`
-- **WHEN** `validateSlug("profile", { scope: 'tag' })` is called
+#### Scenario: Owner-path segment rejected in any scope
+
+- **WHEN** `validateSlug("profile", { scope: 'user' })` is called
+- **THEN** the result SHALL fail with `reserved`
+- **AND** `validateSlug("profile", { scope: 'tag' })` SHALL also fail with `reserved`
+
+#### Scenario: Non-reserved word passes in every scope
+
+- **WHEN** `validateSlug("my-book-club", { scope: 'user' })` is called
 - **THEN** the result SHALL pass (assuming format is valid)
-- **AND** `validateSlug("profile", { scope: 'user' })` SHALL fail with `reserved`
+- **AND** `validateSlug("my-book-club", { scope: 'tag' })` SHALL also pass
 
-#### Scenario: Owner-scoped slug rejects type-prefix segments
+### Requirement: System slug minting bypasses validateSlug
 
-- **WHEN** `validateSlug("settings", { scope: <ownerUserUnitId> })` is called
-- **THEN** the result SHALL indicate the slug collides with a reserved owner path segment
+Service code that mints a contract-defined system slug (e.g., the four system shelf slugs `favorites` / `backlog` / `active` / `completed` written during user bootstrap, or any other code path whose slug value is read directly from a `@rezics/contract` constant) SHALL NOT route the write through `validateSlug`. The unified reserved-word list (which includes these very slugs) would otherwise reject the slug it is itself responsible for installing.
+
+System slug writes SHALL read the canonical string from the contract constant and persist it directly. The format and reserved-word checks are unnecessary because the input is not user-supplied.
+
+#### Scenario: Bootstrap mints the `favorites` system shelf slug
+
+- **WHEN** the system shelf bootstrap path mints a shelf with slug `"favorites"` for a new user
+- **THEN** the write SHALL NOT call `validateSlug`
+- **AND** the slug value SHALL be read from the `@rezics/contract` system-slug constant
+- **AND** the write SHALL succeed despite `"favorites"` being on the reserved list
+
+#### Scenario: User-facing slug write still goes through validateSlug
+
+- **WHEN** a user submits a slug value via any user-facing API surface (tag creation, realm creation, admin entity slug assignment, etc.)
+- **THEN** the write path SHALL call `validateSlug` first
+- **AND** the unified reserved-word list SHALL be enforced
 
 ### Requirement: ENTITY slug writes are gated at the service layer
 
-The `validateSlug` function SHALL succeed for well-formed ENTITY slug inputs (so substrate paths can canonicalize the value), but every service entry point that would persist a slug on an ENTITY-typed Unit SHALL reject the write with a typed error such as `ENTITY_SLUG_DISABLED` until the `entity-slug-activation` change flips the gate. The gate SHALL be a single source of truth (e.g., a `ENTITY_SLUG_WRITES_ENABLED` constant or feature flag) so the future change touches one location.
+The `validateSlug` function SHALL succeed for well-formed ENTITY slug inputs (so substrate paths can canonicalize the value), but every service entry point that would persist a slug on an ENTITY-typed Unit SHALL reject the write with a typed error such as `ENTITY_SLUG_DISABLED` until the `entity-slug-activation` change flips the gate. The gate SHALL be a single source of truth (e.g., an `ENTITY_SLUG_WRITES_ENABLED` constant or feature flag) so the future change touches one location.
 
 #### Scenario: Format-valid ENTITY slug passes validation but fails write
 
@@ -40,7 +67,7 @@ The `validateSlug` function SHALL succeed for well-formed ENTITY slug inputs (so
 
 ### Requirement: Platform-wide reserved words list
 
-The `@rezics/contract` package SHALL export per-scope reserved sets that compose into a platform-wide reserved surface. The user-scope reserved set SHALL inherit the legacy flat list as its starting contents:
+The `@rezics/contract` package SHALL export a **single unified reserved-word list** consulted by `validateSlug` for every scope. The list SHALL be flat (no per-scope or per-owner partitioning) and SHALL contain at minimum:
 
 - Platform route keywords (tag, tags, realm, realms, book, books, shelf, search, explore, feed, trending, discover, browse)
 - Auth/account terms (login, logout, signup, register, account, settings, password, profile)
@@ -49,22 +76,24 @@ The `@rezics/contract` package SHALL export per-scope reserved sets that compose
 - Navigation pages (help, docs, about, terms, privacy, contact, pricing, billing, status, blog, news)
 - Common confusable words (me, you, null, undefined, test, example, anonymous, deleted, unknown, nobody, everyone)
 - Brand terms (rezics)
+- Owner-path segments (profile, settings, shelf, post, list) — the type-prefix segments under owner-scope URLs
+- System slug values (favorites, backlog, active, completed) — slugs the platform mints automatically and SHALL NOT be user-claimable
 
-The realm-scope set SHALL inherit the same list for v1. The tag, zone, and entity scopes SHALL start with smaller scope-relevant sets to be tuned per scope as needed. Owner-scope reserved sets SHALL be derived from the live URL convention (currently `profile`, `settings`, `shelf`, `post`, `list`) and SHALL be auto-augmented when new owner sub-resource types are introduced.
+New entries (additional owner sub-resource types, additional system slugs) SHALL be added to this unified list. There SHALL NOT be parallel per-scope lists.
 
-#### Scenario: Reserved word rejected in user scope
+#### Scenario: Reserved word rejected in every scope
 
 - **WHEN** `validateSlug("administrator", { scope: 'user' })` is called
-- **THEN** the result SHALL indicate the slug is reserved
+- **THEN** the result SHALL fail with `reserved`
+- **AND** `validateSlug("administrator", { scope: 'tag' })` SHALL also fail with `reserved`
 
-#### Scenario: Non-reserved word passes in user scope
+#### Scenario: Non-reserved word passes
 
 - **WHEN** `validateSlug("my-book-club", { scope: 'user' })` is called
 - **THEN** the result SHALL pass (assuming format is valid)
 
-#### Scenario: Scope-relevant reserved word in tag scope
+#### Scenario: System slug value rejected as user-claimable
 
-- **GIVEN** the tag-scope reserved set includes `"system"` but not `"login"`
-- **WHEN** `validateSlug("login", { scope: 'tag' })` is called
-- **THEN** the result SHALL pass (login is not reserved in the tag scope)
-- **AND** `validateSlug("system", { scope: 'tag' })` SHALL fail with `reserved`
+- **WHEN** `validateSlug("backlog", { scope: 'user' })` is called by a user-facing surface
+- **THEN** the result SHALL fail with `reserved`
+- **AND** the system-shelf bootstrap path (which bypasses `validateSlug` per the dedicated requirement) is unaffected

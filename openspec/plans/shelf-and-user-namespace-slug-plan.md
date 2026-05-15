@@ -386,14 +386,30 @@ Hard dependency: this L3 change must ship first (`User.unitId` is the prerequisi
 
 ### 6.2 ENTITY Slug Activation — Decided
 
-L3 seeds the `entity` scope with write access **disabled at the service layer** (any `ENTITY` slug-creation attempt is rejected with a typed error). The USER↔ENTITY product relationship (verified claim / authorship) is not finalised and SHALL NOT block L3 from shipping.
+L3 seeds the `entity` scope with write access **disabled at the service layer** (any `ENTITY` slug-creation attempt is rejected with a typed error). The follow-on change `entity-slug-activation` flips writes on shortly after L3 stabilises. It is queued as #4 in the proposal sequence (§8) and runs in parallel with #3 and #5.
 
-A separate follow-on change `entity-slug-activation` flips writes on shortly after L3 stabilises. That change owns:
-- the entity-creation flow (admin tools and/or user-facing path);
-- whatever USER↔ENTITY claim / authorship policy product wants;
-- the reserved-word list (if any) for the entity scope.
+**USER ↔ ENTITY relationship — Decided.** Entity behaves like Chapter: a user MAY own zero or many entities. There is no 1:1 USER-claims-one-ENTITY semantic. Two creation modes (see [[wiki-content-ownership-plan]]):
 
-It is queued as #4 in the proposal sequence (§8) and runs in parallel with #3 and #5 once L3 ships.
+- **Wiki mode** — community contributor adds a catalog entry (e.g., "Haruki Murakami"). Ownership goes to the system custodian user, not the creator. No slug.
+- **Personal mode** — onboarded user declares an entity that belongs to them (e.g., the user *is* an author and wants their own entity for credit). Ownership stays with the user. Still no slug.
+
+**Slug write authority — Decided (admin-only after verified).** Neither creation mode exposes a slug field to end users. Slug is set only by admin after `verified = true`. Payment / paid-verification flow is deferred to a follow-on — v1 is verified-only.
+
+**Entity-creation surfaces this change owns:**
+
+- `EntityPicker` (modal, embedded in Book/Game/Media creation) — minimum fields: one translation (`language + title`) + `kind`. Bio NOT required for inline create. Spawn mode is always wiki.
+- `/me/entities` index + `/me/entities/new` for personal-mode self-declaration. Entry lives in `/me/settings` sidebar (not main avatar dropdown, since most users never declare an entity).
+- `/admin/entities/:unitId` admin write page — sole surface for setting slug and toggling `verified`.
+
+**Entity detail page (`/e/:slug`, `/entity/:unitId`) — Decided.** Single component, IMDb-style skeleton (Hero + Overview / Works / About / Awards / News tabs). `bio` is rendered as `Overview`. Tabs whose data source is empty SHALL NOT render in the tablist (no hard-coded kind→tab mapping). `Awards` and `News` tab implementations SHALL be written but commented out in v1, with English block comments explaining "no data source wired up yet" — uncommenting is the activation path when their backing data lands.
+
+- **Verified visual:** lucide-react icon next to the kind chip; specific icon choice belongs to the change's `design.md` (governed by `rezics-design` skill).
+- **OwnerHint:** entities owned by the system custodian render a neutral "Community catalog entry" label. Entities owned by a real user render no owner label.
+- **Subscribe button:** NOT shipped in v1. Wired in once `engagement-subscription` lands.
+
+**Cross-scope policy:** USER × REALM × ENTITY collisions are not enforced (see §6.9). ENTITY's admin-only slug write effectively bounds the practical collision risk.
+
+**Hard dependency on `wiki-content-ownership` / `content-creation-mode`** ([[wiki-content-ownership-plan]] §7). The custodian user must exist and the per-surface wiki-vs-personal mode discipline must be defined before EntityPicker (wiki spawn) and `/me/entities/new` (personal spawn) can be implemented coherently. Sequencing updated in §8.
 
 ### 6.3 User Slug Rename Policy — Decided
 
@@ -425,17 +441,15 @@ Lighter path. `Unit` columns not meaningful for `type=USER` (`workUnitId`, `rati
 
 Multi-select chips on `ShelfEditPage` and `NewShelfPage`. Matches `CollectionModal`'s filter semantics (`tag IN seedTags`) and lets a shelf mix book + game content cleanly. The L2 proposal owns the picker UX (chip group component, no upper bound enforced, zero selections allowed).
 
-### 6.9 Cross-Scope Slug Collisions Between USER and REALM — Deferred
+### 6.9 Cross-Scope Slug Collisions Between USER, REALM, and ENTITY — Decided (No Enforcement)
 
-With per-type scopes, `alice` can in principle exist both as a USER slug and a REALM slug — they live in independent uniqueness universes. The plan provides the substrate; it does **not** decide policy.
+With per-type scopes, the same normalized slug (e.g., `alice`) MAY simultaneously exist as a USER slug, a REALM slug, and (once `entity-slug-activation` ships) an ENTITY slug — each scope is an independent uniqueness universe. The plan does not impose any cross-scope policy.
 
-Open product questions for a follow-on:
+- `/u/alice`, `/r/alice`, `/e/alice` are independently addressable; each route resolves only its own scope, and a 404 in one scope does NOT fall back to another.
+- No registration-time warning, block, or "claim/linked-identity" mechanism is introduced.
+- ENTITY tightens this further at the write side, not at the substrate side: ENTITY slugs are admin-only (see §6.2 and the `entity-slug-activation` follow-on). The same-slug collision risk is therefore mostly bounded by admin discretion.
 
-- Are they both simultaneously addressable as `/u/alice` and `/r/alice`? Structurally: yes.
-- Should registration warn or block when a same-slug counterpart already exists in another scope?
-- Should there be a "claim" or "linked-identity" mechanism (e.g., a user can mark a realm with the same slug as theirs)?
-
-Explicitly out of scope for L3. The slug substrate is policy-neutral; layering policy on top is a separate change.
+Rationale: distinct public prefixes already carry distinct identity namespaces; reintroducing a global same-text exclusion would partially recreate the namespace pressure per-type scopes are designed to remove. Product-level protection (warning UX, claim flows, linked identity) MAY layer above this substrate later without schema work.
 
 ### 6.10 Shelf Custom Slugs — Decided (v1)
 
@@ -477,7 +491,7 @@ Meili currently indexes `userId` and `realmIds` etc. With User-as-Unit, `userId`
 
 ## 8. Proposal Sequence
 
-Five OpenSpec changes. L2 is independent; L3 unblocks the rest; #3, #4, #5 are all post-L3 and can run in parallel.
+Six OpenSpec changes. L2 is independent; L3 unblocks #3 / #5 / #6; #4 (`content-creation-mode`) is a hard prerequisite of #5 (`entity-slug-activation`). #3, #4, #6 can run in parallel with each other once L3 ships; #5 waits for #4.
 
 1. **`shelf-tag-pinned-chain`** (L2)
    Specs touched: `profile-shelves-tab`, `shelf-seed-tags`
@@ -494,12 +508,16 @@ Five OpenSpec changes. L2 is independent; L3 unblocks the rest; #3, #4, #5 are a
    Specs touched: `shelf-collection` (clarification only)
    Mints `favorites` / `backlog` / `active` / `completed` slugs under each user at bootstrap; replaces the `User.extra.shelves` frontend exposure question. Reaffirms the §6.10 constraint that user-created shelves stay slug-less.
 
-4. **`entity-slug-activation`** (after L3 stabilises, in parallel with #3 and #5)
-   Specs touched: `unit-slug` (re-allow ENTITY writes), `slug-validation` (entity-scope reserved words if any)
-   Flips the ENTITY scope from write-disabled (L3 default) to writable, and ships the entity-creation flow plus any USER↔ENTITY claim / authorship policy product wants. Resolves §6.2.
+4. **`content-creation-mode`** (after L3 ships, prerequisite of #5)
+   Specs touched: NEW `wiki-content-ownership`; MODIFIED `book-creation`, `entity-unit-type`, any game/media creation specs
+   Seeds the system custodian user, adds per-surface wiki / personal mode discipline, and routes wiki-mode writes to `Unit.userId = system.unitId`. Lock substrate is documented forward but does NOT ship here (waits for `history-infrastructure`). See [[wiki-content-ownership-plan]].
 
-5. **`engagement-subscription`** (after L3 ships, in parallel with #3 and #4)
+5. **`entity-slug-activation`** (after #4 ships, parallel with #3 and #6)
+   Specs touched: `unit-slug` (re-allow ENTITY slug writes via admin), `slug-validation` (entity-scope additions if any), MODIFIED `entity-unit-type` (full CRUD service surface), NEW entity-front-end specs (EntityPicker, `/e/:slug` detail page, `/me/entities`, admin slug-write page)
+   Flips the ENTITY slug gate from disabled to admin-only, builds the EntityService write surface (today absent), ships EntityPicker + detail page + personal-mode `/me/entities` + admin slug page. Resolves §6.2.
+
+6. **`engagement-subscription`** (after L3 ships, parallel with #3, #4, and #5)
    Specs touched: NEW `engagement-subscription`; MODIFIED `notification-feed`, `profile-followers-tab`, `realm-membership-me`
-   Replaces `Follow` with a generic `Subscription(subscriberUnitId → targetUnitId, channels[])` edge; introduces fan-out recipient resolution for notifications; dual-track with `RealmMember`; adds denormalized `Unit.subscriberCount`. Proposal already drafted at `openspec/changes/engagement-subscription/`; cannot apply until L3 lands.
+   Replaces `Follow` with a generic `Subscription(subscriberUnitId → targetUnitId, channels[])` edge; introduces fan-out recipient resolution for notifications; dual-track with `RealmMember`; adds denormalized `Unit.subscriberCount`. Proposal already drafted at `openspec/changes/engagement-subscription/`; cannot apply until L3 lands. Entity `/e/:slug` Subscribe button is wired in once this lands.
 
 **Not yet scoped:** the cross-service protocol for delivering broadcast recipients from `package/server` (where `Subscription` lives) to `package/notify` (where `Notification` rows and SSE streams live) is a separate concern from §6.1's `Subscription` model. It is queued for design discussion immediately after this plan is committed; the resulting change is expected to slot into this sequence as a prerequisite of #5.

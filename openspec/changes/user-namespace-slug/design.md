@@ -132,24 +132,33 @@ The change also rewrites the public URL surface around a single convention — *
 
 **Why**: Scope discipline. The L3 architectural lift is User-as-Unit identity plus per-type slug scopes; broadening it to also adopt UnitTranslation for user-facing strings doubles the migration surface. A follow-on change can adopt UnitTranslation once the identity cutover is stable.
 
-### D13: User-scope and infra-scope reserved words are layered
+### D13: Reserved words are a single unified flat list
 
-**Decision**: `slug-validation` is extended to two layers:
+**Decision**: `slug-validation` uses **one** reserved-word list, exported from `@rezics/contract`, applied uniformly to every scope (`user`, `realm`, `tag`, `zone`, `entity`, and owner-scopes). The list folds in three categories of reservation that were once modeled separately:
 
-1. **Per-scope reserved**: one list per `SlugScope`. Most platform reserved words (`admin`, `login`, `tag`, `realm`, etc.) move into the user-scope reserved list; the realm-scope list inherits the same set for v1; tag / zone / entity scopes start with smaller scope-relevant lists.
-2. **Per-owner reserved**: under any user-or-realm owner, the segment names `profile`, `settings`, `shelf`, `post` (and any future type-prefix segment) are reserved so they cannot be claimed as a sub-resource slug.
+1. **Global platform terms** — admin, login, api, profile, settings, etc.
+2. **Owner-path segments** — `profile`, `settings`, `shelf`, `post`, `list` (the type-prefix segments under owner-scope URLs).
+3. **System-minted slug values** — `favorites`, `backlog`, `active`, `completed` and any future contract-defined system slug.
 
-**Why**: A flat global reserved list cannot express "`shelf` is reserved as a path segment under a user, but `shelf` is a perfectly fine slug in the tag scope." The two-layer model fits the URL surface cleanly.
+`validateSlug` consults this single list regardless of which `scope` is passed. The `scope` argument still drives **uniqueness lookup** against `(slugScope, slug)`, but it does NOT drive reserved-word selection.
 
-### D14: USER and REALM same-name slugs are allowed but unrelated
+System-slug minting paths (e.g., bootstrap-time shelf creation) bypass `validateSlug` entirely and read the slug value from the contract constant. The reserved list would otherwise reject the slug it is itself installing; bypassing also matches the fact that these inputs are not user-supplied and need neither format nor reservation checks.
 
-**Decision**: The L3 baseline allows the same normalized slug to exist independently in the USER and REALM named scopes. For example, `alice` MAY resolve as both `/u/alice` and `/r/alice`. The two records are not linked by slug equality: there is no ownership, affiliation, claim, redirect, fallback, or verification semantics implied by the shared text.
+**Why**: An earlier draft used a two-layer model (per-scope + per-owner). The motivating example was "`shelf` should be reserved under a user but allowed as a tag slug." In practice, that flexibility is not worth the policy complexity: confusing UI and unsafe slug shapes both get worse when the same string is meaningful in one scope and meaningless in another. A single flat list keeps the implementation tiny (one `Set` lookup), keeps the contract surface predictable, and the small loss of expressiveness (a few extra strings being globally reserved) is acceptable.
 
-Routes SHALL resolve exactly one scope. `/u/alice` queries only the USER scope; `/r/alice` queries only the REALM scope. If `/u/alice` is missing and `/r/alice` exists, `/u/alice` still returns 404. If both exist, both are addressable through their own prefixes.
+System-slug bypass is its own subtle correctness rule: the slug `favorites` MUST be unmintable by users (so it stays on the reserved list) AND mintable by the platform's bootstrap path (so the path skips `validateSlug`). This is "by construction" rather than a special case in the validator.
 
-Protective product policy is explicitly deferred. A follow-on change MAY add warnings, creation-time checks, claim flows, or same-slug linking between USER and REALM, but that policy SHALL layer above this substrate and SHALL NOT require changing the `(slugScope, slug)` model.
+### D14: USER, REALM, and ENTITY same-name slugs are allowed but unrelated
 
-**Why**: This is the point of per-type scopes: distinct public prefixes carry distinct identity namespaces. Reintroducing a hard USER/REALM mutual exclusion would partially recreate the global namespace pressure this change removes. The short-prefix route table gives enough context for users and systems to distinguish the two resources, while leaving product free to add softer protection later.
+**Decision**: The L3 baseline allows the same normalized slug to exist independently in the USER, REALM, and (once `entity-slug-activation` ships) ENTITY named scopes. For example, `alice` MAY resolve as `/u/alice`, `/r/alice`, and `/e/alice` simultaneously. None of these records are linked by slug equality: there is no ownership, affiliation, claim, redirect, fallback, or verification semantics implied by the shared text.
+
+Routes SHALL resolve exactly one scope. `/u/alice` queries only the USER scope; `/r/alice` queries only the REALM scope; `/e/alice` queries only the ENTITY scope. A 404 in one scope SHALL NOT fall back to another.
+
+ENTITY scope tightens this further on the write side, not on the substrate side: ENTITY slugs are admin-only (see `entity-slug-activation`), so a same-text ENTITY can only appear after admin discretion. The substrate, however, places no cross-scope constraint.
+
+Protective product policy is explicitly deferred. A follow-on change MAY add warnings, creation-time checks, claim flows, or same-slug linking across scopes, but that policy SHALL layer above this substrate and SHALL NOT require changing the `(slugScope, slug)` model.
+
+**Why**: This is the point of per-type scopes — distinct public prefixes carry distinct identity namespaces. Reintroducing hard mutual exclusion across scopes would partially recreate the global namespace pressure this change removes. The short-prefix route table gives enough context for users and systems to distinguish resources, while leaving product free to add softer protection later. Tracked in `shelf-and-user-namespace-slug-plan.md` §6.9.
 
 ### D15: Owner soft-delete keeps owner-scoped slug namespaces reserved
 

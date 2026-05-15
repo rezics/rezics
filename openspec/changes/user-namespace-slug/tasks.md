@@ -2,8 +2,8 @@
 
 - [ ] 1.1 Add `SlugScopeName` type and `SlugScope` constant set in `package/contract/src/slug/scopes.ts` listing the five named scopes (`'user' | 'realm' | 'tag' | 'zone' | 'entity'`).
 - [ ] 1.2 Update `SlugRef` Typebox schema in `package/contract/src/slug/slug-ref.ts` to require `scope` alongside `slug` and `unitId?`. Export both the discriminated form (named-scope union) and the permissive form (owner-unit-id string).
-- [ ] 1.3 Extend `slugValidation.ts` in `package/contract` to accept a `scope` argument and produce per-scope reserved sets (`userReserved`, `realmReserved`, `tagReserved`, `zoneReserved`, `entityReserved`). Keep the existing flat list as the user-scope starting set; mirror it for realm scope; bootstrap smaller scope-relevant sets for tag, zone, entity.
-- [ ] 1.4 Add owner-scope reserved derivation: a `ownerReservedSegments` constant covering `profile`, `settings`, `shelf`, `post`, `list` (and any future owner sub-resource type-prefix).
+- [ ] 1.3 Extend `slugValidation.ts` in `package/contract` to accept a `scope` argument used for uniqueness lookup. Reserved-word checking SHALL consult a **single unified `RESERVED_SLUGS` constant** (flat `Set<string>`) regardless of scope. Migrate the existing flat list into this constant and fold in: owner-path segments (`profile`, `settings`, `shelf`, `post`, `list`) and system-shelf slug values (`favorites`, `backlog`, `active`, `completed`).
+- [ ] 1.4 Export `SYSTEM_SHELF_SLUGS` (or equivalent) constant in `@rezics/contract`. Document that any code path that mints a slug from this constant SHALL bypass `validateSlug` (the reserved list contains these very values to block user claims).
 - [ ] 1.5 Add an `ENTITY_SLUG_WRITES_ENABLED = false` flag (single source of truth) in `package/contract/src/slug/feature-flags.ts` consumed by the server.
 - [ ] 1.6 Update Typebox schemas for typed by-slug endpoints and add the new `userBySlug`, `entityBySlug`, `shelfBySlug` endpoint contracts plus the generic `POST /slug/resolve` payload/response schemas.
 - [ ] 1.7 Extend `/infra/bootstrap` response schema to include `slugScopes: { user, realm, tag, zone, entity }`.
