@@ -10,6 +10,7 @@ import { echoKvApi } from "./echokv";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
 import { initDefaultRealmCache } from "./infra/default-realm";
+import { initSlugScopesCache } from "./infra/slug-scopes";
 import { infraApi } from "./infra/infra.api";
 import { initSeedTagsCache } from "./infra/seed-tags";
 import { internalApi } from "./internal/internal.api";
@@ -201,6 +202,9 @@ app
   .get("/", () => "Hello Elysia")
   .get("/health", () => ({ status: "ok" }));
 
+// Slug-scopes must hydrate first: default-realm and seed-tags lookups go
+// through `(slugScope, slug)` and depend on the scope cache being populated.
+await initSlugScopesCache();
 await Promise.all([initDefaultRealmCache(), initSeedTagsCache()]);
 
 app.listen(port);

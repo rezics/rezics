@@ -6,7 +6,7 @@ process.env.DATABASE_URL ??=
 process.env.AUTH_BASE_URL ??= "http://localhost:3001";
 
 describe("infra bootstrap endpoint", () => {
-  test("returns seed tag ids and default realm id from caches", async () => {
+  test("returns seed tag ids, default realm id, and slug scopes from caches", async () => {
     mock.module("./default-realm", () => ({
       getDefaultRealmId: () => "realm-uuid-1",
     }));
@@ -17,6 +17,15 @@ describe("infra bootstrap endpoint", () => {
         media: "tag-media",
         post: "tag-post",
         link: "tag-link",
+      }),
+    }));
+    mock.module("./slug-scopes", () => ({
+      getSlugScopesSnapshot: () => ({
+        user: "scope-user",
+        realm: "scope-realm",
+        tag: "scope-tag",
+        zone: "scope-zone",
+        entity: "scope-entity",
       }),
     }));
 
@@ -34,6 +43,13 @@ describe("infra bootstrap endpoint", () => {
         post: "tag-post",
         link: "tag-link",
       },
+      slugScopes: {
+        user: "scope-user",
+        realm: "scope-realm",
+        tag: "scope-tag",
+        zone: "scope-zone",
+        entity: "scope-entity",
+      },
       defaultRealmId: "realm-uuid-1",
     });
   });
@@ -45,6 +61,9 @@ describe("infra bootstrap endpoint", () => {
     mock.module("./seed-tags", () => ({
       getSeedTagsSnapshot: () => ({ book: "tag-book" }),
     }));
+    mock.module("./slug-scopes", () => ({
+      getSlugScopesSnapshot: () => ({}),
+    }));
 
     const { infraApi } = await import("./infra.api");
     const response = await infraApi.handle(
@@ -53,7 +72,7 @@ describe("infra bootstrap endpoint", () => {
 
     expect(response.status).toBe(200);
     const body = (await response.json()) as Record<string, unknown>;
-    expect(body).toEqual({ seedTags: { book: "tag-book" } });
+    expect(body).toEqual({ seedTags: { book: "tag-book" }, slugScopes: {} });
     expect(body.defaultRealmId).toBeUndefined();
   });
 });

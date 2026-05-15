@@ -29,10 +29,10 @@
 
 ## 3. Seed & Bootstrap Wiring
 
-- [ ] 3.1 In `package/server/prisma/seed/`, add a `slugScopes.ts` seed module that creates the five `SCOPE`-type placeholder Units and their `SlugScope` rows idempotently (no-op if rows exist).
-- [ ] 3.2 Wire `slugScopes` seeding into the infra bootstrap entry point so it runs before any other slug-bearing seed (tags, default realm, root user).
-- [ ] 3.3 Update the root-user / default-realm seeds to set `slugScope` correctly on inserted Units.
-- [ ] 3.4 Update `package/server/src/infra/infra.service.ts` (or equivalent) so `/infra/bootstrap` includes the `slugScopes` map from `SlugScope` rows.
+- [x] 3.1 In `package/server/prisma/seed/`, add a `slugScopes.ts` seed module that creates the five `SCOPE`-type placeholder Units and their `SlugScope` rows idempotently (no-op if rows exist).
+- [x] 3.2 Wire `slugScopes` seeding into the infra bootstrap entry point so it runs before any other slug-bearing seed (tags, default realm, root user).
+- [x] 3.3 Update the root-user / default-realm seeds to set `slugScope` correctly on inserted Units.
+- [x] 3.4 Update `package/server/src/infra/infra.service.ts` (or equivalent) so `/infra/bootstrap` includes the `slugScopes` map from `SlugScope` rows.
 - [ ] 3.5 Verify `bun run seed:factory` runs end-to-end against a fresh database; confirm `/infra/bootstrap` returns all expected ids including `slugScopes`.
 
 ## 4. Server: Slug Resolution & Endpoints

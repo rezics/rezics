@@ -14,19 +14,22 @@ import {
   type TagSlug,
 } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client";
+import type { SlugScopesMap } from "./seed-slug-scopes";
 
 export const SEARCH_TAG_IDS_ECHOKV_KEY = "tagids";
 
 /**
  * Seed content-type tags with DB-generated UUIDv7 IDs and contract slugs.
- * Idempotent: looks up existing tags by Unit.slug (from SEED_TAG_SLUGS).
+ * Idempotent: looks up existing tags by `(tagScope, slug)`.
  * Returns a name→ID map.
  */
 export async function seedContentTypeTags(
   prisma: PrismaClient,
+  slugScopes: SlugScopesMap,
 ): Promise<Record<SeedTagName, string>> {
   console.log("[Seed] Seeding content-type tags...");
 
+  const tagScope = slugScopes.tag;
   const tagMap = {} as Record<SeedTagName, string>;
 
   for (const name of SEED_TAG_NAMES) {
@@ -34,14 +37,14 @@ export async function seedContentTypeTags(
     const slug = SEED_TAG_SLUGS[name];
 
     const existing = await prisma.unit.findUnique({
-      where: { slug },
+      where: { slugScope_slug: { slugScope: tagScope, slug } },
       select: { id: true, type: true },
     });
 
     if (existing) {
       if (existing.type !== "TAG") {
         throw new Error(
-          `[Seed] Slug "${slug}" is already used by a non-TAG unit (type=${existing.type}).`,
+          `[Seed] Slug "${slug}" under tag scope is already used by a non-TAG unit (type=${existing.type}).`,
         );
       }
       console.log(
@@ -53,6 +56,7 @@ export async function seedContentTypeTags(
         data: {
           type: "TAG",
           slug,
+          slugScope: tagScope,
           status: "PUBLISHED",
           visibility: "PUBLIC",
           isLanguageNeutral: true,
@@ -135,17 +139,18 @@ async function syncTagTranslations(
 
 async function ensureSearchTag(
   prisma: PrismaClient,
+  tagScope: string,
   slug: TagSlug,
 ): Promise<string> {
   const existing = await prisma.unit.findUnique({
-    where: { slug },
+    where: { slugScope_slug: { slugScope: tagScope, slug } },
     select: { id: true, type: true },
   });
 
   if (existing) {
     if (existing.type !== "TAG") {
       throw new Error(
-        `[Seed] Slug "${slug}" is already used by a non-TAG unit (type=${existing.type}).`,
+        `[Seed] Slug "${slug}" under tag scope is already used by a non-TAG unit (type=${existing.type}).`,
       );
     }
 
@@ -166,6 +171,7 @@ async function ensureSearchTag(
     data: {
       type: "TAG",
       slug,
+      slugScope: tagScope,
       status: "PUBLISHED",
       visibility: "PUBLIC",
       isLanguageNeutral: true,
@@ -206,17 +212,20 @@ function buildSearchTagIds(tagIdBySlug: Record<TagSlug, string>): TagGroupIds {
 
 /**
  * Seed the shared search/forum tag registry and materialize per-category tag
- * IDs into EchoKV. TAG Units are canonical by slug; EchoKV is a runtime ID map.
+ * IDs into EchoKV. TAG Units are canonical by `(tagScope, slug)`; EchoKV is
+ * a runtime ID map.
  */
 export async function seedSearchTagIds(
   prisma: PrismaClient,
+  slugScopes: SlugScopesMap,
 ): Promise<TagGroupIds> {
   console.log("[Seed] Seeding search tag registry...");
 
+  const tagScope = slugScopes.tag;
   const tagIdBySlug = {} as Record<TagSlug, string>;
 
   for (const slug of Object.keys(TAGS) as TagSlug[]) {
-    tagIdBySlug[slug] = await ensureSearchTag(prisma, slug);
+    tagIdBySlug[slug] = await ensureSearchTag(prisma, tagScope, slug);
   }
 
   const tagIds = buildSearchTagIds(tagIdBySlug);

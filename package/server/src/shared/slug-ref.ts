@@ -1,10 +1,36 @@
-import type { SlugRef, TagRef } from "@rezics/contract";
+import {
+  isNamedSlugScope,
+  type SlugRef,
+  type SlugScopeName,
+  type TagRef,
+} from "@rezics/contract";
+import { getSlugScopeId } from "@/infra/slug-scopes";
 import { prisma } from "#/prisma/client";
 
 /**
- * Resolve a SlugRef (or TagRef) to a unitId.
- * Uses unitId directly when present; otherwise looks up by slug.
- * Returns null when neither resolves.
+ * Resolve a {@link SlugRef.scope} value to the `Unit.slugScope` UUID used in
+ * `(slugScope, slug)` lookups. A named scope (`'user' | 'realm' | …`) goes
+ * through the cached `SlugScope` map; an owner-unit-id string is used as-is.
+ *
+ * Returns `null` when a named scope has not been seeded yet.
+ */
+export function resolveScopeId(scope: string): string | null {
+  if (isNamedSlugScope(scope)) {
+    return getSlugScopeId(scope as SlugScopeName);
+  }
+  return scope;
+}
+
+/**
+ * Resolve a {@link SlugRef} (or legacy {@link TagRef}) to a unitId.
+ *
+ * Order of preference:
+ *  1. `unitId` if already provided
+ *  2. `(slugScope, slug)` lookup using the carried `scope`
+ *  3. `null` otherwise
+ *
+ * `TagRef` instances carry no `scope` field and implicitly resolve against
+ * the tag scope.
  */
 export async function resolveSlugRef(
   ref: SlugRef | TagRef,
@@ -12,8 +38,13 @@ export async function resolveSlugRef(
   if (ref.unitId) return ref.unitId;
   if (!ref.slug) return null;
 
+  const scope = "scope" in ref && ref.scope ? ref.scope : "tag";
+
+  const slugScope = resolveScopeId(scope);
+  if (!slugScope) return null;
+
   const unit = await prisma.unit.findUnique({
-    where: { slug: ref.slug },
+    where: { slugScope_slug: { slugScope, slug: ref.slug } },
     select: { id: true },
   });
 
@@ -21,8 +52,8 @@ export async function resolveSlugRef(
 }
 
 /**
- * Resolve an array of refs to unitIds.
- * Filters out refs that cannot be resolved.
+ * Resolve an array of refs to unitIds. Filters out refs that cannot be
+ * resolved.
  */
 export async function resolveSlugRefs(
   refs: (SlugRef | TagRef)[],

@@ -2,14 +2,17 @@ import type { InfraBootstrapResponse } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { getDefaultRealmId } from "./default-realm";
 import { getSeedTagsSnapshot } from "./seed-tags";
+import { getSlugScopesSnapshot } from "./slug-scopes";
 
 export const infraApi = new Elysia({ prefix: "/infra" }).get(
   "/bootstrap",
   (): InfraBootstrapResponse => {
     const seedTags = getSeedTagsSnapshot();
     const defaultRealmId = getDefaultRealmId();
+    const slugScopes = getSlugScopesSnapshot();
     return {
       seedTags,
+      slugScopes,
       ...(defaultRealmId ? { defaultRealmId } : {}),
     };
   },

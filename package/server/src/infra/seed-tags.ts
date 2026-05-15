@@ -4,17 +4,27 @@ import {
   type SeedTagName,
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
+import { getSlugScopeId } from "./slug-scopes";
 
 const cache = new Map<SeedTagName, string>();
 
 /**
- * Look up all content-type tags by Unit.slug and cache their IDs in memory.
- * Called once at server startup. Missing tags are logged and omitted.
+ * Look up all content-type tags by `(tagScope, slug)` and cache their IDs
+ * in memory. Called once at server startup, after `initSlugScopesCache`.
+ * Missing tags are logged and omitted.
  */
 export async function initSeedTagsCache(): Promise<void> {
+  const tagScope = getSlugScopeId("tag");
+  if (!tagScope) {
+    console.warn(
+      `[infra] tag slug scope not seeded — seed-tag cache cannot be hydrated`,
+    );
+    return;
+  }
+
   const slugs = SEED_TAG_NAMES.map((name) => SEED_TAG_SLUGS[name]);
   const units = await prisma.unit.findMany({
-    where: { slug: { in: slugs }, type: "TAG" },
+    where: { slugScope: tagScope, slug: { in: slugs }, type: "TAG" },
     select: { id: true, slug: true },
   });
 

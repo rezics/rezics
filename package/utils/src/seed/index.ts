@@ -8,7 +8,7 @@ import {
   createServerPrisma,
   type ServerPrismaClient,
 } from "../lib/prisma-factory";
-import { seedInfra } from "./infra";
+import { seedInfra, seedSlugScopes } from "./infra";
 import { resetRootUser, seedAllAuthUsers, seedAllMainUsers } from "./users";
 
 export interface RunSeedOptions {
@@ -30,6 +30,11 @@ export async function seedBaseline(
     s.stop("Databases reset.");
   }
 
+  const scopeSpinner = p.spinner();
+  scopeSpinner.start("Seeding slug scopes...");
+  const slugScopes = await seedSlugScopes(serverPrisma);
+  scopeSpinner.stop("Slug scopes seeded.");
+
   const userSpinner = p.spinner();
   userSpinner.start("Seeding users...");
 
@@ -37,6 +42,7 @@ export async function seedBaseline(
   const { rootUserId, results } = await seedAllMainUsers(
     serverPrisma,
     authResults,
+    slugScopes,
   );
 
   userSpinner.stop("Users seeded.");
@@ -87,12 +93,18 @@ export async function runResetRoot(): Promise<void> {
 
   try {
     const s = p.spinner();
-    s.start("Resetting root user...");
+    s.start("Seeding slug scopes...");
+    const slugScopes = await seedSlugScopes(serverPrisma);
+    s.stop("Slug scopes ready.");
+
+    const rootSpinner = p.spinner();
+    rootSpinner.start("Resetting root user...");
     const { result, serverRole } = await resetRootUser(
       authPrisma,
       serverPrisma,
+      slugScopes,
     );
-    s.stop("Root user reset.");
+    rootSpinner.stop("Root user reset.");
 
     p.log.info(
       [

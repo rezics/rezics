@@ -59,6 +59,9 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   ]);
 
   // Group 7: Core
+  // Drop SlugScope rows first — they reference SCOPE Units; Unit.deleteMany
+  // cascades only what Prisma models, but SlugScope.unitId has no FK.
+  await prisma.slugScope.deleteMany();
   await prisma.unit.deleteMany();
 
   // Group 8: Identity + entity

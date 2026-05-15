@@ -1,5 +1,6 @@
 import { DEFAULT_LANGUAGE, FALLBACK_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client";
+import type { SlugScopesMap } from "./seed-slug-scopes";
 
 export interface RealmTaxonomySeedResult {
   communityRealmId: string;
@@ -8,16 +9,17 @@ export interface RealmTaxonomySeedResult {
 
 async function ensureGlobalTag(
   prisma: PrismaClient,
+  tagScope: string,
   slug: string,
   title: string,
 ): Promise<string> {
   const existing = await prisma.unit.findUnique({
-    where: { slug },
+    where: { slugScope_slug: { slugScope: tagScope, slug } },
     select: { id: true, type: true },
   });
   if (existing) {
     if (existing.type !== "TAG") {
-      throw new Error(`[Seed] Slug "${slug}" is not a TAG.`);
+      throw new Error(`[Seed] Slug "${slug}" under tag scope is not a TAG.`);
     }
     return existing.id;
   }
@@ -26,6 +28,7 @@ async function ensureGlobalTag(
     data: {
       type: "TAG",
       slug,
+      slugScope: tagScope,
       status: "PUBLISHED",
       visibility: "PUBLIC",
       isLanguageNeutral: true,
@@ -49,29 +52,34 @@ async function ensureGlobalTag(
   return tag.id;
 }
 
+/**
+ * Ensure a POST unit owned by `userId`. POST units have no slug in the new
+ * substrate (POST is not slug-bearing); existence is determined by an
+ * idempotency tuple of (owner, kind, body) seeded only at infra time.
+ */
 async function ensurePostUnit(
   prisma: PrismaClient,
-  slug: string,
   userId: string,
   title: string,
   body: string,
 ): Promise<string> {
-  const existing = await prisma.unit.findUnique({
-    where: { slug },
-    select: { id: true, type: true },
+  const existing = await prisma.unit.findFirst({
+    where: {
+      type: "POST",
+      userId,
+      post: { is: { body } },
+    },
+    select: { id: true },
   });
-  if (existing) {
-    if (existing.type !== "POST") {
-      throw new Error(`[Seed] Slug "${slug}" is not a POST.`);
-    }
-    return existing.id;
-  }
+  if (existing) return existing.id;
 
   const unit = await prisma.unit.create({
     data: {
       type: "POST",
-      slug,
       userId,
+      // POSTs do not carry slugs; pin slugScope to the owner so the row is
+      // owner-scoped if a slug is ever assigned in the future.
+      slugScope: userId,
       status: "PUBLISHED",
       visibility: "PUBLIC",
       defaultLanguage: DEFAULT_LANGUAGE,
@@ -97,32 +105,33 @@ async function ensurePostUnit(
 
 async function ensureCommunityRealm(
   prisma: PrismaClient,
+  realmScope: string,
   rootUserId: string,
   slowBurnTagId: string,
   hardScifiTagId: string,
 ): Promise<string> {
   const slug = "seed-scifi-readers";
   const existing = await prisma.unit.findUnique({
-    where: { slug },
+    where: { slugScope_slug: { slugScope: realmScope, slug } },
     select: { id: true, type: true },
   });
   if (existing) {
     if (existing.type !== "REALM") {
-      throw new Error(`[Seed] Slug "${slug}" is not a REALM.`);
+      throw new Error(
+        `[Seed] Slug "${slug}" under realm scope is not a REALM.`,
+      );
     }
     return existing.id;
   }
 
   const ruleId = await ensurePostUnit(
     prisma,
-    "seed-scifi-readers-rules",
     rootUserId,
     "Sci-fi Readers Rules",
     "Discuss speculative fiction generously and mark spoilers clearly.",
   );
   const aboutId = await ensurePostUnit(
     prisma,
-    "seed-scifi-readers-about",
     rootUserId,
     "About Sci-fi Readers",
     "A community space for hard sci-fi, space opera, and slow-burn discovery.",
@@ -132,6 +141,7 @@ async function ensureCommunityRealm(
     data: {
       type: "REALM",
       slug,
+      slugScope: realmScope,
       userId: rootUserId,
       status: "PUBLISHED",
       visibility: "PUBLIC",
@@ -233,22 +243,29 @@ export async function seedRealmTaxonomy(
   prisma: PrismaClient,
   rootUserId: string,
   defaultRealmId: string,
+  slugScopes: SlugScopesMap,
 ): Promise<RealmTaxonomySeedResult> {
   console.log("[Seed] Seeding realm taxonomy examples...");
 
+  const tagScope = slugScopes.tag;
+  const realmScope = slugScopes.realm;
+
   const slowBurnTagId = await ensureGlobalTag(
     prisma,
+    tagScope,
     "seed-tag-slow-burn",
     "Slow burn",
   );
   const hardScifiTagId = await ensureGlobalTag(
     prisma,
+    tagScope,
     "seed-tag-hard-scifi",
     "Hard sci-fi",
   );
 
   const communityRealmId = await ensureCommunityRealm(
     prisma,
+    realmScope,
     rootUserId,
     slowBurnTagId,
     hardScifiTagId,
@@ -256,7 +273,6 @@ export async function seedRealmTaxonomy(
 
   const contextUnitId = await ensurePostUnit(
     prisma,
-    "seed-scifi-slow-burn-context",
     rootUserId,
     "Slow burn in Sci-fi Readers",
     "In this realm, slow burn means patient speculative payoff, not simply low action.",
@@ -293,14 +309,12 @@ export async function seedRealmTaxonomy(
 
   const feedTargetId = await ensurePostUnit(
     prisma,
-    "seed-scifi-feed-target",
     rootUserId,
     "A patient orbital mystery",
     "A feed example for realm-tag classification.",
   );
   const outsideTargetId = await ensurePostUnit(
     prisma,
-    "seed-scifi-outside-target",
     rootUserId,
     "An external hard-sci-fi reference",
     "A non-feed target that the realm can still classify.",

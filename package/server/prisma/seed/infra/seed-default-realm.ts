@@ -1,26 +1,33 @@
 import { DEFAULT_LANGUAGE, DEFAULT_REALM } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client";
+import type { SlugScopesMap } from "./seed-slug-scopes";
 
 /**
  * Seed the default official realm owned by the root user with contract slug.
- * Idempotent: matches by Unit.slug first, falls back to any `isOfficial: true` realm.
- * Returns the realm unit ID.
+ *
+ * Idempotent: matches by `(realmScope, slug)`, falls back to any
+ * `isOfficial: true` realm. Returns the realm unit ID.
  */
 export async function seedDefaultRealm(
   prisma: PrismaClient,
   rootUserId: string,
+  slugScopes: SlugScopesMap,
 ): Promise<string> {
   console.log("[Seed] Seeding default realm...");
 
+  const realmScope = slugScopes.realm;
+
   const bySlug = await prisma.unit.findUnique({
-    where: { slug: DEFAULT_REALM.slug },
+    where: {
+      slugScope_slug: { slugScope: realmScope, slug: DEFAULT_REALM.slug },
+    },
     select: { id: true, type: true },
   });
 
   if (bySlug) {
     if (bySlug.type !== "REALM") {
       throw new Error(
-        `[Seed] Slug "${DEFAULT_REALM.slug}" is already used by a non-REALM unit (type=${bySlug.type}).`,
+        `[Seed] Slug "${DEFAULT_REALM.slug}" under realm scope is already used by a non-REALM unit (type=${bySlug.type}).`,
       );
     }
     console.log(
@@ -40,7 +47,7 @@ export async function seedDefaultRealm(
     );
     await prisma.unit.update({
       where: { id: existingOfficial.unitId },
-      data: { slug: DEFAULT_REALM.slug },
+      data: { slug: DEFAULT_REALM.slug, slugScope: realmScope },
     });
     return existingOfficial.unitId;
   }
@@ -53,6 +60,7 @@ export async function seedDefaultRealm(
     data: {
       type: "REALM",
       slug: DEFAULT_REALM.slug,
+      slugScope: realmScope,
       userId: rootUserId,
       status: "PUBLISHED",
       visibility: "PUBLIC",
