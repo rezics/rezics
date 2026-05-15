@@ -1,8 +1,14 @@
+import { SYSTEM_SHELF_SLUGS } from "./system-slugs";
+
 /**
  * Platform-wide reserved slugs.
  *
- * When adding new platform routes or features, add the corresponding
- * keywords here to prevent users from registering them as slugs.
+ * Applied uniformly across every slug scope (`user`, `realm`, `tag`, `zone`,
+ * `entity`, and owner-scopes). A word reserved in any scope is reserved in
+ * every scope.
+ *
+ * When adding new platform routes, owner sub-resource types, or
+ * contract-defined system slug values, add them here.
  */
 
 const RESERVED: readonly string[] = [
@@ -331,6 +337,14 @@ const RESERVED: readonly string[] = [
   "rezics-admin",
   "rezics-support",
   "rezics-bot",
+
+  // ── Owner-path segments (under /u/:slug, /r/:slug, …) ────────
+  // Type-prefix segments that appear after an owner slug. Reserved
+  // globally to keep owner-scope URL parsing unambiguous.
+  "list",
 ];
 
-export const RESERVED_SLUGS: ReadonlySet<string> = new Set(RESERVED);
+export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
+  ...RESERVED,
+  ...SYSTEM_SHELF_SLUGS,
+]);

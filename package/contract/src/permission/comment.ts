@@ -12,7 +12,7 @@ export function hasPermissionToUpdateComment(
 ): boolean {
   if (isBlocked(permission)) return false;
   if (BasicAdminPermission(permission)) return true;
-  return actorUserId === unit?.user?.userId;
+  return actorUserId === unit?.user?.unitId;
 }
 
 /** @deprecated Use hasPermissionToDeletePost */

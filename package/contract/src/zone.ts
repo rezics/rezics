@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { SlugRefSchema } from "./common/slug-ref";
+import { SlugRefSchema } from "./slug/slug-ref";
 import { contentRatingSchema } from "./unit";
 
 // ANCHOR: Zone Filters

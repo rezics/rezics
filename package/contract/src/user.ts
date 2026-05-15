@@ -17,7 +17,8 @@ export const systemShelvesMapSchema = t.Object({
 export type SystemShelvesMap = (typeof systemShelvesMapSchema)["static"];
 
 export const userDTOSchema = t.Object({
-  userId: t.String(),
+  /** Canonical user identifier — the USER `Unit.id`. */
+  unitId: t.String(),
   email: t.Optional(t.String()),
   slug: t.Optional(t.String()),
   name: t.Optional(t.String()),
@@ -151,7 +152,8 @@ export type UpdateUserSettings = (typeof updateUserSettingsSchema)["static"];
 // ============================================================
 
 export const userBriefSchema = t.Object({
-  userId: t.String(),
+  /** Canonical user identifier — the USER `Unit.id`. */
+  unitId: t.String(),
   name: t.Optional(t.String()),
   slug: t.Optional(t.String()),
   bio: t.Optional(t.String()),
@@ -161,7 +163,8 @@ export const userBriefSchema = t.Object({
 export type UserBrief = (typeof userBriefSchema)["static"];
 
 export const userBriefBatchRequestSchema = t.Object({
-  userIds: t.Array(t.String(), { maxItems: 200 }),
+  /** Batch lookup keys — each entry is a USER `Unit.id`. */
+  unitIds: t.Array(t.String(), { maxItems: 200 }),
 });
 
 export type UserBriefBatchRequest =

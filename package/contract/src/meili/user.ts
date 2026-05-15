@@ -6,7 +6,8 @@ import { t } from "elysia";
 
 export const UserSearchDocumentSchema = t.Object({
   id: t.String(),
-  userId: t.String(),
+  /** Canonical user identifier — the USER `Unit.id`. Equals `id` post-`user-namespace-slug`. */
+  unitId: t.String(),
   name: t.String(),
   email: t.Optional(t.String()),
   slug: t.Optional(t.Union([t.String(), t.Null()])),

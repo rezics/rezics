@@ -1,10 +1,22 @@
 import { RESERVED_SLUGS } from "./reserved";
+import type { SlugScopeName } from "./scopes";
 
 export type SlugValidationResult =
   | { ok: true; normalized: string }
   | { ok: false; reason: string };
 
 export interface ValidateSlugOptions {
+  /**
+   * Scope key driving server-side uniqueness lookup against
+   * `(slugScope, slug)`. The validator itself does NOT use this for
+   * reserved-word selection — reserved words are unified into a single
+   * flat list applied to every scope. The argument is accepted here so
+   * callers can pass scope through one validation entry point.
+   *
+   * Accepts a named scope (`'user' | 'realm' | 'tag' | 'zone' | 'entity'`)
+   * or an owner-unit-id string for owner-scoped sub-resources.
+   */
+  scope?: SlugScopeName | string;
   minLen?: number; // default 6
   maxLen?: number; // default 36
   reserved?: ReadonlySet<string>; // default RESERVED_SLUGS

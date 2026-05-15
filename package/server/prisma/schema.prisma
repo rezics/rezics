@@ -27,6 +27,10 @@ enum UnitType {
   LINK
   ENTITY
   ZONE
+  /// Type-extension marker for User rows. `User.unitId` equals the corresponding `Unit.id`.
+  USER
+  /// Placeholder Unit backing a row in `SlugScope`. SCOPE units have `slug = null` and their `id` is the value of `Unit.slugScope` for every top-level slug under that scope.
+  SCOPE
 }
 
 enum UnitStatus {
@@ -95,7 +99,13 @@ enum PostKind {
 model Unit {
   id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   type       UnitType
-  slug       String?  @unique
+  slug       String?
+  /// Slug-namespace key. Points at the placeholder Unit for one of the five
+  /// named scopes (user / realm / tag / zone / entity) for top-level slugs, or
+  /// at an owner Unit's id for owner-scoped sub-resources (e.g. shelves under
+  /// a user). NOT NULL, no FK constraint declared (matches the polymorphic-
+  /// shaped-column convention used by ShelfUnit / ShelfItem).
+  slugScope  String   @db.Uuid
   workUnitId String?  @db.Uuid
   userId     String?  @db.Uuid
 
@@ -128,7 +138,7 @@ model Unit {
   workClaims    WorkLinkClaim[] @relation("WorkLinkClaimWork")
 
   // Owner/creator
-  user User? @relation("UnitForUser", fields: [userId], references: [userId])
+  user User? @relation("UnitForUser", fields: [userId], references: [unitId])
 
   // Translation layer
   translations     UnitTranslation[]
@@ -180,6 +190,7 @@ model Unit {
 
   userProgress UserUnitProgress[] @relation("ProgressUnit")
 
+  @@unique([slugScope, slug])
   @@unique([translationGroupId, defaultLanguage])
   @@index([type, status, createdAt])
   @@index([workUnitId])
@@ -187,6 +198,24 @@ model Unit {
   @@index([status, visibility])
   @@index([defaultLanguage])
   @@index([translationGroupId])
+  @@index([slugScope, type])
+}
+
+/**
+ * ANCHOR SLUG SCOPE
+ *
+ * Lookup table mapping one of the five named scope keys (`user`, `realm`,
+ * `tag`, `zone`, `entity`) to the placeholder `Unit { type: SCOPE }` row whose
+ * id is used as `Unit.slugScope` for every top-level slug under that scope.
+ *
+ * Owner-scoped sub-resources (e.g. shelves under a user) bypass this table
+ * and use the owner Unit's id directly as `slugScope`.
+ */
+model SlugScope {
+  /// Named scope key. The five allowed values are seeded once at infra bootstrap.
+  slug   String @id
+  /// Placeholder Unit (type = SCOPE) whose id is the slugScope value for top-level slugs in this scope.
+  unitId String @unique @db.Uuid
 }
 
 /**
@@ -259,8 +288,8 @@ model WorkLinkClaim {
 
   releaseUnit Unit  @relation("WorkLinkClaimRelease", fields: [releaseUnitId], references: [id], onDelete: Cascade)
   workUnit    Unit  @relation("WorkLinkClaimWork", fields: [workUnitId], references: [id], onDelete: Cascade)
-  claimer     User  @relation("WorkLinkClaimClaimer", fields: [claimerUserId], references: [userId])
-  resolver    User? @relation("WorkLinkClaimResolver", fields: [resolvedBy], references: [userId])
+  claimer     User  @relation("WorkLinkClaimClaimer", fields: [claimerUserId], references: [unitId])
+  resolver    User? @relation("WorkLinkClaimResolver", fields: [resolvedBy], references: [unitId])
 
   @@index([workUnitId, status])
   @@index([claimerUserId, status])
@@ -694,13 +723,13 @@ enum EmailVerificationContractStatus {
 }
 
 model User {
-  userId          String    @id @db.Uuid
+  /// Canonical user identifier. Equals `Unit.id` for the matching USER Unit.
+  unitId          String    @id @db.Uuid
   authUserId      String?   @unique @db.Uuid
   /// Main-owned Rezics product email. It may be initialized from a verified
   /// auth login email during materialization, but is not synchronized with
   /// auth.User.email after that point.
   email           String?   @db.VarChar(320)
-  slug            String?   @unique
   name            String?
   avatar          String?
   bio             String?
@@ -770,7 +799,7 @@ model UserUnitProgress {
   firstSeenAt DateTime @default(now())
   lastSeenAt  DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [unitId], onDelete: Cascade)
   unit Unit @relation("ProgressUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   @@id([userId, unitId])
@@ -833,8 +862,8 @@ model Follow {
   followingId String   @db.Uuid
   createdAt   DateTime @default(now())
 
-  follower  User @relation("UserFollowings", fields: [followerId], references: [userId], onDelete: Cascade)
-  following User @relation("UserFollowers", fields: [followingId], references: [userId], onDelete: Cascade)
+  follower  User @relation("UserFollowings", fields: [followerId], references: [unitId], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [unitId], onDelete: Cascade)
 
   @@unique([followerId, followingId])
 }
@@ -853,7 +882,7 @@ model ApiToken {
   revoked    Boolean   @default(false)
   revokedAt  DateTime?
 
-  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [unitId], onDelete: Cascade)
 
   @@index([userId])
   @@index([tokenHash])

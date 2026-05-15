@@ -1,31 +1,31 @@
 ## 1. Contract Foundations
 
-- [ ] 1.1 Add `SlugScopeName` type and `SlugScope` constant set in `package/contract/src/slug/scopes.ts` listing the five named scopes (`'user' | 'realm' | 'tag' | 'zone' | 'entity'`).
-- [ ] 1.2 Update `SlugRef` Typebox schema in `package/contract/src/slug/slug-ref.ts` to require `scope` alongside `slug` and `unitId?`. Export both the discriminated form (named-scope union) and the permissive form (owner-unit-id string).
-- [ ] 1.3 Extend `slugValidation.ts` in `package/contract` to accept a `scope` argument used for uniqueness lookup. Reserved-word checking SHALL consult a **single unified `RESERVED_SLUGS` constant** (flat `Set<string>`) regardless of scope. Migrate the existing flat list into this constant and fold in: owner-path segments (`profile`, `settings`, `shelf`, `post`, `list`) and system-shelf slug values (`favorites`, `backlog`, `active`, `completed`).
-- [ ] 1.4 Export `SYSTEM_SHELF_SLUGS` (or equivalent) constant in `@rezics/contract`. Document that any code path that mints a slug from this constant SHALL bypass `validateSlug` (the reserved list contains these very values to block user claims).
-- [ ] 1.5 Add an `ENTITY_SLUG_WRITES_ENABLED = false` flag (single source of truth) in `package/contract/src/slug/feature-flags.ts` consumed by the server.
-- [ ] 1.6 Update Typebox schemas for typed by-slug endpoints and add the new `userBySlug`, `entityBySlug`, `shelfBySlug` endpoint contracts plus the generic `POST /slug/resolve` payload/response schemas.
-- [ ] 1.7 Extend `/infra/bootstrap` response schema to include `slugScopes: { user, realm, tag, zone, entity }`.
-- [ ] 1.8 Rename `userId` → `unitId` on user-shaped DTOs (`User`, `UserBrief`, `UserSummary`, profile responses) in `package/contract`. Update JSDoc.
-- [ ] 1.9 Add public route param schemas to `package/contract` for the new short-prefix (`/u`, `/r`, `/t`, `/z`, `/e`) and long-prefix UUID (`/user`, `/realm`, `/tag`, `/zone`, `/entity`) families plus owner-scoped `/u/:userSlug/shelf/:slug` and `/r/:realmSlug/shelf/:slug`. Remove the legacy `publicUnitSlugRouteParamsSchema` and `publicUnitIdRouteParamsSchema` for `/unit/:unitSlug` and `/unit/id/:unitId`.
+- [x] 1.1 Add `SlugScopeName` type and `SlugScope` constant set in `package/contract/src/slug/scopes.ts` listing the five named scopes (`'user' | 'realm' | 'tag' | 'zone' | 'entity'`).
+- [x] 1.2 Update `SlugRef` Typebox schema in `package/contract/src/slug/slug-ref.ts` to require `scope` alongside `slug` and `unitId?`. Export both the discriminated form (named-scope union) and the permissive form (owner-unit-id string).
+- [x] 1.3 Extend `slugValidation.ts` in `package/contract` to accept a `scope` argument used for uniqueness lookup. Reserved-word checking SHALL consult a **single unified `RESERVED_SLUGS` constant** (flat `Set<string>`) regardless of scope. Migrate the existing flat list into this constant and fold in: owner-path segments (`profile`, `settings`, `shelf`, `post`, `list`) and system-shelf slug values (`favorites`, `backlog`, `active`, `completed`).
+- [x] 1.4 Export `SYSTEM_SHELF_SLUGS` (or equivalent) constant in `@rezics/contract`. Document that any code path that mints a slug from this constant SHALL bypass `validateSlug` (the reserved list contains these very values to block user claims).
+- [x] 1.5 Add an `ENTITY_SLUG_WRITES_ENABLED = false` flag (single source of truth) in `package/contract/src/slug/feature-flags.ts` consumed by the server.
+- [x] 1.6 Update Typebox schemas for typed by-slug endpoints and add the new `userBySlug`, `entityBySlug`, `shelfBySlug` endpoint contracts plus the generic `POST /slug/resolve` payload/response schemas.
+- [x] 1.7 Extend `/infra/bootstrap` response schema to include `slugScopes: { user, realm, tag, zone, entity }`.
+- [x] 1.8 Rename `userId` → `unitId` on user-shaped DTOs (`User`, `UserBrief`, `UserSummary`, profile responses) in `package/contract`. Update JSDoc.
+- [x] 1.9 Add public route param schemas to `package/contract` for the new short-prefix (`/u`, `/r`, `/t`, `/z`, `/e`) and long-prefix UUID (`/user`, `/realm`, `/tag`, `/zone`, `/entity`) families plus owner-scoped `/u/:userSlug/shelf/:slug` and `/r/:realmSlug/shelf/:slug`. Remove the legacy `publicUnitSlugRouteParamsSchema` and `publicUnitIdRouteParamsSchema` for `/unit/:unitSlug` and `/unit/id/:unitId`.
 
 ## 2. Prisma Schema & Migrations
 
-- [ ] 2.1 In `package/server/prisma/schema.prisma`, add `USER` and `SCOPE` variants to `UnitType` enum.
-- [ ] 2.2 Add `SlugScope` model: `slug String @id` (the named scope key), `unitId String @db.Uuid @unique`.
-- [ ] 2.3 Add `slugScope String @db.Uuid` to `Unit` (NOT NULL, no FK declared per design D2).
-- [ ] 2.4 Replace the global `Unit.slug` unique constraint with `@@unique([slugScope, slug])`.
-- [ ] 2.5 Rename `User.userId` PK to `User.unitId` (`@id @db.Uuid`). Update every `references: [User.userId]` to `references: [User.unitId]` on FK columns of related tables (column names preserved).
-- [ ] 2.6 Drop `User.slug` column from the `User` extension.
-- [ ] 2.7 Generate the migration. Author the migration body manually for the multi-phase backfill (see tasks 2.8–2.13).
-- [ ] 2.8 In the migration: add `USER` and `SCOPE` enum variants first; defer constraint changes until backfill completes.
-- [ ] 2.9 In the migration: insert five `SCOPE`-type Unit rows (`user`, `realm`, `tag`, `zone`, `entity`) with placeholder `slugScope`, then self-reference each with `slugScope = self.id`, then insert the five `SlugScope` rows.
-- [ ] 2.10 In the migration: for every existing `User` row, insert a `Unit { id = User.userId, type = 'USER', slug = null, slugScope = <user-scope-unit-id> }`.
-- [ ] 2.11 In the migration: backfill `Unit.slugScope` for every slug-bearing TAG / REALM / ZONE Unit to the matching scope unit id. For slug-less Units, backfill `slugScope` to a deterministic default (owner unit id when an owner exists, otherwise the user scope or entity scope placeholder).
-- [ ] 2.12 In the migration: copy each `User.slug` value into the corresponding USER `Unit.slug`. Drop the `User.slug` column.
-- [ ] 2.13 In the migration: drop the legacy `Unit.slug` global unique; apply `@@unique([slugScope, slug])`.
-- [ ] 2.14 Run `bun run prisma:generate` and verify the generated client surface (new types for `UnitType.USER`, `UnitType.SCOPE`, `SlugScope`).
+- [x] 2.1 In `package/server/prisma/schema.prisma`, add `USER` and `SCOPE` variants to `UnitType` enum.
+- [x] 2.2 Add `SlugScope` model: `slug String @id` (the named scope key), `unitId String @db.Uuid @unique`.
+- [x] 2.3 Add `slugScope String @db.Uuid` to `Unit` (NOT NULL, no FK declared per design D2).
+- [x] 2.4 Replace the global `Unit.slug` unique constraint with `@@unique([slugScope, slug])`.
+- [x] 2.5 Rename `User.userId` PK to `User.unitId` (`@id @db.Uuid`). Update every `references: [User.userId]` to `references: [User.unitId]` on FK columns of related tables (column names preserved).
+- [x] 2.6 Drop `User.slug` column from the `User` extension.
+- [x] 2.7 Generate the migration. (Squashed: all prior migrations under `package/server/prisma/migrations/` deleted and replaced with a single baseline `20260515120000_init/migration.sql` generated via `prisma migrate diff --from-empty --to-schema`. Dev-stage authorization granted multi-phase backfill skip.)
+- [x] 2.8 ~~In the migration: add `USER` and `SCOPE` enum variants first…~~ (N/A — squash skips backfill; enum variants are part of the baseline `CREATE TYPE`.)
+- [x] 2.9 ~~Insert five `SCOPE`-type Unit rows…~~ (Moved to seed step §3.1.)
+- [x] 2.10 ~~For every existing `User` row, insert a USER Unit…~~ (N/A — no existing data to backfill after squash; new USER Units will be created at registration time.)
+- [x] 2.11 ~~Backfill `Unit.slugScope` for every slug-bearing TAG / REALM / ZONE Unit…~~ (N/A — no existing data after squash.)
+- [x] 2.12 ~~Copy each `User.slug` value into the corresponding USER `Unit.slug`…~~ (N/A — no existing data after squash; the new schema simply has no `User.slug` column.)
+- [x] 2.13 ~~In the migration: drop the legacy `Unit.slug` global unique; apply `@@unique([slugScope, slug])`…~~ (N/A — the baseline migration creates the new `Unit_slugScope_slug_key` composite unique directly; no legacy unique existed in the baseline.)
+- [x] 2.14 Run `bun run prisma:generate` and verify the generated client surface (new types for `UnitType.USER`, `UnitType.SCOPE`, `SlugScope`).
 
 ## 3. Seed & Bootstrap Wiring
 

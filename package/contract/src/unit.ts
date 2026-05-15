@@ -100,7 +100,8 @@ export const contentRatingSchema = t.Union([
 // ============================================================
 
 export const publicUserSchema = t.Object({
-  userId: t.String(),
+  /** Canonical user identifier — the USER `Unit.id`. */
+  unitId: t.String(),
   slug: t.Optional(t.String()),
   name: t.Optional(t.String()),
   avatar: t.Optional(t.Nullable(t.String())),
