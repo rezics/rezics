@@ -68,9 +68,8 @@ export const notificationApi = new Elysia({ prefix: "/notification" })
     async ({ userId, body }) => {
       await notificationService.markAsRead(
         userId,
-        body.type,
-        body.entityType,
-        body.entityId,
+        body.kind,
+        body.sourceUnitId,
       );
       return { success: true };
     },
@@ -80,7 +79,7 @@ export const notificationApi = new Elysia({ prefix: "/notification" })
       detail: {
         summary: "Mark notification as read",
         description:
-          "Marks a specific notification as read by type, entity type, and entity ID.",
+          "Marks all notifications matching (kind, sourceUnitId) as read for the authenticated user.",
         tags: ["Notifications"],
         security: [{ bearerAuth: [] }],
       },

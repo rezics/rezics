@@ -15,6 +15,7 @@ export * from "./language";
 export * from "./link";
 export * from "./list-query-base";
 export * from "./meili";
+export * from "./notification";
 export * from "./notify";
 export * from "./pagination";
 export * from "./permission";

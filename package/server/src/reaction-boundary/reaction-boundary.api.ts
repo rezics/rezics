@@ -1,9 +1,8 @@
-import { NotificationType } from "@rezics/contract";
 import { createSchema, deleteQuerySchema } from "@rezics/contract/reaction";
 import { Elysia } from "elysia";
 import { prisma } from "#/prisma/client";
 import { authMacro } from "@/middleware";
-import { emitNotificationEvent } from "@/notify-boundary/notify-boundary.client";
+import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { createReaction, removeReaction } from "./reaction-boundary.client";
 
 export const reactionBoundaryApi = new Elysia({ prefix: "/reaction" })
@@ -24,13 +23,12 @@ export const reactionBoundaryApi = new Elysia({ prefix: "/reaction" })
           })
           .then((unit) => {
             if (unit?.userId && unit.userId !== userId) {
-              emitNotificationEvent({
-                recipientId: unit.userId,
-                type: NotificationType.LIKE,
+              broadcast({
+                kind: "reaction.like",
+                sourceUnitId: body.targetId,
+                directRecipients: [unit.userId],
                 actorId: userId,
-                entityType: "unit",
-                entityId: body.targetId,
-                meta: {},
+                extra: {},
               }).catch(() => {});
             }
           })

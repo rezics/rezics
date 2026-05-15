@@ -13,6 +13,7 @@ configureApi({
   apiBaseUrl: env.VITE_API_URL,
   authBaseUrl: env.VITE_API_URL,
   reactionServiceUrl: env.VITE_REACTION_SERVICE_URL,
+  notifyBaseUrl: env.VITE_NOTIFY_BASE_URL,
 });
 initI18n();
 

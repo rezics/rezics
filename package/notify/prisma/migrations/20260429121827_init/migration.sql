@@ -1,15 +1,11 @@
--- CreateEnum
-CREATE TYPE "NotificationType" AS ENUM ('LIKE', 'FAVORITE', 'FOLLOW', 'COMMENT', 'MENTION', 'SYSTEM', 'INVITATION');
-
 -- CreateTable
 CREATE TABLE "Notification" (
     "id" UUID NOT NULL DEFAULT uuidv7(),
     "recipientId" UUID NOT NULL,
     "actorId" UUID,
-    "type" "NotificationType" NOT NULL,
-    "entityType" TEXT NOT NULL,
-    "entityId" TEXT NOT NULL,
-    "meta" JSONB,
+    "kind" VARCHAR(64) NOT NULL,
+    "sourceUnitId" UUID NOT NULL,
+    "extra" JSONB,
     "read" BOOLEAN NOT NULL DEFAULT false,
     "readAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -44,7 +40,7 @@ CREATE TABLE "Message" (
 CREATE INDEX "Notification_recipientId_read_idx" ON "Notification"("recipientId", "read");
 
 -- CreateIndex
-CREATE INDEX "Notification_recipientId_type_entityType_entityId_idx" ON "Notification"("recipientId", "type", "entityType", "entityId");
+CREATE INDEX "Notification_recipientId_kind_sourceUnitId_idx" ON "Notification"("recipientId", "kind", "sourceUnitId");
 
 -- CreateIndex
 CREATE INDEX "Notification_recipientId_createdAt_idx" ON "Notification"("recipientId", "createdAt" DESC);

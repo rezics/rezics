@@ -175,14 +175,15 @@ function csrfRejected(request: Request): boolean {
   }
 }
 
-function buildMainCookie(
-  name: typeof SESSION_COOKIE_NAME | typeof PROFILE_SETUP_COOKIE_NAME,
-  token: string | null,
-  maxAgeSeconds: number,
-): string {
-  const secure =
-    env.NODE_ENV === "production" ||
-    env.AUTH_PUBLIC_ISSUER_URL.startsWith("https://");
+export function buildCookieAttributes(input: {
+  name: string;
+  token: string | null;
+  maxAgeSeconds: number;
+  isProduction: boolean;
+  issuerUrl: string;
+}): string {
+  const { name, token, maxAgeSeconds, isProduction, issuerUrl } = input;
+  const secure = isProduction || issuerUrl.startsWith("https://");
   const parts = [
     `${name}=${token ?? ""}`,
     "Path=/",
@@ -190,8 +191,23 @@ function buildMainCookie(
     "SameSite=Lax",
     `Max-Age=${token ? maxAgeSeconds : 0}`,
   ];
+  if (isProduction) parts.push("Domain=.rezics.com");
   if (secure) parts.push("Secure");
   return parts.join("; ");
+}
+
+function buildMainCookie(
+  name: typeof SESSION_COOKIE_NAME | typeof PROFILE_SETUP_COOKIE_NAME,
+  token: string | null,
+  maxAgeSeconds: number,
+): string {
+  return buildCookieAttributes({
+    name,
+    token,
+    maxAgeSeconds,
+    isProduction: env.NODE_ENV === "production",
+    issuerUrl: env.AUTH_PUBLIC_ISSUER_URL,
+  });
 }
 
 function buildSessionCookie(token: string | null): string {

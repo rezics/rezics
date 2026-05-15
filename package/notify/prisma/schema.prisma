@@ -9,30 +9,19 @@ datasource db {
   provider = "postgres"
 }
 
-enum NotificationType {
-  LIKE
-  FAVORITE
-  FOLLOW
-  COMMENT
-  MENTION
-  SYSTEM
-  INVITATION
-}
-
 model Notification {
-  id          String           @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  recipientId String           @db.Uuid
-  actorId     String?          @db.Uuid
-  type        NotificationType
-  entityType  String
-  entityId    String
-  meta        Json?
-  read        Boolean          @default(false)
-  readAt      DateTime?
-  createdAt   DateTime         @default(now())
+  id           String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  recipientId  String    @db.Uuid
+  actorId      String?   @db.Uuid
+  kind         String    @db.VarChar(64)
+  sourceUnitId String    @db.Uuid
+  extra        Json?
+  read         Boolean   @default(false)
+  readAt       DateTime?
+  createdAt    DateTime  @default(now())
 
   @@index([recipientId, read])
-  @@index([recipientId, type, entityType, entityId])
+  @@index([recipientId, kind, sourceUnitId])
   @@index([recipientId, createdAt(sort: Desc)])
 }
 

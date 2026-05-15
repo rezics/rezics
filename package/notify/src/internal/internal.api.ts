@@ -1,6 +1,7 @@
 import {
+  internalBroadcastBodySchema,
   internalDmBodySchema,
-  internalEventBodySchema,
+  isValidKind,
   systemEmailBodySchema,
   systemEmailResponseSchema,
 } from "@rezics/contract";
@@ -8,8 +9,7 @@ import { Elysia } from "elysia";
 import * as dmFanOut from "../dm/dm.fan-out";
 import * as dmService from "../dm/dm.service";
 import { internalGuard } from "../macro/internal";
-import { mapNotificationToRawEvent } from "../notification/notification.mapper";
-import { createNotification } from "../notification/notification.service";
+import { broadcastNotifications } from "../notification/notification.service";
 import { publish as publishSse } from "../stream/fan-out";
 import { notifySystemAndEmail } from "../system-email/system-email.service";
 
@@ -17,27 +17,45 @@ export const internalApi = new Elysia({ prefix: "/internal" })
   .use(internalGuard)
   .post(
     "/event",
-    async ({ body }) => {
-      const notification = await createNotification({
-        recipientId: body.recipientId,
-        actorId: body.actorId,
-        type: body.type,
-        entityType: body.entityType,
-        entityId: body.entityId,
-        meta: body.meta,
+    async ({ body, set }) => {
+      if (!isValidKind(body.kind)) {
+        set.status = 400;
+        return { error: "Unknown notification kind", kind: body.kind };
+      }
+
+      const uniqueRecipients = Array.from(new Set(body.recipientIds));
+      if (uniqueRecipients.length === 0) {
+        return { success: true, persisted: 0 };
+      }
+
+      const rawEvents = await broadcastNotifications({
+        kind: body.kind,
+        sourceUnitId: body.sourceUnitId,
+        recipientIds: uniqueRecipients,
+        actorId: body.actorId ?? null,
+        extra: body.extra,
       });
 
-      // Fan-out to SSE if recipient is connected
-      publishSse(body.recipientId, mapNotificationToRawEvent(notification));
+      for (const event of rawEvents) {
+        try {
+          publishSse(event.recipientId, event.raw);
+        } catch (err) {
+          // SSE failures are logged but do not fail persistence (per spec)
+          console.error(
+            `[notify/internal/event] SSE push failed for ${event.recipientId}:`,
+            err,
+          );
+        }
+      }
 
-      return { success: true, id: notification.id };
+      return { success: true, persisted: rawEvents.length };
     },
     {
-      body: internalEventBodySchema,
+      body: internalBroadcastBodySchema,
       detail: {
-        summary: "Emit notification event",
+        summary: "Emit notification broadcast event",
         description:
-          "Creates a notification and fans out to the recipient via SSE if connected.",
+          "Persists one notification row per recipient via createMany and fans out to each connected recipient via SSE.",
         tags: ["Internal"],
         security: [{ internalSecret: [] }],
       },
@@ -57,7 +75,6 @@ export const internalApi = new Elysia({ prefix: "/internal" })
         body.content,
       );
 
-      // Fan-out to recipient's WebSocket connections
       dmFanOut.publish(body.recipientId, {
         id: message.id,
         conversationId,

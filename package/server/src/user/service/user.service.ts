@@ -2,7 +2,7 @@
  * Never send unHashed passwords to server
  */
 
-import { NotificationType, type UpdateUser } from "@rezics/contract";
+import type { UpdateUser } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import {
@@ -15,7 +15,7 @@ import {
   syncUserToMeili,
 } from "@/meili/user/sync";
 import { bootstrapSystemShelves } from "@/shelf/system-shelves";
-import { emitNotificationEvent } from "@/notify-boundary/notify-boundary.client";
+import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { getDefaultRealmId } from "@/infra/default-realm";
 import { projectSlugToAuth } from "@/auth-boundary/auth-internal.client";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
@@ -369,13 +369,15 @@ export class UserService {
       });
     });
 
-    // Emit notification (fire-and-forget)
-    emitNotificationEvent({
-      recipientId: followingId,
-      type: NotificationType.FOLLOW,
+    // Emit notification (fire-and-forget).
+    // sourceUnitId here is the followed user's identity. Pre-L3 (user-namespace-slug)
+    // this is the same value as the user PK; post-L3 it becomes the User's
+    // Unit ID. Callers do not need to change at the cutover.
+    broadcast({
+      kind: "follow.new",
+      sourceUnitId: followingId,
+      directRecipients: [followingId],
       actorId: followerId,
-      entityType: "user",
-      entityId: followingId,
     }).catch(() => {});
   }
 

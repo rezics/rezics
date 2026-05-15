@@ -1,8 +1,10 @@
 import { dmMessageListQuerySchema } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro, verifyJwtToken } from "../macro/auth";
+import { authMacro, readCookie, verifyJwtToken } from "../macro/auth";
 import * as dmFanOut from "./dm.fan-out";
 import * as dmService from "./dm.service";
+
+const SESSION_COOKIE_NAME = "rezics-session-token";
 
 export const dmApi = new Elysia({ prefix: "/dm" })
   .use(authMacro)
@@ -76,16 +78,16 @@ export const dmApi = new Elysia({ prefix: "/dm" })
       summary: "DM WebSocket",
       description:
         "WebSocket connection for real-time DM delivery. " +
-        "Authenticate by passing a JWT token as the `token` query parameter (e.g. /dm/ws?token=...). " +
+        "Authenticates via the `rezics-session-token` cookie sent on the upgrade request (under the `subdomain-trust-boundary` cookie scope). " +
         "This is a receive-only connection — client messages are ignored. " +
         "New messages are pushed as JSON frames.",
       tags: ["Direct Messages", "Realtime"],
     },
     async open(ws) {
-      const url = new URL(ws.data.request.url);
-      const token = url.searchParams.get("token");
+      const cookieHeader = ws.data.request.headers.get("cookie") ?? undefined;
+      const token = readCookie(cookieHeader, SESSION_COOKIE_NAME);
       if (!token) {
-        ws.close(4001, "Missing token");
+        ws.close(4001, "Missing session cookie");
         return;
       }
 

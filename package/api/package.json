@@ -6,6 +6,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./notification": {
+      "types": "./src/notification/index.ts",
+      "default": "./src/notification/index.ts"
+    },
     "./shelf": {
       "types": "./src/shelf/index.ts",
       "default": "./src/shelf/index.ts"

@@ -3,6 +3,7 @@ export interface ApiConfig {
   authBaseUrl: string;
   authAdminBaseUrl?: string;
   reactionServiceUrl: string;
+  notifyBaseUrl?: string;
   appVersion?: string;
 }
 
@@ -10,6 +11,7 @@ let config: ApiConfig = {
   apiBaseUrl: "",
   authBaseUrl: "",
   reactionServiceUrl: "",
+  notifyBaseUrl: "",
   appVersion: undefined,
 };
 

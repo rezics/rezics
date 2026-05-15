@@ -17,14 +17,25 @@ const devOrigins = [
   "http://localhost:8000",
 ];
 
-const prodOrigins = ["https://book.rezics.com", "https://rezics.com"];
+function isRezicsOrigin(origin: string | undefined): boolean {
+  if (!origin) return false;
+  try {
+    const { hostname, protocol } = new URL(origin);
+    if (protocol !== "https:") return false;
+    return hostname === "rezics.com" || hostname.endsWith(".rezics.com");
+  } catch {
+    return false;
+  }
+}
 
 const port = env.PORT ? Number(env.PORT) : 3002;
 
 const app = new Elysia()
   .use(
     cors({
-      origin: isDev ? devOrigins : prodOrigins,
+      origin: isDev
+        ? devOrigins
+        : (request) => isRezicsOrigin(request.headers.get("origin") ?? undefined),
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["content-type", "authorization", "x-internal-secret"],

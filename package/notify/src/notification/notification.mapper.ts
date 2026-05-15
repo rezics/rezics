@@ -2,14 +2,13 @@ import type { NotificationItem } from "@rezics/contract";
 import type { Notification } from "#/prisma/client";
 
 type AggregatedRow = {
-  type: string;
-  entityType: string;
-  entityId: string;
+  kind: string;
+  sourceUnitId: string;
   actorIds: string[];
   count: bigint;
   latestAt: Date;
   allRead: boolean;
-  meta: unknown;
+  extra: unknown;
 };
 
 export function mapToAggregatedItems(
@@ -20,13 +19,12 @@ export function mapToAggregatedItems(
 
   for (const row of aggregated) {
     items.push({
-      id: `${row.type}:${row.entityType}:${row.entityId}`,
-      type: row.type as NotificationItem["type"],
-      entityType: row.entityType,
-      entityId: row.entityId,
+      id: `${row.kind}:${row.sourceUnitId}`,
+      kind: row.kind,
+      sourceUnitId: row.sourceUnitId,
       actorIds: row.actorIds ?? [],
       count: Number(row.count),
-      meta: row.meta,
+      extra: row.extra,
       read: row.allRead,
       latestAt: row.latestAt.toISOString(),
     });
@@ -35,12 +33,11 @@ export function mapToAggregatedItems(
   for (const row of individual) {
     items.push({
       id: row.id,
-      type: row.type as NotificationItem["type"],
-      entityType: row.entityType,
-      entityId: row.entityId,
+      kind: row.kind,
+      sourceUnitId: row.sourceUnitId,
       actorIds: row.actorId ? [row.actorId] : [],
       count: 1,
-      meta: row.meta,
+      extra: row.extra,
       read: row.read,
       latestAt: row.createdAt.toISOString(),
     });
@@ -52,11 +49,10 @@ export function mapToAggregatedItems(
 export function mapNotificationToRawEvent(notification: Notification) {
   return {
     id: notification.id,
-    type: notification.type,
+    kind: notification.kind,
+    sourceUnitId: notification.sourceUnitId,
     actorId: notification.actorId,
-    entityType: notification.entityType,
-    entityId: notification.entityId,
-    meta: notification.meta,
+    extra: notification.extra,
     createdAt: notification.createdAt.toISOString(),
   };
 }

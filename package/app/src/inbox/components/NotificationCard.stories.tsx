@@ -1,5 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
+import {
+  notificationComment,
+  notificationFavorite,
+  notificationFollow,
+  notificationLike,
+  notificationMention,
+  notificationSystem,
+} from "../../stories/fixtures/notification";
 import { NotificationCard } from "./NotificationCard";
 
 const meta = {
@@ -9,7 +17,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Placeholder notification card. Stories cover one named export per notification type as fixtures already exist in `stories/fixtures/notification.ts`; the renderer itself is a stub awaiting backend wiring.",
+          "Renders one notification item. The component owns the per-kind copy mapping (`liked`, `followed you`, etc.) and shows an unread dot for `read=false` rows.",
       },
     },
   },
@@ -18,4 +26,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Like: Story = { args: { item: notificationLike } };
+export const Comment: Story = { args: { item: notificationComment } };
+export const Follow: Story = { args: { item: notificationFollow } };
+export const Mention: Story = { args: { item: notificationMention } };
+export const Favorite: Story = { args: { item: notificationFavorite } };
+export const System: Story = { args: { item: notificationSystem } };
