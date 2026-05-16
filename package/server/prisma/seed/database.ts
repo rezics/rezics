@@ -15,7 +15,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.apiToken.deleteMany(),
     prisma.feedback.deleteMany(),
     prisma.tagVote.deleteMany(),
-    prisma.follow.deleteMany(),
+    prisma.subscription.deleteMany(),
     prisma.attribution.deleteMany(),
     prisma.scoreRealmField.deleteMany(),
     prisma.scoreAggregate.deleteMany(),

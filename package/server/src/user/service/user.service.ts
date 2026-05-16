@@ -15,7 +15,6 @@ import {
   syncUserToMeili,
 } from "@/meili/user/sync";
 import { bootstrapSystemShelves } from "@/shelf/system-shelves";
-import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { getDefaultRealmId } from "@/infra/default-realm";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { projectSlugToAuth } from "@/auth-boundary/auth-internal.client";
@@ -390,120 +389,9 @@ export class UserService {
   }
 
   /**
-   * Follow a user
-   */
-  async follow(followerId: string, followingId: string): Promise<void> {
-    if (followerId === followingId) {
-      throw new Error("Cannot follow yourself");
-    }
-
-    await prisma.$transaction(async (tx) => {
-      const existing = await tx.follow.findUnique({
-        where: {
-          followerId_followingId: {
-            followerId,
-            followingId,
-          },
-        },
-      });
-
-      if (existing) return;
-
-      await tx.follow.create({
-        data: {
-          followerId,
-          followingId,
-        },
-      });
-
-      await tx.user.update({
-        where: { unitId: followerId },
-        data: { followingsCount: { increment: 1 } },
-      });
-
-      await tx.user.update({
-        where: { unitId: followingId },
-        data: { followersCount: { increment: 1 } },
-      });
-    });
-
-    broadcast({
-      kind: "follow.new",
-      sourceUnitId: followingId,
-      directRecipients: [followingId],
-      actorId: followerId,
-    }).catch(() => {});
-  }
-
-  /**
-   * Unfollow a user
-   */
-  async unfollow(followerId: string, followingId: string): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-      const existing = await tx.follow.findUnique({
-        where: {
-          followerId_followingId: {
-            followerId,
-            followingId,
-          },
-        },
-      });
-
-      if (!existing) return;
-
-      await tx.follow.delete({
-        where: {
-          followerId_followingId: {
-            followerId,
-            followingId,
-          },
-        },
-      });
-
-      await tx.user.update({
-        where: { unitId: followerId },
-        data: { followingsCount: { decrement: 1 } },
-      });
-
-      await tx.user.update({
-        where: { unitId: followingId },
-        data: { followersCount: { decrement: 1 } },
-      });
-    });
-  }
-
-  /**
-   * Get follow status for multiple targets
-   */
-  async getFollowStatus(
-    followerId: string,
-    targetIds: string[],
-  ): Promise<Record<string, boolean>> {
-    if (!targetIds.length) return {};
-
-    const follows = await prisma.follow.findMany({
-      where: {
-        followerId,
-        followingId: { in: targetIds },
-      },
-      select: {
-        followingId: true,
-      },
-    });
-
-    const result: Record<string, boolean> = {};
-    targetIds.forEach((id) => {
-      result[id] = false;
-    });
-    follows.forEach((f) => {
-      result[f.followingId] = true;
-    });
-
-    return result;
-  }
-
-  /**
-   * Get follower counts summary for multiple targets.
+   * Get follower-count summary for multiple targets. Reads the
+   * denormalized `User.followersCount` counter maintained by the
+   * subscription service (engagement-subscription, design D6).
    */
   async getFollowSummary(targetIds: string[]): Promise<Record<string, number>> {
     if (!targetIds.length) return {};
@@ -530,7 +418,12 @@ export class UserService {
   }
 
   /**
-   * List followers
+   * List followers — users who have an active USER→USER `Subscription`
+   * to `userId`. Pagination is offset/limit-style for parity with the
+   * legacy follow endpoint shape consumed by the profile-followers-tab.
+   * Two-query pattern (subscription ids, then user rows) — `User` is
+   * keyed by `unitId`, not by `Unit.userId`, so we cannot rely on
+   * Prisma's relation include to walk Unit→User for USER-type units.
    */
   async getFollowers(
     userId: string,
@@ -540,26 +433,38 @@ export class UserService {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skip = (pageNum - 1) * limitNum;
 
-    const [follows, total] = await Promise.all([
-      prisma.follow.findMany({
-        where: { followingId: userId },
-        include: { follower: { include: userInclude } },
+    const where = {
+      targetUnitId: userId,
+      subscriber: { type: "USER" as const },
+    } satisfies Prisma.SubscriptionWhereInput;
+
+    const [subs, total] = await Promise.all([
+      prisma.subscription.findMany({
+        where,
+        select: { subscriberUnitId: true, createdAt: true },
         orderBy: { createdAt: "desc" },
         skip,
         take: limitNum,
       }),
-      prisma.follow.count({ where: { followingId: userId } }),
+      prisma.subscription.count({ where }),
     ]);
 
-    const users = await attachSlugs(follows.map((f) => f.follower));
-    return {
-      users: users as UserWithRelations[],
-      total,
-    };
+    const orderById = new Map(subs.map((s, i) => [s.subscriberUnitId, i]));
+    const followers = await prisma.user.findMany({
+      where: { unitId: { in: subs.map((s) => s.subscriberUnitId) } },
+      include: userInclude,
+    });
+    followers.sort(
+      (a, b) =>
+        (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
+    );
+    const users = await attachSlugs(followers);
+    return { users: users as UserWithRelations[], total };
   }
 
   /**
-   * List followings
+   * List followings — users that `userId` has an active USER→USER
+   * `Subscription` to.
    */
   async getFollowings(
     userId: string,
@@ -569,22 +474,33 @@ export class UserService {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skip = (pageNum - 1) * limitNum;
 
-    const [follows, total] = await Promise.all([
-      prisma.follow.findMany({
-        where: { followerId: userId },
-        include: { following: { include: userInclude } },
+    const where = {
+      subscriberUnitId: userId,
+      target: { type: "USER" as const },
+    } satisfies Prisma.SubscriptionWhereInput;
+
+    const [subs, total] = await Promise.all([
+      prisma.subscription.findMany({
+        where,
+        select: { targetUnitId: true, createdAt: true },
         orderBy: { createdAt: "desc" },
         skip,
         take: limitNum,
       }),
-      prisma.follow.count({ where: { followerId: userId } }),
+      prisma.subscription.count({ where }),
     ]);
 
-    const users = await attachSlugs(follows.map((f) => f.following));
-    return {
-      users: users as UserWithRelations[],
-      total,
-    };
+    const orderById = new Map(subs.map((s, i) => [s.targetUnitId, i]));
+    const followings = await prisma.user.findMany({
+      where: { unitId: { in: subs.map((s) => s.targetUnitId) } },
+      include: userInclude,
+    });
+    followings.sort(
+      (a, b) =>
+        (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
+    );
+    const users = await attachSlugs(followings);
+    return { users: users as UserWithRelations[], total };
   }
 
   /**

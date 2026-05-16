@@ -1,9 +1,11 @@
 import {
+  categoryOf,
   type InternalBroadcastBody,
   type InternalDmBody,
   isValidKind,
   type SystemEmailBody,
 } from "@rezics/contract";
+import { prisma } from "#/prisma/client";
 import { env } from "../env";
 
 const baseUrl = env.NOTIFY_BASE_URL;
@@ -48,18 +50,72 @@ export type BroadcastEvent = {
 };
 
 /**
+ * Find subscriber Unit ids whose `channels` filter on `Subscription`
+ * matches the incoming event. Implements the three-tier wildcard match
+ * from design D4: exact event, category wildcard, global wildcard.
+ *
+ * The filter goes through Prisma's `{ has: 'x' }` operator which emits
+ * `channels @> ARRAY['x']` under the hood and is served by the GIN
+ * index `subscription_channels_gin` created in the migration.
+ */
+async function defaultFindSubscriptionMatches(
+  targetUnitId: string,
+  kind: string,
+): Promise<string[]> {
+  const category = categoryOf(kind);
+  const categoryWildcard = category ? `${category}.*` : undefined;
+
+  const rows = await prisma.subscription.findMany({
+    where: {
+      targetUnitId,
+      OR: [
+        { channels: { has: kind } },
+        ...(categoryWildcard
+          ? [{ channels: { has: categoryWildcard } }]
+          : []),
+        { channels: { has: "*" } },
+      ],
+    },
+    select: { subscriberUnitId: true },
+  });
+  return rows.map((r) => r.subscriberUnitId);
+}
+
+export type ResolveRecipientsDeps = {
+  findSubscriptionMatches: (
+    targetUnitId: string,
+    kind: string,
+  ) => Promise<string[]>;
+};
+
+/**
  * Resolve the final recipient set for a broadcast event.
  *
- * v1: returns a deduplicated copy of `directRecipients`. This is the contract
- * surface that the `engagement-subscription` change extends: it unions the
- * `directRecipients` with the result of a `Subscription` query against the
- * server DB (GIN-indexed), keyed by `kind` channel and `sourceUnitId`.
+ * Unions:
+ *   - `directRecipients` (explicit-addressed events keep their direct
+ *     path — mention target, reply parent, DM peer, etc.)
+ *   - subscribers whose `Subscription.channels` matches the event kind
+ *     via the three-tier wildcard query.
  *
- * Keep this function pure and side-effect-free so engagement-subscription's
- * extension stays predictable.
+ * Dedupes through an in-memory `Set` so a subscriber who is also a
+ * direct recipient receives exactly one notification row.
+ *
+ * Dependency-injected for unit testing — production callers omit
+ * `deps` and get the Prisma-backed `defaultFindSubscriptionMatches`.
  */
-async function resolveRecipients(event: BroadcastEvent): Promise<string[]> {
-  return Array.from(new Set(event.directRecipients ?? []));
+export async function resolveRecipients(
+  event: BroadcastEvent,
+  deps: ResolveRecipientsDeps = {
+    findSubscriptionMatches: defaultFindSubscriptionMatches,
+  },
+): Promise<string[]> {
+  const set = new Set(event.directRecipients ?? []);
+  const subscriptionMatches = await deps.findSubscriptionMatches(
+    event.sourceUnitId,
+    event.kind,
+  );
+  for (const id of subscriptionMatches) set.add(id);
+  return Array.from(set);
 }
 
 /**

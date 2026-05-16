@@ -4,6 +4,25 @@ import { prisma } from "#/prisma/client";
 import { authMacro } from "@/middleware";
 import { sendDm } from "./notify-boundary.client";
 
+/**
+ * Predicate: does the sender's Subscription to the recipient permit DM?
+ *
+ * Per design D7a of `engagement-subscription`: a Subscription's `channels`
+ * permits DM if it contains the global wildcard `'*'`, the DM category
+ * wildcard `'dm.*'`, or the exact event `'dm.message'`. This collapses
+ * "I follow you" and "I'll let you DM me" into one edge with channel
+ * filtering — see `CHANNEL_REGISTRY.USER` in `@rezics/contract`.
+ *
+ * Exported for unit testing alongside the dm-boundary route.
+ */
+export function subscriptionPermitsDm(channels: readonly string[]): boolean {
+  return (
+    channels.includes("*") ||
+    channels.includes("dm.*") ||
+    channels.includes("dm.message")
+  );
+}
+
 export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
   "/send",
   async ({ body, identity, set }) => {
@@ -15,20 +34,25 @@ export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
       return { error: "Cannot send a message to yourself" };
     }
 
-    // Check mutual follow or at least sender follows recipient
-    const follow = await prisma.follow.findUnique({
+    // Permission gate: sender must have a Subscription(sender → recipient)
+    // whose `channels` permits DM. Migration backfilled every legacy
+    // Follow row into a Subscription with channels=['*'], so existing
+    // follow-based DM relationships continue to work post-cutover.
+    const sub = await prisma.subscription.findUnique({
       where: {
-        followerId_followingId: {
-          followerId: senderId,
-          followingId: recipientId,
+        subscriberUnitId_targetUnitId: {
+          subscriberUnitId: senderId,
+          targetUnitId: recipientId,
         },
       },
+      select: { channels: true },
     });
 
-    if (!follow) {
+    if (!sub || !subscriptionPermitsDm(sub.channels)) {
       set.status = 403;
       return {
-        error: "You must follow the recipient to send a direct message",
+        error:
+          "You must subscribe to the recipient with DM enabled to send a direct message",
       };
     }
 
@@ -46,7 +70,7 @@ export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
     detail: {
       summary: "Send direct message",
       description:
-        "Sends a direct message to another user. Requires the sender to follow the recipient.",
+        "Sends a direct message to another user. Requires the sender to have an active Subscription to the recipient with channels permitting DM ('*', 'dm.*', or 'dm.message').",
       tags: ["Direct Messages"],
     },
   },

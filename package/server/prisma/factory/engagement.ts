@@ -103,10 +103,15 @@ async function seedFollows(
   spec: CountSpec,
   users: CreatedUser[],
 ): Promise<void> {
-  console.log(`[Seed]   Seeding follows...`);
+  console.log(`[Seed]   Seeding follows (USER→USER subscriptions)...`);
 
   const seen = new Set<string>();
-  const data: { id: string; followerId: string; followingId: string }[] = [];
+  const data: {
+    id: string;
+    subscriberUnitId: string;
+    targetUnitId: string;
+    channels: string[];
+  }[] = [];
 
   for (const user of users) {
     const followCount = ctx.draw(spec);
@@ -120,15 +125,16 @@ async function seedFollows(
       seen.add(key);
       data.push({
         id: randomUUID(),
-        followerId: user.userId,
-        followingId: target.userId,
+        subscriberUnitId: user.userId,
+        targetUnitId: target.userId,
+        channels: ["*"],
       });
     }
   }
 
   const BATCH_SIZE = 5000;
   for (let i = 0; i < data.length; i += BATCH_SIZE) {
-    await ctx.prisma.follow.createMany({
+    await ctx.prisma.subscription.createMany({
       data: data.slice(i, i + BATCH_SIZE),
       skipDuplicates: true,
     });
@@ -136,14 +142,19 @@ async function seedFollows(
 
   const followerCounts = new Map<string, number>();
   const followingCounts = new Map<string, number>();
+  const subscriberCounts = new Map<string, number>();
   for (const f of data) {
     followerCounts.set(
-      f.followingId,
-      (followerCounts.get(f.followingId) ?? 0) + 1,
+      f.targetUnitId,
+      (followerCounts.get(f.targetUnitId) ?? 0) + 1,
     );
     followingCounts.set(
-      f.followerId,
-      (followingCounts.get(f.followerId) ?? 0) + 1,
+      f.subscriberUnitId,
+      (followingCounts.get(f.subscriberUnitId) ?? 0) + 1,
+    );
+    subscriberCounts.set(
+      f.targetUnitId,
+      (subscriberCounts.get(f.targetUnitId) ?? 0) + 1,
     );
   }
 
@@ -164,6 +175,23 @@ async function seedFollows(
             followersCount: followerCounts.get(user.userId) ?? 0,
             followingsCount: followingCounts.get(user.userId) ?? 0,
           },
+        }),
+      ),
+    );
+  }
+
+  // Bump Unit.subscriberCount for every USER unit that gained followers
+  // so the denormalized counter aligns with the seeded subscriptions.
+  const unitsToBump = Array.from(subscriberCounts.entries()).filter(
+    ([, n]) => n > 0,
+  );
+  for (let i = 0; i < unitsToBump.length; i += UPDATE_BATCH) {
+    const slice = unitsToBump.slice(i, i + UPDATE_BATCH);
+    await Promise.all(
+      slice.map(([unitId, n]) =>
+        ctx.prisma.unit.update({
+          where: { id: unitId },
+          data: { subscriberCount: n },
         }),
       ),
     );
