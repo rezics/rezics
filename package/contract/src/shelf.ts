@@ -89,6 +89,7 @@ export type ShelfUnitRelationDTO =
 
 export const shelfDTOSchema = t.Object({
   unitId: t.String(),
+  slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
   kindKey: t.Optional(t.Nullable(t.String())),
@@ -110,6 +111,7 @@ export type ShelfDTO = (typeof shelfDTOSchema)["static"];
 
 export const shelfSummaryDTOSchema = t.Object({
   unitId: t.String(),
+  slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
   kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),

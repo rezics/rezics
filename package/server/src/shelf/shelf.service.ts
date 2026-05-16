@@ -35,6 +35,10 @@ import { getSeedTagId } from "@/infra/seed-tags";
 import { patchContentContainedUnitIdsToMeili } from "@/meili/content/sync";
 import { AppError } from "@/utils/errors";
 import {
+  hydrateUnitOwnerUserSlugRow,
+  hydrateUnitOwnerUserSlugs,
+} from "@/utils/userSlugHydration";
+import {
   generateBetween,
   POSITION_LENGTH_THRESHOLD,
   rebalance,
@@ -193,7 +197,8 @@ export class ShelfService {
       prisma.shelf.count({ where }),
     ]);
 
-    return { shelves: rows.map(mapShelfListRowToDTO), total };
+    const hydratedRows = await hydrateUnitOwnerUserSlugs(rows);
+    return { shelves: hydratedRows.map(mapShelfListRowToDTO), total };
   }
 
   async listUserShelves(userId: string): Promise<ShelfSummaryDTO[]> {
@@ -202,7 +207,7 @@ export class ShelfService {
       orderBy: { createdAt: "asc" },
       select: shelfListSelect,
     });
-    return rows.map(mapShelfSummaryToDTO);
+    return (await hydrateUnitOwnerUserSlugs(rows)).map(mapShelfSummaryToDTO);
   }
 
   async getByUnitId(unitId: string): Promise<ShelfDetailDTO> {
@@ -210,7 +215,10 @@ export class ShelfService {
       where: { unitId },
       include: shelfInclude,
     });
-    return mapShelfDetailToDTO(row, row.itemCount);
+    return mapShelfDetailToDTO(
+      await hydrateUnitOwnerUserSlugRow(row),
+      row.itemCount,
+    );
   }
 
   /**
@@ -241,7 +249,10 @@ export class ShelfService {
       include: shelfInclude,
     });
     if (!row) return null;
-    return mapShelfDetailToDTO(row, row.itemCount);
+    return mapShelfDetailToDTO(
+      await hydrateUnitOwnerUserSlugRow(row),
+      row.itemCount,
+    );
   }
 
   async create(req: CreateShelfInput, userId: string): Promise<ShelfDTO> {
@@ -341,7 +352,7 @@ export class ShelfService {
       include: shelfInclude,
     });
 
-    return mapShelfToDTO(row);
+    return mapShelfToDTO(await hydrateUnitOwnerUserSlugRow(row));
   }
 
   async update(unitId: string, req: UpdateShelfInput): Promise<ShelfDTO> {
@@ -404,7 +415,7 @@ export class ShelfService {
       include: shelfInclude,
     });
 
-    return mapShelfToDTO(row);
+    return mapShelfToDTO(await hydrateUnitOwnerUserSlugRow(row));
   }
 
   async delete(unitId: string): Promise<void> {

@@ -13,6 +13,10 @@ import {
   UnitType,
 } from "#/prisma/client";
 import { patchPostFieldsToMeili, syncPostToMeili } from "@/meili/post/sync";
+import {
+  hydrateUnitOwnerUserSlugRow,
+  hydrateUnitOwnerUserSlugs,
+} from "@/utils/userSlugHydration";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 import { AppError } from "../utils/errors";
@@ -101,7 +105,10 @@ export class PostService {
       prisma.post.count({ where }),
     ]);
 
-    return { posts: posts as PostWithRelations[], total };
+    return {
+      posts: await hydrateUnitOwnerUserSlugs(posts as PostWithRelations[]),
+      total,
+    };
   }
 
   /** List posts associated with a realm through the RealmUnit junction. */
@@ -190,7 +197,10 @@ export class PostService {
       prisma.post.count({ where }),
     ]);
 
-    return { posts: posts as PostWithRelations[], total };
+    return {
+      posts: await hydrateUnitOwnerUserSlugs(posts as PostWithRelations[]),
+      total,
+    };
   }
 
   /** Get a single post by unit ID. */
@@ -199,7 +209,7 @@ export class PostService {
       where: { unitId },
       include: postInclude,
     });
-    return post as PostWithRelations;
+    return hydrateUnitOwnerUserSlugRow(post as PostWithRelations);
   }
 
   /**
@@ -404,7 +414,7 @@ export class PostService {
     // Fire-and-forget sync to Meilisearch
     syncPostToMeili(post.unitId).catch(() => {});
 
-    return post;
+    return hydrateUnitOwnerUserSlugRow(post);
   }
 
   /** Update post body, isLocked, and/or extra. */
@@ -432,7 +442,7 @@ export class PostService {
     if (input.extra !== undefined) patchFields.extra = input.extra;
     patchPostFieldsToMeili(unitId, patchFields).catch(() => {});
 
-    return updated as PostWithRelations;
+    return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
   }
 
   /** Delete a post and decrement parent reply counts. */

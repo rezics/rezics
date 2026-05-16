@@ -33,7 +33,7 @@ export const realmListSelect = {
       userId: true,
       createdAt: true,
       updatedAt: true,
-      user: { select: { unitId: true, name: true, avatar: true } },
+      user: { select: publicUserSelect },
       translations: true,
     },
   },

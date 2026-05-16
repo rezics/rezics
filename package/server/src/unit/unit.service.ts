@@ -19,6 +19,10 @@ import {
   syncContentToMeili,
 } from "@/meili/content/sync";
 import { cleanupReactions } from "@/reaction-boundary/reaction-boundary.client";
+import {
+  hydrateUnitOwnerUserSlugRow,
+  hydrateUnitOwnerUserSlugs,
+} from "@/utils/userSlugHydration";
 import type { UnitWithRelations } from "./types";
 import { unitInclude } from "./types";
 
@@ -187,7 +191,9 @@ export class UnitService {
     ]);
 
     return {
-      units: units as UnitResult<TInclude>[],
+      units: (await hydrateUnitOwnerUserSlugs(
+        units as UnitResult<TInclude>[],
+      )) as UnitResult<TInclude>[],
       total,
     };
   }
@@ -202,7 +208,9 @@ export class UnitService {
       where: { id: unitId },
       include: include as Prisma.UnitInclude,
     });
-    return unit as UnitResult<TInclude>;
+    return (await hydrateUnitOwnerUserSlugRow(
+      unit as UnitResult<TInclude>,
+    )) as UnitResult<TInclude>;
   }
 
   /** Create a Unit with optional translations */
@@ -241,7 +249,7 @@ export class UnitService {
       include: unitInclude,
     });
     await syncContentToMeili(unit.id);
-    return unit as UnitWithRelations;
+    return hydrateUnitOwnerUserSlugRow(unit as UnitWithRelations);
   }
 
   /** Update a Unit (does not touch translations -- use TranslationService) */
@@ -282,7 +290,7 @@ export class UnitService {
     }
     await patchContentMetadataToMeili(unitId, patchFields);
 
-    return unit as UnitWithRelations;
+    return hydrateUnitOwnerUserSlugRow(unit as UnitWithRelations);
   }
 
   /**
@@ -300,7 +308,7 @@ export class UnitService {
       where: { slugScope_slug: { slugScope, slug } },
       include: unitInclude,
     });
-    return unit as UnitWithRelations | null;
+    return unit ? hydrateUnitOwnerUserSlugRow(unit as UnitWithRelations) : null;
   }
 
   /** Set or update a unit's slug */
@@ -310,7 +318,7 @@ export class UnitService {
       data: { slug },
       include: unitInclude,
     });
-    return unit as UnitWithRelations;
+    return hydrateUnitOwnerUserSlugRow(unit as UnitWithRelations);
   }
 
   /** Delete a Unit by id (cascades) */

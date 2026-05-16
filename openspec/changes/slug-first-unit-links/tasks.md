@@ -39,17 +39,24 @@
 
 ## 6. Backend known-slug response audit
 
-- [ ] 6.1 Audit `@rezics/contract` DTO/reference schemas that expose slug-bearing navigation targets. Keep `slug` optional/nullish, but confirm schemas allow it where clients need slug-first links (for example `publicUserSchema`, `userDTOSchema`, `userBriefSchema`, `realmDTOSchema`, `tagDTOSchema`, `entityDTOSchema`, `shelfDTOSchema`, attribution briefs, and any search/list result references).
-- [ ] 6.2 Fix `PostDTO.author` hydration for reviews/comments/posts: backend post mappers SHALL return `author.slug` when the author USER unit has a known slug and the slug can be loaded through the post query or a bounded batch lookup. Add focused coverage so a review author with a slug serializes that slug.
-- [ ] 6.3 Audit mapper paths that embed `publicUserSchema` (`BookDTO.user`, `RealmDTO.user`, `ShelfDTO.user`, `UnitDTO.user`, and profile/reaction history actors). Include USER slugs where reasonably available; avoid N+1 lookups.
-- [ ] 6.4 Audit slug-bearing non-USER references (`REALM`, `TAG`, `ZONE`, `ENTITY`, owner-scoped `SHELF`) in list/search/detail responses. Where a DTO already joins the backing `Unit`, ensure `slug` is forwarded next to `unitId`.
-- [ ] 6.5 Document any intentionally unitId-only response surfaces found during the audit, with the reason (bare unitId, cross-service boundary, expensive lookup, private/admin-only surface, or not a public link target).
+- [x] 6.1 Audit `@rezics/contract` DTO/reference schemas that expose slug-bearing navigation targets. Keep `slug` optional/nullish, but confirm schemas allow it where clients need slug-first links (for example `publicUserSchema`, `userDTOSchema`, `userBriefSchema`, `realmDTOSchema`, `tagDTOSchema`, `entityDTOSchema`, `shelfDTOSchema`, attribution briefs, and any search/list result references).
+- [x] 6.2 Fix `PostDTO.author` hydration for reviews/comments/posts: backend post mappers SHALL return `author.slug` when the author USER unit has a known slug and the slug can be loaded through the post query or a bounded batch lookup. Add focused coverage so a review author with a slug serializes that slug.
+- [x] 6.3 Audit mapper paths that embed `publicUserSchema` (`BookDTO.user`, `RealmDTO.user`, `ShelfDTO.user`, `UnitDTO.user`, and profile/reaction history actors). Include USER slugs where reasonably available; avoid N+1 lookups.
+- [x] 6.4 Audit slug-bearing non-USER references (`REALM`, `TAG`, `ZONE`, `ENTITY`, owner-scoped `SHELF`) in list/search/detail responses. Where a DTO already joins the backing `Unit`, ensure `slug` is forwarded next to `unitId`.
+- [x] 6.5 Document any intentionally unitId-only response surfaces found during the audit, with the reason (bare unitId, cross-service boundary, expensive lookup, private/admin-only surface, or not a public link target).
+
+Audit notes:
+
+- `UnitTagDTO`, `RealmTagUnitDTO`, `TagVoteDTO`, `RealmUnitDTO`, and `RealmMemberDTO` remain unitId-only because they model relationship rows, not public navigation targets. Richer list/detail/search responses carry the linked unit slug where already joined.
+- Chapter/user activity surfaces that only expose scalar ids (`userId`, `unitId`) remain id-only in this change because they do not embed `publicUserSchema` or a slug-bearing reference object.
+- Feedback, subscription, progress, score, token, work-link, and admin/private DTOs remain id-only because they are private/admin/cross-boundary or non-public-link surfaces.
+- Search/index documents already carry denormalized slug fields where used for public navigation, and this change avoids adding extra reverse lookups only to fill optional slugs.
 
 ## 7. Validation
 
 - [x] 7.1 Run `bun -F @rezics/ui test` — new `unitHref.test.ts` passes; no other ui tests regress.
 - [x] 7.2 Run `bun -F @rezics/app test` — existing app tests pass; snapshot updates expected for any test that asserted a `/user/<uuid>` URL where a slug is now used.
-- [ ] 7.3 Run backend tests that cover changed mapper hydration (`bun -F @rezics/server test` or narrower post/user/realm/shelf tests as appropriate).
+- [x] 7.3 Run backend tests that cover changed mapper hydration (`bun -F @rezics/server test` or narrower post/user/realm/shelf tests as appropriate).
 - [x] 7.4 Run `bun run check:convention` from the repo root — passes with no new R-rule violations.
 - [ ] 7.5 Run `bun -F @rezics/ui storybook` (port 6007) — visual smoke test on stories that render unit links (`PostAuthorHeader` story exists; check `UserHoverPreview` if it has one).
 - [ ] 7.6 `bun run dev` (or `bun run app:dev` + `bun run server:dev`) — smoke test in browser: AccountMenu profile click, post author byline click, tag chip click, realm card click. Each lands on the slug URL when the target has a slug, on the unitId URL when it does not.

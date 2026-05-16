@@ -18,6 +18,10 @@ import {
   patchContentMetadataToMeili,
   syncContentToMeili,
 } from "@/meili/content/sync";
+import {
+  hydrateUnitOwnerUserSlugRow,
+  hydrateUnitOwnerUserSlugs,
+} from "@/utils/userSlugHydration";
 import { normalizeBookContentStructureValue } from "./book-content-structure";
 import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
@@ -147,7 +151,10 @@ export class BookService {
       getBookApproxCount(),
     ]);
 
-    return { books: books as BookWithRelations[], total };
+    return {
+      books: await hydrateUnitOwnerUserSlugs(books as BookWithRelations[]),
+      total,
+    };
   }
 
   /**
@@ -159,7 +166,7 @@ export class BookService {
       include: bookInclude,
     });
 
-    return book as BookWithRelations;
+    return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);
   }
 
   /**
@@ -185,7 +192,9 @@ export class BookService {
       include: bookInclude,
     });
 
-    return book as BookWithRelations | null;
+    return book
+      ? hydrateUnitOwnerUserSlugRow(book as BookWithRelations)
+      : null;
   }
 
   /**
@@ -258,7 +267,7 @@ export class BookService {
 
     await syncContentToMeili(book.unitId);
 
-    return book as BookWithRelations;
+    return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);
   }
 
   /**
@@ -321,7 +330,7 @@ export class BookService {
     if (req.visibility !== undefined) patchFields.visibility = req.visibility;
     await patchContentMetadataToMeili(unitId, patchFields);
 
-    return book as BookWithRelations;
+    return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);
   }
 
   /**

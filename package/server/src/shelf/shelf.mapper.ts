@@ -66,6 +66,7 @@ export function mapShelfUnitRelationToDTO(
 export function mapShelfToDTO(row: ShelfWithMetadata): ShelfDTO {
   return {
     unitId: row.unitId,
+    slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
     user: mapPublicUser(row.unit?.user),
     kindKey: row.kindKey ?? undefined,
@@ -101,6 +102,7 @@ export function mapShelfDetailToDTO(
 export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
   return {
     unitId: row.unitId,
+    slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
     user: mapPublicUser(row.unit?.user),
     kindKey: row.kindKey ?? undefined,
@@ -121,6 +123,7 @@ export function mapShelfSummaryToDTO(row: ShelfListSelected): ShelfSummaryDTO {
   const title = row.unit?.translations?.[0]?.title ?? null;
   return {
     unitId: row.unitId,
+    slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
     kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(

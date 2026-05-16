@@ -28,11 +28,12 @@ export const shelfListSelect = {
   unit: {
     select: {
       id: true,
+      slug: true,
       userId: true,
       defaultLanguage: true,
       createdAt: true,
       updatedAt: true,
-      user: { select: { unitId: true, name: true, avatar: true } },
+      user: { select: publicUserSelect },
       translations: true,
       unitTags: { orderBy: { score: "desc" as const } },
     },

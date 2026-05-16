@@ -26,6 +26,10 @@ import {
   syncRealmToMeili,
 } from "@/meili/realm/sync";
 import {
+  hydrateUnitOwnerUserSlugRow,
+  hydrateUnitOwnerUserSlugs,
+} from "@/utils/userSlugHydration";
+import {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,
   mapRealmTagUnitToDTO,
@@ -133,9 +137,10 @@ export class RealmService {
       prisma.realm.count({ where }),
     ]);
 
+    const hydratedRows = await hydrateUnitOwnerUserSlugs(rows);
     return {
       realms: await Promise.all(
-        rows.map(async (row) => {
+        hydratedRows.map(async (row) => {
           const dto = mapRealmListRowToDTO(row);
           return {
             ...dto,
@@ -152,7 +157,7 @@ export class RealmService {
       where: { unitId },
       include: realmInclude,
     });
-    const dto = mapRealmToDTO(row);
+    const dto = mapRealmToDTO(await hydrateUnitOwnerUserSlugRow(row));
     return {
       ...dto,
       extra: await filterRealmExtraPublic(dto.extra),
@@ -216,7 +221,7 @@ export class RealmService {
     // Fire-and-forget sync to Meilisearch
     syncRealmToMeili(unit.id).catch(() => {});
 
-    const dto = mapRealmToDTO(row);
+    const dto = mapRealmToDTO(await hydrateUnitOwnerUserSlugRow(row));
     return {
       ...dto,
       extra: await filterRealmExtraPublic(dto.extra),
@@ -246,7 +251,7 @@ export class RealmService {
     if (extra !== undefined) patchFields.extra = extra;
     patchRealmMetadataToMeili(unitId, patchFields).catch(() => {});
 
-    const dto = mapRealmToDTO(row);
+    const dto = mapRealmToDTO(await hydrateUnitOwnerUserSlugRow(row));
     return {
       ...dto,
       extra: await filterRealmExtraPublic(dto.extra),
@@ -823,10 +828,13 @@ export class RealmService {
       prisma.realm.count({ where }),
     ]);
 
+    const hydratedRealms = await hydrateUnitOwnerUserSlugs(
+      realms as RealmWithRelations[],
+    );
     return {
       realms: await Promise.all(
-        realms.map(async (r) => {
-          const dto = mapRealmToDTO(r as RealmWithRelations);
+        hydratedRealms.map(async (r) => {
+          const dto = mapRealmToDTO(r);
           return {
             ...dto,
             extra: await filterRealmExtraPublic(dto.extra),
