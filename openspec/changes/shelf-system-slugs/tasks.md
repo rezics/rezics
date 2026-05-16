@@ -72,4 +72,3 @@
 ## 12. Documentation & Follow-on
 
 - [ ] 12.1 If `CONTRIBUTING.md` or any in-repo doc references the `User.extra.shelves` resolution pattern, update it to point at `useSystemShelfRef` / SlugRef.
-- [ ] 12.2 Mark L1 as in-flight in `openspec/plans/shelf-and-user-namespace-slug-plan.md`. Once this change archives, mark L1 as complete in §8.

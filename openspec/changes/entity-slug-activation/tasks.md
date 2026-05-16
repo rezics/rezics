@@ -71,9 +71,7 @@
 
 ## 10. Documentation & plan hygiene
 
-- [ ] 10.1 Update `openspec/plans/shelf-and-user-namespace-slug-plan.md` §6.2 to drop the "Hard dependency on `wiki-content-ownership` / `content-creation-mode`" sentence; replace with a one-line note that wiki convention is deferred (decision 2026-05-16) and v1 entities are creator-owned.
-- [ ] 10.2 Update §8 sequence in the same plan: remove the "after #4 ships" annotation on `entity-slug-activation` and mark #4 (`content-creation-mode`) as deferred until paired with `content-history-and-lock`.
-- [ ] 10.3 Update `openspec/plans/wiki-content-ownership-plan.md` with a "Status update 2026-05-16" header note: deferred until paired with history-infrastructure; ships with its first enforced UI surface.
+- [ ] 10.1 Update `openspec/plans/wiki-content-ownership-plan.md` with a "Status update 2026-05-16" header note: deferred until paired with history-infrastructure; ships with its first enforced UI surface.
 
 ## 11. End-to-end verification
 

@@ -204,7 +204,7 @@ The system user is never rendered as a user. Wiki-owned content shows no owner c
 
 ### 6.3 Identity Edge — User-as-ENTITY
 
-A user who registers as an author and creates an ENTITY in personal mode owns that ENTITY. If admin later assigns a slug via `entity-slug-activation` (see [[shelf-and-user-namespace-slug-plan]] §6.2), ownership stays with the user.
+A user who registers as an author and creates an ENTITY in personal mode owns that ENTITY. If admin later assigns a slug via `entity-slug-activation`, ownership stays with the user.
 
 If a wiki ENTITY already exists for the same person (community-added "Haruki Murakami") and Haruki later joins the platform, **merging two entities** is a separate claim flow — out of scope here. The substrate supports it: admin re-points `Unit.userId` from `system` to the claimed user and clears any locks.
 
@@ -230,7 +230,7 @@ Three OpenSpec changes emerge from this plan:
    - Documents the field-lock substrate as a forward design only
 
 2. **`entity-slug-activation`** — already planned, hard-depends on (1)
-   See [[shelf-and-user-namespace-slug-plan]] §6.2 and §8 for full scope. With (1) in place, EntityPicker's wiki-mode spawn has a defined convention.
+   See `openspec/changes/entity-slug-activation/` for full scope. With (1) in place, EntityPicker's wiki-mode spawn has a defined convention.
 
 3. **`content-history-and-lock`** — future, no schedule
    Aligns with [[history-infrastructure]]. Adds `Unit.lockedFields` column, implements edit admission per §4.4, builds owner-side lock UI. Triggered when product wants real community editing.

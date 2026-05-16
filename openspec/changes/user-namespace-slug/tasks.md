@@ -100,5 +100,4 @@
 ## 12. Documentation & Follow-ons
 
 - [x] 12.1 Update `CONTRIBUTING.md` to document the short=slug / long=unitId URL convention and the new `check:convention` rule.
-- [x] 12.2 Update `openspec/plans/shelf-and-user-namespace-slug-plan.md` to mark L3 as in-flight, then archived once this change is archived.
-- [ ] 12.3 Once this change archives, confirm `shelf-system-slugs`, `entity-slug-activation`, and `engagement-subscription` proposals can proceed against the new substrate. File any blocking findings as comments on those proposals. (Deferred to archive time.)
+- [ ] 12.2 Once this change archives, confirm `shelf-system-slugs`, `entity-slug-activation`, and `engagement-subscription` proposals can proceed against the new substrate. File any blocking findings as comments on those proposals. (Deferred to archive time.)

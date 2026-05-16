@@ -1,6 +1,6 @@
 ## Context
 
-This change is the L3 deliverable of `openspec/plans/shelf-and-user-namespace-slug-plan.md`. It bundles two orthogonal architectural commitments because both touch the User PK and the Unit slug topology in the same migration window:
+This change bundles two orthogonal architectural commitments because both touch the User PK and the Unit slug topology in the same migration window:
 
 1. **User-as-Unit** — `User.userId` is renamed to `User.unitId` and a sibling `Unit { type: USER, id = User.unitId }` row is created. The primary motivation is unification of owner / reference / mention / attribution identity, and the prerequisite for `engagement-subscription` (`subscriberUnitId` and `targetUnitId` both being Unit ids).
 2. **Per-type slug scopes** — the global `Unit.slug` unique constraint becomes `(slugScope, slug)`. Five named infrastructure scopes (`user`, `realm`, `tag`, `zone`, `entity`) carry top-level identities; owner-scoped slugs (e.g., shelves under a user) point `slugScope` directly at the owner unit's id. The slug subsystem stops fighting itself: `User.slug` and `Unit.slug` no longer live in two parallel universes.
@@ -158,7 +158,7 @@ ENTITY scope tightens this further on the write side, not on the substrate side:
 
 Protective product policy is explicitly deferred. A follow-on change MAY add warnings, creation-time checks, claim flows, or same-slug linking across scopes, but that policy SHALL layer above this substrate and SHALL NOT require changing the `(slugScope, slug)` model.
 
-**Why**: This is the point of per-type scopes — distinct public prefixes carry distinct identity namespaces. Reintroducing hard mutual exclusion across scopes would partially recreate the global namespace pressure this change removes. The short-prefix route table gives enough context for users and systems to distinguish resources, while leaving product free to add softer protection later. Tracked in `shelf-and-user-namespace-slug-plan.md` §6.9.
+**Why**: This is the point of per-type scopes — distinct public prefixes carry distinct identity namespaces. Reintroducing hard mutual exclusion across scopes would partially recreate the global namespace pressure this change removes. The short-prefix route table gives enough context for users and systems to distinguish resources, while leaving product free to add softer protection later.
 
 ### D15: Owner soft-delete keeps owner-scoped slug namespaces reserved
 

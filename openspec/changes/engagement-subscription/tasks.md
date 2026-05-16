@@ -107,5 +107,4 @@
 ## 10. Cleanup
 
 - [ ] 10.1 Remove `User.followersCount` / `User.followingsCount` from the `User` extension only if a follow-up decision retires denormalized counters (default: keep them, write them through subscription service)
-- [ ] 10.2 Update `openspec/plans/shelf-and-user-namespace-slug-plan.md` §6.1 to point to this change as the resolution of "Subscription Domain Unification"
-- [ ] 10.3 Run `openspec validate engagement-subscription --strict` and resolve any reported issues
+- [ ] 10.2 Run `openspec validate engagement-subscription --strict` and resolve any reported issues

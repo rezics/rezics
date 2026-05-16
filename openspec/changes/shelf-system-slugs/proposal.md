@@ -1,8 +1,8 @@
 ## Why
 
-After `user-namespace-slug` (L3) lands, the slug substrate permits `SHELF` Units to carry a slug under a user owner-scope, but no slug is actually minted anywhere. `/u/:userSlug/shelf/favorites` is wired to resolve 404, the four contract-defined system shelves (`favorites`, `backlog`, `active`, `completed`) exist as plain `SHELF` Units with no addressable identity, and the only way the frontend learns about them is via the `User.extra.shelves` JSON map — a server-side cache that doubles as a frontend-exposed lookup and forces every system-shelf consumer to special-case the resolution path.
+After `user-namespace-slug` lands, the slug substrate permits `SHELF` Units to carry a slug under a user owner-scope, but no slug is actually minted anywhere. `/u/:userSlug/shelf/favorites` is wired to resolve 404, the four contract-defined system shelves (`favorites`, `backlog`, `active`, `completed`) exist as plain `SHELF` Units with no addressable identity, and the only way the frontend learns about them is via the `User.extra.shelves` JSON map — a server-side cache that doubles as a frontend-exposed lookup and forces every system-shelf consumer to special-case the resolution path.
 
-This is the L1 deliverable from `openspec/plans/shelf-and-user-namespace-slug-plan.md`. It mints the four system slugs at user bootstrap so the contract URLs become stable from day zero, and retires `User.extra.shelves` as a frontend surface so system shelves are resolved through the same `SlugRef` path as any other slug-bearing Unit.
+This change mints the four system slugs at user bootstrap so the contract URLs become stable from day zero, and retires `User.extra.shelves` as a frontend surface so system shelves are resolved through the same `SlugRef` path as any other slug-bearing Unit.
 
 ## What Changes
 
@@ -51,4 +51,4 @@ Per `CLAUDE.md`, this change runs as one breaking cutover with no dual-read / sh
 
 **Downstream**
 
-This change closes the L1 leg of `shelf-and-user-namespace-slug-plan.md`. It does not block or unblock `entity-slug-activation` or `engagement-subscription`; those can proceed in parallel.
+This change does not block or unblock `entity-slug-activation` or `engagement-subscription`; those can proceed in parallel.

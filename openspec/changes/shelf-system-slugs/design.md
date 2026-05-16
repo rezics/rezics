@@ -1,6 +1,6 @@
 ## Context
 
-This change is the L1 deliverable of `openspec/plans/shelf-and-user-namespace-slug-plan.md`. It depends on the L3 change `user-namespace-slug` having shipped first: that change provides the `Unit.slugScope` column, the composite `(slugScope, slug)` unique, the `SHELF`-permitted-under-owner-scope substrate rule, the `User.unitId` rename, and the `GET /shelf/by-slug/:userSlug/:slug` endpoint shell that currently returns 404 for every slug.
+This change depends on `user-namespace-slug` having shipped first: that change provides the `Unit.slugScope` column, the composite `(slugScope, slug)` unique, the `SHELF`-permitted-under-owner-scope substrate rule, the `User.unitId` rename, and the `GET /shelf/by-slug/:userSlug/:slug` endpoint shell that currently returns 404 for every slug.
 
 **Current state**
 

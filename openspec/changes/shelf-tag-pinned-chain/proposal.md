@@ -4,7 +4,7 @@
 
 The schema substrate is already in place (`UnitTag.pinned`, dedicated index `(unitId, pinned, position)`). What is missing is (a) a write path that surfaces ownership intent into pinned UnitTag rows, and (b) a read path that distinguishes owner-pinned tags from incidental high-score tags so that the filter chain reflects owner intent rather than community-driven tag scores leaking in.
 
-This is the L2 work item from `openspec/plans/shelf-and-user-namespace-slug-plan.md` — fully independent of the L3 identity rework and ready to ship now.
+This change is fully independent of the `user-namespace-slug` identity rework and ready to ship now.
 
 ## What Changes
 

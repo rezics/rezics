@@ -2,7 +2,7 @@
 
 User identity (`User.userId`) and Unit identity (`Unit.id`) live in separate universes today. This blocks two things at once: any reference that wants to point uniformly at an owner / subject / mention must special-case User, and a generic `Subscription(subscriberUnitId → targetUnitId)` edge cannot exist while the subscriber side has asymmetric identity. At the same time, the slug subsystem has reached the end of its single global namespace — `User.slug` and `Unit.slug` already live in two parallel uniqueness universes, `SHELF` is rejected from slugging so there is no addressable identity for `alice/favorites`, and the existing `/unit/:slug` route blurs the line between UUID and slug surfaces. Both problems touch User identity and Unit slug topology in the same migration window, so we bundle them into one architectural cutover.
 
-This is the L3 deliverable in `openspec/plans/shelf-and-user-namespace-slug-plan.md`. It unblocks L1 (system shelf slugs) and the queued `engagement-subscription` change, both of which are post-L3 and parallelizable.
+Shipping this change unblocks `shelf-system-slugs` (mints system shelf slugs under the user owner scope) and `engagement-subscription` (depends on `User.unitId` as the prerequisite for `subscriberUnitId`); both are post-this-change and parallelizable.
 
 ## What Changes
 
