@@ -33,6 +33,7 @@ import {
 import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
 import { slugApi } from "./slug";
+import { subscriptionApi } from "./subscription";
 import { statsAdminApi } from "./stat";
 import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";
 import { tokenApi } from "./token";
@@ -177,6 +178,7 @@ app
   .use(attributionApi)
   .use(entityApi)
   .use(slugApi)
+  .use(subscriptionApi)
   .use(userApi)
   .use(userBriefApi)
   .use(meiliApi)
