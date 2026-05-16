@@ -26,6 +26,7 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import { JoinButton } from "../components/JoinButton";
 import { RealmContentFeed } from "../components/RealmContentFeed";
 import { RealmMemberList } from "../components/RealmMemberList";
+import { RealmMuteButton } from "../components/RealmMuteButton";
 import { RealmTagManager } from "../components/RealmTagManager";
 import { canManageRealm } from "../models/canManageRealm";
 import { AboutSection } from "../sections/AboutSection";
@@ -107,6 +108,7 @@ export function RealmPage({
               </Button>
             )}
             <JoinButton realmId={realmId} />
+            <RealmMuteButton realmUnitId={realmId} />
           </div>
         </div>
         {description && (

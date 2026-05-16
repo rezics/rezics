@@ -162,6 +162,59 @@ export function useLeaveRealmMutation(
 }
 
 /**
+ * Mutation for muting a realm — removes the Subscription edge while
+ * keeping `RealmMember` intact (engagement-subscription design D5).
+ * Invalidates the same membership/detail keys as join/leave so any
+ * "is subscribed" derived state re-fetches.
+ */
+export function useMuteRealmMutation(
+  options?: Omit<
+    UseMutationOptions<{ muted: boolean }, Error, string>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (realmUnitId: string) => realmApi.mute(realmUnitId),
+    ...options,
+    onSuccess: (data, realmUnitId, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.detail(realmUnitId),
+      });
+      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
+      options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
+    },
+  });
+}
+
+/**
+ * Mutation for unmuting a realm — re-adds the Subscription edge with
+ * `channels=['*']`. Idempotent server-side (no-op if a subscription
+ * already exists).
+ */
+export function useUnmuteRealmMutation(
+  options?: Omit<
+    UseMutationOptions<{ muted: boolean }, Error, string>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (realmUnitId: string) => realmApi.unmute(realmUnitId),
+    ...options,
+    onSuccess: (data, realmUnitId, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.detail(realmUnitId),
+      });
+      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
+      options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
+    },
+  });
+}
+
+/**
  * Mutation for updating a member's role
  */
 export function useUpdateMemberRoleMutation(
@@ -521,6 +574,8 @@ export const realmMutations = {
   useDelete: useDeleteRealmMutation,
   useJoin: useJoinRealmMutation,
   useLeave: useLeaveRealmMutation,
+  useMute: useMuteRealmMutation,
+  useUnmute: useUnmuteRealmMutation,
   useUpdateMemberRole: useUpdateMemberRoleMutation,
   useRemoveMember: useRemoveMemberMutation,
   useAddUnit: useAddRealmUnitMutation,

@@ -259,28 +259,62 @@ export class RealmService {
 
   // --- Membership ---
 
+  /**
+   * Join the realm as a member. Atomically writes BOTH the `RealmMember`
+   * permission edge AND the `Subscription` attention edge (channels=['*'])
+   * per design D5 of `engagement-subscription`. Bumps both denormalized
+   * counters (`Realm.memberCount` and `Unit.subscriberCount`) in the same
+   * transaction. If a Subscription row already exists (the user was
+   * lurking on a public realm and is now joining), the upsert keeps it
+   * intact and the subscriberCount stays accurate.
+   */
   async joinRealm(
     realmUnitId: string,
     userId: string,
     roleKey?: string,
   ): Promise<RealmMemberDTO> {
-    const member = await prisma.realmMember.create({
-      data: {
-        realmUnitId,
-        userId,
-        roleKey: roleKey ?? "member",
-      },
-    });
+    const { member, memberCount } = await prisma.$transaction(async (tx) => {
+      const member = await tx.realmMember.create({
+        data: {
+          realmUnitId,
+          userId,
+          roleKey: roleKey ?? "member",
+        },
+      });
 
-    const updatedRealm = await prisma.realm.update({
-      where: { unitId: realmUnitId },
-      data: { memberCount: { increment: 1 } },
+      const updatedRealm = await tx.realm.update({
+        where: { unitId: realmUnitId },
+        data: { memberCount: { increment: 1 } },
+      });
+
+      const existingSub = await tx.subscription.findUnique({
+        where: {
+          subscriberUnitId_targetUnitId: {
+            subscriberUnitId: userId,
+            targetUnitId: realmUnitId,
+          },
+        },
+        select: { id: true },
+      });
+      if (!existingSub) {
+        await tx.subscription.create({
+          data: {
+            subscriberUnitId: userId,
+            targetUnitId: realmUnitId,
+            channels: ["*"],
+          },
+        });
+        await tx.unit.update({
+          where: { id: realmUnitId },
+          data: { subscriberCount: { increment: 1 } },
+        });
+      }
+
+      return { member, memberCount: updatedRealm.memberCount };
     });
 
     // Fire-and-forget partial sync to Meilisearch (memberCount changed)
-    patchRealmMemberCountToMeili(realmUnitId, updatedRealm.memberCount).catch(
-      () => {},
-    );
+    patchRealmMemberCountToMeili(realmUnitId, memberCount).catch(() => {});
 
     return mapRealmMemberToDTO(member);
   }
@@ -300,22 +334,114 @@ export class RealmService {
     return mapRealmMemberToDTO(member);
   }
 
+  /**
+   * Remove the membership and the matching subscription in one
+   * transaction (design D5). Idempotent for partial state — if either
+   * row is missing the corresponding counter is not decremented, so a
+   * second call doesn't double-decrement.
+   */
   async removeMember(realmUnitId: string, userId: string): Promise<void> {
-    await prisma.realmMember.delete({
-      where: {
-        realmUnitId_userId: { realmUnitId, userId },
-      },
+    const memberCount = await prisma.$transaction(async (tx) => {
+      const existingMember = await tx.realmMember.findUnique({
+        where: { realmUnitId_userId: { realmUnitId, userId } },
+        select: { realmUnitId: true },
+      });
+      const existingSub = await tx.subscription.findUnique({
+        where: {
+          subscriberUnitId_targetUnitId: {
+            subscriberUnitId: userId,
+            targetUnitId: realmUnitId,
+          },
+        },
+        select: { id: true },
+      });
+
+      if (existingMember) {
+        await tx.realmMember.delete({
+          where: { realmUnitId_userId: { realmUnitId, userId } },
+        });
+      }
+      if (existingSub) {
+        await tx.subscription.delete({ where: { id: existingSub.id } });
+        await tx.unit.update({
+          where: { id: realmUnitId },
+          data: { subscriberCount: { decrement: 1 } },
+        });
+      }
+
+      if (!existingMember) {
+        const realm = await tx.realm.findUnique({
+          where: { unitId: realmUnitId },
+          select: { memberCount: true },
+        });
+        return realm?.memberCount ?? 0;
+      }
+      const updatedRealm = await tx.realm.update({
+        where: { unitId: realmUnitId },
+        data: { memberCount: { decrement: 1 } },
+      });
+      return updatedRealm.memberCount;
     });
 
-    const updatedRealm = await prisma.realm.update({
-      where: { unitId: realmUnitId },
-      data: { memberCount: { decrement: 1 } },
-    });
+    patchRealmMemberCountToMeili(realmUnitId, memberCount).catch(() => {});
+  }
 
-    // Fire-and-forget partial sync to Meilisearch (memberCount changed)
-    patchRealmMemberCountToMeili(realmUnitId, updatedRealm.memberCount).catch(
-      () => {},
-    );
+  /**
+   * Mute a realm — remove the Subscription row only (keeps RealmMember).
+   * Idempotent for missing subscription. Per design D5: muting preserves
+   * posting rights and role, only suppresses inbound activity.
+   */
+  async muteRealm(realmUnitId: string, userId: string): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      const existingSub = await tx.subscription.findUnique({
+        where: {
+          subscriberUnitId_targetUnitId: {
+            subscriberUnitId: userId,
+            targetUnitId: realmUnitId,
+          },
+        },
+        select: { id: true },
+      });
+      if (!existingSub) return;
+      await tx.subscription.delete({ where: { id: existingSub.id } });
+      await tx.unit.update({
+        where: { id: realmUnitId },
+        data: { subscriberCount: { decrement: 1 } },
+      });
+    });
+  }
+
+  /**
+   * Unmute a realm — re-add the Subscription row with `channels=['*']`.
+   * Idempotent: if a subscription already exists (caller wasn't muted),
+   * no-op. Per design D5 the caller does not need to be a member to
+   * unmute, since lurking subscriptions are also valid (in which case
+   * "unmute" is just a generic subscribe).
+   */
+  async unmuteRealm(realmUnitId: string, userId: string): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      const existingSub = await tx.subscription.findUnique({
+        where: {
+          subscriberUnitId_targetUnitId: {
+            subscriberUnitId: userId,
+            targetUnitId: realmUnitId,
+          },
+        },
+        select: { id: true },
+      });
+      if (existingSub) return;
+      await tx.subscription.create({
+        data: {
+          subscriberUnitId: userId,
+          targetUnitId: realmUnitId,
+          channels: ["*"],
+        },
+      });
+      await tx.unit.update({
+        where: { id: realmUnitId },
+        data: { subscriberCount: { increment: 1 } },
+      });
+    });
   }
 
   async getMember(

@@ -334,6 +334,40 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       },
     },
   )
+  // --- Subscription / mute (engagement-subscription, design D5) ---
+  .post(
+    "/:unitId/mute",
+    async ({ params, identity }): Promise<{ muted: boolean }> => {
+      await realmService.muteRealm(params.unitId, identity.userId);
+      return { muted: true };
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      detail: {
+        summary: "Mute realm",
+        description:
+          "Suppress realm activity notifications by removing the Subscription edge while keeping RealmMember intact.",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/unmute",
+    async ({ params, identity }): Promise<{ muted: boolean }> => {
+      await realmService.unmuteRealm(params.unitId, identity.userId);
+      return { muted: false };
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      detail: {
+        summary: "Unmute realm",
+        description: "Re-enable realm activity notifications by re-adding the Subscription edge (channels=['*']).",
+        tags: ["Realms"],
+      },
+    },
+  )
   // --- Content feed routes ---
   .post(
     "/:unitId/content",

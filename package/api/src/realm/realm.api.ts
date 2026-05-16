@@ -133,6 +133,18 @@ export const realmApi = {
   /**
    * Leave a realm
    */
+  mute: async (realmUnitId: string): Promise<{ muted: boolean }> => {
+    return apiFetch<{ muted: boolean }>(`/realm/${realmUnitId}/mute`, {
+      method: "POST",
+    });
+  },
+
+  unmute: async (realmUnitId: string): Promise<{ muted: boolean }> => {
+    return apiFetch<{ muted: boolean }>(`/realm/${realmUnitId}/unmute`, {
+      method: "POST",
+    });
+  },
+
   leave: async (realmUnitId: string): Promise<{ message: string }> => {
     const sessionState = await authApi.getSessionState();
     const userId = sessionState.user?.id;
