@@ -1,3 +1,4 @@
+import { useDmStream } from "@rezics/api/dm/dm";
 import {
   useNotificationStream,
   useUnreadCount,
@@ -9,8 +10,11 @@ import { CreateMenu } from "../../components/create-menu/CreateMenu.tsx";
 import { AccountMenu } from "./AccountMenu.tsx";
 
 export function AuthenticatedSection() {
-  // Live notification stream — mounted once at the authenticated shell level.
+  // Live notification + DM streams — mounted once at the authenticated
+  // shell level. The DM stream invalidates conversation/thread caches
+  // on each incoming `dm.message` or `dm.read` event.
   useNotificationStream();
+  useDmStream();
   const { data } = useUnreadCount();
   const unread = data?.count ?? 0;
   const badgeText = unread > 99 ? "99+" : String(unread);

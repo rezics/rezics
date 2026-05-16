@@ -107,13 +107,9 @@ export const userApi = {
     return apiFetch(`/user/${userId}`, { method: "DELETE" });
   },
 
-  follow: async (targetId: string): Promise<{ message: string }> => {
-    return apiFetch(`/user/follow/${targetId}`, { method: "POST" });
-  },
-
-  unfollow: async (targetId: string): Promise<{ message: string }> => {
-    return apiFetch(`/user/follow/${targetId}`, { method: "DELETE" });
-  },
+  // follow / unfollow removed by `engagement-subscription` — callers
+  // now use `useSubscribe` / `useUnsubscribe` from the subscription
+  // module against `POST /subscription` and `DELETE /subscription/:id`.
 
   getFollowStatus: async (
     targetIds: string[],

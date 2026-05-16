@@ -7,6 +7,7 @@ import {
 import { Button } from "@rezics/ui/shadcn";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { NotificationCard } from "../components/NotificationCard.tsx";
+import { InboxTabBar } from "../components/InboxTabBar.tsx";
 
 export const NotificationPage: React.FC = () => {
   const { data, isLoading, isError } = useNotifications(1, 50);
@@ -30,6 +31,8 @@ export const NotificationPage: React.FC = () => {
           </Button>
         )}
       </div>
+      <InboxTabBar active="notifications" />
+      <div className="mt-4" />
 
       {isLoading && (
         <p className="text-sm text-muted-foreground">Loading…</p>

@@ -1,4 +1,8 @@
-import { userMutations, userQueries } from "@rezics/api/user/user";
+import {
+  useIsSubscribed,
+  useSubscribeMutation,
+  useUnsubscribeMutation,
+} from "@rezics/api/subscription/subscription";
 import {
   Button,
   Tooltip,
@@ -6,7 +10,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -92,18 +95,16 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 
   const enabled = !!userId && hasMemberSession;
 
-  const { data: followStatus, isLoading: statusLoading } = useQuery({
-    ...userQueries.followStatus(userId ? [userId] : []),
-    enabled,
-  });
+  const { data: subscriptionStatus, isLoading: statusLoading } =
+    useIsSubscribed(enabled ? (userId as string) : "");
 
-  const followMutation = userMutations.useFollow();
-  const unfollowMutation = userMutations.useUnfollow();
+  const subscribeMutation = useSubscribeMutation();
+  const unsubscribeMutation = useUnsubscribeMutation();
 
   useEffect(() => {
-    if (!userId || !followStatus) return;
-    setLocalIsFollowing(!!followStatus[userId]);
-  }, [followStatus, userId]);
+    if (!userId || !subscriptionStatus) return;
+    setLocalIsFollowing(subscriptionStatus.subscribed);
+  }, [subscriptionStatus, userId]);
 
   const isFollowing = useMemo(
     () => localIsFollowing ?? false,
@@ -114,8 +115,8 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   const loading =
     authSessionLoading ||
     (statusLoading && !hasFollowState) ||
-    followMutation.isPending ||
-    unfollowMutation.isPending;
+    subscribeMutation.isPending ||
+    unsubscribeMutation.isPending;
 
   const handleClick = async () => {
     if (!userId || loading) return;
@@ -136,12 +137,11 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 
     try {
       if (willUnfollow) {
-        await unfollowMutation.mutateAsync(userId);
+        await unsubscribeMutation.mutateAsync(userId);
       } else {
-        await followMutation.mutateAsync(userId);
+        await subscribeMutation.mutateAsync({ targetUnitId: userId });
       }
     } catch {
-      // 回滚本地计数
       if (hasLocalCount) {
         setLocalFollowers((prev) => (prev ?? 0) - delta);
       }

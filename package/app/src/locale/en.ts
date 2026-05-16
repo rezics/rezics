@@ -1076,4 +1076,23 @@ export default {
       },
     },
   },
+
+  // Direct messages (engagement-subscription)
+  dm: {
+    inbox_title: "Direct Messages",
+    notifications_tab: "Notifications",
+    dm_tab: "Direct Messages",
+    conversation_list_empty:
+      "No conversations yet. Subscribe to someone to start a thread.",
+    conversation_list_loading: "Loading…",
+    conversation_list_error: "Could not load conversations.",
+    thread_empty: "No messages yet — say hi.",
+    thread_loading: "Loading messages…",
+    thread_error: "Could not load messages.",
+    composer_placeholder: "Write a message",
+    composer_send: "Send",
+    back_to_list: "All conversations",
+    must_subscribe_to_dm:
+      "You must subscribe to the recipient with DM enabled to send a direct message.",
+  },
 };
