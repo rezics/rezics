@@ -41,6 +41,7 @@ export async function seedMedia(
         data: {
           type: UnitType.MEDIA,
           userId: author.userId,
+          slugScope: author.userId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.8)

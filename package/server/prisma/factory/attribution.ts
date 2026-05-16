@@ -79,6 +79,7 @@ function buildEntityRow(kind: EntityKind, verifiedRate: number): EntitySeedRow {
 
 async function batchInsertEntities(
   prisma: PrismaClient,
+  entityScope: string,
   rows: EntitySeedRow[],
   kind: EntityKind,
 ): Promise<void> {
@@ -88,6 +89,7 @@ async function batchInsertEntities(
       data: chunk.map((r) => ({
         id: r.id,
         type: UnitType.ENTITY,
+        slugScope: entityScope,
         status: UnitStatus.PUBLISHED,
         defaultLanguage: r.primaryLang,
       })),
@@ -144,7 +146,7 @@ export async function seedPeople(
   const rows = Array.from({ length: total }, () =>
     buildEntityRow("person", 0.05),
   );
-  await batchInsertEntities(ctx.prisma, rows, "person");
+  await batchInsertEntities(ctx.prisma, ctx.slugScopes.entity, rows, "person");
 
   return rows.map((r) => ({
     unitId: r.id,
@@ -163,7 +165,7 @@ export async function seedOrganizations(
   const rows = Array.from({ length: total }, () =>
     buildEntityRow("organization", 0.1),
   );
-  await batchInsertEntities(ctx.prisma, rows, "organization");
+  await batchInsertEntities(ctx.prisma, ctx.slugScopes.entity, rows, "organization");
 
   return rows.map((r) => ({
     unitId: r.id,

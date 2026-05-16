@@ -56,6 +56,7 @@ export async function seedBooks(
         data: {
           type: UnitType.BOOK,
           userId: author.userId,
+          slugScope: author.userId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.9)
@@ -242,6 +243,7 @@ export async function seedChaptersForBook(
         data: chunk.map((r) => ({
           id: r.id,
           userId: bookUserId,
+          slugScope: bookUserId,
           type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: DEFAULT_LANGUAGE,
@@ -289,6 +291,7 @@ export async function seedChaptersForBook(
         data: {
           id: row.id,
           userId: bookUserId,
+          slugScope: bookUserId,
           type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: DEFAULT_LANGUAGE,

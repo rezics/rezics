@@ -132,6 +132,7 @@ export async function seedZones(
       data: {
         id,
         type: UnitType.ZONE,
+        slugScope: ctx.slugScopes.zone,
         status: UnitStatus.PUBLISHED,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: faker.date.past({ years: 1 }),

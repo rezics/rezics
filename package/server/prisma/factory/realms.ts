@@ -30,6 +30,7 @@ export async function seedRealms(
         data: {
           type: UnitType.REALM,
           userId: owner.userId,
+          slugScope: ctx.slugScopes.realm,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: faker.date.past({ years: 2 }),

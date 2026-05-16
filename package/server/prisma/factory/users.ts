@@ -113,12 +113,24 @@ export async function seedUsers(
         role: plan.permission?.role[0]?.toLowerCase() ?? "user",
       });
 
+      await ctx.prisma.unit.upsert({
+        where: { id: authResult.userId },
+        update: { slug: plan.slug, slugScope: ctx.slugScopes.user },
+        create: {
+          id: authResult.userId,
+          type: "USER",
+          slug: plan.slug,
+          slugScope: ctx.slugScopes.user,
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          isLanguageNeutral: true,
+        },
+      });
       await ctx.prisma.user.create({
         data: {
-          userId: authResult.userId,
+          unitId: authResult.userId,
           authUserId: authResult.userId,
           email: plan.email,
-          slug: plan.slug,
           name: plan.name,
           avatar: plan.avatar,
           bio: plan.bio,

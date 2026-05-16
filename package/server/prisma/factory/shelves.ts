@@ -72,6 +72,7 @@ export async function seedShelves(
         data: {
           type: UnitType.SHELF,
           userId: author.userId,
+          slugScope: author.userId,
           status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.85)

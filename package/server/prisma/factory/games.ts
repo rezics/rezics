@@ -40,6 +40,7 @@ export async function seedGames(
         data: {
           type: UnitType.GAME,
           userId: author.userId,
+          slugScope: author.userId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.8)

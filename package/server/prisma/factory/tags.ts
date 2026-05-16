@@ -31,6 +31,7 @@ export async function seedTags(
       id: t.id,
       type: UnitType.TAG,
       userId: t.userId,
+      slugScope: ctx.slugScopes.tag,
       status: UnitStatus.PUBLISHED,
       isLanguageNeutral: false,
       defaultLanguage: DEFAULT_LANGUAGE,

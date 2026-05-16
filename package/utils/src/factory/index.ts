@@ -159,7 +159,27 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
   try {
     await seedBaseline(authPrisma, prisma);
-    const ctx = makeSeedCtx(prisma, authPrisma, preset.mode);
+    const { SLUG_SCOPES } = await import("@rezics/contract");
+    const slugScopeRows = await prisma.slugScope.findMany({
+      select: { slug: true, unitId: true },
+    });
+    const scopeMap = new Map(
+      slugScopeRows.map((r) => [r.slug, r.unitId] as const),
+    );
+    const slugScopes = {} as Record<string, string>;
+    for (const name of SLUG_SCOPES) {
+      const id = scopeMap.get(name);
+      if (!id) {
+        throw new Error(`Slug scope "${name}" is missing — seed first.`);
+      }
+      slugScopes[name] = id;
+    }
+    const ctx = makeSeedCtx(
+      prisma,
+      authPrisma,
+      slugScopes as never,
+      preset.mode,
+    );
     await runFactorySeed(ctx, plan);
   } finally {
     await Promise.all([

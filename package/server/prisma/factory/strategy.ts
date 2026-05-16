@@ -1,4 +1,5 @@
 import type { PrismaClient as AuthPrismaClient } from "@rezics/auth/prisma/generated/client";
+import type { SlugScopeName } from "@rezics/contract";
 import * as v from "valibot";
 import type { PrismaClient } from "../generated/client.js";
 import { powerLaw, randomInt } from "./utils.js";
@@ -16,9 +17,12 @@ export interface CountProvider {
   draw(spec: CountSpec): number;
 }
 
+export type SlugScopesMap = Record<SlugScopeName, string>;
+
 export interface SeedCtx {
   prisma: PrismaClient;
   authPrisma: AuthPrismaClient;
+  slugScopes: SlugScopesMap;
   draw(spec: CountSpec): number;
 }
 
@@ -68,12 +72,14 @@ function randInt(min: number, max: number): number {
 export function makeSeedCtx(
   prisma: PrismaClient,
   authPrisma: AuthPrismaClient,
+  slugScopes: SlugScopesMap,
   mode: Mode,
 ): SeedCtx {
   const provider = makeCountProvider(mode);
   return {
     prisma,
     authPrisma,
+    slugScopes,
     draw: (spec) => provider.draw(spec),
   };
 }

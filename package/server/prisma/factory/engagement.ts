@@ -55,6 +55,7 @@ async function seedFavorites(
         id: shelfId,
         type: UnitType.SHELF,
         userId: user.userId,
+        slugScope: user.userId,
         status: UnitStatus.PUBLISHED,
         visibility: UnitVisibility.PRIVATE,
         publishedAt: new Date(),
@@ -158,7 +159,7 @@ async function seedFollows(
     await Promise.all(
       slice.map((user) =>
         ctx.prisma.user.update({
-          where: { userId: user.userId },
+          where: { unitId: user.userId },
           data: {
             followersCount: followerCounts.get(user.userId) ?? 0,
             followingsCount: followingCounts.get(user.userId) ?? 0,
