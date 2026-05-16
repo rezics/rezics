@@ -20,6 +20,27 @@ export const KIND_REGISTRY = {
   "mention.new": { aggregatable: false, category: "mention" },
   "system.notice": { aggregatable: false, category: "system" },
   "invitation.new": { aggregatable: false, category: "invitation" },
+  // engagement-subscription: subscription-driven broadcast kinds.
+  // Categories mirror the dot-prefix used in `CHANNEL_REGISTRY` so the
+  // `<category>.*` wildcard tier in the fan-out resolver lines up with
+  // the UI grouping. Aggregatability: `*.new` for distinct content is
+  // false (each item is its own row); `*.updated` / `*.changed` collapse
+  // to one summary per source; `*.deleted` is rare and informational.
+  "chapter.new": { aggregatable: false, category: "chapter" },
+  "chapter.updated": { aggregatable: true, category: "chapter" },
+  "chapter.deleted": { aggregatable: false, category: "chapter" },
+  "review.new": { aggregatable: false, category: "review" },
+  "review.updated": { aggregatable: true, category: "review" },
+  "edition.new": { aggregatable: false, category: "edition" },
+  "metadata.changed": { aggregatable: true, category: "metadata" },
+  "cover.changed": { aggregatable: true, category: "metadata" },
+  "post.new": { aggregatable: false, category: "post" },
+  "post.review": { aggregatable: false, category: "post" },
+  "announcement.new": { aggregatable: false, category: "announcement" },
+  "member.joined": { aggregatable: true, category: "member" },
+  "unit.tagged": { aggregatable: true, category: "unit" },
+  "item.added": { aggregatable: true, category: "item" },
+  "item.removed": { aggregatable: true, category: "item" },
 } as const satisfies Record<
   string,
   { aggregatable: boolean; category: string }

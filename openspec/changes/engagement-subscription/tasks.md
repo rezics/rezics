@@ -6,23 +6,23 @@
 
 ## 1. Contract layer
 
-- [ ] 1.1 Create `package/contract/src/subscription/channel-registry.ts` exporting `CHANNEL_REGISTRY` keyed by `UnitType` with `categories` and `events` per type for v1 (BOOK, USER, REALM, TAG, SHELF). USER MUST include `categories: ['post', 'review', 'dm']` and `events: ['post.new', 'review.new', 'dm.message']` for the DM permission gate
-- [ ] 1.2 Export `isValidChannel(targetType, channel)` predicate and `assertValidChannels(targetType, channels[])` from the same module
-- [ ] 1.3 Add Typebox schemas for `Subscription` DTO, `SubscriptionCreateBody`, `SubscriptionPatchBody`, `SubscriptionCheckResponse`, `SubscriberCountResponse`
-- [ ] 1.4 Extend `KIND_REGISTRY` (lives in `package/contract/src/notification/kind-registry.ts`, owned by `notify-broadcast-boundary`) with new entries: `chapter.new`, `chapter.updated`, `chapter.deleted`, `review.new`, `review.updated`, `edition.new`, `metadata.changed`, `cover.changed`, `post.new`, `post.review`, `announcement.new`, `member.joined`, `unit.tagged`, `item.added`, `item.removed`. Aggregatability per kind decided per design D4
-- [ ] 1.5 Update `package/contract/src/index.ts` (and barrel exports) to expose the new subscription types; verify `tsc --noEmit` in `package/contract`
+- [x] 1.1 Create `package/contract/src/subscription/channel-registry.ts` exporting `CHANNEL_REGISTRY` keyed by `UnitType` with `categories` and `events` per type for v1 (BOOK, USER, REALM, TAG, SHELF). USER MUST include `categories: ['post', 'review', 'dm']` and `events: ['post.new', 'review.new', 'dm.message']` for the DM permission gate
+- [x] 1.2 Export `isValidChannel(targetType, channel)` predicate and `assertValidChannels(targetType, channels[])` from the same module
+- [x] 1.3 Add Typebox schemas for `Subscription` DTO, `SubscriptionCreateBody`, `SubscriptionPatchBody`, `SubscriptionCheckResponse`, `SubscriberCountResponse`
+- [x] 1.4 Extend `KIND_REGISTRY` (lives in `package/contract/src/notification/kind-registry.ts`, owned by `notify-broadcast-boundary`) with new entries: `chapter.new`, `chapter.updated`, `chapter.deleted`, `review.new`, `review.updated`, `edition.new`, `metadata.changed`, `cover.changed`, `post.new`, `post.review`, `announcement.new`, `member.joined`, `unit.tagged`, `item.added`, `item.removed`. Aggregatability per kind decided per design D4
+- [x] 1.5 Update `package/contract/src/index.ts` (and barrel exports) to expose the new subscription types; verify `tsc --noEmit` in `package/contract`
 
 ## 2. Database schema & migration
 
-- [ ] 2.1 Add `Subscription` model to `package/server/prisma/schema.prisma` per design D1 (fields, `@@unique`, `@@index`)
-- [ ] 2.2 Add `subscriberCount Int @default(0)` column on `Unit`
-- [ ] 2.3 Generate Prisma migration; add a raw SQL step `CREATE INDEX subscription_channels_gin ON "Subscription" USING gin (channels);` inside the migration file
-- [ ] 2.4 In the same migration, backfill: `INSERT INTO "Subscription" (id, subscriberUnitId, targetUnitId, channels, createdAt, updatedAt) SELECT ..., ARRAY['*'], ..., ... FROM "Follow"` and `ON CONFLICT DO NOTHING`
-- [ ] 2.5 In the same migration, backfill `RealmMember → Subscription` for any `(realmUnitId, userId)` not yet present (with `channels=['*']`)
-- [ ] 2.6 In the same migration, recompute `Unit.subscriberCount` and `User.followersCount` / `User.followingsCount` per design D8 and D6
-- [ ] 2.7 In the same migration, drop the `Follow` table and its `User` relations
-- [ ] 2.8 Remove `Follow` model and its `User.followers` / `User.followings` relations from the Prisma schema
-- [ ] 2.9 Run `bun run prisma:generate` and verify client compiles
+- [x] 2.1 Add `Subscription` model to `package/server/prisma/schema.prisma` per design D1 (fields, `@@unique`, `@@index`)
+- [x] 2.2 Add `subscriberCount Int @default(0)` column on `Unit`
+- [x] 2.3 Generate Prisma migration; add a raw SQL step `CREATE INDEX subscription_channels_gin ON "Subscription" USING gin (channels);` inside the migration file
+- [x] 2.4 In the same migration, backfill: `INSERT INTO "Subscription" (id, subscriberUnitId, targetUnitId, channels, createdAt, updatedAt) SELECT ..., ARRAY['*'], ..., ... FROM "Follow"` and `ON CONFLICT DO NOTHING`
+- [x] 2.5 In the same migration, backfill `RealmMember → Subscription` for any `(realmUnitId, userId)` not yet present (with `channels=['*']`)
+- [x] 2.6 In the same migration, recompute `Unit.subscriberCount` and `User.followersCount` / `User.followingsCount` per design D8 and D6
+- [x] 2.7 In the same migration, drop the `Follow` table and its `User` relations
+- [x] 2.8 Remove `Follow` model and its `User.followers` / `User.followings` relations from the Prisma schema
+- [x] 2.9 Run `bun run prisma:generate` and verify client compiles
 
 ## 3. Subscription backend domain
 

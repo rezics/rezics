@@ -33,6 +33,7 @@ export * from "./search/federated";
 export * from "./seed-tags";
 export * from "./shelf";
 export * from "./slug";
+export * from "./subscription";
 export * from "./tag";
 export * from "./tag-groups";
 export * from "./tags";

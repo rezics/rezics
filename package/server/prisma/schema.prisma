@@ -118,6 +118,12 @@ model Unit {
   visibility UnitVisibility @default(PUBLIC)
   rating     ContentRating  @default(GENERAL)
 
+  /// Denormalized count of `Subscription` rows targeting this unit.
+  /// Maintained transactionally by the subscription service alongside row
+  /// insert/delete. Powers Unit-detail render of "N watchers" without a
+  /// COUNT(*) on every read. Drift is mitigated by the migration recompute.
+  subscriberCount Int @default(0)
+
   extra Json?
 
   createdAt   DateTime  @default(now())
@@ -189,6 +195,12 @@ model Unit {
   parentPosts     Post[] @relation("PostParent")
 
   userProgress UserUnitProgress[] @relation("ProgressUnit")
+
+  // Subscription edges (see Subscription model). `subscribers` are rows
+  // where this Unit is the target; `subscriptionsMade` are rows where
+  // this Unit (in v1: a USER Unit) is the subscriber.
+  subscribers       Subscription[] @relation("SubscriptionTarget")
+  subscriptionsMade Subscription[] @relation("SubscriptionSubscriber")
 
   @@unique([slugScope, slug])
   @@unique([translationGroupId, defaultLanguage])
@@ -744,10 +756,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  followers  Follow[]   @relation("UserFollowers")
-  followings Follow[]   @relation("UserFollowings")
-  units      Unit[]     @relation("UnitForUser")
-  apiTokens  ApiToken[]
+  units     Unit[]     @relation("UnitForUser")
+  apiTokens ApiToken[]
 
   workLinkClaimsAsClaimer  WorkLinkClaim[]    @relation("WorkLinkClaimClaimer")
   workLinkClaimsAsResolver WorkLinkClaim[]    @relation("WorkLinkClaimResolver")
@@ -856,16 +866,28 @@ model ScoreRealmField {
   @@index([realm, sortOrder])
 }
 
-model Follow {
-  id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  followerId  String   @db.Uuid
-  followingId String   @db.Uuid
-  createdAt   DateTime @default(now())
+/// Generic attention edge from a subscriber Unit (USER in v1) to any
+/// target Unit. `channels` is a String[] filter using dot-namespaced
+/// events with three wildcard tiers (`'*'`, `'<category>.*'`,
+/// `'<category>.<event>'`); see `@rezics/contract` `CHANNEL_REGISTRY`
+/// for the per-target-type registry. The fan-out resolver in
+/// `notify-boundary` performs three GIN-indexable array-containment
+/// checks against `channels`. The GIN index is added via raw SQL in
+/// the migration since Prisma does not yet model GIN.
+model Subscription {
+  id               String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  subscriberUnitId String   @db.Uuid
+  targetUnitId     String   @db.Uuid
+  channels         String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  follower  User @relation("UserFollowings", fields: [followerId], references: [unitId], onDelete: Cascade)
-  following User @relation("UserFollowers", fields: [followingId], references: [unitId], onDelete: Cascade)
+  subscriber Unit @relation("SubscriptionSubscriber", fields: [subscriberUnitId], references: [id], onDelete: Cascade)
+  target     Unit @relation("SubscriptionTarget", fields: [targetUnitId], references: [id], onDelete: Cascade)
 
-  @@unique([followerId, followingId])
+  @@unique([subscriberUnitId, targetUnitId])
+  @@index([targetUnitId])
+  @@index([subscriberUnitId])
 }
 
 model ApiToken {
