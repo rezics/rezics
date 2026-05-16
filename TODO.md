@@ -6,6 +6,9 @@
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info
 - [ ] 將 所有app路由讓AI過一邊，實際上試試大併發的情況，分析請求上可能的任何性能問題，這是一個非常大的change，tasks集合，需要分段執行
+- [ ] 我们需要一个 local 的数据库，基于indexdb 里面维护了 slugscope-slug-unitid 的对应关系  
+对于比如 /u/root-user/shelf/favourite 就要先查 slug-scope = u slug = root-user get unitId then, slug-scope = root-user-unitid slug = favourite get favourite shelf unitid  
+https://www.npmjs.com/package/dexie 
 
 ## 搜索
 - [ ] Suggest / autocomplete（header 下拉建議）：本身要新 endpoint、prefix 索引或快取層，與聯邦搜尋正交。建議獨立 search-suggest。
