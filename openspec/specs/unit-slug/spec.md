@@ -33,7 +33,7 @@ The following slug placements SHALL be permitted:
 
 - `TAG`, `REALM`, `ZONE`, `USER`, `ENTITY` Units MAY carry a top-level slug whose `slugScope` references the matching scope placeholder Unit.
 - `SHELF` Units MAY carry a slug whose `slugScope` references an owner Unit's id (a USER unit in v1; a REALM unit in a future change). User-created shelves SHALL NOT carry a slug in v1; only contract-defined system shelves (`favorites`, `backlog`, `active`, `completed`) are eligible, and minting is owned by the follow-on `shelf-system-slugs` change.
-- `ENTITY` slug writes SHALL be rejected at the service layer with a typed error until the follow-on `entity-slug-activation` change flips the gate. The substrate permits ENTITY slugs; the write surface is closed in v1.
+- `ENTITY` slug writes SHALL be accepted only when the caller has the global admin role AND the target Entity has `verified = true` at the time of the write. The substrate accepts ENTITY slugs unconditionally; the gate is enforced at the service layer (see `entity-service`).
 
 Attempts to set a slug on any other unit type (BOOK, GAME, MEDIA, POST, CHAPTER, IMAGE, VIDEO, QUOTE, LINK) SHALL be rejected with a validation error.
 
@@ -58,10 +58,21 @@ Attempts to set a slug on any other unit type (BOOK, GAME, MEDIA, POST, CHAPTER,
 - **THEN** the slug SHALL be saved successfully
 - **AND** the USER unit SHALL be resolvable via `GET /user/by-slug/alice`
 
-#### Scenario: Setting slug on an ENTITY unit is rejected in v1
+#### Scenario: Setting slug on a verified ENTITY by an admin
 
-- **WHEN** any caller attempts to set a slug on a unit with type `ENTITY` before `entity-slug-activation` ships
-- **THEN** the request SHALL be rejected with a typed error indicating ENTITY slug writes are not yet enabled
+- **WHEN** an admin sets slug `"liu-cixin"` on an ENTITY unit with `verified = true`, scoped to the entity scope
+- **THEN** the slug SHALL be saved successfully
+- **AND** the ENTITY unit SHALL be resolvable via `GET /entity/by-slug/liu-cixin`
+
+#### Scenario: Non-admin attempts to set an ENTITY slug
+
+- **WHEN** a non-admin user attempts to set a slug on an ENTITY unit
+- **THEN** the request SHALL be rejected with a typed error indicating ENTITY slug writes are admin-only
+
+#### Scenario: Admin attempts to set slug on an unverified ENTITY
+
+- **WHEN** an admin attempts to set a slug on an ENTITY unit with `verified = false`
+- **THEN** the request SHALL be rejected with a typed error indicating the entity must be verified before a slug can be set
 
 #### Scenario: Setting a system shelf slug under a user owner-scope
 
