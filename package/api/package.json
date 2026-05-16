@@ -51,17 +51,20 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "spike:book-db": "bun run src/book/book.collection.spike.ts"
   },
   "dependencies": {
-    "zustand": "5.0.7",
+    "@rezics/app": "workspace:*",
+    "@rezics/contract": "workspace:*",
+    "@rezics/server": "workspace:*",
     "@tanstack/query-broadcast-client-experimental": "^5.96.2",
+    "@tanstack/query-db-collection": "^1.0.36",
     "@tanstack/query-sync-storage-persister": "^5.96.2",
+    "@tanstack/react-db": "^0.1.83",
     "@tanstack/react-query": "^5.96.2",
     "@tanstack/react-query-persist-client": "^5.96.2",
-    "@rezics/server": "workspace:*",
-    "@rezics/contract": "workspace:*",
-    "@rezics/app": "workspace:*"
+    "zustand": "5.0.7"
   },
   "peerDependencies": {
     "react": "^19",
