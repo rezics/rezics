@@ -86,7 +86,7 @@ export function parseSearchString(input: string): SearchQuery {
         result.isLicensed = rawValue === "yes" || rawValue === "true";
         break;
       case "in":
-        result.realm = { slug: rawValue };
+        result.realm = { scope: "realm", slug: rawValue };
         break;
       case "sort":
         result.sort = rawValue;

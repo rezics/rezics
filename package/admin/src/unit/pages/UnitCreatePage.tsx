@@ -23,7 +23,7 @@ export default function UnitCreatePage() {
   const [error, setError] = React.useState<string | null>(null);
 
   const meQuery = useQuery(userQueries.me());
-  const myUnitId = meQuery.data?.userId ?? "";
+  const myUnitId = meQuery.data?.unitId ?? "";
 
   const [userId, setUserId] = React.useState("");
   const [type, setType] = React.useState("");

@@ -48,8 +48,8 @@ describe("buildAppliedFilterChips", () => {
 
   it("hides realm when implicit realm matches", () => {
     const chips = buildAppliedFilterChips(
-      { realm: { slug: "zone1" } },
-      { realm: { slug: "zone1" } },
+      { realm: { scope: "realm", slug: "zone1" } },
+      { realm: { scope: "realm", slug: "zone1" } },
     );
     expect(chips.find((c) => c.key.startsWith("realm"))).toBeUndefined();
   });

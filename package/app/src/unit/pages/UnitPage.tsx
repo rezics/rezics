@@ -137,7 +137,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
                           params={
                             unit.user.slug
                               ? { userSlug: unit.user.slug }
-                              : { unitId: unit.user.userId }
+                              : { unitId: unit.user.unitId }
                           }
                           className="text-sm font-medium"
                           {...props}

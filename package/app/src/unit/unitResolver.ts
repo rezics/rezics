@@ -1,7 +1,6 @@
 import {
   isPublicUnitIdRouteParams,
   isPublicUnitResolverSearch,
-  isPublicUnitSlugRouteParams,
   type UnitDTO,
 } from "@rezics/contract";
 import { notFound, redirect } from "@tanstack/react-router";
@@ -13,13 +12,6 @@ type ViewerRef = Parameters<typeof canAccessUnit>[1];
 export type UnitResolverSearch = {
   view: "auto" | "unit";
 };
-
-export function validatePublicUnitSlugParams(params: unknown) {
-  if (!isPublicUnitSlugRouteParams(params)) {
-    throw notFound();
-  }
-  return params;
-}
 
 export function validatePublicUnitIdParams(params: unknown) {
   if (!isPublicUnitIdRouteParams(params)) {
@@ -61,11 +53,7 @@ export function resolveUnitRoute({
   }
 
   const target = buildUnitUrl(unit);
-  if (
-    target &&
-    target !== `/unit/${unit.slug}` &&
-    target !== `/unit/id/${unit.id}`
-  ) {
+  if (target && target !== `/unit/${unit.id}`) {
     throw redirect({ to: target });
   }
 

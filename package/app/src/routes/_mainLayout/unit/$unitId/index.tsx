@@ -1,30 +1,21 @@
-import { unitBySlugQuery } from "@rezics/api/unit/unit";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { unitDetailQuery } from "@rezics/api/unit/unit";
+import { createFileRoute } from "@tanstack/react-router";
 import { UnitPageById } from "@/unit/pages/UnitPage";
 import {
-  isUuidSegment,
   resolveUnitRoute,
+  validatePublicUnitIdParams,
   validatePublicUnitResolverSearch,
-  validatePublicUnitSlugParams,
 } from "@/unit/unitResolver";
 import { useUserProfileStore } from "@/user/states";
 
-export const Route = createFileRoute("/_mainLayout/unit/$unitSlug/")({
+export const Route = createFileRoute("/_mainLayout/unit/$unitId/")({
   validateSearch: validatePublicUnitResolverSearch,
   loader: async ({ params, context, deps }) => {
-    validatePublicUnitSlugParams(params);
-
-    if (isUuidSegment(params.unitSlug)) {
-      throw redirect({
-        to: "/unit/id/$unitId",
-        params: { unitId: params.unitSlug },
-        search: deps.view === "unit" ? { view: "unit" } : {},
-      });
-    }
+    validatePublicUnitIdParams(params);
 
     const queryClient = context.qc;
     const unit = await queryClient
-      .ensureQueryData(unitBySlugQuery(params.unitSlug))
+      .ensureQueryData(unitDetailQuery(params.unitId))
       .catch(() => null);
 
     const viewer = useUserProfileStore.getState().user;

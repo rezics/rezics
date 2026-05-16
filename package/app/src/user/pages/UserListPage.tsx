@@ -105,9 +105,9 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {users.map((user) => (
               <Card
-                key={user.userId}
+                key={user.unitId}
                 className="shadow-md rounded-lg cursor-pointer hover:shadow-xl transition-shadow"
-                onClick={() => handleUserClick(user.userId)}
+                onClick={() => handleUserClick(user.unitId)}
               >
                 <CardContent className="text-center pt-6">
                   <Avatar className="w-16 h-16 mx-auto mb-3">

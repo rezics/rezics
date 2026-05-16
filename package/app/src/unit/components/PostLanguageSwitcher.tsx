@@ -71,7 +71,7 @@ export function PostLanguageSwitcher({
                   ? undefined
                   : () =>
                       navigate({
-                        to: "/unit/id/$unitId",
+                        to: "/unit/$unitId",
                         params: { unitId: sibling.unitId },
                       })
               }

@@ -160,15 +160,15 @@ function StoryRouterHost({ children }: { children: React.ReactNode }) {
       getParentRoute: () => rootRoute,
       path: "/shelf/$shelfId",
     });
-    const unitSlugRoute = createRoute({
+    const unitIdRoute = createRoute({
       getParentRoute: () => rootRoute,
-      path: "/unit/$unitSlug",
+      path: "/unit/$unitId",
     });
     return createRouter({
       routeTree: rootRoute.addChildren([
         bookRoute.addChildren([chapterRoute]),
         shelfRoute,
-        unitSlugRoute,
+        unitIdRoute,
       ]),
       history: createMemoryHistory({ initialEntries: ["/"] }),
     });

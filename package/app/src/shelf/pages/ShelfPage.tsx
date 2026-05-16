@@ -175,7 +175,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
 
   const hydration = useHydratedShelfUnits(units);
   const currentUser = useUserProfileStore((s) => s.user);
-  const isOwner = !!currentUser && currentUser.userId === shelf?.userId;
+  const isOwner = !!currentUser && currentUser.unitId === shelf?.userId;
   const canEditShelf = useCanEdit({ resource: "shelf", ownerUnit: shelf });
   const cleanupMutation = useCleanupOrphansMutation();
 

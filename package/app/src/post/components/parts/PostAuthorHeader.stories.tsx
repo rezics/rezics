@@ -15,7 +15,7 @@ const previewAuthor = {
 
 const previewPost: PostDTO = {
   ...postFlat[0],
-  authorUserId: previewAuthor.userId,
+  authorUserId: previewAuthor.unitId,
   author: previewAuthor,
 };
 

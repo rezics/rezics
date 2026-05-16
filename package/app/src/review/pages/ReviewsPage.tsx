@@ -14,7 +14,7 @@ function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
     unitId: doc.id,
     authorUserId: doc.authorUserId,
     author: {
-      userId: doc.authorUserId,
+      unitId: doc.authorUserId,
       name: doc.authorName ?? "",
       slug: doc.authorSlug ?? undefined,
       avatar: doc.authorAvatar ?? undefined,

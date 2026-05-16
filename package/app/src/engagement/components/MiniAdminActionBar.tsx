@@ -28,7 +28,7 @@ export function MiniAdminActionBar({
   const { t } = useTranslation();
   const canEdit = useCanEdit({
     resource,
-    ownerUnit: userId ? { user: { userId } } : undefined,
+    ownerUnit: userId ? { user: { unitId: userId } } : undefined,
   });
   const navigate = useNavigate();
 

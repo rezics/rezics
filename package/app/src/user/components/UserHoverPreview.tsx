@@ -18,7 +18,7 @@ import { cn } from "@/shared/utils/css-util";
 export type UserHoverPreviewSize = "compact" | "default";
 
 export interface UserHoverPreviewUser {
-  userId: string;
+  unitId: string;
   slug?: string | null;
   name?: string | null;
   avatar?: string | null;
@@ -56,7 +56,7 @@ export function UserHoverPreview({
   defaultOpen = false,
 }: UserHoverPreviewProps) {
   const idPrefix = useId();
-  const userId = getOptionalText(user.userId);
+  const userId = getOptionalText(user.unitId);
   const slug = getOptionalText(user.slug);
   const displayName = getOptionalText(user.name) ?? slug ?? "Reader";
   const profileText =

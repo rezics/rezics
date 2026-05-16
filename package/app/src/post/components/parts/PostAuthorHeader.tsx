@@ -22,7 +22,7 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
     : "";
   const nameClass =
     size === "compact" ? "text-xs font-semibold" : "text-sm font-semibold";
-  const author = post.author?.userId ? post.author : undefined;
+  const author = post.author?.unitId ? post.author : undefined;
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents the parent post card click when nested author content is used.
@@ -63,7 +63,7 @@ export function PostAuthorAvatar({
   size?: "compact" | "default";
   className?: string;
 }) {
-  const author = post.author?.userId ? post.author : undefined;
+  const author = post.author?.unitId ? post.author : undefined;
   const avatarClassName = [size === "compact" ? "size-8" : "size-9", className]
     .filter(Boolean)
     .join(" ");

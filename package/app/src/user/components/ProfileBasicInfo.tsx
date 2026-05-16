@@ -21,7 +21,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
 }) => {
   const canEdit = useCanEdit({
     resource: "unit",
-    ownerUnit: { user: { userId: user.userId } },
+    ownerUnit: { user: { userId: user.unitId } },
   });
   const shelvesCountQuery = useQuery({
     ...contentSearchQueryOptions({
@@ -99,7 +99,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           {!isCurrentUser && (
             <div className="mt-3">
               <FollowButton
-                userId={user.userId}
+                userId={user.unitId}
                 size="small"
                 variant="default"
               />
@@ -147,7 +147,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
             </Link>
           ) : (
             <FollowButton
-              userId={user.userId}
+              userId={user.unitId}
               size="medium"
               variant="default"
               fullWidth

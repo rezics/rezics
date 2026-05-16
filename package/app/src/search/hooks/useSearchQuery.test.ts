@@ -79,20 +79,20 @@ describe("mergeAppend", () => {
       isLicensed: false,
       sort: "createdAt",
       textLength: { min: 100 },
-      realm: { slug: "r1" },
+      realm: { scope: "realm", slug: "r1" },
     };
     const next = mergeAppend(prev, {
       ratings: ["R_18"],
       isLicensed: true,
       sort: "relevance",
       textLength: { max: 500 },
-      realm: { slug: "r2" },
+      realm: { scope: "realm", slug: "r2" },
     });
     expect(next.ratings).toEqual(["R_18"]);
     expect(next.isLicensed).toBe(true);
     expect(next.sort).toBe("relevance");
     expect(next.textLength).toEqual({ max: 500 });
-    expect(next.realm).toEqual({ slug: "r2" });
+    expect(next.realm).toEqual({ scope: "realm", slug: "r2" });
   });
 
   it("preserves prev fields not in patch", () => {

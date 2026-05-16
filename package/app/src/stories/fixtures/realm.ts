@@ -9,7 +9,7 @@ function makeRealm(
   return {
     unitId: overrides.unitId,
     user: userAlice,
-    userId: userAlice.userId,
+    userId: userAlice.unitId,
     isPublic: true,
     isOfficial: false,
     memberCount: 128,

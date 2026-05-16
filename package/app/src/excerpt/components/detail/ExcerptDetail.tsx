@@ -50,7 +50,7 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
             params={
               excerpt.user.slug
                 ? { userSlug: excerpt.user.slug }
-                : { userId: excerpt.user.userId ?? "" }
+                : { userId: excerpt.user.unitId ?? "" }
             }
             className="flex items-center gap-3"
           >
@@ -91,7 +91,7 @@ function ExcerptSourceLine({ source }: { source?: ExcerptSource | string }) {
     return <p className="text-xs text-text-secondary">—— {source}</p>;
   }
   const href =
-    source.mode === "unit" ? `/unit/id/${source.unitId}` : source.url;
+    source.mode === "unit" ? `/unit/${source.unitId}` : source.url;
   return (
     <p className="text-xs text-text-secondary">
       ——{" "}

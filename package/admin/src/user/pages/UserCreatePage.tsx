@@ -41,7 +41,7 @@ export default function UserCreatePage() {
       avatar: avatar.trim() || undefined,
       bio: bio.trim() || undefined,
     });
-    await navigate({ to: `/user/${user.userId}`, replace: true });
+    await navigate({ to: `/user/${user.unitId}`, replace: true });
   }
 
   return (

@@ -21,10 +21,10 @@ export type EditableResource =
 
 /**
  * Minimal shape every content DTO exposes for ownership checks — the contract
- * helpers only read `user.userId`, so we accept any DTO that provides it
+ * helpers only read `user.unitId`, so we accept any DTO that provides it
  * (BookDTO, ShelfDTO, UnitDTO, PostDTO, …).
  */
-export type OwnerBearing = { user?: { userId?: string } | null } | undefined;
+export type OwnerBearing = { user?: { unitId?: string } | null } | undefined;
 
 export type UseCanEditArgs = {
   resource: EditableResource;

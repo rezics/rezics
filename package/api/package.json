@@ -34,6 +34,10 @@
       "types": "./src/translation-group/index.ts",
       "default": "./src/translation-group/index.ts"
     },
+    "./slug": {
+      "types": "./src/slug/index.ts",
+      "default": "./src/slug/index.ts"
+    },
     "./*": {
       "types": "./src/*.ts",
       "default": "./src/*.ts"

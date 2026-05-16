@@ -36,7 +36,7 @@ export const UserPage: FC<UserPageProps> = ({ isCurrentUser = false }) => {
     setIsEditing(false);
     // Optionally refresh the profile or show success message
   };
-  const userId = routeUserId || currentUser?.userId;
+  const userId = routeUserId || currentUser?.unitId;
 
   // If in edit mode and is current user, show edit form
   if (

@@ -88,7 +88,7 @@ const sampleRealm: RealmSearchDocument = {
 
 const sampleUser: UserSearchDocument = {
   id: "user-1",
-  userId: "user-1",
+  unitId: "user-1",
   name: "Alice Reviewer",
   bio: "Reads everything magical.",
   avatar: null,

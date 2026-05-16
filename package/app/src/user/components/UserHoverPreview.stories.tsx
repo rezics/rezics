@@ -33,7 +33,7 @@ export const Default: Story = {};
 export const MissingOptionalFields: Story = {
   args: {
     user: {
-      userId: "user-minimal",
+      unitId: "user-minimal",
       name: "Mina Park",
       avatar: null,
     },
@@ -43,7 +43,7 @@ export const MissingOptionalFields: Story = {
 export const LongDisplayData: Story = {
   args: {
     user: {
-      userId: "user-long",
+      unitId: "user-long",
       slug: "reader-of-very-long-serials-and-annotated-editions",
       name: "Alexandria Theodora Penelope Versewright-Liang",
       avatar: null,
@@ -58,7 +58,7 @@ export const FollowingState: Story = {
   args: {
     user: {
       ...defaultUser,
-      userId: "user-followed",
+      unitId: "user-followed",
       name: "Cora Lim",
       slug: "cora-lim",
       isFollowing: true,

@@ -234,7 +234,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
                             )}
                             {credit.unitId ? (
                               <Link
-                                to="/unit/id/$unitId"
+                                to="/unit/$unitId"
                                 params={{ unitId: credit.unitId }}
                                 search={{ view: "unit" }}
                                 className="text-white/90 underline underline-offset-4 decoration-white/30 transition-colors hover:text-white hover:decoration-white/70"

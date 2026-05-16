@@ -30,7 +30,7 @@ export const ProfileLayout: FC = () => {
   };
   const currentUser = useUserProfileStore((s) => s.user);
   const isCurrentUser = routeUserId
-    ? currentUser?.userId === routeUserId
+    ? currentUser?.unitId === routeUserId
     : userSlug
       ? currentUser?.slug === userSlug
       : false;
@@ -79,7 +79,7 @@ export const ProfileLayout: FC = () => {
 
   return (
     <ProfileContext.Provider
-      value={{ user, isCurrentUser, userId: user.userId }}
+      value={{ user, isCurrentUser, userId: user.unitId }}
     >
       <div className="w-full max-w-12/16 mx-auto">
         <div className="flex flex-col md:flex-row md:gap-12 px-4 pb-12">
@@ -87,10 +87,10 @@ export const ProfileLayout: FC = () => {
             <ProfileBasicInfo
               user={user}
               isCurrentUser={isCurrentUser}
-              userId={user.userId}
+              userId={user.unitId}
             />
           </aside>
-          <ProfileShell userId={user.userId} userSlug={user.slug ?? userSlug} />
+          <ProfileShell userId={user.unitId} userSlug={user.slug ?? userSlug} />
         </div>
       </div>
     </ProfileContext.Provider>

@@ -98,9 +98,9 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {!isCurrentUser && user.userId !== currentUser?.userId && (
+              {!isCurrentUser && user.unitId !== currentUser?.unitId && (
                 <FollowButton
-                  userId={user.userId}
+                  userId={user.unitId}
                   size="medium"
                   className="!mr-2"
                 />
@@ -116,10 +116,10 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           </div>
 
           <div className="mt-6">
-            {user.userId && (
+            {user.unitId && (
               <div className="mb-4">
                 <h6 className="text-base font-semibold mb-2">User ID</h6>
-                <p className="text-sm text-text-secondary">{user.userId}</p>
+                <p className="text-sm text-text-secondary">{user.unitId}</p>
               </div>
             )}
             {user.email && (
@@ -144,7 +144,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           </div>
         </CardContent>
       </Card>
-      {(isCurrentUser || user.userId === currentUser?.userId) && (
+      {(isCurrentUser || user.unitId === currentUser?.unitId) && (
         <Card className="shadow-lg rounded-2xl mt-4">
           <CardContent>
             <h6 className="text-lg font-semibold inline-block">导航：</h6>
@@ -166,7 +166,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           </CardContent>
         </Card>
       )}
-      <UserUnitsPage userId={user.userId} />
+      <UserUnitsPage userId={user.unitId} />
     </div>
   );
 };

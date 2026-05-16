@@ -52,7 +52,7 @@ function makePost(id: string, title: string): PostDTO {
   return {
     unitId: id,
     authorUserId: "story-user",
-    author: { userId: "story-user", name: "Story Curator" },
+    author: { unitId: "story-user", name: "Story Curator" },
     body: `Body for ${title}.`,
     extra: { title },
     createdAt: "2026-01-01T00:00:00.000Z",

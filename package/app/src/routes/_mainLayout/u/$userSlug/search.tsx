@@ -33,7 +33,7 @@ function UserSlugScopedSearchPage() {
 
   return (
     <FederatedSearchPage
-      scope={{ kind: "user", userId: user.id }}
+      scope={{ kind: "user", userId: user.unitId }}
       initialQuery={initialQuery}
       initialCategory={category ?? "all"}
       onCategoryChange={(next) => {

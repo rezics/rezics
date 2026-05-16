@@ -1,15 +1,21 @@
-import type { InfraBootstrapResponse, SeedTagName } from "@rezics/contract";
+import type {
+  InfraBootstrapResponse,
+  SeedTagName,
+  SlugScopeName,
+  SlugScopesResponse,
+} from "@rezics/contract";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { apiFetch } from "../react-query/http";
 
-export const STORAGE_KEY = "rezics:infra:v1";
-export const SCHEMA_VERSION = 1;
+export const STORAGE_KEY = "rezics:infra:v2";
+export const SCHEMA_VERSION = 2;
 
 type InfraCacheShape = {
   schemaVersion: number;
   defaultRealmId?: string;
   seedTags: Partial<Record<SeedTagName, string>>;
+  slugScopes: SlugScopesResponse;
   fetchedAt: number;
 };
 
@@ -76,6 +82,15 @@ export function getSeedTagId(name: SeedTagName): string | null {
 }
 
 /**
+ * Synchronous accessor for a named-scope unitId.
+ *
+ * Returns `null` until `useInfraBootstrap` has hydrated the cache.
+ */
+export function getSlugScopeId(name: SlugScopeName): string | null {
+  return loadMemoryMirror()?.slugScopes?.[name] ?? null;
+}
+
+/**
  * Hook that fetches `/infra/bootstrap` and persists the result to
  * localStorage. Call once near the root of the app.
  */
@@ -88,6 +103,7 @@ export function useInfraBootstrap(): void {
       schemaVersion: SCHEMA_VERSION,
       defaultRealmId: data.defaultRealmId,
       seedTags: data.seedTags,
+      slugScopes: data.slugScopes ?? {},
       fetchedAt: Date.now(),
     };
     memoryMirror = next;

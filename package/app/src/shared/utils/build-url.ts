@@ -15,6 +15,6 @@ export function buildUnitUrl(unit: UnitDTO): string {
     case "REALM":
       return `/realm/${unit.id}`;
     default:
-      return unit.slug ? `/unit/${unit.slug}` : `/unit/id/${unit.id}`;
+      return `/unit/${unit.id}`;
   }
 }

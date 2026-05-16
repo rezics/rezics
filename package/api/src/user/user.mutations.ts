@@ -50,7 +50,7 @@ export function useAdminCreateUserMutation(
     mutationFn: (input: AdminCreateUserInput) => userApi.adminCreate(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      qc.setQueryData(userKeys.adminDetail(data.userId), data);
+      qc.setQueryData(userKeys.adminDetail(data.unitId), data);
       qc.invalidateQueries({ queryKey: userKeys.adminLists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

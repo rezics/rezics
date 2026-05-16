@@ -171,7 +171,7 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
             {targetTitle &&
               (targetUnitId ? (
                 <Link
-                  to="/unit/id/$unitId"
+                  to="/unit/$unitId"
                   params={{ unitId: targetUnitId }}
                   search={{ view: "auto" }}
                   className="text-sm text-text-secondary no-underline hover:text-text-primary"

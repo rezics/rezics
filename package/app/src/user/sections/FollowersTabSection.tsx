@@ -120,7 +120,7 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
   <div className="flex items-center gap-3 p-3 border border-border-whisper rounded-lg hover:border-border-defined transition-colors">
     <Link
       to="/user/$userId"
-      params={{ userId: user.userId }}
+      params={{ userId: user.unitId }}
       className="no-underline"
     >
       <Avatar className="w-10 h-10">
@@ -131,7 +131,7 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
     <div className="flex-1 min-w-0">
       <Link
         to="/user/$userId"
-        params={{ userId: user.userId }}
+        params={{ userId: user.unitId }}
         className="no-underline"
       >
         <span className="block text-sm font-medium text-text-primary">
@@ -149,6 +149,6 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
         </span>
       )}
     </div>
-    {showFollowButton && <FollowButton userId={user.userId} size="small" />}
+    {showFollowButton && <FollowButton userId={user.unitId} size="small" />}
   </div>
 );

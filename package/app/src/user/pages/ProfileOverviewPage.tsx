@@ -128,7 +128,7 @@ const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
 
   return (
     <Link
-      to="/unit/id/$unitId"
+      to="/unit/$unitId"
       params={{ unitId: item.id }}
       search={{ view: "auto" }}
       className="no-underline"

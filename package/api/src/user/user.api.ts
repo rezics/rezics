@@ -77,19 +77,6 @@ export const userApi = {
     });
   },
 
-  adminUpdateSlug: async (
-    userId: string,
-    input: { slug: string },
-  ): Promise<{
-    user: UserDTO;
-    authProjection: { attempted: boolean; ok: boolean };
-  }> => {
-    return apiFetch(`/user/admin/${userId}/slug`, {
-      method: "PATCH",
-      body: JSON.stringify(input),
-    });
-  },
-
   get: async (userId: string): Promise<UserDTO> => {
     return apiFetch(`/user/${userId}`);
   },
