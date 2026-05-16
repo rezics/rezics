@@ -37,18 +37,28 @@
 - [x] 5.2 For each child route or component under a slug route, confirm it reads `unitId` from the loader DTO and uses unitId-keyed queries downstream. If any child redundantly calls `/slug/resolve` or a by-slug endpoint for the same unit, fix it to read from the loader cache.
 - [x] 5.3 Add a one-line note in `openspec/specs/public-short-routes/spec.md` (post-archive, when the delta merges) confirming the audit was performed — actually, this lives in the delta scenario already (`Slug route loader resolves once`). Skip if the scenario passes verification.
 
-## 6. Validation
+## 6. Backend known-slug response audit
 
-- [x] 6.1 Run `bun -F @rezics/ui test` — new `unitHref.test.ts` passes; no other ui tests regress.
-- [x] 6.2 Run `bun -F @rezics/app test` — existing app tests pass; snapshot updates expected for any test that asserted a `/user/<uuid>` URL where a slug is now used.
-- [x] 6.3 Run `bun run check:convention` from the repo root — passes with no new R-rule violations.
-- [ ] 6.4 Run `bun -F @rezics/ui storybook` (port 6007) — visual smoke test on stories that render unit links (`PostAuthorHeader` story exists; check `UserHoverPreview` if it has one).
-- [ ] 6.5 `bun run dev` (or `bun run app:dev` + `bun run server:dev`) — smoke test in browser: AccountMenu profile click, post author byline click, tag chip click, realm card click. Each lands on the slug URL when the target has a slug, on the unitId URL when it does not.
-- [x] 6.6 `openspec validate slug-first-unit-links --strict` — passes.
+- [ ] 6.1 Audit `@rezics/contract` DTO/reference schemas that expose slug-bearing navigation targets. Keep `slug` optional/nullish, but confirm schemas allow it where clients need slug-first links (for example `publicUserSchema`, `userDTOSchema`, `userBriefSchema`, `realmDTOSchema`, `tagDTOSchema`, `entityDTOSchema`, `shelfDTOSchema`, attribution briefs, and any search/list result references).
+- [ ] 6.2 Fix `PostDTO.author` hydration for reviews/comments/posts: backend post mappers SHALL return `author.slug` when the author USER unit has a known slug and the slug can be loaded through the post query or a bounded batch lookup. Add focused coverage so a review author with a slug serializes that slug.
+- [ ] 6.3 Audit mapper paths that embed `publicUserSchema` (`BookDTO.user`, `RealmDTO.user`, `ShelfDTO.user`, `UnitDTO.user`, and profile/reaction history actors). Include USER slugs where reasonably available; avoid N+1 lookups.
+- [ ] 6.4 Audit slug-bearing non-USER references (`REALM`, `TAG`, `ZONE`, `ENTITY`, owner-scoped `SHELF`) in list/search/detail responses. Where a DTO already joins the backing `Unit`, ensure `slug` is forwarded next to `unitId`.
+- [ ] 6.5 Document any intentionally unitId-only response surfaces found during the audit, with the reason (bare unitId, cross-service boundary, expensive lookup, private/admin-only surface, or not a public link target).
 
-## 7. Out-of-scope cleanup (do NOT do in this change)
+## 7. Validation
 
-- [x] 7.1 **Do not** introduce a client-side slug↔unitId cache (IndexedDB or otherwise). That is the follow-on `slug-client-resolver` change.
-- [x] 7.2 **Do not** add slug-side counterparts for `/user/$userId/followers`, `/realms`, `/reactions`, `/content`, `/shelves`, `/edit`. The asymmetry is documented and is a separate route-table change.
-- [x] 7.3 **Do not** add a `check:convention` R-rule for raw `<Link to="/user/$userId">` outside of helpers. The lint rule needs a route-folder allowlist and is a separate small follow-on.
-- [x] 7.4 **Do not** add a `<UnitLink unit={…}>` component on top of `unitHref`. The helper is sufficient for v1; a wrapper component can come later if call sites prove repetitive.
+- [x] 7.1 Run `bun -F @rezics/ui test` — new `unitHref.test.ts` passes; no other ui tests regress.
+- [x] 7.2 Run `bun -F @rezics/app test` — existing app tests pass; snapshot updates expected for any test that asserted a `/user/<uuid>` URL where a slug is now used.
+- [ ] 7.3 Run backend tests that cover changed mapper hydration (`bun -F @rezics/server test` or narrower post/user/realm/shelf tests as appropriate).
+- [x] 7.4 Run `bun run check:convention` from the repo root — passes with no new R-rule violations.
+- [ ] 7.5 Run `bun -F @rezics/ui storybook` (port 6007) — visual smoke test on stories that render unit links (`PostAuthorHeader` story exists; check `UserHoverPreview` if it has one).
+- [ ] 7.6 `bun run dev` (or `bun run app:dev` + `bun run server:dev`) — smoke test in browser: AccountMenu profile click, post author byline click, tag chip click, realm card click. Each lands on the slug URL when the target has a slug, on the unitId URL when it does not.
+- [x] 7.7 `openspec validate slug-first-unit-links --strict` — passes.
+
+## 8. Out-of-scope cleanup (do NOT do in this change)
+
+- [x] 8.1 **Do not** introduce a client-side slug↔unitId cache (IndexedDB or otherwise). That is the follow-on `slug-client-resolver` change.
+- [x] 8.2 **Do not** add slug-side counterparts for `/user/$userId/followers`, `/realms`, `/reactions`, `/content`, `/shelves`, `/edit`. The asymmetry is documented and is a separate route-table change.
+- [x] 8.3 **Do not** add a `check:convention` R-rule for raw `<Link to="/user/$userId">` outside of helpers. The lint rule needs a route-folder allowlist and is a separate small follow-on.
+- [x] 8.4 **Do not** add a `<UnitLink unit={…}>` component on top of `unitHref`. The helper is sufficient for v1; a wrapper component can come later if call sites prove repetitive.
+- [x] 8.5 **Do not** require every response to always return slug, and do not add expensive per-row reverse lookups solely to satisfy slug-first links.

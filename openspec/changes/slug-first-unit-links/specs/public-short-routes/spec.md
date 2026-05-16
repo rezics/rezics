@@ -81,3 +81,31 @@ Once a slug route loader has resolved a DTO, child routes and child components S
 - **WHEN** the page renders a link to alice's favorites shelf
 - **THEN** the href SHALL be built via the link helper using both the slug and the unitId already in scope
 - **AND** the page SHALL NOT additionally call any slug-resolution endpoint to construct that href
+
+### Requirement: API responses include known slugs for slug-bearing unit references
+
+When a public API response returns a Unit DTO or embedded Unit reference for a slug-bearing type (USER, REALM, TAG, ZONE, ENTITY, or owner-scoped SHELF), the backend SHALL include the target's `slug` alongside its `unitId` whenever that slug is already available in the mapper input or can be obtained through the current query shape or a bounded batch lookup.
+
+This is an opportunistic-but-systematic response policy, not a hard availability guarantee. Responses MAY omit `slug` or return it as null/undefined when the target has no slug, when the response starts from a bare unitId that is not otherwise hydrated, when the slug lives across a service boundary, or when hydrating it would require an expensive per-row lookup. Clients SHALL continue to treat slug as optional and SHALL fall back to the long-prefix unitId URL through the sanctioned link helper.
+
+#### Scenario: Review author response includes known USER slug
+
+- **GIVEN** a review/post response embeds an `author` reference with `unitId = "u-1"`
+- **AND** the author USER unit has `slug = "alice"`
+- **WHEN** the backend maps the review/post DTO and can load the author USER unit slug through the post query or a bounded batch lookup
+- **THEN** `author.slug` SHALL be `"alice"`
+- **AND** a client rendering the author byline can produce `/u/alice` without issuing a separate slug-resolution query
+
+#### Scenario: Embedded reference falls back when slug is not reasonably available
+
+- **GIVEN** a response contains only a bare `unitId` for a slug-bearing target
+- **AND** hydrating the target slug would require an additional per-row lookup or a cross-boundary reverse lookup
+- **WHEN** the backend maps the response
+- **THEN** the response MAY omit `slug`
+- **AND** the client SHALL use the long-prefix unitId URL fallback
+
+#### Scenario: Full slug-bearing DTO returns its own slug when present
+
+- **GIVEN** a full DTO for a slug-bearing Unit type has access to the backing `Unit.slug`
+- **WHEN** the backend returns the DTO
+- **THEN** the DTO SHALL include `slug`

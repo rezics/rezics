@@ -4,7 +4,7 @@ The public URL surface is governed by `public-short-routes`. Short prefixes (`/u
 
 The application drift is concentrated in link-build sites. Multiple components hold a DTO that already carries both `unitId` and `slug` (for slug-eligible types), yet build their `<Link to>` paths against the long-prefix unitId routes. The most visible instance is `AccountMenu.tsx:71` linking the profile menu entry to `/user/me`, which redirects via `routes/_mainLayout/user/me/index.tsx:7` to `/user/$userId`. A viewer with a USER slug therefore lands on `/user/<uuid>/...` despite the slug being available on `useUserProfileStore.user`.
 
-The fix is one helper, an audit, and a small spec delta. No new infrastructure, no cache, no contract changes.
+The fix is one helper, an application link audit, a backend DTO hydration audit, and a small spec delta. No new infrastructure and no cache. Contract changes are additive/clarifying only: slug remains optional/nullish on references, but backend mappers should return it whenever they already know it or can obtain it cheaply.
 
 A follow-on change `slug-client-resolver` is anticipated to handle the harder case where only a `unitId` is available (no embedded slug) and the link builder still wants to render the slug URL by consulting a client-side cache. That change is explicitly deferred.
 
@@ -15,8 +15,9 @@ A follow-on change `slug-client-resolver` is anticipated to handle the harder ca
 - A single sanctioned helper, `unitHref({ type, unitId, slug })`, that returns a typed TanStack Router path. Slug-when-known, unitId-otherwise. Pure, synchronous, no I/O.
 - A thin React wrapper, `useUnitHref(unit)`, for ergonomics when the unit is already a hook-readable value.
 - Migration of every link-build site that currently hardcodes a long-prefix path for a slug-bearing type.
+- Backend responses that return slug-bearing unit references include `slug` next to `unitId` when the slug is already loaded or can be obtained through the current include/select shape or a bounded batch lookup.
 - Fix the AccountMenu profile-link bug as the headline outcome.
-- One additive spec requirement on `public-short-routes` codifying the link-builder rule.
+- Additive spec requirements on `public-short-routes` codifying the link-builder rule and the backend "known slug" response rule.
 
 **Non-Goals:**
 
@@ -24,6 +25,7 @@ A follow-on change `slug-client-resolver` is anticipated to handle the harder ca
 - Reverse lookup from a bare unitId without an embedded slug.
 - Chain resolution for owner-scoped sub-resources like `/u/<userSlug>/shelf/<shelfSlug>`.
 - DTO-walking middleware that snoops `apiFetch` responses.
+- Expensive per-row slug lookups or a hard guarantee that every response always contains slug. The rule is "return known slugs systematically," not "slug is required."
 - Server-side rename redirects (301 from old slug to new slug).
 - Convention check / lint rule enforcement against raw `<Link to="/user/$userId">` (a separate, smaller follow-on).
 - Changing the contract surface of `@rezics/contract` route schemas.
@@ -93,7 +95,7 @@ The redirect at `routes/_mainLayout/user/me/index.tsx` is retained for deep-link
 
 ### Decision 4: Spec delta on `public-short-routes`, not a new capability
 
-The new requirement is a UI policy that constrains existing routes; it does not introduce new substrate, endpoints, or contract types. Adding it to `public-short-routes` keeps related requirements colocated — route-shape rules and link-build rules belong together.
+The new requirements constrain existing routes and DTO behavior; they do not introduce new substrate or endpoints. Adding them to `public-short-routes` keeps related requirements colocated — route-shape rules, link-build rules, and the backend response policy that supplies link builders with known slugs belong together.
 
 The delta is purely **ADDED Requirements**; no existing requirement is modified or removed.
 
@@ -101,11 +103,21 @@ The delta is purely **ADDED Requirements**; no existing requirement is modified 
 
 The proposal acknowledges that data queries already prefer unitId. The change includes one task — an audit — that walks every slug-route loader and confirms that downstream queries consume the resolved `unitId` from the loader DTO rather than re-resolving the slug. If any callsite is found redundantly re-resolving, it is fixed inline. No new helper or convention is added for the query side.
 
+### Decision 6: Backend returns known slugs opportunistically for slug-bearing unit references
+
+Any public API response that embeds a reference to a slug-bearing Unit type (USER, REALM, TAG, ZONE, ENTITY, and owner-scoped SHELF) should include `slug` alongside `unitId` when the backend mapper already has access to the relevant `Unit.slug` or can obtain it with a bounded query. This applies to full DTOs and lightweight references: post/review authors, book/realm/shelf owners, tag chips, entity attribution references, system shelf owner context, and search/list rows that expose public navigation targets.
+
+The rule is intentionally not a hard 100% guarantee. Some responses start from a bare `unitId`, cross a service boundary, or would require an N+1 query to hydrate a slug. Those responses may continue to omit `slug` or return it as null/undefined; `unitHref` remains responsible for falling back to the long-prefix unitId URL. The backend work is to make slug propagation systematic where the data is already available or cheap, not to introduce global DTO walking.
+
+The `PostDTO.author` path is the motivating example: the contract's `publicUserSchema` already permits `slug`, but the current post include selects `User` fields only while USER slugs live on `Unit.slug`. Review and comment author links therefore fall back to `/user/<unitId>` even when the author has a slug. The mapper should hydrate known author slugs through a joined or bounded-batch lookup.
+
 ## Risks / Trade-offs
 
 - **[Risk] Audit incompleteness — a stray hardcoded `/user/$userId` slips through.** → Mitigation: the audit task lists each known callsite explicitly (see `tasks.md`), and a grep-based pass over `package/app/src` catches the long tail. A follow-on convention-check R-rule (deferred) would prevent regression.
 
 - **[Risk] AccountMenu profile-store gap — `useUserProfileStore.user` may not consistently carry the slug.** → Mitigation: the audit verifies `User` state shape and the auth-bootstrap path. If the slug is not present on the viewer DTO, the helper falls back to `/user/<unitId>` (correct legacy behavior); no regression.
+
+- **[Risk] Backend slug hydration introduces N+1 queries.** → Mitigation: the response rule explicitly allows omission when slug is not reasonably available. Mapper changes should prefer existing `Unit.slug` includes or bounded batch lookups keyed by unitId.
 
 - **[Risk] SHELF helper input shape is verbose at call sites that hold only a shelf DTO.** → Trade-off accepted: the explicit input is the price of keeping the helper pure pre-cache. When `slug-client-resolver` lands, the SHELF input shape can be relaxed.
 
@@ -113,16 +125,17 @@ The proposal acknowledges that data queries already prefer unitId. The change in
 
 - **[Trade-off] Helper lives in `@rezics/ui`, not `@rezics/contract`.** Reason: it builds router-shaped paths that are React-router-specific, and `@rezics/ui` is already the natural home for routing-adjacent primitives (`SafeLink`, `Link`). `@rezics/contract` continues to expose the route param schemas; the helper consumes them via type imports.
 
-- **[Trade-off] No cache means `unitId-only → slug URL` cases (notifications with bare `actorUnitId`, comment authors when the comment payload omits `author.slug`) still render long-prefix URLs.** That's by design for this change. Those cases motivate the follow-on `slug-client-resolver`.
+- **[Trade-off] No cache means true `unitId-only → slug URL` cases (notifications with bare `actorUnitId`, cross-boundary payloads that omit slug) still render long-prefix URLs.** That's by design for this change. Cases where the backend can cheaply include slug are fixed here; cases that require client-side reverse lookup motivate the follow-on `slug-client-resolver`.
 
 ## Migration Plan
 
 1. Land the helper in `@rezics/ui` with unit tests covering all five top-level types and the SHELF variant in both owner-slugged and owner-unslugged states.
 2. Land the spec delta on `public-short-routes`.
-3. Migrate `AccountMenu.tsx` as the first consumer; verify by manual run + visual check in the browser.
-4. Sweep the remaining call sites (listed in `tasks.md`).
-5. Run `bun run check:convention` and the existing test suite. Storybook regression check on stories that reference linked units.
-6. No rollback procedure needed — this is a pure refactor with the AccountMenu fix; reverting the commit restores prior behavior.
+3. Audit backend mappers for slug-bearing embedded references and return known slugs where the current query shape or a bounded batch lookup supports it.
+4. Migrate `AccountMenu.tsx` as the first consumer; verify by manual run + visual check in the browser.
+5. Sweep the remaining call sites (listed in `tasks.md`).
+6. Run `bun run check:convention` and the existing test suite. Storybook regression check on stories that reference linked units.
+7. No rollback procedure needed — this is an additive DTO/link refactor with the AccountMenu fix; reverting the commit restores prior behavior.
 
 ## Open Questions
 
