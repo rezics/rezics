@@ -66,50 +66,19 @@ The User model SHALL NOT contain `authorBook`, `pressBook`, `producerBook`, or a
 
 ### Requirement: User relationship with Unit preserved for ownership tracking
 
-The User model SHALL have a stable actor `userId` that is distinct from any associated Unit identifier. The Unit owner field SHALL reference the creating User's `userId` for ownership and authorization checks. Any profile or identity Unit associated with a User SHALL be modeled as a related domain Unit and SHALL NOT be treated as the user's primary actor identifier.
+The User model SHALL have a stable actor identifier exposed as `User.unitId` (the unified Unit identity established by this change). The Unit owner field SHALL reference the creating User's `unitId` for ownership and authorization checks. Where related tables retain a column named `userId` (for example, `Unit.userId`, `WorkLinkClaim.claimerUserId`), the column SHALL reference `User.unitId` as its FK target.
 
-#### Scenario: User has distinct actor id
+#### Scenario: User has stable actor id
 
 - **WHEN** inspecting the User model and its related Unit records
-- **THEN** the User SHALL expose a stable `userId` for authentication and authorization
-- AND any related `unitId` SHALL remain a separate domain resource identifier
+- **THEN** the User SHALL expose `unitId` as its stable identifier for authentication and authorization
+- **AND** the User row SHALL share that id with the matching `Unit` row where `type = USER`
 
-#### Scenario: Content ownership queries use explicit userId
+#### Scenario: Content ownership queries use the user's unitId
 
 - **WHEN** the system checks whether a user owns a specific Unit
-- **THEN** it SHALL compare the Unit owner user identifier against the authenticated actor `userId`
-- AND this check SHALL NOT assume the actor `userId` equals the Unit's own `id`
-
-### Requirement: User table primary key is `userId`
-
-The main `User` table's primary key SHALL be named `userId` (not `unitId`). The `User` row SHALL NOT participate in any FK relationship to `Unit.id` and SHALL NOT be modeled as a `Unit` subtype. User identity is first-class and independent of Unit identity.
-
-#### Scenario: Schema inspection confirms userId primary key
-
-- **WHEN** the Prisma schema for `User` is inspected
-- **THEN** the model declares `userId String @id` (not `unitId String @id`)
-- **AND** there is no FK from `User.userId` to `Unit.id`
-
-#### Scenario: All tables that reference User point at userId
-
-- **WHEN** any FK on a table references the `User` primary key (`Unit.userId`, `WorkLinkClaim.claimerUserId`, `WorkLinkClaim.resolvedBy`, `UserUnitProgress.userId`, `Follow.followerId`, `Follow.followingId`, `ApiToken.userId`, etc.)
-- **THEN** the `references: [...]` target SHALL be `User.userId`
-
-### Requirement: User DTOs expose `userId`, never `unitId`
-
-Every shared user-shaped DTO (`User`, `UserBrief`, `UserSummary`, profile responses) in `@rezics/contract` SHALL expose the field as `userId`. No user-shaped contract SHALL expose `unitId` as a user identifier. Frontend and admin packages SHALL read `user.userId` everywhere they previously read `user.unitId`.
-
-#### Scenario: Contract user DTOs use userId
-
-- **WHEN** a consumer imports a user-shaped schema from `@rezics/contract`
-- **THEN** the schema SHALL declare `userId: string`
-- **AND** there SHALL be no `unitId` field on user-shaped DTOs
-
-#### Scenario: Frontend reads userId
-
-- **WHEN** any frontend component renders a user object
-- **THEN** it SHALL read `user.userId`
-- **AND** it SHALL NOT read `user.unitId`
+- **THEN** it SHALL compare the Unit owner identifier (typically a column named `userId`) against the authenticated actor's `unitId`
+- **AND** this check SHALL resolve correctly because `User.unitId` is the FK target
 
 ### Requirement: User has no `accountStatus` column or DTO field
 
