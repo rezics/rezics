@@ -46,6 +46,17 @@ bun run check:convention   # Scans routes and folders; exits non-zero on violati
 - Not in CI on every push
 - No per-site suppression — only spec amendments
 
+### URL Convention: short-prefix = slug, long-prefix = unitId
+
+Every public Unit-resolving URL falls into one of two families, and the prefix tells the reader which one:
+
+- **Short-prefix routes** (`/u`, `/r`, `/t`, `/z`, `/e`) take a **slug**. Examples: `/u/alice`, `/r/slow-reading`, `/t/spec-fic`. Slugs are resolved against the per-scope `SlugScope` row.
+- **Long-prefix routes** (`/user`, `/realm`, `/tag`, `/zone`, `/entity`, `/unit`) take a **UUID**. Examples: `/user/01976a…`, `/unit/01976a…`. UUIDs resolve `Unit.id` directly.
+
+Mixing the two is forbidden: a slug under a long prefix or a UUID under a short prefix MUST be rejected at the route layer (typed by-slug endpoints like `/user/by-slug/:slug` are the only exception and exist precisely so this rule stays clean).
+
+`R10` in `bun run check:convention` flags route definitions whose param names violate this convention (a `:userSlug` under `/user`, or a `:unitId` under `/u`).
+
 ### Full Specs
 
 - `openspec/specs/api-route-convention/spec.md`

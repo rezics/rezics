@@ -17,6 +17,11 @@
  *                                   `--shadow-*` / `--font-*` / `--duration-*` /
  *                                   `--easing-*` namespace emitted by uno-config.ts is
  *                                   the only sanctioned CSS-variable surface.
+ * - R10 user-namespace-slug        — short-prefix routes (/u, /r, /t, /z, /e) take a slug;
+ *                                   long-prefix routes (/user, /realm, /tag, /zone, /entity,
+ *                                   /unit) take a unitId. A param under a short prefix whose
+ *                                   name looks like an id, or a param under a long prefix
+ *                                   whose name looks like a slug, is flagged.
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -133,7 +138,7 @@ const EXEMPT_PACKAGES = new Set(["auth"]);
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" | "R9";
+type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" | "R9" | "R10";
 
 interface Violation {
   rule: Rule;
@@ -151,6 +156,7 @@ const SPEC_LINK: Record<Rule, string> = {
   R6: "openspec/specs/tanstack-query-keys/spec.md",
   R7: "openspec/changes/seed-unified-plan-modes/specs/seed-power-law-distribution/spec.md",
   R9: "openspec/specs/ui-component-foundation/spec.md",
+  R10: "openspec/changes/user-namespace-slug/proposal.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -577,6 +583,96 @@ function scanTokenConsumption(candidateFiles: string[]): Violation[] {
   return violations;
 }
 
+// ─── R10: short=slug / long=unitId route convention ────────────────────────
+
+const SHORT_SLUG_PREFIXES = new Set(["u", "r", "t", "z", "e"]);
+const LONG_ID_PREFIXES = new Set([
+  "user",
+  "realm",
+  "tag",
+  "zone",
+  "entity",
+  "unit",
+]);
+
+const ID_PARAM_NAME_PATTERN = /Id$|Uuid$/;
+const SLUG_PARAM_NAME_PATTERN = /Slug$|^slug$/;
+
+const ROUTE_HANDLER_PATH_PATTERN =
+  /\.(get|post|put|patch|delete)\s*\(\s*["']([^"']+)["']/g;
+
+function scanShortLongSlugConvention(apiFiles: string[]): Violation[] {
+  const violations: Violation[] = [];
+
+  for (const filePath of apiFiles) {
+    if (!/\.api\.ts$/.test(filePath)) continue;
+    let fileContent: string;
+    try {
+      fileContent = readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+    const relFilePath = relative(REPO_ROOT, filePath);
+
+    const prefixes: string[] = [];
+    for (const prefixMatch of fileContent.matchAll(ELYSIA_PREFIX_PATTERN)) {
+      prefixes.push(prefixMatch[1]!);
+    }
+
+    for (const prefix of prefixes) {
+      const head = prefix.split("/").filter(Boolean)[0];
+      if (!head) continue;
+      const isShort = SHORT_SLUG_PREFIXES.has(head);
+      const isLong = LONG_ID_PREFIXES.has(head);
+      if (!isShort && !isLong) continue;
+
+      for (const handlerMatch of fileContent.matchAll(
+        ROUTE_HANDLER_PATH_PATTERN,
+      )) {
+        const path = handlerMatch[2]!;
+        const segments = path.split("/").filter(Boolean);
+        for (const segment of segments) {
+          if (!segment.startsWith(":")) continue;
+          const paramName = segment.slice(1).replace(/\?$/, "");
+
+          if (isShort && ID_PARAM_NAME_PATTERN.test(paramName)) {
+            violations.push({
+              rule: "R10",
+              path: `${relFilePath}  ${prefix}${path}`,
+              message: `short-prefix \`/${head}\` route param \`:${paramName}\` looks like an id — short prefixes take slugs, use long-prefix \`/${head === "u" ? "user" : head === "r" ? "realm" : head === "t" ? "tag" : head === "z" ? "zone" : "entity"}/:unitId\` for id lookups`,
+              spec: SPEC_LINK.R10,
+            });
+          }
+          if (isLong && SLUG_PARAM_NAME_PATTERN.test(paramName)) {
+            const expectedShort =
+              head === "user"
+                ? "u"
+                : head === "realm"
+                  ? "r"
+                  : head === "tag"
+                    ? "t"
+                    : head === "zone"
+                      ? "z"
+                      : head === "entity"
+                        ? "e"
+                        : null;
+            if (expectedShort) {
+              violations.push({
+                rule: "R10",
+                path: `${relFilePath}  ${prefix}${path}`,
+                message: `long-prefix \`/${head}\` route param \`:${paramName}\` looks like a slug — long prefixes take unitIds; use short-prefix \`/${expectedShort}/:${paramName}\` or the typed \`/${head}/by-slug/:slug\` endpoint for slug lookups`,
+                spec: SPEC_LINK.R10,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return violations;
+}
+
 // ─── Git staged-file helpers ────────────────────────────────────────────────
 
 function getStagedFilePaths(): string[] {
@@ -622,6 +718,7 @@ function buildSnapshot(violations: Violation[]): ViolationSnapshot {
     R6: 0,
     R7: 0,
     R9: 0,
+    R10: 0,
   };
   const keys: string[] = [];
   for (const violation of violations) {
@@ -714,14 +811,15 @@ function main() {
     ...scanInlineQueryKeys(tsAndTsxFiles),
     ...scanPowerLawImports(tsAndTsxFiles),
     ...scanTokenConsumption(r9CandidateFiles),
+    ...scanShortLongSlugConvention(routeFiles),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5, R6, R7, R9 } = currentSnapshot.byRule;
+    const { R1, R2, R3, R4, R5, R6, R7, R9, R10 } = currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10})`,
     );
     process.exit(0);
   }
@@ -743,7 +841,7 @@ function main() {
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
   console.log(
-    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}`,
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}`,
   );
 
   if (newViolations.length > 0) {

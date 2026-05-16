@@ -1,6 +1,8 @@
 ## Section 1
 - [ ] Unit 等級的 版權 copyright 字段，string 或者 array 用戶可以選擇 用戶默認的/realm默認（realm優先）的 copyright 協議，類似於 github 的那種版權協議，cc-by-4.0 這種，不過我們需要確認下各種協議的slug，要固定下來
 - [ ] UnitTag 表是否要重命名到 TagUnit 比較好？
+- [ ] 搞清楚 ui package 如何 允许 unocss config 以及basic-css 共享, 以提供给 dispatch
+- [ ] 需要明确的是，realm scoped tag 和 realm tag 并不相同，realm scoped tag引入了新的tag， realm tag本质上类似于realmVoteTag
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info
 - [ ] 將 所有app路由讓AI過一邊，實際上試試大併發的情況，分析請求上可能的任何性能問題，這是一個非常大的change，tasks集合，需要分段執行

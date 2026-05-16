@@ -78,6 +78,8 @@ This plan addresses all three, with an explicit execution order chosen so that t
 
 ## 4. L3 — User-as-Unit + Per-Type Slug Scopes
 
+**Status**: In flight — see openspec change `user-namespace-slug`. Migration squashed (single baseline `20260515120000_init`), server cutover, route surface migration, and frontend rename completed. Manual validation (prisma:migrate, manual dev walkthrough, full server-test fixture refresh) and Meili scope-context indexing remain.
+
 This is the architectural cornerstone. **Two orthogonal commitments bundled together** because both touch User identity and the Unit slug topology in the same migration window:
 
 1. **User becomes a Unit type-extension** (`User.unitId @id`, with a corresponding `Unit { type: USER }` row sharing the same UUID).
