@@ -7,6 +7,7 @@ import {
   SeedPlanSchema,
   type SeedPreset,
 } from "@rezics/server/prisma/factory";
+import { SLUG_SCOPES } from "@rezics/contract";
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
 import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
@@ -159,7 +160,6 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
   try {
     await seedBaseline(authPrisma, prisma);
-    const { SLUG_SCOPES } = await import("@rezics/contract");
     const slugScopeRows = await prisma.slugScope.findMany({
       select: { slug: true, unitId: true },
     });

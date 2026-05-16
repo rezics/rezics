@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { seedAuthUser } from "@rezics/auth/prisma/seed";
-import { bootstrapSystemShelves } from "../../src/shelf/system-shelves.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
+import { bootstrapSystemShelves } from "./system-shelves.js";
 import type { CreatedUser } from "./types.js";
 import {
   chunkedParallel,
