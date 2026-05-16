@@ -215,11 +215,9 @@ model Unit {
 
 /**
  * ANCHOR SLUG SCOPE
- *
  * Lookup table mapping one of the five named scope keys (`user`, `realm`,
  * `tag`, `zone`, `entity`) to the placeholder `Unit { type: SCOPE }` row whose
  * id is used as `Unit.slugScope` for every top-level slug under that scope.
- *
  * Owner-scoped sub-resources (e.g. shelves under a user) bypass this table
  * and use the owner Unit's id directly as `slugScope`.
  */
@@ -496,9 +494,9 @@ model ShelfUnit {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  shelf            Shelf               @relation(fields: [shelfId], references: [unitId], onDelete: Cascade)
-  parentRelations  ShelfUnitRelation[] @relation("ShelfUnitRelationParent")
-  childRelations   ShelfUnitRelation[] @relation("ShelfUnitRelationChild")
+  shelf           Shelf               @relation(fields: [shelfId], references: [unitId], onDelete: Cascade)
+  parentRelations ShelfUnitRelation[] @relation("ShelfUnitRelationParent")
+  childRelations  ShelfUnitRelation[] @relation("ShelfUnitRelationChild")
 
   @@id([shelfId, unitId])
   @@index([shelfId, position])
@@ -888,6 +886,7 @@ model Subscription {
   @@unique([subscriberUnitId, targetUnitId])
   @@index([targetUnitId])
   @@index([subscriberUnitId])
+  @@index([channels], type: Gin, map: "subscription_channels_gin")
 }
 
 model ApiToken {
