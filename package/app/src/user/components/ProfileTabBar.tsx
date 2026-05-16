@@ -1,3 +1,4 @@
+import { unitHref } from "@rezics/ui/primitive/link";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";
@@ -37,10 +38,13 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({ userId, userSlug }) => {
       <Tabs
         value={activeTab.path}
         onValueChange={(value) => {
-          if (isSlugRoute && userSlug && value === "") {
+          if (value === "") {
             void navigate({
-              to: "/u/$userSlug",
-              params: { userSlug },
+              to: unitHref({
+                type: "USER",
+                unitId: userId,
+                slug: userSlug ?? null,
+              }),
             });
             return;
           }

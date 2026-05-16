@@ -1,6 +1,6 @@
 import { realmQueries } from "@rezics/api/realm/realm.queries";
 import type { RealmDTO } from "@rezics/contract";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link, unitHref } from "@rezics/ui/primitive/link";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
@@ -17,6 +17,7 @@ const FILTER_CHIPS: ChipDefinition[] = [
 
 type RealmListItemModel = {
   unitId: string;
+  slug: string | null;
   title: string;
   description: string;
   memberCount: number;
@@ -30,6 +31,7 @@ function mapJoinedRealmToListItem(realm: RealmDTO): RealmListItemModel {
 
   return {
     unitId: realm.unitId,
+    slug: realm.slug ?? null,
     title: primaryTranslation?.title ?? realm.unitId,
     description: primaryTranslation?.description ?? "",
     memberCount: realm.memberCount,
@@ -110,8 +112,11 @@ export const RealmsTabSection: FC = () => {
 const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
   return (
     <Link
-      to="/realm/$realmId"
-      params={{ realmId: realm.unitId }}
+      to={unitHref({
+        type: "REALM",
+        unitId: realm.unitId,
+        slug: realm.slug,
+      })}
       className="no-underline"
     >
       <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors">

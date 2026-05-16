@@ -1,6 +1,7 @@
 import { useEntityList } from "@rezics/api/entity";
 import type { UnitTranslationDTO } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
+import { unitHref } from "@rezics/ui/primitive/link";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { BadgeCheck } from "lucide-react";
@@ -66,9 +67,11 @@ export function MyEntitiesPage() {
         <ul className="flex flex-col gap-2">
           {entities.map((entity) => {
             const title = getPrimaryTitle(entity.translations);
-            const href = entity.slug
-              ? `/e/${entity.slug}`
-              : `/entity/${entity.unitId}`;
+            const href = unitHref({
+              type: "ENTITY",
+              unitId: entity.unitId,
+              slug: entity.slug ?? null,
+            });
             return (
               <li key={entity.unitId}>
                 <Link

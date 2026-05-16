@@ -1,4 +1,4 @@
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link, unitHref } from "@rezics/ui/primitive/link";
 import {
   Avatar,
   AvatarFallback,
@@ -97,7 +97,11 @@ export function UserHoverPreview({
   }
 
   const stats = getStats(user);
-  const profileParams = { userId };
+  const profileHref = unitHref({
+    type: "USER",
+    unitId: userId,
+    slug: slug ?? null,
+  });
   const openFromTriggerFocus = (nextTriggerId: string) => {
     setTriggerId(nextTriggerId);
     setOpen(true);
@@ -122,8 +126,7 @@ export function UserHoverPreview({
             onMouseEnter={() => setTriggerId(avatarTriggerId)}
             render={
               <Link
-                to="/user/$userId"
-                params={profileParams}
+                to={profileHref}
                 aria-label={`Open ${displayName}'s profile`}
                 className="inline-flex shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
               />
@@ -149,8 +152,7 @@ export function UserHoverPreview({
             onMouseEnter={() => setTriggerId(nameTriggerId)}
             render={
               <Link
-                to="/user/$userId"
-                params={profileParams}
+                to={profileHref}
                 className={cn(
                   "inline-flex min-w-0 max-w-48 items-center truncate text-text-primary no-underline underline-offset-4 outline-none hover:underline focus-visible:underline focus-visible:ring-2 focus-visible:ring-ring/30",
                   getNameClassName(size),
@@ -180,8 +182,7 @@ export function UserHoverPreview({
       >
         <div className="flex min-w-0 items-start justify-between gap-3">
           <Link
-            to="/user/$userId"
-            params={profileParams}
+            to={profileHref}
             aria-label={`Open ${displayName}'s profile`}
             className="inline-flex shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
           >
@@ -206,8 +207,7 @@ export function UserHoverPreview({
         <div className="min-w-0">
           <PopoverTitle className="truncate text-base font-medium leading-ui text-text-primary">
             <Link
-              to="/user/$userId"
-              params={profileParams}
+              to={profileHref}
               className="block truncate text-text-primary no-underline underline-offset-4 outline-none hover:underline focus-visible:underline focus-visible:ring-2 focus-visible:ring-ring/30"
             >
               {displayName}
@@ -216,8 +216,7 @@ export function UserHoverPreview({
           {slug && (
             <PopoverDescription className="truncate text-sm leading-ui text-text-secondary">
               <Link
-                to="/user/$userId"
-                params={profileParams}
+                to={profileHref}
                 className="block truncate text-text-secondary no-underline underline-offset-4 outline-none hover:underline focus-visible:underline focus-visible:ring-2 focus-visible:ring-ring/30"
               >
                 @{slug}

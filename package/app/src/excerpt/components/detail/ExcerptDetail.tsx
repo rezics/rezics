@@ -3,7 +3,7 @@ import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link, unitHref } from "@rezics/ui/primitive/link";
 import { useMemo } from "react";
 import type React from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
@@ -46,12 +46,11 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
       {excerpt.user && (
         <div className="flex items-center gap-3">
           <Link
-            to={excerpt.user.slug ? "/u/$userSlug" : "/user/$userId"}
-            params={
-              excerpt.user.slug
-                ? { userSlug: excerpt.user.slug }
-                : { userId: excerpt.user.unitId ?? "" }
-            }
+            to={unitHref({
+              type: "USER",
+              unitId: excerpt.user.unitId ?? "",
+              slug: excerpt.user.slug ?? null,
+            })}
             className="flex items-center gap-3"
           >
             <LazyLoadImage

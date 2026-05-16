@@ -4,6 +4,7 @@ import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
+import { unitHref } from "@rezics/ui/primitive/link";
 import {
   Avatar,
   AvatarFallback,
@@ -167,7 +168,17 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
         <Button
           variant="ghost"
           className="text-text-brand"
-          onClick={() => navigate({ to: "/user/me" })}
+          onClick={() =>
+            navigate({
+              to: currentUser?.unitId
+                ? unitHref({
+                    type: "USER",
+                    unitId: currentUser.unitId,
+                    slug: currentUser.slug ?? null,
+                  })
+                : "/user/me",
+            })
+          }
         >
           返回
         </Button>

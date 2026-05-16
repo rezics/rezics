@@ -9,6 +9,7 @@ import {
 import { unitApi } from "@rezics/api/unit/unit";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
+import { unitHref } from "@rezics/ui/primitive/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -45,7 +46,13 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
 
   useEffect(() => {
     if (!isLoading && !membershipLoading && !allowed) {
-      navigate({ to: "/realm/$realmId", params: { realmId } });
+      navigate({
+        to: unitHref({
+          type: "REALM",
+          unitId: realmId,
+          slug: realm?.slug ?? null,
+        }),
+      });
     }
   }, [isLoading, membershipLoading, allowed, navigate, realmId]);
 
@@ -70,7 +77,13 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         queryKey: realmKeys.detail(realmId),
       });
 
-      navigate({ to: "/realm/$realmId", params: { realmId } });
+      navigate({
+        to: unitHref({
+          type: "REALM",
+          unitId: realmId,
+          slug: realm?.slug ?? null,
+        }),
+      });
     } finally {
       setSaving(false);
     }
@@ -121,7 +134,13 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
           <Button
             variant="ghost"
             onClick={() =>
-              navigate({ to: "/realm/$realmId", params: { realmId } })
+              navigate({
+                to: unitHref({
+                  type: "REALM",
+                  unitId: realmId,
+                  slug: realm?.slug ?? null,
+                }),
+              })
             }
           >
             Cancel

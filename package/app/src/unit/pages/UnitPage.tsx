@@ -5,7 +5,7 @@ import {
 import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink, unitHref } from "@rezics/ui/primitive/link";
 import {
   Avatar,
   AvatarFallback,
@@ -133,12 +133,11 @@ export function UnitPageById({ unitId }: { unitId: string }) {
                     <TooltipTrigger
                       render={(props) => (
                         <TextLink
-                          to={unit.user.slug ? "/u/$userSlug" : "/user/$userId"}
-                          params={
-                            unit.user.slug
-                              ? { userSlug: unit.user.slug }
-                              : { unitId: unit.user.unitId }
-                          }
+                          to={unitHref({
+                            type: "USER",
+                            unitId: unit.user.unitId,
+                            slug: unit.user.slug ?? null,
+                          })}
                           className="text-sm font-medium"
                           {...props}
                         >

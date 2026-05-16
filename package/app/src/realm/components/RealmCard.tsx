@@ -1,4 +1,5 @@
 import type { RealmDTO } from "@rezics/contract";
+import { unitHref } from "@rezics/ui/primitive/link";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
@@ -16,8 +17,11 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
   return (
     <Card className="cursor-pointer border-0 shadow-none">
       <Link
-        to="/realm/$realmId"
-        params={{ realmId: realm.unitId }}
+        to={unitHref({
+          type: "REALM",
+          unitId: realm.unitId,
+          slug: realm.slug ?? null,
+        })}
         className="block w-full text-left"
       >
         <CardContent>

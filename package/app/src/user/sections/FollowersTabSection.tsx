@@ -1,6 +1,6 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link, unitHref } from "@rezics/ui/primitive/link";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
@@ -116,39 +116,38 @@ export const FollowersTabSection: FC = () => {
 const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
   user,
   showFollowButton,
-}) => (
-  <div className="flex items-center gap-3 p-3 border border-border-whisper rounded-lg hover:border-border-defined transition-colors">
-    <Link
-      to="/user/$userId"
-      params={{ userId: user.unitId }}
-      className="no-underline"
-    >
-      <Avatar className="w-10 h-10">
-        <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
-        <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
-      </Avatar>
-    </Link>
-    <div className="flex-1 min-w-0">
-      <Link
-        to="/user/$userId"
-        params={{ userId: user.unitId }}
-        className="no-underline"
-      >
-        <span className="block text-sm font-medium text-text-primary">
-          {user.name}
-        </span>
-        {user.slug && (
-          <span className="block text-xs text-text-secondary">
-            @{user.slug}
+}) => {
+  const href = unitHref({
+    type: "USER",
+    unitId: user.unitId,
+    slug: user.slug ?? null,
+  });
+  return (
+    <div className="flex items-center gap-3 p-3 border border-border-whisper rounded-lg hover:border-border-defined transition-colors">
+      <Link to={href} className="no-underline">
+        <Avatar className="w-10 h-10">
+          <AvatarImage src={user.avatar ?? undefined} alt={user.name ?? ""} />
+          <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
+        </Avatar>
+      </Link>
+      <div className="flex-1 min-w-0">
+        <Link to={href} className="no-underline">
+          <span className="block text-sm font-medium text-text-primary">
+            {user.name}
+          </span>
+          {user.slug && (
+            <span className="block text-xs text-text-secondary">
+              @{user.slug}
+            </span>
+          )}
+        </Link>
+        {user.bio && (
+          <span className="block text-xs text-text-secondary truncate mt-0.5">
+            {user.bio}
           </span>
         )}
-      </Link>
-      {user.bio && (
-        <span className="block text-xs text-text-secondary truncate mt-0.5">
-          {user.bio}
-        </span>
-      )}
+      </div>
+      {showFollowButton && <FollowButton userId={user.unitId} size="small" />}
     </div>
-    {showFollowButton && <FollowButton userId={user.unitId} size="small" />}
-  </div>
-);
+  );
+};

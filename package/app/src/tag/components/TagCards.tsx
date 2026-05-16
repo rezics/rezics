@@ -1,6 +1,6 @@
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import type { UnitTagDTO } from "@rezics/contract";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink, unitHref } from "@rezics/ui/primitive/link";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 
@@ -61,8 +61,11 @@ export const TagDetailCard: React.FC<{
         </h3>
         <div>
           <TextLink
-            to={"/tag/$unitId"}
-            params={{ unitId: tag.tagUnitId }}
+            to={unitHref({
+              type: "TAG",
+              unitId: tag.tagUnitId,
+              slug: null,
+            })}
             className="text-sm text-text-brand hover:underline"
           >
             查看详情 →

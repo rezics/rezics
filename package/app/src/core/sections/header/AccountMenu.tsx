@@ -1,4 +1,4 @@
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link, unitHref } from "@rezics/ui/primitive/link";
 import {
   Avatar,
   AvatarFallback,
@@ -68,7 +68,15 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
         <DropdownMenuItem
           render={(props) => (
             <Link
-              to={`/user/me`}
+              to={
+                user?.unitId
+                  ? unitHref({
+                      type: "USER",
+                      unitId: user.unitId,
+                      slug: user.slug ?? null,
+                    })
+                  : "/user/me"
+              }
               className="flex items-center gap-2"
               {...props}
             >

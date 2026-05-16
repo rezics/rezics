@@ -1,6 +1,7 @@
 import { useCreateEntity } from "@rezics/api/entity";
 import type { CreateEntityInput } from "@rezics/contract";
 import { entityKinds } from "@rezics/contract";
+import { unitHref } from "@rezics/ui/primitive/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
@@ -15,8 +16,11 @@ export function NewEntityPage() {
   const mutation = useCreateEntity({
     onSuccess: (entity) => {
       void navigate({
-        to: "/entity/$unitId",
-        params: { unitId: entity.unitId },
+        to: unitHref({
+          type: "ENTITY",
+          unitId: entity.unitId,
+          slug: entity.slug ?? null,
+        }),
       });
     },
     onError: (err) => setError(err.message || "Failed to create entity"),

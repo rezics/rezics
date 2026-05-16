@@ -35,13 +35,14 @@ describe("unit resolver — buildUnitUrl coverage", () => {
     expect(buildUnitUrl(unit("LINK"))).toBe("/unit/id/fixture-id");
   });
 
-  test("typed routes without canonical slug routes stay on id compatibility URLs", () => {
-    expect(buildUnitUrl(unit("REALM", { slug: "realm-a" }))).toBe(
-      "/realm/fixture-id",
-    );
-    expect(buildUnitUrl(unit("TAG", { slug: "tag-a" }))).toBe(
-      "/tag/fixture-id",
-    );
+  test("typed routes with a slug prefer the short-prefix slug URL", () => {
+    expect(buildUnitUrl(unit("REALM", { slug: "realm-a" }))).toBe("/r/realm-a");
+    expect(buildUnitUrl(unit("TAG", { slug: "tag-a" }))).toBe("/t/tag-a");
+  });
+
+  test("typed routes without a slug fall back to long-prefix unitId URLs", () => {
+    expect(buildUnitUrl(unit("REALM"))).toBe("/realm/fixture-id");
+    expect(buildUnitUrl(unit("TAG"))).toBe("/tag/fixture-id");
   });
 });
 

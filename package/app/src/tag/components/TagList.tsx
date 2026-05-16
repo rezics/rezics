@@ -1,3 +1,4 @@
+import { unitHref } from "@rezics/ui/primitive/link";
 import { Badge } from "@rezics/ui/shadcn";
 import type { UnitTagDTO } from "@rezics/contract";
 import type React from "react";
@@ -24,7 +25,10 @@ export function SingleTagChip({
   const handleClick = useCallback(
     (e: React.MouseEvent, tag: UnitTagDTO) => {
       if (e.ctrlKey) {
-        window.open(`/tag/${tag.tagUnitId}`, "_blank");
+        window.open(
+          unitHref({ type: "TAG", unitId: tag.tagUnitId, slug: null }),
+          "_blank",
+        );
         return;
       }
       setActiveId(tag.tagUnitId === activeId ? null : tag.tagUnitId);
@@ -66,7 +70,10 @@ export const TagList: React.FC<{
   const handleClick = useCallback(
     (e: React.MouseEvent, tag: UnitTagDTO) => {
       if (e.ctrlKey) {
-        window.open(`/tag/${tag.tagUnitId}`, "_blank");
+        window.open(
+          unitHref({ type: "TAG", unitId: tag.tagUnitId, slug: null }),
+          "_blank",
+        );
         return;
       }
       setActiveId(tag.tagUnitId === activeId ? null : tag.tagUnitId);

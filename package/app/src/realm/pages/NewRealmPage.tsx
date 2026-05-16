@@ -1,5 +1,6 @@
 import { useCreateRealmMutation } from "@rezics/api/realm/realm";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import { unitHref } from "@rezics/ui/primitive/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -15,7 +16,13 @@ export function NewRealmPage() {
       { translations: [{ language: DEFAULT_LANGUAGE, title, description }] },
       {
         onSuccess: (data) =>
-          navigate({ to: "/realm/$realmId", params: { realmId: data.unitId } }),
+          navigate({
+            to: unitHref({
+              type: "REALM",
+              unitId: data.unitId,
+              slug: data.slug ?? null,
+            }),
+          }),
       },
     );
   };

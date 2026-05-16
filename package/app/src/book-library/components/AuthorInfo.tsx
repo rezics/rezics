@@ -3,6 +3,7 @@ import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButton
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { unitHref } from "@rezics/ui/primitive/link";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -35,7 +36,14 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   const { t } = useTranslation();
   return (
     <div>
-      <ArrowForwardIcon size={16} to={`/user/${author?.unitId}`}>
+      <ArrowForwardIcon
+        size={16}
+        to={unitHref({
+          type: "USER",
+          unitId: author?.unitId ?? "",
+          slug: author?.slug ?? null,
+        })}
+      >
         <AccentBarWithText
           text={t("book.author_info.author_line", { name: author?.name })}
         />
@@ -90,7 +98,14 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
     <div>
       <div>
         <div className="flex mb-4">
-          <ArrowForwardIcon size={16} to={`/user/${author?.unitId}`}>
+          <ArrowForwardIcon
+            size={16}
+            to={unitHref({
+              type: "USER",
+              unitId: author?.unitId ?? "",
+              slug: author?.slug ?? null,
+            })}
+          >
             <AccentBarWithText
               text={t("book.author_info.author_line", { name: author?.name })}
             />
