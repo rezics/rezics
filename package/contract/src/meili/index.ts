@@ -1,4 +1,5 @@
 export * from "./content";
+export * from "./entity";
 export * from "./feedback";
 export * from "./post";
 export * from "./realm";

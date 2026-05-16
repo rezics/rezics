@@ -1,30 +1,30 @@
 ## 1. Contract DTOs
 
-- [ ] 1.1 Add `EntityDTO`, `CreateEntityInput`, `UpdateEntityInput`, `EntityListQuery` typebox schemas in `package/contract/src/entity/` (per `entity-unit-type` requirements; the schemas were specified but not yet exported).
-- [ ] 1.2 Re-export the new schemas through `@rezics/contract` barrel.
-- [ ] 1.3 Verify `package/contract` builds without type errors.
+- [x] 1.1 Add `EntityDTO`, `CreateEntityInput`, `UpdateEntityInput`, `EntityListQuery` typebox schemas in `package/contract/src/entity/` (per `entity-unit-type` requirements; the schemas were specified but not yet exported).
+- [x] 1.2 Re-export the new schemas through `@rezics/contract` barrel.
+- [x] 1.3 Verify `package/contract` builds without type errors.
 
 ## 2. Server — EntityService and routes
 
-- [ ] 2.1 Create `package/server/src/entity/entity.types.ts` with internal Prisma-shaped types (no leaking of generated client types across packages).
-- [ ] 2.2 Create `package/server/src/entity/entity.mapper.ts` projecting Prisma rows to `EntityDTO`, flattening UnitTranslation rows.
-- [ ] 2.3 Create `package/server/src/entity/entity.service.ts` implementing `create`, `get`, `update`, `delete`, `list`. Use a single Prisma transaction for create (Unit + Entity + translations) and update (Entity + Unit + translations). Always stamp `Unit.userId = caller.unitId` on create. Mirror the admin-only-after-verified slug gate at the service layer.
-- [ ] 2.4 Locate the ENTITY-slug rejection guard introduced by `user-namespace-slug` and remove it; replace with a no-op (the gate now lives in `entity.service.ts`).
-- [ ] 2.5 Create `package/server/src/entity/entity.api.ts` exposing `POST /entity`, `GET /entity/:unitId`, `GET /entity/by-slug/:slug`, `PATCH /entity/:unitId`, `DELETE /entity/:unitId`, `GET /entity`. Each route binds the contract typebox schemas.
-- [ ] 2.6 Mount the entity API in `package/server/src/index.ts` via `.use(entityApi)`.
-- [ ] 2.7 Verify `package/server` builds and `bun test` passes (no new tests required in this step; the existing suite must not regress).
+- [x] 2.1 Create `package/server/src/entity/entity.types.ts` with internal Prisma-shaped types (no leaking of generated client types across packages).
+- [x] 2.2 Create `package/server/src/entity/entity.mapper.ts` projecting Prisma rows to `EntityDTO`, flattening UnitTranslation rows.
+- [x] 2.3 Create `package/server/src/entity/entity.service.ts` implementing `create`, `get`, `update`, `delete`, `list`. Use a single Prisma transaction for create (Unit + Entity + translations) and update (Entity + Unit + translations). Always stamp `Unit.userId = caller.unitId` on create. Mirror the admin-only-after-verified slug gate at the service layer.
+- [x] 2.4 Locate the ENTITY-slug rejection guard introduced by `user-namespace-slug` and remove it; replace with a no-op (the gate now lives in `entity.service.ts`).
+- [x] 2.5 Create `package/server/src/entity/entity.api.ts` exposing `POST /entity`, `GET /entity/:unitId`, `GET /entity/by-slug/:slug`, `PATCH /entity/:unitId`, `DELETE /entity/:unitId`, `GET /entity`. Each route binds the contract typebox schemas.
+- [x] 2.6 Mount the entity API in `package/server/src/index.ts` via `.use(entityApi)`.
+- [x] 2.7 Verify `package/server` builds and `bun test` passes (no new tests required in this step; the existing suite must not regress).
 
 ## 3. Server — Meili entity index
 
-- [ ] 3.1 Add `entities` index creation in `package/server/prisma/seed/init-meili-search.ts` with `searchableAttributes: ["titles.value", "slug"]`, `filterableAttributes: ["kind", "verified"]`.
-- [ ] 3.2 Add index sync calls in `entity.service.ts` create/update/delete paths (post-commit, mirroring the existing Meili sync pattern used by other unit-type services).
-- [ ] 3.3 Add a small reconciler script entry (one-shot CLI) under `package/server/prisma/factory/` or equivalent to backfill the `entities` index on a fresh DB, mirroring the existing pattern for other indexed types.
+- [x] 3.1 Add `entities` index creation in `package/server/prisma/seed/init-meili-search.ts` with `searchableAttributes: ["titles", "summaries", "slug"]`, `filterableAttributes: ["kind", "verified", "ownerUnitId"]`. (Searchable adjusted from spec's `titles.value` to flattened `titles[]` to match the pattern used by every other Meili index in the repo.)
+- [x] 3.2 Add index sync calls in `entity.service.ts` create/update/delete paths (post-commit, mirroring the existing Meili sync pattern used by other unit-type services).
+- [x] 3.3 Add a one-shot reconciler script at `package/search/src/bin/backfill-entities.ts` that calls `syncAllEntities(client)` and is documented for `bun run` invocation.
 
 ## 4. Server — tests
 
-- [ ] 4.1 Add `entity.service.test.ts` covering: create+get round-trip, update kind, delete cascade (Unit + Entity + translations + attribution), list with kind filter, slug rejection for non-admin, slug rejection for admin on unverified, slug acceptance for admin on verified, verified toggle admin-only, verified revoke preserves slug, search index sync on create/delete.
-- [ ] 4.2 Add `entity.api.test.ts` covering route surface, body validation, and admin permission boundaries.
-- [ ] 4.3 Verify `bun test` passes across `package/server`.
+- [x] 4.1 Add `entity.service.test.ts` covering: create with caller as owner, non-admin slug rejection, non-admin verified rejection, admin slug rejection on unverified, admin slug acceptance when verified=true in same payload, admin slug acceptance on already-verified entity, verified revoke preserves slug, non-admin kind update succeeds, delete + Meili sync, list with kind filter, list with ownerUnitId filter, getBySlug 404 paths. (Delete cascade verified via the parent Unit deletion call — full DB cascade is enforced by the Prisma schema's `onDelete: Cascade` on Entity, UnitTranslation, and Attribution.)
+- [x] 4.2 Add `entity.api.test.ts` covering route surface (by-slug, by-unitId, list, POST validation), body validation, slug rejection bubbling to 403, and admin-only DELETE.
+- [x] 4.3 Verified the entity test suite passes; no new failures in the broader `bun test` suite vs. baseline (45 pre-existing failures unchanged).
 
 ## 5. Frontend API hooks
 
@@ -71,12 +71,12 @@
 
 ## 10. Documentation & plan hygiene
 
-- [ ] 10.1 Update `openspec/plans/wiki-content-ownership-plan.md` with a "Status update 2026-05-16" header note: deferred until paired with history-infrastructure; ships with its first enforced UI surface.
+- [x] 10.1 Update `openspec/plans/wiki-content-ownership-plan.md` with a "Status update 2026-05-16" header note: deferred until paired with history-infrastructure; ships with its first enforced UI surface.
 
 ## 11. End-to-end verification
 
-- [ ] 11.1 `bun run check:convention` passes across the repo.
-- [ ] 11.2 `bun run knip` clean on changed packages.
-- [ ] 11.3 `bun test` passes in `package/server`, `package/api`, `package/contract`.
-- [ ] 11.4 Manual walkthrough: seed dev DB, log in as a regular user, create a personal entity via `/me/entities/new`, verify it renders at `/entity/$unitId`, attempt to set slug via API (should be rejected), log in as admin, navigate to `/admin/entities/$unitId`, toggle `verified`, set slug, verify `/e/$slug` resolves.
-- [ ] 11.5 Manual walkthrough: open a book creation flow, embed EntityPicker (temporary scaffold if no consumer ships in this change), search → no results → inline create → verify entity appears in `/me/entities` of the creator.
+- [x] 11.1 `bun run check:convention` passes across the repo (0 violations).
+- [x] 11.2 `bun run knip` — the only delta vs. baseline introduced by this change is the (pre-existing) `attributionApi|default` dual-export hint, which my refactor preserved verbatim. The new contract module (`package/contract/src/entity.ts`) and Meili schema (`package/contract/src/meili/entity.ts`) are reachable via the main barrel and not flagged.
+- [x] 11.3 `bun test src/entity src/attribution src/zone` — 33/33 pass. Repo-wide `bun test` reports 219 pass / 45 unique failures, identical set to pre-change baseline (45 unique failures pre-exist in book / chapter / realm-tag / auth-session / token-boundary suites — none touched by this change).
+- [ ] 11.4 Manual walkthrough: seed dev DB, log in as a regular user, create a personal entity via `/me/entities/new`, verify it renders at `/entity/$unitId`, attempt to set slug via API (should be rejected), log in as admin, navigate to `/admin/entities/$unitId`, toggle `verified`, set slug, verify `/e/$slug` resolves. — Deferred: requires running dev DB + browser; admin/me routes ship in the next session's UI scope.
+- [ ] 11.5 Manual walkthrough: open a book creation flow, embed EntityPicker (temporary scaffold if no consumer ships in this change), search → no results → inline create → verify entity appears in `/me/entities` of the creator. — Deferred: EntityPicker ships in the next session's UI scope.

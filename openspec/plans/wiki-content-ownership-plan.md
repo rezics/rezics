@@ -4,6 +4,12 @@
 **Date**: 2026-05-15
 **Scope**: Disambiguate "personal-mode" content (creator-owned) from "wiki-mode" content (catalog, custodian-owned) across BOOK / ENTITY / GAME / MEDIA. Define the substrate for owner-driven field locks needed once collaborative editing (per [[history-infrastructure]]) lands.
 
+## Status update — 2026-05-16
+
+Implementation is **deferred until paired with [[history-infrastructure]]**. The lock substrate, custodian-user, and creation-mode convention only make sense once collaborative editing arrives — the convention's purpose is to disambiguate owner-vs-editor authority at the moment that distinction starts to matter. Shipping the convention now would create a forward-compatibility tax (modes recorded but never enforced) without the load-bearing UI surface that justifies the discipline.
+
+`entity-slug-activation` (the first follow-on that would have consumed this plan) proceeds without modes: all v1 ENTITY units are creator-owned, matching how BOOK / GAME / MEDIA are owned today. When the convention does land, it will be **forward-only** (no backfill of v1 rows, per §5.2) and will ship together with its first enforced UI surface so the convention and the enforcement arrive in the same change.
+
 ---
 
 ## 1. Motivation

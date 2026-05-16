@@ -13,6 +13,7 @@ export class SearchClient {
   readonly userIndex: Index;
   readonly postIndex: Index;
   readonly realmIndex: Index;
+  readonly entityIndex: Index;
   readonly progressIndex: Index;
 
   constructor(config: MeiliConfig) {
@@ -22,6 +23,7 @@ export class SearchClient {
     this.userIndex = this.meili.index("users");
     this.postIndex = this.meili.index("posts");
     this.realmIndex = this.meili.index("realms");
+    this.entityIndex = this.meili.index("entities");
     this.progressIndex = this.meili.index(PROGRESS_INDEX_NAME);
   }
 
@@ -119,6 +121,15 @@ export class SearchClient {
     this.realmIndex.addDocuments([], { primaryKey: "id" });
   }
 
+  async initEntityIndex(): Promise<void> {
+    await this.entityIndex.updateSettings({
+      searchableAttributes: ["titles", "summaries", "slug"],
+      filterableAttributes: ["kind", "verified", "ownerUnitId"],
+      sortableAttributes: ["createdAt", "updatedAt"],
+    });
+    this.entityIndex.addDocuments([], { primaryKey: "id" });
+  }
+
   async initProgressIndex(): Promise<void> {
     await this.progressIndex.updateSettings({
       searchableAttributes: [],
@@ -201,6 +212,21 @@ export class SearchClient {
   }
   deleteAllRealms() {
     return this.realmIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: Entity document operations
+
+  addOrUpdateEntities(docs: any[]) {
+    return this.entityIndex.addDocuments(docs);
+  }
+  patchEntities(docs: any[]) {
+    return this.entityIndex.updateDocuments(docs);
+  }
+  deleteEntities(ids: string[]) {
+    return this.entityIndex.deleteDocuments(ids);
+  }
+  deleteAllEntities() {
+    return this.entityIndex.deleteAllDocuments();
   }
 
   // ANCHOR: Progress document operations

@@ -1,0 +1,118 @@
+import { t } from "elysia";
+import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
+import { unitTranslationDTOSchema } from "./unit";
+
+// ============================================================
+// ENTITY DTO
+// ============================================================
+
+export const entityDTOSchema = t.Object({
+  unitId: t.String(),
+  kind: t.Optional(t.Nullable(t.String())),
+  verified: t.Boolean(),
+  slug: t.Optional(t.Nullable(t.String())),
+  /** Owner Unit.userId (the creator's USER unitId) — exposed for /me/entities filtering. */
+  ownerUnitId: t.Optional(t.Nullable(t.String())),
+  translations: t.Optional(t.Array(unitTranslationDTOSchema)),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type EntityDTO = (typeof entityDTOSchema)["static"];
+
+// ============================================================
+// CREATE / UPDATE / PARAMS
+// ============================================================
+
+export const entityParamsSchema = t.Object({
+  unitId: t.String({ format: "uuid" }),
+});
+
+export type EntityParams = (typeof entityParamsSchema)["static"];
+
+/** Legacy params using `id` field (for routes that haven't been renamed). */
+export const entityLegacyParamsSchema = t.Object({
+  id: t.String(),
+});
+
+export type EntityLegacyParams = (typeof entityLegacyParamsSchema)["static"];
+
+export const createEntityTranslationSchema = t.Object({
+  language: t.String(),
+  title: t.String({ minLength: 1 }),
+  subtitle: t.Optional(t.Nullable(t.String())),
+  summary: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(t.String())),
+});
+
+export const createEntitySchema = t.Object({
+  kind: t.Optional(t.Nullable(t.String())),
+  /** Admin-only-after-verified — rejected for non-admin callers. */
+  slug: t.Optional(t.Nullable(t.String())),
+  /** Admin-only — rejected for non-admin callers. */
+  verified: t.Optional(t.Boolean()),
+  translations: t.Array(createEntityTranslationSchema, { minItems: 1 }),
+});
+
+export type CreateEntityInput = (typeof createEntitySchema)["static"];
+
+export const updateEntitySchema = t.Object({
+  kind: t.Optional(t.Nullable(t.String())),
+  /** Admin-only AND only when target Entity has `verified = true`. */
+  slug: t.Optional(t.Nullable(t.String())),
+  /** Admin-only. */
+  verified: t.Optional(t.Boolean()),
+  translations: t.Optional(t.Array(createEntityTranslationSchema)),
+});
+
+export type UpdateEntityInput = (typeof updateEntitySchema)["static"];
+
+// ============================================================
+// LIST
+// ============================================================
+
+export const entityListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
+  kind: t.Optional(t.String()),
+  q: t.Optional(t.String()),
+  /** Filter to entities owned by this USER unitId. */
+  ownerUnitId: t.Optional(t.String()),
+  verified: t.Optional(t.Boolean()),
+  page: t.Optional(t.Numeric()),
+  limit: t.Optional(t.Numeric()),
+});
+
+export type EntityListQuery = (typeof entityListQuerySchema)["static"];
+
+export const entityListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  kind: t.Optional(t.String()),
+  q: t.Optional(t.String()),
+  ownerUnitId: t.Optional(t.String()),
+  verified: t.Optional(t.Boolean()),
+  page: t.Optional(t.Numeric()),
+  limit: t.Optional(t.Numeric()),
+});
+
+export type EntityListBody = (typeof entityListBodySchema)["static"];
+
+export const entityListResponseSchema = t.Object({
+  entities: t.Array(entityDTOSchema),
+  total: t.Number(),
+});
+
+export type EntityListResponse = (typeof entityListResponseSchema)["static"];
+
+// ============================================================
+// KIND CONSTANTS
+// ============================================================
+
+export const entityKinds = [
+  "person",
+  "organization",
+  "circle",
+  "studio",
+  "label",
+] as const;
+
+export type EntityKind = (typeof entityKinds)[number];

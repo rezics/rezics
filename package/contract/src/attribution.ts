@@ -1,76 +1,30 @@
 import { t } from "elysia";
-import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
+import { entityDTOSchema } from "./entity";
 import { unitTranslationDTOSchema } from "./unit";
 
-// ============================================================
-// ENTITY DTO
-// ============================================================
-
-export const entityDTOSchema = t.Object({
-  unitId: t.String(),
-  kind: t.Optional(t.Nullable(t.String())),
-  verified: t.Boolean(),
-  slug: t.Optional(t.Nullable(t.String())),
-  translations: t.Optional(t.Array(unitTranslationDTOSchema)),
-  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
-  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
-});
-
-export type EntityDTO = (typeof entityDTOSchema)["static"];
-
-// ============================================================
-// ENTITY CRUD
-// ============================================================
-
-export const entityParamsSchema = t.Object({
-  id: t.String(),
-});
-
-export type EntityParams = (typeof entityParamsSchema)["static"];
-
-export const createEntityTranslationSchema = t.Object({
-  language: t.String(),
-  title: t.String({ minLength: 1 }),
-  subtitle: t.Optional(t.Nullable(t.String())),
-  summary: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
-});
-
-export const createEntitySchema = t.Object({
-  kind: t.Optional(t.Nullable(t.String())),
-  slug: t.Optional(t.Nullable(t.String())),
-  translations: t.Array(createEntityTranslationSchema, { minItems: 1 }),
-});
-
-export type CreateEntityInput = (typeof createEntitySchema)["static"];
-
-export const updateEntitySchema = t.Object({
-  kind: t.Optional(t.Nullable(t.String())),
-  slug: t.Optional(t.Nullable(t.String())),
-  translations: t.Optional(t.Array(createEntityTranslationSchema)),
-});
-
-export type UpdateEntityInput = (typeof updateEntitySchema)["static"];
-
-export const entityListQuerySchema = t.Object({
-  ...listGetQueryBase.properties,
-  kind: t.Optional(t.String()),
-  q: t.Optional(t.String()),
-  page: t.Optional(t.Numeric()),
-  limit: t.Optional(t.Numeric()),
-});
-
-export type EntityListQuery = (typeof entityListQuerySchema)["static"];
-
-export const entityListBodySchema = t.Object({
-  ...listPostBodyBase.properties,
-  kind: t.Optional(t.String()),
-  q: t.Optional(t.String()),
-  page: t.Optional(t.Numeric()),
-  limit: t.Optional(t.Numeric()),
-});
-
-export type EntityListBody = (typeof entityListBodySchema)["static"];
+// Re-export entity schemas for back-compat with consumers that imported them
+// from "@rezics/contract" — the canonical home is `./entity`.
+export {
+  type CreateEntityInput,
+  createEntitySchema,
+  createEntityTranslationSchema,
+  type EntityDTO,
+  entityDTOSchema,
+  type EntityKind,
+  entityKinds,
+  entityLegacyParamsSchema,
+  type EntityLegacyParams,
+  entityListBodySchema,
+  type EntityListBody,
+  entityListQuerySchema,
+  type EntityListQuery,
+  entityListResponseSchema,
+  type EntityListResponse,
+  entityParamsSchema,
+  type EntityParams,
+  type UpdateEntityInput,
+  updateEntitySchema,
+} from "./entity";
 
 // ============================================================
 // ATTRIBUTION DTO
@@ -154,12 +108,4 @@ export const mediaRoles = [
   "narrator",
   "studio",
   "distributor",
-] as const;
-
-export const entityKinds = [
-  "person",
-  "organization",
-  "circle",
-  "studio",
-  "label",
 ] as const;

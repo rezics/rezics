@@ -11,6 +11,7 @@ export {
 } from "./progress";
 export {
   buildContentDocument,
+  buildEntityDocument,
   buildPostDocument,
   buildRealmDocument,
   patchContentContainedUnitIds,
@@ -31,6 +32,7 @@ export {
   removeProgress,
   syncAllContainedUnitIds,
   syncAllContent,
+  syncAllEntities,
   syncAllFeedbacks,
   syncAllPosts,
   syncAllPostRealmIds,
@@ -41,6 +43,7 @@ export {
   syncPostsByAuthor,
   syncPostsByTarget,
   syncSingleContent,
+  syncSingleEntity,
   syncSinglePost,
   syncSingleRealm,
 } from "./sync";

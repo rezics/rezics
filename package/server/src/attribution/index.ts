@@ -1,7 +1,4 @@
-export { attributionApi, entityBySlugApi } from "./attribution.api";
-export {
-  mapAttributionToDTO,
-  mapEntityToDTO,
-} from "./attribution.mapper";
+export { attributionApi } from "./attribution.api";
+export { mapAttributionToDTO } from "./attribution.mapper";
 export { AttributionService, attributionService } from "./attribution.service";
 export * from "./types";

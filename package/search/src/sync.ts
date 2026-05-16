@@ -1,5 +1,6 @@
 import type {
   ContentSearchDocument,
+  EntitySearchDocument,
   FeedbackSearchDocument,
   PostSearchDocument,
   RealmSearchDocument,
@@ -1085,6 +1086,95 @@ export async function syncAllRealms(client: SearchClient) {
   }
 
   return { message: "syncAllRealms success", totalSynced: total };
+}
+
+// ANCHOR: Entity document builder + sync
+
+const entityIncludeForSync = {
+  unit: {
+    include: {
+      translations: true,
+    },
+  },
+} as const;
+
+export function buildEntityDocument(entity: any): EntitySearchDocument {
+  const unit = entity.unit;
+  const translations: any[] = unit?.translations ?? [];
+
+  const titles = translations.map((t: any) => t.title).filter(Boolean);
+  const summaries = translations.map((t: any) => t.summary).filter(Boolean);
+
+  return {
+    id: entity.unitId,
+    unitId: entity.unitId,
+    kind: entity.kind ?? null,
+    verified: entity.verified,
+    slug: unit?.slug ?? null,
+    ownerUnitId: unit?.userId ?? null,
+    titles,
+    summaries,
+    translations: translations.map((tr: any) => ({
+      language: tr.language,
+      title: tr.title ?? null,
+      subtitle: tr.subtitle ?? null,
+      summary: tr.summary ?? null,
+    })),
+    createdAt:
+      unit?.createdAt instanceof Date
+        ? unit.createdAt.toISOString()
+        : (unit?.createdAt ?? new Date().toISOString()),
+    updatedAt:
+      unit?.updatedAt instanceof Date
+        ? unit.updatedAt.toISOString()
+        : (unit?.updatedAt ?? new Date().toISOString()),
+  };
+}
+
+export async function syncSingleEntity(client: SearchClient, unitId: string) {
+  const entity = await prisma.entity.findUnique({
+    where: { unitId },
+    include: entityIncludeForSync,
+  });
+
+  if (!entity) {
+    await client.deleteEntities([unitId]);
+    return;
+  }
+
+  const doc = buildEntityDocument(entity);
+  await client.addOrUpdateEntities([doc]);
+}
+
+export async function syncAllEntities(client: SearchClient) {
+  const deleteResult = await client.deleteAllEntities();
+  console.log("syncAllEntities: deleted all documents", deleteResult);
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    console.log("syncAllEntities: cursor", cursor, "total", total);
+
+    const entities: any[] = await prisma.entity.findMany({
+      include: entityIncludeForSync,
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (entities.length === 0) break;
+
+    const docs = entities.map(buildEntityDocument);
+    const addResult = await client.addOrUpdateEntities(docs);
+    console.log("syncAllEntities: added batch", addResult);
+
+    total += docs.length;
+    cursor = entities[entities.length - 1]!.unitId;
+  }
+
+  return { message: "syncAllEntities success", totalSynced: total };
 }
 
 // ANCHOR: Users sync

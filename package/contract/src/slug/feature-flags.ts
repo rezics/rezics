@@ -10,10 +10,10 @@
  * Whether ENTITY slug writes are accepted at the service layer.
  *
  * Substrate (the `entity` SlugScope row, the validator's accept-on-format
- * behavior, the `/entity/by-slug/:slug` route) is in place from L3 day one,
- * but every service entry point that would persist a slug on an ENTITY-typed
- * Unit SHALL reject the write with a typed `ENTITY_SLUG_DISABLED` error
- * while this flag is `false`. The follow-on `entity-slug-activation` change
- * flips this to `true`.
+ * behavior, the `/entity/by-slug/:slug` route) is in place from L3 day one.
+ * Activated by `entity-slug-activation`: ENTITY slug writes are now permitted
+ * but service-layer-gated to `admin AND verified=true`. The flag stays here
+ * for spec-history clarity and to give a single point to disable the surface
+ * in an emergency.
  */
-export const ENTITY_SLUG_WRITES_ENABLED = false;
+export const ENTITY_SLUG_WRITES_ENABLED = true;
