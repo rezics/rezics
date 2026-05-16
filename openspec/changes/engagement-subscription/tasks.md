@@ -1,8 +1,8 @@
 ## 0. Preflight
 
-- [ ] 0.1 Confirm `user-namespace-slug` (L3) has shipped and `User.unitId` exists in `package/server/prisma/schema.prisma`; otherwise abort and complete L3 first
-- [ ] 0.2 Confirm `notify-broadcast-boundary` has shipped: `notifyBoundary.broadcast(event)` exists in `package/server/src/notify-boundary/notify-boundary.client.ts`; `KIND_REGISTRY` exists in `@rezics/contract`; notify accepts cookie auth; cookie scope is `Domain=.rezics.com` in prod; otherwise abort and complete that change first
-- [ ] 0.3 Snapshot current row counts: `Follow`, `RealmMember`, `User.followersCount` / `followingsCount` totals — for migration verification later
+- [x] 0.1 Confirm `user-namespace-slug` (L3) has shipped and `User.unitId` exists in `package/server/prisma/schema.prisma`; otherwise abort and complete L3 first
+- [x] 0.2 Confirm `notify-broadcast-boundary` has shipped: `notifyBoundary.broadcast(event)` exists in `package/server/src/notify-boundary/notify-boundary.client.ts`; `KIND_REGISTRY` exists in `@rezics/contract`; notify accepts cookie auth; cookie scope is `Domain=.rezics.com` in prod; otherwise abort and complete that change first
+- [x] 0.3 Snapshot current row counts: `Follow`, `RealmMember`, `User.followersCount` / `followingsCount` totals — for migration verification later (script: `openspec/changes/engagement-subscription/snapshot.sql`; **must be run by operator against live DB before applying §2 migration**)
 
 ## 1. Contract layer
 
