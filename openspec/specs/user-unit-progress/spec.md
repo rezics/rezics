@@ -127,19 +127,29 @@ The system SHALL maintain a database index on `(userId, lastSeenAt DESC)` suffic
 
 ### Requirement: User-level system shelf pointers
 
-The system SHALL extend the `User` model with an `extra Json?` column. Within `extra`, the system SHALL store a `shelves` map whose keys are system-shelf `kindKey`s and whose values are the corresponding `Shelf.unitId` for that user. The four known system kindKeys are `favorites`, `backlog`, `active`, and `completed`. The system SHALL bootstrap all four shelves at user registration, populating `extra.shelves` in the same transaction as `User` creation. For pre-existing users with `extra = NULL` or a missing key in `extra.shelves`, the system SHALL lazy-create the missing shelf on first read and patch the resulting `unitId` into `extra.shelves`.
+The system SHALL bootstrap all four system shelves identified by `SYSTEM_SHELF_KIND_KEYS` (`favorites`, `backlog`, `active`, `completed`) at user registration, inside the same transaction as the `User` row. Each system shelf SHALL be created as a `Unit { type = SHELF, slug = kindKey, slugScope = ownerUserUnitId }` row paired with a `Shelf { unitId, kindKey }` row. The canonical lookup index for system shelves SHALL be the composite `(slugScope, slug)` unique on `Unit`, not any JSON pointer map.
 
-#### Scenario: Registration populates all four system shelves
+The system SHALL retain `getOrCreateSystemShelf(userId, kindKey)` as an idempotent safety net for users provisioned outside the standard registration path (e.g., fixtures bypassing `userService.create`, partial seed runs). When its creation branch fires, the helper SHALL set both `slug` and `slugScope` on the inserted `Unit` row. The four system `kindKey`s SHALL remain reserved — user-created shelves SHALL NOT be permitted to use them.
+
+The previous `User.extra.shelves` JSON map SHALL be removed from the `User` model surface. Existing dev / staging databases SHALL be reseeded; no per-row data backfill is shipped (the project is in active development per `CLAUDE.md`).
+
+#### Scenario: Registration populates all four system shelves with slugs
+
 - **WHEN** a new user completes registration
-- **THEN** the system creates four shelves (one per system `kindKey`) in the same transaction as the `User` row, and writes their `unitId`s into `User.extra.shelves` keyed by `kindKey`
+- **THEN** the system SHALL create four `Unit { type = SHELF, slug = kindKey, slugScope = user.unitId }` rows (one per system `kindKey`) in the same transaction as the `User` row
+- **AND** the corresponding four `Shelf { unitId, kindKey }` rows SHALL be linked
 
-#### Scenario: Lazy-create populates missing pointer for pre-existing users
-- **WHEN** a request needs a system shelf for a user whose `User.extra.shelves` is missing the corresponding key
-- **THEN** the system creates the shelf with the corresponding `kindKey`, writes the resulting `unitId` back into `User.extra.shelves`, and proceeds with the original request using the new `unitId`
+#### Scenario: Safety net heals a missing system shelf
+
+- **WHEN** a request needs a system shelf for a user whose corresponding `(slugScope = user.unitId, slug = kindKey)` Unit row is missing
+- **THEN** the system SHALL create the shelf with `slug` and `slugScope` set, and proceed with the original request using the new `Unit.id`
+- **AND** subsequent invocations SHALL resolve via the slug index without creating a second row
 
 #### Scenario: System kindKeys are reserved for system shelves
+
 - **WHEN** a user attempts to create a shelf with `kindKey` equal to `favorites`, `backlog`, `active`, or `completed`
-- **THEN** the system rejects the request with a validation error and does not create a shelf
+- **THEN** the system SHALL reject the request with a validation error
+- **AND** no shelf SHALL be created
 
 ### Requirement: Progress and shelf are orthogonal stores
 
