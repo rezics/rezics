@@ -546,6 +546,91 @@ describe("ShelfService", () => {
     expect(message).toBe("invalid-pin-target");
   });
 
+  test("getByOwnerAndSlug returns 200-shaped payload for a system slug", async () => {
+    Object.assign(prismaMock, {
+      unit: {
+        findFirst: async ({ where }: any) => {
+          if (
+            where.type === "SHELF" &&
+            where.slug === "favorites" &&
+            where.slugScope === "alice-unit"
+          ) {
+            return { id: "favorites-unit" };
+          }
+          return null;
+        },
+      },
+      shelf: {
+        findUnique: async ({ where }: any) => {
+          if (where.unitId !== "favorites-unit") return null;
+          return {
+            unitId: "favorites-unit",
+            kindKey: "favorites",
+            extra: null,
+            itemCount: 0,
+            pinnedTagOrder: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            unit: {
+              id: "favorites-unit",
+              type: "SHELF",
+              slug: "favorites",
+              slugScope: "alice-unit",
+              userId: "alice-unit",
+              user: null,
+              defaultLanguage: "en",
+              translations: [{ language: "en", title: "Favorites" }],
+              unitTags: [],
+              status: "PUBLISHED",
+              visibility: "PRIVATE",
+              rating: "GENERAL",
+              extra: null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              publishedAt: null,
+            },
+          };
+        },
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    const result = await shelfService.getByOwnerAndSlug(
+      "alice-unit",
+      "favorites",
+    );
+    expect(result).not.toBeNull();
+    expect(result!.unitId).toBe("favorites-unit");
+  });
+
+  test("getByOwnerAndSlug returns null for a non-system slug", async () => {
+    Object.assign(prismaMock, {
+      unit: {
+        findFirst: async () => ({ id: "should-not-be-read" }),
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    const result = await shelfService.getByOwnerAndSlug(
+      "alice-unit",
+      "my-custom-list",
+    );
+    expect(result).toBeNull();
+  });
+
+  test("getByOwnerAndSlug returns null when no matching unit exists", async () => {
+    Object.assign(prismaMock, {
+      unit: { findFirst: async () => null },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    const result = await shelfService.getByOwnerAndSlug(
+      "ghost-user-unit",
+      "favorites",
+    );
+    expect(result).toBeNull();
+  });
+
   test("removeUnit syncs containedUnitIds to Meilisearch after the canonical delete", async () => {
     patchContentContainedUnitIdsToMeiliMock.mockClear();
 

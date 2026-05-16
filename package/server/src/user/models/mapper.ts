@@ -1,35 +1,9 @@
-import {
-  SYSTEM_SHELF_KIND_KEYS,
-  type SystemShelvesMap,
-  type UserDTO,
-} from "@rezics/contract";
+import type { UserDTO } from "@rezics/contract";
 import type { User } from "#/prisma/client";
 import type { UserWithRelations } from "./types";
 
-function extractSystemShelves(extra: User["extra"]): SystemShelvesMap | undefined {
-  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return undefined;
-  const shelves = (extra as Record<string, unknown>).shelves;
-  if (!shelves || typeof shelves !== "object" || Array.isArray(shelves)) {
-    return undefined;
-  }
-  const out: SystemShelvesMap = {};
-  for (const key of SYSTEM_SHELF_KIND_KEYS) {
-    const value = (shelves as Record<string, unknown>)[key];
-    if (typeof value === "string") {
-      out[key] = value;
-    }
-  }
-  return Object.keys(out).length > 0 ? out : undefined;
-}
-
-export type MapUserOptions = {
-  /** Include private fields like systemShelves; only set on the /me path. */
-  includePrivate?: boolean;
-};
-
 type UserLike = (User | UserWithRelations) & {
   slug?: string | null;
-  extra?: User["extra"];
 };
 
 /**
@@ -38,10 +12,7 @@ type UserLike = (User | UserWithRelations) & {
  * Slug is read from the user object — services that load Users SHALL attach
  * `slug` from the matching USER `Unit.slug` so DTO mappers can include it.
  */
-export function mapUserToDTO(
-  user: UserLike,
-  options: MapUserOptions = {},
-): UserDTO {
+export function mapUserToDTO(user: UserLike): UserDTO {
   return {
     unitId: user.unitId,
     email: user.email ?? undefined,
@@ -54,9 +25,6 @@ export function mapUserToDTO(
     followingsCount: user.followingsCount,
     permission: user.permission as { role: string[] } | undefined,
     joinDate: user.joinDate?.toISOString(),
-    ...(options.includePrivate
-      ? { systemShelves: extractSystemShelves(user.extra) }
-      : {}),
   };
 }
 

@@ -9,7 +9,6 @@ import {
   unitProgressListResponseSchema,
   unitProgressRowDTOSchema,
   unitProgressUpsertBodySchema,
-  userExtraSchema,
   userUnitProgressStatusValues,
 } from "./progress";
 
@@ -179,22 +178,4 @@ describe("progress contract schemas", () => {
     ).toBe(false);
   });
 
-  test("validates user extra shelves map", () => {
-    expect(
-      Value.Check(userExtraSchema, {
-        shelves: {
-          favorites: "fav-id",
-          backlog: "backlog-id",
-          active: "active-id",
-          completed: "completed-id",
-          future: "future-id",
-        },
-      }),
-    ).toBe(true);
-    expect(
-      Value.Check(userExtraSchema, {
-        shelves: { favorites: 123 },
-      }),
-    ).toBe(false);
-  });
 });

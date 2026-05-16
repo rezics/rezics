@@ -35,22 +35,6 @@ export const userUnitProgressStatusSchema = t.Union([
 export type UserUnitProgressStatus =
   (typeof userUnitProgressStatusSchema)["static"];
 
-export const userExtraSchema = t.Object({
-  shelves: t.Optional(
-    t.Intersect([
-      t.Record(t.String(), t.String()),
-      t.Object({
-        favorites: t.Optional(t.String()),
-        backlog: t.Optional(t.String()),
-        active: t.Optional(t.String()),
-        completed: t.Optional(t.String()),
-      }),
-    ]),
-  ),
-});
-
-export type UserExtra = (typeof userExtraSchema)["static"];
-
 export const contentStructurePathLastPositionSchema = t.Object(
   {
     kind: t.Literal("contentStructurePath"),

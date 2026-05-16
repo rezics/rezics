@@ -217,17 +217,27 @@ export class ShelfService {
    * Resolve `{ ownerUserId, slug }` under the owner scope. Only system shelf
    * slugs ('favorites' | 'backlog' | 'active' | 'completed') are accepted in
    * v1 — every other slug returns null per `SHELF_CUSTOM_SLUG_DISABLED`.
+   *
+   * Lookup goes through the Unit slug index `(slugScope = ownerUserId,
+   * slug)` so the resolver shares the path used by every other slug-bearing
+   * Unit (see openspec change `shelf-system-slugs`).
    */
   async getByOwnerAndSlug(
     ownerUserId: string,
     slug: string,
   ): Promise<ShelfDetailDTO | null> {
     if (!isSystemKindKey(slug)) return null;
-    const row = await prisma.shelf.findFirst({
+    const unit = await prisma.unit.findFirst({
       where: {
-        kindKey: slug,
-        unit: { userId: ownerUserId, type: UnitType.SHELF },
+        type: UnitType.SHELF,
+        slug,
+        slugScope: ownerUserId,
       },
+      select: { id: true },
+    });
+    if (!unit) return null;
+    const row = await prisma.shelf.findUnique({
+      where: { unitId: unit.id },
       include: shelfInclude,
     });
     if (!row) return null;

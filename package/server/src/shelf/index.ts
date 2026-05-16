@@ -13,8 +13,6 @@ export {
   bootstrapSystemShelves,
   getOrCreateSystemShelf,
   isSystemKindKey,
-  patchUserSystemShelf,
-  readUserSystemShelves,
   SYSTEM_KIND_KEYS,
 } from "./system-shelves";
 export * from "./types";

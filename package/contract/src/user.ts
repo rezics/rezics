@@ -7,15 +7,6 @@ import type { ContentRating } from "./unit";
 // USER DTO (UserType removed — no AUTHOR/PRESS/PRODUCER)
 // ============================================================
 
-export const systemShelvesMapSchema = t.Object({
-  favorites: t.Optional(t.String()),
-  backlog: t.Optional(t.String()),
-  active: t.Optional(t.String()),
-  completed: t.Optional(t.String()),
-});
-
-export type SystemShelvesMap = (typeof systemShelvesMapSchema)["static"];
-
 export const userDTOSchema = t.Object({
   /** Canonical user identifier — the USER `Unit.id`. */
   unitId: t.String(),
@@ -36,7 +27,6 @@ export const userDTOSchema = t.Object({
       { additionalProperties: true },
     ),
   ),
-  systemShelves: t.Optional(systemShelvesMapSchema),
 });
 
 export type UserDTO = (typeof userDTOSchema)["static"];

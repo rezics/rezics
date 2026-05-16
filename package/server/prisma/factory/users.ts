@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { seedAuthUser } from "@rezics/auth/prisma/seed";
+import { bootstrapSystemShelves } from "../../src/shelf/system-shelves.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUser } from "./types.js";
 import {
@@ -139,6 +140,8 @@ export async function seedUsers(
           ...(plan.permission ? { permission: plan.permission } : {}),
         },
       });
+
+      await bootstrapSystemShelves(authResult.userId, ctx.prisma);
 
       return {
         userId: authResult.userId,
