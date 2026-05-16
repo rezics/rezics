@@ -2,6 +2,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   CircleUser as AccountCircleIcon,
   Mail as EmailIcon,
+  IdCard as IdentityIcon,
   Key as KeyIcon,
   Link as LinkIcon,
   ShieldCheck as SecurityIcon,
@@ -16,6 +17,10 @@ const SETTINGS_NAV = [
   { label: "Connected Accounts", path: "connections", icon: LinkIcon },
   { label: "API Tokens", path: "tokens", icon: KeyIcon },
   { label: "Preferences", path: "preferences", icon: TuneIcon },
+] as const;
+
+const EXTRA_NAV = [
+  { label: "Entities", to: "/user/me/entities", icon: IdentityIcon },
 ] as const;
 
 export const SettingsSidebar: FC = () => {
@@ -48,8 +53,32 @@ export const SettingsSidebar: FC = () => {
           </li>
         );
       })}
+
+      <li className="my-1 border-t border-border-whisper" aria-hidden="true" />
+
+      {EXTRA_NAV.map(({ label, to, icon: Icon }) => {
+        const isActive = pathname.startsWith(to);
+        return (
+          <li key={to}>
+            <button
+              type="button"
+              onClick={() => void navigate({ to })}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left text-sm transition-colors ${
+                isActive
+                  ? "bg-surface-elevated"
+                  : "hover:bg-surface-elevated/60"
+              }`}
+            >
+              <span className="min-w-[24px] flex items-center">
+                <Icon className="w-4 h-4" />
+              </span>
+              <span>{label}</span>
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 };
 
-export { SETTINGS_NAV };
+export { EXTRA_NAV, SETTINGS_NAV };

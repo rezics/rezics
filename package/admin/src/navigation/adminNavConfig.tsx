@@ -5,6 +5,7 @@ import {
   LayoutDashboard as DashboardIcon,
   Mail as EmailOutlinedIcon,
   MessagesSquare as ForumIcon,
+  IdCard as IdentityIcon,
   Package as Inventory2Icon,
   Key as KeyOutlinedIcon,
   SearchCheck as ManageSearchOutlinedIcon,
@@ -109,6 +110,12 @@ export const adminNav = {
           to: "/book/meili",
         },
       ],
+    },
+    {
+      id: "entities",
+      label: "Entities",
+      icon: <IdentityIcon fontSize="small" />,
+      to: "/entities",
     },
     // MOCK: realm management pages not yet implemented
     {

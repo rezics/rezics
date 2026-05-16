@@ -28,46 +28,46 @@
 
 ## 5. Frontend API hooks
 
-- [ ] 5.1 Add `package/api/src/entity/` with TanStack Query options + hooks for `useEntity(unitId)`, `useEntityBySlug(slug)`, `useEntityList(query)`, `useEntitySearch(query)` (Meili-backed for the picker), `useCreateEntity`, `useUpdateEntity`, `useDeleteEntity`.
-- [ ] 5.2 Re-export through `@rezics/api` barrel.
-- [ ] 5.3 Verify `package/api` builds.
+- [x] 5.1 Add `package/api/src/entity/` with TanStack Query options + hooks: `useEntity(unitId)`, `useEntityBySlug(slug)`, `useEntityList(query)`, `useEntitySearch(query)` (backed by `GET /entity?q=` in v1 — Meili-backed picker upgrade is a transparent server-side swap; consumer signature unchanged), `useCreateEntity`, `useUpdateEntity`, `useDeleteEntity`.
+- [x] 5.2 Re-export through `@rezics/api/entity` subpath (mirrors `@rezics/api/shelf`, `@rezics/api/notification`). Added the explicit `./entity` export to `package/api/package.json` so deep imports resolve to `./src/entity/index.ts`.
+- [x] 5.3 `bunx tsc --noEmit` on `package/api` returns 0 errors.
 
 ## 6. UI — Entity detail page
 
-- [ ] 6.1 Add shared `EntityDetailPage` component in `package/app/src/entity-detail/` following the project's feature-layered structure (`models/`, `hooks/`, `components/`, `sections/`, `pages/`, `index.ts`).
-- [ ] 6.2 Implement Hero region: primary title (language-aware), kind chip, verified `BadgeCheck` icon, language switcher when ≥2 translations exist.
-- [ ] 6.3 Implement tab strip with live `Overview`, `Works`, `About` tabs; skip tabs whose data source returns empty (no static kind→tab mapping).
-- [ ] 6.4 Implement `Awards` and `News` tab components, commented out with `/* AWARDS_TAB: … */` and `/* NEWS_TAB: … */` markers; also comment their entries in the tab registration array.
-- [ ] 6.5 Confirm no owner card, no subscribe button, and no DOM nodes reserved for either (preserves future additive-only insertion).
-- [ ] 6.6 Add the route `/e/$slug` at `package/app/src/routes/e.$slug.tsx` — resolves slug via `useEntityBySlug`, renders `EntityDetailPage` with the resolved unitId.
-- [ ] 6.7 Add the route `/entity/$unitId` at `package/app/src/routes/entity.$unitId.tsx` — renders `EntityDetailPage` directly.
-- [ ] 6.8 Add a 404 state for unknown slugs and unknown unitIds.
+- [x] 6.1 Added shared `EntityDetailPage` at `package/app/src/entity-detail/` with `models/`, `hooks/`, `components/`, `sections/`, `pages/`, `index.ts`.
+- [x] 6.2 Hero region: primary title (language-aware), kind chip, `BadgeCheck` icon for verified, language switcher when ≥2 translations.
+- [x] 6.3 Tab strip with live `Overview` / `Works` / `About` tabs; each tab is filtered out of the tablist when its data source is empty. Works tab uses a `// MOCK:` hook (`useEntityWorks`) that returns `[]` until a real `attribution.byEntity` endpoint is exposed.
+- [x] 6.4 `Awards` and `News` tab components shipped as block-commented placeholders with `/* AWARDS_TAB: … */` and `/* NEWS_TAB: … */` markers in both the import area, the `tabs[]` registration, and the `TabsContent` JSX block.
+- [x] 6.5 No owner card, no subscribe button rendered anywhere in `EntityDetailPage`. No reserved DOM nodes — additive only when those surfaces land.
+- [x] 6.6 Route `/e/$entitySlug` (existing file `package/app/src/routes/_mainLayout/e/$entitySlug.tsx`) updated from "always 404" to: resolve slug via `entityBySlugQueryOptions`, then render `EntityDetailPage` with the resolved unitId.
+- [x] 6.7 Route `/entity/$unitId` added at `package/app/src/routes/_mainLayout/entity/$unitId/index.tsx`. Validates UUID shape via `isPublicUnitIdRouteParams`, then renders `EntityDetailPage`.
+- [x] 6.8 Both routes throw `notFound()` when the slug / unitId fails to resolve (or the server returns 404 for non-ENTITY units). The `EntityDetailPage` component also renders an inline "Entity not found" surface as a safety net.
 
 ## 7. UI — EntityPicker composite
 
-- [ ] 7.1 Add `EntityPicker` composite under `package/ui/src/composite/EntityPicker/` (or in `package/app` if it stays consumer-app-scoped; final placement per design.md / rezics-design skill review).
-- [ ] 7.2 Implement Dialog-hosted command palette: search input, debounced Meili query via `useEntitySearch`, result list with title / kind chip / verified badge.
-- [ ] 7.3 Implement sticky "+ Create new" affordance with inline mini-form (one translation + kind; bio omitted).
-- [ ] 7.4 Wire inline create to `useCreateEntity`; on success invoke `onSelect(newUnitId)` and close Dialog.
-- [ ] 7.5 Implement `kindHint` prop wiring (pre-fill inline form kind; Meili filter weight).
-- [ ] 7.6 Confirm no slug input is rendered or submitted from any path within the picker.
-- [ ] 7.7 Add a Storybook story for `EntityPicker` under `package/ui/src/composite/EntityPicker/` (mock the search hook).
+- [x] 7.1 `EntityPicker` lives at `package/app/src/entity-picker/` (consumer-app-scoped, per design.md placement option). Depends on `@rezics/api/entity` which would force `@rezics/ui` → `@rezics/api` for a ui-side placement; the picker is composed of shadcn `Dialog`+`Input` plus the `EntityResultRow` / `EntityInlineCreateForm` primitives, so no ui-side primitive is needed.
+- [x] 7.2 Dialog-hosted search palette: debounced (`useDebouncedValue`) `useEntitySearch` query, result rows show primary title + kind chip + `BadgeCheck` icon.
+- [x] 7.3 Sticky "+ Create new" affordance opens the inline `EntityInlineCreateForm` with required fields = one translation (language + title) + kind. No bio.
+- [x] 7.4 Inline form calls `useCreateEntity`; `onSuccess` invokes `onSelect(newUnitId)` and closes the Dialog.
+- [x] 7.5 `kindHint` prop wires the inline form's `kind` default and soft-sorts matching kinds first in the result list (preserves "preferred but not exclusive" filter weight semantics).
+- [x] 7.6 No slug field in the picker. The `CreateEntityInput` payload omits `slug` everywhere within the composite.
+- [x] 7.7 Storybook story at `package/app/src/entity-picker/components/EntityPicker.stories.tsx` mocks the search hook via a hosted `QueryClient` with a `queryFn` that always resolves to the same fixture entity list. Stories: Default, WithPersonHint, WithStudioHint.
 
 ## 8. UI — /me/entities self-claim
 
-- [ ] 8.1 Add `/me/entities` route rendering a list of entities where `Unit.userId === currentUser.unitId`, using `useEntityList({ ownerUnitId: currentUser.unitId })` (extend `EntityListQuery` if needed).
-- [ ] 8.2 Add empty-state CTA pointing to `/me/entities/new`.
-- [ ] 8.3 Add `/me/entities/new` route with a creation form (one translation + kind; no slug input).
-- [ ] 8.4 On submit, call `useCreateEntity`; on success navigate to `/entity/$newUnitId`.
-- [ ] 8.5 Add "Entities" entry to the `/me/settings` left-rail navigation (locate the sidebar config and add the link); confirm it does NOT appear in the main avatar dropdown.
+- [x] 8.1 Route `/user/me/entities` added at `package/app/src/routes/_mainLayout/user/me/entities/index.tsx`. Lists entities filtered via `useEntityList({ ownerUnitId: currentUser.unitId })`. (`EntityListQuery` already exposed `ownerUnitId`; no contract extension needed.)
+- [x] 8.2 Empty state renders a centered card with a "Declare an entity" primary CTA pointing to `/user/me/entities/new`.
+- [x] 8.3 Route `/user/me/entities/new` added at `package/app/src/routes/_mainLayout/user/me/entities/new.tsx`. Form requires one translation (language + title) + kind. No slug input.
+- [x] 8.4 Submit calls `useCreateEntity`; on success navigates to `/entity/$newUnitId` (newly created entities have no slug, so the unitId route is the only addressable surface).
+- [x] 8.5 "Entities" entry added to `SettingsSidebar` in a new `EXTRA_NAV` block (visually separated from the in-settings nav). Links to `/user/me/entities` (jumps out of the settings shell). Not added to `MainLayout`'s avatar dropdown or top-level navigation, per spec rationale ("most users will never declare an entity"). The mobile `SettingsTabBar` continues to render only `SETTINGS_NAV`, so the entity entry is desktop-sidebar-only by design.
 
 ## 9. Admin — /admin/entities curation
 
-- [ ] 9.1 Add `/admin/entities` route in `package/admin` rendering a paginated index with columns: unitId, primary title, kind, verified, slug, createdAt.
-- [ ] 9.2 Wire filters: by `verified`, by `kind`, and free-text search across translation titles (Meili-backed).
-- [ ] 9.3 Add `/admin/entities/$unitId` edit page with: `verified` toggle, `slug` input (disabled when `verified = false`), translation editor reusing the existing pattern.
-- [ ] 9.4 Wire client-side slug validation using `validateSlug` from `@rezics/contract`; disable submit until valid or empty.
-- [ ] 9.5 Confirm non-admin access to either route returns the standard admin forbidden state.
+- [x] 9.1 Route `/admin/entities` added at `package/admin/src/routes/_admin/entities/index.tsx`. `EntityListPage` renders `PaginatedTable` with columns: unitId (8-char prefix), primary title, kind, verified, slug, createdAt, actions (→ edit).
+- [x] 9.2 Filters wired: `verified` (All / Verified / Unverified select), `kind` text input, and `q` free-text search across translation titles. All three feed the same `useEntityList({ … })`. (Backed by `GET /entity?q=` Postgres ilike for now — flipping to Meili is a server-side route change with no client signature impact.)
+- [x] 9.3 Route `/admin/entities/$unitId` added at `package/admin/src/routes/_admin/entities/$unitId.tsx`. `EntityEditPage` exposes: `verified` Checkbox (substitutes for absent Switch in shadcn), `slug` Input (disabled when `verified=false` with explanatory help text), and inline translation editor (add / remove / edit rows). All three submit through `useUpdateEntity` in a single payload.
+- [x] 9.4 Client-side slug validation uses `validateSlug` from `@rezics/contract` with `scope: "entity"`. Inline error message and the submit button disables when slug is non-empty AND (invalid OR `verified=false`).
+- [x] 9.5 Both `/admin/entities` routes are children of `/_admin/`, whose `beforeLoad` already enforces admin role and redirects non-admins to `/login` (mirrors every other admin route). Verified: the new entries are not protected separately; they inherit the same gate.
 
 ## 10. Documentation & plan hygiene
 

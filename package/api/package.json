@@ -14,6 +14,10 @@
       "types": "./src/shelf/index.ts",
       "default": "./src/shelf/index.ts"
     },
+    "./entity": {
+      "types": "./src/entity/index.ts",
+      "default": "./src/entity/index.ts"
+    },
     "./echokv": {
       "types": "./src/echokv/echokv.ts",
       "default": "./src/echokv/echokv.ts"
