@@ -24,8 +24,11 @@ export class ZoneService {
   }
 
   async getBySlug(slug: string): Promise<ZoneWithRelations | null> {
+    const { getSlugScopeId } = await import("@/infra/slug-scopes");
+    const zoneScope = getSlugScopeId("zone");
+    if (!zoneScope) return null;
     const unit = await prisma.unit.findUnique({
-      where: { slug },
+      where: { slugScope_slug: { slugScope: zoneScope, slug } },
       select: { id: true, type: true, visibility: true },
     });
 

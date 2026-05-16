@@ -172,9 +172,12 @@ export class RealmService {
       normalizedSlug = validation.normalized;
     }
 
+    const { requireSlugScopeId } = await import("@/infra/slug-scopes");
+    const realmScope = requireSlugScopeId("realm");
     const unit = await prisma.unit.create({
       data: {
         userId,
+        slugScope: realmScope,
         type: UnitType.REALM,
         status: UnitStatus.PUBLISHED,
         ...(normalizedSlug ? { slug: normalizedSlug } : {}),

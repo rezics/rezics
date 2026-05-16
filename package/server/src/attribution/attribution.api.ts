@@ -2,6 +2,7 @@ import type { AttributionDTO, EntityDTO } from "@rezics/contract";
 import {
   BasicAdminPermission,
   createEntitySchema,
+  entityBySlugParamsSchema,
   entityListQuerySchema,
   entityParamsSchema,
   linkAttributionSchema,
@@ -10,6 +11,28 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { attributionService } from "./attribution.service";
+
+/**
+ * Standalone `/entity/by-slug/:slug` endpoint. Always 404 in v1 — ENTITY slug
+ * writes are gated by `ENTITY_SLUG_WRITES_ENABLED`, so no ENTITY Unit can
+ * carry a slug yet.
+ */
+export const entityBySlugApi = new Elysia({ prefix: "/entity" }).get(
+  "/by-slug/:slug",
+  ({ set }) => {
+    set.status = 404;
+    return { error: { code: "NOT_FOUND", message: "Entity not found" } };
+  },
+  {
+    params: entityBySlugParamsSchema,
+    detail: {
+      summary: "Get entity by slug",
+      description:
+        "Resolve an ENTITY-scope slug. Always 404 in v1 (ENTITY slug writes disabled).",
+      tags: ["Attribution"],
+    },
+  },
+);
 
 export const attributionApi = new Elysia({ prefix: "/attribution" })
   .use(authMacro)

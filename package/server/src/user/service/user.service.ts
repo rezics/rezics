@@ -17,6 +17,7 @@ import {
 import { bootstrapSystemShelves } from "@/shelf/system-shelves";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { getDefaultRealmId } from "@/infra/default-realm";
+import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { projectSlugToAuth } from "@/auth-boundary/auth-internal.client";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
 import { userInclude } from "../models/types";
@@ -45,40 +46,108 @@ export type CompleteProfileSetupInput = {
   avatar?: string | null;
 };
 
-export type AdminSlugChangeResult = {
-  user: UserWithRelations;
-  authProjection: {
-    attempted: boolean;
-    ok: boolean;
-  };
-};
+/**
+ * Upsert the USER Unit that carries a user's canonical slug.
+ *
+ * Called whenever User.unitId becomes known. Idempotent: a re-call with the
+ * same `(unitId, slug)` is a no-op.
+ */
+async function ensureUserUnit(
+  tx: Prisma.TransactionClient,
+  unitId: string,
+  slug: string | null,
+): Promise<void> {
+  const userScope = requireSlugScopeId("user");
+  await tx.unit.upsert({
+    where: { id: unitId },
+    update: { slug, slugScope: userScope },
+    create: {
+      id: unitId,
+      type: "USER",
+      slug,
+      slugScope: userScope,
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      isLanguageNeutral: true,
+    },
+  });
+}
+
+async function fetchUnitSlug(unitId: string): Promise<string | null> {
+  const unit = await prisma.unit.findUnique({
+    where: { id: unitId },
+    select: { slug: true },
+  });
+  return unit?.slug ?? null;
+}
+
+async function batchUnitSlugs(
+  unitIds: string[],
+): Promise<Map<string, string | null>> {
+  if (unitIds.length === 0) return new Map();
+  const units = await prisma.unit.findMany({
+    where: { id: { in: unitIds } },
+    select: { id: true, slug: true },
+  });
+  return new Map(units.map((u) => [u.id, u.slug ?? null]));
+}
+
+async function attachSlug<T extends { unitId: string }>(
+  user: T,
+): Promise<T & { slug: string | null }> {
+  const slug = await fetchUnitSlug(user.unitId);
+  return { ...user, slug };
+}
+
+async function attachSlugs<T extends { unitId: string }>(
+  users: T[],
+): Promise<(T & { slug: string | null })[]> {
+  const slugMap = await batchUnitSlugs(users.map((u) => u.unitId));
+  return users.map((u) => ({ ...u, slug: slugMap.get(u.unitId) ?? null }));
+}
 
 /**
  * User Service - Business logic layer
  */
 export class UserService {
   /**
-   * Build where clause for user queries
+   * Build where clause for user queries. Slug filters are translated to a
+   * USER Unit match because the slug column lives on Unit now.
    */
-  private buildWhereClause(options: UserFilterOptions): Prisma.UserWhereInput {
+  private async buildWhereClause(
+    options: UserFilterOptions,
+  ): Promise<Prisma.UserWhereInput> {
     const andWhere: Prisma.UserWhereInput[] = [];
+    const userScope = requireSlugScopeId("user");
 
-    // Search in name or slug
     if (options.q?.trim()) {
+      const q = options.q.trim();
+      const slugMatches = await prisma.unit.findMany({
+        where: {
+          type: "USER",
+          slugScope: userScope,
+          slug: { contains: q, mode: "insensitive" },
+        },
+        select: { id: true },
+      });
+      const slugMatchedIds = slugMatches.map((u) => u.id);
       andWhere.push({
         OR: [
-          { name: { contains: options.q, mode: "insensitive" } },
-          { slug: { contains: options.q, mode: "insensitive" } },
+          { name: { contains: q, mode: "insensitive" } },
+          ...(slugMatchedIds.length > 0
+            ? [{ unitId: { in: slugMatchedIds } }]
+            : []),
         ],
       });
     }
 
-    // Filter by slug
     if (options.slug?.trim()) {
-      andWhere.push({ slug: { equals: options.slug, mode: "insensitive" } });
+      const slugMatch = await prisma.unit.findUnique({
+        where: { slugScope_slug: { slugScope: userScope, slug: options.slug } },
+        select: { id: true },
+      });
+      andWhere.push({ unitId: slugMatch?.id ?? "no-match" });
     }
-
-    // UserType removed — no type filter
 
     return andWhere.length > 0 ? { AND: andWhere } : {};
   }
@@ -94,7 +163,7 @@ export class UserService {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skip = (pageNum - 1) * limitNum;
 
-    const where = this.buildWhereClause(options);
+    const where = await this.buildWhereClause(options);
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
@@ -107,31 +176,40 @@ export class UserService {
       prisma.user.count({ where }),
     ]);
 
-    return { users: users as UserWithRelations[], total };
+    const withSlugs = await attachSlugs(users);
+    return { users: withSlugs as UserWithRelations[], total };
   }
 
   /**
-   * Get user by userId
+   * Get user by unitId (formerly userId)
    */
   async getByUserId(userId: string): Promise<UserWithRelations> {
     const user = await prisma.user.findUniqueOrThrow({
-      where: { userId },
+      where: { unitId: userId },
       include: userInclude,
     });
 
-    return user as UserWithRelations;
+    return (await attachSlug(user)) as UserWithRelations;
   }
 
   /**
-   * Get user by slug
+   * Get user by slug (USER scope on Unit)
    */
   async getBySlug(slug: string): Promise<UserWithRelations | null> {
+    const userScope = requireSlugScopeId("user");
+    const unit = await prisma.unit.findUnique({
+      where: { slugScope_slug: { slugScope: userScope, slug } },
+      select: { id: true, type: true },
+    });
+    if (!unit || unit.type !== "USER") return null;
+
     const user = await prisma.user.findUnique({
-      where: { slug },
+      where: { unitId: unit.id },
       include: userInclude,
     });
 
-    return user as UserWithRelations | null;
+    if (!user) return null;
+    return { ...user, slug: unit.type === "USER" ? slug : null } as UserWithRelations;
   }
 
   /**
@@ -141,10 +219,10 @@ export class UserService {
     const { userId, slug, avatar, bio } = req;
 
     const user = await prisma.$transaction(async (tx) => {
+      await ensureUserUnit(tx, userId, slug);
       const created = await tx.user.create({
         data: {
-          userId,
-          slug,
+          unitId: userId,
           name: slug,
           avatar: avatar ?? null,
           bio: bio ?? null,
@@ -156,7 +234,7 @@ export class UserService {
       return created;
     });
 
-    await syncUserToMeili(user.userId);
+    await syncUserToMeili(user.unitId);
 
     return user as UserWithRelations;
   }
@@ -171,12 +249,12 @@ export class UserService {
       });
       if (existing) return existing;
 
+      await ensureUserUnit(tx, payload.authUserId, payload.slug ?? null);
       const created = await tx.user.create({
         data: {
-          userId: payload.authUserId,
+          unitId: payload.authUserId,
           authUserId: payload.authUserId,
           email: payload.email,
-          slug: payload.slug ?? null,
           name: payload.displayName ?? null,
           avatar: payload.avatar ?? null,
         },
@@ -186,13 +264,13 @@ export class UserService {
         where: {
           contractName_ownerId_email: {
             contractName: "user.email",
-            ownerId: created.userId,
+            ownerId: created.unitId,
             email: payload.email,
           },
         },
         create: {
           contractName: "user.email",
-          ownerId: created.userId,
+          ownerId: created.unitId,
           email: payload.email,
           status: "VERIFIED",
           source: payload.verificationSource,
@@ -216,10 +294,10 @@ export class UserService {
     const displayName = payload.displayName?.trim() || payload.slug;
 
     const user = await prisma.$transaction(async (tx) => {
+      await ensureUserUnit(tx, payload.userId, payload.slug);
       const updated = await tx.user.update({
-        where: { userId: payload.userId },
+        where: { unitId: payload.userId },
         data: {
-          slug: payload.slug,
           name: displayName,
           avatar: payload.avatar ?? undefined,
           joinDate: new Date(),
@@ -227,7 +305,7 @@ export class UserService {
         include: userInclude,
       });
 
-      await bootstrapSystemShelves(updated.userId, tx);
+      await bootstrapSystemShelves(updated.unitId, tx);
 
       const defaultRealmId = getDefaultRealmId();
       if (defaultRealmId) {
@@ -235,7 +313,7 @@ export class UserService {
           .create({
             data: {
               realmUnitId: defaultRealmId,
-              userId: updated.userId,
+              userId: updated.unitId,
               roleKey: "member",
             },
           })
@@ -245,44 +323,24 @@ export class UserService {
       return updated;
     });
 
-    await syncUserToMeili(user.userId);
+    await syncUserToMeili(user.unitId);
 
     return user as UserWithRelations;
   }
 
-  async changeCanonicalSlugAsAdmin(
-    userId: string,
-    slug: string,
-  ): Promise<AdminSlugChangeResult> {
-    const user = await prisma.user.update({
-      where: { userId },
-      data: { slug },
-      include: userInclude,
-    });
-
-    await patchUserFieldsToMeili(userId, { slug: user.slug });
-    patchPostsAuthorToMeili(userId, { authorSlug: user.slug }).catch(() => {});
-
-    const authProjection = user.authUserId
-      ? {
-          attempted: true,
-          ok: await projectSlugToAuth({
-            authUserId: user.authUserId,
-            slug,
-          }),
-        }
-      : { attempted: false, ok: false };
-
-    return {
-      user: user as UserWithRelations,
-      authProjection,
-    };
-  }
-
   /**
-   * Update user
+   * Update user. Per design D7 user slugs are immutable in v1 — any caller
+   * that smuggles a `slug` field is rejected with `USER_SLUG_IMMUTABLE`.
    */
   async update(userId: string, req: UpdateUser): Promise<UserWithRelations> {
+    if ((req as Record<string, unknown>).slug !== undefined) {
+      const err = new Error("User slug is immutable.") as Error & {
+        code?: string;
+      };
+      err.code = "USER_SLUG_IMMUTABLE";
+      throw err;
+    }
+
     const { name, avatar, bio, description } = req;
 
     const updateData: Prisma.UserUpdateInput = {
@@ -292,13 +350,14 @@ export class UserService {
       description: description || undefined,
     };
 
-    const user = await prisma.user.update({
-      where: { userId },
-      data: updateData,
-      include: userInclude,
-    });
+    const user = (await attachSlug(
+      await prisma.user.update({
+        where: { unitId: userId },
+        data: updateData,
+        include: userInclude,
+      }),
+    )) as UserWithRelations;
 
-    // Partial sync user fields to Meilisearch
     const userPatchFields: Record<string, any> = {};
     if (name) userPatchFields.name = user.name;
     if (avatar) userPatchFields.avatar = user.avatar;
@@ -306,7 +365,6 @@ export class UserService {
     if (description) userPatchFields.description = user.description;
     await patchUserFieldsToMeili(userId, userPatchFields);
 
-    // Fire-and-forget: partial update denormalized author info on all posts
     const authorPatchFields: Record<string, any> = {};
     if (name) authorPatchFields.authorName = user.name;
     if (avatar) authorPatchFields.authorAvatar = user.avatar;
@@ -316,18 +374,18 @@ export class UserService {
   }
 
   /**
-   * Delete user by userId
+   * Delete user by unitId
    */
   async delete(userId: string): Promise<void> {
-    await prisma.user.delete({ where: { userId } });
+    await prisma.user.delete({ where: { unitId: userId } });
     await deleteUserFromMeili(userId);
   }
 
   /**
-   * Check if user exists by userId
+   * Check if user exists by unitId
    */
   async exists(userId: string): Promise<boolean> {
-    const count = await prisma.user.count({ where: { userId } });
+    const count = await prisma.user.count({ where: { unitId: userId } });
     return count > 0;
   }
 
@@ -359,20 +417,16 @@ export class UserService {
       });
 
       await tx.user.update({
-        where: { userId: followerId },
+        where: { unitId: followerId },
         data: { followingsCount: { increment: 1 } },
       });
 
       await tx.user.update({
-        where: { userId: followingId },
+        where: { unitId: followingId },
         data: { followersCount: { increment: 1 } },
       });
     });
 
-    // Emit notification (fire-and-forget).
-    // sourceUnitId here is the followed user's identity. Pre-L3 (user-namespace-slug)
-    // this is the same value as the user PK; post-L3 it becomes the User's
-    // Unit ID. Callers do not need to change at the cutover.
     broadcast({
       kind: "follow.new",
       sourceUnitId: followingId,
@@ -407,12 +461,12 @@ export class UserService {
       });
 
       await tx.user.update({
-        where: { userId: followerId },
+        where: { unitId: followerId },
         data: { followingsCount: { decrement: 1 } },
       });
 
       await tx.user.update({
-        where: { userId: followingId },
+        where: { unitId: followingId },
         data: { followersCount: { decrement: 1 } },
       });
     });
@@ -450,30 +504,26 @@ export class UserService {
 
   /**
    * Get follower counts summary for multiple targets.
-   *
-   * Returns a map: { [targetId]: followersCount }
-   * Missing users default to 0.
    */
   async getFollowSummary(targetIds: string[]): Promise<Record<string, number>> {
     if (!targetIds.length) return {};
 
     const users = await prisma.user.findMany({
       where: {
-        userId: { in: targetIds },
+        unitId: { in: targetIds },
       },
       select: {
-        userId: true,
+        unitId: true,
         followersCount: true,
       },
     });
 
     const result: Record<string, number> = {};
-    // Initialize all requested ids to 0 for deterministic keys
     targetIds.forEach((id) => {
       result[id] = 0;
     });
     users.forEach((user) => {
-      result[user.userId] = user.followersCount ?? 0;
+      result[user.unitId] = user.followersCount ?? 0;
     });
 
     return result;
@@ -501,8 +551,9 @@ export class UserService {
       prisma.follow.count({ where: { followingId: userId } }),
     ]);
 
+    const users = await attachSlugs(follows.map((f) => f.follower));
     return {
-      users: follows.map((f) => f.follower as UserWithRelations),
+      users: users as UserWithRelations[],
       total,
     };
   }
@@ -529,10 +580,19 @@ export class UserService {
       prisma.follow.count({ where: { followerId: userId } }),
     ]);
 
+    const users = await attachSlugs(follows.map((f) => f.following));
     return {
-      users: follows.map((f) => f.following as UserWithRelations),
+      users: users as UserWithRelations[],
       total,
     };
+  }
+
+  /**
+   * Look up a user's canonical slug from the matching USER Unit. Returns
+   * `null` when no Unit row exists for the user.
+   */
+  async getCanonicalSlug(userId: string): Promise<string | null> {
+    return fetchUnitSlug(userId);
   }
 }
 

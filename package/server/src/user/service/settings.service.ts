@@ -44,7 +44,7 @@ function validateSettings(settings: UserSettings): void {
 
 export async function getSettings(userId: string): Promise<UserSettings> {
   const user = await prisma.user.findUniqueOrThrow({
-    where: { userId },
+    where: { unitId: userId },
     select: { settings: true },
   });
   return (user.settings as UserSettings) ?? {};
@@ -59,7 +59,7 @@ export async function updateSettings(
   validateSettings(merged);
 
   await prisma.user.update({
-    where: { userId },
+    where: { unitId: userId },
     data: { settings: merged },
   });
 

@@ -109,7 +109,7 @@ export { isAdminRole };
 
 export async function verifyAdminFromDb(userId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
-    where: { userId },
+    where: { unitId: userId },
     select: { permission: true },
   });
   if (!user) return false;
@@ -120,7 +120,7 @@ export async function verifyAdminFromDb(userId: string): Promise<boolean> {
 
 export async function verifyRootFromDb(userId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
-    where: { userId },
+    where: { unitId: userId },
     select: { permission: true },
   });
   if (!user) return false;

@@ -291,6 +291,7 @@ export class PostService {
       const unit = await tx.unit.create({
         data: {
           userId: authorUserId,
+          slugScope: authorUserId,
           type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
         },

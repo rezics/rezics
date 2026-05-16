@@ -6,7 +6,7 @@ import type { UserDTO, UserSearchDocument } from "@rezics/contract";
  */
 export function mapUserSearchDocToDTO(doc: UserSearchDocument): UserDTO {
   return {
-    userId: doc.userId,
+    unitId: doc.unitId,
     slug: doc.slug ?? undefined,
     name: doc.name,
     avatar: doc.avatar ?? undefined,
@@ -27,7 +27,7 @@ export function mapUserSearchDocToPublicProfile(
   doc: UserSearchDocument,
 ): UserDTO {
   return {
-    userId: doc.userId,
+    unitId: doc.unitId,
     slug: doc.slug ?? undefined,
     name: doc.name,
     avatar: doc.avatar ?? undefined,

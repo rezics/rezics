@@ -2,13 +2,12 @@ import type { PublicUser } from "@rezics/contract";
 import type { Prisma, User } from "#/prisma/client";
 
 /**
- * Prisma select that returns only PublicUser fields.
- * Use `user: { select: publicUserSelect }` in domain includes
- * instead of `user: true` + post-query sanitizeUser().
+ * Prisma select that returns only PublicUser fields (excluding slug — slug
+ * now lives on the USER Unit). Callers attach `slug` separately via a Unit
+ * lookup.
  */
 export const publicUserSelect = {
-  userId: true,
-  slug: true,
+  unitId: true,
   name: true,
   avatar: true,
   bio: true,
@@ -18,8 +17,8 @@ export const publicUserSelect = {
 } satisfies Prisma.UserSelect;
 
 export type PublicUserSelected = {
-  userId: string;
-  slug: string | null;
+  unitId: string;
+  slug?: string | null;
   name: string | null;
   avatar: string | null;
   bio?: string | null;
@@ -33,7 +32,7 @@ export function mapPublicUser(
 ): PublicUser | undefined {
   if (!user) return undefined;
   return {
-    userId: user.userId,
+    unitId: user.unitId,
     slug: user.slug ?? undefined,
     name: user.name ?? undefined,
     avatar: user.avatar ?? null,
@@ -50,10 +49,10 @@ export function mapPublicUser(
  * @deprecated Use `publicUserSelect` with Prisma select instead.
  */
 export function sanitizeUser(
-  u: Pick<User, "userId" | "name"> & Partial<Pick<User, "slug" | "avatar">>,
+  u: Pick<User, "unitId" | "name"> & { slug?: string | null; avatar?: string | null },
 ): PublicUser {
   return mapPublicUser({
-    userId: u.userId,
+    unitId: u.unitId,
     slug: u.slug ?? null,
     name: u.name,
     avatar: u.avatar ?? null,
@@ -65,6 +64,6 @@ export function sanitizeUser(
  *
  * @deprecated Use `publicUserSelect` with Prisma select instead.
  */
-export function sanitizeUserWithBio(u: User): PublicUser {
-  return mapPublicUser(u)!;
+export function sanitizeUserWithBio(u: User & { slug?: string | null }): PublicUser {
+  return mapPublicUser({ ...u, slug: u.slug ?? null })!;
 }

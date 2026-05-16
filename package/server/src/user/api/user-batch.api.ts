@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia";
+import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { prisma } from "#/prisma/client";
 
 export const userBatchApi = new Elysia().get(
@@ -12,19 +13,28 @@ export const userBatchApi = new Elysia().get(
 
     if (ids.length === 0) return {};
 
-    const users = await prisma.user.findMany({
-      where: { userId: { in: ids } },
-      select: { userId: true, name: true, slug: true, avatar: true },
-    });
+    const userScope = requireSlugScopeId("user");
+    const [users, units] = await Promise.all([
+      prisma.user.findMany({
+        where: { unitId: { in: ids } },
+        select: { unitId: true, name: true, avatar: true },
+      }),
+      prisma.unit.findMany({
+        where: { id: { in: ids }, slugScope: userScope, type: "USER" },
+        select: { id: true, slug: true },
+      }),
+    ]);
+
+    const slugById = new Map(units.map((u) => [u.id, u.slug] as const));
 
     const result: Record<
       string,
       { name?: string; slug?: string; avatar: string | null }
     > = {};
     for (const user of users) {
-      result[user.userId] = {
+      result[user.unitId] = {
         name: user.name ?? undefined,
-        slug: user.slug ?? undefined,
+        slug: slugById.get(user.unitId) ?? undefined,
         avatar: user.avatar,
       };
     }

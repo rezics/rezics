@@ -108,18 +108,28 @@ async function loadActors(
   const map = new Map<string, ProfileReactionActor>();
   if (userIds.length === 0) return map;
 
-  const users = await prisma.user.findMany({
-    where: { userId: { in: userIds } },
-    select: publicUserSelect,
-  });
+  const { requireSlugScopeId } = await import("@/infra/slug-scopes");
+  const userScope = requireSlugScopeId("user");
+  const [users, units] = await Promise.all([
+    prisma.user.findMany({
+      where: { unitId: { in: userIds } },
+      select: publicUserSelect,
+    }),
+    prisma.unit.findMany({
+      where: { id: { in: userIds }, slugScope: userScope, type: "USER" },
+      select: { id: true, slug: true },
+    }),
+  ]);
+
+  const slugById = new Map(units.map((u) => [u.id, u.slug ?? null] as const));
 
   for (const u of users) {
-    const pu = mapPublicUser(u);
+    const pu = mapPublicUser({ ...u, slug: slugById.get(u.unitId) ?? null });
     if (!pu) continue;
-    const slug = pu.slug ?? pu.userId;
-    map.set(pu.userId, {
-      userId: pu.userId,
-      displayName: pu.name ?? pu.slug ?? pu.userId,
+    const slug = pu.slug ?? pu.unitId;
+    map.set(pu.unitId, {
+      userId: pu.unitId,
+      displayName: pu.name ?? pu.slug ?? pu.unitId,
       avatarUrl: pu.avatar ?? undefined,
       href: `/u/${slug}`,
     });
@@ -138,8 +148,8 @@ export async function assertProfileViewable(
   _viewerUserId: string | null,
 ): Promise<void> {
   const exists = await prisma.user.findUnique({
-    where: { userId: profileUserId },
-    select: { userId: true },
+    where: { unitId: profileUserId },
+    select: { unitId: true },
   });
   if (!exists) {
     throw notFound("User");

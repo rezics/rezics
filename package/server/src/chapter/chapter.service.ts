@@ -158,6 +158,7 @@ export class ChapterService {
       const unit = await tx.unit.create({
         data: {
           userId,
+          slugScope: userId,
           type: UnitType.POST,
           status: (status as UnitStatus) || UnitStatus.PUBLISHED,
           defaultLanguage: language,
@@ -249,6 +250,7 @@ export class ChapterService {
       const unit = await tx.unit.create({
         data: {
           userId,
+          slugScope: userId,
           type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: language,

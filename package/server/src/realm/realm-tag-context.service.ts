@@ -164,6 +164,7 @@ export class RealmTagContextService {
         data: {
           type: UnitType.POST,
           userId: callerUserId,
+          slugScope: callerUserId,
           status: UnitStatus.PUBLISHED,
           visibility: UnitVisibility.PUBLIC,
           extra: {

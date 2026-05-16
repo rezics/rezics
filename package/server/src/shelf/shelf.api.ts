@@ -19,6 +19,7 @@ import {
   reorderShelfUnitSchema,
   setPinnedTagsBodySchema,
   setShelfUnitChildrenSchema,
+  shelfBySlugParamsSchema,
   shelfListBodySchema,
   shelfListQuerySchema,
   shelfParamsSchema,
@@ -29,6 +30,7 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
+import { userService } from "@/user/service/user.service";
 import { shelfService } from "./shelf.service";
 
 const shelfUnitRouteParamsSchema = t.Object({
@@ -61,6 +63,34 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         summary: "List my shelves",
         description:
           "List the current user's shelves with item counts and tags (for collection modal)",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .get(
+    "/by-slug/:userSlug/:slug",
+    async ({ params, set }) => {
+      const owner = await userService.getBySlug(params.userSlug);
+      if (!owner) {
+        set.status = 404;
+        return { error: { code: "NOT_FOUND", message: "User not found" } };
+      }
+      const shelf = await shelfService.getByOwnerAndSlug(
+        owner.unitId,
+        params.slug,
+      );
+      if (!shelf) {
+        set.status = 404;
+        return { error: { code: "NOT_FOUND", message: "Shelf not found" } };
+      }
+      return shelf;
+    },
+    {
+      params: shelfBySlugParamsSchema,
+      detail: {
+        summary: "Get shelf by slug",
+        description:
+          "Resolve owner by userSlug then a SHELF Unit under the owner scope. Returns 404 for any non-system shelf slug in v1.",
         tags: ["Shelves"],
       },
     },

@@ -27,15 +27,23 @@ export type MapUserOptions = {
   includePrivate?: boolean;
 };
 
+type UserLike = (User | UserWithRelations) & {
+  slug?: string | null;
+  extra?: User["extra"];
+};
+
 /**
- * Map internal User model to UserDTO (public data)
+ * Map internal User model to UserDTO (public data).
+ *
+ * Slug is read from the user object — services that load Users SHALL attach
+ * `slug` from the matching USER `Unit.slug` so DTO mappers can include it.
  */
 export function mapUserToDTO(
-  user: User | UserWithRelations,
+  user: UserLike,
   options: MapUserOptions = {},
 ): UserDTO {
   return {
-    userId: user.userId,
+    unitId: user.unitId,
     email: user.email ?? undefined,
     slug: user.slug ?? undefined,
     name: user.name ?? undefined,
@@ -55,11 +63,9 @@ export function mapUserToDTO(
 /**
  * Map User to public profile
  */
-export function mapUserToPublicProfile(
-  user: User | UserWithRelations,
-): UserDTO {
+export function mapUserToPublicProfile(user: UserLike): UserDTO {
   return {
-    userId: user.userId,
+    unitId: user.unitId,
     slug: user.slug ?? undefined,
     name: user.name ?? undefined,
     avatar: user.avatar || undefined,

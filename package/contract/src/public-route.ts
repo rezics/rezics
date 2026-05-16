@@ -204,6 +204,42 @@ export function isPublicUserSlugRouteParams(
   return Value.Check(publicUserSlugRouteParamsSchema, value);
 }
 
+export function isPublicRealmSlugRouteParams(
+  value: unknown,
+): value is PublicRealmSlugRouteParams {
+  return Value.Check(publicRealmSlugRouteParamsSchema, value);
+}
+
+export function isPublicTagSlugRouteParams(
+  value: unknown,
+): value is PublicTagSlugRouteParams {
+  return Value.Check(publicTagSlugRouteParamsSchema, value);
+}
+
+export function isPublicZoneSlugRouteParams(
+  value: unknown,
+): value is PublicZoneSlugRouteParams {
+  return Value.Check(publicZoneSlugRouteParamsSchema, value);
+}
+
+export function isPublicEntitySlugRouteParams(
+  value: unknown,
+): value is PublicEntitySlugRouteParams {
+  return Value.Check(publicEntitySlugRouteParamsSchema, value);
+}
+
+export function isPublicUserShelfSlugRouteParams(
+  value: unknown,
+): value is PublicUserShelfSlugRouteParams {
+  return Value.Check(publicUserShelfSlugRouteParamsSchema, value);
+}
+
+export function isPublicRealmShelfSlugRouteParams(
+  value: unknown,
+): value is PublicRealmShelfSlugRouteParams {
+  return Value.Check(publicRealmShelfSlugRouteParamsSchema, value);
+}
+
 export function isPublicUnitIdRouteParams(
   value: unknown,
 ): value is PublicUnitIdRouteParams {

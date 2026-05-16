@@ -1102,18 +1102,25 @@ export async function syncAllUsers(client: SearchClient) {
     const users: any[] = await prisma.user.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
-      cursor: cursor ? { userId: cursor } : undefined,
-      orderBy: { userId: "asc" },
+      cursor: cursor ? { unitId: cursor } : undefined,
+      orderBy: { unitId: "asc" },
     });
 
     if (users.length === 0) break;
 
+    // Slug now lives on the USER Unit. Batch-fetch.
+    const unitSlugs = await prisma.unit.findMany({
+      where: { id: { in: users.map((u) => u.unitId) } },
+      select: { id: true, slug: true },
+    });
+    const slugById = new Map(unitSlugs.map((u) => [u.id, u.slug ?? null]));
+
     const formatted: UserSearchDocument[] = users.map((u) => ({
-      id: u.userId,
-      userId: u.userId,
+      id: u.unitId,
+      unitId: u.unitId,
       name: u.name,
       email: u.email,
-      slug: u.slug,
+      slug: slugById.get(u.unitId) ?? null,
       avatar: u.avatar,
       bio: u.bio,
       description: u.description,
@@ -1130,7 +1137,7 @@ export async function syncAllUsers(client: SearchClient) {
     console.log("syncAllUsers: added batch", addResult);
 
     total += formatted.length;
-    cursor = users[users.length - 1]!.userId;
+    cursor = users[users.length - 1]!.unitId;
   }
 
   return { message: "syncAllUsers success", totalSynced: total };

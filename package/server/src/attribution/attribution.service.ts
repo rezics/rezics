@@ -67,11 +67,23 @@ export class AttributionService {
   }
 
   async createEntity(req: CreateEntityInput): Promise<EntityDTO> {
+    const { ENTITY_SLUG_WRITES_ENABLED } = await import("@rezics/contract");
+    if (req.slug && !ENTITY_SLUG_WRITES_ENABLED) {
+      const err = new Error(
+        "ENTITY slug writes are disabled until entity-slug-activation flips the gate.",
+      ) as Error & { code?: string };
+      err.code = "ENTITY_SLUG_DISABLED";
+      throw err;
+    }
+
+    const { requireSlugScopeId } = await import("@/infra/slug-scopes");
+    const entityScope = requireSlugScopeId("entity");
     const row = await prisma.$transaction(async (tx) => {
       const unit = await tx.unit.create({
         data: {
           type: "ENTITY",
           slug: req.slug ?? undefined,
+          slugScope: entityScope,
           status: "PUBLISHED",
           visibility: "PUBLIC",
           translations: {

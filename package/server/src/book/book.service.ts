@@ -227,6 +227,7 @@ export class BookService {
         unit: {
           create: {
             userId: req.userId || "",
+            slugScope: req.userId || "",
             type: UnitType.BOOK,
             status: UnitStatus.PUBLISHED,
             visibility: (req.visibility as UnitVisibility) ?? undefined,

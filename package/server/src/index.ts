@@ -2,7 +2,7 @@ import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { Prisma } from "#/prisma/client";
-import { attributionApi } from "./attribution";
+import { attributionApi, entityBySlugApi } from "./attribution";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
 import { dispatchApi } from "./dispatch";
@@ -31,6 +31,7 @@ import {
 } from "./realm";
 import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
+import { slugApi } from "./slug";
 import { statsAdminApi } from "./stat";
 import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";
 import { tokenApi } from "./token";
@@ -173,6 +174,8 @@ app
   .use(realmTagUnitApi)
   .use(realmTagVoteApi)
   .use(attributionApi)
+  .use(entityBySlugApi)
+  .use(slugApi)
   .use(userApi)
   .use(userBriefApi)
   .use(meiliApi)

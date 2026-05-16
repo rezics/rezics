@@ -85,6 +85,7 @@ export class TranslationGroupService {
       const newUnit = await tx.unit.create({
         data: {
           userId: authorUserId,
+          slugScope: authorUserId,
           type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: input.language,

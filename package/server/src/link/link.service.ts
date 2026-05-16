@@ -15,6 +15,7 @@ export class LinkService {
     const unit = await prisma.unit.create({
       data: {
         userId,
+        slugScope: userId,
         type: UnitType.LINK,
         status: UnitStatus.PUBLISHED,
         visibility: UnitVisibility.PUBLIC,

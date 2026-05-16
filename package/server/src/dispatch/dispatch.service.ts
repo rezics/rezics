@@ -97,6 +97,7 @@ export class DispatchService {
       data: {
         type: "BOOK",
         userId,
+        slugScope: userId,
         status: "DRAFT",
         book: {
           create: {
@@ -164,6 +165,7 @@ export class DispatchService {
       data: {
         type: "GAME",
         userId,
+        slugScope: userId,
         status: "DRAFT",
         game: {
           create: {
@@ -237,6 +239,7 @@ export class DispatchService {
       data: {
         type: "MEDIA",
         userId,
+        slugScope: userId,
         status: "DRAFT",
         media: {
           create: {

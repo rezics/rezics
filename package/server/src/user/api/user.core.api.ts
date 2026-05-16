@@ -1,8 +1,8 @@
 import type { UpdateUser, UserListQuery } from "@rezics/contract";
 import {
   hasPermissionToUpdateUser,
-  slugSchema,
   updateUserSchema,
+  userBySlugParamsSchema,
   userListBodySchema,
   userListQuerySchema,
   userParamsSchema,
@@ -66,9 +66,9 @@ export const coreRoute = new Elysia()
     },
   )
   .get(
-    "/by-slug/:userSlug",
+    "/by-slug/:slug",
     async ({ params, set }) => {
-      const user = await userService.getBySlug(params.userSlug);
+      const user = await userService.getBySlug(params.slug);
       if (!user) {
         set.status = 404;
         return { error: { code: "NOT_FOUND", message: "User not found" } };
@@ -76,10 +76,10 @@ export const coreRoute = new Elysia()
       return mapUserToDTO(user);
     },
     {
-      params: t.Object({ userSlug: slugSchema }),
+      params: userBySlugParamsSchema,
       detail: {
         summary: "Get user by slug",
-        description: "Look up a user profile by user slug",
+        description: "Look up a user profile by user slug (USER scope)",
         tags: ["Users"],
       },
     },

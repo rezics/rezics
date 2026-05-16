@@ -5,7 +5,6 @@ import {
   createUnitSchema,
   hasPermissionToDeleteUnit,
   hasPermissionToUpdateUnit,
-  slugSchema,
   translationParamsSchema,
   type UnitListQuery,
   type UnitListResponse,
@@ -177,25 +176,6 @@ export const unitApi = new Elysia({ prefix: "/unit" })
     },
   )
   // ─── Slug ────────────────────────────────────────────────────
-  .get(
-    "/by-slug/:slug",
-    async ({ params, set }) => {
-      const unit = await unitService.getBySlug(params.slug);
-      if (!unit) {
-        set.status = 404;
-        return { error: { code: "NOT_FOUND", message: "Unit not found" } };
-      }
-      return mapUnitToDTO(unit);
-    },
-    {
-      params: t.Object({ slug: slugSchema }),
-      detail: {
-        summary: "Get unit by slug",
-        description: "Look up a unit by its slug",
-        tags: ["Units"],
-      },
-    },
-  )
   .put(
     "/:unitId/slug",
     async ({ params, body, identity, set }) => {

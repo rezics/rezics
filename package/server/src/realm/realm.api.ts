@@ -75,7 +75,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       params,
       set,
     }): Promise<RealmDTO | { error: { code: string; message: string } }> => {
-      const unit = await unitService.getBySlug(params.slug);
+      const unit = await unitService.getBySlug("realm", params.slug);
       if (!unit || unit.type !== "REALM") {
         set.status = 404;
         return { error: { code: "NOT_FOUND", message: "Realm not found" } };

@@ -5,33 +5,42 @@ import {
   userParamsSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
+import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { prisma } from "#/prisma/client";
 import { notFound } from "@/utils/errors";
 
 const briefSelect = {
-  userId: true,
+  unitId: true,
   name: true,
-  slug: true,
   bio: true,
   avatar: true,
 } as const;
 
 type BriefRow = {
-  userId: string;
+  unitId: string;
   name: string | null;
-  slug: string | null;
   bio: string | null;
   avatar: string | null;
 };
 
-function toBrief(user: BriefRow) {
+function toBrief(user: BriefRow, slug: string | null) {
   return {
-    userId: user.userId,
+    unitId: user.unitId,
     name: user.name ?? undefined,
-    slug: user.slug ?? undefined,
+    slug: slug ?? undefined,
     bio: user.bio ?? undefined,
     avatar: user.avatar ?? undefined,
   };
+}
+
+async function fetchSlugMap(ids: string[]): Promise<Map<string, string | null>> {
+  if (ids.length === 0) return new Map();
+  const userScope = requireSlugScopeId("user");
+  const units = await prisma.unit.findMany({
+    where: { id: { in: ids }, slugScope: userScope, type: "USER" },
+    select: { id: true, slug: true },
+  });
+  return new Map(units.map((u) => [u.id, u.slug ?? null] as const));
 }
 
 export const userBriefApi = new Elysia({ prefix: "/user/brief" })
@@ -39,19 +48,20 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
     "/:userId",
     async ({ params }) => {
       const user = await prisma.user.findUnique({
-        where: { userId: params.userId },
+        where: { unitId: params.userId },
         select: briefSelect,
       });
       if (!user) throw notFound("User");
-      return toBrief(user);
+      const slugMap = await fetchSlugMap([user.unitId]);
+      return toBrief(user, slugMap.get(user.unitId) ?? null);
     },
     {
       params: userParamsSchema,
       response: userBriefSchema,
       detail: {
-        summary: "Get user brief by userId",
+        summary: "Get user brief by unitId",
         description:
-          "Returns a lightweight user object (userId, name, slug, bio, avatar) for card/mention contexts.",
+          "Returns a lightweight user object (unitId, name, slug, bio, avatar) for card/mention contexts.",
         tags: ["Users"],
       },
     },
@@ -59,12 +69,15 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
   .post(
     "/",
     async ({ body }) => {
-      if (body.userIds.length === 0) return { users: [] };
+      if (body.unitIds.length === 0) return { users: [] };
       const users = await prisma.user.findMany({
-        where: { userId: { in: body.userIds } },
+        where: { unitId: { in: body.unitIds } },
         select: briefSelect,
       });
-      return { users: users.map(toBrief) };
+      const slugMap = await fetchSlugMap(users.map((u) => u.unitId));
+      return {
+        users: users.map((u) => toBrief(u, slugMap.get(u.unitId) ?? null)),
+      };
     },
     {
       body: userBriefBatchRequestSchema,
@@ -72,7 +85,7 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
       detail: {
         summary: "Batch fetch user briefs",
         description:
-          "Returns an array of user briefs for the given userIds. Missing userIds are silently omitted.",
+          "Returns an array of user briefs for the given unitIds. Missing unitIds are silently omitted.",
         tags: ["Users"],
       },
     },

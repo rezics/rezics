@@ -46,15 +46,29 @@ export const internalApi = new Elysia({ prefix: "/internal" })
 
       await prisma.$transaction(async (tx) => {
         const existing = await tx.user.findUnique({
-          where: { userId },
-          select: { userId: true },
+          where: { unitId: userId },
+          select: { unitId: true },
         });
         if (existing) return;
 
+        const { requireSlugScopeId } = await import("@/infra/slug-scopes");
+        const userScope = requireSlugScopeId("user");
+        await tx.unit.upsert({
+          where: { id: userId },
+          update: { slug: finalSlug, slugScope: userScope },
+          create: {
+            id: userId,
+            type: "USER",
+            slug: finalSlug,
+            slugScope: userScope,
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            isLanguageNeutral: true,
+          },
+        });
         await tx.user.create({
           data: {
-            userId,
-            slug: finalSlug,
+            unitId: userId,
             name: finalName,
             joinDate: new Date(),
           },

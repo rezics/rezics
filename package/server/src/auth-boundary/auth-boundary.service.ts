@@ -254,11 +254,29 @@ function isUniqueConstraintError(error: unknown): boolean {
   );
 }
 
-async function findMainUserForAuthUser(authUserId: string) {
-  return prisma.user.findUnique({
+async function findMainUserForAuthUser(authUserId: string): Promise<{
+  unitId: string;
+  authUserId: string | null;
+  slug: string | null;
+  permission: unknown;
+} | null> {
+  const user = await prisma.user.findUnique({
     where: { authUserId },
-    select: { userId: true, slug: true, permission: true },
+    select: { unitId: true, authUserId: true, permission: true },
   });
+  if (!user) return null;
+
+  const unit = await prisma.unit.findUnique({
+    where: { id: user.unitId },
+    select: { slug: true },
+  });
+
+  return {
+    unitId: user.unitId,
+    authUserId: user.authUserId,
+    slug: unit?.slug ?? null,
+    permission: user.permission,
+  };
 }
 
 async function fetchAuthSessionState(request: Request) {
@@ -314,15 +332,20 @@ export async function checkAccountSlugAvailability(
     };
   }
 
-  const existing = await prisma.user.findUnique({
-    where: { slug: validation.normalized },
-    select: { userId: true },
+  const { requireSlugScopeId } = await import("@/infra/slug-scopes");
+  const userScope = requireSlugScopeId("user");
+  const existing = await prisma.unit.findUnique({
+    where: {
+      slugScope_slug: { slugScope: userScope, slug: validation.normalized },
+    },
+    select: { id: true, type: true },
   });
 
+  const taken = !!existing && existing.type === "USER";
   return {
-    available: !existing,
+    available: !taken,
     normalized: validation.normalized,
-    reason: existing ? "taken" : undefined,
+    reason: taken ? "taken" : undefined,
   };
 }
 
@@ -389,18 +412,22 @@ export async function materializeMainAccountFromAuth(
     );
   }
 
-  const user =
-    existing ??
-    (await userService.materializeFromVerifiedAuth({
-      authUserId: facts.authUserId,
-      email: facts.email,
-      verifiedAt: facts.verifiedAt ? new Date(facts.verifiedAt) : new Date(),
-      verificationSource:
-        facts.verificationSource ?? facts.trustedProviderId ?? "email-otp",
-      avatar: sessionState.user.image ?? null,
-    }));
+  const userId = existing
+    ? existing.unitId
+    : (
+        await userService.materializeFromVerifiedAuth({
+          authUserId: facts.authUserId,
+          email: facts.email,
+          verifiedAt: facts.verifiedAt
+            ? new Date(facts.verifiedAt)
+            : new Date(),
+          verificationSource:
+            facts.verificationSource ?? facts.trustedProviderId ?? "email-otp",
+          avatar: sessionState.user.image ?? null,
+        })
+      ).unitId;
 
-  const token = await signRezicsProfileSetupToken({ userId: user.userId });
+  const token = await signRezicsProfileSetupToken({ userId });
   const expiresAt = new Date(Date.now() + 900 * 1000);
   const headers = new Headers();
   headers.set("set-cookie", buildProfileSetupCookie(token));
@@ -412,7 +439,7 @@ export async function materializeMainAccountFromAuth(
         active: true,
         stage: "profile-required",
         expiresAt: expiresAt.toISOString(),
-        userId: user.userId,
+        userId,
       },
     },
     200,
@@ -461,15 +488,20 @@ export async function completeProfileSetupFromMain(
   }
 
   const user = await prisma.user.findUnique({
-    where: { userId: claims.userId },
+    where: { unitId: claims.userId },
     select: {
-      userId: true,
+      unitId: true,
       authUserId: true,
-      slug: true,
       permission: true,
     },
   });
-  if (!user || user.slug !== null) {
+  const unit = user
+    ? await prisma.unit.findUnique({
+        where: { id: user.unitId },
+        select: { slug: true },
+      })
+    : null;
+  if (!user || (unit?.slug ?? null) !== null) {
     return jsonResponse(
       {
         success: false,
@@ -498,7 +530,7 @@ export async function completeProfileSetupFromMain(
 
   try {
     const activated = await userService.completeProfileSetup({
-      userId: user.userId,
+      userId: user.unitId,
       slug: slugValidation.normalized,
       displayName: body.displayName,
       avatar: body.avatar,
@@ -517,7 +549,7 @@ export async function completeProfileSetupFromMain(
       | undefined;
     const role = dbPermission?.role?.[0] ?? "MEMBER";
     const token = await signRezicsSessionToken({
-      userId: activated.userId,
+      userId: activated.unitId,
       permission: { role },
     });
 
@@ -588,7 +620,7 @@ export async function getMainAwareAuthSessionState(
   return jsonResponse(
     {
       ...sessionState,
-      rezicsUserId: registrationComplete ? (mainUser?.userId ?? null) : null,
+      rezicsUserId: registrationComplete ? (mainUser?.unitId ?? null) : null,
       rezicsPermission,
       authSession: {
         ...sessionState.authSession,
@@ -681,7 +713,7 @@ export async function refreshMainSessionFromAuth(
     | undefined;
   const role = dbPermission?.role?.[0] ?? "MEMBER";
   const token = await signRezicsSessionToken({
-    userId: user.userId,
+    userId: user.unitId,
     permission: { role },
   });
 
@@ -690,7 +722,7 @@ export async function refreshMainSessionFromAuth(
   return jsonResponse(
     {
       authenticated: true,
-      userId: user.userId,
+      userId: user.unitId,
       role,
     },
     200,
@@ -747,7 +779,7 @@ export async function renewProfileSetupSessionFromAuth(
     );
   }
 
-  const token = await signRezicsProfileSetupToken({ userId: user.userId });
+  const token = await signRezicsProfileSetupToken({ userId: user.unitId });
   const expiresAt = new Date(Date.now() + 900 * 1000);
   const headers = new Headers();
   headers.set("set-cookie", buildProfileSetupCookie(token));
@@ -759,7 +791,7 @@ export async function renewProfileSetupSessionFromAuth(
         active: true,
         stage: "profile-required",
         expiresAt: expiresAt.toISOString(),
-        userId: user.userId,
+        userId: user.unitId,
       },
     },
     200,

@@ -1,26 +1,41 @@
 import { patchUserFields } from "@rezics/search";
 import { prisma } from "#/prisma/client";
+import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { searchClient } from "../search-client";
 import type { UserSearchDocument } from "./index";
 
+async function fetchCanonicalSlug(userId: string): Promise<string | null> {
+  const userScope = requireSlugScopeId("user");
+  const unit = await prisma.unit.findUnique({
+    where: { id: userId },
+    select: { slug: true, slugScope: true, type: true },
+  });
+  if (!unit || unit.type !== "USER" || unit.slugScope !== userScope) {
+    return null;
+  }
+  return unit.slug;
+}
+
 /**
- * Sync a single user (by its userId) into the Meilisearch `users` index.
+ * Sync a single user (by unitId) into the Meilisearch `users` index.
  */
 export async function syncUserToMeili(userId: string): Promise<void> {
   const user = await prisma.user.findUnique({
-    where: { userId },
+    where: { unitId: userId },
   });
 
   if (!user) return;
-  if (!user.slug || !user.name) {
+  if (!user.name) {
     return;
   }
+  const slug = await fetchCanonicalSlug(userId);
+  if (!slug) return;
 
   const doc: UserSearchDocument = {
-    id: user.userId,
-    userId: user.userId,
+    id: user.unitId,
+    unitId: user.unitId,
     name: user.name,
-    slug: user.slug,
+    slug,
     avatar: user.avatar,
     bio: user.bio,
     description: user.description,
@@ -34,7 +49,7 @@ export async function syncUserToMeili(userId: string): Promise<void> {
 }
 
 /**
- * Remove a single user (by its userId) from the Meilisearch `users` index.
+ * Remove a single user (by unitId) from the Meilisearch `users` index.
  */
 export async function deleteUserFromMeili(userId: string): Promise<void> {
   await searchClient.userIndex.deleteDocuments([userId]);

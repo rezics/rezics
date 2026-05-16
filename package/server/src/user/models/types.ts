@@ -4,10 +4,17 @@ import { t } from "elysia";
 import type { Prisma, Unit, User } from "#/prisma/client";
 
 /**
- * Internal user type with relations
+ * Internal user type with relations and the canonical slug attached
+ * separately.
+ *
+ * The User row does not carry the slug column directly — slug now lives on
+ * the USER `Unit`. Services that load Users attach `slug` as part of the
+ * read path so DTO mappers can read it without re-querying.
  */
 export type UserWithRelations = User & {
   units?: Unit[];
+  /** Canonical slug copied from the matching USER `Unit.slug`. */
+  slug?: string | null;
 };
 
 /**

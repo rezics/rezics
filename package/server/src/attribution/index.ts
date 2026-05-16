@@ -1,4 +1,4 @@
-export { attributionApi } from "./attribution.api";
+export { attributionApi, entityBySlugApi } from "./attribution.api";
 export {
   mapAttributionToDTO,
   mapEntityToDTO,

@@ -17,7 +17,7 @@ export async function deriveAllowedRatings(
   if (!userId) return base;
 
   const user = await prisma.user
-    .findUnique({ where: { userId }, select: { settings: true } })
+    .findUnique({ where: { unitId: userId }, select: { settings: true } })
     .catch(() => null);
 
   const settings = (user?.settings as UserSettings | null) ?? null;

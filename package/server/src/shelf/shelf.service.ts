@@ -213,6 +213,27 @@ export class ShelfService {
     return mapShelfDetailToDTO(row, row.itemCount);
   }
 
+  /**
+   * Resolve `{ ownerUserId, slug }` under the owner scope. Only system shelf
+   * slugs ('favorites' | 'backlog' | 'active' | 'completed') are accepted in
+   * v1 — every other slug returns null per `SHELF_CUSTOM_SLUG_DISABLED`.
+   */
+  async getByOwnerAndSlug(
+    ownerUserId: string,
+    slug: string,
+  ): Promise<ShelfDetailDTO | null> {
+    if (!isSystemKindKey(slug)) return null;
+    const row = await prisma.shelf.findFirst({
+      where: {
+        kindKey: slug,
+        unit: { userId: ownerUserId, type: UnitType.SHELF },
+      },
+      include: shelfInclude,
+    });
+    if (!row) return null;
+    return mapShelfDetailToDTO(row, row.itemCount);
+  }
+
   async create(req: CreateShelfInput, userId: string): Promise<ShelfDTO> {
     const {
       title,
@@ -228,6 +249,15 @@ export class ShelfService {
       throw new AppError(
         400,
         `kindKey '${kindKey}' is reserved for system shelves`,
+      );
+    }
+
+    // User-created shelves remain slug-less in v1 — guard against any payload
+    // that smuggles a `slug` field (per design D7 / SHELF_CUSTOM_SLUG_DISABLED).
+    if ((req as Record<string, unknown>).slug != null) {
+      throw new AppError(
+        400,
+        "Custom shelf slugs are disabled (SHELF_CUSTOM_SLUG_DISABLED).",
       );
     }
 
@@ -270,6 +300,7 @@ export class ShelfService {
     const unit = await prisma.unit.create({
       data: {
         userId,
+        slugScope: userId,
         type: UnitType.SHELF,
         status: UnitStatus.PUBLISHED,
         visibility: (visibility as UnitVisibility) ?? UnitVisibility.PUBLIC,
@@ -304,6 +335,12 @@ export class ShelfService {
   }
 
   async update(unitId: string, req: UpdateShelfInput): Promise<ShelfDTO> {
+    if ((req as Record<string, unknown>).slug !== undefined) {
+      throw new AppError(
+        400,
+        "Custom shelf slugs are disabled (SHELF_CUSTOM_SLUG_DISABLED).",
+      );
+    }
     const { kindKey, coverUrl, visibility, extra, title } = req;
 
     if (visibility !== undefined) {

@@ -85,14 +85,17 @@ export class TagService {
   ): Promise<TagWithTranslations> {
     let normalizedSlug: string | undefined;
     if (input.slug) {
-      const validation = validateSlug(input.slug);
+      const validation = validateSlug(input.slug, { scope: "tag" });
       if (!validation.ok) throw new Error(`Invalid slug: ${validation.reason}`);
       normalizedSlug = validation.normalized;
     }
 
+    const { requireSlugScopeId } = await import("@/infra/slug-scopes");
+    const tagScope = requireSlugScopeId("tag");
     const tag = await prisma.unit.create({
       data: {
         type: UnitType.TAG,
+        slugScope: tagScope,
         status: UnitStatus.PUBLISHED,
         isLanguageNeutral: true,
         userId,

@@ -98,7 +98,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   .get(
     "/by-slug/:slug",
     async ({ params, set }) => {
-      const unit = await unitService.getBySlug(params.slug);
+      const unit = await unitService.getBySlug("tag", params.slug);
       if (!unit || unit.type !== "TAG") {
         set.status = 404;
         return { error: { code: "NOT_FOUND", message: "Tag not found" } };

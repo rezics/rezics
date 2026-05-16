@@ -23,6 +23,7 @@ async function makePost(opts: {
     data: {
       type,
       userId: opts.authorUserId,
+      slugScope: opts.authorUserId,
       defaultLanguage: opts.defaultLanguage,
       status: UnitStatus.PUBLISHED,
       ...(type === UnitType.POST
@@ -57,8 +58,12 @@ describeWithDb("TranslationGroupService", () => {
 
   beforeAll(async () => {
     // Bootstrap an author user (not full User row — Unit allows null userId)
+    const idRow = await prisma.$queryRaw<
+      { id: string }[]
+    >`SELECT uuidv7() as id`;
+    const bootstrapId = idRow[0]!.id;
     const u = await prisma.unit.create({
-      data: { type: UnitType.POST },
+      data: { id: bootstrapId, type: UnitType.POST, slugScope: bootstrapId },
       select: { id: true },
     });
     createdUnitIds.add(u.id);

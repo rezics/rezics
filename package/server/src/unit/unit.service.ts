@@ -12,6 +12,7 @@ import {
   type UnitType,
   type UnitVisibility,
 } from "#/prisma/client";
+import { pickSlugScope } from "@/infra/slug-scopes";
 import {
   deleteContentFromMeili,
   patchContentMetadataToMeili,
@@ -206,10 +207,12 @@ export class UnitService {
 
   /** Create a Unit with optional translations */
   async create(input: CreateUnitInput): Promise<UnitWithRelations> {
+    const type = input.type as UnitType;
     const unit = await prisma.unit.create({
       data: {
         userId: input.userId,
-        type: input.type as UnitType,
+        type,
+        slugScope: pickSlugScope(type, input.userId),
         status: (input.status as UnitStatus) ?? UnitStatus.DRAFT,
         visibility: (input.visibility as UnitVisibility) ?? undefined,
         workUnitId: input.workUnitId ?? undefined,
@@ -282,10 +285,19 @@ export class UnitService {
     return unit as UnitWithRelations;
   }
 
-  /** Get a unit by slug with relations */
-  async getBySlug(slug: string): Promise<UnitWithRelations | null> {
+  /**
+   * Get a unit by `(scope, slug)`. `scope` is either a named scope key
+   * (`user|realm|tag|zone|entity`) or an owner unit id.
+   */
+  async getBySlug(
+    scope: string,
+    slug: string,
+  ): Promise<UnitWithRelations | null> {
+    const { resolveScopeId } = await import("@/shared/slug-ref");
+    const slugScope = resolveScopeId(scope);
+    if (!slugScope) return null;
     const unit = await prisma.unit.findUnique({
-      where: { slug },
+      where: { slugScope_slug: { slugScope, slug } },
       include: unitInclude,
     });
     return unit as UnitWithRelations | null;

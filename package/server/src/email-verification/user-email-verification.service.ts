@@ -85,7 +85,7 @@ export async function getUserEmailVerificationState(
 ): Promise<UserEmailVerificationState> {
   const [user, contract] = await Promise.all([
     prisma.user.findUniqueOrThrow({
-      where: { userId },
+      where: { unitId: userId },
       select: { email: true },
     }),
     getLatestUserEmailContract(userId),
@@ -102,7 +102,7 @@ export async function requestUserEmailVerification(
   const now = new Date();
 
   const user = await prisma.user.findUniqueOrThrow({
-    where: { userId },
+    where: { unitId: userId },
     select: { email: true },
   });
   const verifiedContract = await prisma.emailVerificationContract.findUnique({
@@ -255,7 +255,7 @@ export async function verifyUserEmailContract(input: {
       },
     });
     const user = await prisma.user.findUniqueOrThrow({
-      where: { userId: input.userId },
+      where: { unitId: input.userId },
       select: { email: true },
     });
     return {
@@ -282,7 +282,7 @@ export async function verifyUserEmailContract(input: {
   const updated = await prisma.$transaction(
     async (tx: Prisma.TransactionClient) => {
       await tx.user.update({
-        where: { userId: input.userId },
+        where: { unitId: input.userId },
         data: { email },
       });
       return tx.emailVerificationContract.update({
