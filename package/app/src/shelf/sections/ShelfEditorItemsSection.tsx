@@ -15,23 +15,13 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type {
-  ShelfSortField,
-  ShelfSortOrder,
-  ShelfSortState,
-  ShelfView,
-} from "@rezics/api/shelf";
+import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
 import { useHydratedShelfUnits } from "@rezics/api/shelf";
 import type { ShelfDTO, ShelfUnitKind } from "@rezics/contract";
 import {
   Button,
   Checkbox,
   Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   ToggleGroup,
   ToggleGroupItem,
   Tooltip,
@@ -39,13 +29,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import {
-  Eye,
-  ListChecks,
-  Pencil,
-  LayoutList as ViewAgendaIcon,
-  List as ViewListIcon,
-} from "lucide-react";
+import { Eye, ListChecks, Pencil } from "lucide-react";
 import { useEffect, useId, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -57,6 +41,11 @@ import {
 import { CrossPageMoveModal } from "../components/CrossPageMoveModal";
 import { ShelfEditorItemRow } from "../components/ShelfEditorItemRow";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
+import {
+  type ShelfSortChoice,
+  ShelfSortViewPicker,
+  type ShelfViewChoice,
+} from "../components/ShelfSortViewPicker";
 import type { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 import { visualReorderBounds } from "../models/positionMath";
 import {
@@ -79,15 +68,18 @@ interface ShelfEditorItemsSectionProps {
   editor: ReturnType<typeof useShelfItemsEditor>;
 }
 
-const SORT_FIELD_OPTIONS: { value: ShelfSortField; label: string }[] = [
-  { value: "manual", label: "Position" },
-  { value: "addedAt", label: "Added" },
-  { value: "title", label: "Title" },
+const SORT_OPTIONS: ShelfSortChoice[] = [
+  { field: "manual", order: "desc", label: "Manual" },
+  { field: "manual", order: "asc", label: "Manual reversed" },
+  { field: "addedAt", order: "desc", label: "Newest" },
+  { field: "addedAt", order: "asc", label: "Oldest" },
+  { field: "title", order: "asc", label: "Title A-Z" },
+  { field: "title", order: "desc", label: "Title Z-A" },
 ];
 
-const SORT_ORDER_OPTIONS: { value: ShelfSortOrder; label: string }[] = [
-  { value: "desc", label: "Desc" },
-  { value: "asc", label: "Asc" },
+const VIEW_OPTIONS: ShelfViewChoice<"nested" | "flat">[] = [
+  { value: "nested", label: "Nested" },
+  { value: "flat", label: "List" },
 ];
 
 function candidateKindToShelfUnitKind(kind: string): ShelfUnitKind {
@@ -122,32 +114,8 @@ function lastSingleToggleValue(values: readonly string[]): string | undefined {
   return values.at(-1);
 }
 
-function isEditorShelfView(
-  value: string | undefined,
-): value is "nested" | "flat" {
-  return value === "nested" || value === "flat";
-}
-
 function isEditorMode(value: string | undefined): value is EditorMode {
   return value === "edit" || value === "multi-select" || value === "preview";
-}
-
-function requireShelfSortField(value: ShelfSortField | null): ShelfSortField {
-  if (value === null) {
-    throw new Error("Shelf sort field select emitted null");
-  }
-  return value;
-}
-
-function requireShelfSortOrder(value: ShelfSortOrder | null): ShelfSortOrder {
-  if (value === null) {
-    throw new Error("Shelf sort order select emitted null");
-  }
-  return value;
-}
-
-function defaultOrderForField(field: ShelfSortField): ShelfSortOrder {
-  return field === "title" ? "asc" : "desc";
 }
 
 export function ShelfEditorItemsSection({
@@ -296,17 +264,9 @@ export function ShelfEditorItemsSection({
         )
         .map((entry) => streamEntryRowId(entry))
     : [];
-  const selectedSortLabel =
-    SORT_FIELD_OPTIONS.find((option) => option.value === sortState.field)
-      ?.label ?? SORT_FIELD_OPTIONS[0]!.label;
-  const selectedOrderLabel =
-    SORT_ORDER_OPTIONS.find((option) => option.value === sortState.order)
-      ?.label ?? SORT_ORDER_OPTIONS[0]!.label;
   const activeDragEntry = activeDragId
     ? visibleStream.find((entry) => streamEntryRowId(entry) === activeDragId)
     : undefined;
-  const nestedViewLabel = t("shelf.view_modes.nested");
-  const flatViewLabel = t("shelf.view_modes.flat");
   const editModeLabel = t("shelf.edit.mode_edit", "Edit");
   const multiSelectModeLabel = t("shelf.edit.mode_multi_select", "Select");
   const previewModeLabel = t("shelf.edit.mode_preview", "Preview");
@@ -372,51 +332,17 @@ export function ShelfEditorItemsSection({
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Label className="text-sm text-text-secondary">
-            {t("shelf.edit.sort_by", "Sort")}
-          </Label>
-          <Select<ShelfSortField>
-            value={sortState.field}
-            onValueChange={(value) => {
-              const field = requireShelfSortField(value);
-              setSortState({
-                field,
-                order: defaultOrderForField(field),
-              });
-            }}
-          >
-            <SelectTrigger size="sm" className="min-w-[128px]">
-              <SelectValue>{selectedSortLabel}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {SORT_FIELD_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select<ShelfSortOrder>
-            value={sortState.order}
-            onValueChange={(value) =>
-              setSortState((current) => ({
-                ...current,
-                order: requireShelfSortOrder(value),
-              }))
-            }
-          >
-            <SelectTrigger size="sm" className="min-w-[92px]">
-              <SelectValue>{selectedOrderLabel}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {SORT_ORDER_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <ShelfSortViewPicker
+            sort={sortState}
+            sortOptions={SORT_OPTIONS}
+            view={viewMode === "masonry" ? "nested" : viewMode}
+            viewOptions={VIEW_OPTIONS}
+            onSortChange={setSortState}
+            onViewChange={onViewModeChange}
+            sortHeading={t("shelf.controls.sort_by", "Sort by")}
+            viewHeading={t("shelf.controls.view", "View")}
+          />
           {showSortPrimeOnlyToggle && (
             <Label
               htmlFor={sortPrimeOnlyId}
@@ -500,49 +426,6 @@ export function ShelfEditorItemsSection({
                     )}
                   />
                   <TooltipContent side="top">{previewModeLabel}</TooltipContent>
-                </Tooltip>
-              </ToggleGroup>
-            </TooltipProvider>
-          </div>
-          <div className="flex items-center gap-2">
-            <Label className="text-sm text-text-secondary">View</Label>
-            <TooltipProvider>
-              <ToggleGroup
-                value={[viewMode]}
-                onValueChange={(values) => {
-                  const value = lastSingleToggleValue(values);
-                  if (!isEditorShelfView(value)) return;
-                  onViewModeChange(value);
-                }}
-                size="sm"
-              >
-                <Tooltip>
-                  <TooltipTrigger
-                    render={(props) => (
-                      <ToggleGroupItem
-                        value="nested"
-                        aria-label={nestedViewLabel}
-                        {...props}
-                      >
-                        <ViewAgendaIcon className="h-4 w-4" />
-                      </ToggleGroupItem>
-                    )}
-                  />
-                  <TooltipContent side="top">{nestedViewLabel}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={(props) => (
-                      <ToggleGroupItem
-                        value="flat"
-                        aria-label={flatViewLabel}
-                        {...props}
-                      >
-                        <ViewListIcon className="h-4 w-4" />
-                      </ToggleGroupItem>
-                    )}
-                  />
-                  <TooltipContent side="top">{flatViewLabel}</TooltipContent>
                 </Tooltip>
               </ToggleGroup>
             </TooltipProvider>

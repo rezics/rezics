@@ -1,11 +1,6 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type {
-  ShelfSortField,
-  ShelfSortOrder,
-  ShelfSortState,
-  ShelfView,
-} from "@rezics/api/shelf";
+import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
   shelfUnitsInfiniteQuery,
@@ -15,31 +10,10 @@ import {
 } from "@rezics/api/shelf";
 import { shelfCoverImageSpec } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
-import {
-  Button,
-  Checkbox,
-  DropdownMenuItem,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  ToggleGroup,
-  ToggleGroupItem,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@rezics/ui/shadcn";
+import { Button, Checkbox, DropdownMenuItem, Label } from "@rezics/ui/shadcn";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  Pencil as EditIcon,
-  LayoutList as ViewAgendaIcon,
-  List as ViewListIcon,
-  LayoutGrid as ViewQuiltIcon,
-} from "lucide-react";
+import { Pencil as EditIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
@@ -47,6 +21,11 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
+import {
+  type ShelfSortChoice,
+  ShelfSortViewPicker,
+  type ShelfViewChoice,
+} from "../components/ShelfSortViewPicker";
 import { shelfDetailActions, shelfPolicy } from "../models/shelfPolicy";
 import {
   deriveShelfStream,
@@ -72,47 +51,25 @@ function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
   return LEGACY_VIEW_MODE_MAP[raw];
 }
 
-function lastSingleToggleValue(values: readonly string[]): string | undefined {
-  return values.at(-1);
-}
-
-function isShelfView(value: string | undefined): value is ShelfView {
-  return value === "nested" || value === "flat" || value === "masonry";
-}
-
-function requireShelfSortField(value: ShelfSortField | null): ShelfSortField {
-  if (value === null) {
-    throw new Error("Shelf sort field select emitted null");
-  }
-  return value;
-}
-
-function requireShelfSortOrder(value: ShelfSortOrder | null): ShelfSortOrder {
-  if (value === null) {
-    throw new Error("Shelf sort order select emitted null");
-  }
-  return value;
-}
-
-function defaultOrderForField(field: ShelfSortField): ShelfSortOrder {
-  return field === "title" ? "asc" : "desc";
-}
-
 // MOCK: masonry layout uses CSS column-count as a placeholder until the real
 // masonry primitive lands. The column breaks are browser-driven and not
 // height-balanced; the emitted stream and the enum value are real.
 const MASONRY_COLUMN_CLASS =
   "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
 
-const SORT_FIELD_OPTIONS: { value: ShelfSortField; label: string }[] = [
-  { value: "manual", label: "Manual" },
-  { value: "addedAt", label: "Added" },
-  { value: "title", label: "Title" },
+const SORT_OPTIONS: ShelfSortChoice[] = [
+  { field: "manual", order: "desc", label: "Manual" },
+  { field: "manual", order: "asc", label: "Manual reversed" },
+  { field: "addedAt", order: "desc", label: "Newest" },
+  { field: "addedAt", order: "asc", label: "Oldest" },
+  { field: "title", order: "asc", label: "Title A-Z" },
+  { field: "title", order: "desc", label: "Title Z-A" },
 ];
 
-const SORT_ORDER_OPTIONS: { value: ShelfSortOrder; label: string }[] = [
-  { value: "desc", label: "Desc" },
-  { value: "asc", label: "Asc" },
+const VIEW_OPTIONS: ShelfViewChoice[] = [
+  { value: "nested", label: "Nested" },
+  { value: "flat", label: "List" },
+  { value: "masonry", label: "Grid" },
 ];
 
 const PAGE_SIZE = 20;
@@ -258,18 +215,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const showSortScopeToggle =
     (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
     sortState.field !== "manual";
-  const nestedViewLabel = t("shelf.view_modes.nested");
-  const flatViewLabel = t("shelf.view_modes.flat");
-  const masonryViewLabel = t("shelf.view_modes.masonry");
   const streamKeyPrefix = `${effectiveViewMode}:${sortState.field}:${
     sortState.order
   }:${sortPrimeOnly ? "prime" : "all"}`;
-  const selectedSortLabel =
-    SORT_FIELD_OPTIONS.find((option) => option.value === sortState.field)
-      ?.label ?? "Manual";
-  const selectedOrderLabel =
-    SORT_ORDER_OPTIONS.find((option) => option.value === sortState.order)
-      ?.label ?? "Desc";
 
   const handleEditShelf = () => {
     if (!shelf?.unitId) return;
@@ -422,50 +370,16 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
 
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <span className="text-sm text-text-secondary">Sort</span>
-            <div className="flex items-center gap-2">
-              <Select<ShelfSortField>
-                value={sortState.field}
-                onValueChange={(value) => {
-                  const field = requireShelfSortField(value);
-                  setSortState({
-                    field,
-                    order: defaultOrderForField(field),
-                  });
-                }}
-              >
-                <SelectTrigger size="sm" className="min-w-[118px]">
-                  <SelectValue>{selectedSortLabel}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {SORT_FIELD_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select<ShelfSortOrder>
-                value={sortState.order}
-                onValueChange={(value) =>
-                  setSortState((current) => ({
-                    ...current,
-                    order: requireShelfSortOrder(value),
-                  }))
-                }
-              >
-                <SelectTrigger size="sm" className="min-w-[92px]">
-                  <SelectValue>{selectedOrderLabel}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {SORT_ORDER_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <ShelfSortViewPicker
+              sort={sortState}
+              sortOptions={SORT_OPTIONS}
+              view={effectiveViewMode}
+              viewOptions={VIEW_OPTIONS}
+              onSortChange={setSortState}
+              onViewChange={(value) => setViewModeOverride({ unitId, value })}
+              sortHeading={t("shelf.controls.sort_by", "Sort by")}
+              viewHeading={t("shelf.controls.view", "View")}
+            />
             {showSortScopeToggle && (
               <Label className="flex min-w-0 items-center gap-2 text-sm">
                 <Checkbox
@@ -500,64 +414,6 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 )}
               </>
             )}
-          </div>
-
-          <div className="ml-auto flex items-center gap-2">
-            <span className="text-sm text-text-secondary">View</span>
-            <TooltipProvider>
-              <ToggleGroup
-                value={[effectiveViewMode]}
-                onValueChange={(values) => {
-                  const value = lastSingleToggleValue(values);
-                  if (!isShelfView(value)) return;
-                  setViewModeOverride({ unitId, value });
-                }}
-                size="sm"
-              >
-                <Tooltip>
-                  <TooltipTrigger
-                    render={(props) => (
-                      <ToggleGroupItem
-                        value="nested"
-                        aria-label={nestedViewLabel}
-                        {...props}
-                      >
-                        <ViewAgendaIcon className="h-4 w-4" />
-                      </ToggleGroupItem>
-                    )}
-                  />
-                  <TooltipContent side="top">{nestedViewLabel}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={(props) => (
-                      <ToggleGroupItem
-                        value="flat"
-                        aria-label={flatViewLabel}
-                        {...props}
-                      >
-                        <ViewListIcon className="h-4 w-4" />
-                      </ToggleGroupItem>
-                    )}
-                  />
-                  <TooltipContent side="top">{flatViewLabel}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={(props) => (
-                      <ToggleGroupItem
-                        value="masonry"
-                        aria-label={masonryViewLabel}
-                        {...props}
-                      >
-                        <ViewQuiltIcon className="h-4 w-4" />
-                      </ToggleGroupItem>
-                    )}
-                  />
-                  <TooltipContent side="top">{masonryViewLabel}</TooltipContent>
-                </Tooltip>
-              </ToggleGroup>
-            </TooltipProvider>
           </div>
         </div>
 
