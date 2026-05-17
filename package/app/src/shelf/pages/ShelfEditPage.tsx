@@ -36,7 +36,7 @@ function normalizeViewMode(raw: unknown): ShelfView {
 const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
   { value: "nested", label: "Nested" },
   { value: "flat", label: "Flat" },
-  { value: "masonry", label: "Masonry" },
+  // { value: "masonry", label: "Masonry" },
 ];
 
 export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {

@@ -37,18 +37,10 @@ interface ShelfPageProps {
   unitId: string;
 }
 
-const LEGACY_VIEW_MODE_MAP: Record<string, ShelfView> = {
-  review: "nested",
-  list: "flat",
-  grid: "masonry",
-  nested: "nested",
-  flat: "flat",
-  masonry: "masonry",
-};
-
 function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
   if (typeof raw !== "string") return undefined;
-  return LEGACY_VIEW_MODE_MAP[raw];
+  if (raw === "nested" || raw === "flat" || raw === "masonry") return raw;
+  return undefined;
 }
 
 // MOCK: masonry layout uses CSS column-count as a placeholder until the real
@@ -69,7 +61,7 @@ const SORT_OPTIONS: ShelfSortChoice[] = [
 const VIEW_OPTIONS: ShelfViewChoice[] = [
   { value: "nested", label: "Nested" },
   { value: "flat", label: "List" },
-  { value: "masonry", label: "Grid" },
+  // { value: "masonry", label: "Grid" },
 ];
 
 const PAGE_SIZE = 20;
