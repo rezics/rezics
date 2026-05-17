@@ -14,7 +14,6 @@ import { initDefaultRealmCache } from "./infra/default-realm";
 import { initSlugScopesCache } from "./infra/slug-scopes";
 import { infraApi } from "./infra/infra.api";
 import { initSeedTagsCache } from "./infra/seed-tags";
-import { internalApi } from "./internal/internal.api";
 import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
 import { linkApi } from "./link";
 import { federatedSearchApi, meiliApi } from "./meili";
@@ -107,7 +106,6 @@ app
         "content-type",
         "authorization",
         "accept",
-        "x-internal-secret",
       ],
       maxAge: 600,
     }),
@@ -200,7 +198,6 @@ app
   .use(lowScoreTagsAdminApi)
   .use(translationGroupApi)
   .use(scoreApi)
-  .use(internalApi)
   .use(reactionBoundaryApi)
   .use(profileReactionHistoryApi)
   .use(dispatchApi)

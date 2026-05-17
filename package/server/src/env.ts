@@ -153,9 +153,6 @@ export const env = createEnv({
     /** Shared secret for authenticating internal calls to the Reaction service. */
     REACTION_INTERNAL_SECRET: v.string(),
 
-    /** Shared secret for authenticating incoming internal service-to-service calls. */
-    SERVER_INTERNAL_SECRET: v.string(),
-
     /** Base URL of the dispatch hub for audit notifications. */
     DISPATCH_HUB_URL: v.optional(v.string()),
 
