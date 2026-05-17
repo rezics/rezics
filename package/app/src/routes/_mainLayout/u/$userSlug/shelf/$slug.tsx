@@ -1,6 +1,7 @@
 import { slugApi } from "@rezics/api/slug";
 import { isPublicUserShelfSlugRouteParams } from "@rezics/contract";
-import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { ShelfPage } from "@/shelf/pages/ShelfPage";
 
 /**
  * `/u/:userSlug/shelf/:slug` resolves to a SHELF Unit under the user's
@@ -13,9 +14,10 @@ export const Route = createFileRoute("/_mainLayout/u/$userSlug/shelf/$slug")({
       .shelfBySlug(params.userSlug, params.slug)
       .catch(() => null);
     if (!shelf) throw notFound();
-    throw redirect({
-      to: "/shelf/$shelfId",
-      params: { shelfId: shelf.unitId },
-    });
+    return { shelfId: shelf.unitId };
+  },
+  component: () => {
+    const { shelfId } = Route.useLoaderData();
+    return <ShelfPage unitId={shelfId} />;
   },
 });

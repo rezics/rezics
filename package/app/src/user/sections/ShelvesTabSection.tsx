@@ -30,7 +30,7 @@ const SORT_OPTIONS = [
 ];
 
 export const ShelvesTabSection: FC = () => {
-  const { userId, isCurrentUser } = useProfileContext();
+  const { user, userId, isCurrentUser } = useProfileContext();
   const { t } = useTranslation();
   const [kindKey, setKindKey] = useState("all");
   const [filters, setFilters] = useState<Record<string, string>>({
@@ -116,6 +116,7 @@ export const ShelvesTabSection: FC = () => {
               key={shelf.unitId}
               shelf={shelf}
               isOwnerView={isCurrentUser}
+              userSlug={user.slug}
             />
           ))}
         </div>
@@ -124,17 +125,51 @@ export const ShelvesTabSection: FC = () => {
   );
 };
 
-const ShelfCard: FC<{ shelf: ShelfDTO; isOwnerView: boolean }> = ({
-  shelf,
-  isOwnerView,
-}) => {
+const ShelfCard: FC<{
+  shelf: ShelfDTO;
+  isOwnerView: boolean;
+  userSlug?: string;
+}> = ({ shelf, isOwnerView, userSlug }) => {
   const { t } = useTranslation();
   const dbTitle = shelf.translations?.[0]?.title ?? "Untitled Shelf";
+  const isSystemShelf = isSystemKindKey(shelf.kindKey);
   const title =
-    isOwnerView && isSystemKindKey(shelf.kindKey)
+    isOwnerView && isSystemShelf
       ? t(`shelf.system.${shelf.kindKey}`)
       : dbTitle;
   const itemCount = shelf.items?.length ?? 0;
+  const card = (
+    <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors h-full flex flex-col">
+      {shelf.coverUrl && (
+        <img
+          src={shelf.coverUrl}
+          alt={title}
+          className="w-full h-24 object-cover rounded mb-2"
+        />
+      )}
+      <span className="text-sm font-medium line-clamp-2 text-text-primary">
+        {title}
+      </span>
+      <div className="flex items-center justify-between mt-auto pt-2">
+        <span className="text-xs text-text-secondary">{itemCount} items</span>
+        {shelf.kindKey && (
+          <span className="text-xs text-text-secondary">{shelf.kindKey}</span>
+        )}
+      </div>
+    </div>
+  );
+
+  if (isSystemShelf && userSlug) {
+    return (
+      <Link
+        to="/u/$userSlug/shelf/$slug"
+        params={{ userSlug, slug: shelf.kindKey }}
+        className="no-underline"
+      >
+        {card}
+      </Link>
+    );
+  }
 
   return (
     <Link
@@ -142,24 +177,7 @@ const ShelfCard: FC<{ shelf: ShelfDTO; isOwnerView: boolean }> = ({
       params={{ shelfId: shelf.unitId }}
       className="no-underline"
     >
-      <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors h-full flex flex-col">
-        {shelf.coverUrl && (
-          <img
-            src={shelf.coverUrl}
-            alt={title}
-            className="w-full h-24 object-cover rounded mb-2"
-          />
-        )}
-        <span className="text-sm font-medium line-clamp-2 text-text-primary">
-          {title}
-        </span>
-        <div className="flex items-center justify-between mt-auto pt-2">
-          <span className="text-xs text-text-secondary">{itemCount} items</span>
-          {shelf.kindKey && (
-            <span className="text-xs text-text-secondary">{shelf.kindKey}</span>
-          )}
-        </div>
-      </div>
+      {card}
     </Link>
   );
 };
