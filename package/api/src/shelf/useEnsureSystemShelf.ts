@@ -12,25 +12,19 @@ import { slugKeys } from "../slug/slug.keys";
 import { shelfApi } from "./shelf.api";
 
 /**
- * User-driven recovery hook for the rare orphan-state case where a system
- * shelf is missing for the authenticated viewer. Wired into the recovery
- * toast surfaced on `system_shelf_missing` 404s — never auto-triggered.
+ * Low-level ensure mutation for the rare orphan-state case where a system
+ * shelf is missing for the authenticated viewer.
  *
  * On success this invalidates the `slugResolveQuery({ scope: viewer, slug:
  * kindKey })` cache entry so the next read picks up the freshly-minted
- * unitId. The original mutation is NOT auto-replayed; the user re-issues
- * the action themselves.
+ * unitId.
  *
- * Caller is responsible for surfacing errors via a toast. The mutation
- * deliberately disables retry-on-error so the user controls when to retry.
+ * The mutation deliberately disables retry-on-error; callers decide whether
+ * and how to surface or retry recovery.
  */
 export function useEnsureSystemShelf(
   options?: Omit<
-    UseMutationOptions<
-      EnsureSystemShelfResponse,
-      Error,
-      SystemShelfKindKey
-    >,
+    UseMutationOptions<EnsureSystemShelfResponse, Error, SystemShelfKindKey>,
     "mutationFn" | "retry"
   >,
 ) {

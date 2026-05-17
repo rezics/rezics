@@ -1,25 +1,25 @@
+import {
+  useDeleteUnitProgress,
+  useUpdateUnitProgress,
+} from "@rezics/api/progress/progress.mutations";
+import { useSystemShelfIdResolver } from "@rezics/api/shelf";
+import {
+  useAddShelfUnitMutation,
+  useRemoveShelfUnitMutation,
+} from "@rezics/api/shelf/shelf.mutations";
 import type {
   ProgressExtra,
   UnitLastPosition,
   UserUnitProgressStatus,
 } from "@rezics/contract";
-import {
-  useDeleteUnitProgress,
-  useUpdateUnitProgress,
-} from "@rezics/api/progress/progress.mutations";
-import {
-  useAddShelfUnitMutation,
-  useRemoveShelfUnitMutation,
-} from "@rezics/api/shelf/shelf.mutations";
 import { useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
-  type ShelfOp,
   planRemoveProgress,
   planTransition,
+  type ShelfOp,
 } from "../models/transition";
-import { useSystemShelfIds } from "./useSystemShelfIds";
 
 export type StatusTransitionPayload = {
   to: UserUnitProgressStatus;
@@ -47,10 +47,11 @@ export function useStatusTransition(
   currentStatus: UserUnitProgressStatus | null,
 ): UseStatusTransitionResult {
   const { t } = useTranslation();
-  const { getShelfId } = useSystemShelfIds();
 
   const updateProgress = useUpdateUnitProgress(unitId);
   const deleteProgress = useDeleteUnitProgress(unitId);
+  const { resolve: resolveSystemShelfId, isPending: isSystemShelfPending } =
+    useSystemShelfIdResolver();
   const addShelfUnit = useAddShelfUnitMutation();
   const removeShelfUnit = useRemoveShelfUnitMutation();
 
@@ -58,10 +59,7 @@ export function useStatusTransition(
 
   const runShelfOp = useCallback(
     async (op: ShelfOp) => {
-      const shelfId = getShelfId(op.shelfKey);
-      if (!shelfId) {
-        throw new Error(`No shelf id for ${op.shelfKey}`);
-      }
+      const shelfId = await resolveSystemShelfId(op.shelfKey);
       if (op.kind === "add") {
         await addShelfUnit.mutateAsync({
           shelfId,
@@ -71,7 +69,7 @@ export function useStatusTransition(
         await removeShelfUnit.mutateAsync({ shelfId, shelfUnitId: unitId });
       }
     },
-    [addShelfUnit, getShelfId, removeShelfUnit, unitId],
+    [addShelfUnit, removeShelfUnit, resolveSystemShelfId, unitId],
   );
 
   const showRetryToast = useCallback(
@@ -216,11 +214,13 @@ export function useStatusTransition(
     () =>
       updateProgress.isPending ||
       deleteProgress.isPending ||
+      isSystemShelfPending ||
       addShelfUnit.isPending ||
       removeShelfUnit.isPending,
     [
       addShelfUnit.isPending,
       deleteProgress.isPending,
+      isSystemShelfPending,
       removeShelfUnit.isPending,
       updateProgress.isPending,
     ],
