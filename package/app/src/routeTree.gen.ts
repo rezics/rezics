@@ -80,7 +80,12 @@ import { Route as MainLayoutUserUserIdReactionsRouteImport } from './routes/_mai
 import { Route as MainLayoutUserUserIdFollowersRouteImport } from './routes/_mainLayout/user/$userId/followers'
 import { Route as MainLayoutUserUserIdEditRouteImport } from './routes/_mainLayout/user/$userId/edit'
 import { Route as MainLayoutUserUserIdContentRouteImport } from './routes/_mainLayout/user/$userId/content'
+import { Route as MainLayoutUUserSlugShelvesRouteImport } from './routes/_mainLayout/u/$userSlug/shelves'
 import { Route as MainLayoutUUserSlugSearchRouteImport } from './routes/_mainLayout/u/$userSlug/search'
+import { Route as MainLayoutUUserSlugRealmsRouteImport } from './routes/_mainLayout/u/$userSlug/realms'
+import { Route as MainLayoutUUserSlugReactionsRouteImport } from './routes/_mainLayout/u/$userSlug/reactions'
+import { Route as MainLayoutUUserSlugFollowersRouteImport } from './routes/_mainLayout/u/$userSlug/followers'
+import { Route as MainLayoutUUserSlugContentRouteImport } from './routes/_mainLayout/u/$userSlug/content'
 import { Route as MainLayoutShelfBookBookIdRouteImport } from './routes/_mainLayout/shelf/book/$bookId'
 import { Route as MainLayoutShelfShelfIdEditRouteImport } from './routes/_mainLayout/shelf/$shelfId/edit'
 import { Route as MainLayoutReviewNewBookUnitIdRouteImport } from './routes/_mainLayout/review/new/$bookUnitId'
@@ -499,10 +504,40 @@ const MainLayoutUserUserIdContentRoute =
     path: '/content',
     getParentRoute: () => MainLayoutUserUserIdRoute,
   } as any)
+const MainLayoutUUserSlugShelvesRoute =
+  MainLayoutUUserSlugShelvesRouteImport.update({
+    id: '/shelves',
+    path: '/shelves',
+    getParentRoute: () => MainLayoutUUserSlugRoute,
+  } as any)
 const MainLayoutUUserSlugSearchRoute =
   MainLayoutUUserSlugSearchRouteImport.update({
     id: '/search',
     path: '/search',
+    getParentRoute: () => MainLayoutUUserSlugRoute,
+  } as any)
+const MainLayoutUUserSlugRealmsRoute =
+  MainLayoutUUserSlugRealmsRouteImport.update({
+    id: '/realms',
+    path: '/realms',
+    getParentRoute: () => MainLayoutUUserSlugRoute,
+  } as any)
+const MainLayoutUUserSlugReactionsRoute =
+  MainLayoutUUserSlugReactionsRouteImport.update({
+    id: '/reactions',
+    path: '/reactions',
+    getParentRoute: () => MainLayoutUUserSlugRoute,
+  } as any)
+const MainLayoutUUserSlugFollowersRoute =
+  MainLayoutUUserSlugFollowersRouteImport.update({
+    id: '/followers',
+    path: '/followers',
+    getParentRoute: () => MainLayoutUUserSlugRoute,
+  } as any)
+const MainLayoutUUserSlugContentRoute =
+  MainLayoutUUserSlugContentRouteImport.update({
+    id: '/content',
+    path: '/content',
     getParentRoute: () => MainLayoutUUserSlugRoute,
   } as any)
 const MainLayoutShelfBookBookIdRoute =
@@ -808,7 +843,12 @@ export interface FileRoutesByFullPath {
   '/review/new/$bookUnitId': typeof MainLayoutReviewNewBookUnitIdRoute
   '/shelf/$shelfId/edit': typeof MainLayoutShelfShelfIdEditRoute
   '/shelf/book/$bookId': typeof MainLayoutShelfBookBookIdRoute
+  '/u/$userSlug/content': typeof MainLayoutUUserSlugContentRoute
+  '/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
+  '/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
+  '/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
   '/u/$userSlug/search': typeof MainLayoutUUserSlugSearchRoute
+  '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
   '/user/$userId/edit': typeof MainLayoutUserUserIdEditRoute
   '/user/$userId/followers': typeof MainLayoutUserUserIdFollowersRoute
@@ -912,7 +952,12 @@ export interface FileRoutesByTo {
   '/review/new/$bookUnitId': typeof MainLayoutReviewNewBookUnitIdRoute
   '/shelf/$shelfId/edit': typeof MainLayoutShelfShelfIdEditRoute
   '/shelf/book/$bookId': typeof MainLayoutShelfBookBookIdRoute
+  '/u/$userSlug/content': typeof MainLayoutUUserSlugContentRoute
+  '/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
+  '/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
+  '/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
   '/u/$userSlug/search': typeof MainLayoutUUserSlugSearchRoute
+  '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
   '/user/$userId/edit': typeof MainLayoutUserUserIdEditRoute
   '/user/$userId/followers': typeof MainLayoutUserUserIdFollowersRoute
@@ -1026,7 +1071,12 @@ export interface FileRoutesById {
   '/_mainLayout/review/new/$bookUnitId': typeof MainLayoutReviewNewBookUnitIdRoute
   '/_mainLayout/shelf/$shelfId/edit': typeof MainLayoutShelfShelfIdEditRoute
   '/_mainLayout/shelf/book/$bookId': typeof MainLayoutShelfBookBookIdRoute
+  '/_mainLayout/u/$userSlug/content': typeof MainLayoutUUserSlugContentRoute
+  '/_mainLayout/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
+  '/_mainLayout/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
+  '/_mainLayout/u/$userSlug/realms': typeof MainLayoutUUserSlugRealmsRoute
   '/_mainLayout/u/$userSlug/search': typeof MainLayoutUUserSlugSearchRoute
+  '/_mainLayout/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/_mainLayout/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
   '/_mainLayout/user/$userId/edit': typeof MainLayoutUserUserIdEditRoute
   '/_mainLayout/user/$userId/followers': typeof MainLayoutUserUserIdFollowersRoute
@@ -1141,7 +1191,12 @@ export interface FileRouteTypes {
     | '/review/new/$bookUnitId'
     | '/shelf/$shelfId/edit'
     | '/shelf/book/$bookId'
+    | '/u/$userSlug/content'
+    | '/u/$userSlug/followers'
+    | '/u/$userSlug/reactions'
+    | '/u/$userSlug/realms'
     | '/u/$userSlug/search'
+    | '/u/$userSlug/shelves'
     | '/user/$userId/content'
     | '/user/$userId/edit'
     | '/user/$userId/followers'
@@ -1245,7 +1300,12 @@ export interface FileRouteTypes {
     | '/review/new/$bookUnitId'
     | '/shelf/$shelfId/edit'
     | '/shelf/book/$bookId'
+    | '/u/$userSlug/content'
+    | '/u/$userSlug/followers'
+    | '/u/$userSlug/reactions'
+    | '/u/$userSlug/realms'
     | '/u/$userSlug/search'
+    | '/u/$userSlug/shelves'
     | '/user/$userId/content'
     | '/user/$userId/edit'
     | '/user/$userId/followers'
@@ -1358,7 +1418,12 @@ export interface FileRouteTypes {
     | '/_mainLayout/review/new/$bookUnitId'
     | '/_mainLayout/shelf/$shelfId/edit'
     | '/_mainLayout/shelf/book/$bookId'
+    | '/_mainLayout/u/$userSlug/content'
+    | '/_mainLayout/u/$userSlug/followers'
+    | '/_mainLayout/u/$userSlug/reactions'
+    | '/_mainLayout/u/$userSlug/realms'
     | '/_mainLayout/u/$userSlug/search'
+    | '/_mainLayout/u/$userSlug/shelves'
     | '/_mainLayout/user/$userId/content'
     | '/_mainLayout/user/$userId/edit'
     | '/_mainLayout/user/$userId/followers'
@@ -1915,11 +1980,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserUserIdContentRouteImport
       parentRoute: typeof MainLayoutUserUserIdRoute
     }
+    '/_mainLayout/u/$userSlug/shelves': {
+      id: '/_mainLayout/u/$userSlug/shelves'
+      path: '/shelves'
+      fullPath: '/u/$userSlug/shelves'
+      preLoaderRoute: typeof MainLayoutUUserSlugShelvesRouteImport
+      parentRoute: typeof MainLayoutUUserSlugRoute
+    }
     '/_mainLayout/u/$userSlug/search': {
       id: '/_mainLayout/u/$userSlug/search'
       path: '/search'
       fullPath: '/u/$userSlug/search'
       preLoaderRoute: typeof MainLayoutUUserSlugSearchRouteImport
+      parentRoute: typeof MainLayoutUUserSlugRoute
+    }
+    '/_mainLayout/u/$userSlug/realms': {
+      id: '/_mainLayout/u/$userSlug/realms'
+      path: '/realms'
+      fullPath: '/u/$userSlug/realms'
+      preLoaderRoute: typeof MainLayoutUUserSlugRealmsRouteImport
+      parentRoute: typeof MainLayoutUUserSlugRoute
+    }
+    '/_mainLayout/u/$userSlug/reactions': {
+      id: '/_mainLayout/u/$userSlug/reactions'
+      path: '/reactions'
+      fullPath: '/u/$userSlug/reactions'
+      preLoaderRoute: typeof MainLayoutUUserSlugReactionsRouteImport
+      parentRoute: typeof MainLayoutUUserSlugRoute
+    }
+    '/_mainLayout/u/$userSlug/followers': {
+      id: '/_mainLayout/u/$userSlug/followers'
+      path: '/followers'
+      fullPath: '/u/$userSlug/followers'
+      preLoaderRoute: typeof MainLayoutUUserSlugFollowersRouteImport
+      parentRoute: typeof MainLayoutUUserSlugRoute
+    }
+    '/_mainLayout/u/$userSlug/content': {
+      id: '/_mainLayout/u/$userSlug/content'
+      path: '/content'
+      fullPath: '/u/$userSlug/content'
+      preLoaderRoute: typeof MainLayoutUUserSlugContentRouteImport
       parentRoute: typeof MainLayoutUUserSlugRoute
     }
     '/_mainLayout/shelf/book/$bookId': {
@@ -2297,13 +2397,23 @@ const MainLayoutRRealmSlugRouteWithChildren =
   MainLayoutRRealmSlugRoute._addFileChildren(MainLayoutRRealmSlugRouteChildren)
 
 interface MainLayoutUUserSlugRouteChildren {
+  MainLayoutUUserSlugContentRoute: typeof MainLayoutUUserSlugContentRoute
+  MainLayoutUUserSlugFollowersRoute: typeof MainLayoutUUserSlugFollowersRoute
+  MainLayoutUUserSlugReactionsRoute: typeof MainLayoutUUserSlugReactionsRoute
+  MainLayoutUUserSlugRealmsRoute: typeof MainLayoutUUserSlugRealmsRoute
   MainLayoutUUserSlugSearchRoute: typeof MainLayoutUUserSlugSearchRoute
+  MainLayoutUUserSlugShelvesRoute: typeof MainLayoutUUserSlugShelvesRoute
   MainLayoutUUserSlugIndexRoute: typeof MainLayoutUUserSlugIndexRoute
   MainLayoutUUserSlugShelfSlugRoute: typeof MainLayoutUUserSlugShelfSlugRoute
 }
 
 const MainLayoutUUserSlugRouteChildren: MainLayoutUUserSlugRouteChildren = {
+  MainLayoutUUserSlugContentRoute: MainLayoutUUserSlugContentRoute,
+  MainLayoutUUserSlugFollowersRoute: MainLayoutUUserSlugFollowersRoute,
+  MainLayoutUUserSlugReactionsRoute: MainLayoutUUserSlugReactionsRoute,
+  MainLayoutUUserSlugRealmsRoute: MainLayoutUUserSlugRealmsRoute,
   MainLayoutUUserSlugSearchRoute: MainLayoutUUserSlugSearchRoute,
+  MainLayoutUUserSlugShelvesRoute: MainLayoutUUserSlugShelvesRoute,
   MainLayoutUUserSlugIndexRoute: MainLayoutUUserSlugIndexRoute,
   MainLayoutUUserSlugShelfSlugRoute: MainLayoutUUserSlugShelfSlugRoute,
 }

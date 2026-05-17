@@ -21,16 +21,24 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({ userId, userSlug }) => {
   const navigate = useNavigate();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
-  const isSlugRoute = userSlug ? pathname.startsWith(`/u/${userSlug}`) : false;
-  const basePath =
-    isSlugRoute && userSlug ? `/u/${userSlug}` : `/user/${userId}`;
+  const basePath = unitHref({
+    type: "USER",
+    unitId: userId,
+    slug: userSlug ?? null,
+  });
+  const activeBasePaths =
+    basePath === `/user/${userId}` ? [basePath] : [basePath, `/user/${userId}`];
 
   const activeTab =
     PROFILE_TABS.find((tab, i) => {
       if (i === 0) {
-        return pathname === basePath || pathname === `${basePath}/`;
+        return activeBasePaths.some(
+          (base) => pathname === base || pathname === `${base}/`,
+        );
       }
-      return pathname.startsWith(`${basePath}${tab.path}`);
+      return activeBasePaths.some((base) =>
+        pathname.startsWith(`${base}${tab.path}`),
+      );
     }) ?? PROFILE_TABS[0];
 
   return (
@@ -39,21 +47,7 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({ userId, userSlug }) => {
         value={activeTab.path}
         className="min-w-0 max-w-full"
         onValueChange={(value) => {
-          if (value === "") {
-            void navigate({
-              to: unitHref({
-                type: "USER",
-                unitId: userId,
-                slug: userSlug ?? null,
-              }),
-            });
-            return;
-          }
-
-          void navigate({
-            to: `/user/$userId${value}`,
-            params: { userId },
-          });
+          void navigate({ to: `${basePath}${value}` });
         }}
       >
         <TabsList className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain bg-transparent">
