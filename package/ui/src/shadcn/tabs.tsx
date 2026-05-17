@@ -1,5 +1,6 @@
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
 import { cva, type VariantProps } from "class-variance-authority";
+import { type PointerEvent, useEffect, useRef } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
@@ -22,7 +23,7 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  "group/tabs-list inline-flex w-fit items-center justify-center rounded-full p-1 text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col group-data-[orientation=vertical]/tabs:rounded-2xl data-[variant=line]:rounded-none",
+  "group/tabs-list scrollbar-hide inline-flex w-fit items-center justify-center rounded-full p-1 text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col group-data-[orientation=vertical]/tabs:rounded-2xl data-[variant=line]:rounded-none",
   {
     variants: {
       variant: {
@@ -36,16 +37,191 @@ const tabsListVariants = cva(
   },
 );
 
+function getMaxScrollLeft(element: HTMLElement) {
+  return Math.max(0, element.scrollWidth - element.clientWidth);
+}
+
+function canScrollHorizontally(element: HTMLElement) {
+  return getMaxScrollLeft(element) > 0;
+}
+
+function clampScrollLeft(element: HTMLElement, scrollLeft: number) {
+  return Math.min(Math.max(scrollLeft, 0), getMaxScrollLeft(element));
+}
+
+function setScrollLeftImmediately(element: HTMLElement, scrollLeft: number) {
+  const previousScrollBehavior = element.style.scrollBehavior;
+  element.style.scrollBehavior = "auto";
+  element.scrollLeft = scrollLeft;
+  element.style.scrollBehavior = previousScrollBehavior;
+}
+
 function TabsList({
   className,
   variant = "default",
+  onPointerCancel,
+  onPointerDown,
+  onPointerLeave,
+  onPointerMove,
+  onPointerUp,
   ...props
 }: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const dragStateRef = useRef({
+    isDown: false,
+    isDragging: false,
+    pointerId: -1,
+    scrollBehavior: "",
+    scrollLeft: 0,
+    scrollSnapType: "",
+    x: 0,
+  });
+  const suppressClickRef = useRef(false);
+
+  useEffect(() => {
+    const element = listRef.current;
+    if (!element) {
+      return;
+    }
+
+    function handleNativeWheel(event: WheelEvent) {
+      if (!listRef.current || event.defaultPrevented) {
+        return;
+      }
+
+      const element = listRef.current;
+      if (
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+        !canScrollHorizontally(element)
+      ) {
+        return;
+      }
+
+      setScrollLeftImmediately(
+        element,
+        clampScrollLeft(element, element.scrollLeft + event.deltaY),
+      );
+      event.preventDefault();
+    }
+
+    function handleNativeClick(event: MouseEvent) {
+      if (!suppressClickRef.current) {
+        return;
+      }
+
+      suppressClickRef.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    element.addEventListener("wheel", handleNativeWheel, { passive: false });
+    element.addEventListener("click", handleNativeClick, true);
+
+    return () => {
+      element.removeEventListener("wheel", handleNativeWheel);
+      element.removeEventListener("click", handleNativeClick, true);
+    };
+  }, []);
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    onPointerDown?.(event);
+
+    suppressClickRef.current = false;
+    dragStateRef.current.isDragging = false;
+
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      !canScrollHorizontally(event.currentTarget)
+    ) {
+      return;
+    }
+
+    dragStateRef.current = {
+      isDown: true,
+      isDragging: false,
+      pointerId: event.pointerId,
+      scrollBehavior: event.currentTarget.style.scrollBehavior,
+      scrollLeft: event.currentTarget.scrollLeft,
+      scrollSnapType: event.currentTarget.style.scrollSnapType,
+      x: event.clientX,
+    };
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    onPointerMove?.(event);
+
+    const dragState = dragStateRef.current;
+    if (!dragState.isDown || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const deltaX = event.clientX - dragState.x;
+    if (!dragState.isDragging && Math.abs(deltaX) < 2) {
+      return;
+    }
+
+    dragState.isDragging = true;
+    suppressClickRef.current = true;
+    event.currentTarget.style.scrollBehavior = "auto";
+    event.currentTarget.style.scrollSnapType = "none";
+
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    setScrollLeftImmediately(
+      event.currentTarget,
+      clampScrollLeft(event.currentTarget, dragState.scrollLeft - deltaX),
+    );
+    event.preventDefault();
+  }
+
+  function stopDragging(element: HTMLElement, pointerId: number) {
+    const dragState = dragStateRef.current;
+
+    if (
+      dragState.pointerId === pointerId &&
+      element.hasPointerCapture(pointerId)
+    ) {
+      element.releasePointerCapture(pointerId);
+    }
+
+    dragState.isDown = false;
+    dragState.pointerId = -1;
+    element.style.scrollBehavior = dragState.scrollBehavior;
+    element.style.scrollSnapType = dragState.scrollSnapType;
+  }
+
+  function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
+    onPointerUp?.(event);
+    stopDragging(event.currentTarget, event.pointerId);
+  }
+
+  function handlePointerCancel(event: PointerEvent<HTMLDivElement>) {
+    onPointerCancel?.(event);
+    stopDragging(event.currentTarget, event.pointerId);
+  }
+
+  function handlePointerLeave(event: PointerEvent<HTMLDivElement>) {
+    onPointerLeave?.(event);
+
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+      stopDragging(event.currentTarget, event.pointerId);
+    }
+  }
+
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
       data-variant={variant}
       className={cn(tabsListVariants({ variant }), className)}
+      ref={listRef}
+      onPointerCancel={handlePointerCancel}
+      onPointerDown={handlePointerDown}
+      onPointerLeave={handlePointerLeave}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
       {...props}
     />
   );
@@ -77,4 +253,4 @@ function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
   );
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants };
+export { Tabs, TabsContent, TabsList, TabsTrigger, tabsListVariants };

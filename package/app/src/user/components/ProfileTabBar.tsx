@@ -34,9 +34,10 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({ userId, userSlug }) => {
     }) ?? PROFILE_TABS[0];
 
   return (
-    <div className="border-b border-border-whisper overflow-x-auto">
+    <div className="border-b border-border-whisper">
       <Tabs
         value={activeTab.path}
+        className="min-w-0 max-w-full"
         onValueChange={(value) => {
           if (value === "") {
             void navigate({
@@ -55,9 +56,9 @@ export const ProfileTabBar: FC<ProfileTabBarProps> = ({ userId, userSlug }) => {
           });
         }}
       >
-        <TabsList className="bg-transparent">
+        <TabsList className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain bg-transparent">
           {PROFILE_TABS.map((tab) => (
-            <TabsTrigger key={tab.path} value={tab.path}>
+            <TabsTrigger key={tab.path} value={tab.path} className="flex-none">
               {tab.label}
             </TabsTrigger>
           ))}

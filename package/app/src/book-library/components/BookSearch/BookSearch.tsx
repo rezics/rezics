@@ -1,5 +1,6 @@
 import type { SearchQuery } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
+import { SlidersHorizontal as TuneIcon } from "lucide-react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,7 +14,6 @@ import {
 } from "@/search/components/primitive";
 import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
-import { SlidersHorizontal as TuneIcon } from "lucide-react";
 
 export type BookSearchProps = {
   query: UseSearchQueryReturn["query"];

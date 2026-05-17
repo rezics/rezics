@@ -22,12 +22,16 @@ export const SearchCategoryNav: React.FC<SearchCategoryNavProps> = ({
   const permitted = permittedCategoriesForScope(scope);
 
   return (
-    <Tabs value={value} onValueChange={(v) => onChange(v as SearchCategory)}>
-      <TabsList className="overflow-x-auto">
+    <Tabs
+      value={value}
+      onValueChange={(v) => onChange(v as SearchCategory)}
+      className="min-w-0 max-w-full"
+    >
+      <TabsList className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain scroll-smooth">
         {permitted.map((category) => {
           const count = counts?.[category];
           return (
-            <TabsTrigger key={category} value={category}>
+            <TabsTrigger key={category} value={category} className="flex-none">
               <span>{CATEGORY_LABELS[category]}</span>
               {typeof count === "number" && (
                 <span className="ml-1 text-xs text-text-secondary">
