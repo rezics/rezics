@@ -104,7 +104,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
             placeholder={t("search.input.tags_hint")}
           />
         </div>
-        <div className="no-scrollbar flex min-w-0 items-center gap-2 overflow-x-auto">
+        <div className="scrollbar-hide flex min-w-0 items-center gap-2 overflow-x-auto">
           {showWordCount && (
             <WordCountRangeInput
               value={textLength.value}
