@@ -28,7 +28,7 @@ interface BookHeroActionBarProps {
 }
 
 const ghostHeroClass =
-  "text-white/90 border-white/25 rounded-full hover:border-white/50 hover:bg-white/10 bg-transparent";
+  "text-white/90 border-white/25 rounded-full bg-transparent hover:border-white/50 hover:bg-white/10 hover:text-white aria-expanded:bg-white/10 aria-expanded:text-white";
 
 export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   bookInfo,

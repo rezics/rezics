@@ -294,6 +294,7 @@ export function BookProgressStatusSection({
           onSelectDropped={handleDropped}
           onRemoveProgress={handleRemoveProgress}
           disabled={isPending}
+          currentStatus={currentStatus}
           isActive={currentStatus === "PAUSED" || currentStatus === "DROPPED"}
           showPrimaryStatuses={!isChineseLayout}
         />

@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import {
   READ_STATUS_I18N_KEYS,
   READ_STATUS_LABELS_ZH_HANT,
+  type ReadStatus,
 } from "../models/status";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -33,6 +34,7 @@ type StatusOverflowMenuProps = {
   onSelectDropped: () => void;
   onRemoveProgress: () => void;
   disabled?: boolean;
+  currentStatus?: ReadStatus | null;
   isActive?: boolean;
   showPrimaryStatuses?: boolean;
   className?: string;
@@ -46,11 +48,27 @@ export function StatusOverflowMenu({
   onSelectDropped,
   onRemoveProgress,
   disabled,
+  currentStatus,
   isActive,
   showPrimaryStatuses = false,
   className,
 }: StatusOverflowMenuProps) {
   const { t } = useTranslation();
+  const renderStatusMarker = (status: ReadStatus) => (
+    <span
+      aria-hidden="true"
+      className={cx(
+        "h-1.5 w-1.5 rounded-full bg-transparent",
+        currentStatus === status && "bg-brand-fill",
+      )}
+    />
+  );
+  const statusIconClass = (status: ReadStatus) =>
+    cx(
+      "w-4 h-4 mr-2",
+      currentStatus === status && "text-text-brand",
+    );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -75,22 +93,36 @@ export function StatusOverflowMenu({
       <DropdownMenuContent align="end">
         {showPrimaryStatuses && (
           <>
-            <DropdownMenuItem onClick={onSelectBacklog}>
-              <BookmarkPlus className="w-4 h-4 mr-2" />
+            <DropdownMenuItem
+              aria-current={currentStatus === "BACKLOG" ? "true" : undefined}
+              onClick={onSelectBacklog}
+            >
+              {renderStatusMarker("BACKLOG")}
+              <BookmarkPlus className={statusIconClass("BACKLOG")} />
               {t(
                 READ_STATUS_I18N_KEYS.BACKLOG,
                 READ_STATUS_LABELS_ZH_HANT.BACKLOG,
               )}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onSelectActive}>
-              <PlayCircle className="w-4 h-4 mr-2" />
+            <DropdownMenuItem
+              aria-current={currentStatus === "ACTIVE" ? "true" : undefined}
+              onClick={onSelectActive}
+            >
+              {renderStatusMarker("ACTIVE")}
+              <PlayCircle className={statusIconClass("ACTIVE")} />
               {t(
                 READ_STATUS_I18N_KEYS.ACTIVE,
                 READ_STATUS_LABELS_ZH_HANT.ACTIVE,
               )}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onSelectCompleted}>
-              <CircleCheck className="w-4 h-4 mr-2" />
+            <DropdownMenuItem
+              aria-current={
+                currentStatus === "COMPLETED" ? "true" : undefined
+              }
+              onClick={onSelectCompleted}
+            >
+              {renderStatusMarker("COMPLETED")}
+              <CircleCheck className={statusIconClass("COMPLETED")} />
               {t(
                 READ_STATUS_I18N_KEYS.COMPLETED,
                 READ_STATUS_LABELS_ZH_HANT.COMPLETED,
@@ -99,12 +131,20 @@ export function StatusOverflowMenu({
             <DropdownMenuSeparator />
           </>
         )}
-        <DropdownMenuItem onClick={onSelectPaused}>
-          <Pause className="w-4 h-4 mr-2" />
+        <DropdownMenuItem
+          aria-current={currentStatus === "PAUSED" ? "true" : undefined}
+          onClick={onSelectPaused}
+        >
+          {renderStatusMarker("PAUSED")}
+          <Pause className={statusIconClass("PAUSED")} />
           {t(READ_STATUS_I18N_KEYS.PAUSED, READ_STATUS_LABELS_ZH_HANT.PAUSED)}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onSelectDropped}>
-          <X className="w-4 h-4 mr-2" />
+        <DropdownMenuItem
+          aria-current={currentStatus === "DROPPED" ? "true" : undefined}
+          onClick={onSelectDropped}
+        >
+          {renderStatusMarker("DROPPED")}
+          <X className={statusIconClass("DROPPED")} />
           {t(READ_STATUS_I18N_KEYS.DROPPED, READ_STATUS_LABELS_ZH_HANT.DROPPED)}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
