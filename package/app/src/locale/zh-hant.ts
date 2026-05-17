@@ -571,6 +571,14 @@ export default {
 
   // Shelf
   shelf: {
+    system: {
+      favorites: "收藏",
+      backlog: "待看",
+      active: "在看",
+      completed: "已讀",
+      recoveryToast: "你的「{{kind}}」列表暫未就緒。",
+      recoveryRetry: "重試",
+    },
     featured: "精選書架",
     includes_items: "包含 {{count}} 項",
     includes_reviews: "包含 {{count}} 則書評",

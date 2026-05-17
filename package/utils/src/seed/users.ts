@@ -3,6 +3,7 @@ import {
   seedAuthUser,
   slugify,
 } from "@rezics/auth/prisma/seed";
+import { bootstrapSystemShelves } from "@rezics/server/prisma/factory/system-shelves";
 import type { SlugScopesMap } from "@rezics/server/prisma/seed/infra/seed-slug-scopes";
 import type {
   AuthPrismaClient,
@@ -108,6 +109,8 @@ async function seedServerUser(
       joinDate: new Date(),
     },
   });
+
+  await bootstrapSystemShelves(input.unitId, input.slug, prisma);
 }
 
 export type CrossSeedUserResult = SeedAuthUserResult & {

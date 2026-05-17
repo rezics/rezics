@@ -115,6 +115,12 @@ app
   .onError(({ code, error, set }) => {
     if (error instanceof AppError) {
       set.status = error.statusCode;
+      return {
+        status: error.statusCode,
+        code: error.code ?? code,
+        message: error.message,
+        ...(error.details ? { detail: error.details } : {}),
+      };
     } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
       const prismaStatusMap: Record<string, number> = {
         P2025: 404,

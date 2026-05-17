@@ -662,6 +662,14 @@ export default {
 
   // Shelf
   shelf: {
+    system: {
+      favorites: "Favorites",
+      backlog: "Backlog",
+      active: "Active",
+      completed: "Completed",
+      recoveryToast: "Your {{kind}} shelf isn't ready.",
+      recoveryRetry: "Retry",
+    },
     featured: "Featured shelves",
     includes_items: "Includes {{count}} items",
     includes_reviews: "Includes {{count}} reviews",

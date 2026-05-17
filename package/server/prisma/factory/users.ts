@@ -141,7 +141,7 @@ export async function seedUsers(
         },
       });
 
-      await bootstrapSystemShelves(authResult.userId, ctx.prisma);
+      await bootstrapSystemShelves(authResult.userId, plan.slug, ctx.prisma);
 
       return {
         userId: authResult.userId,

@@ -229,7 +229,7 @@ export class UserService {
         },
         include: userInclude,
       });
-      await bootstrapSystemShelves(userId, tx);
+      await bootstrapSystemShelves(userId, slug, tx);
       return created;
     });
 
@@ -304,7 +304,7 @@ export class UserService {
         include: userInclude,
       });
 
-      await bootstrapSystemShelves(updated.unitId, tx);
+      await bootstrapSystemShelves(updated.unitId, payload.slug, tx);
 
       const defaultRealmId = getDefaultRealmId();
       if (defaultRealmId) {

@@ -12,6 +12,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
 import { useCallback } from "react";
+import { useSystemShelfRecoveryToast } from "@/collection/hooks/useSystemShelfRecoveryToast";
 
 interface FavoriteButtonProps {
   unitId: string;
@@ -29,7 +30,14 @@ export function FavoriteButton({
   color,
 }: FavoriteButtonProps) {
   const statusQuery = useQuery(collectionStatusQuery(unitId));
-  const toggleMutation = useToggleFavoriteMutation();
+  const recovery = useSystemShelfRecoveryToast();
+  const toggleMutation = useToggleFavoriteMutation({
+    onError: (error) => {
+      // If the favorites shelf is missing, surface the recovery toast.
+      // The user retriggers the heart click themselves after retry succeeds.
+      recovery.handleError(error);
+    },
+  });
 
   const isFavorited = statusQuery.data?.isFavorited ?? false;
 

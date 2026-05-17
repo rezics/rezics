@@ -7,8 +7,10 @@ import {
   SEED_TAG_NAMES,
   SEED_TAG_TITLES,
   type SeedTagName,
+  type SystemShelfKindKey,
 } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
+import { useTranslation } from "react-i18next";
 import {
   Badge,
   Button,
@@ -21,6 +23,17 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useCallback, useMemo, useState } from "react";
+
+// Backlog/Active/Completed are reached only via progress-status side-effects
+// (`user-unit-progress` spec). Surfacing them as collectable targets in the
+// modal would let users mis-route a unit through the wrong write path, so
+// the modal filters them out entirely. Favorites stays as the one
+// system-shelf collectable target.
+const HIDDEN_SYSTEM_KIND_KEYS: ReadonlySet<SystemShelfKindKey> = new Set([
+  "backlog",
+  "active",
+  "completed",
+]);
 
 interface CollectionModalProps {
   open: boolean;
@@ -43,6 +56,7 @@ export function CollectionModal({
   isLoading,
   isReview = false,
 }: CollectionModalProps) {
+  const { t } = useTranslation();
   const [selectedShelves, setSelectedShelves] = useState<Set<string>>(
     new Set(),
   );
@@ -56,12 +70,31 @@ export function CollectionModal({
     }
   }, [status]);
 
+  const visibleShelves = useMemo(() => {
+    return shelves.filter((s) => {
+      const kk = s.kindKey;
+      return !kk || !HIDDEN_SYSTEM_KIND_KEYS.has(kk as SystemShelfKindKey);
+    });
+  }, [shelves]);
+
   const filteredShelves = useMemo(() => {
-    if (!filterTag) return shelves;
+    if (!filterTag) return visibleShelves;
     const tagId = getSeedTagId(filterTag);
-    if (!tagId) return shelves;
-    return shelves.filter((s) => s.tags?.some((t) => t.tagUnitId === tagId));
-  }, [shelves, filterTag]);
+    if (!tagId) return visibleShelves;
+    return visibleShelves.filter((s) =>
+      s.tags?.some((t) => t.tagUnitId === tagId),
+    );
+  }, [visibleShelves, filterTag]);
+
+  const shelfDisplayTitle = useCallback(
+    (shelf: ShelfSummaryDTO): string => {
+      if (shelf.kindKey === "favorites") {
+        return t("shelf.system.favorites");
+      }
+      return shelf.title ?? "Untitled";
+    },
+    [t],
+  );
 
   const toggleShelf = useCallback((shelfId: string) => {
     setSelectedShelves((prev) => {
@@ -117,30 +150,31 @@ export function CollectionModal({
                   No shelves found
                 </p>
               ) : (
-                filteredShelves.map((shelf) => (
-                  <li key={shelf.unitId}>
-                    {/* biome-ignore lint/a11y/noStaticElementInteractions: row click mirrors the checkbox for pointer users. */}
-                    {/* biome-ignore lint/a11y/useKeyWithClickEvents: keyboard users can toggle the checkbox directly. */}
-                    <div
-                      className="flex items-center gap-2 py-1 cursor-pointer"
-                      onClick={() => toggleShelf(shelf.unitId)}
-                    >
-                      <Checkbox
-                        checked={selectedShelves.has(shelf.unitId)}
-                        tabIndex={-1}
-                        aria-label={`Select ${shelf.title ?? "Untitled"}`}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm truncate">
-                          {shelf.title ?? "Untitled"}
-                        </p>
-                        <p className="text-xs text-text-secondary">
-                          {shelf.itemCount} items
-                        </p>
+                filteredShelves.map((shelf) => {
+                  const displayTitle = shelfDisplayTitle(shelf);
+                  return (
+                    <li key={shelf.unitId}>
+                      {/* biome-ignore lint/a11y/noStaticElementInteractions: row click mirrors the checkbox for pointer users. */}
+                      {/* biome-ignore lint/a11y/useKeyWithClickEvents: keyboard users can toggle the checkbox directly. */}
+                      <div
+                        className="flex items-center gap-2 py-1 cursor-pointer"
+                        onClick={() => toggleShelf(shelf.unitId)}
+                      >
+                        <Checkbox
+                          checked={selectedShelves.has(shelf.unitId)}
+                          tabIndex={-1}
+                          aria-label={`Select ${displayTitle}`}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm truncate">{displayTitle}</p>
+                          <p className="text-xs text-text-secondary">
+                            {shelf.itemCount} items
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </li>
-                ))
+                    </li>
+                  );
+                })
               )}
             </ul>
 

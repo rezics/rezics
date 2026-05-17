@@ -10,9 +10,9 @@ import { PostKind, prisma, UnitType } from "#/prisma/client";
 import { AppError } from "@/utils/errors";
 import { generateBetween } from "./fractional-index";
 import { mapUnitToKind } from "./shelf.service";
-import { getOrCreateSystemShelf } from "./system-shelves";
+import { findSystemShelf } from "./system-shelves";
 
-const FAVORITES_KIND_KEY = "favorites";
+const FAVORITES_KIND_KEY = "favorites" as const;
 const COLLECTION_STATUS_BATCH_CAP = 100;
 
 interface ResolvedTarget {
@@ -33,7 +33,14 @@ interface BatchResolvedTarget {
 
 export class CollectionService {
   private async getFavoritesShelfId(userId: string): Promise<string> {
-    return getOrCreateSystemShelf(userId, FAVORITES_KIND_KEY);
+    const shelfId = await findSystemShelf(userId, FAVORITES_KIND_KEY, prisma);
+    if (!shelfId) {
+      throw new AppError(404, "Favorites shelf not found", {
+        code: "system_shelf_missing",
+        details: { kindKey: FAVORITES_KIND_KEY },
+      });
+    }
+    return shelfId;
   }
 
   /**

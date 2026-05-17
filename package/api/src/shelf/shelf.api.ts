@@ -6,6 +6,7 @@ import type {
   CollectionStatusResponse,
   CollectResponse,
   CreateShelfInput,
+  EnsureSystemShelfResponse,
   ReorderShelfUnitInput,
   SetPinnedTagsInput,
   SetPinnedTagsResponse,
@@ -19,6 +20,7 @@ import type {
   ShelfUnitDTO,
   ShelfUnitRelationDTO,
   ShelfUnitsResponse,
+  SystemShelfKindKey,
   ToggleFavoriteResponse,
   UpdateShelfInput,
 } from "@rezics/contract";
@@ -181,6 +183,15 @@ export const shelfApi = {
     return apiFetch<SetPinnedTagsResponse>(`/shelf/${shelfId}/pinned-tags`, {
       method: "PUT",
       body: JSON.stringify(input),
+    });
+  },
+
+  ensureSystem: async (
+    kindKey: SystemShelfKindKey,
+  ): Promise<EnsureSystemShelfResponse> => {
+    return apiFetch<EnsureSystemShelfResponse>("/shelf/system/ensure", {
+      method: "POST",
+      body: JSON.stringify({ kindKey }),
     });
   },
 };

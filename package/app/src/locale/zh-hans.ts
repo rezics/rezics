@@ -2,6 +2,18 @@ export default {
   title: "ICS",
   motto: "繼承 創造 傳播",
 
+  // Shelf
+  shelf: {
+    system: {
+      favorites: "收藏",
+      backlog: "想看",
+      active: "在看",
+      completed: "已读",
+      recoveryToast: "你的「{{kind}}」列表暂未就绪。",
+      recoveryRetry: "重试",
+    },
+  },
+
   // Navigation & Menu
   navigation: {
     main_items: "主要項目",

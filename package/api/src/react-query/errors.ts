@@ -4,6 +4,8 @@ export interface ApiErrorDetail {
     model?: string;
     target?: string[];
   };
+  /** Set when `code === "system_shelf_missing"`. */
+  kindKey?: string;
 }
 
 export class ApiError extends Error {

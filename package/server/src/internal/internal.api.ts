@@ -73,7 +73,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
             joinDate: new Date(),
           },
         });
-        await bootstrapSystemShelves(userId, tx);
+        await bootstrapSystemShelves(userId, finalSlug, tx);
       });
 
       await syncUserToMeili(userId).catch(() => {});

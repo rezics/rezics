@@ -1,9 +1,11 @@
 import {
   SYSTEM_SHELF_KIND_KEYS as CONTRACT_SYSTEM_SHELF_KIND_KEYS,
+  formatSystemShelfTitle,
   type SystemShelfKindKey,
 } from "@rezics/contract";
 import {
   type Prisma,
+  type PrismaClient,
   UnitStatus,
   UnitType,
   UnitVisibility,
@@ -21,14 +23,7 @@ import {
 export const SYSTEM_KIND_KEYS = CONTRACT_SYSTEM_SHELF_KIND_KEYS;
 
 type PrismaTx = Prisma.TransactionClient;
-type PrismaClientLike = PrismaTx;
-
-const SYSTEM_SHELF_TITLES: Record<SystemShelfKindKey, string> = {
-  favorites: "Favorites",
-  backlog: "Backlog",
-  active: "Active",
-  completed: "Completed",
-};
+type PrismaClientLike = PrismaTx | PrismaClient;
 
 async function findSystemShelf(
   userId: string,
@@ -48,6 +43,7 @@ async function findSystemShelf(
 
 async function createSystemShelf(
   userId: string,
+  userSlug: string,
   kindKey: SystemShelfKindKey,
   client: PrismaClientLike,
 ): Promise<string> {
@@ -62,7 +58,7 @@ async function createSystemShelf(
       translations: {
         create: {
           language: "en",
-          title: SYSTEM_SHELF_TITLES[kindKey],
+          title: formatSystemShelfTitle(userSlug, kindKey),
         },
       },
     },
@@ -86,6 +82,7 @@ function isUniqueConstraintError(error: unknown): boolean {
 
 async function findOrCreateSystemShelf(
   userId: string,
+  userSlug: string,
   kindKey: SystemShelfKindKey,
   client: PrismaClientLike,
 ): Promise<string> {
@@ -93,7 +90,7 @@ async function findOrCreateSystemShelf(
   if (existing) return existing;
 
   try {
-    return await createSystemShelf(userId, kindKey, client);
+    return await createSystemShelf(userId, userSlug, kindKey, client);
   } catch (error) {
     if (isUniqueConstraintError(error)) {
       const retried = await findSystemShelf(userId, kindKey, client);
@@ -105,9 +102,10 @@ async function findOrCreateSystemShelf(
 
 export async function bootstrapSystemShelves(
   userId: string,
+  userSlug: string,
   client: PrismaClientLike,
 ): Promise<void> {
   for (const kindKey of SYSTEM_KIND_KEYS) {
-    await findOrCreateSystemShelf(userId, kindKey, client);
+    await findOrCreateSystemShelf(userId, userSlug, kindKey, client);
   }
 }

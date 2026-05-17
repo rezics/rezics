@@ -1,8 +1,13 @@
 import { shelfQueries } from "@rezics/api/shelf/shelf.queries";
-import type { ShelfDTO } from "@rezics/contract";
+import {
+  SYSTEM_SHELF_KIND_KEYS,
+  type ShelfDTO,
+  type SystemShelfKindKey,
+} from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,
@@ -10,13 +15,23 @@ import {
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
+function isSystemKindKey(
+  kindKey: string | null | undefined,
+): kindKey is SystemShelfKindKey {
+  return (
+    !!kindKey &&
+    (SYSTEM_SHELF_KIND_KEYS as readonly string[]).includes(kindKey)
+  );
+}
+
 const SORT_OPTIONS = [
   { value: "createdAt:desc", label: "Newest" },
   { value: "createdAt:asc", label: "Oldest" },
 ];
 
 export const ShelvesTabSection: FC = () => {
-  const { userId } = useProfileContext();
+  const { userId, isCurrentUser } = useProfileContext();
+  const { t } = useTranslation();
   const [kindKey, setKindKey] = useState("all");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
@@ -41,10 +56,12 @@ export const ShelvesTabSection: FC = () => {
     }
     const chips: ChipDefinition[] = [{ value: "all", label: "All" }];
     for (const k of kindSet) {
-      chips.push({ value: k, label: k });
+      const label =
+        isCurrentUser && isSystemKindKey(k) ? t(`shelf.system.${k}`) : k;
+      chips.push({ value: k, label });
     }
     return chips;
-  }, [shelves]);
+  }, [shelves, isCurrentUser, t]);
 
   // Filter shelves
   const filtered = useMemo(() => {
@@ -95,7 +112,11 @@ export const ShelvesTabSection: FC = () => {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {filtered.map((shelf) => (
-            <ShelfCard key={shelf.unitId} shelf={shelf} />
+            <ShelfCard
+              key={shelf.unitId}
+              shelf={shelf}
+              isOwnerView={isCurrentUser}
+            />
           ))}
         </div>
       )}
@@ -103,8 +124,16 @@ export const ShelvesTabSection: FC = () => {
   );
 };
 
-const ShelfCard: FC<{ shelf: ShelfDTO }> = ({ shelf }) => {
-  const title = shelf.translations?.[0]?.title ?? "Untitled Shelf";
+const ShelfCard: FC<{ shelf: ShelfDTO; isOwnerView: boolean }> = ({
+  shelf,
+  isOwnerView,
+}) => {
+  const { t } = useTranslation();
+  const dbTitle = shelf.translations?.[0]?.title ?? "Untitled Shelf";
+  const title =
+    isOwnerView && isSystemKindKey(shelf.kindKey)
+      ? t(`shelf.system.${shelf.kindKey}`)
+      : dbTitle;
   const itemCount = shelf.items?.length ?? 0;
 
   return (

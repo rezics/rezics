@@ -11,7 +11,8 @@ export {
 export { ShelfService, shelfService } from "./shelf.service";
 export {
   bootstrapSystemShelves,
-  getOrCreateSystemShelf,
+  ensureSystemShelf,
+  findSystemShelf,
   isSystemKindKey,
   SYSTEM_KIND_KEYS,
 } from "./system-shelves";

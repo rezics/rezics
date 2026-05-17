@@ -1,4 +1,5 @@
 import type {
+  EnsureSystemShelfResponse,
   SetPinnedTagsResponse,
   ShelfDetailDTO,
   ShelfDTO,
@@ -14,6 +15,7 @@ import {
   attachReviewSchema,
   cleanupShelfOrphansSchema,
   createShelfSchema,
+  ensureSystemShelfBodySchema,
   hasPermissionToDeleteShelf,
   hasPermissionToUpdateShelf,
   reorderShelfUnitSchema,
@@ -31,7 +33,9 @@ import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { userService } from "@/user/service/user.service";
+import { AppError } from "@/utils/errors";
 import { shelfService } from "./shelf.service";
+import { ensureSystemShelf } from "./system-shelves";
 
 const shelfUnitRouteParamsSchema = t.Object({
   unitId: t.String(),
@@ -63,6 +67,65 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
         summary: "List my shelves",
         description:
           "List the current user's shelves with item counts and tags (for collection modal)",
+        tags: ["Shelves"],
+      },
+    },
+  )
+  .post(
+    "/system/ensure",
+    async ({ body, identity }): Promise<EnsureSystemShelfResponse> => {
+      const user = await userService.getByUserId(identity.userId);
+      if (!user.slug) {
+        throw new AppError(
+          409,
+          "Caller has no slug; cannot ensure system shelf",
+        );
+      }
+      const { unitId, created } = await ensureSystemShelf(
+        identity.userId,
+        user.slug,
+        body.kindKey,
+      );
+      return { unitId, created };
+    },
+    {
+      requireLogin: true,
+      body: ensureSystemShelfBodySchema,
+      parse: async ({ request }) => {
+        const text = await request.text();
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          throw new AppError(400, "Invalid JSON body", {
+            code: "invalid_body",
+          });
+        }
+        if (
+          parsed === null ||
+          typeof parsed !== "object" ||
+          Array.isArray(parsed)
+        ) {
+          throw new AppError(400, "Body must be a JSON object", {
+            code: "invalid_body",
+          });
+        }
+        const extraneousKeys = Object.keys(parsed).filter(
+          (k) => k !== "kindKey",
+        );
+        if (extraneousKeys.length > 0) {
+          throw new AppError(
+            400,
+            `Unexpected body field(s): ${extraneousKeys.join(", ")}`,
+            { code: "invalid_body" },
+          );
+        }
+        return parsed;
+      },
+      detail: {
+        summary: "Ensure a system shelf exists",
+        description:
+          "Idempotent recovery path for users in an inconsistent post-registration state (missing system shelf). Always creates with visibility=PRIVATE and DB title `${slug}'s ${Label}`. No automatic retry; user-driven only.",
         tags: ["Shelves"],
       },
     },

@@ -11,8 +11,37 @@ export type UseSystemShelfRefResult = {
    * resolved. `null` for unauthenticated viewers or while loading.
    */
   unitId: string | null;
+  /**
+   * `true` only when the viewer is authenticated, the slug resolution has
+   * settled, and no Unit row was returned. Differentiates "still loading
+   * at first paint" and "unauthenticated viewer" from the orphan state
+   * surfaced by the recovery flow.
+   */
+  missing: boolean;
   data: SlugResolveResponse | undefined;
 };
+
+/**
+ * Pure projection of (viewer auth state, query state) → `UseSystemShelfRefResult`.
+ *
+ * Exposed for unit tests because the React hook can't be exercised from
+ * `bun:test` without a full DOM + testing-library setup.
+ */
+export function computeSystemShelfRefResult(args: {
+  viewerUnitId: string | null | undefined;
+  isLoading: boolean;
+  data: SlugResolveResponse | undefined;
+}): UseSystemShelfRefResult {
+  const enabled = !!args.viewerUnitId;
+  const unitId = args.data?.unitId ?? null;
+  const settled = enabled && !args.isLoading;
+  return {
+    isLoading: enabled && args.isLoading,
+    unitId,
+    missing: settled && unitId == null,
+    data: args.data,
+  };
+}
 
 /**
  * Resolve the viewer's system-shelf `Unit.id` for a given `kindKey` via the
@@ -33,9 +62,9 @@ export function useSystemShelfRef(
     ...slugResolveQuery({ scope: viewerUnitId ?? "", slug: kindKey }),
     enabled,
   });
-  return {
-    isLoading: enabled && query.isLoading,
-    unitId: query.data?.unitId ?? null,
+  return computeSystemShelfRefResult({
+    viewerUnitId,
+    isLoading: query.isLoading,
     data: query.data,
-  };
+  });
 }

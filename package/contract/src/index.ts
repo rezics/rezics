@@ -33,6 +33,7 @@ export * from "./search/scope";
 export * from "./search/federated";
 export * from "./seed-tags";
 export * from "./shelf";
+export * from "./shelf/system-shelves";
 export * from "./slug";
 export * from "./subscription";
 export * from "./tag";

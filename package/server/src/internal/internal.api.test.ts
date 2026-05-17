@@ -91,6 +91,9 @@ describe("POST /internal/users/provision", () => {
     expect(body).toEqual({ ok: true });
     expect(mockUserCreate).toHaveBeenCalled();
     expect(mockBootstrapSystemShelves).toHaveBeenCalled();
+    const [bootstrapArgs] = mockBootstrapSystemShelves.mock.calls as any[];
+    expect(bootstrapArgs[0]).toBe("user-1");
+    expect(bootstrapArgs[1]).toBe("testuser");
   });
 
   test("new user joins default realm", async () => {
