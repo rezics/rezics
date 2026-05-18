@@ -35,10 +35,12 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const messages = data?.messages ?? [];
+  const messageCount = messages.length;
 
   useEffect(() => {
+    if (messageCount === 0) return;
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages.length]);
+  }, [messageCount]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

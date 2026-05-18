@@ -45,15 +45,13 @@ async function waitAllReady(): Promise<void> {
 
 const dim = (s: string) => `\x1b[2m${s}\x1b[0m`;
 const bold = (s: string) => `\x1b[1m${s}\x1b[0m`;
-const cyan = (s: string) => `\x1b[36m${s}\x1b[0m`;
 const green = (s: string) => `\x1b[32m${s}\x1b[0m`;
 
 function printBanner(): void {
   const labelWidth = Math.max(...instances.map((i) => i.label.length));
-  const rows = instances.map((i, idx) => {
+  const rows = instances.map((i) => {
     const label = i.label.padEnd(labelWidth);
     const url = `http://localhost:${i.port}/`;
-    // const tag = idx === 0 ? cyan("  ← open this") : "";
     const tag = "";
     return `  ${bold(label)}  ${url}${tag}`;
   });

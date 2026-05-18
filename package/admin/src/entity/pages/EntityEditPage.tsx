@@ -24,12 +24,22 @@ import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/entities/$unitId";
 
 interface TranslationDraft {
+  _draftId: string;
   language: string;
   title: string;
   subtitle?: string;
   summary?: string;
   description?: string;
   _removed?: boolean;
+}
+
+function createTranslationDraft(
+  draft: Omit<TranslationDraft, "_draftId">,
+): TranslationDraft {
+  return {
+    _draftId: crypto.randomUUID(),
+    ...draft,
+  };
 }
 
 export default function EntityEditPage() {
@@ -57,13 +67,15 @@ export default function EntityEditPage() {
     setVerified(Boolean(entity.verified));
     setSlugInput(entity.slug ?? "");
     setTranslations(
-      (entity.translations ?? []).map((t) => ({
-        language: t.language,
-        title: t.title ?? "",
-        subtitle: t.subtitle ?? "",
-        summary: t.summary ?? "",
-        description: t.description ?? "",
-      })),
+      (entity.translations ?? []).map((t) =>
+        createTranslationDraft({
+          language: t.language,
+          title: t.title ?? "",
+          subtitle: t.subtitle ?? "",
+          summary: t.summary ?? "",
+          description: t.description ?? "",
+        }),
+      ),
     );
   }, [entityQuery.data]);
 
@@ -79,7 +91,13 @@ export default function EntityEditPage() {
   const handleAddTranslation = () => {
     setTranslations((prev) => [
       ...prev,
-      { language: "", title: "", subtitle: "", summary: "", description: "" },
+      createTranslationDraft({
+        language: "",
+        title: "",
+        subtitle: "",
+        summary: "",
+        description: "",
+      }),
     ]);
   };
 
@@ -274,7 +292,7 @@ export default function EntityEditPage() {
                   translations.map((tr, index) =>
                     tr._removed ? null : (
                       <div
-                        key={`${index}-${tr.language}`}
+                        key={tr._draftId}
                         className="rounded-md border border-border-whisper p-3"
                       >
                         <div className="flex items-center justify-between gap-2">

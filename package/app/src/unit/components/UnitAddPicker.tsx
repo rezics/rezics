@@ -12,7 +12,14 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Link as LinkIcon, Search } from "lucide-react";
-import { type ReactNode, useCallback, useEffect, useId, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useUnitCandidates } from "../hooks/useUnitCandidates";
 import {
@@ -44,16 +51,20 @@ export function UnitAddPicker({
   renderItemAction,
 }: UnitAddPickerProps) {
   const { t } = useTranslation();
-  const explicitContext = workContextUnitId
-    ? { unitId: workContextUnitId, title: workContextTitle }
-    : undefined;
+  const explicitContext = useMemo(
+    () =>
+      workContextUnitId
+        ? { unitId: workContextUnitId, title: workContextTitle }
+        : undefined,
+    [workContextUnitId, workContextTitle],
+  );
   const [workContext, setWorkContext] = useState<UnitWorkContext | undefined>(
     explicitContext,
   );
 
   useEffect(() => {
     if (explicitContext) setWorkContext(explicitContext);
-  }, [explicitContext?.unitId, explicitContext?.title]);
+  }, [explicitContext]);
 
   const renderAction = (candidate: Candidate) => {
     if (renderItemAction) return renderItemAction(candidate);

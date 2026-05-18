@@ -53,8 +53,10 @@ function paramNamesFromRoute(route: MatchedRoute): string[] {
   const names: string[] = [];
   let match: RegExpExecArray | null;
   ID_PARAM_RE.lastIndex = 0;
-  while ((match = ID_PARAM_RE.exec(template)) !== null) {
+  match = ID_PARAM_RE.exec(template);
+  while (match !== null) {
     if (match[1]) names.push(match[1]);
+    match = ID_PARAM_RE.exec(template);
   }
   return names;
 }

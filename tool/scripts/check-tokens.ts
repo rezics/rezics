@@ -14,7 +14,6 @@ import {
   lightColors,
 } from "../../package/ui/src/config/tokens/colors";
 
-type Mode = "light" | "dark";
 type RGB = { r: number; g: number; b: number; a: number };
 
 const HEX_RE = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;

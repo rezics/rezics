@@ -85,7 +85,7 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
       </div>
       {!item.read && (
         <span
-          aria-label="unread"
+          aria-hidden="true"
           className="mt-2 size-2 shrink-0 rounded-full bg-primary"
         />
       )}

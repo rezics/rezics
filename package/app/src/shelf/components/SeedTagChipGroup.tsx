@@ -41,11 +41,8 @@ export function SeedTagChipGroup({
   };
 
   return (
-    <div
-      className="flex flex-wrap gap-2"
-      role="group"
-      aria-label="Content type tags"
-    >
+    <fieldset className="flex flex-wrap gap-2">
+      <legend className="sr-only">Content type tags</legend>
       {chips.map(({ name, tagId, label }) => {
         const isSelected = selected.has(tagId);
         return (
@@ -63,7 +60,7 @@ export function SeedTagChipGroup({
           </Badge>
         );
       })}
-    </div>
+    </fieldset>
   );
 }
 

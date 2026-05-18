@@ -54,7 +54,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         }),
       });
     }
-  }, [isLoading, membershipLoading, allowed, navigate, realmId]);
+  }, [isLoading, membershipLoading, allowed, navigate, realmId, realm?.slug]);
 
   useEffect(() => {
     if (translation) {
