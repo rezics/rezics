@@ -24,6 +24,11 @@ import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfCard } from "./ShelfCard";
 import { ShelfItemCard } from "./ShelfItemCard";
 
+interface ReviewTargetWork {
+  unitId: string;
+  title: string;
+}
+
 interface ShelfItemRendererProps {
   entry: ShelfStreamEntry;
   viewMode: ShelfView;
@@ -41,6 +46,10 @@ interface ShelfItemRendererProps {
 function renderUnit(
   enriched: EnrichedShelfUnit,
   viewMode: ShelfView,
+  options?: {
+    targetWork?: ReviewTargetWork;
+    showTargetWork?: boolean;
+  },
 ): React.ReactNode {
   const { unit, data } = enriched;
   switch (unit.kind) {
@@ -75,7 +84,13 @@ function renderUnit(
     case "review": {
       const post = data as PostDTO | undefined;
       if (!post) return <ShelfItemCard unit={unit} />;
-      return <ReviewCard review={post} />;
+      return (
+        <ReviewCard
+          review={post}
+          targetWork={options?.targetWork}
+          showTargetWork={options?.showTargetWork}
+        />
+      );
     }
     case "quote": {
       const post = data as PostDTO | undefined;
@@ -102,16 +117,52 @@ function renderUnit(
   }
 }
 
+function getBookTitle(enriched: EnrichedShelfUnit | undefined): string | null {
+  if (!enriched || enriched.unit.kind !== "book") return null;
+  const book = enriched.data as BookDTO | undefined;
+  return book?.translations?.[0]?.title ?? enriched.unit.unitId;
+}
+
+function targetWorkFromParent(
+  parent: EnrichedShelfUnit | undefined,
+): ReviewTargetWork | undefined {
+  const title = getBookTitle(parent);
+  if (!parent || !title) return undefined;
+  return {
+    unitId: parent.unit.unitId,
+    title,
+  };
+}
+
+function attachmentCountsForEntry(entry: ShelfStreamEntry):
+  | {
+      reviews: number;
+      tags: number;
+    }
+  | undefined {
+  if (entry.kind !== "root") return undefined;
+  let reviews = 0;
+  let tags = 0;
+  for (const child of entry.children) {
+    if (child.unit.kind === "review") reviews += 1;
+    if (child.unit.kind === "tag") tags += 1;
+  }
+  if (reviews === 0 && tags === 0) return undefined;
+  return { reviews, tags };
+}
+
 function NestedRootCard({
   root,
-  children,
+  attachedChildren,
 }: {
   root: EnrichedShelfUnit;
-  children: EnrichedShelfUnit[];
+  attachedChildren: EnrichedShelfUnit[];
 }) {
   const [tab, setTab] = useState("0");
   const primary = renderUnit(root, "nested");
-  const reviewChildren = children.filter((c) => c.unit.kind === "review");
+  const reviewChildren = attachedChildren.filter(
+    (c) => c.unit.kind === "review",
+  );
 
   if (reviewChildren.length === 0) {
     return <>{primary}</>;
@@ -139,6 +190,7 @@ function NestedRootCard({
         {reviewChildren[activeIdx]?.data && (
           <ReviewCard
             review={reviewChildren[activeIdx]!.data as PostDTO}
+            showTargetWork={false}
           />
         )}
       </div>
@@ -156,15 +208,26 @@ export function ShelfItemRenderer({
   if (editing) {
     content = (
       <UnitCard
-        summary={shelfUnitToUnitCardSummary(entry.unit.unit, entry.unit.data)}
+        summary={shelfUnitToUnitCardSummary(
+          entry.unit.unit,
+          entry.unit.data,
+          undefined,
+          attachmentCountsForEntry(entry),
+        )}
       />
     );
   } else if (entry.kind === "root" && viewMode === "nested") {
     content = (
-      <NestedRootCard root={entry.unit} children={entry.children ?? []} />
+      <NestedRootCard
+        root={entry.unit}
+        attachedChildren={entry.children ?? []}
+      />
     );
   } else {
-    content = <>{renderUnit(entry.unit, viewMode)}</>;
+    content = renderUnit(entry.unit, viewMode, {
+      targetWork:
+        entry.kind === "child" ? targetWorkFromParent(entry.parent) : undefined,
+    });
   }
 
   if (!editControls) {

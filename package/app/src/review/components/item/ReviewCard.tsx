@@ -54,15 +54,41 @@ const ReviewRatingBadge: React.FC<ReviewRatingBadgeProps> = ({ review }) => {
 interface ReviewCardProps {
   review: PostDTO;
   className?: string;
+  targetWork?: ReviewTargetWork | null;
+  showTargetWork?: boolean;
+}
+
+export interface ReviewTargetWork {
+  unitId: string;
+  title: string;
+}
+
+function getReviewTargetWork(
+  review: PostDTO,
+  targetWork?: ReviewTargetWork | null,
+): ReviewTargetWork | null {
+  if (targetWork?.unitId && targetWork.title) return targetWork;
+  const book = (
+    review.extra as { book?: { id?: string; title?: string } } | null
+  )?.book;
+  const unitId = book?.id ?? review.targetUnitId ?? undefined;
+  const title = book?.title;
+  if (!unitId || !title) return null;
+  return { unitId, title };
 }
 
 export const ReviewCard: React.FC<ReviewCardProps> = ({
   review,
   className,
+  targetWork,
+  showTargetWork = true,
 }) => {
   const navigate = useNavigate();
 
   const reviewTitle = (review.extra as any)?.title as string | undefined;
+  const reviewTargetWork = showTargetWork
+    ? getReviewTargetWork(review, targetWork)
+    : null;
 
   const handleReplyInvoke = () => {
     if (!review.unitId) return;
@@ -94,11 +120,26 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
             to="/review/$reviewId"
             params={{ reviewId: review.unitId }}
             underline="none"
-            className="w-fit max-w-full truncate text-base font-medium text-text-primary hover:text-brand"
+            className="w-fit max-w-full truncate text-base font-medium text-text-primary hover:text-text-brand"
             onClick={(e) => e.stopPropagation()}
           >
             {reviewTitle}
           </TextLink>
+        )}
+
+        {reviewTargetWork && (
+          <div className="flex min-w-0 items-center gap-1 text-xs leading-dense text-text-secondary">
+            <span className="shrink-0">作品</span>
+            <TextLink
+              to="/book/$bookId"
+              params={{ bookId: reviewTargetWork.unitId }}
+              underline="none"
+              className="min-w-0 truncate text-text-secondary hover:text-text-primary"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {reviewTargetWork.title}
+            </TextLink>
+          </div>
         )}
 
         <PostBodyMarkdown body={review.body ?? ""} clamp={{ maxLines: 6 }} />

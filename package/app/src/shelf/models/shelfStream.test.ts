@@ -270,13 +270,7 @@ describe("deriveShelfStream — flat emission", () => {
       { unitId: "book-c", title: "Cherry", position: "c" },
     ]);
 
-    const stream = deriveShelfStream(
-      units,
-      relations,
-      "flat",
-      titleAsc,
-      false,
-    );
+    const stream = deriveShelfStream(units, relations, "flat", titleAsc, false);
 
     expect(stream).toHaveLength(5);
     expect(stream.every((entry) => entry.kind === "peer")).toBe(true);
@@ -358,13 +352,7 @@ describe("deriveShelfStream — sort scope and invariants", () => {
 
   test("manual sort yields the same prime-anchored stream regardless of sortPrimeOnly flag", () => {
     const { units, relations } = defaultScene();
-    const withOn = deriveShelfStream(
-      units,
-      relations,
-      "flat",
-      manualAsc,
-      true,
-    );
+    const withOn = deriveShelfStream(units, relations, "flat", manualAsc, true);
     const withOff = deriveShelfStream(
       units,
       relations,
@@ -422,20 +410,8 @@ describe("deriveShelfStream — sort scope and invariants", () => {
       { unitId: "book-b", title: "Same", position: "b" },
     ]);
 
-    const first = deriveShelfStream(
-      units,
-      relations,
-      "flat",
-      titleAsc,
-      true,
-    );
-    const second = deriveShelfStream(
-      units,
-      relations,
-      "flat",
-      titleAsc,
-      true,
-    );
+    const first = deriveShelfStream(units, relations, "flat", titleAsc, true);
+    const second = deriveShelfStream(units, relations, "flat", titleAsc, true);
 
     expect(idsOf(first)).toEqual(["book-a", "book-b", "book-c"]);
     expect(idsOf(second)).toEqual(idsOf(first));
@@ -492,13 +468,7 @@ describe("deriveShelfStream — sort scope and invariants", () => {
 
   test("title descending reverses title order with deterministic fallbacks", () => {
     const { units, relations } = defaultScene();
-    const stream = deriveShelfStream(
-      units,
-      relations,
-      "flat",
-      titleDesc,
-      true,
-    );
+    const stream = deriveShelfStream(units, relations, "flat", titleDesc, true);
 
     expect(idsOf(stream)).toEqual([
       "book-c",
@@ -517,6 +487,7 @@ describe("deriveShelfStream — sort scope and invariants", () => {
     expect(child).toBeTruthy();
     if (child?.kind === "child") {
       expect(child.parentUnitId).toBe("book-a");
+      expect(child.parent?.unit.unitId).toBe("book-a");
       expect(child.unit.unit.unitId).toBe("r-a1");
     }
   });

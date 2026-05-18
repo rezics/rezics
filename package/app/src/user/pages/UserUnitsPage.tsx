@@ -1,8 +1,15 @@
+import { bookQueries } from "@rezics/api/book/book";
 import {
   contentSearchQueryOptions,
   postSearchQueryOptions,
 } from "@rezics/api/meili/meili.queries";
-import { bookQueries } from "@rezics/api/book/book";
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
+import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
+import { PostKind, UnitType } from "@rezics/contract";
+import {
+  UniversalPaginator,
+  type UniversalPaginatorHandle,
+} from "@rezics/ui/composite/pagination/Pagination.tsx";
 import {
   Alert,
   AlertDescription,
@@ -10,24 +17,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rezics/ui/shadcn";
-import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type {
-  BookDTO,
-  PostDTO,
-  PostSearchDocument,
-  ShelfDTO,
-  UnitDTO,
-} from "@rezics/contract";
-import { PostKind, UnitType } from "@rezics/contract";
-import {
-  UniversalPaginator,
-  type UniversalPaginatorHandle,
-} from "@rezics/ui/composite/pagination/Pagination.tsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
 import { BookListView } from "@/book-library/components/BookList/BookListView";
 import { ExcerptList } from "@/excerpt";
 import { ReviewList } from "@/review/components/list/ReviewList";
+import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { ShelfCard } from "@/shelf/components/ShelfCard";
@@ -49,35 +44,6 @@ const ShelfListView: React.FC<{ shelves: ShelfDTO[] }> = ({ shelves }) => {
 type TabKey = "shelf" | "review" | "remark" | "excerpt" | "book";
 
 const EXTERNAL_PAGE_SIZE = 50;
-
-function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
-  return {
-    unitId: doc.id,
-    authorUserId: doc.authorUserId,
-    author: {
-      unitId: doc.authorUserId,
-      name: doc.authorName ?? "",
-      slug: doc.authorSlug ?? undefined,
-      avatar: doc.authorAvatar ?? undefined,
-    },
-    targetUnitId: doc.targetUnitId,
-    realmUnitId: doc.realmUnitId,
-    body: doc.body,
-    rootPostUnitId: doc.rootPostUnitId,
-    parentPostUnitId: doc.parentPostUnitId,
-    kind: doc.kind as PostDTO["kind"],
-    depth: doc.depth,
-    sortPath: doc.sortPath,
-    replyCount: doc.replyCount,
-    directReplyCount: doc.directReplyCount,
-    lastReplyAt: doc.lastReplyAt,
-    isLocked: doc.isLocked,
-    scoreEntryId: doc.scoreEntryId,
-    extra: doc.extra,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
-  };
-}
 
 export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const ref = useRef<UniversalPaginatorHandle>(null);

@@ -17,6 +17,7 @@ export interface ShelfStreamChildEntry {
   kind: "child";
   unit: EnrichedShelfUnit;
   parentUnitId: string;
+  parent?: EnrichedShelfUnit;
 }
 
 export interface ShelfStreamPeerEntry {
@@ -167,6 +168,7 @@ export function deriveShelfStream(
           kind: "child",
           unit: child,
           parentUnitId: root.unit.unitId,
+          parent: root,
         });
       }
     }

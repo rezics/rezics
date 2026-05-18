@@ -9,10 +9,13 @@ import type {
   SearchScope,
   UserSearchDocument,
 } from "@rezics/contract";
+import { PostKind } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { ReviewCard } from "@/review/components/item/ReviewCard";
+import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 
 const CATEGORY_TITLES: Record<SearchCategory, string> = {
   all: "All",
@@ -57,14 +60,21 @@ function ContentItemRow({ item }: { item: ContentSearchDocument }) {
 }
 
 function PostItemRow({ item }: { item: PostSearchDocument }) {
+  if (item.kind === PostKind.REVIEW) {
+    return (
+      <ReviewCard
+        review={mapPostSearchDocToPostDTO(item)}
+        className="border-b-0 py-0"
+      />
+    );
+  }
+
   return (
     <div className="py-3 border-b border-border-whisper last:border-b-0">
       <p className="text-xs text-text-secondary">
         {item.kind ?? "POST"} · {item.authorName ?? item.authorUserId}
       </p>
-      {item.body && (
-        <p className="text-sm line-clamp-3 mt-1">{item.body}</p>
-      )}
+      {item.body && <p className="text-sm line-clamp-3 mt-1">{item.body}</p>}
     </div>
   );
 }
@@ -74,9 +84,7 @@ function RealmItemRow({ item }: { item: RealmSearchDocument }) {
   return (
     <div className="py-3 border-b border-border-whisper last:border-b-0">
       <p className="text-sm font-medium truncate">{title || item.id}</p>
-      <p className="text-xs text-text-secondary">
-        {item.memberCount} members
-      </p>
+      <p className="text-xs text-text-secondary">{item.memberCount} members</p>
     </div>
   );
 }
@@ -94,9 +102,7 @@ function UserItemRow({ item }: { item: UserSearchDocument }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{item.name}</p>
         {item.bio && (
-          <p className="text-xs text-text-secondary line-clamp-2">
-            {item.bio}
-          </p>
+          <p className="text-xs text-text-secondary line-clamp-2">{item.bio}</p>
         )}
       </div>
     </div>
@@ -113,7 +119,9 @@ type ItemRowCategory =
   | RealmRowCategory
   | UserRowCategory;
 
-function isContentSection(category: SearchCategory): category is ContentRowCategory {
+function isContentSection(
+  category: SearchCategory,
+): category is ContentRowCategory {
   return category === "books" || category === "shelves";
 }
 
@@ -150,15 +158,11 @@ function RankedHitRow({ hit }: { hit: FederatedRankedHit }) {
       {indexUid === "content" && (
         <ContentItemRow item={hit as ContentSearchDocument} />
       )}
-      {indexUid === "post" && (
-        <PostItemRow item={hit as PostSearchDocument} />
-      )}
+      {indexUid === "post" && <PostItemRow item={hit as PostSearchDocument} />}
       {indexUid === "realm" && (
         <RealmItemRow item={hit as RealmSearchDocument} />
       )}
-      {indexUid === "user" && (
-        <UserItemRow item={hit as UserSearchDocument} />
-      )}
+      {indexUid === "user" && <UserItemRow item={hit as UserSearchDocument} />}
     </div>
   );
 }
@@ -206,7 +210,9 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
   }
 
   if (result.kind === "grouped") {
-    const sectionEntries: Array<[ItemRowCategory, { totalHits: number; items: unknown[] }]> = [];
+    const sectionEntries: Array<
+      [ItemRowCategory, { totalHits: number; items: unknown[] }]
+    > = [];
     const s = result.sections;
     if (s.books) sectionEntries.push(["books", s.books]);
     if (s.reviews) sectionEntries.push(["reviews", s.reviews]);

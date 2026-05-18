@@ -94,7 +94,7 @@ export const BookReviewPage: React.FC = () => {
             Write a Review
           </Button>
         </div>
-        <ReviewList reviews={reviews} />
+        <ReviewList reviews={reviews} showTargetWork={false} />
       </div>
     </div>
   );

@@ -1,42 +1,14 @@
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type { PostDTO, PostSearchDocument } from "@rezics/contract";
+import type { PostDTO } from "@rezics/contract";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
+import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-
-function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
-  return {
-    unitId: doc.id,
-    authorUserId: doc.authorUserId,
-    author: {
-      unitId: doc.authorUserId,
-      name: doc.authorName ?? "",
-      slug: doc.authorSlug ?? undefined,
-      avatar: doc.authorAvatar ?? undefined,
-    },
-    targetUnitId: doc.targetUnitId,
-    realmUnitId: doc.realmUnitId,
-    body: doc.body,
-    rootPostUnitId: doc.rootPostUnitId,
-    parentPostUnitId: doc.parentPostUnitId,
-    kind: doc.kind as any,
-    depth: doc.depth,
-    sortPath: doc.sortPath,
-    replyCount: doc.replyCount,
-    directReplyCount: doc.directReplyCount,
-    lastReplyAt: doc.lastReplyAt,
-    isLocked: doc.isLocked,
-    scoreEntryId: doc.scoreEntryId,
-    extra: doc.extra as any,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
-  };
-}
 
 type Review = PostDTO;
 
@@ -134,7 +106,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
         }
       >
         {(currentPageItems: Review[]) => (
-          <ReviewList reviews={currentPageItems} />
+          <ReviewList reviews={currentPageItems} showTargetWork={!bookUnitId} />
         )}
       </UniversalPaginator>
     </div>

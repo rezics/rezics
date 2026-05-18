@@ -1,3 +1,6 @@
+/**
+ * TODO The current strategy has an issue. In list mode, a review actually does not need to be tied to the prime ordering. It should be able to be sorted into any position independently, while the bound prime information should be shown in the review card.
+ */
 import type { ShelfView } from "@rezics/api/shelf";
 import { shelfDetailQuery } from "@rezics/api/shelf";
 import {

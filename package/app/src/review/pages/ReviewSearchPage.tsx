@@ -1,10 +1,10 @@
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
-import type { PostDTO, PostSearchDocument } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReviewList } from "@/review/components/list/ReviewList";
+import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 
@@ -52,32 +52,3 @@ export function ReviewSearchPage() {
 }
 
 export default ReviewSearchPage;
-
-function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
-  return {
-    unitId: doc.id,
-    authorUserId: doc.authorUserId,
-    author: {
-      unitId: doc.authorUserId,
-      name: doc.authorName ?? "",
-      slug: doc.authorSlug ?? undefined,
-      avatar: doc.authorAvatar ?? undefined,
-    },
-    targetUnitId: doc.targetUnitId,
-    realmUnitId: doc.realmUnitId,
-    body: doc.body,
-    rootPostUnitId: doc.rootPostUnitId,
-    parentPostUnitId: doc.parentPostUnitId,
-    kind: doc.kind as PostDTO["kind"],
-    depth: doc.depth,
-    sortPath: doc.sortPath,
-    replyCount: doc.replyCount,
-    directReplyCount: doc.directReplyCount,
-    lastReplyAt: doc.lastReplyAt,
-    isLocked: doc.isLocked,
-    scoreEntryId: doc.scoreEntryId,
-    extra: doc.extra,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
-  };
-}
