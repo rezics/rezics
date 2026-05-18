@@ -86,7 +86,7 @@ describe("authApi", () => {
             createdAt: "2026-03-10T00:00:00.000Z",
             updatedAt: "2026-03-10T00:00:00.000Z",
           },
-          authSession: {
+          authAccountState: {
             email: "reader@example.com",
             emailVerified: false,
             mainUserExists: false,
@@ -118,7 +118,7 @@ describe("authApi", () => {
     const { authApi } = await import("./auth.api");
     const response = await authApi.getSessionState();
 
-    expect(response.authSession.emailVerified).toBe(false);
+    expect(response.authAccountState.emailVerified).toBe(false);
 
     const [url, options] = fetchMock.mock.calls[0]!;
     expect(url).toBe("http://api.example/auth/get-session-state");

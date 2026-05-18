@@ -56,7 +56,7 @@ export async function hydrateAuthSessionState(options?: {
     const sessionState: AuthSessionSnapshot = {
       session: serverState.session ?? null,
       user: serverState.user ?? null,
-      authSession: serverState.authSession,
+      authAccountState: serverState.authAccountState,
       rezicsUserId: serverState.rezicsUserId ?? null,
       rezicsPermission: serverState.rezicsPermission ?? null,
     };

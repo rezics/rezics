@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { permissionSchema } from "../permission";
-import { authSessionStateSchema } from "./self-service";
+import { authAccountStateSchema } from "./self-service";
 import { authSessionSchema, authUserSchema } from "./sign-in";
 
 export const AUTH_PRESENCE_COOKIE_NAME = "rezics_logged_in";
@@ -16,7 +16,7 @@ export type GetSessionResponse = (typeof getSessionResponseSchema)["static"];
 export const getSessionStateResponseSchema = t.Object({
   session: authSessionSchema,
   user: authUserSchema,
-  authSession: authSessionStateSchema,
+  authAccountState: authAccountStateSchema,
   rezicsUserId: t.Optional(t.Nullable(t.String())),
   rezicsPermission: t.Optional(t.Nullable(permissionSchema)),
 });

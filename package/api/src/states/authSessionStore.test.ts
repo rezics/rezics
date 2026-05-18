@@ -33,7 +33,7 @@ const readySession: GetSessionStateResponse = {
     createdAt: "2026-03-10T00:00:00.000Z",
     updatedAt: "2026-03-10T00:00:00.000Z",
   },
-  authSession: {
+  authAccountState: {
     email: "reader@example.com",
     emailVerified: true,
     mainUserExists: true,
@@ -59,8 +59,8 @@ const readySession: GetSessionStateResponse = {
 
 const incompleteSession = {
   ...readySession,
-  authSession: {
-    ...readySession.authSession,
+  authAccountState: {
+    ...readySession.authAccountState,
     emailVerified: false,
     mainUserExists: false,
     registrationComplete: false,
@@ -80,8 +80,8 @@ const incompleteSession = {
 
 const setupRequiredSession = {
   ...readySession,
-  authSession: {
-    ...readySession.authSession,
+  authAccountState: {
+    ...readySession.authAccountState,
     mainUserExists: false,
     registrationComplete: false,
     canAcquireMemberToken: false,
@@ -99,8 +99,8 @@ const setupRequiredSession = {
 
 const profileSetupSession = {
   ...readySession,
-  authSession: {
-    ...readySession.authSession,
+  authAccountState: {
+    ...readySession.authAccountState,
     mainUserExists: true,
     registrationComplete: false,
     canAcquireMemberToken: false,
@@ -177,7 +177,7 @@ describe("authSessionStore", () => {
     });
   });
 
-  test("derives pending verification from authSession state", async () => {
+  test("derives pending verification from auth account state", async () => {
     const { useAuthSessionStore } = await import("./authSessionStore");
 
     useAuthSessionStore.getState().setSessionState(incompleteSession);

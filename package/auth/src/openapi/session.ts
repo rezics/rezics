@@ -121,7 +121,7 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
 
   return Response.json({
     ...sessionData,
-    authSession: {
+    authAccountState: {
       email: sessionData.user.email,
       emailVerified,
       mainUserExists,

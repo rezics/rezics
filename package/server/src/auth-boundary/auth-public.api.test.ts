@@ -400,7 +400,7 @@ describe("main auth public boundary", () => {
           email: "reader@example.com",
           emailVerified: true,
         },
-        authSession: {
+        authAccountState: {
           registrationComplete: true,
         },
       }),
@@ -468,7 +468,7 @@ describe("main auth public boundary", () => {
           createdAt: "2026-03-10T00:00:00.000Z",
           updatedAt: "2026-03-10T00:00:00.000Z",
         },
-        authSession: {
+        authAccountState: {
           email: "root@example.com",
           emailVerified: true,
           mainUserExists: true,
@@ -546,7 +546,7 @@ describe("main auth public boundary", () => {
           email: "reader@example.com",
           emailVerified: false,
         },
-        authSession: {
+        authAccountState: {
           registrationComplete: false,
         },
       }),
@@ -578,7 +578,7 @@ describe("main auth public boundary", () => {
           email: "reader@example.com",
           emailVerified: true,
         },
-        authSession: {
+        authAccountState: {
           registrationComplete: false,
           readinessStatus: "needs-main-setup",
         },
@@ -622,7 +622,7 @@ describe("main auth public boundary", () => {
           email: "reader@example.com",
           emailVerified: true,
         },
-        authSession: {
+        authAccountState: {
           registrationComplete: false,
           readinessStatus: "needs-main-setup",
         },

@@ -28,7 +28,7 @@ const LOCAL_DEV_ORIGINS = [
   "http://localhost:8000",
 ];
 
-type AuthSessionStateResponse = {
+type AuthBoundarySessionStateResponse = {
   session?: {
     id?: string;
     token?: string;
@@ -41,7 +41,7 @@ type AuthSessionStateResponse = {
     emailVerified?: boolean;
     image?: string | null;
   };
-  authSession?: {
+  authAccountState?: {
     email?: string;
     mainUserExists?: boolean;
     registrationComplete?: boolean;
@@ -294,7 +294,7 @@ async function fetchAuthSessionState(request: Request) {
     return null;
   }
 
-  return (await response.json()) as AuthSessionStateResponse;
+  return (await response.json()) as AuthBoundarySessionStateResponse;
 }
 
 export async function proxyAuthBoundaryRequest(
@@ -587,7 +587,7 @@ export async function getMainAwareAuthSessionState(
 ): Promise<Response> {
   const sessionState = await fetchAuthSessionState(request);
   const authUserId = sessionState?.user?.id;
-  if (!authUserId || !sessionState?.authSession) {
+  if (!authUserId || !sessionState?.authAccountState) {
     return jsonResponse(
       {
         error: {
@@ -622,8 +622,8 @@ export async function getMainAwareAuthSessionState(
       ...sessionState,
       rezicsUserId: registrationComplete ? (mainUser?.unitId ?? null) : null,
       rezicsPermission,
-      authSession: {
-        ...sessionState.authSession,
+      authAccountState: {
+        ...sessionState.authAccountState,
         emailVerified,
         mainUserExists,
         registrationComplete,
@@ -636,7 +636,8 @@ export async function getMainAwareAuthSessionState(
             : memberReady
               ? undefined
               : "setup-account",
-          email: sessionState.authSession.email ?? sessionState.user?.email,
+          email:
+            sessionState.authAccountState.email ?? sessionState.user?.email,
           emailVerified,
           requiresEmailVerification: !emailVerified,
           requiresMainAccountSetup: emailVerified && !memberReady,

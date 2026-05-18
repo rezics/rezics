@@ -20,7 +20,7 @@ export type AuthRegistrationStage =
 export type AuthSessionSnapshot = {
   session: GetSessionStateResponse["session"] | null;
   user: GetSessionStateResponse["user"] | null;
-  authSession: GetSessionStateResponse["authSession"];
+  authAccountState: GetSessionStateResponse["authAccountState"];
   rezicsUserId?: GetSessionStateResponse["rezicsUserId"] | null;
   rezicsPermission?: GetSessionStateResponse["rezicsPermission"] | null;
 };
@@ -53,7 +53,7 @@ export type AuthSessionDerivedState = {
   auth: AuthSessionAuthState;
   rezics: RezicsSessionState;
   registration: AuthRegistrationState;
-  authSession: GetSessionStateResponse["authSession"] | null;
+  authAccountState: GetSessionStateResponse["authAccountState"] | null;
   capabilityLevel: AuthCapabilityLevel;
   error: string | null;
 };
@@ -63,7 +63,7 @@ function deriveRegistrationStage(input: {
   emailVerified: boolean;
   mainUserExists: boolean;
   registrationComplete: boolean;
-  pendingStep?: GetSessionStateResponse["authSession"]["pendingRegistration"]["step"];
+  pendingStep?: GetSessionStateResponse["authAccountState"]["pendingRegistration"]["step"];
 }): AuthRegistrationStage {
   if (!input.hasAuthIdentity) {
     return "anonymous";
@@ -108,17 +108,17 @@ export function deriveAuthSessionState(
   status: AuthSessionHydrationStatus = "ready",
   error: string | null = null,
 ): AuthSessionDerivedState {
-  const authSession = snapshot?.authSession ?? null;
-  const hasAuthIdentity = Boolean(authSession);
-  const emailVerified = Boolean(authSession?.emailVerified);
-  const mainUserExists = Boolean(authSession?.mainUserExists);
+  const authAccountState = snapshot?.authAccountState ?? null;
+  const hasAuthIdentity = Boolean(authAccountState);
+  const emailVerified = Boolean(authAccountState?.emailVerified);
+  const mainUserExists = Boolean(authAccountState?.mainUserExists);
   const needsVerification = hasAuthIdentity && !emailVerified;
-  const registrationComplete = Boolean(authSession?.registrationComplete);
+  const registrationComplete = Boolean(authAccountState?.registrationComplete);
   const needsMainSetup = Boolean(
     hasAuthIdentity && emailVerified && !registrationComplete,
   );
   const permission =
-    authSession?.canAcquireMemberToken || registrationComplete
+    authAccountState?.canAcquireMemberToken || registrationComplete
       ? (snapshot?.rezicsPermission ?? null)
       : null;
   const hasMemberSession = permission !== null;
@@ -127,7 +127,7 @@ export function deriveAuthSessionState(
     emailVerified,
     mainUserExists,
     registrationComplete,
-    pendingStep: authSession?.pendingRegistration?.step,
+    pendingStep: authAccountState?.pendingRegistration?.step,
   });
   const capabilityLevel = deriveCapabilityLevel({
     hasMemberSession,
@@ -163,7 +163,7 @@ export function deriveAuthSessionState(
       needsVerification,
       needsMainSetup,
     },
-    authSession,
+    authAccountState,
     capabilityLevel,
     error,
   };

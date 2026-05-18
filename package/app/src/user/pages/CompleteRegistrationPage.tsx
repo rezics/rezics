@@ -115,19 +115,19 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
   const { t } = useTranslation();
   const auth = useAuth();
   const [displayName, setDisplayName] = useState(
-    auth.authSession?.email?.split("@")[0] ?? "",
+    auth.authAccountState?.email?.split("@")[0] ?? "",
   );
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
 
-  // Pre-fill from auth session (OAuth name)
+  // Pre-fill from auth account state (OAuth name)
   useEffect(() => {
-    if (auth.authSession && !displayName) {
-      setDisplayName(auth.authSession.email.split("@")[0] ?? "");
+    if (auth.authAccountState && !displayName) {
+      setDisplayName(auth.authAccountState.email.split("@")[0] ?? "");
     }
-  }, [auth.authSession, displayName]);
+  }, [auth.authAccountState, displayName]);
 
   // Auto-derive slug from username if user hasn't manually edited slug
   useEffect(() => {
@@ -463,12 +463,12 @@ export const CompleteRegistrationPage: FC = () => {
       : registrationStage;
   const emailVerified =
     effectiveRegistrationStage !== "verify-email" &&
-    (auth.authSession?.emailVerified || justCompletedEmail);
+    (auth.authAccountState?.emailVerified || justCompletedEmail);
   const mainUserExists = auth.mainUserExists;
-  const email = auth.authSession?.email ?? "";
-  const trustedProvider = auth.authSession?.trustedProviderId;
+  const email = auth.authAccountState?.email ?? "";
+  const trustedProvider = auth.authAccountState?.trustedProviderId;
   const checkingAuthSession =
-    !auth.authSession &&
+    !auth.authAccountState &&
     (auth.loading ||
       authSessionStatus === "idle" ||
       sessionProbeStatus !== "done");
@@ -548,7 +548,7 @@ export const CompleteRegistrationPage: FC = () => {
 
   useEffect(() => {
     if (
-      auth.authSession ||
+      auth.authAccountState ||
       authSessionStatus === "loading" ||
       sessionProbeStatus !== "idle"
     ) {
@@ -566,7 +566,7 @@ export const CompleteRegistrationPage: FC = () => {
     return () => {
       mounted = false;
     };
-  }, [auth.authSession, authSessionStatus, sessionProbeStatus]);
+  }, [auth.authAccountState, authSessionStatus, sessionProbeStatus]);
 
   // Redirect once both steps complete
   useEffect(() => {
@@ -612,7 +612,7 @@ export const CompleteRegistrationPage: FC = () => {
     </Button>
   );
 
-  if (checkingAuthSession && !auth.authSession) {
+  if (checkingAuthSession && !auth.authAccountState) {
     return (
       <Layout
         title={t("auth.flow.complete_registration_title")}
@@ -628,7 +628,7 @@ export const CompleteRegistrationPage: FC = () => {
   }
 
   // Not authenticated at all
-  if (!auth.authenticated && !auth.authSession) {
+  if (!auth.authenticated && !auth.authAccountState) {
     return (
       <Layout
         title={t("auth.flow.complete_registration_title")}

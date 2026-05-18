@@ -3,9 +3,9 @@ export * from "./oauth";
 export * from "./password";
 export {
   type AuthReadinessStatus,
-  type AuthSessionState,
+  type AuthAccountState,
   authReadinessStatusSchema,
-  authSessionStateSchema,
+  authAccountStateSchema,
   type PendingRegistrationState,
   type PendingRegistrationStep,
   pendingRegistrationStateSchema,

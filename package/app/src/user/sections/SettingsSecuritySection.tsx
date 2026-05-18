@@ -29,8 +29,8 @@ export const SettingsSecuritySection: FC = () => {
     authQueries.sessions(),
   );
 
-  const hasPassword = sessionState?.authSession?.hasPassword ?? false;
-  const loginEmail = sessionState?.authSession?.email ?? "";
+  const hasPassword = sessionState?.authAccountState?.hasPassword ?? false;
+  const loginEmail = sessionState?.authAccountState?.email ?? "";
   const [newLoginEmail, setNewLoginEmail] = useState("");
   const [loginEmailSuccess, setLoginEmailSuccess] = useState(false);
   const [newPassword, setNewPassword] = useState("");

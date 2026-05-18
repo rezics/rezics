@@ -40,7 +40,7 @@ export const pendingRegistrationStateSchema = t.Object({
 export type PendingRegistrationState =
   (typeof pendingRegistrationStateSchema)["static"];
 
-export const authSessionStateSchema = t.Object({
+export const authAccountStateSchema = t.Object({
   email: t.String({ format: "email" }),
   emailVerified: t.Boolean(),
   mainUserExists: t.Boolean(),
@@ -54,7 +54,7 @@ export const authSessionStateSchema = t.Object({
   primaryProviderId: t.Optional(authProviderIdSchema),
   trustedProviderId: t.Optional(authProviderIdSchema),
 });
-export type AuthSessionState = (typeof authSessionStateSchema)["static"];
+export type AuthAccountState = (typeof authAccountStateSchema)["static"];
 
 export const listAuthProvidersResponseSchema = t.Object({
   providers: t.Array(authProviderSchema),

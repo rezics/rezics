@@ -34,9 +34,9 @@ export const SettingsConnectionsSection: FC = () => {
     );
   }
 
-  const authSession = sessionState?.authSession;
-  const connectedProviders = new Set(authSession?.providerIds ?? []);
-  const primaryProvider = authSession?.primaryProviderId;
+  const authAccountState = sessionState?.authAccountState;
+  const connectedProviders = new Set(authAccountState?.providerIds ?? []);
+  const primaryProvider = authAccountState?.primaryProviderId;
 
   const handleConnect = async (providerId: AuthProvider["id"]) => {
     setConnecting(providerId);

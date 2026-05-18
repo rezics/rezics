@@ -16,7 +16,9 @@ import {
  * Derives all state from authSessionStore + userProfileStore.
  */
 export const useAuth = () => {
-  const authSession = useAuthSessionStore((state) => state.authSession);
+  const authAccountState = useAuthSessionStore(
+    (state) => state.authAccountState,
+  );
   const permission = useAuthSessionStore((state) => state.rezics.permission);
   const registrationComplete = useAuthSessionStore(
     (state) => state.registration.complete,
@@ -48,7 +50,7 @@ export const useAuth = () => {
 
   return {
     user: resolvedUser,
-    authSession,
+    authAccountState,
     loading:
       status === "loading" ||
       (canFetchUserProfile && !resolvedUser ? isLoading : false),

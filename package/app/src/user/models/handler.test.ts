@@ -61,7 +61,7 @@ const setUserMock = mock(() => undefined);
 const hydrateAuthSessionStateMock = mock(async () => ({
   session: { id: "session-1" },
   user: { id: "user-1" },
-  authSession: {
+  authAccountState: {
     canAcquireMemberToken: true,
     mainUserExists: true,
     registrationComplete: true,
