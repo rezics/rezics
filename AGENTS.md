@@ -1,124 +1,70 @@
 # AGENTS.md
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+Shared project instructions for coding agents. Keep this file short, concrete,
+and repo-specific; move detailed rules to skills, OpenSpec specs, or docs.
 
-## Project Overview
+## Project
 
-Library.Book (rezics-book-library) is a full-stack TypeScript monorepo for a book library platform. It uses **Bun** workspaces with packages under `package/`.
+Library.Book (`rezics-book-library`) is a full-stack TypeScript monorepo for a
+book library platform. Runtime and package manager: Bun. Workspaces live under
+`package/*`.
 
-## Common Commands
+## Commands
 
 ```bash
-# Development
-bun run app:dev          # Start frontend dev server (Vite, port 35001)
-bun run server:dev       # Start backend dev server (Elysia with --watch)
+bun run dev                         # start the local dev orchestration
+bun --filter=@rezics/app run dev    # frontend app, Vite
+bun --filter=@rezics/server run dev # main Elysia API
+bun --filter=@rezics/auth run dev   # auth service
 
-# In package/server or package/auth:
-bun run dev              # Start with --watch --no-cache
-bun run build            # Compile to binary (bun build --compile --minify)
-bun run prisma:generate  # Generate Prisma client
-bun run prisma:migrate   # Run migrations + generate
-bun run prisma:studio    # Open Prisma Studio
+bun test                            # tests in the current package
+bun run format                      # Biome format
+bun run format:check                # Biome format check
+bun run check:convention            # repo conventions
+bun run check:tokens                # token checks
+bun run knip                        # unused exports/deps
 
-# Testing (bun:test)
-bun test                           # Run all tests in current package
-bun test src/path/to/file.test.ts  # Run a single test file
+bun --filter=@rezics/server run prisma:generate
+bun --filter=@rezics/server run prisma:migrate
+bun --filter=@rezics/server run seed:factory
+bun --filter=@rezics/server run seed:factory:fast
 
-# Formatting & linting
-bun run format           # Prettier (in frontend packages)
-bun run format:check     # Check formatting
-bun run knip             # Detect unused exports/dependencies (root)
+bun run storybook                   # all Storybooks
+bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
 ```
 
-## Architecture
+## Architecture Rules
 
-### Package Map
+- Backend domains use `{domain}.api.ts`, `.service.ts`, `.mapper.ts`, `.types.ts`.
+  Mount domain APIs from `package/server/src/index.ts`.
+- API types are contract-first in `@rezics/contract`; frontend access belongs in
+  `@rezics/api`. Do not duplicate API DTOs in app code.
+- `@rezics/server` and `@rezics/auth` use separate Prisma schemas and databases.
+- `package/app` features follow the layered structure in
+  `package/app/docs/feature standard.md`. `models/` must not import React,
+  hooks, or state modules; external consumers go through the feature `index.ts`.
+- Runtime env validation uses `@t3-oss/env-core` + Valibot. Keep env dependencies
+  isolated from module exports.
 
-| Package             | Role                                                              |
-| ------------------- | ----------------------------------------------------------------- |
-| `@rezics/server`    | Main Elysia API server (PostgreSQL via Prisma)                    |
-| `@rezics/auth`      | Authentication service (better-auth, separate DB + Prisma schema) |
-| `@rezics/jwt`       | Shared JWT/JWKS utilities (jose)                                  |
-| `@rezics/contract`  | Shared TypeScript API contracts (Elysia + Typebox schemas)        |
-| `@rezics/api`       | Frontend API client (TanStack Query hooks + query options)        |
-| `@rezics/app`       | Main React SPA (Vite + TanStack Router)                           |
-| `@rezics/admin`     | Admin dashboard (Vite + React + Material-UI)                      |
-| `@rezics/ui`        | Shared UI components (Radix/shadcn, dnd-kit)                      |
-| `@rezics/app-shell` | Shared shell/layout components                                    |
-| `@rezics/search`    | Meilisearch integration                                           |
+## Workflows
 
-### Backend Pattern (Elysia)
+- Non-trivial changes use OpenSpec: propose, review artifacts under
+  `openspec/changes/<change>/`, apply, then archive when complete.
+- In this development-stage project, internal renames are clear cutovers: update
+  all internal callsites in the same change unless an OpenSpec explicitly says
+  otherwise.
+- Main branch is `dev`.
 
-Server modules follow a domain-based structure:
-- `{domain}.api.ts` — Elysia route definitions
-- `{domain}.service.ts` — Business logic
-- `{domain}.mapper.ts` — Data transformation
-- `{domain}.types.ts` — Domain types
+## UI Work
 
-Each domain API is mounted via `.use()` in `package/server/src/index.ts`.
+- Load the `rezics-design` skill before editing or reviewing JSX, CSS, UnoCSS
+  classes, tokens, typography, spacing, component selection, icons, or copy.
+- Authoritative UI rules live in `rezics-design`, `@rezics/ui` Storybook, and
+  `openspec/specs/ui-component-foundation/spec.md`; do not duplicate those
+  details here.
 
-### Contract-First API Design
+## References
 
-Types are defined once in `@rezics/contract` using Typebox and shared across frontend/backend. The `@rezics/api` layer wraps these into TanStack Query hooks and query options — avoid duplicating type definitions in API functions.
-
-### Frontend Feature Structure
-
-Features in `package/app` follow a layered architecture (see `package/app/docs/feature standard.md`):
-- `models/` — Pure business types and selectors (no React dependencies)
-- `hooks/` — React logic and side effects
-- `states/` — Jotai atoms or Zustand stores
-- `components/` — Pure UI components
-- `sections/` — Business sections (wire state into components)
-- `pages/` — Thin route-level entry points
-- `index.ts` — The only public export for the feature
-
-**Key rule:** `models` must never import from `hooks` or `states`. External consumers must go through `index.ts`.
-
-### Two Separate Databases
-
-- **Server DB** (`package/server/prisma/schema.prisma`) — Books, chapters, users, comments, reactions, readlists, etc.
-- **Auth DB** (`package/auth/prisma/schema.prisma`) — Users, sessions, accounts, organizations, OAuth providers, JWKS
-
-### Environment Variables
-
-Validated at runtime using `@t3-oss/env-core` + Valibot. Environment dependencies must be isolated from module exports.
-
-## Tech Stack
-
-- **Runtime:** Bun
-- **Backend:** Elysia, Prisma 7, PostgreSQL
-- **Frontend:** React 19, Vite 8, TanStack Router + Query, UnoCSS (Tailwind/shadcn presets), Jotai, Zustand
-- **Auth:** better-auth, jose (JWT/JWKS)
-- **Formatting:** Prettier (2 spaces, single quotes, trailing commas)
-
-## Change Management
-
-This project uses **OpenSpec** for non-trivial changes:
-1. `/opsx:propose <description>` — Create a change proposal
-2. Review artifacts under `openspec/changes/<change>/`
-3. `/opsx:apply <change>` — Implement
-4. `/opsx:archive <change>` — Archive when complete
-
-Keep implementation scoped to affected packages. Respect monorepo boundaries and shared package contracts.
-
-### Development-Stage Cutovers
-
-This project is in active development. For internal development-stage renames, make one clear cutover and update every internal callsite in the same change unless an OpenSpec change explicitly grants an exception.
-
-## Git
-
-- Main branch: `dev`
-
-## Global Instructions
-
-- Prefer reading local files and fetching docs over answering from memory
-- Use `rg` for all codebase text search (recursive and `.gitignore`-aware by default)
-- Use bash as a last resort; never run destructive commands without explicit confirmation
-
-### Visual QA
-
-For UI changes, prefer human-led visual review. Provide the local URL, Storybook story, or screenshot path and ask the project owner to verify design polish.
-
-Use automated browser/screenshot checks only for smoke coverage: non-blank render, no overlays, no console errors, reachable interactions, and obvious responsive breakage.
-
-Human feedback is the source of truth for aesthetics unless deeper visual QA is explicitly requested.
+- `CONTRIBUTING.md` - route, folder, seed, Storybook, and convention details.
+- `openspec/specs/` - authoritative behavior specs.
+- `.agents/skills/` and `.claude/skills/` - task-specific agent guidance.
