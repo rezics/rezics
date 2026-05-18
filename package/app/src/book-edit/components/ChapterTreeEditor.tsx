@@ -6,6 +6,7 @@ import type { ContentRating } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { Download as DownloadIcon, Save as SaveIcon } from "lucide-react";
 import type React from "react";
 import {
   forwardRef,
@@ -23,8 +24,8 @@ import type {
   RenameHandler,
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
-import type { ChapterTreeOccurrence } from "@/book-library/models/bookContentStructurePath";
 import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
+import type { ChapterTreeOccurrence } from "@/book-library/models/bookContentStructurePath";
 import {
   findAndAddChild,
   findAndDelete,
@@ -44,7 +45,6 @@ import { ChapterTreeEditorToolbar } from "./ChapterTreeEditorToolbar";
 import { CreateChapterDialog } from "./CreateChapterDialog";
 import { EditChapterDialog } from "./EditChapterDialog";
 import { MoveToParentDialog } from "./MoveToParentDialog";
-import { Download as DownloadIcon, Save as SaveIcon } from "lucide-react";
 
 /** Chapter tree node structure. */
 export type Chapter = {
@@ -146,9 +146,18 @@ export const ChapterTreeEditor = forwardRef<
     if (!el) return;
 
     const measure = () => {
-      setTreeSize({
+      const nextSize = {
         width: el.clientWidth,
         height: Math.max(MIN_TREE_HEIGHT, el.clientHeight),
+      };
+      setTreeSize((current) => {
+        if (
+          current.width === nextSize.width &&
+          current.height === nextSize.height
+        ) {
+          return current;
+        }
+        return nextSize;
       });
     };
     measure();

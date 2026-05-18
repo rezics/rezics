@@ -224,7 +224,7 @@ export const createChapterTreeEditorNode = ({
         {...longPress}
       >
         <Card
-          className={`mx-2 mr-4 mt-px hover:shadow-md transition-shadow ${
+          className={`mx-2 mr-4 mt-px gap-0 rounded-md py-0 shadow-none transition-colors hover:bg-surface-subtle ${
             isChecked ? "outline outline-2 outline-primary" : ""
           }`}
           style={{ height: "calc(100% - 2px)" }}

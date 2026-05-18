@@ -22,12 +22,16 @@ import { useTranslation } from "react-i18next";
 import { useChapterListStore } from "@/book-library/states/chapterListStore";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
+  type ChapterTreeOccurrence,
   EMPTY_CHAPTER_ROUTE_ID,
   encodeBookContentStructurePath,
   materializedOrPathId,
-  type ChapterTreeOccurrence,
   withBookContentStructureOccurrences,
 } from "../../models/bookContentStructurePath";
+import {
+  ContentChapterVirtualTree,
+  type ContentChapterVirtualTreeHandle,
+} from "./ContentChapterVirtualTree";
 
 export type ChapterTreeHandle = {
   expandAll: () => void;
@@ -344,7 +348,7 @@ export interface ChapterListProps {
 }
 
 /**
- * Chapter List - Displays chapter tree with expand/collapse controls.
+ * Chapter List - Displays a lightweight virtualized chapter tree.
  *
  * Fetches chapter data and renders using ChapterTreeView.
  */
@@ -361,35 +365,22 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     [chapterTree],
   );
 
-  const treeRef = React.useRef<ChapterTreeHandle>(null);
+  const treeRef = React.useRef<ContentChapterVirtualTreeHandle>(null);
 
   if (isLoading) return <div>{t("common.loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
+    <div className="flex min-h-0 flex-col gap-4">
+      <div className="flex items-center justify-between">
         <AccentBarWithText text={t("book.toc")} />
-
-        <div className="flex justify-end gap-2">
-          <Button onClick={() => treeRef.current?.expandAll()}>
-            {t("common.expand_all")}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => treeRef.current?.collapseAll()}
-          >
-            {t("common.collapse_all")}
-          </Button>
-        </div>
       </div>
 
-      <ChapterTreeView
+      <ContentChapterVirtualTree
+        key={id}
         ref={treeRef}
         bookId={id}
         nodes={chapterOccurrences}
-        storageKey={id}
-        defaultExpandAll={true}
       />
     </div>
   );

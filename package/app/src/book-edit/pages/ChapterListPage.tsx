@@ -6,12 +6,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import { ChapterTreeJsonEditor } from "@/book-library/components/Chapter/ChapterTreeJsonEditor";
+import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
-import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
 import {
-  ChapterTreeEditor,
   type Chapter,
+  ChapterTreeEditor,
   type ChapterTreeEditorHandle,
 } from "../components/ChapterTreeEditor";
 
@@ -64,19 +64,19 @@ export const BookEditChapterListPage: React.FC = () => {
   }
 
   return (
-    <div className="mt-4 mx-auto max-w-2xl px-4 flex flex-col h-[calc(100vh-5rem)]">
+    <div className="mx-auto flex h-[calc(100dvh-8rem)] max-w-2xl flex-col px-4 pb-4">
       <h2 className="text-lg font-semibold mb-2">Chapter Management</h2>
 
       <Tabs
         value={tab}
         onValueChange={(v) => setTab(v as "editor" | "json")}
-        className="mb-2"
+        className="min-h-0 flex-1"
       >
-        <TabsList>
+        <TabsList className="flex-none">
           <TabsTrigger value="editor">Editor</TabsTrigger>
           <TabsTrigger value="json">JSON</TabsTrigger>
         </TabsList>
-        <TabsContent value="editor">
+        <TabsContent value="editor" className="min-h-0">
           <ChapterTreeEditor
             ref={editorRef}
             chapterTree={chapterTree}
@@ -85,7 +85,7 @@ export const BookEditChapterListPage: React.FC = () => {
             onDownloadJSON={downloadJSON}
           />
         </TabsContent>
-        <TabsContent value="json">
+        <TabsContent value="json" className="min-h-0">
           <ChapterTreeJsonEditor bookId={bookId} />
         </TabsContent>
       </Tabs>
