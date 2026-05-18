@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { attributionBriefSchema } from "./attribution";
+import { creditAttributionBriefSchema } from "./credit-attribution";
 import { languageSchema } from "./language";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
@@ -48,8 +48,8 @@ export const bookDTOSchema = t.Object({
   // Translation layer
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
 
-  // Attribution
-  attributions: t.Optional(t.Array(attributionBriefSchema)),
+  // Credit attribution
+  attributions: t.Optional(t.Array(creditAttributionBriefSchema)),
 
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -202,6 +202,17 @@ export const bookContentStructureNodeSchema: ReturnType<typeof t.Recursive> =
       noContent: t.Optional(t.Boolean()),
       rating: t.Optional(contentRatingSchema),
       children: t.Optional(t.Array(self)),
+      /**
+       * BookContentStructureNode row id. Populated by the server on reads. On
+       * writes the server uses it to identify the existing row; nodes
+       * submitted without `id` are treated as new and inserted.
+       */
+      id: t.Optional(t.String()),
+      /**
+       * Per-node last-updated timestamp (ISO 8601), populated by the server on
+       * reads. Ignored by the server on writes.
+       */
+      updatedAt: t.Optional(t.String()),
     }),
   );
 
@@ -225,6 +236,17 @@ export interface ChapterTreeItem {
   noContent?: boolean;
   rating?: ContentRating;
   children?: ChapterTreeItem[];
+  /**
+   * BookContentStructureNode row id. Populated by the server on reads. On
+   * writes the server uses it to identify the existing row; nodes submitted
+   * without `id` are treated as new and inserted.
+   */
+  id?: string;
+  /**
+   * Per-node last-updated timestamp (ISO 8601), populated by the server on
+   * reads. Ignored by the server on writes.
+   */
+  updatedAt?: string;
 }
 
 export const bookContentStructureDTOSchema = t.Object({

@@ -5,11 +5,7 @@ import type {
   CreateChapterInput,
   UpdateChapterInput,
 } from "@rezics/contract";
-import {
-  getBookContentStructureNode,
-  normalizeBookContentStructureValue,
-  updateBookContentStructureNode,
-} from "@/book/book-content-structure";
+import { resolvePath } from "@/book/book-content-structure";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
@@ -30,7 +26,7 @@ import { chapterPostInclude } from "./types";
  *   - Chapter cover URL   -> UnitTranslation.extra.coverUrl (typed)
  *   - Chapter body        -> Post.body
  *   - Chapter parent book -> Post.targetUnitId (must reference Unit(type=BOOK))
- *   - Chapter ordering    -> BookContentStructure.nodes (out of scope of this service)
+ *   - Chapter ordering    -> BookContentStructureNode rows (out of scope of this service)
  */
 export class ChapterService {
   private buildWhereClause(options: ChapterListQuery): Prisma.PostWhereInput {
@@ -215,6 +211,7 @@ export class ChapterService {
 
       const contentStructure = await tx.bookContentStructure.findUniqueOrThrow({
         where: { bookUnitId },
+        select: { bookUnitId: true, updatedAt: true },
       });
 
       if (
@@ -225,8 +222,12 @@ export class ChapterService {
         throw new Error("Conflict: BookContentStructure has changed");
       }
 
-      const nodes = normalizeBookContentStructureValue(contentStructure.nodes);
-      const node = getBookContentStructureNode(nodes, req.path);
+      const nodeRows = await tx.bookContentStructureNode.findMany({
+        where: { bookUnitId },
+        orderBy: [{ parentId: "asc" }, { sortKey: "asc" }],
+      });
+
+      const node = resolvePath(nodeRows, req.path);
       if (!node) {
         throw new Error("Conflict: BookContentStructure path does not resolve");
       }
@@ -276,18 +277,15 @@ export class ChapterService {
         },
       });
 
-      const updatedNodes = updateBookContentStructureNode(
-        nodes,
-        req.path,
-        (current) => ({
-          ...current,
-          chapterUnitId: unit.id,
-        }),
-      );
+      await tx.bookContentStructureNode.update({
+        where: { id: node.id },
+        data: { chapterUnitId: unit.id },
+      });
 
       const updatedContentStructure = await tx.bookContentStructure.update({
         where: { bookUnitId },
-        data: { nodes: updatedNodes as Prisma.InputJsonValue },
+        data: { updatedAt: new Date() },
+        select: { updatedAt: true },
       });
 
       return {
@@ -329,6 +327,16 @@ export class ChapterService {
       }
       if (Object.keys(postPatch).length > 0) {
         await tx.post.update({ where: { unitId }, data: postPatch });
+      }
+
+      // Body-only edit: bump every linked BookContentStructureNode's updatedAt,
+      // never bump container BookContentStructure.updatedAt (body edits are
+      // not structure-shape changes). updateMany handles the multi-link case.
+      if (content !== undefined) {
+        await tx.bookContentStructureNode.updateMany({
+          where: { chapterUnitId: unitId },
+          data: { updatedAt: new Date() },
+        });
       }
 
       if (status || rating !== undefined) {
@@ -381,6 +389,30 @@ export class ChapterService {
               title: title ?? "",
               extra: nextExtra,
             },
+          });
+        }
+      }
+
+      // Title rename propagates to every linked BookContentStructureNode's
+      // denormalized `title` and bumps each affected container's
+      // `BookContentStructure.updatedAt` exactly once (title is a
+      // structure-shape field per D6).
+      if (title !== undefined) {
+        const affected = await tx.bookContentStructureNode.findMany({
+          where: { chapterUnitId: unitId },
+          select: { bookUnitId: true },
+        });
+        await tx.bookContentStructureNode.updateMany({
+          where: { chapterUnitId: unitId },
+          data: { title, updatedAt: new Date() },
+        });
+        const bookUnitIds = Array.from(
+          new Set(affected.map((row) => row.bookUnitId)),
+        );
+        if (bookUnitIds.length > 0) {
+          await tx.bookContentStructure.updateMany({
+            where: { bookUnitId: { in: bookUnitIds } },
+            data: { updatedAt: new Date() },
           });
         }
       }

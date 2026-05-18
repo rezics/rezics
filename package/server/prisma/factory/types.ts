@@ -35,6 +35,12 @@ export interface PostsPerWorkPlan {
 export interface ChapterPlan {
   count: CountSpec;
   unitProbability: number;
+  /**
+   * Probability that a materialized chapter receives an additional
+   * BookContentStructureNode row in the same book (multi-link fixture).
+   * Defaults to 0 so existing seeds are unaffected.
+   */
+  multiLinkChapterProbability?: number;
 }
 
 export interface TreeShapePlan {
@@ -78,6 +84,9 @@ export const PostsPerWorkPlanSchema = v.strictObject({
 export const ChapterPlanSchema = v.strictObject({
   count: CountSpecSchema,
   unitProbability: v.pipe(v.number(), v.minValue(0), v.maxValue(1)),
+  multiLinkChapterProbability: v.optional(
+    v.pipe(v.number(), v.minValue(0), v.maxValue(1)),
+  ),
 });
 
 export const TreeShapePlanSchema = v.strictObject({

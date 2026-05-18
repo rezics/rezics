@@ -77,7 +77,7 @@ export async function seedBooks(
               ]),
               extra: generateBookExtra(),
               contentStructure: {
-                create: { nodes: [] as Prisma.InputJsonValue },
+                create: {},
               },
             },
           },
@@ -217,9 +217,9 @@ export async function seedChaptersForBook(
   }
 
   // Tree is always fully built; Units are only materialized for a random
-  // subset. The rest live as JSON nodes in BookContentStructure and can be lazily
-  // promoted to a Unit at runtime when something needs to attach to them
-  // (review target, comment, attribution claim, etc.).
+  // subset. The rest live as BookContentStructureNode rows with
+  // chapterUnitId = NULL and can be lazily promoted to a Unit at runtime
+  // when something needs to attach to them (review target, comment, etc.).
   const allRows = [...parentRows, ...childRows];
   const materializedRows = allRows.filter(
     () => Math.random() < chapterPlan.unitProbability,
@@ -234,7 +234,10 @@ export async function seedChaptersForBook(
     }));
   }
 
-  if (materializedRows.length === 0) return serializeTree(tree);
+  if (materializedRows.length === 0) {
+    await insertNodeRows(ctx.prisma, bookUnitId, tree, materializedRows);
+    return serializeTree(tree);
+  }
 
   if (useBatch) {
     for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
@@ -319,16 +322,168 @@ export async function seedChaptersForBook(
     });
   }
 
+  // Chapter Units now exist; insert BookContentStructureNode rows referencing them.
+  await insertNodeRows(ctx.prisma, bookUnitId, tree, materializedRows);
+
+  if ((chapterPlan.multiLinkChapterProbability ?? 0) > 0) {
+    await insertMultiLinkNodes(
+      ctx.prisma,
+      bookUnitId,
+      materializedRows,
+      chapterPlan.multiLinkChapterProbability ?? 0,
+    );
+  }
+
   return serializeTree(tree);
 }
 
-export async function updateContentStructure(
+// LexoRank generation — lightweight base36 fractional indexing for sibling
+// ordering. Mirrors the runtime utility but kept inline to avoid factory
+// importing from server/src.
+const LEXO_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
+const LEXO_FIRST = "0";
+const LEXO_LAST = "z";
+
+function lexoBetween(prev: string | null, next: string | null): string {
+  const a = prev ?? "";
+  const b = next ?? "";
+  let i = 0;
+  let result = "";
+  while (true) {
+    const da = i < a.length ? a[i]! : LEXO_FIRST;
+    const db = b === "" ? LEXO_LAST : i < b.length ? b[i]! : LEXO_FIRST;
+    if (da === db) {
+      result += da;
+      i++;
+      continue;
+    }
+    const va = LEXO_ALPHABET.indexOf(da);
+    const vb = LEXO_ALPHABET.indexOf(db);
+    if (vb - va > 1) {
+      result += LEXO_ALPHABET[va + Math.floor((vb - va) / 2)]!;
+      return result;
+    }
+    result += da;
+    i++;
+    while (true) {
+      const ta = i < a.length ? a[i]! : LEXO_FIRST;
+      if (ta === LEXO_LAST) {
+        result += LEXO_LAST;
+        i++;
+        continue;
+      }
+      result += LEXO_ALPHABET[LEXO_ALPHABET.indexOf(ta) + 1]!;
+      return result;
+    }
+  }
+}
+
+const NODE_BATCH_SIZE = 500;
+
+interface NodeRowInput {
+  id: string;
+  bookUnitId: string;
+  parentId: string | null;
+  sortKey: string;
+  chapterUnitId: string | null;
+  title: string;
+  noContent: boolean;
+}
+
+interface TreeNode {
+  id?: string;
+  title: string;
+  noContent?: boolean;
+  children?: TreeNode[];
+}
+
+/**
+ * Flatten the in-memory tree into BookContentStructureNode row inputs and
+ * batch-insert via createMany. Each sibling gets a sortKey via lexoBetween
+ * keyed off its left neighbour.
+ */
+async function insertNodeRows(
   prisma: PrismaClient,
-  bookId: string,
-  nodes: Prisma.InputJsonValue,
+  bookUnitId: string,
+  tree: TreeNode[],
+  materializedRows: Array<{ id: string }>,
 ): Promise<void> {
-  await prisma.bookContentStructure.update({
-    where: { bookUnitId: bookId },
-    data: { nodes },
+  const materializedIds = new Set(materializedRows.map((r) => r.id));
+  const rows: NodeRowInput[] = [];
+
+  function visit(nodes: TreeNode[], parentId: string | null): void {
+    let prevKey: string | null = null;
+    for (const node of nodes) {
+      const id = node.id ?? randomUUID();
+      const key = lexoBetween(prevKey, null);
+      rows.push({
+        id,
+        bookUnitId,
+        parentId,
+        sortKey: key,
+        chapterUnitId: materializedIds.has(id) ? id : null,
+        title: node.title,
+        noContent: node.noContent === true,
+      });
+      prevKey = key;
+      if (node.children && node.children.length > 0) {
+        visit(node.children, id);
+      }
+    }
+  }
+
+  visit(tree, null);
+
+  for (let i = 0; i < rows.length; i += NODE_BATCH_SIZE) {
+    await prisma.bookContentStructureNode.createMany({
+      data: rows.slice(i, i + NODE_BATCH_SIZE),
+    });
+  }
+}
+
+/**
+ * Insert additional multi-link node rows for a sample of materialized
+ * chapters. Each picked chapter gets one extra BookContentStructureNode row
+ * with the same `chapterUnitId` but a fresh `id` / `parentId` / `sortKey`,
+ * exercising the multi-link contract end-to-end.
+ */
+export async function insertMultiLinkNodes(
+  prisma: PrismaClient,
+  bookUnitId: string,
+  materializedRows: Array<{ id: string; title: string }>,
+  multiLinkProbability: number,
+): Promise<number> {
+  if (multiLinkProbability <= 0 || materializedRows.length === 0) return 0;
+
+  // Fetch root sortKeys for this book so we can append after the last root.
+  const roots = await prisma.bookContentStructureNode.findMany({
+    where: { bookUnitId, parentId: null },
+    select: { sortKey: true },
+    orderBy: { sortKey: "desc" },
+    take: 1,
   });
+  let lastSortKey = roots[0]?.sortKey ?? null;
+
+  const extras: NodeRowInput[] = [];
+  for (const row of materializedRows) {
+    if (Math.random() >= multiLinkProbability) continue;
+    const key = lexoBetween(lastSortKey, null);
+    extras.push({
+      id: randomUUID(),
+      bookUnitId,
+      parentId: null,
+      sortKey: key,
+      chapterUnitId: row.id,
+      title: row.title,
+      noContent: false,
+    });
+    lastSortKey = key;
+  }
+
+  for (let i = 0; i < extras.length; i += NODE_BATCH_SIZE) {
+    await prisma.bookContentStructureNode.createMany({
+      data: extras.slice(i, i + NODE_BATCH_SIZE),
+    });
+  }
+  return extras.length;
 }

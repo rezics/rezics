@@ -7,14 +7,6 @@ export class BookContentStructurePathError extends Error {
   }
 }
 
-export type BookContentStructureNodeUpdate = (
-  node: ChapterTreeItem,
-) => ChapterTreeItem;
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 export function parseBookContentStructurePath(
   path: string | number[],
 ): number[] {
@@ -44,84 +36,127 @@ export function validateBookContentStructurePath(path: number[]): number[] {
   return path;
 }
 
-export function normalizeBookContentStructureValue(
-  value: unknown,
+/**
+ * A minimal shape capturing the BookContentStructureNode row fields we read
+ * to assemble the wire tree. Defined structurally so tests can supply plain
+ * objects without pulling in Prisma's generated types.
+ */
+export interface BookContentStructureNodeRow {
+  id: string;
+  bookUnitId: string;
+  parentId: string | null;
+  sortKey: string;
+  chapterUnitId: string | null;
+  title: string;
+  noContent: boolean;
+  rating: ContentRating | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Assemble a flat list of node rows into the nested `ChapterTreeItem[]` wire
+ * shape. Children at each level are ordered lexicographically by `sortKey`.
+ * Runs in O(n) with one pass to bucket by `parentId` and one DFS from roots.
+ *
+ * `id` and `updatedAt` are populated on every returned node. `rating` is
+ * omitted when the row's column is NULL.
+ */
+export function buildTree(
+  rows: readonly BookContentStructureNodeRow[],
 ): ChapterTreeItem[] {
-  if (Array.isArray(value)) {
-    return value.map((node) => normalizeBookContentStructureNode(node));
-  }
-  return [];
-}
+  if (rows.length === 0) return [];
 
-export function normalizeBookContentStructureNode(
-  value: unknown,
-): ChapterTreeItem {
-  const source = isObject(value) ? value : {};
-  const node: ChapterTreeItem = {
-    title: typeof source.title === "string" ? source.title : "",
-  };
-
-  const chapterUnitId =
-    typeof source.chapterUnitId === "string" ? source.chapterUnitId : undefined;
-  if (chapterUnitId) node.chapterUnitId = chapterUnitId;
-  if (typeof source.noContent === "boolean") node.noContent = source.noContent;
-  if (typeof source.rating === "string") {
-    node.rating = source.rating as ContentRating;
+  const childrenByParent = new Map<
+    string | null,
+    BookContentStructureNodeRow[]
+  >();
+  for (const row of rows) {
+    const bucket = childrenByParent.get(row.parentId);
+    if (bucket) {
+      bucket.push(row);
+    } else {
+      childrenByParent.set(row.parentId, [row]);
+    }
   }
-  if (Array.isArray(source.children)) {
-    node.children = source.children.map((child) =>
-      normalizeBookContentStructureNode(child),
+  for (const bucket of childrenByParent.values()) {
+    bucket.sort((a, b) =>
+      a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0,
     );
   }
 
-  return node;
-}
-
-export function getBookContentStructureNode(
-  nodes: ChapterTreeItem[],
-  path: number[],
-): ChapterTreeItem | null {
-  let currentNodes = nodes;
-  let node: ChapterTreeItem | undefined;
-
-  for (const segment of validateBookContentStructurePath(path)) {
-    node = currentNodes[segment];
-    if (!node) return null;
-    currentNodes = node.children ?? [];
-  }
-
-  return node ?? null;
-}
-
-export function updateBookContentStructureNode(
-  nodes: ChapterTreeItem[],
-  path: number[],
-  update: BookContentStructureNodeUpdate,
-): ChapterTreeItem[] {
-  validateBookContentStructurePath(path);
-  if (path.length === 0) {
-    throw new BookContentStructurePathError(
-      "Cannot update the BookContentStructure forest root",
-    );
-  }
-
-  const [head, ...tail] = path;
-  if (head === undefined || head >= nodes.length) {
-    throw new BookContentStructurePathError(
-      `BookContentStructure path does not resolve`,
-    );
-  }
-
-  return nodes.map((node, i) => {
-    if (i !== head) return node;
-    if (tail.length === 0) return update(node);
-    return {
-      ...node,
-      children: updateBookContentStructureNode(
-        node.children ?? [],
-        tail,
-        update,
-      ),
+  function rowToNode(row: BookContentStructureNodeRow): ChapterTreeItem {
+    const item: ChapterTreeItem = {
+      id: row.id,
+      title: row.title,
+      updatedAt: row.updatedAt.toISOString(),
     };
-  });
+    if (row.chapterUnitId) item.chapterUnitId = row.chapterUnitId;
+    if (row.noContent) item.noContent = row.noContent;
+    if (row.rating) item.rating = row.rating;
+    const children = childrenByParent.get(row.id);
+    if (children && children.length > 0) {
+      item.children = children.map(rowToNode);
+    }
+    return item;
+  }
+
+  const roots = childrenByParent.get(null) ?? [];
+  return roots.map(rowToNode);
+}
+
+/**
+ * Resolve a `BookContentStructurePath` against a flat list of node rows.
+ * Returns the target row, or `null` if any segment fails to resolve.
+ *
+ * Stale-path semantics: a path with an out-of-range segment returns `null`
+ * rather than throwing — callers (materialization) translate this into a
+ * conflict response.
+ */
+export function resolvePath(
+  rows: readonly BookContentStructureNodeRow[],
+  path: readonly number[],
+): BookContentStructureNodeRow | null {
+  validateBookContentStructurePath([...path]);
+  if (path.length === 0) return null;
+
+  const childrenByParent = new Map<
+    string | null,
+    BookContentStructureNodeRow[]
+  >();
+  for (const row of rows) {
+    const bucket = childrenByParent.get(row.parentId);
+    if (bucket) {
+      bucket.push(row);
+    } else {
+      childrenByParent.set(row.parentId, [row]);
+    }
+  }
+  for (const bucket of childrenByParent.values()) {
+    bucket.sort((a, b) =>
+      a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0,
+    );
+  }
+
+  let parentId: string | null = null;
+  let current: BookContentStructureNodeRow | undefined;
+  for (const segment of path) {
+    const siblings: BookContentStructureNodeRow[] =
+      childrenByParent.get(parentId) ?? [];
+    current = siblings[segment];
+    if (!current) return null;
+    parentId = current.id;
+  }
+  return current ?? null;
+}
+
+/**
+ * Convenience wrapper returning the resolved node id (or null if the path
+ * doesn't resolve).
+ */
+export function pathToNodeId(
+  rows: readonly BookContentStructureNodeRow[],
+  path: readonly number[],
+): string | null {
+  return resolvePath(rows, path)?.id ?? null;
 }

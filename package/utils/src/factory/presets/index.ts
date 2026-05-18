@@ -1,4 +1,5 @@
 import type { SeedPreset } from "@rezics/server/prisma/factory";
+import { bookMultiLinkToc } from "./book-multi-link-toc";
 import { fast } from "./fast";
 import { medium } from "./medium";
 import { minimal } from "./minimal";
@@ -11,6 +12,7 @@ export const PRESETS: Record<string, SeedPreset> = {
   medium,
   minimal,
   "post-tree-focus": postTreeFocus,
+  "book-multi-link-toc": bookMultiLinkToc,
 };
 
 export type PresetName = keyof typeof PRESETS;

@@ -1,11 +1,11 @@
-import type { Prisma } from "../generated/client.js";
 import { PostKind } from "../generated/client.js";
-import { seedOrganizations, seedPeople } from "./attribution.js";
 import {
-  seedBooks,
-  seedChaptersForBook,
-  updateContentStructure,
-} from "./books.js";
+  seedOrganizations,
+  seedPeople,
+  seedSubjectAttributions,
+  seedSubjectEntities,
+} from "./attribution.js";
+import { seedBooks, seedChaptersForBook } from "./books.js";
 import { seedEchoKV } from "./echokv.js";
 import { seedEngagement } from "./engagement.js";
 import { seedGames } from "./games.js";
@@ -37,14 +37,15 @@ export async function runFactorySeed(
   console.time("seed:total");
   console.log("[Seed] Starting database seeding...");
 
-  let done = stepTimer("Step 1: Users + People + Organizations");
+  let done = stepTimer("Step 1: Users + People + Organizations + Subjects");
   const users = await seedUsers(ctx, plan.users);
-  const [people, organizations] = await Promise.all([
+  const [people, organizations, subjects] = await Promise.all([
     seedPeople(ctx, plan.personEntities),
     seedOrganizations(ctx, plan.organizationEntities),
+    seedSubjectEntities(ctx, plan.organizationEntities),
   ]);
   console.log(
-    `[Seed]   ${users.length} users, ${people.length} person entities, ${organizations.length} organization entities`,
+    `[Seed]   ${users.length} users, ${people.length} person entities, ${organizations.length} organization entities, ${subjects.length} subject entities`,
   );
   done();
 
@@ -65,8 +66,13 @@ export async function runFactorySeed(
     ...mediaItems.map((m) => m.id),
   ];
   const allWorks = [...books, ...games, ...mediaItems];
+  const subjectAttributionCount = await seedSubjectAttributions(
+    ctx.prisma,
+    allWorks,
+    subjects,
+  );
   console.log(
-    `[Seed]   ${books.length} books, ${games.length} games, ${mediaItems.length} media`,
+    `[Seed]   ${books.length} books, ${games.length} games, ${mediaItems.length} media, ${subjectAttributionCount} subject attributions`,
   );
   done();
 
@@ -125,7 +131,7 @@ export async function runFactorySeed(
   );
   done();
 
-  done = stepTimer("Step 10: Chapters + BookContentStructure");
+  done = stepTimer("Step 10: Chapters + BookContentStructureNode rows");
   const bookUnitMap = new Map<string, string>();
   for (const book of books) {
     const unit = await ctx.prisma.unit.findUnique({
@@ -139,17 +145,7 @@ export async function runFactorySeed(
     const userId = bookUnitMap.get(book.id);
     if (!userId) return;
 
-    const chapterTree = await seedChaptersForBook(
-      ctx,
-      book.id,
-      userId,
-      plan.chapter,
-    );
-    await updateContentStructure(
-      ctx.prisma,
-      book.id,
-      chapterTree as unknown as Prisma.InputJsonValue,
-    );
+    await seedChaptersForBook(ctx, book.id, userId, plan.chapter);
   });
   done();
 
@@ -187,6 +183,7 @@ export async function runFactorySeed(
     users: users.length,
     personEntities: people.length,
     organizationEntities: organizations.length,
+    subjectEntities: subjects.length,
     tags: tags.length,
     books: books.length,
     games: games.length,

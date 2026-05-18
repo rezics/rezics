@@ -6,6 +6,12 @@ export type ChapterTreeOccurrence = ChapterTreeItem & {
   id: string;
   path: number[];
   occurrenceId: string;
+  /**
+   * Server-side BookContentStructureNode.id round-tripped from reads. Used by
+   * the TOC save flow to identify the existing row; `undefined` for client-
+   * created nodes that have not yet been saved.
+   */
+  nodeId?: string;
   children?: ChapterTreeOccurrence[];
 };
 
@@ -38,11 +44,13 @@ export function withBookContentStructureOccurrences(
 ): ChapterTreeOccurrence[] {
   return nodes.map((node, index) => {
     const path = [...prefix, index];
+    const { id: serverNodeId, ...rest } = node;
     return {
-      ...node,
+      ...rest,
       path,
       occurrenceId: occurrenceIdForPath(path),
       id: occurrenceIdForPath(path),
+      nodeId: serverNodeId,
       children: node.children
         ? withBookContentStructureOccurrences(node.children, path)
         : undefined,

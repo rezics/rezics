@@ -16,6 +16,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.feedback.deleteMany(),
     prisma.tagVote.deleteMany(),
     prisma.subscription.deleteMany(),
+    prisma.subjectAttribution.deleteMany(),
     prisma.attribution.deleteMany(),
     prisma.scoreRealmField.deleteMany(),
     prisma.scoreAggregate.deleteMany(),
@@ -34,6 +35,9 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   ]);
 
   // Group 4: Extension children
+  // BookContentStructureNode rows hold FKs to BookContentStructure; delete
+  // them first so the parent delete in this group doesn't trip a constraint.
+  await prisma.bookContentStructureNode.deleteMany();
   await Promise.all([
     prisma.bookContentStructure.deleteMany(),
     prisma.gamePlatform.deleteMany(),

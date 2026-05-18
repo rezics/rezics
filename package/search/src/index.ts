@@ -19,6 +19,7 @@ export {
   patchContentMetadata,
   patchContentRealmIds,
   patchContentRealmTagKeys,
+  patchContentSubjects,
   patchContentTags,
   patchContentTranslations,
   patchFeedbackResolution,

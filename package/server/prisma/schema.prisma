@@ -87,7 +87,7 @@ enum PostKind {
   /**
    * A chapter of the book named by `targetUnitId` (a Unit of type=BOOK).
    * Body lives in `Post.body`; cover (optional) lives in `UnitTranslation.extra.coverUrl`.
-   * Order is governed by `BookContentStructure.nodes`.
+   * Order is governed by `BookContentStructureNode` rows.
    */
   CHAPTER
 }
@@ -183,9 +183,13 @@ model Unit {
   realmTagContextsAsTag            RealmTagContext[] @relation("RealmTagContextTag")
   realmTagContextsAsContent        RealmTagContext[] @relation("RealmTagContextContent")
 
-  // Attribution
+  // Credit attribution
   attributions Attribution[] @relation("AttributedUnit")
   attributedAs Attribution[] @relation("AttributionEntity")
+
+  // Subject attribution
+  subjectAttributions SubjectAttribution[] @relation("SubjectAttributedUnit")
+  subjectOfAttributions SubjectAttribution[] @relation("SubjectAttributionEntity")
 
   // Engagement (reactions moved to @rezics/reaction service)
 
@@ -201,6 +205,10 @@ model Unit {
   // this Unit (in v1: a USER Unit) is the subscriber.
   subscribers       Subscription[] @relation("SubscriptionTarget")
   subscriptionsMade Subscription[] @relation("SubscriptionSubscriber")
+
+  // Inverse of BookContentStructureNode.chapterUnitId — every BookContentStructure
+  // node that references this Unit as its materialized chapter.
+  chapterIndexNodes BookContentStructureNode[] @relation("BookContentStructureNodeChapter")
 
   @@unique([slugScope, slug])
   @@unique([translationGroupId, defaultLanguage])
@@ -334,11 +342,37 @@ model Book {
 
 model BookContentStructure {
   bookUnitId String   @id @db.Uuid
-  nodes      Json
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  book Book @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)
+  book         Book                       @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)
+  contentNodes BookContentStructureNode[] @relation("BookContentStructureContainer")
+}
+
+/// Normalized one-row-per-node storage for a BookContentStructure tree.
+/// Sibling order is determined by lexicographic `sortKey` within a
+/// `(bookUnitId, parentId)` group. `chapterUnitId` is intentionally
+/// non-unique because the same chapter MAY be referenced from multiple nodes.
+model BookContentStructureNode {
+  id            String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  bookUnitId    String        @db.Uuid
+  parentId      String?       @db.Uuid
+  sortKey       String
+  chapterUnitId String?       @db.Uuid
+  title         String
+  noContent     Boolean       @default(false)
+  rating        ContentRating?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  container   BookContentStructure       @relation("BookContentStructureContainer", fields: [bookUnitId], references: [bookUnitId], onDelete: Cascade)
+  parent      BookContentStructureNode?  @relation("BookContentStructureNodeChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children    BookContentStructureNode[] @relation("BookContentStructureNodeChildren")
+  chapterUnit Unit?                      @relation("BookContentStructureNodeChapter", fields: [chapterUnitId], references: [id], onDelete: SetNull)
+
+  @@index([bookUnitId, parentId, sortKey])
+  @@index([chapterUnitId])
+  @@index([bookUnitId, updatedAt(sort: Desc)])
 }
 
 /**
@@ -718,6 +752,22 @@ model Attribution {
 
   @@id([unitId, entityId, role])
   @@index([entityId, role])
+  @@index([unitId, role, sortOrder])
+}
+
+model SubjectAttribution {
+  unitId    String  @db.Uuid
+  entityId  String  @db.Uuid
+  role      String  @db.VarChar(64)
+  sortOrder Int     @default(0)
+  weight    Float?
+
+  unit   Unit @relation("SubjectAttributedUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  entity Unit @relation("SubjectAttributionEntity", fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, entityId, role])
+  @@index([entityId, role, sortOrder])
+  @@index([entityId, sortOrder])
   @@index([unitId, role, sortOrder])
 }
 

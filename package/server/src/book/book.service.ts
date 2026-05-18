@@ -1,6 +1,7 @@
 import type {
   BookContentStructureResponse,
   BookListQuery,
+  ChapterTreeItem,
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
@@ -22,7 +23,8 @@ import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
-import { normalizeBookContentStructureValue } from "./book-content-structure";
+import { buildTree } from "./book-content-structure";
+import { between, firstKey } from "./lexorank";
 import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
 import { bookInclude } from "./types";
@@ -170,17 +172,29 @@ export class BookService {
   }
 
   /**
-   * Get content structure by bookUnitId
+   * Get content structure by bookUnitId. Reads all node rows for the book and
+   * assembles them server-side into the nested `ChapterTreeItem[]` wire shape.
    */
   async getContentStructureByBookUnitId(
     bookUnitId: string,
   ): Promise<BookContentStructureResponse> {
-    const contentStructure =
-      await prisma.bookContentStructure.findUniqueOrThrow({
+    const [container, nodeRows] = await Promise.all([
+      prisma.bookContentStructure.findUniqueOrThrow({
         where: { bookUnitId },
-      });
-    const nodes = normalizeBookContentStructureValue(contentStructure.nodes);
-    return { ...contentStructure, nodes };
+        select: { bookUnitId: true, createdAt: true, updatedAt: true },
+      }),
+      prisma.bookContentStructureNode.findMany({
+        where: { bookUnitId },
+        orderBy: [{ parentId: "asc" }, { sortKey: "asc" }],
+      }),
+    ]);
+    const nodes = buildTree(nodeRows);
+    return {
+      bookUnitId: container.bookUnitId,
+      nodes,
+      createdAt: container.createdAt,
+      updatedAt: container.updatedAt,
+    };
   }
 
   /**
@@ -192,9 +206,7 @@ export class BookService {
       include: bookInclude,
     });
 
-    return book
-      ? hydrateUnitOwnerUserSlugRow(book as BookWithRelations)
-      : null;
+    return book ? hydrateUnitOwnerUserSlugRow(book as BookWithRelations) : null;
   }
 
   /**
@@ -259,7 +271,7 @@ export class BookService {
         isLicensed: req.isLicensed ?? false,
         extra: (req.extra ?? null) as Prisma.InputJsonValue,
         contentStructure: {
-          create: { nodes: [] as Prisma.InputJsonValue },
+          create: {},
         },
       },
       include: bookInclude,
@@ -334,18 +346,99 @@ export class BookService {
   }
 
   /**
-   * Update content structure
+   * Update content structure (diff-based TOC save).
+   *
+   * Walks the submitted tree, diffs against current BookContentStructureNode
+   * rows, and applies the minimum set of INSERT / UPDATE / DELETE in a single
+   * transaction. Preserves existing `sortKey` values when sibling order is
+   * unchanged so a no-op save produces zero row mutations. The container
+   * `updatedAt` is bumped only when at least one node actually changed.
    */
   async updateContentStructure(
     unitId: string,
-    nodes: Prisma.InputJsonValue,
+    submitted: ChapterTreeItem[],
   ): Promise<BookContentStructureResponse> {
-    const normalizedNodes = normalizeBookContentStructureValue(nodes);
-    const contentStructure = await prisma.bookContentStructure.update({
-      where: { bookUnitId: unitId },
-      data: { nodes: normalizedNodes as Prisma.InputJsonValue },
+    await prisma.$transaction(async (tx) => {
+      const current = await tx.bookContentStructureNode.findMany({
+        where: { bookUnitId: unitId },
+        select: {
+          id: true,
+          parentId: true,
+          sortKey: true,
+          chapterUnitId: true,
+          title: true,
+          noContent: true,
+          rating: true,
+        },
+      });
+
+      const currentById = new Map(current.map((row) => [row.id, row]));
+      const planned = planSubmittedTree(submitted, currentById);
+      const submittedIds = new Set(planned.map((p) => p.id));
+
+      let mutated = false;
+
+      const toDelete = current
+        .map((row) => row.id)
+        .filter((id) => !submittedIds.has(id));
+      if (toDelete.length > 0) {
+        await tx.bookContentStructureNode.deleteMany({
+          where: { id: { in: toDelete } },
+        });
+        mutated = true;
+      }
+
+      for (const plan of planned) {
+        const existing = currentById.get(plan.id);
+        if (!existing) {
+          await tx.bookContentStructureNode.create({
+            data: {
+              id: plan.id,
+              bookUnitId: unitId,
+              parentId: plan.parentId,
+              sortKey: plan.sortKey,
+              chapterUnitId: plan.chapterUnitId ?? null,
+              title: plan.title,
+              noContent: plan.noContent,
+              rating: plan.rating ?? null,
+            },
+          });
+          mutated = true;
+          continue;
+        }
+
+        if (
+          existing.parentId !== plan.parentId ||
+          existing.sortKey !== plan.sortKey ||
+          (existing.chapterUnitId ?? null) !== (plan.chapterUnitId ?? null) ||
+          existing.title !== plan.title ||
+          existing.noContent !== plan.noContent ||
+          (existing.rating ?? null) !== (plan.rating ?? null)
+        ) {
+          await tx.bookContentStructureNode.update({
+            where: { id: plan.id },
+            data: {
+              parentId: plan.parentId,
+              sortKey: plan.sortKey,
+              chapterUnitId: plan.chapterUnitId ?? null,
+              title: plan.title,
+              noContent: plan.noContent,
+              rating: plan.rating ?? null,
+            },
+          });
+          mutated = true;
+        }
+      }
+
+      if (mutated) {
+        await tx.bookContentStructure.update({
+          where: { bookUnitId: unitId },
+          data: { updatedAt: new Date() },
+        });
+      }
     });
-    return { ...contentStructure, nodes: normalizedNodes };
+
+    return this.getContentStructureByBookUnitId(unitId);
   }
 
   /**
@@ -367,3 +460,126 @@ export class BookService {
 
 // Export singleton instance
 export const bookService = new BookService();
+
+// ---------------------------------------------------------------------------
+// TOC save planning
+// ---------------------------------------------------------------------------
+
+interface PlannedNode {
+  id: string;
+  parentId: string | null;
+  sortKey: string;
+  title: string;
+  noContent: boolean;
+  rating: ContentRating | null;
+  chapterUnitId: string | null;
+}
+
+interface ExistingRow {
+  id: string;
+  parentId: string | null;
+  sortKey: string;
+  chapterUnitId: string | null;
+  title: string;
+  noContent: boolean;
+  rating: ContentRating | null;
+}
+
+/**
+ * Walk the submitted tree DFS, assigning ids to nodes without one and
+ * allocating `sortKey` values that preserve existing rows' keys when sibling
+ * ordering hasn't changed. Returns a flat list of planned rows.
+ *
+ * A child's `parentId` is its in-tree parent id (the id we just assigned for
+ * the parent), regardless of any client-supplied `parentId` — this guards
+ * against cycles or malformed submissions.
+ */
+function planSubmittedTree(
+  submitted: readonly ChapterTreeItem[],
+  existingById: ReadonlyMap<string, ExistingRow>,
+): PlannedNode[] {
+  const out: PlannedNode[] = [];
+  // Track id reuse to avoid two submitted nodes claiming the same row.
+  const claimedIds = new Set<string>();
+
+  function visit(
+    siblings: readonly ChapterTreeItem[],
+    parentId: string | null,
+  ): void {
+    const ids: string[] = siblings.map((node) => {
+      const claimed = node.id && !claimedIds.has(node.id) ? node.id : undefined;
+      const fresh =
+        claimed && existingById.has(claimed)
+          ? claimed
+          : (claimed ?? generateNodeId());
+      claimedIds.add(fresh);
+      return fresh;
+    });
+
+    const sortKeys = allocateSortKeys(siblings, ids, parentId, existingById);
+
+    for (let i = 0; i < siblings.length; i++) {
+      const node = siblings[i]!;
+      const id = ids[i]!;
+      const sortKey = sortKeys[i]!;
+      out.push({
+        id,
+        parentId,
+        sortKey,
+        title: node.title,
+        noContent: node.noContent === true,
+        rating: (node.rating as ContentRating | undefined) ?? null,
+        chapterUnitId: node.chapterUnitId ?? null,
+      });
+      if (node.children && node.children.length > 0) {
+        visit(node.children, id);
+      }
+    }
+  }
+
+  visit(submitted, null);
+  return out;
+}
+
+function allocateSortKeys(
+  siblings: readonly ChapterTreeItem[],
+  assignedIds: readonly string[],
+  parentId: string | null,
+  existingById: ReadonlyMap<string, ExistingRow>,
+): string[] {
+  const existingKeys: (string | null)[] = assignedIds.map((id, i) => {
+    const node = siblings[i]!;
+    if (!node.id) return null;
+    const existing = existingById.get(id);
+    if (!existing || existing.parentId !== parentId) return null;
+    return existing.sortKey;
+  });
+
+  const result: string[] = [];
+  for (let i = 0; i < siblings.length; i++) {
+    const prev = result[i - 1] ?? null;
+    const candidate = existingKeys[i] ?? null;
+
+    if (candidate !== null && (prev === null || candidate > prev)) {
+      result.push(candidate);
+      continue;
+    }
+
+    let upper: string | null = null;
+    for (let j = i + 1; j < siblings.length; j++) {
+      const e = existingKeys[j] ?? null;
+      if (e !== null && (prev === null || e > prev)) {
+        upper = e;
+        break;
+      }
+    }
+    const fresh =
+      prev === null && upper === null ? firstKey() : between(prev, upper);
+    result.push(fresh);
+  }
+  return result;
+}
+
+function generateNodeId(): string {
+  return crypto.randomUUID();
+}

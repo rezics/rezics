@@ -34,6 +34,7 @@
     "prisma:migrate": "bunx prisma migrate dev",
     "prisma:deploy": "bunx prisma migrate deploy && bun run prisma:generate",
     "prisma:studio": "bunx prisma studio",
+    "migrate:content-structure": "bun run prisma/migrations-runtime/normalize-book-content-structure.ts",
     "seed": "bun run ../../package/utils/bin/cli.ts",
     "seed:all": "bun run ../../package/utils/bin/cli.ts seed --no-interactive",
     "seed:factory": "bun run ../../package/utils/bin/cli.ts factory --preset=realistic --no-interactive",
