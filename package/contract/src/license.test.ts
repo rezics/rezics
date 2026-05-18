@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import { realmExtraSchema } from "./realm/realm-extra";
 import {
+  LICENSE_REGISTRY,
   licenseSlugSchema,
   publishableUnitInputSchema,
   unitPublicationMetadataSchema,
@@ -25,7 +26,6 @@ describe("Unit publication metadata schemas", () => {
     expect(
       Value.Check(unitPublicationMetadataSchema, {
         licenseSlug: "cc-by-sa-4.0",
-        copyrightNotice: "Copyright 2026 Rezics",
       }),
     ).toBe(true);
   });
@@ -36,6 +36,15 @@ describe("Unit publication metadata schemas", () => {
         licenseSlug: ["cc-by-4.0", "cc0-1.0"],
       }),
     ).toBe(false);
+  });
+});
+
+describe("license registry", () => {
+  test("maps every license slug to an i18n key", () => {
+    for (const [slug, entry] of Object.entries(LICENSE_REGISTRY)) {
+      expect(entry.slug).toBe(slug);
+      expect(entry.i18nKey).toMatch(/^license\./);
+    }
   });
 });
 

@@ -498,6 +498,7 @@ export default {
       text_length: "字數",
       chapter_count: "章節數",
       rating: "內容分級",
+      publication_license: "發布授權",
     },
     placeholders: {
       search_author: "搜尋作者...",
@@ -741,6 +742,14 @@ export default {
       empty: {
         title: "目前還沒有書評",
       },
+    },
+    license: {
+      all_rights_reserved: "保留所有權利",
+      cc0_1_0: "CC0 1.0 通用",
+      cc_by_4_0: "創用 CC 姓名標示 4.0",
+      cc_by_sa_4_0: "創用 CC 姓名標示-相同方式分享 4.0",
+      cc_by_nc_4_0: "創用 CC 姓名標示-非商業性 4.0",
+      cc_by_nc_sa_4_0: "創用 CC 姓名標示-非商業性-相同方式分享 4.0",
     },
     search: {
       empty: {

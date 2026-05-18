@@ -73,7 +73,6 @@ export function mapShelfToDTO(row: ShelfWithMetadata): ShelfDTO {
     status: row.unit?.status,
     visibility: row.unit?.visibility,
     licenseSlug: resolveStoredLicenseSlug(row.unit?.licenseSlug),
-    copyrightNotice: row.unit?.copyrightNotice ?? undefined,
     kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(
       row.unit?.defaultLanguage,
@@ -113,7 +112,6 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
     status: row.unit?.status,
     visibility: row.unit?.visibility,
     licenseSlug: resolveStoredLicenseSlug(row.unit?.licenseSlug),
-    copyrightNotice: row.unit?.copyrightNotice ?? undefined,
     kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(
       row.unit?.defaultLanguage,

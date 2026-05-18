@@ -1,10 +1,10 @@
 ## 1. Contract and Schema
 
-- [x] 1.1 Add a license registry module in `package/contract/src` with stable license slugs, labels/URLs where appropriate, and a `licenseSlugSchema`.
+- [x] 1.1 Add a license registry module in `package/contract/src` with stable license slugs, i18n keys/URLs where appropriate, and a `licenseSlugSchema`.
 - [x] 1.2 Export publication metadata schemas for Unit DTOs and publishable create/update inputs without changing existing `isLicensed` semantics.
 - [x] 1.3 Extend `UserSettings` in `package/contract/src/user.ts` with an optional publishing default license slug and validation tests.
 - [x] 1.4 Extend realm extra/settings contract with an optional advisory default license slug and validation tests.
-- [x] 1.5 Add Prisma schema support for Unit publication metadata (`licenseSlug` and optional copyright notice, or an equivalent Unit-owned structure).
+- [x] 1.5 Add Prisma schema support for Unit publication metadata (`licenseSlug`).
 - [x] 1.6 Generate and review the Prisma migration, including a nullable/backward-compatible rollout path.
 
 ## 2. Server Publication Policy

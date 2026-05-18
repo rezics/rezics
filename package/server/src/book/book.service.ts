@@ -256,7 +256,6 @@ export class BookService {
             status: UnitStatus.PUBLISHED,
             visibility: (req.visibility as UnitVisibility) ?? undefined,
             licenseSlug: assertLicenseSlug(req.licenseSlug) ?? undefined,
-            copyrightNotice: req.copyrightNotice ?? undefined,
             workUnitId: req.workUnitId ?? undefined,
             defaultLanguage: req.defaultLanguage ?? undefined,
             rating: (req.rating as ContentRating | undefined) ?? undefined,
@@ -339,10 +338,6 @@ export class BookService {
               req.licenseSlug === null
                 ? null
                 : (assertLicenseSlug(req.licenseSlug) ?? undefined),
-            copyrightNotice:
-              req.copyrightNotice === null
-                ? null
-                : (req.copyrightNotice ?? undefined),
           },
         },
       },
@@ -356,8 +351,6 @@ export class BookService {
     if (req.visibility !== undefined) patchFields.visibility = req.visibility;
     if (req.licenseSlug !== undefined)
       patchFields.licenseSlug = req.licenseSlug;
-    if (req.copyrightNotice !== undefined)
-      patchFields.copyrightNotice = req.copyrightNotice;
     await patchContentMetadataToMeili(unitId, patchFields);
 
     return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);

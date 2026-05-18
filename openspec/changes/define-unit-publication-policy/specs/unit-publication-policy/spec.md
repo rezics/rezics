@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Unit publication metadata defines a single license
-The system SHALL represent the publication license for a Unit as one effective license slug plus optional copyright notice metadata.
+The system SHALL represent the publication license for a Unit as one effective license slug. License display text SHALL be resolved from the shared license registry's slug-to-i18n-key mapping, not from Unit-owned free text.
 
 #### Scenario: Unit has an explicit license
 - **WHEN** a publishable Unit is created with a valid license slug

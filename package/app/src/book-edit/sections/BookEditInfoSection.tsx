@@ -197,7 +197,6 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         licenseSlug: resolvePublicationLicenseDefault({
           explicitSelection: metadataState?.licenseSlug,
         }),
-        copyrightNotice: metadataState?.copyrightNotice,
         extra: metadataState?.extra,
         defaultLanguage: DEFAULT_LANGUAGE,
         translations: [
@@ -237,7 +236,6 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       rating: metadataState?.rating,
       isLicensed: metadataState?.isLicensed,
       licenseSlug: metadataState?.licenseSlug,
-      copyrightNotice: metadataState?.copyrightNotice,
       extra: metadataState?.extra,
     };
 

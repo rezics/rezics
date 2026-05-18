@@ -26,7 +26,7 @@ Unit-backed content currently has related but under-specified publication concep
 ## What Changes
 
 - Introduce a platform license registry with stable slugs such as `all-rights-reserved`, `cc0-1.0`, `cc-by-4.0`, `cc-by-sa-4.0`, `cc-by-nc-4.0`, and `cc-by-nc-sa-4.0`.
-- Add a single effective license slug on Unit-backed publishable content, with optional copyright notice text.
+- Add a single effective license slug on Unit-backed publishable content, with fixed display text resolved through slug-to-i18n-key registry entries.
 - Define default license resolution as platform default, then user preference, then realm preference, then composer override. Realm defaults are advisory and override user defaults only as composer prefill, not as an immutable rule.
 - Define `UnitStatus.DELETED` as the canonical soft-delete state for posts and post trees.
 - Define public read behavior for deleted posts: ordinary lists and search exclude them; tree/reference contexts may return tombstone DTOs when needed to preserve structure.

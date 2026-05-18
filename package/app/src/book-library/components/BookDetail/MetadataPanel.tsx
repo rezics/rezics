@@ -19,7 +19,10 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
 }) => {
   const { t } = useTranslation();
   const licenseLabel = bookInfo.licenseSlug
-    ? LICENSE_REGISTRY[bookInfo.licenseSlug as LicenseSlug]?.label
+    ? t(
+        LICENSE_REGISTRY[bookInfo.licenseSlug as LicenseSlug]?.i18nKey,
+        bookInfo.licenseSlug,
+      )
     : undefined;
 
   const items = (
@@ -51,11 +54,6 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
         <p className="text-sm">
           {t("book.fields.publication_license", "Publication license")}：
           {licenseLabel}
-        </p>
-      )}
-      {bookInfo?.copyrightNotice && (
-        <p className="text-sm text-text-secondary">
-          {bookInfo.copyrightNotice}
         </p>
       )}
     </div>

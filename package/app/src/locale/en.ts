@@ -586,6 +586,7 @@ export default {
       text_length: "Text length",
       chapter_count: "Chapters",
       rating: "Content rating",
+      publication_license: "Publication license",
     },
     placeholders: {
       search_author: "Search authors...",
@@ -835,6 +836,15 @@ export default {
       empty: {
         title: "No reviews yet",
       },
+    },
+    license: {
+      all_rights_reserved: "All rights reserved",
+      cc0_1_0: "CC0 1.0 Universal",
+      cc_by_4_0: "Creative Commons Attribution 4.0",
+      cc_by_sa_4_0: "Creative Commons Attribution-ShareAlike 4.0",
+      cc_by_nc_4_0: "Creative Commons Attribution-NonCommercial 4.0",
+      cc_by_nc_sa_4_0:
+        "Creative Commons Attribution-NonCommercial-ShareAlike 4.0",
     },
     search: {
       empty: {

@@ -205,7 +205,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             <SelectContent>
               {LICENSE_SLUGS.map((slug) => (
                 <SelectItem key={slug} value={slug}>
-                  {LICENSE_REGISTRY[slug].label}
+                  {t(LICENSE_REGISTRY[slug].i18nKey, slug)}
                 </SelectItem>
               ))}
             </SelectContent>

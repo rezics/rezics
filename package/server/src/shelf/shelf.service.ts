@@ -328,7 +328,6 @@ export class ShelfService {
         status: UnitStatus.PUBLISHED,
         visibility: (visibility as UnitVisibility) ?? UnitVisibility.PUBLIC,
         licenseSlug: assertLicenseSlug(req.licenseSlug) ?? undefined,
-        copyrightNotice: req.copyrightNotice ?? undefined,
         ...(translationData.length
           ? { translations: { create: translationData } }
           : {}),
@@ -368,11 +367,7 @@ export class ShelfService {
     }
     const { kindKey, coverUrl, visibility, extra, title } = req;
 
-    if (
-      visibility !== undefined ||
-      req.licenseSlug !== undefined ||
-      req.copyrightNotice !== undefined
-    ) {
+    if (visibility !== undefined || req.licenseSlug !== undefined) {
       await prisma.unit.update({
         where: { id: unitId },
         data: {
@@ -381,10 +376,6 @@ export class ShelfService {
             req.licenseSlug === null
               ? null
               : (assertLicenseSlug(req.licenseSlug) ?? undefined),
-          copyrightNotice:
-            req.copyrightNotice === null
-              ? null
-              : (req.copyrightNotice ?? undefined),
         },
       });
     }

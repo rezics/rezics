@@ -80,7 +80,6 @@ export const postDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  copyrightNotice: t.Optional(t.Nullable(t.String())),
   isTombstone: t.Optional(t.Boolean()),
   depth: t.Optional(t.Number()),
   sortPath: t.Optional(t.Nullable(t.String())),

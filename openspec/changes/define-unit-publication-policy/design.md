@@ -36,7 +36,10 @@ The missing piece is a shared contract. Public APIs, Meilisearch sync, shelf pre
 Add Unit-owned publication metadata with:
 
 - `licenseSlug: string | null`
-- `copyrightNotice: string | null` or an equivalent typed field inside publication metadata
+
+License display text is not stored on Unit rows. The contract registry maps each
+accepted slug to a stable i18n key, and UI surfaces render that key through the
+active locale.
 
 The initial accepted license slugs are:
 
@@ -53,6 +56,7 @@ Alternatives considered:
 
 - Prisma enum: rejected because license catalogs are product/legal configuration and should not require schema migrations for every new public license.
 - `licenseSlug[]`: rejected for v1 because arrays blur whether multiple licenses are alternatives, cumulative obligations, or component-specific notices.
+- Free-form Unit-owned license text: rejected because it can conflict with the selected slug, bypass fixed license semantics, and break i18n.
 - Store only in `Unit.extra`: rejected because search, validation, and API contracts need stable fields.
 
 ### D2. Use inheritance only for composer defaults
@@ -184,5 +188,4 @@ Rollback: schema additions are backward-compatible if nullable. API behavior cha
 ## Open Questions
 
 - Should review-like post visibility support ship in the same implementation, or should this change only define the guardrails and leave actual UI controls out?
-- Should `copyrightNotice` be plain text only in v1, or should it support structured owner/source fields?
 - Should `cc-by-nd-4.0` be included in the initial registry, or deferred until the product has clearer derivative-work policy copy?

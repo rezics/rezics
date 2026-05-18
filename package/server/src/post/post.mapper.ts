@@ -19,7 +19,6 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     status: post.unit.status,
     visibility: post.unit.visibility,
     licenseSlug: resolveStoredLicenseSlug(post.unit.licenseSlug),
-    copyrightNotice: post.unit.copyrightNotice ?? undefined,
     isTombstone: post.unit.status === "DELETED",
     scoreEntryId: post.scoreEntryId ?? null,
     depth: post.depth,

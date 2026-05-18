@@ -33,7 +33,6 @@ export const shelfListSelect = {
       status: true,
       visibility: true,
       licenseSlug: true,
-      copyrightNotice: true,
       defaultLanguage: true,
       createdAt: true,
       updatedAt: true,

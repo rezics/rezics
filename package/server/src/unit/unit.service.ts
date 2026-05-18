@@ -236,7 +236,6 @@ export class UnitService {
         isLanguageNeutral: input.isLanguageNeutral ?? false,
         rating: (input.rating as ContentRating | undefined) ?? undefined,
         licenseSlug: assertLicenseSlug(input.licenseSlug) ?? undefined,
-        copyrightNotice: input.copyrightNotice ?? undefined,
         extra: (input.extra ?? null) as Prisma.InputJsonValue,
         publishedAt: input.publishedAt
           ? new Date(input.publishedAt as any)
@@ -278,10 +277,6 @@ export class UnitService {
           input.licenseSlug === null
             ? null
             : (assertLicenseSlug(input.licenseSlug) ?? undefined),
-        copyrightNotice:
-          input.copyrightNotice === null
-            ? null
-            : (input.copyrightNotice ?? undefined),
         defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? undefined,
         workUnitId: input.workUnitId,
@@ -301,8 +296,6 @@ export class UnitService {
       patchFields.visibility = input.visibility;
     if (input.licenseSlug !== undefined)
       patchFields.licenseSlug = input.licenseSlug;
-    if (input.copyrightNotice !== undefined)
-      patchFields.copyrightNotice = input.copyrightNotice;
     if (input.defaultLanguage !== undefined)
       patchFields.defaultLanguage = input.defaultLanguage;
     if (input.publishedAt !== undefined) {

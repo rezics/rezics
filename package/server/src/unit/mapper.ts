@@ -21,7 +21,6 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     visibility: unit.visibility,
     rating: unit.rating,
     licenseSlug: resolveStoredLicenseSlug(unit.licenseSlug),
-    copyrightNotice: unit.copyrightNotice ?? undefined,
     extra: (unit.extra as Record<string, unknown>) ?? undefined,
     createdAt: unit.createdAt,
     updatedAt: unit.updatedAt,

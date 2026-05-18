@@ -34,7 +34,6 @@ export const bookDTOSchema = t.Object({
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  copyrightNotice: t.Optional(t.Nullable(t.String())),
   defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
 
@@ -158,7 +157,6 @@ export const createBookSchema = t.Object({
   formatKey: t.Optional(t.String()),
   isLicensed: t.Optional(t.Boolean()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
   coverUrl: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
   visibility: t.Optional(t.String()),
@@ -189,7 +187,6 @@ export const updateBookSchema = t.Object({
   formatKey: t.Optional(t.Nullable(t.String())),
   isLicensed: t.Optional(t.Boolean()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
   coverUrl: t.Optional(t.Nullable(t.String())),
   rating: t.Optional(contentRatingSchema),
   visibility: t.Optional(t.String()),

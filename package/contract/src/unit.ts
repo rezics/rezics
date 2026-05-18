@@ -139,7 +139,6 @@ export type UnitTranslationDTO = (typeof unitTranslationDTOSchema)["static"];
 
 export const unitPublicationMetadataSchema = t.Object({
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
 });
 
 export type UnitPublicationMetadata =
@@ -147,7 +146,6 @@ export type UnitPublicationMetadata =
 
 export const publishableUnitInputSchema = t.Object({
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
 });
 
 export type PublishableUnitInput =
@@ -181,7 +179,6 @@ export const baseUnitSchema = t.Object({
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  copyrightNotice: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -304,7 +301,6 @@ export const createUnitSchema = t.Object({
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   publishedAt: t.Optional(t.Union([t.String(), t.Date()])),
   translations: t.Optional(
@@ -329,7 +325,6 @@ export const updateUnitSchema = t.Object({
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
   defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),
   workUnitId: t.Optional(t.Nullable(t.String())),
