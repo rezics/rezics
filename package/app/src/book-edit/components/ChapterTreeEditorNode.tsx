@@ -98,7 +98,6 @@ export const createChapterTreeEditorNode = ({
     dragHandle,
   }: NodeRendererProps<Chapter>) {
     const hasChildren = !!(node.children && node.children.length > 0);
-    const isSelected = node.state.isSelected;
     const wordCount = mockWordCount(node.data);
 
     const handleContextMenu = (e: React.MouseEvent) => {
@@ -131,9 +130,7 @@ export const createChapterTreeEditorNode = ({
           tabIndex={0}
           style={style}
           ref={isSortingMode ? dragHandle : undefined}
-          className={`group flex items-center gap-2 px-2 h-full cursor-pointer select-none transition-colors duration-150 ${
-            isSelected ? "bg-primary/8" : "hover:bg-muted/40"
-          }`}
+          className="group flex h-full cursor-pointer select-none items-center gap-2 px-2 transition-colors duration-150 hover:bg-surface-subtle active:bg-surface-subtle"
           onClick={() => node.toggle()}
           onKeyDown={(e: React.KeyboardEvent) => {
             if (e.key === "Enter") node.toggle();
