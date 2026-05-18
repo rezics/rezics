@@ -83,6 +83,9 @@ enum PostKind {
    * No word limit
    */
   REMARK
+  /**
+   * Because PostTree does not currently support the UnitVisibility setting
+   */
   POST
   /**
    * A chapter of the book named by `targetUnitId` (a Unit of type=BOOK).
@@ -188,7 +191,7 @@ model Unit {
   creditedAs         CreditAttribution[] @relation("CreditAttributionEntity")
 
   // Subject attribution
-  subjectAttributions SubjectAttribution[] @relation("SubjectAttributedUnit")
+  subjectAttributions   SubjectAttribution[] @relation("SubjectAttributedUnit")
   subjectOfAttributions SubjectAttribution[] @relation("SubjectAttributionEntity")
 
   // Engagement (reactions moved to @rezics/reaction service)
@@ -355,16 +358,16 @@ model BookContentStructure {
 /// `(bookUnitId, parentId)` group. `chapterUnitId` is intentionally
 /// non-unique because the same chapter MAY be referenced from multiple nodes.
 model BookContentStructureNode {
-  id            String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  bookUnitId    String        @db.Uuid
-  parentId      String?       @db.Uuid
+  id            String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  bookUnitId    String         @db.Uuid
+  parentId      String?        @db.Uuid
   sortKey       String
-  chapterUnitId String?       @db.Uuid
+  chapterUnitId String?        @db.Uuid
   title         String
-  noContent     Boolean       @default(false)
+  noContent     Boolean        @default(false)
   rating        ContentRating?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   container   BookContentStructure       @relation("BookContentStructureContainer", fields: [bookUnitId], references: [bookUnitId], onDelete: Cascade)
   parent      BookContentStructureNode?  @relation("BookContentStructureNodeChildren", fields: [parentId], references: [id], onDelete: Cascade)
@@ -757,10 +760,10 @@ model CreditAttribution {
 }
 
 model SubjectAttribution {
-  unitId    String  @db.Uuid
-  entityId  String  @db.Uuid
-  role      String  @db.VarChar(64)
-  sortOrder Int     @default(0)
+  unitId    String @db.Uuid
+  entityId  String @db.Uuid
+  role      String @db.VarChar(64)
+  sortOrder Int    @default(0)
   weight    Float?
 
   unit   Unit @relation("SubjectAttributedUnit", fields: [unitId], references: [id], onDelete: Cascade)
