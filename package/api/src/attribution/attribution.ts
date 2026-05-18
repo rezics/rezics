@@ -1,24 +1,27 @@
-export { attributionApi } from "./attribution.api";
-export { attributionKeys } from "./attribution.keys";
 export {
-  attributionMutations,
-  useCreateEntityMutation,
-  useDeleteEntityMutation,
-  useLinkAttributionMutation,
-  useUnlinkAttributionMutation,
-  useUpdateEntityMutation,
-} from "./attribution.mutations";
+  creditAttributionApi as attributionApi,
+  creditAttributionApi,
+} from "../credit-attribution/credit-attribution.api";
 export {
-  attributionQueries,
-  entityDetailQuery,
-  entityListQuery,
-} from "./attribution.queries";
+  creditAttributionKeys as attributionKeys,
+  creditAttributionKeys,
+} from "../credit-attribution/credit-attribution.keys";
+export {
+  creditAttributionMutations as attributionMutations,
+  useLinkCreditAttributionMutation as useLinkAttributionMutation,
+  useUnlinkCreditAttributionMutation as useUnlinkAttributionMutation,
+  creditAttributionMutations,
+  useLinkCreditAttributionMutation,
+  useUnlinkCreditAttributionMutation,
+} from "../credit-attribution/credit-attribution.mutations";
+export {
+  creditAttributionQueries as attributionQueries,
+  creditAttributionsByUnitQueryOptions,
+  creditAttributionQueries,
+} from "../credit-attribution/credit-attribution.queries";
 export type {
-  AttributionBrief,
-  AttributionDTO,
-  CreateEntityInput,
-  EntityDTO,
-  EntityListQuery,
-  LinkAttributionInput,
-  UpdateEntityInput,
-} from "./attribution.types";
+  CreditAttributionDTO as AttributionDTO,
+  CreditAttributionDTO,
+  LinkCreditAttributionInput as LinkAttributionInput,
+  LinkCreditAttributionInput,
+} from "@rezics/contract";

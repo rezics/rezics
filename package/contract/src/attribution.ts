@@ -1,6 +1,15 @@
-import { t } from "elysia";
-import { entityDTOSchema } from "./entity";
-import { unitTranslationDTOSchema } from "./unit";
+export {
+  bookCreditRoles as bookRoles,
+  creditAttributionBriefEntitySchema as attributionBriefEntitySchema,
+  creditAttributionBriefSchema as attributionBriefSchema,
+  creditAttributionDTOSchema as attributionDTOSchema,
+  gameCreditRoles as gameRoles,
+  linkCreditAttributionSchema as linkAttributionSchema,
+  mediaCreditRoles as mediaRoles,
+  type CreditAttributionBrief as AttributionBrief,
+  type CreditAttributionDTO as AttributionDTO,
+  type LinkCreditAttributionInput as LinkAttributionInput,
+} from "./credit-attribution";
 
 export {
   type CreateEntityInput,
@@ -21,87 +30,3 @@ export {
   type UpdateEntityInput,
   updateEntitySchema,
 } from "./entity";
-
-// ============================================================
-// ATTRIBUTION DTO
-// ============================================================
-
-export const attributionDTOSchema = t.Object({
-  unitId: t.String(),
-  entityId: t.String(),
-  role: t.String(),
-  sortOrder: t.Number(),
-  entity: t.Optional(entityDTOSchema),
-});
-
-export type AttributionDTO = (typeof attributionDTOSchema)["static"];
-
-// ============================================================
-// ATTRIBUTION LINK/UNLINK
-// ============================================================
-
-export const linkAttributionSchema = t.Object({
-  unitId: t.String(),
-  entityId: t.String(),
-  role: t.String(),
-  sortOrder: t.Optional(t.Number()),
-});
-
-export type LinkAttributionInput = (typeof linkAttributionSchema)["static"];
-
-// ============================================================
-// ATTRIBUTION BRIEF (inline for BookDTO etc.)
-// ============================================================
-
-export const attributionBriefEntitySchema = t.Object({
-  unitId: t.String(),
-  kind: t.Optional(t.Nullable(t.String())),
-  slug: t.Optional(t.Nullable(t.String())),
-  translations: t.Optional(t.Array(unitTranslationDTOSchema)),
-});
-
-export const attributionBriefSchema = t.Object({
-  entityId: t.String(),
-  name: t.String(),
-  role: t.String(),
-  sortOrder: t.Optional(t.Number()),
-  entity: t.Optional(attributionBriefEntitySchema),
-});
-
-export type AttributionBrief = (typeof attributionBriefSchema)["static"];
-
-// ============================================================
-// ROLE CONSTANTS
-// ============================================================
-
-export const bookRoles = [
-  "author",
-  "co-author",
-  "translator",
-  "illustrator",
-  "editor",
-  "publisher",
-  "letterer",
-  "colorist",
-] as const;
-
-export const gameRoles = [
-  "developer",
-  "publisher",
-  "composer",
-  "designer",
-  "director",
-  "producer",
-  "writer",
-] as const;
-
-export const mediaRoles = [
-  "director",
-  "producer",
-  "writer",
-  "composer",
-  "actor",
-  "narrator",
-  "studio",
-  "distributor",
-] as const;

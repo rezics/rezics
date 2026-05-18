@@ -1,5 +1,11 @@
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import { unitMutations } from "@rezics/api/unit/unit.mutations";
+import {
+  subjectAttributionQueries,
+  useLinkSubjectAttributionMutation,
+  useUnlinkSubjectAttributionMutation,
+} from "@rezics/api/subject-attribution/subject-attribution";
+import { subjectAttributionRoles } from "@rezics/contract";
 
 import { Spinner } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -18,7 +24,12 @@ import React from "react";
 
 import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/unit/$unitId";
-import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
+import {
+  ArrowLeft as ArrowBackIcon,
+  Plus as PlusIcon,
+  Save as SaveIcon,
+  Trash2 as TrashIcon,
+} from "lucide-react";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -41,16 +52,33 @@ export default function UnitEditPage() {
   const [error, setError] = React.useState<string | null>(null);
 
   const detailQuery = useQuery(unitQueries.detail(unitId));
+  const subjectQuery = useQuery(subjectAttributionQueries.byUnit(unitId));
 
   const updateMutation = unitMutations.useUpdate({
     onError: (err) =>
       setError(err instanceof Error ? err.message : "Update failed"),
     onSuccess: () => setError(null),
   });
+  const linkSubjectMutation = useLinkSubjectAttributionMutation({
+    onError: (err) =>
+      setError(err instanceof Error ? err.message : "Subject link failed"),
+    onSuccess: () => setError(null),
+  });
+  const unlinkSubjectMutation = useUnlinkSubjectAttributionMutation({
+    onError: (err) =>
+      setError(err instanceof Error ? err.message : "Subject unlink failed"),
+    onSuccess: () => setError(null),
+  });
 
   const [status, setStatus] = React.useState("");
   const [visibility, setVisibility] = React.useState("");
   const [extraText, setExtraText] = React.useState("");
+  const [subjectEntityId, setSubjectEntityId] = React.useState("");
+  const [subjectRole, setSubjectRole] = React.useState(
+    subjectAttributionRoles[0],
+  );
+  const [subjectSortOrder, setSubjectSortOrder] = React.useState("0");
+  const [subjectWeight, setSubjectWeight] = React.useState("");
 
   React.useEffect(() => {
     const u: UnitDTO | undefined = detailQuery.data;
@@ -85,6 +113,40 @@ export default function UnitEditPage() {
     });
 
     await detailQuery.refetch();
+  }
+
+  async function onLinkSubject(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    const parsedSortOrder = Number.parseInt(subjectSortOrder, 10);
+    const parsedWeight = subjectWeight.trim()
+      ? Number.parseFloat(subjectWeight)
+      : undefined;
+
+    if (!subjectEntityId.trim()) {
+      setError("Subject Entity Unit ID is required.");
+      return;
+    }
+    if (Number.isNaN(parsedSortOrder)) {
+      setError("Sort order must be a number.");
+      return;
+    }
+    if (parsedWeight !== undefined && Number.isNaN(parsedWeight)) {
+      setError("Weight must be a number.");
+      return;
+    }
+
+    await linkSubjectMutation.mutateAsync({
+      unitId,
+      entityId: subjectEntityId.trim(),
+      role: subjectRole,
+      sortOrder: parsedSortOrder,
+      weight: parsedWeight,
+    });
+    setSubjectEntityId("");
+    setSubjectSortOrder("0");
+    setSubjectWeight("");
+    await subjectQuery.refetch();
   }
 
   return (
@@ -193,6 +255,136 @@ export default function UnitEditPage() {
                   No translations available.
                 </p>
               )}
+
+              <Separator className="mb-4" />
+
+              <section className="flex flex-col gap-3 mb-6">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-base font-semibold">
+                    Subject Attributions
+                  </h3>
+                  <p className="text-xs text-text-secondary">
+                    Link character, faction, location, event, or concept
+                    Entities to this Unit for subject indexing.
+                  </p>
+                </div>
+
+                {subjectQuery.isLoading ? (
+                  <div className="flex justify-center py-4">
+                    <Spinner />
+                  </div>
+                ) : subjectQuery.isError ? (
+                  <p className="text-sm text-error-text">
+                    Failed to load subject attributions.
+                  </p>
+                ) : subjectQuery.data?.length ? (
+                  <div className="flex flex-col gap-2">
+                    {subjectQuery.data.map((subject) => (
+                      <div
+                        key={`${subject.entityId}-${subject.role}`}
+                        className="flex flex-col gap-2 border-b border-border-whisper py-2 sm:flex-row sm:items-center"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">
+                            {subject.entity?.translations?.[0]?.title ??
+                              subject.entityId}
+                          </p>
+                          <p className="text-xs text-text-secondary">
+                            {subject.role} · {subject.entity?.kind ?? "entity"}{" "}
+                            · order {subject.sortOrder}
+                            {subject.weight != null
+                              ? ` · weight ${subject.weight}`
+                              : ""}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Remove subject attribution"
+                          disabled={unlinkSubjectMutation.isPending}
+                          onClick={async () => {
+                            await unlinkSubjectMutation.mutateAsync({
+                              unitId,
+                              entityId: subject.entityId,
+                              role: subject.role,
+                            });
+                            await subjectQuery.refetch();
+                          }}
+                        >
+                          <TrashIcon className="size-4 text-text-secondary" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-text-secondary">
+                    No subject attributions yet.
+                  </p>
+                )}
+
+                <form
+                  onSubmit={onLinkSubject}
+                  className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_180px_96px_96px_auto]"
+                >
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="subject-entity-id">
+                      Subject Entity Unit ID
+                    </Label>
+                    <Input
+                      id="subject-entity-id"
+                      value={subjectEntityId}
+                      onChange={(e) => setSubjectEntityId(e.target.value)}
+                      placeholder="ENTITY unit id"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="subject-role">Role</Label>
+                    <select
+                      id="subject-role"
+                      value={subjectRole}
+                      onChange={(e) =>
+                        setSubjectRole(
+                          e.target
+                            .value as (typeof subjectAttributionRoles)[number],
+                        )
+                      }
+                      className="h-9 rounded-md border border-border-whisper bg-transparent px-2 text-sm"
+                    >
+                      {subjectAttributionRoles.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="subject-sort-order">Order</Label>
+                    <Input
+                      id="subject-sort-order"
+                      value={subjectSortOrder}
+                      onChange={(e) => setSubjectSortOrder(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="subject-weight">Weight</Label>
+                    <Input
+                      id="subject-weight"
+                      value={subjectWeight}
+                      onChange={(e) => setSubjectWeight(e.target.value)}
+                      placeholder="optional"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="self-end"
+                    disabled={linkSubjectMutation.isPending}
+                  >
+                    <PlusIcon className="size-4" />
+                    Link
+                  </Button>
+                </form>
+              </section>
 
               <Separator className="mb-4" />
 

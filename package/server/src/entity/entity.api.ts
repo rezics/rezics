@@ -149,7 +149,8 @@ export const entityApi = new Elysia({ prefix: "/entity" })
       params: entityParamsSchema,
       detail: {
         summary: "Delete entity",
-        description: "Admin-only delete; cascades to translations and attribution.",
+        description:
+          "Admin-only delete; cascades to translations, credit attributions, and subject attributions.",
         tags: ["Entity"],
       },
     },

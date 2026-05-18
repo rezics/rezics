@@ -71,7 +71,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     // Translation layer
     translations: unit.translations?.map(mapTranslation) ?? [],
 
-    // Attribution
+    // Credit attribution
     attributions:
       unit.attributions?.map((a) => {
         const entityRecord = (a as any).entity ?? {};

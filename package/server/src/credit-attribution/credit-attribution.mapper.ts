@@ -1,9 +1,9 @@
-import type { AttributionDTO, Language } from "@rezics/contract";
-import type { AttributionWithRelations } from "./types";
+import type { CreditAttributionDTO, Language } from "@rezics/contract";
+import type { CreditAttributionWithRelations } from "./types";
 
-export function mapAttributionToDTO(
-  row: AttributionWithRelations,
-): AttributionDTO {
+export function mapCreditAttributionToDTO(
+  row: CreditAttributionWithRelations,
+): CreditAttributionDTO {
   const entityUnit = row.entity;
   const entityExt = (entityUnit as any).entity;
 

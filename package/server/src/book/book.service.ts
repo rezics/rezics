@@ -56,7 +56,7 @@ export class BookService {
       andWhere.push({ unit: { userId: options.userId } });
     }
 
-    // Filter by entity ID (via Attribution)
+    // Filter by entity ID (via credit attribution)
     if (options.entityId?.trim()) {
       andWhere.push({
         unit: {

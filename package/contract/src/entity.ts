@@ -106,6 +106,13 @@ export const entityKinds = [
   "circle",
   "studio",
   "label",
+  "character",
+  "faction",
+  "family",
+  "location",
+  "artifact",
+  "event",
+  "concept",
 ] as const;
 
 export type EntityKind = (typeof entityKinds)[number];

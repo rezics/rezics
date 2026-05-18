@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
+import { faker } from "@faker-js/faker";
 import { LANGUAGES } from "@rezics/contract";
-import type { PrismaClient } from "../generated/client.js";
+import type { Prisma, PrismaClient } from "../generated/client.js";
 import { UnitStatus, UnitType } from "../generated/client.js";
 import { generateTranslations, getFaker } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity } from "./types.js";
-import { randomBoolean } from "./utils.js";
+import { pickN, randomBoolean, randomInt } from "./utils.js";
 
 /** Locale distribution for attribution names — diverse locale mix. */
 const LOCALE_WEIGHTS = [
@@ -28,7 +29,36 @@ function pickRandomLocale(): (typeof LOCALE_WEIGHTS)[number]["lang"] {
 
 const BATCH_SIZE = 500;
 
-type EntityKind = "person" | "organization";
+type EntityKind =
+  | "person"
+  | "organization"
+  | "character"
+  | "faction"
+  | "family"
+  | "location"
+  | "artifact"
+  | "event"
+  | "concept";
+
+const SUBJECT_KINDS = [
+  "character",
+  "faction",
+  "family",
+  "location",
+  "artifact",
+  "event",
+  "concept",
+] as const;
+
+const SUBJECT_ROLES = [
+  "primary_character",
+  "featured_character",
+  "appears",
+  "about",
+  "setting",
+  "source_work",
+  "related_subject",
+] as const;
 
 interface EntitySeedRow {
   id: string;
@@ -44,7 +74,13 @@ interface EntitySeedRow {
 
 function localeName(lang: string, kind: EntityKind): string {
   const f = getFaker(lang as Parameters<typeof getFaker>[0]);
-  return kind === "person" ? f.person.fullName() : f.company.name();
+  if (kind === "person") return f.person.fullName();
+  if (kind === "organization") return f.company.name();
+  if (kind === "location") return f.location.city();
+  if (kind === "event") return `${f.word.adjective()} ${f.word.noun()}`;
+  if (kind === "artifact") return `${f.word.adjective()} ${f.word.noun()}`;
+  if (kind === "concept") return f.word.noun();
+  return `${f.word.adjective()} ${f.person.firstName()}`;
 }
 
 function buildEntityRow(kind: EntityKind, verifiedRate: number): EntitySeedRow {
@@ -165,11 +201,85 @@ export async function seedOrganizations(
   const rows = Array.from({ length: total }, () =>
     buildEntityRow("organization", 0.1),
   );
-  await batchInsertEntities(ctx.prisma, ctx.slugScopes.entity, rows, "organization");
+  await batchInsertEntities(
+    ctx.prisma,
+    ctx.slugScopes.entity,
+    rows,
+    "organization",
+  );
 
   return rows.map((r) => ({
     unitId: r.id,
     name: r.primaryName,
     kind: "organization",
   }));
+}
+
+export async function seedSubjectEntities(
+  ctx: SeedCtx,
+  spec: CountSpec,
+): Promise<CreatedEntity[]> {
+  const total = Math.max(7, ctx.draw(spec));
+  console.log(`[Seed] Seeding ${total} subject entities...`);
+
+  const rows = Array.from({ length: total }, (_, index) => {
+    const kind = SUBJECT_KINDS[index % SUBJECT_KINDS.length]!;
+    return { kind, row: buildEntityRow(kind, 0.05) };
+  });
+
+  for (const kind of SUBJECT_KINDS) {
+    const kindRows = rows.filter((entry) => entry.kind === kind);
+    if (kindRows.length === 0) continue;
+    await batchInsertEntities(
+      ctx.prisma,
+      ctx.slugScopes.entity,
+      kindRows.map((entry) => entry.row),
+      kind,
+    );
+  }
+
+  return rows.map(({ kind, row }) => ({
+    unitId: row.id,
+    name: row.primaryName,
+    kind,
+  }));
+}
+
+export async function seedSubjectAttributions(
+  prisma: PrismaClient,
+  works: Array<{ id: string }>,
+  subjects: CreatedEntity[],
+): Promise<number> {
+  if (works.length === 0 || subjects.length === 0) return 0;
+
+  const rows: Prisma.SubjectAttributionCreateManyInput[] = [];
+  for (const work of works) {
+    if (!randomBoolean(0.7)) continue;
+    for (const [index, subject] of pickN(subjects, randomInt(1, 3)).entries()) {
+      rows.push({
+        unitId: work.id,
+        entityId: subject.unitId,
+        role:
+          subject.kind === "character"
+            ? faker.helpers.arrayElement([
+                "primary_character",
+                "featured_character",
+                "appears",
+              ])
+            : faker.helpers.arrayElement(SUBJECT_ROLES),
+        sortOrder: index,
+        weight: Number(faker.number.float({ min: 0.1, max: 1 }).toFixed(2)),
+      });
+    }
+  }
+
+  const BATCH = 500;
+  for (let i = 0; i < rows.length; i += BATCH) {
+    await prisma.subjectAttribution.createMany({
+      data: rows.slice(i, i + BATCH),
+      skipDuplicates: true,
+    });
+  }
+
+  return rows.length;
 }

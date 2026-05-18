@@ -4,6 +4,7 @@ import {
   patchContentMetadata,
   patchContentRealmIds,
   patchContentRealmTagKeys,
+  patchContentSubjects,
   patchContentTags,
   patchContentTranslations,
   syncSingleContent,
@@ -33,6 +34,12 @@ export async function patchContentCreditsToMeili(
   unitId: string,
 ): Promise<void> {
   await patchContentCredits(searchClient, unitId);
+}
+
+export async function patchContentSubjectsToMeili(
+  unitId: string,
+): Promise<void> {
+  await patchContentSubjects(searchClient, unitId);
 }
 
 export async function patchContentTranslationsToMeili(

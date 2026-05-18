@@ -1,11 +1,35 @@
-// MOCK: Works tab data source — entity→attribution→work lookup is not yet
-// exposed by the server. Returns an empty result so the Works tab is hidden
-// (per entity-detail-page spec: empty tabs SHALL NOT render). When the
-// `/attribution/by-entity/:entityId` endpoint lands, swap this for a real
-// useQuery against it.
-export function useEntityWorks(_entityUnitId: string): {
-  works: Array<{ unitId: string; type: string; title: string }>;
+import { subjectAttributionQueries } from "@rezics/api/subject-attribution/subject-attribution";
+import { useQuery } from "@tanstack/react-query";
+
+export function useEntityWorks(entityUnitId: string): {
+  works: Array<{ unitId: string; type: string; title: string; role: string }>;
   isLoading: boolean;
 } {
-  return { works: [], isLoading: false };
+  const query = useQuery(
+    subjectAttributionQueries.bySubject(entityUnitId, {
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+    }),
+  );
+
+  const works =
+    query.data?.flatMap((row) => {
+      if (!row.unit) return [];
+      const title =
+        row.unit.translations?.find(
+          (translation) => translation.language === row.unit?.defaultLanguage,
+        )?.title ??
+        row.unit.translations?.[0]?.title ??
+        row.unit.id;
+      return [
+        {
+          unitId: row.unit.id,
+          type: row.unit.type,
+          title,
+          role: row.role,
+        },
+      ];
+    }) ?? [];
+
+  return { works, isLoading: query.isLoading };
 }

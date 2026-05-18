@@ -46,6 +46,7 @@ export class SearchClient {
         "descriptions",
         "summaries",
         "creditNames",
+        "subjectNames",
         "tagLabels",
       ],
       filterableAttributes: [
@@ -61,6 +62,9 @@ export class SearchClient {
         "textLength",
         "userId",
         "containedUnitIds",
+        "subjectEntityIds",
+        "subjectKinds",
+        "subjectRoles",
       ],
       sortableAttributes: ["createdAt", "updatedAt", "publishedAt"],
     });

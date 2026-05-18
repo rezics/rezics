@@ -2,7 +2,7 @@ import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { Prisma } from "#/prisma/client";
-import { attributionApi } from "./attribution";
+import { creditAttributionApi } from "./credit-attribution";
 import { entityApi } from "./entity";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
@@ -32,6 +32,7 @@ import {
 import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
 import { slugApi } from "./slug";
+import { subjectAttributionApi } from "./subject-attribution";
 import { subscriptionApi } from "./subscription";
 import { statsAdminApi } from "./stat";
 import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";
@@ -102,11 +103,7 @@ app
       origin: isDev ? devOrigins : prodOrigins,
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: [
-        "content-type",
-        "authorization",
-        "accept",
-      ],
+      allowedHeaders: ["content-type", "authorization", "accept"],
       maxAge: 600,
     }),
   )
@@ -179,7 +176,8 @@ app
   .use(realmTagContextApi)
   .use(realmTagUnitApi)
   .use(realmTagVoteApi)
-  .use(attributionApi)
+  .use(creditAttributionApi)
+  .use(subjectAttributionApi)
   .use(entityApi)
   .use(slugApi)
   .use(subscriptionApi)

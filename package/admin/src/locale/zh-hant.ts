@@ -276,6 +276,37 @@ export default {
     collapse_all: "全部折叠",
   },
 
+  entity: {
+    kind: {
+      person: "人物",
+      organization: "组织",
+      circle: "社团",
+      studio: "工作室",
+      label: "品牌",
+      character: "角色",
+      faction: "阵营",
+      family: "家族",
+      location: "地点",
+      artifact: "物品",
+      event: "事件",
+      concept: "概念",
+    },
+    credit_attribution: "制作 credit 关联",
+    subject_attribution: {
+      title: "主题关联",
+      role: {
+        primary_character: "主要角色",
+        featured_character: "登场角色",
+        appears: "出现",
+        about: "关于",
+        setting: "舞台",
+        source_work: "来源作品",
+        canonical_wiki_page: "标准 Wiki 页",
+        related_subject: "相关主题",
+      },
+    },
+  },
+
   unit: {
     no_content: "暂无内容",
     meta_data: "Meta 信息",

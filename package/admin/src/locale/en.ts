@@ -248,6 +248,37 @@ export default {
     open_profile: "Open Profile",
   },
 
+  entity: {
+    kind: {
+      person: "Person",
+      organization: "Organization",
+      circle: "Circle",
+      studio: "Studio",
+      label: "Label",
+      character: "Character",
+      faction: "Faction",
+      family: "Family",
+      location: "Location",
+      artifact: "Artifact",
+      event: "Event",
+      concept: "Concept",
+    },
+    credit_attribution: "Credit attribution",
+    subject_attribution: {
+      title: "Subject attribution",
+      role: {
+        primary_character: "Primary character",
+        featured_character: "Featured character",
+        appears: "Appears",
+        about: "About",
+        setting: "Setting",
+        source_work: "Source work",
+        canonical_wiki_page: "Canonical wiki page",
+        related_subject: "Related subject",
+      },
+    },
+  },
+
   // ANCHOR Unit
   unit: {
     no_content: "No content",

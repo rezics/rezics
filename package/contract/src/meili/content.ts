@@ -18,8 +18,14 @@ export const ContentSearchDocumentSchema = t.Object({
   summaries: t.Array(t.String()),
   descriptions: t.Array(t.String()),
 
-  // Searchable attribution (denormalized from Attribution → Entity translations)
+  // Searchable credit attribution (denormalized from Attribution -> Entity translations)
   creditNames: t.Array(t.String()),
+
+  // Searchable subject attribution (denormalized from SubjectAttribution -> Entity translations)
+  subjectNames: t.Array(t.String()),
+  subjectEntityIds: t.Array(t.String()),
+  subjectKinds: t.Array(t.String()),
+  subjectRoles: t.Array(t.String()),
 
   // Searchable tag labels (denormalized from tag Unit translations)
   tagLabels: t.Array(t.String()),

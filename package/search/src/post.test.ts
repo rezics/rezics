@@ -158,6 +158,51 @@ describe("buildContentDocument realm tag keys", () => {
   });
 });
 
+describe("buildContentDocument subject attributions", () => {
+  test("subject names do not pollute creditNames", async () => {
+    process.env.DATABASE_URL ??=
+      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      id: "fanfic-1",
+      type: "BOOK",
+      defaultLanguage: "en",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      userId: "user-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      publishedAt: null,
+      translations: [{ language: "en", title: "Fanfic", extra: null }],
+      unitTags: [],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [],
+      attributions: [],
+      subjectAttributions: [
+        {
+          entityId: "character-1",
+          role: "primary_character",
+          entity: {
+            entity: { kind: "character" },
+            translations: [
+              { language: "en", title: "Aster", extra: null },
+              { language: "ja", title: "Aster JP", extra: null },
+            ],
+          },
+        },
+      ],
+      book: { textLength: 100, isLicensed: false },
+    });
+
+    expect(doc.creditNames).toEqual([]);
+    expect(doc.subjectEntityIds).toEqual(["character-1"]);
+    expect(doc.subjectNames).toEqual(["Aster", "Aster JP"]);
+    expect(doc.subjectKinds).toEqual(["character"]);
+    expect(doc.subjectRoles).toEqual(["primary_character"]);
+  });
+});
+
 describe("buildContentDocument containedUnitIds", () => {
   const baseUnit = {
     defaultLanguage: "en",
@@ -184,11 +229,7 @@ describe("buildContentDocument containedUnitIds", () => {
       type: "SHELF",
       translations: [{ language: "en", title: "My Shelf", extra: null }],
       shelf: {
-        units: [
-          { unitId: "u-a" },
-          { unitId: "u-b" },
-          { unitId: "u-c" },
-        ],
+        units: [{ unitId: "u-a" }, { unitId: "u-b" }, { unitId: "u-c" }],
       },
     });
 
@@ -212,6 +253,8 @@ describe("buildContentDocument containedUnitIds", () => {
       book: { textLength: 100, isLicensed: false },
     });
 
-    expect((doc as { containedUnitIds?: string[] }).containedUnitIds).toBeUndefined();
+    expect(
+      (doc as { containedUnitIds?: string[] }).containedUnitIds,
+    ).toBeUndefined();
   });
 });

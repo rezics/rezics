@@ -1,0 +1,103 @@
+import type {
+  LinkSubjectAttributionInput,
+  SubjectAttributionBySubjectQuery,
+  SubjectAttributionByUnitQuery,
+  SubjectAttributionDTO,
+} from "@rezics/contract";
+import { prisma } from "#/prisma/client";
+import { patchContentSubjectsToMeili } from "@/meili/content/sync";
+import { AppError } from "@/utils/errors";
+import { mapSubjectAttributionToDTO } from "./subject-attribution.mapper";
+import { subjectAttributionInclude } from "./types";
+
+export class SubjectAttributionService {
+  private async assertEntityUnit(entityId: string): Promise<void> {
+    const entityUnit = await prisma.unit.findUnique({
+      where: { id: entityId },
+      select: { id: true, type: true },
+    });
+
+    if (!entityUnit) {
+      throw new AppError(404, "Subject Entity not found", {
+        code: "subject_entity_not_found",
+        details: { entityId },
+      });
+    }
+
+    if (entityUnit.type !== "ENTITY") {
+      throw new AppError(
+        400,
+        "Subject attribution entityId must reference an ENTITY Unit",
+        {
+          code: "subject_entity_must_be_entity_unit",
+          details: { entityId, type: entityUnit.type },
+        },
+      );
+    }
+  }
+
+  async link(req: LinkSubjectAttributionInput): Promise<SubjectAttributionDTO> {
+    await this.assertEntityUnit(req.entityId);
+
+    const row = await prisma.subjectAttribution.create({
+      data: {
+        unitId: req.unitId,
+        entityId: req.entityId,
+        role: req.role,
+        sortOrder: req.sortOrder ?? 0,
+        weight: req.weight ?? null,
+      },
+      include: subjectAttributionInclude,
+    });
+    await patchContentSubjectsToMeili(req.unitId);
+    return mapSubjectAttributionToDTO(row);
+  }
+
+  async unlink(unitId: string, entityId: string, role: string): Promise<void> {
+    await prisma.subjectAttribution.delete({
+      where: {
+        unitId_entityId_role: { unitId, entityId, role },
+      },
+    });
+    await patchContentSubjectsToMeili(unitId);
+  }
+
+  async listByUnit(
+    unitId: string,
+    query: SubjectAttributionByUnitQuery = {},
+  ): Promise<SubjectAttributionDTO[]> {
+    const rows = await prisma.subjectAttribution.findMany({
+      where: {
+        unitId,
+        ...(query.role ? { role: query.role } : {}),
+      },
+      include: subjectAttributionInclude,
+      orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
+    });
+    return rows.map(mapSubjectAttributionToDTO);
+  }
+
+  async listBySubject(
+    entityId: string,
+    query: SubjectAttributionBySubjectQuery = {},
+  ): Promise<SubjectAttributionDTO[]> {
+    await this.assertEntityUnit(entityId);
+
+    const rows = await prisma.subjectAttribution.findMany({
+      where: {
+        entityId,
+        ...(query.role ? { role: query.role } : {}),
+        unit: {
+          ...(query.unitType ? { type: query.unitType as any } : {}),
+          ...(query.status ? { status: query.status as any } : {}),
+          ...(query.visibility ? { visibility: query.visibility as any } : {}),
+        },
+      },
+      include: subjectAttributionInclude,
+      orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
+    });
+    return rows.map(mapSubjectAttributionToDTO);
+  }
+}
+
+export const subjectAttributionService = new SubjectAttributionService();

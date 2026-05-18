@@ -397,6 +397,37 @@ export default {
     open_profile: "開啟個人檔案",
   },
 
+  entity: {
+    kind: {
+      person: "人物",
+      organization: "組織",
+      circle: "社團",
+      studio: "工作室",
+      label: "品牌",
+      character: "角色",
+      faction: "陣營",
+      family: "家族",
+      location: "地點",
+      artifact: "物品",
+      event: "事件",
+      concept: "概念",
+    },
+    credit_attribution: "製作 credit 關聯",
+    subject_attribution: {
+      title: "主題關聯",
+      role: {
+        primary_character: "主要角色",
+        featured_character: "登場角色",
+        appears: "出現",
+        about: "關於",
+        setting: "舞台",
+        source_work: "來源作品",
+        canonical_wiki_page: "標準 Wiki 頁",
+        related_subject: "相關主題",
+      },
+    },
+  },
+
   // Unit
   unit: {
     no_content: "暫無內容",

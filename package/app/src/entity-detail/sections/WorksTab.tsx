@@ -5,7 +5,10 @@ interface WorksTabProps {
 }
 
 export function WorksTab({ entityUnitId }: WorksTabProps) {
-  const { works } = useEntityWorks(entityUnitId);
+  const { works, isLoading } = useEntityWorks(entityUnitId);
+  if (isLoading) {
+    return <p className="text-sm text-text-secondary">Loading works…</p>;
+  }
   if (works.length === 0) {
     return <p className="text-sm text-text-secondary">No works yet.</p>;
   }
@@ -20,6 +23,7 @@ export function WorksTab({ entityUnitId }: WorksTabProps) {
             {w.type}
           </span>
           {w.title}
+          <span className="ml-2 text-xs text-text-secondary">{w.role}</span>
         </li>
       ))}
     </ul>

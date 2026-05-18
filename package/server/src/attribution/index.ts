@@ -1,4 +1,14 @@
-export { attributionApi } from "./attribution.api";
-export { mapAttributionToDTO } from "./attribution.mapper";
-export { AttributionService, attributionService } from "./attribution.service";
-export * from "./types";
+export {
+  creditAttributionApi as attributionApi,
+  creditAttributionApi,
+} from "../credit-attribution/credit-attribution.api";
+export {
+  mapCreditAttributionToDTO as mapAttributionToDTO,
+  mapCreditAttributionToDTO,
+} from "../credit-attribution/credit-attribution.mapper";
+export {
+  CreditAttributionService as AttributionService,
+  creditAttributionService as attributionService,
+  CreditAttributionService,
+  creditAttributionService,
+} from "../credit-attribution/credit-attribution.service";

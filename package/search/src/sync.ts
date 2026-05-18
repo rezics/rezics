@@ -99,7 +99,15 @@ const contentInclude = {
   attributions: {
     include: {
       entity: {
-        include: { translations: true },
+        include: { entity: true, translations: true },
+      },
+    },
+    orderBy: { sortOrder: "asc" as const },
+  },
+  subjectAttributions: {
+    include: {
+      entity: {
+        include: { entity: true, translations: true },
       },
     },
     orderBy: { sortOrder: "asc" as const },
@@ -122,6 +130,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const realmTagApplicationsAsTargetUnit: any[] =
     unit.realmTagApplicationsAsTargetUnit ?? [];
   const attributions: any[] = unit.attributions ?? [];
+  const subjectAttributions: any[] = unit.subjectAttributions ?? [];
 
   // Flatten translations
   const titles = translations.map((t: any) => t.title).filter(Boolean);
@@ -152,13 +161,32 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     (rt: any) => `${rt.realmUnitId}:${rt.tagUnitId}`,
   );
 
-  // Attribution
+  // Credit attribution
   const creditNames = attributions
     .map((a: any) => {
       const translations = a.entity?.translations ?? [];
       return translations[0]?.title;
     })
     .filter(Boolean);
+
+  const subjectEntityIds = subjectAttributions.map((a: any) => a.entityId);
+  const subjectNames = subjectAttributions
+    .flatMap((a: any) =>
+      (a.entity?.translations ?? []).map(
+        (translation: any) => translation.title,
+      ),
+    )
+    .filter(Boolean);
+  const subjectKinds = [
+    ...new Set(
+      subjectAttributions
+        .map((a: any) => a.entity?.entity?.kind)
+        .filter(Boolean),
+    ),
+  ];
+  const subjectRoles = [
+    ...new Set(subjectAttributions.map((a: any) => a.role).filter(Boolean)),
+  ];
 
   // Type extension fields
   const ext = unit.book ?? unit.game ?? unit.media ?? null;
@@ -179,9 +207,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   // Shelf membership: list of unit ids contained in this shelf (SHELF type only)
   const containedUnitIds: string[] | undefined =
     unit.type === UnitType.SHELF
-      ? ((unit.shelf?.units ?? []) as { unitId: string }[]).map(
-          (i) => i.unitId,
-        )
+      ? ((unit.shelf?.units ?? []) as { unitId: string }[]).map((i) => i.unitId)
       : undefined;
 
   return {
@@ -192,6 +218,10 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     summaries,
     descriptions,
     creditNames,
+    subjectNames,
+    subjectEntityIds,
+    subjectKinds,
+    subjectRoles,
     tagLabels,
     tagIds,
     tagScores,
@@ -365,6 +395,44 @@ export async function patchContentCredits(
     .filter(Boolean);
 
   await client.patchContent([{ id: unitId, creditNames }]);
+}
+
+export async function patchContentSubjects(
+  client: SearchClient,
+  unitId: string,
+) {
+  const subjectAttributions = await prisma.subjectAttribution.findMany({
+    where: { unitId },
+    include: {
+      entity: {
+        include: { entity: true, translations: true },
+      },
+    },
+    orderBy: { sortOrder: "asc" },
+  });
+
+  const subjectEntityIds = subjectAttributions.map((a: any) => a.entityId);
+  const subjectNames = subjectAttributions
+    .flatMap((a: any) =>
+      (a.entity?.translations ?? []).map(
+        (translation: any) => translation.title,
+      ),
+    )
+    .filter(Boolean);
+  const subjectKinds = [
+    ...new Set(
+      subjectAttributions
+        .map((a: any) => a.entity?.entity?.kind)
+        .filter(Boolean),
+    ),
+  ];
+  const subjectRoles = [
+    ...new Set(subjectAttributions.map((a: any) => a.role).filter(Boolean)),
+  ];
+
+  await client.patchContent([
+    { id: unitId, subjectEntityIds, subjectNames, subjectKinds, subjectRoles },
+  ]);
 }
 
 export async function patchContentTranslations(
