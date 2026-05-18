@@ -165,13 +165,22 @@ export function useCreateReactionMutation(
       for (const snap of context.summarySnapshots) {
         queryClient.setQueryData(
           snap.key,
-          applySummaryDelta(snap.data, variables.targetId, variables.reaction, 1),
+          applySummaryDelta(
+            snap.data,
+            variables.targetId,
+            variables.reaction,
+            1,
+          ),
         );
       }
       for (const snap of context.mySnapshots) {
         queryClient.setQueryData(
           snap.key,
-          applyUserReactionAdd(snap.data, variables.targetId, variables.reaction),
+          applyUserReactionAdd(
+            snap.data,
+            variables.targetId,
+            variables.reaction,
+          ),
         );
       }
 
@@ -218,7 +227,12 @@ export function useDeleteReactionMutation(
       for (const snap of context.summarySnapshots) {
         queryClient.setQueryData(
           snap.key,
-          applySummaryDelta(snap.data, variables.targetId, variables.reaction, -1),
+          applySummaryDelta(
+            snap.data,
+            variables.targetId,
+            variables.reaction,
+            -1,
+          ),
         );
       }
       for (const snap of context.mySnapshots) {

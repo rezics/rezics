@@ -58,9 +58,8 @@ export class SubscriptionService {
     }
     const targetType: SubscribableUnitType = target.type;
 
-    const effectiveChannels = channels && channels.length > 0
-      ? [...channels]
-      : [...DEFAULT_CHANNELS];
+    const effectiveChannels =
+      channels && channels.length > 0 ? [...channels] : [...DEFAULT_CHANNELS];
 
     try {
       assertValidChannels(targetType, effectiveChannels);
@@ -209,10 +208,7 @@ export class SubscriptionService {
       throw new AppError(404, "Target Unit not found");
     }
     if (!isSubscribableUnitType(target.type)) {
-      throw new AppError(
-        400,
-        `Unit type ${target.type} is not subscribable`,
-      );
+      throw new AppError(400, `Unit type ${target.type} is not subscribable`);
     }
 
     try {

@@ -99,8 +99,7 @@ function createTransporter(config: SmtpTransportConfig): Transporter {
 function toDeliveryFailure(error: unknown): EmailDeliveryFailure {
   return {
     code: "EMAIL_DELIVERY_FAILED",
-    message:
-      error instanceof Error ? error.message : "Email delivery failed",
+    message: error instanceof Error ? error.message : "Email delivery failed",
     cause: error,
   };
 }
@@ -108,7 +107,8 @@ function toDeliveryFailure(error: unknown): EmailDeliveryFailure {
 export function createEmailSender(
   options: CreateEmailSenderOptions,
 ): EmailSender {
-  const transporter = options.transporter ?? createTransporter(options.transport);
+  const transporter =
+    options.transporter ?? createTransporter(options.transport);
   const send: EmailSender["send"] = async (message) => {
     try {
       await transporter.sendMail({

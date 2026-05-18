@@ -70,9 +70,7 @@ async function defaultFindSubscriptionMatches(
       targetUnitId,
       OR: [
         { channels: { has: kind } },
-        ...(categoryWildcard
-          ? [{ channels: { has: categoryWildcard } }]
-          : []),
+        ...(categoryWildcard ? [{ channels: { has: categoryWildcard } }] : []),
         { channels: { has: "*" } },
       ],
     },
@@ -154,7 +152,8 @@ export async function broadcast(
   };
 
   const result = await postInternal("/internal/event", body);
-  const persisted = (result.data as { persisted?: number } | undefined)?.persisted;
+  const persisted = (result.data as { persisted?: number } | undefined)
+    ?.persisted;
   return { ok: result.ok, persisted };
 }
 

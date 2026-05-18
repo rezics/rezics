@@ -8,11 +8,13 @@ process.env.BETTER_AUTH_SECRET ??=
   "this-is-a-long-auth-secret-for-tests-123456";
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
 
-const userFindUnique = mock(async (_args?: unknown): Promise<any> => ({
-  id: "auth-user-1",
-  email: "reader@example.com",
-  emailVerified: false,
-}));
+const userFindUnique = mock(
+  async (_args?: unknown): Promise<any> => ({
+    id: "auth-user-1",
+    email: "reader@example.com",
+    emailVerified: false,
+  }),
+);
 const userFindMany = mock(async (_args?: unknown) => [
   { id: "stale-user-1", email: "stale@example.com" },
 ]);

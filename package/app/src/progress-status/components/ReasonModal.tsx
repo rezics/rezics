@@ -42,8 +42,14 @@ type ReasonModalProps = {
 };
 
 const TITLE_KEY: Record<ReasonStatus, { key: string; fallback: string }> = {
-  PAUSED: { key: "progress_status.reason_modal.title_paused", fallback: "擱置原因" },
-  DROPPED: { key: "progress_status.reason_modal.title_dropped", fallback: "棄讀原因" },
+  PAUSED: {
+    key: "progress_status.reason_modal.title_paused",
+    fallback: "擱置原因",
+  },
+  DROPPED: {
+    key: "progress_status.reason_modal.title_dropped",
+    fallback: "棄讀原因",
+  },
 };
 
 const DESC_KEY: Record<ReasonStatus, { key: string; fallback: string }> = {
@@ -162,9 +168,7 @@ export function ReasonModal({
           )}
           <Button
             type="button"
-            onClick={() =>
-              onSave({ body, visibility, mode: "create-or-edit" })
-            }
+            onClick={() => onSave({ body, visibility, mode: "create-or-edit" })}
             disabled={isPending || body.trim().length === 0}
           >
             {t("common.save", "儲存")}

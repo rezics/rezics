@@ -22,9 +22,7 @@ export function SeedTagChipGroup({
     () =>
       SEED_TAG_NAMES.map((name) => {
         const tagId = getSeedTagId(name);
-        return tagId
-          ? { name, tagId, label: SEED_TAG_TITLES[name] }
-          : null;
+        return tagId ? { name, tagId, label: SEED_TAG_TITLES[name] } : null;
       }).filter(
         (c): c is { name: SeedTagName; tagId: string; label: string } =>
           c !== null,
@@ -55,9 +53,7 @@ export function SeedTagChipGroup({
             key={name}
             variant={isSelected ? "default" : "outline"}
             className={
-              disabled
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer"
+              disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
             }
             aria-pressed={isSelected}
             aria-disabled={disabled || undefined}

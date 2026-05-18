@@ -89,8 +89,7 @@ function ExcerptSourceLine({ source }: { source?: ExcerptSource | string }) {
   if (typeof source === "string") {
     return <p className="text-xs text-text-secondary">—— {source}</p>;
   }
-  const href =
-    source.mode === "unit" ? `/unit/${source.unitId}` : source.url;
+  const href = source.mode === "unit" ? `/unit/${source.unitId}` : source.url;
   return (
     <p className="text-xs text-text-secondary">
       ——{" "}

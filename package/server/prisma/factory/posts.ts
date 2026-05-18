@@ -415,10 +415,9 @@ async function seedTreePostsForTarget(
 
     const author = faker.helpers.arrayElement(users);
     const replyId = randomUUID();
-    const sortPath = `${parent.sortPath}.${String(parent.childCount + 1).padStart(
-      4,
-      "0",
-    )}`;
+    const sortPath = `${parent.sortPath}.${String(
+      parent.childCount + 1,
+    ).padStart(4, "0")}`;
 
     const unit = await ctx.prisma.unit.create({
       data: {

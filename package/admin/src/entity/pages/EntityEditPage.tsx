@@ -1,7 +1,4 @@
-import {
-  useEntity,
-  useUpdateEntity,
-} from "@rezics/api/entity";
+import { useEntity, useUpdateEntity } from "@rezics/api/entity";
 import { entityKinds, validateSlug } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";

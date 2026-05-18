@@ -38,9 +38,7 @@ export async function seedSlugScopes(
     }
 
     const unitId = await prisma.$transaction(async (tx) => {
-      const rows = await tx.$queryRaw<
-        { id: string }[]
-      >`SELECT uuidv7() as id`;
+      const rows = await tx.$queryRaw<{ id: string }[]>`SELECT uuidv7() as id`;
       const id = rows[0]?.id;
       if (!id) {
         throw new Error(

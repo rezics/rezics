@@ -1,1 +1,4 @@
-export { EntityPicker, type EntityPickerProps } from "./components/EntityPicker";
+export {
+  EntityPicker,
+  type EntityPickerProps,
+} from "./components/EntityPicker";

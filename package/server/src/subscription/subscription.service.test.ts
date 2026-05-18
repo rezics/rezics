@@ -19,8 +19,8 @@ const SUBSCRIBER = "subscriber-unit-id";
 const TARGET = "target-unit-id";
 
 function stubTransaction() {
-  prismaMock.$transaction = mock(async (fn: (tx: typeof prismaMock) => unknown) =>
-    fn(prismaMock),
+  prismaMock.$transaction = mock(
+    async (fn: (tx: typeof prismaMock) => unknown) => fn(prismaMock),
   );
 }
 
@@ -223,11 +223,9 @@ describe("subscriptionService.updateChannels", () => {
   });
 
   test("accepts valid channels and writes update", async () => {
-    const dto = await subscriptionService.updateChannels(
-      SUBSCRIBER,
-      TARGET,
-      ["chapter.new"],
-    );
+    const dto = await subscriptionService.updateChannels(SUBSCRIBER, TARGET, [
+      "chapter.new",
+    ]);
     expect(dto.channels).toEqual(["chapter.new"]);
     expect(prismaMock.subscription.update).toHaveBeenCalledTimes(1);
   });

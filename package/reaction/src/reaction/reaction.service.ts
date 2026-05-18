@@ -15,9 +15,7 @@ const MAX_TARGET_IDS = 1000;
 export class TargetIdsOverflowError extends Error {
   readonly statusCode = 400;
   constructor() {
-    super(
-      `targetIds exceeds maximum of ${MAX_TARGET_IDS} entries per request`,
-    );
+    super(`targetIds exceeds maximum of ${MAX_TARGET_IDS} entries per request`);
     this.name = "TargetIdsOverflowError";
   }
 }
@@ -73,10 +71,7 @@ function buildCursorPredicate(
     OR: [
       { createdAt: { lt: cursor.createdAt } },
       {
-        AND: [
-          { createdAt: cursor.createdAt },
-          { id: { lt: cursor.id } },
-        ],
+        AND: [{ createdAt: cursor.createdAt }, { id: { lt: cursor.id } }],
       },
     ],
   };
@@ -234,9 +229,7 @@ export class ReactionService {
       ...(input.reactions && input.reactions.length > 0
         ? { reaction: { in: input.reactions } }
         : {}),
-      ...(input.excludeUserId
-        ? { userId: { not: input.excludeUserId } }
-        : {}),
+      ...(input.excludeUserId ? { userId: { not: input.excludeUserId } } : {}),
       ...(buildCursorPredicate(cursor) ?? {}),
     };
 

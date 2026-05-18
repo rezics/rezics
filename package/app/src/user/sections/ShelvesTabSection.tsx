@@ -19,8 +19,7 @@ function isSystemKindKey(
   kindKey: string | null | undefined,
 ): kindKey is SystemShelfKindKey {
   return (
-    !!kindKey &&
-    (SYSTEM_SHELF_KIND_KEYS as readonly string[]).includes(kindKey)
+    !!kindKey && (SYSTEM_SHELF_KIND_KEYS as readonly string[]).includes(kindKey)
   );
 }
 
@@ -134,9 +133,7 @@ const ShelfCard: FC<{
   const dbTitle = shelf.translations?.[0]?.title ?? "Untitled Shelf";
   const isSystemShelf = isSystemKindKey(shelf.kindKey);
   const title =
-    isOwnerView && isSystemShelf
-      ? t(`shelf.system.${shelf.kindKey}`)
-      : dbTitle;
+    isOwnerView && isSystemShelf ? t(`shelf.system.${shelf.kindKey}`) : dbTitle;
   const itemCount = shelf.items?.length ?? 0;
   const card = (
     <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors h-full flex flex-col">

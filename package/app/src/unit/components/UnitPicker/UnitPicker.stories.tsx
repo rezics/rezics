@@ -9,11 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Button } from "@rezics/ui/shadcn";
 import { unitKeys } from "@rezics/api/unit/unit.keys";
-import type {
-  UnitDTO,
-  UnitListResponse,
-  UnitResponse,
-} from "@rezics/contract";
+import type { UnitDTO, UnitListResponse, UnitResponse } from "@rezics/contract";
 import { useEffect, useMemo, useState } from "react";
 import type { Candidate } from "../../models/types";
 import { UnitPicker } from "./UnitPicker";
@@ -89,7 +85,11 @@ interface StoryShellProps {
   mode: "single" | "multi";
 }
 
-function StoryShell({ initialInput, workContextUnitId, mode }: StoryShellProps) {
+function StoryShell({
+  initialInput,
+  workContextUnitId,
+  mode,
+}: StoryShellProps) {
   useHydrateUnitCache();
   const [selected, setSelected] = useState<Candidate | undefined>(undefined);
   const [added, setAdded] = useState<Candidate[]>([]);

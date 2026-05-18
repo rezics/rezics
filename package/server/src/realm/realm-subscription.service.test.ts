@@ -36,13 +36,21 @@ interface TxOps {
 }
 
 function installTx(ops: TxOps) {
-  prismaMock.$transaction = mock(async (fn: (tx: typeof prismaMock) => unknown) =>
-    fn(prismaMock),
+  prismaMock.$transaction = mock(
+    async (fn: (tx: typeof prismaMock) => unknown) => fn(prismaMock),
   );
   prismaMock.realmMember = {
-    create: ops.memberCreate ?? mock(async () => ({ realmUnitId: REALM, userId: USER, roleKey: "member" })),
+    create:
+      ops.memberCreate ??
+      mock(async () => ({
+        realmUnitId: REALM,
+        userId: USER,
+        roleKey: "member",
+      })),
     delete: ops.memberDelete ?? mock(async () => ({})),
-    findUnique: ops.memberFindUnique ?? mock(async () => ({ realmUnitId: REALM, userId: USER })),
+    findUnique:
+      ops.memberFindUnique ??
+      mock(async () => ({ realmUnitId: REALM, userId: USER })),
   };
   prismaMock.realm = {
     update: ops.realmUpdate ?? mock(async () => ({ memberCount: 1 })),
@@ -76,7 +84,11 @@ describe("realmService.joinRealm", () => {
     expect(prismaMock.subscription.create).toHaveBeenCalledTimes(1);
     expect(prismaMock.unit.update).toHaveBeenCalledTimes(1); // subscriberCount++
     const subArgs = prismaMock.subscription.create.mock.calls[0]?.[0] as {
-      data: { channels: string[]; subscriberUnitId: string; targetUnitId: string };
+      data: {
+        channels: string[];
+        subscriberUnitId: string;
+        targetUnitId: string;
+      };
     };
     expect(subArgs.data.channels).toEqual(["*"]);
     expect(subArgs.data.subscriberUnitId).toBe(USER);

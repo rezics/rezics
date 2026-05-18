@@ -152,12 +152,14 @@ async function ensureCommunityRealm(
           {
             language: DEFAULT_LANGUAGE,
             title: "Sci-fi Readers",
-            description: "Community discussion and curation for science fiction.",
+            description:
+              "Community discussion and curation for science fiction.",
           },
           {
             language: FALLBACK_LANGUAGE,
             title: "Sci-fi Readers",
-            description: "Community discussion and curation for science fiction.",
+            description:
+              "Community discussion and curation for science fiction.",
           },
         ],
       },

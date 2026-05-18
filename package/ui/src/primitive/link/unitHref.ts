@@ -12,12 +12,7 @@
  * wrapper.
  */
 
-export type SlugBearingTopType =
-  | "USER"
-  | "REALM"
-  | "TAG"
-  | "ZONE"
-  | "ENTITY";
+export type SlugBearingTopType = "USER" | "REALM" | "TAG" | "ZONE" | "ENTITY";
 
 type SlugBearingTopInput = {
   type: SlugBearingTopType;

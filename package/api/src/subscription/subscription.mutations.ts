@@ -1,7 +1,4 @@
-import type {
-  SubscriptionCreateBody,
-  SubscriptionDTO,
-} from "@rezics/contract";
+import type { SubscriptionCreateBody, SubscriptionDTO } from "@rezics/contract";
 import {
   type UseMutationOptions,
   useMutation,

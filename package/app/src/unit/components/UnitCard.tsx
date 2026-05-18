@@ -143,7 +143,9 @@ function renderAttachmentCounts(summary: UnitCardSummary): string | null {
   if (!counts) return null;
   const parts: string[] = [];
   if (counts.reviews > 0) {
-    parts.push(`${counts.reviews} ${counts.reviews === 1 ? "review" : "reviews"}`);
+    parts.push(
+      `${counts.reviews} ${counts.reviews === 1 ? "review" : "reviews"}`,
+    );
   }
   if (counts.tags > 0) {
     parts.push(`${counts.tags} ${counts.tags === 1 ? "tag" : "tags"}`);

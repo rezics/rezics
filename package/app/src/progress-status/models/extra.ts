@@ -1,7 +1,4 @@
-import type {
-  ProgressExtra,
-  UserUnitProgressStatus,
-} from "@rezics/contract";
+import type { ProgressExtra, UserUnitProgressStatus } from "@rezics/contract";
 
 export type { ProgressExtra };
 

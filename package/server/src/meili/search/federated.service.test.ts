@@ -30,7 +30,11 @@ interface CapturedMultiSearch {
 function makeFakeClient(opts?: {
   multiSearchResponse?: any;
   perIndex?: (q: string, params: any) => any;
-}): { client: SearchClient; calls: CapturedSearch[]; multi: CapturedMultiSearch[] } {
+}): {
+  client: SearchClient;
+  calls: CapturedSearch[];
+  multi: CapturedMultiSearch[];
+} {
   const calls: CapturedSearch[] = [];
   const multi: CapturedMultiSearch[] = [];
 
@@ -286,7 +290,9 @@ describe("federatedSearch", () => {
 
     await federatedSearch(client, opts);
 
-    const postsQueries = multi[0]!.queries.filter((q) => q.indexUid === "posts");
+    const postsQueries = multi[0]!.queries.filter(
+      (q) => q.indexUid === "posts",
+    );
     for (const q of postsQueries) {
       expect(q.filter).toContain("isLocked = false");
     }

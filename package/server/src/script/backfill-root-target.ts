@@ -12,10 +12,7 @@ async function fetchBatch(
     where: {
       ...where,
       rootPostUnitId: { not: null },
-      OR: [
-        { rootTargetUnitId: null },
-        { rootTargetUnitType: null },
-      ],
+      OR: [{ rootTargetUnitId: null }, { rootTargetUnitType: null }],
     },
     select: { unitId: true },
     orderBy: { unitId: "asc" },

@@ -42,9 +42,10 @@ function kindLabel(kind: string): string {
 }
 
 export function NotificationCard({ item, onClick }: NotificationCardProps) {
-  const extra = (item.extra ?? null) as
-    | { unitTitle?: string; unitCover?: string }
-    | null;
+  const extra = (item.extra ?? null) as {
+    unitTitle?: string;
+    unitCover?: string;
+  } | null;
   const actorCount = item.actorIds.length;
   const actorSummary =
     actorCount === 0

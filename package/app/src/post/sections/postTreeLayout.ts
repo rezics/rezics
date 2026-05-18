@@ -9,8 +9,7 @@ export const RAIL_STROKE_PX = 2;
 export const RAIL_HITBOX_PX = 12;
 export const ROW_TOP_PADDING_PX = 4;
 export const RAIL_GAP_PX = 4;
-export const RAIL_TOP_PX =
-  ROW_TOP_PADDING_PX + AVATAR_SIZE_PX + RAIL_GAP_PX;
+export const RAIL_TOP_PX = ROW_TOP_PADDING_PX + AVATAR_SIZE_PX + RAIL_GAP_PX;
 export const AVATAR_CENTER_Y_PX = ROW_TOP_PADDING_PX + AVATAR_CENTER_PX;
 export const RAIL_CAP_RADIUS_PX = RAIL_STROKE_PX;
 export const TERMINAL_RAIL_HEIGHT_PX =

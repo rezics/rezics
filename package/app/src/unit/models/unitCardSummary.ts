@@ -199,9 +199,7 @@ export function shelfUnitToUnitCardSummary(
     };
   }
 
-  return attachmentCounts
-    ? { ...summary, attachmentCounts }
-    : summary;
+  return attachmentCounts ? { ...summary, attachmentCounts } : summary;
 }
 
 export function resolveUnitWorkContext(

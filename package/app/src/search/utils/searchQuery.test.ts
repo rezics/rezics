@@ -3,9 +3,9 @@ import { buildSearchPath } from "./searchQuery";
 
 describe("buildSearchPath", () => {
   test("global scope produces /search?q=…", () => {
-    expect(buildSearchPath({ scope: { kind: "global" }, keyword: "magic" })).toBe(
-      "/search?q=magic",
-    );
+    expect(
+      buildSearchPath({ scope: { kind: "global" }, keyword: "magic" }),
+    ).toBe("/search?q=magic");
   });
 
   test("global scope is the default when scope omitted", () => {
@@ -65,7 +65,10 @@ describe("buildSearchPath", () => {
   });
 
   test("keyword is URL-encoded", () => {
-    const out = buildSearchPath({ scope: { kind: "global" }, keyword: "hello world" });
+    const out = buildSearchPath({
+      scope: { kind: "global" },
+      keyword: "hello world",
+    });
     expect(out).toContain("q=hello+world");
   });
 });

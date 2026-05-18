@@ -6,10 +6,7 @@ import {
   seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
 import { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
-import {
-  seedSlugScopes,
-  type SlugScopesMap,
-} from "./seed-slug-scopes";
+import { seedSlugScopes, type SlugScopesMap } from "./seed-slug-scopes";
 
 export { seedDefaultRealm } from "./seed-default-realm";
 export {
@@ -40,11 +37,7 @@ export async function seedInfra(
 ): Promise<SeedInfraResult> {
   const slugScopes = await seedSlugScopes(prisma);
   const tagMap = await seedContentTypeTags(prisma, slugScopes);
-  const defaultRealmId = await seedDefaultRealm(
-    prisma,
-    rootUserId,
-    slugScopes,
-  );
+  const defaultRealmId = await seedDefaultRealm(prisma, rootUserId, slugScopes);
   const realmTaxonomy = await seedRealmTaxonomy(
     prisma,
     rootUserId,

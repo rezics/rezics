@@ -34,18 +34,14 @@ export const NotificationPage: React.FC = () => {
       <InboxTabBar active="notifications" />
       <div className="mt-4" />
 
-      {isLoading && (
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      )}
+      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
       {isError && (
         <p className="text-sm text-destructive">
           Could not load notifications.
         </p>
       )}
       {!isLoading && !isError && items.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          No notifications yet.
-        </p>
+        <p className="text-sm text-muted-foreground">No notifications yet.</p>
       )}
 
       <ul className="flex flex-col gap-1">

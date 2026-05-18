@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { resolveRecipients, type BroadcastEvent } from "./notify-boundary.client";
+import {
+  resolveRecipients,
+  type BroadcastEvent,
+} from "./notify-boundary.client";
 
 /**
  * Unit tests for the recipient resolver. The Prisma-backed

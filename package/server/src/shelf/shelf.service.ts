@@ -18,11 +18,7 @@ import type {
   ShelfUnitsResponse,
   UpdateShelfInput,
 } from "@rezics/contract";
-import {
-  parseIdsCsv,
-  SEED_TAG_NAMES,
-  withCoverUrl,
-} from "@rezics/contract";
+import { parseIdsCsv, SEED_TAG_NAMES, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
   PostKind,
@@ -1008,8 +1004,7 @@ export class ShelfService {
                   where: { shelfId_unitId: { shelfId, unitId: childId } },
                 });
                 if (!existing) {
-                  const kind =
-                    op.childKind ?? (await this.deriveKind(childId));
+                  const kind = op.childKind ?? (await this.deriveKind(childId));
                   const r = await ensureShelfUnit(tx, shelfId, childId, kind);
                   if (r.created) mutated = true;
                 }
@@ -1077,7 +1072,9 @@ export class ShelfService {
         const r = results[i]!;
         if (
           r.status === "ok" &&
-          (r.op.op === "add" || r.op.op === "reorder" || r.op.op === "reorderToPage")
+          (r.op.op === "add" ||
+            r.op.op === "reorder" ||
+            r.op.op === "reorderToPage")
         ) {
           const opUnitId = r.op.unitId;
           if (touchedUnitIds.has(opUnitId)) {

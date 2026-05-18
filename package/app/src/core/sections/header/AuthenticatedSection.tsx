@@ -26,9 +26,7 @@ export function AuthenticatedSection() {
           variant="ghost"
           size="icon"
           aria-label={
-            unread > 0
-              ? `notifications (${unread} unread)`
-              : "notifications"
+            unread > 0 ? `notifications (${unread} unread)` : "notifications"
           }
           className="relative h-9 min-w-9 rounded-full bg-transparent md:h-10 md:min-w-10"
         >

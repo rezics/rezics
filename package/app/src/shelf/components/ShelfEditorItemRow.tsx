@@ -111,8 +111,7 @@ export function ShelfEditorItemRow({
     );
   }
 
-  const hasControls =
-    multiSelect || sortable || canMoveCrossPage || canDelete;
+  const hasControls = multiSelect || sortable || canMoveCrossPage || canDelete;
 
   return (
     <div ref={setNodeRef} style={style} className="py-1">

@@ -14,7 +14,11 @@ export function buildUnitUrl(unit: UnitDTO): string {
       // owner slug is plumbed through, fall back to the canonical unitId form.
       return `/shelf/${unit.id}`;
     case "TAG":
-      return unitHref({ type: "TAG", unitId: unit.id, slug: unit.slug ?? null });
+      return unitHref({
+        type: "TAG",
+        unitId: unit.id,
+        slug: unit.slug ?? null,
+      });
     case "REALM":
       return unitHref({
         type: "REALM",
@@ -22,9 +26,17 @@ export function buildUnitUrl(unit: UnitDTO): string {
         slug: unit.slug ?? null,
       });
     case "USER":
-      return unitHref({ type: "USER", unitId: unit.id, slug: unit.slug ?? null });
+      return unitHref({
+        type: "USER",
+        unitId: unit.id,
+        slug: unit.slug ?? null,
+      });
     case "ZONE":
-      return unitHref({ type: "ZONE", unitId: unit.id, slug: unit.slug ?? null });
+      return unitHref({
+        type: "ZONE",
+        unitId: unit.id,
+        slug: unit.slug ?? null,
+      });
     case "ENTITY":
       return unitHref({
         type: "ENTITY",

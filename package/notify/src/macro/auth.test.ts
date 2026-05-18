@@ -4,7 +4,10 @@ import { readCookie, resolveSessionToken } from "./auth";
 describe("readCookie", () => {
   test("extracts cookie value by name", () => {
     expect(
-      readCookie("foo=bar; rezics-session-token=abc.def.ghi", "rezics-session-token"),
+      readCookie(
+        "foo=bar; rezics-session-token=abc.def.ghi",
+        "rezics-session-token",
+      ),
     ).toBe("abc.def.ghi");
   });
 
@@ -56,6 +59,8 @@ describe("resolveSessionToken", () => {
   });
 
   test("returns Authorization raw value when no Bearer prefix", () => {
-    expect(resolveSessionToken("raw.jwt.token", undefined)).toBe("raw.jwt.token");
+    expect(resolveSessionToken("raw.jwt.token", undefined)).toBe(
+      "raw.jwt.token",
+    );
   });
 });

@@ -138,8 +138,7 @@ describe("ShelfService", () => {
               applied.push("update");
               return makeShelfUnitRow({ unitId: "b-1", position: "z0" });
             },
-            findUniqueOrThrow: async () =>
-              makeShelfUnitRow({ unitId: "b-1" }),
+            findUniqueOrThrow: async () => makeShelfUnitRow({ unitId: "b-1" }),
           },
           shelf: { update: async () => ({}) },
         }),
@@ -419,7 +418,9 @@ describe("ShelfService", () => {
 
     const del = calls.find((c) => c.op === "deleteMany");
     expect(del).toBeDefined();
-    expect(del!.payload.where.tagUnitId.in).toEqual([SEED_TAG_ID_BY_NAME.media!]);
+    expect(del!.payload.where.tagUnitId.in).toEqual([
+      SEED_TAG_ID_BY_NAME.media!,
+    ]);
     expect(calls.find((c) => c.op === "createMany")).toBeUndefined();
   });
 
@@ -459,7 +460,9 @@ describe("ShelfService", () => {
 
     const del = calls.find((c) => c.op === "deleteMany");
     const create = calls.find((c) => c.op === "createMany");
-    expect(del!.payload.where.tagUnitId.in).toEqual([SEED_TAG_ID_BY_NAME.book!]);
+    expect(del!.payload.where.tagUnitId.in).toEqual([
+      SEED_TAG_ID_BY_NAME.book!,
+    ]);
     expect(create!.payload.data.map((r: any) => r.tagUnitId)).toEqual([
       SEED_TAG_ID_BY_NAME.game!,
     ]);

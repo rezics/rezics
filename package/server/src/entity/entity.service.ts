@@ -8,10 +8,7 @@ import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { getSlugScopeId, requireSlugScopeId } from "@/infra/slug-scopes";
-import {
-  deleteEntityFromMeili,
-  syncEntityToMeili,
-} from "@/meili/entity/sync";
+import { deleteEntityFromMeili, syncEntityToMeili } from "@/meili/entity/sync";
 import { AppError } from "@/utils/errors";
 import { entityInclude, type EntityWithRelations } from "./entity.types";
 
@@ -133,8 +130,7 @@ export class EntityService {
           where: { unitId },
           data: {
             kind: input.kind !== undefined ? (input.kind ?? null) : undefined,
-            verified:
-              input.verified !== undefined ? input.verified : undefined,
+            verified: input.verified !== undefined ? input.verified : undefined,
           },
         });
       }

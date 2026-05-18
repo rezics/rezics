@@ -1,4 +1,7 @@
-import type { SystemShelfKindKey, UserUnitProgressStatus } from "@rezics/contract";
+import type {
+  SystemShelfKindKey,
+  UserUnitProgressStatus,
+} from "@rezics/contract";
 
 export type ShelfOpKind = "add" | "remove";
 

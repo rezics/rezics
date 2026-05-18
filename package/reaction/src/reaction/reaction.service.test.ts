@@ -181,24 +181,37 @@ describe("reactionService.listByUser", () => {
   test("rejects oversized targetIds", async () => {
     seed([]);
     const targetIds = Array.from({ length: 1001 }, (_, i) => `t-${i}`);
-    await expect(
-      service.listByUser({ targetIds }),
-    ).rejects.toBeInstanceOf(TargetIdsOverflowError);
+    await expect(service.listByUser({ targetIds })).rejects.toBeInstanceOf(
+      TargetIdsOverflowError,
+    );
   });
 
   test("returns empty when targetIds is empty", async () => {
-    seed([
-      row(1, { id: "id-a", userId: "u" }),
-    ]);
+    seed([row(1, { id: "id-a", userId: "u" })]);
     const result = await service.listByUser({ targetIds: [] });
     expect(result).toEqual({ items: [], nextCursor: null });
   });
 
   test("excludes excludeUserId and respects type filter", async () => {
     seed([
-      row(1, { id: "id-a", userId: "owner", targetId: "t-1", reaction: "like" }),
-      row(2, { id: "id-b", userId: "alice", targetId: "t-1", reaction: "like" }),
-      row(3, { id: "id-c", userId: "bob", targetId: "t-1", reaction: "dislike" }),
+      row(1, {
+        id: "id-a",
+        userId: "owner",
+        targetId: "t-1",
+        reaction: "like",
+      }),
+      row(2, {
+        id: "id-b",
+        userId: "alice",
+        targetId: "t-1",
+        reaction: "like",
+      }),
+      row(3, {
+        id: "id-c",
+        userId: "bob",
+        targetId: "t-1",
+        reaction: "dislike",
+      }),
     ]);
     const result = await service.listByUser({
       targetIds: ["t-1"],

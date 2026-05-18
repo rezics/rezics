@@ -6,7 +6,11 @@ import type {
   SearchScope,
 } from "@rezics/contract";
 import { useMemo } from "react";
-import { AdvancedSearch, FederatedResultList, SearchCategoryNav } from "../components";
+import {
+  AdvancedSearch,
+  FederatedResultList,
+  SearchCategoryNav,
+} from "../components";
 import { useInjectedTags } from "../hooks/useInjectedTags";
 import { useSearchQuery } from "../hooks/useSearchQuery";
 import { parseSearchString } from "../models/searchQuery";

@@ -109,10 +109,7 @@ export async function federatedSearch(
   const hitsPerPage = opts.hitsPerPage ?? DEFAULT_PAGE_HITS_PER_PAGE;
 
   // ANCHOR: single category → one-element drill-down
-  if (
-    category !== "all" &&
-    category !== "mixed"
-  ) {
+  if (category !== "all" && category !== "mixed") {
     return federatedSingle(client, opts, ctx, q, page, hitsPerPage);
   }
 
@@ -226,7 +223,10 @@ async function federatedSingle(
     kind: "single",
     scope,
     category,
-    items: items as FederatedSearchResult extends { kind: "single"; items: infer I }
+    items: items as FederatedSearchResult extends {
+      kind: "single";
+      items: infer I;
+    }
       ? I
       : never,
     totalHits,
@@ -280,7 +280,10 @@ async function federatedRanked(
   return {
     kind: "ranked",
     scope,
-    hits: hits as FederatedSearchResult extends { kind: "ranked"; hits: infer H }
+    hits: hits as FederatedSearchResult extends {
+      kind: "ranked";
+      hits: infer H;
+    }
       ? H
       : never,
     totalHits: (resp as any).estimatedTotalHits ?? hits.length,

@@ -33,7 +33,9 @@ function toBrief(user: BriefRow, slug: string | null) {
   };
 }
 
-async function fetchSlugMap(ids: string[]): Promise<Map<string, string | null>> {
+async function fetchSlugMap(
+  ids: string[],
+): Promise<Map<string, string | null>> {
   if (ids.length === 0) return new Map();
   const userScope = requireSlugScopeId("user");
   const units = await prisma.unit.findMany({

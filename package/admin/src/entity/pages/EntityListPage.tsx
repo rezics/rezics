@@ -46,8 +46,7 @@ export default function EntityListPage() {
     limit,
     q: query || undefined,
     kind: kind || undefined,
-    verified:
-      verifiedFilter === "all" ? undefined : verifiedFilter === "true",
+    verified: verifiedFilter === "all" ? undefined : verifiedFilter === "true",
   });
 
   const entities = listQuery.data?.entities ?? [];
@@ -95,9 +94,7 @@ export default function EntityListPage() {
         id: "slug",
         header: "Slug",
         minWidth: 160,
-        cell: (e) => (
-          <span className="text-sm font-mono">{e.slug ?? "-"}</span>
-        ),
+        cell: (e) => <span className="text-sm font-mono">{e.slug ?? "-"}</span>,
       },
       {
         id: "createdAt",

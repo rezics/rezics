@@ -10,10 +10,7 @@ import { BasicAdminPermission } from "@rezics/contract";
 
 export class RealmTagContextError extends Error {
   constructor(
-    public code:
-      | "REALM_NOT_FOUND"
-      | "TAG_NOT_FOUND"
-      | "FORBIDDEN",
+    public code: "REALM_NOT_FOUND" | "TAG_NOT_FOUND" | "FORBIDDEN",
     message: string,
     public httpStatus: 400 | 403 | 404,
   ) {

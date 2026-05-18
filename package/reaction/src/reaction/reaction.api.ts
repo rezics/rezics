@@ -6,10 +6,7 @@ import {
 } from "@rezics/contract/reaction";
 import { Elysia, t } from "elysia";
 import { authMacro } from "../macro/auth";
-import {
-  MalformedCursorError,
-  reactionService,
-} from "./reaction.service";
+import { MalformedCursorError, reactionService } from "./reaction.service";
 
 function normalizeIds(raw: string | string[] | undefined): string[] {
   if (!raw) return [];

@@ -1,10 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type {
-  BookDTO,
-  PostDTO,
-  ShelfUnitDTO,
-  UnitDTO,
-} from "@rezics/contract";
+import type { BookDTO, PostDTO, ShelfUnitDTO, UnitDTO } from "@rezics/contract";
 import {
   candidateToUnitCardSummary,
   resolveUnitWorkContext,
@@ -115,9 +110,7 @@ describe("shelfUnitToUnitCardSummary", () => {
     const book = {
       unitId: "book-1",
       coverUrl: null,
-      translations: [
-        { unitId: "book-1", language: "en", title: "Shelf Book" },
-      ],
+      translations: [{ unitId: "book-1", language: "en", title: "Shelf Book" }],
     } as BookDTO;
 
     const summary = shelfUnitToUnitCardSummary(unit, book, undefined, {

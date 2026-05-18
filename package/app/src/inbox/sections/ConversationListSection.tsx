@@ -1,9 +1,5 @@
 import { useConversations, type DmConversation } from "@rezics/api/dm/dm";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@rezics/ui/shadcn";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type { FC } from "react";
 
@@ -23,7 +19,9 @@ function formatPeerInitial(c: DmConversation): string {
  */
 export const ConversationListSection: FC = () => {
   const { data, isLoading, isError } = useConversations();
-  const conversations = (data?.conversations ?? []).slice().sort(compareUpdatedDesc);
+  const conversations = (data?.conversations ?? [])
+    .slice()
+    .sort(compareUpdatedDesc);
 
   return (
     <ul className="flex w-full flex-col gap-1">

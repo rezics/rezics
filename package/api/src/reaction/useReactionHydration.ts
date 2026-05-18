@@ -43,7 +43,6 @@ export function useReactionHydration(
 
   return {
     isHydrated: summaryReady && myReady,
-    isLoading:
-      summaryQuery.isLoading || (isAuthenticated && myQuery.isLoading),
+    isLoading: summaryQuery.isLoading || (isAuthenticated && myQuery.isLoading),
   };
 }

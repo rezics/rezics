@@ -35,7 +35,8 @@ const app = new Elysia()
     cors({
       origin: isDev
         ? devOrigins
-        : (request) => isRezicsOrigin(request.headers.get("origin") ?? undefined),
+        : (request) =>
+            isRezicsOrigin(request.headers.get("origin") ?? undefined),
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["content-type", "authorization", "x-internal-secret"],

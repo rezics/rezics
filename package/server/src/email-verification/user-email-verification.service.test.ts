@@ -87,8 +87,9 @@ beforeEach(() => {
 
 describe("user email verification contracts", () => {
   test("creates a pending contract without overwriting User.email", async () => {
-    const { requestUserEmailVerification } =
-      await import("./user-email-verification.service");
+    const { requestUserEmailVerification } = await import(
+      "./user-email-verification.service"
+    );
 
     const response = await requestUserEmailVerification(
       "user-1",

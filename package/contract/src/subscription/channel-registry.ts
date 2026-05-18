@@ -44,7 +44,9 @@ export const CHANNEL_REGISTRY = {
 
 export type SubscribableUnitType = keyof typeof CHANNEL_REGISTRY;
 
-const SUBSCRIBABLE_TYPES = Object.keys(CHANNEL_REGISTRY) as SubscribableUnitType[];
+const SUBSCRIBABLE_TYPES = Object.keys(
+  CHANNEL_REGISTRY,
+) as SubscribableUnitType[];
 
 export function isSubscribableUnitType(
   targetType: string,

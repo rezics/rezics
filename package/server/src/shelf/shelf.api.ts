@@ -256,12 +256,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   )
   .put(
     "/:unitId/pinned-tags",
-    async ({
-      params,
-      body,
-      identity,
-      set,
-    }): Promise<SetPinnedTagsResponse> => {
+    async ({ params, body, identity, set }): Promise<SetPinnedTagsResponse> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (!target) {
         set.status = 404;

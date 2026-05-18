@@ -12,10 +12,12 @@ describe("seedAuthUser", () => {
       email: "factory-mock@mock.rezics.local",
       role: "user",
     }));
-    const accountUpsert = mock(async (args: { create: { password: string } }) => {
-      storedHash = args.create.password;
-      return { id: "account-1" };
-    });
+    const accountUpsert = mock(
+      async (args: { create: { password: string } }) => {
+        storedHash = args.create.password;
+        return { id: "account-1" };
+      },
+    );
 
     const prismaMock = {
       user: { upsert: userUpsert },

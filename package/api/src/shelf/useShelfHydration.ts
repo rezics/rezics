@@ -141,9 +141,7 @@ interface Group {
  * seeds each package's detail cache via `queryClient.setQueryData`, and
  * reports unit ids whose underlying unit was not returned.
  */
-export function useShelfHydration(
-  units: ShelfUnitDTO[],
-): ShelfHydrationResult {
+export function useShelfHydration(units: ShelfUnitDTO[]): ShelfHydrationResult {
   const queryClient = useQueryClient();
 
   const grouped: Group[] = useMemo(() => {

@@ -7,8 +7,9 @@ process.env.DATABASE_URL ??=
 
 const unitCreateMock = mock(async (): Promise<any> => ({ id: "post-1" }));
 const unitFindUniqueMock = mock(async (): Promise<any> => null);
-const unitFindManyMock = mock(async (args: any): Promise<any> =>
-  (args.where.id.in as string[]).map((id) => ({ id })),
+const unitFindManyMock = mock(
+  async (args: any): Promise<any> =>
+    (args.where.id.in as string[]).map((id) => ({ id })),
 );
 const postCreateMock = mock(async (): Promise<any> => ({ unitId: "post-1" }));
 const postUpdateMock = mock(async (): Promise<any> => ({ unitId: "post-1" }));

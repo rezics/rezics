@@ -11,9 +11,7 @@ import {
 } from "@rezics/contract";
 import { Elysia, status } from "elysia";
 import { authMacro } from "@/middleware";
-import {
-  mapRealmTagContextToDTO,
-} from "./realm.mapper";
+import { mapRealmTagContextToDTO } from "./realm.mapper";
 import {
   RealmTagContextError,
   realmTagContextService,

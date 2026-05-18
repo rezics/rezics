@@ -34,9 +34,8 @@ function resolveSessionToken(
   );
 }
 
-export const authMacro = new Elysia({ name: "macro/auth" }).macro(
-  "requireLogin",
-  {
+export const authMacro = new Elysia({ name: "macro/auth" })
+  .macro("requireLogin", {
     async resolve(ctx) {
       const { headers } = ctx as unknown as {
         headers: Record<string, string | undefined>;
@@ -60,32 +59,32 @@ export const authMacro = new Elysia({ name: "macro/auth" }).macro(
         identity: claims as RezicsSessionClaims,
       };
     },
-  },
-).macro("requireProfileSetup", {
-  async resolve(ctx) {
-    const { headers } = ctx as unknown as {
-      headers: Record<string, string | undefined>;
-    };
+  })
+  .macro("requireProfileSetup", {
+    async resolve(ctx) {
+      const { headers } = ctx as unknown as {
+        headers: Record<string, string | undefined>;
+      };
 
-    const setupToken =
-      readCookie(headers["cookie"], PROFILE_SETUP_COOKIE_NAME) ?? undefined;
-    if (!setupToken) {
-      return status(401, "Unauthorized: No profile setup token provided");
-    }
+      const setupToken =
+        readCookie(headers["cookie"], PROFILE_SETUP_COOKIE_NAME) ?? undefined;
+      if (!setupToken) {
+        return status(401, "Unauthorized: No profile setup token provided");
+      }
 
-    const claims = await verifyRezicsProfileSetupToken(setupToken);
-    if (!claims) {
-      return status(
-        401,
-        "Unauthorized: Profile setup token is invalid or expired",
-      );
-    }
+      const claims = await verifyRezicsProfileSetupToken(setupToken);
+      if (!claims) {
+        return status(
+          401,
+          "Unauthorized: Profile setup token is invalid or expired",
+        );
+      }
 
-    return {
-      setupIdentity: claims,
-    };
-  },
-});
+      return {
+        setupIdentity: claims,
+      };
+    },
+  });
 
 export async function tryResolveIdentity(
   authorization: string | undefined,

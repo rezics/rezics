@@ -32,10 +32,7 @@ export function OverviewTab({ entity, language }: OverviewTabProps) {
   );
 }
 
-export function hasOverviewData(
-  entity: EntityDTO,
-  language: string,
-): boolean {
+export function hasOverviewData(entity: EntityDTO, language: string): boolean {
   const tr = getEntityTranslation(entity, language);
   const matched = tr?.language === language ? tr : undefined;
   return Boolean(matched?.summary?.trim() || matched?.description?.trim());

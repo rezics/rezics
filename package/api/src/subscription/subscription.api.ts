@@ -16,7 +16,9 @@ import { buildQueryString } from "../utils/buildQuery";
  * `subscription.mutations.ts`.
  */
 export const subscriptionApi = {
-  subscribe: async (input: SubscriptionCreateBody): Promise<SubscriptionDTO> => {
+  subscribe: async (
+    input: SubscriptionCreateBody,
+  ): Promise<SubscriptionDTO> => {
     return apiFetch<SubscriptionDTO>("/subscription", {
       method: "POST",
       body: JSON.stringify(input),

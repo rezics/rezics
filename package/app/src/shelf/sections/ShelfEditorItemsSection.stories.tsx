@@ -101,11 +101,7 @@ function makeUnit(
 }
 
 function makeBookUnit(idx: number): ShelfUnitDTO {
-  return makeUnit(
-    `fixture-book-${idx}`,
-    "book",
-    String(idx).padStart(4, "0"),
-  );
+  return makeUnit(`fixture-book-${idx}`, "book", String(idx).padStart(4, "0"));
 }
 
 function makeShelf(): ShelfDTO {

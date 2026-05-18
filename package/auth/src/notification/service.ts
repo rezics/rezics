@@ -1,8 +1,4 @@
-import {
-  formatSenderAddress,
-  render,
-  VerificationCode,
-} from "@rezics/email";
+import { formatSenderAddress, render, VerificationCode } from "@rezics/email";
 import { env } from "../env";
 import { createAuthMailer } from "./mailer";
 import {

@@ -14,22 +14,28 @@ describe("reaction cursor", () => {
     expect(encoded).not.toContain("/");
 
     const decoded = decodeCursor(encoded);
-    expect(decoded.createdAt.toISOString()).toBe(original.createdAt.toISOString());
+    expect(decoded.createdAt.toISOString()).toBe(
+      original.createdAt.toISOString(),
+    );
     expect(decoded.id).toBe(original.id);
   });
 
   test("rejects malformed cursors", () => {
     expect(() => decodeCursor("not-base64-$$$")).toThrow(CursorDecodeError);
-    expect(() => decodeCursor(Buffer.from("not json").toString("base64url"))).toThrow(
-      CursorDecodeError,
-    );
+    expect(() =>
+      decodeCursor(Buffer.from("not json").toString("base64url")),
+    ).toThrow(CursorDecodeError);
     expect(() =>
       decodeCursor(
-        Buffer.from(JSON.stringify({ t: "not-a-date", i: "x" })).toString("base64url"),
+        Buffer.from(JSON.stringify({ t: "not-a-date", i: "x" })).toString(
+          "base64url",
+        ),
       ),
     ).toThrow(CursorDecodeError);
     expect(() =>
-      decodeCursor(Buffer.from(JSON.stringify({ foo: "bar" })).toString("base64url")),
+      decodeCursor(
+        Buffer.from(JSON.stringify({ foo: "bar" })).toString("base64url"),
+      ),
     ).toThrow(CursorDecodeError);
   });
 });

@@ -113,15 +113,13 @@ export function coalesce(log: ItemOpLog): ItemOpLog {
     }
   }
 
-  const cleaned = kept
-    .reverse()
-    .filter((e) => {
-      const key = unitKeyOf(e.op);
-      if (key === null) return true;
-      if (e.op.op === "delete" && droppedAddRef.has(key)) return false;
-      if (e.op.op === "detach" && droppedDetachKey.has(key)) return false;
-      return true;
-    });
+  const cleaned = kept.reverse().filter((e) => {
+    const key = unitKeyOf(e.op);
+    if (key === null) return true;
+    if (e.op.op === "delete" && droppedAddRef.has(key)) return false;
+    if (e.op.op === "detach" && droppedDetachKey.has(key)) return false;
+    return true;
+  });
 
   return {
     entries: [...failed, ...cleaned],
@@ -133,7 +131,10 @@ export function clear(log: ItemOpLog): ItemOpLog {
   return { entries: [], nextSeq: log.nextSeq };
 }
 
-export function clearSucceeded(log: ItemOpLog, succeededIds: Set<string>): ItemOpLog {
+export function clearSucceeded(
+  log: ItemOpLog,
+  succeededIds: Set<string>,
+): ItemOpLog {
   return {
     entries: log.entries.filter((e) => !succeededIds.has(e.id)),
     nextSeq: log.nextSeq,

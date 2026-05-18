@@ -95,7 +95,11 @@ mock.module("@/middleware", () => ({
 }));
 
 mock.module("@/reaction-boundary/reaction-boundary.client", () => ({
-  listGivenReactions: async (q: { userId: string; cursor?: string; limit?: number }) => {
+  listGivenReactions: async (q: {
+    userId: string;
+    cursor?: string;
+    limit?: number;
+  }) => {
     const all = givenByUser.get(q.userId) ?? [];
     const limit = q.limit ?? 20;
     const sliced = all.slice(0, limit);
@@ -219,7 +223,9 @@ describe("GET /profile/:userId/reaction/given", () => {
   test("renders deleted target as null", async () => {
     resetState();
     users.set("u1", { userId: "u1" });
-    givenByUser.set("u1", [row(1, { id: "r1", userId: "u1", targetId: "deleted" })]);
+    givenByUser.set("u1", [
+      row(1, { id: "r1", userId: "u1", targetId: "deleted" }),
+    ]);
 
     const res = await api.handle(
       new Request("http://localhost/profile/u1/reaction/given"),

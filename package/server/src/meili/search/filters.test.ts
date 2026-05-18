@@ -17,9 +17,14 @@ describe("buildContentFilter", () => {
 
   test("book scope with shelves subtype emits SHELF type + containedUnitIds", () => {
     const scope: SearchScope = { kind: "book", unitId: "b-1" };
-    const filter = buildContentFilter(emptyQuery, scope, {}, {
-      contentSubtype: "shelves",
-    });
+    const filter = buildContentFilter(
+      emptyQuery,
+      scope,
+      {},
+      {
+        contentSubtype: "shelves",
+      },
+    );
     expect(filter).toContain('type = "SHELF"');
     expect(filter).toContain('containedUnitIds = "b-1"');
   });
@@ -90,18 +95,15 @@ describe("buildPostFilter", () => {
   });
 
   test("book scope emits rootTargetUnitId", () => {
-    const filter = buildPostFilter(
-      emptyQuery,
-      { kind: "book", unitId: "b-2" },
-    );
+    const filter = buildPostFilter(emptyQuery, { kind: "book", unitId: "b-2" });
     expect(filter).toContain('rootTargetUnitId = "b-2"');
   });
 
   test("realm scope emits realmIds", () => {
-    const filter = buildPostFilter(
-      emptyQuery,
-      { kind: "realm", realmId: "r-9" },
-    );
+    const filter = buildPostFilter(emptyQuery, {
+      kind: "realm",
+      realmId: "r-9",
+    });
     expect(filter).toContain('realmIds = "r-9"');
   });
 

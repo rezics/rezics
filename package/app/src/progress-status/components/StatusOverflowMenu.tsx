@@ -64,10 +64,7 @@ export function StatusOverflowMenu({
     />
   );
   const statusIconClass = (status: ReadStatus) =>
-    cx(
-      "w-4 h-4 mr-2",
-      currentStatus === status && "text-text-brand",
-    );
+    cx("w-4 h-4 mr-2", currentStatus === status && "text-text-brand");
 
   return (
     <DropdownMenu>
@@ -116,9 +113,7 @@ export function StatusOverflowMenu({
               )}
             </DropdownMenuItem>
             <DropdownMenuItem
-              aria-current={
-                currentStatus === "COMPLETED" ? "true" : undefined
-              }
+              aria-current={currentStatus === "COMPLETED" ? "true" : undefined}
               onClick={onSelectCompleted}
             >
               {renderStatusMarker("COMPLETED")}

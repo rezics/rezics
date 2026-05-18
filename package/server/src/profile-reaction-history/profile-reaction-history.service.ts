@@ -224,7 +224,8 @@ export class ProfileReactionHistoryService {
       chunks.map((targetIds) =>
         listByUser({
           targetIds,
-          reactions: reactionsArr && reactionsArr.length > 0 ? reactionsArr : undefined,
+          reactions:
+            reactionsArr && reactionsArr.length > 0 ? reactionsArr : undefined,
           excludeUserId: opts.profileUserId,
           cursor: opts.cursor,
           limit: limit + 1,

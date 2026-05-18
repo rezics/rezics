@@ -174,8 +174,7 @@ export const realmTagContextDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type RealmTagContextDTO =
-  (typeof realmTagContextDTOSchema)["static"];
+export type RealmTagContextDTO = (typeof realmTagContextDTOSchema)["static"];
 
 export const realmTagContextPathParamsSchema = t.Object({
   realmUnitId: t.String(),

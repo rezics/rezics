@@ -36,7 +36,5 @@ export function AboutTab({ entity, language }: AboutTabProps) {
 }
 
 export function hasAboutData(entity: EntityDTO): boolean {
-  return Boolean(
-    entity.kind || entity.slug || entity.verified !== undefined,
-  );
+  return Boolean(entity.kind || entity.slug || entity.verified !== undefined);
 }

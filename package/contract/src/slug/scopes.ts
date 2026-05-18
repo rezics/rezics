@@ -9,13 +9,7 @@
  * Owner-scoped sub-resources (e.g. SHELF under a USER) bypass this list and
  * use the owner Unit's id as `slugScope` directly.
  */
-export const SLUG_SCOPES = [
-  "user",
-  "realm",
-  "tag",
-  "zone",
-  "entity",
-] as const;
+export const SLUG_SCOPES = ["user", "realm", "tag", "zone", "entity"] as const;
 
 export type SlugScopeName = (typeof SLUG_SCOPES)[number];
 

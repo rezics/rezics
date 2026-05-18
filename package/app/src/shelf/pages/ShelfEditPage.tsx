@@ -70,9 +70,8 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const [defaultViewMode, setDefaultViewMode] = useState<ShelfView>("nested");
 
   /** Local items-editor preview view — does NOT dirty metadata. */
-  const [editorPreviewView, setEditorPreviewView] = useState<ShelfView>(
-    "nested",
-  );
+  const [editorPreviewView, setEditorPreviewView] =
+    useState<ShelfView>("nested");
 
   useEffect(() => {
     if (translation) {

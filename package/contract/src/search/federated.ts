@@ -17,7 +17,9 @@ export const FederatedSearchOptionsSchema = t.Object({
   hitsPerPage: t.Optional(t.Number()),
 });
 
-export type FederatedSearchOptions = Static<typeof FederatedSearchOptionsSchema>;
+export type FederatedSearchOptions = Static<
+  typeof FederatedSearchOptionsSchema
+>;
 
 // ANCHOR: Federated Search Result
 // Discriminated on `kind`:

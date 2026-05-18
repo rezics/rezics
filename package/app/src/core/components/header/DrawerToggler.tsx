@@ -22,9 +22,7 @@ export const DrawerToggler = ({
       aria-label={t("accessibility.open_drawer")}
       onClick={handleDrawerToggleInner}
       className={
-        hidden
-          ? "hidden"
-          : "flex h-10 min-w-10 rounded-full bg-transparent"
+        hidden ? "hidden" : "flex h-10 min-w-10 rounded-full bg-transparent"
       }
     >
       <Menu className="w-5 h-5" />

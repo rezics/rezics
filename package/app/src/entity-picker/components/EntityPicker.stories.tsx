@@ -62,11 +62,7 @@ const withMockedSearch: Decorator = (Story) => {
   );
 };
 
-function PickerHarness({
-  kindHint,
-}: {
-  kindHint?: string;
-}) {
+function PickerHarness({ kindHint }: { kindHint?: string }) {
   const [open, setOpen] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
   return (
