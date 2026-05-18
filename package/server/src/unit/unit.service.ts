@@ -24,6 +24,10 @@ import {
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
 import type { UnitWithRelations } from "./types";
+import {
+  assertLicenseSlug,
+  publicUnitEligibilityWhere,
+} from "./publication-policy";
 import { unitInclude } from "./types";
 
 type MaybeInclude = Prisma.UnitInclude | undefined;
@@ -150,6 +154,10 @@ export function mergeUnitWhereInputs(
   return { AND: valid };
 }
 
+export function publicUnitWhere(): Prisma.UnitWhereInput {
+  return { ...publicUnitEligibilityWhere };
+}
+
 /**
  * Unit Service - Business logic for generic Unit entities
  */
@@ -227,6 +235,8 @@ export class UnitService {
         defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? false,
         rating: (input.rating as ContentRating | undefined) ?? undefined,
+        licenseSlug: assertLicenseSlug(input.licenseSlug) ?? undefined,
+        copyrightNotice: input.copyrightNotice ?? undefined,
         extra: (input.extra ?? null) as Prisma.InputJsonValue,
         publishedAt: input.publishedAt
           ? new Date(input.publishedAt as any)
@@ -264,6 +274,14 @@ export class UnitService {
         visibility:
           (input.visibility as UnitVisibility | undefined) ?? undefined,
         rating: (input.rating as ContentRating | undefined) ?? undefined,
+        licenseSlug:
+          input.licenseSlug === null
+            ? null
+            : (assertLicenseSlug(input.licenseSlug) ?? undefined),
+        copyrightNotice:
+          input.copyrightNotice === null
+            ? null
+            : (input.copyrightNotice ?? undefined),
         defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? undefined,
         workUnitId: input.workUnitId,
@@ -281,6 +299,10 @@ export class UnitService {
     if (input.rating !== undefined) patchFields.rating = input.rating;
     if (input.visibility !== undefined)
       patchFields.visibility = input.visibility;
+    if (input.licenseSlug !== undefined)
+      patchFields.licenseSlug = input.licenseSlug;
+    if (input.copyrightNotice !== undefined)
+      patchFields.copyrightNotice = input.copyrightNotice;
     if (input.defaultLanguage !== undefined)
       patchFields.defaultLanguage = input.defaultLanguage;
     if (input.publishedAt !== undefined) {

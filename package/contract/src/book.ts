@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import { creditAttributionBriefSchema } from "./credit-attribution";
 import { languageSchema } from "./language";
+import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import {
@@ -32,6 +33,8 @@ export const bookDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
+  licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  copyrightNotice: t.Optional(t.Nullable(t.String())),
   defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
 
@@ -154,6 +157,8 @@ export const createBookSchema = t.Object({
   textLength: t.Optional(t.Number()),
   formatKey: t.Optional(t.String()),
   isLicensed: t.Optional(t.Boolean()),
+  licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
   coverUrl: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
   visibility: t.Optional(t.String()),
@@ -183,6 +188,8 @@ export const updateBookSchema = t.Object({
   textLength: t.Optional(t.Number()),
   formatKey: t.Optional(t.Nullable(t.String())),
   isLicensed: t.Optional(t.Boolean()),
+  licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
   coverUrl: t.Optional(t.Nullable(t.String())),
   rating: t.Optional(contentRatingSchema),
   visibility: t.Optional(t.String()),

@@ -1,5 +1,6 @@
 import type { BookDTO, Language, UnitTranslationDTO } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
+import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { BookWithRelations } from "./types";
 
@@ -55,6 +56,8 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     status: unit.status,
     visibility: unit.visibility,
     rating: unit.rating,
+    licenseSlug: resolveStoredLicenseSlug(unit.licenseSlug),
+    copyrightNotice: unit.copyrightNotice ?? undefined,
     defaultLanguage: (unit.defaultLanguage as Language) ?? undefined,
     isLanguageNeutral: unit.isLanguageNeutral,
 

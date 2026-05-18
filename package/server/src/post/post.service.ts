@@ -17,6 +17,7 @@ import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
+import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 import { AppError } from "../utils/errors";
@@ -34,10 +35,23 @@ export class PostService {
   ): Promise<{ posts: PostWithRelations[]; total: number }> {
     const limitNum = Math.max(1, Math.min(Number(query.limit ?? 50), 200));
     const skipNum = query.start ?? 0;
+    const isThreaded = query.mode === "threaded";
 
     const where: Prisma.PostWhereInput = options?.isAdmin
       ? {}
-      : { unit: { status: UnitStatus.PUBLISHED } };
+      : isThreaded
+        ? {
+            OR: [
+              { unit: { ...publicUnitEligibilityWhere } },
+              {
+                unit: {
+                  status: UnitStatus.DELETED,
+                  visibility: publicUnitEligibilityWhere.visibility,
+                },
+              },
+            ],
+          }
+        : { unit: { ...publicUnitEligibilityWhere } };
 
     if (query.targetUnitId) where.targetUnitId = query.targetUnitId;
     if (query.rootPostUnitId) where.rootPostUnitId = query.rootPostUnitId;
@@ -80,8 +94,6 @@ export class PostService {
       where.depth = { lte: query.maxDepth };
     }
 
-    const isThreaded = query.mode === "threaded";
-
     const orderBy: Prisma.PostOrderByWithRelationInput[] = isThreaded
       ? [{ sortPath: "asc" }, { createdAt: "asc" }]
       : [
@@ -123,9 +135,8 @@ export class PostService {
     const tagIds = this.normalizeTagIds(opts.tagIds);
 
     const where: Prisma.PostWhereInput = {
-      ...(options?.isAdmin ? {} : { unit: { status: UnitStatus.PUBLISHED } }),
       unit: {
-        ...(options?.isAdmin ? {} : { status: UnitStatus.PUBLISHED }),
+        ...(options?.isAdmin ? {} : publicUnitEligibilityWhere),
         inRealms: {
           some: { realmUnitId },
         },
@@ -204,11 +215,22 @@ export class PostService {
   }
 
   /** Get a single post by unit ID. */
-  async getByUnitId(unitId: string): Promise<PostWithRelations> {
+  async getByUnitId(
+    unitId: string,
+    options?: { isAdmin?: boolean; allowTombstone?: boolean },
+  ): Promise<PostWithRelations> {
     const post = await prisma.post.findUniqueOrThrow({
       where: { unitId },
       include: postInclude,
     });
+    if (
+      !options?.isAdmin &&
+      !options?.allowTombstone &&
+      (post.unit.status !== UnitStatus.PUBLISHED ||
+        post.unit.visibility !== "PUBLIC")
+    ) {
+      throw new AppError(404, `Post not found: ${unitId}`);
+    }
     return hydrateUnitOwnerUserSlugRow(post as PostWithRelations);
   }
 

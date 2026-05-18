@@ -35,6 +35,10 @@ import {
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
 import {
+  assertLicenseSlug,
+  publicUnitEligibilityWhere,
+} from "@/unit/publication-policy";
+import {
   generateBetween,
   POSITION_LENGTH_THRESHOLD,
   rebalance,
@@ -138,7 +142,9 @@ function assertOnlySeedTags(ids: readonly string[]): void {
 
 export class ShelfService {
   private buildWhere(options: ShelfListQuery): Prisma.ShelfWhereInput {
-    const and: Prisma.ShelfWhereInput[] = [{ unit: { type: UnitType.SHELF } }];
+    const and: Prisma.ShelfWhereInput[] = [
+      { unit: { type: UnitType.SHELF, ...publicUnitEligibilityWhere } },
+    ];
 
     if (options.userId?.trim()) {
       and.push({ unit: { userId: options.userId } });
@@ -321,6 +327,8 @@ export class ShelfService {
         type: UnitType.SHELF,
         status: UnitStatus.PUBLISHED,
         visibility: (visibility as UnitVisibility) ?? UnitVisibility.PUBLIC,
+        licenseSlug: assertLicenseSlug(req.licenseSlug) ?? undefined,
+        copyrightNotice: req.copyrightNotice ?? undefined,
         ...(translationData.length
           ? { translations: { create: translationData } }
           : {}),
@@ -360,10 +368,24 @@ export class ShelfService {
     }
     const { kindKey, coverUrl, visibility, extra, title } = req;
 
-    if (visibility !== undefined) {
+    if (
+      visibility !== undefined ||
+      req.licenseSlug !== undefined ||
+      req.copyrightNotice !== undefined
+    ) {
       await prisma.unit.update({
         where: { id: unitId },
-        data: { visibility: visibility as UnitVisibility },
+        data: {
+          visibility: (visibility as UnitVisibility | undefined) ?? undefined,
+          licenseSlug:
+            req.licenseSlug === null
+              ? null
+              : (assertLicenseSlug(req.licenseSlug) ?? undefined),
+          copyrightNotice:
+            req.copyrightNotice === null
+              ? null
+              : (req.copyrightNotice ?? undefined),
+        },
       });
     }
 

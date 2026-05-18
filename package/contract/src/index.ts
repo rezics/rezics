@@ -13,6 +13,7 @@ export * from "./feedback";
 export * from "./infra";
 export * from "./jwt-service";
 export * from "./language";
+export * from "./license";
 export * from "./link";
 export * from "./list-query-base";
 export * from "./meili";

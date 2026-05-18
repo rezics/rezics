@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema } from "./unit";
@@ -76,6 +77,11 @@ export const postDTOSchema = t.Object({
   rootPostUnitId: t.Optional(t.Nullable(t.String())),
   parentPostUnitId: t.Optional(t.Nullable(t.String())),
   kind: t.Optional(t.Nullable(postKindLiterals)),
+  status: t.Optional(t.String()),
+  visibility: t.Optional(t.String()),
+  licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  copyrightNotice: t.Optional(t.Nullable(t.String())),
+  isTombstone: t.Optional(t.Boolean()),
   depth: t.Optional(t.Number()),
   sortPath: t.Optional(t.Nullable(t.String())),
   replyCount: t.Optional(t.Number()),

@@ -32,7 +32,7 @@ export const BookHeroCountLinks: React.FC<BookHeroCountLinksProps> = ({
     enabled: Boolean(bookId),
   });
   const { data: shelfData } = useQuery({
-    ...shelfQueries.list({ containsItemRef: bookId, limit: 1 }),
+    ...shelfQueries.list({ containsUnitId: bookId, limit: 1 }),
     enabled: Boolean(bookId),
   });
   const { data: tagsData } = useQuery({

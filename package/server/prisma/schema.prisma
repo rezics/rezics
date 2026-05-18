@@ -121,6 +121,12 @@ model Unit {
   visibility UnitVisibility @default(PUBLIC)
   rating     ContentRating  @default(GENERAL)
 
+  /// Publication license slug from the contract registry. Nullable for
+  /// backward-compatible rollout; readers may treat null as the platform
+  /// default when an effective license is required.
+  licenseSlug     String?
+  copyrightNotice String?
+
   /// Denormalized count of `Subscription` rows targeting this unit.
   /// Maintained transactionally by the subscription service alongside row
   /// insert/delete. Powers Unit-detail render of "N watchers" without a

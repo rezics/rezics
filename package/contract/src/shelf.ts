@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "./language";
+import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
@@ -92,6 +93,10 @@ export const shelfDTOSchema = t.Object({
   slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
+  status: t.Optional(t.String()),
+  visibility: t.Optional(t.String()),
+  licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  copyrightNotice: t.Optional(t.Nullable(t.String())),
   kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(shelfExtraSchema)),
@@ -228,6 +233,8 @@ export const createShelfSchema = t.Object({
   title: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
+  licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
   tagIds: t.Optional(t.Array(t.String())),
   coverUrl: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -251,6 +258,8 @@ export const updateShelfSchema = t.Object({
   kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   visibility: t.Optional(t.String()),
+  licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  copyrightNotice: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });
 

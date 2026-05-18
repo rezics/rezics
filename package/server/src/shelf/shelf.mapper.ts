@@ -8,6 +8,7 @@ import type {
   ShelfUnitRelationRole,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
+import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type {
   ShelfListSelected,
@@ -69,6 +70,10 @@ export function mapShelfToDTO(row: ShelfWithMetadata): ShelfDTO {
     slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
     user: mapPublicUser(row.unit?.user),
+    status: row.unit?.status,
+    visibility: row.unit?.visibility,
+    licenseSlug: resolveStoredLicenseSlug(row.unit?.licenseSlug),
+    copyrightNotice: row.unit?.copyrightNotice ?? undefined,
     kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(
       row.unit?.defaultLanguage,
@@ -105,6 +110,10 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
     slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
     user: mapPublicUser(row.unit?.user),
+    status: row.unit?.status,
+    visibility: row.unit?.visibility,
+    licenseSlug: resolveStoredLicenseSlug(row.unit?.licenseSlug),
+    copyrightNotice: row.unit?.copyrightNotice ?? undefined,
     kindKey: row.kindKey ?? undefined,
     coverUrl: pickShelfCoverUrl(
       row.unit?.defaultLanguage,

@@ -46,6 +46,35 @@ function makeShelfUnitRow(overrides: Record<string, unknown> = {}) {
 }
 
 describe("ShelfService", () => {
+  test("list filters public discovery by published public shelves containing the target Unit", async () => {
+    let findManyArgs: any;
+    Object.assign(prismaMock, {
+      shelf: {
+        findMany: async (args: any) => {
+          findManyArgs = args;
+          return [];
+        },
+        count: async () => 0,
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.list({ containsUnitId: "book-1", limit: 10 });
+
+    expect(findManyArgs.where).toMatchObject({
+      AND: [
+        {
+          unit: {
+            type: "SHELF",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+          },
+        },
+        { units: { some: { unitId: "book-1" } } },
+      ],
+    });
+  });
+
   test("rejects reserved system shelf kind keys on create", async () => {
     const { shelfService } = await import("./shelf.service");
 

@@ -1,4 +1,5 @@
-import type { BookDTO } from "@rezics/contract";
+import type { BookDTO, LicenseSlug } from "@rezics/contract";
+import { LICENSE_REGISTRY } from "@rezics/contract";
 import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,9 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   variant = "panel",
 }) => {
   const { t } = useTranslation();
+  const licenseLabel = bookInfo.licenseSlug
+    ? LICENSE_REGISTRY[bookInfo.licenseSlug as LicenseSlug]?.label
+    : undefined;
 
   const items = (
     <div className="flex flex-col gap-2">
@@ -41,6 +45,17 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
       {bookInfo?.formatKey && (
         <p className="text-sm">
           {t("book.fields.format" as any)}：{bookInfo.formatKey}
+        </p>
+      )}
+      {licenseLabel && (
+        <p className="text-sm">
+          {t("book.fields.publication_license", "Publication license")}：
+          {licenseLabel}
+        </p>
+      )}
+      {bookInfo?.copyrightNotice && (
+        <p className="text-sm text-text-secondary">
+          {bookInfo.copyrightNotice}
         </p>
       )}
     </div>

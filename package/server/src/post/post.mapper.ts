@@ -1,4 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
+import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { PostWithRelations } from "./types";
 
@@ -15,6 +16,11 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     rootPostUnitId: post.rootPostUnitId ?? null,
     parentPostUnitId: post.parentPostUnitId ?? null,
     kind: post.kind ?? null,
+    status: post.unit.status,
+    visibility: post.unit.visibility,
+    licenseSlug: resolveStoredLicenseSlug(post.unit.licenseSlug),
+    copyrightNotice: post.unit.copyrightNotice ?? undefined,
+    isTombstone: post.unit.status === "DELETED",
     scoreEntryId: post.scoreEntryId ?? null,
     depth: post.depth,
     sortPath: post.sortPath ?? null,

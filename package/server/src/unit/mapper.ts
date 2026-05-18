@@ -1,5 +1,6 @@
 import type { UnitDTO, UnitTranslationDTO } from "@rezics/contract";
 import { mapPublicUser } from "@/utils/sanitizeUser";
+import { resolveStoredLicenseSlug } from "./publication-policy";
 import type { UnitWithRelations } from "./types";
 
 /**
@@ -19,6 +20,8 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     status: unit.status,
     visibility: unit.visibility,
     rating: unit.rating,
+    licenseSlug: resolveStoredLicenseSlug(unit.licenseSlug),
+    copyrightNotice: unit.copyrightNotice ?? undefined,
     extra: (unit.extra as Record<string, unknown>) ?? undefined,
     createdAt: unit.createdAt,
     updatedAt: unit.updatedAt,

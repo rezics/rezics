@@ -13,6 +13,7 @@ import type {
   UpdateBookInput,
 } from "@rezics/contract";
 import { DEFAULT_LANGUAGE, normalizeLanguage } from "@rezics/contract";
+import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import {
   Alert,
@@ -193,6 +194,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         formatKey: metadataState?.formatKey ?? undefined,
         rating: metadataState?.rating,
         isLicensed: metadataState?.isLicensed,
+        licenseSlug: resolvePublicationLicenseDefault({
+          explicitSelection: metadataState?.licenseSlug,
+        }),
+        copyrightNotice: metadataState?.copyrightNotice,
         extra: metadataState?.extra,
         defaultLanguage: DEFAULT_LANGUAGE,
         translations: [
@@ -231,6 +236,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       formatKey: metadataState?.formatKey,
       rating: metadataState?.rating,
       isLicensed: metadataState?.isLicensed,
+      licenseSlug: metadataState?.licenseSlug,
+      copyrightNotice: metadataState?.copyrightNotice,
       extra: metadataState?.extra,
     };
 

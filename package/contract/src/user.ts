@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import type { ContentRating } from "./unit";
@@ -117,6 +118,13 @@ export const contentPreferenceSchema = t.Object({
 
 export type ContentPreference = (typeof contentPreferenceSchema)["static"];
 
+export const publishingPreferenceSchema = t.Object({
+  defaultLicenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+});
+
+export type PublishingPreference =
+  (typeof publishingPreferenceSchema)["static"];
+
 /** Ratings a user may opt into; GENERAL/R_15 are always on. */
 export const OPT_IN_RATINGS: readonly ContentRating[] = ["R_18", "R_18G"];
 
@@ -129,6 +137,7 @@ export const userSettingsSchema = t.Object({
   ),
   preferredLanguages: t.Optional(t.Array(t.String())),
   content: t.Optional(contentPreferenceSchema),
+  publishing: t.Optional(publishingPreferenceSchema),
 });
 
 export type UserSettings = (typeof userSettingsSchema)["static"];

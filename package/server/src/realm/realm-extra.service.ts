@@ -1,5 +1,6 @@
 import type { RezicsSessionClaims } from "@rezics/contract";
 import type { RealmBannerExtra, TagTreeNode } from "@rezics/contract";
+import { LICENSE_SLUGS } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { hasAuthorityOver } from "@/unit/authority";
@@ -23,10 +24,15 @@ export class RealmExtraError extends Error {
 const REALM_AUTHORITY_ROLES = ["owner", "admin", "moderator"] as const;
 
 type ExtraJson = Record<string, unknown>;
-type SingleExtraKey = "rule" | "about" | "banner";
+type SingleExtraKey = "rule" | "about" | "banner" | "defaultLicenseSlug";
 type UnitReferenceExtraKey = "rule" | "about" | "banner";
 
-const SINGLE_EXTRA_KEYS = new Set<string>(["rule", "about", "banner"]);
+const SINGLE_EXTRA_KEYS = new Set<string>([
+  "rule",
+  "about",
+  "banner",
+  "defaultLicenseSlug",
+]);
 
 function readList(extra: unknown, key: string): string[] {
   if (!extra || typeof extra !== "object") return [];
@@ -252,6 +258,20 @@ async function validateSingleExtraValue(
   key: SingleExtraKey,
   value: unknown,
 ): Promise<unknown> {
+  if (key === "defaultLicenseSlug") {
+    if (
+      typeof value !== "string" ||
+      !(LICENSE_SLUGS as readonly string[]).includes(value)
+    ) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "defaultLicenseSlug must be a known Unit publication license slug",
+        400,
+      );
+    }
+    return value;
+  }
+
   if (key === "rule" || key === "about") {
     if (typeof value !== "string" || value.length === 0) {
       throw new RealmExtraError(

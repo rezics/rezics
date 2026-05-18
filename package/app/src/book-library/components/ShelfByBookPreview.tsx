@@ -19,7 +19,7 @@ export function ShelfByBookPreview({
   const { t } = useTranslation();
   const { data, isLoading, error } = useQuery({
     ...shelfQueries.list({
-      containsItemRef: bookId,
+      containsUnitId: bookId,
       limit: shelfNumber,
     }),
     enabled: !!bookId,

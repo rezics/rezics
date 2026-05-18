@@ -329,7 +329,10 @@ describe("PostService.list subtree queries", () => {
       },
     });
     expect(firstPostFindManyArgs().where).toMatchObject({
-      unit: { status: "PUBLISHED" },
+      OR: [
+        { unit: { status: "PUBLISHED", visibility: "PUBLIC" } },
+        { unit: { status: "DELETED", visibility: "PUBLIC" } },
+      ],
       rootPostUnitId: "root-1",
       unitId: { not: "reply-2" },
       depth: { lte: 4 },
@@ -357,7 +360,10 @@ describe("PostService.list subtree queries", () => {
     });
 
     expect(firstPostFindManyArgs().where).toMatchObject({
-      unit: { status: "PUBLISHED" },
+      OR: [
+        { unit: { status: "PUBLISHED", visibility: "PUBLIC" } },
+        { unit: { status: "DELETED", visibility: "PUBLIC" } },
+      ],
       rootPostUnitId: "root-1",
       unitId: { not: "root-1" },
       depth: { lte: 3 },

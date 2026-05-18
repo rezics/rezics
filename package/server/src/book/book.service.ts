@@ -23,12 +23,12 @@ import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
+import { assertLicenseSlug } from "@/unit/publication-policy";
 import {
   buildTree,
   countReadableBookContentStructureItems,
 } from "./book-content-structure";
 import { between, firstKey } from "./lexorank";
-import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
 import { bookInclude } from "./types";
 
@@ -153,7 +153,7 @@ export class BookService {
         take: limitNum,
         include: bookInclude,
       }),
-      getBookApproxCount(),
+      prisma.book.count({ where }),
     ]);
 
     return {
@@ -255,6 +255,8 @@ export class BookService {
             type: UnitType.BOOK,
             status: UnitStatus.PUBLISHED,
             visibility: (req.visibility as UnitVisibility) ?? undefined,
+            licenseSlug: assertLicenseSlug(req.licenseSlug) ?? undefined,
+            copyrightNotice: req.copyrightNotice ?? undefined,
             workUnitId: req.workUnitId ?? undefined,
             defaultLanguage: req.defaultLanguage ?? undefined,
             rating: (req.rating as ContentRating | undefined) ?? undefined,
@@ -333,6 +335,14 @@ export class BookService {
             rating: (req.rating as ContentRating | undefined) ?? undefined,
             visibility:
               (req.visibility as UnitVisibility | undefined) ?? undefined,
+            licenseSlug:
+              req.licenseSlug === null
+                ? null
+                : (assertLicenseSlug(req.licenseSlug) ?? undefined),
+            copyrightNotice:
+              req.copyrightNotice === null
+                ? null
+                : (req.copyrightNotice ?? undefined),
           },
         },
       },
@@ -344,6 +354,10 @@ export class BookService {
     if (req.coverUrl !== undefined) patchFields.coverUrl = req.coverUrl;
     if (req.rating !== undefined) patchFields.rating = req.rating;
     if (req.visibility !== undefined) patchFields.visibility = req.visibility;
+    if (req.licenseSlug !== undefined)
+      patchFields.licenseSlug = req.licenseSlug;
+    if (req.copyrightNotice !== undefined)
+      patchFields.copyrightNotice = req.copyrightNotice;
     await patchContentMetadataToMeili(unitId, patchFields);
 
     return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);

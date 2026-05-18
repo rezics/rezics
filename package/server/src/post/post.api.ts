@@ -20,8 +20,14 @@ export const postApi = new Elysia({ prefix: "/post" })
   .use(authMacro)
   .get(
     "/:unitId",
-    async ({ params }): Promise<PostResponse> => {
-      const post = await postService.getByUnitId(params.unitId);
+    async ({ headers, params }): Promise<PostResponse> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
+      const post = await postService.getByUnitId(params.unitId, {
+        isAdmin: isAdminRole(identity),
+      });
       return mapPostToDTO(post);
     },
     {

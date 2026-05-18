@@ -1,9 +1,27 @@
 import { describe, expect, test } from "bun:test";
 
+function setServerEnvForSearchTests() {
+  process.env.DATABASE_URL ??=
+    "postgresql://postgres:postgres@localhost:5432/rezics_book";
+  process.env.AUTH_INTERNAL_BASE_URL ??= "http://localhost:4001";
+  process.env.AUTH_PUBLIC_BASE_URL ??= "http://localhost:4001";
+  process.env.AUTH_PUBLIC_ISSUER_URL ??= "http://localhost:4001";
+  process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "test-secret";
+  process.env.SMTP_HOST ??= "localhost";
+  process.env.SMTP_USER ??= "test";
+  process.env.SMTP_PASSWORD ??= "test";
+  process.env.TURNSTILE_SECRET ??= "test";
+  process.env.MEILI_HOST ??= "http://localhost:7700";
+  process.env.MEILI_MASTER_KEY ??= "masterKey";
+  process.env.NOTIFY_BASE_URL ??= "http://localhost:4002";
+  process.env.NOTIFY_INTERNAL_SECRET ??= "test-secret";
+  process.env.REACTION_BASE_URL ??= "http://localhost:4003";
+  process.env.REACTION_INTERNAL_SECRET ??= "test-secret";
+}
+
 describe("buildPostDocument", () => {
   test("includes realmIds from RealmUnit rows", async () => {
-    process.env.DATABASE_URL ??=
-      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
@@ -35,8 +53,7 @@ describe("buildPostDocument", () => {
   });
 
   test("projects rootTargetUnitId and rootTargetUnitType from the Post row", async () => {
-    process.env.DATABASE_URL ??=
-      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
@@ -68,8 +85,7 @@ describe("buildPostDocument", () => {
   });
 
   test("falls back to null when rootTargetUnit fields are missing on the row", async () => {
-    process.env.DATABASE_URL ??=
-      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-2",
@@ -98,8 +114,7 @@ describe("buildPostDocument", () => {
   });
 
   test("uses empty realmIds when a post belongs to no realms", async () => {
-    process.env.DATABASE_URL ??=
-      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
@@ -129,8 +144,7 @@ describe("buildPostDocument", () => {
 
 describe("buildContentDocument realm tag keys", () => {
   test("realmTagKeys can exist without matching realmIds", async () => {
-    process.env.DATABASE_URL ??=
-      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    setServerEnvForSearchTests();
     const { buildContentDocument } = await import("./sync");
 
     const doc = buildContentDocument({
@@ -160,8 +174,7 @@ describe("buildContentDocument realm tag keys", () => {
 
 describe("buildContentDocument subject attributions", () => {
   test("subject names do not pollute creditNames", async () => {
-    process.env.DATABASE_URL ??=
-      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    setServerEnvForSearchTests();
     const { buildContentDocument } = await import("./sync");
 
     const doc = buildContentDocument({
@@ -219,8 +232,7 @@ describe("buildContentDocument containedUnitIds", () => {
   };
 
   test("SHELF unit with three items projects all three ids", async () => {
-    process.env.DATABASE_URL ??=
-      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    setServerEnvForSearchTests();
     const { buildContentDocument } = await import("./sync");
 
     const doc = buildContentDocument({
@@ -241,8 +253,7 @@ describe("buildContentDocument containedUnitIds", () => {
   });
 
   test("BOOK unit omits containedUnitIds entirely", async () => {
-    process.env.DATABASE_URL ??=
-      "postgresql://postgres:postgres@localhost:5432/rezics_book";
+    setServerEnvForSearchTests();
     const { buildContentDocument } = await import("./sync");
 
     const doc = buildContentDocument({
@@ -256,5 +267,72 @@ describe("buildContentDocument containedUnitIds", () => {
     expect(
       (doc as { containedUnitIds?: string[] }).containedUnitIds,
     ).toBeUndefined();
+  });
+});
+
+describe("public content indexing eligibility", () => {
+  test("accepts published public indexable Units", async () => {
+    setServerEnvForSearchTests();
+    const { isPublicIndexableContentUnit } = await import("./sync");
+    expect(
+      isPublicIndexableContentUnit({
+        type: "BOOK",
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        workUnitId: null,
+      }),
+    ).toBe(true);
+  });
+
+  test("rejects private, deleted, and release Units", async () => {
+    setServerEnvForSearchTests();
+    const { isPublicIndexableContentUnit } = await import("./sync");
+    expect(
+      isPublicIndexableContentUnit({
+        type: "BOOK",
+        status: "PUBLISHED",
+        visibility: "PRIVATE",
+        workUnitId: null,
+      }),
+    ).toBe(false);
+    expect(
+      isPublicIndexableContentUnit({
+        type: "BOOK",
+        status: "DELETED",
+        visibility: "PUBLIC",
+        workUnitId: null,
+      }),
+    ).toBe(false);
+    expect(
+      isPublicIndexableContentUnit({
+        type: "BOOK",
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        workUnitId: "work-1",
+      }),
+    ).toBe(false);
+  });
+
+  test("rejects private and deleted post backing Units", async () => {
+    setServerEnvForSearchTests();
+    const { isPublicIndexablePostUnit } = await import("./sync");
+    expect(
+      isPublicIndexablePostUnit({
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+      }),
+    ).toBe(true);
+    expect(
+      isPublicIndexablePostUnit({
+        status: "PUBLISHED",
+        visibility: "PRIVATE",
+      }),
+    ).toBe(false);
+    expect(
+      isPublicIndexablePostUnit({
+        status: "DELETED",
+        visibility: "PUBLIC",
+      }),
+    ).toBe(false);
   });
 });

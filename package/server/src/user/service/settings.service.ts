@@ -1,5 +1,5 @@
 import type { UserSettings } from "@rezics/contract";
-import { OPT_IN_RATINGS } from "@rezics/contract";
+import { LICENSE_SLUGS, OPT_IN_RATINGS } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 
 function deepMerge(target: any, source: any): any {
@@ -39,6 +39,15 @@ function validateSettings(settings: UserSettings): void {
         `content.optedInRatings contains invalid values: ${invalid.join(", ")}. Only R_18 and R_18G are opt-in tiers.`,
       );
     }
+  }
+  const defaultLicenseSlug = settings.publishing?.defaultLicenseSlug;
+  if (
+    defaultLicenseSlug != null &&
+    !(LICENSE_SLUGS as readonly string[]).includes(defaultLicenseSlug)
+  ) {
+    throw new Error(
+      `publishing.defaultLicenseSlug contains invalid value: ${defaultLicenseSlug}.`,
+    );
   }
 }
 

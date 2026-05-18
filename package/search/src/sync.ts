@@ -7,7 +7,7 @@ import type {
   UserSearchDocument,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
-import { prisma, UnitType } from "@rezics/server";
+import { prisma } from "@rezics/server";
 import type { SearchClient } from "./client";
 import {
   buildProgressDocument,
@@ -39,13 +39,68 @@ const BATCH_SIZE = 5000;
 const PROGRESS_SYNC_ATTEMPTS = 3;
 const PROGRESS_SYNC_RETRY_BASE_MS = 100;
 
-const INDEXABLE_TYPES = [
-  UnitType.BOOK,
-  UnitType.GAME,
-  UnitType.MEDIA,
-  UnitType.SHELF,
-  UnitType.LINK,
-];
+const INDEXABLE_TYPES = ["BOOK", "GAME", "MEDIA", "SHELF", "LINK"];
+
+const PUBLIC_ELIGIBLE_UNIT_WHERE = {
+  status: "PUBLISHED",
+  visibility: "PUBLIC",
+} as const;
+
+async function isContentPatchEligible(unitId: string): Promise<boolean> {
+  const unit = await prisma.unit.findUnique({
+    where: { id: unitId },
+    select: { type: true, status: true, visibility: true, workUnitId: true },
+  });
+  return isPublicIndexableContentUnit(unit);
+}
+
+export function isPublicIndexableContentUnit(
+  unit:
+    | {
+        type: string;
+        status: string;
+        visibility: string;
+        workUnitId?: string | null;
+      }
+    | null
+    | undefined,
+): boolean {
+  return Boolean(
+    unit &&
+      unit.workUnitId == null &&
+      INDEXABLE_TYPES.includes(unit.type as any) &&
+      unit.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
+      unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility,
+  );
+}
+
+export function isPublicIndexablePostUnit(
+  unit:
+    | {
+        status: string;
+        visibility: string;
+      }
+    | null
+    | undefined,
+): boolean {
+  return Boolean(
+    unit &&
+      unit.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
+      unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility,
+  );
+}
+
+async function patchContentIfEligible(
+  client: SearchClient,
+  unitId: string,
+  fields: Record<string, any>,
+): Promise<void> {
+  if (!(await isContentPatchEligible(unitId))) {
+    await client.deleteContent([unitId]);
+    return;
+  }
+  await client.patchContent([{ id: unitId, ...fields }]);
+}
 
 function describeError(error: unknown): Record<string, unknown> {
   if (error instanceof Error) {
@@ -206,7 +261,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
 
   // Shelf membership: list of unit ids contained in this shelf (SHELF type only)
   const containedUnitIds: string[] | undefined =
-    unit.type === UnitType.SHELF
+    unit.type === "SHELF"
       ? ((unit.shelf?.units ?? []) as { unitId: string }[]).map((i) => i.unitId)
       : undefined;
 
@@ -278,8 +333,7 @@ export async function syncAllContent(client: SearchClient) {
       where: {
         workUnitId: null,
         type: { in: INDEXABLE_TYPES },
-        status: "PUBLISHED",
-        visibility: "PUBLIC",
+        ...PUBLIC_ELIGIBLE_UNIT_WHERE,
       },
       include: contentInclude,
       orderBy: { id: "asc" },
@@ -339,8 +393,8 @@ export async function syncSingleContent(client: SearchClient, unitId: string) {
     !unit ||
     unit.workUnitId != null ||
     !INDEXABLE_TYPES.includes(unit.type as any) ||
-    unit.status !== "PUBLISHED" ||
-    unit.visibility !== "PUBLIC"
+    unit.status !== PUBLIC_ELIGIBLE_UNIT_WHERE.status ||
+    unit.visibility !== PUBLIC_ELIGIBLE_UNIT_WHERE.visibility
   ) {
     await client.deleteContent([unitId]);
     return;
@@ -353,6 +407,10 @@ export async function syncSingleContent(client: SearchClient, unitId: string) {
 // ANCHOR: Content partial sync functions
 
 export async function patchContentTags(client: SearchClient, unitId: string) {
+  if (!(await isContentPatchEligible(unitId))) {
+    await client.deleteContent([unitId]);
+    return;
+  }
   const unitTags = await prisma.unitTag.findMany({
     where: { unitId },
     include: { tag: { include: { translations: true } } },
@@ -370,13 +428,21 @@ export async function patchContentTags(client: SearchClient, unitId: string) {
     tagLabels.push(...labels);
   }
 
-  await client.patchContent([{ id: unitId, tagIds, tagScores, tagLabels }]);
+  await patchContentIfEligible(client, unitId, {
+    tagIds,
+    tagScores,
+    tagLabels,
+  });
 }
 
 export async function patchContentCredits(
   client: SearchClient,
   unitId: string,
 ) {
+  if (!(await isContentPatchEligible(unitId))) {
+    await client.deleteContent([unitId]);
+    return;
+  }
   const creditAttributions = await prisma.creditAttribution.findMany({
     where: { unitId },
     include: {
@@ -394,13 +460,17 @@ export async function patchContentCredits(
     })
     .filter(Boolean);
 
-  await client.patchContent([{ id: unitId, creditNames }]);
+  await patchContentIfEligible(client, unitId, { creditNames });
 }
 
 export async function patchContentSubjects(
   client: SearchClient,
   unitId: string,
 ) {
+  if (!(await isContentPatchEligible(unitId))) {
+    await client.deleteContent([unitId]);
+    return;
+  }
   const subjectAttributions = await prisma.subjectAttribution.findMany({
     where: { unitId },
     include: {
@@ -430,15 +500,22 @@ export async function patchContentSubjects(
     ...new Set(subjectAttributions.map((a: any) => a.role).filter(Boolean)),
   ];
 
-  await client.patchContent([
-    { id: unitId, subjectEntityIds, subjectNames, subjectKinds, subjectRoles },
-  ]);
+  await patchContentIfEligible(client, unitId, {
+    subjectEntityIds,
+    subjectNames,
+    subjectKinds,
+    subjectRoles,
+  });
 }
 
 export async function patchContentTranslations(
   client: SearchClient,
   unitId: string,
 ) {
+  if (!(await isContentPatchEligible(unitId))) {
+    await client.deleteContent([unitId]);
+    return;
+  }
   const translations = await prisma.unitTranslation.findMany({
     where: { unitId },
   });
@@ -451,41 +528,46 @@ export async function patchContentTranslations(
     .filter(Boolean);
   const languages = translations.map((t: any) => t.language);
 
-  await client.patchContent([
-    {
-      id: unitId,
-      titles,
-      subtitles,
-      summaries,
-      descriptions,
-      languages,
-      translations: translations.map((tr: any) => ({
-        language: tr.language,
-        title: tr.title ?? null,
-        subtitle: tr.subtitle ?? null,
-        summary: tr.summary ?? null,
-        description: tr.description ?? null,
-      })),
-    },
-  ]);
+  await patchContentIfEligible(client, unitId, {
+    titles,
+    subtitles,
+    summaries,
+    descriptions,
+    languages,
+    translations: translations.map((tr: any) => ({
+      language: tr.language,
+      title: tr.title ?? null,
+      subtitle: tr.subtitle ?? null,
+      summary: tr.summary ?? null,
+      description: tr.description ?? null,
+    })),
+  });
 }
 
 export async function patchContentRealmIds(
   client: SearchClient,
   unitId: string,
 ) {
+  if (!(await isContentPatchEligible(unitId))) {
+    await client.deleteContent([unitId]);
+    return;
+  }
   const inRealms = await prisma.realmUnit.findMany({
     where: { unitId },
   });
 
   const realmIds = inRealms.map((r: any) => r.realmUnitId);
-  await client.patchContent([{ id: unitId, realmIds }]);
+  await patchContentIfEligible(client, unitId, { realmIds });
 }
 
 export async function patchContentRealmTagKeys(
   client: SearchClient,
   unitId: string,
 ) {
+  if (!(await isContentPatchEligible(unitId))) {
+    await client.deleteContent([unitId]);
+    return;
+  }
   const realmTagApplicationsAsTargetUnit = await prisma.realmTagUnit.findMany({
     where: { unitId },
   });
@@ -493,7 +575,7 @@ export async function patchContentRealmTagKeys(
   const realmTagKeys = realmTagApplicationsAsTargetUnit.map(
     (rt: any) => `${rt.realmUnitId}:${rt.tagUnitId}`,
   );
-  await client.patchContent([{ id: unitId, realmTagKeys }]);
+  await patchContentIfEligible(client, unitId, { realmTagKeys });
 }
 
 export async function patchContentMetadata(
@@ -501,7 +583,11 @@ export async function patchContentMetadata(
   unitId: string,
   fields: Record<string, any>,
 ) {
-  await client.patchContent([{ id: unitId, ...fields }]);
+  if ("status" in fields || "visibility" in fields || "workUnitId" in fields) {
+    await syncSingleContent(client, unitId);
+    return;
+  }
+  await patchContentIfEligible(client, unitId, fields);
 }
 
 /**
@@ -513,12 +599,16 @@ export async function patchContentContainedUnitIds(
   client: SearchClient,
   shelfId: string,
 ) {
+  if (!(await isContentPatchEligible(shelfId))) {
+    await client.deleteContent([shelfId]);
+    return;
+  }
   const units = await prisma.shelfUnit.findMany({
     where: { shelfId },
     select: { unitId: true },
   });
   const containedUnitIds = units.map((u) => u.unitId);
-  await client.patchContent([{ id: shelfId, containedUnitIds }]);
+  await patchContentIfEligible(client, shelfId, { containedUnitIds });
 }
 
 // ANCHOR: Post partial sync functions
@@ -534,7 +624,7 @@ export async function patchPostsAuthor(
     const posts = await prisma.post.findMany({
       where: {
         authorUserId: userId,
-        unit: { status: "PUBLISHED" },
+        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
       },
       select: { unitId: true },
       orderBy: { unitId: "asc" },
@@ -587,7 +677,7 @@ export async function patchPostsTarget(
     const posts = await prisma.post.findMany({
       where: {
         targetUnitId,
-        unit: { status: "PUBLISHED" },
+        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
       },
       select: { unitId: true },
       orderBy: { unitId: "asc" },
@@ -615,6 +705,14 @@ export async function patchPostFields(
   unitId: string,
   fields: Record<string, any>,
 ) {
+  const post = await prisma.post.findUnique({
+    where: { unitId },
+    select: { unit: { select: { status: true, visibility: true } } },
+  });
+  if (!post || !isPublicIndexablePostUnit(post.unit)) {
+    await client.deletePosts([unitId]);
+    return;
+  }
   await client.patchPosts([{ id: unitId, ...fields }]);
 }
 
@@ -819,7 +917,7 @@ export async function syncSinglePost(client: SearchClient, unitId: string) {
     },
   });
 
-  if (!post || post.unit.status !== "PUBLISHED") {
+  if (!post || !isPublicIndexablePostUnit(post.unit)) {
     await client.deletePosts([unitId]);
     return;
   }
@@ -840,7 +938,7 @@ export async function syncAllPosts(client: SearchClient) {
 
     const posts: any[] = await prisma.post.findMany({
       where: {
-        unit: { status: "PUBLISHED" },
+        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
       },
       include: {
         ...postIncludeForSync,
@@ -916,8 +1014,8 @@ export async function syncAllContainedUnitIds(client: SearchClient) {
   while (true) {
     const shelves: any[] = await prisma.unit.findMany({
       where: {
-        type: UnitType.SHELF,
-        status: "PUBLISHED",
+        type: "SHELF",
+        ...PUBLIC_ELIGIBLE_UNIT_WHERE,
       },
       select: {
         id: true,
@@ -960,7 +1058,7 @@ export async function syncAllPostRootTargets(client: SearchClient) {
   while (true) {
     const posts: any[] = await prisma.post.findMany({
       where: {
-        unit: { status: "PUBLISHED" },
+        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
       },
       select: {
         unitId: true,
@@ -998,7 +1096,7 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
     const posts: any[] = await prisma.post.findMany({
       where: {
         authorUserId: userId,
-        unit: { status: "PUBLISHED" },
+        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
       },
       include: {
         ...postIncludeForSync,
@@ -1033,7 +1131,7 @@ export async function syncPostsByTarget(
     const posts: any[] = await prisma.post.findMany({
       where: {
         targetUnitId,
-        unit: { status: "PUBLISHED" },
+        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
       },
       include: {
         ...postIncludeForSync,

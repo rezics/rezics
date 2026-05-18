@@ -17,6 +17,7 @@ import { Elysia, status, t } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { mapScoreAggregateToDTO } from "@/score/score.mapper";
 import { scoreService } from "@/score/score.service";
+import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import { unitService } from "@/unit/unit.service";
 import { bookService } from "./book.service";
 import { mapBookToDTO } from "./mapper";
@@ -100,7 +101,11 @@ export const bookApi = new Elysia({ prefix: "/book" })
 
       const effectiveQuery = admin
         ? query
-        : { ...query, status: "PUBLISHED", visibility: "PUBLIC" };
+        : {
+            ...query,
+            status: publicUnitEligibilityWhere.status,
+            visibility: publicUnitEligibilityWhere.visibility,
+          };
 
       const { books, total } = await bookService.list(effectiveQuery);
       return { books: books.map(mapBookToDTO), total };
@@ -127,7 +132,11 @@ export const bookApi = new Elysia({ prefix: "/book" })
       const query = { ...body, ids: body.ids?.join(",") };
       const effectiveQuery = admin
         ? query
-        : { ...query, status: "PUBLISHED", visibility: "PUBLIC" };
+        : {
+            ...query,
+            status: publicUnitEligibilityWhere.status,
+            visibility: publicUnitEligibilityWhere.visibility,
+          };
 
       const { books, total } = await bookService.list(effectiveQuery);
       return { books: books.map(mapBookToDTO), total };

@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { licenseSlugSchema } from "../license";
 
 export const realmRuleExtraNote =
   "Single Post Unit ID that holds the realm's rule content shown before joining.";
@@ -96,6 +97,12 @@ export const realmExtraSchema = t.Object(
      * constrain tagging.
      */
     tagTree: t.Optional(t.Array(tagTreeNodeSchema)),
+
+    /**
+     * Advisory default Unit publication license for composer prefill in this
+     * realm. Created Units store their selected license explicitly.
+     */
+    defaultLicenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   },
   { additionalProperties: true },
 );

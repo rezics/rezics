@@ -1,7 +1,17 @@
-import type { BookDTO, ContentRating } from "@rezics/contract";
+import type { BookDTO, ContentRating, LicenseSlug } from "@rezics/contract";
+import {
+  LICENSE_REGISTRY,
+  LICENSE_SLUGS,
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
+} from "@rezics/contract";
 import { RatingSelector } from "@rezics/ui";
 import {
   Checkbox,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -10,6 +20,15 @@ import {
 import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+
+function TooltipIconTrigger(props: Record<string, unknown>) {
+  const { ref: _ref, ...triggerProps } = props;
+  return (
+    <span {...(triggerProps as React.HTMLAttributes<HTMLSpanElement>)}>
+      <InfoOutlined size={16} className="text-muted-foreground cursor-help" />
+    </span>
+  );
+}
 
 /**
  * BookMetadataValue — flat overlay of book unit-level fields (i.e. fields
@@ -51,14 +70,7 @@ function FlagWithTooltip({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger
-            render={(props) => (
-              <span {...props}>
-                <InfoOutlined
-                  size={16}
-                  className="text-muted-foreground cursor-help"
-                />
-              </span>
-            )}
+            render={(props) => <TooltipIconTrigger {...props} />}
           />
           <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>
@@ -78,6 +90,9 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   const currentCoverUrl = value?.coverUrl ?? "";
   const currentPageCount = value?.pageCount ?? "";
   const currentTextLength = value?.textLength ?? "";
+  const currentLicense =
+    (value?.licenseSlug as LicenseSlug | null | undefined) ??
+    DEFAULT_PUBLICATION_LICENSE_SLUG;
 
   return (
     <div className="flex flex-col gap-6">
@@ -173,6 +188,29 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             disabled={disabled}
           />
         </div>
+        <div className="max-w-xs space-y-1">
+          <label className="text-sm" htmlFor="book-publication-license">
+            {t("book.fields.publication_license", "Publication license")}
+          </label>
+          <Select
+            value={currentLicense}
+            onValueChange={(licenseSlug) =>
+              onChange?.({ licenseSlug: licenseSlug as LicenseSlug })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger id="book-publication-license">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LICENSE_SLUGS.map((slug) => (
+                <SelectItem key={slug} value={slug}>
+                  {LICENSE_REGISTRY[slug].label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );
@@ -186,14 +224,7 @@ export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger
-            render={(props) => (
-              <span {...props}>
-                <InfoOutlined
-                  size={16}
-                  className="text-muted-foreground cursor-help"
-                />
-              </span>
-            )}
+            render={(props) => <TooltipIconTrigger {...props} />}
           />
           <TooltipContent>
             {tooltipTitle ?? t("book.tooltips.licensed")}
