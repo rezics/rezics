@@ -28,6 +28,11 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
       <p className="text-sm">
         {t("book.fields.text_length")}：{bookInfo?.textLength ?? 0}
       </p>
+      {typeof bookInfo?.chapterCount === "number" && (
+        <p className="text-sm">
+          {t("book.fields.chapter_count", "章節數")}：{bookInfo.chapterCount}
+        </p>
+      )}
       {bookInfo?.pageCount != null && (
         <p className="text-sm">
           {t("book.fields.page_count" as any)}：{bookInfo.pageCount}

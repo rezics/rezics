@@ -565,6 +565,7 @@ export default {
         editor: "Editor",
         publisher: "Publisher",
         producer: "Producer",
+        chapter_count: "{{count}} chapters",
       },
     },
     copyright_notice: {
@@ -583,6 +584,7 @@ export default {
       press: "Publisher",
       producer: "Producer",
       text_length: "Text length",
+      chapter_count: "Chapters",
       rating: "Content rating",
     },
     placeholders: {

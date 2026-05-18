@@ -1,5 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
-import type { ChapterTreeItem } from "@rezics/contract";
+import type { BookContentStructureItem } from "@rezics/contract";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -7,30 +7,30 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 
-/** Props for ChapterTreeJsonEditor component. */
-interface ChapterTreeJsonEditorProps {
+/** Props for BookTocJsonEditor component. */
+interface BookTocJsonEditorProps {
   /** Book unit ID. */
   bookId: string;
 }
 
-/** JSON structure for chapter tree editor. */
-type ChapterTreeJsonData = {
-  nodes: ChapterTreeItem[];
+/** JSON structure for the table-of-contents editor. */
+type BookTocJsonData = {
+  nodes: BookContentStructureItem[];
 };
 
 /**
- * Chapter Tree JSON Editor - Raw JSON editor for chapter tree.
+ * Raw JSON editor for the table of contents.
  *
  * Note: This feature is currently disabled.
  */
-export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({
+export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
   bookId,
 }) => {
   const { data, isLoading, error } = useQuery(
     bookQueries.contentStructure(bookId),
   );
 
-  const [jsonData, setJsonData] = useState<ChapterTreeJsonData>({ nodes: [] });
+  const [jsonData, setJsonData] = useState<BookTocJsonData>({ nodes: [] });
 
   useEffect(() => {
     setJsonData({
@@ -38,7 +38,7 @@ export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({
     });
   }, [data]);
 
-  function onChange(value: ChapterTreeJsonData) {
+  function onChange(value: BookTocJsonData) {
     console.log(value);
   }
 

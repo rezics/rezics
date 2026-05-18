@@ -1,7 +1,7 @@
 import type {
   BookContentStructureResponse,
   BookListQuery,
-  ChapterTreeItem,
+  BookContentStructureItem,
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
@@ -23,7 +23,10 @@ import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
-import { buildTree } from "./book-content-structure";
+import {
+  buildTree,
+  countReadableBookContentStructureItems,
+} from "./book-content-structure";
 import { between, firstKey } from "./lexorank";
 import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
@@ -173,7 +176,7 @@ export class BookService {
 
   /**
    * Get content structure by bookUnitId. Reads all node rows for the book and
-   * assembles them server-side into the nested `ChapterTreeItem[]` wire shape.
+   * assembles them server-side into the nested `BookContentStructureItem[]` wire shape.
    */
   async getContentStructureByBookUnitId(
     bookUnitId: string,
@@ -267,6 +270,7 @@ export class BookService {
           : undefined,
         pageCount: req.pageCount ?? undefined,
         textLength: req.textLength ?? 0,
+        chapterCount: 0,
         formatKey: req.formatKey ?? undefined,
         isLicensed: req.isLicensed ?? false,
         extra: (req.extra ?? null) as Prisma.InputJsonValue,
@@ -356,7 +360,7 @@ export class BookService {
    */
   async updateContentStructure(
     unitId: string,
-    submitted: ChapterTreeItem[],
+    submitted: BookContentStructureItem[],
   ): Promise<BookContentStructureResponse> {
     await prisma.$transaction(async (tx) => {
       const current = await tx.bookContentStructureNode.findMany({
@@ -375,6 +379,7 @@ export class BookService {
       const currentById = new Map(current.map((row) => [row.id, row]));
       const planned = planSubmittedTree(submitted, currentById);
       const submittedIds = new Set(planned.map((p) => p.id));
+      const chapterCount = countReadableBookContentStructureItems(submitted);
 
       let mutated = false;
 
@@ -434,6 +439,10 @@ export class BookService {
         await tx.bookContentStructure.update({
           where: { bookUnitId: unitId },
           data: { updatedAt: new Date() },
+        });
+        await tx.book.update({
+          where: { unitId },
+          data: { chapterCount },
         });
       }
     });
@@ -495,7 +504,7 @@ interface ExistingRow {
  * against cycles or malformed submissions.
  */
 function planSubmittedTree(
-  submitted: readonly ChapterTreeItem[],
+  submitted: readonly BookContentStructureItem[],
   existingById: ReadonlyMap<string, ExistingRow>,
 ): PlannedNode[] {
   const out: PlannedNode[] = [];
@@ -503,7 +512,7 @@ function planSubmittedTree(
   const claimedIds = new Set<string>();
 
   function visit(
-    siblings: readonly ChapterTreeItem[],
+    siblings: readonly BookContentStructureItem[],
     parentId: string | null,
   ): void {
     const ids: string[] = siblings.map((node) => {
@@ -542,7 +551,7 @@ function planSubmittedTree(
 }
 
 function allocateSortKeys(
-  siblings: readonly ChapterTreeItem[],
+  siblings: readonly BookContentStructureItem[],
   assignedIds: readonly string[],
   parentId: string | null,
   existingById: ReadonlyMap<string, ExistingRow>,

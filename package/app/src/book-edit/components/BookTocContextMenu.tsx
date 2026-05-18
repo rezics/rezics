@@ -16,9 +16,9 @@ import {
   moveSiblingFirst,
   moveSiblingLast,
 } from "@/shared/utils/arborist-tree";
-import type { Chapter, ChapterContextMenuState } from "./ChapterTreeEditor";
+import type { Chapter, ChapterContextMenuState } from "./BookTocEditor";
 
-interface ChapterTreeContextMenuProps {
+interface BookTocContextMenuProps {
   contextMenu: NonNullable<ChapterContextMenuState>;
   setContextMenu: (state: ChapterContextMenuState) => void;
   setTreeData: React.Dispatch<React.SetStateAction<Chapter[]>>;
@@ -51,14 +51,14 @@ function MenuItem({ onClick, icon, children, destructive }: MenuItemProps) {
   );
 }
 
-export const ChapterTreeContextMenu = ({
+export const BookTocContextMenu = ({
   contextMenu,
   setContextMenu,
   setTreeData,
   handleCreate,
   onEditChapter,
   onMoveToParent,
-}: ChapterTreeContextMenuProps) => {
+}: BookTocContextMenuProps) => {
   const { node } = contextMenu;
   const ref = useRef<HTMLDivElement>(null);
 

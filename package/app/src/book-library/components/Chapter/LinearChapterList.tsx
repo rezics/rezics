@@ -36,7 +36,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   const selectedId = chapterId || "";
   const baseLink = bookId;
 
-  const chapterTree = useMemo(
+  const bookTocTree = useMemo(
     () => withBookContentStructureOccurrences(data?.nodes ?? []),
     [data],
   );
@@ -89,7 +89,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
 
         <ChapterArborist
           ref={arboristRef}
-          chapterTree={chapterTree}
+          bookTocTree={bookTocTree}
           treeIndent={10}
           tHeight={height}
           searchTerm={searchTerm}

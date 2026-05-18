@@ -17,7 +17,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Chapter } from "./ChapterTreeEditor";
+import type { Chapter } from "./BookTocEditor";
 
 // MOCK: publish statuses — replace with contract enum when backend is ready
 const PUBLISH_STATUSES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;

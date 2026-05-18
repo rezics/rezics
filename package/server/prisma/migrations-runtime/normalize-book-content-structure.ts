@@ -15,7 +15,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type { ChapterTreeItem, ContentRating } from "@rezics/contract";
+import type { BookContentStructureItem, ContentRating } from "@rezics/contract";
 import { prisma } from "../client";
 import {
   type BookContentStructureNodeRow,
@@ -40,9 +40,9 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function normalizeNode(value: unknown): ChapterTreeItem {
+function normalizeNode(value: unknown): BookContentStructureItem {
   const source = isObject(value) ? value : {};
-  const node: ChapterTreeItem = {
+  const node: BookContentStructureItem = {
     title: typeof source.title === "string" ? source.title : "",
   };
   if (typeof source.chapterUnitId === "string") {
@@ -58,18 +58,21 @@ function normalizeNode(value: unknown): ChapterTreeItem {
   return node;
 }
 
-function normalizeJsonNodes(value: unknown): ChapterTreeItem[] {
+function normalizeJsonNodes(value: unknown): BookContentStructureItem[] {
   if (!Array.isArray(value)) return [];
   return value.map(normalizeNode);
 }
 
 function flattenJsonTree(
   bookUnitId: string,
-  nodes: ChapterTreeItem[],
+  nodes: BookContentStructureItem[],
 ): RowInput[] {
   const out: RowInput[] = [];
 
-  function visit(siblings: ChapterTreeItem[], parentId: string | null): void {
+  function visit(
+    siblings: BookContentStructureItem[],
+    parentId: string | null,
+  ): void {
     let prevKey: string | null = null;
     for (const node of siblings) {
       const id = randomUUID();
@@ -95,9 +98,11 @@ function flattenJsonTree(
   return out;
 }
 
-function stripDerivedFields(items: ChapterTreeItem[]): ChapterTreeItem[] {
+function stripDerivedFields(
+  items: BookContentStructureItem[],
+): BookContentStructureItem[] {
   return items.map((item) => {
-    const cleaned: ChapterTreeItem = { title: item.title };
+    const cleaned: BookContentStructureItem = { title: item.title };
     if (item.chapterUnitId) cleaned.chapterUnitId = item.chapterUnitId;
     if (item.noContent === true) cleaned.noContent = item.noContent;
     if (item.rating) cleaned.rating = item.rating;
@@ -151,7 +156,7 @@ async function readLegacyContainers(): Promise<
 
 async function verifyBook(
   bookUnitId: string,
-  source: ChapterTreeItem[],
+  source: BookContentStructureItem[],
 ): Promise<{ ok: boolean; reason?: string }> {
   const rows = await prisma.bookContentStructureNode.findMany({
     where: { bookUnitId },

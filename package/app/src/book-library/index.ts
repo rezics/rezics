@@ -55,8 +55,8 @@ export {
 export {
   ChapterLeaf,
   ChapterList,
-  type ChapterTreeHandle,
-  ChapterTreeView,
+  type BookTocTreeHandle,
+  BookTocTreeView,
 } from "./components/Chapter/ChapterList";
 
 // ============================================================================

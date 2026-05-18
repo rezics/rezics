@@ -1,4 +1,4 @@
-import type { ChapterTreeItem, ContentRating } from "@rezics/contract";
+import type { BookContentStructureItem, ContentRating } from "@rezics/contract";
 
 export class BookContentStructurePathError extends Error {
   constructor(message: string) {
@@ -55,7 +55,7 @@ export interface BookContentStructureNodeRow {
 }
 
 /**
- * Assemble a flat list of node rows into the nested `ChapterTreeItem[]` wire
+ * Assemble a flat list of node rows into the nested `BookContentStructureItem[]` wire
  * shape. Children at each level are ordered lexicographically by `sortKey`.
  * Runs in O(n) with one pass to bucket by `parentId` and one DFS from roots.
  *
@@ -64,7 +64,7 @@ export interface BookContentStructureNodeRow {
  */
 export function buildTree(
   rows: readonly BookContentStructureNodeRow[],
-): ChapterTreeItem[] {
+): BookContentStructureItem[] {
   if (rows.length === 0) return [];
 
   const childrenByParent = new Map<
@@ -85,8 +85,10 @@ export function buildTree(
     );
   }
 
-  function rowToNode(row: BookContentStructureNodeRow): ChapterTreeItem {
-    const item: ChapterTreeItem = {
+  function rowToNode(
+    row: BookContentStructureNodeRow,
+  ): BookContentStructureItem {
+    const item: BookContentStructureItem = {
       id: row.id,
       title: row.title,
       updatedAt: row.updatedAt.toISOString(),
@@ -103,6 +105,19 @@ export function buildTree(
 
   const roots = childrenByParent.get(null) ?? [];
   return roots.map(rowToNode);
+}
+
+export function countReadableBookContentStructureItems(
+  nodes: readonly BookContentStructureItem[],
+): number {
+  let count = 0;
+  for (const node of nodes) {
+    if (node.noContent !== true) count++;
+    if (node.children) {
+      count += countReadableBookContentStructureItems(node.children);
+    }
+  }
+  return count;
 }
 
 /**

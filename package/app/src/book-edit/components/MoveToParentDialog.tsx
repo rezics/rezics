@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Chapter } from "./ChapterTreeEditor";
+import type { Chapter } from "./BookTocEditor";
 
 interface MoveToParentDialogProps {
   open: boolean;

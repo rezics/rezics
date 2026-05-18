@@ -10,7 +10,7 @@ import {
 import type React from "react";
 import type { NodeRendererProps, TreeApi } from "react-arborist";
 import { useLongPress } from "../hooks/useLongPress";
-import type { Chapter, ChapterContextMenuState } from "./ChapterTreeEditor";
+import type { Chapter, ChapterContextMenuState } from "./BookTocEditor";
 
 /** Uniform row height — react-arborist (react-window) requires a single number. */
 export const LEAF_ROW_HEIGHT = 100;
@@ -66,7 +66,7 @@ function mockViewCount(id: string | number): number {
 }
 
 /** Options for the node renderer factory. */
-export interface ChapterTreeEditorNodeOptions {
+export interface BookTocEditorNodeOptions {
   setContextMenu: React.Dispatch<React.SetStateAction<ChapterContextMenuState>>;
   treeRef: React.RefObject<TreeApi<Chapter> | null>;
   onEditChapter: (node: Chapter) => void;
@@ -81,7 +81,7 @@ export interface ChapterTreeEditorNodeOptions {
 /**
  * Factory that returns a Node renderer bound to editor state setters.
  */
-export const createChapterTreeEditorNode = ({
+export const createBookTocEditorNode = ({
   setContextMenu,
   treeRef,
   onEditChapter,
@@ -91,8 +91,8 @@ export const createChapterTreeEditorNode = ({
   isSelectionMode,
   selectedIds,
   onToggleSelect,
-}: ChapterTreeEditorNodeOptions) => {
-  return function ChapterTreeEditorNode({
+}: BookTocEditorNodeOptions) => {
+  return function BookTocEditorNode({
     node,
     style,
     dragHandle,

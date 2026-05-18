@@ -25,7 +25,7 @@ const deepTree: Chapter[] = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const Wrapper = (args: {
-  chapterTree: Chapter[];
+  bookTocTree: Chapter[];
   searchTerm?: string;
   selectedId?: string;
 }) => {
@@ -33,7 +33,7 @@ const Wrapper = (args: {
   return (
     <ChapterArborist
       ref={ref}
-      chapterTree={args.chapterTree}
+      bookTocTree={args.bookTocTree}
       tHeight={300}
       searchTerm={args.searchTerm ?? ""}
       selectedId={args.selectedId ?? ""}
@@ -48,7 +48,7 @@ const meta = {
   title: "Domain/Book/ChapterArborist",
   component: Wrapper,
   decorators: [withRouter],
-  args: { chapterTree: shallowTree },
+  args: { bookTocTree: shallowTree },
 } satisfies Meta<typeof Wrapper>;
 
 export default meta;
@@ -57,9 +57,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const Empty: Story = {
-  args: { chapterTree: [] },
+  args: { bookTocTree: [] },
 };
 
 export const Large: Story = {
-  args: { chapterTree: deepTree },
+  args: { bookTocTree: deepTree },
 };

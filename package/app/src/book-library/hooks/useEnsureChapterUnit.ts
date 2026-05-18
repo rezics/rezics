@@ -1,9 +1,9 @@
 import { chapterMutations } from "@rezics/api/chapter/chapter.mutations";
 import { useCallback } from "react";
-import type { ChapterTreeOccurrence } from "../models/bookContentStructurePath";
+import type { BookContentStructureOccurrence } from "../models/bookContentStructurePath";
 
 export type EnsureChapterUnitInput = Pick<
-  ChapterTreeOccurrence,
+  BookContentStructureOccurrence,
   "chapterUnitId" | "path" | "title"
 >;
 

@@ -7,7 +7,7 @@ import {
   chapterDetailQuery,
   useUpdateChapterMutation,
 } from "@rezics/api/chapter/chapter";
-import type { ChapterTreeItem } from "@rezics/contract";
+import type { BookContentStructureItem } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { RezicsMarkdownEditor, type ViewMode } from "@rezics/ui/editor";
 import {
@@ -33,10 +33,10 @@ import {
 } from "lucide-react";
 
 function updateContentStructureNodeTitle(
-  nodes: ChapterTreeItem[],
+  nodes: BookContentStructureItem[],
   chapterUnitId: string,
   title: string,
-): ChapterTreeItem[] {
+): BookContentStructureItem[] {
   return nodes.map((node) => ({
     ...node,
     ...(node.chapterUnitId === chapterUnitId ? { title } : {}),
@@ -76,7 +76,7 @@ export const BookEditChapterPage: React.FC = () => {
   const { data: contentStructureData } = useQuery(
     bookQueries.contentStructure(bookId),
   );
-  const chapterTree = useMemo(
+  const bookTocTree = useMemo(
     () => contentStructureData?.nodes ?? [],
     [contentStructureData],
   );
@@ -243,7 +243,7 @@ export const BookEditChapterPage: React.FC = () => {
       <MoveToParentDialog
         open={moveDialogOpen}
         onClose={() => setMoveDialogOpen(false)}
-        treeData={chapterTree}
+        treeData={bookTocTree}
         movingNode={data ? { id: chapterId, title, children: [] } : null}
         onConfirm={(targetParentId) => {
           // TODO: move chapter to new parent via API

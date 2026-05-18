@@ -19,7 +19,7 @@ import {
 import { type NodeRendererProps, Tree, type TreeApi } from "react-arborist";
 import { cn } from "@/shared/utils/css-util";
 import {
-  type ChapterTreeOccurrence,
+  type BookContentStructureOccurrence,
   EMPTY_CHAPTER_ROUTE_ID,
   encodeBookContentStructurePath,
 } from "../../models/bookContentStructurePath";
@@ -28,7 +28,7 @@ const CONTENT_ROW_HEIGHT = 48;
 const MIN_TREE_HEIGHT = 320;
 const VIEWPORT_HEIGHT_GAP = 96;
 
-type ContentChapter = ChapterTreeOccurrence;
+type ContentChapter = BookContentStructureOccurrence;
 
 export type ContentChapterVirtualTreeHandle = {
   expandAll: () => void;

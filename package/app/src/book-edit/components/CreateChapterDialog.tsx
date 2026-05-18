@@ -13,7 +13,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
-import type { Chapter } from "./ChapterTreeEditor";
+import type { Chapter } from "./BookTocEditor";
 
 interface CreateChapterDialogProps {
   open: boolean;

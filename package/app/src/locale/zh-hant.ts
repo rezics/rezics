@@ -477,6 +477,7 @@ export default {
         editor: "編輯",
         publisher: "出版",
         producer: "製作",
+        chapter_count: "{{count}} 章",
       },
     },
     copyright_notice: {
@@ -495,6 +496,7 @@ export default {
       press: "出版社",
       producer: "出品方",
       text_length: "字數",
+      chapter_count: "章節數",
       rating: "內容分級",
     },
     placeholders: {

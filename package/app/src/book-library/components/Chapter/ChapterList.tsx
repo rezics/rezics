@@ -1,5 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
-import type { ChapterTreeItem } from "@rezics/contract";
+import type { BookContentStructureItem } from "@rezics/contract";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import {
@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import { useChapterListStore } from "@/book-library/states/chapterListStore";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
-  type ChapterTreeOccurrence,
+  type BookContentStructureOccurrence,
   EMPTY_CHAPTER_ROUTE_ID,
   encodeBookContentStructurePath,
   materializedOrPathId,
@@ -33,7 +33,7 @@ import {
   type ContentChapterVirtualTreeHandle,
 } from "./ContentChapterVirtualTree";
 
-export type ChapterTreeHandle = {
+export type BookTocTreeHandle = {
   expandAll: () => void;
   collapseAll: () => void;
   toggle: (id: string) => void;
@@ -43,7 +43,7 @@ export type ChapterTreeHandle = {
 
 type ChapterLeafProps = {
   bookId: string;
-  node: ChapterTreeOccurrence;
+  node: BookContentStructureOccurrence;
 };
 
 export const ChapterLeaf = React.memo(function ChapterLeaf({
@@ -93,7 +93,9 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   );
 });
 
-function getAllExpandableIds(nodes: ChapterTreeOccurrence[]): Set<string> {
+function getAllExpandableIds(
+  nodes: BookContentStructureOccurrence[],
+): Set<string> {
   const set = new Set<string>();
   const stack = [...nodes];
   while (stack.length) {
@@ -107,9 +109,9 @@ function getAllExpandableIds(nodes: ChapterTreeOccurrence[]): Set<string> {
   return set;
 }
 
-export type ChapterTreeProps = {
+export type BookTocTreeProps = {
   bookId: string;
-  nodes: ChapterTreeOccurrence[];
+  nodes: BookContentStructureOccurrence[];
   expanded: Set<string>;
   onToggle: (id: string) => void;
   renderGroupActions?: boolean;
@@ -123,13 +125,13 @@ const CHAPTER_GRID_CLASS =
  * This is important so recursion can keep rendering at the same "root grid level"
  * (no nested grid/indent), while group headers can span full width.
  */
-const ChapterTreeItems = React.memo(function ChapterTreeItems({
+const BookTocTreeItems = React.memo(function BookTocTreeItems({
   bookId,
   nodes,
   expanded,
   onToggle,
   renderGroupActions = true,
-}: ChapterTreeProps) {
+}: BookTocTreeProps) {
   if (!nodes || nodes.length === 0) return null;
 
   return (
@@ -170,7 +172,7 @@ const ChapterTreeItems = React.memo(function ChapterTreeItems({
             </div>
 
             {isOpen && (
-              <ChapterTreeItems
+              <BookTocTreeItems
                 bookId={bookId}
                 nodes={children}
                 expanded={expanded}
@@ -185,18 +187,18 @@ const ChapterTreeItems = React.memo(function ChapterTreeItems({
   );
 });
 
-const ChapterTreeInner = React.memo(function ChapterTreeInner({
+const BookTocTreeInner = React.memo(function BookTocTreeInner({
   bookId,
   nodes,
   expanded,
   onToggle,
   renderGroupActions = true,
-}: ChapterTreeProps) {
+}: BookTocTreeProps) {
   if (!nodes || nodes.length === 0) return null;
 
   return (
     <div className={CHAPTER_GRID_CLASS}>
-      <ChapterTreeItems
+      <BookTocTreeItems
         bookId={bookId}
         nodes={nodes}
         expanded={expanded}
@@ -207,9 +209,9 @@ const ChapterTreeInner = React.memo(function ChapterTreeInner({
   );
 });
 
-type ChapterTreeViewProps = {
+type BookTocTreeViewProps = {
   bookId: string;
-  nodes: ChapterTreeOccurrence[];
+  nodes: BookContentStructureOccurrence[];
   /**
    * Optional: persist expanded ids externally (e.g. Zustand store).
    * If provided, component will read initial expanded ids from it once on mount,
@@ -219,10 +221,10 @@ type ChapterTreeViewProps = {
   defaultExpandAll?: boolean;
 };
 
-export const ChapterTreeView = forwardRef<
-  ChapterTreeHandle,
-  ChapterTreeViewProps
->(function ChapterTreeView(
+export const BookTocTreeView = forwardRef<
+  BookTocTreeHandle,
+  BookTocTreeViewProps
+>(function BookTocTreeView(
   { bookId, nodes, storageKey, defaultExpandAll = true },
   ref,
 ) {
@@ -332,7 +334,7 @@ export const ChapterTreeView = forwardRef<
   );
 
   return (
-    <ChapterTreeInner
+    <BookTocTreeInner
       bookId={bookId}
       nodes={nodes}
       expanded={expanded}
@@ -350,19 +352,19 @@ export interface ChapterListProps {
 /**
  * Chapter List - Displays a lightweight virtualized chapter tree.
  *
- * Fetches chapter data and renders using ChapterTreeView.
+ * Fetches chapter data and renders using BookTocTreeView.
  */
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
   const { t } = useTranslation();
   const { data, isLoading, error } = useQuery(bookQueries.contentStructure(id));
 
-  const chapterTree: ChapterTreeItem[] = useMemo(
+  const bookTocTree: BookContentStructureItem[] = useMemo(
     () => data?.nodes ?? [],
     [data],
   );
   const chapterOccurrences = useMemo(
-    () => withBookContentStructureOccurrences(chapterTree),
-    [chapterTree],
+    () => withBookContentStructureOccurrences(bookTocTree),
+    [bookTocTree],
   );
 
   const treeRef = React.useRef<ContentChapterVirtualTreeHandle>(null);

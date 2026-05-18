@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import {
-  type ChapterTreeItem,
+  type BookContentStructureItem,
   DEFAULT_LANGUAGE,
   withCoverUrl,
 } from "@rezics/contract";
@@ -70,6 +70,7 @@ export async function seedBooks(
                 : null,
               pageCount: randomInt(80, 1200),
               textLength: randomInt(20000, 500000),
+              chapterCount: 0,
               formatKey: faker.helpers.arrayElement([
                 "paperback",
                 "hardcover",
@@ -168,13 +169,15 @@ export async function seedChaptersForBook(
   bookUnitId: string,
   bookUserId: string,
   chapterPlan: ChapterPlan,
-): Promise<ChapterTreeItem[]> {
+): Promise<BookContentStructureItem[]> {
   const totalChapters = ctx.draw(chapterPlan.count);
   const topLevelCount = Math.max(1, Math.min(6, Math.ceil(totalChapters / 40)));
   const useBatch = totalChapters > CHAPTER_BATCH_THRESHOLD;
 
-  type FactoryChapterTreeItem = ChapterTreeItem & { id?: string };
-  const tree: FactoryChapterTreeItem[] = [];
+  type FactoryBookContentStructureItem = BookContentStructureItem & {
+    id?: string;
+  };
+  const tree: FactoryBookContentStructureItem[] = [];
 
   // Distribute children as evenly as possible across top-level parents
   const childCounts: number[] = Array.from(
@@ -197,7 +200,7 @@ export async function seedChaptersForBook(
     const parentId = randomUUID();
     parentRows.push({ id: parentId, title: parentTitle });
 
-    const children: FactoryChapterTreeItem[] = [];
+    const children: FactoryBookContentStructureItem[] = [];
 
     const childCount = childCounts[t]!;
     for (let c = 0; c < childCount; c++) {
@@ -229,7 +232,9 @@ export async function seedChaptersForBook(
     () => Math.random() < chapterPlan.unitProbability,
   );
 
-  function serializeTree(nodes: FactoryChapterTreeItem[]): ChapterTreeItem[] {
+  function serializeTree(
+    nodes: FactoryBookContentStructureItem[],
+  ): BookContentStructureItem[] {
     const materializedIds = new Set(materializedRows.map((row) => row.id));
     return nodes.map(({ id, children, ...node }) => ({
       ...node,
@@ -238,8 +243,19 @@ export async function seedChaptersForBook(
     }));
   }
 
+  let chapterCount = 0;
+
   if (materializedRows.length === 0) {
-    await insertNodeRows(ctx.prisma, bookUnitId, tree, materializedRows);
+    chapterCount = await insertNodeRows(
+      ctx.prisma,
+      bookUnitId,
+      tree,
+      materializedRows,
+    );
+    await ctx.prisma.book.update({
+      where: { unitId: bookUnitId },
+      data: { chapterCount },
+    });
     return serializeTree(tree);
   }
 
@@ -327,16 +343,26 @@ export async function seedChaptersForBook(
   }
 
   // Chapter Units now exist; insert BookContentStructureNode rows referencing them.
-  await insertNodeRows(ctx.prisma, bookUnitId, tree, materializedRows);
+  chapterCount = await insertNodeRows(
+    ctx.prisma,
+    bookUnitId,
+    tree,
+    materializedRows,
+  );
 
   if ((chapterPlan.multiLinkChapterProbability ?? 0) > 0) {
-    await insertMultiLinkNodes(
+    chapterCount += await insertMultiLinkNodes(
       ctx.prisma,
       bookUnitId,
       materializedRows,
       chapterPlan.multiLinkChapterProbability ?? 0,
     );
   }
+
+  await ctx.prisma.book.update({
+    where: { unitId: bookUnitId },
+    data: { chapterCount },
+  });
 
   return serializeTree(tree);
 }
@@ -411,7 +437,7 @@ async function insertNodeRows(
   bookUnitId: string,
   tree: TreeNode[],
   materializedRows: Array<{ id: string }>,
-): Promise<void> {
+): Promise<number> {
   const materializedIds = new Set(materializedRows.map((r) => r.id));
   const rows: NodeRowInput[] = [];
 
@@ -443,6 +469,8 @@ async function insertNodeRows(
       data: rows.slice(i, i + NODE_BATCH_SIZE),
     });
   }
+
+  return rows.filter((row) => !row.noContent).length;
 }
 
 /**

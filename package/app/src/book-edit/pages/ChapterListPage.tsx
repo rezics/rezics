@@ -5,20 +5,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
-import { ChapterTreeJsonEditor } from "@/book-library/components/Chapter/ChapterTreeJsonEditor";
+import { BookTocJsonEditor } from "@/book-library/components/Chapter/BookTocJsonEditor";
 import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
 import {
   type Chapter,
-  ChapterTreeEditor,
-  type ChapterTreeEditorHandle,
-} from "../components/ChapterTreeEditor";
+  BookTocEditor,
+  type BookTocEditorHandle,
+} from "../components/BookTocEditor";
 
 export const BookEditChapterListPage: React.FC = () => {
   const { bookId } = bookEditLayoutRoute.useParams();
   const queryClient = useQueryClient();
-  const editorRef = useRef<ChapterTreeEditorHandle | null>(null);
+  const editorRef = useRef<BookTocEditorHandle | null>(null);
   const [tab, setTab] = useState<"editor" | "json">("editor");
 
   const { data, isLoading, error } = useQuery(
@@ -26,7 +26,7 @@ export const BookEditChapterListPage: React.FC = () => {
   );
   const { data: bookData } = useQuery(bookQueries.detail(bookId));
 
-  const chapterTree: Chapter[] = useMemo(
+  const bookTocTree: Chapter[] = useMemo(
     () => withBookContentStructureOccurrences(data?.nodes ?? []),
     [data],
   );
@@ -65,7 +65,7 @@ export const BookEditChapterListPage: React.FC = () => {
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-8rem)] max-w-2xl flex-col px-4 pb-4">
-      <h2 className="text-lg font-semibold mb-2">Chapter Management</h2>
+      <h2 className="text-lg font-semibold mb-2">目錄管理</h2>
 
       <Tabs
         value={tab}
@@ -73,20 +73,20 @@ export const BookEditChapterListPage: React.FC = () => {
         className="min-h-0 flex-1"
       >
         <TabsList className="flex-none">
-          <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="editor">編輯</TabsTrigger>
           <TabsTrigger value="json">JSON</TabsTrigger>
         </TabsList>
         <TabsContent value="editor" className="min-h-0">
-          <ChapterTreeEditor
+          <BookTocEditor
             ref={editorRef}
-            chapterTree={chapterTree}
+            bookTocTree={bookTocTree}
             bookUnitId={bookId}
             bookRating={bookRating}
             onDownloadJSON={downloadJSON}
           />
         </TabsContent>
         <TabsContent value="json" className="min-h-0">
-          <ChapterTreeJsonEditor bookId={bookId} />
+          <BookTocJsonEditor bookId={bookId} />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,4 +1,4 @@
-import type { ChapterTreeItem } from "@rezics/contract";
+import type { BookContentStructureItem } from "@rezics/contract";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -15,7 +15,7 @@ export type UseChapterPickerResult = {
 };
 
 function flatten(
-  nodes: ChapterTreeItem[] | undefined,
+  nodes: BookContentStructureItem[] | undefined,
   trail: string[],
   depth: number,
   acc: ChapterPickerOption[],
@@ -47,7 +47,7 @@ export function useChapterPicker(
   const options = useMemo(() => {
     if (!data?.nodes) return [];
     const acc: ChapterPickerOption[] = [];
-    flatten(data.nodes as ChapterTreeItem[], [], 0, acc);
+    flatten(data.nodes as BookContentStructureItem[], [], 0, acc);
     return acc;
   }, [data]);
 

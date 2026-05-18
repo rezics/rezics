@@ -7,7 +7,7 @@ import type {
   BookContentStructureResponse,
   BookListResponse,
   BookResponse,
-  ChapterTreeItem,
+  BookContentStructureItem,
   CreateBookInput,
   ScoreAggregateDTO,
   UpdateBookInput,
@@ -59,7 +59,7 @@ export const bookApi = {
    */
   updateContentStructure: async (
     bookUnitId: string,
-    nodes: ChapterTreeItem[],
+    nodes: BookContentStructureItem[],
   ): Promise<BookContentStructureResponse> => {
     return apiFetch<BookContentStructureResponse>(
       `/book/${bookUnitId}/content-structure`,

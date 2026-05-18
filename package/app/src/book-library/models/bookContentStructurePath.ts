@@ -1,8 +1,8 @@
-import type { ChapterTreeItem } from "@rezics/contract";
+import type { BookContentStructureItem } from "@rezics/contract";
 
 export const EMPTY_CHAPTER_ROUTE_ID = "__bookContentStructurePath";
 
-export type ChapterTreeOccurrence = ChapterTreeItem & {
+export type BookContentStructureOccurrence = BookContentStructureItem & {
   id: string;
   path: number[];
   occurrenceId: string;
@@ -12,7 +12,7 @@ export type ChapterTreeOccurrence = ChapterTreeItem & {
    * created nodes that have not yet been saved.
    */
   nodeId?: string;
-  children?: ChapterTreeOccurrence[];
+  children?: BookContentStructureOccurrence[];
 };
 
 export function encodeBookContentStructurePath(path: number[]): string {
@@ -34,14 +34,16 @@ export function occurrenceIdForPath(path: number[]): string {
   return `path:${encodeBookContentStructurePath(path)}`;
 }
 
-export function materializedOrPathId(node: ChapterTreeOccurrence): string {
+export function materializedOrPathId(
+  node: BookContentStructureOccurrence,
+): string {
   return node.chapterUnitId ?? node.occurrenceId;
 }
 
 export function withBookContentStructureOccurrences(
-  nodes: ChapterTreeItem[],
+  nodes: BookContentStructureItem[],
   prefix: number[] = [],
-): ChapterTreeOccurrence[] {
+): BookContentStructureOccurrence[] {
   return nodes.map((node, index) => {
     const path = [...prefix, index];
     const { id: serverNodeId, ...rest } = node;
@@ -59,11 +61,11 @@ export function withBookContentStructureOccurrences(
 }
 
 export function findBookContentStructureOccurrence(
-  nodes: ChapterTreeOccurrence[],
+  nodes: BookContentStructureOccurrence[],
   path: number[],
-): ChapterTreeOccurrence | null {
+): BookContentStructureOccurrence | null {
   let current = nodes;
-  let node: ChapterTreeOccurrence | undefined;
+  let node: BookContentStructureOccurrence | undefined;
   for (const segment of path) {
     node = current[segment];
     if (!node) return null;

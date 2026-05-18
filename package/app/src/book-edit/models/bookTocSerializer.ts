@@ -1,5 +1,5 @@
-import type { ChapterTreeItem, ContentRating } from "@rezics/contract";
-import type { Chapter } from "../components/ChapterTreeEditor";
+import type { BookContentStructureItem, ContentRating } from "@rezics/contract";
+import type { Chapter } from "../components/BookTocEditor";
 
 /**
  * Serialize chapter tree for persistence.
@@ -13,10 +13,10 @@ import type { Chapter } from "../components/ChapterTreeEditor";
  * save; client-created nodes without a `nodeId` are emitted without `id` and
  * the server treats them as inserts.
  */
-export function serializeChapterTree(
+export function serializeBookToc(
   tree: Chapter[],
   bookRating: ContentRating | undefined,
-): ChapterTreeItem[] {
+): BookContentStructureItem[] {
   return tree.map((node) => {
     const {
       id: _arboristId,
@@ -28,13 +28,13 @@ export function serializeChapterTree(
       children,
       ...rest
     } = node;
-    const serialized: ChapterTreeItem = { ...rest };
+    const serialized: BookContentStructureItem = { ...rest };
     if (nodeId) serialized.id = nodeId;
     if (rating !== undefined && rating !== bookRating) {
       serialized.rating = rating;
     }
     if (children) {
-      serialized.children = serializeChapterTree(children, bookRating);
+      serialized.children = serializeBookToc(children, bookRating);
     }
     return serialized;
   });

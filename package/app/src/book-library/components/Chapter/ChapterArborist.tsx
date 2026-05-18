@@ -8,11 +8,11 @@ import {
   useState,
 } from "react";
 import { Tree, type TreeApi } from "react-arborist";
-import type { ChapterTreeOccurrence } from "../../models/bookContentStructurePath";
+import type { BookContentStructureOccurrence } from "../../models/bookContentStructurePath";
 import { createChapterArboristNode } from "./ChapterArboristNode.tsx";
 
 /** Chapter tree node structure for arborist. */
-export type Chapter = ChapterTreeOccurrence;
+export type Chapter = BookContentStructureOccurrence;
 
 /** Imperative handle for ChapterArborist component. */
 export interface ChapterArboristRefHandle {
@@ -23,7 +23,7 @@ export interface ChapterArboristRefHandle {
 /** Props for ChapterArborist component (reader-only). */
 interface ChapterArboristProps {
   /** Chapter tree data. */
-  chapterTree: Chapter[];
+  bookTocTree: Chapter[];
   /** Tree indentation in pixels. */
   treeIndent?: number;
   /** Tree height in pixels. */
@@ -46,7 +46,7 @@ export const ChapterArborist = forwardRef<
 >(
   (
     {
-      chapterTree,
+      bookTocTree,
       treeIndent = 24,
       tHeight,
       searchTerm,
@@ -69,8 +69,8 @@ export const ChapterArborist = forwardRef<
     }));
 
     useEffect(() => {
-      setTreeData(chapterTree);
-    }, [chapterTree]);
+      setTreeData(bookTocTree);
+    }, [bookTocTree]);
 
     const Node = useMemo(() => createChapterArboristNode(baseLink), [baseLink]);
 

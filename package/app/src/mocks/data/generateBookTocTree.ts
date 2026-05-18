@@ -17,7 +17,7 @@ export interface Chapter {
 /**
  * Represents the complete chapter tree structure.
  */
-export interface ChapterTree {
+export interface BookTocTree {
   chapters: Record<string, Chapter>;
   order: Record<string, string[]>;
 }
@@ -28,13 +28,13 @@ export interface ChapterTree {
  * @param {number} topLevelCount - Number of top-level chapters.
  * @param {number} minChildren - Minimum number of subchapters per top-level.
  * @param {number} maxChildren - Maximum number of subchapters per top-level.
- * @returns {ChapterTree} The generated tree structure.
+ * @returns {BookTocTree} The generated tree structure.
  */
-export function generateChapterTree(
+export function generateBookTocTree(
   topLevelCount: number = 3,
   minChildren: number = 5,
   maxChildren: number = 10,
-): ChapterTree {
+): BookTocTree {
   const chapters: Record<string, Chapter> = {};
   const order: Record<string, string[]> = {};
 
@@ -73,5 +73,5 @@ export function generateChapterTree(
 /**
  * Example usage
  */
-const exampleTree = generateChapterTree(2, 3, 6);
+const exampleTree = generateBookTocTree(2, 3, 6);
 console.log(JSON.stringify(exampleTree, null, 2));

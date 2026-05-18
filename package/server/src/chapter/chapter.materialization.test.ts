@@ -46,6 +46,7 @@ const mockFindBook = mock(async () => ({
 }));
 const mockCreateUnit = mock(async () => ({ id: "chapter-new" }));
 const mockCreatePost = mock(async () => ({ unitId: "chapter-new" }));
+const mockUpdateBook = mock(async (_args: unknown) => ({ unitId: "book-1" }));
 const mockFindContentStructure = mock(async () => ({
   bookUnitId: "book-1",
   updatedAt: bookContentStructureUpdatedAt,
@@ -75,6 +76,9 @@ const mockTransaction = mock(async (fn: (tx: unknown) => unknown) =>
     post: {
       create: mockCreatePost,
     },
+    book: {
+      update: mockUpdateBook,
+    },
     bookContentStructure: {
       findUniqueOrThrow: mockFindContentStructure,
       update: mockUpdateContentStructure,
@@ -101,6 +105,7 @@ describe("ChapterService.materializeByBookPath", () => {
     mockFindBook.mockClear();
     mockCreateUnit.mockClear();
     mockCreatePost.mockClear();
+    mockUpdateBook.mockClear();
     mockFindContentStructure.mockClear();
     mockFindNodeRows.mockClear();
     mockUpdateNode.mockClear();
@@ -173,6 +178,7 @@ describe("ChapterService.materializeByBookPath", () => {
       where: { id: "n-1" },
       data: { chapterUnitId: "chapter-new" },
     });
+    expect(mockUpdateBook).not.toHaveBeenCalled();
     expect(result).toEqual({
       bookUnitId: "book-1",
       path: [0],

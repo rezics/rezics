@@ -25,7 +25,7 @@ import type {
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
 import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
-import type { ChapterTreeOccurrence } from "@/book-library/models/bookContentStructurePath";
+import type { BookContentStructureOccurrence } from "@/book-library/models/bookContentStructurePath";
 import {
   findAndAddChild,
   findAndDelete,
@@ -33,15 +33,15 @@ import {
   findAndInsert,
   findAndRemove,
 } from "@/shared/utils/arborist-tree";
-import { serializeChapterTree } from "../models/chapterTreeSerializer";
+import { serializeBookToc } from "../models/bookTocSerializer";
 import { BulkRatingDialog } from "./BulkRatingDialog";
-import { ChapterTreeContextMenu } from "./ChapterTreeContextMenu";
+import { BookTocContextMenu } from "./BookTocContextMenu";
 import {
-  createChapterTreeEditorNode,
+  createBookTocEditorNode,
   LEAF_ROW_HEIGHT,
   mockWordCount,
-} from "./ChapterTreeEditorNode";
-import { ChapterTreeEditorToolbar } from "./ChapterTreeEditorToolbar";
+} from "./BookTocEditorNode";
+import { BookTocEditorToolbar } from "./BookTocEditorToolbar";
 import { CreateChapterDialog } from "./CreateChapterDialog";
 import { EditChapterDialog } from "./EditChapterDialog";
 import { MoveToParentDialog } from "./MoveToParentDialog";
@@ -55,7 +55,7 @@ export type Chapter = {
   occurrenceId?: string;
   rating?: ContentRating;
   children?: Chapter[];
-} & Partial<ChapterTreeOccurrence>;
+} & Partial<BookContentStructureOccurrence>;
 
 /** Context menu state. */
 export type ChapterContextMenuState = {
@@ -65,13 +65,13 @@ export type ChapterContextMenuState = {
 } | null;
 
 /** Imperative handle for parent components. */
-export interface ChapterTreeEditorHandle {
+export interface BookTocEditorHandle {
   expandAll: () => void;
   collapseAll: () => void;
 }
 
-interface ChapterTreeEditorProps {
-  chapterTree: Chapter[];
+interface BookTocEditorProps {
+  bookTocTree: Chapter[];
   bookUnitId: string;
   bookRating?: ContentRating;
   onDownloadJSON?: () => void;
@@ -124,10 +124,10 @@ function formatTotal(n: number): string {
 
 const MIN_TREE_HEIGHT = 300;
 
-export const ChapterTreeEditor = forwardRef<
-  ChapterTreeEditorHandle,
-  ChapterTreeEditorProps
->(({ chapterTree, bookUnitId, bookRating, onDownloadJSON }, ref) => {
+export const BookTocEditor = forwardRef<
+  BookTocEditorHandle,
+  BookTocEditorProps
+>(({ bookTocTree, bookUnitId, bookRating, onDownloadJSON }, ref) => {
   const treeRef = useRef<TreeApi<Chapter> | null>(null);
   const [treeData, setTreeData] = useState<Chapter[]>([]);
   const [treeSize, setTreeSize] = useState({
@@ -201,8 +201,8 @@ export const ChapterTreeEditor = forwardRef<
   }));
 
   useEffect(() => {
-    setTreeData(chapterTree);
-  }, [chapterTree]);
+    setTreeData(bookTocTree);
+  }, [bookTocTree]);
 
   const onMove: MoveHandler<Chapter> = useCallback(
     ({ dragIds, parentId, index }) => {
@@ -238,7 +238,7 @@ export const ChapterTreeEditor = forwardRef<
     try {
       await updateContentStructureMutation.mutateAsync({
         bookUnitId,
-        nodes: serializeChapterTree(data, bookRating),
+        nodes: serializeBookToc(data, bookRating),
       });
     } catch (error) {
       showAlert(`Failed to save: ${error}`);
@@ -349,7 +349,7 @@ export const ChapterTreeEditor = forwardRef<
 
   const Node = useMemo(
     () =>
-      createChapterTreeEditorNode({
+      createBookTocEditorNode({
         setContextMenu,
         treeRef,
         onEditChapter: handleEditChapter,
@@ -457,7 +457,7 @@ export const ChapterTreeEditor = forwardRef<
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <ChapterTreeEditorToolbar
+      <BookTocEditorToolbar
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onExpandAll={() => treeRef.current?.openAll()}
@@ -527,7 +527,7 @@ export const ChapterTreeEditor = forwardRef<
         )}
 
         {contextMenu && (
-          <ChapterTreeContextMenu
+          <BookTocContextMenu
             contextMenu={contextMenu}
             setContextMenu={setContextMenu}
             setTreeData={setTreeData}
@@ -599,4 +599,4 @@ export const ChapterTreeEditor = forwardRef<
   );
 });
 
-ChapterTreeEditor.displayName = "ChapterTreeEditor";
+BookTocEditor.displayName = "BookTocEditor";

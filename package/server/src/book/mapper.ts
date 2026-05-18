@@ -63,6 +63,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     publicationDate: book.publicationDate ?? undefined,
     pageCount: book.pageCount ?? undefined,
     textLength: book.textLength,
+    chapterCount: book.chapterCount,
     formatKey: book.formatKey ?? undefined,
     isLicensed: book.isLicensed,
     coverUrl: pickCoverUrl(book),

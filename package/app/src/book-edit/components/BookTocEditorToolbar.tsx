@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 
-interface ChapterTreeEditorToolbarProps {
+interface BookTocEditorToolbarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onExpandAll: () => void;
@@ -32,9 +32,7 @@ interface ChapterTreeEditorToolbarProps {
   onResyncOverrides: () => void;
 }
 
-export const ChapterTreeEditorToolbar: React.FC<
-  ChapterTreeEditorToolbarProps
-> = ({
+export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
   searchTerm,
   onSearchChange,
   onExpandAll,

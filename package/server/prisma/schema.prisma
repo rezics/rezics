@@ -208,7 +208,7 @@ model Unit {
 
   // Inverse of BookContentStructureNode.chapterUnitId — every BookContentStructure
   // node that references this Unit as its materialized chapter.
-  chapterIndexNodes BookContentStructureNode[] @relation("BookContentStructureNodeChapter")
+  contentStructureNodesAsChapter BookContentStructureNode[] @relation("BookContentStructureNodeChapter")
 
   @@unique([slugScope, slug])
   @@unique([translationGroupId, defaultLanguage])
@@ -326,6 +326,7 @@ model Book {
   publicationDate DateTime?
   pageCount       Int?
   textLength      Int       @default(0)
+  chapterCount    Int       @default(0)
   formatKey       String?   @db.VarChar(32)
   isLicensed      Boolean   @default(false)
 

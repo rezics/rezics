@@ -4,6 +4,7 @@
 
 import type {
   BookContentStructureResponse,
+  BookContentStructureItem,
   BookDTO,
   BookListQuery,
   BookListResponse,
@@ -15,6 +16,7 @@ import type {
 // Re-export contract types
 export type {
   BookContentStructureResponse,
+  BookContentStructureItem,
   BookDTO,
   BookListQuery,
   BookListResponse,

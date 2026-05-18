@@ -40,6 +40,7 @@ export const bookDTOSchema = t.Object({
   publicationDate: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
   pageCount: t.Optional(t.Nullable(t.Number())),
   textLength: t.Optional(t.Number()),
+  chapterCount: t.Optional(t.Number()),
   formatKey: t.Optional(t.Nullable(t.String())),
   isLicensed: t.Optional(t.Boolean()),
   coverUrl: t.Optional(t.Nullable(t.String())),
@@ -225,7 +226,7 @@ export const bookContentStructureNodeSchema: ReturnType<typeof t.Recursive> =
  */
 export type BookContentStructurePath = number[];
 
-export interface ChapterTreeItem {
+export interface BookContentStructureItem {
   title: string;
   /**
    * Materialized Chapter Unit id. Optional and intentionally non-unique inside
@@ -235,7 +236,7 @@ export interface ChapterTreeItem {
   chapterUnitId?: string;
   noContent?: boolean;
   rating?: ContentRating;
-  children?: ChapterTreeItem[];
+  children?: BookContentStructureItem[];
   /**
    * BookContentStructureNode row id. Populated by the server on reads. On
    * writes the server uses it to identify the existing row; nodes submitted
@@ -261,7 +262,7 @@ export type BookContentStructureDTO =
 
 export interface BookContentStructureResponse {
   bookUnitId: string;
-  nodes: ChapterTreeItem[];
+  nodes: BookContentStructureItem[];
   createdAt: Date;
   updatedAt: Date;
 }

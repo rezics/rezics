@@ -110,6 +110,14 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   const briefParts: BriefPart[] = [
     { id: "kind", text: t("book.hero.kind.book", "Book") },
   ];
+  if (typeof bookInfo?.chapterCount === "number") {
+    briefParts.push({
+      id: "chapters",
+      text: t("book.hero.meta.chapter_count", "{{count}} 章", {
+        count: bookInfo.chapterCount,
+      }),
+    });
+  }
   if (typeof bookInfo?.textLength === "number" && bookInfo.textLength > 0) {
     briefParts.push({
       id: "length",
