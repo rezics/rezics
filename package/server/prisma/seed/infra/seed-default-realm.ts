@@ -1,4 +1,8 @@
-import { DEFAULT_LANGUAGE, DEFAULT_REALM } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
+  DEFAULT_REALM,
+} from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client";
 import type { SlugScopesMap } from "./seed-slug-scopes";
 
@@ -85,6 +89,9 @@ export async function seedDefaultRealm(
           isPublic: DEFAULT_REALM.isPublic,
           isOfficial: DEFAULT_REALM.isOfficial,
           memberCount: 1,
+          extra: {
+            defaultLicenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+          },
         },
       },
     },

@@ -1,5 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
+} from "@rezics/contract";
 import { UnitStatus, UnitType } from "../generated/client.js";
 import { REALM_ROLE_KEYS } from "./data.js";
 import { generateTranslations } from "./generators.js";
@@ -38,6 +41,9 @@ export async function seedRealms(
             create: {
               isPublic,
               isOfficial: false,
+              extra: {
+                defaultLicenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+              },
             },
           },
           translations: {

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
+import { DEFAULT_PUBLICATION_LICENSE_SLUG } from "@rezics/contract";
 import { seedAuthUser } from "@rezics/auth/prisma/seed";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import { bootstrapSystemShelves } from "./system-shelves.js";
@@ -31,6 +32,11 @@ interface FactoryUserPlan {
   joinDate: Date;
   avatar: string;
   permission?: { role: string[] };
+  settings?: {
+    publishing?: {
+      defaultLicenseSlug?: string | null;
+    };
+  };
 }
 
 async function deleteExistingFactoryAuthUsers(ctx: SeedCtx): Promise<void> {
@@ -87,6 +93,9 @@ export async function seedUsers(
     joinDate: faker.date.past({ years: 4 }),
     avatar: faker.image.avatar(),
     permission: { role: ["ADMIN"] },
+    settings: {
+      publishing: { defaultLicenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG },
+    },
   };
 
   const userPlans: FactoryUserPlan[] = Array.from({ length: total }, () => {
@@ -137,6 +146,7 @@ export async function seedUsers(
           bio: plan.bio,
           description: plan.description,
           joinDate: plan.joinDate,
+          settings: plan.settings,
           ...(plan.permission ? { permission: plan.permission } : {}),
         },
       });

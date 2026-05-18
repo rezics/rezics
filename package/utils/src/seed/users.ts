@@ -3,6 +3,7 @@ import {
   seedAuthUser,
   slugify,
 } from "@rezics/auth/prisma/seed";
+import { DEFAULT_PUBLICATION_LICENSE_SLUG } from "@rezics/contract";
 import { bootstrapSystemShelves } from "@rezics/server/prisma/factory/system-shelves";
 import type { SlugScopesMap } from "@rezics/server/prisma/seed/infra/seed-slug-scopes";
 import type {
@@ -21,6 +22,7 @@ export interface CrossSeedUserInput {
   password?: string;
   bio?: string;
   permission?: unknown;
+  settings?: unknown;
 }
 
 export const SEED_USERS: CrossSeedUserInput[] = [
@@ -30,6 +32,9 @@ export const SEED_USERS: CrossSeedUserInput[] = [
     role: "owner",
     slug: ROOT_SLUG,
     permission: { role: ["ROOT"] },
+    settings: {
+      publishing: { defaultLicenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG },
+    },
   },
   {
     email: "admin@rezics.com",
@@ -63,6 +68,7 @@ interface SeedServerUserInput {
   avatar?: string;
   bio?: string;
   permission?: unknown;
+  settings?: unknown;
 }
 
 /**
@@ -97,6 +103,7 @@ async function seedServerUser(
       avatar: input.avatar,
       bio: input.bio,
       permission: input.permission as never,
+      settings: input.settings as never,
     },
     create: {
       unitId: input.unitId,
@@ -106,6 +113,7 @@ async function seedServerUser(
       avatar: input.avatar,
       bio: input.bio,
       permission: input.permission as never,
+      settings: input.settings as never,
       joinDate: new Date(),
     },
   });
@@ -167,6 +175,7 @@ export async function seedAllMainUsers(
       name: authResult.name,
       bio: input.bio,
       permission: input.permission,
+      settings: input.settings,
     });
 
     const result: CrossSeedUserResult = { ...authResult, slug };
@@ -262,6 +271,7 @@ export async function resetRootUser(
     name: authResult.name,
     bio: rootInput.bio,
     permission: rootInput.permission as never,
+    settings: rootInput.settings as never,
   };
 
   await serverPrisma.user.upsert({

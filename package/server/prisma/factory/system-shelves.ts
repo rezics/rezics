@@ -1,4 +1,5 @@
 import {
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
   SYSTEM_SHELF_KIND_KEYS as CONTRACT_SYSTEM_SHELF_KIND_KEYS,
   formatSystemShelfTitle,
   type SystemShelfKindKey,
@@ -55,6 +56,7 @@ async function createSystemShelf(
       type: UnitType.SHELF,
       status: UnitStatus.PUBLISHED,
       visibility: UnitVisibility.PRIVATE,
+      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
       translations: {
         create: {
           language: "en",

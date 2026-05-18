@@ -3,6 +3,7 @@ import { faker } from "@faker-js/faker";
 import {
   type BookContentStructureItem,
   DEFAULT_LANGUAGE,
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
   withCoverUrl,
 } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "../generated/client.js";
@@ -58,6 +59,7 @@ export async function seedBooks(
           userId: author.userId,
           slugScope: author.userId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.9)
             ? faker.date.past({ years: 3 })
@@ -269,6 +271,7 @@ export async function seedChaptersForBook(
           slugScope: bookUserId,
           type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
         })),
       });
@@ -317,6 +320,7 @@ export async function seedChaptersForBook(
           slugScope: bookUserId,
           type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
           translations: {
             create: {

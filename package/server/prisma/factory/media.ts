@@ -1,5 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
+} from "@rezics/contract";
 import type { Prisma } from "../generated/client.js";
 import { UnitStatus, UnitType } from "../generated/client.js";
 import { flushCreditAttributionsAndTags } from "./books.js";
@@ -43,6 +46,7 @@ export async function seedMedia(
           userId: author.userId,
           slugScope: author.userId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.8)
             ? faker.date.past({ years: 5 })

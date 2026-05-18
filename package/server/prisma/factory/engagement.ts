@@ -1,5 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
+} from "@rezics/contract";
 import { UnitStatus, UnitType, UnitVisibility } from "../generated/client.js";
 import { generateBetween } from "../../src/shelf/fractional-index";
 import type { CountSpec, SeedCtx } from "./strategy.js";
@@ -58,6 +61,7 @@ async function seedFavorites(
         slugScope: user.userId,
         status: UnitStatus.PUBLISHED,
         visibility: UnitVisibility.PRIVATE,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         publishedAt: new Date(),
         shelf: { create: { kindKey: "favorites" } },
         translations: {

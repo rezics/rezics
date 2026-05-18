@@ -1,5 +1,9 @@
 import { faker } from "@faker-js/faker";
-import { DEFAULT_LANGUAGE, withCoverUrl } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
+  withCoverUrl,
+} from "@rezics/contract";
 import type { Prisma } from "../generated/client.js";
 import { UnitStatus, UnitType } from "../generated/client.js";
 import { generateBetween } from "../../src/shelf/fractional-index";
@@ -74,6 +78,7 @@ export async function seedShelves(
           userId: author.userId,
           slugScope: author.userId,
           status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.85)
             ? faker.date.past({ years: 2 })

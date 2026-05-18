@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
+} from "@rezics/contract";
 import type { PrismaClient } from "../generated/client.js";
 import { PostKind, UnitStatus, UnitType } from "../generated/client.js";
 import {
@@ -133,6 +136,7 @@ async function seedPostKindForTarget(
         userId: author.userId,
         slugScope: author.userId,
         status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
         post: {
@@ -233,6 +237,7 @@ async function seedPostKindBatch(
         userId: r.author.userId,
         slugScope: r.author.userId,
         status: r.published ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: r.publishedAt,
       })),
@@ -344,6 +349,7 @@ async function seedTreePostsForTarget(
           userId: author.userId,
           slugScope: author.userId,
           status: UnitStatus.PUBLISHED,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: faker.date.past({ years: 1 }),
           post: {
@@ -426,6 +432,7 @@ async function seedTreePostsForTarget(
         userId: author.userId,
         slugScope: author.userId,
         status: UnitStatus.PUBLISHED,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: faker.date.past({ years: 1 }),
         post: {
@@ -558,6 +565,7 @@ export async function seedWikiTranslationGroups(
           userId: author.userId,
           slugScope: author.userId,
           status: UnitStatus.PUBLISHED,
+          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: p.language,
           translationGroupId: WIKI_GROUP_ID,
           publishedAt: new Date(),
