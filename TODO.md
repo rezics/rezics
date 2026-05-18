@@ -1,14 +1,12 @@
 ## Section 1
 - [ ] Unit 等級的 版權 copyright 字段，string 或者 array 用戶可以選擇 用戶默認的/realm默認（realm優先）的 copyright 協議，類似於 github 的那種版權協議，cc-by-4.0 這種，不過我們需要確認下各種協議的slug，要固定下來
 - [ ] UnitTag 表是否要重命名到 TagUnit 比較好？
+- [ ] 软件架构还是选择electron
 - [ ] 搞清楚 ui package 如何 允许 unocss config 以及basic-css 共享, 以提供给 dispatch
 - [ ] 需要明确的是，realm scoped tag 和 realm tag 并不相同，realm scoped tag引入了新的tag， realm tag本质上类似于realmVoteTag
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info
 - [ ] 將 所有app路由讓AI過一邊，實際上試試大併發的情況，分析請求上可能的任何性能問題，這是一個非常大的change，tasks集合，需要分段執行
-- [ ] 我们需要一个 local 的数据库，基于indexdb 里面维护了 slugscope-slug-unitid 的对应关系  
-对于比如 /u/root-user/shelf/favourite 就要先查 slug-scope = u slug = root-user get unitId then, slug-scope = root-user-unitid slug = favourite get favourite shelf unitid  
-https://www.npmjs.com/package/dexie 
 
 ## 搜索
 - [ ] Suggest / autocomplete（header 下拉建議）：本身要新 endpoint、prefix 索引或快取層，與聯邦搜尋正交。建議獨立 search-suggest。
@@ -30,3 +28,5 @@ https://www.npmjs.com/package/dexie
 - [ ] R2 分爲 user domain 和 site domain，像 book cover 之類的就是site domain, 然後 post 上傳就是 user domain, user domain 可能可以限制每個用戶的r2空間，比如1gb free之類的。目標其實是無限的站內用空間，尤其是圖片，不能限制用戶的post創作，但是對於file或者可分享空間需要有限制。
 - [ ] 設計參考https://better-auth.com/docs/infrastructure/plugins/dashboard
 - [ ] login page 太窄了，左侧可以添加图片之类的以美观，参考https://www.deviantart.com/join/
+- [ ] 我们需要一个 local 的数据库，基于indexdb 里面维护了 slugScope-slug-unitId 的对应关系 对于比如 /u/root-user/shelf/favorites 就要先查 slug-scope = u slug = root-user get unitId then, slug-scope = root-user-unitId slug = favorites get favorites shelf unitId  https://www.npmjs.com/package/dexie 
+
