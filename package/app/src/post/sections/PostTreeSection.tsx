@@ -4,15 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { excludeRootPost } from "../hooks/usePostTreeCollapse";
 import { PostTreeList } from "./PostTreeList";
-import {
-  DEFAULT_MAX_DEPTH,
-  DEFAULT_VISUAL_MAX_DEPTH,
-} from "./postTreeLayout";
+import { DEFAULT_MAX_DEPTH, DEFAULT_VISUAL_MAX_DEPTH } from "./postTreeLayout";
 
 interface PostTreeSectionProps {
   rootPostUnitId: string;
   maxDepth?: number;
   visualMaxDepth?: number;
+  focusPostUnitId?: string;
+  highlightFocusedPost?: boolean;
   /**
    * When supplied, overrides the built-in "mount an inline composer" behaviour
    * (used by surfaces that need to navigate or otherwise intercept replies).
@@ -24,6 +23,8 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   rootPostUnitId,
   maxDepth = DEFAULT_MAX_DEPTH,
   visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
+  focusPostUnitId,
+  highlightFocusedPost,
   onReply,
 }) => {
   const { data, isLoading } = useQuery(
@@ -48,6 +49,8 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
       rootPostUnitId={rootPostUnitId}
       maxDepth={maxDepth}
       visualMaxDepth={visualMaxDepth}
+      focusPostUnitId={focusPostUnitId}
+      highlightFocusedPost={highlightFocusedPost}
       onReply={onReply}
     />
   );

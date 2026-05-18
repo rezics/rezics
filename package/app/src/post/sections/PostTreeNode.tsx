@@ -1,3 +1,4 @@
+import type { PostDTO } from "@rezics/contract";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import type React from "react";
 import { PostReply } from "../components/item/PostReply";
@@ -21,8 +22,11 @@ export interface PostTreeNodeProps {
   isCollapsed: (postUnitId: string) => boolean;
   toggleCollapse: (postUnitId: string) => void;
   openComposers: Set<string>;
+  focusedPostUnitId?: string;
+  highlightedFocusPostUnitId?: string;
   highlightedThreadUnitId?: string;
   onReplyClick: (postUnitId: string) => void;
+  onComposerSubmitted: (parentPostUnitId: string, post: PostDTO) => void;
   onComposerDone: (postUnitId: string) => void;
   onThreadHoverChange: (postUnitId: string, hovered: boolean) => void;
 }
@@ -34,8 +38,11 @@ export function PostTreeNode({
   isCollapsed,
   toggleCollapse,
   openComposers,
+  focusedPostUnitId,
+  highlightedFocusPostUnitId,
   highlightedThreadUnitId,
   onReplyClick,
+  onComposerSubmitted,
   onComposerDone,
   onThreadHoverChange,
 }: PostTreeNodeProps) {
@@ -45,6 +52,7 @@ export function PostTreeNode({
   const hasThreadChildren =
     (post.directReplyCount ?? 0) > 0 || node.children.length > 0;
   const composerOpen = openComposers.has(post.unitId);
+  const focusHighlighted = highlightedFocusPostUnitId === post.unitId;
   const highlighted = highlightedThreadUnitId === post.unitId;
   const canIndentChildren = node.displayDepth < visualMaxDepth;
 
@@ -63,7 +71,13 @@ export function PostTreeNode({
 
   return (
     <ThreadingHoverProvider>
-      <div className="relative" data-post-tree-node={post.unitId}>
+      <div
+        className={[
+          "relative rounded-md transition-colors duration-200",
+          focusHighlighted ? "bg-surface-subtle" : "",
+        ].join(" ")}
+        data-post-tree-node={post.unitId}
+      >
         <div className="relative">
           {hasVisibleChildren ? (
             <button
@@ -118,7 +132,9 @@ export function PostTreeNode({
                   autoFocus
                   targetUnitId={rootPostUnitId}
                   parentPostUnitId={post.unitId}
-                  onSubmitted={() => onComposerDone(post.unitId)}
+                  onSubmitted={(createdPost) =>
+                    onComposerSubmitted(post.unitId, createdPost)
+                  }
                   onCancelled={() => onComposerDone(post.unitId)}
                 />
               ) : null
@@ -156,8 +172,11 @@ export function PostTreeNode({
                 isCollapsed={isCollapsed}
                 toggleCollapse={toggleCollapse}
                 openComposers={openComposers}
+                focusedPostUnitId={focusedPostUnitId}
+                highlightedFocusPostUnitId={highlightedFocusPostUnitId}
                 highlightedThreadUnitId={highlightedThreadUnitId}
                 onReplyClick={onReplyClick}
+                onComposerSubmitted={onComposerSubmitted}
                 onComposerDone={onComposerDone}
                 onThreadHoverChange={onThreadHoverChange}
               />

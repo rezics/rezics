@@ -1,9 +1,9 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { realmQueries } from "@rezics/api/realm/realm";
 import { tagQueries } from "@rezics/api/tag/tag";
-import { PostKind, type TagTreeNode } from "@rezics/contract";
-import { Button, Input } from "@rezics/ui/shadcn";
+import { type PostDTO, PostKind, type TagTreeNode } from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import {
@@ -28,7 +28,7 @@ type ReplyComposerBaseProps = {
   mode: ReplyComposerMode;
   placeholder?: string;
   autoFocus?: boolean;
-  onSubmitted?: () => void;
+  onSubmitted?: (post: PostDTO) => void;
   onCancelled?: () => void;
 };
 
@@ -358,9 +358,9 @@ export const ReplyComposer = forwardRef<
         };
 
     mutation.mutate(payload, {
-      onSuccess: () => {
+      onSuccess: (post) => {
         reset();
-        onSubmitted?.();
+        onSubmitted?.(post);
       },
     });
   };

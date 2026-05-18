@@ -1,7 +1,20 @@
 import type { PostDTO } from "@rezics/contract";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-const DEFAULT_COLLAPSE_DEPTH = 2;
+const DEFAULT_VISIBLE_GENERATIONS = 3;
+
+export interface PostTreeCollapseOptions {
+  baseDepth?: number;
+  defaultVisibleGenerations?: number;
+  revealPostUnitId?: string;
+}
+
+type SeedCollapsedIdsOptions =
+  | number
+  | Pick<
+      PostTreeCollapseOptions,
+      "baseDepth" | "defaultVisibleGenerations" | "revealPostUnitId"
+    >;
 
 export function excludeRootPost(
   posts: PostDTO[],
@@ -12,11 +25,53 @@ export function excludeRootPost(
 
 export function seedCollapsedIds(
   posts: PostDTO[],
-  defaultCollapseDepth = DEFAULT_COLLAPSE_DEPTH,
+  options?: SeedCollapsedIdsOptions,
 ): Set<string> {
+  const normalizedOptions =
+    typeof options === "number"
+      ? { defaultVisibleGenerations: options }
+      : (options ?? {});
+  const baseDepth = normalizedOptions.baseDepth ?? 0;
+  const defaultVisibleGenerations =
+    normalizedOptions.defaultVisibleGenerations ?? DEFAULT_VISIBLE_GENERATIONS;
+  const revealExpandedIds = getRevealExpandedIds(
+    posts,
+    normalizedOptions.revealPostUnitId,
+  );
+
   const set = new Set<string>();
   for (const post of posts) {
-    if ((post.depth ?? 0) >= defaultCollapseDepth) set.add(post.unitId);
+    const relativeDepth = Math.max(0, (post.depth ?? 0) - baseDepth);
+    if (
+      relativeDepth >= defaultVisibleGenerations &&
+      !revealExpandedIds.has(post.unitId)
+    ) {
+      set.add(post.unitId);
+    }
+  }
+  return set;
+}
+
+export function getRevealExpandedIds(
+  posts: PostDTO[],
+  revealPostUnitId?: string,
+): Set<string> {
+  if (!revealPostUnitId) return new Set();
+
+  const target = posts.find((post) => post.unitId === revealPostUnitId);
+  if (!target?.sortPath) {
+    return new Set(revealPostUnitId ? [revealPostUnitId] : []);
+  }
+
+  const set = new Set<string>();
+  for (const post of posts) {
+    if (!post.sortPath) continue;
+    if (
+      target.sortPath === post.sortPath ||
+      target.sortPath.startsWith(`${post.sortPath}.`)
+    ) {
+      set.add(post.unitId);
+    }
   }
   return set;
 }
@@ -60,32 +115,63 @@ export interface UsePostTreeCollapseResult {
 
 export function usePostTreeCollapse(
   posts: PostDTO[],
-  options?: { defaultCollapseDepth?: number },
+  options?: PostTreeCollapseOptions,
 ): UsePostTreeCollapseResult {
-  const defaultDepth = options?.defaultCollapseDepth ?? DEFAULT_COLLAPSE_DEPTH;
+  const baseDepth = options?.baseDepth ?? 0;
+  const defaultVisibleGenerations =
+    options?.defaultVisibleGenerations ?? DEFAULT_VISIBLE_GENERATIONS;
+  const revealPostUnitId = options?.revealPostUnitId;
 
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() =>
-    seedCollapsedIds(posts, defaultDepth),
+    seedCollapsedIds(posts, {
+      baseDepth,
+      defaultVisibleGenerations,
+      revealPostUnitId,
+    }),
   );
 
   const [seededUnitIds, setSeededUnitIds] = useState<Set<string>>(
     () => new Set(posts.map((post) => post.unitId)),
   );
 
-  if (posts.some((post) => !seededUnitIds.has(post.unitId))) {
+  useEffect(() => {
     const nextSeeded = new Set(seededUnitIds);
+    const newPosts = posts.filter((post) => !seededUnitIds.has(post.unitId));
+    const revealExpandedIds = getRevealExpandedIds(posts, revealPostUnitId);
+
+    if (newPosts.length === 0 && revealExpandedIds.size === 0) return;
+
     setCollapsedIds((prev) => {
       const next = new Set(prev);
-      for (const post of posts) {
-        if (!seededUnitIds.has(post.unitId)) {
-          nextSeeded.add(post.unitId);
-          if ((post.depth ?? 0) >= defaultDepth) next.add(post.unitId);
+      let changed = false;
+
+      for (const postUnitId of revealExpandedIds) {
+        if (next.delete(postUnitId)) changed = true;
+      }
+
+      for (const post of newPosts) {
+        nextSeeded.add(post.unitId);
+        const relativeDepth = Math.max(0, (post.depth ?? 0) - baseDepth);
+        if (
+          relativeDepth >= defaultVisibleGenerations &&
+          !revealExpandedIds.has(post.unitId)
+        ) {
+          next.add(post.unitId);
+          changed = true;
         }
       }
-      return next;
+
+      return changed ? next : prev;
     });
-    setSeededUnitIds(nextSeeded);
-  }
+
+    if (newPosts.length > 0) setSeededUnitIds(nextSeeded);
+  }, [
+    baseDepth,
+    defaultVisibleGenerations,
+    posts,
+    revealPostUnitId,
+    seededUnitIds,
+  ]);
 
   const isCollapsed = useCallback(
     (unitId: string) => collapsedIds.has(unitId),

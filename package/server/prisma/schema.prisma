@@ -591,7 +591,7 @@ model RealmTagUnit {
   updatedAt DateTime @updatedAt
 
   /// A realm-scoped application of an existing global TAG Unit to any target Unit.
-  /// This does not create a realm-local tag and does not require the target to be posted into the realm via RealmUnit.
+  /// This does not create a realm-scoped tag and does not require the target to be posted into the realm via RealmUnit.
   realm      Realm          @relation("RealmTagApplicationRealm", fields: [realmUnitId], references: [unitId], onDelete: Cascade)
   appliedTag Unit           @relation("RealmTagApplicationAppliedTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
   targetUnit Unit           @relation("RealmTagApplicationTargetUnit", fields: [unitId], references: [id], onDelete: Cascade)

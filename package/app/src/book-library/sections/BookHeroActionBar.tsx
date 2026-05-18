@@ -112,9 +112,9 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
                       "book.hero.actions.edit_details",
                       "編輯書籍詳情",
                     )}
+                    {...props}
                     onClick={handleEdit}
                     className={ghostHeroClass}
-                    {...props}
                   >
                     <EditOutlined className="w-4 h-4" />
                   </Button>
