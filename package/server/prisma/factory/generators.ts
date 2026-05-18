@@ -205,7 +205,13 @@ export function generatePostExtra(
     case PostKind.REVIEW:
       return { rating: Math.round(randomFloat(1, 5) * 10) / 10 };
     case PostKind.EXCERPT:
-      return { source: faker.lorem.sentence() };
+      return {
+        source: {
+          mode: "url",
+          url: faker.internet.url(),
+          title: faker.lorem.sentence({ min: 2, max: 6 }).slice(0, 200),
+        },
+      };
     case PostKind.REMARK:
       return { rating: Math.round(randomFloat(1, 5) * 10) / 10 };
     default:
