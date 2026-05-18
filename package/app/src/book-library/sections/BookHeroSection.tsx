@@ -3,17 +3,17 @@ import { tagQueries } from "@rezics/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link, unitHref } from "@rezics/ui/primitive/link";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import {
+  type EntityTranslation,
   getBookCoverUrl,
   getEntityTranslationsByRole,
   getTranslation,
-  type EntityTranslation,
 } from "@/shared/utils/translation-helpers";
 
 import { useBookLanguage } from "../hooks/useBookLanguage";
@@ -234,9 +234,11 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
                             )}
                             {credit.unitId ? (
                               <Link
-                                to="/unit/$unitId"
-                                params={{ unitId: credit.unitId }}
-                                search={{ view: "unit" }}
+                                to={unitHref({
+                                  type: "ENTITY",
+                                  unitId: credit.unitId,
+                                  slug: credit.slug ?? null,
+                                })}
                                 className="text-white/90 underline underline-offset-4 decoration-white/30 transition-colors hover:text-white hover:decoration-white/70"
                               >
                                 {credit.name}
