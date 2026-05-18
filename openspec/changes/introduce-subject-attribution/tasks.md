@@ -12,12 +12,12 @@
 - [x] 2.2 Validate that `SubjectAttribution.entityId` references a `Unit(type = ENTITY)` before linking.
 - [x] 2.3 Implement link, unlink, list-by-unit, and list-by-subject operations with Entity translations included in DTOs.
 - [x] 2.4 Mount the subject attribution API from `package/server/src/index.ts`.
-- [x] 2.5 Rename or alias current attribution server modules to credit-specific names and update all internal imports.
+- [x] 2.5 Rename current attribution server modules to credit-specific names and update all internal imports.
 
 ## 3. API Client And Frontend Surfaces
 
 - [x] 3.1 Add `package/api/src/subject-attribution/` keys, API calls, queries, mutations, and exported types.
-- [x] 3.2 Update `package/api/src/attribution/` naming to credit-specific surfaces if the cutover is implemented.
+- [x] 3.2 Remove the legacy `package/api/src/attribution/` compatibility surface after cutting over to credit-specific APIs.
 - [x] 3.3 Add admin subject attribution management affordances for linking Entities to target Units.
 - [x] 3.4 Update app-side Entity kind labels and pickers to include subject kinds without changing the Entity i18n resolution path.
 - [x] 3.5 Add initial subject browsing/query UI only where required by the implementation scope.
@@ -33,9 +33,10 @@
 ## 5. Migration And Repo Cutover
 
 - [x] 5.1 Run repo-wide searches for `Attribution`, `attribution`, and `/attribution` and update affected imports/routes/docs according to the chosen credit naming strategy.
-- [x] 5.2 Update OpenAPI route summaries and tags for credit attribution and subject attribution.
-- [x] 5.3 Update admin and app locale keys for subject kinds, subject roles, and credit attribution naming.
-- [x] 5.4 Update seed/factory data to include representative subject Entities and SubjectAttribution rows.
+- [x] 5.2 Rename the Prisma model and physical table from `Attribution` to `CreditAttribution`; remove legacy contract/API/server attribution aliases.
+- [x] 5.3 Update OpenAPI route summaries and tags for credit attribution and subject attribution.
+- [x] 5.4 Update admin and app locale keys for subject kinds, subject roles, and credit attribution naming.
+- [x] 5.5 Update seed/factory data to include representative subject Entities and SubjectAttribution rows.
 
 ## 6. Verification
 
@@ -43,4 +44,4 @@
 - [x] 6.2 Run targeted server tests for entity, credit attribution, subject attribution, and search sync.
 - [x] 6.3 Run `bun run check:convention`.
 - [x] 6.4 Run `bun run format:check`.
-- [ ] 6.5 Run `bun run knip` or targeted export checks if public names are changed.
+- [x] 6.5 Run `bun run knip` or targeted export checks if public names are changed. `bun run knip` currently reports baseline unused files/dependencies/exports unrelated to this cutover; package-level searches confirm legacy attribution aliases were removed.

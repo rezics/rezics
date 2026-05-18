@@ -1,6 +1,6 @@
 /**
  * React Query keys for the `/subscription/*` endpoint family. Mirrors
- * the `userKeys` / `attributionKeys` shape used elsewhere in the api
+ * the `userKeys` / `creditAttributionKeys` shape used elsewhere in the api
  * package so cache-invalidation predicates can be written uniformly.
  */
 export const subscriptionKeys = {

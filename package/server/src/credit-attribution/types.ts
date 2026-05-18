@@ -1,8 +1,9 @@
 import type { Prisma } from "#/prisma/client";
 
-export type CreditAttributionWithRelations = Prisma.AttributionGetPayload<{
-  include: typeof creditAttributionInclude;
-}>;
+export type CreditAttributionWithRelations =
+  Prisma.CreditAttributionGetPayload<{
+    include: typeof creditAttributionInclude;
+  }>;
 
 export const creditAttributionInclude = {
   entity: {
@@ -11,4 +12,4 @@ export const creditAttributionInclude = {
       translations: true,
     },
   },
-} satisfies Prisma.AttributionInclude;
+} satisfies Prisma.CreditAttributionInclude;

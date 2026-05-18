@@ -149,7 +149,7 @@ describe("buildContentDocument realm tag keys", () => {
       realmTagApplicationsAsTargetUnit: [
         { realmUnitId: "realm-1", tagUnitId: "tag-1" },
       ],
-      attributions: [],
+      creditAttributions: [],
       book: { textLength: 100, isLicensed: false },
     });
 
@@ -178,7 +178,7 @@ describe("buildContentDocument subject attributions", () => {
       unitTags: [],
       inRealms: [],
       realmTagApplicationsAsTargetUnit: [],
-      attributions: [],
+      creditAttributions: [],
       subjectAttributions: [
         {
           entityId: "character-1",
@@ -215,7 +215,7 @@ describe("buildContentDocument containedUnitIds", () => {
     unitTags: [],
     inRealms: [],
     realmTagApplicationsAsTargetUnit: [],
-    attributions: [],
+    creditAttributions: [],
   };
 
   test("SHELF unit with three items projects all three ids", async () => {

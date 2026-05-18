@@ -38,11 +38,11 @@ function extractTitle(book: BookDTO): string {
   return primary?.title || "(no title)";
 }
 
-/** Format attribution credits into a readable string. */
+/** Format credit attribution into a readable string. */
 function formatCredits(book: BookDTO): string {
-  const attributions = book.attributions ?? [];
-  if (!attributions.length) return "-";
-  return attributions.map((c) => `${c.name} (${c.role})`).join(", ");
+  const credits = book.creditAttributions ?? [];
+  if (!credits.length) return "-";
+  return credits.map((c) => `${c.name} (${c.role})`).join(", ");
 }
 
 export default function BooksPage() {

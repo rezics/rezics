@@ -49,7 +49,7 @@ export const bookDTOSchema = t.Object({
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
 
   // Credit attribution
-  attributions: t.Optional(t.Array(creditAttributionBriefSchema)),
+  creditAttributions: t.Optional(t.Array(creditAttributionBriefSchema)),
 
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),

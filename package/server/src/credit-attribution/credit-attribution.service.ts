@@ -9,7 +9,7 @@ import { creditAttributionInclude } from "./types";
 
 export class CreditAttributionService {
   async link(req: LinkCreditAttributionInput): Promise<CreditAttributionDTO> {
-    const row = await prisma.attribution.create({
+    const row = await prisma.creditAttribution.create({
       data: {
         unitId: req.unitId,
         entityId: req.entityId,
@@ -23,7 +23,7 @@ export class CreditAttributionService {
   }
 
   async unlink(unitId: string, entityId: string, role: string): Promise<void> {
-    await prisma.attribution.delete({
+    await prisma.creditAttribution.delete({
       where: {
         unitId_entityId_role: { unitId, entityId, role },
       },
@@ -32,7 +32,7 @@ export class CreditAttributionService {
   }
 
   async listByUnit(unitId: string): Promise<CreditAttributionDTO[]> {
-    const rows = await prisma.attribution.findMany({
+    const rows = await prisma.creditAttribution.findMany({
       where: { unitId },
       include: creditAttributionInclude,
       orderBy: [{ role: "asc" }, { sortOrder: "asc" }],

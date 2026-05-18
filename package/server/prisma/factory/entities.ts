@@ -8,7 +8,7 @@ import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity } from "./types.js";
 import { pickN, randomBoolean, randomInt } from "./utils.js";
 
-/** Locale distribution for attribution names — diverse locale mix. */
+/** Locale distribution for entity names — diverse locale mix. */
 const LOCALE_WEIGHTS = [
   { lang: LANGUAGES.ZH_HANT, weight: 0.35 },
   { lang: LANGUAGES.EN, weight: 0.25 },

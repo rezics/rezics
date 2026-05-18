@@ -12,7 +12,7 @@ export const bookInclude = {
       user: { select: publicUserSelect },
       translations: true,
       supportLanguages: true,
-      attributions: {
+      creditAttributions: {
         include: {
           entity: {
             include: { entity: true, translations: true },

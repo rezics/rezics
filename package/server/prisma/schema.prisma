@@ -184,8 +184,8 @@ model Unit {
   realmTagContextsAsContent        RealmTagContext[] @relation("RealmTagContextContent")
 
   // Credit attribution
-  attributions Attribution[] @relation("AttributedUnit")
-  attributedAs Attribution[] @relation("AttributionEntity")
+  creditAttributions CreditAttribution[] @relation("CreditAttributedUnit")
+  creditedAs         CreditAttribution[] @relation("CreditAttributionEntity")
 
   // Subject attribution
   subjectAttributions SubjectAttribution[] @relation("SubjectAttributedUnit")
@@ -741,14 +741,14 @@ model Zone {
   updatedAt DateTime @updatedAt
 }
 
-model Attribution {
+model CreditAttribution {
   unitId    String @db.Uuid
   entityId  String @db.Uuid
   role      String @db.VarChar(64)
   sortOrder Int    @default(0)
 
-  unit   Unit @relation("AttributedUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  entity Unit @relation("AttributionEntity", fields: [entityId], references: [id], onDelete: Cascade)
+  unit   Unit @relation("CreditAttributedUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  entity Unit @relation("CreditAttributionEntity", fields: [entityId], references: [id], onDelete: Cascade)
 
   @@id([unitId, entityId, role])
   @@index([entityId, role])

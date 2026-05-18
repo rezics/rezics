@@ -60,7 +60,7 @@ export class BookService {
     if (options.entityId?.trim()) {
       andWhere.push({
         unit: {
-          attributions: {
+          creditAttributions: {
             some: { entityId: options.entityId },
           },
         },

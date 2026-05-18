@@ -135,14 +135,14 @@ export function getBookCoverUrl(book: BookDTO | null | undefined): string {
 }
 
 /**
- * Filter attributions by role (e.g. 'author', 'translator', 'publisher').
+ * Filter credit attributions by role (e.g. 'author', 'translator', 'publisher').
  */
-export function getAttributionsByRole(
-  attributions: BookDTO["attributions"],
+export function getCreditAttributionsByRole(
+  creditAttributions: BookDTO["creditAttributions"],
   role: string,
-): NonNullable<BookDTO["attributions"]> {
-  if (!attributions) return [];
-  return attributions.filter((a) => a.role === role);
+): NonNullable<BookDTO["creditAttributions"]> {
+  if (!creditAttributions) return [];
+  return creditAttributions.filter((a) => a.role === role);
 }
 
 export type EntityTranslation = {
@@ -157,27 +157,27 @@ export type EntityTranslation = {
 
 /**
  * Resolve an entity's translated name/bio for a given language from a
- * book's attributions. The attribution brief carries an optional `entity`
+ * book's credit attributions. The credit attribution brief carries an optional `entity`
  * with `translations[]` (UnitTranslationDTO). Falls back through the
  * standard translation chain when the requested language is unavailable.
  *
- * Always returns at least an entry with the attribution's denormalized
+ * Always returns at least an entry with the credit attribution's denormalized
  * `name` so callers don't need to handle the missing-entity case.
  */
 export function getEntityTranslation(
-  attributions: BookDTO["attributions"],
+  creditAttributions: BookDTO["creditAttributions"],
   role: string,
   language?: string,
 ): EntityTranslation | undefined {
-  return getEntityTranslationsByRole(attributions, role, language)[0];
+  return getEntityTranslationsByRole(creditAttributions, role, language)[0];
 }
 
 export function getEntityTranslationsByRole(
-  attributions: BookDTO["attributions"],
+  creditAttributions: BookDTO["creditAttributions"],
   role: string,
   language?: string,
 ): EntityTranslation[] {
-  const matches = getAttributionsByRole(attributions, role);
+  const matches = getCreditAttributionsByRole(creditAttributions, role);
   if (matches.length === 0) return [];
 
   return matches.map((match) => {
@@ -199,22 +199,28 @@ export function getEntityTranslationsByRole(
 
 /**
  * Get the primary author name from a BookDTO.
- * Returns the first attribution with role 'author', or the first attribution.
+ * Returns the first credit attribution with role 'author', or the first credit attribution.
  */
 export function getBookAuthorName(book: BookDTO | null | undefined): string {
-  if (!book?.attributions?.length) return "";
-  const authors = getAttributionsByRole(book.attributions, "author");
+  if (!book?.creditAttributions?.length) return "";
+  const authors = getCreditAttributionsByRole(
+    book.creditAttributions,
+    "author",
+  );
   if (authors.length > 0) return authors[0].name;
-  // Fallback to first attribution
-  return book.attributions[0].name;
+  // Fallback to first credit attribution
+  return book.creditAttributions[0].name;
 }
 
 /**
  * Get the primary publisher name from a BookDTO.
  */
 export function getBookPublisherName(book: BookDTO | null | undefined): string {
-  if (!book?.attributions?.length) return "";
-  const publishers = getAttributionsByRole(book.attributions, "publisher");
+  if (!book?.creditAttributions?.length) return "";
+  const publishers = getCreditAttributionsByRole(
+    book.creditAttributions,
+    "publisher",
+  );
   if (publishers.length > 0) return publishers[0].name;
   return "";
 }

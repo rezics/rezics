@@ -37,7 +37,7 @@ function makeBook(overrides: Partial<BookDTO> & { unitId: string }): BookDTO {
           "Across twelve essays, the narrator walks through public libraries from Tokyo to Buenos Aires, tracing how each city's reading rooms shape the books that find their way home with us.",
       },
     ],
-    attributions: [
+    creditAttributions: [
       {
         entityId: "author-mei",
         name: "Mei Tanaka",
@@ -51,7 +51,7 @@ function makeBook(overrides: Partial<BookDTO> & { unitId: string }): BookDTO {
 export const bookEmpty: BookDTO = makeBook({
   unitId: "book-empty",
   translations: [],
-  attributions: [],
+  creditAttributions: [],
 });
 
 export const bookFew: BookDTO = makeBook({
@@ -128,7 +128,7 @@ export const bookLatin: BookDTO = makeBook({
 export const bookCardPropsList = bookMany.map((book, index) => ({
   id: book.unitId,
   title: book.translations?.[0]?.title ?? `Book ${index + 1}`,
-  author: book.attributions?.[0]?.name,
+  author: book.creditAttributions?.[0]?.name,
   description: book.translations?.[0]?.summary,
   coverUrl: book.coverUrl ?? PLACEHOLDER_COVER,
   href: `/books/${book.unitId}`,

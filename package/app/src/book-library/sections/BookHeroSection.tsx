@@ -124,7 +124,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
 
   const metaRows: MetaRow[] = CREDIT_ROLES.flatMap((config) => {
     const credits = getEntityTranslationsByRole(
-      bookInfo?.attributions,
+      bookInfo?.creditAttributions,
       config.role,
       selectedLang,
     ).filter((credit) => credit.name);

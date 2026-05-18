@@ -96,7 +96,7 @@ const contentInclude = {
   },
   inRealms: true,
   realmTagApplicationsAsTargetUnit: true,
-  attributions: {
+  creditAttributions: {
     include: {
       entity: {
         include: { entity: true, translations: true },
@@ -129,7 +129,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const inRealms: any[] = unit.inRealms ?? [];
   const realmTagApplicationsAsTargetUnit: any[] =
     unit.realmTagApplicationsAsTargetUnit ?? [];
-  const attributions: any[] = unit.attributions ?? [];
+  const creditAttributions: any[] = unit.creditAttributions ?? [];
   const subjectAttributions: any[] = unit.subjectAttributions ?? [];
 
   // Flatten translations
@@ -162,7 +162,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   );
 
   // Credit attribution
-  const creditNames = attributions
+  const creditNames = creditAttributions
     .map((a: any) => {
       const translations = a.entity?.translations ?? [];
       return translations[0]?.title;
@@ -377,7 +377,7 @@ export async function patchContentCredits(
   client: SearchClient,
   unitId: string,
 ) {
-  const attributions = await prisma.attribution.findMany({
+  const creditAttributions = await prisma.creditAttribution.findMany({
     where: { unitId },
     include: {
       entity: {
@@ -387,7 +387,7 @@ export async function patchContentCredits(
     orderBy: { sortOrder: "asc" },
   });
 
-  const creditNames = attributions
+  const creditNames = creditAttributions
     .map((a: any) => {
       const translations = a.entity?.translations ?? [];
       return translations[0]?.title;

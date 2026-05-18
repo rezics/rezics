@@ -37,7 +37,7 @@ Alternatives considered:
 
 ### Decision: SubjectAttribution is separate from credit attribution
 
-`SubjectAttribution` links any target Unit to an Entity Unit with a free-form `role`, ordered display metadata, and optional weight. It is not used for creator credits. Existing `Attribution` semantics are narrowed to credits and should be renamed in code/API surfaces to `CreditAttribution` during implementation.
+`SubjectAttribution` links any target Unit to an Entity Unit with a free-form `role`, ordered display metadata, and optional weight. It is not used for creator credits. Existing `Attribution` semantics are narrowed to credits and renamed to `CreditAttribution` in code, API, Prisma model, and physical table names during implementation.
 
 Alternatives considered:
 
@@ -84,7 +84,7 @@ Alternatives considered:
 1. Add Prisma schema for `SubjectAttribution` with indexes for target-unit and subject-centric queries.
 2. Add contract schemas and role constants for subject attribution.
 3. Add server service/API for linking, unlinking, and listing subject attributions.
-4. Rename or alias current Attribution surfaces to `CreditAttribution`, updating internal callsites in the same change.
+4. Rename current Attribution surfaces to `CreditAttribution`, updating internal callsites in the same change.
 5. Extend Entity kind constants and admin/entity-picker UI options.
 6. Extend content search document building and partial sync for subject fields.
 7. Add admin/app UI surfaces only where needed for initial management and browsing.
@@ -94,6 +94,6 @@ Rollback is schema-migration dependent. Before production data exists, rollback 
 
 ## Open Questions
 
-- Should the physical Prisma model for current credits be renamed from `Attribution` to `CreditAttribution`, or should only contract/API/service names change first?
+- Resolved: the physical Prisma model and table for current credits are renamed from `Attribution` to `CreditAttribution` in this development-stage cutover.
 - Which initial subject roles should appear in UI pickers versus remain hidden as advanced/manual roles?
 - Should `SubjectAttribution` include `createdByUnitId` in v1, or defer authorship/audit to the future history infrastructure?

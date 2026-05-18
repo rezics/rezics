@@ -41,7 +41,7 @@ export async function seedBooks(
   const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} books...`);
 
-  const allAttributions: Prisma.AttributionCreateManyInput[] = [];
+  const allCreditAttributions: Prisma.CreditAttributionCreateManyInput[] = [];
   const allTagLinks: Prisma.UnitTagCreateManyInput[] = [];
 
   const created = await chunkedParallel(
@@ -106,7 +106,7 @@ export async function seedBooks(
       });
 
       for (const [i, p] of pickN(people, randomInt(1, 3)).entries()) {
-        allAttributions.push({
+        allCreditAttributions.push({
           unitId: unit.id,
           entityId: p.unitId,
           role: faker.helpers.arrayElement(BOOK_PERSON_ROLES),
@@ -114,7 +114,7 @@ export async function seedBooks(
         });
       }
       for (const [i, o] of pickN(organizations, randomInt(0, 2)).entries()) {
-        allAttributions.push({
+        allCreditAttributions.push({
           unitId: unit.id,
           entityId: o.unitId,
           role: faker.helpers.arrayElement(BOOK_ORG_ROLES),
@@ -129,20 +129,24 @@ export async function seedBooks(
     },
   );
 
-  await flushAttributionsAndTags(ctx.prisma, allAttributions, allTagLinks);
+  await flushCreditAttributionsAndTags(
+    ctx.prisma,
+    allCreditAttributions,
+    allTagLinks,
+  );
 
   return created;
 }
 
-async function flushAttributionsAndTags(
+async function flushCreditAttributionsAndTags(
   prisma: PrismaClient,
-  attributions: Prisma.AttributionCreateManyInput[],
+  creditAttributions: Prisma.CreditAttributionCreateManyInput[],
   tagLinks: Prisma.UnitTagCreateManyInput[],
 ): Promise<void> {
   const BATCH = 500;
-  for (let i = 0; i < attributions.length; i += BATCH) {
-    await prisma.attribution.createMany({
-      data: attributions.slice(i, i + BATCH),
+  for (let i = 0; i < creditAttributions.length; i += BATCH) {
+    await prisma.creditAttribution.createMany({
+      data: creditAttributions.slice(i, i + BATCH),
       skipDuplicates: true,
     });
   }
@@ -154,7 +158,7 @@ async function flushAttributionsAndTags(
   }
 }
 
-export { flushAttributionsAndTags };
+export { flushCreditAttributionsAndTags };
 
 const CHAPTER_BATCH_THRESHOLD = 50;
 const CHAPTER_BATCH_SIZE = 500;

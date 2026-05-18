@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { Prisma } from "../generated/client.js";
 import { UnitStatus, UnitType } from "../generated/client.js";
-import { flushAttributionsAndTags } from "./books.js";
+import { flushCreditAttributionsAndTags } from "./books.js";
 import { MEDIA_KIND_KEYS } from "./data.js";
 import { generateMediaExtra, generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
@@ -25,7 +25,7 @@ export async function seedMedia(
   const total = ctx.draw(spec);
   console.log(`[Seed] Seeding ${total} media...`);
 
-  const allAttributions: Prisma.AttributionCreateManyInput[] = [];
+  const allCreditAttributions: Prisma.CreditAttributionCreateManyInput[] = [];
   const allTagLinks: Prisma.UnitTagCreateManyInput[] = [];
 
   const created = await chunkedParallel(
@@ -79,7 +79,7 @@ export async function seedMedia(
       });
 
       for (const [i, p] of pickN(people, randomInt(1, 4)).entries()) {
-        allAttributions.push({
+        allCreditAttributions.push({
           unitId: unit.id,
           entityId: p.unitId,
           role: faker.helpers.arrayElement(MEDIA_PERSON_ROLES),
@@ -87,7 +87,7 @@ export async function seedMedia(
         });
       }
       for (const [i, o] of pickN(organizations, randomInt(1, 2)).entries()) {
-        allAttributions.push({
+        allCreditAttributions.push({
           unitId: unit.id,
           entityId: o.unitId,
           role: faker.helpers.arrayElement(MEDIA_ORG_ROLES),
@@ -102,6 +102,10 @@ export async function seedMedia(
     },
   );
 
-  await flushAttributionsAndTags(ctx.prisma, allAttributions, allTagLinks);
+  await flushCreditAttributionsAndTags(
+    ctx.prisma,
+    allCreditAttributions,
+    allTagLinks,
+  );
   return created;
 }

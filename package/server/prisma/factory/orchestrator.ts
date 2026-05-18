@@ -4,7 +4,7 @@ import {
   seedPeople,
   seedSubjectAttributions,
   seedSubjectEntities,
-} from "./attribution.js";
+} from "./entities.js";
 import { seedBooks, seedChaptersForBook } from "./books.js";
 import { seedEchoKV } from "./echokv.js";
 import { seedEngagement } from "./engagement.js";
