@@ -7,7 +7,7 @@ import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import { ChapterTreeJsonEditor } from "@/book-library/components/Chapter/ChapterTreeJsonEditor";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { bookEditLayoutRoute } from "@/router";
+import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
 import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
 import {
   ChapterTreeEditor,

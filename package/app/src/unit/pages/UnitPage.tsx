@@ -19,7 +19,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { unitRoute } from "@/router";
+import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
 import { PostLanguageSwitcher } from "../components/PostLanguageSwitcher";
 
 function formatMetadataValue(value: unknown): string {

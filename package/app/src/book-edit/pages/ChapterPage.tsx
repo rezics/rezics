@@ -24,7 +24,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
-import { bookEditChapterRoute, bookEditLayoutRoute } from "@/router";
+import { Route as bookEditChapterRoute } from "@/routes/book_/$bookId/edit/$chapterId";
+import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
 import {
   Network as AccountTree,
   Ellipsis as MoreHoriz,

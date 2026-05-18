@@ -10,7 +10,7 @@
 import type { RealmExtraListKey } from "@rezics/contract";
 
 /**
- * Well-known Realm.extra list keys this feature renders. Aliased to the
+ * Well-known Realm.extra list keys this feature renders. Mirrored in the
  * contract's `RealmExtraListKey` so downstream switches stay exhaustive.
  */
 export type PinboardListKey = RealmExtraListKey;

@@ -27,7 +27,6 @@ export const HorizontalShelfCarousel: React.FC<
       itemKey={(_shelf, index) => index}
       itemClassName={SHELF_ITEM_CLASS}
       className={className}
-      arrowVariant="default"
       ariaLabel="Shelves"
       renderItem={(item) => <ShelfCard shelf={item} />}
     />

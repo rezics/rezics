@@ -2,7 +2,7 @@ import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWith
 import { Button, Separator } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { reviewByBookRoute } from "@/router";
+import { Route as reviewByBookRoute } from "@/routes/_mainLayout/review/book/$bookId";
 import { ReviewNewPage } from "./ReviewNewPage";
 import { ReviewsPage } from "./ReviewsPage";
 

@@ -11,7 +11,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReviewForm, type ReviewEditState } from "@/review/forms/ReviewForm";
-import { reviewEditRoute } from "@/router";
+import { Route as reviewEditRoute } from "@/routes/_mainLayout/review/$reviewId/edit";
 
 export function ReviewEditPageContainer() {
   const { reviewId } = reviewEditRoute.useParams();

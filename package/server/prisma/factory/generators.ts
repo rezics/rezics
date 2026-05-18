@@ -142,15 +142,6 @@ export function generateTranslations(type: UnitType): TranslationData[] {
   return result;
 }
 
-// ── Legacy single-language generator (kept for compatibility) ──
-
-export function generateTranslation(type: UnitType): TranslationData {
-  return {
-    language: LANGUAGES.ZH_HANT,
-    ...pickFromCorpus(type, LANGUAGES.ZH_HANT),
-  };
-}
-
 // ── Book ───────────────────────────────────────────────
 
 export function generateBookExtra(): Prisma.InputJsonValue {

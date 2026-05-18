@@ -76,9 +76,9 @@ The unified CLI is `bun run seed` (entry: `package/utils/bin/cli.ts`). It covers
 bun run seed
 
 # Factory data only, named preset, no prompts
-bun run seed:factory              # alias for --preset=realistic --no-interactive
-bun run seed:factory:fast         # alias for --preset=fast --no-interactive
-bun run seed:factory:medium       # alias for --preset=medium --no-interactive
+bun run seed:factory              # shortcut for --preset=realistic --no-interactive
+bun run seed:factory:fast         # shortcut for --preset=fast --no-interactive
+bun run seed:factory:medium       # shortcut for --preset=medium --no-interactive
 bun run seed --preset=minimal --no-interactive
 ```
 

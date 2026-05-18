@@ -16,7 +16,7 @@ import {
  *
  * Keep this copy in sync when the runtime system shelf bootstrap logic changes.
  * The factory seed is launched from `package/utils`, so importing the runtime
- * module would require server tsconfig aliases such as `#/prisma/client` during
+ * module would require server tsconfig path mappings such as `#/prisma/client` during
  * seed startup. This copy stays inside `prisma/factory` and only depends on the
  * generated Prisma client that the seed already uses.
  */

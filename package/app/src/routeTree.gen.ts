@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MainLayoutRouteImport } from './routes/_mainLayout'
 import { Route as MainLayoutIndexRouteImport } from './routes/_mainLayout/index'
-import { Route as MainLayoutVerifyEmailRouteImport } from './routes/_mainLayout/verify-email'
 import { Route as MainLayoutThemeSwitchRouteImport } from './routes/_mainLayout/theme-switch'
 import { Route as MainLayoutTest03RouteImport } from './routes/_mainLayout/test03'
 import { Route as MainLayoutTest02RouteImport } from './routes/_mainLayout/test02'
@@ -19,7 +18,6 @@ import { Route as MainLayoutTestLinksRouteImport } from './routes/_mainLayout/te
 import { Route as MainLayoutTestRouteImport } from './routes/_mainLayout/test'
 import { Route as MainLayoutResetPasswordRouteImport } from './routes/_mainLayout/reset-password'
 import { Route as MainLayoutRegisterRouteImport } from './routes/_mainLayout/register'
-import { Route as MainLayoutOnboardingRouteImport } from './routes/_mainLayout/onboarding'
 import { Route as MainLayoutNoticeRouteImport } from './routes/_mainLayout/notice'
 import { Route as MainLayoutLoginRouteImport } from './routes/_mainLayout/login'
 import { Route as MainLayoutCompleteRegistrationRouteImport } from './routes/_mainLayout/complete-registration'
@@ -136,11 +134,6 @@ const MainLayoutIndexRoute = MainLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MainLayoutRoute,
 } as any)
-const MainLayoutVerifyEmailRoute = MainLayoutVerifyEmailRouteImport.update({
-  id: '/verify-email',
-  path: '/verify-email',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
 const MainLayoutThemeSwitchRoute = MainLayoutThemeSwitchRouteImport.update({
   id: '/theme-switch',
   path: '/theme-switch',
@@ -174,11 +167,6 @@ const MainLayoutResetPasswordRoute = MainLayoutResetPasswordRouteImport.update({
 const MainLayoutRegisterRoute = MainLayoutRegisterRouteImport.update({
   id: '/register',
   path: '/register',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
-const MainLayoutOnboardingRoute = MainLayoutOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
   getParentRoute: () => MainLayoutRoute,
 } as any)
 const MainLayoutNoticeRoute = MainLayoutNoticeRouteImport.update({
@@ -786,7 +774,6 @@ export interface FileRoutesByFullPath {
   '/complete-registration': typeof MainLayoutCompleteRegistrationRoute
   '/login': typeof MainLayoutLoginRoute
   '/notice': typeof MainLayoutNoticeRoute
-  '/onboarding': typeof MainLayoutOnboardingRoute
   '/register': typeof MainLayoutRegisterRoute
   '/reset-password': typeof MainLayoutResetPasswordRoute
   '/test': typeof MainLayoutTestRoute
@@ -794,7 +781,6 @@ export interface FileRoutesByFullPath {
   '/test02': typeof MainLayoutTest02Route
   '/test03': typeof MainLayoutTest03Route
   '/theme-switch': typeof MainLayoutThemeSwitchRoute
-  '/verify-email': typeof MainLayoutVerifyEmailRoute
   '/book/$bookId': typeof MainLayoutBookBookIdRouteRouteWithChildren
   '/user/me': typeof MainLayoutUserMeRouteRouteWithChildren
   '/book/$bookId/edit': typeof BookBookIdEditRouteRouteWithChildren
@@ -903,7 +889,6 @@ export interface FileRoutesByTo {
   '/complete-registration': typeof MainLayoutCompleteRegistrationRoute
   '/login': typeof MainLayoutLoginRoute
   '/notice': typeof MainLayoutNoticeRoute
-  '/onboarding': typeof MainLayoutOnboardingRoute
   '/register': typeof MainLayoutRegisterRoute
   '/reset-password': typeof MainLayoutResetPasswordRoute
   '/test': typeof MainLayoutTestRoute
@@ -911,7 +896,6 @@ export interface FileRoutesByTo {
   '/test02': typeof MainLayoutTest02Route
   '/test03': typeof MainLayoutTest03Route
   '/theme-switch': typeof MainLayoutThemeSwitchRoute
-  '/verify-email': typeof MainLayoutVerifyEmailRoute
   '/': typeof MainLayoutIndexRoute
   '/book/new': typeof MainLayoutBookNewRoute
   '/book/search': typeof MainLayoutBookSearchRoute
@@ -1013,7 +997,6 @@ export interface FileRoutesById {
   '/_mainLayout/complete-registration': typeof MainLayoutCompleteRegistrationRoute
   '/_mainLayout/login': typeof MainLayoutLoginRoute
   '/_mainLayout/notice': typeof MainLayoutNoticeRoute
-  '/_mainLayout/onboarding': typeof MainLayoutOnboardingRoute
   '/_mainLayout/register': typeof MainLayoutRegisterRoute
   '/_mainLayout/reset-password': typeof MainLayoutResetPasswordRoute
   '/_mainLayout/test': typeof MainLayoutTestRoute
@@ -1021,7 +1004,6 @@ export interface FileRoutesById {
   '/_mainLayout/test02': typeof MainLayoutTest02Route
   '/_mainLayout/test03': typeof MainLayoutTest03Route
   '/_mainLayout/theme-switch': typeof MainLayoutThemeSwitchRoute
-  '/_mainLayout/verify-email': typeof MainLayoutVerifyEmailRoute
   '/_mainLayout/': typeof MainLayoutIndexRoute
   '/_mainLayout/book/$bookId': typeof MainLayoutBookBookIdRouteRouteWithChildren
   '/_mainLayout/user/me': typeof MainLayoutUserMeRouteRouteWithChildren
@@ -1134,7 +1116,6 @@ export interface FileRouteTypes {
     | '/complete-registration'
     | '/login'
     | '/notice'
-    | '/onboarding'
     | '/register'
     | '/reset-password'
     | '/test'
@@ -1142,7 +1123,6 @@ export interface FileRouteTypes {
     | '/test02'
     | '/test03'
     | '/theme-switch'
-    | '/verify-email'
     | '/book/$bookId'
     | '/user/me'
     | '/book/$bookId/edit'
@@ -1251,7 +1231,6 @@ export interface FileRouteTypes {
     | '/complete-registration'
     | '/login'
     | '/notice'
-    | '/onboarding'
     | '/register'
     | '/reset-password'
     | '/test'
@@ -1259,7 +1238,6 @@ export interface FileRouteTypes {
     | '/test02'
     | '/test03'
     | '/theme-switch'
-    | '/verify-email'
     | '/'
     | '/book/new'
     | '/book/search'
@@ -1360,7 +1338,6 @@ export interface FileRouteTypes {
     | '/_mainLayout/complete-registration'
     | '/_mainLayout/login'
     | '/_mainLayout/notice'
-    | '/_mainLayout/onboarding'
     | '/_mainLayout/register'
     | '/_mainLayout/reset-password'
     | '/_mainLayout/test'
@@ -1368,7 +1345,6 @@ export interface FileRouteTypes {
     | '/_mainLayout/test02'
     | '/_mainLayout/test03'
     | '/_mainLayout/theme-switch'
-    | '/_mainLayout/verify-email'
     | '/_mainLayout/'
     | '/_mainLayout/book/$bookId'
     | '/_mainLayout/user/me'
@@ -1497,13 +1473,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutIndexRouteImport
       parentRoute: typeof MainLayoutRoute
     }
-    '/_mainLayout/verify-email': {
-      id: '/_mainLayout/verify-email'
-      path: '/verify-email'
-      fullPath: '/verify-email'
-      preLoaderRoute: typeof MainLayoutVerifyEmailRouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
     '/_mainLayout/theme-switch': {
       id: '/_mainLayout/theme-switch'
       path: '/theme-switch'
@@ -1551,13 +1520,6 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof MainLayoutRegisterRouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
-    '/_mainLayout/onboarding': {
-      id: '/_mainLayout/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof MainLayoutOnboardingRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/notice': {
@@ -2501,7 +2463,6 @@ interface MainLayoutRouteChildren {
   MainLayoutCompleteRegistrationRoute: typeof MainLayoutCompleteRegistrationRoute
   MainLayoutLoginRoute: typeof MainLayoutLoginRoute
   MainLayoutNoticeRoute: typeof MainLayoutNoticeRoute
-  MainLayoutOnboardingRoute: typeof MainLayoutOnboardingRoute
   MainLayoutRegisterRoute: typeof MainLayoutRegisterRoute
   MainLayoutResetPasswordRoute: typeof MainLayoutResetPasswordRoute
   MainLayoutTestRoute: typeof MainLayoutTestRoute
@@ -2509,7 +2470,6 @@ interface MainLayoutRouteChildren {
   MainLayoutTest02Route: typeof MainLayoutTest02Route
   MainLayoutTest03Route: typeof MainLayoutTest03Route
   MainLayoutThemeSwitchRoute: typeof MainLayoutThemeSwitchRoute
-  MainLayoutVerifyEmailRoute: typeof MainLayoutVerifyEmailRoute
   MainLayoutIndexRoute: typeof MainLayoutIndexRoute
   MainLayoutBookBookIdRouteRoute: typeof MainLayoutBookBookIdRouteRouteWithChildren
   MainLayoutUserMeRouteRoute: typeof MainLayoutUserMeRouteRouteWithChildren
@@ -2569,7 +2529,6 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutCompleteRegistrationRoute: MainLayoutCompleteRegistrationRoute,
   MainLayoutLoginRoute: MainLayoutLoginRoute,
   MainLayoutNoticeRoute: MainLayoutNoticeRoute,
-  MainLayoutOnboardingRoute: MainLayoutOnboardingRoute,
   MainLayoutRegisterRoute: MainLayoutRegisterRoute,
   MainLayoutResetPasswordRoute: MainLayoutResetPasswordRoute,
   MainLayoutTestRoute: MainLayoutTestRoute,
@@ -2577,7 +2536,6 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutTest02Route: MainLayoutTest02Route,
   MainLayoutTest03Route: MainLayoutTest03Route,
   MainLayoutThemeSwitchRoute: MainLayoutThemeSwitchRoute,
-  MainLayoutVerifyEmailRoute: MainLayoutVerifyEmailRoute,
   MainLayoutIndexRoute: MainLayoutIndexRoute,
   MainLayoutBookBookIdRouteRoute: MainLayoutBookBookIdRouteRouteWithChildren,
   MainLayoutUserMeRouteRoute: MainLayoutUserMeRouteRouteWithChildren,

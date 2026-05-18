@@ -1,4 +1,4 @@
-/* MUI autofill shim — keep input autofill colors aligned with the light brand
+/* MUI autofill styles keep input autofill colors aligned with the light brand
  * container. The design-system color tokens themselves are emitted by UnoCSS
  * from package/ui/src/config/uno-config.ts; do NOT redeclare them here. */
 

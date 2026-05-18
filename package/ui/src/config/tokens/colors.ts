@@ -361,6 +361,3 @@ export const colors: Record<ColorScheme, ColorTokens> = {
   light: lightColors,
   dark: darkColors,
 };
-
-// Backwards-compatible alias for callsites that imported the older name.
-export type ColorMode = ColorScheme;

@@ -9,8 +9,6 @@ interface PasswordFieldProps {
   name?: string;
   label?: string;
   value: string;
-  /** Accepted for source-level compatibility with legacy callers — not rendered. */
-  variant?: "standard" | "outlined" | "filled";
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   setValue: (value: string) => void;
   helperText?: string;

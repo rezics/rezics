@@ -22,7 +22,7 @@ export function resolveScopeId(scope: string): string | null {
 }
 
 /**
- * Resolve a {@link SlugRef} (or legacy {@link TagRef}) to a unitId.
+ * Resolve a {@link SlugRef} or {@link TagRef} to a unitId.
  *
  * Order of preference:
  *  1. `unitId` if already provided

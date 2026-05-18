@@ -25,7 +25,7 @@ import {
 
 # Iconography
 
-rezics' default icon library is **lucide-react** — a community fork of Feather, with a stroke style that reads on the warm parchment canvas without the geometric stiffness that MUI's filled defaults imposed. When lucide lacks a glyph, fall back to **`@tabler/icons-react`** (named, not aliased — make the fallback obvious in code). Apple SF Symbols is the deeper reference for stroke weight + scale sensibility; we adopt the philosophy at lower fidelity.
+rezics' default icon library is **lucide-react** — a community fork of Feather, with a stroke style that reads on the warm parchment canvas without the geometric stiffness that MUI's filled defaults imposed. When lucide lacks a glyph, fall back to **`@tabler/icons-react`** with clear naming that makes the fallback obvious in code. Apple SF Symbols is the deeper reference for stroke weight + scale sensibility; we adopt the philosophy at lower fidelity.
 
 ## Standard sizes
 
@@ -74,9 +74,9 @@ lucide ships a `2px` stroke that sits well at all three sizes. Don't override `s
   </div>
 </Unstyled>
 
-## Canonical mapping (former MUI → lucide)
+## Canonical mapping (MUI → lucide)
 
-The codebase has been migrated; this table preserves the former MUI name as a search anchor for grep-driven onboarding and for reviewers reading older PRs. Imports use the lucide name; the `as MUIName` alias pattern (`Plus as AddIcon`) is allowed but not required.
+This table preserves the former MUI name as a search anchor for grep-driven onboarding and for reviewers reading older PRs. Imports use the lucide name; explicit import renames (`Plus as AddIcon`) are allowed but not required.
 
 | MUI name | lucide-react import | Use |
 | --- | --- | --- |
@@ -121,7 +121,7 @@ The codebase has been migrated; this table preserves the former MUI name as a se
 
 ## Named fallback: `@tabler/icons-react`
 
-If lucide lacks a glyph (rare; tabler covers ~5,000), import from `@tabler/icons-react` with the `Tabler*` prefix or an explicit alias to make the cross-library origin visible at the import site:
+If lucide lacks a glyph (rare; tabler covers ~5,000), import from `@tabler/icons-react` with the `Tabler*` prefix or an explicit import rename to make the cross-library origin visible at the import site:
 
 ```tsx
 import { IconBrandGitlab as GitLabLogo } from "@tabler/icons-react";

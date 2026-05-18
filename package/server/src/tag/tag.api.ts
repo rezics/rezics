@@ -212,7 +212,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const { tagUnitId, unitId } = body as AttachTagInput;
-      await tagService.attachToUnit(tagUnitId, unitId, identity.userId);
+      await tagService.createUnitTag(identity.userId, unitId, tagUnitId);
       return { message: "Tag attached successfully" };
     },
     {
@@ -236,7 +236,7 @@ export const tagApi = new Elysia({ prefix: "/tag" })
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       const { tagUnitId, unitId } = body as AttachTagInput;
-      await tagService.detachFromUnit(tagUnitId, unitId);
+      await tagService.deleteUnitTag(unitId, tagUnitId);
       return { message: "Tag detached successfully" };
     },
     {

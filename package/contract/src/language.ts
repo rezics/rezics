@@ -44,36 +44,16 @@ export const LANGUAGE_META: Record<
 export const DEFAULT_LANGUAGE: Language = "zh-hant";
 export const FALLBACK_LANGUAGE: Language = "en";
 
-// ============================================================
-// LEGACY CODE NORMALIZATION
-// ============================================================
-
-export const LANGUAGE_ALIASES: Record<string, Language> = {
-  "zh-SC": "zh-hans",
-  "zh-TC": "zh-hant",
-  "zh-CN": "zh-hans",
-  "zh-TW": "zh-hant",
-  "en-US": "en",
-  "en-GB": "en",
-  "ja-JP": "ja",
-  "de-DE": "de",
-};
-
 const ALL_CANONICAL = new Set<string>(Object.values(LANGUAGES));
 
 /**
  * Normalize a language code to its canonical form.
- * Handles case-insensitive matching against canonical codes and known aliases.
+ * Handles case-insensitive matching against canonical codes.
  * Returns null for unknown codes.
  */
 export function normalizeLanguage(code: string): Language | null {
   const lower = code.toLowerCase();
   if (ALL_CANONICAL.has(lower)) return lower as Language;
-
-  // Check aliases (case-insensitive)
-  for (const [alias, canonical] of Object.entries(LANGUAGE_ALIASES)) {
-    if (alias.toLowerCase() === lower) return canonical;
-  }
 
   return null;
 }

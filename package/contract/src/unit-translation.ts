@@ -8,8 +8,8 @@ import { t } from "elysia";
 // readers SHOULD access these fields via this schema rather than reading
 // `extra` as an untyped JSON blob.
 //
-// Forward-compatible: unrecognized keys in `extra` are tolerated by the
-// caller — only fields codified here are surfaced as flat DTO fields.
+// Unrecognized keys in `extra` are tolerated by the caller; only fields
+// codified here are surfaced as flat DTO fields.
 
 export const unitTranslationExtraSchema = t.Object({
   coverUrl: t.Optional(t.String({ format: "uri" })),

@@ -64,29 +64,29 @@ The contract SHALL export `DEFAULT_LANGUAGE` with value `'zh-hant'` and `FALLBAC
 - **WHEN** a consumer imports `FALLBACK_LANGUAGE`
 - **THEN** the value SHALL be `'en'`
 
-### Requirement: Legacy code normalization
+### Requirement: Canonical code normalization
 
-The contract SHALL export a `normalizeLanguage(code: string)` function that maps known legacy codes to their canonical equivalents. Unknown codes SHALL return `null`.
+The contract SHALL export a `normalizeLanguage(code: string)` function that normalizes canonical codes case-insensitively. Non-canonical codes SHALL return `null`.
 
-#### Scenario: Normalize zh-CN to zh-hans
+#### Scenario: Reject zh-CN
 
 - **WHEN** `normalizeLanguage('zh-CN')` is called
-- **THEN** the result SHALL be `'zh-hans'`
+- **THEN** the result SHALL be `null`
 
-#### Scenario: Normalize zh-SC to zh-hans
+#### Scenario: Reject zh-SC
 
 - **WHEN** `normalizeLanguage('zh-SC')` is called
-- **THEN** the result SHALL be `'zh-hans'`
+- **THEN** the result SHALL be `null`
 
-#### Scenario: Normalize zh-TC to zh-hant
+#### Scenario: Reject zh-TC
 
 - **WHEN** `normalizeLanguage('zh-TC')` is called
-- **THEN** the result SHALL be `'zh-hant'`
+- **THEN** the result SHALL be `null`
 
-#### Scenario: Normalize en-US to en
+#### Scenario: Reject en-US
 
 - **WHEN** `normalizeLanguage('en-US')` is called
-- **THEN** the result SHALL be `'en'`
+- **THEN** the result SHALL be `null`
 
 #### Scenario: Canonical code passes through
 
@@ -103,11 +103,3 @@ The contract SHALL export a `normalizeLanguage(code: string)` function that maps
 - **WHEN** `normalizeLanguage('ZH-HANT')` is called
 - **THEN** the result SHALL be `'zh-hant'`
 
-### Requirement: Language alias map
-
-The contract SHALL export a `LANGUAGE_ALIASES` record mapping known legacy codes to canonical codes. The map SHALL include at minimum: `zh-SC` → `zh-hans`, `zh-TC` → `zh-hant`, `zh-CN` → `zh-hans`, `zh-TW` → `zh-hant`, `en-US` → `en`, `en-GB` → `en`, `ja-JP` → `ja`, `de-DE` → `de`. Bare `zh` SHALL NOT appear in the alias map.
-
-#### Scenario: Alias map does not include bare zh
-
-- **WHEN** a consumer inspects all keys in `LANGUAGE_ALIASES`
-- **THEN** no key SHALL equal `'zh'`

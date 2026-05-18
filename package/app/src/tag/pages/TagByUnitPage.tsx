@@ -4,7 +4,7 @@ import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWith
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
-import { tagBookRoute } from "@/router";
+import { Route as tagBookRoute } from "@/routes/_mainLayout/tag/book/$bookId/route";
 import { TagWrapper } from "../components/TagWrapper";
 
 export function TagByBookPage() {

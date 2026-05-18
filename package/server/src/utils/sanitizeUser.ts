@@ -1,5 +1,5 @@
 import type { PublicUser } from "@rezics/contract";
-import type { Prisma, User } from "#/prisma/client";
+import type { Prisma } from "#/prisma/client";
 
 /**
  * Prisma select that returns only PublicUser fields (excluding slug — slug
@@ -41,29 +41,4 @@ export function mapPublicUser(
     followersCount: user.followersCount,
     followingsCount: user.followingsCount,
   };
-}
-
-/**
- * Sanitize user data for public response — base version.
- *
- * @deprecated Use `publicUserSelect` with Prisma select instead.
- */
-export function sanitizeUser(
-  u: Pick<User, "unitId" | "name"> & { slug?: string | null; avatar?: string | null },
-): PublicUser {
-  return mapPublicUser({
-    unitId: u.unitId,
-    slug: u.slug ?? null,
-    name: u.name,
-    avatar: u.avatar ?? null,
-  })!;
-}
-
-/**
- * Sanitize user data for public response — extended version with profile info.
- *
- * @deprecated Use `publicUserSelect` with Prisma select instead.
- */
-export function sanitizeUserWithBio(u: User & { slug?: string | null }): PublicUser {
-  return mapPublicUser({ ...u, slug: u.slug ?? null })!;
 }

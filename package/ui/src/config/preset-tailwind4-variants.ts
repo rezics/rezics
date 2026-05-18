@@ -96,7 +96,7 @@ function isSimpleTailwindArbitrarySelector(segment: string) {
   return /^\[(?:[.#:]?[\w-]+|[a-z][\w-]*(?::[\w-]+)?)\]$/.test(segment);
 }
 
-function preprocessTailwind4CompatVariants(matcher: string) {
+function preprocessTailwind4Variants(matcher: string) {
   const segments = splitVariantSegments(matcher);
   if (segments.length < 2) {
     return matcher;
@@ -141,9 +141,9 @@ function preprocessTailwind4CompatVariants(matcher: string) {
   return changed ? processed.join(":") : matcher;
 }
 
-export const presetTailwind4Compat = definePreset(() => ({
-  name: "rezics-tailwind4-compat",
-  preprocess: [preprocessTailwind4CompatVariants],
+export const presetTailwind4Variants = definePreset(() => ({
+  name: "rezics-tailwind4-variants",
+  preprocess: [preprocessTailwind4Variants],
   variants: [
     {
       name: "tailwind4-child-arbitrary",

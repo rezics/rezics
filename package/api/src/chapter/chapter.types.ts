@@ -27,7 +27,7 @@ export type {
   UpdateChapterInput,
 };
 
-// Convenience alias for detail DTO as the primary Chapter DTO
+// Primary chapter DTO used by app surfaces
 export type ChapterDTO = ChapterDetailDTO;
 
 /**

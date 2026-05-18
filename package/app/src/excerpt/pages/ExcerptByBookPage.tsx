@@ -2,7 +2,7 @@ import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIc
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useTranslation } from "react-i18next";
 import { ExcerptList } from "@/excerpt";
-import { excerptByBookRoute } from "@/router";
+import { Route as excerptByBookRoute } from "@/routes/_mainLayout/excerpt/book/$bookId";
 import UnitsPage from "@/unit/pages/UnitsPage";
 import { ExcerptNewPage } from "./ExcerptNewPage";
 

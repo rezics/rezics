@@ -2,8 +2,6 @@ import { t } from "elysia";
 import { entityDTOSchema } from "./entity";
 import { unitTranslationDTOSchema } from "./unit";
 
-// Re-export entity schemas for back-compat with consumers that imported them
-// from "@rezics/contract" — the canonical home is `./entity`.
 export {
   type CreateEntityInput,
   createEntitySchema,
@@ -12,8 +10,6 @@ export {
   entityDTOSchema,
   type EntityKind,
   entityKinds,
-  entityLegacyParamsSchema,
-  type EntityLegacyParams,
   entityListBodySchema,
   type EntityListBody,
   entityListQuerySchema,

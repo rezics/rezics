@@ -9,13 +9,10 @@ import { userSubscriptionRoute } from "./user.subscription.api";
 /**
  * User Controller - Elysia.js routes with JWT authentication.
  *
- * The legacy `followRoute` (user.follow.api.ts) was retired by the
- * `engagement-subscription` change. `userSubscriptionRoute` keeps the
- * user-shaped read endpoints (`GET /:userId/followers`, `/followings`,
- * `/follow/status`, `/follow/summary`) consumed by the
- * profile-followers-tab, now backed by `Subscription` filtered to
- * USER→USER edges. Subscribe/unsubscribe actions go through the
- * generic `/subscription/*` endpoints.
+ * `userSubscriptionRoute` exposes the user-shaped read endpoints for
+ * followers and followings, backed by `Subscription` filtered to USER→USER
+ * edges. Subscribe/unsubscribe actions go through the generic
+ * `/subscription/*` endpoints.
  */
 export const userApi = new Elysia({ prefix: "/user" })
   .use(userBatchApi)

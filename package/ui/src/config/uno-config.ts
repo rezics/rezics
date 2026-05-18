@@ -24,7 +24,7 @@ import transformerDirectives from "@unocss/transformer-directives";
 import { defineConfig, presetAttributify, presetIcons } from "unocss";
 import presetAnimations from "unocss-preset-animations";
 import { presetScrollbarHide } from "unocss-preset-scrollbar-hide";
-import { presetTailwind4Compat } from "./preset-tailwind4-compat";
+import { presetTailwind4Variants } from "./preset-tailwind4-variants";
 import { darkColors, lightColors } from "./tokens/colors";
 
 const FONT_SANS =
@@ -66,7 +66,6 @@ const DURATION = {
   "extra-long2": "800ms",
   "extra-long3": "900ms",
   "extra-long4": "1000ms",
-  // legacy rezics aliases mapped into the ladder.
   fast: "150ms",
   base: "250ms",
   slow: "400ms",
@@ -83,7 +82,6 @@ const EASING = {
   "emphasized-decelerate": "cubic-bezier(0.05, 0.7, 0.1, 1)",
   "emphasized-accelerate": "cubic-bezier(0.3, 0, 0.8, 0.15)",
   spring: "cubic-bezier(0.34, 1.56, 0.64, 1)",
-  // legacy rezics aliases.
   out: "cubic-bezier(0, 0, 0, 1)",
   "in-out": "cubic-bezier(0.2, 0, 0, 1)",
 } as const;
@@ -248,7 +246,7 @@ export function createUnoConfig() {
   return defineConfig({
     presets: [
       presetWind4({ preflights: { reset: true } }),
-      presetTailwind4Compat(),
+      presetTailwind4Variants(),
       presetAnimations(),
       presetIcons(),
       presetAttributify({

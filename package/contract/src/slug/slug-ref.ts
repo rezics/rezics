@@ -36,8 +36,7 @@ export type OwnerScopedSlugRef = Static<typeof OwnerScopedSlugRefSchema>;
  * Permissive form accepting either a named scope or an owner-unit-id scope.
  *
  * This is the default shape used by request payloads where the caller may
- * carry either kind of reference. `scope` is REQUIRED in v1; the legacy
- * `{ slug, unitId? }` shape no longer parses.
+ * carry either kind of reference. `scope` is required.
  */
 export const SlugRefSchema = t.Object({
   scope: t.String(),

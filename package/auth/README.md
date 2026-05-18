@@ -58,7 +58,7 @@ JWT service metadata is persisted in the auth database. Environment variables (`
 | Endpoint                   | Description                       |
 | -------------------------- | --------------------------------- |
 | `/api/auth/session/jwks`   | Canonical auth JWKS               |
-| `/.well-known/jwks.json`   | Compatibility JWKS                |
+| `/.well-known/jwks.json`   | Well-known JWKS                   |
 
 - Session/browser routes use credentialed CORS
 - Public JWKS and discovery routes use non-credentialed CORS

@@ -45,7 +45,7 @@ describe("authApi", () => {
     globalThis.localStorage = createMemoryStorage() as Storage;
   });
 
-  test("keeps legacy token helper pointed at the blocked main auth boundary", async () => {
+  test("keeps token helper pointed at the blocked main auth boundary", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ token: "jwt-token" }), {
         status: 200,

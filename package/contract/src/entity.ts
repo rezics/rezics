@@ -30,13 +30,6 @@ export const entityParamsSchema = t.Object({
 
 export type EntityParams = (typeof entityParamsSchema)["static"];
 
-/** Legacy params using `id` field (for routes that haven't been renamed). */
-export const entityLegacyParamsSchema = t.Object({
-  id: t.String(),
-});
-
-export type EntityLegacyParams = (typeof entityLegacyParamsSchema)["static"];
-
 export const createEntityTranslationSchema = t.Object({
   language: t.String(),
   title: t.String({ minLength: 1 }),

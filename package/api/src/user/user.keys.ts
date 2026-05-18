@@ -25,8 +25,6 @@ export const userKeys = {
     [...userKeys.detail(userId), "followers", query] as const,
   followings: (userId: string, query?: Record<string, unknown>) =>
     [...userKeys.detail(userId), "followings", query] as const,
-  followStatus: (targetIds: string[]) =>
-    [...userKeys.detail("me"), "follow-status", targetIds] as const,
   batch: (ids: string[]) => [...userKeys.all(), "batch", ids] as const,
   settings: () => [...userKeys.all(), "me", "settings"] as const,
   emailVerification: () =>

@@ -42,8 +42,7 @@ bun run prisma:generate
 
 If a local database must be kept, migrate one way by creating verified
 `EmailVerificationContract` rows for existing `User.email` values before
-dropping the old verification columns. Do not add dual-write or compatibility
-shims for this cutover.
+dropping the old verification columns. Keep this cutover one-way.
 
 ## PostgreSQL
 

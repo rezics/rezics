@@ -1,5 +1,5 @@
 import type React from "react";
-import { excerptRoute } from "@/router";
+import { Route as excerptRoute } from "@/routes/_mainLayout/excerpt/$unitId";
 import { ExcerptDetailSection } from "../sections/ExcerptDetailSection";
 
 export const ExcerptPage: React.FC = () => {

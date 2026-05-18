@@ -45,7 +45,7 @@ const DEFAULT_RESERVED = [
   "cdn",
   "webhook",
   "callback",
-  // special aliases
+  // special mappings
   "me",
   "you",
   "null",

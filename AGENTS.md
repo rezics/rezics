@@ -101,9 +101,9 @@ This project uses **OpenSpec** for non-trivial changes:
 
 Keep implementation scoped to affected packages. Respect monorepo boundaries and shared package contracts.
 
-### Development-Stage Compatibility
+### Development-Stage Cutovers
 
-This project is in active development. Do not add backward-compatible aliases, legacy routes, compatibility adapters, or dual-read/write shims for internal development-stage renames unless an OpenSpec change explicitly grants an exception. Prefer one clear breaking cutover and update all internal callsites.
+This project is in active development. For internal development-stage renames, make one clear cutover and update every internal callsite in the same change unless an OpenSpec change explicitly grants an exception.
 
 ## Git
 

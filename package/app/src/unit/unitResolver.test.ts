@@ -20,7 +20,7 @@ function unit(type: string, overrides: Partial<UnitDTO> = {}): UnitDTO {
 describe("unit resolver — buildUnitUrl coverage", () => {
   test.each(
     Object.values(UnitType),
-  )("%s resolves without revisiting legacy /unit/:id", (type) => {
+  )("%s resolves without using /unit/:id", (type) => {
     const typedUrl = buildUnitUrl(unit(type));
     expect(typedUrl).not.toBe("/unit/fixture-id");
   });
@@ -85,7 +85,7 @@ describe("public Unit resolver search", () => {
     expect(() => validatePublicUnitResolverSearch({ view: "raw" })).toThrow();
   });
 
-  test("UUID-shaped legacy Unit routes are distinguishable for migration", () => {
+  test("UUID-shaped Unit route segments are distinguishable for migration", () => {
     expect(isUuidSegment("018f1111-2222-4333-8444-555555555555")).toBe(true);
     expect(isUuidSegment("018f-valid-looking-id")).toBe(false);
   });

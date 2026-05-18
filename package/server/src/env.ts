@@ -104,8 +104,7 @@ export const env = createEnv({
     MAIN_EMAIL_FROM_NAME: v.optional(v.string()),
 
     /**
-     * Legacy sender display name reserved for older server mail features.
-     * New main product email flows use `MAIN_EMAIL_FROM_NAME`.
+     * Sender display name for SMTP-backed mail features.
      */
     SMTP_USER_NAME: v.optional(v.string()),
 
@@ -130,7 +129,7 @@ export const env = createEnv({
      */
     PORT: v.optional(v.string()),
 
-    /** Cloudflare R2 S3-compatible endpoint URL. */
+    /** Cloudflare R2 S3 API endpoint URL. */
     R2_ENDPOINT: v.optional(v.string()),
     /** Cloudflare R2 access key ID. */
     R2_ACCESS_KEY_ID: v.optional(v.string()),

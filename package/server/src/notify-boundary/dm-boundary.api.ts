@@ -34,10 +34,9 @@ export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
       return { error: "Cannot send a message to yourself" };
     }
 
-    // Permission gate: sender must have a Subscription(sender → recipient)
-    // whose `channels` permits DM. Migration backfilled every legacy
-    // Follow row into a Subscription with channels=['*'], so existing
-    // follow-based DM relationships continue to work post-cutover.
+    // Permission gate: sender must have a Subscription(sender -> recipient)
+    // whose `channels` permits DM. Existing follow-based DM relationships
+    // were materialized as Subscription rows with channels=['*'].
     const sub = await prisma.subscription.findUnique({
       where: {
         subscriberUnitId_targetUnitId: {

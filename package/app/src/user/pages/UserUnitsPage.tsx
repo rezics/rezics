@@ -1,7 +1,8 @@
 import {
   contentSearchQueryOptions,
-  meiliBookSearchQuery,
+  postSearchQueryOptions,
 } from "@rezics/api/meili/meili.queries";
+import { bookQueries } from "@rezics/api/book/book";
 import {
   Alert,
   AlertDescription,
@@ -10,8 +11,14 @@ import {
   TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
-import { UnitType } from "@rezics/contract";
+import type {
+  BookDTO,
+  PostDTO,
+  PostSearchDocument,
+  ShelfDTO,
+  UnitDTO,
+} from "@rezics/contract";
+import { PostKind, UnitType } from "@rezics/contract";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -42,6 +49,35 @@ const ShelfListView: React.FC<{ shelves: ShelfDTO[] }> = ({ shelves }) => {
 type TabKey = "shelf" | "review" | "remark" | "excerpt" | "book";
 
 const EXTERNAL_PAGE_SIZE = 50;
+
+function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
+  return {
+    unitId: doc.id,
+    authorUserId: doc.authorUserId,
+    author: {
+      unitId: doc.authorUserId,
+      name: doc.authorName ?? "",
+      slug: doc.authorSlug ?? undefined,
+      avatar: doc.authorAvatar ?? undefined,
+    },
+    targetUnitId: doc.targetUnitId,
+    realmUnitId: doc.realmUnitId,
+    body: doc.body,
+    rootPostUnitId: doc.rootPostUnitId,
+    parentPostUnitId: doc.parentPostUnitId,
+    kind: doc.kind as PostDTO["kind"],
+    depth: doc.depth,
+    sortPath: doc.sortPath,
+    replyCount: doc.replyCount,
+    directReplyCount: doc.directReplyCount,
+    lastReplyAt: doc.lastReplyAt,
+    isLocked: doc.isLocked,
+    scoreEntryId: doc.scoreEntryId,
+    extra: doc.extra,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
 
 export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const ref = useRef<UniversalPaginatorHandle>(null);
@@ -96,8 +132,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     isLoading: isLoadingBook,
     error: errorBook,
   } = useQuery(
-    meiliBookSearchQuery({
-      authorIds: [userId],
+    bookQueries.byUser(userId, {
       start: startBook,
       limit: EXTERNAL_PAGE_SIZE,
     }),
@@ -110,8 +145,9 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     isLoading: isLoadingReview,
     error: errorReview,
   } = useQuery(
-    contentSearchQueryOptions({
-      type: UnitType.POST,
+    postSearchQueryOptions({
+      kind: PostKind.REVIEW,
+      authorUserId: userId,
       keyword: keyword || undefined,
       offset: startReview,
       limit: EXTERNAL_PAGE_SIZE,
@@ -123,8 +159,9 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     isLoading: isLoadingRemark,
     error: errorRemark,
   } = useQuery(
-    contentSearchQueryOptions({
-      type: UnitType.POST,
+    postSearchQueryOptions({
+      kind: PostKind.REMARK,
+      authorUserId: userId,
       keyword: keyword || undefined,
       offset: startRemark,
       limit: EXTERNAL_PAGE_SIZE,
@@ -137,7 +174,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   const reviewTargetIds = useMemo(
     () =>
-      ((activeReviewLikeData?.items ?? []) as unknown as PostDTO[])
+      (activeReviewLikeData?.items?.map(mapPostSearchDocToPostDTO) ?? [])
         .map((r) => r.unitId)
         .filter(Boolean) as string[],
     [activeReviewLikeData],
@@ -146,7 +183,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   useReactionHydration(reviewTargetIds);
 
   const reviews = useMemo(
-    () => (activeReviewLikeData?.items ?? []) as unknown as PostDTO[],
+    () => activeReviewLikeData?.items?.map(mapPostSearchDocToPostDTO) ?? [],
     [activeReviewLikeData],
   );
 
@@ -211,8 +248,9 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
       if (tab === "review" || tab === "remark") {
         const result = await queryClient.fetchQuery(
-          contentSearchQueryOptions({
-            type: UnitType.POST,
+          postSearchQueryOptions({
+            kind: tab === "review" ? PostKind.REVIEW : PostKind.REMARK,
+            authorUserId: userId,
             keyword: keyword || undefined,
             offset: start,
             limit: EXTERNAL_PAGE_SIZE,
@@ -223,13 +261,12 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
       if (tab === "book") {
         const result = await queryClient.fetchQuery(
-          meiliBookSearchQuery({
-            authorIds: [userId],
+          bookQueries.byUser(userId, {
             start,
             limit: EXTERNAL_PAGE_SIZE,
           }),
         );
-        return (result as any)?.books?.length ?? 0;
+        return result?.books?.length ?? 0;
       }
 
       const result = await queryClient.fetchQuery(

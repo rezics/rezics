@@ -10,33 +10,35 @@ import {
 export type StorybookConfigOverrides = Partial<StorybookConfig>;
 
 /**
- * Storybook 10's manager probes legacy `/stories.json` (v6 manifest name) and
+ * Storybook 10's manager probes `/stories.json` (v6 manifest name) and
  * `/metadata.json` (pre-v6 metadata) when resolving a composed ref, even
- * though v10's core-server only emits `/index.json` and `/project.json`. This
- * is intentional backwards-compat — `manager-api/index.js`'s `checkRef`
- * succeeds if *either* `index.json` or `stories.json` responds, and the
- * `metadata.json` fetch is `.catch`ed.
+ * though v10's core-server only emits `/index.json` and `/project.json`.
+ * `manager-api/index.js`'s `checkRef` succeeds if *either* `index.json` or
+ * `stories.json` responds, and the `metadata.json` fetch is `.catch`ed.
  *
- * The functional outcome is fine, but the legacy paths fall through to Vite's
+ * The functional outcome is fine, but those manager probes fall through to Vite's
  * 404 catchall which emits no CORS headers. The manager fetches with
  * `credentials: "include"`, so the browser raises a console-visible CORS
  * error before the 404 is observable. The error is cosmetic — refs still
  * load via `index.json` — but it floods the console.
  *
- * This plugin intercepts the two legacy paths in dev mode and returns a
+ * This plugin intercepts the two manager probe paths in dev mode and returns a
  * CORS-correct 404. The manager's `handleRequest` treats the 404 as
  * `indexError`, falls back to `index.json`, and the network panel shows a
  * gray 404 with no JS-level error.
  */
-const STORYBOOK_LEGACY_ENDPOINTS = new Set(["/stories.json", "/metadata.json"]);
+const STORYBOOK_MANAGER_PROBE_ENDPOINTS = new Set([
+  "/stories.json",
+  "/metadata.json",
+]);
 
-function corsLegacyEndpointsPlugin(): Plugin {
+function corsManagerProbeEndpointsPlugin(): Plugin {
   return {
-    name: "rezics-storybook-cors-legacy-endpoints",
+    name: "rezics-storybook-cors-manager-probe-endpoints",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const path = (req.url ?? "").split("?")[0];
-        if (!STORYBOOK_LEGACY_ENDPOINTS.has(path)) {
+        if (!STORYBOOK_MANAGER_PROBE_ENDPOINTS.has(path)) {
           next();
           return;
         }
@@ -115,7 +117,7 @@ export async function baseStorybookViteConfig(
 ): Promise<UserConfig> {
   const { uno = true, unoConfigPath } = options;
 
-  const plugins: PluginOption[] = [corsLegacyEndpointsPlugin()];
+  const plugins: PluginOption[] = [corsManagerProbeEndpointsPlugin()];
   if (uno) {
     const { default: UnoCSS } = await import("unocss/vite");
     plugins.push(UnoCSS(unoConfigPath));

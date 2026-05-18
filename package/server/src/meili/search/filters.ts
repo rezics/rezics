@@ -44,7 +44,10 @@ export interface PostBuildOpts {
   categoryHint?: SearchCategory;
 }
 
-const POST_CATEGORY_TO_KIND: Record<NonNullable<PostBuildOpts["postCategory"]>, PostKind> = {
+const POST_CATEGORY_TO_KIND: Record<
+  NonNullable<PostBuildOpts["postCategory"]>,
+  PostKind
+> = {
   reviews: "REVIEW",
   excerpts: "EXCERPT",
   remarks: "REMARK",
@@ -204,7 +207,7 @@ export function buildRealmFilter(
 
 // ANCHOR: buildUserFilter
 // User scope is meaningless on the users index. Only `global` permits this
-// index per strict membership. The legacy users handler applies no filters.
+// index per strict membership. User search currently applies no filters.
 
 export function buildUserFilter(
   _query: SearchQuery,

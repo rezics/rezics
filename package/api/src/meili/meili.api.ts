@@ -19,8 +19,6 @@ import type {
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 
-export * from "./mapper";
-
 // ANCHOR: Content search
 
 export const meiliContentApi = {

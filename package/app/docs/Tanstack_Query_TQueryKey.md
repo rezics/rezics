@@ -89,7 +89,7 @@ userQueries.byId: (id: string) =>
 
 如果你觉得 `ReturnType<typeof userKeys.byId>` 太冗长，也有一些变通（trade-off）：
 
-- 你可以给 `userKeys.byId` 做一个 type alias，比如：
+- 你可以给 `userKeys.byId` 做一个类型简称，比如：
 
   ```ts
   type UserByIdKey = readonly ['users', 'by-id', string]; // 或者更精确

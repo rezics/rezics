@@ -96,7 +96,7 @@ export const BookLibPage: React.FC = () => {
     ref.current?.resetPaginationPageNumber();
   }, []);
 
-  // Map ContentSearchDocument to BookDTO-compatible shape for existing UI
+  // Map ContentSearchDocument to the BookDTO shape consumed by this page
   const books = useMemo(
     () =>
       (data?.items ?? []).map((item: ContentSearchDocument) => ({

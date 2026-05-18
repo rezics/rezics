@@ -7,8 +7,6 @@ import {
   CarouselPrevious,
 } from "../../shadcn/carousel";
 
-export type DomainCarouselArrowVariant = "default" | "ghost";
-
 export interface DomainCarouselProps<TItem> {
   items: readonly TItem[];
   renderItem: (item: TItem, index: number) => ReactNode;
@@ -16,8 +14,6 @@ export interface DomainCarouselProps<TItem> {
   itemClassName?: string;
   className?: string;
   showArrows?: boolean;
-  /** @deprecated no-op since shadcn upgrade — ArrowButton has no variants */
-  arrowVariant?: DomainCarouselArrowVariant;
   scrollSnap?: "start" | "center";
   dragFree?: boolean;
   ariaLabel?: string;

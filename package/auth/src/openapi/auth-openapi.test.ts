@@ -29,7 +29,7 @@ const accountFindMany = mock(async () => [
 
 mock.module("../auth/routes", () => ({
   handleAuthRequest,
-  handleJwksCompatibilityRequest: () =>
+  handleJwksWellKnownRequest: () =>
     Response.json({ pathname: "/api/auth/session/jwks" }),
   handleOpenIdConfigRequest: () =>
     Response.json({ issuer: "http://localhost:35003" }),
@@ -246,24 +246,24 @@ describe("auth openapi routes", () => {
     });
   });
 
-  test("exposes public session and compatibility jwks endpoints", async () => {
+  test("exposes public session and well-known jwks endpoints", async () => {
     const { sessionRouter } = await import("./session");
     const { oauthRouter } = await import("./oauth");
 
     const sessionJwksResponse = await sessionRouter.handle(
       new Request("http://localhost/session/jwks"),
     );
-    const compatibilityJwksResponse = await oauthRouter.handle(
+    const wellKnownJwksResponse = await oauthRouter.handle(
       new Request("http://localhost/.well-known/jwks.json"),
     );
 
     expect(sessionJwksResponse.status).toBe(200);
-    expect(compatibilityJwksResponse.status).toBe(200);
+    expect(wellKnownJwksResponse.status).toBe(200);
     expect(handleAuthRequest).not.toHaveBeenCalled();
     expect(await sessionJwksResponse.json()).toEqual({
       pathname: "/api/auth/session/jwks",
     });
-    expect(await compatibilityJwksResponse.json()).toEqual({
+    expect(await wellKnownJwksResponse.json()).toEqual({
       pathname: "/api/auth/session/jwks",
     });
   });

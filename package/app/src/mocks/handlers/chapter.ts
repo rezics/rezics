@@ -9,7 +9,6 @@ const chapterList01 = {
   order: { 143: [144] },
 };
 
-// Chapter ops – keep here for backward compatibility with previous file structure
 export function chapterListHandler(_body: any) {
   const data: any = { chapters: [], order: [] };
   data.order = (chapterList01 as any).order;

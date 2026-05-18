@@ -3,7 +3,6 @@ import type {
   RealmDTO,
   RealmListQuery,
   RealmMemberDTO,
-  RealmTagUnitDTO,
   RealmUnitDTO,
   UpdateRealmInput,
 } from "@rezics/contract";
@@ -32,7 +31,6 @@ import {
 import {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,
-  mapRealmTagUnitToDTO,
   mapRealmToDTO,
   mapRealmUnitToDTO,
 } from "./realm.mapper";
@@ -760,48 +758,6 @@ export class RealmService {
     });
   }
 
-  // --- Legacy realm-tag-unit aliases (kept for the existing `/realm/:unitId/tags` route) ---
-
-  /**
-   * @deprecated Use {@link createRealmTagUnit} via `POST /realm-tag-units`.
-   * Authenticated callers are routed through the same backend-owned
-   * contribution path. Unauthenticated internal callers preserve the legacy
-   * direct upsert behavior.
-   */
-  async addRealmTagUnit(
-    realmUnitId: string,
-    tagUnitId: string,
-    unitId: string,
-    actorUserId?: string,
-  ): Promise<RealmTagUnitDTO> {
-    if (actorUserId) {
-      const row = await this.createRealmTagUnit(
-        actorUserId,
-        realmUnitId,
-        unitId,
-        tagUnitId,
-      );
-      return mapRealmTagUnitToDTO(row);
-    }
-
-    const row = await prisma.realmTagUnit.upsert({
-      where: {
-        realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
-      },
-      update: {},
-      create: { realmUnitId, tagUnitId, unitId, score: 0, voteCount: 0 },
-    });
-    await patchContentRealmTagKeysToMeili(unitId);
-    return mapRealmTagUnitToDTO(row);
-  }
-
-  async removeRealmTagUnit(
-    realmUnitId: string,
-    tagUnitId: string,
-    unitId: string,
-  ): Promise<void> {
-    await this.deleteRealmTagUnit(realmUnitId, unitId, tagUnitId);
-  }
   async listByMember(
     userId: string,
     options: { publicOnly?: boolean } = {},

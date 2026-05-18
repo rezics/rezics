@@ -12,7 +12,7 @@ import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { bookReadLayoutRoute } from "@/router";
+import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
 import { PostListSection, ReplyComposer } from "@/post";
 import {
   EMPTY_CHAPTER_ROUTE_ID,

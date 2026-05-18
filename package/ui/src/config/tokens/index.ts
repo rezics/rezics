@@ -12,7 +12,7 @@ import {
   colors,
   lightColors,
   darkColors,
-  type ColorMode,
+  type ColorScheme,
   type ColorTokens,
 } from "./colors";
 import { typography, type TypographyTokens } from "./typography";
@@ -31,7 +31,7 @@ export const tokens = {
 } as const;
 
 export interface DesignTokens {
-  colors: Record<ColorMode, ColorTokens>;
+  colors: Record<ColorScheme, ColorTokens>;
   typography: TypographyTokens;
   spacing: SpacingTokens;
   radius: RadiusTokens;

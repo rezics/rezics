@@ -1,5 +1,5 @@
-import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
-import type { UnitDTO, UnitType } from "@rezics/contract";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import type { UnitDTO } from "@rezics/contract";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -100,7 +100,6 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   type,
   types = ["UNIT", "POST", "QUOTE", "BOOK"],
   userId,
-  targetUnitId,
   children = defaultChildren,
 }) => {
   const { t } = useTranslation();
@@ -164,24 +163,15 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [types.forEach]);
 
-  function mapUnitResponse(unitResp: any) {
-    return unitResp;
-  }
-
-  const { queryKey, queryFn } = buildMeiliUnitQuery({
-    kind: tab === "UNIT" ? undefined : (tab as keyof typeof UnitType),
-    start: startMap[tab] ?? 0,
-    targetUnitId: targetUnitId ?? "",
-    keyword: keyword,
-    limit: EXTERNAL_PAGE_SIZE,
-    mapFn: mapUnitResponse,
-    options: { userId },
-  });
-
-  const { data: activeData, isLoading } = useQuery({
-    queryKey,
-    queryFn,
-  });
+  const { data: activeData, isLoading } = useQuery(
+    contentSearchQueryOptions({
+      type: tab === "UNIT" ? undefined : tab,
+      userId,
+      keyword: keyword || undefined,
+      offset: startMap[tab] ?? 0,
+      limit: EXTERNAL_PAGE_SIZE,
+    }),
+  );
 
   function handleNeedMoreData(page: number) {
     const externalStart = (page - 1) * EXTERNAL_PAGE_SIZE;
@@ -191,17 +181,16 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
 
   async function handlePreRequestData(page: number) {
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const { queryKey, queryFn } = buildMeiliUnitQuery({
-      kind: tab === "UNIT" ? undefined : (tab as keyof typeof UnitType),
-      start: start,
-      targetUnitId: targetUnitId ?? "",
-      keyword: keyword,
-      limit: EXTERNAL_PAGE_SIZE,
-      mapFn: mapUnitResponse,
-      options: { userId },
-    });
-    const nextData = await queryClient.fetchQuery({ queryKey, queryFn });
-    return nextData?.units?.length ?? 0;
+    const nextData = await queryClient.fetchQuery(
+      contentSearchQueryOptions({
+        type: tab === "UNIT" ? undefined : tab,
+        userId,
+        keyword: keyword || undefined,
+        offset: start,
+        limit: EXTERNAL_PAGE_SIZE,
+      }),
+    );
+    return nextData?.items?.length ?? 0;
   }
 
   useEffect(() => {
@@ -209,8 +198,11 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     setCurrentPage(1);
   }, []);
 
-  const units: Unit[] = useMemo(() => activeData?.units ?? [], [activeData]);
-  const totalItems: number = activeData?.total ?? 10000;
+  const units: Unit[] = useMemo(
+    () => (activeData?.items ?? []) as unknown as Unit[],
+    [activeData],
+  );
+  const totalItems: number = activeData?.total ?? 0;
 
   return (
     <div className="mx-auto max-w-7xl p-4 mt-4">

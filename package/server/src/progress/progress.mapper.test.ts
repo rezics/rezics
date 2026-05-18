@@ -22,11 +22,11 @@ describe("mapProgressToDTO", () => {
     expect(mapProgressToDTO({ ...baseRow }).extra).toBeNull();
   });
 
-  test("strips unknown top-level keys from legacy extra", () => {
+  test("strips unknown top-level keys from stored extra", () => {
     const row: UserUnitProgress = {
       ...baseRow,
       extra: {
-        legacy: 1,
+        unknownBucket: 1,
         device: "web",
         paused: { reasonPostUnitIds: ["post-1", "post-2"] },
       } as unknown as UserUnitProgress["extra"],

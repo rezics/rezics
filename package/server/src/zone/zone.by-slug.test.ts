@@ -86,7 +86,7 @@ describe("GET /zone/:unitId", () => {
     expect(await res.json()).toEqual(zoneStub);
   });
 
-  test("does not resolve slug-shaped segments through the legacy route", async () => {
+  test("does not resolve slug-shaped segments through the unitId route", async () => {
     const { zoneApi } = await import("./zone.api");
     const res = await zoneApi.handle(
       new Request("http://localhost/zone/featured"),

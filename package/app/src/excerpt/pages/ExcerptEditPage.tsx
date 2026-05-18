@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { excerptEditRoute } from "@/router";
+import { Route as excerptEditRoute } from "@/routes/_mainLayout/excerpt/$unitId/edit";
 import { ExcerptSourcePicker } from "../components/source/ExcerptSourcePicker";
 
 interface ExcerptEditPageProps {

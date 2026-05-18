@@ -1,11 +1,11 @@
 import { Elysia } from "elysia";
 import {
-  handleJwksCompatibilityRequest,
+  handleJwksWellKnownRequest,
   handleOAuthAuthorizationServerRequest,
   handleOpenIdConfigRequest,
 } from "../auth/routes";
 export const wellKnownApi = new Elysia({ prefix: "/.well-known" })
-  .get("/jwks.json", ({ request }) => handleJwksCompatibilityRequest(request), {
+  .get("/jwks.json", ({ request }) => handleJwksWellKnownRequest(request), {
     detail: {
       summary: "JWKS endpoint",
       description:

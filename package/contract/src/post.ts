@@ -96,10 +96,7 @@ export type PostDTO = (typeof postDTOSchema)["static"];
 
 export const postListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
-  /**
-   * @deprecated Realm feeds must use `realmUnitId`; `targetUnitId` is only for
-   * reply/thread targets.
-   */
+  /** Target Unit ID for reply/thread targets. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the RealmUnit junction. */
   realmUnitId: t.Optional(t.String()),
@@ -139,10 +136,7 @@ export type PostListQuery = (typeof postListQuerySchema)["static"];
 
 export const postListBodySchema = t.Object({
   ...listPostBodyBase.properties,
-  /**
-   * @deprecated Realm feeds must use `realmUnitId`; `targetUnitId` is only for
-   * reply/thread targets.
-   */
+  /** Target Unit ID for reply/thread targets. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the RealmUnit junction. */
   realmUnitId: t.Optional(t.String()),

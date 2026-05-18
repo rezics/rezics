@@ -21,6 +21,7 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
+import { mapRealmTagUnitToDTO } from "./realm.mapper";
 import { realmService } from "./realm.service";
 
 /** Realm roles that can moderate (update members, manage tags). */
@@ -363,7 +364,8 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       params: realmParamsSchema,
       detail: {
         summary: "Unmute realm",
-        description: "Re-enable realm activity notifications by re-adding the Subscription edge (channels=['*']).",
+        description:
+          "Re-enable realm activity notifications by re-adding the Subscription edge (channels=['*']).",
         tags: ["Realms"],
       },
     },
@@ -450,12 +452,13 @@ export const realmApi = new Elysia({ prefix: "/realm" })
           );
         }
       }
-      return realmService.addRealmTagUnit(
-        params.unitId,
-        body.tagUnitId,
-        body.unitId,
+      const row = await realmService.createRealmTagUnit(
         identity.userId,
+        params.unitId,
+        body.unitId,
+        body.tagUnitId,
       );
+      return mapRealmTagUnitToDTO(row);
     },
     {
       requireLogin: true,
@@ -482,10 +485,10 @@ export const realmApi = new Elysia({ prefix: "/realm" })
           );
         }
       }
-      await realmService.removeRealmTagUnit(
+      await realmService.deleteRealmTagUnit(
         params.unitId,
-        params.tagUnitId,
         params.contentUnitId,
+        params.tagUnitId,
       );
       return { message: "Realm tag unit removed" };
     },

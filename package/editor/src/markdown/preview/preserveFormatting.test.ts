@@ -92,7 +92,7 @@ describe("novelModePlugin", () => {
   });
 });
 
-// ── preserveFormattingPlugin (backward compat) ──────────────────────
+// -- preserveFormattingPlugin -------------------------------------------------
 
 describe("preserveFormattingPlugin", () => {
   test("disabled preserveEmptyLines skips empty_line injection", () => {

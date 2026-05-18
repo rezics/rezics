@@ -109,7 +109,7 @@ The canonical visual reference is the **`@rezics/ui` Storybook** (`bun -F @rezic
 
 ## Token Consumption Convention
 
-Color tokens MUST be consumed via the curated short names in `package/ui/src/config/uno-config.ts` `theme.colors` (`text-primary`, `bg-surface-elevated`, `border-border-whisper`, `fill-brand-fill`, …). The single source of truth is `package/ui/src/config/tokens/colors.ts` (`lightColors` + `darkColors`); UnoCSS preset-wind4 emits each leaf as a flat `--colors-<path>` custom property under `:root, :host`, and a preflight emits the `.dark { --colors-*: … }` override. Auxiliary tokens (`--font-*`, `--radius-*`, `--shadow-*`, `--duration-*`, `--easing-*`, state opacities) come from the same preflight. The legacy `--rezics-*` namespace and `tokens.css` were retired by the `unify-tokens-single-source` change. R9 in `bun run check:convention` bans every `var(--rezics-*)` reference in source files (`.css`, `.ts`, `.tsx`, `.js`, `.jsx`, `.mdx`) and asserts `package/ui/src/config/tokens.css` does not exist. Mode switching is class-based: toggle `class="dark"` on `<html>`. See `openspec/specs/ui-component-foundation/spec.md` and `package/ui/src/config/README.md` for the full surface.
+Color tokens MUST be consumed via the curated short names in `package/ui/src/config/uno-config.ts` `theme.colors` (`text-primary`, `bg-surface-elevated`, `border-border-whisper`, `fill-brand-fill`, …). The single source of truth is `package/ui/src/config/tokens/colors.ts` (`lightColors` + `darkColors`); UnoCSS preset-wind4 emits each leaf as a flat `--colors-<path>` custom property under `:root, :host`, and a preflight emits the `.dark { --colors-*: … }` override. Auxiliary tokens (`--font-*`, `--radius-*`, `--shadow-*`, `--duration-*`, `--easing-*`, state opacities) come from the same preflight. R9 in `bun run check:convention` bans every `var(--rezics-*)` reference in source files (`.css`, `.ts`, `.tsx`, `.js`, `.jsx`, `.mdx`) and asserts `package/ui/src/config/tokens.css` does not exist. Mode switching is class-based: toggle `class="dark"` on `<html>`. See `openspec/specs/ui-component-foundation/spec.md` and `package/ui/src/config/README.md` for the full surface.
 
 ## UI Component Policy
 
@@ -125,9 +125,9 @@ This project uses **OpenSpec** for non-trivial changes:
 
 Keep implementation scoped to affected packages. Respect monorepo boundaries and shared package contracts.
 
-### Development-Stage Compatibility
+### Development-Stage Cutovers
 
-This project is in active development. Do not add backward-compatible aliases, legacy routes, compatibility adapters, or dual-read/write shims for internal development-stage renames unless an OpenSpec change explicitly grants an exception. Prefer one clear breaking cutover and update all internal callsites.
+This project is in active development. For internal development-stage renames, make one clear cutover and update every internal callsite in the same change unless an OpenSpec change explicitly grants an exception.
 
 ## Git
 

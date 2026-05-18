@@ -67,13 +67,6 @@ export const userFollowingsQuery = (
     enabled: !!userId,
   });
 
-export const userFollowStatusQuery = (targetIds: string[]) =>
-  queryOptions({
-    queryKey: userKeys.followStatus(targetIds),
-    queryFn: () => userApi.getFollowStatus(targetIds),
-    enabled: targetIds.length > 0,
-  });
-
 export const userBatchQuery = (ids: string[]) =>
   queryOptions({
     queryKey: userKeys.batch(ids),
@@ -105,7 +98,6 @@ export const userQueries = {
   adminDetail: userAdminDetailQuery,
   followers: userFollowersQuery,
   followings: userFollowingsQuery,
-  followStatus: userFollowStatusQuery,
   batch: userBatchQuery,
   settings: userSettingsQuery,
   emailVerification: userEmailVerificationQuery,

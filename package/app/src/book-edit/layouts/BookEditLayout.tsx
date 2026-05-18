@@ -2,7 +2,7 @@ import type React from "react";
 import type { ReactNode } from "react";
 import { Header } from "@/core/components/header/MainLayoutHeader.tsx";
 import { Sidebar } from "@/core/components/sidebar/MainLayoutSidebar.tsx";
-import { bookEditLayoutRoute } from "@/router";
+import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
 import { NAVIGATION } from "./BookEditorNavigation";
 
 export interface BookEditLayoutProps {

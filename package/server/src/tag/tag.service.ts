@@ -231,35 +231,6 @@ export class TagService {
   }
 
   /**
-   * Detach a tag from a unit by deleting the UnitTag row.
-   * Kept for the legacy admin "detach" route; prefer {@link deleteUnitTag}.
-   */
-  async detachFromUnit(tagUnitId: string, unitId: string): Promise<void> {
-    await this.deleteUnitTag(unitId, tagUnitId);
-  }
-
-  /**
-   * Backwards-compatible alias used by the legacy admin "attach" route.
-   * Records the attach as the actor's vote, matching {@link createUnitTag}.
-   */
-  async attachToUnit(
-    tagUnitId: string,
-    unitId: string,
-    actorUserId?: string,
-  ): Promise<void> {
-    if (actorUserId) {
-      await this.createUnitTag(actorUserId, unitId, tagUnitId);
-      return;
-    }
-    await prisma.unitTag.upsert({
-      where: { unitId_tagUnitId: { unitId, tagUnitId } },
-      update: {},
-      create: { unitId, tagUnitId, score: 0, voteCount: 0 },
-    });
-    await patchContentTagsToMeili(unitId);
-  }
-
-  /**
    * Cast a vote on a tag-unit association.
    * Upserts the TagVote and recalculates the UnitTag score and voteCount.
    */

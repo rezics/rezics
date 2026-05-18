@@ -15,11 +15,6 @@ import type {
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 
-type FollowSummaryResponse = {
-  targetIds: string[];
-  followers: Record<string, number>;
-};
-
 export const userApi = {
   me: async (): Promise<UserDTO> => {
     return apiFetch(`/user/me`);
@@ -105,28 +100,6 @@ export const userApi = {
 
   delete: async (userId: string): Promise<{ message: string }> => {
     return apiFetch(`/user/${userId}`, { method: "DELETE" });
-  },
-
-  // follow / unfollow removed by `engagement-subscription` — callers
-  // now use `useSubscribe` / `useUnsubscribe` from the subscription
-  // module against `POST /subscription` and `DELETE /subscription/:id`.
-
-  getFollowStatus: async (
-    targetIds: string[],
-  ): Promise<Record<string, boolean>> => {
-    const qs = new URLSearchParams();
-    for (const id of targetIds) qs.append("targetIds", id);
-    return apiFetch(`/user/follow/status?${qs.toString()}`);
-  },
-
-  getFollowSummary: async (
-    targetIds: string[],
-  ): Promise<FollowSummaryResponse> => {
-    const qs = new URLSearchParams();
-    for (const id of targetIds) qs.append("targetIds", id);
-    return apiFetch<FollowSummaryResponse>(
-      `/user/follow/summary?${qs.toString()}`,
-    );
   },
 
   getFollowers: async (

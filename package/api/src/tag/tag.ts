@@ -48,13 +48,6 @@ export {
   sortTagsByPinThenScore,
 } from "./sort";
 
-// Double-write helper
-export {
-  type TagInRealmInput,
-  type TagInRealmLegStatus,
-  type TagInRealmResult,
-  useTagInRealm,
-} from "./useTagInRealm";
 // Types
 export type {
   AttachTagInput,

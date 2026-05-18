@@ -335,7 +335,7 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
   return response;
 }
 
-export async function handleJwksCompatibilityRequest(
+export async function handleJwksWellKnownRequest(
   request: Request,
 ): Promise<Response> {
   void request;

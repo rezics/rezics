@@ -208,7 +208,10 @@ export class UserService {
     });
 
     if (!user) return null;
-    return { ...user, slug: unit.type === "USER" ? slug : null } as UserWithRelations;
+    return {
+      ...user,
+      slug: unit.type === "USER" ? slug : null,
+    } as UserWithRelations;
   }
 
   /**
@@ -389,38 +392,8 @@ export class UserService {
   }
 
   /**
-   * Get follower-count summary for multiple targets. Reads the
-   * denormalized `User.followersCount` counter maintained by the
-   * subscription service (engagement-subscription, design D6).
-   */
-  async getFollowSummary(targetIds: string[]): Promise<Record<string, number>> {
-    if (!targetIds.length) return {};
-
-    const users = await prisma.user.findMany({
-      where: {
-        unitId: { in: targetIds },
-      },
-      select: {
-        unitId: true,
-        followersCount: true,
-      },
-    });
-
-    const result: Record<string, number> = {};
-    targetIds.forEach((id) => {
-      result[id] = 0;
-    });
-    users.forEach((user) => {
-      result[user.unitId] = user.followersCount ?? 0;
-    });
-
-    return result;
-  }
-
-  /**
    * List followers — users who have an active USER→USER `Subscription`
-   * to `userId`. Pagination is offset/limit-style for parity with the
-   * legacy follow endpoint shape consumed by the profile-followers-tab.
+   * to `userId`.
    * Two-query pattern (subscription ids, then user rows) — `User` is
    * keyed by `unitId`, not by `Unit.userId`, so we cannot rely on
    * Prisma's relation include to walk Unit→User for USER-type units.
@@ -455,8 +428,7 @@ export class UserService {
       include: userInclude,
     });
     followers.sort(
-      (a, b) =>
-        (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
+      (a, b) => (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
     );
     const users = await attachSlugs(followers);
     return { users: users as UserWithRelations[], total };
@@ -496,8 +468,7 @@ export class UserService {
       include: userInclude,
     });
     followings.sort(
-      (a, b) =>
-        (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
+      (a, b) => (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
     );
     const users = await attachSlugs(followings);
     return { users: users as UserWithRelations[], total };

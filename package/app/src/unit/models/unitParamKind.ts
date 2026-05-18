@@ -1,6 +1,6 @@
 import type { CandidateKind, IdentifierType } from "./types";
 
-const ALIAS_MAP: Record<string, CandidateKind> = {
+const PARAM_KIND_BY_NAME: Record<string, CandidateKind> = {
   rootPostUnitId: "post",
   reviewId: "review",
   remarkId: "remark",
@@ -39,9 +39,9 @@ export function unitParamKind(paramName: string): ParamKind | null {
   }
   if (!baseName) return null;
 
-  const alias = ALIAS_MAP[paramName];
-  if (alias) {
-    return { kind: alias, identifierType };
+  const namedKind = PARAM_KIND_BY_NAME[paramName];
+  if (namedKind) {
+    return { kind: namedKind, identifierType };
   }
 
   return { kind: baseName.toLowerCase() as CandidateKind, identifierType };

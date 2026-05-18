@@ -144,7 +144,7 @@ describe("progress contract schemas", () => {
     expect(
       Value.Check(progressExtraSchema, {
         paused: { reasonPostUnitIds: ["p-1"] },
-        legacy: { foo: 1 },
+        unknownBucket: { foo: 1 },
       }),
     ).toBe(false);
     // Unknown sub-keys rejected
@@ -177,5 +177,4 @@ describe("progress contract schemas", () => {
       }),
     ).toBe(false);
   });
-
 });

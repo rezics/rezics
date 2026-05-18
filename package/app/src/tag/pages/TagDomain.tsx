@@ -1,7 +1,8 @@
 import { tagQueries } from "@rezics/api/tag/tag";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
-import { tagDomainRoute, tagDomainTitleRoute } from "@/router";
+import { Route as tagDomainRoute } from "@/routes/_mainLayout/tag/domain/$unitId/route";
+import { Route as tagDomainTitleRoute } from "@/routes/_mainLayout/tag/domain/$unitId/title/$title";
 import { TagWrapper } from "../components/TagWrapper";
 
 export function TagDomainPage() {

@@ -3,10 +3,7 @@ import type {
   ShelfSortState,
   ShelfView,
 } from "@rezics/api/shelf";
-import type {
-  ShelfUnitDTO,
-  ShelfUnitRelationDTO,
-} from "@rezics/contract";
+import type { ShelfUnitDTO, ShelfUnitRelationDTO } from "@rezics/contract";
 import { titleOf } from "./titleOf";
 
 export interface ShelfStreamRootEntry {
@@ -60,8 +57,10 @@ function compareByMode(
 ): number {
   if (sort.field === "manual") {
     return (
-      maybeReverse(comparePosition(a.unit.position, b.unit.position), sort.order) ||
-      titleCollator.compare(a.unit.unitId, b.unit.unitId)
+      maybeReverse(
+        comparePosition(a.unit.position, b.unit.position),
+        sort.order,
+      ) || titleCollator.compare(a.unit.unitId, b.unit.unitId)
     );
   }
   if (sort.field === "addedAt") {
@@ -154,10 +153,7 @@ export function deriveShelfStream(
     return sortedClone(roots, sort).map((root) => ({
       kind: "root" as const,
       unit: root,
-      children: sortedClone(
-        childByParent.get(root.unit.unitId) ?? [],
-        sort,
-      ),
+      children: sortedClone(childByParent.get(root.unit.unitId) ?? [], sort),
     }));
   }
 
@@ -183,10 +179,6 @@ export function deriveShelfStream(
   }));
 }
 
-/**
- * Convenience helper for legacy callsites that operated on a single
- * `ShelfUnitDTO` list and need to find a unit by id.
- */
 export function shelfUnitsById(
   units: EnrichedShelfUnit[],
 ): Map<string, EnrichedShelfUnit> {

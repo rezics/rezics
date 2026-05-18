@@ -77,7 +77,7 @@ main-owned email verification contracts such as `user.email`; auth login email
 changes must not update this column automatically.
 
 `server.User.slug` is the canonical Rezics slug. Auth may store that slug as a
-login alias or technical label, but the projection is one-way from main to
+login identifier or technical label, but the projection is one-way from main to
 auth.
 
 `server.User.name` is the Rezics product display name. If better-auth requires

@@ -25,15 +25,6 @@ type ButtonVariant =
   | "secondary"
   | "link";
 type ButtonSize = "sm" | "default" | "lg" | "icon";
-// Legacy MUI size names accepted at the prop boundary for backwards compatibility
-// with un-migrated call sites; mapped onto shadcn sizes internally.
-type LegacyButtonSize = "small" | "medium" | "large";
-
-const SIZE_MAP: Record<LegacyButtonSize, ButtonSize> = {
-  small: "sm",
-  medium: "default",
-  large: "lg",
-};
 
 type FollowButtonProps = {
   /** Target user's userId. */
@@ -48,20 +39,13 @@ type FollowButtonProps = {
   /** 是否显示粉丝统计文案，例如 "123 followers" */
   showFollowersText?: boolean;
   /** 覆盖 Button 尺寸 */
-  size?: ButtonSize | LegacyButtonSize;
+  size?: ButtonSize;
   /** 覆盖 Button 变体 */
   variant?: ButtonVariant;
   /** 是否铺满宽度 */
   fullWidth?: boolean;
   className?: string;
 };
-
-function normalizeSize(size: ButtonSize | LegacyButtonSize): ButtonSize {
-  if (size === "small" || size === "medium" || size === "large") {
-    return SIZE_MAP[size];
-  }
-  return size;
-}
 
 export const FollowButton: React.FC<FollowButtonProps> = ({
   userId,
@@ -151,16 +135,14 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 
   const label = isFollowing ? "Following" : "Follow";
 
-  const normalizedSize = normalizeSize(size);
-
   const button = (
     <Button
       variant={variant}
-      size={normalizedSize}
+      size={size}
       disabled={!userId || loading}
       onClick={handleClick}
       className={cn(
-        normalizedSize === "sm" ? "py-1" : "py-2",
+        size === "sm" ? "py-1" : "py-2",
         fullWidth && "w-full",
         className,
       )}

@@ -54,7 +54,7 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: v.string(),
 
     /**
-     * Supplemental secrets for rotation or backward compatibility.
+     * Supplemental secrets for planned secret rotation.
      */
     BETTER_AUTH_SECRETS: v.optional(v.string()),
 

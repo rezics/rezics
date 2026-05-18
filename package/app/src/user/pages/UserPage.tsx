@@ -2,7 +2,7 @@ import type { UserDTO } from "@rezics/contract";
 import { useMatch } from "@tanstack/react-router";
 import type { FC } from "react";
 import { useState } from "react";
-import { userRoute } from "@/router";
+import { Route as userRoute } from "@/routes/_mainLayout/user/$userId";
 import { useUserProfileStore } from "@/user/states";
 import { UserEditPage } from "./UserEditPage";
 import { UserProfilePage } from "./UserProfilePage";

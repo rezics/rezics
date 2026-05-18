@@ -44,9 +44,6 @@ export const jwtPayloadSchema = t.Object({
   userId: t.String(),
   slug: t.Optional(t.String()),
   scope: t.Union([t.String(), t.Array(t.String())]),
-  /**
-   * @deprecated use scope instead
-   */
   permission: t.Optional(
     t.Object(
       {

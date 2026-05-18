@@ -6,7 +6,7 @@ import { LinearChapterList } from "@/book-library/components/Chapter/LinearChapt
 import { Header } from "@/core/components/header/MainLayoutHeader";
 import { Sidebar } from "@/core/components/sidebar/MainLayoutSidebar";
 import { useLayoutStore } from "@/core/states/layoutStore.ts";
-import { bookReadLayoutRoute } from "@/router";
+import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
 export interface BookReadLayoutProps {
   children: ReactNode;
 }

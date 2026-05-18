@@ -387,7 +387,7 @@ describe("auth jwt prisma adapter", () => {
     });
   });
 
-  test("keeps migration bootstrap and backfill steps for legacy jwks rows", () => {
+  test("keeps migration bootstrap and backfill steps for jwks rows", () => {
     const migrationPath = join(
       import.meta.dir,
       "../../../prisma/migrations/20260319120000_jwk_storage/migration.sql",

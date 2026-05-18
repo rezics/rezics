@@ -1,8 +1,7 @@
-import { mapUnitListToReviewListResponse } from "@rezics/api/meili/meili.api";
-import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
-import { UnitType } from "@rezics/contract";
+import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
+import type { PostDTO, PostSearchDocument } from "@rezics/contract";
+import { PostKind } from "@rezics/contract";
 import { EmptyState, Spinner } from "@rezics/ui";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReviewList } from "@/review/components/list/ReviewList";
@@ -17,18 +16,14 @@ export function ReviewSearchPage() {
   const keyword = search.query.keyword ?? "";
   const keywordBind = search.bind("keyword");
 
-  const { data, isLoading } = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.POST,
-      start,
-      targetUnitId: "",
-      keyword,
-      limit,
-      mapFn: mapUnitListToReviewListResponse,
-    }),
-  );
+  const { data, isLoading } = usePostSearchQuery({
+    kind: PostKind.REVIEW,
+    keyword,
+    offset: start,
+    limit,
+  });
 
-  const reviews = data?.reviews ?? [];
+  const reviews = data?.items?.map(mapPostSearchDocToPostDTO) ?? [];
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
@@ -57,3 +52,32 @@ export function ReviewSearchPage() {
 }
 
 export default ReviewSearchPage;
+
+function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
+  return {
+    unitId: doc.id,
+    authorUserId: doc.authorUserId,
+    author: {
+      unitId: doc.authorUserId,
+      name: doc.authorName ?? "",
+      slug: doc.authorSlug ?? undefined,
+      avatar: doc.authorAvatar ?? undefined,
+    },
+    targetUnitId: doc.targetUnitId,
+    realmUnitId: doc.realmUnitId,
+    body: doc.body,
+    rootPostUnitId: doc.rootPostUnitId,
+    parentPostUnitId: doc.parentPostUnitId,
+    kind: doc.kind as PostDTO["kind"],
+    depth: doc.depth,
+    sortPath: doc.sortPath,
+    replyCount: doc.replyCount,
+    directReplyCount: doc.directReplyCount,
+    lastReplyAt: doc.lastReplyAt,
+    isLocked: doc.isLocked,
+    scoreEntryId: doc.scoreEntryId,
+    extra: doc.extra,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
