@@ -7,7 +7,7 @@
 - [x] 1.5 Add contract schemas for lock metadata, collaborator metadata, authority errors, and locked-field rejection payloads.
 - [x] 1.6 Add contract schemas for history outbox payload categories and history read DTOs (`UnitRevision`, `RevisionContent`, timeline page, single revision).
 - [x] 1.7 Add tests for field-key vocabulary coverage and stable literal values used by server/app/api.
-- [ ] 1.8 Run contract type checks and update any generated exports affected by new enums or schemas.
+- [x] 1.8 Run contract type checks and update any generated exports affected by new enums or schemas.
 
 ## 2. Main Schema And Seed Infrastructure
 
@@ -40,9 +40,9 @@
 - [x] 4.2 Add server services for listing, creating, and deleting Unit field locks.
 - [x] 4.3 Add API routes for collaborator management with owner/maintainer/admin gating.
 - [x] 4.4 Add API routes for field lock management with owner/maintainer/admin gating.
-- [ ] 4.5 Ensure lock and collaborator mutations write history/audit outbox records where applicable.
-- [ ] 4.6 Add `package/api` clients and hooks for collaborator list/mutation workflows.
-- [ ] 4.7 Add `package/api` clients and hooks for field lock list/mutation workflows.
+- [x] 4.5 Ensure lock and collaborator mutations write history/audit outbox records where applicable.
+- [x] 4.6 Add `package/api` clients and hooks for collaborator list/mutation workflows.
+- [x] 4.7 Add `package/api` clients and hooks for field lock list/mutation workflows.
 - [x] 4.8 Add tests for unauthorized lock/collaborator mutation attempts and admin override behavior.
 
 ## 5. Transactional History Outbox In Main
@@ -54,23 +54,23 @@
 - [x] 5.5 Implement structure-event payload builders for Book content-structure operations.
 - [x] 5.6 Add tests proving canonical mutation rollback also rolls back the outbox row.
 - [x] 5.7 Add tests proving consecutive edits write distinct payloads and ordered per-Unit sequences.
-- [ ] 5.8 Add tests proving main does not call history service HTTP inside mutation transactions.
+- [x] 5.8 Add tests proving main does not call history service HTTP inside mutation transactions.
 
 ## 6. History Service Package
 
 - [x] 6.1 Add `package/history` workspace with Bun package metadata, tsconfig, Elysia entrypoint, and scripts.
 - [x] 6.2 Add `package/history/prisma/schema.prisma` for `UnitRevision`, `RevisionContent`, structure event storage, ingestion cursors, and processing metadata.
 - [x] 6.3 Add history service env validation using the repo's `@t3-oss/env-core` + Valibot pattern.
-- [ ] 6.4 Implement the outbox consumer with claim, process, retry, failure, and idempotency behavior.
+- [x] 6.4 Implement the outbox consumer with claim, process, retry, failure, and idempotency behavior.
 - [x] 6.5 Implement `RevisionContent` upsert by content hash.
 - [x] 6.6 Implement `UnitRevision` insertion with unique `(unitId, sequence)`.
 - [x] 6.7 Implement structure event ingestion for Book content-structure events.
 - [x] 6.8 Add `GET /history/unit/:unitId/revisions` timeline endpoint.
 - [x] 6.9 Add `GET /history/unit/:unitId/revisions/:sequence` single revision endpoint.
-- [ ] 6.10 Add structure event read endpoints required by Book content-structure history.
+- [x] 6.10 Add structure event read endpoints required by Book content-structure history.
 - [x] 6.11 Add health/readiness endpoints matching existing service patterns.
-- [ ] 6.12 Add unit tests for revision ingestion, idempotent retries, duplicate content hashes, failed outbox retry, and sequence uniqueness.
-- [ ] 6.13 Add service integration notes or scripts to local dev orchestration if required.
+- [x] 6.12 Add unit tests for revision ingestion, idempotent retries, duplicate content hashes, failed outbox retry, and sequence uniqueness.
+- [x] 6.13 Add service integration notes or scripts to local dev orchestration if required.
 
 ## 7. Server Creation Modes
 
@@ -88,8 +88,8 @@
 
 ## 8. Collaborative Metadata Mutations
 
-- [ ] 8.1 Identify current server endpoints that mutate Book metadata, Entity metadata, Unit translations, credit attribution, subject attribution, and tags.
-- [ ] 8.2 For the first rollout batch, choose endpoints that will become collaborative and document skipped endpoints in code comments or tasks.
+- [x] 8.1 Identify current server endpoints that mutate Book metadata, Entity metadata, Unit translations, credit attribution, subject attribution, and tags.
+- [x] 8.2 For the first rollout batch, choose endpoints that will become collaborative and document skipped endpoints in code comments or tasks.
 - [ ] 8.3 Add changed-field-key mapping for each migrated mutation request.
 - [ ] 8.4 Wrap each migrated mutation in the shared authority/lock gate before canonical writes.
 - [ ] 8.5 Write history outbox rows for each migrated mutation after canonical writes in the same transaction.
