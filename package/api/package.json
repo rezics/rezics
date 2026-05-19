@@ -42,6 +42,10 @@
       "types": "./src/slug/index.ts",
       "default": "./src/slug/index.ts"
     },
+    "./unit": {
+      "types": "./src/unit/index.ts",
+      "default": "./src/unit/index.ts"
+    },
     "./*": {
       "types": "./src/*.ts",
       "default": "./src/*.ts"

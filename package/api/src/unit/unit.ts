@@ -13,10 +13,23 @@
 
 // API Client
 export { unitApi } from "./unit.api";
+export { unitAuthorityApi } from "./authority.api";
 
 // Query Keys
+export { unitAuthorityKeys } from "./authority.keys";
 export { unitKeys } from "./unit.keys";
 // Mutation Hooks
+export {
+  unitAuthorityMutations,
+  useRemoveUnitCollaboratorMutation,
+  useRemoveUnitFieldLockMutation,
+  useUpsertUnitCollaboratorMutation,
+  useUpsertUnitFieldLockMutation,
+  type RemoveUnitCollaboratorVariables,
+  type RemoveUnitFieldLockVariables,
+  type UpsertUnitCollaboratorVariables,
+  type UpsertUnitFieldLockVariables,
+} from "./authority.mutations";
 export {
   unitMutations,
   useCreateUnitMutation,
@@ -27,6 +40,11 @@ export {
 } from "./unit.mutations";
 
 // Query Configurations
+export {
+  unitAuthorityQueries,
+  unitCollaboratorsQueryOptions,
+  unitFieldLocksQueryOptions,
+} from "./authority.queries";
 export {
   unitBySlugQuery,
   unitDetailQuery,
