@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { creditAttributionBriefSchema } from "./credit-attribution";
+import { creationModeSchema } from "./content-authority";
 import { languageSchema } from "./language";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
@@ -149,6 +150,7 @@ export type BookResponse = (typeof bookResponseSchema)["static"];
 
 export const createBookSchema = t.Object({
   userId: t.Optional(t.String()),
+  creationMode: t.Optional(creationModeSchema),
   defaultLanguage: t.Optional(languageSchema),
   isbn13: t.Optional(t.String()),
   publicationDate: t.Optional(t.Union([t.String(), t.Date()])),

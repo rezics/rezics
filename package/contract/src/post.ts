@@ -3,6 +3,7 @@ import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema } from "./unit";
+import { creationModeSchema } from "./content-authority";
 
 // ============================================================
 // POST KIND
@@ -14,6 +15,7 @@ export const PostKind = {
   EXCERPT: "EXCERPT",
   POST: "POST",
   CHAPTER: "CHAPTER",
+  WIKI: "WIKI",
 } as const;
 
 export type PostKind = (typeof PostKind)[keyof typeof PostKind];
@@ -24,6 +26,7 @@ export const postKindLiterals = t.Union([
   t.Literal("EXCERPT"),
   t.Literal("POST"),
   t.Literal("CHAPTER"),
+  t.Literal("WIKI"),
 ]);
 
 // ============================================================
@@ -214,6 +217,7 @@ export const createPostSchema = t.Object({
   tagIds: t.Optional(t.Array(t.String())),
   parentPostUnitId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
+  creationMode: t.Optional(creationModeSchema),
   body: t.String(),
   scoreEntryId: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),

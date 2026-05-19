@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { creationModeSchema } from "./content-authority";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { unitTranslationDTOSchema } from "./unit";
 
@@ -39,6 +40,7 @@ export const createEntityTranslationSchema = t.Object({
 });
 
 export const createEntitySchema = t.Object({
+  creationMode: t.Optional(creationModeSchema),
   kind: t.Optional(t.Nullable(t.String())),
   /** Admin-only-after-verified — rejected for non-admin callers. */
   slug: t.Optional(t.Nullable(t.String())),
