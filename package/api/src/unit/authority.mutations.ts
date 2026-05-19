@@ -104,7 +104,11 @@ export function useUpsertUnitFieldLockMutation(
 
 export function useRemoveUnitFieldLockMutation(
   options?: Omit<
-    UseMutationOptions<{ message: string }, Error, RemoveUnitFieldLockVariables>,
+    UseMutationOptions<
+      { message: string },
+      Error,
+      RemoveUnitFieldLockVariables
+    >,
     "mutationFn"
   >,
 ) {

@@ -1,11 +1,27 @@
-import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
-import { unitMutations } from "@rezics/api/unit/unit.mutations";
+import {
+  type RemoveUnitCollaboratorVariables,
+  type RemoveUnitFieldLockVariables,
+  type UnitDTO,
+  unitAuthorityQueries,
+  unitMutations,
+  useRemoveUnitCollaboratorMutation,
+  useRemoveUnitFieldLockMutation,
+  useUpsertUnitCollaboratorMutation,
+  useUpsertUnitFieldLockMutation,
+} from "@rezics/api/unit/unit";
 import {
   subjectAttributionQueries,
   useLinkSubjectAttributionMutation,
   useUnlinkSubjectAttributionMutation,
 } from "@rezics/api/subject-attribution/subject-attribution";
-import { subjectAttributionRoles } from "@rezics/contract";
+import {
+  type LockFieldKey,
+  UNIT_FIELD_KEYS,
+  UNIT_FIELD_LOCK_ALL,
+  UnitAuthorityRoleKey,
+  type UnitAuthorityRoleKey as UnitAuthorityRoleKeyType,
+  subjectAttributionRoles,
+} from "@rezics/contract";
 
 import { Spinner } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -31,6 +47,9 @@ import {
   Trash2 as TrashIcon,
 } from "lucide-react";
 
+const lockFieldOptions = [UNIT_FIELD_LOCK_ALL, ...UNIT_FIELD_KEYS] as const;
+const collaboratorRoleOptions = Object.values(UnitAuthorityRoleKey);
+
 function fmtDate(v?: string | Date) {
   if (!v) return "";
   const d = typeof v === "string" ? new Date(v) : v;
@@ -53,6 +72,10 @@ export default function UnitEditPage() {
 
   const detailQuery = useQuery(unitQueries.detail(unitId));
   const subjectQuery = useQuery(subjectAttributionQueries.byUnit(unitId));
+  const fieldLocksQuery = useQuery(unitAuthorityQueries.fieldLocks(unitId));
+  const collaboratorsQuery = useQuery(
+    unitAuthorityQueries.collaborators(unitId),
+  );
 
   const updateMutation = unitMutations.useUpdate({
     onError: (err) =>
@@ -69,6 +92,32 @@ export default function UnitEditPage() {
       setError(err instanceof Error ? err.message : "Subject unlink failed"),
     onSuccess: () => setError(null),
   });
+  const upsertFieldLockMutation = useUpsertUnitFieldLockMutation({
+    onError: (err) =>
+      setError(err instanceof Error ? err.message : "Field lock update failed"),
+    onSuccess: () => setError(null),
+  });
+  const removeFieldLockMutation = useRemoveUnitFieldLockMutation({
+    onError: (err) =>
+      setError(
+        err instanceof Error ? err.message : "Field lock removal failed",
+      ),
+    onSuccess: () => setError(null),
+  });
+  const upsertCollaboratorMutation = useUpsertUnitCollaboratorMutation({
+    onError: (err) =>
+      setError(
+        err instanceof Error ? err.message : "Collaborator update failed",
+      ),
+    onSuccess: () => setError(null),
+  });
+  const removeCollaboratorMutation = useRemoveUnitCollaboratorMutation({
+    onError: (err) =>
+      setError(
+        err instanceof Error ? err.message : "Collaborator removal failed",
+      ),
+    onSuccess: () => setError(null),
+  });
 
   const [status, setStatus] = React.useState("");
   const [visibility, setVisibility] = React.useState("");
@@ -79,6 +128,12 @@ export default function UnitEditPage() {
   );
   const [subjectSortOrder, setSubjectSortOrder] = React.useState("0");
   const [subjectWeight, setSubjectWeight] = React.useState("");
+  const [lockFieldKey, setLockFieldKey] =
+    React.useState<LockFieldKey>(UNIT_FIELD_LOCK_ALL);
+  const [lockReason, setLockReason] = React.useState("");
+  const [collaboratorUserId, setCollaboratorUserId] = React.useState("");
+  const [collaboratorRole, setCollaboratorRole] =
+    React.useState<UnitAuthorityRoleKeyType>(UnitAuthorityRoleKey.EDITOR);
 
   React.useEffect(() => {
     const u: UnitDTO | undefined = detailQuery.data;
@@ -147,6 +202,48 @@ export default function UnitEditPage() {
     setSubjectSortOrder("0");
     setSubjectWeight("");
     await subjectQuery.refetch();
+  }
+
+  async function onUpsertFieldLock(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    await upsertFieldLockMutation.mutateAsync({
+      unitId,
+      fieldKey: lockFieldKey,
+      reason: lockReason.trim() || null,
+    });
+    setLockReason("");
+    await fieldLocksQuery.refetch();
+  }
+
+  async function onRemoveFieldLock(variables: RemoveUnitFieldLockVariables) {
+    setError(null);
+    await removeFieldLockMutation.mutateAsync(variables);
+    await fieldLocksQuery.refetch();
+  }
+
+  async function onUpsertCollaborator(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (!collaboratorUserId.trim()) {
+      setError("Collaborator User Unit ID is required.");
+      return;
+    }
+    await upsertCollaboratorMutation.mutateAsync({
+      unitId,
+      userId: collaboratorUserId.trim(),
+      roleKey: collaboratorRole,
+    });
+    setCollaboratorUserId("");
+    await collaboratorsQuery.refetch();
+  }
+
+  async function onRemoveCollaborator(
+    variables: RemoveUnitCollaboratorVariables,
+  ) {
+    setError(null);
+    await removeCollaboratorMutation.mutateAsync(variables);
+    await collaboratorsQuery.refetch();
   }
 
   return (
@@ -384,6 +481,216 @@ export default function UnitEditPage() {
                     Link
                   </Button>
                 </form>
+              </section>
+
+              <Separator className="mb-4" />
+
+              <section className="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-2">
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
+                    <h3 className="text-base font-semibold">Field Locks</h3>
+                    <p className="text-xs text-text-secondary">
+                      Manage sparse collaborative locks for this Unit. Whole
+                      object locks use the <code>*</code> field key.
+                    </p>
+                  </div>
+
+                  {fieldLocksQuery.isLoading ? (
+                    <div className="flex justify-center py-4">
+                      <Spinner />
+                    </div>
+                  ) : fieldLocksQuery.isError ? (
+                    <p className="text-sm text-error-text">
+                      Failed to load field locks.
+                    </p>
+                  ) : fieldLocksQuery.data?.locks.length ? (
+                    <div className="flex flex-col gap-2">
+                      {fieldLocksQuery.data.locks.map((lock) => (
+                        <div
+                          key={lock.fieldKey}
+                          className="flex flex-col gap-2 border-b border-border-whisper py-2 sm:flex-row sm:items-center"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium">
+                              {lock.fieldKey}
+                            </p>
+                            <p className="text-xs text-text-secondary">
+                              Locked by {lock.lockedById} ·{" "}
+                              {fmtDate(lock.createdAt)}
+                            </p>
+                            {lock.reason ? (
+                              <p className="text-xs text-text-secondary">
+                                {lock.reason}
+                              </p>
+                            ) : null}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Remove field lock"
+                            disabled={removeFieldLockMutation.isPending}
+                            onClick={() =>
+                              onRemoveFieldLock({
+                                unitId,
+                                fieldKey: lock.fieldKey,
+                              })
+                            }
+                          >
+                            <TrashIcon className="size-4 text-text-secondary" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-text-secondary">
+                      No field locks are active.
+                    </p>
+                  )}
+
+                  <form
+                    onSubmit={onUpsertFieldLock}
+                    className="grid grid-cols-1 gap-3 sm:grid-cols-[220px_minmax(0,1fr)_auto]"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor="field-lock-key">Field</Label>
+                      <select
+                        id="field-lock-key"
+                        value={lockFieldKey}
+                        onChange={(e) =>
+                          setLockFieldKey(e.target.value as LockFieldKey)
+                        }
+                        className="h-9 rounded-md border border-border-whisper bg-transparent px-2 text-sm"
+                      >
+                        {lockFieldOptions.map((fieldKey) => (
+                          <option key={fieldKey} value={fieldKey}>
+                            {fieldKey}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor="field-lock-reason">Reason</Label>
+                      <Input
+                        id="field-lock-reason"
+                        value={lockReason}
+                        onChange={(e) => setLockReason(e.target.value)}
+                        placeholder="optional moderation note"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="self-end"
+                      disabled={upsertFieldLockMutation.isPending}
+                    >
+                      <PlusIcon className="size-4" />
+                      Lock
+                    </Button>
+                  </form>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
+                    <h3 className="text-base font-semibold">Collaborators</h3>
+                    <p className="text-xs text-text-secondary">
+                      Delegate per-Unit authority without changing the primary
+                      owner.
+                    </p>
+                  </div>
+
+                  {collaboratorsQuery.isLoading ? (
+                    <div className="flex justify-center py-4">
+                      <Spinner />
+                    </div>
+                  ) : collaboratorsQuery.isError ? (
+                    <p className="text-sm text-error-text">
+                      Failed to load collaborators.
+                    </p>
+                  ) : collaboratorsQuery.data?.collaborators.length ? (
+                    <div className="flex flex-col gap-2">
+                      {collaboratorsQuery.data.collaborators.map(
+                        (collaborator) => (
+                          <div
+                            key={collaborator.userId}
+                            className="flex flex-col gap-2 border-b border-border-whisper py-2 sm:flex-row sm:items-center"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium">
+                                {collaborator.userId}
+                              </p>
+                              <p className="text-xs text-text-secondary">
+                                {collaborator.roleKey} · added by{" "}
+                                {collaborator.addedById} ·{" "}
+                                {fmtDate(collaborator.createdAt)}
+                              </p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Remove collaborator"
+                              disabled={removeCollaboratorMutation.isPending}
+                              onClick={() =>
+                                onRemoveCollaborator({
+                                  unitId,
+                                  userId: collaborator.userId,
+                                })
+                              }
+                            >
+                              <TrashIcon className="size-4 text-text-secondary" />
+                            </Button>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-text-secondary">
+                      No collaborators are assigned.
+                    </p>
+                  )}
+
+                  <form
+                    onSubmit={onUpsertCollaborator}
+                    className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_160px_auto]"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor="collaborator-user-id">User Unit ID</Label>
+                      <Input
+                        id="collaborator-user-id"
+                        value={collaboratorUserId}
+                        onChange={(e) => setCollaboratorUserId(e.target.value)}
+                        placeholder="USER unit id"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor="collaborator-role">Role</Label>
+                      <select
+                        id="collaborator-role"
+                        value={collaboratorRole}
+                        onChange={(e) =>
+                          setCollaboratorRole(
+                            e.target.value as UnitAuthorityRoleKeyType,
+                          )
+                        }
+                        className="h-9 rounded-md border border-border-whisper bg-transparent px-2 text-sm"
+                      >
+                        {collaboratorRoleOptions.map((role) => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <Button
+                      type="submit"
+                      className="self-end"
+                      disabled={upsertCollaboratorMutation.isPending}
+                    >
+                      <PlusIcon className="size-4" />
+                      Add
+                    </Button>
+                  </form>
+                </div>
               </section>
 
               <Separator className="mb-4" />
