@@ -256,3 +256,14 @@ Seed and factory writers SHALL NOT supply an `accountStatus` field on `prisma.us
 
 - **WHEN** a developer attempts to write `accountStatus: "MEMBER_READY"` in a seed function
 - **THEN** TypeScript SHALL surface a type error (the field does not exist on the Prisma user model after migration)
+
+### Requirement: Seeded publishable units carry publication defaults
+The seed system SHALL write the platform default publication license slug onto seeded publishable Unit rows instead of relying on nullable fallback behavior.
+
+#### Scenario: Factory seed creates publishable content
+- **WHEN** the factory seed creates a `BOOK`, `GAME`, `MEDIA`, `POST`, or `SHELF` Unit
+- **THEN** the Unit SHALL store `licenseSlug = "all-rights-reserved"`
+
+#### Scenario: Seeded publishing defaults are available for composer flows
+- **WHEN** infra and user seeds create default demo records
+- **THEN** at least one seeded user and the default official realm SHALL expose a valid publishing default license slug
