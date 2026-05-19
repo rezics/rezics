@@ -1,5 +1,13 @@
+export {
+  AddUnitTranslationLanguageDialog,
+  type AddUnitTranslationLanguageDialogProps,
+} from "./components/AddUnitTranslationLanguageDialog";
 export { UnitAddPicker, UnitSearchSelect } from "./components/UnitAddPicker";
 export { UnitCard, type UnitCardProps } from "./components/UnitCard";
+export {
+  UnitTranslationLanguageBar,
+  type UnitTranslationLanguageBarProps,
+} from "./components/UnitTranslationLanguageBar";
 export {
   UnitPicker,
   type UnitPickerProps,

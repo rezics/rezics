@@ -96,6 +96,7 @@ import { Route as MainLayoutRealmRealmIdManageRouteImport } from './routes/_main
 import { Route as MainLayoutInboxDmConversationIdRouteImport } from './routes/_mainLayout/inbox/dm/$conversationId'
 import { Route as MainLayoutExcerptBookBookIdRouteImport } from './routes/_mainLayout/excerpt/book/$bookId'
 import { Route as MainLayoutExcerptUnitIdEditRouteImport } from './routes/_mainLayout/excerpt/$unitId/edit'
+import { Route as MainLayoutEntityUnitIdEditRouteImport } from './routes/_mainLayout/entity/$unitId/edit'
 import { Route as MainLayoutBookBookIdSearchRouteImport } from './routes/_mainLayout/book/$bookId/search'
 import { Route as MainLayoutBookBookIdReviewRouteImport } from './routes/_mainLayout/book/$bookId/review'
 import { Route as MainLayoutBookBookIdInfoRouteImport } from './routes/_mainLayout/book/$bookId/info'
@@ -602,6 +603,12 @@ const MainLayoutExcerptUnitIdEditRoute =
     path: '/excerpt/$unitId/edit',
     getParentRoute: () => MainLayoutRoute,
   } as any)
+const MainLayoutEntityUnitIdEditRoute =
+  MainLayoutEntityUnitIdEditRouteImport.update({
+    id: '/entity/$unitId/edit',
+    path: '/entity/$unitId/edit',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
 const MainLayoutBookBookIdSearchRoute =
   MainLayoutBookBookIdSearchRouteImport.update({
     id: '/search',
@@ -832,6 +839,7 @@ export interface FileRoutesByFullPath {
   '/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
   '/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
+  '/entity/$unitId/edit': typeof MainLayoutEntityUnitIdEditRoute
   '/excerpt/$unitId/edit': typeof MainLayoutExcerptUnitIdEditRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
@@ -941,6 +949,7 @@ export interface FileRoutesByTo {
   '/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
   '/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
+  '/entity/$unitId/edit': typeof MainLayoutEntityUnitIdEditRoute
   '/excerpt/$unitId/edit': typeof MainLayoutExcerptUnitIdEditRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
@@ -1060,6 +1069,7 @@ export interface FileRoutesById {
   '/_mainLayout/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
   '/_mainLayout/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/_mainLayout/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
+  '/_mainLayout/entity/$unitId/edit': typeof MainLayoutEntityUnitIdEditRoute
   '/_mainLayout/excerpt/$unitId/edit': typeof MainLayoutExcerptUnitIdEditRoute
   '/_mainLayout/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/_mainLayout/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
@@ -1180,6 +1190,7 @@ export interface FileRouteTypes {
     | '/book/$bookId/info'
     | '/book/$bookId/review'
     | '/book/$bookId/search'
+    | '/entity/$unitId/edit'
     | '/excerpt/$unitId/edit'
     | '/excerpt/book/$bookId'
     | '/inbox/dm/$conversationId'
@@ -1289,6 +1300,7 @@ export interface FileRouteTypes {
     | '/book/$bookId/info'
     | '/book/$bookId/review'
     | '/book/$bookId/search'
+    | '/entity/$unitId/edit'
     | '/excerpt/$unitId/edit'
     | '/excerpt/book/$bookId'
     | '/inbox/dm/$conversationId'
@@ -1407,6 +1419,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/book/$bookId/info'
     | '/_mainLayout/book/$bookId/review'
     | '/_mainLayout/book/$bookId/search'
+    | '/_mainLayout/entity/$unitId/edit'
     | '/_mainLayout/excerpt/$unitId/edit'
     | '/_mainLayout/excerpt/book/$bookId'
     | '/_mainLayout/inbox/dm/$conversationId'
@@ -2094,6 +2107,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutExcerptUnitIdEditRouteImport
       parentRoute: typeof MainLayoutRoute
     }
+    '/_mainLayout/entity/$unitId/edit': {
+      id: '/_mainLayout/entity/$unitId/edit'
+      path: '/entity/$unitId/edit'
+      fullPath: '/entity/$unitId/edit'
+      preLoaderRoute: typeof MainLayoutEntityUnitIdEditRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
     '/_mainLayout/book/$bookId/search': {
       id: '/_mainLayout/book/$bookId/search'
       path: '/search'
@@ -2557,6 +2577,7 @@ interface MainLayoutRouteChildren {
   MainLayoutUnitIndexRoute: typeof MainLayoutUnitIndexRoute
   MainLayoutTagBookBookIdRouteRoute: typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   MainLayoutTagDomainUnitIdRouteRoute: typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
+  MainLayoutEntityUnitIdEditRoute: typeof MainLayoutEntityUnitIdEditRoute
   MainLayoutExcerptUnitIdEditRoute: typeof MainLayoutExcerptUnitIdEditRoute
   MainLayoutExcerptBookBookIdRoute: typeof MainLayoutExcerptBookBookIdRoute
   MainLayoutInboxDmConversationIdRoute: typeof MainLayoutInboxDmConversationIdRoute
@@ -2625,6 +2646,7 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
     MainLayoutTagBookBookIdRouteRouteWithChildren,
   MainLayoutTagDomainUnitIdRouteRoute:
     MainLayoutTagDomainUnitIdRouteRouteWithChildren,
+  MainLayoutEntityUnitIdEditRoute: MainLayoutEntityUnitIdEditRoute,
   MainLayoutExcerptUnitIdEditRoute: MainLayoutExcerptUnitIdEditRoute,
   MainLayoutExcerptBookBookIdRoute: MainLayoutExcerptBookBookIdRoute,
   MainLayoutInboxDmConversationIdRoute: MainLayoutInboxDmConversationIdRoute,

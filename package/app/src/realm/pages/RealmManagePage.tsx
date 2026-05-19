@@ -10,12 +10,15 @@ import { unitApi } from "@rezics/api/unit/unit";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { unitHref } from "@rezics/ui/primitive/link";
-import { Button, Input, Label } from "@rezics/ui/shadcn";
+import { Button, Input, Label, Textarea } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PinboardAdminSection } from "@/pinboard";
-import { getTranslation } from "@/shared/utils/translation-helpers";
+import {
+  AddUnitTranslationLanguageDialog,
+  UnitTranslationLanguageBar,
+} from "@/unit";
 import { canManageRealm } from "../models/canManageRealm";
 import { RealmExtraManageSection } from "../sections/RealmExtraManageSection";
 
@@ -34,10 +37,28 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
   // updateMutation kept for completeness; actual save runs through unitApi
   useUpdateRealmMutation();
 
-  const translation = realm ? getTranslation(realm.translations) : null;
+  const existingLanguages = useMemo(
+    () =>
+      (realm?.translations ?? [])
+        .map((translation) => translation.language as string | undefined)
+        .filter((language): language is string => Boolean(language)),
+    [realm?.translations],
+  );
+  const [selectedLanguage, setSelectedLanguage] = useState(DEFAULT_LANGUAGE);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [draftLanguages, setDraftLanguages] = useState<string[]>([]);
+  const editableLanguages = useMemo(
+    () => [
+      ...existingLanguages,
+      ...draftLanguages.filter(
+        (language) => !existingLanguages.includes(language),
+      ),
+    ],
+    [draftLanguages, existingLanguages],
+  );
 
   const allowed = canManageRealm({
     permission,
@@ -56,19 +77,38 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
     }
   }, [isLoading, membershipLoading, allowed, navigate, realmId, realm?.slug]);
 
+  const translation = realm?.translations?.find(
+    (item) => item.language === selectedLanguage,
+  );
+
   useEffect(() => {
-    if (translation) {
-      setTitle(translation.title ?? "");
-      setDescription(translation.description ?? "");
+    if (
+      editableLanguages.length > 0 &&
+      !editableLanguages.includes(selectedLanguage)
+    ) {
+      setSelectedLanguage(editableLanguages[0] ?? DEFAULT_LANGUAGE);
     }
+  }, [editableLanguages, selectedLanguage]);
+
+  useEffect(() => {
+    setTitle(translation?.title ?? "");
+    setDescription(translation?.description ?? "");
   }, [translation]);
+
+  const handleAddLanguage = (language: string) => {
+    setAddOpen(false);
+    setDraftLanguages((prev) =>
+      prev.includes(language) ? prev : [...prev, language],
+    );
+    setSelectedLanguage(language);
+    setTitle("");
+    setDescription("");
+  };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const language = translation?.language ?? DEFAULT_LANGUAGE;
-
-      await unitApi.upsertTranslation(realmId, language, {
+      await unitApi.upsertTranslation(realmId, selectedLanguage, {
         title,
         description,
       });
@@ -108,6 +148,16 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
       <h1 className="mb-6 text-2xl font-semibold">Manage Realm</h1>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
+          <UnitTranslationLanguageBar
+            existingLanguages={editableLanguages}
+            selectedLanguage={selectedLanguage}
+            onSelect={setSelectedLanguage}
+            onAddClick={() => setAddOpen(true)}
+            label="Language"
+            addLabel="Add translation"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
           <Label htmlFor="realm-name">Name</Label>
           <Input
             id="realm-name"
@@ -117,12 +167,11 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="realm-description">Description</Label>
-          <textarea
+          <Textarea
             id="realm-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <PinboardAdminSection
@@ -150,6 +199,16 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
           </Button>
         </div>
       </div>
+      <AddUnitTranslationLanguageDialog
+        open={addOpen}
+        existingLanguages={editableLanguages}
+        onClose={() => setAddOpen(false)}
+        onSubmit={handleAddLanguage}
+        title="Add translation"
+        languageLabel="Language"
+        cancelLabel="Cancel"
+        submitLabel="Add"
+      />
     </div>
   );
 }

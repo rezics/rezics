@@ -1,13 +1,15 @@
 import { entityDetailQueryOptions, useEntity } from "@rezics/api/entity";
+import { useServerPermission } from "@rezics/api/hooks";
+import { BasicAdminPermission } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { EntityHero } from "../components/EntityHero";
+import { useEntityWorks } from "../hooks/useEntityWorks";
 import { getEntityLanguages, getEntityTranslation } from "../models/types";
 import { AboutTab, hasAboutData } from "../sections/AboutTab";
 import { hasOverviewData, OverviewTab } from "../sections/OverviewTab";
 import { WorksTab } from "../sections/WorksTab";
-import { useEntityWorks } from "../hooks/useEntityWorks";
 
 /*
  * AWARDS_TAB: uncomment when an awards data source lands.
@@ -31,6 +33,7 @@ interface EntityDetailPageProps {
 
 export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
   const { data: entity, isLoading, error } = useEntity(unitId);
+  const permission = useServerPermission();
 
   // Hooks must run unconditionally — call works hook with current id regardless
   // of whether the entity is loaded yet.
@@ -65,6 +68,7 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
   }
 
   const tr = getEntityTranslation(entity, activeLanguage);
+  const canEdit = permission ? BasicAdminPermission(permission) : false;
 
   const tabs: Array<{ value: string; label: string; show: boolean }> = [
     {
@@ -98,6 +102,7 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
         entity={entity}
         language={activeLanguage}
         onLanguageChange={setLanguage}
+        canEdit={canEdit}
       />
 
       {visibleTabs.length > 0 ? (

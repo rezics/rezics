@@ -1,5 +1,15 @@
 import type { EntityDTO } from "@rezics/contract";
-import { BadgeCheck } from "lucide-react";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
+import { BadgeCheck, Pencil } from "lucide-react";
 import {
   getEntityLanguages,
   getEntityPrimaryTitle,
@@ -10,12 +20,14 @@ interface EntityHeroProps {
   entity: EntityDTO;
   language: string;
   onLanguageChange: (language: string) => void;
+  canEdit?: boolean;
 }
 
 export function EntityHero({
   entity,
   language,
   onLanguageChange,
+  canEdit = false,
 }: EntityHeroProps) {
   const title = getEntityPrimaryTitle(entity, language);
   const tr = getEntityTranslation(entity, language);
@@ -36,30 +48,32 @@ export function EntityHero({
             aria-label="Verified entity"
           />
         ) : null}
+        {canEdit ? (
+          <Link to="/entity/$unitId/edit" params={{ unitId: entity.unitId }}>
+            <Button variant="ghost" size="icon" aria-label="Edit entity">
+              <Pencil data-icon="icon" />
+            </Button>
+          </Link>
+        ) : null}
       </div>
       {tr?.subtitle ? (
         <p className="text-base text-text-secondary">{tr.subtitle}</p>
       ) : null}
       {languages.length >= 2 ? (
-        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          {languages.map((lang) => {
-            const active = lang === language;
-            return (
-              <button
-                key={lang}
-                type="button"
-                onClick={() => onLanguageChange(lang)}
-                className={
-                  active
-                    ? "rounded-full bg-brand-fill px-2.5 py-0.5 text-xs font-medium text-text-on-brand"
-                    : "rounded-full border border-border-whisper px-2.5 py-0.5 text-xs text-text-secondary hover:text-text-primary"
-                }
-              >
-                {lang}
-              </button>
-            );
-          })}
-        </div>
+        <Select value={language} onValueChange={onLanguageChange}>
+          <SelectTrigger className="w-fit min-w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {languages.map((lang) => (
+                <SelectItem key={lang} value={lang}>
+                  {lang}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       ) : null}
     </header>
   );
