@@ -1,90 +1,90 @@
 ## 1. Contract And Vocabulary
 
-- [ ] 1.1 Add `creationMode` contract types for wiki-capable create requests in `package/contract`.
-- [ ] 1.2 Add `PostKind.WIKI` to the contract enum and update generated/derived PostKind schemas.
-- [ ] 1.3 Define shared `UnitAuthorityRoleKey` values (`owner`, `maintainer`, `editor`, `viewer`) in `package/contract`.
-- [ ] 1.4 Define shared semantic field-key vocabularies for Unit common fields, Book, Entity, Game, Media, attribution fields, and wiki post body.
-- [ ] 1.5 Add contract schemas for lock metadata, collaborator metadata, authority errors, and locked-field rejection payloads.
-- [ ] 1.6 Add contract schemas for history outbox payload categories and history read DTOs (`UnitRevision`, `RevisionContent`, timeline page, single revision).
-- [ ] 1.7 Add tests for field-key vocabulary coverage and stable literal values used by server/app/api.
+- [x] 1.1 Add `creationMode` contract types for wiki-capable create requests in `package/contract`.
+- [x] 1.2 Add `PostKind.WIKI` to the contract enum and update generated/derived PostKind schemas.
+- [x] 1.3 Define shared `UnitAuthorityRoleKey` values (`owner`, `maintainer`, `editor`, `viewer`) in `package/contract`.
+- [x] 1.4 Define shared semantic field-key vocabularies for Unit common fields, Book, Entity, Game, Media, attribution fields, and wiki post body.
+- [x] 1.5 Add contract schemas for lock metadata, collaborator metadata, authority errors, and locked-field rejection payloads.
+- [x] 1.6 Add contract schemas for history outbox payload categories and history read DTOs (`UnitRevision`, `RevisionContent`, timeline page, single revision).
+- [x] 1.7 Add tests for field-key vocabulary coverage and stable literal values used by server/app/api.
 - [ ] 1.8 Run contract type checks and update any generated exports affected by new enums or schemas.
 
 ## 2. Main Schema And Seed Infrastructure
 
-- [ ] 2.1 Add `UnitCollaborator` to `package/server/prisma/schema.prisma` with primary key `(unitId, userId)` and role indexes.
-- [ ] 2.2 Add `UnitFieldLock` to `package/server/prisma/schema.prisma` with primary key `(unitId, fieldKey)` and locked-by indexes.
-- [ ] 2.3 Add `UnitHistoryClock` to `package/server/prisma/schema.prisma` for per-Unit monotonic history sequence allocation.
-- [ ] 2.4 Add `HistoryOutbox` to `package/server/prisma/schema.prisma` with status, attempts, payload, sequence, unit id, actor id, and processing metadata.
-- [ ] 2.5 Add Prisma relations from `Unit`/`User` to collaborators and locks without disrupting existing relation names.
-- [ ] 2.6 Create and review the main server Prisma migration for authority and outbox tables.
-- [ ] 2.7 Update server seed code to create or upsert `rezics` and `rezics-wiki` USER Units and User rows.
-- [ ] 2.8 Ensure seeded infra users have no `authUserId` and cannot be used as login identities.
-- [ ] 2.9 Add seed tests or seed verification helpers proving idempotency for `rezics` and `rezics-wiki`.
-- [ ] 2.10 Run `bun --filter=@rezics/server run prisma:generate`.
+- [x] 2.1 Add `UnitCollaborator` to `package/server/prisma/schema.prisma` with primary key `(unitId, userId)` and role indexes.
+- [x] 2.2 Add `UnitFieldLock` to `package/server/prisma/schema.prisma` with primary key `(unitId, fieldKey)` and locked-by indexes.
+- [x] 2.3 Add `UnitHistoryClock` to `package/server/prisma/schema.prisma` for per-Unit monotonic history sequence allocation.
+- [x] 2.4 Add `HistoryOutbox` to `package/server/prisma/schema.prisma` with status, attempts, payload, sequence, unit id, actor id, and processing metadata.
+- [x] 2.5 Add Prisma relations from `Unit`/`User` to collaborators and locks without disrupting existing relation names.
+- [x] 2.6 Create and review the main server Prisma migration for authority and outbox tables.
+- [x] 2.7 Update server seed code to create or upsert `rezics` and `rezics-wiki` USER Units and User rows.
+- [x] 2.8 Ensure seeded infra users have no `authUserId` and cannot be used as login identities.
+- [x] 2.9 Add seed tests or seed verification helpers proving idempotency for `rezics` and `rezics-wiki`.
+- [x] 2.10 Run `bun --filter=@rezics/server run prisma:generate`.
 
 ## 3. Server Authority Core
 
-- [ ] 3.1 Create a shared `package/server/src/unit/authority` module for owner, collaborator, admin, surface-policy, and lock admission checks.
-- [ ] 3.2 Implement admin/root override detection using existing permission helpers.
-- [ ] 3.3 Implement primary owner admission using `Unit.userId`.
-- [ ] 3.4 Implement collaborator lookup and role-to-capability checks.
-- [ ] 3.5 Implement sparse lock lookup using `fieldKey in ["*", ...changedFieldKeys]`.
-- [ ] 3.6 Implement non-collaborative surface short-circuit so ordinary post/review/remark/reply edits do not query locks.
-- [ ] 3.7 Implement typed authority errors that include blocked field keys when locks deny a community edit.
-- [ ] 3.8 Add unit tests for type-alone denial, `Unit.userId = rezicsWikiUser.unitId` with locked fields, whole-object locks, owner bypass, collaborator allow, admin override, and non-collaborative short-circuit.
-- [ ] 3.9 Add tests proving no community edit is granted solely because a Unit has type BOOK/ENTITY/GAME/MEDIA.
+- [x] 3.1 Create a shared `package/server/src/unit/authority` module for owner, collaborator, admin, surface-policy, and lock admission checks.
+- [x] 3.2 Implement admin/root override detection using existing permission helpers.
+- [x] 3.3 Implement primary owner admission using `Unit.userId`.
+- [x] 3.4 Implement collaborator lookup and role-to-capability checks.
+- [x] 3.5 Implement sparse lock lookup using `fieldKey in ["*", ...changedFieldKeys]`.
+- [x] 3.6 Implement non-collaborative surface short-circuit so ordinary post/review/remark/reply edits do not query locks.
+- [x] 3.7 Implement typed authority errors that include blocked field keys when locks deny a community edit.
+- [x] 3.8 Add unit tests for type-alone denial, `Unit.userId = rezicsWikiUser.unitId` with locked fields, whole-object locks, owner bypass, collaborator allow, admin override, and non-collaborative short-circuit.
+- [x] 3.9 Add tests proving no community edit is granted solely because a Unit has type BOOK/ENTITY/GAME/MEDIA.
 
 ## 4. Lock And Collaborator APIs
 
-- [ ] 4.1 Add server services for listing, adding, updating, and removing Unit collaborators.
-- [ ] 4.2 Add server services for listing, creating, and deleting Unit field locks.
-- [ ] 4.3 Add API routes for collaborator management with owner/maintainer/admin gating.
-- [ ] 4.4 Add API routes for field lock management with owner/maintainer/admin gating.
+- [x] 4.1 Add server services for listing, adding, updating, and removing Unit collaborators.
+- [x] 4.2 Add server services for listing, creating, and deleting Unit field locks.
+- [x] 4.3 Add API routes for collaborator management with owner/maintainer/admin gating.
+- [x] 4.4 Add API routes for field lock management with owner/maintainer/admin gating.
 - [ ] 4.5 Ensure lock and collaborator mutations write history/audit outbox records where applicable.
 - [ ] 4.6 Add `package/api` clients and hooks for collaborator list/mutation workflows.
 - [ ] 4.7 Add `package/api` clients and hooks for field lock list/mutation workflows.
-- [ ] 4.8 Add tests for unauthorized lock/collaborator mutation attempts and admin override behavior.
+- [x] 4.8 Add tests for unauthorized lock/collaborator mutation attempts and admin override behavior.
 
 ## 5. Transactional History Outbox In Main
 
-- [ ] 5.1 Implement a main-server helper to allocate `UnitHistoryClock` sequence values inside an existing Prisma transaction.
-- [ ] 5.2 Implement a main-server helper to write `HistoryOutbox` rows inside the same transaction as canonical mutations.
-- [ ] 5.3 Implement canonical payload hashing or canonical serialization helpers shared by outbox builders.
-- [ ] 5.4 Implement editorial payload builders for Unit common fields, translations, support languages, extension rows, credit attribution, subject attribution, tags, and post slots.
-- [ ] 5.5 Implement structure-event payload builders for Book content-structure operations.
-- [ ] 5.6 Add tests proving canonical mutation rollback also rolls back the outbox row.
-- [ ] 5.7 Add tests proving consecutive edits write distinct payloads and ordered per-Unit sequences.
+- [x] 5.1 Implement a main-server helper to allocate `UnitHistoryClock` sequence values inside an existing Prisma transaction.
+- [x] 5.2 Implement a main-server helper to write `HistoryOutbox` rows inside the same transaction as canonical mutations.
+- [x] 5.3 Implement canonical payload hashing or canonical serialization helpers shared by outbox builders.
+- [x] 5.4 Implement editorial payload builders for Unit common fields, translations, support languages, extension rows, credit attribution, subject attribution, tags, and post slots.
+- [x] 5.5 Implement structure-event payload builders for Book content-structure operations.
+- [x] 5.6 Add tests proving canonical mutation rollback also rolls back the outbox row.
+- [x] 5.7 Add tests proving consecutive edits write distinct payloads and ordered per-Unit sequences.
 - [ ] 5.8 Add tests proving main does not call history service HTTP inside mutation transactions.
 
 ## 6. History Service Package
 
-- [ ] 6.1 Add `package/history` workspace with Bun package metadata, tsconfig, Elysia entrypoint, and scripts.
-- [ ] 6.2 Add `package/history/prisma/schema.prisma` for `UnitRevision`, `RevisionContent`, structure event storage, ingestion cursors, and processing metadata.
-- [ ] 6.3 Add history service env validation using the repo's `@t3-oss/env-core` + Valibot pattern.
+- [x] 6.1 Add `package/history` workspace with Bun package metadata, tsconfig, Elysia entrypoint, and scripts.
+- [x] 6.2 Add `package/history/prisma/schema.prisma` for `UnitRevision`, `RevisionContent`, structure event storage, ingestion cursors, and processing metadata.
+- [x] 6.3 Add history service env validation using the repo's `@t3-oss/env-core` + Valibot pattern.
 - [ ] 6.4 Implement the outbox consumer with claim, process, retry, failure, and idempotency behavior.
-- [ ] 6.5 Implement `RevisionContent` upsert by content hash.
-- [ ] 6.6 Implement `UnitRevision` insertion with unique `(unitId, sequence)`.
-- [ ] 6.7 Implement structure event ingestion for Book content-structure events.
-- [ ] 6.8 Add `GET /history/unit/:unitId/revisions` timeline endpoint.
-- [ ] 6.9 Add `GET /history/unit/:unitId/revisions/:sequence` single revision endpoint.
+- [x] 6.5 Implement `RevisionContent` upsert by content hash.
+- [x] 6.6 Implement `UnitRevision` insertion with unique `(unitId, sequence)`.
+- [x] 6.7 Implement structure event ingestion for Book content-structure events.
+- [x] 6.8 Add `GET /history/unit/:unitId/revisions` timeline endpoint.
+- [x] 6.9 Add `GET /history/unit/:unitId/revisions/:sequence` single revision endpoint.
 - [ ] 6.10 Add structure event read endpoints required by Book content-structure history.
-- [ ] 6.11 Add health/readiness endpoints matching existing service patterns.
+- [x] 6.11 Add health/readiness endpoints matching existing service patterns.
 - [ ] 6.12 Add unit tests for revision ingestion, idempotent retries, duplicate content hashes, failed outbox retry, and sequence uniqueness.
 - [ ] 6.13 Add service integration notes or scripts to local dev orchestration if required.
 
 ## 7. Server Creation Modes
 
-- [ ] 7.1 Add server-side resolver for the seeded `rezics-wiki` User's `unitId`.
-- [ ] 7.2 Update book creation input handling to accept wiki vs personal creation intent.
-- [ ] 7.3 Ensure wiki-mode book creation stamps `Unit.userId = rezicsWikiUser.unitId`.
-- [ ] 7.4 Ensure personal-mode book creation stamps `Unit.userId = currentUser.unitId`.
-- [ ] 7.5 Apply initial lock policy for personal-mode wiki-capable content.
-- [ ] 7.6 Update entity creation to support wiki-mode creation for EntityPicker/catalog flows.
-- [ ] 7.7 Keep personal entity/self-claim creation owned by the current user.
-- [ ] 7.8 Add or update game/media creation mode handling if those create APIs exist in the current codebase.
-- [ ] 7.9 Reject or ignore client-submitted owner ids on wiki-mode create requests.
-- [ ] 7.10 Add tests for ordinary user wiki-mode creation of BOOK and ENTITY Units whose `userId` equals `rezicsWikiUser.unitId`.
-- [ ] 7.11 Add tests for personal-mode creation remaining current-user owned and closed by initial policy.
+- [x] 7.1 Add server-side resolver for the seeded `rezics-wiki` User's `unitId`.
+- [x] 7.2 Update book creation input handling to accept wiki vs personal creation intent.
+- [x] 7.3 Ensure wiki-mode book creation stamps `Unit.userId = rezicsWikiUser.unitId`.
+- [x] 7.4 Ensure personal-mode book creation stamps `Unit.userId = currentUser.unitId`.
+- [x] 7.5 Apply initial lock policy for personal-mode wiki-capable content.
+- [x] 7.6 Update entity creation to support wiki-mode creation for EntityPicker/catalog flows.
+- [x] 7.7 Keep personal entity/self-claim creation owned by the current user.
+- [x] 7.8 Add or update game/media creation mode handling if those create APIs exist in the current codebase.
+- [x] 7.9 Reject or ignore client-submitted owner ids on wiki-mode create requests.
+- [x] 7.10 Add tests for ordinary user wiki-mode creation of BOOK and ENTITY Units whose `userId` equals `rezicsWikiUser.unitId`.
+- [x] 7.11 Add tests for personal-mode creation remaining current-user owned and closed by initial policy.
 
 ## 8. Collaborative Metadata Mutations
 
@@ -169,12 +169,12 @@
 
 ## 16. Validation
 
-- [ ] 16.1 Run `bun --filter=@rezics/contract test` or the closest available contract validation command.
-- [ ] 16.2 Run targeted server tests for authority, locks, creation mode, wiki posts, and outbox helpers.
-- [ ] 16.3 Run `bun --filter=@rezics/server run prisma:generate`.
-- [ ] 16.4 Run targeted history service tests.
+- [x] 16.1 Run `bun --filter=@rezics/contract test` or the closest available contract validation command.
+- [x] 16.2 Run targeted server tests for authority, locks, creation mode, wiki posts, and outbox helpers.
+- [x] 16.3 Run `bun --filter=@rezics/server run prisma:generate`.
+- [x] 16.4 Run targeted history service tests.
 - [ ] 16.5 Run `bun --filter=@rezics/api test` or targeted API package tests.
 - [ ] 16.6 Run affected app tests or Storybook checks for creation/history/wiki UI.
-- [ ] 16.7 Run `bun run format:check`.
-- [ ] 16.8 Run `bun run check:convention`.
-- [ ] 16.9 Run `openspec validate content-authority-history-locks --strict`.
+- [x] 16.7 Run `bun run format:check`.
+- [x] 16.8 Run `bun run check:convention`.
+- [x] 16.9 Run `openspec validate content-authority-history-locks --strict`.
