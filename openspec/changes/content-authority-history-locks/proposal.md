@@ -15,12 +15,12 @@ The change is needed before community editing becomes broad: BOOK, ENTITY, GAME,
 ## Goals
 
 - Seed ordinary infra users for `rezics` and `rezics-wiki`; both are `User` + `Unit(type=USER)` records with no login credentials.
-- Treat `rezics-wiki` as the custodian owner for community catalog and wiki content created by ordinary users through wiki creation surfaces.
+- Treat the seeded `rezics-wiki` User's `unitId` as the custodian owner id for community catalog and wiki content created by ordinary users through wiki creation surfaces.
 - Add sparse Unit authority tables for collaborators and field locks, with locks as the runtime fact source for protected fields.
 - Ensure runtime edit admission uses actor permission, `Unit.userId`, Unit collaborators, endpoint policy, and lock rows, not `UnitType` or owner identity as an automatic community-edit shortcut.
 - Add a history service package with its own Prisma schema and API surface, fed by a main-DB transactional outbox written in the same transaction as canonical mutations.
 - Add wiki post support using existing Unit/Post primitives, not a separate wiki-page model.
-- Update frontend and API clients so ordinary users can create `rezics-wiki` owned catalog entries and wiki posts through explicit wiki-mode flows.
+- Update frontend and API clients so ordinary users can create catalog entries and wiki posts owned by the seeded `rezics-wiki` User's `unitId` through explicit wiki-mode flows.
 
 ## Non-goals
 
@@ -42,7 +42,7 @@ The change is needed before community editing becomes broad: BOOK, ENTITY, GAME,
   - `UnitCollaborator` role;
   - endpoint-level collaborative edit eligibility;
   - `UnitFieldLock` rows for `["*", ...changedFieldKeys]`.
-- Add creation-mode inputs on wiki-capable create APIs. `creationMode = "wiki"` stamps `Unit.userId = rezics-wiki`, while personal flows keep the current user as owner.
+- Add creation-mode inputs on wiki-capable create APIs. `creationMode = "wiki"` stamps `Unit.userId = rezicsWikiUser.unitId`, while personal flows keep the current user's `unitId` as owner.
 - Add `Post.kind = WIKI` and route it through collaborative Unit edit/history behavior; ordinary posts keep existing author-only semantics.
 - Add `package/history` as an independent service workspace with Prisma schema, revision/event storage, and read APIs.
 - Add a main-server `HistoryOutbox` table written in the same transaction as canonical content changes so history service persistence is reliable without CDC or an external queue.
@@ -59,7 +59,7 @@ This change covers the first end-to-end implementation of authority, locks, hist
 
 - `content-authority`: Defines Unit ownership, `rezics`/`rezics-wiki` infra users, Unit collaborators, sparse field locks, field vocabulary, and runtime collaborative edit admission.
 - `content-history-service`: Defines the independent history service, main-server transactional outbox, revision/event storage, sequence guarantees, and history read APIs.
-- `wiki-content-creation`: Defines wiki-mode creation flows for catalog content and entities, including ordinary-user creation of `rezics-wiki` owned Units.
+- `wiki-content-creation`: Defines wiki-mode creation flows for catalog content and entities, including ordinary-user creation of Units whose `userId` is the seeded `rezics-wiki` User's `unitId`.
 - `wiki-post-editing`: Defines `Post.kind = WIKI`, wiki post creation/edit permissions, body history, and the boundary between ordinary posts and wiki posts.
 
 ### Modified Capabilities
@@ -73,7 +73,7 @@ This change covers the first end-to-end implementation of authority, locks, hist
   - `package/history`: New independent Elysia/Prisma service for revision/event persistence and history read APIs.
   - `package/contract`: New DTOs, schemas, enums, field-key vocabularies, PostKind addition, history API contracts, and authority contracts.
   - `package/api`: API clients and React Query hooks for authority, locks, collaborators, wiki creation, wiki posts, and history reads.
-  - `package/app`: Book/entity/wiki creation surfaces, wiki post editor, history timeline UI, lock/collaborator affordances where needed, and rendering rules for `rezics-wiki` owned content.
+  - `package/app`: Book/entity/wiki creation surfaces, wiki post editor, history timeline UI, lock/collaborator affordances where needed, and rendering rules for content whose owner id is the seeded `rezics-wiki` User's `unitId`.
   - `package/admin`: Administrative lock/collaborator/history inspection and override surfaces.
 - Dependencies:
   - Adds a new Bun workspace package for `@rezics/history`.

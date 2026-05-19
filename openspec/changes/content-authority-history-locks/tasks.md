@@ -31,7 +31,7 @@
 - [ ] 3.5 Implement sparse lock lookup using `fieldKey in ["*", ...changedFieldKeys]`.
 - [ ] 3.6 Implement non-collaborative surface short-circuit so ordinary post/review/remark/reply edits do not query locks.
 - [ ] 3.7 Implement typed authority errors that include blocked field keys when locks deny a community edit.
-- [ ] 3.8 Add unit tests for type-alone denial, `rezics-wiki` ownership with locked fields, whole-object locks, owner bypass, collaborator allow, admin override, and non-collaborative short-circuit.
+- [ ] 3.8 Add unit tests for type-alone denial, `Unit.userId = rezicsWikiUser.unitId` with locked fields, whole-object locks, owner bypass, collaborator allow, admin override, and non-collaborative short-circuit.
 - [ ] 3.9 Add tests proving no community edit is granted solely because a Unit has type BOOK/ENTITY/GAME/MEDIA.
 
 ## 4. Lock And Collaborator APIs
@@ -74,16 +74,16 @@
 
 ## 7. Server Creation Modes
 
-- [ ] 7.1 Add server-side resolver for the seeded `rezics-wiki` user id.
+- [ ] 7.1 Add server-side resolver for the seeded `rezics-wiki` User's `unitId`.
 - [ ] 7.2 Update book creation input handling to accept wiki vs personal creation intent.
-- [ ] 7.3 Ensure wiki-mode book creation stamps `Unit.userId = rezics-wiki`.
-- [ ] 7.4 Ensure personal-mode book creation stamps `Unit.userId = current user`.
+- [ ] 7.3 Ensure wiki-mode book creation stamps `Unit.userId = rezicsWikiUser.unitId`.
+- [ ] 7.4 Ensure personal-mode book creation stamps `Unit.userId = currentUser.unitId`.
 - [ ] 7.5 Apply initial lock policy for personal-mode wiki-capable content.
 - [ ] 7.6 Update entity creation to support wiki-mode creation for EntityPicker/catalog flows.
 - [ ] 7.7 Keep personal entity/self-claim creation owned by the current user.
 - [ ] 7.8 Add or update game/media creation mode handling if those create APIs exist in the current codebase.
 - [ ] 7.9 Reject or ignore client-submitted owner ids on wiki-mode create requests.
-- [ ] 7.10 Add tests for ordinary user wiki-mode creation of `rezics-wiki` owned BOOK and ENTITY Units.
+- [ ] 7.10 Add tests for ordinary user wiki-mode creation of BOOK and ENTITY Units whose `userId` equals `rezicsWikiUser.unitId`.
 - [ ] 7.11 Add tests for personal-mode creation remaining current-user owned and closed by initial policy.
 
 ## 8. Collaborative Metadata Mutations
@@ -100,7 +100,7 @@
 
 - [ ] 9.1 Add `PostKind.WIKI` support to server Prisma enum usage and post contract mappings.
 - [ ] 9.2 Update post DTO mappers and validators to include WIKI without breaking existing post kinds.
-- [ ] 9.3 Add wiki post create service path that creates `Unit(type=POST)` with `userId = rezics-wiki` and `Post.authorUserId = actor`.
+- [ ] 9.3 Add wiki post create service path that creates `Unit(type=POST)` with `userId = rezicsWikiUser.unitId` and `Post.authorUserId = actor`.
 - [ ] 9.4 Add wiki post update service path that edits `Post.body` through collaborative authority with changed field key `post.body`.
 - [ ] 9.5 Ensure ordinary post update paths remain author/owner-only and do not enter community lock checks.
 - [ ] 9.6 Ensure `Post.isLocked` remains thread/reply lock semantics and is not used as field protection.

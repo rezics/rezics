@@ -9,7 +9,7 @@ Two draft plans informed this change:
 
 The design updates both plans with the latest decisions:
 
-- Runtime collaborative edit admission MUST NOT infer openness from `Unit.type` or from `Unit.userId == rezics-wiki`.
+- Runtime collaborative edit admission MUST NOT infer openness from `Unit.type` or from `Unit.userId == rezicsWikiUser.unitId`.
 - Creation mode determines initial owner and initial lock state only.
 - `UnitFieldLock` is the runtime source of truth for protected fields.
 - Ordinary posts remain author-owned and non-collaborative; only `Post.kind = WIKI` joins the collaborative edit/history model.
@@ -21,7 +21,7 @@ The design updates both plans with the latest decisions:
 
 - Preserve `Unit` as the shared content identity model.
 - Seed `rezics` and `rezics-wiki` as ordinary infra `User` rows with backing `Unit(type=USER)` rows.
-- Let ordinary users create `rezics-wiki` owned catalog and wiki content through explicit wiki-mode frontend flows.
+- Let ordinary users create catalog and wiki content whose `Unit.userId` is the seeded `rezics-wiki` User's `unitId` through explicit wiki-mode frontend flows.
 - Support delegated Unit authority with a `UnitCollaborator` table.
 - Support sparse field-level and whole-object locks with a `UnitFieldLock` table.
 - Keep lock checks cheap for the common no-lock case.
@@ -57,7 +57,7 @@ rezics-wiki
 
 Both have `Unit(type=USER)` rows and normal `User` rows. They are not a separate actor type. History records, audit logs, ownership checks, and rendering receive their regular `unitId`.
 
-Display policy is product-facing, not schema-facing: app/admin renderers may show `rezics-wiki` owned content as "Community catalog" or equivalent copy, but storage and permission code treat it as a normal user id.
+Display policy is product-facing, not schema-facing: app/admin renderers may show content owned by the seeded `rezics-wiki` User's `unitId` as "Community catalog" or equivalent copy, but storage and permission code treat the owner value as a normal user `unitId`.
 
 ### 2. Authority Tables
 
@@ -169,12 +169,12 @@ Creation mode controls initial state:
 
 ```text
 wiki creation:
-  Unit.userId = rezics-wiki
+  Unit.userId = rezicsWikiUser.unitId
   no whole-object lock by default
   optional initial field locks according to server policy
 
 personal creation:
-  Unit.userId = current user
+  Unit.userId = currentUser.unitId
   UnitFieldLock("*") by default when the type also has collaborative edit surfaces
 ```
 
@@ -288,7 +288,7 @@ Wiki posts use existing primitives:
 
 ```text
 Unit(type=POST)
-  userId = rezics-wiki for wiki-mode creation
+  userId = rezicsWikiUser.unitId for wiki-mode creation
   normal Unit translations for title/summary if needed
 
 Post
@@ -306,7 +306,7 @@ Server/API:
 
 - creation endpoints accept a constrained `creationMode` where applicable;
 - clients cannot submit arbitrary owner ids for wiki creation;
-- server resolves `rezics-wiki` internally;
+- server resolves the seeded `rezics-wiki` User internally and writes its `unitId`;
 - update endpoints compute changed field keys server-side or validate client-provided keys against request body;
 - authority/lock rejection returns typed 403 errors with locked field metadata;
 - history read endpoints are exposed by `package/history` and wrapped by `package/api`.
@@ -319,7 +319,7 @@ Frontend:
 - ordinary post/review/remark editors keep existing author-only semantics;
 - history timelines query history service and resolve current display references from main server;
 - owner/collaborator UI exposes lock controls only where the actor can manage locks;
-- `rezics-wiki` owned content renders as community catalog/wiki content, not as a normal human profile card.
+- content whose owner id is the seeded `rezics-wiki` User's `unitId` renders as community catalog/wiki content, not as a normal human profile card.
 
 ## Decisions
 
@@ -336,12 +336,12 @@ Rationale: sparse rows preserve performance and make locks first-class enough fo
 
 ### Decision 2: Runtime openness is endpoint policy, not type/owner inference
 
-Do not allow community edits merely because `Unit.type` is wiki-eligible or `Unit.userId == rezics-wiki`.
+Do not allow community edits merely because `Unit.type` is wiki-eligible or `Unit.userId == rezicsWikiUser.unitId`.
 
 Alternatives considered:
 
 - `type in [BOOK, ENTITY, GAME, MEDIA]` means open: rejected because personal BOOK/work content exists.
-- `owner == rezics-wiki` means open: rejected because wiki-owned fields may still be locked or fully protected.
+- `ownerId == rezicsWikiUser.unitId` means open: rejected because wiki-owned fields may still be locked or fully protected.
 
 Rationale: creation mode sets initial facts; runtime checks read facts.
 

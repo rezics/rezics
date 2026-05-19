@@ -51,7 +51,7 @@ The system SHALL store protected Unit fields in a sparse `UnitFieldLock` table. 
 - **THEN** the lock layer SHALL NOT block a community edit
 
 ### Requirement: Runtime authority gate
-The system SHALL determine collaborative edit admission from actor permission, primary owner, Unit collaborators, endpoint surface policy, and `UnitFieldLock` rows. The system SHALL NOT grant community edit authority merely because a Unit has a wiki-eligible type or because `Unit.userId` equals `rezics-wiki`.
+The system SHALL determine collaborative edit admission from actor permission, primary owner, Unit collaborators, endpoint surface policy, and `UnitFieldLock` rows. The system SHALL NOT grant community edit authority merely because a Unit has a wiki-eligible type or because `Unit.userId` equals the seeded `rezics-wiki` User's `unitId`.
 
 #### Scenario: Type alone does not grant community edit
 - **WHEN** a BOOK Unit is personal-owned by user A
@@ -59,7 +59,7 @@ The system SHALL determine collaborative edit admission from actor permission, p
 - **THEN** user B SHALL NOT be allowed to edit the Unit merely because the Unit type is BOOK
 
 #### Scenario: Rezics-wiki ownership alone does not bypass locks
-- **WHEN** a Unit is owned by `rezics-wiki`
+- **WHEN** a Unit's `userId` equals the seeded `rezics-wiki` User's `unitId`
 - **AND** the changed field is locked by `UnitFieldLock`
 - **THEN** a community editor SHALL NOT be allowed to edit that field
 

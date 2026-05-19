@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
 ### Requirement: Wiki creation mode
-Wiki-capable create endpoints SHALL accept an explicit `creationMode = "wiki"` input. When this mode is used, the server SHALL set the new Unit's `userId` to the seeded `rezics-wiki` user and SHALL NOT allow clients to submit arbitrary owner user ids.
+Wiki-capable create endpoints SHALL accept an explicit `creationMode = "wiki"` input. When this mode is used, the server SHALL set the new Unit's `userId` to the seeded `rezics-wiki` User's `unitId` and SHALL NOT allow clients to submit arbitrary owner user ids.
 
 #### Scenario: Ordinary user creates wiki catalog book
 - **WHEN** an authenticated ordinary user submits a wiki-mode book creation request
-- **THEN** the server SHALL create the BOOK Unit with `userId = rezics-wiki.unitId`
+- **THEN** the server SHALL create the BOOK Unit with `userId = rezicsWikiUser.unitId`
 - **AND** the requesting user SHALL be recorded as the actor for history/audit purposes
 
 #### Scenario: Client cannot spoof wiki owner
@@ -33,11 +33,11 @@ EntityPicker inline entity creation from catalog/editing surfaces SHALL create `
 
 #### Scenario: EntityPicker creates author entity
 - **WHEN** a user creates a new author entity from inside a book catalog form
-- **THEN** the new ENTITY Unit SHALL be owned by `rezics-wiki`
+- **THEN** the new ENTITY Unit's `userId` SHALL equal `rezicsWikiUser.unitId`
 - **AND** the current user SHALL be recorded as the creation actor
 
 ### Requirement: Personal entity claim flows stay personal
-Self-registration or claim-oriented entity flows SHALL create or transfer content according to claim rules and SHALL NOT silently use `rezics-wiki` ownership.
+Self-registration or claim-oriented entity flows SHALL create or transfer content according to claim rules and SHALL NOT silently set `Unit.userId` to `rezicsWikiUser.unitId`.
 
 #### Scenario: User creates personal author entity
 - **WHEN** a user uses a personal "register as author" flow
@@ -70,9 +70,9 @@ The frontend SHALL expose clear wiki/catalog and personal creation paths where b
 - **AND** it SHALL render the created item as owned by the current user
 
 ### Requirement: Rezics-wiki display
-Client renderers SHALL avoid showing `rezics-wiki` as a normal human author card for wiki-owned catalog content. They SHALL render community catalog ownership copy or an equivalent product label.
+Client renderers SHALL avoid showing the seeded `rezics-wiki` User as a normal human author card for wiki-owned catalog content. They SHALL render community catalog ownership copy or an equivalent product label.
 
 #### Scenario: Wiki-owned book card
-- **WHEN** a book card receives a Unit whose owner is `rezics-wiki`
-- **THEN** the card SHALL NOT display a normal user-owner profile card for `rezics-wiki`
+- **WHEN** a book card receives a Unit whose `userId` equals `rezicsWikiUser.unitId`
+- **THEN** the card SHALL NOT display a normal user-owner profile card for the seeded `rezics-wiki` User
 - **AND** it SHALL display community catalog ownership treatment

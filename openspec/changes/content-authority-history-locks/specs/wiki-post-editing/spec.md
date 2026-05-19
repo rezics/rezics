@@ -8,11 +8,11 @@ The contract SHALL define `PostKind.WIKI` for collaborative wiki-style post cont
 - **THEN** `PostKind.WIKI` SHALL be available as a typed value
 
 ### Requirement: Wiki post creation
-Wiki post creation SHALL create a POST Unit and Post row with `Post.kind = WIKI`. Wiki-mode wiki post creation SHALL set `Unit.userId = rezics-wiki.unitId`, while `Post.authorUserId` SHALL record the user who created the first version.
+Wiki post creation SHALL create a POST Unit and Post row with `Post.kind = WIKI`. Wiki-mode wiki post creation SHALL set `Unit.userId = rezicsWikiUser.unitId`, while `Post.authorUserId` SHALL record the user who created the first version.
 
 #### Scenario: Ordinary user creates wiki post
 - **WHEN** an authenticated ordinary user creates a wiki post for a book
-- **THEN** the system SHALL create `Unit(type=POST)` owned by `rezics-wiki`
+- **THEN** the system SHALL create `Unit(type=POST)` with `userId = rezicsWikiUser.unitId`
 - **AND** it SHALL create `Post.kind = WIKI`
 - **AND** it SHALL set `Post.authorUserId` to the creating user's Unit id
 
