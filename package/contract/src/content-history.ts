@@ -118,3 +118,33 @@ export const singleUnitRevisionResponseSchema = t.Object({
 
 export type SingleUnitRevisionResponse =
   (typeof singleUnitRevisionResponseSchema)["static"];
+
+export const structureEventSchema = t.Object({
+  id: t.String(),
+  unitId: t.String(),
+  sequence: t.Number(),
+  eventType: t.String(),
+  actorUserId: t.String(),
+  changedFieldKeys: t.Array(lockFieldKeySchema),
+  payload: t.Record(t.String(), t.Any()),
+  message: t.Optional(t.Nullable(t.String())),
+  createdAt: t.Union([t.String(), t.Date()]),
+  ingestedAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type StructureEventDTO = (typeof structureEventSchema)["static"];
+
+export const structureEventTimelinePageSchema = t.Object({
+  events: t.Array(structureEventSchema),
+  nextCursor: t.Optional(t.Nullable(t.String())),
+});
+
+export type StructureEventTimelinePage =
+  (typeof structureEventTimelinePageSchema)["static"];
+
+export const singleStructureEventResponseSchema = t.Object({
+  event: structureEventSchema,
+});
+
+export type SingleStructureEventResponse =
+  (typeof singleStructureEventResponseSchema)["static"];
