@@ -8,6 +8,7 @@ import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { getSlugScopeId, requireSlugScopeId } from "@/infra/slug-scopes";
+import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { deleteEntityFromMeili, syncEntityToMeili } from "@/meili/entity/sync";
 import { AppError } from "@/utils/errors";
 import { entityInclude, type EntityWithRelations } from "./entity.types";
@@ -57,6 +58,10 @@ export class EntityService {
     }
 
     const entityScope = requireSlugScopeId("entity");
+    const ownerUserId =
+      input.creationMode === "wiki"
+        ? await resolveRezicsWikiUserId()
+        : ctx.callerUnitId;
 
     const row = await prisma.$transaction(async (tx) => {
       const unit = await tx.unit.create({
@@ -66,7 +71,18 @@ export class EntityService {
           slugScope: entityScope,
           status: "PUBLISHED",
           visibility: "PUBLIC",
-          userId: ctx.callerUnitId,
+          userId: ownerUserId,
+          fieldLocks:
+            input.creationMode === "wiki"
+              ? undefined
+              : {
+                  create: {
+                    fieldKey: "*",
+                    lockedById: ctx.callerUnitId,
+                    reason:
+                      "Personal creation starts closed to community edits.",
+                  },
+                },
           translations: {
             create: input.translations.map((tr) => ({
               language: tr.language as Language,

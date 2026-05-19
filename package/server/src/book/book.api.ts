@@ -72,8 +72,8 @@ export const bookApi = new Elysia({ prefix: "/book" })
     "/",
     async ({ body, identity }): Promise<BookResponse> => {
       const bookReq: CreateBookInput = {
-        userId: identity.userId,
         ...body,
+        userId: identity.userId,
       };
 
       const book = await bookService.create(bookReq);

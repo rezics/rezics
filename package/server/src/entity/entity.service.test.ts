@@ -15,12 +15,21 @@ mock.module("@/meili/entity/sync", () => ({
 // `entity.service.ts` calls `requireSlugScopeId("entity")` from infra/slug-scopes.
 mock.module("@/infra/slug-scopes", () => ({
   getSlugScopeId: (name: string) =>
-    name === "entity" ? "entity-scope-unit-id" : null,
+    name === "entity"
+      ? "entity-scope-unit-id"
+      : name === "user"
+        ? "user-scope-unit-id"
+        : null,
   requireSlugScopeId: (name: string) => {
     if (name === "entity") return "entity-scope-unit-id";
+    if (name === "user") return "user-scope-unit-id";
     throw new Error(`unknown scope ${name}`);
   },
   pickSlugScope: () => "entity-scope-unit-id",
+}));
+
+mock.module("@/infra/infra-users", () => ({
+  resolveRezicsWikiUserId: async () => "rezics-wiki-user",
 }));
 
 function makeEntityRow(overrides: Record<string, any> = {}) {
@@ -185,6 +194,45 @@ describe("EntityService.create", () => {
         { callerUnitId: "admin-1", isAdmin: true },
       ),
     ).resolves.toBeDefined();
+  });
+
+  test("wiki creation stamps rezics-wiki as owner", async () => {
+    const { txClient } = freshMocks();
+    const { entityService } = await import("./entity.service");
+
+    await entityService.create(
+      {
+        creationMode: "wiki",
+        kind: "person",
+        translations: [{ language: "en", title: "Wiki Author" }],
+      },
+      { callerUnitId: "user-1", isAdmin: false },
+    );
+
+    const createArgs = (txClient.unit.create as any).mock.calls[0]?.[0];
+    expect(createArgs.data.userId).toBe("rezics-wiki-user");
+    expect(createArgs.data.fieldLocks).toBeUndefined();
+  });
+
+  test("personal creation keeps current user owner and starts closed", async () => {
+    const { txClient } = freshMocks();
+    const { entityService } = await import("./entity.service");
+
+    await entityService.create(
+      {
+        creationMode: "personal",
+        kind: "person",
+        translations: [{ language: "en", title: "Personal Author" }],
+      },
+      { callerUnitId: "user-1", isAdmin: false },
+    );
+
+    const createArgs = (txClient.unit.create as any).mock.calls[0]?.[0];
+    expect(createArgs.data.userId).toBe("user-1");
+    expect(createArgs.data.fieldLocks.create).toMatchObject({
+      fieldKey: "*",
+      lockedById: "user-1",
+    });
   });
 });
 

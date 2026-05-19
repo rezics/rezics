@@ -24,6 +24,7 @@ import {
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
 import { assertLicenseSlug } from "@/unit/publication-policy";
+import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import {
   buildTree,
   countReadableBookContentStructureItems,
@@ -216,6 +217,11 @@ export class BookService {
    * Create new book (Unit + Book extension + translations in one transaction)
    */
   async create(req: CreateBookInput): Promise<BookWithRelations> {
+    const actorUserId = req.userId || "";
+    const ownerUserId =
+      req.creationMode === "wiki"
+        ? await resolveRezicsWikiUserId()
+        : actorUserId;
     const language = req.defaultLanguage ?? "en";
     const providedTranslations = req.translations ?? [];
     const hasDefault = providedTranslations.some(
@@ -250,8 +256,8 @@ export class BookService {
       data: {
         unit: {
           create: {
-            userId: req.userId || "",
-            slugScope: req.userId || "",
+            userId: ownerUserId,
+            slugScope: ownerUserId,
             type: UnitType.BOOK,
             status: UnitStatus.PUBLISHED,
             visibility: (req.visibility as UnitVisibility) ?? undefined,
@@ -263,6 +269,17 @@ export class BookService {
             translations: translationData.length
               ? { create: translationData }
               : undefined,
+            fieldLocks:
+              req.creationMode === "wiki" || !actorUserId
+                ? undefined
+                : {
+                    create: {
+                      fieldKey: "*",
+                      lockedById: actorUserId,
+                      reason:
+                        "Personal creation starts closed to community edits.",
+                    },
+                  },
           },
         },
         isbn13: req.isbn13 ?? undefined,

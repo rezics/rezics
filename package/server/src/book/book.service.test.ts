@@ -12,6 +12,10 @@ mock.module("@/meili/content/sync", () => ({
   syncContentToMeili: mockSyncContentToMeili,
 }));
 
+mock.module("@/infra/infra-users", () => ({
+  resolveRezicsWikiUserId: async () => "rezics-wiki-user",
+}));
+
 interface FakeRow {
   id: string;
   bookUnitId: string;
@@ -148,6 +152,40 @@ describe("BookService.create", () => {
     const createArgs = mockCreateBook.mock.calls[0]?.[0] as any;
     expect(createArgs.data.chapterCount).toBe(0);
     expect(mockSyncContentToMeili).toHaveBeenCalledWith("book-1");
+  });
+
+  test("wiki creation stamps rezics-wiki as owner and does not add whole-object lock", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.create({
+      userId: "user-1",
+      creationMode: "wiki",
+      defaultLanguage: "en",
+      translations: [{ language: "en", title: "Catalog Book" }],
+    });
+
+    const createArgs = mockCreateBook.mock.calls[0]?.[0] as any;
+    expect(createArgs.data.unit.create.userId).toBe("rezics-wiki-user");
+    expect(createArgs.data.unit.create.slugScope).toBe("rezics-wiki-user");
+    expect(createArgs.data.unit.create.fieldLocks).toBeUndefined();
+  });
+
+  test("personal creation keeps current user owner and creates whole-object lock", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.create({
+      userId: "user-1",
+      creationMode: "personal",
+      defaultLanguage: "en",
+      translations: [{ language: "en", title: "Personal Book" }],
+    });
+
+    const createArgs = mockCreateBook.mock.calls[0]?.[0] as any;
+    expect(createArgs.data.unit.create.userId).toBe("user-1");
+    expect(createArgs.data.unit.create.fieldLocks.create).toMatchObject({
+      fieldKey: "*",
+      lockedById: "user-1",
+    });
   });
 });
 
