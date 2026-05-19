@@ -40,6 +40,7 @@ import { tokenApi } from "./token";
 import { translationGroupApi } from "./translation-group";
 import {
   translationSourceApi,
+  unitAuthorityApi,
   unitApi,
   workLinkApi,
   workLinkClaimApi,
@@ -186,6 +187,7 @@ app
   .use(meiliApi)
   .use(federatedSearchApi)
   .use(unitApi)
+  .use(unitAuthorityApi)
   .use(workLinkApi)
   .use(workLinkClaimApi)
   .use(translationSourceApi)

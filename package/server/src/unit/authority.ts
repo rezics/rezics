@@ -1,4 +1,10 @@
-import type { RezicsSessionClaims } from "@rezics/contract";
+import {
+  UNIT_FIELD_LOCK_ALL,
+  UnitAuthorityRoleKey,
+  type LockFieldKey,
+  type RezicsSessionClaims,
+  type UnitFieldKey,
+} from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { isAdminRole, verifyAdminFromDb } from "@/middleware";
 
@@ -7,6 +13,220 @@ const REALM_AUTHORITY_ROLES = ["owner", "admin", "moderator"] as const;
 export interface AuthorityUnit {
   id: string;
   userId: string | null;
+}
+
+export type CollaborativeSurfacePolicy = {
+  collaborative: boolean;
+  collaboratorRoles?: readonly UnitAuthorityRoleKey[];
+};
+
+export type AuthorityDenyCode =
+  | "AUTHORITY_DENIED"
+  | "FIELD_LOCKED"
+  | "SURFACE_NOT_COLLABORATIVE"
+  | "COLLABORATOR_ROLE_DENIED";
+
+export type UnitFieldEditDecision =
+  | {
+      allowed: true;
+      reason:
+        | "admin-override"
+        | "primary-owner"
+        | "collaborator"
+        | "community-edit";
+      auditOverride: boolean;
+      collaboratorRole?: UnitAuthorityRoleKey;
+    }
+  | {
+      allowed: false;
+      code: AuthorityDenyCode;
+      message: string;
+      blockedFieldKeys?: LockFieldKey[];
+      collaboratorRole?: UnitAuthorityRoleKey;
+    };
+
+export class UnitAuthorityError extends Error {
+  readonly code: AuthorityDenyCode;
+  readonly unitId?: string;
+  readonly blockedFieldKeys?: LockFieldKey[];
+
+  constructor(input: {
+    code: AuthorityDenyCode;
+    message: string;
+    unitId?: string;
+    blockedFieldKeys?: LockFieldKey[];
+  }) {
+    super(input.message);
+    this.name = "UnitAuthorityError";
+    this.code = input.code;
+    this.unitId = input.unitId;
+    this.blockedFieldKeys = input.blockedFieldKeys;
+  }
+}
+
+type AuthorityPrisma = Pick<
+  typeof prisma,
+  "unitCollaborator" | "unitFieldLock"
+>;
+
+const DEFAULT_COLLABORATOR_ROLES = [
+  UnitAuthorityRoleKey.OWNER,
+  UnitAuthorityRoleKey.MAINTAINER,
+  UnitAuthorityRoleKey.EDITOR,
+] as const;
+
+const LOCK_BYPASS_ROLES = new Set<UnitAuthorityRoleKey>([
+  UnitAuthorityRoleKey.OWNER,
+  UnitAuthorityRoleKey.MAINTAINER,
+]);
+
+function uniqueFieldKeys(fieldKeys: readonly UnitFieldKey[]): UnitFieldKey[] {
+  return [...new Set(fieldKeys)];
+}
+
+function roleFromString(roleKey: string): UnitAuthorityRoleKey | null {
+  return Object.values(UnitAuthorityRoleKey).includes(
+    roleKey as UnitAuthorityRoleKey,
+  )
+    ? (roleKey as UnitAuthorityRoleKey)
+    : null;
+}
+
+function denies(
+  code: AuthorityDenyCode,
+  message: string,
+  extra: Pick<
+    UnitFieldEditDecision & { allowed: false },
+    "blockedFieldKeys" | "collaboratorRole"
+  > = {},
+): UnitFieldEditDecision {
+  return { allowed: false, code, message, ...extra };
+}
+
+export async function canEditUnitFields(
+  caller: RezicsSessionClaims | null,
+  unit: AuthorityUnit,
+  changedFieldKeys: readonly UnitFieldKey[],
+  surfacePolicy: CollaborativeSurfacePolicy,
+  options: {
+    prismaClient?: AuthorityPrisma;
+    verifyAdmin?: (userId: string) => Promise<boolean>;
+  } = {},
+): Promise<UnitFieldEditDecision> {
+  if (!caller) {
+    return denies("AUTHORITY_DENIED", "Login is required to edit this Unit.");
+  }
+
+  const verifyAdmin = options.verifyAdmin ?? verifyAdminFromDb;
+  if (isAdminRole(caller) || (await verifyAdmin(caller.userId))) {
+    return {
+      allowed: true,
+      reason: "admin-override",
+      auditOverride: true,
+    };
+  }
+
+  if (unit.userId && caller.userId === unit.userId) {
+    return {
+      allowed: true,
+      reason: "primary-owner",
+      auditOverride: false,
+    };
+  }
+
+  const db = options.prismaClient ?? prisma;
+  const collaborator = await db.unitCollaborator.findUnique({
+    where: { unitId_userId: { unitId: unit.id, userId: caller.userId } },
+    select: { roleKey: true },
+  });
+  const collaboratorRole = collaborator
+    ? roleFromString(collaborator.roleKey)
+    : null;
+
+  if (collaboratorRole) {
+    const allowedRoles =
+      surfacePolicy.collaboratorRoles ?? DEFAULT_COLLABORATOR_ROLES;
+    if (!allowedRoles.includes(collaboratorRole)) {
+      return denies(
+        "COLLABORATOR_ROLE_DENIED",
+        "Collaborator role is not allowed to edit this surface.",
+        { collaboratorRole },
+      );
+    }
+
+    if (LOCK_BYPASS_ROLES.has(collaboratorRole)) {
+      return {
+        allowed: true,
+        reason: "collaborator",
+        auditOverride: false,
+        collaboratorRole,
+      };
+    }
+  }
+
+  if (!surfacePolicy.collaborative) {
+    return denies(
+      "SURFACE_NOT_COLLABORATIVE",
+      "This surface is not collaborative.",
+      collaboratorRole ? { collaboratorRole } : {},
+    );
+  }
+
+  const fieldKeys = uniqueFieldKeys(changedFieldKeys);
+  const locks = await db.unitFieldLock.findMany({
+    where: {
+      unitId: unit.id,
+      fieldKey: { in: [UNIT_FIELD_LOCK_ALL, ...fieldKeys] },
+    },
+    select: { fieldKey: true },
+  });
+
+  if (locks.length > 0) {
+    return denies("FIELD_LOCKED", "One or more fields are locked.", {
+      blockedFieldKeys: locks.map((lock) => lock.fieldKey as LockFieldKey),
+      ...(collaboratorRole ? { collaboratorRole } : {}),
+    });
+  }
+
+  if (collaboratorRole) {
+    return {
+      allowed: true,
+      reason: "collaborator",
+      auditOverride: false,
+      collaboratorRole,
+    };
+  }
+
+  return {
+    allowed: true,
+    reason: "community-edit",
+    auditOverride: false,
+  };
+}
+
+export async function assertCanEditUnitFields(
+  caller: RezicsSessionClaims | null,
+  unit: AuthorityUnit,
+  changedFieldKeys: readonly UnitFieldKey[],
+  surfacePolicy: CollaborativeSurfacePolicy,
+  options?: Parameters<typeof canEditUnitFields>[4],
+): Promise<UnitFieldEditDecision & { allowed: true }> {
+  const decision = await canEditUnitFields(
+    caller,
+    unit,
+    changedFieldKeys,
+    surfacePolicy,
+    options,
+  );
+  if (!decision.allowed) {
+    throw new UnitAuthorityError({
+      code: decision.code,
+      message: decision.message,
+      unitId: unit.id,
+      blockedFieldKeys: decision.blockedFieldKeys,
+    });
+  }
+  return decision;
 }
 
 /**

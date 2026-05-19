@@ -2,8 +2,22 @@
  * Units Service - Main exports
  */
 
-export { hasAuthorityOver } from "./authority";
-export type { AuthorityUnit } from "./authority";
+export {
+  assertCanEditUnitFields,
+  canEditUnitFields,
+  hasAuthorityOver,
+  UnitAuthorityError,
+} from "./authority";
+export type {
+  AuthorityUnit,
+  CollaborativeSurfacePolicy,
+  UnitFieldEditDecision,
+} from "./authority";
+export { unitAuthorityApi } from "./authority.api";
+export {
+  UnitAuthorityService,
+  unitAuthorityService,
+} from "./authority.service";
 export { mapTranslationToDTO, mapUnitToDTO } from "./mapper";
 export { translationSourceApi } from "./translation-source.api";
 export { TranslationService, translationService } from "./translation.service";
