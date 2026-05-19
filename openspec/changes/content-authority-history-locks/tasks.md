@@ -137,35 +137,35 @@
 - [x] 12.2 Add empty-state UI for history timelines when the history service has not ingested revisions yet.
 - [x] 12.3 Add single revision view that renders slot payloads and resolves referenced Unit ids through main server APIs.
 - [x] 12.4 Add lock status affordances on collaborative edit forms where the viewer needs to understand blocked fields.
-- [ ] 12.5 Add owner/maintainer UI for managing field locks where in scope for v1.
-- [ ] 12.6 Add collaborator management UI where in scope for v1 or mark as admin-only if deferred.
-- [ ] 12.7 Add admin UI for inspecting history outbox lag/failures if operationally required.
+- [x] 12.5 Add owner/maintainer UI for managing field locks where in scope for v1.
+- [x] 12.6 Add collaborator management UI where in scope for v1 or mark as admin-only if deferred.
+- [x] 12.7 Add admin UI for inspecting history outbox lag/failures if operationally required.
 - [x] 12.8 Verify responsive layout and accessibility for new history/wiki/lock surfaces.
 
 ## 13. Admin And Operations
 
-- [ ] 13.1 Add admin routes or pages for searching Unit locks and collaborators.
-- [ ] 13.2 Add admin override flows for removing problematic locks or collaborators.
-- [ ] 13.3 Add operational visibility for `HistoryOutbox` pending/failed row counts.
-- [ ] 13.4 Add a safe retry mechanism for failed outbox rows.
-- [ ] 13.5 Add documentation for pausing history consumption without blocking main canonical writes.
-- [ ] 13.6 Add documentation for seeded infra user purpose and ownership semantics.
+- [x] 13.1 Add admin routes or pages for searching Unit locks and collaborators.
+- [x] 13.2 Add admin override flows for removing problematic locks or collaborators.
+- [x] 13.3 Add operational visibility for `HistoryOutbox` pending/failed row counts.
+- [x] 13.4 Add a safe retry mechanism for failed outbox rows.
+- [x] 13.5 Add documentation for pausing history consumption without blocking main canonical writes.
+- [x] 13.6 Add documentation for seeded infra user purpose and ownership semantics.
 
 ## 14. Search, Indexing, And Rendering Integration
 
-- [ ] 14.1 Audit search/index DTOs that expose `userId` or owner fields.
-- [ ] 14.2 Ensure search result renderers treat `rezics-wiki` as community catalog ownership.
-- [ ] 14.3 Ensure wiki post documents are indexed with an appropriate kind and target Unit relationship.
-- [ ] 14.4 Ensure ordinary posts remain filtered/rendered by author semantics.
+- [x] 14.1 Audit search/index DTOs that expose `userId` or owner fields.
+- [x] 14.2 Ensure search result renderers treat `rezics-wiki` as community catalog ownership.
+- [x] 14.3 Ensure wiki post documents are indexed with an appropriate kind and target Unit relationship.
+- [x] 14.4 Ensure ordinary posts remain filtered/rendered by author semantics.
 - [x] 14.5 Add tests for `rezics-wiki` owner rendering in search or card contexts.
 
 ## 15. Migration And Compatibility
 
-- [ ] 15.1 Confirm no automatic backfill is required for existing development rows.
-- [ ] 15.2 Add a one-off verification script or query to list existing wiki-shaped rows by owner for manual review.
-- [ ] 15.3 Keep existing owner-only edit endpoints working until explicitly migrated.
-- [ ] 15.4 Add migration notes for API consumers that need to pass `creationMode`.
-- [ ] 15.5 Run repo-wide search for direct owner-id create inputs and ensure wiki creation paths resolve owner server-side.
+- [x] 15.1 Confirm no automatic backfill is required for existing development rows.
+- [x] 15.2 Add a one-off verification script or query to list existing wiki-shaped rows by owner for manual review.
+- [x] 15.3 Keep existing owner-only edit endpoints working until explicitly migrated.
+- [x] 15.4 Add migration notes for API consumers that need to pass `creationMode`.
+- [x] 15.5 Run repo-wide search for direct owner-id create inputs and ensure wiki creation paths resolve owner server-side.
 
 ## 16. Validation
 
