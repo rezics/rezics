@@ -7,12 +7,19 @@ process.env.DATABASE_URL ??=
 
 const unitCreateMock = mock(async (): Promise<any> => ({ id: "post-1" }));
 const unitFindUniqueMock = mock(async (): Promise<any> => null);
+const unitFindUniqueOrThrowMock = mock(
+  async (): Promise<any> => ({ id: "post-1", userId: "wiki-owner" }),
+);
 const unitFindManyMock = mock(
   async (args: any): Promise<any> =>
     (args.where.id.in as string[]).map((id) => ({ id })),
 );
-const postCreateMock = mock(async (): Promise<any> => ({ unitId: "post-1" }));
-const postUpdateMock = mock(async (): Promise<any> => ({ unitId: "post-1" }));
+const postCreateMock = mock(
+  async (_args?: any): Promise<any> => ({ unitId: "post-1" }),
+);
+const postUpdateMock = mock(
+  async (_args?: any): Promise<any> => ({ unitId: "post-1" }),
+);
 const postFindManyMock = mock(async (): Promise<any[]> => []);
 const postCountMock = mock(async () => 0);
 const postFindUniqueMock = mock(async (): Promise<any> => null);
@@ -35,11 +42,24 @@ const realmUnitCreateMock = mock(async (args: any) => {
   return args.data;
 });
 const unitTagCreateMock = mock(async (args: any) => args.data);
+const unitTagFindManyMock = mock(async (): Promise<any[]> => []);
+const unitTranslationFindManyMock = mock(async (): Promise<any[]> => []);
+const bookFindUniqueMock = mock(async (): Promise<any> => null);
+const entityFindUniqueMock = mock(async (): Promise<any> => null);
+const creditAttributionFindManyMock = mock(async (): Promise<any[]> => []);
+const subjectAttributionFindManyMock = mock(async (): Promise<any[]> => []);
+const unitCollaboratorFindUniqueMock = mock(async (): Promise<any> => null);
+const unitFieldLockFindManyMock = mock(async (): Promise<any[]> => []);
+const queryRawMock = mock(async (): Promise<any[]> => [{ sequence: 1n }]);
+const historyOutboxCreateMock = mock(async (args: any) => args.data);
+const userFindUniqueMock = mock(async () => null);
 const transactionMock = mock(async (fn: any) =>
   fn({
+    $queryRaw: queryRawMock,
     unit: {
       create: unitCreateMock,
       findMany: unitFindManyMock,
+      findUniqueOrThrow: unitFindUniqueOrThrowMock,
     },
     post: {
       create: postCreateMock,
@@ -48,7 +68,15 @@ const transactionMock = mock(async (fn: any) =>
       findFirst: postFindFirstMock,
     },
     realmUnit: { create: realmUnitCreateMock },
-    unitTag: { create: unitTagCreateMock },
+    unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
+    unitTranslation: { findMany: unitTranslationFindManyMock },
+    book: { findUnique: bookFindUniqueMock },
+    entity: { findUnique: entityFindUniqueMock },
+    creditAttribution: { findMany: creditAttributionFindManyMock },
+    subjectAttribution: { findMany: subjectAttributionFindManyMock },
+    unitCollaborator: { findUnique: unitCollaboratorFindUniqueMock },
+    unitFieldLock: { findMany: unitFieldLockFindManyMock },
+    historyOutbox: { create: historyOutboxCreateMock },
   }),
 );
 
@@ -59,6 +87,7 @@ Object.assign(prismaMock, {
     create: unitCreateMock,
     findMany: unitFindManyMock,
     findUnique: unitFindUniqueMock,
+    findUniqueOrThrow: unitFindUniqueOrThrowMock,
   },
   post: {
     create: postCreateMock,
@@ -70,8 +99,13 @@ Object.assign(prismaMock, {
     findFirst: postFindFirstMock,
   },
   realmUnit: { create: realmUnitCreateMock },
-  unitTag: { create: unitTagCreateMock },
+  unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
+  user: { findUnique: userFindUniqueMock },
 });
+
+mock.module("@/infra/infra-users", () => ({
+  resolveRezicsWikiUserId: mock(async () => "wiki-owner"),
+}));
 
 mock.module("@/meili/post/sync", () => ({
   deletePostFromMeili: mock(async () => undefined),
@@ -93,6 +127,7 @@ const { PostService } = await import("./post.service");
 function resetMocks() {
   unitCreateMock.mockClear();
   unitFindUniqueMock.mockClear();
+  unitFindUniqueOrThrowMock.mockClear();
   unitFindManyMock.mockClear();
   unitFindManyMock.mockImplementation(async (args: any) =>
     (args.where.id.in as string[]).map((id) => ({ id })),
@@ -106,6 +141,17 @@ function resetMocks() {
   postFindFirstMock.mockClear();
   realmUnitCreateMock.mockClear();
   unitTagCreateMock.mockClear();
+  unitTagFindManyMock.mockClear();
+  unitTranslationFindManyMock.mockClear();
+  bookFindUniqueMock.mockClear();
+  entityFindUniqueMock.mockClear();
+  creditAttributionFindManyMock.mockClear();
+  subjectAttributionFindManyMock.mockClear();
+  unitCollaboratorFindUniqueMock.mockClear();
+  unitFieldLockFindManyMock.mockClear();
+  queryRawMock.mockClear();
+  historyOutboxCreateMock.mockClear();
+  userFindUniqueMock.mockClear();
   transactionMock.mockClear();
 }
 
@@ -506,5 +552,97 @@ describe("PostService.update immutability", () => {
 
     // Restore the shared mock so subsequent tests see the standard behavior.
     Object.assign(prismaMock.post, { update: postUpdateMock });
+  });
+});
+
+describe("PostService wiki posts", () => {
+  const service = new PostService();
+  const actor = {
+    userId: "actor-1",
+    permission: { role: "USER" },
+  } as any;
+
+  test("wiki creation uses rezics-wiki ownership and records author", async () => {
+    resetMocks();
+    postCreateMock.mockImplementationOnce(async (args: any) => ({
+      unitId: "wiki-post-1",
+      body: args.data.body,
+      kind: args.data.kind,
+    }));
+    postUpdateMock.mockImplementationOnce(async (args: any) => ({
+      unitId: "wiki-post-1",
+      body: "body",
+      kind: "WIKI",
+      rootPostUnitId: args.data.rootPostUnitId,
+    }));
+
+    await service.create({ kind: "WIKI", body: "body" }, "actor-1");
+
+    const unitCreateArgs = (unitCreateMock.mock.calls as any[])[0][0];
+    const postCreateArgs = (postCreateMock.mock.calls as any[])[0][0];
+    expect(unitCreateArgs.data.userId).toBe("wiki-owner");
+    expect(postCreateArgs.data.authorUserId).toBe("actor-1");
+    expect(postCreateArgs.data.kind).toBe("WIKI");
+    expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("unlocked wiki body edit writes through collaborative authority", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
+      kind: "WIKI",
+    }));
+
+    await service.update("wiki-post-1", { body: "edited" }, actor);
+
+    expect(unitFieldLockFindManyMock).toHaveBeenCalledTimes(1);
+    expect(postUpdateMock).toHaveBeenCalledTimes(1);
+    expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("locked wiki body edit is rejected", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
+      kind: "WIKI",
+    }));
+    unitFieldLockFindManyMock.mockImplementationOnce(async () => [
+      { fieldKey: "post.body" },
+    ]);
+
+    await expect(
+      service.update("wiki-post-1", { body: "edited" }, actor),
+    ).rejects.toMatchObject({
+      statusCode: 403,
+      code: "FIELD_LOCKED",
+    });
+    expect(postUpdateMock).not.toHaveBeenCalled();
+  });
+
+  test("ordinary review update does not query field locks", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
+      kind: "REVIEW",
+    }));
+
+    await service.update("review-1", { body: "edited" }, actor);
+
+    expect(unitFieldLockFindManyMock).not.toHaveBeenCalled();
+    expect(historyOutboxCreateMock).not.toHaveBeenCalled();
+  });
+
+  test("Post.isLocked does not control wiki body locks", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
+      kind: "WIKI",
+    }));
+
+    await service.update(
+      "wiki-post-1",
+      { body: "edited", isLocked: true },
+      actor,
+    );
+
+    expect(unitFieldLockFindManyMock).toHaveBeenCalledTimes(1);
+    const postUpdateArgs = (postUpdateMock.mock.calls as any[])[0][0];
+    expect(postUpdateArgs.data.isLocked).toBe(true);
   });
 });

@@ -1,5 +1,7 @@
+import { WikiPostFieldKey } from "@rezics/contract";
 import type {
   CreatePostInput,
+  RezicsSessionClaims,
   PostListQuery,
   UpdatePostInput,
 } from "@rezics/contract";
@@ -18,6 +20,11 @@ import {
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
+import { resolveRezicsWikiUserId } from "@/infra/infra-users";
+import {
+  assertCanEditCollaborativeMetadata,
+  writeEditorialMetadataHistory,
+} from "@/unit/collaborative-metadata";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 import { AppError } from "../utils/errors";
@@ -320,10 +327,12 @@ export class PostService {
     }
 
     const post = await prisma.$transaction(async (tx) => {
+      const ownerUserId =
+        kind === "WIKI" ? await resolveRezicsWikiUserId() : authorUserId;
       const unit = await tx.unit.create({
         data: {
-          userId: authorUserId,
-          slugScope: authorUserId,
+          userId: ownerUserId,
+          slugScope: ownerUserId,
           type: UnitType.POST,
           status: UnitStatus.PUBLISHED,
         },
@@ -398,6 +407,8 @@ export class PostService {
         );
       }
 
+      let result: PostWithRelations;
+
       // Top-level post: set rootPostUnitId to own unitId
       if (!parentPostUnitId) {
         const updated = await tx.post.update({
@@ -406,31 +417,43 @@ export class PostService {
           include: postInclude,
         });
 
-        return updated as PostWithRelations;
-      }
-
-      // Reply: increment parent counters and update lastReplyAt
-      await tx.post.update({
-        where: { unitId: parentPostUnitId },
-        data: {
-          replyCount: { increment: 1 },
-          directReplyCount: { increment: 1 },
-          lastReplyAt: new Date(),
-        },
-      });
-
-      // Also increment root post's replyCount (not directReplyCount)
-      if (rootPostUnitId && rootPostUnitId !== parentPostUnitId) {
+        result = updated as PostWithRelations;
+      } else {
+        // Reply: increment parent counters and update lastReplyAt
         await tx.post.update({
-          where: { unitId: rootPostUnitId },
+          where: { unitId: parentPostUnitId },
           data: {
             replyCount: { increment: 1 },
+            directReplyCount: { increment: 1 },
             lastReplyAt: new Date(),
           },
         });
+
+        // Also increment root post's replyCount (not directReplyCount)
+        if (rootPostUnitId && rootPostUnitId !== parentPostUnitId) {
+          await tx.post.update({
+            where: { unitId: rootPostUnitId },
+            data: {
+              replyCount: { increment: 1 },
+              lastReplyAt: new Date(),
+            },
+          });
+        }
+
+        result = created as PostWithRelations;
       }
 
-      return created as PostWithRelations;
+      if (kind === "WIKI") {
+        await writeEditorialMetadataHistory(tx as any, {
+          unitId: result.unitId,
+          actorUserId: authorUserId,
+          changedFieldKeys: [WikiPostFieldKey.BODY],
+          message: "wiki-post.create",
+          slots: { post: { body: result.body } },
+        });
+      }
+
+      return result;
     });
 
     // Fire-and-forget sync to Meilisearch
@@ -443,6 +466,7 @@ export class PostService {
   async update(
     unitId: string,
     input: UpdatePostInput,
+    actor?: RezicsSessionClaims,
   ): Promise<PostWithRelations> {
     const data: Prisma.PostUpdateInput = {};
 
@@ -451,10 +475,53 @@ export class PostService {
     if (input.extra !== undefined)
       data.extra = input.extra as Prisma.InputJsonValue;
 
-    const updated = await prisma.post.update({
-      where: { unitId },
-      data,
-      include: postInclude,
+    if (!actor) {
+      const updated = await prisma.post.update({
+        where: { unitId },
+        data,
+        include: postInclude,
+      });
+
+      const patchFields: Record<string, any> = {};
+      if (input.body !== undefined) patchFields.body = input.body;
+      if (input.isLocked !== undefined) patchFields.isLocked = input.isLocked;
+      if (input.extra !== undefined) patchFields.extra = input.extra;
+      patchPostFieldsToMeili(unitId, patchFields).catch(() => {});
+
+      return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const existing = await tx.post.findUniqueOrThrow({
+        where: { unitId },
+        select: { kind: true },
+      });
+      const isWikiBodyEdit =
+        existing.kind === "WIKI" && input.body !== undefined;
+
+      if (isWikiBodyEdit && actor) {
+        await assertCanEditCollaborativeMetadata(tx as any, actor, unitId, [
+          WikiPostFieldKey.BODY,
+        ]);
+      }
+
+      const row = await tx.post.update({
+        where: { unitId },
+        data,
+        include: postInclude,
+      });
+
+      if (isWikiBodyEdit && actor) {
+        await writeEditorialMetadataHistory(tx as any, {
+          unitId,
+          actorUserId: actor.userId,
+          changedFieldKeys: [WikiPostFieldKey.BODY],
+          message: "wiki-post.body.update",
+          slots: { post: { body: row.body } },
+        });
+      }
+
+      return row;
     });
 
     // Fire-and-forget partial sync to Meilisearch

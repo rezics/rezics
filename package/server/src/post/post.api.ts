@@ -1,8 +1,8 @@
 import {
-  BasicAdminPermission,
   createPostSchema,
   hasPermissionToDeletePost,
   hasPermissionToUpdatePost,
+  PostKind,
   type PostListResponse,
   type PostResponse,
   postListBodySchema,
@@ -117,7 +117,14 @@ export const postApi = new Elysia({ prefix: "/post" })
     "/:unitId",
     async ({ params, body, identity, set }): Promise<PostResponse> => {
       const target = await postService.getByUnitId(params.unitId);
+      const isWikiBodyOnlyEdit =
+        target.kind === PostKind.WIKI &&
+        body.body !== undefined &&
+        body.isLocked === undefined &&
+        body.extra === undefined;
+
       if (
+        !isWikiBodyOnlyEdit &&
         !hasPermissionToUpdatePost(
           identity.permission,
           identity.userId,
@@ -129,7 +136,7 @@ export const postApi = new Elysia({ prefix: "/post" })
           "Forbidden: you do not have permission to update this post",
         );
       }
-      const updated = await postService.update(params.unitId, body);
+      const updated = await postService.update(params.unitId, body, identity);
       return mapPostToDTO(updated);
     },
     {
