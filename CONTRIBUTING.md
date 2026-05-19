@@ -13,6 +13,7 @@ bun install
 bun run dev              # Start all dev services
 bun run app:dev          # Frontend only (Vite, port 35001)
 bun run server:dev       # Backend only (Elysia with --watch)
+bun --filter=@rezics/history run dev # History service only (Elysia, port 3004)
 ```
 
 ## Conventions
