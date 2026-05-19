@@ -1,0 +1,69 @@
+generator client {
+  provider      = "prisma-client"
+  output        = "./generated"
+  moduleFormat  = "esm"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgres"
+}
+
+model UnitRevision {
+  id               String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  unitId           String   @db.Uuid
+  sequence         BigInt
+  contentHash      String   @db.VarChar(64)
+  actorUserId      String   @db.Uuid
+  changedFieldKeys String[]
+  message          String?
+  createdAt        DateTime
+  ingestedAt       DateTime @default(now())
+
+  content RevisionContent @relation(fields: [contentHash], references: [hash])
+
+  @@unique([unitId, sequence])
+  @@index([unitId, createdAt(sort: Desc)])
+  @@index([actorUserId, createdAt])
+  @@index([contentHash])
+}
+
+model RevisionContent {
+  hash      String   @id @db.VarChar(64)
+  payload   Json
+  createdAt DateTime @default(now())
+
+  revisions UnitRevision[]
+}
+
+model StructureEvent {
+  id               String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  unitId           String   @db.Uuid
+  sequence         BigInt
+  eventType        String   @db.VarChar(96)
+  actorUserId      String   @db.Uuid
+  changedFieldKeys String[]
+  payload          Json
+  message          String?
+  createdAt        DateTime
+  ingestedAt       DateTime @default(now())
+
+  @@unique([unitId, sequence, eventType])
+  @@index([unitId, createdAt(sort: Desc)])
+  @@index([eventType, createdAt])
+}
+
+model IngestionCursor {
+  source    String   @id @db.VarChar(64)
+  outboxId  String?  @db.Uuid
+  updatedAt DateTime @updatedAt
+}
+
+model OutboxProcessingFailure {
+  outboxId   String   @id @db.Uuid
+  attempts   Int      @default(0)
+  lastError  String?
+  retryAfter DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
