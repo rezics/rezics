@@ -5,6 +5,7 @@ import { RevisionService } from "./revision.service";
 function dbStub() {
   const content = new Map<string, unknown>();
   const revisions: any[] = [];
+  const structureEvents: any[] = [];
   return {
     revisionContent: {
       upsert: mock(async ({ where, create }: any) => {
@@ -46,7 +47,32 @@ function dbStub() {
       ),
     },
     structureEvent: {
-      upsert: mock(async () => ({})),
+      upsert: mock(async ({ where, create }: any) => {
+        const existing = structureEvents.find(
+          (row) =>
+            row.unitId === where.unitId_sequence_eventType.unitId &&
+            row.sequence === where.unitId_sequence_eventType.sequence &&
+            row.eventType === where.unitId_sequence_eventType.eventType,
+        );
+        if (existing) return existing;
+        const row = {
+          id: `event-${structureEvents.length + 1}`,
+          ...create,
+          ingestedAt: new Date("2026-05-19T00:00:00.000Z"),
+        };
+        structureEvents.push(row);
+        return row;
+      }),
+      findMany: mock(async ({ take }: any) => structureEvents.slice(0, take)),
+      findUnique: mock(
+        async ({ where }: any) =>
+          structureEvents.find(
+            (row) =>
+              row.unitId === where.unitId_sequence_eventType.unitId &&
+              row.sequence === where.unitId_sequence_eventType.sequence &&
+              row.eventType === where.unitId_sequence_eventType.eventType,
+          ) ?? null,
+      ),
     },
   };
 }
@@ -72,6 +98,31 @@ describe("RevisionService", () => {
     });
 
     expect(db.revisionContent.upsert).toHaveBeenCalledTimes(2);
+    expect(db.unitRevision.upsert).toHaveBeenCalledTimes(2);
+  });
+
+  test("duplicate unit sequence ingestion is idempotent", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+    const payload = {
+      unitId: "unit-1",
+      sequence: 1,
+      actorUserId: "user-1",
+      changedFieldKeys: [UnitCommonFieldKey.TITLE],
+      slots: { unit: { title: "Captured" } },
+      message: null,
+    };
+
+    const first = await service.insertUnitRevision({
+      payload,
+      contentHash: "hash-1",
+    });
+    const retry = await service.insertUnitRevision({
+      payload,
+      contentHash: "hash-1",
+    });
+
+    expect(retry.id).toBe(first.id);
     expect(db.unitRevision.upsert).toHaveBeenCalledTimes(2);
   });
 
@@ -146,5 +197,36 @@ describe("RevisionService", () => {
 
     expect(page.revisions).toHaveLength(1);
     expect(page.nextCursor).toBe("revision-2");
+  });
+
+  test("lists and reads structure events", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    await service.insertStructureEvent({
+      payload: {
+        unitId: "unit-1",
+        sequence: 1,
+        actorUserId: "user-1",
+        eventType: "book.contentStructure.node.update",
+        changedFieldKeys: [UnitCommonFieldKey.TITLE],
+        payload: { nodeId: "node-1", title: "Captured" },
+        message: null,
+      },
+      createdAt: new Date("2026-05-19T00:00:00.000Z"),
+    });
+
+    const page = await service.listStructureEvents({
+      unitId: "unit-1",
+      limit: 10,
+    });
+    const event = await service.getStructureEvent({
+      unitId: "unit-1",
+      sequence: 1,
+      eventType: "book.contentStructure.node.update",
+    });
+
+    expect(page.events).toHaveLength(1);
+    expect(event?.payload).toEqual({ nodeId: "node-1", title: "Captured" });
   });
 });

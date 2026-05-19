@@ -1,15 +1,36 @@
 import type {
   EditorialRevisionPayload,
+  StructureEventDTO,
   StructureEventPayload,
+  StructureEventTimelinePage,
   UnitRevisionDTO,
   UnitRevisionTimelinePage,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
 
-type HistoryDb = Pick<
-  typeof prisma,
-  "revisionContent" | "unitRevision" | "structureEvent"
->;
+type HistoryDb = {
+  revisionContent: {
+    upsert(input: unknown): Promise<unknown>;
+  };
+  unitRevision: {
+    upsert(input: unknown): Promise<unknown>;
+    findMany(input: unknown): Promise<unknown[]>;
+    findUnique(input: unknown): Promise<unknown | null>;
+  };
+  structureEvent: {
+    upsert(input: unknown): Promise<unknown>;
+    findMany(input: unknown): Promise<unknown[]>;
+    findUnique(input: unknown): Promise<unknown | null>;
+  };
+};
+
+let defaultDbPromise: Promise<HistoryDb> | null = null;
+
+async function getDefaultDb(): Promise<HistoryDb> {
+  defaultDbPromise ??= import("#/prisma/client").then(
+    ({ prisma }) => prisma as unknown as HistoryDb,
+  );
+  return defaultDbPromise;
+}
 
 function mapRevision(row: {
   id: string;
@@ -44,14 +65,46 @@ function mapRevision(row: {
   };
 }
 
+function mapStructureEvent(row: {
+  id: string;
+  unitId: string;
+  sequence: bigint;
+  eventType: string;
+  actorUserId: string;
+  changedFieldKeys: string[];
+  payload: unknown;
+  message: string | null;
+  createdAt: Date;
+  ingestedAt: Date;
+}): StructureEventDTO {
+  return {
+    id: row.id,
+    unitId: row.unitId,
+    sequence: Number(row.sequence),
+    eventType: row.eventType,
+    actorUserId: row.actorUserId,
+    changedFieldKeys:
+      row.changedFieldKeys as StructureEventDTO["changedFieldKeys"],
+    payload: row.payload as Record<string, unknown>,
+    message: row.message,
+    createdAt: row.createdAt,
+    ingestedAt: row.ingestedAt,
+  };
+}
+
 export class RevisionService {
-  constructor(private readonly db: HistoryDb = prisma) {}
+  constructor(private readonly db?: HistoryDb) {}
+
+  private database(): Promise<HistoryDb> {
+    return this.db ? Promise.resolve(this.db) : getDefaultDb();
+  }
 
   async upsertRevisionContent(input: {
     hash: string;
     payload: unknown;
   }): Promise<void> {
-    await this.db.revisionContent.upsert({
+    const db = await this.database();
+    await db.revisionContent.upsert({
       where: { hash: input.hash },
       update: {},
       create: { hash: input.hash, payload: input.payload as never },
@@ -63,11 +116,12 @@ export class RevisionService {
     contentHash: string;
     createdAt?: Date;
   }): Promise<UnitRevisionDTO> {
+    const db = await this.database();
     await this.upsertRevisionContent({
       hash: input.contentHash,
       payload: input.payload.slots,
     });
-    const row = await this.db.unitRevision.upsert({
+    const row = await db.unitRevision.upsert({
       where: {
         unitId_sequence: {
           unitId: input.payload.unitId,
@@ -86,14 +140,15 @@ export class RevisionService {
       },
       include: { content: true },
     });
-    return mapRevision(row);
+    return mapRevision(row as Parameters<typeof mapRevision>[0]);
   }
 
   async insertStructureEvent(input: {
     payload: StructureEventPayload;
     createdAt?: Date;
   }): Promise<void> {
-    await this.db.structureEvent.upsert({
+    const db = await this.database();
+    await db.structureEvent.upsert({
       where: {
         unitId_sequence_eventType: {
           unitId: input.payload.unitId,
@@ -120,8 +175,9 @@ export class RevisionService {
     limit?: number;
     cursor?: string | null;
   }): Promise<UnitRevisionTimelinePage> {
+    const db = await this.database();
     const limit = Math.max(1, Math.min(input.limit ?? 20, 100));
-    const rows = await this.db.unitRevision.findMany({
+    const rows = await db.unitRevision.findMany({
       where: { unitId: input.unitId },
       orderBy: { sequence: "desc" },
       take: limit + 1,
@@ -130,9 +186,14 @@ export class RevisionService {
     });
 
     const pageRows = rows.slice(0, limit);
-    const next = rows.length > limit ? rows[limit]?.id : null;
+    const next =
+      rows.length > limit
+        ? (rows[limit] as { id?: string } | undefined)?.id
+        : null;
     return {
-      revisions: pageRows.map(mapRevision),
+      revisions: pageRows.map((row) =>
+        mapRevision(row as Parameters<typeof mapRevision>[0]),
+      ),
       nextCursor: next ?? null,
     };
   }
@@ -141,7 +202,8 @@ export class RevisionService {
     unitId: string;
     sequence: number;
   }): Promise<UnitRevisionDTO | null> {
-    const row = await this.db.unitRevision.findUnique({
+    const db = await this.database();
+    const row = await db.unitRevision.findUnique({
       where: {
         unitId_sequence: {
           unitId: input.unitId,
@@ -150,7 +212,58 @@ export class RevisionService {
       },
       include: { content: true },
     });
-    return row ? mapRevision(row) : null;
+    return row ? mapRevision(row as Parameters<typeof mapRevision>[0]) : null;
+  }
+
+  async listStructureEvents(input: {
+    unitId: string;
+    limit?: number;
+    cursor?: string | null;
+    eventType?: string | null;
+  }): Promise<StructureEventTimelinePage> {
+    const db = await this.database();
+    const limit = Math.max(1, Math.min(input.limit ?? 50, 100));
+    const rows = await db.structureEvent.findMany({
+      where: {
+        unitId: input.unitId,
+        ...(input.eventType ? { eventType: input.eventType } : {}),
+      },
+      orderBy: { sequence: "desc" },
+      take: limit + 1,
+      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+    });
+
+    const pageRows = rows.slice(0, limit);
+    const next =
+      rows.length > limit
+        ? (rows[limit] as { id?: string } | undefined)?.id
+        : null;
+    return {
+      events: pageRows.map((row) =>
+        mapStructureEvent(row as Parameters<typeof mapStructureEvent>[0]),
+      ),
+      nextCursor: next ?? null,
+    };
+  }
+
+  async getStructureEvent(input: {
+    unitId: string;
+    sequence: number;
+    eventType: string;
+  }): Promise<StructureEventDTO | null> {
+    const db = await this.database();
+    const row = await db.structureEvent.findUnique({
+      where: {
+        unitId_sequence_eventType: {
+          unitId: input.unitId,
+          sequence: BigInt(input.sequence),
+          eventType: input.eventType,
+        },
+      },
+    });
+    return row
+      ? mapStructureEvent(row as Parameters<typeof mapStructureEvent>[0])
+      : null;
   }
 }
 
