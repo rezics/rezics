@@ -109,38 +109,38 @@
 
 ## 10. API Package
 
-- [ ] 10.1 Add `package/api` clients for authority and lock endpoints.
-- [ ] 10.2 Add `package/api` clients for history timeline and single revision reads.
-- [ ] 10.3 Add `package/api` create helpers that expose `creationMode` without exposing arbitrary owner ids.
-- [ ] 10.4 Add `package/api` wiki post create/update/list/detail helpers.
-- [ ] 10.5 Add React Query keys and hooks for history reads with eventual-consistency-friendly empty states.
-- [ ] 10.6 Add error mapping for locked-field authority errors so app/admin can render actionable messages.
-- [ ] 10.7 Add tests for API request bodies, query keys, error mapping, and history DTO parsing.
-- [ ] 10.8 Update public exports and run repo-wide search for stale PostKind exhaustiveness checks.
+- [x] 10.1 Add `package/api` clients for authority and lock endpoints.
+- [x] 10.2 Add `package/api` clients for history timeline and single revision reads.
+- [x] 10.3 Add `package/api` create helpers that expose `creationMode` without exposing arbitrary owner ids.
+- [x] 10.4 Add `package/api` wiki post create/update/list/detail helpers.
+- [x] 10.5 Add React Query keys and hooks for history reads with eventual-consistency-friendly empty states.
+- [x] 10.6 Add error mapping for locked-field authority errors so app/admin can render actionable messages.
+- [x] 10.7 Add tests for API request bodies, query keys, error mapping, and history DTO parsing.
+- [x] 10.8 Update public exports and run repo-wide search for stale PostKind exhaustiveness checks.
 
 ## 11. Frontend Creation And Editing Surfaces
 
-- [ ] 11.1 Load `rezics-design` before editing frontend JSX/CSS for this phase.
-- [ ] 11.2 Update `/book/new` or its successor to expose clear catalog/wiki and personal creation paths.
-- [ ] 11.3 Ensure catalog/wiki book creation submits `creationMode = "wiki"`.
-- [ ] 11.4 Ensure personal book creation submits personal creation intent and communicates ownership correctly.
-- [ ] 11.5 Update `EntityPicker` inline create to use wiki-mode entity creation.
-- [ ] 11.6 Add or update personal entity/self-registration UI to keep personal ownership.
-- [ ] 11.7 Add wiki post editor UI for `PostKind.WIKI` create/update flows.
-- [ ] 11.8 Preserve unsaved drafts when locked-field errors occur in wiki post editor.
-- [ ] 11.9 Render `rezics-wiki` owned catalog content as community catalog/wiki ownership, not a normal user owner card.
-- [ ] 11.10 Add frontend tests/stories for catalog vs personal creation mode and locked-field error states.
+- [x] 11.1 Load `rezics-design` before editing frontend JSX/CSS for this phase.
+- [x] 11.2 Update `/book/new` or its successor to expose clear catalog/wiki and personal creation paths.
+- [x] 11.3 Ensure catalog/wiki book creation submits `creationMode = "wiki"`.
+- [x] 11.4 Ensure personal book creation submits personal creation intent and communicates ownership correctly.
+- [x] 11.5 Update `EntityPicker` inline create to use wiki-mode entity creation.
+- [x] 11.6 Add or update personal entity/self-registration UI to keep personal ownership.
+- [x] 11.7 Add wiki post editor UI for `PostKind.WIKI` create/update flows.
+- [x] 11.8 Preserve unsaved drafts when locked-field errors occur in wiki post editor.
+- [x] 11.9 Render `rezics-wiki` owned catalog content as community catalog/wiki ownership, not a normal user owner card.
+- [x] 11.10 Add frontend tests/stories for catalog vs personal creation mode and locked-field error states.
 
 ## 12. History And Authority UI
 
-- [ ] 12.1 Add history timeline route or surface for Unit revision history.
-- [ ] 12.2 Add empty-state UI for history timelines when the history service has not ingested revisions yet.
-- [ ] 12.3 Add single revision view that renders slot payloads and resolves referenced Unit ids through main server APIs.
-- [ ] 12.4 Add lock status affordances on collaborative edit forms where the viewer needs to understand blocked fields.
+- [x] 12.1 Add history timeline route or surface for Unit revision history.
+- [x] 12.2 Add empty-state UI for history timelines when the history service has not ingested revisions yet.
+- [x] 12.3 Add single revision view that renders slot payloads and resolves referenced Unit ids through main server APIs.
+- [x] 12.4 Add lock status affordances on collaborative edit forms where the viewer needs to understand blocked fields.
 - [ ] 12.5 Add owner/maintainer UI for managing field locks where in scope for v1.
 - [ ] 12.6 Add collaborator management UI where in scope for v1 or mark as admin-only if deferred.
 - [ ] 12.7 Add admin UI for inspecting history outbox lag/failures if operationally required.
-- [ ] 12.8 Verify responsive layout and accessibility for new history/wiki/lock surfaces.
+- [x] 12.8 Verify responsive layout and accessibility for new history/wiki/lock surfaces.
 
 ## 13. Admin And Operations
 
@@ -157,7 +157,7 @@
 - [ ] 14.2 Ensure search result renderers treat `rezics-wiki` as community catalog ownership.
 - [ ] 14.3 Ensure wiki post documents are indexed with an appropriate kind and target Unit relationship.
 - [ ] 14.4 Ensure ordinary posts remain filtered/rendered by author semantics.
-- [ ] 14.5 Add tests for `rezics-wiki` owner rendering in search or card contexts.
+- [x] 14.5 Add tests for `rezics-wiki` owner rendering in search or card contexts.
 
 ## 15. Migration And Compatibility
 
@@ -173,8 +173,8 @@
 - [x] 16.2 Run targeted server tests for authority, locks, creation mode, wiki posts, and outbox helpers.
 - [x] 16.3 Run `bun --filter=@rezics/server run prisma:generate`.
 - [x] 16.4 Run targeted history service tests.
-- [ ] 16.5 Run `bun --filter=@rezics/api test` or targeted API package tests.
-- [ ] 16.6 Run affected app tests or Storybook checks for creation/history/wiki UI.
+- [x] 16.5 Run `bun --filter=@rezics/api test` or targeted API package tests.
+- [x] 16.6 Run affected app tests or Storybook checks for creation/history/wiki UI.
 - [x] 16.7 Run `bun run format:check`.
 - [x] 16.8 Run `bun run check:convention`.
 - [x] 16.9 Run `openspec validate content-authority-history-locks --strict`.
