@@ -1,6 +1,13 @@
-import { useUpdatePostMutation } from "@rezics/api/post/post";
-import type { PostDTO } from "@rezics/contract";
+import { getLockedFieldError } from "@rezics/api";
 import {
+  useUpdatePostMutation,
+  useUpdateWikiPostBodyMutation,
+} from "@rezics/api/post/post";
+import type { PostDTO } from "@rezics/contract";
+import { PostKind } from "@rezics/contract";
+import {
+  Alert,
+  AlertDescription,
   Button,
   Dialog,
   DialogContent,
@@ -25,15 +32,37 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
 }) => {
   const { t } = useTranslation();
   const [text, setText] = useState(post.body ?? "");
+  const [lockedError, setLockedError] = useState<string | null>(null);
+  const isWikiPost = post.kind === PostKind.WIKI;
 
   const updateMutation = useUpdatePostMutation({
     onSuccess: () => {
       onClose();
     },
   });
+  const updateWikiMutation = useUpdateWikiPostBodyMutation({
+    onSuccess: () => {
+      onClose();
+    },
+    onError: (error) => {
+      const locked = getLockedFieldError(error);
+      if (!locked) return;
+      setLockedError(
+        locked.blockedFieldKeys.length
+          ? `Locked fields: ${locked.blockedFieldKeys.join(", ")}`
+          : locked.message,
+      );
+    },
+  });
+  const activeMutation = isWikiPost ? updateWikiMutation : updateMutation;
 
   const handleSubmit = () => {
     if (!text.trim()) return;
+    setLockedError(null);
+    if (isWikiPost) {
+      updateWikiMutation.mutate({ unitId: post.unitId, body: text.trim() });
+      return;
+    }
     updateMutation.mutate({
       unitId: post.unitId,
       input: { body: text.trim() },
@@ -44,9 +73,16 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("common.edit")}</DialogTitle>
+          <DialogTitle>
+            {isWikiPost ? "Edit wiki post" : t("common.edit")}
+          </DialogTitle>
         </DialogHeader>
-        <div className="pt-2">
+        <div className="flex flex-col gap-3 pt-2">
+          {lockedError ? (
+            <Alert variant="destructive">
+              <AlertDescription>{lockedError}</AlertDescription>
+            </Alert>
+          ) : null}
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -60,9 +96,9 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={updateMutation.isPending || !text.trim()}
+            disabled={activeMutation.isPending || !text.trim()}
           >
-            {updateMutation.isPending
+            {activeMutation.isPending
               ? t("common.saving", "Saving…")
               : t("common.save", "Save")}
           </Button>

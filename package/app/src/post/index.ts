@@ -10,6 +10,10 @@ export {
   type ReplyComposerProps,
   useBlurRetain,
 } from "./forms/ReplyComposer";
+export {
+  WikiPostEditor,
+  type WikiPostEditorProps,
+} from "./forms/WikiPostEditor";
 export { useFocusReplyFromQuery } from "./hooks/useFocusReplyFromQuery";
 export {
   filterBySortPathPrefix,
