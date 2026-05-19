@@ -90,22 +90,22 @@
 
 - [x] 8.1 Identify current server endpoints that mutate Book metadata, Entity metadata, Unit translations, credit attribution, subject attribution, and tags.
 - [x] 8.2 For the first rollout batch, choose endpoints that will become collaborative and document skipped endpoints in code comments or tasks.
-- [ ] 8.3 Add changed-field-key mapping for each migrated mutation request.
-- [ ] 8.4 Wrap each migrated mutation in the shared authority/lock gate before canonical writes.
-- [ ] 8.5 Write history outbox rows for each migrated mutation after canonical writes in the same transaction.
-- [ ] 8.6 Ensure owner/admin-only endpoints that are not collaborative keep existing behavior and do not query `UnitFieldLock`.
-- [ ] 8.7 Add targeted tests for locked attribution fields, locked translation title fields, unlocked community edits, owner edits, and collaborator edits.
+- [x] 8.3 Add changed-field-key mapping for each migrated mutation request.
+- [x] 8.4 Wrap each migrated mutation in the shared authority/lock gate before canonical writes.
+- [x] 8.5 Write history outbox rows for each migrated mutation after canonical writes in the same transaction.
+- [x] 8.6 Ensure owner/admin-only endpoints that are not collaborative keep existing behavior and do not query `UnitFieldLock`.
+- [x] 8.7 Add targeted tests for locked attribution fields, locked translation title fields, unlocked community edits, owner edits, and collaborator edits.
 
 ## 9. Wiki Post Backend
 
-- [ ] 9.1 Add `PostKind.WIKI` support to server Prisma enum usage and post contract mappings.
-- [ ] 9.2 Update post DTO mappers and validators to include WIKI without breaking existing post kinds.
-- [ ] 9.3 Add wiki post create service path that creates `Unit(type=POST)` with `userId = rezicsWikiUser.unitId` and `Post.authorUserId = actor`.
-- [ ] 9.4 Add wiki post update service path that edits `Post.body` through collaborative authority with changed field key `post.body`.
-- [ ] 9.5 Ensure ordinary post update paths remain author/owner-only and do not enter community lock checks.
-- [ ] 9.6 Ensure `Post.isLocked` remains thread/reply lock semantics and is not used as field protection.
-- [ ] 9.7 Write history outbox rows for wiki post create and body update mutations.
-- [ ] 9.8 Add tests for wiki post creation, wiki post target Unit assignment, unlocked body edit, locked body edit, ordinary review denial, and `Post.isLocked` separation.
+- [x] 9.1 Add `PostKind.WIKI` support to server Prisma enum usage and post contract mappings.
+- [x] 9.2 Update post DTO mappers and validators to include WIKI without breaking existing post kinds.
+- [x] 9.3 Add wiki post create service path that creates `Unit(type=POST)` with `userId = rezicsWikiUser.unitId` and `Post.authorUserId = actor`.
+- [x] 9.4 Add wiki post update service path that edits `Post.body` through collaborative authority with changed field key `post.body`.
+- [x] 9.5 Ensure ordinary post update paths remain author/owner-only and do not enter community lock checks.
+- [x] 9.6 Ensure `Post.isLocked` remains thread/reply lock semantics and is not used as field protection.
+- [x] 9.7 Write history outbox rows for wiki post create and body update mutations.
+- [x] 9.8 Add tests for wiki post creation, wiki post target Unit assignment, unlocked body edit, locked body edit, ordinary review denial, and `Post.isLocked` separation.
 
 ## 10. API Package
 
