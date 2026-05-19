@@ -66,7 +66,9 @@ function canonicalSerialize(value: unknown): string {
   if (!value || typeof value !== "object") return JSON.stringify(value);
   return `{${Object.entries(value as Record<string, unknown>)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, nested]) => `${JSON.stringify(key)}:${canonicalSerialize(nested)}`)
+    .map(
+      ([key, nested]) => `${JSON.stringify(key)}:${canonicalSerialize(nested)}`,
+    )
     .join(",")}}`;
 }
 
