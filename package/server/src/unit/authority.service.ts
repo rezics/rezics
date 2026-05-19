@@ -6,6 +6,7 @@ import type {
   UnitFieldLockDTO,
   UpsertUnitCollaboratorInput,
 } from "@rezics/contract";
+import { HistoryOutboxPayloadKind } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { AppError } from "@/utils/errors";
 import {
@@ -13,11 +14,25 @@ import {
   type AuthorityUnit,
   type CollaborativeSurfacePolicy,
 } from "./authority";
+import {
+  buildEditorialRevisionPayload,
+  type HistoryOutboxWriter,
+  writeSequencedHistoryOutbox,
+} from "./history-outbox";
 
-type AuthorityDb = Pick<
+type AuthorityDataDb = Pick<
   typeof prisma,
   "unit" | "unitCollaborator" | "unitFieldLock"
 >;
+
+type AuthorityTransactionDb = AuthorityDataDb & HistoryOutboxWriter;
+
+type AuthorityDb = AuthorityDataDb &
+  Partial<HistoryOutboxWriter> & {
+    $transaction?<T>(
+      callback: (tx: AuthorityTransactionDb) => Promise<T>,
+    ): Promise<T>;
+  };
 
 const MANAGE_AUTHORITY_POLICY: CollaborativeSurfacePolicy = {
   collaborative: false,
@@ -112,17 +127,27 @@ export class UnitAuthorityService {
     input: UpsertUnitCollaboratorInput,
   ): Promise<UnitCollaboratorDTO> {
     await this.assertCanManageAuthority(actor, unitId);
-    const row = await this.db.unitCollaborator.upsert({
-      where: { unitId_userId: { unitId, userId: input.userId } },
-      update: { roleKey: input.roleKey, addedById: actor.userId },
-      create: {
+    return this.runAuthorityMutation(unitId, async (tx) => {
+      const row = await tx.unitCollaborator.upsert({
+        where: { unitId_userId: { unitId, userId: input.userId } },
+        update: { roleKey: input.roleKey, addedById: actor.userId },
+        create: {
+          unitId,
+          userId: input.userId,
+          roleKey: input.roleKey,
+          addedById: actor.userId,
+        },
+      });
+      const collaborator = toCollaboratorDTO(row);
+      await this.writeAuthorityAudit(tx, {
         unitId,
-        userId: input.userId,
-        roleKey: input.roleKey,
-        addedById: actor.userId,
-      },
+        actorUserId: actor.userId,
+        kind: HistoryOutboxPayloadKind.COLLABORATOR_MUTATION,
+        operation: "collaborator.upsert",
+        payload: { collaborator },
+      });
+      return collaborator;
     });
-    return toCollaboratorDTO(row);
   }
 
   async removeCollaborator(
@@ -131,8 +156,17 @@ export class UnitAuthorityService {
     userId: string,
   ): Promise<void> {
     await this.assertCanManageAuthority(actor, unitId);
-    await this.db.unitCollaborator.delete({
-      where: { unitId_userId: { unitId, userId } },
+    await this.runAuthorityMutation(unitId, async (tx) => {
+      await tx.unitCollaborator.delete({
+        where: { unitId_userId: { unitId, userId } },
+      });
+      await this.writeAuthorityAudit(tx, {
+        unitId,
+        actorUserId: actor.userId,
+        kind: HistoryOutboxPayloadKind.COLLABORATOR_MUTATION,
+        operation: "collaborator.remove",
+        payload: { collaborator: { unitId, userId } },
+      });
     });
   }
 
@@ -150,20 +184,30 @@ export class UnitAuthorityService {
     input: CreateUnitFieldLockInput,
   ): Promise<UnitFieldLockDTO> {
     await this.assertCanManageAuthority(actor, unitId);
-    const row = await this.db.unitFieldLock.upsert({
-      where: { unitId_fieldKey: { unitId, fieldKey: input.fieldKey } },
-      update: {
-        lockedById: actor.userId,
-        reason: input.reason ?? null,
-      },
-      create: {
+    return this.runAuthorityMutation(unitId, async (tx) => {
+      const row = await tx.unitFieldLock.upsert({
+        where: { unitId_fieldKey: { unitId, fieldKey: input.fieldKey } },
+        update: {
+          lockedById: actor.userId,
+          reason: input.reason ?? null,
+        },
+        create: {
+          unitId,
+          fieldKey: input.fieldKey,
+          lockedById: actor.userId,
+          reason: input.reason ?? null,
+        },
+      });
+      const lock = toLockDTO(row);
+      await this.writeAuthorityAudit(tx, {
         unitId,
-        fieldKey: input.fieldKey,
-        lockedById: actor.userId,
-        reason: input.reason ?? null,
-      },
+        actorUserId: actor.userId,
+        kind: HistoryOutboxPayloadKind.LOCK_MUTATION,
+        operation: "lock.upsert",
+        payload: { lock },
+      });
+      return lock;
     });
-    return toLockDTO(row);
   }
 
   async deleteFieldLock(
@@ -172,8 +216,65 @@ export class UnitAuthorityService {
     fieldKey: string,
   ): Promise<void> {
     await this.assertCanManageAuthority(actor, unitId);
-    await this.db.unitFieldLock.delete({
-      where: { unitId_fieldKey: { unitId, fieldKey } },
+    await this.runAuthorityMutation(unitId, async (tx) => {
+      await tx.unitFieldLock.delete({
+        where: { unitId_fieldKey: { unitId, fieldKey } },
+      });
+      await this.writeAuthorityAudit(tx, {
+        unitId,
+        actorUserId: actor.userId,
+        kind: HistoryOutboxPayloadKind.LOCK_MUTATION,
+        operation: "lock.delete",
+        payload: { lock: { unitId, fieldKey } },
+      });
+    });
+  }
+
+  private async runAuthorityMutation<T>(
+    unitId: string,
+    callback: (tx: AuthorityTransactionDb) => Promise<T>,
+  ): Promise<T> {
+    if (this.db.$transaction) {
+      return this.db.$transaction(callback);
+    }
+    return callback(this.db as AuthorityTransactionDb);
+  }
+
+  private async writeAuthorityAudit(
+    tx: AuthorityTransactionDb,
+    input: {
+      unitId: string;
+      actorUserId: string;
+      kind:
+        | typeof HistoryOutboxPayloadKind.LOCK_MUTATION
+        | typeof HistoryOutboxPayloadKind.COLLABORATOR_MUTATION;
+      operation: string;
+      payload: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    if (!tx.historyOutbox || !tx.$queryRaw) return;
+
+    await writeSequencedHistoryOutbox(tx, {
+      unitId: input.unitId,
+      actorUserId: input.actorUserId,
+      buildPayload: (sequence) => ({
+        kind: input.kind,
+        revision: buildEditorialRevisionPayload({
+          unitId: input.unitId,
+          sequence,
+          actorUserId: input.actorUserId,
+          changedFieldKeys: [],
+          slots: {
+            unit: {
+              authority: {
+                operation: input.operation,
+                ...input.payload,
+              },
+            },
+          },
+          message: input.operation,
+        }),
+      }),
     });
   }
 }

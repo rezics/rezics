@@ -76,6 +76,42 @@ describe("history outbox helpers", () => {
     expect(tx.historyOutbox.create).toHaveBeenCalledTimes(2);
   });
 
+  test("writes outbox without calling history service HTTP", async () => {
+    const originalFetch = globalThis.fetch;
+    const fetchMock = mock(() => {
+      throw new Error("history HTTP must not be called from main mutation");
+    });
+    globalThis.fetch = fetchMock as never;
+    const tx = {
+      $queryRaw: mock(async () => [{ sequence: 1n }]),
+      historyOutbox: {
+        create: mock(async () => ({})),
+      },
+    };
+
+    try {
+      await writeHistoryOutbox(tx as never, {
+        unitId: "unit-1",
+        actorUserId: "user-1",
+        payload: {
+          kind: HistoryOutboxPayloadKind.EDITORIAL_REVISION,
+          revision: buildEditorialRevisionPayload({
+            unitId: "unit-1",
+            sequence: 1,
+            actorUserId: "user-1",
+            changedFieldKeys: [UnitCommonFieldKey.TITLE],
+            slots: { unit: { title: "Captured" } },
+          }),
+        },
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(tx.historyOutbox.create).toHaveBeenCalledTimes(1);
+  });
+
   test("failed transaction callback does not write outbox after rollback point", async () => {
     const tx = {
       $queryRaw: mock(async () => [{ sequence: 1n }]),

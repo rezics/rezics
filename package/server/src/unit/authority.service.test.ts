@@ -13,8 +13,9 @@ function actor(userId: string, role: "USER" | "ADMIN" | "ROOT" = "USER") {
 function dbStub(input?: {
   unitUserId?: string | null;
   collaboratorRole?: string | null;
+  withOutbox?: boolean;
 }) {
-  return {
+  const db: Record<string, any> = {
     unit: {
       findUnique: mock(async () => ({
         id: "unit-1",
@@ -48,6 +49,16 @@ function dbStub(input?: {
       delete: mock(async () => ({})),
     },
   };
+  if (input?.withOutbox) {
+    db.$queryRaw = mock(async () => [{ sequence: 1n }]);
+    db.historyOutbox = {
+      create: mock(async () => ({})),
+    };
+    db.$transaction = mock(async (callback: (tx: typeof db) => unknown) =>
+      callback(db),
+    );
+  }
+  return db;
 }
 
 describe("UnitAuthorityService", () => {
@@ -102,6 +113,36 @@ describe("UnitAuthorityService", () => {
     });
   });
 
+  test("writes collaborator mutation outbox rows with canonical changes", async () => {
+    const db = dbStub({ withOutbox: true });
+    const service = new UnitAuthorityService(db as never, async () => false);
+
+    await service.upsertCollaborator("unit-1", actor("owner-1"), {
+      userId: "user-3",
+      roleKey: UnitAuthorityRoleKey.EDITOR,
+    });
+
+    expect(db.$transaction).toHaveBeenCalledTimes(1);
+    expect(db.historyOutbox.create).toHaveBeenCalledTimes(1);
+    expect(db.historyOutbox.create.mock.calls[0]?.[0]).toMatchObject({
+      data: {
+        unitId: "unit-1",
+        sequence: 1n,
+        actorUserId: "owner-1",
+        category: "collaborator_mutation",
+        payload: {
+          kind: "collaborator_mutation",
+          revision: {
+            unitId: "unit-1",
+            sequence: 1,
+            actorUserId: "owner-1",
+            message: "collaborator.upsert",
+          },
+        },
+      },
+    });
+  });
+
   test("allows maintainer collaborator to manage locks", async () => {
     const db = dbStub({ collaboratorRole: UnitAuthorityRoleKey.MAINTAINER });
     const service = new UnitAuthorityService(db as never, async () => false);
@@ -109,5 +150,35 @@ describe("UnitAuthorityService", () => {
     await service.deleteFieldLock("unit-1", actor("maintainer-1"), "*");
 
     expect(db.unitFieldLock.delete).toHaveBeenCalledTimes(1);
+  });
+
+  test("writes field lock mutation outbox rows with canonical changes", async () => {
+    const db = dbStub({ withOutbox: true });
+    const service = new UnitAuthorityService(db as never, async () => false);
+
+    await service.createFieldLock("unit-1", actor("owner-1"), {
+      fieldKey: "identity.title",
+      reason: "verified title",
+    });
+
+    expect(db.$transaction).toHaveBeenCalledTimes(1);
+    expect(db.historyOutbox.create).toHaveBeenCalledTimes(1);
+    expect(db.historyOutbox.create.mock.calls[0]?.[0]).toMatchObject({
+      data: {
+        unitId: "unit-1",
+        sequence: 1n,
+        actorUserId: "owner-1",
+        category: "lock_mutation",
+        payload: {
+          kind: "lock_mutation",
+          revision: {
+            unitId: "unit-1",
+            sequence: 1,
+            actorUserId: "owner-1",
+            message: "lock.upsert",
+          },
+        },
+      },
+    });
   });
 });

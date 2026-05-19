@@ -115,15 +115,31 @@ export async function writeHistoryOutbox(
     payload: HistoryOutboxPayload;
   },
 ): Promise<{ sequence: bigint; payloadHash: string }> {
+  return writeSequencedHistoryOutbox(tx, {
+    unitId: input.unitId,
+    actorUserId: input.actorUserId,
+    buildPayload: () => input.payload,
+  });
+}
+
+export async function writeSequencedHistoryOutbox(
+  tx: HistoryOutboxWriter,
+  input: {
+    unitId: string;
+    actorUserId: string;
+    buildPayload: (sequence: bigint) => HistoryOutboxPayload;
+  },
+): Promise<{ sequence: bigint; payloadHash: string }> {
   const sequence = await allocateUnitHistorySequence(tx, input.unitId);
-  const payloadHash = hashCanonicalPayload(input.payload);
+  const payload = input.buildPayload(sequence);
+  const payloadHash = hashCanonicalPayload(payload);
   await tx.historyOutbox.create({
     data: {
       unitId: input.unitId,
       sequence,
       actorUserId: input.actorUserId,
-      category: input.payload.kind,
-      payload: input.payload,
+      category: payload.kind,
+      payload,
       payloadHash,
     },
   });
