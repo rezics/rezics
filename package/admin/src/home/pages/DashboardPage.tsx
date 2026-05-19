@@ -9,6 +9,7 @@ import {
   MessageCircle as CommentIcon,
   MessageCircleQuestion as FeedbackIcon,
   BookOpen as MenuBookIcon,
+  History as HistoryIcon,
   Users as PeopleIcon,
 } from "lucide-react";
 
@@ -47,6 +48,25 @@ export default function DashboardPage() {
             color={
               stats.counts.unresolvedFeedback > 0
                 ? "var(--colors-semantic-warning-fill)"
+                : undefined
+            }
+          />
+        </div>
+        <div className="col-span-12 sm:col-span-6 md:col-span-3">
+          <StatCard
+            label="History Pending"
+            value={stats.counts.historyOutboxPending}
+            icon={<HistoryIcon />}
+          />
+        </div>
+        <div className="col-span-12 sm:col-span-6 md:col-span-3">
+          <StatCard
+            label="History Failed"
+            value={stats.counts.historyOutboxFailed}
+            icon={<HistoryIcon />}
+            color={
+              stats.counts.historyOutboxFailed > 0
+                ? "var(--colors-semantic-error-fill)"
                 : undefined
             }
           />

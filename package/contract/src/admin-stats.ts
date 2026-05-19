@@ -6,6 +6,8 @@ export const adminStatsResponseSchema = t.Object({
     books: t.Number(),
     comments: t.Number(),
     unresolvedFeedback: t.Number(),
+    historyOutboxPending: t.Number(),
+    historyOutboxFailed: t.Number(),
   }),
   health: t.Object({
     server: t.Union([t.Literal("ok"), t.Literal("degraded")]),

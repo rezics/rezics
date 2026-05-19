@@ -26,6 +26,7 @@ export {
   hashCanonicalPayload,
   writeHistoryOutbox,
 } from "./history-outbox";
+export { historyOutboxAdminApi } from "./history-outbox.admin.api";
 export { mapTranslationToDTO, mapUnitToDTO } from "./mapper";
 export { translationSourceApi } from "./translation-source.api";
 export { TranslationService, translationService } from "./translation.service";

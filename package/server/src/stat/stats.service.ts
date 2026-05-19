@@ -12,6 +12,8 @@ export class StatsService {
       books,
       posts,
       unresolvedFeedback,
+      historyOutboxPending,
+      historyOutboxFailed,
       meiliHealthy,
       bookTrend,
       postTrend,
@@ -20,6 +22,8 @@ export class StatsService {
       prisma.book.count(),
       prisma.post.count(),
       prisma.feedback.count({ where: { resolved: false } }),
+      prisma.historyOutbox.count({ where: { status: "pending" } }),
+      prisma.historyOutbox.count({ where: { status: "failed" } }),
       this.checkMeiliHealth(),
       prisma.$queryRaw<{ date: Date; count: bigint }[]>`
         SELECT date_trunc('day', "createdAt")::date AS date, COUNT(*)::bigint AS count
@@ -44,7 +48,14 @@ export class StatsService {
     );
 
     return {
-      counts: { users, books, comments: posts, unresolvedFeedback },
+      counts: {
+        users,
+        books,
+        comments: posts,
+        unresolvedFeedback,
+        historyOutboxPending,
+        historyOutboxFailed,
+      },
       health: {
         server: "ok",
         meili: meiliHealthy ? "ok" : "unreachable",

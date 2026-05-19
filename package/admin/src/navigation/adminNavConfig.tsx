@@ -9,6 +9,7 @@ import {
   Package as Inventory2Icon,
   Key as KeyOutlinedIcon,
   SearchCheck as ManageSearchOutlinedIcon,
+  ShieldCheck as ShieldCheckIcon,
   Users as PeopleIcon,
   Settings as SettingsIcon,
   Database as StorageOutlinedIcon,
@@ -116,6 +117,12 @@ export const adminNav = {
       label: "Entities",
       icon: <IdentityIcon fontSize="small" />,
       to: "/entities",
+    },
+    {
+      id: "authority",
+      label: "Authority",
+      icon: <ShieldCheckIcon fontSize="small" />,
+      to: "/authority",
     },
     // MOCK: realm management pages not yet implemented
     {
