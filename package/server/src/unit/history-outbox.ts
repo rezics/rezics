@@ -19,7 +19,7 @@ export interface HistoryOutboxWriter {
         sequence: bigint;
         actorUserId: string;
         category: string;
-        payload: unknown;
+        payload: any;
         payloadHash?: string;
       };
     }): Promise<unknown>;
