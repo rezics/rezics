@@ -2,7 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import { realmExtraSchema } from "./realm/realm-extra";
 import {
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
   LICENSE_REGISTRY,
+  LICENSE_SLUGS,
   licenseSlugSchema,
   publishableUnitInputSchema,
   unitPublicationMetadataSchema,
@@ -40,6 +42,21 @@ describe("Unit publication metadata schemas", () => {
 });
 
 describe("license registry", () => {
+  test("uses the publication preference order", () => {
+    expect(LICENSE_SLUGS).toEqual([
+      "cc-by-nc-sa-4.0",
+      "cc-by-sa-4.0",
+      "all-rights-reserved",
+      "cc-by-nc-4.0",
+      "cc-by-4.0",
+      "cc0-1.0",
+    ]);
+  });
+
+  test("defaults to non-commercial share-alike", () => {
+    expect(DEFAULT_PUBLICATION_LICENSE_SLUG).toBe("cc-by-nc-sa-4.0");
+  });
+
   test("maps every license slug to an i18n key", () => {
     for (const [slug, entry] of Object.entries(LICENSE_REGISTRY)) {
       expect(entry.slug).toBe(slug);
