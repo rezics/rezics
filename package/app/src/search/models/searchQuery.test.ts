@@ -41,7 +41,7 @@ describe("parseSearchString", () => {
       languages: ["ja"],
       ratings: ["R_18"],
       isLicensed: false,
-      realm: { slug: "my-realm" },
+      realm: { scope: "realm", slug: "my-realm" },
       sort: "newest",
       keyword: "hello",
     });
@@ -64,6 +64,11 @@ describe("parseSearchString", () => {
   test("parses kind:excerpts (plural) to EXCERPT", () => {
     const result = parseSearchString("kind:excerpts");
     expect(result.kind).toBe("EXCERPT");
+  });
+
+  test("parses kind:wiki token to canonical WIKI", () => {
+    const result = parseSearchString("kind:wiki");
+    expect(result.kind).toBe("WIKI");
   });
 
   test("kind is single-valued, last wins", () => {

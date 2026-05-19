@@ -11,6 +11,8 @@ const KIND_TOKENS: Record<string, PostKind> = {
   posts: "POST",
   chapter: "CHAPTER",
   chapters: "CHAPTER",
+  wiki: "WIKI",
+  wikis: "WIKI",
 };
 
 const RATING_TOKENS: Record<string, ContentRating> = {
@@ -41,7 +43,7 @@ const FILTER_REGEX = /(\w+):("[^"]*"|\S+)/g;
  *   licensed:yes|no → licensed toggle
  *   in:slug         → realm scope
  *   sort:value      → sort order
- *   kind:value      → post kind (review/excerpt/remark/post/chapter; last-wins)
+ *   kind:value      → post kind (review/excerpt/remark/post/chapter/wiki; last-wins)
  *   everything else → keyword
  */
 export function parseSearchString(input: string): SearchQuery {
