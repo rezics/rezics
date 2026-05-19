@@ -13,6 +13,8 @@ import type {
 
 export const ROOT_EMAIL = "root@rezics.com";
 export const ROOT_SLUG = "root-user";
+export const REZICS_INFRA_SLUG = "rezics";
+export const REZICS_WIKI_INFRA_SLUG = "rezics-wiki";
 
 export interface CrossSeedUserInput {
   email: string;
@@ -53,6 +55,25 @@ export const SEED_USERS: CrossSeedUserInput[] = [
     name: "Blocked User",
     role: "user",
     permission: { role: ["BLOCKED"] },
+  },
+];
+
+export interface InfraUserSeedInput {
+  slug: string;
+  name: string;
+  bio: string;
+}
+
+export const INFRA_USERS: InfraUserSeedInput[] = [
+  {
+    slug: REZICS_INFRA_SLUG,
+    name: "Rezics",
+    bio: "Official platform account for Rezics-owned content.",
+  },
+  {
+    slug: REZICS_WIKI_INFRA_SLUG,
+    name: "Rezics Wiki",
+    bio: "Community catalog custodian account for wiki-owned content.",
   },
 ];
 
@@ -121,6 +142,102 @@ async function seedServerUser(
   await bootstrapSystemShelves(input.unitId, input.slug, prisma);
 }
 
+async function resolveOrCreateInfraUserUnit(
+  prisma: ServerPrismaClient,
+  userScope: string,
+  input: InfraUserSeedInput,
+): Promise<string> {
+  const existingUnit = await prisma.unit.findUnique({
+    where: { slugScope_slug: { slugScope: userScope, slug: input.slug } },
+    select: { id: true, type: true },
+  });
+
+  if (existingUnit) {
+    if (existingUnit.type !== "USER") {
+      throw new Error(
+        `Cannot seed infra user "${input.slug}": slug is already used by ${existingUnit.type}.`,
+      );
+    }
+    return existingUnit.id;
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const rows = await tx.$queryRaw<{ id: string }[]>`SELECT uuidv7() as id`;
+    const id = rows[0]?.id;
+    if (!id) {
+      throw new Error(
+        `[Seed] uuidv7() returned no row when creating infra user "${input.slug}"`,
+      );
+    }
+
+    await tx.unit.create({
+      data: {
+        id,
+        type: "USER",
+        slug: input.slug,
+        slugScope: userScope,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        isLanguageNeutral: true,
+      },
+    });
+
+    return id;
+  });
+}
+
+export async function seedInfraUsers(
+  prisma: ServerPrismaClient,
+  slugScopes: SlugScopesMap,
+): Promise<Record<(typeof INFRA_USERS)[number]["slug"], string>> {
+  const results: Record<string, string> = {};
+
+  for (const input of INFRA_USERS) {
+    const unitId = await resolveOrCreateInfraUserUnit(
+      prisma,
+      slugScopes.user,
+      input,
+    );
+
+    await prisma.unit.update({
+      where: { id: unitId },
+      data: {
+        slug: input.slug,
+        slugScope: slugScopes.user,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        isLanguageNeutral: true,
+      },
+    });
+
+    await prisma.user.upsert({
+      where: { unitId },
+      update: {
+        authUserId: null,
+        email: null,
+        name: input.name,
+        bio: input.bio,
+        permission: null as never,
+        settings: null as never,
+      },
+      create: {
+        unitId,
+        authUserId: null,
+        email: null,
+        name: input.name,
+        bio: input.bio,
+        permission: null as never,
+        settings: null as never,
+        joinDate: new Date(),
+      },
+    });
+
+    results[input.slug] = unitId;
+  }
+
+  return results;
+}
+
 export type CrossSeedUserResult = SeedAuthUserResult & {
   slug: string;
 };
@@ -150,6 +267,7 @@ export async function seedAllAuthUsers(
 
 export interface SeedAllUsersResult {
   rootUserId: string;
+  infraUserIds: Record<string, string>;
   results: Array<{ result: CrossSeedUserResult; serverRole: string }>;
 }
 
@@ -190,7 +308,9 @@ export async function seedAllMainUsers(
     throw new Error("Root user not found after seeding.");
   }
 
-  return { rootUserId, results };
+  const infraUserIds = await seedInfraUsers(serverPrisma, slugScopes);
+
+  return { rootUserId, infraUserIds, results };
 }
 
 export interface ResetRootUserResult {

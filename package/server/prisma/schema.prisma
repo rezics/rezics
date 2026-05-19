@@ -93,6 +93,11 @@ enum PostKind {
    * Order is governed by `BookContentStructureNode` rows.
    */
   CHAPTER
+  /**
+   * Collaborative wiki-style post content. Field protection is handled through
+   * UnitFieldLock, not Post.isLocked.
+   */
+  WIKI
 }
 
 /**
@@ -213,6 +218,12 @@ model Unit {
   // this Unit (in v1: a USER Unit) is the subscriber.
   subscribers       Subscription[] @relation("SubscriptionTarget")
   subscriptionsMade Subscription[] @relation("SubscriptionSubscriber")
+
+  // Collaborative authority and history capture.
+  collaborators UnitCollaborator[]
+  fieldLocks    UnitFieldLock[]
+  historyClock  UnitHistoryClock?
+  historyOutbox HistoryOutbox[]
 
   // Inverse of BookContentStructureNode.chapterUnitId — every BookContentStructure
   // node that references this Unit as its materialized chapter.
@@ -819,8 +830,79 @@ model User {
   workLinkClaimsAsClaimer  WorkLinkClaim[]    @relation("WorkLinkClaimClaimer")
   workLinkClaimsAsResolver WorkLinkClaim[]    @relation("WorkLinkClaimResolver")
   unitProgress             UserUnitProgress[]
+  unitCollaborations       UnitCollaborator[] @relation("UnitCollaboratorUser")
+  unitCollaboratorsAdded   UnitCollaborator[] @relation("UnitCollaboratorAddedBy")
+  unitFieldLocksCreated    UnitFieldLock[]    @relation("UnitFieldLockLockedBy")
+  historyOutboxAuthored    HistoryOutbox[]    @relation("HistoryOutboxActor")
+  historyOutboxProcessed   HistoryOutbox[]    @relation("HistoryOutboxProcessor")
 
   @@index([email])
+}
+
+model UnitCollaborator {
+  unitId    String   @db.Uuid
+  userId    String   @db.Uuid
+  roleKey   String   @db.VarChar(32)
+  addedById String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  unit    Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  user    User @relation("UnitCollaboratorUser", fields: [userId], references: [unitId], onDelete: Cascade)
+  addedBy User @relation("UnitCollaboratorAddedBy", fields: [addedById], references: [unitId], onDelete: Restrict)
+
+  @@id([unitId, userId])
+  @@index([userId, roleKey])
+  @@index([unitId, roleKey])
+}
+
+model UnitFieldLock {
+  unitId     String   @db.Uuid
+  fieldKey   String   @db.VarChar(96)
+  lockedById String   @db.Uuid
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  unit     Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  lockedBy User @relation("UnitFieldLockLockedBy", fields: [lockedById], references: [unitId], onDelete: Restrict)
+
+  @@id([unitId, fieldKey])
+  @@index([lockedById, createdAt])
+}
+
+model UnitHistoryClock {
+  unitId       String   @id @db.Uuid
+  nextSequence BigInt   @default(1)
+  updatedAt    DateTime @updatedAt
+
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+}
+
+model HistoryOutbox {
+  id            String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  unitId        String    @db.Uuid
+  sequence      BigInt
+  actorUserId   String    @db.Uuid
+  category      String    @db.VarChar(64)
+  payload       Json
+  payloadHash   String?   @db.VarChar(64)
+  status        String    @default("pending") @db.VarChar(32)
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime?
+  processedAt   DateTime?
+  processedById String?   @db.Uuid
+  lastError     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  unit        Unit  @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  actor       User  @relation("HistoryOutboxActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
+  processedBy User? @relation("HistoryOutboxProcessor", fields: [processedById], references: [unitId], onDelete: SetNull)
+
+  @@unique([unitId, sequence])
+  @@index([status, nextAttemptAt, createdAt])
+  @@index([unitId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([processedById])
 }
 
 model EmailVerificationContract {
