@@ -17,7 +17,13 @@ import { MainContentContainer } from "@/core/components/container/MainContentCon
 
 import { useBookLanguage } from "../hooks/useBookLanguage";
 
-const TAB_ROUTES = ["info", "review", "content", "discussion"] as const;
+const TAB_ROUTES = [
+  "info",
+  "review",
+  "content",
+  "discussion",
+  "history",
+] as const;
 type TabRoute = (typeof TAB_ROUTES)[number];
 
 function useActiveTabRoute(): TabRoute {
@@ -91,6 +97,9 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                 >
                   {t("page.book.tabs.community")}
                 </TabsTrigger>
+                <TabsTrigger value="history" className="flex-none snap-start">
+                  History
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -98,7 +107,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
           {availableLanguages.length > 1 && (
             <Select
               value={selectedLang}
-              onValueChange={(v) => setSelectedLang(v)}
+              onValueChange={(v) => v && setSelectedLang(v)}
             >
               <SelectTrigger className="flex-shrink-0 min-w-[100px]">
                 <SelectValue />

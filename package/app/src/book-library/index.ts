@@ -17,6 +17,10 @@ export { BookContentPage } from "./pages/BookContentPage";
 /** Book detail layout (shared hero + data fetching). */
 export { BookDetailLayout } from "./pages/BookDetailLayout";
 export { BookCommunityPage } from "./pages/BookDiscussionPage";
+export {
+  BookHistoryPage,
+  BookRevisionPage,
+} from "./pages/BookHistoryPage";
 /** Book library curated homepage. */
 export { BookHomePage } from "./pages/BookHomePage";
 /** Book library list page. */
@@ -53,10 +57,10 @@ export {
   type BookSearchProps,
 } from "./components/BookSearch/BookSearch";
 export {
-  ChapterLeaf,
-  ChapterList,
   type BookTocTreeHandle,
   BookTocTreeView,
+  ChapterLeaf,
+  ChapterList,
 } from "./components/Chapter/ChapterList";
 
 // ============================================================================
@@ -64,8 +68,8 @@ export {
 // ============================================================================
 
 export {
-  useEnsureChapterUnit,
   type EnsureChapterUnitInput,
+  useEnsureChapterUnit,
 } from "./hooks/useEnsureChapterUnit";
 export {
   type Book,
