@@ -93,6 +93,7 @@ export const entityApi = new Elysia({ prefix: "/entity" })
       const row = await entityService.create(body, {
         callerUnitId: identity.userId,
         isAdmin,
+        actor: identity,
       });
       return mapEntityToDTO(row);
     },
@@ -116,6 +117,7 @@ export const entityApi = new Elysia({ prefix: "/entity" })
       const row = await entityService.update(params.unitId, body, {
         callerUnitId: identity.userId,
         isAdmin,
+        actor: identity,
       });
       return mapEntityToDTO(row);
     },

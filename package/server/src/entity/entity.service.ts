@@ -1,16 +1,28 @@
+import { EntityFieldKey } from "@rezics/contract";
 import type {
   CreateEntityInput,
   EntityListQuery,
   Language,
+  RezicsSessionClaims,
   UpdateEntityInput,
 } from "@rezics/contract";
-import { parseIdsCsv } from "@rezics/contract";
+import {
+  parseIdsCsv,
+  UnitCommonFieldKey,
+  type UnitFieldKey,
+} from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { getSlugScopeId, requireSlugScopeId } from "@/infra/slug-scopes";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { deleteEntityFromMeili, syncEntityToMeili } from "@/meili/entity/sync";
 import { AppError } from "@/utils/errors";
+import {
+  assertCanEditCollaborativeMetadata,
+  mapTranslationFieldKeys,
+  uniqueFieldKeys,
+  writeEditorialMetadataHistory,
+} from "@/unit/collaborative-metadata";
 import { entityInclude, type EntityWithRelations } from "./entity.types";
 
 /** Caller-context flags consumed by the slug + verified gates. */
@@ -19,6 +31,7 @@ export interface EntityCallerContext {
   callerUnitId: string;
   /** Whether the caller has the global admin role (ADMIN or ROOT). */
   isAdmin: boolean;
+  actor?: RezicsSessionClaims;
 }
 
 function rejectNonAdminPrivilegedFields(
@@ -141,6 +154,16 @@ export class EntityService {
     }
 
     const row = await prisma.$transaction(async (tx) => {
+      const changedFieldKeys = mapEntityUpdateFieldKeys(input);
+      if (ctx.actor) {
+        await assertCanEditCollaborativeMetadata(
+          tx as any,
+          ctx.actor,
+          unitId,
+          changedFieldKeys,
+        );
+      }
+
       if (input.kind !== undefined || input.verified !== undefined) {
         await tx.entity.update({
           where: { unitId },
@@ -182,10 +205,21 @@ export class EntityService {
         }
       }
 
-      return tx.entity.findUniqueOrThrow({
+      const updated = await tx.entity.findUniqueOrThrow({
         where: { unitId },
         include: entityInclude,
       });
+
+      if (ctx.actor) {
+        await writeEditorialMetadataHistory(tx as any, {
+          unitId,
+          actorUserId: ctx.callerUnitId,
+          changedFieldKeys,
+          message: "entity.metadata.update",
+        });
+      }
+
+      return updated;
     });
 
     await syncEntityToMeili(unitId).catch((error: unknown) => {
@@ -284,3 +318,17 @@ export class EntityService {
 }
 
 export const entityService = new EntityService();
+
+export function mapEntityUpdateFieldKeys(
+  input: UpdateEntityInput,
+): UnitFieldKey[] {
+  return uniqueFieldKeys([
+    input.kind !== undefined ? EntityFieldKey.KIND : undefined,
+    input.verified !== undefined ? EntityFieldKey.VERIFIED : undefined,
+    input.slug !== undefined ? EntityFieldKey.SLUG : undefined,
+    ...(input.translations ?? []).flatMap((tr) => [
+      ...mapTranslationFieldKeys(tr),
+      tr.title !== undefined ? UnitCommonFieldKey.TITLE : undefined,
+    ]),
+  ]);
+}

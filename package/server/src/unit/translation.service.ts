@@ -1,5 +1,6 @@
 import type {
   CreateTranslationInput,
+  RezicsSessionClaims,
   UpdateTranslationInput,
 } from "@rezics/contract";
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
@@ -8,6 +9,11 @@ import { prisma, UnitType } from "#/prisma/client";
 import { patchContentTranslationsToMeili } from "@/meili/content/sync";
 import { patchPostsTargetToMeili } from "@/meili/post/sync";
 import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
+import {
+  assertCanEditCollaborativeMetadata,
+  mapTranslationFieldKeys,
+  writeEditorialMetadataHistory,
+} from "./collaborative-metadata";
 
 /**
  * Translation Service - CRUD for UnitTranslation rows
@@ -42,6 +48,7 @@ export class TranslationService {
     unitId: string,
     language: string,
     data: CreateTranslationInput | UpdateTranslationInput,
+    actor?: RezicsSessionClaims,
   ): Promise<UnitTranslation> {
     const payload: Prisma.UnitTranslationCreateInput = {
       unit: { connect: { id: unitId } },
@@ -57,18 +64,40 @@ export class TranslationService {
           : undefined,
     };
 
-    const result = await prisma.unitTranslation.upsert({
-      where: { unitId_language: { unitId, language } },
-      create: payload,
-      update: {
-        title: data.title,
-        subtitle: data.subtitle,
-        summary: data.summary,
-        description: data.description,
-        extra: (data.extra ?? undefined) as Prisma.InputJsonValue | undefined,
-        sourceReleaseUnitId:
-          "sourceReleaseUnitId" in data ? data.sourceReleaseUnitId : undefined,
-      },
+    const changedFieldKeys = mapTranslationFieldKeys(data);
+    const result = await prisma.$transaction(async (tx) => {
+      if (actor) {
+        await assertCanEditCollaborativeMetadata(
+          tx as any,
+          actor,
+          unitId,
+          changedFieldKeys,
+        );
+      }
+      const row = await tx.unitTranslation.upsert({
+        where: { unitId_language: { unitId, language } },
+        create: payload,
+        update: {
+          title: data.title,
+          subtitle: data.subtitle,
+          summary: data.summary,
+          description: data.description,
+          extra: (data.extra ?? undefined) as Prisma.InputJsonValue | undefined,
+          sourceReleaseUnitId:
+            "sourceReleaseUnitId" in data
+              ? data.sourceReleaseUnitId
+              : undefined,
+        },
+      });
+      if (actor) {
+        await writeEditorialMetadataHistory(tx as any, {
+          unitId,
+          actorUserId: actor.userId,
+          changedFieldKeys,
+          message: "unit.translation.upsert",
+        });
+      }
+      return row;
     });
 
     // Fire-and-forget: sync dependent Meilisearch documents

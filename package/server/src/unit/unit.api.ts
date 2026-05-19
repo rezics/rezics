@@ -279,21 +279,11 @@ export const unitApi = new Elysia({ prefix: "/unit" })
   .put(
     "/:unitId/translations/:language",
     async ({ params, body, identity, set }) => {
-      const target = await unitService.getByUnitId(params.unitId);
-      if (
-        !hasPermissionToUpdateUnit(
-          identity.permission,
-          identity.userId,
-          target as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error("Forbidden: you do not own this unit");
-      }
       const translation = await translationService.upsertTranslation(
         params.unitId,
         params.language,
         body,
+        identity,
       );
       return mapTranslationToDTO(translation as any);
     },

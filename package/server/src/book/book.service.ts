@@ -1,8 +1,10 @@
+import { BookFieldKey, UnitCommonFieldKey } from "@rezics/contract";
 import type {
   BookContentStructureResponse,
   BookListQuery,
   BookContentStructureItem,
   CreateBookInput,
+  RezicsSessionClaims,
   UpdateBookInput,
 } from "@rezics/contract";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
@@ -25,6 +27,11 @@ import {
 } from "@/utils/userSlugHydration";
 import { assertLicenseSlug } from "@/unit/publication-policy";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
+import {
+  assertCanEditCollaborativeMetadata,
+  uniqueFieldKeys,
+  writeEditorialMetadataHistory,
+} from "@/unit/collaborative-metadata";
 import {
   buildTree,
   countReadableBookContentStructureItems,
@@ -310,55 +317,80 @@ export class BookService {
   async update(
     unitId: string,
     req: UpdateBookInput,
+    actor?: RezicsSessionClaims,
   ): Promise<BookWithRelations> {
-    if (req.coverUrl !== undefined) {
-      const unit = await prisma.unit.findUniqueOrThrow({
-        where: { id: unitId },
-        select: { defaultLanguage: true },
-      });
-      const language = unit.defaultLanguage ?? "en";
-      const existing = await prisma.unitTranslation.findUnique({
-        where: { unitId_language: { unitId, language } },
-        select: { extra: true },
-      });
-      const nextExtra = withCoverUrl(
-        existing?.extra ?? undefined,
-        req.coverUrl ?? undefined,
-      ) as Prisma.InputJsonValue;
-      await prisma.unitTranslation.upsert({
-        where: { unitId_language: { unitId, language } },
-        create: { unitId, language, extra: nextExtra },
-        update: { extra: nextExtra },
-      });
-    }
+    const changedFieldKeys = mapBookUpdateFieldKeys(req);
 
-    const book = await prisma.book.update({
-      where: { unitId },
-      data: {
-        isbn13: req.isbn13,
-        publicationDate: req.publicationDate
-          ? new Date(req.publicationDate as any)
-          : req.publicationDate === null
-            ? null
-            : undefined,
-        pageCount: req.pageCount,
-        textLength: req.textLength ?? undefined,
-        formatKey: req.formatKey,
-        isLicensed: req.isLicensed ?? undefined,
-        extra: (req.extra ?? undefined) as Prisma.InputJsonValue | undefined,
-        unit: {
-          update: {
-            rating: (req.rating as ContentRating | undefined) ?? undefined,
-            visibility:
-              (req.visibility as UnitVisibility | undefined) ?? undefined,
-            licenseSlug:
-              req.licenseSlug === null
-                ? null
-                : (assertLicenseSlug(req.licenseSlug) ?? undefined),
+    const book = await prisma.$transaction(async (tx) => {
+      if (actor) {
+        await assertCanEditCollaborativeMetadata(
+          tx as any,
+          actor,
+          unitId,
+          changedFieldKeys,
+        );
+      }
+
+      if (req.coverUrl !== undefined) {
+        const unit = await tx.unit.findUniqueOrThrow({
+          where: { id: unitId },
+          select: { defaultLanguage: true },
+        });
+        const language = unit.defaultLanguage ?? "en";
+        const existing = await tx.unitTranslation.findUnique({
+          where: { unitId_language: { unitId, language } },
+          select: { extra: true },
+        });
+        const nextExtra = withCoverUrl(
+          existing?.extra ?? undefined,
+          req.coverUrl ?? undefined,
+        ) as Prisma.InputJsonValue;
+        await tx.unitTranslation.upsert({
+          where: { unitId_language: { unitId, language } },
+          create: { unitId, language, extra: nextExtra },
+          update: { extra: nextExtra },
+        });
+      }
+
+      const updated = await tx.book.update({
+        where: { unitId },
+        data: {
+          isbn13: req.isbn13,
+          publicationDate: req.publicationDate
+            ? new Date(req.publicationDate as any)
+            : req.publicationDate === null
+              ? null
+              : undefined,
+          pageCount: req.pageCount,
+          textLength: req.textLength ?? undefined,
+          formatKey: req.formatKey,
+          isLicensed: req.isLicensed ?? undefined,
+          extra: (req.extra ?? undefined) as Prisma.InputJsonValue | undefined,
+          unit: {
+            update: {
+              rating: (req.rating as ContentRating | undefined) ?? undefined,
+              visibility:
+                (req.visibility as UnitVisibility | undefined) ?? undefined,
+              licenseSlug:
+                req.licenseSlug === null
+                  ? null
+                  : (assertLicenseSlug(req.licenseSlug) ?? undefined),
+            },
           },
         },
-      },
-      include: bookInclude,
+        include: bookInclude,
+      });
+
+      if (actor) {
+        await writeEditorialMetadataHistory(tx as any, {
+          unitId,
+          actorUserId: actor.userId,
+          changedFieldKeys,
+          message: "book.metadata.update",
+        });
+      }
+
+      return updated;
     });
 
     const patchFields: Record<string, any> = {};
@@ -493,6 +525,24 @@ export class BookService {
 
 // Export singleton instance
 export const bookService = new BookService();
+
+export function mapBookUpdateFieldKeys(req: UpdateBookInput) {
+  return uniqueFieldKeys([
+    req.isbn13 !== undefined ? BookFieldKey.ISBN_13 : undefined,
+    req.publicationDate !== undefined
+      ? BookFieldKey.PUBLICATION_DATE
+      : undefined,
+    req.pageCount !== undefined ? BookFieldKey.PAGE_COUNT : undefined,
+    req.textLength !== undefined ? BookFieldKey.TEXT_LENGTH : undefined,
+    req.formatKey !== undefined ? BookFieldKey.FORMAT : undefined,
+    req.isLicensed !== undefined ? BookFieldKey.LICENSED : undefined,
+    req.extra !== undefined ? UnitCommonFieldKey.EXTRA : undefined,
+    req.coverUrl !== undefined ? UnitCommonFieldKey.COVER : undefined,
+    req.rating !== undefined ? UnitCommonFieldKey.RATING : undefined,
+    req.visibility !== undefined ? UnitCommonFieldKey.VISIBILITY : undefined,
+    req.licenseSlug !== undefined ? UnitCommonFieldKey.LICENSE : undefined,
+  ]);
+}
 
 // ---------------------------------------------------------------------------
 // TOC save planning

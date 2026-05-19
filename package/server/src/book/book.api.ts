@@ -160,21 +160,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
         throw new Error(`Book not found: ${params.unitId}`);
       }
 
-      if (
-        !hasPermissionToUpdateBook(
-          identity.permission,
-          identity.userId,
-          undefined,
-          targetBookUnit as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to update this book",
-        );
-      }
-
-      const book = await bookService.update(params.unitId, body);
+      const book = await bookService.update(params.unitId, body, identity);
       return mapBookToDTO(book);
     },
     {
