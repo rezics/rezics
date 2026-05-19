@@ -11,6 +11,7 @@ import type {
   PostResponse,
   UpdatePostInput,
 } from "@rezics/contract";
+import { CreationMode, PostKind } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { PostFilters } from "./post.types";
@@ -113,6 +114,17 @@ export const postApi = {
     );
   },
 
+  listWiki: async (filters?: Omit<PostFilters, "kind">) => {
+    return postApi.list({ ...filters, kind: PostKind.WIKI });
+  },
+
+  getWikiByTarget: async (
+    targetUnitId: string,
+    filters?: Omit<PostFilters, "kind" | "targetUnitId">,
+  ): Promise<PostListResponse> => {
+    return postApi.listWiki({ ...filters, targetUnitId });
+  },
+
   /**
    * Create new post
    */
@@ -120,6 +132,16 @@ export const postApi = {
     return apiFetch<PostResponse>("/post", {
       method: "POST",
       body: JSON.stringify(input),
+    });
+  },
+
+  createWiki: async (
+    input: Omit<CreatePostInput, "kind" | "creationMode">,
+  ): Promise<PostResponse> => {
+    return postApi.create({
+      ...input,
+      kind: PostKind.WIKI,
+      creationMode: CreationMode.WIKI,
     });
   },
 
@@ -134,6 +156,13 @@ export const postApi = {
       method: "PUT",
       body: JSON.stringify(input),
     });
+  },
+
+  updateWikiBody: async (
+    unitId: string,
+    body: UpdatePostInput["body"],
+  ): Promise<PostResponse> => {
+    return postApi.update(unitId, { body });
   },
 
   /**

@@ -4,14 +4,16 @@
  */
 
 import type {
+  BookContentStructureItem,
   BookContentStructureResponse,
   BookListResponse,
   BookResponse,
-  BookContentStructureItem,
   CreateBookInput,
+  CreationMode,
   ScoreAggregateDTO,
   UpdateBookInput,
 } from "@rezics/contract";
+import { CreationMode as CreationModeValue } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { BookFilters } from "./book.types";
@@ -135,6 +137,25 @@ export const bookApi = {
       method: "POST",
       body: JSON.stringify(input),
     });
+  },
+
+  createWithMode: async (
+    input: Omit<CreateBookInput, "creationMode">,
+    creationMode: CreationMode,
+  ): Promise<BookResponse> => {
+    return bookApi.create({ ...input, creationMode });
+  },
+
+  createWiki: async (
+    input: Omit<CreateBookInput, "creationMode">,
+  ): Promise<BookResponse> => {
+    return bookApi.createWithMode(input, CreationModeValue.WIKI);
+  },
+
+  createPersonal: async (
+    input: Omit<CreateBookInput, "creationMode">,
+  ): Promise<BookResponse> => {
+    return bookApi.createWithMode(input, CreationModeValue.PERSONAL);
   },
 
   /**

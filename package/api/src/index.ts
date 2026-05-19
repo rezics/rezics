@@ -1,4 +1,3 @@
-export { ApiError, type ApiErrorDetail } from "./react-query/errors";
 export {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   LICENSE_REGISTRY,
@@ -7,7 +6,15 @@ export {
   type UnitPublicationMetadata,
 } from "@rezics/contract";
 export * from "./credit-attribution/credit-attribution";
+export * from "./history/history";
 export * from "./progress";
-export * from "./subscription/subscription";
+export {
+  ApiError,
+  type ApiErrorDetail,
+  getLockedFieldError,
+  type LockedFieldApiError,
+} from "./react-query/errors";
 export * from "./subject-attribution/subject-attribution";
+export * from "./subscription/subscription";
+export * from "./unit/unit";
 export { zoneApi, zoneKeys, zoneQueries, zoneQueryOptions } from "./zone/zone";

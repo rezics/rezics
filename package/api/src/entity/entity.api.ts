@@ -1,10 +1,12 @@
 import type {
   CreateEntityInput,
+  CreationMode,
   EntityDTO,
   EntityListQuery,
   EntityListResponse,
   UpdateEntityInput,
 } from "@rezics/contract";
+import { CreationMode as CreationModeValue } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 
@@ -26,6 +28,25 @@ export const entityApi = {
       method: "POST",
       body: JSON.stringify(input),
     });
+  },
+
+  createWithMode: async (
+    input: Omit<CreateEntityInput, "creationMode">,
+    creationMode: CreationMode,
+  ): Promise<EntityDTO> => {
+    return entityApi.create({ ...input, creationMode });
+  },
+
+  createWiki: async (
+    input: Omit<CreateEntityInput, "creationMode">,
+  ): Promise<EntityDTO> => {
+    return entityApi.createWithMode(input, CreationModeValue.WIKI);
+  },
+
+  createPersonal: async (
+    input: Omit<CreateEntityInput, "creationMode">,
+  ): Promise<EntityDTO> => {
+    return entityApi.createWithMode(input, CreationModeValue.PERSONAL);
   },
 
   update: async (

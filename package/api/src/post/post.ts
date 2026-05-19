@@ -20,8 +20,10 @@ export { postKeys } from "./post.keys";
 export {
   postMutations,
   useCreatePostMutation,
+  useCreateWikiPostMutation,
   useDeletePostMutation,
   useUpdatePostMutation,
+  useUpdateWikiPostBodyMutation,
 } from "./post.mutations";
 
 // Query Configurations
@@ -36,6 +38,7 @@ export {
   postsByRealmQuery,
   postsByTargetQuery,
   postThreadQuery,
+  wikiPostsByTargetQuery,
 } from "./post.queries";
 // Types
 export type {

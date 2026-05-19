@@ -41,6 +41,17 @@ export const postsByTargetQuery = (
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
+export const wikiPostsByTargetQuery = (
+  targetUnitId: string,
+  filters?: PostByTargetFilters,
+) =>
+  queryOptions({
+    queryKey: postKeys.wikiByTarget(targetUnitId, filters),
+    queryFn: () => postApi.getWikiByTarget(targetUnitId, filters),
+    enabled: !!targetUnitId,
+    staleTime: 1000 * 60 * 2,
+  });
+
 /**
  * Query options for getting posts by author
  */
@@ -135,6 +146,7 @@ export const postQueries = {
   list: postListQuery,
   detail: postDetailQuery,
   byTarget: postsByTargetQuery,
+  wikiByTarget: wikiPostsByTargetQuery,
   byAuthor: postsByAuthorQuery,
   thread: postThreadQuery,
   subtree: postSubtreeQuery,

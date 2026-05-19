@@ -34,6 +34,8 @@ export const postKeys = {
     [...postKeys.all(), "target", targetUnitId] as const,
   byTarget: (targetUnitId: string, filters?: PostByTargetFilters) =>
     [...postKeys.byTargets(targetUnitId), filters ?? null] as const,
+  wikiByTarget: (targetUnitId: string, filters?: PostByTargetFilters) =>
+    [...postKeys.byTargets(targetUnitId), "wiki", filters ?? null] as const,
 
   /**
    * Keys for author-specific queries

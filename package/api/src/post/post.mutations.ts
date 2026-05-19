@@ -73,6 +73,34 @@ export function useCreatePostMutation(
   });
 }
 
+export function useCreateWikiPostMutation(
+  options?: Omit<
+    UseMutationOptions<
+      PostResponse,
+      Error,
+      Omit<CreatePostInput, "kind" | "creationMode">
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input) => postApi.createWiki(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      if (variables.targetUnitId) {
+        queryClient.invalidateQueries({
+          queryKey: postKeys.byTargets(variables.targetUnitId),
+        });
+      }
+      queryClient.setQueryData(postKeys.detail(data.unitId), data);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 /**
  * Mutation for updating a post
  */
@@ -98,6 +126,29 @@ export function useUpdatePostMutation(
       // Invalidate lists to ensure they're refreshed
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
 
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useUpdateWikiPostBodyMutation(
+  options?: Omit<
+    UseMutationOptions<
+      PostResponse,
+      Error,
+      { unitId: string; body: UpdatePostInput["body"] }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unitId, body }) => postApi.updateWikiBody(unitId, body),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.setQueryData(postKeys.detail(variables.unitId), data);
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -134,6 +185,8 @@ export function useDeletePostMutation(
  */
 export const postMutations = {
   useCreate: useCreatePostMutation,
+  useCreateWiki: useCreateWikiPostMutation,
   useUpdate: useUpdatePostMutation,
+  useUpdateWikiBody: useUpdateWikiPostBodyMutation,
   useDelete: useDeletePostMutation,
 };

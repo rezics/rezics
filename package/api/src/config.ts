@@ -2,6 +2,7 @@ export interface ApiConfig {
   apiBaseUrl: string;
   authBaseUrl: string;
   authAdminBaseUrl?: string;
+  historyBaseUrl?: string;
   reactionServiceUrl: string;
   notifyBaseUrl?: string;
   appVersion?: string;

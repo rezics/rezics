@@ -7,6 +7,11 @@ function getApiBaseUrl(): string {
   return getApiConfig().apiBaseUrl;
 }
 
+function buildRequestUrl(endpoint: string): string {
+  if (/^https?:\/\//.test(endpoint)) return endpoint;
+  return `${getApiBaseUrl()}${endpoint}`;
+}
+
 export type ApiRequestInit = globalThis.RequestInit;
 
 function buildHeaders(options?: ApiRequestInit): Record<string, string> {
@@ -58,7 +63,7 @@ export async function apiFetchResponse<T>(
   endpoint: string,
   options?: ApiRequestInit,
 ): Promise<{ data: T; response: Response }> {
-  const url = `${getApiBaseUrl()}${endpoint}`;
+  const url = buildRequestUrl(endpoint);
   const response = await requestWithAuthRetry(url, options);
   const responseJson = await response.json().catch(() => null);
 
