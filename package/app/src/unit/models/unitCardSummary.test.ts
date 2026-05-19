@@ -12,7 +12,7 @@ describe("unitDtoToUnitCardSummary", () => {
     const unit: UnitDTO = {
       id: "unit-1",
       type: "BOOK",
-      user: { userId: "user-1", name: "Mina" },
+      user: { unitId: "user-1", name: "Mina" },
       defaultLanguage: "en",
       translations: [
         {
@@ -41,13 +41,32 @@ describe("unitDtoToUnitCardSummary", () => {
       subtitle: "Subtitle",
       imageUrl: "https://example.test/cover.jpg",
       contentPreview: "Short summary",
-      author: { userId: "user-1", name: "Mina" },
+      author: { unitId: "user-1", name: "Mina" },
       addedAt: "2026-01-02T03:04:05.000Z",
       translationMeta: {
         language: "en",
         sourceTitle: "Source title",
         overrideTitle: "Override title",
       },
+    });
+  });
+
+  test("marks rezics-wiki owned units as community catalog content", () => {
+    const summary = unitDtoToUnitCardSummary({
+      id: "book-1",
+      type: "BOOK",
+      user: {
+        unitId: "rezics-wiki-unit",
+        name: "rezics-wiki",
+        slug: "rezics-wiki",
+      } as never,
+      translations: [{ unitId: "book-1", language: "en", title: "Wiki Book" }],
+    });
+
+    expect(summary).toMatchObject({
+      unitId: "book-1",
+      title: "Wiki Book",
+      isCommunityCatalog: true,
     });
   });
 
@@ -139,7 +158,7 @@ describe("shelfUnitToUnitCardSummary", () => {
     const review: PostDTO = {
       unitId: "review-1",
       authorUserId: "user-1",
-      author: { userId: "user-1", name: "Reviewer" },
+      author: { unitId: "user-1", name: "Reviewer" },
       body: "Review body",
       extra: { title: "Review title" },
     };
@@ -152,7 +171,7 @@ describe("shelfUnitToUnitCardSummary", () => {
       title: "Review title",
       contentPreview: "Review body",
       addedAt: "2026-02-01T00:00:00.000Z",
-      author: { userId: "user-1", name: "Reviewer" },
+      author: { unitId: "user-1", name: "Reviewer" },
     });
   });
 

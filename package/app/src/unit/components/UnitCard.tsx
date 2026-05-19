@@ -122,7 +122,15 @@ export function UnitCard({
 }
 
 function renderAuthor(summary: UnitCardSummary) {
-  if (summary.author?.userId) {
+  if (summary.isCommunityCatalog) {
+    return (
+      <span className="min-w-0 truncate text-text-secondary">
+        Community catalog
+      </span>
+    );
+  }
+
+  if (summary.author?.unitId) {
     return (
       <UserHoverPreview
         user={summary.author}

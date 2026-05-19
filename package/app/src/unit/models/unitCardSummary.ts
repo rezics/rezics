@@ -32,6 +32,7 @@ export interface UnitCardSummary {
   imageUrl?: string | null;
   contentPreview?: string;
   author?: UnitCardAuthor | null;
+  isCommunityCatalog?: boolean;
   addedAt?: string | Date | null;
   translationMeta?: UnitCardTranslationMeta;
   attachmentCounts?: UnitCardAttachmentCounts;
@@ -105,9 +106,22 @@ export function unitDtoToUnitCardSummary(
     contentPreview:
       text(translation?.summary) ?? text(translation?.description),
     author: unit.user ?? null,
+    isCommunityCatalog: isRezicsWikiUser(unit.user),
     addedAt: options.addedAt ?? null,
     translationMeta: translationToMeta(translation),
   };
+}
+
+function isRezicsWikiUser(user: PublicUser | null | undefined): boolean {
+  const candidate = user as
+    | (PublicUser & { slug?: string | null; userSlug?: string | null })
+    | null
+    | undefined;
+  return (
+    candidate?.slug === "rezics-wiki" ||
+    candidate?.userSlug === "rezics-wiki" ||
+    candidate?.name === "rezics-wiki"
+  );
 }
 
 export function candidateToUnitCardSummary(
