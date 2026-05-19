@@ -1,32 +1,97 @@
 import type {
   CreditAttributionDTO,
   LinkCreditAttributionInput,
+  RezicsSessionClaims,
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { patchContentCreditsToMeili } from "@/meili/content/sync";
+import {
+  assertCanEditCollaborativeMetadata,
+  creditRoleFieldKey,
+  writeEditorialMetadataHistory,
+} from "@/unit/collaborative-metadata";
 import { mapCreditAttributionToDTO } from "./credit-attribution.mapper";
 import { creditAttributionInclude } from "./types";
 
 export class CreditAttributionService {
-  async link(req: LinkCreditAttributionInput): Promise<CreditAttributionDTO> {
-    const row = await prisma.creditAttribution.create({
-      data: {
+  async link(
+    req: LinkCreditAttributionInput,
+    actor?: RezicsSessionClaims,
+  ): Promise<CreditAttributionDTO> {
+    const fieldKey = creditRoleFieldKey(req.role);
+
+    if (!actor) {
+      const row = await prisma.creditAttribution.create({
+        data: {
+          unitId: req.unitId,
+          entityId: req.entityId,
+          role: req.role,
+          sortOrder: req.sortOrder ?? 0,
+        },
+        include: creditAttributionInclude,
+      });
+      await patchContentCreditsToMeili(req.unitId);
+      return mapCreditAttributionToDTO(row);
+    }
+
+    const row = await prisma.$transaction(async (tx) => {
+      await assertCanEditCollaborativeMetadata(tx as any, actor, req.unitId, [
+        fieldKey,
+      ]);
+      const created = await tx.creditAttribution.create({
+        data: {
+          unitId: req.unitId,
+          entityId: req.entityId,
+          role: req.role,
+          sortOrder: req.sortOrder ?? 0,
+        },
+        include: creditAttributionInclude,
+      });
+      await writeEditorialMetadataHistory(tx as any, {
         unitId: req.unitId,
-        entityId: req.entityId,
-        role: req.role,
-        sortOrder: req.sortOrder ?? 0,
-      },
-      include: creditAttributionInclude,
+        actorUserId: actor.userId,
+        changedFieldKeys: [fieldKey],
+        message: "credit-attribution.link",
+      });
+      return created;
     });
     await patchContentCreditsToMeili(req.unitId);
     return mapCreditAttributionToDTO(row);
   }
 
-  async unlink(unitId: string, entityId: string, role: string): Promise<void> {
-    await prisma.creditAttribution.delete({
-      where: {
-        unitId_entityId_role: { unitId, entityId, role },
-      },
+  async unlink(
+    unitId: string,
+    entityId: string,
+    role: string,
+    actor?: RezicsSessionClaims,
+  ): Promise<void> {
+    const fieldKey = creditRoleFieldKey(role);
+
+    if (!actor) {
+      await prisma.creditAttribution.delete({
+        where: {
+          unitId_entityId_role: { unitId, entityId, role },
+        },
+      });
+      await patchContentCreditsToMeili(unitId);
+      return;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await assertCanEditCollaborativeMetadata(tx as any, actor, unitId, [
+        fieldKey,
+      ]);
+      await tx.creditAttribution.delete({
+        where: {
+          unitId_entityId_role: { unitId, entityId, role },
+        },
+      });
+      await writeEditorialMetadataHistory(tx as any, {
+        unitId,
+        actorUserId: actor.userId,
+        changedFieldKeys: [fieldKey],
+        message: "credit-attribution.unlink",
+      });
     });
     await patchContentCreditsToMeili(unitId);
   }

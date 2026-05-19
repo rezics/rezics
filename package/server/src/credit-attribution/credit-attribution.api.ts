@@ -1,8 +1,5 @@
 import type { CreditAttributionDTO } from "@rezics/contract";
-import {
-  BasicAdminPermission,
-  linkCreditAttributionSchema,
-} from "@rezics/contract";
+import { linkCreditAttributionSchema } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { creditAttributionService } from "./credit-attribution.service";
@@ -13,12 +10,8 @@ export const creditAttributionApi = new Elysia({
   .use(authMacro)
   .post(
     "/",
-    async ({ body, identity, set }): Promise<CreditAttributionDTO> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error("Forbidden: admin permission required");
-      }
-      return creditAttributionService.link(body);
+    async ({ body, identity }): Promise<CreditAttributionDTO> => {
+      return creditAttributionService.link(body, identity);
     },
     {
       requireLogin: true,
@@ -46,15 +39,12 @@ export const creditAttributionApi = new Elysia({
   )
   .delete(
     "/:unitId/:entityId/:role",
-    async ({ params, identity, set }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error("Forbidden: admin permission required");
-      }
+    async ({ params, identity }): Promise<{ message: string }> => {
       await creditAttributionService.unlink(
         params.unitId,
         params.entityId,
         params.role,
+        identity,
       );
       return { message: "Credit attribution unlinked" };
     },

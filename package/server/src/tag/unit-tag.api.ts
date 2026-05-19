@@ -9,24 +9,8 @@ import {
 } from "@rezics/contract";
 import { Elysia, status } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
-import { unitService } from "@/unit/unit.service";
 import { mapUnitTagToDTO } from "./tag.mapper";
 import { tagService, VISIBILITY_THRESHOLD } from "./tag.service";
-
-/**
- * Authorization helper for pin/delete on a UnitTag.
- * Allowed: platform admin OR the owning unit's `userId`.
- * Rejected: any caller when `Unit.userId` is null and they are not admin.
- */
-async function canMutateUnitTag(
-  actorPermission: { role: string },
-  actorUserId: string,
-  unitId: string,
-): Promise<boolean> {
-  if (BasicAdminPermission(actorPermission as any)) return true;
-  const unit = await unitService.getByUnitId(unitId);
-  return unit?.userId != null && unit.userId === actorUserId;
-}
 
 export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
   .use(authMacro)
@@ -39,6 +23,7 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
         identity.userId,
         body.unitId,
         body.tagUnitId,
+        identity,
       );
       return mapUnitTagToDTO({ ...row, tag: undefined as any });
     },
@@ -57,22 +42,12 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
   // PATCH /unit-tags/:unitId/:tagUnitId — pin / position (admin or unit owner)
   .patch(
     "/:unitId/:tagUnitId",
-    async ({ params, body, identity, set }): Promise<UnitTagDTO> => {
-      const allowed = await canMutateUnitTag(
-        identity.permission,
-        identity.userId,
-        params.unitId,
-      );
-      if (!allowed) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: only platform admin or unit owner may pin tags",
-        );
-      }
+    async ({ params, body, identity }): Promise<UnitTagDTO> => {
       const row = await tagService.setUnitTagPin(
         params.unitId,
         params.tagUnitId,
         body,
+        identity,
       );
       return mapUnitTagToDTO({ ...row, tag: undefined as any });
     },
@@ -90,19 +65,8 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
   // DELETE /unit-tags/:unitId/:tagUnitId — delete (admin or unit owner)
   .delete(
     "/:unitId/:tagUnitId",
-    async ({ params, identity, set }): Promise<{ message: string }> => {
-      const allowed = await canMutateUnitTag(
-        identity.permission,
-        identity.userId,
-        params.unitId,
-      );
-      if (!allowed) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: only platform admin or unit owner may delete tags",
-        );
-      }
-      await tagService.deleteUnitTag(params.unitId, params.tagUnitId);
+    async ({ params, identity }): Promise<{ message: string }> => {
+      await tagService.deleteUnitTag(params.unitId, params.tagUnitId, identity);
       return { message: "Unit tag deleted" };
     },
     {

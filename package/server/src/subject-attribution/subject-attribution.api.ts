@@ -1,6 +1,5 @@
 import type { SubjectAttributionDTO } from "@rezics/contract";
 import {
-  BasicAdminPermission,
   linkSubjectAttributionSchema,
   subjectAttributionBySubjectQuerySchema,
   subjectAttributionByUnitQuerySchema,
@@ -15,12 +14,8 @@ export const subjectAttributionApi = new Elysia({
   .use(authMacro)
   .post(
     "/",
-    async ({ body, identity, set }): Promise<SubjectAttributionDTO> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error("Forbidden: admin permission required");
-      }
-      return subjectAttributionService.link(body);
+    async ({ body, identity }): Promise<SubjectAttributionDTO> => {
+      return subjectAttributionService.link(body, identity);
     },
     {
       requireLogin: true,
@@ -63,15 +58,12 @@ export const subjectAttributionApi = new Elysia({
   )
   .delete(
     "/:unitId/:entityId/:role",
-    async ({ params, identity, set }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error("Forbidden: admin permission required");
-      }
+    async ({ params, identity }): Promise<{ message: string }> => {
       await subjectAttributionService.unlink(
         params.unitId,
         params.entityId,
         params.role,
+        identity,
       );
       return { message: "Subject attribution unlinked" };
     },
