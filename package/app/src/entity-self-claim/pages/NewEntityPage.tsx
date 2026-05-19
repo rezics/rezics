@@ -1,6 +1,6 @@
 import { useCreateEntity } from "@rezics/api/entity";
 import type { CreateEntityInput } from "@rezics/contract";
-import { entityKinds } from "@rezics/contract";
+import { CreationMode, entityKinds } from "@rezics/contract";
 import { unitHref } from "@rezics/ui/primitive/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -36,6 +36,7 @@ export function NewEntityPage() {
     }
     const payload: CreateEntityInput = {
       kind,
+      creationMode: CreationMode.PERSONAL,
       translations: [{ language: language.trim() || "en", title: trimmed }],
     };
     mutation.mutate(payload);

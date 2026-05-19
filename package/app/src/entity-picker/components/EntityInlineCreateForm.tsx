@@ -1,6 +1,6 @@
 import { useCreateEntity } from "@rezics/api/entity";
 import type { CreateEntityInput, EntityKind } from "@rezics/contract";
-import { entityKinds } from "@rezics/contract";
+import { CreationMode, entityKinds } from "@rezics/contract";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { type FormEvent, useState } from "react";
 
@@ -40,6 +40,7 @@ export function EntityInlineCreateForm({
     const trimmedLang = language.trim() || "en";
     const payload: CreateEntityInput = {
       kind,
+      creationMode: CreationMode.WIKI,
       translations: [{ language: trimmedLang, title: trimmedTitle }],
     };
     mutation.mutate(payload);

@@ -8,12 +8,15 @@ import {
   useUpsertTranslationMutation,
 } from "@rezics/api/unit/unit.mutations";
 import type {
-  BookDTO,
   CreateBookInput,
+  CreationMode,
   UpdateBookInput,
 } from "@rezics/contract";
-import { DEFAULT_LANGUAGE, normalizeLanguage } from "@rezics/contract";
-import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
+import {
+  CreationMode as CreationModeValue,
+  DEFAULT_LANGUAGE,
+  normalizeLanguage,
+} from "@rezics/contract";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import {
   Alert,
@@ -29,9 +32,11 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
+import { ChevronDown as ExpandMore } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
 import { AddTranslationDialog } from "../components/AddTranslationDialog";
 import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
 import {
@@ -47,7 +52,6 @@ import {
   type TranslationDraft,
   useBookTranslationEditor,
 } from "../hooks/useBookTranslationEditor";
-import { ChevronDown as ExpandMore } from "lucide-react";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));
@@ -126,6 +130,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     React.useState<UpdateBookDialogState>(null);
   const [extraOpen, setExtraOpen] = React.useState(true);
   const [addOpen, setAddOpen] = React.useState(false);
+  const [creationMode, setCreationMode] = React.useState<CreationMode>(
+    CreationModeValue.WIKI,
+  );
 
   const editor = useBookTranslationEditor(data);
 
@@ -199,6 +206,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         }),
         extra: metadataState?.extra,
         defaultLanguage: DEFAULT_LANGUAGE,
+        creationMode,
         translations: [
           {
             language:
@@ -341,6 +349,51 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       </div>
 
       <div className="space-y-16">
+        {newBook && (
+          <section>
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Creation path
+            </h3>
+            <Separator className="mb-6" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                className={`rounded-md border border-border-whisper p-4 text-left transition-colors ${
+                  creationMode === CreationModeValue.WIKI
+                    ? "bg-brand-fill text-text-on-brand"
+                    : "bg-surface-subtle text-text-primary hover:bg-surface-elevated"
+                }`}
+                onClick={() => setCreationMode(CreationModeValue.WIKI)}
+              >
+                <span className="block text-sm font-medium leading-ui">
+                  Catalog entry
+                </span>
+                <span className="mt-1 block text-xs leading-dense opacity-80">
+                  Owned by the community catalog and open to collaborative
+                  edits.
+                </span>
+              </button>
+              <button
+                type="button"
+                className={`rounded-md border border-border-whisper p-4 text-left transition-colors ${
+                  creationMode === CreationModeValue.PERSONAL
+                    ? "bg-brand-fill text-text-on-brand"
+                    : "bg-surface-subtle text-text-primary hover:bg-surface-elevated"
+                }`}
+                onClick={() => setCreationMode(CreationModeValue.PERSONAL)}
+              >
+                <span className="block text-sm font-medium leading-ui">
+                  Personal work
+                </span>
+                <span className="mt-1 block text-xs leading-dense opacity-80">
+                  Owned by your account and closed to community edits by
+                  default.
+                </span>
+              </button>
+            </div>
+          </section>
+        )}
+
         {/* Translation: language bar + per-language fields + sync actions */}
         {!newBook && data && (
           <section>
