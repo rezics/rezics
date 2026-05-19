@@ -18,6 +18,14 @@ export {
   UnitAuthorityService,
   unitAuthorityService,
 } from "./authority.service";
+export {
+  allocateUnitHistorySequence,
+  buildEditorialRevisionPayload,
+  buildStructureEventPayload,
+  canonicalSerialize,
+  hashCanonicalPayload,
+  writeHistoryOutbox,
+} from "./history-outbox";
 export { mapTranslationToDTO, mapUnitToDTO } from "./mapper";
 export { translationSourceApi } from "./translation-source.api";
 export { TranslationService, translationService } from "./translation.service";
