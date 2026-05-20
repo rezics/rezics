@@ -3,6 +3,7 @@ import {
   type HistoryOutboxPayload,
   HistoryOutboxPayloadKind,
 } from "@rezics/contract";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 type HistoryOutboxRow = {
   id: string;
@@ -241,16 +242,26 @@ export class HistoryOutboxConsumer {
 }
 
 export async function createDefaultHistoryOutboxConsumer() {
-  const mainClientSpecifier = "@rezics/server/prisma/client";
+  const { env } = await import("../env");
+
   const [
-    { prisma: mainPrisma },
+    { PrismaClient: MainPrismaClient },
     { prisma: historyPrisma },
     { revisionService: defaultRevisionService },
   ] = await Promise.all([
-    import(mainClientSpecifier),
+    import("@rezics/server/prisma/generated/client"),
     import("../../prisma/client"),
     import("../revision/revision.service"),
   ]);
+  const mainPrisma = new MainPrismaClient({
+    adapter: new PrismaPg({
+      connectionString: env.SERVER_DATABASE_URL,
+      max: 20,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 2_000,
+    }),
+  });
+
   return new HistoryOutboxConsumer(
     mainPrisma as unknown as MainOutboxDb,
     historyPrisma as unknown as HistoryFailureDb,
