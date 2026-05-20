@@ -1,22 +1,16 @@
-import path from "node:path";
 import * as p from "@clack/prompts";
-
-const SCRIPT_DIR = path.dirname(Bun.main);
-const ROOT_DIR = path.resolve(SCRIPT_DIR, "..", "..");
-
-const PACKAGES = ["server", "auth", "notify", "reaction"] as const;
-type Package = (typeof PACKAGES)[number];
-
-type StepResult = "ok" | "fail";
+import {
+  isPrismaPackage,
+  PRISMA_PACKAGES,
+  type PrismaPackage,
+} from "./packages";
+import { askOnFailure, pickPackages as promptPackages } from "./prompts";
+import { runPrisma, type StepResult } from "./prisma-runner";
 
 interface CliFlags {
   yes: boolean;
-  packages: Package[];
+  packages: PrismaPackage[];
   unknown: string[];
-}
-
-function isPackage(value: string): value is Package {
-  return PACKAGES.includes(value as Package);
 }
 
 function parseArgs(argv: string[]): CliFlags {
@@ -33,7 +27,7 @@ function parseArgs(argv: string[]): CliFlags {
       const value = arg.slice("--package=".length);
       const packages = value.split(",").filter(Boolean);
       for (const pkg of packages) {
-        if (isPackage(pkg)) {
+        if (isPrismaPackage(pkg)) {
           flags.packages.push(pkg);
         } else {
           flags.unknown.push(`--package=${pkg}`);
@@ -50,47 +44,12 @@ function parseArgs(argv: string[]): CliFlags {
   };
 }
 
-async function runPrismaReset(pkg: Package): Promise<StepResult> {
-  const cwd = path.join(ROOT_DIR, "package", pkg);
-  const proc = Bun.spawn(
-    ["bunx", "prisma", "migrate", "reset", "--force", "--skip-seed"],
-    {
-      cwd,
-      stdout: "inherit",
-      stderr: "inherit",
-      stdin: "inherit",
-    },
-  );
-  const exitCode = await proc.exited;
-  return exitCode === 0 ? "ok" : "fail";
-}
-
-type FailureChoice = "quit" | "continue" | "retry";
-
-async function askOnFailure(pkg: Package): Promise<FailureChoice> {
-  const choice = await p.select<FailureChoice>({
-    message: `Reset for @rezics/${pkg} failed. What now?`,
-    initialValue: "quit",
-    options: [
-      { value: "quit", label: "Quit", hint: "stop here" },
-      {
-        value: "continue",
-        label: "Continue",
-        hint: "skip this package, run the rest",
-      },
-      {
-        value: "retry",
-        label: "Retry",
-        hint: "re-run reset for this package",
-      },
-    ],
-  });
-  if (p.isCancel(choice)) return "quit";
-  return choice;
+async function runPrismaReset(pkg: PrismaPackage): Promise<StepResult> {
+  return runPrisma(pkg, ["migrate", "reset", "--force", "--skip-seed"]);
 }
 
 async function processPackage(
-  pkg: Package,
+  pkg: PrismaPackage,
   interactive: boolean,
 ): Promise<StepResult> {
   while (true) {
@@ -100,35 +59,25 @@ async function processPackage(
 
     if (!interactive) return "fail";
 
-    const choice = await askOnFailure(pkg);
+    const choice = await askOnFailure(
+      pkg,
+      "Reset",
+      "re-run reset for this package",
+    );
     if (choice === "retry") continue;
     return choice === "continue" ? "ok" : "fail";
   }
 }
 
-async function pickPackages(flags: CliFlags): Promise<Package[]> {
+async function pickPackages(flags: CliFlags): Promise<PrismaPackage[]> {
   if (flags.packages.length > 0) return flags.packages;
-  if (flags.yes) return [...PACKAGES];
+  if (flags.yes) return [...PRISMA_PACKAGES];
 
-  type Pick = Package | "all";
-  const picks = await p.multiselect<Pick>({
-    message: "Which packages should be reset?",
-    required: true,
-    options: [
-      { value: "all", label: "All", hint: PACKAGES.join(", ") },
-      ...PACKAGES.map((pkg) => ({ value: pkg, label: `@rezics/${pkg}` })),
-    ],
-  });
-  if (p.isCancel(picks)) {
-    p.cancel("Cancelled.");
-    process.exit(0);
-  }
-  if (picks.includes("all")) return [...PACKAGES];
-  return picks.filter((pick): pick is Package => pick !== "all");
+  return promptPackages("Which packages should be reset?");
 }
 
 async function confirmReset(
-  selected: readonly Package[],
+  selected: readonly PrismaPackage[],
   flags: CliFlags,
 ): Promise<void> {
   if (flags.yes) return;
