@@ -202,7 +202,9 @@ export const bookApi = new Elysia({ prefix: "/book" })
         );
       }
 
-      return bookService.updateContentStructure(params.unitId, body);
+      return bookService.updateContentStructure(params.unitId, body, {
+        actorUserId: identity.userId,
+      });
     },
     {
       requireLogin: true,

@@ -132,7 +132,10 @@ export async function writeSequencedHistoryOutbox(
 ): Promise<{ sequence: bigint; payloadHash: string }> {
   const sequence = await allocateUnitHistorySequence(tx, input.unitId);
   const payload = input.buildPayload(sequence);
-  const payloadHash = hashCanonicalPayload(payload);
+  const payloadHash =
+    "revision" in payload
+      ? hashCanonicalPayload(payload.revision.slots)
+      : hashCanonicalPayload(payload);
   await tx.historyOutbox.create({
     data: {
       unitId: input.unitId,

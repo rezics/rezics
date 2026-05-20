@@ -51,6 +51,10 @@ const mockCreateNode = mock(async (_args: unknown) => ({ id: "" }));
 const mockUpdateNode = mock(async (_args: unknown) => ({ id: "" }));
 const mockDeleteManyNode = mock(async (_args: unknown) => ({ count: 0 }));
 const mockUpdateBook = mock(async (_args: unknown) => ({ unitId: "book-1" }));
+const mockAllocateSequence = mock(async (_strings: TemplateStringsArray) => [
+  { sequence: 1n },
+]);
+const mockCreateHistoryOutbox = mock(async (_args: unknown) => ({}));
 const mockCreateBook = mock(async (_args: unknown) => ({
   unitId: "book-1",
   unit: {
@@ -89,6 +93,7 @@ const mockFindContainer = mock(async (_args: unknown) => ({
 }));
 
 const mockTx = {
+  $queryRaw: mockAllocateSequence,
   bookContentStructureNode: {
     findMany: mockFindNodeRows,
     create: mockCreateNode,
@@ -100,6 +105,9 @@ const mockTx = {
   },
   book: {
     update: mockUpdateBook,
+  },
+  historyOutbox: {
+    create: mockCreateHistoryOutbox,
   },
 };
 
@@ -127,12 +135,19 @@ function resetMocks(): void {
   mockUpdateNode.mockClear();
   mockDeleteManyNode.mockClear();
   mockUpdateBook.mockClear();
+  mockAllocateSequence.mockClear();
+  mockCreateHistoryOutbox.mockClear();
   mockCreateBook.mockClear();
   mockUpdateContainer.mockClear();
   mockFindContainer.mockClear();
   mockTransaction.mockClear();
   mockSyncContentToMeili.mockClear();
   mockPatchContentMetadataToMeili.mockClear();
+}
+
+function latestStructureHistoryOperations(): any[] {
+  const createArgs = mockCreateHistoryOutbox.mock.calls.at(-1)?.[0] as any;
+  return createArgs.data.payload.event.payload.operations;
 }
 
 describe("BookService.create", () => {
@@ -217,6 +232,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
     expect(mockDeleteManyNode).not.toHaveBeenCalled();
     expect(mockUpdateContainer).not.toHaveBeenCalled();
     expect(mockUpdateBook).not.toHaveBeenCalled();
+    expect(mockCreateHistoryOutbox).not.toHaveBeenCalled();
   });
 
   test("single rename issues exactly one UPDATE and bumps container once", async () => {
@@ -238,6 +254,14 @@ describe("BookService.updateContentStructure (diff-based)", () => {
       where: { unitId: "book-1" },
       data: { chapterCount: 1 },
     });
+    expect(latestStructureHistoryOperations()).toEqual([
+      {
+        op: "node.update",
+        nodeId: "n-a",
+        before: { title: "Old" },
+        after: { title: "New" },
+      },
+    ]);
   });
 
   test("delete subtree issues a single deleteMany covering all omitted ids", async () => {
@@ -273,6 +297,32 @@ describe("BookService.updateContentStructure (diff-based)", () => {
       where: { unitId: "book-1" },
       data: { chapterCount: 1 },
     });
+    expect(latestStructureHistoryOperations()).toEqual([
+      {
+        op: "node.delete",
+        node: {
+          nodeId: "n-child-1",
+          title: "C1",
+          chapterUnitId: null,
+          noContent: false,
+          rating: null,
+        },
+        placement: { parentId: "n-root", sortKey: "g" },
+        descendantCount: 0,
+      },
+      {
+        op: "node.delete",
+        node: {
+          nodeId: "n-child-2",
+          title: "C2",
+          chapterUnitId: null,
+          noContent: false,
+          rating: null,
+        },
+        placement: { parentId: "n-root", sortKey: "n" },
+        descendantCount: 0,
+      },
+    ]);
   });
 
   test("insert new sibling produces one INSERT with sortKey between neighbors", async () => {
@@ -300,6 +350,11 @@ describe("BookService.updateContentStructure (diff-based)", () => {
     expect(mockUpdateBook).toHaveBeenCalledWith({
       where: { unitId: "book-1" },
       data: { chapterCount: 3 },
+    });
+    expect(latestStructureHistoryOperations()[0]).toMatchObject({
+      op: "node.create",
+      node: { title: "B (new)" },
+      placement: { parentId: null },
     });
   });
 
@@ -355,5 +410,72 @@ describe("BookService.updateContentStructure (diff-based)", () => {
       where: { unitId: "book-1" },
       data: { chapterCount: 2 },
     });
+  });
+
+  test("move and link changes are recorded in one structure history sequence", async () => {
+    const existing: FakeRow[] = [
+      makeRow({ id: "n-a", parentId: null, sortKey: "g", title: "A" }),
+      makeRow({ id: "n-b", parentId: null, sortKey: "n", title: "B" }),
+    ];
+    mockFindNodeRows.mockResolvedValue(existing);
+
+    const { bookService } = await import("./book.service");
+    await bookService.updateContentStructure(
+      "book-1",
+      [
+        {
+          id: "n-a",
+          title: "A",
+          children: [{ id: "n-b", title: "B", chapterUnitId: "chapter-b" }],
+        },
+      ],
+      { actorUserId: "user-1", message: "Move B under A" },
+    );
+
+    expect(mockCreateHistoryOutbox).toHaveBeenCalledTimes(1);
+    const createArgs = mockCreateHistoryOutbox.mock.calls[0]?.[0] as any;
+    expect(createArgs.data.sequence).toBe(1n);
+    expect(createArgs.data.actorUserId).toBe("user-1");
+    expect(createArgs.data.payload.event.message).toBe("Move B under A");
+    const operations = latestStructureHistoryOperations();
+    expect(operations[0]).toMatchObject({
+      op: "node.move",
+      nodeId: "n-b",
+      before: { parentId: null, sortKey: "n" },
+      after: { parentId: "n-a" },
+    });
+    expect(operations[0].after.sortKey).toEqual(expect.any(String));
+    expect(operations[1]).toEqual({
+      op: "node.link",
+      nodeId: "n-b",
+      beforeChapterUnitId: null,
+      afterChapterUnitId: "chapter-b",
+    });
+  });
+
+  test("unlink changes are recorded as structure history operations", async () => {
+    const existing: FakeRow[] = [
+      makeRow({
+        id: "n-a",
+        parentId: null,
+        sortKey: "g",
+        title: "A",
+        chapterUnitId: "chapter-a",
+      }),
+    ];
+    mockFindNodeRows.mockResolvedValue(existing);
+
+    const { bookService } = await import("./book.service");
+    await bookService.updateContentStructure("book-1", [
+      { id: "n-a", title: "A" },
+    ]);
+
+    expect(latestStructureHistoryOperations()).toEqual([
+      {
+        op: "node.unlink",
+        nodeId: "n-a",
+        beforeChapterUnitId: "chapter-a",
+      },
+    ]);
   });
 });

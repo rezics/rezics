@@ -1,8 +1,13 @@
-import { BookFieldKey, UnitCommonFieldKey } from "@rezics/contract";
+import {
+  BookFieldKey,
+  HistoryOutboxPayloadKind,
+  UnitCommonFieldKey,
+} from "@rezics/contract";
 import type {
   BookContentStructureResponse,
   BookListQuery,
   BookContentStructureItem,
+  ContentStructureBatchOperation,
   CreateBookInput,
   RezicsSessionClaims,
   UpdateBookInput,
@@ -32,6 +37,10 @@ import {
   uniqueFieldKeys,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
+import {
+  buildStructureEventPayload,
+  writeSequencedHistoryOutbox,
+} from "@/unit/history-outbox";
 import {
   buildTree,
   countReadableBookContentStructureItems,
@@ -417,8 +426,11 @@ export class BookService {
   async updateContentStructure(
     unitId: string,
     submitted: BookContentStructureItem[],
+    options: { actorUserId?: string; message?: string | null } = {},
   ): Promise<BookContentStructureResponse> {
     await prisma.$transaction(async (tx) => {
+      const actorUserId =
+        options.actorUserId ?? (await resolveRezicsWikiUserId());
       const current = await tx.bookContentStructureNode.findMany({
         where: { bookUnitId: unitId },
         select: {
@@ -434,6 +446,7 @@ export class BookService {
 
       const currentById = new Map(current.map((row) => [row.id, row]));
       const planned = planSubmittedTree(submitted, currentById);
+      const operations = planContentStructureOperations(current, planned);
       const submittedIds = new Set(planned.map((p) => p.id));
       const chapterCount = countReadableBookContentStructureItems(submitted);
 
@@ -499,6 +512,22 @@ export class BookService {
         await tx.book.update({
           where: { unitId },
           data: { chapterCount },
+        });
+        await writeSequencedHistoryOutbox(tx, {
+          unitId,
+          actorUserId,
+          buildPayload: (sequence) => ({
+            kind: HistoryOutboxPayloadKind.STRUCTURE_EVENT,
+            event: buildStructureEventPayload({
+              unitId,
+              sequence,
+              actorUserId,
+              eventType: "book.contentStructure.batch",
+              changedFieldKeys: [BookFieldKey.CONTENT_STRUCTURE],
+              payload: { operations },
+              message: options.message ?? null,
+            }),
+          }),
         });
       }
     });
@@ -566,6 +595,129 @@ interface ExistingRow {
   title: string;
   noContent: boolean;
   rating: ContentRating | null;
+}
+
+function nodeSnapshot(row: ExistingRow | PlannedNode) {
+  return {
+    nodeId: row.id,
+    title: row.title,
+    chapterUnitId: row.chapterUnitId,
+    noContent: row.noContent,
+    rating: row.rating,
+  };
+}
+
+function nodePlacement(row: ExistingRow | PlannedNode) {
+  return {
+    parentId: row.parentId,
+    sortKey: row.sortKey,
+  };
+}
+
+function countDescendants(
+  nodeId: string,
+  rowsByParentId: ReadonlyMap<string | null, readonly ExistingRow[]>,
+): number {
+  const children = rowsByParentId.get(nodeId) ?? [];
+  return children.reduce(
+    (total, child) => total + 1 + countDescendants(child.id, rowsByParentId),
+    0,
+  );
+}
+
+export function planContentStructureOperations(
+  current: readonly ExistingRow[],
+  planned: readonly PlannedNode[],
+): ContentStructureBatchOperation[] {
+  const currentById = new Map(current.map((row) => [row.id, row]));
+  const plannedById = new Map(planned.map((row) => [row.id, row]));
+  const rowsByParentId = new Map<string | null, ExistingRow[]>();
+  for (const row of current) {
+    const siblings = rowsByParentId.get(row.parentId) ?? [];
+    siblings.push(row);
+    rowsByParentId.set(row.parentId, siblings);
+  }
+
+  const operations: ContentStructureBatchOperation[] = [];
+
+  for (const row of current) {
+    if (plannedById.has(row.id)) continue;
+    operations.push({
+      op: "node.delete",
+      node: nodeSnapshot(row),
+      placement: nodePlacement(row),
+      descendantCount: countDescendants(row.id, rowsByParentId),
+    });
+  }
+
+  for (const plan of planned) {
+    const existing = currentById.get(plan.id);
+    if (!existing) {
+      operations.push({
+        op: "node.create",
+        node: nodeSnapshot(plan),
+        placement: nodePlacement(plan),
+      });
+      continue;
+    }
+
+    const beforeUpdate: Partial<ReturnType<typeof nodeSnapshot>> = {};
+    const afterUpdate: Partial<ReturnType<typeof nodeSnapshot>> = {};
+    if (existing.title !== plan.title) {
+      beforeUpdate.title = existing.title;
+      afterUpdate.title = plan.title;
+    }
+    if (existing.noContent !== plan.noContent) {
+      beforeUpdate.noContent = existing.noContent;
+      afterUpdate.noContent = plan.noContent;
+    }
+    if ((existing.rating ?? null) !== (plan.rating ?? null)) {
+      beforeUpdate.rating = existing.rating;
+      afterUpdate.rating = plan.rating;
+    }
+    if (Object.keys(afterUpdate).length > 0) {
+      operations.push({
+        op: "node.update",
+        nodeId: plan.id,
+        before: beforeUpdate,
+        after: afterUpdate,
+      });
+    }
+
+    if (
+      existing.parentId !== plan.parentId ||
+      existing.sortKey !== plan.sortKey
+    ) {
+      operations.push({
+        op: "node.move",
+        nodeId: plan.id,
+        before: nodePlacement(existing),
+        after: nodePlacement(plan),
+      });
+    }
+
+    const beforeChapterUnitId = existing.chapterUnitId ?? null;
+    const afterChapterUnitId = plan.chapterUnitId ?? null;
+    if (beforeChapterUnitId !== afterChapterUnitId) {
+      if (beforeChapterUnitId) {
+        operations.push({
+          op: "node.unlink",
+          nodeId: plan.id,
+          beforeChapterUnitId,
+        });
+      }
+      if (afterChapterUnitId) {
+        operations.push({
+          op: "node.link",
+          nodeId: plan.id,
+          beforeChapterUnitId,
+          afterChapterUnitId,
+        });
+      }
+    }
+  }
+
+  return operations;
 }
 
 /**
