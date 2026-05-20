@@ -30,12 +30,14 @@ export const revisionApi = new Elysia({ prefix: "/history" })
         unitId: params.unitId,
         limit: Number(query.limit ?? 20),
         cursor: query.cursor ?? null,
+        includeContent: query.includeContent ?? false,
       }),
     {
       params: unitRevisionParamsSchema,
       query: t.Object({
         limit: t.Optional(t.Numeric()),
         cursor: t.Optional(t.String()),
+        includeContent: t.Optional(t.Boolean()),
       }),
       response: unitRevisionTimelinePageSchema,
       detail: {
@@ -46,10 +48,11 @@ export const revisionApi = new Elysia({ prefix: "/history" })
   )
   .get(
     "/unit/:unitId/revisions/:sequence",
-    async ({ params, set }) => {
+    async ({ params, query, set }) => {
       const revision = await revisionService.getUnitRevision({
         unitId: params.unitId,
         sequence: Number(params.sequence),
+        includeContent: query.includeContent ?? true,
       });
       if (!revision) {
         set.status = 404;
@@ -59,6 +62,9 @@ export const revisionApi = new Elysia({ prefix: "/history" })
     },
     {
       params: singleRevisionParamsSchema,
+      query: t.Object({
+        includeContent: t.Optional(t.Boolean()),
+      }),
       response: {
         200: singleUnitRevisionResponseSchema,
         404: t.Object({ message: t.String() }),
@@ -77,6 +83,7 @@ export const revisionApi = new Elysia({ prefix: "/history" })
         limit: Number(query.limit ?? 50),
         cursor: query.cursor ?? null,
         eventType: query.eventType ?? null,
+        includePayload: query.includePayload ?? false,
       }),
     {
       params: unitRevisionParamsSchema,
@@ -84,6 +91,7 @@ export const revisionApi = new Elysia({ prefix: "/history" })
         limit: t.Optional(t.Numeric()),
         cursor: t.Optional(t.String()),
         eventType: t.Optional(t.String()),
+        includePayload: t.Optional(t.Boolean()),
       }),
       response: structureEventTimelinePageSchema,
       detail: {
@@ -94,11 +102,12 @@ export const revisionApi = new Elysia({ prefix: "/history" })
   )
   .get(
     "/unit/:unitId/structure-events/:sequence/:eventType",
-    async ({ params, set }) => {
+    async ({ params, query, set }) => {
       const event = await revisionService.getStructureEvent({
         unitId: params.unitId,
         sequence: Number(params.sequence),
         eventType: params.eventType,
+        includePayload: query.includePayload ?? true,
       });
       if (!event) {
         set.status = 404;
@@ -108,6 +117,9 @@ export const revisionApi = new Elysia({ prefix: "/history" })
     },
     {
       params: singleStructureEventParamsSchema,
+      query: t.Object({
+        includePayload: t.Optional(t.Boolean()),
+      }),
       response: {
         200: singleStructureEventResponseSchema,
         404: t.Object({ message: t.String() }),

@@ -1,6 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
 import { HistoryOutboxPayloadKind, UnitCommonFieldKey } from "@rezics/contract";
-import { RevisionService } from "./revision.service";
+import {
+  RevisionService,
+  computeRevisionContentHash,
+} from "./revision.service";
 
 function dbStub() {
   const content = new Map<string, unknown>();
@@ -78,7 +81,33 @@ function dbStub() {
 }
 
 describe("RevisionService", () => {
-  test("deduplicates duplicate content hashes", async () => {
+  test("computes canonical content hash from revision slots", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+    const payload = {
+      unitId: "unit-1",
+      sequence: 1,
+      actorUserId: "user-1",
+      changedFieldKeys: [UnitCommonFieldKey.TITLE],
+      slots: { unit: { title: "Canonical" } },
+      message: null,
+    };
+    const contentHash = computeRevisionContentHash(payload.slots);
+
+    const revision = await service.insertUnitRevision({
+      payload,
+      contentHash: "metadata-derived-old-hash",
+    });
+
+    expect(revision.contentHash).toBe(contentHash);
+    expect(db.revisionContent.upsert).toHaveBeenCalledWith({
+      where: { hash: contentHash },
+      update: {},
+      create: { hash: contentHash, payload: payload.slots },
+    });
+  });
+
+  test("deduplicates duplicate canonical content hashes", async () => {
     const db = dbStub();
     const service = new RevisionService(db as never);
 
@@ -91,13 +120,27 @@ describe("RevisionService", () => {
       message: null,
     };
 
-    await service.insertUnitRevision({ payload, contentHash: "hash-1" });
+    const contentHash = computeRevisionContentHash(payload.slots);
+
+    await service.insertUnitRevision({ payload, contentHash: "wrong-1" });
     await service.insertUnitRevision({
-      payload: { ...payload, sequence: 2 },
-      contentHash: "hash-1",
+      payload: { ...payload, sequence: 2, actorUserId: "user-2" },
+      contentHash: "wrong-2",
     });
 
     expect(db.revisionContent.upsert).toHaveBeenCalledTimes(2);
+    expect(db.unitRevision.upsert).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        create: expect.objectContaining({ contentHash }),
+      }),
+    );
+    expect(db.unitRevision.upsert).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        create: expect.objectContaining({ contentHash }),
+      }),
+    );
     expect(db.unitRevision.upsert).toHaveBeenCalledTimes(2);
   });
 
@@ -197,6 +240,33 @@ describe("RevisionService", () => {
 
     expect(page.revisions).toHaveLength(1);
     expect(page.nextCursor).toBe("revision-2");
+    expect(page.revisions[0]?.content).toBeUndefined();
+  });
+
+  test("timeline can include content when raw payload access is requested", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 1,
+        actorUserId: "user-1",
+        changedFieldKeys: [UnitCommonFieldKey.TITLE],
+        slots: { unit: { title: "Visible" } },
+        message: null,
+      },
+      contentHash: "hash-1",
+    });
+
+    const page = await service.listUnitRevisions({
+      unitId: "unit-1",
+      includeContent: true,
+    });
+
+    expect(page.revisions[0]?.content?.payload).toEqual({
+      unit: { title: "Visible" },
+    });
   });
 
   test("lists and reads structure events", async () => {
@@ -208,9 +278,18 @@ describe("RevisionService", () => {
         unitId: "unit-1",
         sequence: 1,
         actorUserId: "user-1",
-        eventType: "book.contentStructure.node.update",
-        changedFieldKeys: [UnitCommonFieldKey.TITLE],
-        payload: { nodeId: "node-1", title: "Captured" },
+        eventType: "book.contentStructure.batch",
+        changedFieldKeys: ["book.contentStructure"],
+        payload: {
+          operations: [
+            {
+              op: "node.update",
+              nodeId: "node-1",
+              before: { title: "Before" },
+              after: { title: "Captured" },
+            },
+          ],
+        },
         message: null,
       },
       createdAt: new Date("2026-05-19T00:00:00.000Z"),
@@ -223,10 +302,20 @@ describe("RevisionService", () => {
     const event = await service.getStructureEvent({
       unitId: "unit-1",
       sequence: 1,
-      eventType: "book.contentStructure.node.update",
+      eventType: "book.contentStructure.batch",
     });
 
     expect(page.events).toHaveLength(1);
-    expect(event?.payload).toEqual({ nodeId: "node-1", title: "Captured" });
+    expect(page.events[0]?.payload).toBeUndefined();
+    expect(event?.payload).toEqual({
+      operations: [
+        {
+          op: "node.update",
+          nodeId: "node-1",
+          before: { title: "Before" },
+          after: { title: "Captured" },
+        },
+      ],
+    });
   });
 });

@@ -32,18 +32,21 @@ async function getDefaultDb(): Promise<HistoryDb> {
   return defaultDbPromise;
 }
 
-function mapRevision(row: {
-  id: string;
-  unitId: string;
-  sequence: bigint;
-  contentHash: string;
-  actorUserId: string;
-  changedFieldKeys: string[];
-  message: string | null;
-  createdAt: Date;
-  ingestedAt: Date;
-  content?: { hash: string; payload: unknown; createdAt: Date } | null;
-}): UnitRevisionDTO {
+function mapRevision(
+  row: {
+    id: string;
+    unitId: string;
+    sequence: bigint;
+    contentHash: string;
+    actorUserId: string;
+    changedFieldKeys: string[];
+    message: string | null;
+    createdAt: Date;
+    ingestedAt: Date;
+    content?: { hash: string; payload: unknown; createdAt: Date } | null;
+  },
+  options: { includeContent?: boolean } = {},
+): UnitRevisionDTO {
   return {
     id: row.id,
     unitId: row.unitId,
@@ -55,28 +58,32 @@ function mapRevision(row: {
     message: row.message,
     createdAt: row.createdAt,
     ingestedAt: row.ingestedAt,
-    content: row.content
-      ? {
-          hash: row.content.hash,
-          payload: row.content.payload as Record<string, unknown>,
-          createdAt: row.content.createdAt,
-        }
-      : undefined,
+    content:
+      options.includeContent && row.content
+        ? {
+            hash: row.content.hash,
+            payload: row.content.payload as Record<string, unknown>,
+            createdAt: row.content.createdAt,
+          }
+        : undefined,
   };
 }
 
-function mapStructureEvent(row: {
-  id: string;
-  unitId: string;
-  sequence: bigint;
-  eventType: string;
-  actorUserId: string;
-  changedFieldKeys: string[];
-  payload: unknown;
-  message: string | null;
-  createdAt: Date;
-  ingestedAt: Date;
-}): StructureEventDTO {
+function mapStructureEvent(
+  row: {
+    id: string;
+    unitId: string;
+    sequence: bigint;
+    eventType: string;
+    actorUserId: string;
+    changedFieldKeys: string[];
+    payload: unknown;
+    message: string | null;
+    createdAt: Date;
+    ingestedAt: Date;
+  },
+  options: { includePayload?: boolean } = {},
+): StructureEventDTO {
   return {
     id: row.id,
     unitId: row.unitId,
@@ -85,11 +92,34 @@ function mapStructureEvent(row: {
     actorUserId: row.actorUserId,
     changedFieldKeys:
       row.changedFieldKeys as StructureEventDTO["changedFieldKeys"],
-    payload: row.payload as Record<string, unknown>,
+    payload: options.includePayload
+      ? (row.payload as Record<string, unknown>)
+      : undefined,
     message: row.message,
     createdAt: row.createdAt,
     ingestedAt: row.ingestedAt,
   };
+}
+
+function canonicalSerialize(value: unknown): string {
+  if (value instanceof Date) return JSON.stringify(value.toISOString());
+  if (typeof value === "bigint") return JSON.stringify(value.toString());
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => canonicalSerialize(item)).join(",")}]`;
+  }
+  if (!value || typeof value !== "object") return JSON.stringify(value);
+  return `{${Object.entries(value as Record<string, unknown>)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(
+      ([key, nested]) => `${JSON.stringify(key)}:${canonicalSerialize(nested)}`,
+    )
+    .join(",")}}`;
+}
+
+export function computeRevisionContentHash(slots: unknown): string {
+  return new Bun.CryptoHasher("sha256")
+    .update(canonicalSerialize(slots))
+    .digest("hex");
 }
 
 export class RevisionService {
@@ -113,12 +143,13 @@ export class RevisionService {
 
   async insertUnitRevision(input: {
     payload: EditorialRevisionPayload;
-    contentHash: string;
+    contentHash?: string | null;
     createdAt?: Date;
   }): Promise<UnitRevisionDTO> {
     const db = await this.database();
+    const contentHash = computeRevisionContentHash(input.payload.slots);
     await this.upsertRevisionContent({
-      hash: input.contentHash,
+      hash: contentHash,
       payload: input.payload.slots,
     });
     const row = await db.unitRevision.upsert({
@@ -132,7 +163,7 @@ export class RevisionService {
       create: {
         unitId: input.payload.unitId,
         sequence: BigInt(input.payload.sequence),
-        contentHash: input.contentHash,
+        contentHash,
         actorUserId: input.payload.actorUserId,
         changedFieldKeys: input.payload.changedFieldKeys,
         message: input.payload.message ?? null,
@@ -140,7 +171,9 @@ export class RevisionService {
       },
       include: { content: true },
     });
-    return mapRevision(row as Parameters<typeof mapRevision>[0]);
+    return mapRevision(row as Parameters<typeof mapRevision>[0], {
+      includeContent: true,
+    });
   }
 
   async insertStructureEvent(input: {
@@ -174,6 +207,7 @@ export class RevisionService {
     unitId: string;
     limit?: number;
     cursor?: string | null;
+    includeContent?: boolean;
   }): Promise<UnitRevisionTimelinePage> {
     const db = await this.database();
     const limit = Math.max(1, Math.min(input.limit ?? 20, 100));
@@ -182,7 +216,7 @@ export class RevisionService {
       orderBy: { sequence: "desc" },
       take: limit + 1,
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
-      include: { content: true },
+      include: input.includeContent ? { content: true } : undefined,
     });
 
     const pageRows = rows.slice(0, limit);
@@ -192,7 +226,9 @@ export class RevisionService {
         : null;
     return {
       revisions: pageRows.map((row) =>
-        mapRevision(row as Parameters<typeof mapRevision>[0]),
+        mapRevision(row as Parameters<typeof mapRevision>[0], {
+          includeContent: input.includeContent,
+        }),
       ),
       nextCursor: next ?? null,
     };
@@ -201,6 +237,7 @@ export class RevisionService {
   async getUnitRevision(input: {
     unitId: string;
     sequence: number;
+    includeContent?: boolean;
   }): Promise<UnitRevisionDTO | null> {
     const db = await this.database();
     const row = await db.unitRevision.findUnique({
@@ -210,9 +247,13 @@ export class RevisionService {
           sequence: BigInt(input.sequence),
         },
       },
-      include: { content: true },
+      include: input.includeContent === false ? undefined : { content: true },
     });
-    return row ? mapRevision(row as Parameters<typeof mapRevision>[0]) : null;
+    return row
+      ? mapRevision(row as Parameters<typeof mapRevision>[0], {
+          includeContent: input.includeContent !== false,
+        })
+      : null;
   }
 
   async listStructureEvents(input: {
@@ -220,6 +261,7 @@ export class RevisionService {
     limit?: number;
     cursor?: string | null;
     eventType?: string | null;
+    includePayload?: boolean;
   }): Promise<StructureEventTimelinePage> {
     const db = await this.database();
     const limit = Math.max(1, Math.min(input.limit ?? 50, 100));
@@ -240,7 +282,9 @@ export class RevisionService {
         : null;
     return {
       events: pageRows.map((row) =>
-        mapStructureEvent(row as Parameters<typeof mapStructureEvent>[0]),
+        mapStructureEvent(row as Parameters<typeof mapStructureEvent>[0], {
+          includePayload: input.includePayload,
+        }),
       ),
       nextCursor: next ?? null,
     };
@@ -250,6 +294,7 @@ export class RevisionService {
     unitId: string;
     sequence: number;
     eventType: string;
+    includePayload?: boolean;
   }): Promise<StructureEventDTO | null> {
     const db = await this.database();
     const row = await db.structureEvent.findUnique({
@@ -262,7 +307,9 @@ export class RevisionService {
       },
     });
     return row
-      ? mapStructureEvent(row as Parameters<typeof mapStructureEvent>[0])
+      ? mapStructureEvent(row as Parameters<typeof mapStructureEvent>[0], {
+          includePayload: input.includePayload !== false,
+        })
       : null;
   }
 }
