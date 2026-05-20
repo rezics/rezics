@@ -138,6 +138,22 @@ Alternatives considered:
 
 - Copy display names into every revision: rejected due to storage bloat, temporal coupling, and compliance cost.
 
+### Decision: Raw payload is debug data, not public product UI
+
+Public viewers SHALL be able to open revision detail and compare views for visible Units. The app-facing product UI SHALL avoid raw JSON payload panels in these public surfaces, including unknown-slot compare fallback. Authorized raw payload access remains a backend/API capability for maintainers, admins, or explicit debug permissions, but it is not required in the public compare surface.
+
+Rationale:
+
+- The project schema is open source and stored IDs are not secret by themselves.
+- Product risk is leaking private content, user data, migration-only fields, or confusing internal structures into normal reader/editor flows.
+- Product-grade compare should prefer semantic display and product-safe changed indicators over raw schema dumps.
+- Keeping raw payload inspection out of public history UI simplifies visibility gates while preserving service-level authority controls for future admin/debug tools.
+
+Alternatives considered:
+
+- Show raw fallback to every authorized editor inside compare: rejected for this phase because it makes product UI depend on internal payload shape.
+- Hide revision detail/compare from public viewers: rejected because visible history is a core wiki-grade product capability.
+
 ### Decision: One large change, many task phases
 
 This change remains one OpenSpec change because the user-facing outcome is one coherent product capability. Implementation SHALL be broken into contract, server, history service, API client, UI primitives, UI pages, and verification tasks.
@@ -178,5 +194,4 @@ Rollback strategy:
 
 - Should `@formatjs/intl-segmenter` be installed immediately, or dynamically added only after testing target browsers?
 - Should `book.contentStructure.batch` include a `before` subtree for deletes by default, or only minimal node metadata plus descendant count?
-- Should raw payload visibility be admin-only, maintainer-only, or controlled by a dedicated permission key?
 - Should the first implementation include a one-time "seed current TOC state" event for books that already have content structures?

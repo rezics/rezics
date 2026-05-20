@@ -4,12 +4,11 @@
 - [ ] 搞清楚 ui package 如何 允许 unocss config 以及basic-css 共享, 以提供给 dispatch
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info
+- [ ] seed factory 相关脚本需要彻底的优化，以满足我的需求，包括将 meili search sync 流程加入 factory，以及搞清楚，要怎么满足特殊测试，譬如大post tree, 大 content tree, 大 history， 复杂 shelf。也许这种特殊 seed 可以作为单独的流程在常规 seed 选项之后进行 seed，然后 seed 完之后输出 unit type - unit id 
 - [ ] tag 搜索機制要明確 搜索 score>xxx 或者 被 pinned 的，不過以 score排名的時候則不需要特別處理pinned，我覺得這是符合語義的，就是 owner pinned 的內容始終被尊重，可以被 tag 搜索到，但是不代表你要被特殊照顧排在上面。
 - [ ] entity 应当有 avatar
 - [ ] wiki 和所有权之间的冲突，我们需要锁机制，就是 用户拥有的 entity 是不允许其他用户编辑的， 然后 book 里面的某些字段，也是可以锁起来的。 wiki-content-ownership-plan 基本上 需要和 wiki history 系统一起实现
 - [ ] 基于 cdc-queue-sequin-spike report 的结果实现相应功能 确定 pg-boss 用独立的数据库，最好独立的后端service。
-- [ ] post 禁止硬删除，但是有软删除，走UnitStatus
-- [ ] 
 - [ ] unitTranslation常用叫法扩充表，单独的表，允许类似 tagVote 的机制让用户贡献unit的常见叫法，作为元信息的一部分，也能方便搜索。
 
 ## 搜索
@@ -46,3 +45,8 @@
 
 - [ ] The software architecture is determined to adopt Electron
 - [ ] focus on local lib
+
+
+## 社区治理
+
+- [ ] 如何防止个人作品或者社区作品恶意挂靠知名entity（譬如知名作者，导演），从而导致滥用？然后是否扩展锁，以支持锁定某个entity不允许被使用，即需要使用邀请机制，就是user添加该entity，会触发邀请通知和邮件。然后这个机制是先确定现有schema能不能做，具体实践则是以后再做

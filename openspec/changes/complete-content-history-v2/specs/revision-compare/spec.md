@@ -75,12 +75,12 @@ Collections such as tags, credits, subjects, translations, and support languages
 - **WHEN** a credit attribution keeps the same referenced entity but changes role or order
 - **THEN** the compare view SHALL show an updated attribution entry rather than only a raw JSON diff
 
-### Requirement: Raw diff fallback
+### Requirement: Product-safe unknown fallback
 
-If a field or slot is not recognized by the semantic compare model, the compare view SHALL provide a raw JSON diff fallback for authorized viewers and a generic changed-field indicator for viewers without raw payload access.
+If a field or slot is not recognized by the semantic compare model, the product compare view SHALL provide a product-safe changed-field indicator rather than a raw JSON diff. Authorized raw payload inspection MAY be provided by a separate maintainer/admin debug surface, but it is not required inside the public compare view.
 
 #### Scenario: Unknown slot changes
 
 - **WHEN** an unknown revision slot differs between base and target
-- **THEN** authorized viewers SHALL be able to inspect a raw JSON diff for that slot
-- **AND** unauthorized viewers SHALL see that the slot changed without seeing raw payload content
+- **THEN** the viewer SHALL see that the slot changed without seeing raw payload content
+- **AND** the compare view SHALL NOT expose private content, user data, migration-only fields, or internal payload structure through raw JSON fallback

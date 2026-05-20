@@ -62,6 +62,9 @@ bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
 - Authoritative UI rules live in `rezics-design`, `@rezics/ui` Storybook, and
   `openspec/specs/ui-component-foundation/spec.md`; do not duplicate those
   details here.
+- For browser verification, prefer giving the user the exact URLs to verify
+  after they run `bun run dev` from the repo root. Do not download browsers or
+  run heavyweight browser automation unless the user explicitly asks.
 
 ## References
 

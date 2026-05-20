@@ -26,7 +26,7 @@
 ## 4. Authority and Resolution APIs
 
 - [x] 4.1 Define server-side authority helpers for history timeline visibility, raw payload visibility, compare access, and restore eligibility.
-- [ ] 4.2 Apply Unit visibility checks to history proxy/read endpoints exposed through the app-facing API boundary.
+- [x] 4.2 Apply Unit visibility checks to history proxy/read endpoints exposed through the app-facing API boundary.
 - [x] 4.3 Add or extend batch actor resolution so history UI can resolve `actorUserId` values without per-row requests.
 - [x] 4.4 Add or extend batch Unit reference resolution for ids found in history payloads, including `OK`, `DELETED`, `GONE`, and `RESTRICTED` statuses.
 - [x] 4.5 Add tests for public viewer, owner, maintainer, admin, deleted actor, and restricted reference cases.
@@ -52,23 +52,23 @@
 - [x] 7.2 Build revision timeline rows with resolved actor display, changed field chips, message, created time, compare action, restore action when authorized, and ingestion-lag-friendly empty states.
 - [x] 7.3 Build revision detail sections for translations, extension metadata, credits, subjects, tags, authority records, and restricted/raw fallback states.
 - [x] 7.4 Build structure-event timeline rows that collapse one `book.contentStructure.batch` event and expand ordered operations.
-- [ ] 7.5 Build compare route/surface with base/target selection, changed-field navigation, split/unified controls, Markdown source diff, semantic collection diffs, and raw fallback for authorized viewers.
-- [ ] 7.6 Build restore flow that loads a selected revision into the normal edit path, requires confirmation, and preserves later history.
-- [ ] 7.7 Ensure history and compare UI use localized copy, accessible icon labels, keyboard-reachable controls, and non-color-only status indicators.
-- [ ] 7.8 Verify responsive layouts for desktop and narrow mobile widths, especially unified compare mode and long CJK text.
+- [x] 7.5 Build compare route/surface with base/target selection, changed-field navigation, split/unified controls, Markdown source diff, semantic collection diffs, and product-safe unknown-field fallback.
+- [x] 7.6 Build restore flow that loads a selected revision into the normal edit path, requires confirmation, and preserves later history.
+- [x] 7.7 Ensure history and compare UI use localized copy, accessible icon labels, keyboard-reachable controls, and non-color-only status indicators.
+- [x] 7.8 Verify responsive layouts for desktop and narrow mobile widths, especially unified compare mode and long CJK text.
 
 ## 8. Fixtures, Storybook, and Visual QA
 
-- [ ] 8.1 Add app or Storybook fixtures for editorial revision timelines, structure batch events, authority events, deleted actors, restricted references, empty history, ingestion lag, and raw payload authorization.
-- [ ] 8.2 Add stories or route fixtures for Markdown diff in English, Chinese, Japanese, long prose, and large collapsed hunks.
-- [ ] 8.3 Run browser verification for history timeline, revision detail, compare, structure-event expansion, restore confirmation, and mobile compare layout.
+- [x] 8.1 Add app or Storybook fixtures for editorial revision timelines, structure batch events, authority events, deleted actors, restricted references, empty history, ingestion lag, and raw payload authorization.
+- [x] 8.2 Add stories or route fixtures for Markdown diff in English, Chinese, Japanese, long prose, and large collapsed hunks.
+- [x] 8.3 Run browser verification for history timeline, revision detail, compare, structure-event expansion, restore confirmation, and mobile compare layout.
 
 ## 9. Repo-Wide Migration and Cleanup
 
-- [ ] 9.1 Search for UUID-only history displays and migrate them to actor/reference resolution.
-- [ ] 9.2 Search for raw `JSON.stringify(payload)` history UI and move it behind authorized raw payload affordances.
-- [ ] 9.3 Ensure new public exports include required file suffixes across package boundaries.
-- [ ] 9.4 Remove or replace unnecessary container/show wrappers encountered in touched history UI.
+- [x] 9.1 Search for UUID-only history displays and migrate them to actor/reference resolution.
+- [x] 9.2 Search for raw `JSON.stringify(payload)` history UI and replace it with product-safe typed display or changed-field affordances.
+- [x] 9.3 Ensure new public exports include required file suffixes across package boundaries.
+- [x] 9.4 Remove or replace unnecessary container/show wrappers encountered in touched history UI.
 
 ## 10. Validation
 
