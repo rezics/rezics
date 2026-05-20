@@ -90,16 +90,91 @@ describe("content authority and history API clients", () => {
             createdAt: "2026-05-19T00:00:00.000Z",
           },
         }),
+      )
+      .mockResolvedValueOnce(ok({ events: [], nextCursor: null }))
+      .mockResolvedValueOnce(
+        ok({
+          event: {
+            id: "event-1",
+            unitId: "unit-1",
+            sequence: 2,
+            eventType: "book.contentStructure.batch",
+            actorUserId: "actor-1",
+            changedFieldKeys: ["book.contentStructure"],
+            createdAt: "2026-05-19T00:00:00.000Z",
+            payload: { operations: [] },
+          },
+        }),
+      )
+      .mockResolvedValueOnce(ok({ actors: {} }))
+      .mockResolvedValueOnce(ok({ units: {} }))
+      .mockResolvedValueOnce(
+        ok({
+          revision: {
+            id: "rev-0",
+            unitId: "unit-1",
+            sequence: 0,
+            contentHash: "hash-0",
+            actorUserId: "actor-1",
+            changedFieldKeys: [UnitCommonFieldKey.TITLE],
+            createdAt: "2026-05-19T00:00:00.000Z",
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        ok({
+          revision: {
+            id: "rev-1",
+            unitId: "unit-1",
+            sequence: 1,
+            contentHash: "hash-1",
+            actorUserId: "actor-1",
+            changedFieldKeys: [UnitCommonFieldKey.TITLE],
+            createdAt: "2026-05-19T00:00:00.000Z",
+          },
+        }),
       );
 
-    await historyApi.listUnitRevisions("unit-1", { cursor: "c 1", limit: 10 });
-    await historyApi.getUnitRevision("unit-1", 1);
+    await historyApi.listUnitRevisions("unit-1", {
+      cursor: "c 1",
+      limit: 10,
+      includeContent: false,
+    });
+    await historyApi.getUnitRevision("unit-1", 1, { includeContent: true });
+    await historyApi.listStructureEvents("unit-1", {
+      eventType: "book.contentStructure.batch",
+      includePayload: false,
+    });
+    await historyApi.getStructureEvent(
+      "unit-1",
+      2,
+      "book.contentStructure.batch",
+      { includePayload: true },
+    );
+    await historyApi.resolveActors(["actor-1"]);
+    await historyApi.resolveUnitReferences(["unit-1"]);
+    await historyApi.getRevisionCompareInput("unit-1", 0, 1);
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://history.example/unit/unit-1/revisions?cursor=c+1&limit=10",
+      "http://history.example/unit/unit-1/revisions?cursor=c+1&limit=10&includeContent=false",
     );
     expect(fetchMock.mock.calls[1]?.[0]).toBe(
-      "http://history.example/unit/unit-1/revisions/1",
+      "http://history.example/unit/unit-1/revisions/1?includeContent=true",
+    );
+    expect(fetchMock.mock.calls[2]?.[0]).toBe(
+      "http://history.example/unit/unit-1/structure-events?eventType=book.contentStructure.batch&includePayload=false",
+    );
+    expect(fetchMock.mock.calls[3]?.[0]).toBe(
+      "http://history.example/unit/unit-1/structure-events/2/book.contentStructure.batch?includePayload=true",
+    );
+    expect(fetchMock.mock.calls[4]?.[0]).toBe(
+      "http://api.example/history/resolve/actors",
+    );
+    expect(JSON.parse(fetchMock.mock.calls[4]?.[1]?.body as string)).toEqual({
+      ids: ["actor-1"],
+    });
+    expect(fetchMock.mock.calls[5]?.[0]).toBe(
+      "http://api.example/history/resolve/units",
     );
     expect(historyKeys.revisions("unit-1", { limit: 10 })).toEqual([
       "history",
@@ -107,6 +182,20 @@ describe("content authority and history API clients", () => {
       "unit-1",
       "revisions",
       { limit: 10 },
+    ]);
+    expect(historyKeys.actorResolution(["b", "a"])).toEqual([
+      "history",
+      "resolve",
+      "actors",
+      ["a", "b"],
+    ]);
+    expect(historyKeys.compare("unit-1", 0, 1)).toEqual([
+      "history",
+      "unit",
+      "unit-1",
+      "compare",
+      0,
+      1,
     ]);
     expect(postKeys.wikiByTarget("book-1", { limit: 5 })).toEqual([
       "posts",
