@@ -12,9 +12,7 @@ import { buildQueryString } from "../utils/buildQuery";
 import type { HistoryTimelineParams } from "./history.keys";
 
 function historyEndpoint(path: string) {
-  const historyBaseUrl = getApiConfig().historyBaseUrl;
-  if (!historyBaseUrl) return path;
-  return `${historyBaseUrl}${path}`;
+  return `${getApiConfig().apiBaseUrl}/history${path}`;
 }
 
 const encodePathPart = (value: string | number) => encodeURIComponent(value);

@@ -152,6 +152,13 @@ export const env = createEnv({
     /** Shared secret for authenticating internal calls to the Reaction service. */
     REACTION_INTERNAL_SECRET: v.string(),
 
+    /**
+     * Base URL of the History service for app-facing read proxy requests.
+     * When omitted, history proxy endpoints return a clear service-unavailable
+     * response instead of bypassing Unit visibility checks.
+     */
+    HISTORY_BASE_URL: v.optional(v.string()),
+
     /** Base URL of the dispatch hub for audit notifications. */
     DISPATCH_HUB_URL: v.optional(v.string()),
 

@@ -10,7 +10,7 @@ import { dispatchApi } from "./dispatch";
 import { echoKvApi } from "./echokv";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
-import { historyResolutionApi } from "./history";
+import { historyProxyApi, historyResolutionApi } from "./history";
 import { initDefaultRealmCache } from "./infra/default-realm";
 import { initSlugScopesCache } from "./infra/slug-scopes";
 import { infraApi } from "./infra/infra.api";
@@ -207,6 +207,7 @@ app
   .use(tokenApi)
   .use(echoKvApi)
   .use(feedbackApi)
+  .use(historyProxyApi)
   .use(historyResolutionApi)
   .use(jwtServiceAdminApi)
   .use(statsAdminApi)

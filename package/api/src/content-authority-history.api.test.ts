@@ -14,7 +14,6 @@ const fetchMock = mock();
 configureApi({
   apiBaseUrl: "http://api.example",
   authBaseUrl: "http://auth.example",
-  historyBaseUrl: "http://history.example",
   reactionServiceUrl: "http://reaction.example",
 });
 
@@ -156,16 +155,16 @@ describe("content authority and history API clients", () => {
     await historyApi.getRevisionCompareInput("unit-1", 0, 1);
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://history.example/unit/unit-1/revisions?cursor=c+1&limit=10&includeContent=false",
+      "http://api.example/history/unit/unit-1/revisions?cursor=c+1&limit=10&includeContent=false",
     );
     expect(fetchMock.mock.calls[1]?.[0]).toBe(
-      "http://history.example/unit/unit-1/revisions/1?includeContent=true",
+      "http://api.example/history/unit/unit-1/revisions/1?includeContent=true",
     );
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
-      "http://history.example/unit/unit-1/structure-events?eventType=book.contentStructure.batch&includePayload=false",
+      "http://api.example/history/unit/unit-1/structure-events?eventType=book.contentStructure.batch&includePayload=false",
     );
     expect(fetchMock.mock.calls[3]?.[0]).toBe(
-      "http://history.example/unit/unit-1/structure-events/2/book.contentStructure.batch?includePayload=true",
+      "http://api.example/history/unit/unit-1/structure-events/2/book.contentStructure.batch?includePayload=true",
     );
     expect(fetchMock.mock.calls[4]?.[0]).toBe(
       "http://api.example/history/resolve/actors",
