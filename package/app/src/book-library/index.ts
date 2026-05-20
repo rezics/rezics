@@ -19,6 +19,7 @@ export { BookDetailLayout } from "./pages/BookDetailLayout";
 export { BookCommunityPage } from "./pages/BookDiscussionPage";
 export {
   BookHistoryPage,
+  BookRevisionComparePage,
   BookRevisionPage,
 } from "./pages/BookHistoryPage";
 /** Book library curated homepage. */
