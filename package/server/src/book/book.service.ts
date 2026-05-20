@@ -331,6 +331,13 @@ export class BookService {
     const changedFieldKeys = mapBookUpdateFieldKeys(req);
 
     const book = await prisma.$transaction(async (tx) => {
+      if (changedFieldKeys.length === 0) {
+        return tx.book.findUniqueOrThrow({
+          where: { unitId },
+          include: bookInclude,
+        });
+      }
+
       if (actor) {
         await assertCanEditCollaborativeMetadata(
           tx as any,

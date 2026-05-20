@@ -141,9 +141,10 @@ export async function writeEditorialMetadataHistory(
     slots?: Record<string, unknown>;
   },
 ): Promise<void> {
-  const baseSlots = await loadEditorialSlots(tx, input.unitId);
   const changedFieldKeys = uniqueFieldKeys(input.changedFieldKeys);
+  if (changedFieldKeys.length === 0) return;
 
+  const baseSlots = await loadEditorialSlots(tx, input.unitId);
   await writeSequencedHistoryOutbox(tx, {
     unitId: input.unitId,
     actorUserId: input.actorUserId,
@@ -192,10 +193,29 @@ async function loadEditorialSlots(
     ]);
 
   return {
-    translations,
-    extension: (book ?? entity ?? null) as Prisma.JsonValue | null,
-    credits,
-    subjects,
-    tags,
+    translations: sanitizeHistoryValue(translations),
+    extension: sanitizeHistoryValue(
+      (book ?? entity ?? null) as Prisma.JsonValue | null,
+    ),
+    credits: sanitizeHistoryValue(credits),
+    subjects: sanitizeHistoryValue(subjects),
+    tags: sanitizeHistoryValue(tags),
   };
+}
+
+function sanitizeHistoryValue(value: unknown): unknown {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeHistoryValue(item));
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([, item]) => item !== undefined)
+        .map(([key, item]) => [key, sanitizeHistoryValue(item)]),
+    );
+  }
+  return value;
 }

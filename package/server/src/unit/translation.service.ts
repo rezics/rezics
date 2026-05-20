@@ -2,8 +2,9 @@ import type {
   CreateTranslationInput,
   RezicsSessionClaims,
   UpdateTranslationInput,
+  UnitFieldKey,
 } from "@rezics/contract";
-import { FALLBACK_LANGUAGE } from "@rezics/contract";
+import { FALLBACK_LANGUAGE, UnitCommonFieldKey } from "@rezics/contract";
 import type { Prisma, UnitTranslation } from "#/prisma/client";
 import { prisma, UnitType } from "#/prisma/client";
 import { patchContentTranslationsToMeili } from "@/meili/content/sync";
@@ -12,6 +13,7 @@ import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
 import {
   assertCanEditCollaborativeMetadata,
   mapTranslationFieldKeys,
+  uniqueFieldKeys,
   writeEditorialMetadataHistory,
 } from "./collaborative-metadata";
 
@@ -64,8 +66,16 @@ export class TranslationService {
           : undefined,
     };
 
-    const changedFieldKeys = mapTranslationFieldKeys(data);
+    let didMutate = false;
     const result = await prisma.$transaction(async (tx) => {
+      const previous = await tx.unitTranslation.findUnique({
+        where: { unitId_language: { unitId, language } },
+      });
+      const changedFieldKeys = mapActualTranslationFieldKeys(data, previous);
+      if (previous && changedFieldKeys.length === 0) {
+        return previous;
+      }
+
       if (actor) {
         await assertCanEditCollaborativeMetadata(
           tx as any,
@@ -89,6 +99,7 @@ export class TranslationService {
               : undefined,
         },
       });
+      didMutate = true;
       if (actor) {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
@@ -101,7 +112,9 @@ export class TranslationService {
     });
 
     // Fire-and-forget: sync dependent Meilisearch documents
-    this.syncMeiliOnTranslationChange(unitId).catch(() => {});
+    if (didMutate) {
+      this.syncMeiliOnTranslationChange(unitId).catch(() => {});
+    }
 
     return result;
   }
@@ -176,3 +189,51 @@ export class TranslationService {
 }
 
 export const translationService = new TranslationService();
+
+function mapActualTranslationFieldKeys(
+  input: CreateTranslationInput | UpdateTranslationInput,
+  previous: UnitTranslation | null,
+): UnitFieldKey[] {
+  if (!previous) {
+    return mapTranslationFieldKeys(input);
+  }
+
+  return uniqueFieldKeys([
+    changedNullableString(input, previous, "title")
+      ? UnitCommonFieldKey.TITLE
+      : undefined,
+    changedNullableString(input, previous, "subtitle")
+      ? UnitCommonFieldKey.SUBTITLE
+      : undefined,
+    changedNullableString(input, previous, "summary")
+      ? UnitCommonFieldKey.SUMMARY
+      : undefined,
+    changedNullableString(input, previous, "description")
+      ? UnitCommonFieldKey.DESCRIPTION
+      : undefined,
+    hasOwn(input, "extra") && !sameJson(input.extra ?? null, previous.extra)
+      ? UnitCommonFieldKey.EXTRA
+      : undefined,
+    hasOwn(input, "sourceReleaseUnitId") &&
+    (input.sourceReleaseUnitId ?? null) !==
+      (previous.sourceReleaseUnitId ?? null)
+      ? UnitCommonFieldKey.WORK
+      : undefined,
+  ]);
+}
+
+function changedNullableString(
+  input: CreateTranslationInput | UpdateTranslationInput,
+  previous: UnitTranslation,
+  key: "title" | "subtitle" | "summary" | "description",
+): boolean {
+  return hasOwn(input, key) && (input[key] ?? null) !== (previous[key] ?? null);
+}
+
+function hasOwn<T extends object>(input: T, key: PropertyKey): key is keyof T {
+  return Object.prototype.hasOwnProperty.call(input, key);
+}
+
+function sameJson(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
+}
