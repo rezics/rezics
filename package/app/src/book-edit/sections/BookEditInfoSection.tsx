@@ -3,6 +3,7 @@ import {
   useCreateBookMutation,
   useUpdateBookMutation,
 } from "@rezics/api/book/book";
+import { historyQueries } from "@rezics/api";
 import {
   useDeleteTranslationMutation,
   useUpsertTranslationMutation,
@@ -30,7 +31,7 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useMatchRoute, useNavigate } from "@tanstack/react-router";
+import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
 import { ChevronDown as ExpandMore } from "lucide-react";
 import React from "react";
@@ -64,6 +65,26 @@ type UpdateBookDialogState = {
   showBookLink?: boolean;
   bookId?: string;
 } | null;
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function asRecordOrNull(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function nullableNumber(value: unknown): number | null {
+  return typeof value === "number" ? value : null;
+}
+
+function nullableString(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
 
 const UpdateBookDialog: React.FC<{
   t: TFunction;
@@ -116,15 +137,29 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const search = useSearch({ strict: false }) as {
+    lang?: string;
+    restoreRevision?: string;
+  };
   const matchRoute = useMatchRoute();
   const editParams = matchRoute({ to: "/book/$bookId/edit", fuzzy: false });
   const bookId = !newBook && editParams ? editParams.bookId : undefined;
+  const restoreSequence = Number(search.restoreRevision);
   const { data, isLoading, error } = useQuery({
     ...bookQueries.detail(bookId ?? ""),
     enabled: !newBook && !!bookId,
   });
+  const restoreQuery = useQuery({
+    ...historyQueries.unitRevision(bookId ?? "", restoreSequence, {
+      includeContent: true,
+    }),
+    enabled: !newBook && !!bookId && Number.isFinite(restoreSequence),
+  });
   const [metadataState, setMetadataState] =
     React.useState<BookMetadataValue | null>(null);
+  const [appliedRestoreSequence, setAppliedRestoreSequence] = React.useState<
+    number | null
+  >(null);
   const [updateBookErrorOpen, setUpdateBookErrorOpen] = React.useState(false);
   const [dialogState, setDialogState] =
     React.useState<UpdateBookDialogState>(null);
@@ -137,6 +172,60 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const editor = useBookTranslationEditor(data);
 
   const metadata: BookMetadataValue = metadataState ?? data ?? {};
+
+  React.useEffect(() => {
+    if (!data) return;
+    if (!Number.isFinite(restoreSequence)) return;
+    if (appliedRestoreSequence === restoreSequence) return;
+    const payload = restoreQuery.data?.revision.content?.payload;
+    if (!payload) return;
+
+    const slots = asRecord(payload);
+    const extension = asRecord(slots.extension);
+    const bookExtension = asRecord(extension.book ?? extension);
+    setMetadataState({
+      ...data,
+      isbn13: nullableString(bookExtension.isbn13) ?? data.isbn13,
+      coverUrl: nullableString(bookExtension.coverUrl) ?? data.coverUrl,
+      pageCount: nullableNumber(bookExtension.pageCount) ?? data.pageCount,
+      textLength: nullableNumber(bookExtension.textLength) ?? data.textLength,
+      formatKey: nullableString(bookExtension.formatKey) ?? data.formatKey,
+      isLicensed:
+        typeof bookExtension.isLicensed === "boolean"
+          ? bookExtension.isLicensed
+          : data.isLicensed,
+      licenseSlug:
+        nullableString(bookExtension.licenseSlug) ?? data.licenseSlug,
+      rating: nullableString(bookExtension.rating) ?? data.rating,
+      extra: asRecordOrNull(bookExtension.extra) ?? data.extra,
+    });
+
+    const translations = Array.isArray(slots.translations)
+      ? slots.translations
+      : [];
+    for (const item of translations) {
+      const translation = asRecord(item);
+      const language = String(translation.language ?? "");
+      if (!language) continue;
+      editor.replaceDraft(language, {
+        title: String(translation.title ?? ""),
+        subtitle: String(translation.subtitle ?? ""),
+        summary: String(translation.summary ?? ""),
+        description: String(translation.description ?? ""),
+      });
+    }
+    const firstLanguage = asRecord(translations[0]).language;
+    if (typeof firstLanguage === "string") {
+      editor.setSelectedLanguage(firstLanguage);
+    }
+    setAppliedRestoreSequence(restoreSequence);
+  }, [
+    appliedRestoreSequence,
+    data,
+    editor,
+    restoreQuery.data?.revision.content?.payload,
+    restoreSequence,
+  ]);
 
   const createBookMutation = useCreateBookMutation({
     onSuccess: (responseData) => {
@@ -247,8 +336,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       extra: metadataState?.extra,
     };
 
-    await Promise.all([
-      updateBookMutation.mutateAsync({ unitId: bookId, input: updateBookData }),
+    const saveOperations: Promise<unknown>[] = [
       upsertTranslationMutation.mutateAsync({
         unitId: bookId,
         language: editor.selectedLanguage,
@@ -259,7 +347,18 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           description: draft.description || null,
         },
       }),
-    ]);
+    ];
+
+    if (metadataState) {
+      saveOperations.unshift(
+        updateBookMutation.mutateAsync({
+          unitId: bookId,
+          input: updateBookData,
+        }),
+      );
+    }
+
+    await Promise.all(saveOperations);
     editor.clearDraft(editor.selectedLanguage);
   }
 
@@ -331,6 +430,17 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
   return (
     <div className="mt-16 mx-auto max-w-3xl px-4 pb-16">
+      {Number.isFinite(restoreSequence) ? (
+        <Alert className="mb-8">
+          <AlertDescription>
+            {t(
+              "history.restore.edit_notice",
+              "This draft was loaded from revision {{sequence}}. Saving creates a new latest revision and keeps later history preserved.",
+              { sequence: restoreSequence },
+            )}
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <div className="flex justify-between items-center mb-12">
         <h1 className="text-2xl font-bold">{resolvedPageTitle}</h1>
         <div className="flex items-center gap-2">

@@ -5,6 +5,6 @@ const BookHistoryPage = lazyRouteComponent(
   "BookHistoryPage",
 );
 
-export const Route = createFileRoute("/_mainLayout/book/$bookId/history")({
+export const Route = createFileRoute("/_mainLayout/book/$bookId/history/")({
   component: BookHistoryPage,
 });

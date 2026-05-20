@@ -5,7 +5,12 @@ import type {
   UnitRevisionDTO,
 } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "@tanstack/react-router";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearch,
+} from "@tanstack/react-router";
 import {
   ArrowLeftRight,
   CheckCircle2,
@@ -15,13 +20,15 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { compareRevisionSlots } from "../models/historyCompare";
+import { compareRevisionSlots, type DiffPart } from "../models/historyCompare";
 
 type HistoryTab = "editorial" | "structure" | "authority";
 
 export function BookHistoryPage() {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
+  const { t } = useTranslation();
   const [tab, setTab] = useState<HistoryTab>("editorial");
   const [restoreSequence, setRestoreSequence] = useState<number | null>(null);
   const revisionsQuery = useQuery({
@@ -52,7 +59,11 @@ export function BookHistoryPage() {
   const actors = actorsQuery.data?.actors ?? {};
 
   if (revisionsQuery.isLoading) {
-    return <p className="text-sm leading-ui text-text-secondary">Loading...</p>;
+    return (
+      <p className="text-sm leading-ui text-text-secondary">
+        {t("common.loading", "Loading...")}
+      </p>
+    );
   }
 
   if (revisionsQuery.error) {
@@ -67,26 +78,28 @@ export function BookHistoryPage() {
       <header className="flex flex-col gap-3">
         <div className="flex items-center gap-2 text-text-secondary">
           <History className="h-4 w-4" aria-hidden="true" />
-          <h2 className="text-sm font-medium leading-ui">Content history</h2>
+          <h2 className="text-sm font-medium leading-ui">
+            {t("history.title", "Content history")}
+          </h2>
         </div>
         <div className="flex flex-wrap gap-2" role="tablist">
           <HistoryTabButton
             active={tab === "editorial"}
             onClick={() => setTab("editorial")}
           >
-            Editorial
+            {t("history.tabs.editorial", "Editorial")}
           </HistoryTabButton>
           <HistoryTabButton
             active={tab === "structure"}
             onClick={() => setTab("structure")}
           >
-            Content structure
+            {t("history.tabs.structure", "Content structure")}
           </HistoryTabButton>
           <HistoryTabButton
             active={tab === "authority"}
             onClick={() => setTab("authority")}
           >
-            Authority
+            {t("history.tabs.authority", "Authority")}
           </HistoryTabButton>
         </div>
       </header>
@@ -108,26 +121,31 @@ export function BookHistoryPage() {
         <section className="grid gap-3 rounded-md bg-surface-subtle p-4">
           <div className="flex items-center gap-2 text-sm font-medium leading-ui text-text-primary">
             <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            Restore revision {restoreSequence}
+            {t("history.restore.title", "Restore revision {{sequence}}", {
+              sequence: restoreSequence,
+            })}
           </div>
           <p className="text-sm leading-ui text-text-secondary">
-            Restoring creates a new latest revision through the normal edit
-            path. Later history remains preserved.
+            {t(
+              "history.restore.description",
+              "Restoring creates a new latest revision through the normal edit path. Later history remains preserved.",
+            )}
           </p>
           <div className="flex flex-wrap gap-2">
             <Link
-              to="/book/$bookId/history/$sequence"
-              params={{ bookId, sequence: String(restoreSequence) }}
+              to="/book/$bookId/edit"
+              params={{ bookId }}
+              search={{ restoreRevision: String(restoreSequence) }}
               className="rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand"
             >
-              Review source revision
+              {t("history.restore.open_draft", "Open restore draft")}
             </Link>
             <button
               type="button"
               className="rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-base"
               onClick={() => setRestoreSequence(null)}
             >
-              Cancel
+              {t("common.cancel", "Cancel")}
             </button>
           </div>
         </section>
@@ -162,7 +180,7 @@ function HistoryTabButton({
   );
 }
 
-function RevisionTimeline({
+export function RevisionTimeline({
   actors,
   bookId,
   onRestore,
@@ -173,65 +191,116 @@ function RevisionTimeline({
   onRestore: (sequence: number) => void;
   revisions: UnitRevisionDTO[];
 }) {
+  const { t } = useTranslation();
   if (revisions.length === 0) {
     return <EmptyHistoryState />;
   }
+  const revisionSequences = unique(
+    revisions.map((revision) => revision.sequence),
+  )
+    .filter(Number.isFinite)
+    .sort((a, b) => b - a);
+  const latestSequence = revisionSequences[0];
+
   return (
     <ol className="flex flex-col divide-y divide-border-whisper">
-      {revisions.map((revision) => (
-        <li key={revision.id} className="grid gap-3 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <Link
-                to="/book/$bookId/history/$sequence"
-                params={{ bookId, sequence: String(revision.sequence) }}
-                className="text-sm font-medium leading-ui text-text-primary hover:text-text-brand"
-              >
-                Revision {revision.sequence}
-              </Link>
-              <p className="mt-1 text-sm leading-ui text-text-secondary">
-                {revision.message ?? "Metadata update"}
-              </p>
+      {revisions.map((revision) => {
+        const compareTarget = latestSequence ?? revision.sequence;
+        const compareBase = revision.sequence;
+        return (
+          <li key={revision.id} className="grid gap-3 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <Link
+                  to="/book/$bookId/history/$sequence"
+                  params={{ bookId, sequence: String(revision.sequence) }}
+                  className="text-sm font-medium leading-ui text-text-primary hover:text-text-brand"
+                >
+                  {t("history.revision.title", "Revision {{sequence}}", {
+                    sequence: revision.sequence,
+                  })}
+                </Link>
+                <p className="mt-1 text-sm leading-ui text-text-secondary">
+                  {revision.message ??
+                    t("history.revision.default_message", "Metadata update")}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {latestSequence ? (
+                  <Link
+                    to="/book/$bookId/history/compare/$targetSequence"
+                    params={{
+                      bookId,
+                      targetSequence: String(compareTarget),
+                    }}
+                    search={
+                      {
+                        base: String(compareBase),
+                        mode: "unified",
+                      } as never
+                    }
+                    aria-label={t(
+                      "history.revision.compare_label",
+                      "Compare latest changes from revision {{base}} to revision {{target}}",
+                      { base: compareBase, target: compareTarget },
+                    )}
+                    className="rounded-md p-2 text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+                  >
+                    <ArrowLeftRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    aria-label={t(
+                      "history.revision.compare_unavailable",
+                      "No earlier revision to compare",
+                    )}
+                    className="rounded-md p-2 text-text-disabled"
+                    disabled
+                  >
+                    <ArrowLeftRight className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  aria-label={t(
+                    "history.revision.restore_label",
+                    "Restore revision {{sequence}}",
+                    { sequence: revision.sequence },
+                  )}
+                  className="rounded-md p-2 text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
+                  onClick={() => onRestore(revision.sequence)}
+                >
+                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Link
-                to="/book/$bookId/history/compare/$targetSequence"
-                params={{ bookId, targetSequence: String(revision.sequence) }}
-                aria-label={`Compare revision ${revision.sequence}`}
-                className="rounded-md p-2 text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
-              >
-                <ArrowLeftRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-              <button
-                type="button"
-                aria-label={`Restore revision ${revision.sequence}`}
-                className="rounded-md p-2 text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
-                onClick={() => onRestore(revision.sequence)}
-              >
-                <RotateCcw className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-          <FieldChips keys={revision.changedFieldKeys} />
-          <p className="text-xs leading-dense text-text-tertiary">
-            {formatDate(revision.createdAt)} ·{" "}
-            {actorLabel(actors[revision.actorUserId], revision.actorUserId)}
-          </p>
-        </li>
-      ))}
+            <FieldChips keys={revision.changedFieldKeys} />
+            <p className="text-xs leading-dense text-text-tertiary">
+              {formatDate(revision.createdAt)} ·{" "}
+              {actorLabel(actors[revision.actorUserId], revision.actorUserId)}
+            </p>
+          </li>
+        );
+      })}
     </ol>
   );
 }
 
-function StructureTimeline({
+export function StructureTimeline({
   actors,
   events,
 }: {
   actors: Record<string, HistoryActorResolution>;
   events: StructureEventDTO[];
 }) {
+  const { t } = useTranslation();
   if (events.length === 0) {
-    return <EmptyHistoryState label="No structure history yet" />;
+    return (
+      <EmptyHistoryState
+        label={t("history.empty.structure", "No structure history yet")}
+      />
+    );
   }
   return (
     <ol className="flex flex-col divide-y divide-border-whisper">
@@ -244,10 +313,15 @@ function StructureTimeline({
             <details className="group">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
                 <span className="text-sm font-medium leading-ui text-text-primary">
-                  Structure save {event.sequence}
+                  {t("history.structure.title", "Structure save {{sequence}}", {
+                    sequence: event.sequence,
+                  })}
                 </span>
                 <span className="flex items-center gap-2 text-xs leading-dense text-text-secondary">
-                  {operations.length} operations
+                  {t("history.structure.operation_count", {
+                    count: operations.length,
+                    defaultValue: "{{count}} operations",
+                  })}
                   <ChevronDown className="h-4 w-4 transition group-open:rotate-180" />
                 </span>
               </summary>
@@ -276,20 +350,27 @@ function StructureTimeline({
   );
 }
 
-function AuthorityPanel() {
+export function AuthorityPanel() {
+  const { t } = useTranslation();
   return (
     <section className="grid gap-3 rounded-md bg-surface-subtle p-4 text-sm leading-ui text-text-secondary">
       <div className="flex items-center gap-2 text-text-primary">
         <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-        <h3 className="font-medium">History authority</h3>
+        <h3 className="font-medium">
+          {t("history.authority.title", "History authority")}
+        </h3>
       </div>
       <p>
-        Public viewers can read visible history metadata. Raw payload inspection
-        and restore actions are reserved for owners, maintainers, and admins.
+        {t(
+          "history.authority.visibility",
+          "Public viewers can read visible revision detail and compare views. Raw payload inspection is not part of the public product UI, and restore actions are reserved for owners, maintainers, and admins.",
+        )}
       </p>
       <p>
-        Restricted references render with status text instead of leaking private
-        Unit names.
+        {t(
+          "history.authority.references",
+          "Restricted references render with status text instead of leaking private Unit names.",
+        )}
       </p>
     </section>
   );
@@ -309,6 +390,12 @@ export function BookRevisionPage() {
   });
   const revision = data?.revision;
   const payload = revision?.content?.payload ?? {};
+  const actorIds = useMemo(
+    () => (revision?.actorUserId ? [revision.actorUserId] : []),
+    [revision?.actorUserId],
+  );
+  const actorsQuery = useQuery(historyQueries.actorResolution(actorIds));
+  const actors = actorsQuery.data?.actors ?? {};
   const referencedUnitIds = useMemo(
     () => extractUuidStrings(payload).slice(0, 40),
     [payload],
@@ -319,13 +406,17 @@ export function BookRevisionPage() {
   const references = referencesQuery.data?.units ?? {};
 
   if (isLoading) {
-    return <p className="text-sm leading-ui text-text-secondary">Loading...</p>;
+    return (
+      <p className="text-sm leading-ui text-text-secondary">
+        {t("common.loading", "Loading...")}
+      </p>
+    );
   }
   if (error) return <QueryErrorDisplay error={error} />;
   if (!revision) {
     return (
       <p className="text-sm leading-ui text-text-secondary">
-        Revision not found.
+        {t("history.revision.not_found", "Revision not found.")}
       </p>
     );
   }
@@ -334,10 +425,13 @@ export function BookRevisionPage() {
     <section className="grid gap-6">
       <header className="grid gap-2">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
-          Revision {revision.sequence}
+          {t("history.revision.title", "Revision {{sequence}}", {
+            sequence: revision.sequence,
+          })}
         </h2>
         <p className="text-sm leading-ui text-text-secondary">
-          {formatDate(revision.createdAt)} · {revision.actorUserId}
+          {formatDate(revision.createdAt)} ·{" "}
+          {actorLabel(actors[revision.actorUserId], revision.actorUserId)}
         </p>
         <FieldChips keys={revision.changedFieldKeys} />
       </header>
@@ -351,20 +445,83 @@ export function BookRevisionComparePage() {
     bookId: string;
     targetSequence: string;
   };
+  const { t } = useTranslation();
+  const search = useSearch({ strict: false }) as {
+    base?: string;
+    mode?: "split" | "unified";
+  };
+  const navigate = useNavigate();
   const target = Number(targetSequence);
-  const base = Math.max(1, target - 1);
+  const baseFromSearch = Number(search.base);
+  const base = Number.isFinite(baseFromSearch)
+    ? baseFromSearch
+    : Math.max(1, target - 1);
+  const mode = search.mode === "split" ? "split" : "unified";
+  const revisionsQuery = useQuery({
+    ...historyQueries.unitRevisionTimeline(bookId, { limit: 100 }),
+    enabled: Boolean(bookId),
+  });
   const { data, isLoading, error } = useQuery({
     ...historyQueries.revisionCompareInput(bookId, base, target),
-    enabled: Boolean(bookId) && Number.isFinite(target),
+    enabled:
+      Boolean(bookId) && Number.isFinite(base) && Number.isFinite(target),
   });
-  const compare = useMemo(() => {
+  const comparison = useMemo(() => {
     const before = data?.base.content?.payload ?? {};
     const after = data?.target.content?.payload ?? {};
-    return compareRevisionSlots(before, after, { allowRaw: true });
-  }, [data]);
+    const shouldSwap =
+      latestPayloadTimestamp(before) > latestPayloadTimestamp(after);
+    const fromPayload = shouldSwap ? after : before;
+    const toPayload = shouldSwap ? before : after;
+    return {
+      changes: compareRevisionSlots(fromPayload, toPayload, {
+        allowRaw: false,
+      }).changes,
+      fromPayload,
+      fromSequence: shouldSwap ? target : base,
+      toPayload,
+      toSequence: shouldSwap ? base : target,
+    };
+  }, [base, data, target]);
+  const referencedUnitIds = useMemo(
+    () =>
+      unique([
+        ...extractUuidStrings(comparison.fromPayload),
+        ...extractUuidStrings(comparison.toPayload),
+      ]).slice(0, 80),
+    [comparison.fromPayload, comparison.toPayload],
+  );
+  const referencesQuery = useQuery(
+    historyQueries.unitReferenceResolution(referencedUnitIds),
+  );
+  const references = referencesQuery.data?.units ?? {};
+  const revisionOptions = (revisionsQuery.data?.revisions ?? [])
+    .map((revision) => revision.sequence)
+    .filter((sequence, index, values) => values.indexOf(sequence) === index)
+    .sort((a, b) => b - a);
+
+  const updateCompare = (next: {
+    base?: number;
+    mode?: "split" | "unified";
+    target?: number;
+  }) => {
+    const nextTarget = next.target ?? target;
+    navigate({
+      to: "/book/$bookId/history/compare/$targetSequence",
+      params: { bookId, targetSequence: String(nextTarget) },
+      search: {
+        base: String(next.base ?? base),
+        mode: next.mode ?? mode,
+      } as never,
+    });
+  };
 
   if (isLoading) {
-    return <p className="text-sm leading-ui text-text-secondary">Loading...</p>;
+    return (
+      <p className="text-sm leading-ui text-text-secondary">
+        {t("common.loading", "Loading...")}
+      </p>
+    );
   }
   if (error) return <QueryErrorDisplay error={error} />;
 
@@ -372,25 +529,114 @@ export function BookRevisionComparePage() {
     <section className="grid gap-6">
       <header className="grid gap-2">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
-          Compare revisions {base} and {target}
+          {t(
+            "history.compare.title",
+            "Changes from revision {{base}} to revision {{target}}",
+            { base: comparison.fromSequence, target: comparison.toSequence },
+          )}
         </h2>
         <p className="text-sm leading-ui text-text-secondary">
-          Unified source diff with changed-field navigation.
+          {t(
+            "history.compare.description",
+            "Additions are content in the target revision. Removals are content that existed in the base revision.",
+          )}
         </p>
       </header>
-      <nav className="flex flex-wrap gap-2" aria-label="Changed fields">
-        {compare.changes.map((change) => (
-          <a
-            key={change.path}
-            href={`#${fieldAnchor(change.path)}`}
-            className="rounded-md bg-surface-subtle px-2 py-1 text-xs leading-dense text-text-secondary hover:text-text-primary"
+      <section
+        className="grid gap-3 border-y border-border-whisper py-4 md:grid-cols-[1fr_auto]"
+        aria-label={t("history.compare.controls_label", "Compare controls")}
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
+            {t("history.compare.base_revision", "From revision")}
+            <select
+              className="rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary"
+              value={base}
+              onChange={(event) =>
+                updateCompare({ base: Number(event.currentTarget.value) })
+              }
+            >
+              {revisionOptions.map((sequence) => (
+                <option key={sequence} value={sequence}>
+                  {t("history.revision.title", "Revision {{sequence}}", {
+                    sequence,
+                  })}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
+            {t("history.compare.target_revision", "To revision")}
+            <select
+              className="rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary"
+              value={target}
+              onChange={(event) =>
+                updateCompare({ target: Number(event.currentTarget.value) })
+              }
+            >
+              {revisionOptions.map((sequence) => (
+                <option key={sequence} value={sequence}>
+                  {t("history.revision.title", "Revision {{sequence}}", {
+                    sequence,
+                  })}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div
+          className="flex items-end gap-2"
+          role="group"
+          aria-label={t("history.compare.layout_label", "Diff layout")}
+        >
+          <button
+            type="button"
+            aria-pressed={mode === "unified"}
+            className={
+              mode === "unified"
+                ? "rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand"
+                : "rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-subtle"
+            }
+            onClick={() => updateCompare({ mode: "unified" })}
           >
-            {change.path}
-          </a>
-        ))}
+            {t("history.compare.unified", "Unified")}
+          </button>
+          <button
+            type="button"
+            aria-pressed={mode === "split"}
+            className={
+              mode === "split"
+                ? "rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand"
+                : "rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-subtle"
+            }
+            onClick={() => updateCompare({ mode: "split" })}
+          >
+            {t("history.compare.split", "Split")}
+          </button>
+        </div>
+      </section>
+      <nav
+        className="flex flex-wrap gap-2"
+        aria-label={t("history.compare.changed_fields", "Changed fields")}
+      >
+        {comparison.changes.length === 0 ? (
+          <span className="text-sm leading-ui text-text-secondary">
+            {t("history.compare.no_changes", "No changed fields.")}
+          </span>
+        ) : (
+          comparison.changes.map((change) => (
+            <a
+              key={change.path}
+              href={`#${fieldAnchor(change.path)}`}
+              className="rounded-md bg-surface-subtle px-2 py-1 text-xs leading-dense text-text-secondary hover:text-text-primary"
+            >
+              {change.path}
+            </a>
+          ))
+        )}
       </nav>
       <div className="grid gap-4">
-        {compare.changes.map((change) => (
+        {comparison.changes.map((change) => (
           <section
             key={change.path}
             id={fieldAnchor(change.path)}
@@ -399,7 +645,11 @@ export function BookRevisionComparePage() {
             <h3 className="text-sm font-medium leading-ui text-text-primary">
               {change.path}
             </h3>
-            <CompareChange change={change} />
+            <CompareChange
+              change={change}
+              mode={mode}
+              references={references}
+            />
           </section>
         ))}
       </div>
@@ -407,22 +657,34 @@ export function BookRevisionComparePage() {
   );
 }
 
-function CompareChange({
+export function CompareChange({
   change,
+  mode,
+  references,
 }: {
   change: ReturnType<typeof compareRevisionSlots>["changes"][number];
+  mode: "split" | "unified";
+  references: Record<
+    string,
+    { status: string; title?: string; unitType?: string }
+  >;
 }) {
+  const { t } = useTranslation();
   if (change.kind === "scalar") {
     return (
       <dl className="grid gap-2 text-sm leading-ui sm:grid-cols-2">
         <div>
-          <dt className="text-xs leading-dense text-text-tertiary">Before</dt>
+          <dt className="text-xs leading-dense text-text-tertiary">
+            {t("history.compare.before", "Before")}
+          </dt>
           <dd className="text-text-primary">
             {String(change.before ?? "null")}
           </dd>
         </div>
         <div>
-          <dt className="text-xs leading-dense text-text-tertiary">After</dt>
+          <dt className="text-xs leading-dense text-text-tertiary">
+            {t("history.compare.after", "After")}
+          </dt>
           <dd className="text-text-primary">
             {String(change.after ?? "null")}
           </dd>
@@ -431,44 +693,232 @@ function CompareChange({
     );
   }
   if (change.kind === "markdown") {
-    return (
-      <pre className="overflow-auto rounded-md bg-surface-subtle p-3 text-xs leading-dense text-text-primary">
-        {change.lineParts
-          .map(
-            (part) =>
-              `${part.type === "added" ? "+ " : part.type === "removed" ? "- " : "  "}${part.value}`,
-          )
-          .join("")}
-      </pre>
+    return mode === "split" ? (
+      <SplitMarkdownDiff parts={change.lineParts} />
+    ) : (
+      <UnifiedMarkdownDiff parts={change.lineParts} />
     );
   }
   if (change.kind === "collection") {
     return (
       <div className="grid gap-2 text-sm leading-ui text-text-primary">
         {change.added.map((item, index) => (
-          <StatusLine key={`add-${index}`} status="Added" value={item} />
+          <StatusLine
+            key={`add-${index}`}
+            status={t("history.compare.status_added", "Added")}
+            value={item}
+            references={references}
+          />
         ))}
         {change.removed.map((item, index) => (
-          <StatusLine key={`remove-${index}`} status="Removed" value={item} />
+          <StatusLine
+            key={`remove-${index}`}
+            status={t("history.compare.status_removed", "Removed")}
+            value={item}
+            references={references}
+          />
         ))}
         {change.updated.map((item) => (
-          <StatusLine key={item.key} status="Changed" value={item} />
+          <StatusLine
+            key={item.key}
+            status={t("history.compare.status_changed", "Changed")}
+            value={item}
+            references={references}
+          />
         ))}
       </div>
     );
   }
   return (
-    <RevisionPayloadValue value={change.hidden ? "Changed" : change.after} />
+    <RevisionPayloadValue
+      value={
+        change.hidden
+          ? t("history.compare.status_changed", "Changed")
+          : change.after
+      }
+    />
   );
 }
 
-function StatusLine({ status, value }: { status: string; value: unknown }) {
+function UnifiedMarkdownDiff({ parts }: { parts: DiffPart[] }) {
+  const rows = createMarkdownDiffRows(parts);
+  return (
+    <div className="overflow-auto rounded-md bg-surface-subtle text-sm leading-ui text-text-primary">
+      {rows.map((row, index) => (
+        <DiffLine
+          key={`${row.type}-${row.oldLineNumber ?? ""}-${row.newLineNumber ?? ""}-${index}`}
+          row={row}
+          variant="unified"
+        />
+      ))}
+    </div>
+  );
+}
+
+function SplitMarkdownDiff({ parts }: { parts: DiffPart[] }) {
+  const { t } = useTranslation();
+  const rows = createMarkdownDiffRows(parts);
+  return (
+    <div className="grid gap-2 md:grid-cols-2">
+      <DiffPane
+        label={t("history.compare.before", "Before")}
+        rows={rows.filter((row) => row.type !== "added")}
+        side="old"
+      />
+      <DiffPane
+        label={t("history.compare.after", "After")}
+        rows={rows.filter((row) => row.type !== "removed")}
+        side="new"
+      />
+    </div>
+  );
+}
+
+type MarkdownDiffRow = {
+  content: string;
+  newLineNumber?: number;
+  oldLineNumber?: number;
+  type: DiffPart["type"];
+};
+
+function createMarkdownDiffRows(parts: DiffPart[]): MarkdownDiffRow[] {
+  let oldLineNumber = 1;
+  let newLineNumber = 1;
+
+  return parts.flatMap((part) =>
+    part.value
+      .split(/(?<=\n)/)
+      .filter((line) => line.length > 0)
+      .map((line) => {
+        const row: MarkdownDiffRow = {
+          content: line.endsWith("\n") ? line.slice(0, -1) : line,
+          type: part.type,
+        };
+
+        if (part.type !== "added") {
+          row.oldLineNumber = oldLineNumber;
+          oldLineNumber += 1;
+        }
+        if (part.type !== "removed") {
+          row.newLineNumber = newLineNumber;
+          newLineNumber += 1;
+        }
+
+        return row;
+      }),
+  );
+}
+
+function DiffPane({
+  label,
+  rows,
+  side,
+}: {
+  label: string;
+  rows: MarkdownDiffRow[];
+  side: "new" | "old";
+}) {
+  return (
+    <section className="overflow-hidden rounded-md bg-surface-subtle">
+      <h4 className="border-b border-border-whisper px-3 py-2 text-xs font-medium leading-dense text-text-secondary">
+        {label}
+      </h4>
+      <div className="overflow-auto text-sm leading-ui text-text-primary">
+        {rows.map((row, index) => (
+          <DiffLine
+            key={`${side}-${row.type}-${row.oldLineNumber ?? ""}-${row.newLineNumber ?? ""}-${index}`}
+            row={row}
+            side={side}
+            variant="split"
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DiffLine({
+  row,
+  side,
+  variant,
+}: {
+  row: MarkdownDiffRow;
+  side?: "new" | "old";
+  variant: "split" | "unified";
+}) {
+  const sign = row.type === "added" ? "+" : row.type === "removed" ? "-" : " ";
+  const rowClass =
+    row.type === "added"
+      ? "bg-success-fill/10"
+      : row.type === "removed"
+        ? "bg-error-fill/10"
+        : "";
+  const signClass =
+    row.type === "added"
+      ? "text-success-text"
+      : row.type === "removed"
+        ? "text-error-text"
+        : "text-text-tertiary";
+
+  if (variant === "split") {
+    const lineNumber = side === "old" ? row.oldLineNumber : row.newLineNumber;
+    return (
+      <div className={`grid grid-cols-[3rem_1.5rem_minmax(0,1fr)] ${rowClass}`}>
+        <span className="select-none border-r border-border-whisper px-2 text-right font-mono text-xs leading-ui text-text-tertiary">
+          {lineNumber ?? ""}
+        </span>
+        <span
+          className={`select-none px-2 text-center font-mono text-xs leading-ui ${signClass}`}
+        >
+          {sign}
+        </span>
+        <span className="whitespace-pre-wrap break-words py-1 pr-3">
+          {row.content || " "}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`grid grid-cols-[3rem_3rem_1.5rem_minmax(0,1fr)] ${rowClass}`}
+    >
+      <span className="select-none border-r border-border-whisper px-2 text-right font-mono text-xs leading-ui text-text-tertiary">
+        {row.oldLineNumber ?? ""}
+      </span>
+      <span className="select-none border-r border-border-whisper px-2 text-right font-mono text-xs leading-ui text-text-tertiary">
+        {row.newLineNumber ?? ""}
+      </span>
+      <span
+        className={`select-none px-2 text-center font-mono text-xs leading-ui ${signClass}`}
+      >
+        {sign}
+      </span>
+      <span className="whitespace-pre-wrap break-words py-1 pr-3">
+        {row.content || " "}
+      </span>
+    </div>
+  );
+}
+
+function StatusLine({
+  references,
+  status,
+  value,
+}: {
+  references: Record<
+    string,
+    { status: string; title?: string; unitType?: string }
+  >;
+  status: string;
+  value: unknown;
+}) {
   return (
     <div className="rounded-md bg-surface-subtle p-3">
       <span className="text-xs font-medium leading-dense text-text-secondary">
         {status}
       </span>
-      <RevisionPayloadValue value={value} />
+      <RevisionPayloadValue references={references} value={value} />
     </div>
   );
 }
@@ -483,9 +933,17 @@ function RevisionSections({
     { status: string; title?: string; unitType?: string }
   >;
 }) {
+  const { t } = useTranslation();
   const entries = Object.entries(payload);
   if (entries.length === 0) {
-    return <EmptyHistoryState label="Revision content is unavailable" />;
+    return (
+      <EmptyHistoryState
+        label={t(
+          "history.revision.content_unavailable",
+          "Revision content is unavailable",
+        )}
+      />
+    );
   }
   return (
     <div className="grid gap-5">
@@ -500,7 +958,7 @@ function RevisionSections({
       {Object.keys(references).length > 0 ? (
         <section className="grid gap-2">
           <h3 className="text-sm font-medium leading-ui text-text-primary">
-            Referenced Units
+            {t("history.references.title", "Referenced Units")}
           </h3>
           <ul className="grid gap-2">
             {Object.entries(references).map(([unitId, reference]) => (
@@ -512,9 +970,7 @@ function RevisionSections({
                   className="mr-2 inline h-4 w-4"
                   aria-hidden="true"
                 />
-                {reference.status === "OK"
-                  ? `${reference.title ?? unitId} · ${reference.unitType ?? "Unit"}`
-                  : `${reference.status} · ${unitId}`}
+                {referenceLabel(reference, t)}
               </li>
             ))}
           </ul>
@@ -539,34 +995,96 @@ function FieldChips({ keys }: { keys: readonly string[] }) {
   );
 }
 
-function EmptyHistoryState({ label = "No revision history yet" }) {
+function EmptyHistoryState({ label }: { label?: string }) {
+  const { t } = useTranslation();
   return (
     <section className="flex flex-col items-center gap-3 py-16 text-center">
       <History className="h-8 w-8 text-text-tertiary" aria-hidden="true" />
       <div>
         <h2 className="text-lg font-medium leading-ui text-text-primary">
-          {label}
+          {label ?? t("history.empty.revisions", "No revision history yet")}
         </h2>
         <p className="mt-2 max-w-md text-sm leading-ui text-text-secondary">
-          Recent edits may take a moment to appear while the history service
-          ingests them.
+          {t(
+            "history.empty.ingestion_lag",
+            "Recent edits may take a moment to appear while the history service ingests them.",
+          )}
         </p>
       </div>
     </section>
   );
 }
 
-function RevisionPayloadValue({ value }: { value: unknown }) {
+function RevisionPayloadValue({
+  references = {},
+  value,
+}: {
+  references?: Record<
+    string,
+    { status: string; title?: string; unitType?: string }
+  >;
+  value: unknown;
+}) {
+  const { t } = useTranslation();
   if (value == null || typeof value === "string" || typeof value === "number") {
-    return <span>{String(value ?? "null")}</span>;
+    if (typeof value === "string" && references[value]) {
+      return <span>{referenceLabel(references[value], t)}</span>;
+    }
+    if (typeof value === "string" && isUuid(value)) {
+      return (
+        <span>{t("history.references.unresolved", "Referenced Unit")}</span>
+      );
+    }
+    return (
+      <span>
+        {value == null ? t("history.value.null", "null") : String(value)}
+      </span>
+    );
   }
   if (typeof value === "boolean") {
     return <span>{value ? "true" : "false"}</span>;
   }
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return <span>{t("history.value.empty", "Empty")}</span>;
+    }
+    return (
+      <ul className="mt-2 grid gap-2">
+        {value.map((item, index) => (
+          <li
+            key={index}
+            className="rounded-md bg-surface-subtle p-3 text-sm leading-ui text-text-primary"
+          >
+            <RevisionPayloadValue references={references} value={item} />
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) {
+      return <span>{t("history.value.empty", "Empty")}</span>;
+    }
+    return (
+      <dl className="mt-2 grid gap-2 text-sm leading-ui">
+        {entries.map(([key, nested]) => (
+          <div key={key} className="grid gap-1">
+            <dt className="text-xs font-medium leading-dense text-text-tertiary">
+              {slotLabel(key)}
+            </dt>
+            <dd className="text-text-primary">
+              <RevisionPayloadValue references={references} value={nested} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
   return (
-    <pre className="overflow-auto rounded-md bg-surface-subtle p-3 text-xs leading-dense text-text-primary">
-      {JSON.stringify(value, null, 2)}
-    </pre>
+    <span className="text-text-secondary">
+      {t("history.value.changed_structured", "Changed structured value")}
+    </span>
   );
 }
 
@@ -592,13 +1110,61 @@ function extractUuidStrings(value: unknown) {
   return [...ids];
 }
 
+function latestPayloadTimestamp(value: unknown): number {
+  let latest = 0;
+  const visit = (current: unknown) => {
+    if (!current || typeof current !== "object") return;
+    if (Array.isArray(current)) {
+      for (const item of current) visit(item);
+      return;
+    }
+    for (const [key, nested] of Object.entries(
+      current as Record<string, unknown>,
+    )) {
+      if (
+        (key === "createdAt" || key === "updatedAt") &&
+        (typeof nested === "string" || nested instanceof Date)
+      ) {
+        const timestamp = new Date(nested).getTime();
+        if (Number.isFinite(timestamp)) {
+          latest = Math.max(latest, timestamp);
+        }
+      }
+      visit(nested);
+    }
+  };
+  visit(value);
+  return latest;
+}
+
 function actorLabel(
   actor: HistoryActorResolution | undefined,
   fallback: string,
 ) {
-  if (!actor) return fallback;
+  if (!actor) return fallback && !isUuid(fallback) ? fallback : "Unknown actor";
   if (actor.status !== "OK") return actor.status.toLowerCase();
-  return actor.displayName ?? actor.handle ?? fallback;
+  return actor.displayName ?? actor.handle ?? "Unknown actor";
+}
+
+function referenceLabel(
+  reference: { status: string; title?: string; unitType?: string },
+  t: ReturnType<typeof useTranslation>["t"],
+) {
+  if (reference.status === "OK") {
+    const title =
+      reference.title ?? t("history.references.untitled", "Untitled Unit");
+    return `${title} · ${reference.unitType ?? t("history.references.unit", "Unit")}`;
+  }
+  if (reference.status === "RESTRICTED") {
+    return t("history.references.restricted", "Restricted Unit");
+  }
+  if (reference.status === "DELETED") {
+    return t("history.references.deleted", "Deleted Unit");
+  }
+  if (reference.status === "GONE") {
+    return t("history.references.gone", "Unavailable Unit");
+  }
+  return t("history.references.unresolved", "Referenced Unit");
 }
 
 function slotLabel(value: string) {
@@ -613,6 +1179,12 @@ function fieldAnchor(value: string) {
 
 function unique(values: readonly string[]) {
   return [...new Set(values.filter(Boolean))];
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
 }
 
 function formatDate(value: string | Date) {
