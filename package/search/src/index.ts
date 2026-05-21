@@ -49,4 +49,5 @@ export {
   syncSingleEntity,
   syncSinglePost,
   syncSingleRealm,
+  setSearchPrismaClient,
 } from "./sync";

@@ -3,6 +3,30 @@ import type { PostKind, UnitType } from "../generated/client.js";
 import { CountSpecSchema, ModeSchema } from "./strategy.js";
 import type { CountSpec, Mode } from "./strategy.js";
 
+export const SEED_SYNC_TARGETS = [
+  "content",
+  "post",
+  "realm",
+  "user",
+  "entity",
+  "content-contained-units",
+] as const;
+
+export type SeedSyncTarget = (typeof SEED_SYNC_TARGETS)[number];
+
+export interface SeedManifestEntry {
+  label: string;
+  scenario?: string;
+  unitType: UnitType;
+  unitId: string;
+  syncTargets: SeedSyncTarget[];
+  notes?: string;
+}
+
+export interface SeedResult {
+  manifest: SeedManifestEntry[];
+}
+
 export interface CreatedUser {
   userId: string;
   name: string;

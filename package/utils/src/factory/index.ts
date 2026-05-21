@@ -1,16 +1,27 @@
 import { readFileSync } from "node:fs";
 import * as p from "@clack/prompts";
 import {
+  FACTORY_SCENARIO_NAMES,
+  FACTORY_SCENARIOS,
+  type FactoryScenarioName,
   makeSeedCtx,
+  mergeSeedResults,
   runFactorySeed,
+  runFactoryScenarios,
   type SeedPlan,
+  type SeedResult,
   SeedPlanSchema,
   type SeedPreset,
+  syncSeedManifestToMeili,
 } from "@rezics/server/prisma/factory";
 import { SLUG_SCOPES } from "@rezics/contract";
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
 import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
+import {
+  createFactorySyncDependencies,
+  createSeedSearchClient,
+} from "../lib/search";
 import { seedBaseline } from "../seed/index";
 import { tweakPlan } from "./interactive";
 import { getPreset, listPresetNames, PRESETS } from "./presets";
@@ -20,7 +31,15 @@ export interface RunFactoryOptions {
   planFile?: string;
   noInteractive?: boolean;
   only?: "echokv";
+  meiliMode?: string;
+  scenarioNames?: string[];
+  allScenarios?: boolean;
+  noScenarios?: boolean;
+  manifestFormat?: string;
 }
+
+type MeiliMode = "init-and-sync" | "skip";
+type ManifestFormat = "human" | "json" | "both" | "none";
 
 function resolvePresetByName(name: string): SeedPreset {
   const preset = getPreset(name);
@@ -53,6 +72,44 @@ async function selectPresetInteractively(): Promise<{
     process.exit(0);
   }
   return { name: choice, preset: PRESETS[choice]! };
+}
+
+async function selectMeiliModeInteractively(): Promise<MeiliMode> {
+  const choice = await p.select<MeiliMode>({
+    message: "Pick Meili mode.",
+    options: [
+      {
+        value: "init-and-sync",
+        label: "init-and-sync",
+        hint: "initialize indexes, then targeted-sync manifest entries",
+      },
+      { value: "skip", label: "skip", hint: "do not touch Meilisearch" },
+    ],
+  });
+  if (p.isCancel(choice)) {
+    p.cancel("Seed cancelled.");
+    process.exit(0);
+  }
+  return choice;
+}
+
+async function selectScenariosInteractively(): Promise<FactoryScenarioName[]> {
+  const selected = await p.multiselect<FactoryScenarioName>({
+    message: "Pick special factory scenarios.",
+    options: FACTORY_SCENARIO_NAMES.map((name) => ({
+      value: name,
+      label: name,
+      hint: FACTORY_SCENARIOS[name].description,
+    })),
+    initialValues: FACTORY_SCENARIO_NAMES.filter(
+      (name) => FACTORY_SCENARIOS[name].defaultSelected,
+    ),
+  });
+  if (p.isCancel(selected)) {
+    p.cancel("Seed cancelled.");
+    process.exit(0);
+  }
+  return [...selected];
 }
 
 async function maybeTweak(
@@ -91,8 +148,17 @@ function summarizePlan(plan: SeedPlan): string {
   ].join("\n  ");
 }
 
-async function confirmRun(plan: SeedPlan, mode: string): Promise<void> {
-  p.log.info(`Mode: ${mode}\n  ${summarizePlan(plan)}`);
+async function confirmRun(
+  plan: SeedPlan,
+  mode: string,
+  meiliMode: MeiliMode,
+  scenarios: FactoryScenarioName[],
+): Promise<void> {
+  p.log.info(
+    `Mode: ${mode}\nMeili: ${meiliMode}\nScenarios: ${
+      scenarios.length > 0 ? scenarios.join(", ") : "none"
+    }\n  ${summarizePlan(plan)}`,
+  );
   const ok = await p.confirm({
     message:
       "Reset auth and server databases, seed users/infrastructure, then run factory seed with this plan?",
@@ -101,6 +167,78 @@ async function confirmRun(plan: SeedPlan, mode: string): Promise<void> {
   if (p.isCancel(ok) || !ok) {
     p.cancel("Seed cancelled.");
     process.exit(0);
+  }
+}
+
+function resolveMeiliMode(value: string | undefined): MeiliMode {
+  if (!value) return "skip";
+  if (value === "init-and-sync" || value === "skip") return value;
+  p.log.error('Unknown --meili value. Supported: "init-and-sync", "skip".');
+  process.exit(2);
+}
+
+function resolveManifestFormat(value: string | undefined): ManifestFormat {
+  if (!value) return "human";
+  if (
+    value === "human" ||
+    value === "json" ||
+    value === "both" ||
+    value === "none"
+  ) {
+    return value;
+  }
+  p.log.error(
+    'Unknown --manifest value. Supported: "human", "json", "both", "none".',
+  );
+  process.exit(2);
+}
+
+function resolveScenarioNames(
+  opts: Pick<
+    RunFactoryOptions,
+    "scenarioNames" | "allScenarios" | "noScenarios" | "noInteractive"
+  >,
+): FactoryScenarioName[] {
+  if (opts.allScenarios && opts.noScenarios) {
+    p.log.error("--all-scenarios and --no-scenarios cannot be combined.");
+    process.exit(2);
+  }
+
+  if (opts.noScenarios) return [];
+  if (opts.allScenarios) return [...FACTORY_SCENARIO_NAMES];
+
+  const names = opts.scenarioNames ?? [];
+  const invalid = names.filter(
+    (name): name is string =>
+      !FACTORY_SCENARIO_NAMES.includes(name as FactoryScenarioName),
+  );
+  if (invalid.length > 0) {
+    p.log.error(
+      `Unknown scenario(s): ${invalid.join(", ")}. Available: ${FACTORY_SCENARIO_NAMES.join(", ")}.`,
+    );
+    process.exit(2);
+  }
+
+  return [...new Set(names as FactoryScenarioName[])];
+}
+
+function printManifest(result: SeedResult, format: ManifestFormat): void {
+  if (format === "none") return;
+
+  if (format === "human" || format === "both") {
+    p.log.info(
+      [
+        "Seed manifest:",
+        ...result.manifest.map((entry) => {
+          const scenario = entry.scenario ? ` [${entry.scenario}]` : "";
+          return `- ${entry.label}${scenario}: ${entry.unitType} ${entry.unitId}`;
+        }),
+      ].join("\n"),
+    );
+  }
+
+  if (format === "json" || format === "both") {
+    console.log(JSON.stringify({ manifest: result.manifest }, null, 2));
   }
 }
 
@@ -129,6 +267,8 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
 
   let presetName: string;
   let preset: SeedPreset;
+  let meiliMode = resolveMeiliMode(opts.meiliMode);
+  let scenarioNames = resolveScenarioNames(opts);
 
   if (opts.presetName) {
     presetName = opts.presetName;
@@ -137,9 +277,11 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
     presetName = "realistic";
     preset = PRESETS.realistic!;
   } else {
+    meiliMode = await selectMeiliModeInteractively();
     const picked = await selectPresetInteractively();
     presetName = picked.name;
     preset = picked.preset;
+    scenarioNames = await selectScenariosInteractively();
   }
   void presetName;
 
@@ -152,13 +294,22 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   }
 
   if (!opts.noInteractive && !opts.planFile) {
-    await confirmRun(plan, preset.mode);
+    await confirmRun(plan, preset.mode, meiliMode, scenarioNames);
   }
 
   const env = getEnv();
   const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
   const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
+  const searchClient = createSeedSearchClient({
+    host: env.MEILI_HOST,
+    apiKey: env.MEILI_MASTER_KEY,
+  });
+  const syncDeps = createFactorySyncDependencies(searchClient, prisma);
   try {
+    if (meiliMode === "init-and-sync") {
+      const { initMeiliSearch } = await import("@rezics/server/prisma/seed");
+      await initMeiliSearch(searchClient);
+    }
     await seedBaseline(authPrisma, prisma);
     const slugScopeRows = await prisma.slugScope.findMany({
       select: { slug: true, unitId: true },
@@ -180,7 +331,20 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       slugScopes as never,
       preset.mode,
     );
-    await runFactorySeed(ctx, plan);
+    const result = await runFactorySeed(ctx, plan);
+    const scenarioResult = await runFactoryScenarios(ctx, scenarioNames);
+    mergeSeedResults(result, scenarioResult);
+    if (meiliMode === "init-and-sync") {
+      const summary = await syncSeedManifestToMeili(
+        ctx,
+        result.manifest,
+        syncDeps,
+      );
+      p.log.info(
+        `Targeted Meili sync complete: ${summary.total} operation(s).`,
+      );
+    }
+    printManifest(result, resolveManifestFormat(opts.manifestFormat));
   } finally {
     await Promise.all([
       prisma.$disconnect().catch(() => {}),

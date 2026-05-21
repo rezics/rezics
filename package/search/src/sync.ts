@@ -7,13 +7,28 @@ import type {
   UserSearchDocument,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
-import { prisma } from "@rezics/server";
+import type { PrismaClient } from "@rezics/server/prisma/generated/client";
 import type { SearchClient } from "./client";
 import {
   buildProgressDocument,
   progressDocumentId,
   type UserUnitProgressRow,
 } from "./progress";
+
+let searchPrismaClient: PrismaClient | null = null;
+
+export function setSearchPrismaClient(prisma: PrismaClient): void {
+  searchPrismaClient = prisma;
+}
+
+function getSearchPrismaClient(): PrismaClient {
+  if (!searchPrismaClient) {
+    throw new Error(
+      "Search Prisma client is not configured. Call setSearchPrismaClient() before running search sync.",
+    );
+  }
+  return searchPrismaClient;
+}
 
 function pickCoverUrlFromTranslations(
   defaultLanguage: string | null | undefined,
@@ -47,7 +62,7 @@ const PUBLIC_ELIGIBLE_UNIT_WHERE = {
 } as const;
 
 async function isContentPatchEligible(unitId: string): Promise<boolean> {
-  const unit = await prisma.unit.findUnique({
+  const unit = await getSearchPrismaClient().unit.findUnique({
     where: { id: unitId },
     select: { type: true, status: true, visibility: true, workUnitId: true },
   });
@@ -329,7 +344,7 @@ export async function syncAllContent(client: SearchClient) {
   while (true) {
     console.log("syncAllContent: cursor", cursor, "total", total);
 
-    const units: any[] = await prisma.unit.findMany({
+    const units: any[] = await getSearchPrismaClient().unit.findMany({
       where: {
         workUnitId: null,
         type: { in: INDEXABLE_TYPES },
@@ -383,7 +398,7 @@ export async function removeProgress(
 // ANCHOR: Incremental single-unit sync
 
 export async function syncSingleContent(client: SearchClient, unitId: string) {
-  const unit = await prisma.unit.findUnique({
+  const unit = await getSearchPrismaClient().unit.findUnique({
     where: { id: unitId },
     include: contentInclude,
   });
@@ -411,7 +426,7 @@ export async function patchContentTags(client: SearchClient, unitId: string) {
     await client.deleteContent([unitId]);
     return;
   }
-  const unitTags = await prisma.unitTag.findMany({
+  const unitTags = await getSearchPrismaClient().unitTag.findMany({
     where: { unitId },
     include: { tag: { include: { translations: true } } },
     orderBy: { score: "desc" },
@@ -443,15 +458,16 @@ export async function patchContentCredits(
     await client.deleteContent([unitId]);
     return;
   }
-  const creditAttributions = await prisma.creditAttribution.findMany({
-    where: { unitId },
-    include: {
-      entity: {
-        include: { translations: true },
+  const creditAttributions =
+    await getSearchPrismaClient().creditAttribution.findMany({
+      where: { unitId },
+      include: {
+        entity: {
+          include: { translations: true },
+        },
       },
-    },
-    orderBy: { sortOrder: "asc" },
-  });
+      orderBy: { sortOrder: "asc" },
+    });
 
   const creditNames = creditAttributions
     .map((a: any) => {
@@ -471,15 +487,16 @@ export async function patchContentSubjects(
     await client.deleteContent([unitId]);
     return;
   }
-  const subjectAttributions = await prisma.subjectAttribution.findMany({
-    where: { unitId },
-    include: {
-      entity: {
-        include: { entity: true, translations: true },
+  const subjectAttributions =
+    await getSearchPrismaClient().subjectAttribution.findMany({
+      where: { unitId },
+      include: {
+        entity: {
+          include: { entity: true, translations: true },
+        },
       },
-    },
-    orderBy: { sortOrder: "asc" },
-  });
+      orderBy: { sortOrder: "asc" },
+    });
 
   const subjectEntityIds = subjectAttributions.map((a: any) => a.entityId);
   const subjectNames = subjectAttributions
@@ -516,7 +533,7 @@ export async function patchContentTranslations(
     await client.deleteContent([unitId]);
     return;
   }
-  const translations = await prisma.unitTranslation.findMany({
+  const translations = await getSearchPrismaClient().unitTranslation.findMany({
     where: { unitId },
   });
 
@@ -552,7 +569,7 @@ export async function patchContentRealmIds(
     await client.deleteContent([unitId]);
     return;
   }
-  const inRealms = await prisma.realmUnit.findMany({
+  const inRealms = await getSearchPrismaClient().realmUnit.findMany({
     where: { unitId },
   });
 
@@ -568,9 +585,10 @@ export async function patchContentRealmTagKeys(
     await client.deleteContent([unitId]);
     return;
   }
-  const realmTagApplicationsAsTargetUnit = await prisma.realmTagUnit.findMany({
-    where: { unitId },
-  });
+  const realmTagApplicationsAsTargetUnit =
+    await getSearchPrismaClient().realmTagUnit.findMany({
+      where: { unitId },
+    });
 
   const realmTagKeys = realmTagApplicationsAsTargetUnit.map(
     (rt: any) => `${rt.realmUnitId}:${rt.tagUnitId}`,
@@ -603,7 +621,7 @@ export async function patchContentContainedUnitIds(
     await client.deleteContent([shelfId]);
     return;
   }
-  const units = await prisma.shelfUnit.findMany({
+  const units = await getSearchPrismaClient().shelfUnit.findMany({
     where: { shelfId },
     select: { unitId: true },
   });
@@ -621,7 +639,7 @@ export async function patchPostsAuthor(
   let cursor: string | undefined;
 
   while (true) {
-    const posts = await prisma.post.findMany({
+    const posts = await getSearchPrismaClient().post.findMany({
       where: {
         authorUserId: userId,
         unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
@@ -647,7 +665,7 @@ export async function patchPostsTarget(
   targetUnitId: string,
 ) {
   // Fetch target unit data once
-  const targetUnit = await prisma.unit.findUnique({
+  const targetUnit = await getSearchPrismaClient().unit.findUnique({
     where: { id: targetUnitId },
     include: {
       translations: true,
@@ -674,7 +692,7 @@ export async function patchPostsTarget(
   let cursor: string | undefined;
 
   while (true) {
-    const posts = await prisma.post.findMany({
+    const posts = await getSearchPrismaClient().post.findMany({
       where: {
         targetUnitId,
         unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
@@ -705,7 +723,7 @@ export async function patchPostFields(
   unitId: string,
   fields: Record<string, any>,
 ) {
-  const post = await prisma.post.findUnique({
+  const post = await getSearchPrismaClient().post.findUnique({
     where: { unitId },
     select: { unit: { select: { status: true, visibility: true } } },
   });
@@ -738,7 +756,7 @@ export async function patchRealmTranslations(
   client: SearchClient,
   unitId: string,
 ) {
-  const translations = await prisma.unitTranslation.findMany({
+  const translations = await getSearchPrismaClient().unitTranslation.findMany({
     where: { unitId },
   });
 
@@ -791,7 +809,7 @@ export async function syncAllFeedbacks(client: SearchClient) {
   while (true) {
     console.log("syncAllFeedbacks: cursor", cursor, "total", total);
 
-    const feedbacks: any[] = await prisma.feedback.findMany({
+    const feedbacks: any[] = await getSearchPrismaClient().feedback.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
@@ -909,7 +927,7 @@ export function buildPostDocument(post: any): PostSearchDocument {
 // ANCHOR: Post sync functions
 
 export async function syncSinglePost(client: SearchClient, unitId: string) {
-  const post = await prisma.post.findUnique({
+  const post = await getSearchPrismaClient().post.findUnique({
     where: { unitId },
     include: {
       ...postIncludeForSync,
@@ -936,7 +954,7 @@ export async function syncAllPosts(client: SearchClient) {
   while (true) {
     console.log("syncAllPosts: cursor", cursor, "total", total);
 
-    const posts: any[] = await prisma.post.findMany({
+    const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
       },
@@ -968,7 +986,7 @@ export async function syncAllPostRealmIds(client: SearchClient) {
   let total = 0;
 
   while (true) {
-    const posts: any[] = await prisma.post.findMany({
+    const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         unit: { status: "PUBLISHED" },
       },
@@ -1012,7 +1030,7 @@ export async function syncAllContainedUnitIds(client: SearchClient) {
   let total = 0;
 
   while (true) {
-    const shelves: any[] = await prisma.unit.findMany({
+    const shelves: any[] = await getSearchPrismaClient().unit.findMany({
       where: {
         type: "SHELF",
         ...PUBLIC_ELIGIBLE_UNIT_WHERE,
@@ -1056,7 +1074,7 @@ export async function syncAllPostRootTargets(client: SearchClient) {
   let total = 0;
 
   while (true) {
-    const posts: any[] = await prisma.post.findMany({
+    const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
       },
@@ -1093,7 +1111,7 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
   let total = 0;
 
   while (true) {
-    const posts: any[] = await prisma.post.findMany({
+    const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         authorUserId: userId,
         unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
@@ -1128,7 +1146,7 @@ export async function syncPostsByTarget(
   let total = 0;
 
   while (true) {
-    const posts: any[] = await prisma.post.findMany({
+    const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         targetUnitId,
         unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
@@ -1194,7 +1212,7 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
 // ANCHOR: Realm sync functions
 
 export async function syncSingleRealm(client: SearchClient, unitId: string) {
-  const realm = await prisma.realm.findUnique({
+  const realm = await getSearchPrismaClient().realm.findUnique({
     where: { unitId },
     include: {
       unit: {
@@ -1224,7 +1242,7 @@ export async function syncAllRealms(client: SearchClient) {
   while (true) {
     console.log("syncAllRealms: cursor", cursor, "total", total);
 
-    const realms: any[] = await prisma.realm.findMany({
+    const realms: any[] = await getSearchPrismaClient().realm.findMany({
       where: {
         unit: { status: "PUBLISHED" },
       },
@@ -1345,7 +1363,7 @@ export function buildEntityDocument(entity: any): EntitySearchDocument {
 }
 
 export async function syncSingleEntity(client: SearchClient, unitId: string) {
-  const entity = await prisma.entity.findUnique({
+  const entity = await getSearchPrismaClient().entity.findUnique({
     where: { unitId },
     include: entityIncludeForSync,
   });
@@ -1363,7 +1381,7 @@ export async function patchEntityCreditFacets(
   client: SearchClient,
   entityId: string,
 ) {
-  const entity = await prisma.entity.findUnique({
+  const entity = await getSearchPrismaClient().entity.findUnique({
     where: { unitId: entityId },
     include: {
       unit: {
@@ -1397,7 +1415,7 @@ export async function patchEntitySubjectFacets(
   client: SearchClient,
   entityId: string,
 ) {
-  const entity = await prisma.entity.findUnique({
+  const entity = await getSearchPrismaClient().entity.findUnique({
     where: { unitId: entityId },
     include: {
       unit: {
@@ -1437,7 +1455,7 @@ export async function syncAllEntities(client: SearchClient) {
   while (true) {
     console.log("syncAllEntities: cursor", cursor, "total", total);
 
-    const entities: any[] = await prisma.entity.findMany({
+    const entities: any[] = await getSearchPrismaClient().entity.findMany({
       include: entityIncludeForSync,
       orderBy: { unitId: "asc" },
       take: BATCH_SIZE,
@@ -1470,7 +1488,7 @@ export async function syncAllUsers(client: SearchClient) {
   while (true) {
     console.log("syncAllUsers: cursor", cursor, "total", total);
 
-    const users: any[] = await prisma.user.findMany({
+    const users: any[] = await getSearchPrismaClient().user.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { unitId: cursor } : undefined,
@@ -1480,7 +1498,7 @@ export async function syncAllUsers(client: SearchClient) {
     if (users.length === 0) break;
 
     // Slug now lives on the USER Unit. Batch-fetch.
-    const unitSlugs = await prisma.unit.findMany({
+    const unitSlugs = await getSearchPrismaClient().unit.findMany({
       where: { id: { in: users.map((u) => u.unitId) } },
       select: { id: true, slug: true },
     });

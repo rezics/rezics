@@ -8,6 +8,8 @@ import { getRepoRoot } from "./cache-dir";
 type SeedEnv = {
   readonly AUTH_DATABASE_URL: string;
   readonly SERVER_DATABASE_URL: string;
+  readonly MEILI_HOST: string;
+  readonly MEILI_MASTER_KEY: string;
 };
 
 type EnvSource =
@@ -20,6 +22,12 @@ const PACKAGE_MAPPINGS = [
     pkg: "server",
     sourceKey: "DATABASE_URL",
     targetKey: "SERVER_DATABASE_URL",
+  },
+  { pkg: "server", sourceKey: "MEILI_HOST", targetKey: "MEILI_HOST" },
+  {
+    pkg: "server",
+    sourceKey: "MEILI_MASTER_KEY",
+    targetKey: "MEILI_MASTER_KEY",
   },
 ] as const;
 
@@ -80,6 +88,8 @@ export function getEnv(): SeedEnv {
     server: {
       AUTH_DATABASE_URL: v.string(),
       SERVER_DATABASE_URL: v.string(),
+      MEILI_HOST: v.string(),
+      MEILI_MASTER_KEY: v.string(),
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,

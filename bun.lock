@@ -569,6 +569,7 @@
         "@prisma/adapter-pg": "^7.8.0",
         "@rezics/auth": "workspace:*",
         "@rezics/contract": "workspace:*",
+        "@rezics/search": "workspace:*",
         "@rezics/server": "workspace:*",
         "@t3-oss/env-core": "^0.13.10",
         "dotenv": "^17.2.3",

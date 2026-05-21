@@ -1,5 +1,6 @@
 import { getEnv } from "../lib/env";
 import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
+import { createSeedSearchClient } from "../lib/search";
 
 export async function runDbCommand(argv: string[]): Promise<void> {
   const sub = argv[0];
@@ -43,5 +44,10 @@ async function runInitMeili(): Promise<void> {
   const { initMeiliSearch } = await import(
     "@rezics/server/prisma/seed/init-meili-search"
   );
-  await initMeiliSearch();
+  const env = getEnv();
+  const searchClient = createSeedSearchClient({
+    host: env.MEILI_HOST,
+    apiKey: env.MEILI_MASTER_KEY,
+  });
+  await initMeiliSearch(searchClient);
 }

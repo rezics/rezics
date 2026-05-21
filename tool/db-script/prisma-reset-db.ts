@@ -45,7 +45,7 @@ function parseArgs(argv: string[]): CliFlags {
 }
 
 async function runPrismaReset(pkg: PrismaPackage): Promise<StepResult> {
-  return runPrisma(pkg, ["migrate", "reset", "--force", "--skip-seed"]);
+  return runPrisma(pkg, ["migrate", "reset", "--force"]);
 }
 
 async function processPackage(
@@ -53,7 +53,7 @@ async function processPackage(
   interactive: boolean,
 ): Promise<StepResult> {
   while (true) {
-    p.log.step(`@rezics/${pkg} — prisma migrate reset --force --skip-seed`);
+    p.log.step(`@rezics/${pkg} — prisma migrate reset --force`);
     const reset = await runPrismaReset(pkg);
     if (reset === "ok") return "ok";
 
@@ -87,7 +87,7 @@ async function confirmReset(
       .map((pkg) => `@rezics/${pkg}`)
       .join(", ")}.`,
   );
-  p.log.info("Prisma migrations will be re-applied and seeds will be skipped.");
+  p.log.info("Prisma migrations will be re-applied.");
 
   const confirmed = await p.confirm({
     message: "Reset selected databases?",

@@ -12,6 +12,7 @@ function renderEnvError(err: EnvValidationError): void {
   );
   lines.push("  • package/auth/.env   → DATABASE_URL → AUTH_DATABASE_URL");
   lines.push("  • package/server/.env → DATABASE_URL → SERVER_DATABASE_URL");
+  lines.push("  • package/server/.env → MEILI_HOST / MEILI_MASTER_KEY");
 
   if (err.attempts.length > 0) {
     lines.push("");
@@ -26,7 +27,7 @@ function renderEnvError(err: EnvValidationError): void {
   lines.push("       cp package/server/.env.example package/server/.env");
   lines.push("");
   lines.push(
-    "  2. Or set AUTH_DATABASE_URL and SERVER_DATABASE_URL in the project root .env.",
+    "  2. Or set AUTH_DATABASE_URL, SERVER_DATABASE_URL, MEILI_HOST, and MEILI_MASTER_KEY in the project root .env.",
   );
 
   if (err.examplePath && err.exampleContents) {

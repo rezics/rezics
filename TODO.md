@@ -5,7 +5,7 @@
 - [ ] 定製 elysia + prisma 的 console 輸出主題，可以做成獨立 package
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info
-- [ ] 
+- [ ] slug scopes 可能 seed 了兩次
 - [ ] tag 搜索機制要明確 搜索 score>xxx 或者 被 pinned 的，不過以 score排名的時候則不需要特別處理pinned，我覺得這是符合語義的，就是 owner pinned 的內容始終被尊重，可以被 tag 搜索到，但是不代表你要被特殊照顧排在上面。
 - [ ] entity 应当有 avatar
 - [ ] wiki 和所有权之间的冲突，我们需要锁机制，就是 用户拥有的 entity 是不允许其他用户编辑的， 然后 book 里面的某些字段，也是可以锁起来的。 wiki-content-ownership-plan 基本上 需要和 wiki history 系统一起实现

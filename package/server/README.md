@@ -52,23 +52,24 @@ bun run seed:mock        # Seed mock data
 bun run db:migrate       # Run custom migrations
 ```
 
-## Mock Seed
+## Factory Seed
 
-`bun run seed:mock` resets the server DB and populates it with deterministic mock data drawn from the `realistic` preset.
-
-```bash
-bun run seed:mock          # realistic preset (defaults)
-bun run seed:mock:fast     # smaller, quick iteration fixture
-```
-
-For interactive preset selection, plan tweaks via `$EDITOR`, and the full preset list, run the unified CLI directly:
+Factory seed commands reset auth and server databases, seed baseline rows, run a base preset, optionally run special scenarios, and print a manifest of useful fixture Unit IDs.
 
 ```bash
-bun run tool/seed/seed.ts                          # interactive
-bun run tool/seed/seed.ts --preset=minimal --no-interactive
+bun run seed:factory:fast
+bun run ../../package/utils/bin/cli.ts factory --preset=fast --no-interactive --scenario=complex-shelf --manifest=both
+bun run ../../package/utils/bin/cli.ts factory --preset=fast --no-interactive --all-scenarios --meili=skip
 ```
 
-Available presets: `realistic`, `fast`, `minimal`, `post-tree-focus`. Plan parameters (counts, alphas, mode) live in `tool/seed/presets/*.ts`.
+Manifest output includes `label`, optional `scenario`, `unitType`, `unitId`, and `syncTargets`. Use `--manifest=human`, `--manifest=json`, `--manifest=both`, or `--manifest=none`.
+
+Meilisearch modes:
+
+- `--meili=skip` skips index initialization and synchronization.
+- `--meili=init-and-sync` initializes indexes before seeding and targeted-syncs manifest entries after seeding.
+
+Special scenarios are `large-post-tree`, `large-content-tree`, `large-history`, and `complex-shelf`. Non-interactive runs are base-only unless `--scenario=<name>` or `--all-scenarios` is passed.
 
 ## Tech Stack
 

@@ -1,6 +1,8 @@
-import { searchClient } from "../../src/meili/search-client";
+import type { SearchClient } from "@rezics/search/client";
 
-export async function initMeiliSearch(): Promise<void> {
+export async function initMeiliSearch(
+  searchClient: SearchClient,
+): Promise<void> {
   console.log("Initializing MeiliSearch indexes...");
   const healthy = await searchClient.checkHealth();
   if (!healthy) {
