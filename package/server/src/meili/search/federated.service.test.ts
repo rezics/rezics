@@ -8,7 +8,7 @@ import { federatedSearch } from "./federated.service";
 // is on the orchestrator's filter and index allowlist behavior.
 
 interface CapturedSearch {
-  index: "content" | "posts" | "realms" | "users";
+  index: "content" | "posts" | "realms" | "users" | "entities";
   q: string;
   filter?: string;
   offset?: number;
@@ -93,6 +93,7 @@ function makeFakeClient(opts?: {
     postIndex: captureIndex("posts"),
     realmIndex: captureIndex("realms"),
     userIndex: captureIndex("users"),
+    entityIndex: captureIndex("entities"),
   } as unknown as SearchClient;
 
   return { client, calls, multi };
@@ -114,12 +115,13 @@ describe("federatedSearch", () => {
     // The orchestrator issues one multiSearch with all permitted sub-queries.
     expect(multi.length).toBe(1);
     const indexUids = multi[0]!.queries.map((q) => q.indexUid).sort();
-    // Books + 4 post sections + shelves + realms + users = 8 sub-queries.
+    // Books + 4 post sections + shelves + realms + users + entities = 9 sub-queries.
     // Books and shelves both target the "content" index.
     expect(indexUids.filter((u) => u === "content")).toHaveLength(2);
     expect(indexUids.filter((u) => u === "posts")).toHaveLength(4);
     expect(indexUids).toContain("realms");
     expect(indexUids).toContain("users");
+    expect(indexUids).toContain("entities");
   });
 
   test("book scope omits realms+users and constrains shelves by containedUnitIds", async () => {
@@ -136,9 +138,10 @@ describe("federatedSearch", () => {
     expect(multi.length).toBe(1);
     const queries = multi[0]!.queries;
     const indexUids = queries.map((q) => q.indexUid);
-    // No realms, no users.
+    // No realms, no users, no entities.
     expect(indexUids).not.toContain("realms");
     expect(indexUids).not.toContain("users");
+    expect(indexUids).not.toContain("entities");
     // The shelves sub-query (one of the two `content` targets) must include
     // the containedUnitIds clause for the book scope.
     const shelfQuery = queries.find(
@@ -175,7 +178,7 @@ describe("federatedSearch", () => {
     }
   });
 
-  test("user scope filters content by userId and posts by authorUserId", async () => {
+  test("user scope filters content by userId, posts by authorUserId, and entities by ownerUnitId", async () => {
     const { client, multi } = makeFakeClient();
     const opts: FederatedSearchOptions = {
       scope: { kind: "user", userId: "u-3" },
@@ -192,6 +195,30 @@ describe("federatedSearch", () => {
     for (const q of queries.filter((qq) => qq.indexUid === "posts")) {
       expect(q.filter).toContain('authorUserId = "u-3"');
     }
+    const entityQuery = queries.find((q) => q.indexUid === "entities");
+    expect(entityQuery?.filter).toContain('ownerUnitId = "u-3"');
+  });
+
+  test("single entities category is global and omitted for book scope", async () => {
+    const { client, calls } = makeFakeClient();
+
+    await federatedSearch(client, {
+      scope: { kind: "global" },
+      category: "entities",
+      query: { keyword: "liu" },
+    });
+
+    expect(calls[0]?.index).toBe("entities");
+    expect(calls[0]?.filter).toBeUndefined();
+
+    const bookResult = await federatedSearch(client, {
+      scope: { kind: "book", unitId: "book-1" },
+      category: "entities",
+      query: { keyword: "liu" },
+    });
+    expect(bookResult.kind).toBe("single");
+    if (bookResult.kind !== "single") throw new Error("expected single");
+    expect(bookResult.totalHits).toBe(0);
   });
 
   test("mixed category uses federated multiSearch with weights", async () => {

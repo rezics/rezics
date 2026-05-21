@@ -11,6 +11,7 @@ export const ALL_CATEGORIES: readonly SearchCategory[] = [
   "shelves",
   "realms",
   "users",
+  "entities",
 ];
 
 export const CATEGORY_LABELS: Record<SearchCategory, string> = {
@@ -24,6 +25,7 @@ export const CATEGORY_LABELS: Record<SearchCategory, string> = {
   shelves: "Shelves",
   realms: "Realms",
   users: "Users",
+  entities: "Entities",
 };
 
 export function permittedCategoriesForScope(
@@ -33,12 +35,15 @@ export function permittedCategoriesForScope(
     case "global":
       return ALL_CATEGORIES;
     case "realm":
-      return ALL_CATEGORIES.filter((c) => c !== "realms" && c !== "users");
+      return ALL_CATEGORIES.filter(
+        (c) => c !== "realms" && c !== "users" && c !== "entities",
+      );
     case "user":
       return ALL_CATEGORIES.filter((c) => c !== "users");
     case "book":
       return ALL_CATEGORIES.filter(
-        (c) => c !== "books" && c !== "realms" && c !== "users",
+        (c) =>
+          c !== "books" && c !== "realms" && c !== "users" && c !== "entities",
       );
   }
 }

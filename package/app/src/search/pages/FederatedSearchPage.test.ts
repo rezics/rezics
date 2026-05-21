@@ -14,6 +14,7 @@ describe("isSearchCategory", () => {
       "shelves",
       "realms",
       "users",
+      "entities",
     ] as const) {
       expect(isSearchCategory(c)).toBe(true);
     }

@@ -14,13 +14,15 @@ describe("permittedCategoriesForScope", () => {
       "shelves",
       "realms",
       "users",
+      "entities",
     ]);
   });
 
-  test("realm scope omits realms and users", () => {
+  test("realm scope omits realms, users, and entities", () => {
     const out = permittedCategoriesForScope({ kind: "realm", realmId: "r" });
     expect(out).not.toContain("realms");
     expect(out).not.toContain("users");
+    expect(out).not.toContain("entities");
     expect(out).toContain("books");
     expect(out).toContain("shelves");
   });
@@ -28,14 +30,16 @@ describe("permittedCategoriesForScope", () => {
   test("user scope omits users", () => {
     const out = permittedCategoriesForScope({ kind: "user", userId: "u" });
     expect(out).not.toContain("users");
+    expect(out).toContain("entities");
     expect(out).toContain("realms");
   });
 
-  test("book scope omits books, realms, and users", () => {
+  test("book scope omits books, realms, users, and entities", () => {
     const out = permittedCategoriesForScope({ kind: "book", unitId: "b" });
     expect(out).not.toContain("books");
     expect(out).not.toContain("realms");
     expect(out).not.toContain("users");
+    expect(out).not.toContain("entities");
     expect(out).toContain("reviews");
     expect(out).toContain("shelves");
   });

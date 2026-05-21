@@ -27,6 +27,7 @@ export const SearchCategorySchema = t.Union([
   t.Literal("shelves"),
   t.Literal("realms"),
   t.Literal("users"),
+  t.Literal("entities"),
 ]);
 
 export type SearchCategory = Static<typeof SearchCategorySchema>;

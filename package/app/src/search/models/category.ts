@@ -11,6 +11,7 @@ const SEARCH_CATEGORIES: SearchCategory[] = [
   "shelves",
   "realms",
   "users",
+  "entities",
 ];
 
 export function isSearchCategory(

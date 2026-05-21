@@ -8,6 +8,7 @@ export const federationWeights = {
   posts: 1.0,
   realms: 1.2,
   users: 1.5,
+  entities: 1.2,
 } as const;
 
 export type FederationWeightKey = keyof typeof federationWeights;

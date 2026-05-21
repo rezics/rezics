@@ -31,6 +31,7 @@ function countsFromResult(
   if (s.shelves) out.shelves = s.shelves.totalHits;
   if (s.realms) out.realms = s.realms.totalHits;
   if (s.users) out.users = s.users.totalHits;
+  if (s.entities) out.entities = s.entities.totalHits;
   return out;
 }
 

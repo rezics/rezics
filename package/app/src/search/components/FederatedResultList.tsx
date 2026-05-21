@@ -1,5 +1,6 @@
 import type {
   ContentSearchDocument,
+  EntitySearchDocument,
   FederatedRankedHit,
   FederatedSearchResult,
   FederatedSingleItem,
@@ -28,6 +29,7 @@ const CATEGORY_TITLES: Record<SearchCategory, string> = {
   shelves: "Shelves",
   realms: "Realms",
   users: "Users",
+  entities: "Entities",
 };
 
 function pickTitle(titles: readonly string[] | null | undefined): string {
@@ -109,15 +111,41 @@ function UserItemRow({ item }: { item: UserSearchDocument }) {
   );
 }
 
+function EntityItemRow({ item }: { item: EntitySearchDocument }) {
+  const title = pickTitle(item.titles);
+  return (
+    <div className="flex items-start gap-3 border-b border-border-whisper py-3 last:border-b-0">
+      <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-subtle text-xs text-text-secondary">
+        {item.avatar ? (
+          <img
+            src={item.avatar}
+            alt=""
+            className="size-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          (title || item.id).slice(0, 1).toUpperCase()
+        )}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{title || item.id}</p>
+        <p className="text-xs text-text-secondary">{item.kind ?? "Entity"}</p>
+      </div>
+    </div>
+  );
+}
+
 type ContentRowCategory = "books" | "shelves";
 type PostRowCategory = "reviews" | "excerpts" | "remarks" | "posts";
 type RealmRowCategory = "realms";
 type UserRowCategory = "users";
+type EntityRowCategory = "entities";
 type ItemRowCategory =
   | ContentRowCategory
   | PostRowCategory
   | RealmRowCategory
-  | UserRowCategory;
+  | UserRowCategory
+  | EntityRowCategory;
 
 function isContentSection(
   category: SearchCategory,
@@ -146,6 +174,7 @@ function originBadge(hit: FederatedRankedHit): string {
   }
   if (origin.indexUid === "realm") return "Realm";
   if (origin.indexUid === "user") return "User";
+  if (origin.indexUid === "entities") return "Entity";
   return origin.indexUid;
 }
 
@@ -163,6 +192,9 @@ function RankedHitRow({ hit }: { hit: FederatedRankedHit }) {
         <RealmItemRow item={hit as RealmSearchDocument} />
       )}
       {indexUid === "user" && <UserItemRow item={hit as UserSearchDocument} />}
+      {indexUid === "entities" && (
+        <EntityItemRow item={hit as EntitySearchDocument} />
+      )}
     </div>
   );
 }
@@ -179,6 +211,9 @@ function renderSingleItem(category: SearchCategory, item: FederatedSingleItem) {
   }
   if (category === "users") {
     return <UserItemRow item={item as UserSearchDocument} />;
+  }
+  if (category === "entities") {
+    return <EntityItemRow item={item as EntitySearchDocument} />;
   }
   return null;
 }
@@ -222,6 +257,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
     if (s.shelves) sectionEntries.push(["shelves", s.shelves]);
     if (s.realms) sectionEntries.push(["realms", s.realms]);
     if (s.users) sectionEntries.push(["users", s.users]);
+    if (s.entities) sectionEntries.push(["entities", s.entities]);
 
     const visible = sectionEntries.filter(([, sec]) => sec.totalHits > 0);
     if (visible.length === 0) {

@@ -1,5 +1,6 @@
 import type {
   ContentSearchDocument,
+  EntitySearchDocument,
   FederatedSearchOptions,
   FederatedSearchResult,
   PostSearchDocument,
@@ -45,6 +46,7 @@ interface PermittedIndexes {
   posts: boolean;
   realms: boolean;
   users: boolean;
+  entities: boolean;
 }
 
 function permittedFor(scope: SearchScope): PermittedIndexes {
@@ -56,6 +58,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         posts: true,
         realms: true,
         users: true,
+        entities: true,
       };
     case "book":
       // BOOK-side excluded; SHELF allowed via containedUnitIds; posts via
@@ -66,6 +69,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         posts: true,
         realms: false,
         users: false,
+        entities: false,
       };
     case "realm":
       return {
@@ -74,6 +78,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         posts: true,
         realms: false,
         users: false,
+        entities: false,
       };
     case "user":
       return {
@@ -82,6 +87,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         posts: true,
         realms: false,
         users: false,
+        entities: true,
       };
   }
 }
@@ -208,6 +214,20 @@ async function federatedSingle(
       if (!permitted.users) break;
       const filter = buildUserFilter(query, scope);
       const resp = await client.userIndex.search<UserSearchDocument>(q, {
+        filter: joinFilter(filter),
+        offset,
+        limit: hitsPerPage,
+      });
+      items = resp.hits;
+      totalHits = resp.estimatedTotalHits ?? resp.hits.length;
+      processingTimeMs = resp.processingTimeMs;
+      break;
+    }
+    case "entities": {
+      if (!permitted.entities) break;
+      const filter =
+        scope.kind === "user" ? [`ownerUnitId = "${scope.userId}"`] : [];
+      const resp = await client.entityIndex.search<EntitySearchDocument>(q, {
         filter: joinFilter(filter),
         offset,
         limit: hitsPerPage,
@@ -347,7 +367,8 @@ interface BuiltSubQuery extends BuiltQuery {
     | "posts"
     | "shelves"
     | "realms"
-    | "users";
+    | "users"
+    | "entities";
 }
 
 function buildAllSubQueries(
@@ -438,6 +459,18 @@ function buildAllSubQueries(
     });
   }
 
+  if (permitted.entities) {
+    const filter =
+      scope.kind === "user" ? [`ownerUnitId = "${scope.userId}"`] : [];
+    out.push({
+      indexUid: "entities",
+      q: query.keyword ?? "",
+      filter,
+      weightKey: "entities",
+      sectionKey: "entities",
+    });
+  }
+
   return out;
 }
 
@@ -461,6 +494,7 @@ function mapIndexToCategory(indexUid: string, hit: any): SearchCategory {
   }
   if (indexUid === "realms") return "realms";
   if (indexUid === "users") return "users";
+  if (indexUid === "entities") return "entities";
   // Fallback for unmapped index uids — treat as posts so the union resolves.
   return "posts";
 }
