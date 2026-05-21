@@ -1,5 +1,6 @@
 import type {
   CreditAttributionDTO,
+  CreditAttributionRole,
   LinkCreditAttributionInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -23,7 +24,7 @@ export const creditAttributionApi = {
   unlink: async (
     unitId: string,
     entityId: string,
-    role: string,
+    role: CreditAttributionRole,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
       `/credit-attribution/${unitId}/${entityId}/${role}`,

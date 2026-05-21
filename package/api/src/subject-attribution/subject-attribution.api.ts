@@ -1,5 +1,6 @@
 import type {
   LinkSubjectAttributionInput,
+  SubjectAttributionRole,
   SubjectAttributionBySubjectQuery,
   SubjectAttributionByUnitQuery,
   SubjectAttributionDTO,
@@ -38,7 +39,7 @@ export const subjectAttributionApi = {
   unlink: async (
     unitId: string,
     entityId: string,
-    role: string,
+    role: SubjectAttributionRole,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
       `/subject-attribution/${unitId}/${entityId}/${role}`,

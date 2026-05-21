@@ -1,11 +1,11 @@
-import type { EntityListQuery } from "@rezics/contract";
+import type { EntityListQuery, EntitySearchOptions } from "@rezics/contract";
 
 export const entityKeys = {
   all: () => ["entity"] as const,
   lists: () => [...entityKeys.all(), "list"] as const,
   list: (query?: EntityListQuery) => [...entityKeys.lists(), query] as const,
   searches: () => [...entityKeys.all(), "search"] as const,
-  search: (query?: EntityListQuery) =>
+  search: (query?: EntitySearchOptions) =>
     [...entityKeys.searches(), query] as const,
   details: () => [...entityKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...entityKeys.details(), unitId] as const,

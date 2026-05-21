@@ -1,4 +1,4 @@
-import type { EntityListQuery } from "@rezics/contract";
+import type { EntityListQuery, EntitySearchOptions } from "@rezics/contract";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { entityApi } from "./entity.api";
 import { entityKeys } from "./entity.keys";
@@ -27,18 +27,16 @@ export const entityBySlugQueryOptions = (slug: string) =>
   });
 
 /**
- * Search query used by EntityPicker. Backed by `GET /entity?q=` (server-side
- * Postgres ilike on translation titles) in v1. The picker spec calls for a
- * Meili-backed result list; that is an internal upgrade path — the response
- * shape (`{ entities, total }`) and the consumer hook signature stay the same
- * when the server route is switched to `/meili/entities/search` later.
+ * Search query used by EntityPicker. Backed by the dedicated Meilisearch
+ * entities index so role/kind facets and global/personal picker contexts use
+ * the same search document.
  */
-export const entitySearchQueryOptions = (query?: EntityListQuery) => {
+export const entitySearchQueryOptions = (query?: EntitySearchOptions) => {
   const q = query?.q?.trim() ?? "";
   return queryOptions({
     queryKey: entityKeys.search(query),
-    queryFn: () => entityApi.list(query),
-    enabled: q.length > 0,
+    queryFn: () => entityApi.search(query),
+    enabled: q.length > 0 || Boolean(query?.kind || query?.ownerUnitId),
     staleTime: 1000 * 60 * 1,
   });
 };
@@ -55,7 +53,7 @@ export function useEntityList(query?: EntityListQuery) {
   return useQuery(entityListQueryOptions(query));
 }
 
-export function useEntitySearch(query?: EntityListQuery) {
+export function useEntitySearch(query?: EntitySearchOptions) {
   return useQuery(entitySearchQueryOptions(query));
 }
 

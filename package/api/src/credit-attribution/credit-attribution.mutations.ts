@@ -1,7 +1,9 @@
 import type {
   CreditAttributionDTO,
+  CreditAttributionRole,
   LinkCreditAttributionInput,
 } from "@rezics/contract";
+import { entityKeys } from "../entity/entity.keys";
 import {
   type UseMutationOptions,
   useMutation,
@@ -25,6 +27,10 @@ export function useLinkCreditAttributionMutation(
       queryClient.invalidateQueries({
         queryKey: creditAttributionKeys.byUnit(variables.unitId),
       });
+      queryClient.invalidateQueries({ queryKey: entityKeys.searches() });
+      queryClient.invalidateQueries({
+        queryKey: entityKeys.detail(variables.entityId),
+      });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -35,7 +41,7 @@ export function useUnlinkCreditAttributionMutation(
     UseMutationOptions<
       { message: string },
       Error,
-      { unitId: string; entityId: string; role: string }
+      { unitId: string; entityId: string; role: CreditAttributionRole }
     >,
     "mutationFn"
   >,
@@ -48,6 +54,10 @@ export function useUnlinkCreditAttributionMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
         queryKey: creditAttributionKeys.byUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({ queryKey: entityKeys.searches() });
+      queryClient.invalidateQueries({
+        queryKey: entityKeys.detail(variables.entityId),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

@@ -1,7 +1,9 @@
 import type {
   LinkSubjectAttributionInput,
+  SubjectAttributionRole,
   SubjectAttributionDTO,
 } from "@rezics/contract";
+import { entityKeys } from "../entity/entity.keys";
 import {
   type UseMutationOptions,
   useMutation,
@@ -32,6 +34,10 @@ export function useLinkSubjectAttributionMutation(
       queryClient.invalidateQueries({
         queryKey: subjectAttributionKeys.bySubject(variables.entityId),
       });
+      queryClient.invalidateQueries({ queryKey: entityKeys.searches() });
+      queryClient.invalidateQueries({
+        queryKey: entityKeys.detail(variables.entityId),
+      });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -42,7 +48,7 @@ export function useUnlinkSubjectAttributionMutation(
     UseMutationOptions<
       { message: string },
       Error,
-      { unitId: string; entityId: string; role: string }
+      { unitId: string; entityId: string; role: SubjectAttributionRole }
     >,
     "mutationFn"
   >,
@@ -58,6 +64,10 @@ export function useUnlinkSubjectAttributionMutation(
       });
       queryClient.invalidateQueries({
         queryKey: subjectAttributionKeys.bySubject(variables.entityId),
+      });
+      queryClient.invalidateQueries({ queryKey: entityKeys.searches() });
+      queryClient.invalidateQueries({
+        queryKey: entityKeys.detail(variables.entityId),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

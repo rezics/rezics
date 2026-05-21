@@ -4,6 +4,8 @@ import type {
   EntityDTO,
   EntityListQuery,
   EntityListResponse,
+  EntitySearchOptions,
+  EntitySearchResult,
   UpdateEntityInput,
 } from "@rezics/contract";
 import { CreationMode as CreationModeValue } from "@rezics/contract";
@@ -13,6 +15,15 @@ import { buildQueryString } from "../utils/buildQuery";
 export const entityApi = {
   list: async (query?: EntityListQuery): Promise<EntityListResponse> => {
     return apiFetch<EntityListResponse>(`/entity${buildQueryString(query)}`);
+  },
+
+  search: async (
+    options?: EntitySearchOptions,
+  ): Promise<EntitySearchResult> => {
+    return apiFetch<EntitySearchResult>("/meili/entities/search", {
+      method: "POST",
+      body: JSON.stringify(options ?? {}),
+    });
   },
 
   get: async (unitId: string): Promise<EntityDTO> => {
