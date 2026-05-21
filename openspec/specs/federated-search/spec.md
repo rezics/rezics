@@ -33,13 +33,18 @@ The `@rezics/contract` package SHALL export a `SearchScope` Typebox union repres
 
 ### Requirement: SearchCategory contract
 
-The `@rezics/contract` package SHALL export a `SearchCategory` Typebox union enumerating the result-view categories. The union SHALL be exactly: `"all"`, `"mixed"`, `"books"`, `"reviews"`, `"excerpts"`, `"remarks"`, `"posts"`, `"shelves"`, `"realms"`, `"users"`. The default category for any scope SHALL be `"all"`.
+The `@rezics/contract` package SHALL export a `SearchCategory` Typebox union enumerating the result-view categories. The union SHALL be exactly: `"all"`, `"mixed"`, `"books"`, `"reviews"`, `"excerpts"`, `"remarks"`, `"posts"`, `"shelves"`, `"realms"`, `"users"`, `"entities"`. The default category for any scope SHALL be `"all"`.
 
 #### Scenario: SearchCategory union is exhaustive
 
 - **WHEN** a consumer imports `SearchCategory`
 - **THEN** the type SHALL admit only the listed string literals
 - **AND** any other value SHALL fail Typebox validation
+
+#### Scenario: entities category is accepted
+
+- **WHEN** a request specifies `category = "entities"`
+- **THEN** Typebox validation SHALL accept the request
 
 #### Scenario: chapters is intentionally excluded
 
@@ -125,35 +130,32 @@ The server SHALL expose `POST /meili/search/federated` that accepts a `Federated
 
 The server SHALL apply scope filters according to the table below. Other indexes for a given scope SHALL be excluded from the request rather than queried with no filter.
 
-| Scope | content (BOOK/GAME/MEDIA/LINK) | content (SHELF) | posts | realms | users |
-|---|---|---|---|---|---|
-| `global` | (no filter) | (no filter) | (no filter) | (no filter) | (no filter) |
-| `book {unitId}` | excluded | `containedUnitIds = unitId` | `rootTargetUnitId = unitId` | excluded | excluded |
-| `realm {realmId}` | `realmIds = realmId` | `realmIds = realmId` | `realmIds = realmId` | excluded | excluded |
-| `user {userId}` | `userId = userId` | `userId = userId` | `authorUserId = userId` | excluded | excluded |
+| Scope | content (BOOK/GAME/MEDIA/LINK) | content (SHELF) | posts | realms | users | entities |
+|---|---|---|---|---|---|---|
+| `global` | (no filter) | (no filter) | (no filter) | (no filter) | (no filter) | (no filter) |
+| `book {unitId}` | excluded | `containedUnitIds = unitId` | `rootTargetUnitId = unitId` | excluded | excluded | excluded |
+| `realm {realmId}` | `realmIds = realmId` | `realmIds = realmId` | `realmIds = realmId` | excluded | excluded | excluded |
+| `user {userId}` | `userId = userId` | `userId = userId` | `authorUserId = userId` | excluded | excluded | `ownerUnitId = userId` |
 
-The orchestrator SHALL NOT execute sub-queries against excluded indexes. Indirect-mention semantics (e.g., posts whose body text references a different book) SHALL NOT be expanded; if a scope doesn't permit an index, results from that index SHALL NOT appear in any category.
+The orchestrator SHALL NOT execute sub-queries against excluded indexes. Indirect-mention semantics and attribution graph expansion SHALL NOT be inferred from entity documents.
 
-#### Scenario: Book scope omits the books and realms indexes
+#### Scenario: Global search includes entities
 
-- **GIVEN** `{ scope: { kind: "book", unitId: "b-9" }, category: "all", query: { keyword: "epic" } }`
+- **GIVEN** `{ scope: { kind: "global" }, category: "all", query: { keyword: "liu" } }`
 - **WHEN** the endpoint orchestrates sub-queries
-- **THEN** it SHALL NOT issue a Meilisearch query for `realms` or `users`
-- **AND** it SHALL issue queries for `posts` (filter `rootTargetUnitId = "b-9"`) and `content` SHELF subset (filter `type = "SHELF" AND containedUnitIds = "b-9"`)
-- **AND** the response `sections` SHALL only contain `posts`-derived sections (`reviews`/`excerpts`/`remarks`/`posts`) and the `shelves` section
+- **THEN** it SHALL include an `entities` section backed by the entities index
 
-#### Scenario: Realm scope filters every queried index by realmIds
+#### Scenario: Book scope omits entities
 
-- **GIVEN** `{ scope: { kind: "realm", realmId: "r-1" }, category: "books", query: {} }`
-- **WHEN** the endpoint queries the content index
-- **THEN** the filter SHALL include `type = "BOOK" AND realmIds = "r-1"`
-
-#### Scenario: User scope filters content by userId and posts by authorUserId
-
-- **GIVEN** `{ scope: { kind: "user", userId: "u-3" }, category: "all", query: {} }`
+- **GIVEN** `{ scope: { kind: "book", unitId: "b-9" }, category: "all", query: { keyword: "liu" } }`
 - **WHEN** the endpoint orchestrates sub-queries
-- **THEN** the content sub-queries SHALL include filter `userId = "u-3"`
-- **AND** the posts sub-queries SHALL include filter `authorUserId = "u-3"`
+- **THEN** it SHALL NOT query the entities index
+
+#### Scenario: User scope filters entities by owner
+
+- **GIVEN** `{ scope: { kind: "user", userId: "u-3" }, category: "entities", query: {} }`
+- **WHEN** the endpoint queries the entities index
+- **THEN** the filter SHALL include `ownerUnitId = "u-3"`
 
 ### Requirement: Federation weights are config-driven
 

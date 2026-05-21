@@ -11,6 +11,8 @@
 - [ ] wiki 和所有权之间的冲突，我们需要锁机制，就是 用户拥有的 entity 是不允许其他用户编辑的， 然后 book 里面的某些字段，也是可以锁起来的。 wiki-content-ownership-plan 基本上 需要和 wiki history 系统一起实现
 - [ ] 基于 cdc-queue-sequin-spike report 的结果实现相应功能 确定 pg-boss 用独立的数据库，最好独立的后端service。
 - [ ] unitTranslation常用叫法扩充表，单独的表，允许类似 tagVote 的机制让用户贡献unit的常见叫法，作为元信息的一部分，也能方便搜索。
+- [ ] 可能的通用性能問題，如果 lazy import 同一個 @/entity index，可能會讓detail/edit/self-claim 被打進同一個 lazy chunk。 如果feature很小，這不一定是問題；但如果想保留 route-level split，可以在合併目錄使用薄 entry point，或者在整理 TanStack Router code splitting 策略時一起整理。
+
 
 ## 搜索
 

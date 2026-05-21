@@ -8,26 +8,31 @@ Defines `EntityService`, the server-side CRUD surface and Elysia routes for ENTI
 
 ### Requirement: EntityService implements the CRUD surface specified in entity-unit-type
 
-The server SHALL provide an `EntityService` module with `create`, `get`, `update`, `delete`, and `list` operations. The `create` operation SHALL execute a single Prisma transaction that inserts a `Unit` row (`type = ENTITY`, `slugScope = <entity-scope-unit-id>`) and an `Entity` extension row sharing the same `unitId`, together with any provided `UnitTranslation` rows. The `update` operation SHALL atomically mutate Entity fields, Unit fields (slug, status, visibility), and translations.
+The server SHALL provide an `EntityService` module with `create`, `get`, `update`, `delete`, and `list` operations. The `create` operation SHALL execute a single Prisma transaction that inserts a `Unit` row (`type = ENTITY`, `slugScope = <entity-scope-unit-id>`) and an `Entity` extension row sharing the same `unitId`, together with any provided `UnitTranslation` rows. The update operation SHALL atomically mutate Entity fields (`kind`, `avatar`, `verified`), Unit fields (slug, status, visibility), and translations.
 
 #### Scenario: Create an entity with translations
 
 - **WHEN** `EntityService.create({ kind: "person", translations: [{ language: "zh", title: "刘慈欣" }, { language: "en", title: "Liu Cixin" }] })` is called by a non-admin user
-- **THEN** a Unit row SHALL be inserted with `type = ENTITY`, `slug = null`, `slugScope = <entity-scope-unit-id>`, `userId = caller.unitId`
-- **AND** an Entity row SHALL be inserted with `unitId` matching the new Unit, `kind = "person"`, `verified = false`
+- **THEN** a Unit row SHALL be inserted with `type = ENTITY`, `slug = null`, `slugScope = <entity-scope-unit-id>`, and the owner determined by creation mode
+- **AND** an Entity row SHALL be inserted with `unitId` matching the new Unit, `kind = "person"`, and `verified = false`
 - **AND** two UnitTranslation rows SHALL be inserted with the provided translations
 - **AND** all writes SHALL succeed or fail as a single transaction
 
-#### Scenario: Update an entity's kind without touching translations
+#### Scenario: Update an entity's avatar without touching translations
 
-- **WHEN** `EntityService.update(unitId, { kind: "circle" })` is called by the entity's creator
-- **THEN** the Entity row SHALL be updated with `kind = "circle"`
-- **AND** the parent Unit, slug, verified flag, and translations SHALL remain unchanged
+- **WHEN** `EntityService.update(unitId, { avatar: "https://cdn.example/a.png" })` is called by an authorized actor
+- **THEN** the Entity row SHALL be updated with that avatar
+- **AND** the parent Unit and translations SHALL remain unchanged
+
+#### Scenario: Update rejects unregistered kind
+
+- **WHEN** `EntityService.update(unitId, { kind: "custom_raw_kind" })` is called through a public API
+- **THEN** the request SHALL be rejected by the request schema before the service writes data
 
 #### Scenario: Delete an entity cascades to extension, translations, and attribution
 
 - **WHEN** `EntityService.delete(unitId)` is called
-- **THEN** the parent Unit row SHALL be deleted
+- **THEN** the parent Unit SHALL be deleted
 - **AND** the Entity extension row SHALL be cascade-deleted
 - **AND** all UnitTranslation rows referencing that unitId SHALL be cascade-deleted
 - **AND** all Attribution rows referencing that entityId SHALL be cascade-deleted
@@ -94,17 +99,32 @@ The `verified` field on an Entity SHALL be mutable only by callers with the glob
 
 ### Requirement: EntityService search index sync
 
-The `EntityService.create`, `update`, and `delete` operations SHALL synchronize a Meili `entities` index document after the database transaction commits. The document SHALL include `unitId`, `slug`, `kind`, `verified`, and a flattened `titles: [{ language, value }]` array sourced from UnitTranslation rows.
+The `EntityService.create`, `update`, and `delete` operations SHALL synchronize a Meili `entities` index document after the database transaction commits. The document SHALL include `unitId`, `slug`, `kind`, `verified`, `avatar`, `ownerUnitId`, translated identity text, and reverse attribution facets.
 
 #### Scenario: Create syncs a new index document
 
 - **WHEN** EntityService.create succeeds with translations
-- **THEN** a Meili document SHALL be upserted into the `entities` index containing the new unitId, current slug (null on create), kind, verified=false, and the provided translation titles
+- **THEN** a Meili document SHALL be upserted into the `entities` index containing the new unitId, current slug, kind, verified flag, avatar, ownerUnitId, and translation titles
+
+#### Scenario: Update avatar patches the index document
+
+- **WHEN** EntityService.update changes `avatar`
+- **THEN** the corresponding `entities` index document SHALL expose the new avatar
 
 #### Scenario: Delete removes the index document
 
 - **WHEN** EntityService.delete succeeds
 - **THEN** the corresponding Meili document SHALL be removed from the `entities` index
+
+### Requirement: Public entity schemas validate registry keys
+
+The create and update schemas for public Entity APIs SHALL validate `kind` against the contract entity kind registry. The schema SHALL allow null/omitted kind where the operation supports no kind.
+
+#### Scenario: Elysia rejects unknown entity kind
+
+- **WHEN** a public caller submits `kind = "made_up_kind"`
+- **THEN** Elysia validation SHALL reject the request
+- **AND** the handler SHALL NOT persist the value
 
 ### Requirement: EntityService HTTP route surface
 
