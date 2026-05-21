@@ -1,4 +1,5 @@
 import type { EntityDTO } from "@rezics/contract";
+import { EntityAvatar, EntityKindBadge, EntityVerifiedIcon } from "@/entity";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import {
   Button,
@@ -9,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { BadgeCheck, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import {
   getEntityLanguages,
   getEntityPrimaryTitle,
@@ -36,31 +37,11 @@ export function EntityHero({
   return (
     <header className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-4">
-        <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-subtle text-lg font-medium text-text-secondary">
-          {entity.avatar ? (
-            <img
-              src={entity.avatar}
-              alt=""
-              className="size-full object-cover"
-              loading="lazy"
-            />
-          ) : (
-            title.slice(0, 1).toUpperCase()
-          )}
-        </span>
+        <EntityAvatar avatar={entity.avatar} title={title} size="lg" />
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
           <h1 className="text-3xl font-semibold text-text-primary">{title}</h1>
-          {entity.kind ? (
-            <span className="rounded-full border border-border-whisper bg-surface-subtle px-2 py-0.5 text-xs uppercase tracking-wide text-text-secondary">
-              {entity.kind}
-            </span>
-          ) : null}
-          {entity.verified ? (
-            <BadgeCheck
-              className="h-5 w-5 text-text-brand"
-              aria-label="Verified entity"
-            />
-          ) : null}
+          <EntityKindBadge kind={entity.kind} />
+          <EntityVerifiedIcon verified={entity.verified} />
           {canEdit ? (
             <Link to="/entity/$unitId/edit" params={{ unitId: entity.unitId }}>
               <Button variant="ghost" size="icon" aria-label="Edit entity">
@@ -74,7 +55,12 @@ export function EntityHero({
         <p className="text-base text-text-secondary">{tr.subtitle}</p>
       ) : null}
       {languages.length >= 2 ? (
-        <Select value={language} onValueChange={onLanguageChange}>
+        <Select
+          value={language}
+          onValueChange={(value) => {
+            if (value) onLanguageChange(value);
+          }}
+        >
           <SelectTrigger className="w-fit min-w-[120px]">
             <SelectValue />
           </SelectTrigger>

@@ -20,6 +20,7 @@ import {
 import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { BookCreditAttributionEditor } from "./BookCreditAttributionEditor";
 
 function TooltipIconTrigger(props: Record<string, unknown>) {
   const { ref: _ref, ...triggerProps } = props;
@@ -39,6 +40,7 @@ export type BookMetadataValue = Partial<BookDTO>;
 
 interface BookMetadataEditorProps {
   value?: BookMetadataValue;
+  bookUnitId?: string;
   onChange?: (value: BookMetadataValue) => void;
   disabled?: boolean;
 }
@@ -81,6 +83,7 @@ function FlagWithTooltip({
 
 export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   value,
+  bookUnitId,
   onChange,
   disabled,
 }) => {
@@ -163,11 +166,12 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         </div>
       </div>
 
-      {/* MOCK: personCredits/orgCredits editing would need a separate credit editor component */}
-      <div className="text-sm text-gray-500">
-        {/* MOCK: credits editing UI placeholder - use the admin panel for now */}
-        Credits (author, publisher, producer) are managed via the admin panel.
-      </div>
+      {bookUnitId ? (
+        <BookCreditAttributionEditor
+          bookUnitId={bookUnitId}
+          disabled={disabled}
+        />
+      ) : null}
 
       {/* Rating + Flags */}
       <div className="flex flex-col gap-4">

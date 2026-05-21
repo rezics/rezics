@@ -428,6 +428,43 @@ export default {
     },
   },
 
+  attribution: {
+    credit: {
+      role: {
+        author: "作者",
+        co_author: "共同作者",
+        translator: "譯者",
+        illustrator: "插畫",
+        editor: "編輯",
+        publisher: "出版社",
+        letterer: "嵌字",
+        colorist: "上色",
+        developer: "開發者",
+        composer: "作曲",
+        designer: "設計",
+        director: "導演",
+        producer: "製作人",
+        writer: "編劇",
+        actor: "演員",
+        narrator: "朗讀者",
+        studio: "工作室",
+        distributor: "發行",
+      },
+    },
+    subject: {
+      role: {
+        primary_character: "主要角色",
+        featured_character: "登場角色",
+        appears: "出現",
+        about: "關於",
+        setting: "舞台",
+        source_work: "來源作品",
+        canonical_wiki_page: "標準 Wiki 頁",
+        related_subject: "相關主題",
+      },
+    },
+  },
+
   // Unit
   unit: {
     no_content: "暫無內容",

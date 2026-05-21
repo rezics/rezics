@@ -1,18 +1,10 @@
 import { useEntityList } from "@rezics/api/entity";
-import type { UnitTranslationDTO } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { unitHref } from "@rezics/ui/primitive/link";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck } from "lucide-react";
+import { EntityIdentityRow } from "@/entity";
 import { useUserProfileStore } from "@/user/states";
-
-function getPrimaryTitle(
-  translations: UnitTranslationDTO[] | undefined,
-): string {
-  if (!translations || translations.length === 0) return "Untitled entity";
-  return translations[0]?.title?.trim() || "Untitled entity";
-}
 
 export function MyEntitiesPage() {
   const currentUserUnitId = useUserProfileStore(
@@ -66,7 +58,6 @@ export function MyEntitiesPage() {
       ) : (
         <ul className="flex flex-col gap-2">
           {entities.map((entity) => {
-            const title = getPrimaryTitle(entity.translations);
             const href = unitHref({
               type: "ENTITY",
               unitId: entity.unitId,
@@ -78,32 +69,7 @@ export function MyEntitiesPage() {
                   to={href}
                   className="flex w-full items-center gap-3 rounded-md border border-border-whisper p-3 hover:border-border-strong"
                 >
-                  <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-subtle text-xs text-text-secondary">
-                    {entity.avatar ? (
-                      <img
-                        src={entity.avatar}
-                        alt=""
-                        className="size-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      title.slice(0, 1).toUpperCase()
-                    )}
-                  </span>
-                  <span className="flex-1 truncate text-text-primary">
-                    {title}
-                  </span>
-                  {entity.kind ? (
-                    <span className="rounded-full border border-border-whisper px-2 py-0.5 text-xs uppercase text-text-secondary">
-                      {entity.kind}
-                    </span>
-                  ) : null}
-                  {entity.verified ? (
-                    <BadgeCheck
-                      className="h-4 w-4 text-text-brand"
-                      aria-label="Verified entity"
-                    />
-                  ) : null}
+                  <EntityIdentityRow entity={entity} />
                 </Link>
               </li>
             );

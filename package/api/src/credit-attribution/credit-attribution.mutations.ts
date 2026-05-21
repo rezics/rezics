@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-query";
 import { creditAttributionApi } from "./credit-attribution.api";
 import { creditAttributionKeys } from "./credit-attribution.keys";
+import { bookKeys } from "../book/book.keys";
 
 export function useLinkCreditAttributionMutation(
   options?: Omit<
@@ -26,6 +27,9 @@ export function useLinkCreditAttributionMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
         queryKey: creditAttributionKeys.byUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: bookKeys.detail(variables.unitId),
       });
       queryClient.invalidateQueries({ queryKey: entityKeys.searches() });
       queryClient.invalidateQueries({
@@ -54,6 +58,9 @@ export function useUnlinkCreditAttributionMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
         queryKey: creditAttributionKeys.byUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: bookKeys.detail(variables.unitId),
       });
       queryClient.invalidateQueries({ queryKey: entityKeys.searches() });
       queryClient.invalidateQueries({

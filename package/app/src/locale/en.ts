@@ -444,6 +444,43 @@ export default {
     },
   },
 
+  attribution: {
+    credit: {
+      role: {
+        author: "Author",
+        co_author: "Co-author",
+        translator: "Translator",
+        illustrator: "Illustrator",
+        editor: "Editor",
+        publisher: "Publisher",
+        letterer: "Letterer",
+        colorist: "Colorist",
+        developer: "Developer",
+        composer: "Composer",
+        designer: "Designer",
+        director: "Director",
+        producer: "Producer",
+        writer: "Writer",
+        actor: "Actor",
+        narrator: "Narrator",
+        studio: "Studio",
+        distributor: "Distributor",
+      },
+    },
+    subject: {
+      role: {
+        primary_character: "Primary character",
+        featured_character: "Featured character",
+        appears: "Appears",
+        about: "About",
+        setting: "Setting",
+        source_work: "Source work",
+        canonical_wiki_page: "Canonical wiki page",
+        related_subject: "Related subject",
+      },
+    },
+  },
+
   settings: {
     account: {
       rezics_email_title: "Rezics Email",

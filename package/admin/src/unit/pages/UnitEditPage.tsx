@@ -20,6 +20,7 @@ import {
   UNIT_FIELD_LOCK_ALL,
   UnitAuthorityRoleKey,
   type UnitAuthorityRoleKey as UnitAuthorityRoleKeyType,
+  subjectAttributionRoleRegistry,
   subjectAttributionRoles,
 } from "@rezics/contract";
 
@@ -36,6 +37,7 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import i18n from "i18next";
 import React from "react";
 
 import { Page } from "@/core/layouts/Page";
@@ -64,6 +66,11 @@ function toJsonText(value: unknown) {
   } catch {
     return String(value);
   }
+}
+
+function tLabel(key: string, fallback: string) {
+  const translated = i18n.t(key);
+  return translated === key ? fallback : translated;
 }
 
 export default function UnitEditPage() {
@@ -123,9 +130,9 @@ export default function UnitEditPage() {
   const [visibility, setVisibility] = React.useState("");
   const [extraText, setExtraText] = React.useState("");
   const [subjectEntityId, setSubjectEntityId] = React.useState("");
-  const [subjectRole, setSubjectRole] = React.useState(
-    subjectAttributionRoles[0],
-  );
+  const [subjectRole, setSubjectRole] = React.useState<
+    (typeof subjectAttributionRoles)[number]
+  >(subjectAttributionRoles[0]);
   const [subjectSortOrder, setSubjectSortOrder] = React.useState("0");
   const [subjectWeight, setSubjectWeight] = React.useState("");
   const [lockFieldKey, setLockFieldKey] =
@@ -381,18 +388,48 @@ export default function UnitEditPage() {
                         key={`${subject.entityId}-${subject.role}`}
                         className="flex flex-col gap-2 border-b border-border-whisper py-2 sm:flex-row sm:items-center"
                       >
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">
-                            {subject.entity?.translations?.[0]?.title ??
-                              subject.entityId}
-                          </p>
-                          <p className="text-xs text-text-secondary">
-                            {subject.role} · {subject.entity?.kind ?? "entity"}{" "}
-                            · order {subject.sortOrder}
-                            {subject.weight != null
-                              ? ` · weight ${subject.weight}`
-                              : ""}
-                          </p>
+                        <div className="flex min-w-0 flex-1 items-center gap-3">
+                          <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-subtle text-xs text-text-secondary">
+                            {subject.entity?.avatar ? (
+                              <img
+                                src={subject.entity.avatar}
+                                alt=""
+                                className="size-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              (
+                                subject.entity?.translations?.[0]?.title ??
+                                subject.entityId
+                              )
+                                .slice(0, 1)
+                                .toUpperCase()
+                            )}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium">
+                              {subject.entity?.translations?.[0]?.title ??
+                                subject.entityId}
+                            </p>
+                            <p className="text-xs text-text-secondary">
+                              {tLabel(
+                                subjectAttributionRoleRegistry[subject.role]
+                                  .i18nKey,
+                                subject.role,
+                              )}{" "}
+                              ·{" "}
+                              {subject.entity?.kind
+                                ? tLabel(
+                                    `entity.kind.${subject.entity.kind}`,
+                                    subject.entity.kind,
+                                  )
+                                : "entity"}{" "}
+                              · order {subject.sortOrder}
+                              {subject.weight != null
+                                ? ` · weight ${subject.weight}`
+                                : ""}
+                            </p>
+                          </div>
                         </div>
                         <Button
                           type="button"
@@ -450,7 +487,10 @@ export default function UnitEditPage() {
                     >
                       {subjectAttributionRoles.map((role) => (
                         <option key={role} value={role}>
-                          {role}
+                          {tLabel(
+                            subjectAttributionRoleRegistry[role].i18nKey,
+                            role,
+                          )}
                         </option>
                       ))}
                     </select>

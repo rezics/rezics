@@ -78,6 +78,60 @@ export default {
     book_list_edit_page: "Buchliste bearbeiten",
   },
 
+  entity: {
+    kind: {
+      person: "Person",
+      organization: "Organisation",
+      circle: "Zirkel",
+      studio: "Studio",
+      label: "Label",
+      character: "Figur",
+      faction: "Fraktion",
+      family: "Familie",
+      location: "Ort",
+      artifact: "Artefakt",
+      event: "Ereignis",
+      concept: "Konzept",
+    },
+  },
+
+  attribution: {
+    credit: {
+      role: {
+        author: "Autor",
+        co_author: "Co-Autor",
+        translator: "Übersetzer",
+        illustrator: "Illustrator",
+        editor: "Redakteur",
+        publisher: "Verlag",
+        letterer: "Letterer",
+        colorist: "Kolorist",
+        developer: "Entwickler",
+        composer: "Komponist",
+        designer: "Designer",
+        director: "Regisseur",
+        producer: "Produzent",
+        writer: "Autor",
+        actor: "Darsteller",
+        narrator: "Erzähler",
+        studio: "Studio",
+        distributor: "Vertrieb",
+      },
+    },
+    subject: {
+      role: {
+        primary_character: "Hauptfigur",
+        featured_character: "Vorgestellte Figur",
+        appears: "Erscheint",
+        about: "Über",
+        setting: "Schauplatz",
+        source_work: "Quellwerk",
+        canonical_wiki_page: "Kanonische Wiki-Seite",
+        related_subject: "Verwandtes Thema",
+      },
+    },
+  },
+
   // Form & Editor
   editor: {
     bold: "Fett",

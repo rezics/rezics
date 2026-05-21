@@ -78,6 +78,60 @@ export default {
     book_list_edit_page: "ブックリスト編集ページ",
   },
 
+  entity: {
+    kind: {
+      person: "人物",
+      organization: "組織",
+      circle: "サークル",
+      studio: "スタジオ",
+      label: "レーベル",
+      character: "キャラクター",
+      faction: "勢力",
+      family: "家族",
+      location: "場所",
+      artifact: "アイテム",
+      event: "イベント",
+      concept: "概念",
+    },
+  },
+
+  attribution: {
+    credit: {
+      role: {
+        author: "著者",
+        co_author: "共著者",
+        translator: "翻訳者",
+        illustrator: "イラスト",
+        editor: "編集者",
+        publisher: "出版社",
+        letterer: "レタラー",
+        colorist: "カラー担当",
+        developer: "開発者",
+        composer: "作曲者",
+        designer: "デザイナー",
+        director: "監督",
+        producer: "プロデューサー",
+        writer: "脚本",
+        actor: "出演者",
+        narrator: "ナレーター",
+        studio: "スタジオ",
+        distributor: "配給",
+      },
+    },
+    subject: {
+      role: {
+        primary_character: "主要キャラクター",
+        featured_character: "登場キャラクター",
+        appears: "登場",
+        about: "関連",
+        setting: "舞台",
+        source_work: "原作",
+        canonical_wiki_page: "標準 Wiki ページ",
+        related_subject: "関連対象",
+      },
+    },
+  },
+
   // Form & Editor
   editor: {
     bold: "太字",

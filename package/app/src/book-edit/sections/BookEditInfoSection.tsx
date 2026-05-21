@@ -596,6 +596,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <Separator className="mb-6" />
           <BookMetadataEditor
             value={metadata}
+            bookUnitId={bookId}
             onChange={(value) => {
               setMetadataState((prev) => ({
                 ...(prev ?? data ?? {}),

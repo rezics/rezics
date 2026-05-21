@@ -307,6 +307,43 @@ export default {
     },
   },
 
+  attribution: {
+    credit: {
+      role: {
+        author: "作者",
+        co_author: "共同作者",
+        translator: "译者",
+        illustrator: "插画",
+        editor: "编辑",
+        publisher: "出版社",
+        letterer: "嵌字",
+        colorist: "上色",
+        developer: "开发者",
+        composer: "作曲",
+        designer: "设计",
+        director: "导演",
+        producer: "制作人",
+        writer: "编剧",
+        actor: "演员",
+        narrator: "朗读者",
+        studio: "工作室",
+        distributor: "发行",
+      },
+    },
+    subject: {
+      role: {
+        primary_character: "主要角色",
+        featured_character: "登场角色",
+        appears: "出现",
+        about: "关于",
+        setting: "舞台",
+        source_work: "来源作品",
+        canonical_wiki_page: "标准 Wiki 页",
+        related_subject: "相关主题",
+      },
+    },
+  },
+
   unit: {
     no_content: "暂无内容",
     meta_data: "Meta 信息",
