@@ -4,7 +4,7 @@ import {
   TokenTransportHeader,
 } from "@rezics/contract";
 import { createJwtVerifier, JwtAlgorithm } from "@rezics/jwt";
-import { Elysia } from "elysia";
+import { Elysia, status } from "elysia";
 import { env } from "../env";
 
 const SESSION_COOKIE_NAME = "rezics-session-token";
@@ -59,27 +59,21 @@ export const authMacro = new Elysia({ name: "macro/notify-auth" }).macro(
     async resolve({ headers }) {
       const authHeaderKey = TokenTransportHeader.AUTHORIZATION.toLowerCase();
       const authorization = headers[authHeaderKey];
-      const cookieHeader = headers["cookie"];
+      const cookieHeader = headers.cookie;
       const token = resolveSessionToken(authorization, cookieHeader);
       if (!token) {
-        return new Response("Unauthorized: Missing token", {
-          status: 401,
-        }) as any;
+        return status(401, "Unauthorized: Missing token");
       }
 
       try {
         const result = await verifier(`Bearer ${token}`);
         const userId = result.payload.userId || result.payload.sub;
         if (!userId) {
-          return new Response("Unauthorized: Missing user identity", {
-            status: 401,
-          }) as any;
+          return status(401, "Unauthorized: Missing user identity");
         }
         return { userId };
       } catch {
-        return new Response("Unauthorized: Invalid or missing token", {
-          status: 401,
-        }) as any;
+        return status(401, "Unauthorized: Invalid or missing token");
       }
     },
   },

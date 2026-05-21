@@ -73,7 +73,7 @@ export const dmApi = new Elysia({ prefix: "/dm" })
       },
     },
   )
-  .ws("/ws", {
+  .ws("/", {
     detail: {
       summary: "DM WebSocket",
       description:
