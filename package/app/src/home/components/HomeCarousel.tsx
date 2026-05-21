@@ -1,10 +1,10 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
+import { SafeLink } from "@rezics/ui";
 import { CarouselIndicator } from "@rezics/ui/primitive/carousel/CarouselIndicator.tsx";
 import { useEmblaAutoplay } from "@rezics/ui/primitive/carousel/use-embla-autoplay.ts";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import {
   Carousel,
   type CarouselApi,
@@ -24,6 +24,22 @@ type ProductType = {
   link?: string;
 };
 
+type CarouselItemLinkProps = {
+  link?: string;
+  children: React.ReactNode;
+};
+
+const CarouselItemLink = ({ link, children }: CarouselItemLinkProps) => {
+  const href = link?.trim();
+  if (!href) return <div>{children}</div>;
+
+  return (
+    <SafeLink href={href} className="block">
+      {children}
+    </SafeLink>
+  );
+};
+
 type CarouselContentInnerProps = {
   product: ProductType;
   maxHeightClass: string;
@@ -34,7 +50,7 @@ const CarouselContentInner = ({
   maxHeightClass,
 }: CarouselContentInnerProps) => {
   return (
-    <Link to={product?.link ?? "#"}>
+    <CarouselItemLink link={product.link}>
       <div className="flex items-center gap-4 px-4">
         <div className="hidden sm:block flex-shrink-0 h-full overflow-hidden">
           <LazyLoadImage
@@ -51,7 +67,7 @@ const CarouselContentInner = ({
           <p className="text-sm m-0">{product?.lorem}</p>
         </div>
       </div>
-    </Link>
+    </CarouselItemLink>
   );
 };
 
@@ -63,7 +79,7 @@ const CarouselContentInnerCompact = ({
   product,
 }: CarouselContentInnerCompactProps) => {
   return (
-    <Link to={product?.link ?? "#"}>
+    <CarouselItemLink link={product.link}>
       <div className="flex items-center gap-3 px-3 py-2">
         <div className="w-1/3 h-38 md:h-52 flex-shrink-0 overflow-hidden">
           <LazyLoadImage
@@ -81,7 +97,7 @@ const CarouselContentInnerCompact = ({
           </p>
         </div>
       </div>
-    </Link>
+    </CarouselItemLink>
   );
 };
 
