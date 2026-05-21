@@ -1,4 +1,3 @@
-import type React from "react";
 import {
   forwardRef,
   useEffect,
@@ -82,7 +81,7 @@ export const ChapterArborist = forwardRef<
           width={width ?? undefined}
           height={tHeight}
           indent={treeIndent}
-          rowHeight={32}
+          rowHeight={64}
           disableDrag={true}
           disableDrop={true}
           idAccessor={(node) => node.occurrenceId}

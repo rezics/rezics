@@ -90,7 +90,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
         <ChapterArborist
           ref={arboristRef}
           bookTocTree={bookTocTree}
-          treeIndent={10}
+          treeIndent={0}
           tHeight={height}
           searchTerm={searchTerm}
           bookUnitId={bookId}

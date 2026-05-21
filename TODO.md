@@ -2,6 +2,7 @@
 
 - [ ] UnitTag 表是否要重命名到 TagUnit 比較好？
 - [ ] 搞清楚 ui package 如何 允许 unocss config 以及basic-css 共享, 以提供给 dispatch，還有未來別的package
+- [ ] history輪詢outbox在對列做出來之後應當修正成對列主動通知
 - [ ] 定製 elysia + prisma 的 console 輸出主題，可以做成獨立 package
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info

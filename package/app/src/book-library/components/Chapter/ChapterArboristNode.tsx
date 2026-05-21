@@ -32,23 +32,6 @@ export const createChapterArboristNode = (bookId: string) => {
             : ""
         }`}
       >
-        {/* Arrow toggle */}
-        {hasChildren ? (
-          <button
-            type="button"
-            onClick={() => node.toggle()}
-            className="w-6 h-6 flex justify-center items-center text-text-tertiary hover:text-text-primary"
-            aria-label={node.isOpen ? "Collapse" : "Expand"}
-          >
-            {node.isOpen ? (
-              <KeyboardArrowDownIcon className="w-4 h-4" />
-            ) : (
-              <KeyboardArrowRightIcon className="w-4 h-4" />
-            )}
-          </button>
-        ) : null}
-
-        {/* Title with navigation link for leaf nodes */}
         <div className="min-w-0 flex-1">
           {hasChildren ? (
             <span className="truncate">{node.data.title}</span>
@@ -72,6 +55,21 @@ export const createChapterArboristNode = (bookId: string) => {
             </Link>
           )}
         </div>
+
+        {hasChildren ? (
+          <button
+            type="button"
+            onClick={() => node.toggle()}
+            className="w-6 h-6 flex justify-center items-center text-text-tertiary hover:text-text-primary"
+            aria-label={node.isOpen ? "Collapse" : "Expand"}
+          >
+            {node.isOpen ? (
+              <KeyboardArrowDownIcon className="w-4 h-4" />
+            ) : (
+              <KeyboardArrowRightIcon className="w-4 h-4" />
+            )}
+          </button>
+        ) : null}
       </div>
     );
   };

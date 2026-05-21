@@ -1,12 +1,6 @@
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
-import {
-  ChevronDown,
-  ChevronRight,
-  FileText,
-  ScrollText,
-  Search,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import type React from "react";
 import {
   forwardRef,
@@ -24,7 +18,7 @@ import {
   encodeBookContentStructurePath,
 } from "../../models/bookContentStructurePath";
 
-const CONTENT_ROW_HEIGHT = 48;
+const CONTENT_ROW_HEIGHT = 64;
 const MIN_TREE_HEIGHT = 320;
 const VIEWPORT_HEIGHT_GAP = 96;
 
@@ -47,7 +41,6 @@ function createContentChapterNode(bookId: string) {
   }: NodeRendererProps<ContentChapter>) {
     const hasChildren = Boolean(node.children?.length);
     const isSelected = node.state.isSelected;
-    const depth = Math.max(0, (node.data.path?.length ?? 1) - 1);
 
     const title = (
       <div className="min-w-0 flex-1">
@@ -79,39 +72,8 @@ function createContentChapterNode(bookId: string) {
             "group flex h-full w-full min-w-0 items-center gap-2 border-b border-border-whisper px-3 transition-colors hover:bg-surface-subtle",
             isSelected && "bg-surface-subtle",
           )}
-          style={{
-            height: CONTENT_ROW_HEIGHT,
-            paddingLeft: `${12 + depth * 18}px`,
-          }}
+          style={{ height: CONTENT_ROW_HEIGHT }}
         >
-          <button
-            type="button"
-            className={cn(
-              "flex size-7 flex-none items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-surface-elevated hover:text-text-primary",
-              !hasChildren && "pointer-events-none opacity-0",
-            )}
-            aria-label={node.isOpen ? "Collapse" : "Expand"}
-            tabIndex={hasChildren ? 0 : -1}
-            onClick={(event) => {
-              event.stopPropagation();
-              if (hasChildren) node.toggle();
-            }}
-          >
-            {node.isOpen ? (
-              <ChevronDown className="size-4" />
-            ) : (
-              <ChevronRight className="size-4" />
-            )}
-          </button>
-
-          <span className="flex size-8 flex-none items-center justify-center rounded-md bg-surface-subtle text-text-tertiary">
-            {hasChildren ? (
-              <ScrollText className="size-4" />
-            ) : (
-              <FileText className="size-4" />
-            )}
-          </span>
-
           <Link
             to="/book/$bookId/read/$chapterId"
             params={{
@@ -130,6 +92,24 @@ function createContentChapterNode(bookId: string) {
           >
             {title}
           </Link>
+
+          {hasChildren && (
+            <button
+              type="button"
+              className="flex size-7 flex-none items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-surface-elevated hover:text-text-primary"
+              aria-label={node.isOpen ? "Collapse" : "Expand"}
+              onClick={(event) => {
+                event.stopPropagation();
+                node.toggle();
+              }}
+            >
+              {node.isOpen ? (
+                <ChevronDown className="size-4" />
+              ) : (
+                <ChevronRight className="size-4" />
+              )}
+            </button>
+          )}
         </div>
       </div>
     );
