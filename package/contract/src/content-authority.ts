@@ -60,6 +60,7 @@ export const BookFieldKey = {
 
 export const EntityFieldKey = {
   KIND: "entity.kind",
+  AVATAR: "entity.avatar",
   VERIFIED: "entity.verified",
   SLUG: "entity.slug",
 } as const;
