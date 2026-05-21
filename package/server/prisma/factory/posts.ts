@@ -332,52 +332,49 @@ async function seedTreePostsForTarget(
   const posts: CreatedPost[] = [];
 
   // Pass 1: Root posts
-  const rootIds: string[] = [];
+  const rootPlans = Array.from({ length: rootCount }, (_, index) => ({
+    id: randomUUID(),
+    sortPath: String(index + 1).padStart(4, "0"),
+  }));
+  const rootIds = rootPlans.map((plan) => plan.id);
 
-  await chunkedParallel(
-    Array.from({ length: rootCount }),
-    CHUNK_SIZE,
-    async (_, index) => {
-      const author = faker.helpers.arrayElement(users);
-      const id = randomUUID();
-      const sortPath = String(index + 1).padStart(4, "0");
+  await chunkedParallel(rootPlans, CHUNK_SIZE, async (rootPlan) => {
+    const author = faker.helpers.arrayElement(users);
 
-      const unit = await ctx.prisma.unit.create({
-        data: {
-          id,
-          type: UnitType.POST,
-          userId: author.userId,
-          slugScope: author.userId,
-          status: UnitStatus.PUBLISHED,
-          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-          defaultLanguage: DEFAULT_LANGUAGE,
-          publishedAt: faker.date.past({ years: 1 }),
-          post: {
-            create: {
-              authorUserId: author.userId,
-              targetUnitId,
-              rootPostUnitId: id,
-              kind: PostKind.POST,
-              body: generatePostBody(PostKind.POST),
-              depth: 0,
-              sortPath,
-            },
-          },
-          supportLanguages: {
-            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+    const unit = await ctx.prisma.unit.create({
+      data: {
+        id: rootPlan.id,
+        type: UnitType.POST,
+        userId: author.userId,
+        slugScope: author.userId,
+        status: UnitStatus.PUBLISHED,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: faker.date.past({ years: 1 }),
+        post: {
+          create: {
+            authorUserId: author.userId,
+            targetUnitId,
+            rootPostUnitId: rootPlan.id,
+            kind: PostKind.POST,
+            body: generatePostBody(PostKind.POST),
+            depth: 0,
+            sortPath: rootPlan.sortPath,
           },
         },
-        select: { id: true, type: true },
-      });
+        supportLanguages: {
+          create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+        },
+      },
+      select: { id: true, type: true },
+    });
 
-      rootIds.push(unit.id);
-      posts.push({
-        ...unit,
-        kind: PostKind.POST,
-        targetUnitId,
-      });
-    },
-  );
+    posts.push({
+      ...unit,
+      kind: PostKind.POST,
+      targetUnitId,
+    });
+  });
 
   if (rootIds.length === 0 || replyCount === 0) return posts;
 
@@ -391,7 +388,7 @@ async function seedTreePostsForTarget(
 
   const replyParents: ParentSlot[] = rootIds.map((id, i) => ({
     id,
-    sortPath: String(i + 1).padStart(4, "0"),
+    sortPath: rootPlans[i]!.sortPath,
     depth: 0,
     rootId: id,
     childCount: 0,

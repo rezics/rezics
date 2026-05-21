@@ -7,7 +7,10 @@ import type {
   UserSearchDocument,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
-import type { PrismaClient } from "@rezics/server/prisma/generated/client";
+import {
+  type PrismaClient,
+  UnitType,
+} from "@rezics/server/prisma/generated/client";
 import type { SearchClient } from "./client";
 import {
   buildProgressDocument,
@@ -54,7 +57,13 @@ const BATCH_SIZE = 5000;
 const PROGRESS_SYNC_ATTEMPTS = 3;
 const PROGRESS_SYNC_RETRY_BASE_MS = 100;
 
-const INDEXABLE_TYPES = ["BOOK", "GAME", "MEDIA", "SHELF", "LINK"];
+const INDEXABLE_TYPES = [
+  UnitType.BOOK,
+  UnitType.GAME,
+  UnitType.MEDIA,
+  UnitType.SHELF,
+  UnitType.LINK,
+];
 
 const PUBLIC_ELIGIBLE_UNIT_WHERE = {
   status: "PUBLISHED",

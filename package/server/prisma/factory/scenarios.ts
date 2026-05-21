@@ -3,8 +3,8 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
-import { PostKind, UnitStatus, UnitType } from "../generated/client.js";
 import { generateBetween } from "../../src/shelf/fractional-index";
+import { PostKind, UnitStatus, UnitType } from "../generated/client.js";
 import { seedChaptersForBook } from "./books.js";
 import { addSeedManifestEntry, createSeedResult } from "./manifest.js";
 import type { SeedCtx } from "./strategy.js";
@@ -100,8 +100,15 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
 
   const rootCount = 8;
   const repliesPerRoot = 18;
+  const maxDepth = 4;
+  const branchCap = 4;
   const now = new Date();
-  const roots = Array.from({ length: rootCount }, () => randomUUID());
+  const plannedPosts = buildLargePostTreePlan({
+    rootCount,
+    repliesPerRoot,
+    maxDepth,
+    branchCap,
+  });
   const unitRows: Array<{
     id: string;
     type: UnitType;
@@ -132,12 +139,9 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     isPrimary: boolean;
   }> = [];
 
-  const pushPost = (
-    unitId: string,
-    post: Omit<(typeof postRows)[number], "unitId" | "authorUserId">,
-  ) => {
+  for (const planned of plannedPosts) {
     unitRows.push({
-      id: unitId,
+      id: planned.id,
       type: UnitType.POST,
       userId: user.userId,
       slugScope: user.userId,
@@ -147,60 +151,137 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
       publishedAt: now,
     });
     postRows.push({
-      unitId,
+      unitId: planned.id,
       authorUserId: user.userId,
-      ...post,
+      targetUnitId,
+      rootPostUnitId: planned.rootId,
+      ...(planned.parentId ? { parentPostUnitId: planned.parentId } : {}),
+      kind: PostKind.POST,
+      body:
+        planned.depth === 0
+          ? `Root ${planned.rootIndex + 1} for the large post tree scenario.`
+          : `Reply ${planned.replyIndex + 1} at depth ${planned.depth} under root ${planned.rootIndex + 1}.`,
+      depth: planned.depth,
+      sortPath: planned.sortPath,
+      replyCount: planned.replyCount,
+      directReplyCount: planned.directReplyCount,
+      ...(planned.replyCount > 0 ? { lastReplyAt: now } : {}),
     });
     supportRows.push({
-      unitId,
+      unitId: planned.id,
       language: DEFAULT_LANGUAGE,
       isPrimary: true,
     });
-  };
-
-  for (const [rootIndex, rootId] of roots.entries()) {
-    const rootSortPath = String(rootIndex + 1).padStart(4, "0");
-    pushPost(rootId, {
-      targetUnitId,
-      rootPostUnitId: rootId,
-      kind: PostKind.POST,
-      body: `Root ${rootIndex + 1} for the large post tree scenario.`,
-      depth: 0,
-      sortPath: rootSortPath,
-      replyCount: repliesPerRoot,
-      directReplyCount: 6,
-      lastReplyAt: now,
-    });
-
-    for (let replyIndex = 0; replyIndex < repliesPerRoot; replyIndex++) {
-      const depth = replyIndex < 6 ? 1 : 2 + (replyIndex % 3);
-      pushPost(randomUUID(), {
-        targetUnitId,
-        rootPostUnitId: rootId,
-        parentPostUnitId: rootId,
-        kind: PostKind.POST,
-        body: `Reply ${replyIndex + 1} under root ${rootIndex + 1}.`,
-        depth,
-        sortPath: `${rootSortPath}.${String(replyIndex + 1).padStart(4, "0")}`,
-      });
-    }
   }
 
   await ctx.prisma.unit.createMany({ data: unitRows });
   await ctx.prisma.post.createMany({ data: postRows });
   await ctx.prisma.unitSupportLanguage.createMany({ data: supportRows });
 
-  for (const [index, unitId] of roots.slice(0, 3).entries()) {
+  const roots = plannedPosts.filter((post) => post.depth === 0);
+  for (const [index, post] of roots.slice(0, 3).entries()) {
     addSeedManifestEntry(result, {
       label: `Large post tree root ${index + 1}`,
       scenario: "large-post-tree",
       unitType: UnitType.POST,
-      unitId,
+      unitId: post.id,
       syncTargets: ["post"],
     });
   }
 
   return result;
+}
+
+export interface LargePostTreePlanInput {
+  rootCount: number;
+  repliesPerRoot: number;
+  maxDepth: number;
+  branchCap: number;
+}
+
+export interface LargePostTreePlanNode {
+  id: string;
+  rootId: string;
+  rootIndex: number;
+  replyIndex: number;
+  parentId: string | null;
+  depth: number;
+  sortPath: string;
+  replyCount: number;
+  directReplyCount: number;
+}
+
+export function buildLargePostTreePlan({
+  rootCount,
+  repliesPerRoot,
+  maxDepth,
+  branchCap,
+}: LargePostTreePlanInput): LargePostTreePlanNode[] {
+  const nodes: LargePostTreePlanNode[] = [];
+
+  for (let rootIndex = 0; rootIndex < rootCount; rootIndex++) {
+    const rootId = randomUUID();
+    const root: LargePostTreePlanNode = {
+      id: rootId,
+      rootId,
+      rootIndex,
+      replyIndex: -1,
+      parentId: null,
+      depth: 0,
+      sortPath: String(rootIndex + 1).padStart(4, "0"),
+      replyCount: 0,
+      directReplyCount: 0,
+    };
+    nodes.push(root);
+
+    const parents: LargePostTreePlanNode[] = [root];
+    const byId = new Map<string, LargePostTreePlanNode>([[root.id, root]]);
+    let parentCursor = 0;
+
+    for (let replyIndex = 0; replyIndex < repliesPerRoot; replyIndex++) {
+      let parent = parents[parentCursor % parents.length]!;
+      let attempts = 0;
+      while (
+        (parent.depth >= maxDepth || parent.directReplyCount >= branchCap) &&
+        attempts < parents.length
+      ) {
+        parentCursor++;
+        attempts++;
+        parent = parents[parentCursor % parents.length]!;
+      }
+      if (parent.depth >= maxDepth) {
+        throw new Error("Large post tree plan ran out of eligible parents.");
+      }
+
+      const childIndex = parent.directReplyCount + 1;
+      const id = randomUUID();
+      const node: LargePostTreePlanNode = {
+        id,
+        rootId,
+        rootIndex,
+        replyIndex,
+        parentId: parent.id,
+        depth: parent.depth + 1,
+        sortPath: `${parent.sortPath}.${String(childIndex).padStart(4, "0")}`,
+        replyCount: 0,
+        directReplyCount: 0,
+      };
+
+      parent.directReplyCount++;
+      nodes.push(node);
+      parents.push(node);
+      byId.set(node.id, node);
+
+      let ancestor: LargePostTreePlanNode | undefined = parent;
+      while (ancestor) {
+        ancestor.replyCount++;
+        ancestor = ancestor.parentId ? byId.get(ancestor.parentId) : undefined;
+      }
+      parentCursor++;
+    }
+  }
+
+  return nodes;
 }
 
 async function runLargeContentTree(ctx: SeedCtx): Promise<SeedResult> {

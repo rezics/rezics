@@ -308,7 +308,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   try {
     if (meiliMode === "init-and-sync") {
       const { initMeiliSearch } = await import("@rezics/server/prisma/seed");
-      await initMeiliSearch(searchClient);
+      await initMeiliSearch(searchClient, { clean: true });
     }
     const { credentials } = await seedBaseline(authPrisma, prisma);
     const slugScopeRows = await prisma.slugScope.findMany({
