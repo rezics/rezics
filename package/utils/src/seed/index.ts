@@ -9,17 +9,56 @@ import {
   type ServerPrismaClient,
 } from "../lib/prisma-factory";
 import { seedInfra, seedSlugScopes } from "./infra";
-import { resetRootUser, seedAllAuthUsers, seedAllMainUsers } from "./users";
+import {
+  type CrossSeedUserResult,
+  resetRootUser,
+  seedAllAuthUsers,
+  seedAllMainUsers,
+} from "./users";
 
 export interface RunSeedOptions {
   resetDatabases?: boolean;
+}
+
+export interface SeedCredential {
+  result: CrossSeedUserResult;
+  serverRole: string;
+}
+
+export interface SeedBaselineResult {
+  credentials: SeedCredential[];
+}
+
+export function printSeedCredentials(
+  credentials: SeedCredential[],
+  opts: { singular?: boolean } = {},
+): void {
+  for (const { result, serverRole } of credentials) {
+    p.log.info(
+      [
+        `${result.name} <${result.email}>`,
+        `  Role: ${result.role} (auth) / ${serverRole} (server)`,
+        `  Slug: ${result.slug}`,
+        `  ID:   ${result.userId}`,
+        `  Pass: ${result.password}`,
+      ].join("\n"),
+    );
+  }
+
+  if (credentials.length > 0) {
+    p.log.warn(
+      opts.singular
+        ? "Store this password securely."
+        : "Store these passwords securely.",
+    );
+  }
 }
 
 export async function seedBaseline(
   authPrisma: AuthPrismaClient,
   serverPrisma: ServerPrismaClient,
   opts: RunSeedOptions = {},
-): Promise<void> {
+): Promise<SeedBaselineResult> {
   const resetDatabases = opts.resetDatabases ?? true;
 
   if (resetDatabases) {
@@ -47,24 +86,12 @@ export async function seedBaseline(
 
   userSpinner.stop("Users seeded.");
 
-  for (const { result, serverRole } of results) {
-    p.log.info(
-      [
-        `${result.name} <${result.email}>`,
-        `  Role: ${result.role} (auth) / ${serverRole} (server)`,
-        `  Slug: ${result.slug}`,
-        `  ID:   ${result.userId}`,
-        `  Pass: ${result.password}`,
-      ].join("\n"),
-    );
-  }
-
-  p.log.warn("Store these passwords securely.");
-
   const infraSpinner = p.spinner();
   infraSpinner.start("Seeding infrastructure...");
   await seedInfra(serverPrisma, rootUserId);
   infraSpinner.stop("Infrastructure seeded.");
+
+  return { credentials: results };
 }
 
 export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
@@ -75,7 +102,8 @@ export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
   );
 
   try {
-    await seedBaseline(authPrisma, serverPrisma, opts);
+    const { credentials } = await seedBaseline(authPrisma, serverPrisma, opts);
+    printSeedCredentials(credentials);
   } finally {
     await Promise.all([
       authPrisma.$disconnect().catch(() => {}),
@@ -106,16 +134,7 @@ export async function runResetRoot(): Promise<void> {
     );
     rootSpinner.stop("Root user reset.");
 
-    p.log.info(
-      [
-        `${result.name} <${result.email}>`,
-        `  Role: ${result.role} (auth) / ${serverRole} (server)`,
-        `  Slug: ${result.slug}`,
-        `  ID:   ${result.userId}`,
-        `  Pass: ${result.password}`,
-      ].join("\n"),
-    );
-    p.log.warn("Store this password securely.");
+    printSeedCredentials([{ result, serverRole }], { singular: true });
   } finally {
     await Promise.all([
       authPrisma.$disconnect().catch(() => {}),

@@ -70,10 +70,16 @@ async function syncUser(
       followingsCount: true,
       joinDate: true,
       permission: true,
-      unit: { select: { slug: true } },
     },
   });
   if (!user) return;
+
+  const unit = await ctx.prisma.unit.findUnique({
+    where: { id: unitId },
+    select: { slug: true, type: true },
+  });
+  if (unit?.type !== "USER") return;
+
   await client.addOrUpdateUsers([
     {
       id: user.unitId,
@@ -90,7 +96,7 @@ async function syncUser(
           ? user.joinDate.toISOString()
           : (user.joinDate ?? null),
       permission: user.permission,
-      slug: user.unit?.slug ?? null,
+      slug: unit.slug ?? null,
     },
   ]);
 }

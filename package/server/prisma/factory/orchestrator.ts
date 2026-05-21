@@ -1,15 +1,15 @@
-import { PostKind, UnitType } from "../generated/client.js";
+import { PostKind } from "../generated/client.js";
+import { seedBooks, seedChaptersForBook } from "./books.js";
+import { seedEchoKV } from "./echokv.js";
+import { seedEngagement } from "./engagement.js";
 import {
   seedOrganizations,
   seedPeople,
   seedSubjectAttributions,
   seedSubjectEntities,
 } from "./entities.js";
-import { seedBooks, seedChaptersForBook } from "./books.js";
-import { seedEchoKV } from "./echokv.js";
-import { seedEngagement } from "./engagement.js";
 import { seedGames } from "./games.js";
-import { addSeedManifestEntry, createSeedResult } from "./manifest.js";
+import { createSeedResult } from "./manifest.js";
 import { seedMedia } from "./media.js";
 import { seedPinboard } from "./pinboard.js";
 import { seedPostsForWorks, seedWikiTranslationGroups } from "./posts.js";
@@ -49,36 +49,11 @@ export async function runFactorySeed(
   console.log(
     `[Seed]   ${users.length} users, ${people.length} person entities, ${organizations.length} organization entities, ${subjects.length} subject entities`,
   );
-  for (const user of users.slice(0, 5)) {
-    addSeedManifestEntry(result, {
-      label: `User: ${user.name}`,
-      unitType: UnitType.USER,
-      unitId: user.userId,
-      syncTargets: ["user"],
-    });
-  }
-  for (const entity of [...people, ...organizations, ...subjects].slice(0, 8)) {
-    addSeedManifestEntry(result, {
-      label: `Entity: ${entity.name}`,
-      unitType: UnitType.ENTITY,
-      unitId: entity.unitId,
-      syncTargets: ["entity"],
-      notes: entity.kind,
-    });
-  }
   done();
 
   done = stepTimer("Step 2: Tags");
   const tags = await seedTags(ctx, plan.tags, users);
   console.log(`[Seed]   ${tags.length} random tags`);
-  for (const tag of tags.slice(0, 5)) {
-    addSeedManifestEntry(result, {
-      label: "Factory tag",
-      unitType: tag.type,
-      unitId: tag.id,
-      syncTargets: ["content"],
-    });
-  }
   done();
 
   done = stepTimer("Step 3: Books + Games + Media");
@@ -101,27 +76,11 @@ export async function runFactorySeed(
   console.log(
     `[Seed]   ${books.length} books, ${games.length} games, ${mediaItems.length} media, ${subjectAttributionCount} subject attributions`,
   );
-  for (const work of allWorks.slice(0, 12)) {
-    addSeedManifestEntry(result, {
-      label: `Factory ${work.type.toLowerCase()}`,
-      unitType: work.type,
-      unitId: work.id,
-      syncTargets: ["content"],
-    });
-  }
   done();
 
   done = stepTimer("Step 4: Realms");
   const realms = await seedRealms(ctx, plan.realms, users, allWorkIds);
   console.log(`[Seed]   ${realms.length} realms`);
-  for (const realm of realms.slice(0, 5)) {
-    addSeedManifestEntry(result, {
-      label: "Factory realm",
-      unitType: realm.type,
-      unitId: realm.id,
-      syncTargets: ["realm"],
-    });
-  }
   done();
 
   done = stepTimer("Step 5: Scores");
@@ -145,14 +104,6 @@ export async function runFactorySeed(
     scoreEntries,
   );
   console.log(`[Seed]   ${posts.length} posts`);
-  for (const post of posts.slice(0, 12)) {
-    addSeedManifestEntry(result, {
-      label: `Factory ${post.kind ?? "post"}`,
-      unitType: post.type,
-      unitId: post.id,
-      syncTargets: ["post"],
-    });
-  }
   done();
 
   done = stepTimer("Step 7: Wiki translation groups");
@@ -180,14 +131,6 @@ export async function runFactorySeed(
   console.log(
     `[Seed]   ${shelves.length} shelves (${reviewPosts.length} review posts available)`,
   );
-  for (const shelf of shelves.slice(0, 5)) {
-    addSeedManifestEntry(result, {
-      label: "Factory shelf",
-      unitType: shelf.type,
-      unitId: shelf.id,
-      syncTargets: ["content", "content-contained-units"],
-    });
-  }
   done();
 
   done = stepTimer("Step 10: Chapters + BookContentStructureNode rows");
@@ -232,14 +175,6 @@ export async function runFactorySeed(
     tags.map((t) => t.id),
   );
   console.log(`[Seed]   ${zones.length} zones`);
-  for (const zone of zones.slice(0, 5)) {
-    addSeedManifestEntry(result, {
-      label: "Factory zone",
-      unitType: zone.type,
-      unitId: zone.id,
-      syncTargets: ["content"],
-    });
-  }
   done();
 
   done = stepTimer("Step 13: EchoKV");

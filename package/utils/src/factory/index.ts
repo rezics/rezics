@@ -1,20 +1,20 @@
 import { readFileSync } from "node:fs";
 import * as p from "@clack/prompts";
+import { SLUG_SCOPES } from "@rezics/contract";
 import {
   FACTORY_SCENARIO_NAMES,
   FACTORY_SCENARIOS,
   type FactoryScenarioName,
   makeSeedCtx,
   mergeSeedResults,
-  runFactorySeed,
   runFactoryScenarios,
+  runFactorySeed,
   type SeedPlan,
-  type SeedResult,
   SeedPlanSchema,
   type SeedPreset,
+  type SeedResult,
   syncSeedManifestToMeili,
 } from "@rezics/server/prisma/factory";
-import { SLUG_SCOPES } from "@rezics/contract";
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
 import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
@@ -22,7 +22,7 @@ import {
   createFactorySyncDependencies,
   createSeedSearchClient,
 } from "../lib/search";
-import { seedBaseline } from "../seed/index";
+import { printSeedCredentials, seedBaseline } from "../seed/index";
 import { tweakPlan } from "./interactive";
 import { getPreset, listPresetNames, PRESETS } from "./presets";
 
@@ -225,10 +225,10 @@ function resolveScenarioNames(
 function printManifest(result: SeedResult, format: ManifestFormat): void {
   if (format === "none") return;
 
-  if (format === "human" || format === "both") {
+  if ((format === "human" || format === "both") && result.manifest.length > 0) {
     p.log.info(
       [
-        "Seed manifest:",
+        "Special seed targets:",
         ...result.manifest.map((entry) => {
           const scenario = entry.scenario ? ` [${entry.scenario}]` : "";
           return `- ${entry.label}${scenario}: ${entry.unitType} ${entry.unitId}`;
@@ -310,7 +310,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       const { initMeiliSearch } = await import("@rezics/server/prisma/seed");
       await initMeiliSearch(searchClient);
     }
-    await seedBaseline(authPrisma, prisma);
+    const { credentials } = await seedBaseline(authPrisma, prisma);
     const slugScopeRows = await prisma.slugScope.findMany({
       select: { slug: true, unitId: true },
     });
@@ -345,6 +345,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       );
     }
     printManifest(result, resolveManifestFormat(opts.manifestFormat));
+    printSeedCredentials(credentials);
   } finally {
     await Promise.all([
       prisma.$disconnect().catch(() => {}),
