@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const EntityEditPage = lazyRouteComponent(
-  () => import("@/entity-edit"),
+  () => import("@/entity"),
   "EntityEditPage",
 );
 

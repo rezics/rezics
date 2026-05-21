@@ -1,8 +1,8 @@
 import type { EntityDTO, UnitTranslationDTO } from "@rezics/contract";
 
 /**
- * Pure selectors for the entity-detail feature. No React, no hooks — safe to
- * call from any layer.
+ * Pure selectors for the Entity feature. No React, no hooks — safe to call
+ * from any layer.
  */
 
 export function getEntityTranslation(

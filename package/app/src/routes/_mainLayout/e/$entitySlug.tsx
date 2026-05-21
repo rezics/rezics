@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 
 const EntityDetailPage = lazyRouteComponent(
-  () => import("@/entity-detail"),
+  () => import("@/entity"),
   "EntityDetailPage",
 );
 

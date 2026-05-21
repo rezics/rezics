@@ -1,5 +1,4 @@
 import type { EntityDTO } from "@rezics/contract";
-import { EntityAvatar, EntityKindBadge, EntityVerifiedIcon } from "@/entity";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import {
   Button,
@@ -11,6 +10,9 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { Pencil } from "lucide-react";
+import { EntityAvatar } from "./EntityAvatar";
+import { EntityKindBadge } from "./EntityKindBadge";
+import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
 import {
   getEntityLanguages,
   getEntityPrimaryTitle,

@@ -14,7 +14,7 @@ import { WorksTab } from "../sections/WorksTab";
 /*
  * AWARDS_TAB: uncomment when an awards data source lands.
  *   Tab registration in `tabs[]` below AND the JSX block must both be
- *   uncommented. See entity-detail-page spec.
+ *   uncommented. See entity detail page spec.
  *
  * import { AwardsTab, hasAwardsData } from "../sections/AwardsTab";
  */
@@ -22,7 +22,7 @@ import { WorksTab } from "../sections/WorksTab";
 /*
  * NEWS_TAB: uncomment when a news/press data source lands.
  *   Tab registration in `tabs[]` below AND the JSX block must both be
- *   uncommented. See entity-detail-page spec.
+ *   uncommented. See entity detail page spec.
  *
  * import { NewsTab, hasNewsData } from "../sections/NewsTab";
  */

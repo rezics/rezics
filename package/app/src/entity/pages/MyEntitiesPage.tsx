@@ -3,8 +3,8 @@ import { Spinner } from "@rezics/ui";
 import { unitHref } from "@rezics/ui/primitive/link";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
-import { EntityIdentityRow } from "@/entity";
 import { useUserProfileStore } from "@/user/states";
+import { EntityIdentityRow } from "../components/EntityIdentityRow";
 
 export function MyEntitiesPage() {
   const currentUserUnitId = useUserProfileStore(
