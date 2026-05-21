@@ -1,5 +1,6 @@
 import type { CreditAttributionDTO } from "@rezics/contract";
 import { linkCreditAttributionSchema } from "@rezics/contract";
+import { creditAttributionRoleKeySchema } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { creditAttributionService } from "./credit-attribution.service";
@@ -53,7 +54,7 @@ export const creditAttributionApi = new Elysia({
       params: t.Object({
         unitId: t.String(),
         entityId: t.String(),
-        role: t.String(),
+        role: creditAttributionRoleKeySchema,
       }),
       detail: {
         summary: "Unlink credit attribution",

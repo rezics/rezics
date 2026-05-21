@@ -108,6 +108,7 @@ export class EntityService {
           entity: {
             create: {
               kind: input.kind ?? undefined,
+              avatar: input.avatar ?? undefined,
               verified: input.verified ?? false,
             },
           },
@@ -164,11 +165,17 @@ export class EntityService {
         );
       }
 
-      if (input.kind !== undefined || input.verified !== undefined) {
+      if (
+        input.kind !== undefined ||
+        input.avatar !== undefined ||
+        input.verified !== undefined
+      ) {
         await tx.entity.update({
           where: { unitId },
           data: {
             kind: input.kind !== undefined ? (input.kind ?? null) : undefined,
+            avatar:
+              input.avatar !== undefined ? (input.avatar ?? null) : undefined,
             verified: input.verified !== undefined ? input.verified : undefined,
           },
         });
@@ -324,6 +331,7 @@ export function mapEntityUpdateFieldKeys(
 ): UnitFieldKey[] {
   return uniqueFieldKeys([
     input.kind !== undefined ? EntityFieldKey.KIND : undefined,
+    input.avatar !== undefined ? EntityFieldKey.AVATAR : undefined,
     input.verified !== undefined ? EntityFieldKey.VERIFIED : undefined,
     input.slug !== undefined ? EntityFieldKey.SLUG : undefined,
     ...(input.translations ?? []).flatMap((tr) => [

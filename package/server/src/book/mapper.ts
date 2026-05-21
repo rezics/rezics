@@ -89,6 +89,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
           entity: {
             unitId: innerEntity.unitId ?? a.entityId,
             kind: innerEntity.kind ?? undefined,
+            avatar: innerEntity.avatar ?? undefined,
             slug: innerEntity.slug ?? undefined,
             translations: entityTranslations.map((tr: any) => ({
               unitId: tr.unitId,

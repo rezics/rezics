@@ -70,6 +70,7 @@ function entityRow(unitId = "entity-1", slug: string | null = null) {
   return {
     unitId,
     kind: "person",
+    avatar: "https://cdn.example/entity.png",
     verified: false,
     unit: {
       id: unitId,
@@ -224,6 +225,31 @@ describe("POST /entity body validation", () => {
       }),
     );
     expect(res.status).toBe(403);
+  });
+
+  test("rejects unregistered kind before service writes", async () => {
+    resetPrisma();
+    currentIdentity = {
+      sub: "user-1",
+      userId: "user-1",
+      permission: { role: "USER" },
+    };
+    dbAdmin = false;
+
+    const app = await makeApp();
+    const res = await app.handle(
+      new Request("http://localhost/entity", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          kind: "made_up_kind",
+          translations: [{ language: "en", title: "X" }],
+        }),
+      }),
+    );
+    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect(res.status).toBeLessThan(500);
+    expect((prismaMock.$transaction as any).mock.calls.length).toBe(0);
   });
 });
 

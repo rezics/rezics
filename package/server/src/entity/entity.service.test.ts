@@ -37,6 +37,7 @@ function makeEntityRow(overrides: Record<string, any> = {}) {
   return {
     unitId: overrides.unitId ?? "entity-1",
     kind: overrides.kind ?? "person",
+    avatar: overrides.avatar ?? null,
     verified: overrides.verified ?? false,
     unit: {
       id: overrides.unitId ?? "entity-1",
@@ -129,6 +130,25 @@ describe("EntityService.create", () => {
 
     expect(row.unitId).toBe("entity-1");
     expect(syncEntityToMeili).toHaveBeenCalledWith("entity-1");
+  });
+
+  test("persists avatar on the Entity extension row", async () => {
+    const { txClient } = freshMocks();
+    const { entityService } = await import("./entity.service");
+
+    await entityService.create(
+      {
+        kind: "person",
+        avatar: "https://cdn.example/entity.png",
+        translations: [{ language: "en", title: "Test Author" }],
+      },
+      { callerUnitId: "user-1", isAdmin: false },
+    );
+
+    const createArgs = (txClient.unit.create as any).mock.calls[0]?.[0];
+    expect(createArgs.data.entity.create.avatar).toBe(
+      "https://cdn.example/entity.png",
+    );
   });
 
   test("non-admin: rejects payload that includes slug", async () => {
@@ -322,6 +342,27 @@ describe("EntityService.update", () => {
         { callerUnitId: "user-1", isAdmin: false },
       ),
     ).resolves.toBeDefined();
+  });
+
+  test("non-admin: avatar update succeeds and records avatar field key", async () => {
+    const { txClient } = freshMocks();
+    const { entityService, mapEntityUpdateFieldKeys } = await import(
+      "./entity.service"
+    );
+
+    await expect(
+      entityService.update(
+        "entity-1",
+        { avatar: "https://cdn.example/new.png" },
+        { callerUnitId: "user-1", isAdmin: false },
+      ),
+    ).resolves.toBeDefined();
+
+    const updateArgs = (txClient.entity.update as any).mock.calls[0]?.[0];
+    expect(updateArgs.data.avatar).toBe("https://cdn.example/new.png");
+    expect(mapEntityUpdateFieldKeys({ avatar: null })).toContain(
+      "entity.avatar",
+    );
   });
 });
 

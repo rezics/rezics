@@ -6,6 +6,7 @@ export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
   return {
     unitId: row.unitId,
     kind: row.kind ?? undefined,
+    avatar: row.avatar ?? undefined,
     verified: row.verified,
     slug: row.unit.slug ?? undefined,
     ownerUnitId: row.unit.userId ?? undefined,

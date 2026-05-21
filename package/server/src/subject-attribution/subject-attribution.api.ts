@@ -3,6 +3,7 @@ import {
   linkSubjectAttributionSchema,
   subjectAttributionBySubjectQuerySchema,
   subjectAttributionByUnitQuerySchema,
+  subjectAttributionRoleKeySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
@@ -72,7 +73,7 @@ export const subjectAttributionApi = new Elysia({
       params: t.Object({
         unitId: t.String(),
         entityId: t.String(),
-        role: t.String(),
+        role: subjectAttributionRoleKeySchema,
       }),
       detail: {
         summary: "Unlink subject attribution",

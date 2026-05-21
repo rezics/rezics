@@ -16,6 +16,7 @@ export function mapCreditAttributionToDTO(
       ? {
           unitId: entityUnit.id,
           kind: entityExt?.kind ?? undefined,
+          avatar: entityExt?.avatar ?? undefined,
           verified: entityExt?.verified ?? false,
           slug: entityUnit.slug ?? undefined,
           ownerUnitId: entityUnit.userId ?? undefined,
