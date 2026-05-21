@@ -7,7 +7,8 @@ import { type FormEvent, useState } from "react";
 interface EntityInlineCreateFormProps {
   initialTitle?: string;
   initialLanguage?: string;
-  kindHint?: EntityKind | string;
+  creationContext?: "catalog" | "personal";
+  kindHint?: EntityKind;
   onCreated: (unitId: string) => void;
   onCancel?: () => void;
 }
@@ -15,13 +16,15 @@ interface EntityInlineCreateFormProps {
 export function EntityInlineCreateForm({
   initialTitle = "",
   initialLanguage = "en",
+  creationContext = "catalog",
   kindHint,
   onCreated,
   onCancel,
 }: EntityInlineCreateFormProps) {
   const [title, setTitle] = useState(initialTitle);
   const [language, setLanguage] = useState(initialLanguage);
-  const [kind, setKind] = useState<string>(kindHint ?? entityKinds[0]);
+  const [kind, setKind] = useState<EntityKind>(kindHint ?? entityKinds[0]);
+  const [avatar, setAvatar] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const mutation = useCreateEntity({
@@ -40,7 +43,11 @@ export function EntityInlineCreateForm({
     const trimmedLang = language.trim() || "en";
     const payload: CreateEntityInput = {
       kind,
-      creationMode: CreationMode.WIKI,
+      avatar: avatar.trim() || null,
+      creationMode:
+        creationContext === "personal"
+          ? CreationMode.PERSONAL
+          : CreationMode.WIKI,
       translations: [{ language: trimmedLang, title: trimmedTitle }],
     };
     mutation.mutate(payload);
@@ -78,7 +85,7 @@ export function EntityInlineCreateForm({
           <select
             id="entity-inline-kind"
             value={kind}
-            onChange={(e) => setKind(e.target.value)}
+            onChange={(e) => setKind(e.target.value as EntityKind)}
             className="h-9 rounded-md border border-border-whisper bg-surface-canvas px-2 text-sm text-text-primary"
           >
             {entityKinds.map((k) => (
@@ -88,6 +95,15 @@ export function EntityInlineCreateForm({
             ))}
           </select>
         </div>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="entity-inline-avatar">Avatar URL</Label>
+        <Input
+          id="entity-inline-avatar"
+          value={avatar}
+          onChange={(e) => setAvatar(e.target.value)}
+          placeholder="https://cdn.example/entity.png"
+        />
       </div>
       {error ? <p className="text-xs text-text-error">{error}</p> : null}
       <div className="flex justify-end gap-2">

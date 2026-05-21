@@ -21,30 +21,39 @@ export interface EntityPickerProps {
   onOpenChange: (open: boolean) => void;
   /** Invoked with the selected entity's unitId (existing or just-created). */
   onSelect: (unitId: string) => void;
-  /**
-   * Optional kind hint. Pre-fills the inline-create kind field and weights
-   * search results toward this kind. NOT a hard filter.
-   */
-  kindHint?: EntityKind | string;
+  /** Catalog creates wiki entities; personal creates current-user entities. */
+  creationContext?: "catalog" | "personal";
+  /** Optional current USER unitId for personal-context owner bias. */
+  ownerUnitId?: string;
+  /** Soft kind hints for ranking and inline-create defaults. */
+  kindHints?: readonly EntityKind[];
+  kindHint?: EntityKind;
 }
 
 export function EntityPicker({
   open,
   onOpenChange,
   onSelect,
+  creationContext = "catalog",
+  ownerUnitId,
+  kindHints,
   kindHint,
 }: EntityPickerProps) {
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const debouncedQuery = useDebouncedValue(query.trim(), 200);
 
+  const effectiveKindHints = useMemo(
+    () => kindHints ?? (kindHint ? [kindHint] : []),
+    [kindHint, kindHints],
+  );
+
   const searchQuery = useMemo(
     () => ({
       q: debouncedQuery || undefined,
-      kind: kindHint,
       limit: 12,
     }),
-    [debouncedQuery, kindHint],
+    [debouncedQuery],
   );
 
   const { data, isFetching } = useEntitySearch(searchQuery);
@@ -53,13 +62,18 @@ export function EntityPicker({
   // When the kindHint is provided we soft-sort matches of that kind first,
   // emulating a Meili `filter` weight without dropping other matches.
   const orderedResults = useMemo(() => {
-    if (!kindHint) return results;
+    if (effectiveKindHints.length === 0 && !ownerUnitId) return results;
     return [...results].sort((a, b) => {
-      const am = a.kind === kindHint ? 0 : 1;
-      const bm = b.kind === kindHint ? 0 : 1;
+      const ao =
+        creationContext === "personal" && a.ownerUnitId === ownerUnitId ? 0 : 1;
+      const bo =
+        creationContext === "personal" && b.ownerUnitId === ownerUnitId ? 0 : 1;
+      if (ao !== bo) return ao - bo;
+      const am = a.kind && effectiveKindHints.includes(a.kind) ? 0 : 1;
+      const bm = b.kind && effectiveKindHints.includes(b.kind) ? 0 : 1;
       return am - bm;
     });
-  }, [results, kindHint]);
+  }, [creationContext, effectiveKindHints, ownerUnitId, results]);
 
   const handleSelect = (unitId: string) => {
     onSelect(unitId);
@@ -137,7 +151,8 @@ export function EntityPicker({
         {creating ? (
           <EntityInlineCreateForm
             initialTitle={query.trim()}
-            kindHint={kindHint}
+            creationContext={creationContext}
+            kindHint={effectiveKindHints[0]}
             onCreated={handleSelect}
             onCancel={() => setCreating(false)}
           />

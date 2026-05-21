@@ -1,6 +1,6 @@
 import { entityKeys, useEntity, useUpdateEntity } from "@rezics/api/entity";
 import { useServerPermission } from "@rezics/api/hooks";
-import type { EntityDTO } from "@rezics/contract";
+import type { EntityDTO, EntityKind } from "@rezics/contract";
 import {
   BasicAdminPermission,
   DEFAULT_LANGUAGE,
@@ -67,6 +67,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
   const [addOpen, setAddOpen] = useState(false);
 
   const [kind, setKind] = useState(NO_KIND);
+  const [avatar, setAvatar] = useState("");
   const [verified, setVerified] = useState(false);
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
@@ -87,6 +88,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
   useEffect(() => {
     if (!entity) return;
     setKind(entity.kind ?? NO_KIND);
+    setAvatar(entity.avatar ?? "");
     setVerified(entity.verified);
     setSlug(entity.slug ?? "");
   }, [entity]);
@@ -124,7 +126,8 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
     const updated = await updateEntity.mutateAsync({
       unitId,
       input: {
-        kind: kind === NO_KIND ? null : kind,
+        kind: kind === NO_KIND ? null : (kind as EntityKind),
+        avatar: avatar.trim() || null,
         verified,
         slug: slug.trim() ? slug.trim() : null,
         translations: [
@@ -219,6 +222,14 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
                 id="entity-slug"
                 value={slug}
                 onChange={(event) => setSlug(event.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="entity-avatar">Avatar URL</Label>
+              <Input
+                id="entity-avatar"
+                value={avatar}
+                onChange={(event) => setAvatar(event.target.value)}
               />
             </div>
             <Label

@@ -1,5 +1,5 @@
 import { useCreateEntity } from "@rezics/api/entity";
-import type { CreateEntityInput } from "@rezics/contract";
+import type { CreateEntityInput, EntityKind } from "@rezics/contract";
 import { CreationMode, entityKinds } from "@rezics/contract";
 import { unitHref } from "@rezics/ui/primitive/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
@@ -10,7 +10,8 @@ export function NewEntityPage() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("en");
-  const [kind, setKind] = useState<string>(entityKinds[0]);
+  const [kind, setKind] = useState<EntityKind>(entityKinds[0]);
+  const [avatar, setAvatar] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const mutation = useCreateEntity({
@@ -36,6 +37,7 @@ export function NewEntityPage() {
     }
     const payload: CreateEntityInput = {
       kind,
+      avatar: avatar.trim() || null,
       creationMode: CreationMode.PERSONAL,
       translations: [{ language: language.trim() || "en", title: trimmed }],
     };
@@ -80,7 +82,7 @@ export function NewEntityPage() {
             <select
               id="entity-kind"
               value={kind}
-              onChange={(e) => setKind(e.target.value)}
+              onChange={(e) => setKind(e.target.value as EntityKind)}
               className="h-9 rounded-md border border-border-whisper bg-surface-canvas px-2 text-sm text-text-primary"
             >
               {entityKinds.map((k) => (
@@ -90,6 +92,15 @@ export function NewEntityPage() {
               ))}
             </select>
           </div>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="entity-avatar">Avatar URL</Label>
+          <Input
+            id="entity-avatar"
+            value={avatar}
+            onChange={(e) => setAvatar(e.target.value)}
+            placeholder="https://cdn.example/me.png"
+          />
         </div>
 
         {error ? <p className="text-sm text-text-error">{error}</p> : null}

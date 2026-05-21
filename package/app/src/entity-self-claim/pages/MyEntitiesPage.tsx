@@ -78,6 +78,18 @@ export function MyEntitiesPage() {
                   to={href}
                   className="flex w-full items-center gap-3 rounded-md border border-border-whisper p-3 hover:border-border-strong"
                 >
+                  <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-subtle text-xs text-text-secondary">
+                    {entity.avatar ? (
+                      <img
+                        src={entity.avatar}
+                        alt=""
+                        className="size-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      title.slice(0, 1).toUpperCase()
+                    )}
+                  </span>
                   <span className="flex-1 truncate text-text-primary">
                     {title}
                   </span>

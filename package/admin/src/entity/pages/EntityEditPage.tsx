@@ -1,4 +1,5 @@
 import { useEntity, useUpdateEntity } from "@rezics/api/entity";
+import type { EntityKind } from "@rezics/contract";
 import { entityKinds, validateSlug } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -53,7 +54,8 @@ export default function EntityEditPage() {
     onSuccess: () => setError(null),
   });
 
-  const [kind, setKind] = React.useState<string>("");
+  const [kind, setKind] = React.useState<EntityKind | "">("");
+  const [avatar, setAvatar] = React.useState("");
   const [verified, setVerified] = React.useState(false);
   const [slugInput, setSlugInput] = React.useState("");
   const [translations, setTranslations] = React.useState<TranslationDraft[]>(
@@ -64,6 +66,7 @@ export default function EntityEditPage() {
     const entity = entityQuery.data;
     if (!entity) return;
     setKind(entity.kind ?? "");
+    setAvatar(entity.avatar ?? "");
     setVerified(Boolean(entity.verified));
     setSlugInput(entity.slug ?? "");
     setTranslations(
@@ -145,7 +148,8 @@ export default function EntityEditPage() {
     await updateMutation.mutateAsync({
       unitId,
       input: {
-        kind: kind.trim() ? kind.trim() : undefined,
+        kind: kind || undefined,
+        avatar: avatar.trim() || null,
         verified,
         slug: wantsSlug ? slugInput.trim() || null : undefined,
         translations:
@@ -221,7 +225,7 @@ export default function EntityEditPage() {
                   <select
                     id="entity-kind"
                     value={kind}
-                    onChange={(e) => setKind(e.target.value)}
+                    onChange={(e) => setKind(e.target.value as EntityKind | "")}
                     className="h-9 rounded-md border border-border-whisper bg-transparent px-2 text-sm"
                   >
                     <option value="">(none)</option>
@@ -246,6 +250,15 @@ export default function EntityEditPage() {
                         : "Unverified — slug edits disabled."}
                     </span>
                   </div>
+                </div>
+                <div className="flex flex-col gap-1.5 sm:col-span-2">
+                  <Label htmlFor="entity-avatar">Avatar URL</Label>
+                  <Input
+                    id="entity-avatar"
+                    value={avatar}
+                    onChange={(e) => setAvatar(e.target.value)}
+                    placeholder="https://cdn.example/entity.png"
+                  />
                 </div>
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
                   <Label htmlFor="entity-slug">Slug</Label>

@@ -14,6 +14,18 @@ export function EntityResultRow({ entity, onSelect }: EntityResultRowProps) {
       onClick={() => onSelect(entity.unitId)}
       className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-surface-subtle"
     >
+      <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-subtle text-xs text-text-secondary">
+        {entity.avatar ? (
+          <img
+            src={entity.avatar}
+            alt=""
+            className="size-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          getEntityPrimaryTitle(entity).slice(0, 1).toUpperCase()
+        )}
+      </span>
       <span className="flex-1 truncate text-text-primary">
         {getEntityPrimaryTitle(entity)}
       </span>
