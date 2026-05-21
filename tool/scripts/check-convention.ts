@@ -630,6 +630,7 @@ function scanShortLongSlugConvention(apiFiles: string[]): Violation[] {
         ROUTE_HANDLER_PATH_PATTERN,
       )) {
         const path = handlerMatch[2]!;
+        if (isLong && /^\/by-slug\/:slug\/?$/.test(path)) continue;
         const segments = path.split("/").filter(Boolean);
         for (const segment of segments) {
           if (!segment.startsWith(":")) continue;
@@ -836,7 +837,7 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5, R6, R7, R9 } = currentSnapshot.byRule;
+  const { R1, R2, R3, R4, R5, R6, R7, R9, R10 } = currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );

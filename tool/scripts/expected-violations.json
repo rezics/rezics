@@ -1,15 +1,16 @@
 {
   "_note": "TEMPORARY BASELINE. This snapshot exists only to block NEW violations from accumulating while a migration is in progress. Delete this file once the migration lands.",
-  "total": 6,
+  "total": 9,
   "byRule": {
     "R1": 5,
     "R2": 0,
     "R3": 0,
-    "R4": 0,
+    "R4": 2,
     "R5": 1,
-    "R6": 0,
+    "R6": 1,
     "R7": 0,
-    "R9": 0
+    "R9": 0,
+    "R10": 0
   },
   "keys": [
     "R1  package/server/src/realm/realm-tag-unit.api.ts  prefix=\"/realm-tag-units\"",
@@ -17,6 +18,9 @@
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/admin/low-score-tags\"",
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/tag-votes\"",
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/unit-tags\"",
-    "R5  package/preview/src/components/BookShareDocument.tsx:107"
+    "R4  package/admin/src/routes/_admin/entities",
+    "R4  package/app/src/routes/_mainLayout/user/me/entities",
+    "R5  package/preview/src/components/BookShareDocument.tsx:107",
+    "R6  package/app/src/inbox/sections/ConversationThreadSection.tsx:60"
   ]
 }

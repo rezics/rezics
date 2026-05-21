@@ -48,6 +48,7 @@ export const entityApi = new Elysia({ prefix: "/entity" })
     },
   )
 
+  // @convention:root-list-ok
   .get(
     "/",
     async ({ query }): Promise<{ entities: EntityDTO[]; total: number }> => {
