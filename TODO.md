@@ -1,7 +1,8 @@
 ## Section 1
 
 - [ ] UnitTag 表是否要重命名到 TagUnit 比較好？
-- [ ] 搞清楚 ui package 如何 允许 unocss config 以及basic-css 共享, 以提供给 dispatch
+- [ ] 搞清楚 ui package 如何 允许 unocss config 以及basic-css 共享, 以提供给 dispatch，還有未來別的package
+- [ ] 定製 elysia + prisma 的 console 輸出主題，可以做成獨立 package
 - [ ] meilisearch 可能的性能問題的全面分析
 - [ ] 章節數量，加入 book info
 - [ ] seed factory 相关脚本需要彻底的优化，以满足我的需求，包括将 meili search sync 流程加入 factory，以及搞清楚，要怎么满足特殊测试，譬如大post tree, 大 content tree, 大 history， 复杂 shelf。也许这种特殊 seed 可以作为单独的流程在常规 seed 选项之后进行 seed，然后 seed 完之后输出 unit type - unit id 
