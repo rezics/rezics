@@ -8,6 +8,11 @@ mock.module("@/meili/content/sync", () => ({
   patchContentSubjectsToMeili,
 }));
 
+const patchEntitySubjectFacetsToMeili = mock(async (_entityId: string) => {});
+mock.module("@/meili/entity/sync", () => ({
+  patchEntitySubjectFacetsToMeili,
+}));
+
 const now = new Date("2026-05-18T00:00:00.000Z");
 
 function makeSubjectRow(overrides: Record<string, any> = {}) {
@@ -79,6 +84,7 @@ function freshMocks() {
 
 beforeEach(() => {
   patchContentSubjectsToMeili.mockClear();
+  patchEntitySubjectFacetsToMeili.mockClear();
 });
 
 describe("SubjectAttributionService.link", () => {
@@ -120,6 +126,7 @@ describe("SubjectAttributionService.link", () => {
 
     expect(row.entity?.kind).toBe("character");
     expect(patchContentSubjectsToMeili).toHaveBeenCalledWith("work-1");
+    expect(patchEntitySubjectFacetsToMeili).toHaveBeenCalledWith("character-1");
   });
 });
 

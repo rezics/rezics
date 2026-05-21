@@ -5,6 +5,7 @@ import type {
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { patchContentCreditsToMeili } from "@/meili/content/sync";
+import { patchEntityCreditFacetsToMeili } from "@/meili/entity/sync";
 import {
   assertCanEditCollaborativeMetadata,
   creditRoleFieldKey,
@@ -31,6 +32,7 @@ export class CreditAttributionService {
         include: creditAttributionInclude,
       });
       await patchContentCreditsToMeili(req.unitId);
+      await patchEntityCreditFacetsToMeili(req.entityId);
       return mapCreditAttributionToDTO(row);
     }
 
@@ -56,6 +58,7 @@ export class CreditAttributionService {
       return created;
     });
     await patchContentCreditsToMeili(req.unitId);
+    await patchEntityCreditFacetsToMeili(req.entityId);
     return mapCreditAttributionToDTO(row);
   }
 
@@ -74,6 +77,7 @@ export class CreditAttributionService {
         },
       });
       await patchContentCreditsToMeili(unitId);
+      await patchEntityCreditFacetsToMeili(entityId);
       return;
     }
 
@@ -94,6 +98,7 @@ export class CreditAttributionService {
       });
     });
     await patchContentCreditsToMeili(unitId);
+    await patchEntityCreditFacetsToMeili(entityId);
   }
 
   async listByUnit(unitId: string): Promise<CreditAttributionDTO[]> {

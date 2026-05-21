@@ -22,6 +22,8 @@ export {
   patchContentSubjects,
   patchContentTags,
   patchContentTranslations,
+  patchEntityCreditFacets,
+  patchEntitySubjectFacets,
   patchFeedbackResolution,
   patchPostFields,
   patchPostsAuthor,

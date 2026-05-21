@@ -1,5 +1,6 @@
 import {
   ContentSearchOptionsSchema,
+  EntitySearchOptionsSchema,
   type FeedbackListQuery,
   feedbackListQuerySchema,
   isRoot,
@@ -59,6 +60,21 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       detail: {
         summary: "Search users (Meilisearch)",
         tags: ["Meili", "Users", "Search"],
+      },
+    },
+  )
+  .post(
+    "/entities/search",
+    async ({ body }) => {
+      return meiliService.searchEntities(body);
+    },
+    {
+      body: EntitySearchOptionsSchema,
+      detail: {
+        summary: "Search entities (Meilisearch)",
+        description:
+          "Full-text search over Entity identity with kind, owner, verified, and attribution role facets.",
+        tags: ["Meili", "Entities", "Search"],
       },
     },
   )
@@ -222,6 +238,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Init realms index",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/entities/init",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init entities index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init entities index");
+      }
+      await meiliService.initEntitiesIndex();
+      return { message: "entities index initialized" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Init entities index",
         tags: ["Meili", "Admin"],
       },
     },

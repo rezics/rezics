@@ -128,7 +128,15 @@ export class SearchClient {
   async initEntityIndex(): Promise<void> {
     await this.entityIndex.updateSettings({
       searchableAttributes: ["titles", "summaries", "slug"],
-      filterableAttributes: ["kind", "verified", "ownerUnitId"],
+      filterableAttributes: [
+        "kind",
+        "verified",
+        "ownerUnitId",
+        "creditRoles",
+        "creditUnitTypes",
+        "subjectRoles",
+        "subjectUnitTypes",
+      ],
       sortableAttributes: ["createdAt", "updatedAt"],
     });
     this.entityIndex.addDocuments([], { primaryKey: "id" });

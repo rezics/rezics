@@ -8,6 +8,7 @@ import type {
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { patchContentSubjectsToMeili } from "@/meili/content/sync";
+import { patchEntitySubjectFacetsToMeili } from "@/meili/entity/sync";
 import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
@@ -60,6 +61,7 @@ export class SubjectAttributionService {
         include: subjectAttributionInclude,
       });
       await patchContentSubjectsToMeili(req.unitId);
+      await patchEntitySubjectFacetsToMeili(req.entityId);
       return mapSubjectAttributionToDTO(row);
     }
 
@@ -86,6 +88,7 @@ export class SubjectAttributionService {
       return created;
     });
     await patchContentSubjectsToMeili(req.unitId);
+    await patchEntitySubjectFacetsToMeili(req.entityId);
     return mapSubjectAttributionToDTO(row);
   }
 
@@ -102,6 +105,7 @@ export class SubjectAttributionService {
         },
       });
       await patchContentSubjectsToMeili(unitId);
+      await patchEntitySubjectFacetsToMeili(entityId);
       return;
     }
 
@@ -122,6 +126,7 @@ export class SubjectAttributionService {
       });
     });
     await patchContentSubjectsToMeili(unitId);
+    await patchEntitySubjectFacetsToMeili(entityId);
   }
 
   async listByUnit(
