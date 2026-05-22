@@ -3,31 +3,25 @@ import { t } from "elysia";
 export const LICENSE_REGISTRY = {
   "cc-by-nc-sa-4.0": {
     slug: "cc-by-nc-sa-4.0",
-    i18nKey: "license.cc_by_nc_sa_4_0",
     url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
   },
   "cc-by-sa-4.0": {
     slug: "cc-by-sa-4.0",
-    i18nKey: "license.cc_by_sa_4_0",
     url: "https://creativecommons.org/licenses/by-sa/4.0/",
   },
   "all-rights-reserved": {
     slug: "all-rights-reserved",
-    i18nKey: "license.all_rights_reserved",
   },
   "cc-by-nc-4.0": {
     slug: "cc-by-nc-4.0",
-    i18nKey: "license.cc_by_nc_4_0",
     url: "https://creativecommons.org/licenses/by-nc/4.0/",
   },
   "cc-by-4.0": {
     slug: "cc-by-4.0",
-    i18nKey: "license.cc_by_4_0",
     url: "https://creativecommons.org/licenses/by/4.0/",
   },
   "cc0-1.0": {
     slug: "cc0-1.0",
-    i18nKey: "license.cc0_1_0",
     url: "https://creativecommons.org/publicdomain/zero/1.0/",
   },
 } as const;
@@ -56,7 +50,6 @@ export const licenseSlugSchema = t.Union([
 
 export const licenseRegistryEntrySchema = t.Object({
   slug: licenseSlugSchema,
-  i18nKey: t.String(),
   url: t.Optional(t.String()),
 });
 

@@ -43,8 +43,8 @@ describe("subject attribution role registry schemas", () => {
     expect(
       subjectAttributionRoleRegistry.primary_character.entityKindHints,
     ).toContain("character");
-    expect(subjectAttributionRoleRegistry.primary_character.i18nKey).toBe(
-      "attribution.subject.role.primary_character",
+    expect(subjectAttributionRoleRegistry.primary_character.key).toBe(
+      "primary_character",
     );
   });
 });

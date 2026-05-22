@@ -59,8 +59,6 @@ describe("credit attribution role registry schemas", () => {
       "BOOK",
     );
     expect(creditAttributionRoleRegistry.author.prominence).toBe("metadata");
-    expect(creditAttributionRoleRegistry.author.i18nKey).toBe(
-      "attribution.credit.role.author",
-    );
+    expect(creditAttributionRoleRegistry.author.key).toBe("author");
   });
 });

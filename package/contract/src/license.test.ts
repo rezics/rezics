@@ -57,10 +57,10 @@ describe("license registry", () => {
     expect(DEFAULT_PUBLICATION_LICENSE_SLUG).toBe("cc-by-nc-sa-4.0");
   });
 
-  test("maps every license slug to an i18n key", () => {
-    for (const [slug, entry] of Object.entries(LICENSE_REGISTRY)) {
+  test("maps every license slug to its registry entry", () => {
+    for (const slug of LICENSE_SLUGS) {
+      const entry = LICENSE_REGISTRY[slug];
       expect(entry.slug).toBe(slug);
-      expect(entry.i18nKey).toMatch(/^license\./);
     }
   });
 });

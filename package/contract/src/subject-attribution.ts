@@ -2,7 +2,6 @@ import { t } from "elysia";
 import { entityDTOSchema, entityKindKeySchema } from "./entity";
 import {
   subjectAttributionRoleKeySchema,
-  subjectAttributionRoles,
   type SubjectAttributionRole,
 } from "./subject-attribution.roles";
 import { unitDTOSchema } from "./unit";
@@ -19,43 +18,36 @@ export {
 export const subjectAttributionRoleRegistry = {
   primary_character: {
     key: "primary_character",
-    i18nKey: "attribution.subject.role.primary_character",
     entityKindHints: ["character"],
     group: "character",
   },
   featured_character: {
     key: "featured_character",
-    i18nKey: "attribution.subject.role.featured_character",
     entityKindHints: ["character"],
     group: "character",
   },
   appears: {
     key: "appears",
-    i18nKey: "attribution.subject.role.appears",
     entityKindHints: ["person", "character", "organization", "faction"],
     group: "appearance",
   },
   about: {
     key: "about",
-    i18nKey: "attribution.subject.role.about",
     entityKindHints: ["person", "organization", "event", "concept"],
     group: "topic",
   },
   setting: {
     key: "setting",
-    i18nKey: "attribution.subject.role.setting",
     entityKindHints: ["location", "faction", "event", "concept"],
     group: "setting",
   },
   source_work: {
     key: "source_work",
-    i18nKey: "attribution.subject.role.source_work",
     entityKindHints: ["concept"],
     group: "source",
   },
   canonical_wiki_page: {
     key: "canonical_wiki_page",
-    i18nKey: "attribution.subject.role.canonical_wiki_page",
     entityKindHints: [
       "person",
       "organization",
@@ -67,7 +59,6 @@ export const subjectAttributionRoleRegistry = {
   },
   related_subject: {
     key: "related_subject",
-    i18nKey: "attribution.subject.role.related_subject",
     entityKindHints: ["person", "organization", "character", "concept"],
     group: "related",
   },
@@ -75,7 +66,6 @@ export const subjectAttributionRoleRegistry = {
   SubjectAttributionRole,
   {
     key: SubjectAttributionRole;
-    i18nKey: `attribution.subject.role.${string}`;
     entityKindHints: readonly (typeof entityKindKeySchema)["static"][];
     group:
       | "character"

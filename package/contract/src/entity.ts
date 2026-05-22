@@ -29,57 +29,44 @@ export type EntityKind = (typeof entityKinds)[number];
 export const entityKindRegistry = {
   person: {
     key: "person",
-    i18nKey: "entity.kind.person",
   },
   organization: {
     key: "organization",
-    i18nKey: "entity.kind.organization",
   },
   circle: {
     key: "circle",
-    i18nKey: "entity.kind.circle",
   },
   studio: {
     key: "studio",
-    i18nKey: "entity.kind.studio",
   },
   label: {
     key: "label",
-    i18nKey: "entity.kind.label",
   },
   character: {
     key: "character",
-    i18nKey: "entity.kind.character",
   },
   faction: {
     key: "faction",
-    i18nKey: "entity.kind.faction",
   },
   family: {
     key: "family",
-    i18nKey: "entity.kind.family",
   },
   location: {
     key: "location",
-    i18nKey: "entity.kind.location",
   },
   artifact: {
     key: "artifact",
-    i18nKey: "entity.kind.artifact",
   },
   event: {
     key: "event",
-    i18nKey: "entity.kind.event",
   },
   concept: {
     key: "concept",
-    i18nKey: "entity.kind.concept",
   },
 } as const satisfies Record<
   EntityKind,
   {
     key: EntityKind;
-    i18nKey: `entity.kind.${string}`;
   }
 >;
 
