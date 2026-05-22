@@ -27,11 +27,9 @@ export function NavSecondary({
           {items.map(
             (item: { title: string; url: string; icon: LucideIcon }) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <SafeLink href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </SafeLink>
+                <SidebarMenuButton render={<SafeLink href={item.url} />}>
+                  <item.icon />
+                  <span>{item.title}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ),
