@@ -1,4 +1,10 @@
-## ADDED Requirements
+# multilingual-ui Specification
+
+## Purpose
+
+Defines how Rezics frontends render multilingual UI: homepage sections, search components, and book content all SHALL resolve their copy from Paraglide-generated product/domain message functions or from the per-language content fallback chain. Canonical locale codes (`zh-hant`, `zh-hans`, `en`, `ja`, `de`) anchor both the Paraglide runtime and the language toggle so locale identifiers stay consistent across i18n source files, runtime APIs, and user-visible controls.
+
+## Requirements
 
 ### Requirement: Homepage sections use i18n for all UI strings
 
@@ -46,12 +52,12 @@ Translation keys for homepage sections and search components SHALL exist in all 
 
 #### Scenario: en locale has complete homepage section keys
 
-- **WHEN** the `en` JSON message file is loaded
+- **WHEN** the `en` locale message file is loaded
 - **THEN** it SHALL contain keys for all homepage section titles, action labels, tab labels, loading states, and empty states
 
 #### Scenario: zh-hant locale has complete homepage section keys
 
-- **WHEN** the `zh-hant` JSON message file is loaded
+- **WHEN** the `zh-hant` locale message file is loaded
 - **THEN** it SHALL contain keys matching the same key structure as `en` with Traditional Chinese translations
 
 ### Requirement: Homepage book content renders in user's preferred content language
