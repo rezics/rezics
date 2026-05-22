@@ -1,9 +1,9 @@
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { PinboardEntryCard } from "../components/PinboardEntryCard";
 import { PinboardErrorState } from "../components/PinboardErrorState";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { usePinboardList } from "../hooks/usePinboard";
+import * as m from "@rezics/i18n/messages";
 
 export interface PinnedFeedSectionProps {
   realmUnitId: string;
@@ -20,7 +20,6 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   realmUnitId,
   linkFor,
 }) => {
-  const { t } = useTranslation();
   const { entries, isLoading, isError, refetch } = usePinboardList({
     realmUnitId,
     pinboardKey: "pinboard",
@@ -45,9 +44,9 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   if (entries.length === 0) return null;
 
   return (
-    <section className="mb-4" aria-label={t("pinboard.pinned.region")}>
+    <section className="mb-4" aria-label={m.pinboard_pinned_region()}>
       <p className="px-1 text-xs font-medium uppercase tracking-wider text-text-secondary">
-        {t("pinboard.pinned.heading")}
+        {m.pinboard_pinned_heading()}
       </p>
       <div className="flex flex-col gap-2 mt-1">
         {entries.map((entry) => (

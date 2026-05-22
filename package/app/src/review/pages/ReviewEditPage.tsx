@@ -9,13 +9,12 @@ import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ReviewForm, type ReviewEditState } from "@/review/forms/ReviewForm";
 import { Route as reviewEditRoute } from "@/routes/_mainLayout/review/$reviewId/edit";
+import * as m from "@rezics/i18n/messages";
 
 export function ReviewEditPageContainer() {
   const { reviewId } = reviewEditRoute.useParams();
-  const { t } = useTranslation();
   const { data, isLoading, isError } = useQuery(postQueries.detail(reviewId));
   const navigate = useNavigate();
   const [reviewData, setReviewData] = useState<ReviewEditState>({
@@ -43,7 +42,7 @@ export function ReviewEditPageContainer() {
 
   const { mutate, isPending } = useUpdatePostMutation({
     onSuccess: () => {
-      show(t("review.messages.update_success"));
+      show(m.review_messages_update_success());
     },
     onError: (error) => {
       show(String(error));
@@ -52,7 +51,7 @@ export function ReviewEditPageContainer() {
 
   const { mutate: deletePostMutation } = useDeletePostMutation({
     onSuccess: () => {
-      show(t("review.messages.delete_success"));
+      show(m.review_messages_delete_success());
     },
     onError: (error) => {
       show(String(error));
@@ -61,17 +60,13 @@ export function ReviewEditPageContainer() {
 
   function handleSave() {
     if ((reviewData.body?.length ?? 0) < 200) {
-      show(
-        t("review.validation.min_chars", {
-          defaultValue: "Reviews must be at least 200 characters",
-        }),
-      );
+      show(m.review_validation_min_chars());
       return;
     }
 
     if (reviewData._editRating) {
       if (reviewData._editRating > 10 || reviewData._editRating < 0) {
-        show(t("review.messages.rating_range_error"));
+        show(m.review_messages_rating_range_error());
         return;
       }
     }
@@ -91,7 +86,7 @@ export function ReviewEditPageContainer() {
   function handleDelete() {
     deletePostMutation(reviewId, {
       onSuccess: () => {
-        show(t("review.messages.delete_success"));
+        show(m.review_messages_delete_success());
         navigate({ to: `/review/book/${reviewData.targetUnitId ?? ""}` });
       },
       onError: (error) => {
@@ -101,11 +96,11 @@ export function ReviewEditPageContainer() {
   }
 
   if (isLoading) {
-    return <div>{t("common.loading")}</div>;
+    return <div>{m.common_loading()}</div>;
   }
 
   if (isError || !data) {
-    return <div>{t("review.messages.failed_load")}</div>;
+    return <div>{m.review_messages_failed_load()}</div>;
   }
 
   return (
@@ -116,7 +111,7 @@ export function ReviewEditPageContainer() {
           data={reviewData}
           setData={setReviewData}
           onSubmit={handleSave}
-          submitLabel={isPending ? t("common.submitting") : t("common.submit")}
+          submitLabel={isPending ? m.common_submitting() : m.common_submit()}
           extraActions={<DeleteButton onDelete={handleDelete} />}
         />
       </div>

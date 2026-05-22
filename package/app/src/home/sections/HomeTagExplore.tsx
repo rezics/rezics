@@ -5,8 +5,9 @@ import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import * as m from "@rezics/i18n/messages";
 
 export type HomeTagExploreProps = {
   title?: string;
@@ -19,8 +20,8 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   limit = 60,
   maxTags = 18,
 }) => {
-  const { t, i18n } = useTranslation();
-  const resolvedTitle = title ?? t("page.home.sections.tag_explore");
+  const locale = useLocale();
+  const resolvedTitle = title ?? m.page_home_sections_tag_explore();
 
   const { data, isLoading, error } = useQuery(tagQueries.list({ limit }));
   const tagUnitIds = useMemo(
@@ -28,7 +29,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
     [data, maxTags],
   );
   const { data: translations } = useQuery(
-    tagQueries.batchTranslations(tagUnitIds, i18n.language),
+    tagQueries.batchTranslations(tagUnitIds, locale),
   );
 
   if (error) {

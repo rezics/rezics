@@ -20,15 +20,14 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { compareRevisionSlots, type DiffPart } from "../models/historyCompare";
+import * as m from "@rezics/i18n/messages";
 
 type HistoryTab = "editorial" | "structure" | "authority";
 
 export function BookHistoryPage() {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
-  const { t } = useTranslation();
   const [tab, setTab] = useState<HistoryTab>("editorial");
   const [restoreSequence, setRestoreSequence] = useState<number | null>(null);
   const revisionsQuery = useQuery({
@@ -61,7 +60,7 @@ export function BookHistoryPage() {
   if (revisionsQuery.isLoading) {
     return (
       <p className="text-sm leading-ui text-text-secondary">
-        {t("common.loading", "Loading...")}
+        {m.common_loading()}
       </p>
     );
   }
@@ -79,7 +78,7 @@ export function BookHistoryPage() {
         <div className="flex items-center gap-2 text-text-secondary">
           <History className="h-4 w-4" aria-hidden="true" />
           <h2 className="text-sm font-medium leading-ui">
-            {t("history.title", "Content history")}
+            {m.history_title()}
           </h2>
         </div>
         <div className="flex flex-wrap gap-2" role="tablist">
@@ -87,19 +86,19 @@ export function BookHistoryPage() {
             active={tab === "editorial"}
             onClick={() => setTab("editorial")}
           >
-            {t("history.tabs.editorial", "Editorial")}
+            {m.history_tabs_editorial()}
           </HistoryTabButton>
           <HistoryTabButton
             active={tab === "structure"}
             onClick={() => setTab("structure")}
           >
-            {t("history.tabs.structure", "Content structure")}
+            {m.history_tabs_structure()}
           </HistoryTabButton>
           <HistoryTabButton
             active={tab === "authority"}
             onClick={() => setTab("authority")}
           >
-            {t("history.tabs.authority", "Authority")}
+            {m.history_tabs_authority()}
           </HistoryTabButton>
         </div>
       </header>
@@ -121,15 +120,10 @@ export function BookHistoryPage() {
         <section className="grid gap-3 rounded-md bg-surface-subtle p-4">
           <div className="flex items-center gap-2 text-sm font-medium leading-ui text-text-primary">
             <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            {t("history.restore.title", "Restore revision {{sequence}}", {
-              sequence: restoreSequence,
-            })}
+            {m.history_restore_title({ sequence: restoreSequence })}
           </div>
           <p className="text-sm leading-ui text-text-secondary">
-            {t(
-              "history.restore.description",
-              "Restoring creates a new latest revision through the normal edit path. Later history remains preserved.",
-            )}
+            {m.history_restore_description()}
           </p>
           <div className="flex flex-wrap gap-2">
             <Link
@@ -138,14 +132,14 @@ export function BookHistoryPage() {
               search={{ restoreRevision: String(restoreSequence) }}
               className="rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand"
             >
-              {t("history.restore.open_draft", "Open restore draft")}
+              {m.history_restore_open_draft()}
             </Link>
             <button
               type="button"
               className="rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-base"
               onClick={() => setRestoreSequence(null)}
             >
-              {t("common.cancel", "Cancel")}
+              {m.common_cancel()}
             </button>
           </div>
         </section>
@@ -191,7 +185,6 @@ export function RevisionTimeline({
   onRestore: (sequence: number) => void;
   revisions: UnitRevisionDTO[];
 }) {
-  const { t } = useTranslation();
   if (revisions.length === 0) {
     return <EmptyHistoryState />;
   }
@@ -216,13 +209,10 @@ export function RevisionTimeline({
                   params={{ bookId, sequence: String(revision.sequence) }}
                   className="text-sm font-medium leading-ui text-text-primary hover:text-text-brand"
                 >
-                  {t("history.revision.title", "Revision {{sequence}}", {
-                    sequence: revision.sequence,
-                  })}
+                  {m.history_revision_title({ sequence: revision.sequence })}
                 </Link>
                 <p className="mt-1 text-sm leading-ui text-text-secondary">
-                  {revision.message ??
-                    t("history.revision.default_message", "Metadata update")}
+                  {revision.message ?? m.history_revision_default_message()}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -239,11 +229,10 @@ export function RevisionTimeline({
                         mode: "unified",
                       } as never
                     }
-                    aria-label={t(
-                      "history.revision.compare_label",
-                      "Compare latest changes from revision {{base}} to revision {{target}}",
-                      { base: compareBase, target: compareTarget },
-                    )}
+                    aria-label={m.history_revision_compare_label({
+                      base: compareBase,
+                      target: compareTarget,
+                    })}
                     className="rounded-md p-2 text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
                   >
                     <ArrowLeftRight className="h-4 w-4" aria-hidden="true" />
@@ -251,10 +240,7 @@ export function RevisionTimeline({
                 ) : (
                   <button
                     type="button"
-                    aria-label={t(
-                      "history.revision.compare_unavailable",
-                      "No earlier revision to compare",
-                    )}
+                    aria-label={m.history_revision_compare_unavailable()}
                     className="rounded-md p-2 text-text-disabled"
                     disabled
                   >
@@ -263,11 +249,9 @@ export function RevisionTimeline({
                 )}
                 <button
                   type="button"
-                  aria-label={t(
-                    "history.revision.restore_label",
-                    "Restore revision {{sequence}}",
-                    { sequence: revision.sequence },
-                  )}
+                  aria-label={m.history_revision_restore_label({
+                    sequence: revision.sequence,
+                  })}
                   className="rounded-md p-2 text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
                   onClick={() => onRestore(revision.sequence)}
                 >
@@ -294,13 +278,8 @@ export function StructureTimeline({
   actors: Record<string, HistoryActorResolution>;
   events: StructureEventDTO[];
 }) {
-  const { t } = useTranslation();
   if (events.length === 0) {
-    return (
-      <EmptyHistoryState
-        label={t("history.empty.structure", "No structure history yet")}
-      />
-    );
+    return <EmptyHistoryState label={m.history_empty_structure()} />;
   }
   return (
     <ol className="flex flex-col divide-y divide-border-whisper">
@@ -313,14 +292,11 @@ export function StructureTimeline({
             <details className="group">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
                 <span className="text-sm font-medium leading-ui text-text-primary">
-                  {t("history.structure.title", "Structure save {{sequence}}", {
-                    sequence: event.sequence,
-                  })}
+                  {m.history_structure_title({ sequence: event.sequence })}
                 </span>
                 <span className="flex items-center gap-2 text-xs leading-dense text-text-secondary">
-                  {t("history.structure.operation_count", {
+                  {m.history_structure_operation_count({
                     count: operations.length,
-                    defaultValue: "{{count}} operations",
                   })}
                   <ChevronDown className="h-4 w-4 transition group-open:rotate-180" />
                 </span>
@@ -351,27 +327,14 @@ export function StructureTimeline({
 }
 
 export function AuthorityPanel() {
-  const { t } = useTranslation();
   return (
     <section className="grid gap-3 rounded-md bg-surface-subtle p-4 text-sm leading-ui text-text-secondary">
       <div className="flex items-center gap-2 text-text-primary">
         <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-        <h3 className="font-medium">
-          {t("history.authority.title", "History authority")}
-        </h3>
+        <h3 className="font-medium">{m.history_authority_title()}</h3>
       </div>
-      <p>
-        {t(
-          "history.authority.visibility",
-          "Public viewers can read visible revision detail and compare views. Raw payload inspection is not part of the public product UI, and restore actions are reserved for owners, maintainers, and admins.",
-        )}
-      </p>
-      <p>
-        {t(
-          "history.authority.references",
-          "Restricted references render with status text instead of leaking private Unit names.",
-        )}
-      </p>
+      <p>{m.history_authority_visibility()}</p>
+      <p>{m.history_authority_references()}</p>
     </section>
   );
 }
@@ -408,7 +371,7 @@ export function BookRevisionPage() {
   if (isLoading) {
     return (
       <p className="text-sm leading-ui text-text-secondary">
-        {t("common.loading", "Loading...")}
+        {m.common_loading()}
       </p>
     );
   }
@@ -416,7 +379,7 @@ export function BookRevisionPage() {
   if (!revision) {
     return (
       <p className="text-sm leading-ui text-text-secondary">
-        {t("history.revision.not_found", "Revision not found.")}
+        {m.history_revision_not_found()}
       </p>
     );
   }
@@ -425,9 +388,7 @@ export function BookRevisionPage() {
     <section className="grid gap-6">
       <header className="grid gap-2">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
-          {t("history.revision.title", "Revision {{sequence}}", {
-            sequence: revision.sequence,
-          })}
+          {m.history_revision_title({ sequence: revision.sequence })}
         </h2>
         <p className="text-sm leading-ui text-text-secondary">
           {formatDate(revision.createdAt)} ·{" "}
@@ -445,7 +406,6 @@ export function BookRevisionComparePage() {
     bookId: string;
     targetSequence: string;
   };
-  const { t } = useTranslation();
   const search = useSearch({ strict: false }) as {
     base?: string;
     mode?: "split" | "unified";
@@ -519,7 +479,7 @@ export function BookRevisionComparePage() {
   if (isLoading) {
     return (
       <p className="text-sm leading-ui text-text-secondary">
-        {t("common.loading", "Loading...")}
+        {m.common_loading()}
       </p>
     );
   }
@@ -529,26 +489,22 @@ export function BookRevisionComparePage() {
     <section className="grid gap-6">
       <header className="grid gap-2">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
-          {t(
-            "history.compare.title",
-            "Changes from revision {{base}} to revision {{target}}",
-            { base: comparison.fromSequence, target: comparison.toSequence },
-          )}
+          {m.history_compare_title({
+            base: comparison.fromSequence,
+            target: comparison.toSequence,
+          })}
         </h2>
         <p className="text-sm leading-ui text-text-secondary">
-          {t(
-            "history.compare.description",
-            "Additions are content in the target revision. Removals are content that existed in the base revision.",
-          )}
+          {m.history_compare_description()}
         </p>
       </header>
       <section
         className="grid gap-3 border-y border-border-whisper py-4 md:grid-cols-[1fr_auto]"
-        aria-label={t("history.compare.controls_label", "Compare controls")}
+        aria-label={m.history_compare_controls_label()}
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
-            {t("history.compare.base_revision", "From revision")}
+            {m.history_compare_base_revision()}
             <select
               className="rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary"
               value={base}
@@ -558,15 +514,13 @@ export function BookRevisionComparePage() {
             >
               {revisionOptions.map((sequence) => (
                 <option key={sequence} value={sequence}>
-                  {t("history.revision.title", "Revision {{sequence}}", {
-                    sequence,
-                  })}
+                  {m.history_revision_title({ sequence })}
                 </option>
               ))}
             </select>
           </label>
           <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
-            {t("history.compare.target_revision", "To revision")}
+            {m.history_compare_target_revision()}
             <select
               className="rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary"
               value={target}
@@ -576,9 +530,7 @@ export function BookRevisionComparePage() {
             >
               {revisionOptions.map((sequence) => (
                 <option key={sequence} value={sequence}>
-                  {t("history.revision.title", "Revision {{sequence}}", {
-                    sequence,
-                  })}
+                  {m.history_revision_title({ sequence })}
                 </option>
               ))}
             </select>
@@ -587,7 +539,7 @@ export function BookRevisionComparePage() {
         <div
           className="flex items-end gap-2"
           role="group"
-          aria-label={t("history.compare.layout_label", "Diff layout")}
+          aria-label={m.history_compare_layout_label()}
         >
           <button
             type="button"
@@ -599,7 +551,7 @@ export function BookRevisionComparePage() {
             }
             onClick={() => updateCompare({ mode: "unified" })}
           >
-            {t("history.compare.unified", "Unified")}
+            {m.history_compare_unified()}
           </button>
           <button
             type="button"
@@ -611,17 +563,17 @@ export function BookRevisionComparePage() {
             }
             onClick={() => updateCompare({ mode: "split" })}
           >
-            {t("history.compare.split", "Split")}
+            {m.history_compare_split()}
           </button>
         </div>
       </section>
       <nav
         className="flex flex-wrap gap-2"
-        aria-label={t("history.compare.changed_fields", "Changed fields")}
+        aria-label={m.history_compare_changed_fields()}
       >
         {comparison.changes.length === 0 ? (
           <span className="text-sm leading-ui text-text-secondary">
-            {t("history.compare.no_changes", "No changed fields.")}
+            {m.history_compare_no_changes()}
           </span>
         ) : (
           comparison.changes.map((change) => (
@@ -669,13 +621,12 @@ export function CompareChange({
     { status: string; title?: string; unitType?: string }
   >;
 }) {
-  const { t } = useTranslation();
   if (change.kind === "scalar") {
     return (
       <dl className="grid gap-2 text-sm leading-ui sm:grid-cols-2">
         <div>
           <dt className="text-xs leading-dense text-text-tertiary">
-            {t("history.compare.before", "Before")}
+            {m.history_compare_before()}
           </dt>
           <dd className="text-text-primary">
             {String(change.before ?? "null")}
@@ -683,7 +634,7 @@ export function CompareChange({
         </div>
         <div>
           <dt className="text-xs leading-dense text-text-tertiary">
-            {t("history.compare.after", "After")}
+            {m.history_compare_after()}
           </dt>
           <dd className="text-text-primary">
             {String(change.after ?? "null")}
@@ -705,7 +656,7 @@ export function CompareChange({
         {change.added.map((item, index) => (
           <StatusLine
             key={`add-${index}`}
-            status={t("history.compare.status_added", "Added")}
+            status={m.history_compare_status_added()}
             value={item}
             references={references}
           />
@@ -713,7 +664,7 @@ export function CompareChange({
         {change.removed.map((item, index) => (
           <StatusLine
             key={`remove-${index}`}
-            status={t("history.compare.status_removed", "Removed")}
+            status={m.history_compare_status_removed()}
             value={item}
             references={references}
           />
@@ -721,7 +672,7 @@ export function CompareChange({
         {change.updated.map((item) => (
           <StatusLine
             key={item.key}
-            status={t("history.compare.status_changed", "Changed")}
+            status={m.history_compare_status_changed()}
             value={item}
             references={references}
           />
@@ -731,11 +682,7 @@ export function CompareChange({
   }
   return (
     <RevisionPayloadValue
-      value={
-        change.hidden
-          ? t("history.compare.status_changed", "Changed")
-          : change.after
-      }
+      value={change.hidden ? m.history_compare_status_changed() : change.after}
     />
   );
 }
@@ -756,17 +703,16 @@ function UnifiedMarkdownDiff({ parts }: { parts: DiffPart[] }) {
 }
 
 function SplitMarkdownDiff({ parts }: { parts: DiffPart[] }) {
-  const { t } = useTranslation();
   const rows = createMarkdownDiffRows(parts);
   return (
     <div className="grid gap-2 md:grid-cols-2">
       <DiffPane
-        label={t("history.compare.before", "Before")}
+        label={m.history_compare_before()}
         rows={rows.filter((row) => row.type !== "added")}
         side="old"
       />
       <DiffPane
-        label={t("history.compare.after", "After")}
+        label={m.history_compare_after()}
         rows={rows.filter((row) => row.type !== "removed")}
         side="new"
       />
@@ -933,16 +879,10 @@ function RevisionSections({
     { status: string; title?: string; unitType?: string }
   >;
 }) {
-  const { t } = useTranslation();
   const entries = Object.entries(payload);
   if (entries.length === 0) {
     return (
-      <EmptyHistoryState
-        label={t(
-          "history.revision.content_unavailable",
-          "Revision content is unavailable",
-        )}
-      />
+      <EmptyHistoryState label={m.history_revision_content_unavailable()} />
     );
   }
   return (
@@ -958,7 +898,7 @@ function RevisionSections({
       {Object.keys(references).length > 0 ? (
         <section className="grid gap-2">
           <h3 className="text-sm font-medium leading-ui text-text-primary">
-            {t("history.references.title", "Referenced Units")}
+            {m.history_references_title()}
           </h3>
           <ul className="grid gap-2">
             {Object.entries(references).map(([unitId, reference]) => (
@@ -970,7 +910,7 @@ function RevisionSections({
                   className="mr-2 inline h-4 w-4"
                   aria-hidden="true"
                 />
-                {referenceLabel(reference, t)}
+                {referenceLabel(reference)}
               </li>
             ))}
           </ul>
@@ -996,19 +936,15 @@ function FieldChips({ keys }: { keys: readonly string[] }) {
 }
 
 function EmptyHistoryState({ label }: { label?: string }) {
-  const { t } = useTranslation();
   return (
     <section className="flex flex-col items-center gap-3 py-16 text-center">
       <History className="h-8 w-8 text-text-tertiary" aria-hidden="true" />
       <div>
         <h2 className="text-lg font-medium leading-ui text-text-primary">
-          {label ?? t("history.empty.revisions", "No revision history yet")}
+          {label ?? m.history_empty_revisions()}
         </h2>
         <p className="mt-2 max-w-md text-sm leading-ui text-text-secondary">
-          {t(
-            "history.empty.ingestion_lag",
-            "Recent edits may take a moment to appear while the history service ingests them.",
-          )}
+          {m.history_empty_ingestion_lag()}
         </p>
       </div>
     </section>
@@ -1025,20 +961,15 @@ function RevisionPayloadValue({
   >;
   value: unknown;
 }) {
-  const { t } = useTranslation();
   if (value == null || typeof value === "string" || typeof value === "number") {
     if (typeof value === "string" && references[value]) {
-      return <span>{referenceLabel(references[value], t)}</span>;
+      return <span>{referenceLabel(references[value])}</span>;
     }
     if (typeof value === "string" && isUuid(value)) {
-      return (
-        <span>{t("history.references.unresolved", "Referenced Unit")}</span>
-      );
+      return <span>{m.history_references_unresolved()}</span>;
     }
     return (
-      <span>
-        {value == null ? t("history.value.null", "null") : String(value)}
-      </span>
+      <span>{value == null ? m.history_value_null() : String(value)}</span>
     );
   }
   if (typeof value === "boolean") {
@@ -1046,7 +977,7 @@ function RevisionPayloadValue({
   }
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <span>{t("history.value.empty", "Empty")}</span>;
+      return <span>{m.history_value_empty()}</span>;
     }
     return (
       <ul className="mt-2 grid gap-2">
@@ -1064,7 +995,7 @@ function RevisionPayloadValue({
   if (value && typeof value === "object") {
     const entries = Object.entries(value as Record<string, unknown>);
     if (entries.length === 0) {
-      return <span>{t("history.value.empty", "Empty")}</span>;
+      return <span>{m.history_value_empty()}</span>;
     }
     return (
       <dl className="mt-2 grid gap-2 text-sm leading-ui">
@@ -1083,7 +1014,7 @@ function RevisionPayloadValue({
   }
   return (
     <span className="text-text-secondary">
-      {t("history.value.changed_structured", "Changed structured value")}
+      {m.history_value_changed_structured()}
     </span>
   );
 }
@@ -1146,25 +1077,25 @@ function actorLabel(
   return actor.displayName ?? actor.handle ?? "Unknown actor";
 }
 
-function referenceLabel(
-  reference: { status: string; title?: string; unitType?: string },
-  t: ReturnType<typeof useTranslation>["t"],
-) {
+function referenceLabel(reference: {
+  status: string;
+  title?: string;
+  unitType?: string;
+}) {
   if (reference.status === "OK") {
-    const title =
-      reference.title ?? t("history.references.untitled", "Untitled Unit");
-    return `${title} · ${reference.unitType ?? t("history.references.unit", "Unit")}`;
+    const title = reference.title ?? m.history_references_untitled();
+    return `${title} · ${reference.unitType ?? m.history_references_unit()}`;
   }
   if (reference.status === "RESTRICTED") {
-    return t("history.references.restricted", "Restricted Unit");
+    return m.history_references_restricted();
   }
   if (reference.status === "DELETED") {
-    return t("history.references.deleted", "Deleted Unit");
+    return m.history_references_deleted();
   }
   if (reference.status === "GONE") {
-    return t("history.references.gone", "Unavailable Unit");
+    return m.history_references_gone();
   }
-  return t("history.references.unresolved", "Referenced Unit");
+  return m.history_references_unresolved();
 }
 
 function slotLabel(value: string) {

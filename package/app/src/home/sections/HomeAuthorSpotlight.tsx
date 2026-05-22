@@ -5,8 +5,8 @@ import type { BookDTO, PublicUser } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import * as m from "@rezics/i18n/messages";
 
 type Book = BookDTO;
 
@@ -25,8 +25,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   limit = 24,
   maxAuthors = 12,
 }) => {
-  const { t } = useTranslation();
-  const resolvedTitle = title ?? t("page.home.sections.author_spotlight");
+  const resolvedTitle = title ?? m.page_home_sections_author_spotlight();
 
   const { data, isLoading, error } = useQuery(
     bookQueries.list({ start: 0, limit }),

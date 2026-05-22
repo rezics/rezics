@@ -5,10 +5,10 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { type ReactNode, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useUnitCandidates } from "../../hooks/useUnitCandidates";
 import type { Candidate } from "../../models/types";
 import { UnitCandidateRow } from "./UnitCandidateRow";
+import * as m from "@rezics/i18n/messages";
 
 export interface UnitPickerProps {
   workContextUnitId?: string;
@@ -29,7 +29,6 @@ export function UnitPicker({
   label,
   placeholder,
 }: UnitPickerProps) {
-  const { t } = useTranslation();
   const [input, setInput] = useState(initialInput ?? "");
   const { resolved, parseError } = useUnitCandidates(input);
 
@@ -38,20 +37,12 @@ export function UnitPicker({
   return (
     <div className="flex flex-col gap-2 border-b border-border-whisper pb-2">
       <div className="flex flex-col gap-1">
-        <Label htmlFor={fieldId}>
-          {label ?? t("unit_picker.url_label", "Unit URL")}
-        </Label>
+        <Label htmlFor={fieldId}>{label ?? m.unit_picker_url_label()}</Label>
         <Input
           id={fieldId}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={
-            placeholder ??
-            t(
-              "unit_picker.url_placeholder",
-              "Paste a unit, chapter, or book URL",
-            )
-          }
+          placeholder={placeholder ?? m.unit_picker_url_placeholder()}
         />
       </div>
 
@@ -72,10 +63,7 @@ export function UnitPicker({
 
       {parseError && (
         <p className="text-xs text-text-secondary">
-          {t(
-            "unit_picker.parse_error",
-            "Couldn't recognize that as a unit link.",
-          )}
+          {m.unit_picker_parse_error()}
         </p>
       )}
 
@@ -101,7 +89,6 @@ function BrowsePanel({
   language,
   renderItemAction,
 }: BrowsePanelProps) {
-  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   const { data, isLoading, error } = useQuery({
@@ -125,7 +112,7 @@ function BrowsePanel({
             (expanded ? "rotate-180" : "rotate-0")
           }
         />
-        <span>{t("unit_picker.browse_panel", "Browse this work")}</span>
+        <span>{m.unit_picker_browse_panel()}</span>
       </button>
       {expanded && (
         <div className="pt-2">
@@ -133,7 +120,7 @@ function BrowsePanel({
           {error && <p className="text-xs text-error-text">{String(error)}</p>}
           {!isLoading && !error && units.length === 0 && (
             <p className="text-xs text-text-secondary">
-              {t("unit_picker.no_sub_units", "No sub-units")}
+              {m.unit_picker_no_sub_units()}
             </p>
           )}
           <ul className="flex flex-col">

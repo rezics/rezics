@@ -6,7 +6,7 @@ import {
   Gamepad2 as SportsEsportsOutlinedIcon,
 } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 const libraries = [
   {
@@ -29,9 +29,15 @@ const libraries = [
   },
 ] as const;
 
-export const LibraryCardsSection: React.FC = () => {
-  const { t } = useTranslation();
+type LibraryKey = (typeof libraries)[number]["key"];
 
+const LIBRARY_CARD_TITLE = {
+  book_library: m.page_home_sections_library_cards_book_library,
+  game_library: m.page_home_sections_library_cards_game_library,
+  media_library: m.page_home_sections_library_cards_media_library,
+} as const satisfies Record<LibraryKey, () => string>;
+
+export const LibraryCardsSection: React.FC = () => {
   const renderLibraryCard = (lib: (typeof libraries)[number]) => (
     <Link key={lib.key} to={lib.to} className="min-w-0">
       <Card size="sm" className="h-full border-0 shadow-none">
@@ -45,11 +51,11 @@ export const LibraryCardsSection: React.FC = () => {
             />
             <div className="min-w-0">
               <h6 className="m-0 truncate text-xs font-semibold leading-tight sm:text-base">
-                {t(`page.home.sections.library_cards.${lib.key}`)}
+                {LIBRARY_CARD_TITLE[lib.key]()}
               </h6>
               {!lib.active && (
                 <Badge variant="outline" className="text-xs">
-                  {t("page.home.sections.library_cards.coming_soon")}
+                  {m.page_home_sections_library_cards_coming_soon()}
                 </Badge>
               )}
             </div>

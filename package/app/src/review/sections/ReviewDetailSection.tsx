@@ -6,7 +6,6 @@ import { TextLink } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useRef } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostTreeSection } from "@/post";
 import {
@@ -15,6 +14,7 @@ import {
 } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { ReviewDetail } from "../components/detail/ReviewDetail";
+import * as m from "@rezics/i18n/messages";
 
 interface ReviewDetailSectionProps {
   reviewId: string;
@@ -23,7 +23,6 @@ interface ReviewDetailSectionProps {
 export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
   reviewId,
 }) => {
-  const { t } = useTranslation();
   const commentRef = useRef<HTMLDivElement>(null);
   const composerRef = useFocusReplyFromQuery();
 
@@ -43,9 +42,9 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
     ownerUnit: { user: review?.author },
   });
 
-  if (isLoading) return <div>{t("common.loading")}</div>;
+  if (isLoading) return <div>{m.common_loading()}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
-  if (!review) return <div>{t("common.no_data")}</div>;
+  if (!review) return <div>{m.common_no_data()}</div>;
 
   const handleReplyInvoke = () => {
     composerRef.current?.focus();
@@ -56,7 +55,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
       {canEdit && (
         <div className="self-end">
           <TextLink to="/review/$reviewId/edit" params={{ reviewId }}>
-            {t("common.edit")}
+            {m.common_edit()}
           </TextLink>
         </div>
       )}
@@ -70,7 +69,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
       <div ref={commentRef} className="mt-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <AccentBar />
-          <h2 className="text-lg font-bold">{t("review.comments")}</h2>
+          <h2 className="text-lg font-bold">{m.review_comments()}</h2>
         </div>
 
         <ReplyComposer

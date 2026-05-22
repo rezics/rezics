@@ -3,8 +3,8 @@ import type { PostDTO } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import { useMemo } from "react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { RemarkCard } from "../item/RemarkCard";
+import * as m from "@rezics/i18n/messages";
 
 const SPACING_CLASS_BY_NUMBER: Record<number, string> = {
   0: "gap-0",
@@ -23,7 +23,6 @@ export const RemarkList: React.FC<RemarkListProps> = ({
   posts,
   spacing = 2,
 }) => {
-  const { t } = useTranslation();
   const targetIds = useMemo(
     () => posts.map((p) => p.unitId).filter(Boolean) as string[],
     [posts],
@@ -31,7 +30,7 @@ export const RemarkList: React.FC<RemarkListProps> = ({
   useReactionHydration(targetIds);
 
   if (posts.length === 0) {
-    return <EmptyState title={t("remark.list.empty.title")} />;
+    return <EmptyState title={m.remark_list_empty_title()} />;
   }
 
   const gapClass =

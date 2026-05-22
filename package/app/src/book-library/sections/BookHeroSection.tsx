@@ -7,7 +7,6 @@ import { Link, unitHref } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import {
   type EntityTranslation,
@@ -23,6 +22,7 @@ import { BookHeroFeaturedReview } from "./BookHeroFeaturedReview";
 import { BookHeroScoreBlock } from "./BookHeroScoreBlock";
 import { BookHeroStatCards, type BookHeroStatKey } from "./BookHeroStatCards";
 import { BookYourScoreBlock } from "./BookYourScoreBlock";
+import * as m from "@rezics/i18n/messages";
 
 type Book = BookDTO;
 
@@ -37,29 +37,25 @@ type BriefPart = { id: string; text: string };
 type MetaRow = { key: string; label: string; credits: EntityTranslation[] };
 
 const CREDIT_ROLES = [
-  { role: "author", labelKey: "book.hero.meta.author", fallback: "作者" },
+  { role: "author", label: m.book_hero_meta_author },
   {
     role: "co-author",
-    labelKey: "book.hero.meta.co_author",
-    fallback: "共同作者",
+    label: m.book_hero_meta_co_author,
   },
   {
     role: "translator",
-    labelKey: "book.hero.meta.translator",
-    fallback: "譯者",
+    label: m.book_hero_meta_translator,
   },
   {
     role: "illustrator",
-    labelKey: "book.hero.meta.illustrator",
-    fallback: "繪者",
+    label: m.book_hero_meta_illustrator,
   },
-  { role: "editor", labelKey: "book.hero.meta.editor", fallback: "編輯" },
+  { role: "editor", label: m.book_hero_meta_editor },
   {
     role: "publisher",
-    labelKey: "book.hero.meta.publisher",
-    fallback: "出版",
+    label: m.book_hero_meta_publisher,
   },
-  { role: "producer", labelKey: "book.hero.meta.producer", fallback: "製作" },
+  { role: "producer", label: m.book_hero_meta_producer },
 ] as const;
 
 export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
@@ -67,7 +63,6 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   rating,
   ratingCount = 0,
 }) => {
-  const { t } = useTranslation();
   const { bookId: routeBookId } = useParams({ strict: false }) as {
     bookId?: string;
   };
@@ -108,22 +103,18 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
     : ["reviews", "shelves", "tags"];
 
   const briefParts: BriefPart[] = [
-    { id: "kind", text: t("book.hero.kind.book", "Book") },
+    { id: "kind", text: m.book_hero_kind_book() },
   ];
   if (typeof bookInfo?.chapterCount === "number") {
     briefParts.push({
       id: "chapters",
-      text: t("book.hero.meta.chapter_count", "{{count}} 章", {
-        count: bookInfo.chapterCount,
-      }),
+      text: m.book_hero_meta_chapter_count({ count: bookInfo.chapterCount }),
     });
   }
   if (typeof bookInfo?.textLength === "number" && bookInfo.textLength > 0) {
     briefParts.push({
       id: "length",
-      text: t("book.hero.meta.length_chars", "{{count}} 字", {
-        count: bookInfo.textLength,
-      }),
+      text: m.book_hero_meta_length_chars({ count: bookInfo.textLength }),
     });
   }
   if (bookInfo?.isbn13) {
@@ -142,7 +133,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
     return [
       {
         key: config.role,
-        label: t(config.labelKey, config.fallback),
+        label: config.label(),
         credits,
       },
     ];

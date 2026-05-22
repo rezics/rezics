@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 type BacklogRemoveConfirmModalProps = {
   open: boolean;
@@ -22,8 +22,6 @@ export function BacklogRemoveConfirmModal({
   onConfirm,
   isPending,
 }: BacklogRemoveConfirmModalProps) {
-  const { t } = useTranslation();
-
   const handleConfirm = async () => {
     await onConfirm();
     onCancel();
@@ -34,13 +32,10 @@ export function BacklogRemoveConfirmModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {t("progress_status.remove_backlog_modal.title", "移除想讀？")}
+            {m.progress_status_remove_backlog_modal_title()}
           </DialogTitle>
           <DialogDescription>
-            {t(
-              "progress_status.remove_backlog_modal.description",
-              "確認後會隱藏這筆閱讀狀態，並從想讀書架移除這本書。之後重新標記狀態時，原本的進度資料會被保留並恢復。",
-            )}
+            {m.progress_status_remove_backlog_modal_description()}
           </DialogDescription>
         </DialogHeader>
 
@@ -51,10 +46,10 @@ export function BacklogRemoveConfirmModal({
             onClick={onCancel}
             disabled={isPending}
           >
-            {t("common.cancel", "取消")}
+            {m.common_cancel()}
           </Button>
           <Button type="button" onClick={handleConfirm} disabled={isPending}>
-            {t("progress_status.remove_backlog_modal.confirm", "移除想讀")}
+            {m.progress_status_remove_backlog_modal_confirm()}
           </Button>
         </DialogFooter>
       </DialogContent>

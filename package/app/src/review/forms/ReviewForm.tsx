@@ -3,7 +3,7 @@ import { RatingInput } from "@rezics/ui";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Input, Label } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 export type ReviewEditState = {
   unitId: string;
@@ -31,11 +31,10 @@ export function ReviewForm({
   submitLabel,
   extraActions,
 }: ReviewFormProps) {
-  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4 mt-2">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="review-title">{t("review.form.title")}</Label>
+        <Label htmlFor="review-title">{m.review_form_title()}</Label>
         <Input
           id="review-title"
           value={data._editTitle || ""}
@@ -44,13 +43,13 @@ export function ReviewForm({
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium">{t("review.form.rating")}</span>
+        <span className="text-sm font-medium">{m.review_form_rating()}</span>
         <RatingInput
           value={data._editRating > 0 ? data._editRating : null}
           onChange={(value) => setData({ ...data, _editRating: value ?? 0 })}
           max={SCORE_MAX}
           size="lg"
-          aria-label={t("review.form.rating")}
+          aria-label={m.review_form_rating()}
         />
       </div>
       <div className="flex-1 min-h-[300px]">
@@ -72,9 +71,7 @@ export function ReviewForm({
           </span>
           {(data.body?.length ?? 0) < 200 && (
             <span className="text-xs text-red-500">
-              {t("review.validation.min_chars", {
-                defaultValue: "Reviews must be at least 200 characters",
-              })}
+              {m.review_validation_min_chars()}
             </span>
           )}
         </div>

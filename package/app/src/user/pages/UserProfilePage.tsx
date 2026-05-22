@@ -13,11 +13,11 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditIcon } from "lucide-react";
 import type { FC } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import FollowButton from "@/engagement/components/FollowButton";
 import { useUserProfileStore } from "@/user/states";
 import { UserError, UserLoading } from "./UserState";
 import { UserUnitsPage } from "./UserUnitsPage";
+import * as m from "@rezics/i18n/messages";
 
 export interface UserProfilePageProps {
   userId: string;
@@ -35,8 +35,6 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   onEditClick,
 }) => {
   const currentUser = useUserProfileStore((state) => state.user);
-  const { t } = useTranslation();
-
   const meQuery = useQuery({
     ...userQueries.me(),
     enabled: isCurrentUser,
@@ -109,7 +107,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               currentUser?.permission?.role?.includes("ADMIN") ? (
                 <Button onClick={onEditClick}>
                   <EditIcon className="w-4 h-4 mr-2" />
-                  {t("common.edit")}
+                  {m.common_edit()}
                 </Button>
               ) : null}
             </div>
@@ -125,7 +123,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             {user.email && (
               <div className="mb-4">
                 <h6 className="text-base font-semibold mb-2">
-                  {t("common.email")}
+                  {m.common_email()}
                 </h6>
                 <p className="text-sm text-text-secondary">{user.email}</p>
               </div>

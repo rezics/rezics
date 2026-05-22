@@ -5,12 +5,11 @@ import { buttonVariants } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RealmCard } from "@/realm/components/RealmCard";
+import * as m from "@rezics/i18n/messages";
 
 export const ActiveRealmsSection: React.FC = () => {
-  const { t } = useTranslation();
   const { data, isLoading, error } = useQuery(
     realmListQuery({
       isPublic: true,
@@ -29,10 +28,10 @@ export const ActiveRealmsSection: React.FC = () => {
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">
-          {t("page.home.sections.active_realms.title")}
+          {m.page_home_sections_active_realms_title()}
         </h2>
         <Link to="/realm" className={buttonVariants({ variant: "ghost" })}>
-          {t("page.home.sections.active_realms.more")}
+          {m.page_home_sections_active_realms_more()}
         </Link>
       </div>
       {isLoading ? (
@@ -45,7 +44,7 @@ export const ActiveRealmsSection: React.FC = () => {
               itemKey={(realm) => realm.unitId}
               itemClassName="pl-4 basis-[86%] xsm:basis-[62%]"
               showArrows={false}
-              ariaLabel={t("page.home.sections.active_realms.title")}
+              ariaLabel={m.page_home_sections_active_realms_title()}
               renderItem={(realm) => <RealmCard realm={realm} />}
             />
           </div>

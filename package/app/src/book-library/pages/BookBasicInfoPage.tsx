@@ -10,7 +10,6 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { RemarkInlineForm } from "@/remark";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -23,6 +22,7 @@ import { RemarkPreview } from "../components/RemarkPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
+import * as m from "@rezics/i18n/messages";
 
 interface BookWorkReleaseNavProps {
   workUnitId: string;
@@ -33,7 +33,6 @@ const BookWorkReleaseNav: React.FC<BookWorkReleaseNavProps> = ({
   workUnitId,
   currentUnitId,
 }) => {
-  const { t } = useTranslation();
   const { data } = useQuery({
     ...bookQueries.list({ workUnitId, limit: 10 }),
     enabled: Boolean(workUnitId),
@@ -49,8 +48,8 @@ const BookWorkReleaseNav: React.FC<BookWorkReleaseNavProps> = ({
     <WorkReleaseNav
       releases={releases}
       currentUnitId={currentUnitId}
-      heading={t("book.otherEditions", "Other Editions")}
-      emptyLabel={t("book.editionFallback", "Edition")}
+      heading={m.book_otherEditions()}
+      emptyLabel={m.book_editionFallback()}
       renderLink={(release, children) => (
         <Link
           key={release.unitId}
@@ -71,8 +70,6 @@ export const BookBasicInfoPage: React.FC = () => {
     enabled: Boolean(bookId),
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
-
-  const { t } = useTranslation();
   const [selectedLang] = useBookLanguage(bookId, bookInfo);
   const navigateToBookTagSearch = useNavigateToBookTagSearch();
 
@@ -123,7 +120,7 @@ export const BookBasicInfoPage: React.FC = () => {
         <>
           <Separator />
           <div>
-            <AccentBarWithText text={t("book.fields.tags", "Tags")} />
+            <AccentBarWithText text={m.book_fields_tags()} />
             <div className="mt-2">
               <TagInteraction
                 tags={unitTags}
@@ -141,7 +138,7 @@ export const BookBasicInfoPage: React.FC = () => {
 
       <div>
         <ArrowForwardIcon size={16} to={`/excerpt/book/${bookInfo.unitId}`}>
-          <AccentBarWithText text={t("book.excerpts")} />
+          <AccentBarWithText text={m.book_excerpts()} />
         </ArrowForwardIcon>
       </div>
       <ExcerptPreview id={bookInfo.unitId || ""} />
@@ -154,7 +151,7 @@ export const BookBasicInfoPage: React.FC = () => {
             size={16}
             to={`/review/book/${bookInfo.unitId}?tab=remark`}
           >
-            <AccentBarWithText text={t("book.remark")} />
+            <AccentBarWithText text={m.book_remark()} />
           </ArrowForwardIcon>
         </div>
         <div className="mt-3 mb-4">

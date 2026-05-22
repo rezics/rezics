@@ -18,9 +18,9 @@ import {
   Share as IosShareOutlined,
 } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useShareMenu } from "@/engagement/hooks/useShareMenu";
 import { BookProgressStatusSection } from "@/progress-status";
+import * as m from "@rezics/i18n/messages";
 
 interface BookHeroActionBarProps {
   bookInfo: BookDTO;
@@ -34,7 +34,6 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   bookInfo,
   shareTitle,
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "book", ownerUnit: bookInfo });
   const bookId = bookInfo?.unitId ?? "";
@@ -65,7 +64,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
         }}
       >
         <BookmarkAddOutlined className="w-4 h-4 mr-2" />
-        {t("book.hero.actions.add_to_shelf", "加入書架")}
+        {m.book_hero_actions_add_to_shelf()}
       </Button>
 
       {bookId ? <BookProgressStatusSection bookUnitId={bookId} /> : null}
@@ -83,17 +82,17 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
                 {...props}
               >
                 <IosShareOutlined className="w-4 h-4 mr-2" />
-                {t("common.share", "分享")}
+                {m.common_share()}
               </Button>
             )}
           />
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onClick={share.handleCopy}>
-              {t("common.copy_link", "複製連結")}
+              {m.common_copy_link()}
             </DropdownMenuItem>
             {share.canWebShare && (
               <DropdownMenuItem onClick={share.handleWebShare}>
-                {t("common.share_via", "分享…")}
+                {m.common_share_via()}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
@@ -108,10 +107,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
                     type="button"
                     size="icon"
                     variant="outline"
-                    aria-label={t(
-                      "book.hero.actions.edit_details",
-                      "編輯書籍詳情",
-                    )}
+                    aria-label={m.book_hero_actions_edit_details()}
                     {...props}
                     onClick={handleEdit}
                     className={ghostHeroClass}
@@ -121,7 +117,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
                 )}
               />
               <TooltipContent side="top">
-                {t("book.hero.actions.edit_details", "編輯書籍詳情")}
+                {m.book_hero_actions_edit_details()}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

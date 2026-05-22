@@ -6,9 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
+import * as m from "@rezics/i18n/messages";
 
 export type TrendingShelfSectionProps = {
   title?: string;
@@ -19,8 +19,7 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
   title,
   limit = 8,
 }) => {
-  const { t } = useTranslation();
-  const resolvedTitle = title ?? t("page.home.sections.trending_shelves");
+  const resolvedTitle = title ?? m.page_home_sections_trending_shelves();
   const { data, isLoading, error } = useQuery(
     contentSearchQueryOptions({ type: "SHELF", offset: 0, limit }),
   );

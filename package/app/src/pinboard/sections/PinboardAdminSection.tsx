@@ -25,7 +25,6 @@ import {
 import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { toast } from "sonner";
 import { PinboardEmptyState } from "../components/PinboardEmptyState";
 import { PinboardErrorState } from "../components/PinboardErrorState";
@@ -35,12 +34,18 @@ import { StaleIdsBanner } from "../components/StaleIdsBanner";
 import { usePinboardList } from "../hooks/usePinboard";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 import { Plus as AddRoundedIcon } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 
 export interface PinboardAdminSectionProps {
   realmUnitId: string;
   /** When true, the `announcement` tab is included alongside `pinboard`. */
   isDefaultRealm?: boolean;
 }
+
+const PINBOARD_ADMIN_TAB_LABEL = {
+  announcement: m.pinboard_admin_tabs_announcement,
+  pinboard: m.pinboard_admin_tabs_pinboard,
+} as const satisfies Record<PinboardListKey, () => string>;
 
 /**
  * Tabbed admin surface. Shows one tab per Realm.extra list key available to
@@ -52,7 +57,6 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
   realmUnitId,
   isDefaultRealm,
 }) => {
-  const { t } = useTranslation();
   const availableKeys = useMemo<PinboardListKey[]>(
     () => (isDefaultRealm ? ["announcement", "pinboard"] : ["pinboard"]),
     [isDefaultRealm],
@@ -61,20 +65,18 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-2">
-        {t("pinboard.admin.title")}
-      </h2>
+      <h2 className="text-lg font-semibold mb-2">{m.pinboard_admin_title()}</h2>
       {availableKeys.length > 1 ? (
         <Tabs
           value={activeKey}
           onValueChange={(v) => setActiveKey(v as RealmExtraListKey)}
-          aria-label={t("pinboard.admin.tabs_aria")}
+          aria-label={m.pinboard_admin_tabs_aria()}
           className="mb-4"
         >
           <TabsList>
             {availableKeys.map((key) => (
               <TabsTrigger key={key} value={key}>
-                {t(`pinboard.admin.tabs.${key}`)}
+                {PINBOARD_ADMIN_TAB_LABEL[key]()}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -95,7 +97,6 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   realmUnitId,
   pinboardKey,
 }) => {
-  const { t } = useTranslation();
   const { entries, staleIds, isLoading, isError, error, refetch } =
     usePinboardList({
       realmUnitId,
@@ -139,18 +140,18 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
         key: pinboardKey,
         unitId: pendingRemove.unitId,
       });
-      toast.success(t("pinboard.admin.delete_done"));
+      toast.success(m.pinboard_admin_delete_done());
       setPendingRemove(null);
     } catch (err) {
       toast.error(
-        t("pinboard.admin.delete_failed", {
+        m.pinboard_admin_delete_failed({
           error: err instanceof Error ? err.message : String(err),
         }),
       );
     } finally {
       setRemoving(false);
     }
-  }, [removeMut, pendingRemove, realmUnitId, pinboardKey, t]);
+  }, [removeMut, pendingRemove, realmUnitId, pinboardKey]);
 
   const handleCreate = useCallback(
     async (translations: TranslationEditorEntry[]) => {
@@ -177,10 +178,10 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
         key: pinboardKey,
         unitId: created.id,
       });
-      toast.success(t("pinboard.editor.created"));
+      toast.success(m.pinboard_editor_created());
       refetch();
     },
-    [append, realmUnitId, pinboardKey, refetch, t],
+    [append, realmUnitId, pinboardKey, refetch],
   );
 
   const handleEditSave = useCallback(
@@ -195,10 +196,10 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
           description: tr.description,
         });
       }
-      toast.success(t("pinboard.editor.saved"));
+      toast.success(m.pinboard_editor_saved());
       refetch();
     },
-    [refetch, t],
+    [refetch],
   );
 
   return (
@@ -206,7 +207,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
       <div className="flex flex-row justify-end">
         <Button onClick={openCreate}>
           <AddRoundedIcon className="h-4 w-4 mr-1" />
-          {t("pinboard.admin.create")}
+          {m.pinboard_admin_create()}
         </Button>
       </div>
 
@@ -265,24 +266,24 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
         <DialogContent aria-labelledby="pinboard-delete-title">
           <DialogHeader>
             <DialogTitle id="pinboard-delete-title">
-              {t("pinboard.admin.delete_title")}
+              {m.pinboard_admin_delete_title()}
             </DialogTitle>
             <DialogDescription>
-              {t("pinboard.admin.delete_description", {
+              {m.pinboard_admin_delete_description({
                 title: pendingRemove?.title ?? "",
               })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setPendingRemove(null)}>
-              {t("common.cancel")}
+              {m.common_cancel()}
             </Button>
             <Button
               variant="destructive"
               onClick={confirmRemove}
               disabled={removing}
             >
-              {t("common.delete")}
+              {m.common_delete()}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -314,7 +315,6 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
   onCreate,
   onEdit,
 }) => {
-  const { t } = useTranslation();
   const isEdit = entry !== null;
   const detailQuery = useQuery({
     ...unitDetailQuery(entry?.unitId ?? ""),
@@ -352,14 +352,14 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
       }
     } catch (err) {
       toast.error(
-        t("pinboard.editor.errors.save_failed", {
+        m.pinboard_editor_errors_save_failed({
           error: err instanceof Error ? err.message : String(err),
         }),
       );
     } finally {
       setSaving(false);
     }
-  }, [isEdit, entry, drafts, onCreate, onEdit, t]);
+  }, [isEdit, entry, drafts, onCreate, onEdit]);
 
   return (
     <Dialog
@@ -375,8 +375,8 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
         <DialogHeader>
           <DialogTitle id="pinboard-editor-title">
             {isEdit
-              ? t("pinboard.editor.title_edit")
-              : t("pinboard.editor.title_create")}
+              ? m.pinboard_editor_title_edit()
+              : m.pinboard_editor_title_create()}
           </DialogTitle>
         </DialogHeader>
         {isEdit && detailQuery.isLoading ? (
@@ -386,10 +386,10 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
         )}
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} disabled={saving}>
-            {t("common.cancel")}
+            {m.common_cancel()}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
-            {t("common.save")}
+            {m.common_save()}
           </Button>
         </DialogFooter>
       </DialogContent>

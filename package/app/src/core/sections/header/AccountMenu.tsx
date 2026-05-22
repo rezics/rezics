@@ -17,10 +17,10 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { logout } from "@/user/models/handler";
 import { useUserProfileStore } from "@/user/states";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";
+import * as m from "@rezics/i18n/messages";
 
 export type AccountMenuProps = {
   onLogout?: () => void;
@@ -30,9 +30,6 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const clearProfile = useUserProfileStore((state) => state.clearProfile);
   const user = useUserProfileStore((state) => state.user);
-
-  const { t } = useTranslation();
-
   const handleLogout = () => {
     onLogout?.();
     clearProfile();
@@ -81,7 +78,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
               {...props}
             >
               <PersonIcon className="w-4 h-4" />
-              <span>{t("navigation.profile")}</span>
+              <span>{m.navigation_profile()}</span>
             </Link>
           )}
         />
@@ -93,7 +90,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
               {...props}
             >
               <SettingsIcon className="w-4 h-4" />
-              <span>{t("navigation.settings")}</span>
+              <span>{m.navigation_settings()}</span>
             </Link>
           )}
         />
@@ -101,7 +98,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogoutIcon className="w-4 h-4" />
-          <span>{t("auth.logout")}</span>
+          <span>{m.auth_logout()}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

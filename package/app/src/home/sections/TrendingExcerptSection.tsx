@@ -2,10 +2,10 @@ import { Button } from "@rezics/ui/shadcn";
 import { Spinner } from "@rezics/ui";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalExcerptCarousel } from "@/excerpt/components/list/HorizontalExcerptCarousel";
 import { useHomeExcerpts } from "./hooks/hooks";
+import * as m from "@rezics/i18n/messages";
 
 export type TrendingExcerptSectionProps = {
   title?: string;
@@ -16,9 +16,8 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
   title,
   limit = 8,
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
-  const resolvedTitle = title ?? t("page.home.sections.trending_excerpt.title");
+  const resolvedTitle = title ?? m.page_home_sections_trending_excerpt_title();
   const { items, isLoading, error } = useHomeExcerpts(limit);
 
   const handleMoreClick = () => {
@@ -51,7 +50,7 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
         <Button variant="ghost" onClick={handleMoreClick}>
-          {t("page.home.sections.trending_excerpt.more")}
+          {m.page_home_sections_trending_excerpt_more()}
         </Button>
       </div>
 
@@ -59,7 +58,7 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
 
       {!isLoading && !items.length && (
         <p className="text-sm text-text-secondary">
-          {t("page.home.sections.trending_excerpt.empty")}
+          {m.page_home_sections_trending_excerpt_empty()}
         </p>
       )}
 

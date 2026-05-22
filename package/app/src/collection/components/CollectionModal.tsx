@@ -10,7 +10,6 @@ import {
   type SystemShelfKindKey,
 } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
-import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Button,
@@ -23,6 +22,7 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useCallback, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 // Backlog/Active/Completed are reached only via progress-status side-effects
 // (`user-unit-progress` spec). Surfacing them as collectable targets in the
@@ -56,7 +56,6 @@ export function CollectionModal({
   isLoading,
   isReview = false,
 }: CollectionModalProps) {
-  const { t } = useTranslation();
   const [selectedShelves, setSelectedShelves] = useState<Set<string>>(
     new Set(),
   );
@@ -86,15 +85,12 @@ export function CollectionModal({
     );
   }, [visibleShelves, filterTag]);
 
-  const shelfDisplayTitle = useCallback(
-    (shelf: ShelfSummaryDTO): string => {
-      if (shelf.kindKey === "favorites") {
-        return t("shelf.system.favorites");
-      }
-      return shelf.title ?? "Untitled";
-    },
-    [t],
-  );
+  const shelfDisplayTitle = useCallback((shelf: ShelfSummaryDTO): string => {
+    if (shelf.kindKey === "favorites") {
+      return m.shelf_system_favorites();
+    }
+    return shelf.title ?? "Untitled";
+  }, []);
 
   const toggleShelf = useCallback((shelfId: string) => {
     setSelectedShelves((prev) => {

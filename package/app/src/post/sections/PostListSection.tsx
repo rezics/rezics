@@ -4,8 +4,8 @@ import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { PostCard } from "../components/item/PostCard";
+import * as m from "@rezics/i18n/messages";
 
 interface PostListSectionProps {
   targetUnitId: string;
@@ -18,7 +18,6 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
   kind,
   limit = 20,
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data, isLoading } = useQuery(
     postsByTargetQuery(targetUnitId, {
@@ -39,9 +38,7 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
 
   if (posts.length === 0) {
     return (
-      <p className="text-sm text-text-secondary py-4">
-        {t("discussion.empty", "No discussions yet.")}
-      </p>
+      <p className="text-sm text-text-secondary py-4">{m.discussion_empty()}</p>
     );
   }
 

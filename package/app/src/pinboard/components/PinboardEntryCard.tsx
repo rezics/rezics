@@ -7,7 +7,6 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { cn } from "@/shared/utils/css-util";
 import type { PinboardEntryView } from "../models/types";
 import {
@@ -16,6 +15,7 @@ import {
   Pencil as EditRoundedIcon,
   Pin as PushPinRoundedIcon,
 } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 
 export type PinboardEntryCardVariant = "compact" | "card" | "adminRow";
 
@@ -43,8 +43,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
   dragHandle,
   stale,
 }) => {
-  const { t } = useTranslation();
-  const title = entry.title ?? t("pinboard.entry.untitled");
+  const title = entry.title ?? m.pinboard_entry_untitled();
   const summary = entry.summary ?? undefined;
 
   if (variant === "compact") {
@@ -87,14 +86,12 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
                 variant="outline"
                 className="border-warning-fill text-warning-text"
               >
-                {t("pinboard.entry.stale")}
+                {m.pinboard_entry_stale()}
               </Badge>
             ) : null}
             <Badge
               variant="outline"
-              aria-label={t("pinboard.entry.language", {
-                lang: entry.language,
-              })}
+              aria-label={m.pinboard_entry_language({ lang: entry.language })}
             >
               {entry.language}
             </Badge>
@@ -115,14 +112,14 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
                       size="icon"
                       variant="ghost"
                       onClick={() => onEdit(entry)}
-                      aria-label={t("common.edit")}
+                      aria-label={m.common_edit()}
                       {...props}
                     >
                       <EditRoundedIcon className="h-4 w-4" />
                     </Button>
                   )}
                 />
-                <TooltipContent>{t("common.edit")}</TooltipContent>
+                <TooltipContent>{m.common_edit()}</TooltipContent>
               </Tooltip>
             ) : null}
             {onDelete ? (
@@ -134,14 +131,14 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
                       variant="ghost"
                       className="text-error-text"
                       onClick={() => onDelete(entry)}
-                      aria-label={t("common.delete")}
+                      aria-label={m.common_delete()}
                       {...props}
                     >
                       <DeleteOutlineRoundedIcon className="h-4 w-4" />
                     </Button>
                   )}
                 />
-                <TooltipContent>{t("common.delete")}</TooltipContent>
+                <TooltipContent>{m.common_delete()}</TooltipContent>
               </Tooltip>
             ) : null}
           </div>

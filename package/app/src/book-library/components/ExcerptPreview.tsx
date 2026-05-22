@@ -2,9 +2,9 @@ import { postQueries } from "@rezics/api/post/post";
 import { type PostDTO, PostKind, type UnitDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ExcerptList } from "@/excerpt";
+import * as m from "@rezics/i18n/messages";
 
 export type ExcerptPreviewProps = {
   id: string;
@@ -15,7 +15,6 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
   id,
   excerptNumber = 3,
 }) => {
-  const { t } = useTranslation();
   const { data, isLoading, error } = useQuery(
     postQueries.byTarget(id, {
       kind: PostKind.EXCERPT,
@@ -23,7 +22,7 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
     }),
   );
 
-  if (isLoading) return <div>{t("common.loading")}</div>;
+  if (isLoading) return <div>{m.common_loading()}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   const units: UnitDTO[] =

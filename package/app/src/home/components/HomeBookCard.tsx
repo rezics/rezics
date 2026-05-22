@@ -2,12 +2,12 @@ import { Card, CardContent } from "@rezics/ui/shadcn";
 import type { BookDTO } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Link } from "@/shared/ui/link";
-import { useTranslation } from "@rezics/i18n/react";
 import {
   getBookAuthorName,
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
+import * as m from "@rezics/i18n/messages";
 
 const BookCard = ({
   book,
@@ -16,7 +16,6 @@ const BookCard = ({
   book: BookDTO;
   className?: string;
 }) => {
-  const { t } = useTranslation();
   const title = getBookTitle(book);
   const coverUrl = getBookCoverUrl(book);
   const authorName = getBookAuthorName(book);
@@ -40,7 +39,7 @@ const BookCard = ({
           </div>
         ) : (
           <div className="w-full aspect-[3/4] h-42 bg-gray-200 flex items-center justify-center text-gray-400">
-            {t("book.no_cover")}
+            {m.book_no_cover()}
           </div>
         )}
 
@@ -53,7 +52,7 @@ const BookCard = ({
           </div>
 
           <p className="text-xs text-gray-500 truncate mt-auto pt-1 m-0">
-            {authorName || t("book.unknown_author")}
+            {authorName || m.book_unknown_author()}
           </p>
         </CardContent>
       </Link>

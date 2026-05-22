@@ -17,10 +17,10 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
 import { PostLanguageSwitcher } from "../components/PostLanguageSwitcher";
+import * as m from "@rezics/i18n/messages";
 
 function formatMetadataValue(value: unknown): string {
   if (value === null || value === undefined) return "-";
@@ -38,8 +38,6 @@ function formatMetadataValue(value: unknown): string {
 }
 
 export function UnitPageById({ unitId }: { unitId: string }) {
-  const { t } = useTranslation();
-
   const {
     data: unit,
     isLoading,
@@ -66,7 +64,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   if (!unit) {
     return (
       <div className="mt-8 text-center text-sm text-gray-500">
-        {t("common.no_data")}
+        {m.common_no_data()}
       </div>
     );
   }
@@ -79,12 +77,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   // MOCK: client-side gate until permissions are finalized for translation attach.
   const canAddTranslation = isPost;
   const handleAddTranslation = () => {
-    const lang = window.prompt(
-      t(
-        "post.add_translation_prompt",
-        "New translation language code (e.g. ja, en, zh-hant)",
-      ) ?? "",
-    );
+    const lang = window.prompt(m.post_add_translation_prompt() ?? "");
     if (!lang) return;
     attach.mutate({
       unitId: unit.id,
@@ -97,9 +90,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
       {/* ANCHOR Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold">
-            {title || t("pages.unit_page", "Unit")}
-          </h1>
+          <h1 className="text-3xl font-bold">{title || m.pages_unit_page()}</h1>
           <p className="text-xs sm:text-sm break-all text-text-secondary">
             ID: {unit.id}
           </p>
@@ -145,7 +136,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
                         </TextLink>
                       )}
                     />
-                    <TooltipContent>{t("user.open_profile")}</TooltipContent>
+                    <TooltipContent>{m.user_open_profile()}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
                 <span className="text-xs text-text-secondary">
@@ -158,12 +149,12 @@ export function UnitPageById({ unitId }: { unitId: string }) {
           <div className="text-xs space-y-0.5 sm:text-right">
             {unit.createdAt && (
               <div>
-                {t("common.created_at")}: {String(unit.createdAt)}
+                {m.common_created_at()}: {String(unit.createdAt)}
               </div>
             )}
             {unit.updatedAt && (
               <div>
-                {t("common.updated_at")}: {String(unit.updatedAt)}
+                {m.common_updated_at()}: {String(unit.updatedAt)}
               </div>
             )}
           </div>
@@ -191,9 +182,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
           {content ? (
             <MarkdownContent content={content} />
           ) : (
-            <p className="text-sm text-text-secondary">
-              {t("unit.no_content")}
-            </p>
+            <p className="text-sm text-text-secondary">{m.unit_no_content()}</p>
           )}
         </div>
       </div>
@@ -202,13 +191,11 @@ export function UnitPageById({ unitId }: { unitId: string }) {
       <div className="mt-16">
         <div className="flex items-center gap-2 mb-4">
           <AccentBar />
-          <h2 className="text-lg font-bold">{t("unit.meta_data")}</h2>
+          <h2 className="text-lg font-bold">{m.unit_meta_data()}</h2>
         </div>
 
         {metadataEntries.length === 0 ? (
-          <p className="text-sm text-text-secondary">
-            {t("unit.no_metadata", "暂无 Meta 信息")}
-          </p>
+          <p className="text-sm text-text-secondary">{m.unit_no_metadata()}</p>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {metadataEntries.map(([key, value]) => (

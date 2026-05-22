@@ -13,13 +13,13 @@ import type {
   UserUnitProgressStatus,
 } from "@rezics/contract";
 import { useCallback, useMemo, useRef } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { toast } from "sonner";
 import {
   planRemoveProgress,
   planTransition,
   type ShelfOp,
 } from "../models/transition";
+import * as m from "@rezics/i18n/messages";
 
 export type StatusTransitionPayload = {
   to: UserUnitProgressStatus;
@@ -46,8 +46,6 @@ export function useStatusTransition(
   unitId: string,
   currentStatus: UserUnitProgressStatus | null,
 ): UseStatusTransitionResult {
-  const { t } = useTranslation();
-
   const updateProgress = useUpdateUnitProgress(unitId);
   const deleteProgress = useDeleteUnitProgress(unitId);
   const { resolve: resolveSystemShelfId, isPending: isSystemShelfPending } =
@@ -73,16 +71,11 @@ export function useStatusTransition(
   );
 
   const showRetryToast = useCallback(
-    (
-      retryKey: string,
-      messageKey: string,
-      defaultMessage: string,
-      retry: () => Promise<void>,
-    ) => {
+    (retryKey: string, message: () => string, retry: () => Promise<void>) => {
       if (inFlightRetries.current.has(retryKey)) return;
-      toast.error(t(messageKey, defaultMessage), {
+      toast.error(message(), {
         action: {
-          label: t("common.retry", "重試"),
+          label: m.common_retry(),
           onClick: () => {
             if (inFlightRetries.current.has(retryKey)) return;
             inFlightRetries.current.add(retryKey);
@@ -93,7 +86,7 @@ export function useStatusTransition(
         },
       });
     },
-    [t],
+    [],
   );
 
   const dispatchShelfOps = useCallback(
@@ -117,8 +110,7 @@ export function useStatusTransition(
       if (progressFailed && shelfFailed) {
         showRetryToast(
           `${unitId}:both`,
-          "progress_status.toast.both_failed",
-          "進度與書架更新失敗",
+          m.progress_status_toast_both_failed,
           async () => {
             await Promise.allSettled([retryProgress(), retryShelf()]);
           },
@@ -126,15 +118,13 @@ export function useStatusTransition(
       } else if (progressFailed) {
         showRetryToast(
           `${unitId}:progress`,
-          "progress_status.toast.progress_failed",
-          "進度更新失敗",
+          m.progress_status_toast_progress_failed,
           retryProgress,
         );
       } else if (shelfFailed) {
         showRetryToast(
           `${unitId}:shelf`,
-          "progress_status.toast.shelf_failed",
-          "書架更新失敗",
+          m.progress_status_toast_shelf_failed,
           retryShelf,
         );
       }

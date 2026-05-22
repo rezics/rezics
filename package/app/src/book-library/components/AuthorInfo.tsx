@@ -6,9 +6,9 @@ import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { unitHref } from "@/shared/ui/link";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { FollowButton } from "@/engagement/components/FollowButton.tsx";
 import { useIsMobile } from "@/shared/utils/use-media-query.ts";
+import * as m from "@rezics/i18n/messages";
 
 // --------- Types ---------
 export type Author = PublicUser;
@@ -33,7 +33,6 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
-  const { t } = useTranslation();
   return (
     <div>
       <ArrowForwardIcon
@@ -45,11 +44,11 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
         })}
       >
         <AccentBarWithText
-          text={t("book.author_info.author_line", { name: author?.name })}
+          text={m.book_author_info_author_line({ name: author?.name })}
         />
       </ArrowForwardIcon>
       {showEditButton && (
-        <EditButtonFloatRightShow onClick={onEdit} text={t("common.edit")} />
+        <EditButtonFloatRightShow onClick={onEdit} text={m.common_edit()} />
       )}
       <div className="flex items-start gap-4 px-4 pt-8">
         {/* Left: Avatar + Follow */}
@@ -93,7 +92,6 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
-  const { t } = useTranslation();
   return (
     <div>
       <div>
@@ -107,14 +105,11 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
             })}
           >
             <AccentBarWithText
-              text={t("book.author_info.author_line", { name: author?.name })}
+              text={m.book_author_info_author_line({ name: author?.name })}
             />
           </ArrowForwardIcon>
           {showEditButton && (
-            <EditButtonFloatRightShow
-              onClick={onEdit}
-              text={t("common.edit")}
-            />
+            <EditButtonFloatRightShow onClick={onEdit} text={m.common_edit()} />
           )}
         </div>
 
@@ -144,11 +139,11 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
               {/* Right text */}
               <div className="flex-1 !text-md">
                 <p>
-                  {t("book.author_info.bio_label")}:{author.bio}
+                  {m.book_author_info_bio_label()}:{author.bio}
                 </p>
                 <br />
                 <p>
-                  {t("book.author_info.description_label")}:{author.description}
+                  {m.book_author_info_description_label()}:{author.description}
                 </p>
               </div>
             </div>

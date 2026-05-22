@@ -7,7 +7,8 @@ import {
 } from "@rezics/ui/shadcn";
 import type { ContentRating } from "@rezics/contract";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import { ratingTierLabel } from "@/search/models/ratingTierLabel";
+import * as m from "@rezics/i18n/messages";
 
 const RATINGS: ContentRating[] = ["GENERAL", "R_15", "R_18", "R_18G"];
 
@@ -24,7 +25,6 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
   allowed,
   isAuthenticated = true,
 }) => {
-  const { t } = useTranslation();
   const selected = new Set(value ?? []);
   const allowSet = allowed ? new Set(allowed) : null;
 
@@ -39,7 +39,7 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
   return (
     <div className="flex flex-col gap-1">
       <span className="text-sm font-medium opacity-60">
-        {t("search.filters.rating", "Rating")}
+        {m.search_filters_rating()}
       </span>
       <TooltipProvider>
         <div className="flex flex-wrap items-center gap-2">
@@ -47,15 +47,9 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
             const disabled = allowSet !== null && !allowSet.has(rating);
             const hint =
               disabled && !isAuthenticated
-                ? t(
-                    "search.tooltips.ratingSignIn",
-                    "Sign in and opt in to enable this rating",
-                  )
+                ? m.search_tooltips_ratingSignIn()
                 : disabled
-                  ? t(
-                      "search.tooltips.ratingOptIn",
-                      "Enable this rating in settings",
-                    )
+                  ? m.search_tooltips_ratingOptIn()
                   : "";
             const label = (
               <div
@@ -68,11 +62,9 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
                   onCheckedChange={(checked) =>
                     toggle(rating, checked === true)
                   }
-                  aria-label={t(`rating.tier.${rating}`, rating)}
+                  aria-label={ratingTierLabel(rating)}
                 />
-                <span className="text-sm">
-                  {t(`rating.tier.${rating}`, rating)}
-                </span>
+                <span className="text-sm">{ratingTierLabel(rating)}</span>
               </div>
             );
             return hint ? (

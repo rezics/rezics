@@ -1,4 +1,5 @@
 import type { UserUnitProgressStatus } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 
 export type ReadStatus = UserUnitProgressStatus;
 
@@ -10,31 +11,17 @@ export const READ_STATUS_VALUES = [
   "DROPPED",
 ] as const satisfies readonly ReadStatus[];
 
-export type StatusLabelMap = Record<ReadStatus, string>;
+const READ_STATUS_MESSAGE = {
+  BACKLOG: m.book_hero_actions_want_to_read,
+  ACTIVE: m.book_hero_actions_reading,
+  PAUSED: m.book_hero_actions_paused,
+  COMPLETED: m.book_hero_actions_read,
+  DROPPED: m.book_hero_actions_dropped,
+} as const satisfies Record<ReadStatus, () => string>;
 
-export const READ_STATUS_LABELS_ZH_HANT: StatusLabelMap = {
-  BACKLOG: "想讀",
-  ACTIVE: "在讀",
-  PAUSED: "擱置",
-  COMPLETED: "已讀",
-  DROPPED: "棄",
-};
-
-export const READ_STATUS_LABELS_EN: StatusLabelMap = {
-  BACKLOG: "Want to read",
-  ACTIVE: "Reading",
-  PAUSED: "Paused",
-  COMPLETED: "Read",
-  DROPPED: "Dropped",
-};
-
-export const READ_STATUS_I18N_KEYS = {
-  BACKLOG: "book.hero.actions.want_to_read",
-  ACTIVE: "book.hero.actions.reading",
-  PAUSED: "book.hero.actions.paused",
-  COMPLETED: "book.hero.actions.read",
-  DROPPED: "book.hero.actions.dropped",
-} as const satisfies Record<ReadStatus, string>;
+export function readStatusLabel(status: ReadStatus): string {
+  return READ_STATUS_MESSAGE[status]();
+}
 
 export const TOGGLE_GROUP_STATUSES = [
   "BACKLOG",

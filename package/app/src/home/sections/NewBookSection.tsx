@@ -1,7 +1,6 @@
 import { Button, Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { HorizontalBookCarousel } from "@/book-library/components/list/HorizontalBookCarousel";
 import {
   getBookAuthorName,
@@ -10,6 +9,7 @@ import {
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
 import { useHomeBooks } from "./hooks/hooks";
+import * as m from "@rezics/i18n/messages";
 
 type TabKey = "latest" | "new" | "completed";
 
@@ -22,7 +22,6 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
   limit = 12,
   className,
 }) => {
-  const { t } = useTranslation();
   const [tab, setTab] = React.useState<TabKey>("latest");
   const navigate = useNavigate();
 
@@ -44,10 +43,10 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">
-          {t("page.home.sections.new_book.title")}
+          {m.page_home_sections_new_book_title()}
         </h2>
         <Button variant="ghost" onClick={() => navigate({ to: "/book" })}>
-          {t("page.home.sections.new_book.more")}
+          {m.page_home_sections_new_book_more()}
         </Button>
       </div>
 
@@ -60,13 +59,13 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
         >
           <TabsList className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain scroll-smooth sm:w-fit sm:overflow-visible">
             <TabsTrigger value="latest" className="flex-none">
-              {t("page.home.sections.new_book.tab_latest_serial")}
+              {m.page_home_sections_new_book_tab_latest_serial()}
             </TabsTrigger>
             <TabsTrigger value="new" className="flex-none">
-              {t("page.home.sections.new_book.tab_new_on_shelf")}
+              {m.page_home_sections_new_book_tab_new_on_shelf()}
             </TabsTrigger>
             <TabsTrigger value="completed" className="flex-none">
-              {t("page.home.sections.new_book.tab_recently_completed")}
+              {m.page_home_sections_new_book_tab_recently_completed()}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -76,7 +75,7 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
       <div>
         {isLoading ? (
           <div className="text-slate-400 text-sm">
-            {t("page.home.sections.trending_book.loading")}
+            {m.page_home_sections_trending_book_loading()}
           </div>
         ) : (
           <HorizontalBookCarousel bookList={bookList} />

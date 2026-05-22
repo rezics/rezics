@@ -18,8 +18,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
+import * as m from "@rezics/i18n/messages";
 
 export interface AddTranslationDialogProps {
   open: boolean;
@@ -42,7 +42,6 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const { t } = useTranslation();
   const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
   const firstAvailableLanguage = available[0] ?? "";
   const [language, setLanguage] = useState<string>(firstAvailableLanguage);
@@ -84,13 +83,13 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>
-            {t("page.book_edit.info.translation.add_dialog.title")}
+            {m.page_book_edit_info_translation_add_dialog_title()}
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-6 mt-2">
           <div className="flex flex-col gap-1">
             <Label htmlFor="add-trans-language">
-              {t("page.book_edit.info.translation.add_dialog.language")}
+              {m.page_book_edit_info_translation_add_dialog_language()}
             </Label>
             <Select
               value={language}
@@ -115,7 +114,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
 
           <div className="flex flex-col gap-1">
             <Label htmlFor="add-trans-source">
-              {t("page.book_edit.info.translation.add_dialog.source_release")}
+              {m.page_book_edit_info_translation_add_dialog_source_release()}
             </Label>
             <Select
               value={sourceReleaseUnitId}
@@ -127,7 +126,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
               <SelectContent>
                 <SelectItem value={NO_SOURCE}>
                   <span className="text-text-secondary">
-                    {t("page.book_edit.info.translation.add_dialog.no_source")}
+                    {m.page_book_edit_info_translation_add_dialog_no_source()}
                   </span>
                 </SelectItem>
                 {candidates.map((b) => (
@@ -138,18 +137,16 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
               </SelectContent>
             </Select>
             <p className="text-sm text-text-secondary">
-              {t(
-                "page.book_edit.info.translation.add_dialog.source_release_help",
-              )}
+              {m.page_book_edit_info_translation_add_dialog_source_release_help()}
             </p>
           </div>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {t("common.cancel")}
+            {m.common_cancel()}
           </Button>
           <Button onClick={handleSubmit} disabled={!language}>
-            {t("page.book_edit.info.translation.add_dialog.submit")}
+            {m.page_book_edit_info_translation_add_dialog_submit()}
           </Button>
         </DialogFooter>
       </DialogContent>

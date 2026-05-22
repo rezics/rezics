@@ -1,8 +1,8 @@
-import { translate as t } from "@rezics/i18n";
+import * as m from "@rezics/i18n/messages";
 
 export function validateEmail(email: string) {
   if (!email) {
-    return { valid: false, error: t("auth.error.email_required") };
+    return { valid: false, error: m.auth_error_email_required() };
   }
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!pattern.test(email)) {

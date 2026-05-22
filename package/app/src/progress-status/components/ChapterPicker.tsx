@@ -5,8 +5,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { useTranslation } from "@rezics/i18n/react";
 import { useChapterPicker } from "../hooks/useChapterPicker";
+import * as m from "@rezics/i18n/messages";
 
 type ChapterPickerProps = {
   bookUnitId: string;
@@ -23,7 +23,6 @@ export function ChapterPicker({
   onChange,
   disabled,
 }: ChapterPickerProps) {
-  const { t } = useTranslation();
   const { options, isLoading } = useChapterPicker(bookUnitId);
 
   return (
@@ -37,15 +36,12 @@ export function ChapterPicker({
     >
       <SelectTrigger>
         <SelectValue
-          placeholder={t(
-            "progress_status.chapter_picker.placeholder",
-            "選擇章節",
-          )}
+          placeholder={m.progress_status_chapter_picker_placeholder()}
         />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={NONE_VALUE}>
-          {t("progress_status.chapter_picker.none", "未指定")}
+          {m.progress_status_chapter_picker_none()}
         </SelectItem>
         {options.map((opt) => (
           <SelectItem key={opt.chapterUnitId} value={opt.chapterUnitId}>

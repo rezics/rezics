@@ -5,8 +5,8 @@ import { PostKind } from "@rezics/contract";
 import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import type { BookHeroStatKey } from "./BookHeroStatCards";
+import * as m from "@rezics/i18n/messages";
 
 interface BookHeroCountLinksProps {
   bookId: string;
@@ -25,8 +25,6 @@ export const BookHeroCountLinks: React.FC<BookHeroCountLinksProps> = ({
   bookId,
   excludeKeys = [],
 }) => {
-  const { t } = useTranslation();
-
   const { data: reviewData } = useQuery({
     ...postQueries.byTarget(bookId, { kind: PostKind.REVIEW, limit: 1 }),
     enabled: Boolean(bookId),
@@ -49,25 +47,19 @@ export const BookHeroCountLinks: React.FC<BookHeroCountLinksProps> = ({
       key: "reviews",
       to: "/review/book/$bookId",
       count: reviewCount,
-      label: t("book.hero.count_links.reviews", "{{count}} 篇書評", {
-        count: reviewCount,
-      }),
+      label: m.book_hero_count_links_reviews({ count: reviewCount }),
     },
     {
       key: "shelves",
       to: "/shelf/book/$bookId",
       count: shelfCount,
-      label: t("book.hero.count_links.shelves", "{{count}} 個書架", {
-        count: shelfCount,
-      }),
+      label: m.book_hero_count_links_shelves({ count: shelfCount }),
     },
     {
       key: "tags",
       to: "/tag/book/$bookId",
       count: tagCount,
-      label: t("book.hero.count_links.tags", "{{count}} 個標籤", {
-        count: tagCount,
-      }),
+      label: m.book_hero_count_links_tags({ count: tagCount }),
     },
   ];
 

@@ -1,7 +1,7 @@
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { Collapsible } from "@rezics/ui/primitive/typography/collapsible/Collapsible.tsx";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 interface PostBodyMarkdownProps {
   body: string;
@@ -14,14 +14,12 @@ export const PostBodyMarkdown: React.FC<PostBodyMarkdownProps> = ({
   clamp,
   className,
 }) => {
-  const { t } = useTranslation();
-
   if (clamp) {
     return (
       <Collapsible
         maxLines={clamp.maxLines}
-        showMoreLabel={t("common.expand")}
-        showLessLabel={t("common.collapse")}
+        showMoreLabel={m.common_expand()}
+        showLessLabel={m.common_collapse()}
       >
         <MarkdownContent content={body ?? ""} className={className} />
       </Collapsible>

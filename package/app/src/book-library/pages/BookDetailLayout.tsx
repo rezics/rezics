@@ -5,7 +5,6 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
 import type React from "react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 
 import { BookDetailShell } from "../sections/BookDetailSection";
@@ -15,6 +14,7 @@ import {
   setBookDetailAtomFamily,
 } from "../states/bookDetailAtoms";
 import { BookDetailLayoutContext } from "./bookDetailLayoutContext";
+import * as m from "@rezics/i18n/messages";
 
 /**
  * Book Detail Layout
@@ -32,9 +32,6 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   const params = useParams({ strict: false }) as { bookId?: string };
   const bookId = params.bookId ?? "";
   const queriesEnabled = Boolean(bookId);
-
-  const { t } = useTranslation();
-
   const { data, isLoading, error } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: queriesEnabled,
@@ -63,11 +60,11 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   const layoutContextValue = useMemo(() => ({ setSidebar }), []);
 
   if (!queriesEnabled) {
-    return <div>{t("common.error_generic")} Missing bookId</div>;
+    return <div>{m.common_error_generic()} Missing bookId</div>;
   }
 
   if (isLoading || !bookInfo) {
-    return <div>{t("common.loading")}</div>;
+    return <div>{m.common_loading()}</div>;
   }
 
   if (error) {

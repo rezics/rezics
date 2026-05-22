@@ -11,7 +11,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 interface RemarkEditDialogProps {
   remark: PostDTO;
@@ -24,7 +24,6 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   open,
   onClose,
 }) => {
-  const { t } = useTranslation();
   const initialRating = (remark.extra as { rating?: number } | null)?.rating;
   const [score, setScore] = useState<number | null>(
     typeof initialRating === "number" ? initialRating : null,
@@ -61,7 +60,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
     >
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{t("common.edit")}</DialogTitle>
+          <DialogTitle>{m.common_edit()}</DialogTitle>
         </DialogHeader>
         <div className="pt-2">
           <div className="flex flex-col gap-4">
@@ -69,7 +68,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
               value={score}
               onChange={setScore}
               max={SCORE_MAX}
-              aria-label={t("remark.form.rating", "Rating")}
+              aria-label={m.remark_form_rating()}
             />
             <textarea
               value={text}
@@ -81,15 +80,13 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {t("common.cancel", "Cancel")}
+            {m.common_cancel()}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={updateMutation.isPending || !text.trim()}
           >
-            {updateMutation.isPending
-              ? t("common.saving", "Saving…")
-              : t("common.save", "Save")}
+            {updateMutation.isPending ? m.common_saving() : m.common_save()}
           </Button>
         </DialogFooter>
       </DialogContent>

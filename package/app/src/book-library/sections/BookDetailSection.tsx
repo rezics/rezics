@@ -12,10 +12,10 @@ import {
 import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 
 import { useBookLanguage } from "../hooks/useBookLanguage";
+import * as m from "@rezics/i18n/messages";
 
 const TAB_ROUTES = [
   "info",
@@ -48,7 +48,6 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   children,
   sidebar,
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const activeTab = useActiveTabRoute();
@@ -83,19 +82,19 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                 className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory sm:w-fit sm:overflow-visible"
               >
                 <TabsTrigger value="info" className="flex-none snap-start">
-                  {t("page.book.tabs.overview")}
+                  {m.page_book_tabs_overview()}
                 </TabsTrigger>
                 <TabsTrigger value="review" className="flex-none snap-start">
-                  {t("page.book.tabs.review_shelf")}
+                  {m.page_book_tabs_review_shelf()}
                 </TabsTrigger>
                 <TabsTrigger value="content" className="flex-none snap-start">
-                  {t("page.book.tabs.content")}
+                  {m.page_book_tabs_content()}
                 </TabsTrigger>
                 <TabsTrigger
                   value="discussion"
                   className="flex-none snap-start"
                 >
-                  {t("page.book.tabs.community")}
+                  {m.page_book_tabs_community()}
                 </TabsTrigger>
                 <TabsTrigger value="history" className="flex-none snap-start">
                   History

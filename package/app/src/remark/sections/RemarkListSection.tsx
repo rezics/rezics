@@ -2,9 +2,9 @@ import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RemarkList } from "../components/list/RemarkList";
+import * as m from "@rezics/i18n/messages";
 
 interface RemarkListSectionProps {
   targetUnitId: string;
@@ -15,13 +15,12 @@ export const RemarkListSection: React.FC<RemarkListSectionProps> = ({
   targetUnitId,
   limit = 20,
 }) => {
-  const { t } = useTranslation();
   const { data, isLoading, error } = useQuery({
     ...postQueries.byTarget(targetUnitId, { kind: PostKind.REMARK, limit }),
     enabled: !!targetUnitId,
   });
 
-  if (isLoading) return <div>{t("common.loading")}</div>;
+  if (isLoading) return <div>{m.common_loading()}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   const posts = data?.posts ?? [];

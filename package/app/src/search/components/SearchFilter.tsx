@@ -12,7 +12,7 @@ import {
   ArrowUp as ArrowUpward,
 } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 export type BookLibSortKey =
   | "relevance"
@@ -22,13 +22,13 @@ export type BookLibSortKey =
   | "monthVotes"
   | "recommend";
 
-const LABEL_KEYS: Partial<Record<BookLibSortKey, string>> = {
-  relevance: "search.filter.relevance",
-  time: "search.filter.time",
-  favorites: "search.filter.favorites",
-  wordCount: "search.filter.word_count",
-  monthVotes: "search.filter.month_votes",
-};
+const FILTER_LABEL = {
+  relevance: m.search_filter_relevance,
+  time: m.search_filter_time,
+  favorites: m.search_filter_favorites,
+  wordCount: m.search_filter_word_count,
+  monthVotes: m.search_filter_month_votes,
+} as const satisfies Partial<Record<BookLibSortKey, () => string>>;
 
 export type BookSearchFilterProps = SortControlsProps;
 
@@ -37,8 +37,6 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
   sortOrder,
   onSortChange,
 }) => {
-  const { t } = useTranslation();
-
   const handleSecondaryMenuSelect = (key: string) => () => {
     console.log(key);
   };
@@ -46,18 +44,20 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
   return (
     <div className="flex justify-between">
       <div className="book-search-filter mb-8 flex flex-row items-center gap-4">
-        {(Object.keys(LABEL_KEYS) as BookLibSortKey[]).map((key) => {
-          const active = key === sortType;
-          return (
-            <Button
-              key={key}
-              variant={active ? "secondary" : "ghost"}
-              onClick={() => onSortChange({ type: key })}
-            >
-              <span className="text-sm">{t(LABEL_KEYS[key]! as any)}</span>
-            </Button>
-          );
-        })}
+        {(Object.keys(FILTER_LABEL) as Array<keyof typeof FILTER_LABEL>).map(
+          (key) => {
+            const active = key === sortType;
+            return (
+              <Button
+                key={key}
+                variant={active ? "secondary" : "ghost"}
+                onClick={() => onSortChange({ type: key })}
+              >
+                <span className="text-sm">{FILTER_LABEL[key]()}</span>
+              </Button>
+            );
+          },
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -65,7 +65,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
             render={(props) => (
               <Button variant="ghost" {...props}>
                 <span className="text-sm">
-                  {t("search.filter.recommendation")}
+                  {m.search_filter_recommendation()}
                 </span>
                 <ArrowDropDownIcon className="ml-1" size={16} />
               </Button>
@@ -73,13 +73,13 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           />
           <DropdownMenuContent>
             <DropdownMenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>
-              {t("search.filter.week_votes")}
+              {m.search_filter_week_votes()}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleSecondaryMenuSelect("monthVotes")}>
-              {t("search.filter.month_votes")}
+              {m.search_filter_month_votes()}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleSecondaryMenuSelect("totalVotes")}>
-              {t("search.filter.total_votes")}
+              {m.search_filter_total_votes()}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -92,7 +92,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           className="normal-case"
         >
           <ArrowDownward />
-          &nbsp; {t("search.filter.desc")}
+          &nbsp; {m.search_filter_desc()}
         </Button>
         <Button
           variant={sortOrder === "asc" ? "secondary" : "ghost"}
@@ -101,7 +101,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           className="ml-2 normal-case"
         >
           <ArrowUpward />
-          &nbsp; {t("search.filter.asc")}
+          &nbsp; {m.search_filter_asc()}
         </Button>
       </div>
     </div>

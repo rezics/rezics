@@ -2,7 +2,7 @@ import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
 import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale } from "@rezics/i18n/react";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
 import { BacklogRemoveConfirmModal } from "../components/BacklogRemoveConfirmModal";
 import { CompletedConfirmModal } from "../components/CompletedConfirmModal";
@@ -26,6 +26,7 @@ import {
   openStatusModalAtom,
   statusModalAtom,
 } from "../states/statusModalAtom";
+import * as m from "@rezics/i18n/messages";
 
 export type BookProgressStatusSectionProps = {
   bookUnitId: string;
@@ -43,44 +44,39 @@ function usesChineseProgressLayout(language: string | undefined) {
 
 function getDefaultPrimaryAction(status: UserUnitProgressStatus | null): {
   status: ToggleGroupStatus;
-  labelKey: string;
-  fallback: string;
+  label: string;
 } {
   if (!status) {
     return {
       status: "BACKLOG",
-      labelKey: "book.hero.actions.want_to_read",
-      fallback: "Want to read",
+      label: m.book_hero_actions_want_to_read(),
     };
   }
 
   if (status === "ACTIVE") {
     return {
       status: "COMPLETED",
-      labelKey: "book.hero.actions.mark_as_read",
-      fallback: "Mark as read",
+      label: m.book_hero_actions_mark_as_read(),
     };
   }
 
   if (status === "COMPLETED") {
     return {
       status: "COMPLETED",
-      labelKey: "book.hero.actions.read_again",
-      fallback: "Read again",
+      label: m.book_hero_actions_read_again(),
     };
   }
 
   return {
     status: "ACTIVE",
-    labelKey: "book.hero.actions.start_reading",
-    fallback: "Start reading",
+    label: m.book_hero_actions_start_reading(),
   };
 }
 
 export function BookProgressStatusSection({
   bookUnitId,
 }: BookProgressStatusSectionProps) {
-  const { i18n } = useTranslation();
+  const language = useLocale();
   const progress = useUnitProgress(bookUnitId);
   const currentStatus: UserUnitProgressStatus | null =
     progress.data?.status ?? null;
@@ -260,9 +256,7 @@ export function BookProgressStatusSection({
     modal.kind === "reason" && modal.status && isReasonStatus(modal.status)
       ? modal.status
       : null;
-  const isChineseLayout = usesChineseProgressLayout(
-    i18n.resolvedLanguage ?? i18n.language,
-  );
+  const isChineseLayout = usesChineseProgressLayout(language);
   const primaryAction = getDefaultPrimaryAction(currentStatus);
 
   return (
@@ -279,8 +273,7 @@ export function BookProgressStatusSection({
         ) : (
           <StatusPrimaryActionButton
             status={primaryAction.status}
-            labelKey={primaryAction.labelKey}
-            fallback={primaryAction.fallback}
+            label={primaryAction.label}
             onClick={() => handleSelect(primaryAction.status)}
             disabled={isPending}
             className="col-span-3"

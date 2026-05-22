@@ -5,14 +5,12 @@ import {
   DropdownMenuSubTrigger,
 } from "@rezics/ui/shadcn";
 import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
 import { ThemeToggler } from "./ThemeToggler";
 import { Languages as LanguageIcon } from "lucide-react";
 import { setRezicsLocale } from "@/app/locale";
+import * as m from "@rezics/i18n/messages";
 
 export function MiscMenuItems() {
-  const { t } = useTranslation();
-
   const changeLang = (lang: Language) => setRezicsLocale(lang);
 
   return (
@@ -20,7 +18,7 @@ export function MiscMenuItems() {
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>
           <LanguageIcon className="w-4 h-4" />
-          <span>{t("layout.header.toggle_language")}</span>
+          <span>{m.layout_header_toggle_language()}</span>
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent>
           <DropdownMenuItem onClick={() => changeLang(LANGUAGES.ZH_HANT)}>

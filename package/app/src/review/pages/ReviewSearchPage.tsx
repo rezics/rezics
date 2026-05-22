@@ -2,14 +2,13 @@ import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { PostKind } from "@rezics/contract";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import * as m from "@rezics/i18n/messages";
 
 export function ReviewSearchPage() {
-  const { t } = useTranslation();
   const search = useSearchQuery({});
   const [start, setStart] = useState(0);
   const limit = 20;
@@ -43,7 +42,7 @@ export function ReviewSearchPage() {
           <Spinner />
         </div>
       ) : reviews.length === 0 ? (
-        <EmptyState title={t("review.search.empty.title")} />
+        <EmptyState title={m.review_search_empty_title()} />
       ) : (
         <ReviewList reviews={reviews} />
       )}

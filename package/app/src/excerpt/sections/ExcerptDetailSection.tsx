@@ -4,11 +4,11 @@ import { TextLink } from "@/shared/ui/link";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { PostListSection } from "@/post";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { ExcerptDetail } from "../components/detail/ExcerptDetail";
+import * as m from "@rezics/i18n/messages";
 
 interface ExcerptDetailSectionProps {
   unitId: string;
@@ -17,7 +17,6 @@ interface ExcerptDetailSectionProps {
 export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   unitId,
 }) => {
-  const { t } = useTranslation();
   const composerRef = useFocusReplyFromQuery();
   const { data: excerpt, isLoading } = useQuery(unitQueries.detail(unitId));
   const canEdit = useCanEdit({
@@ -25,11 +24,11 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
     ownerUnit: { user: excerpt?.user },
   });
 
-  if (isLoading) return <div>{t("common.loading")}</div>;
+  if (isLoading) return <div>{m.common_loading()}</div>;
   if (!excerpt?.id) {
     return (
       <div className="text-center py-16 text-error-text">
-        {t("excerpt.not_found")}
+        {m.excerpt_not_found()}
       </div>
     );
   }
@@ -47,7 +46,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
         {canEdit && (
           <div className="ml-auto">
             <TextLink to="/excerpt/$unitId/edit" params={{ unitId }}>
-              {t("common.edit")}
+              {m.common_edit()}
             </TextLink>
           </div>
         )}
@@ -58,7 +57,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
       <div className="mt-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <AccentBar />
-          <h2 className="text-xl font-bold">{t("review.comments")}</h2>
+          <h2 className="text-xl font-bold">{m.review_comments()}</h2>
         </div>
         <ReplyComposer
           ref={composerRef}

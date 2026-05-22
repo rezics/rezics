@@ -10,8 +10,8 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
+import * as m from "@rezics/i18n/messages";
 
 const NO_SOURCE = "__none__";
 
@@ -29,8 +29,6 @@ export interface SetSourceReleaseControlProps {
 export const SetSourceReleaseControl: React.FC<
   SetSourceReleaseControlProps
 > = ({ book, language, currentSourceReleaseUnitId }) => {
-  const { t } = useTranslation();
-
   const siblingFilter = book.workUnitId
     ? { workUnitId: book.workUnitId }
     : { workUnitId: book.unitId };
@@ -48,7 +46,7 @@ export const SetSourceReleaseControl: React.FC<
   return (
     <div className="flex flex-row items-center gap-2 flex-wrap">
       <span className="text-xs text-text-secondary">
-        {t("page.book_edit.info.translation.set_source.label")}
+        {m.page_book_edit_info_translation_set_source_label()}
       </span>
       <Select
         value={currentSourceReleaseUnitId ?? NO_SOURCE}
@@ -67,7 +65,7 @@ export const SetSourceReleaseControl: React.FC<
         <SelectContent>
           <SelectItem value={NO_SOURCE}>
             <span className="text-text-secondary">
-              {t("page.book_edit.info.translation.set_source.none")}
+              {m.page_book_edit_info_translation_set_source_none()}
             </span>
           </SelectItem>
           {candidates.map((b) => (

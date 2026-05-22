@@ -2,7 +2,7 @@ import { LANGUAGE_META, type Language } from "@rezics/contract";
 import { Badge, Button, Skeleton } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus as AddIcon } from "lucide-react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 type Sibling = {
   unitId: string;
@@ -34,7 +34,6 @@ export function PostLanguageSwitcher({
   canAddTranslation,
   onAddTranslation,
 }: PostLanguageSwitcherProps) {
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -54,9 +53,7 @@ export function PostLanguageSwitcher({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs text-text-secondary">
-        {t("post.languages", "Languages")}
-      </span>
+      <span className="text-xs text-text-secondary">{m.post_languages()}</span>
       <div className="flex flex-wrap items-center gap-2">
         {orderedSiblings.map((sibling) => {
           const isCurrent = sibling.unitId === currentUnitId;
@@ -95,7 +92,7 @@ export function PostLanguageSwitcher({
             className="gap-1"
           >
             <AddIcon className="h-4 w-4" />
-            {t("post.add_translation", "Add translation")}
+            {m.post_add_translation()}
           </Button>
         )}
       </div>

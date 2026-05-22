@@ -8,7 +8,8 @@ import {
 } from "@rezics/ui/shadcn";
 import type { ContentRating } from "@rezics/contract";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import { ratingTierLabel } from "@/search/models/ratingTierLabel";
+import * as m from "@rezics/i18n/messages";
 
 const RATINGS: ContentRating[] = ["GENERAL", "R_15", "R_18", "R_18G"];
 
@@ -28,10 +29,9 @@ export const RatingMultiSelect: React.FC<RatingMultiSelectProps> = ({
   isAuthenticated = true,
   minWidth = 160,
 }) => {
-  const { t } = useTranslation();
   const selected = new Set(value ?? []);
   const allowSet = allowed ? new Set(allowed) : null;
-  const labelText = t("search.filters.rating", "Rating");
+  const labelText = m.search_filters_rating();
 
   const toggle = (rating: ContentRating, disabled: boolean) => {
     if (disabled) return;
@@ -49,7 +49,7 @@ export const RatingMultiSelect: React.FC<RatingMultiSelectProps> = ({
         {selected.size > 0 &&
           [...selected].map((rating) => (
             <Badge key={`sel-${rating}`} variant="secondary">
-              {t(`rating.tier.${rating}`, rating)}
+              {ratingTierLabel(rating)}
             </Badge>
           ))}
       </div>
@@ -59,14 +59,8 @@ export const RatingMultiSelect: React.FC<RatingMultiSelectProps> = ({
             const disabled = allowSet !== null && !allowSet.has(rating);
             const hint = disabled
               ? !isAuthenticated
-                ? t(
-                    "search.tooltips.ratingSignIn",
-                    "Sign in and opt in to enable this rating",
-                  )
-                : t(
-                    "search.tooltips.ratingOptIn",
-                    "Enable this rating in settings",
-                  )
+                ? m.search_tooltips_ratingSignIn()
+                : m.search_tooltips_ratingOptIn()
               : "";
             const chip = (
               <Badge
@@ -77,7 +71,7 @@ export const RatingMultiSelect: React.FC<RatingMultiSelectProps> = ({
                 }
                 onClick={() => toggle(rating, disabled)}
               >
-                {t(`rating.tier.${rating}`, rating)}
+                {ratingTierLabel(rating)}
               </Badge>
             );
             return hint ? (

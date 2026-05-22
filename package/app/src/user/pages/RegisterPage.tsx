@@ -11,7 +11,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FC, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useAuthSessionStore } from "@/user/states";
 import { SocialAuthButtons } from "../components/SocialAuthButtons";
 import { Layout } from "../layouts/Layout.tsx";
@@ -19,6 +18,7 @@ import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { resolvePostAuthDestination } from "../models/authRedirect";
 import { register } from "../models/handler.ts";
 import { validateEmail, validatePassword } from "../models/validate.ts";
+import * as m from "@rezics/i18n/messages";
 
 interface RegisterData {
   email: string;
@@ -42,7 +42,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   onClose,
   onLoginClick,
 }) => {
-  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<RegisterData>({
@@ -73,7 +72,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       validateData = validatePassword(confirm);
       if (!validateData.valid) throw new Error(validateData.error ?? "");
       if (password !== confirm) {
-        throw new Error(t("auth.error.passwords_mismatch"));
+        throw new Error(m.auth_error_passwords_mismatch());
       }
 
       await register(email, password);
@@ -112,7 +111,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         </Alert>
       )}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="register-email">{t("common.email")}</Label>
+        <Label htmlFor="register-email">{m.common_email()}</Label>
         <Input
           id="register-email"
           name="email"
@@ -137,9 +136,9 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         }}
       />
       <div>
-        {t("auth.flow.already_have_account")}&nbsp;
+        {m.auth_flow_already_have_account()}&nbsp;
         <TextButton onClick={handleLoginClickInternal}>
-          {t("auth.flow.sign_in_instead")}
+          {m.auth_flow_sign_in_instead()}
         </TextButton>
       </div>
       <SocialAuthButtons mode="register" />
@@ -149,14 +148,14 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   const actions = (
     <>
       <Button type="button" disabled={loading} onClick={handleSubmit}>
-        {loading ? t("common.loading") : t("auth.register")}
+        {loading ? m.common_loading() : m.auth_register()}
       </Button>
     </>
   );
 
   return (
     <LayoutComponent
-      title={t("auth.register")}
+      title={m.auth_register()}
       content={content}
       actions={actions}
     />

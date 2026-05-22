@@ -2,7 +2,6 @@ import { Button } from "@rezics/ui/shadcn";
 import type { SearchQuery } from "@rezics/contract";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 import type { UseSearchQueryReturn } from "../hooks/useSearchQuery";
 import {
@@ -15,6 +14,7 @@ import {
   TagPicker,
   WordCountRangeInput,
 } from "./primitive";
+import * as m from "@rezics/i18n/messages";
 
 export type AdvancedSearchProps = {
   query: UseSearchQueryReturn["query"];
@@ -35,7 +35,6 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
   middleware,
   keywordPlaceholder,
 }) => {
-  const { t } = useTranslation();
   const keyword = bind("keyword");
   const tags = bind("tags");
   const type = bind("type");
@@ -56,7 +55,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
             onPatch={(p: Partial<SearchQuery>) => patch(p)}
             onSubmit={onSubmit}
             middleware={middleware}
-            placeholder={keywordPlaceholder ?? t("search.input.placeholder")}
+            placeholder={keywordPlaceholder ?? m.search_input_placeholder()}
           />
         </div>
         {onToggleBasic && (
@@ -75,23 +74,23 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
         <ContentTypeCheckboxes
           value={type.value ?? []}
           onChange={(v) => type.onChange(v.length ? v : undefined)}
-          label={t("search.filters.type", "Content Type")}
+          label={m.search_filters_type()}
         />
         <PostKindCheckboxes
           value={postKind.value ?? []}
           onChange={(v) => postKind.onChange(v.length ? v : undefined)}
-          label={t("search.filters.postKind", "Post Kind")}
+          label={m.search_filters_postKind()}
         />
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium opacity-60">
-            {t("search.filters.sort", "Sort By")}
+            {m.search_filters_sort()}
           </span>
           <SortSelect value={sort.value} onChange={sort.onChange} />
         </div>
         <WordCountRangeInput
           value={textLength.value}
           onChange={textLength.onChange}
-          label={t("search.filters.wordCount", "Word Count")}
+          label={m.search_filters_wordCount()}
         />
         <RatingFilterChips
           value={ratings.value}
@@ -110,11 +109,8 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
       <TagPicker
         value={tags.value ?? []}
         onChange={(v) => tags.onChange(v.length ? v : undefined)}
-        label={t("search.input.tags_label", "Tags")}
-        placeholder={t(
-          "search.input.tags_hint",
-          "Enter tag slugs separated by comma",
-        )}
+        label={m.search_input_tags_label()}
+        placeholder={m.search_input_tags_hint()}
       />
     </div>
   );

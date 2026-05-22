@@ -1,10 +1,8 @@
 import { Copyright as CopyrightOutlined } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 export const BookCopyrightNotice: React.FC = () => {
-  const { t } = useTranslation();
-
   return (
     <div>
       <div className="flex flex-row gap-3 items-start">
@@ -14,13 +12,13 @@ export const BookCopyrightNotice: React.FC = () => {
             className="block text-xs text-text-secondary"
             style={{ lineHeight: 1.55 }}
           >
-            {t("book.copyright_notice.body")}
+            {m.book_copyright_notice_body()}
           </span>
           <span
             className="block text-xs text-text-tertiary"
             style={{ lineHeight: 1.55 }}
           >
-            {t("book.copyright_notice.fair_use")}
+            {m.book_copyright_notice_fair_use()}
           </span>
         </div>
       </div>

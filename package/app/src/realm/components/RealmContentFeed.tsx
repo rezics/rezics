@@ -5,7 +5,6 @@ import { EmptyState } from "@rezics/ui";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { PostCard } from "@/post";
 import {
   ReviewCard,
@@ -13,6 +12,7 @@ import {
 } from "@/review/components/item/ReviewCard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
+import * as m from "@rezics/i18n/messages";
 
 interface RealmContentFeedProps {
   realmId: string;
@@ -25,7 +25,6 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   sort = "new",
   tagIds = [],
 }) => {
-  const { t } = useTranslation();
   const { data } = useQuery(
     postQueries.byRealm(realmId, {
       sort,
@@ -68,7 +67,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   }, [targetBookQueries]);
 
   if (posts.length === 0) {
-    return <EmptyState title={t("realm.content.empty.title")} />;
+    return <EmptyState title={m.realm_content_empty_title()} />;
   }
 
   return (

@@ -24,7 +24,6 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
 import { Route as bookEditChapterRoute } from "@/routes/book_/$bookId/edit/$chapterId";
@@ -34,6 +33,7 @@ import {
   Ellipsis as MoreHoriz,
   Settings,
 } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 
 function updateContentStructureNodeTitle(
   nodes: BookContentStructureItem[],
@@ -61,8 +61,6 @@ function updateContentStructureNodeTitle(
 export const BookEditChapterPage: React.FC = () => {
   const { bookId } = bookEditLayoutRoute.useParams();
   const { chapterId } = bookEditChapterRoute.useParams();
-  const { t } = useTranslation();
-
   // Load chapter detail
   const {
     data,
@@ -186,7 +184,7 @@ export const BookEditChapterPage: React.FC = () => {
       <div className="flex items-center gap-2 mb-4">
         <Input
           id="chapter-title"
-          placeholder={t("placeholders.chapter_title", "章节标题")}
+          placeholder={m.placeholders_chapter_title()}
           className={`flex-1 text-xl font-semibold border-0 border-b shadow-none rounded-none ${
             !title.trim() ? "border-border-error" : "border-border-defined"
           }`}
@@ -209,7 +207,7 @@ export const BookEditChapterPage: React.FC = () => {
               }}
             >
               <AccountTree className="w-4 h-4 mr-2" />
-              {t("chapter.move_volume", "移动至分卷")}
+              {m.chapter_move_volume()}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
@@ -217,7 +215,7 @@ export const BookEditChapterPage: React.FC = () => {
               }}
             >
               <Settings className="w-4 h-4 mr-2" />
-              {t("chapter.metadata", "章节设置")}
+              {m.chapter_metadata()}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -15,12 +15,8 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useTranslation } from "@rezics/i18n/react";
-import {
-  READ_STATUS_I18N_KEYS,
-  READ_STATUS_LABELS_ZH_HANT,
-  type ReadStatus,
-} from "../models/status";
+import { readStatusLabel, type ReadStatus } from "../models/status";
+import * as m from "@rezics/i18n/messages";
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -53,7 +49,6 @@ export function StatusOverflowMenu({
   showPrimaryStatuses = false,
   className,
 }: StatusOverflowMenuProps) {
-  const { t } = useTranslation();
   const renderStatusMarker = (status: ReadStatus) => (
     <span
       aria-hidden="true"
@@ -74,7 +69,7 @@ export function StatusOverflowMenu({
           <Button
             variant="outline"
             size="default"
-            aria-label={t("progress_status.overflow.aria", "更多狀態選項")}
+            aria-label={m.progress_status_overflow_aria()}
             disabled={disabled}
             className={cx(
               "h-9 w-full min-w-0 rounded-none border-0 bg-transparent px-2 text-white/90 hover:bg-white/10 hover:text-white aria-expanded:bg-white/15 aria-expanded:text-white",
@@ -96,10 +91,7 @@ export function StatusOverflowMenu({
             >
               {renderStatusMarker("BACKLOG")}
               <BookmarkPlus className={statusIconClass("BACKLOG")} />
-              {t(
-                READ_STATUS_I18N_KEYS.BACKLOG,
-                READ_STATUS_LABELS_ZH_HANT.BACKLOG,
-              )}
+              {readStatusLabel("BACKLOG")}
             </DropdownMenuItem>
             <DropdownMenuItem
               aria-current={currentStatus === "ACTIVE" ? "true" : undefined}
@@ -107,10 +99,7 @@ export function StatusOverflowMenu({
             >
               {renderStatusMarker("ACTIVE")}
               <PlayCircle className={statusIconClass("ACTIVE")} />
-              {t(
-                READ_STATUS_I18N_KEYS.ACTIVE,
-                READ_STATUS_LABELS_ZH_HANT.ACTIVE,
-              )}
+              {readStatusLabel("ACTIVE")}
             </DropdownMenuItem>
             <DropdownMenuItem
               aria-current={currentStatus === "COMPLETED" ? "true" : undefined}
@@ -118,10 +107,7 @@ export function StatusOverflowMenu({
             >
               {renderStatusMarker("COMPLETED")}
               <CircleCheck className={statusIconClass("COMPLETED")} />
-              {t(
-                READ_STATUS_I18N_KEYS.COMPLETED,
-                READ_STATUS_LABELS_ZH_HANT.COMPLETED,
-              )}
+              {readStatusLabel("COMPLETED")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
@@ -132,7 +118,7 @@ export function StatusOverflowMenu({
         >
           {renderStatusMarker("PAUSED")}
           <Pause className={statusIconClass("PAUSED")} />
-          {t(READ_STATUS_I18N_KEYS.PAUSED, READ_STATUS_LABELS_ZH_HANT.PAUSED)}
+          {readStatusLabel("PAUSED")}
         </DropdownMenuItem>
         <DropdownMenuItem
           aria-current={currentStatus === "DROPPED" ? "true" : undefined}
@@ -140,12 +126,12 @@ export function StatusOverflowMenu({
         >
           {renderStatusMarker("DROPPED")}
           <X className={statusIconClass("DROPPED")} />
-          {t(READ_STATUS_I18N_KEYS.DROPPED, READ_STATUS_LABELS_ZH_HANT.DROPPED)}
+          {readStatusLabel("DROPPED")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onRemoveProgress}>
           <Trash2 className="w-4 h-4 mr-2" />
-          {t("progress_status.overflow.remove_progress", "移除進度")}
+          {m.progress_status_overflow_remove_progress()}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

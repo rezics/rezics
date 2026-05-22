@@ -17,7 +17,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 interface PostEditDialogProps {
   post: PostDTO;
@@ -30,7 +30,6 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   open,
   onClose,
 }) => {
-  const { t } = useTranslation();
   const [text, setText] = useState(post.body ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const isWikiPost = post.kind === PostKind.WIKI;
@@ -74,7 +73,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isWikiPost ? "Edit wiki post" : t("common.edit")}
+            {isWikiPost ? "Edit wiki post" : m.common_edit()}
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3 pt-2">
@@ -92,15 +91,13 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {t("common.cancel", "Cancel")}
+            {m.common_cancel()}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={activeMutation.isPending || !text.trim()}
           >
-            {activeMutation.isPending
-              ? t("common.saving", "Saving…")
-              : t("common.save", "Save")}
+            {activeMutation.isPending ? m.common_saving() : m.common_save()}
           </Button>
         </DialogFooter>
       </DialogContent>

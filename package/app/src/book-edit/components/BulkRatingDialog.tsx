@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 interface BulkRatingDialogProps {
   open: boolean;
@@ -27,31 +27,24 @@ export function BulkRatingDialog({
   onChange,
   onConfirm,
 }: BulkRatingDialogProps) {
-  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-xs">
         <DialogHeader>
-          <DialogTitle>
-            {t("book.chapter.bulk_rating.title", "Set rating for selected")}
-          </DialogTitle>
+          <DialogTitle>{m.book_chapter_bulk_rating_title()}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 pt-4">
           <p className="text-sm text-text-secondary">
-            {t("book.chapter.bulk_rating.description", {
-              defaultValue:
-                "This will override the rating on {{count}} selected chapters.",
-              count,
-            })}
+            {m.book_chapter_bulk_rating_description({ count })}
           </p>
           <RatingSelector value={value} onChange={onChange} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {t("common.cancel", "Cancel")}
+            {m.common_cancel()}
           </Button>
           <Button onClick={onConfirm} disabled={count === 0}>
-            {t("common.apply", "Apply")}
+            {m.common_apply()}
           </Button>
         </DialogFooter>
       </DialogContent>

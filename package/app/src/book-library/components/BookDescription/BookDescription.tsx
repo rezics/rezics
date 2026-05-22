@@ -1,18 +1,16 @@
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import type { BookDescriptionProps } from "./types";
+import * as m from "@rezics/i18n/messages";
 
 export const BookDescription: React.FC<BookDescriptionProps> = ({
   description,
 }) => {
-  const { t } = useTranslation();
-
   return (
     <div>
       <div>
         <div className="flex mb-4">
-          <AccentBarWithText text={t("book.description")} />
+          <AccentBarWithText text={m.book_description()} />
         </div>{" "}
         <p className="whitespace-pre-line text-base">{description}</p>
       </div>{" "}

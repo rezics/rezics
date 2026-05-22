@@ -1,9 +1,9 @@
 import { BookOpen } from "lucide-react";
 import { useId } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { cn } from "@/shared/utils/css-util";
 import { UserHoverPreview } from "@/user/components";
 import type { UnitCardSummary } from "../models/unitCardSummary";
+import * as m from "@rezics/i18n/messages";
 
 export interface UnitCardProps {
   summary: UnitCardSummary;
@@ -20,7 +20,6 @@ export function UnitCard({
   authorSlot,
   className,
 }: UnitCardProps) {
-  const { t } = useTranslation();
   const titleId = useId();
   const isCompact = variant === "compact";
   const addedAt = formatAddedAt(summary.addedAt);
@@ -92,7 +91,7 @@ export function UnitCard({
           {author && addedAt && <span aria-hidden="true">·</span>}
           {addedAt && (
             <time dateTime={toDateTime(summary.addedAt)}>
-              {t("unit_card.added_at", "Added {{date}}", { date: addedAt })}
+              {m.unit_card_added_at({ date: addedAt })}
             </time>
           )}
           {attachments && (

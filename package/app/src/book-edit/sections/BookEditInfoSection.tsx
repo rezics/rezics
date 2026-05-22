@@ -33,10 +33,8 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import type { TranslateFunction as TFunction } from "@rezics/i18n";
 import { ChevronDown as ExpandMore, Plus } from "lucide-react";
 import React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { EntityPicker } from "@/entity-picker";
 import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
@@ -55,6 +53,7 @@ import {
   type TranslationDraft,
   useBookTranslationEditor,
 } from "../hooks/useBookTranslationEditor";
+import * as m from "@rezics/i18n/messages";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));
@@ -89,11 +88,10 @@ function nullableString(value: unknown): string | null {
 }
 
 const UpdateBookDialog: React.FC<{
-  t: TFunction;
   open: boolean;
   onClose: () => void;
   state: UpdateBookDialogState;
-}> = ({ t, open, onClose, state }) => {
+}> = ({ open, onClose, state }) => {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
@@ -106,14 +104,14 @@ const UpdateBookDialog: React.FC<{
             <p className="text-base">
               {state?.showBookLink && state?.bookId && (
                 <TextLink to="/book/$bookId" params={{ bookId: state.bookId }}>
-                  {t("page.book_edit.info.dialog.view_book")}
+                  {m.page_book_edit_info_dialog_view_book()}
                 </TextLink>
               )}
             </p>
           </AlertDescription>
         </Alert>
         <DialogFooter>
-          <Button onClick={onClose}>{t("common.close")}</Button>
+          <Button onClick={onClose}>{m.common_close()}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -137,7 +135,6 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   newBook = false,
   pageTitle,
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as {
     lang?: string;
@@ -233,8 +230,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const createBookMutation = useCreateBookMutation({
     onSuccess: (responseData) => {
       setDialogState({
-        title: t("page.book_edit.info.toast.create_success_title"),
-        message: t("page.book_edit.info.toast.create_success_message"),
+        title: m.page_book_edit_info_toast_create_success_title(),
+        message: m.page_book_edit_info_toast_create_success_message(),
         showBookLink: true,
         bookId: responseData.unitId,
       });
@@ -242,8 +239,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     },
     onError: (err) => {
       setDialogState({
-        title: t("page.book_edit.info.toast.create_failed_title"),
-        message: String(err || t("common.unknown_error")),
+        title: m.page_book_edit_info_toast_create_failed_title(),
+        message: String(err || m.common_unknown_error()),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -253,15 +250,15 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const updateBookMutation = useUpdateBookMutation({
     onSuccess: () => {
       setDialogState({
-        title: t("page.book_edit.info.toast.update_success_title"),
-        message: t("page.book_edit.info.toast.update_success_message"),
+        title: m.page_book_edit_info_toast_update_success_title(),
+        message: m.page_book_edit_info_toast_update_success_message(),
       });
       setUpdateBookErrorOpen(true);
     },
     onError: (err) => {
       setDialogState({
-        title: t("page.book_edit.info.toast.update_failed_title"),
-        message: String(err || t("common.unknown_error")),
+        title: m.page_book_edit_info_toast_update_failed_title(),
+        message: String(err || m.common_unknown_error()),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -271,8 +268,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const upsertTranslationMutation = useUpsertTranslationMutation({
     onError: (err) => {
       setDialogState({
-        title: t("page.book_edit.info.toast.update_failed_title"),
-        message: String(err || t("common.unknown_error")),
+        title: m.page_book_edit_info_toast_update_failed_title(),
+        message: String(err || m.common_unknown_error()),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -319,8 +316,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         await createBookMutation.mutateAsync(createBookData);
       } else {
         setDialogState({
-          title: t("page.book_edit.info.toast.create_failed_title"),
-          message: t("page.book_edit.info.validation.publish_url_required"),
+          title: m.page_book_edit_info_toast_create_failed_title(),
+          message: m.page_book_edit_info_validation_publish_url_required(),
           error: true,
         });
         setUpdateBookErrorOpen(true);
@@ -393,7 +390,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     if (!editor.currentTranslation) return;
     if (
       !window.confirm(
-        t("page.book_edit.info.translation.delete_confirm", {
+        m.page_book_edit_info_translation_delete_confirm({
           lang: editor.selectedLanguage,
         }),
       )
@@ -412,7 +409,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   if (isLoading)
     return (
       <div className="mt-16 mx-auto max-w-3xl px-4 text-muted-foreground">
-        {t("common.loading")}
+        {m.common_loading()}
       </div>
     );
   if (error)
@@ -424,11 +421,11 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   if (!data && !newBook)
     return (
       <div className="mt-16 mx-auto max-w-3xl px-4 text-muted-foreground">
-        {t("common.no_data")}
+        {m.common_no_data()}
       </div>
     );
 
-  const resolvedPageTitle = pageTitle ?? t("page.book_edit.info.title");
+  const resolvedPageTitle = pageTitle ?? m.page_book_edit_info_title();
   const sourceReleaseUnitId = editor.currentTranslation?.sourceReleaseUnitId;
   const hasAvailable = ALL_LANGUAGES.length > editor.existingLanguages.length;
 
@@ -437,11 +434,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       {Number.isFinite(restoreSequence) ? (
         <Alert className="mb-8">
           <AlertDescription>
-            {t(
-              "history.restore.edit_notice",
-              "This draft was loaded from revision {{sequence}}. Saving creates a new latest revision and keeps later history preserved.",
-              { sequence: restoreSequence },
-            )}
+            {m.history_restore_edit_notice({ sequence: restoreSequence })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -455,10 +448,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                 navigate({ to: "/book/$bookId", params: { bookId } })
               }
             >
-              {t("common.back")}
+              {m.common_back()}
             </Button>
           )}
-          <Button onClick={() => handleSubmit()}>{t("common.submit")}</Button>
+          <Button onClick={() => handleSubmit()}>{m.common_submit()}</Button>
         </div>
       </div>
 
@@ -512,7 +505,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         {!newBook && data && (
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              {t("page.book_edit.info.translation.section_title")}
+              {m.page_book_edit_info_translation_section_title()}
             </h3>
             <Separator className="mb-6" />
             <div className="flex flex-col gap-8">
@@ -528,7 +521,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {!editor.currentTranslation && (
                 <Alert>
                   <AlertDescription>
-                    {t("page.book_edit.info.translation.empty_for_lang", {
+                    {m.page_book_edit_info_translation_empty_for_lang({
                       lang: editor.selectedLanguage,
                     })}
                   </AlertDescription>
@@ -549,7 +542,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                         onClick={() => setAuthorPickerOpen(true)}
                       >
                         <Plus className="size-4" />
-                        {t("book.actions.add_author", "Add author")}
+                        {m.book_actions_add_author()}
                       </Button>
                     </div>
                   ) : null
@@ -565,7 +558,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {editor.isDirty && sourceReleaseUnitId && (
                 <Alert>
                   <AlertDescription>
-                    {t("page.book_edit.info.translation.diverge_warning")}
+                    {m.page_book_edit_info_translation_diverge_warning()}
                   </AlertDescription>
                 </Alert>
               )}
@@ -587,7 +580,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                       className="text-error-text"
                       onClick={handleDeleteCurrentTranslation}
                     >
-                      {t("page.book_edit.info.translation.delete_button")}
+                      {m.page_book_edit_info_translation_delete_button()}
                     </Button>
                   </div>
                 )}
@@ -599,7 +592,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         {newBook && (
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              {t("page.book_edit.info.translation.section_title")}
+              {m.page_book_edit_info_translation_section_title()}
             </h3>
             <Separator className="mb-6" />
             <TranslationFieldsEditor
@@ -611,7 +604,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-            {t("book.edit_sections.metadata")}
+            {m.book_edit_sections_metadata()}
           </h3>
           <Separator className="mb-6" />
           <BookMetadataEditor
@@ -633,7 +626,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
             onClick={() => setExtraOpen((o) => !o)}
           >
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("book.edit_sections.extra")}
+              {m.book_edit_sections_extra()}
             </h3>
             <ExpandMore
               className="w-5 h-5 text-text-secondary transition-transform duration-200"
@@ -679,7 +672,6 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       ) : null}
 
       <UpdateBookDialog
-        t={t}
         open={updateBookErrorOpen}
         onClose={() => setUpdateBookErrorOpen(false)}
         state={dialogState}

@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { BookCarousel } from "../components/HomeCarousel";
 import { NoticeBoard } from "./NoticeBoard";
+import * as m from "@rezics/i18n/messages";
 
 export function ResponsiveCarouselNotice() {
-  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const noticeRef = useRef<HTMLDivElement>(null);
@@ -45,16 +44,16 @@ export function ResponsiveCarouselNotice() {
       <div ref={carouselRef} className={`${isWide ? "w-2/3" : "w-full"}`}>
         <div className="space-y-2 mb-4">
           <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">
-            {t("page.home.hero.kicker")}
+            {m.page_home_hero_kicker()}
           </p>
           <h1 className="text-2xl font-semibold leading-snug">
             <span className="text-primary">
               {" "}
-              {t("page.home.hero.title_highlight")}
+              {m.page_home_hero_title_highlight()}
             </span>
           </h1>
           <p className="text-xs text-muted-foreground">
-            {t("page.home.hero.subtitle")}
+            {m.page_home_hero_subtitle()}
           </p>
         </div>
         <BookCarousel autoplayIntervalNum={3000} />

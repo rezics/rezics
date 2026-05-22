@@ -1,7 +1,7 @@
 import { Button, ToggleGroup, ToggleGroupItem } from "@rezics/ui/shadcn";
 import { BookmarkPlus, CircleCheck, PlayCircle } from "lucide-react";
-import { useTranslation } from "@rezics/i18n/react";
 import {
+  readStatusLabel,
   TOGGLE_GROUP_STATUSES,
   type ToggleGroupStatus,
 } from "../models/status";
@@ -17,15 +17,6 @@ export const STATUS_ICONS: Record<
   BACKLOG: BookmarkPlus,
   ACTIVE: PlayCircle,
   COMPLETED: CircleCheck,
-};
-
-const STATUS_I18N: Record<
-  ToggleGroupStatus,
-  { key: string; fallback: string }
-> = {
-  BACKLOG: { key: "book.hero.actions.want_to_read", fallback: "想讀" },
-  ACTIVE: { key: "book.hero.actions.reading", fallback: "在讀" },
-  COMPLETED: { key: "book.hero.actions.read", fallback: "已讀" },
 };
 
 export const HERO_STATUS_ITEM_CLASS =
@@ -52,7 +43,6 @@ export function StatusToggleGroup({
   className,
   itemClassName,
 }: StatusToggleGroupProps) {
-  const { t } = useTranslation();
   return (
     <ToggleGroup
       size="sm"
@@ -73,16 +63,16 @@ export function StatusToggleGroup({
     >
       {TOGGLE_GROUP_STATUSES.map((status) => {
         const Icon = STATUS_ICONS[status];
-        const label = STATUS_I18N[status];
+        const label = readStatusLabel(status);
         return (
           <ToggleGroupItem
             key={status}
             value={status}
             className={itemClassName ?? DEFAULT_ITEM_CLASS}
-            aria-label={t(label.key, label.fallback)}
+            aria-label={label}
           >
             <Icon className="w-3.5 h-3.5 mr-1" />
-            {t(label.key, label.fallback)}
+            {label}
           </ToggleGroupItem>
         );
       })}
@@ -92,8 +82,7 @@ export function StatusToggleGroup({
 
 type StatusPrimaryActionButtonProps = {
   status: ToggleGroupStatus;
-  labelKey: string;
-  fallback: string;
+  label: string;
   onClick: () => void;
   disabled?: boolean;
   className?: string;
@@ -101,13 +90,11 @@ type StatusPrimaryActionButtonProps = {
 
 export function StatusPrimaryActionButton({
   status,
-  labelKey,
-  fallback,
+  label,
   onClick,
   disabled,
   className,
 }: StatusPrimaryActionButtonProps) {
-  const { t } = useTranslation();
   const Icon = STATUS_ICONS[status];
 
   return (
@@ -119,7 +106,7 @@ export function StatusPrimaryActionButton({
       className={cx(HERO_STATUS_PRIMARY_CLASS, className)}
     >
       <Icon className="w-3.5 h-3.5 mr-1.5" />
-      <span className="min-w-0 truncate">{t(labelKey, fallback)}</span>
+      <span className="min-w-0 truncate">{label}</span>
     </Button>
   );
 }

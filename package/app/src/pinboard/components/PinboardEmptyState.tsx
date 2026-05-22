@@ -1,7 +1,7 @@
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { Pin as PushPinRoundedIcon } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 
 interface PinboardEmptyStateProps {
   title?: string;
@@ -14,12 +14,11 @@ export const PinboardEmptyState: React.FC<PinboardEmptyStateProps> = ({
   description,
   action,
 }) => {
-  const { t } = useTranslation();
   return (
     <EmptyState
       icon={<PushPinRoundedIcon fontSize="large" />}
-      title={title ?? t("pinboard.empty.title")}
-      description={description ?? t("pinboard.empty.description")}
+      title={title ?? m.pinboard_empty_title()}
+      description={description ?? m.pinboard_empty_description()}
       action={action}
     />
   );

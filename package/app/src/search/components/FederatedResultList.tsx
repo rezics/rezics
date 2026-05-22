@@ -14,9 +14,9 @@ import { PostKind } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ReviewCard } from "@/review/components/item/ReviewCard";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
+import * as m from "@rezics/i18n/messages";
 
 const CATEGORY_TITLES: Record<SearchCategory, string> = {
   all: "All",
@@ -230,18 +230,16 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
   isLoading,
   onCategoryChange,
 }) => {
-  const { t } = useTranslation();
-
   if (isLoading) {
     return (
       <div className="py-12 text-center">
-        <p className="text-text-secondary">{t("common.loading")}</p>
+        <p className="text-text-secondary">{m.common_loading()}</p>
       </div>
     );
   }
 
   if (!result) {
-    return <EmptyState title={t("search.empty.title")} />;
+    return <EmptyState title={m.search_empty_title()} />;
   }
 
   if (result.kind === "grouped") {
@@ -261,7 +259,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
     const visible = sectionEntries.filter(([, sec]) => sec.totalHits > 0);
     if (visible.length === 0) {
-      return <EmptyState title={t("search.empty.title")} />;
+      return <EmptyState title={m.search_empty_title()} />;
     }
 
     return (
@@ -298,7 +296,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
   if (result.kind === "ranked") {
     if (result.hits.length === 0) {
-      return <EmptyState title={t("search.empty.title")} />;
+      return <EmptyState title={m.search_empty_title()} />;
     }
     return (
       <div>
@@ -316,7 +314,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
   // single
   if (result.items.length === 0) {
-    return <EmptyState title={t("search.empty.title")} />;
+    return <EmptyState title={m.search_empty_title()} />;
   }
   return (
     <div>

@@ -1,5 +1,5 @@
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 export type HomePromotionStripProps = {
   items?: { text: string; href?: string }[];
@@ -12,11 +12,10 @@ export type HomePromotionStripProps = {
 export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
   items,
 }) => {
-  const { t } = useTranslation();
   const resolvedItems = items ?? [
-    { text: t("page.home.sections.promotion_item_1") },
-    { text: t("page.home.sections.promotion_item_2") },
-    { text: t("page.home.sections.promotion_item_3") },
+    { text: m.page_home_sections_promotion_item_1() },
+    { text: m.page_home_sections_promotion_item_2() },
+    { text: m.page_home_sections_promotion_item_3() },
   ];
 
   return (

@@ -3,11 +3,11 @@ import type { BookDTO, PostDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { useMemo } from "react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { reviewDetailActions, reviewPolicy } from "../../models/reviewPolicy";
+import * as m from "@rezics/i18n/messages";
 
 interface ReviewDetailProps {
   review: PostDTO;
@@ -20,7 +20,6 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
   book,
   onReplyInvoke,
 }) => {
-  const { t } = useTranslation();
   const rating = (review.extra as { rating?: number } | null)?.rating;
   const title = (review.extra as { title?: string } | null)?.title;
   const hydrationIds = useMemo(
@@ -34,9 +33,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
       {book && <BookListViewItem book={book} />}
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">
-          {title || t("pages.review_page")}
-        </h1>
+        <h1 className="text-2xl font-bold">{title || m.pages_review_page()}</h1>
         {rating !== undefined && (
           <span className="text-sm text-text-secondary">
             {rating.toFixed(1)} / 10

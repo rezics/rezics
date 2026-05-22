@@ -19,8 +19,8 @@ import {
 } from "@rezics/ui/shadcn";
 import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { BookCreditAttributionEditor } from "./BookCreditAttributionEditor";
+import * as m from "@rezics/i18n/messages";
 
 function TooltipIconTrigger(props: Record<string, unknown>) {
   const { ref: _ref, ...triggerProps } = props;
@@ -87,8 +87,6 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   onChange,
   disabled,
 }) => {
-  const { t } = useTranslation();
-
   const currentIsbn = value?.isbn13 ?? "";
   const currentCoverUrl = value?.coverUrl ?? "";
   const currentPageCount = value?.pageCount ?? "";
@@ -103,7 +101,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-isbn">
-            {t("book.fields.isbn")}
+            {m.book_fields_isbn()}
           </label>
           <input
             id="book-isbn"
@@ -115,7 +113,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         </div>
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-cover">
-            {t("book.fields.cover_url")}
+            {m.book_fields_cover_url()}
           </label>
           <input
             id="book-cover"
@@ -132,7 +130,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-pagecount">
-            {t("book.fields.page_count" as any)}
+            {m.book_fields_page_count()}
           </label>
           <input
             id="book-pagecount"
@@ -149,7 +147,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         </div>
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-textlength">
-            {t("book.fields.text_length")}
+            {m.book_fields_text_length()}
           </label>
           <input
             id="book-textlength"
@@ -179,14 +177,14 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           <RatingSelector
             value={(value?.rating as ContentRating | undefined) ?? "GENERAL"}
             onChange={(rating) => onChange?.({ rating })}
-            label={t("book.fields.rating", "Content rating")}
+            label={m.book_fields_rating()}
             disabled={disabled}
           />
         </div>
         <div className="flex flex-wrap gap-8">
           <FlagWithTooltip
-            label={t("book.flags.licensed")}
-            tooltip={t("book.tooltips.licensed")}
+            label={m.book_flags_licensed()}
+            tooltip={m.book_tooltips_licensed()}
             checked={value?.isLicensed ?? false}
             onCheckedChange={(checked) => onChange?.({ isLicensed: !!checked })}
             disabled={disabled}
@@ -194,7 +192,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         </div>
         <div className="max-w-xs space-y-1">
           <label className="text-sm" htmlFor="book-publication-license">
-            {t("book.fields.publication_license", "Publication license")}
+            {m.book_fields_publication_license()}
           </label>
           <Select
             value={currentLicense}
@@ -221,17 +219,16 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 };
 
 export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
-  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1 whitespace-nowrap">
-      <span>{t("book.flags.licensed")}</span>
+      <span>{m.book_flags_licensed()}</span>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger
             render={(props) => <TooltipIconTrigger {...props} />}
           />
           <TooltipContent>
-            {tooltipTitle ?? t("book.tooltips.licensed")}
+            {tooltipTitle ?? m.book_tooltips_licensed()}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

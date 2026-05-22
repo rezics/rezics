@@ -11,13 +11,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search as SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { buildHeaderSubmitPath } from "./buildHeaderSubmitPath";
 import LogoIcon from "@/shared/assets/logo.svg?react";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user/states";
+import * as m from "@rezics/i18n/messages";
 
 type HeaderSearchScope =
   | { kind: "general" }
@@ -125,7 +125,6 @@ function useHeaderSearchPresentation(pathname: string) {
 }
 
 export function HeaderSearch({ className }: { className?: string }) {
-  const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isMobile = useIsMobile();
   const isHomePage = pathname === "/";
@@ -145,7 +144,7 @@ export function HeaderSearch({ className }: { className?: string }) {
         size="icon"
         variant="ghost"
         className={cn("h-9 w-9 shrink-0 text-text-primary", className)}
-        aria-label={t("accessibility.search")}
+        aria-label={m.accessibility_search()}
         onClick={submit}
       >
         <SearchIcon className="h-5 w-5" />
@@ -196,7 +195,7 @@ export function HeaderSearch({ className }: { className?: string }) {
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder={presentation.placeholder}
-        aria-label={t("accessibility.search")}
+        aria-label={m.accessibility_search()}
         className="h-9 min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
       />
     </form>

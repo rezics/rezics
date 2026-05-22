@@ -16,14 +16,18 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 type OptInRating = "R_18" | "R_18G";
 const OPT_IN_RATINGS: OptInRating[] = ["R_18", "R_18G"];
 const BASELINE_RATINGS: ContentRating[] = ["GENERAL", "R_15"];
 
+const OPT_IN_RATING_DESCRIPTION = {
+  R_18: m.settings_content_rating_description_R_18,
+  R_18G: m.settings_content_rating_description_R_18G,
+} as const satisfies Record<OptInRating, () => string>;
+
 export const ContentRatingPreferences: FC = () => {
-  const { t } = useTranslation();
   const { data: settings } = useQuery(userQueries.settings());
   const updateSettings = useUpdateSettingsMutation();
 
@@ -67,7 +71,7 @@ export const ContentRatingPreferences: FC = () => {
       {saved && (
         <Alert className="mb-3 text-success-text">
           <AlertDescription>
-            {t("settings.content_rating.saved", "Preferences saved.")}
+            {m.settings_content_rating_saved()}
           </AlertDescription>
         </Alert>
       )}
@@ -80,7 +84,7 @@ export const ContentRatingPreferences: FC = () => {
               <span className="flex flex-row items-center gap-2">
                 <RatingBadge rating={rating} />
                 <span className="text-sm text-text-secondary">
-                  {t("settings.content_rating.always_on", "Always on")}
+                  {m.settings_content_rating_always_on()}
                 </span>
               </span>
             </div>
@@ -101,12 +105,7 @@ export const ContentRatingPreferences: FC = () => {
               <span className="flex flex-row items-center gap-2">
                 <RatingBadge rating={rating} />
                 <span className="text-sm text-text-secondary">
-                  {t(
-                    `settings.content_rating.description.${rating}`,
-                    rating === "R_18"
-                      ? "Adult content."
-                      : "Explicit adult content.",
-                  )}
+                  {OPT_IN_RATING_DESCRIPTION[rating]()}
                 </span>
               </span>
             </div>
@@ -121,25 +120,20 @@ export const ContentRatingPreferences: FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {t(
-                "settings.content_rating.opt_in_modal.title",
-                "Confirm age-restricted content",
-              )}
+              {m.settings_content_rating_opt_in_modal_title()}
             </DialogTitle>
             <DialogDescription>
-              {t(
-                "settings.content_rating.opt_in_modal.body",
-                "By enabling {{rating}} you confirm you are of legal age in your jurisdiction and consent to viewing this content.",
-                { rating: confirming ?? "" },
-              )}
+              {m.settings_content_rating_opt_in_modal_body({
+                rating: confirming ?? "",
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConfirming(null)}>
-              {t("common.cancel", "Cancel")}
+              {m.common_cancel()}
             </Button>
             <Button onClick={confirmOptIn}>
-              {t("settings.content_rating.opt_in_modal.confirm", "I confirm")}
+              {m.settings_content_rating_opt_in_modal_confirm()}
             </Button>
           </DialogFooter>
         </DialogContent>

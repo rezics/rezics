@@ -10,7 +10,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
 import { PostListSection, ReplyComposer } from "@/post";
@@ -21,11 +20,11 @@ import {
   withBookContentStructureOccurrences,
 } from "@/book-library/models/bookContentStructurePath";
 import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
+import * as m from "@rezics/i18n/messages";
 
 export const BookReadChapterPage: React.FC = () => {
   const { bookId, chapterId } = bookReadLayoutRoute.useParams();
   const search = bookReadLayoutRoute.useSearch();
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [chapterDiscussionUnitId, setChapterDiscussionUnitId] = useState<
     string | null
@@ -156,7 +155,7 @@ export const BookReadChapterPage: React.FC = () => {
             type="button"
             size="icon"
             variant="ghost"
-            aria-label={t("common.edit")}
+            aria-label={m.common_edit()}
             onClick={() =>
               navigate({ to: `/book/${bookId}/edit/${chapterId}` })
             }
@@ -183,8 +182,8 @@ export const BookReadChapterPage: React.FC = () => {
             disabled={updateBookProgress.isPending}
           >
             {updateBookProgress.isPending
-              ? t("book.read.position.saving", "Saving position...")
-              : t("book.read.position.save", "Save reading position")}
+              ? m.book_read_position_saving()
+              : m.book_read_position_save()}
           </Button>
           <div className="mt-5 flex flex-wrap gap-2">
             {canEdit && (
@@ -195,8 +194,8 @@ export const BookReadChapterPage: React.FC = () => {
                 disabled={pendingChapterAction !== null}
               >
                 {pendingChapterAction === "content"
-                  ? t("book.read.chapter_actions.preparing", "Preparing...")
-                  : t("book.read.chapter_actions.content", "Edit content")}
+                  ? m.book_read_chapter_actions_preparing()
+                  : m.book_read_chapter_actions_content()}
               </Button>
             )}
             <Button
@@ -206,8 +205,8 @@ export const BookReadChapterPage: React.FC = () => {
               disabled={pendingChapterAction !== null}
             >
               {pendingChapterAction === "review"
-                ? t("book.read.chapter_actions.preparing", "Preparing...")
-                : t("book.read.chapter_actions.review", "Write chapter review")}
+                ? m.book_read_chapter_actions_preparing()
+                : m.book_read_chapter_actions_review()}
             </Button>
             <Button
               type="button"
@@ -216,8 +215,8 @@ export const BookReadChapterPage: React.FC = () => {
               disabled={pendingChapterAction !== null}
             >
               {pendingChapterAction === "discussion"
-                ? t("book.read.chapter_actions.preparing", "Preparing...")
-                : t("book.read.chapter_actions.discuss", "Discuss chapter")}
+                ? m.book_read_chapter_actions_preparing()
+                : m.book_read_chapter_actions_discuss()}
             </Button>
             <Button
               type="button"
@@ -226,11 +225,8 @@ export const BookReadChapterPage: React.FC = () => {
               disabled={pendingChapterAction !== null}
             >
               {pendingChapterAction === "progress"
-                ? t("book.read.chapter_actions.saving", "Saving...")
-                : t(
-                    "book.read.chapter_actions.progress",
-                    "Save chapter progress",
-                  )}
+                ? m.book_read_chapter_actions_saving()
+                : m.book_read_chapter_actions_progress()}
             </Button>
           </div>
           {chapterDiscussionUnitId && (

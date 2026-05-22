@@ -15,13 +15,13 @@ import {
 } from "@rezics/ui/shadcn";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import type { ReasonStatus } from "../models/extra";
 import {
   type ReasonPost,
   useReasonPostHistory,
 } from "../hooks/useReasonPostHistory";
 import type { ReasonPostVisibility } from "../hooks/useReasonPostMutations";
+import * as m from "@rezics/i18n/messages";
 
 type ReasonModalProps = {
   open: boolean;
@@ -41,27 +41,15 @@ type ReasonModalProps = {
   isPending?: boolean;
 };
 
-const TITLE_KEY: Record<ReasonStatus, { key: string; fallback: string }> = {
-  PAUSED: {
-    key: "progress_status.reason_modal.title_paused",
-    fallback: "擱置原因",
-  },
-  DROPPED: {
-    key: "progress_status.reason_modal.title_dropped",
-    fallback: "棄讀原因",
-  },
-};
+const TITLE_MESSAGE = {
+  PAUSED: m.progress_status_reason_modal_title_paused,
+  DROPPED: m.progress_status_reason_modal_title_dropped,
+} as const satisfies Record<ReasonStatus, () => string>;
 
-const DESC_KEY: Record<ReasonStatus, { key: string; fallback: string }> = {
-  PAUSED: {
-    key: "progress_status.reason_modal.desc_paused",
-    fallback: "說說你為什麼擱置這本書？",
-  },
-  DROPPED: {
-    key: "progress_status.reason_modal.desc_dropped",
-    fallback: "說說你為什麼棄讀這本書？",
-  },
-};
+const DESC_MESSAGE = {
+  PAUSED: m.progress_status_reason_modal_desc_paused,
+  DROPPED: m.progress_status_reason_modal_desc_dropped,
+} as const satisfies Record<ReasonStatus, () => string>;
 
 export function ReasonModal({
   open,
@@ -73,7 +61,6 @@ export function ReasonModal({
   onAppend,
   isPending,
 }: ReasonModalProps) {
-  const { t } = useTranslation();
   const { posts, isLoading: postsLoading } =
     useReasonPostHistory(reasonPostUnitIds);
 
@@ -99,22 +86,15 @@ export function ReasonModal({
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {t(TITLE_KEY[status].key, TITLE_KEY[status].fallback)}
-          </DialogTitle>
-          <DialogDescription>
-            {t(DESC_KEY[status].key, DESC_KEY[status].fallback)}
-          </DialogDescription>
+          <DialogTitle>{TITLE_MESSAGE[status]()}</DialogTitle>
+          <DialogDescription>{DESC_MESSAGE[status]()}</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-3">
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder={t(
-              "progress_status.reason_modal.placeholder",
-              "輸入你的想法…",
-            )}
+            placeholder={m.progress_status_reason_modal_placeholder()}
             rows={6}
           />
 
@@ -123,7 +103,7 @@ export function ReasonModal({
               checked={isPrivate}
               onCheckedChange={(c) => setIsPrivate(c === true)}
             />
-            {t("progress_status.reason_modal.private", "僅自己可見")}
+            {m.progress_status_reason_modal_private()}
           </Label>
 
           {hasHistory && olderPosts.length > 0 && (
@@ -134,11 +114,11 @@ export function ReasonModal({
                     showHistory ? "rotate-180" : ""
                   }`}
                 />
-                {t("progress_status.reason_modal.history", "查看過去紀錄")}
+                {m.progress_status_reason_modal_history()}
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-2 grid gap-2">
                 {postsLoading
-                  ? t("common.loading", "載入中…")
+                  ? m.common_loading()
                   : olderPosts.map((p) => (
                       <article
                         key={p.unitId}
@@ -154,7 +134,7 @@ export function ReasonModal({
 
         <DialogFooter className="gap-2">
           <Button type="button" variant="ghost" onClick={onSkip}>
-            {t("progress_status.reason_modal.skip", "跳過")}
+            {m.progress_status_reason_modal_skip()}
           </Button>
           {hasHistory && (
             <Button
@@ -163,7 +143,7 @@ export function ReasonModal({
               onClick={() => onAppend({ body, visibility })}
               disabled={isPending || body.trim().length === 0}
             >
-              {t("progress_status.reason_modal.append", "新增")}
+              {m.progress_status_reason_modal_append()}
             </Button>
           )}
           <Button
@@ -171,7 +151,7 @@ export function ReasonModal({
             onClick={() => onSave({ body, visibility, mode: "create-or-edit" })}
             disabled={isPending || body.trim().length === 0}
           >
-            {t("common.save", "儲存")}
+            {m.common_save()}
           </Button>
         </DialogFooter>
       </DialogContent>

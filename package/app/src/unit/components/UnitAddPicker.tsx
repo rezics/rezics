@@ -20,7 +20,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useUnitCandidates } from "../hooks/useUnitCandidates";
 import {
   resolveUnitWorkContext,
@@ -28,6 +27,7 @@ import {
 } from "../models/unitCardSummary";
 import type { Candidate } from "../models/types";
 import { UnitCandidateRow } from "./UnitPicker/UnitCandidateRow";
+import * as m from "@rezics/i18n/messages";
 
 export interface UnitAddPickerProps {
   language?: string;
@@ -50,7 +50,6 @@ export function UnitAddPicker({
   onSelectCandidate,
   renderItemAction,
 }: UnitAddPickerProps) {
-  const { t } = useTranslation();
   const explicitContext = useMemo(
     () =>
       workContextUnitId
@@ -76,7 +75,7 @@ export function UnitAddPicker({
         variant="outline"
         onClick={() => onSelectCandidate(candidate)}
       >
-        {actionLabel ?? t("unit_picker.add", "Add")}
+        {actionLabel ?? m.unit_picker_add()}
       </Button>
     );
   };
@@ -95,7 +94,7 @@ export function UnitAddPicker({
     <section className="flex flex-col gap-3 border-b border-border-whisper pb-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-base font-medium leading-ui text-text-primary">
-          {t("unit_picker.add_item", "Add item")}
+          {m.unit_picker_add_item()}
         </h3>
       </div>
 
@@ -103,11 +102,11 @@ export function UnitAddPicker({
         <TabsList>
           <TabsTrigger value="search" className="gap-1.5">
             <Search className="h-4 w-4" />
-            {t("unit_picker.search_tab", "Search")}
+            {m.unit_picker_search_tab()}
           </TabsTrigger>
           <TabsTrigger value="url" className="gap-1.5">
             <LinkIcon className="h-4 w-4" />
-            {t("unit_picker.url_tab", "URL")}
+            {m.unit_picker_url_tab()}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="search" className="pt-3">
@@ -156,7 +155,6 @@ export function UnitSearchSelect({
   actionForCandidate,
   onPreview,
 }: UnitSearchSelectProps) {
-  const { t } = useTranslation();
   const inputId = useId();
   const [query, setQuery] = useState(initialQuery ?? "");
   const trimmedQuery = query.trim();
@@ -168,14 +166,12 @@ export function UnitSearchSelect({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-1">
-        <Label htmlFor={inputId}>
-          {t("unit_picker.search_label", "Search content")}
-        </Label>
+        <Label htmlFor={inputId}>{m.unit_picker_search_label()}</Label>
         <Input
           id={inputId}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder={t("unit_picker.search_placeholder", "Title or keyword")}
+          placeholder={m.unit_picker_search_placeholder()}
         />
       </div>
 
@@ -185,7 +181,7 @@ export function UnitSearchSelect({
       ) : null}
       {!isLoading && trimmedQuery && units.length === 0 ? (
         <p className="text-xs leading-dense text-text-secondary">
-          {t("unit_picker.no_search_results", "No matching units.")}
+          {m.unit_picker_no_search_results()}
         </p>
       ) : null}
       {units.length > 0 ? (
@@ -225,7 +221,6 @@ export function UnitUrlImport({
   actionForCandidate,
   onPreview,
 }: UnitUrlImportProps) {
-  const { t } = useTranslation();
   const inputId = useId();
   const [input, setInput] = useState(initialInput ?? "");
   const { resolved, parseError } = useUnitCandidates(input);
@@ -244,17 +239,12 @@ export function UnitUrlImport({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-1">
-        <Label htmlFor={inputId}>
-          {t("unit_picker.url_label", "Unit URL")}
-        </Label>
+        <Label htmlFor={inputId}>{m.unit_picker_url_label()}</Label>
         <Input
           id={inputId}
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder={t(
-            "unit_picker.url_placeholder",
-            "Paste a unit, chapter, or book URL",
-          )}
+          placeholder={m.unit_picker_url_placeholder()}
         />
       </div>
 
@@ -276,10 +266,7 @@ export function UnitUrlImport({
 
       {parseError ? (
         <p className="text-xs leading-dense text-text-secondary">
-          {t(
-            "unit_picker.parse_error",
-            "Couldn't recognize that as a unit link.",
-          )}
+          {m.unit_picker_parse_error()}
         </p>
       ) : null}
     </div>
@@ -296,7 +283,6 @@ export function UnitBrowseRelated({
   actionForCandidate,
   onPreview,
 }: UnitBrowseRelatedProps) {
-  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
   const { data, isLoading, error } = useQuery({
     ...unitQueries.list({ workUnitId: context.unitId, limit: 100 }),
@@ -320,10 +306,8 @@ export function UnitBrowseRelated({
         />
         <span className="min-w-0 truncate">
           {context.title
-            ? t("unit_picker.browse_named_work", "Browse {{title}}", {
-                title: context.title,
-              })
-            : t("unit_picker.browse_panel", "Browse this work")}
+            ? m.unit_picker_browse_named_work({ title: context.title })
+            : m.unit_picker_browse_panel()}
         </span>
       </button>
 
@@ -337,7 +321,7 @@ export function UnitBrowseRelated({
           ) : null}
           {!isLoading && !error && units.length === 0 ? (
             <p className="text-xs leading-dense text-text-secondary">
-              {t("unit_picker.no_sub_units", "No sub-units")}
+              {m.unit_picker_no_sub_units()}
             </p>
           ) : null}
           <ul className="flex flex-col">

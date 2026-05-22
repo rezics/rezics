@@ -1,7 +1,7 @@
 import { RatingInput } from "@rezics/ui";
 import { Star } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 interface BookHeroScoreBlockProps {
   /** Average score, 0–10 scale, 0 means no ratings yet. */
@@ -23,14 +23,13 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
   onRate,
   variant = "block",
 }) => {
-  const { t } = useTranslation();
   const hasRating = rating > 0;
 
   if (variant === "inline") {
     return (
       <div className="flex flex-col items-center gap-1">
         <span className="text-xs font-bold tracking-[0.12em] uppercase text-white/65">
-          {t("book.hero.score.rezics_label", "REZICS SCORE")}
+          {m.book_hero_score_rezics_label()}
         </span>
         {hasRating ? (
           <div className="flex items-center gap-1.5 min-h-[2.25rem] text-white">
@@ -44,8 +43,8 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
               </span>
               <span className="text-xs text-white/55 tabular-nums">
                 {typeof count === "number" && count > 0
-                  ? t("book.hero.score.count", "{{count}} 人評分", { count })
-                  : t("book.hero.score.empty_short", "尚無評分")}
+                  ? m.book_hero_score_count({ count })
+                  : m.book_hero_score_empty_short()}
               </span>
             </div>
           </div>
@@ -57,10 +56,10 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
             />
             <div className="flex flex-col items-start leading-tight">
               <span className="text-base font-medium text-white/80">
-                {t("book.hero.score.empty", "尚無評分")}
+                {m.book_hero_score_empty()}
               </span>
               <span className="text-xs text-white/45">
-                {t("book.hero.score.be_first", "成為第一個評分者")}
+                {m.book_hero_score_be_first()}
               </span>
             </div>
           </div>
@@ -73,16 +72,16 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
     return (
       <div className="flex flex-col items-end gap-1 text-white">
         <span className="text-[0.7rem] uppercase tracking-wider text-white/60">
-          {t("book.hero.score.label", "READER SCORE")}
+          {m.book_hero_score_label()}
         </span>
         <RatingInput
           value={null}
           onChange={(v) => onRate?.(v ?? 0)}
           readOnly={!onRate}
-          aria-label={t("book.hero.score.label", "READER SCORE")}
+          aria-label={m.book_hero_score_label()}
         />
         <span className="text-xs text-white/70">
-          {t("book.hero.score.empty", "尚無評分")}
+          {m.book_hero_score_empty()}
         </span>
       </div>
     );
@@ -91,7 +90,7 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
   return (
     <div className="flex flex-col items-end gap-1 text-white">
       <span className="text-[0.7rem] uppercase tracking-wider text-white/60">
-        {t("book.hero.score.label", "READER SCORE")}
+        {m.book_hero_score_label()}
       </span>
       <div className="flex items-baseline gap-1">
         <Star className="w-7 h-7" style={{ color: "#f5b942" }} />
@@ -100,7 +99,7 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
       </div>
       {typeof count === "number" && count > 0 && (
         <span className="text-xs text-white/70">
-          {t("book.hero.score.count", "{{count}} 人評分", { count })}
+          {m.book_hero_score_count({ count })}
         </span>
       )}
     </div>

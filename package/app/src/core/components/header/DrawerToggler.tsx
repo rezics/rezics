@@ -1,6 +1,6 @@
 import { Button } from "@rezics/ui/shadcn";
-import { useTranslation } from "@rezics/i18n/react";
 import { Menu } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 
 interface DrawerTogglerProps {
   handleDrawerToggleInner: () => void;
@@ -13,13 +13,12 @@ export const DrawerToggler = ({
   layoutType,
   sidebarOpen,
 }: DrawerTogglerProps) => {
-  const { t } = useTranslation();
   const hidden = layoutType === "type-a" && sidebarOpen;
   return (
     <Button
       variant="ghost"
       size="icon"
-      aria-label={t("accessibility.open_drawer")}
+      aria-label={m.accessibility_open_drawer()}
       onClick={handleDrawerToggleInner}
       className={
         hidden ? "hidden" : "flex h-10 min-w-10 rounded-full bg-transparent"

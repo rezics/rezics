@@ -31,7 +31,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Eye, ListChecks, Pencil } from "lucide-react";
 import { useEffect, useId, useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import {
   type Candidate,
   shelfUnitToUnitCardSummary,
@@ -56,6 +55,7 @@ import {
   deriveShelfStream,
   type ShelfStreamEntry,
 } from "../models/shelfStream";
+import * as m from "@rezics/i18n/messages";
 
 const PAGE_SIZE = 20;
 
@@ -124,7 +124,6 @@ export function ShelfEditorItemsSection({
   onViewModeChange,
   editor,
 }: ShelfEditorItemsSectionProps) {
-  const { t } = useTranslation();
   const hydration = useHydratedShelfUnits(editor.units);
   const [sortState, setSortState] = useState<ShelfSortState>({
     field: "manual",
@@ -267,9 +266,9 @@ export function ShelfEditorItemsSection({
   const activeDragEntry = activeDragId
     ? visibleStream.find((entry) => streamEntryRowId(entry) === activeDragId)
     : undefined;
-  const editModeLabel = t("shelf.edit.mode_edit", "Edit");
-  const multiSelectModeLabel = t("shelf.edit.mode_multi_select", "Select");
-  const previewModeLabel = t("shelf.edit.mode_preview", "Preview");
+  const editModeLabel = m.shelf_edit_mode_edit();
+  const multiSelectModeLabel = m.shelf_edit_mode_multi_select();
+  const previewModeLabel = m.shelf_edit_mode_preview();
   const isPreview = mode === "preview";
   const isMultiSelect = mode === "multi-select";
   const listItems = (
@@ -320,13 +319,11 @@ export function ShelfEditorItemsSection({
   return (
     <div className="flex flex-col gap-4">
       <hr className="border-border-whisper" />
-      <h2 className="text-lg font-semibold">
-        {t("shelf.edit.items_heading", "Items")}
-      </h2>
+      <h2 className="text-lg font-semibold">{m.shelf_edit_items_heading()}</h2>
 
       {mode === "edit" && (
         <UnitAddPicker
-          actionLabel={t("shelf.edit.add", "Add")}
+          actionLabel={m.shelf_edit_add()}
           onSelectCandidate={handleAddCandidate}
         />
       )}
@@ -340,8 +337,8 @@ export function ShelfEditorItemsSection({
             viewOptions={VIEW_OPTIONS}
             onSortChange={setSortState}
             onViewChange={onViewModeChange}
-            sortHeading={t("shelf.controls.sort_by", "Sort by")}
-            viewHeading={t("shelf.controls.view", "View")}
+            sortHeading={m.shelf_controls_sort_by()}
+            viewHeading={m.shelf_controls_view()}
           />
           {showSortPrimeOnlyToggle && (
             <Label
@@ -353,7 +350,7 @@ export function ShelfEditorItemsSection({
                 checked={sortPrimeOnly}
                 onCheckedChange={(next) => setSortPrimeOnly(Boolean(next))}
               />
-              {t("shelf.edit.sort_prime_only", "Group attached")}
+              {m.shelf_edit_sort_prime_only()}
             </Label>
           )}
         </div>
@@ -366,9 +363,7 @@ export function ShelfEditorItemsSection({
               size="sm"
               onClick={handleBulkDelete}
             >
-              {t("shelf.edit.delete_selected", "Delete {{n}}", {
-                n: selectedIds.size,
-              })}
+              {m.shelf_edit_delete_selected({ n: selectedIds.size })}
             </Button>
           )}
           <div className="flex items-center gap-2">
@@ -435,15 +430,15 @@ export function ShelfEditorItemsSection({
 
       {editor.isLoading ? (
         <div className="py-4 text-sm text-text-secondary">
-          {t("common.loading", "Loading…")}
+          {m.common_loading()}
         </div>
       ) : waitingForPageData || editor.isLoadingMoreUnits ? (
         <div className="py-4 text-sm text-text-secondary">
-          {t("common.loading", "Loading…")}
+          {m.common_loading()}
         </div>
       ) : visibleStream.length === 0 ? (
         <div className="py-4 text-sm text-text-secondary">
-          {t("shelf.edit.empty", "No items yet — add one above.")}
+          {m.shelf_edit_empty()}
         </div>
       ) : (
         <DndContext
@@ -482,7 +477,7 @@ export function ShelfEditorItemsSection({
             disabled={page === 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
-            {t("common.prev", "Prev")}
+            {m.common_prev()}
           </Button>
           <span className="text-sm text-text-secondary">
             {page} / {totalPages}
@@ -493,7 +488,7 @@ export function ShelfEditorItemsSection({
             disabled={page === totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           >
-            {t("common.next", "Next")}
+            {m.common_next()}
           </Button>
         </div>
       )}
@@ -534,7 +529,6 @@ interface FooterProps {
 }
 
 function ShelfEditorItemsFooter({ editor }: FooterProps) {
-  const { t } = useTranslation();
   if (!editor.dirty) return null;
   return (
     <div className="sticky bottom-0 -mx-4 px-4 py-3 bg-surface-elevated border-t border-border-whisper flex items-center justify-end gap-2">
@@ -544,16 +538,14 @@ function ShelfEditorItemsFooter({ editor }: FooterProps) {
         onClick={editor.discard}
         disabled={editor.saving}
       >
-        {t("shelf.edit.discard_ops", "Discard ops")}
+        {m.shelf_edit_discard_ops()}
       </Button>
       <Button
         type="button"
         onClick={() => void editor.save()}
         disabled={editor.saving || editor.pendingCount === 0}
       >
-        {t("shelf.edit.save_n_ops", "Save · {{n}} ops", {
-          n: editor.pendingCount,
-        })}
+        {m.shelf_edit_save_n_ops({ n: editor.pendingCount })}
       </Button>
     </div>
   );

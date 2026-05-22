@@ -5,7 +5,7 @@ import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 interface RemarkInlineFormProps {
   bookUnitId: string;
@@ -16,7 +16,6 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
   bookUnitId,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [body, setBody] = useState("");
   const [score, setScore] = useState<number | null>(null);
@@ -74,7 +73,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
     return (
       <div ref={wrapperRef}>
         <Input
-          placeholder={t("remark.compose_placeholder", "寫下你的短評…")}
+          placeholder={m.remark_compose_placeholder()}
           onFocus={handleExpand}
           onClick={handleExpand}
         />
@@ -89,7 +88,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
           value={score}
           onChange={setScore}
           max={SCORE_MAX}
-          aria-label={t("remark.form.rating", "Rating")}
+          aria-label={m.remark_form_rating()}
         />
       </div>
       <RezicsMarkdownEditor
@@ -99,9 +98,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         submitLabel={
-          postMutation.isPending
-            ? t("common.submitting", "Submitting…")
-            : t("remark.submit", "Submit Remark")
+          postMutation.isPending ? m.common_submitting() : m.remark_submit()
         }
       />
     </div>

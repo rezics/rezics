@@ -13,9 +13,9 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { cn } from "@/shared/utils/css-util";
 import { useIsMobile } from "@/shared/utils/use-media-query";
+import * as m from "@rezics/i18n/messages";
 
 type ProductType = {
   cover?: string;
@@ -120,7 +120,6 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
 
   const [products, setProducts] = useState<CarouselProduct[]>([]);
   const { show: showAlert } = useAlertStore();
-  const { t } = useTranslation();
   const [carouselApi, setCarouselApi] = React.useState<CarouselApi | null>(
     null,
   );
@@ -130,12 +129,10 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
       setProducts(parseEchoKVResponse<CarouselProduct[]>(data) ?? []);
     } catch (error) {
       showAlert(
-        t("page.home.carousel.alert.parse_failed", {
-          error: String(error),
-        }),
+        m.page_home_carousel_alert_parse_failed({ error: String(error) }),
       );
     }
-  }, [data, showAlert, t]);
+  }, [data, showAlert]);
 
   // autoplay using carousel api
   useEmblaAutoplay(carouselApi, {

@@ -19,10 +19,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { buildUnitUrl } from "@/shared/utils/build-url";
+import * as m from "@rezics/i18n/messages";
 
 type Unit = UnitDTO;
 
@@ -102,7 +102,6 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   userId,
   children = defaultChildren,
 }) => {
-  const { t } = useTranslation();
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
   const routerSearch = useRouterState({
@@ -225,7 +224,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
             <KeywordInput
               value={keywordBind.value ?? ""}
               onChange={(v) => keywordBind.onChange(v)}
-              placeholder={t("units.search_placeholder")}
+              placeholder={m.units_search_placeholder()}
             />
             {!isSingle && (
               <div className="mt-4 mb-4 border-b border-border-whisper">

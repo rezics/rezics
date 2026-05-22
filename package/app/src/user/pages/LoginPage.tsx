@@ -12,7 +12,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FC, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useAuthSessionStore } from "@/user/states";
 import { SocialAuthButtons } from "../components/SocialAuthButtons";
 import { Layout } from "../layouts/Layout";
@@ -20,6 +19,7 @@ import { ModalLayout } from "../layouts/ModalLayout";
 import { resolvePostAuthDestination } from "../models/authRedirect";
 import { login } from "../models/handler";
 import { validateEmail } from "../models/validate";
+import * as m from "@rezics/i18n/messages";
 
 interface LoginData {
   email: string;
@@ -42,7 +42,6 @@ export const LoginPage: FC<LoginPageProps> = ({
   onClose,
   onRegisterClick,
 }) => {
-  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<LoginData>({
@@ -104,7 +103,7 @@ export const LoginPage: FC<LoginPageProps> = ({
         </Alert>
       )}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="login-email">{t("common.email")}</Label>
+        <Label htmlFor="login-email">{m.common_email()}</Label>
         <Input
           id="login-email"
           name="email"
@@ -123,13 +122,13 @@ export const LoginPage: FC<LoginPageProps> = ({
         }}
       />
       <div>
-        {t("auth.flow.new_to_app")}&nbsp;
+        {m.auth_flow_new_to_app()}&nbsp;
         <TextButton onClick={handleRegisterClick}>
-          {t("auth.flow.create_account")}
+          {m.auth_flow_create_account()}
         </TextButton>
         <br />
         <TextLink to="/reset-password">
-          {t("auth.flow.forgot_password")}
+          {m.auth_flow_forgot_password()}
         </TextLink>
       </div>
       <SocialAuthButtons mode="login" />
@@ -144,14 +143,14 @@ export const LoginPage: FC<LoginPageProps> = ({
         disabled={loading}
         onClick={handleSubmit}
       >
-        {loading ? t("common.loading") : t("auth.login")}
+        {loading ? m.common_loading() : m.auth_login()}
       </Button>
     </>
   );
 
   return (
     <LayoutComponent
-      title={t("auth.login")}
+      title={m.auth_login()}
       content={content}
       actions={actions}
     />

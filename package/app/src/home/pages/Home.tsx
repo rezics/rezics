@@ -1,5 +1,4 @@
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { HomeSearch } from "@/search";
 import { useIsMobile } from "@/shared/utils/use-media-query";
@@ -10,11 +9,11 @@ import { LibraryCardsSection } from "../sections/LibraryCardsSection";
 import { NewBookSection } from "../sections/NewBookSection";
 import { TrendingReviews } from "../sections/TrendingReviewsSection";
 import { TrendingShelfSection } from "../sections/TrendingShelfSection";
+import * as m from "@rezics/i18n/messages";
 
 export type HomeProps = object;
 
 export const Home: React.FC<HomeProps> = () => {
-  const { t } = useTranslation();
   const isMobile = useIsMobile();
 
   return (
@@ -29,11 +28,11 @@ export const Home: React.FC<HomeProps> = () => {
           <div className="space-y-2 mb-4">
             <h1 className="text-2xl font-semibold leading-snug">
               <span className="text-brand">
-                {t("page.home.hero.title_highlight")}
+                {m.page_home_hero_title_highlight()}
               </span>
             </h1>
             <p className="text-xs text-muted-foreground">
-              {t("page.home.hero.subtitle")}
+              {m.page_home_hero_subtitle()}
             </p>
           </div>
           <BookCarousel autoplayIntervalNum={3000} />

@@ -1,6 +1,6 @@
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 const defaultBrands = [
   "https://dummyimage.com/100x40/cccccc/000&text=Brand+A",
@@ -19,8 +19,7 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
   logos = defaultBrands,
   title,
 }) => {
-  const { t } = useTranslation();
-  const resolvedTitle = title ?? t("page.home.sections.partner_brands");
+  const resolvedTitle = title ?? m.page_home_sections_partner_brands();
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">

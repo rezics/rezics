@@ -7,13 +7,13 @@ import {
 import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import { systemShelfKindLabel } from "@/shelf/models/systemShelfLabel";
 
 function isSystemKindKey(
   kindKey: string | null | undefined,
@@ -30,7 +30,6 @@ const SORT_OPTIONS = [
 
 export const ShelvesTabSection: FC = () => {
   const { user, userId, isCurrentUser } = useProfileContext();
-  const { t } = useTranslation();
   const [kindKey, setKindKey] = useState("all");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
@@ -56,11 +55,11 @@ export const ShelvesTabSection: FC = () => {
     const chips: ChipDefinition[] = [{ value: "all", label: "All" }];
     for (const k of kindSet) {
       const label =
-        isCurrentUser && isSystemKindKey(k) ? t(`shelf.system.${k}`) : k;
+        isCurrentUser && isSystemKindKey(k) ? systemShelfKindLabel(k) : k;
       chips.push({ value: k, label });
     }
     return chips;
-  }, [shelves, isCurrentUser, t]);
+  }, [shelves, isCurrentUser]);
 
   // Filter shelves
   const filtered = useMemo(() => {
@@ -129,11 +128,12 @@ const ShelfCard: FC<{
   isOwnerView: boolean;
   userSlug?: string;
 }> = ({ shelf, isOwnerView, userSlug }) => {
-  const { t } = useTranslation();
   const dbTitle = shelf.translations?.[0]?.title ?? "Untitled Shelf";
   const isSystemShelf = isSystemKindKey(shelf.kindKey);
   const title =
-    isOwnerView && isSystemShelf ? t(`shelf.system.${shelf.kindKey}`) : dbTitle;
+    isOwnerView && isSystemShelf
+      ? systemShelfKindLabel(shelf.kindKey)
+      : dbTitle;
   const itemCount = shelf.items?.length ?? 0;
   const card = (
     <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors h-full flex flex-col">

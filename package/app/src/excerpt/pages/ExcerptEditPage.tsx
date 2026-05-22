@@ -7,10 +7,10 @@ import type { ExcerptSource } from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as excerptEditRoute } from "@/routes/_mainLayout/excerpt/$unitId/edit";
 import { ExcerptSourcePicker } from "../components/source/ExcerptSourcePicker";
+import * as m from "@rezics/i18n/messages";
 
 interface ExcerptEditPageProps {
   unitId: string;
@@ -25,7 +25,6 @@ export function ExcerptEditPage({
   setData,
   targetUnitId,
 }: ExcerptEditPageProps) {
-  const { t } = useTranslation();
   const { show } = useAlertStore();
   const translation = data.translations?.[0];
   const extra = (data.extra as Record<string, any>) ?? {};
@@ -33,11 +32,11 @@ export function ExcerptEditPage({
 
   const { mutate } = useUpdateUnitMutation({
     onSuccess: (result) => {
-      show(t("excerpt.updated_success"));
+      show(m.excerpt_updated_success());
       console.log("update excerpt success", result);
     },
     onError: (error) => {
-      show(t("excerpt.messages.update_failed", { error: String(error) }));
+      show(m.excerpt_messages_update_failed({ error: String(error) }));
       console.error("update excerpt failed", error);
     },
   });
@@ -66,7 +65,7 @@ export function ExcerptEditPage({
   return (
     <div className="flex flex-col gap-4 mt-2">
       <div className="flex flex-col gap-1">
-        <Label htmlFor="excerpt-title">{t("excerpt.form.title")}</Label>
+        <Label htmlFor="excerpt-title">{m.excerpt_form_title()}</Label>
         <Input
           id="excerpt-title"
           value={translation?.title || ""}
@@ -102,7 +101,7 @@ export function ExcerptEditPage({
             })
           }
           onSubmit={handleSave}
-          submitLabel={t("common.save")}
+          submitLabel={m.common_save()}
         />
       </div>
     </div>

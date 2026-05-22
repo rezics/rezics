@@ -6,13 +6,13 @@ import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
   getBookAuthorName,
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
+import * as m from "@rezics/i18n/messages";
 
 type Book = BookDTO;
 
@@ -25,9 +25,8 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
   title,
   limit = 12,
 }) => {
-  const { t } = useTranslation();
   const resolvedTitle =
-    title ?? t("page.home.sections.new_book_recommendations");
+    title ?? m.page_home_sections_new_book_recommendations();
 
   const { data, isLoading, error } = useQuery(
     bookQueries.list({

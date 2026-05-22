@@ -1,7 +1,6 @@
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ResponsiveBookGridLimited } from "@/book-library/components/list/ResponsiveBookGridLimited";
 import {
   getBookAuthorName,
@@ -10,6 +9,7 @@ import {
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
 import { useHomeBooks } from "./hooks/hooks";
+import * as m from "@rezics/i18n/messages";
 
 export interface TrendingBookSectionProps {
   limit?: number;
@@ -20,7 +20,6 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   limit = 12,
   className,
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { items = [], isLoading } = useHomeBooks(limit);
 
@@ -39,15 +38,15 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
     <section className={className}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">
-          {t("page.home.sections.trending_book.title")}
+          {m.page_home_sections_trending_book_title()}
         </h2>
         <Button variant="ghost" onClick={() => navigate({ to: "/book" })}>
-          {t("page.home.sections.trending_book.more")}
+          {m.page_home_sections_trending_book_more()}
         </Button>
       </div>
       {isLoading ? (
         <div className="text-slate-400 text-sm">
-          {t("page.home.sections.trending_book.loading")}
+          {m.page_home_sections_trending_book_loading()}
         </div>
       ) : (
         <ResponsiveBookGridLimited bookList={bookList} />

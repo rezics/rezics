@@ -10,7 +10,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 interface BookHeroFeaturedReviewProps {
   bookId: string;
@@ -32,8 +32,6 @@ function mockReviewScore(post: PostDTO): number | null {
 export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   bookId,
 }) => {
-  const { t } = useTranslation();
-
   // MOCK: should sort by reaction count once postsByTarget supports it.
   // For now, take the most recent review.
   const { data, isLoading } = useQuery({
@@ -73,7 +71,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
           style={{ fontSize: "1.125rem" }}
         >
           {QUOTE_OPEN}
-          {t("book.hero.featured_review.empty_quote", "等待你的第一篇書評…")}
+          {m.book_hero_featured_review_empty_quote()}
           {QUOTE_CLOSE}
         </p>
         <Link
@@ -81,7 +79,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
           params={{ bookId }}
           className="text-sm text-white/70 hover:text-white underline-offset-4 hover:underline"
         >
-          {t("book.hero.featured_review.write_cta", "撰寫第一篇書評 →")}
+          {m.book_hero_featured_review_write_cta()}
         </Link>
       </div>
     );
@@ -103,7 +101,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
         }}
       >
         {QUOTE_OPEN}
-        {body || t("book.hero.featured_review.empty_body", "（無正文）")}
+        {body || m.book_hero_featured_review_empty_body()}
         {QUOTE_CLOSE}
       </p>
 
@@ -115,8 +113,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
           </Avatar>
         )}
         <span className="text-sm font-medium">
-          {author?.name ??
-            t("book.hero.featured_review.unknown_author", "匿名讀者")}
+          {author?.name ?? m.book_hero_featured_review_unknown_author()}
         </span>
         {score != null && (
           <div className="ml-1">
@@ -136,7 +133,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
         params={{ bookId }}
         className="text-sm text-white/80 hover:text-white underline-offset-4 hover:underline self-start"
       >
-        {t("book.hero.featured_review.read_full", "閱讀全文 →")}
+        {m.book_hero_featured_review_read_full()}
       </Link>
     </div>
   );

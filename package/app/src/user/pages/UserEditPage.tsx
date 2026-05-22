@@ -19,10 +19,10 @@ import { XCircle as CancelIcon, Save as SaveIcon } from "lucide-react";
 import type React from "react";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 import { UserLoading } from "./UserState";
+import * as m from "@rezics/i18n/messages";
 
 export interface UserEditPageProps {
   onCancel?: () => void;
@@ -41,7 +41,6 @@ export const UserEditPage: FC<UserEditPageProps> = ({
 }) => {
   const routeMatch = useMatch({ from: UserEditRoute.id, shouldThrow: false });
   const resolvedUserId = userId ?? routeMatch?.params.userId;
-  const { t } = useTranslation();
   const [user, setUser] = useState<UserDTO | null>(null);
   const {
     data,
@@ -142,7 +141,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
               </AvatarFallback>
             </Avatar>
             <h4 className="text-2xl font-semibold">
-              {t("common.edit")} Profile
+              {m.common_edit()} Profile
             </h4>
           </div>
           <form onSubmit={handleSubmit}>
@@ -156,7 +155,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
             )}
             <div className="space-y-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="user-edit-name">{t("common.nickname")}</Label>
+                <Label htmlFor="user-edit-name">{m.common_nickname()}</Label>
                 <Input
                   id="user-edit-name"
                   value={formData.name ?? ""}
@@ -219,7 +218,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                     disabled={saving}
                   >
                     <CancelIcon className="w-4 h-4 mr-2" />
-                    {t("common.cancel")}
+                    {m.common_cancel()}
                   </Button>
                 )}
                 <Button type="submit" disabled={saving}>
@@ -228,7 +227,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   ) : (
                     <>
                       <SaveIcon className="w-4 h-4 mr-2" />
-                      {t("common.save")}
+                      {m.common_save()}
                     </>
                   )}
                 </Button>

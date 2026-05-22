@@ -1,6 +1,6 @@
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { UnitTranslationLanguageBar } from "@/unit";
+import * as m from "@rezics/i18n/messages";
 
 export interface TranslationLanguageBarProps {
   existingLanguages: string[];
@@ -19,8 +19,6 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
   onAddClick,
   hasAvailable,
 }) => {
-  const { t } = useTranslation();
-
   return (
     <UnitTranslationLanguageBar
       existingLanguages={existingLanguages}
@@ -29,9 +27,9 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
       onSelect={onSelect}
       onAddClick={onAddClick}
       hasAvailable={hasAvailable}
-      label={t("page.book_edit.info.translation.language_label")}
-      addLabel={t("page.book_edit.info.translation.add_button")}
-      defaultLabel={t("page.book_edit.info.translation.default_badge")}
+      label={m.page_book_edit_info_translation_language_label()}
+      addLabel={m.page_book_edit_info_translation_add_button()}
+      defaultLabel={m.page_book_edit_info_translation_default_badge()}
     />
   );
 };

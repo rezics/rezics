@@ -18,7 +18,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useChapterListStore } from "@/book-library/states/chapterListStore";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
@@ -32,6 +31,7 @@ import {
   ContentChapterVirtualTree,
   type ContentChapterVirtualTreeHandle,
 } from "./ContentChapterVirtualTree";
+import * as m from "@rezics/i18n/messages";
 
 export type BookTocTreeHandle = {
   expandAll: () => void;
@@ -355,7 +355,6 @@ export interface ChapterListProps {
  * Fetches chapter data and renders using BookTocTreeView.
  */
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
-  const { t } = useTranslation();
   const { data, isLoading, error } = useQuery(bookQueries.contentStructure(id));
 
   const bookTocTree: BookContentStructureItem[] = useMemo(
@@ -369,13 +368,13 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
 
   const treeRef = React.useRef<ContentChapterVirtualTreeHandle>(null);
 
-  if (isLoading) return <div>{t("common.loading")}</div>;
+  if (isLoading) return <div>{m.common_loading()}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div className="flex min-h-0 flex-col gap-4">
       <div className="flex items-center justify-between">
-        <AccentBarWithText text={t("book.toc")} />
+        <AccentBarWithText text={m.book_toc()} />
       </div>
 
       <ContentChapterVirtualTree

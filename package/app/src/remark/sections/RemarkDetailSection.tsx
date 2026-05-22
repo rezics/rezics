@@ -3,11 +3,11 @@ import { postQueries } from "@rezics/api/post/post";
 import { TextLink } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "@/post/sections/PostTreeSection";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
+import * as m from "@rezics/i18n/messages";
 
 interface RemarkDetailSectionProps {
   remarkId: string;
@@ -16,7 +16,6 @@ interface RemarkDetailSectionProps {
 export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   remarkId,
 }) => {
-  const { t } = useTranslation();
   const composerRef = useFocusReplyFromQuery();
   const { data: remark, isLoading } = useQuery(postQueries.detail(remarkId));
   const canEdit = useCanEdit({
@@ -24,8 +23,8 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
     ownerUnit: { user: remark?.author },
   });
 
-  if (isLoading) return <div>{t("common.loading")}</div>;
-  if (!remark) return <div>{t("common.no_data")}</div>;
+  if (isLoading) return <div>{m.common_loading()}</div>;
+  if (!remark) return <div>{m.common_no_data()}</div>;
 
   const handleReplyInvoke = () => {
     composerRef.current?.focus();
@@ -36,7 +35,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
       {canEdit && (
         <div className="self-end">
           <TextLink to="/remark/$reviewId/edit" params={{ reviewId: remarkId }}>
-            {t("common.edit")}
+            {m.common_edit()}
           </TextLink>
         </div>
       )}

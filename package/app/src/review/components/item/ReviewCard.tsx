@@ -9,19 +9,18 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Star as StarIcon } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { cn } from "@/shared/utils/css-util";
 import { reviewCardActions, reviewPolicy } from "../../models/reviewPolicy";
+import * as m from "@rezics/i18n/messages";
 
 interface ReviewRatingBadgeProps {
   review: PostDTO;
 }
 
 const ReviewRatingBadge: React.FC<ReviewRatingBadgeProps> = ({ review }) => {
-  const { t } = useTranslation();
   const rating = (review.extra as { rating?: number } | null)?.rating;
 
   return (
@@ -44,7 +43,7 @@ const ReviewRatingBadge: React.FC<ReviewRatingBadgeProps> = ({ review }) => {
           )}
         />
         <TooltipContent side="top">
-          {t("review.open_review_page")}
+          {m.review_open_review_page()}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -8,26 +8,25 @@ import {
 } from "@rezics/ui/shadcn";
 import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
 import { useQuery } from "@tanstack/react-query";
-import type { TranslateFunction as TFunction } from "@rezics/i18n";
 import { type FC, useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { buildOAuthCallbackTargets } from "../models/authRedirect";
 import { providerIcons } from "./providerIcons";
+import * as m from "@rezics/i18n/messages";
 
 // TODO 横条文字应该居中一点，更美观
 
-function formatProviderLabel(providerId: string, t: TFunction): string {
+function formatProviderLabel(providerId: string): string {
   switch (providerId) {
     case "github":
-      return t("auth.flow.providers.github");
+      return m.auth_flow_providers_github();
     case "google":
-      return t("auth.flow.providers.google");
+      return m.auth_flow_providers_google();
     case "microsoft":
-      return t("auth.flow.providers.microsoft");
+      return m.auth_flow_providers_microsoft();
     case "telegram":
-      return t("auth.flow.providers.telegram");
+      return m.auth_flow_providers_telegram();
     case "twitter":
-      return t("auth.flow.providers.twitter");
+      return m.auth_flow_providers_twitter();
     default:
       return providerId;
   }
@@ -43,7 +42,6 @@ const OPTIMISTIC_PROVIDER: AuthProvider = {
 export const SocialAuthButtons: FC<{
   mode: "login" | "register";
 }> = ({ mode }) => {
-  const { t } = useTranslation();
   const [error, setError] = useState<string>();
   const [providerLoading, setProviderLoading] = useState<string>();
   const { data, isLoading } = useQuery(authQueries.providers());
@@ -97,9 +95,9 @@ export const SocialAuthButtons: FC<{
         disabled={Boolean(providerLoading && providerLoading !== provider.id)}
         label={
           isCompact
-            ? formatProviderLabel(provider.id, t)
-            : t("auth.flow.continue_with_provider", {
-                provider: formatProviderLabel(provider.id, t),
+            ? formatProviderLabel(provider.id)
+            : m.auth_flow_continue_with_provider({
+                provider: formatProviderLabel(provider.id),
               })
         }
         onClick={() => void startProviderSignIn(provider.id)}
@@ -112,7 +110,7 @@ export const SocialAuthButtons: FC<{
       <div className="relative flex items-center">
         <Separator className="flex-1" />
         <span className="px-3 text-sm text-text-secondary">
-          {t("auth.flow.providers_divider")}
+          {m.auth_flow_providers_divider()}
         </span>
         <Separator className="flex-1" />
       </div>

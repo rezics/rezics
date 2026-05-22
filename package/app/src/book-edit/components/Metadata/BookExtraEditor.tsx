@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 /** Book extra data structure. */
 export type BookExtraData = {
@@ -24,7 +24,6 @@ interface BookExtraEditorProps {
 }
 
 function PublishURL({ value, onChange }: BookExtraEditorProps) {
-  const { t } = useTranslation();
   const [newUrl, setNewUrl] = useState("");
   const urls: string[] = Array.isArray(value) ? value : [];
 
@@ -46,7 +45,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
   return (
     <div className="space-y-3">
       <h4 className="text-sm font-medium">
-        {t("book.extra.publish_urls.title")}
+        {m.book_extra_publish_urls_title()}
       </h4>
 
       {urls.length > 0 && (
@@ -93,7 +92,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
               handleAdd();
             }
           }}
-          placeholder={t("placeholders.enter_url")}
+          placeholder={m.placeholders_enter_url()}
           className="flex-1 border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors"
         />
         <Button
@@ -103,7 +102,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
           disabled={!newUrl.trim()}
         >
           <Add className="w-4 h-4 mr-2" />
-          {t("common.add")}
+          {m.common_add()}
         </Button>
       </div>
     </div>

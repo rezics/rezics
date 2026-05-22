@@ -10,8 +10,8 @@ import {
   Label,
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ChapterPicker } from "./ChapterPicker";
+import * as m from "@rezics/i18n/messages";
 
 type ActiveProgressModalProps = {
   open: boolean;
@@ -42,7 +42,6 @@ export function ActiveProgressModal({
   onSave,
   isPending,
 }: ActiveProgressModalProps) {
-  const { t } = useTranslation();
   const [progressPct, setProgressPct] = useState<number>(
     Math.round((initialProgress ?? 0) * 100),
   );
@@ -71,22 +70,16 @@ export function ActiveProgressModal({
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {t("progress_status.active_modal.title", "更新閱讀進度")}
-          </DialogTitle>
+          <DialogTitle>{m.progress_status_active_modal_title()}</DialogTitle>
           <DialogDescription>
-            {t(
-              "progress_status.active_modal.description",
-              "拖動滑桿更新進度百分比，並可選定目前章節。",
-            )}
+            {m.progress_status_active_modal_description()}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="progress-status-pct">
-              {t("progress_status.active_modal.progress_label", "進度")} ·{" "}
-              {progressPct}%
+              {m.progress_status_active_modal_progress_label()} · {progressPct}%
             </Label>
             <input
               id="progress-status-pct"
@@ -101,9 +94,7 @@ export function ActiveProgressModal({
           </div>
 
           <div className="grid gap-2">
-            <Label>
-              {t("progress_status.active_modal.chapter_label", "目前章節")}
-            </Label>
+            <Label>{m.progress_status_active_modal_chapter_label()}</Label>
             <ChapterPicker
               bookUnitId={bookUnitId}
               value={chapterUnitId}
@@ -114,10 +105,10 @@ export function ActiveProgressModal({
 
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={onCancel}>
-            {t("common.cancel", "取消")}
+            {m.common_cancel()}
           </Button>
           <Button type="button" onClick={handleSave} disabled={isPending}>
-            {t("common.save", "儲存")}
+            {m.common_save()}
           </Button>
         </DialogFooter>
       </DialogContent>

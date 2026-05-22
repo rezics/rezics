@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@rezics/ui/shadcn";
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 type CompletedConfirmModalProps = {
   open: boolean;
@@ -35,7 +35,6 @@ export function CompletedConfirmModal({
   onConfirm,
   isPending,
 }: CompletedConfirmModalProps) {
-  const { t } = useTranslation();
   const [displayCount, setDisplayCount] = useState(currentCount);
   const [badgeFading, setBadgeFading] = useState(false);
   const [animating, setAnimating] = useState(false);
@@ -86,14 +85,9 @@ export function CompletedConfirmModal({
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {t("progress_status.completed_modal.title", "再讀一次？")}
-          </DialogTitle>
+          <DialogTitle>{m.progress_status_completed_modal_title()}</DialogTitle>
           <DialogDescription>
-            {t(
-              "progress_status.completed_modal.description",
-              "確認後會把已讀次數 +1，並把進度設為 100%。",
-            )}
+            {m.progress_status_completed_modal_description()}
           </DialogDescription>
         </DialogHeader>
 
@@ -122,14 +116,14 @@ export function CompletedConfirmModal({
             onClick={onCancel}
             disabled={animating}
           >
-            {t("common.cancel", "取消")}
+            {m.common_cancel()}
           </Button>
           <Button
             type="button"
             onClick={handleConfirm}
             disabled={isPending || animating}
           >
-            {t("common.confirm", "確認")}
+            {m.common_confirm()}
           </Button>
         </DialogFooter>
       </DialogContent>

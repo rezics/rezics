@@ -1,11 +1,9 @@
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
-import { useTranslation } from "@rezics/i18n/react";
 import { logout } from "@/user/models/handler";
+import * as m from "@rezics/i18n/messages";
 
 export function PendingVerificationSection() {
-  const { t } = useTranslation();
-
   const handleLogout = async () => {
     await logout();
   };
@@ -18,7 +16,7 @@ export function PendingVerificationSection() {
         className="h-10 rounded-full border-border-whisper bg-transparent px-4"
         render={(props) => (
           <Link to="/complete-registration" {...props}>
-            {t("auth.flow.complete_registration_action")}
+            {m.auth_flow_complete_registration_action()}
           </Link>
         )}
       />
@@ -28,7 +26,7 @@ export function PendingVerificationSection() {
         className="h-10 rounded-full border border-border-whisper bg-transparent px-4"
         onClick={handleLogout}
       >
-        {t("auth.logout")}
+        {m.auth_logout()}
       </Button>
     </div>
   );

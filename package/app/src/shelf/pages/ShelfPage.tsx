@@ -15,7 +15,6 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
@@ -32,6 +31,7 @@ import {
   type ShelfStreamEntry,
 } from "../models/shelfStream";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
+import * as m from "@rezics/i18n/messages";
 
 interface ShelfPageProps {
   unitId: string;
@@ -75,7 +75,6 @@ function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const [viewModeOverride, setViewModeOverride] = useState<{
     unitId: string;
     value: ShelfView | undefined;
@@ -369,8 +368,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               viewOptions={VIEW_OPTIONS}
               onSortChange={setSortState}
               onViewChange={(value) => setViewModeOverride({ unitId, value })}
-              sortHeading={t("shelf.controls.sort_by", "Sort by")}
-              viewHeading={t("shelf.controls.view", "View")}
+              sortHeading={m.shelf_controls_sort_by()}
+              viewHeading={m.shelf_controls_view()}
             />
             {showSortScopeToggle && (
               <Label className="flex min-w-0 items-center gap-2 text-sm">
@@ -459,7 +458,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 }))
               }
             >
-              {t("common.prev", "Prev")}
+              {m.common_prev()}
             </Button>
             <span className="text-sm text-text-secondary">
               {page} / {totalPages}
@@ -478,7 +477,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 }))
               }
             >
-              {t("common.next", "Next")}
+              {m.common_next()}
             </Button>
           </div>
         )}

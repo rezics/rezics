@@ -5,13 +5,13 @@ import type { BookDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
   getBookAuthorName,
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
+import * as m from "@rezics/i18n/messages";
 
 type Book = BookDTO;
 
@@ -28,8 +28,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   title,
   limit = 10,
 }) => {
-  const { t } = useTranslation();
-  const resolvedTitle = title ?? t("page.home.sections.ranking");
+  const resolvedTitle = title ?? m.page_home_sections_ranking();
 
   const { data, isLoading, error } = useQuery(
     bookQueries.list({

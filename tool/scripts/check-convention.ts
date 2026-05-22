@@ -24,7 +24,8 @@
  *                                   whose name looks like a slug, is flagged.
  * - R11 paraglide-static-access    — no dynamic access to generated Paraglide messages.
  * - R12 contract-i18n-keys         — no i18nKey fields in contract domain objects and no
- *                                   t(*.i18nKey) callsites.
+ *                                   t(*.i18nKey) callsites. Also bans legacy
+ *                                   frontend string-key translation APIs.
  * - R13 ui-package-autonomy        — core @rezics/ui cannot import host runtime deps.
  *
  * Usage:
@@ -792,6 +793,14 @@ function scanI18nInvariants(filePaths: string[]): Violation[] {
     /\bm\s*\[\s*(?!["'][A-Za-z0-9_.-]+["'])|const\s+\{[^}]+\}\s*=\s*m\b/;
   const i18nKeyCallPattern = /\bt\s*\([^)]*\.i18nKey\b/;
   const contractI18nKeyPattern = /\bi18nKey\s*:/;
+  const frontendSourcePattern =
+    /^package\/(?:app|admin|ui|editor|folio)\/src\/.*\.(?:ts|tsx)$/;
+  const legacyUseTranslationPattern =
+    /from\s+["']@rezics\/i18n\/react["'][\s\S]*?\buseTranslation\b|\buseTranslation\s*\(/;
+  const legacyTranslatePattern =
+    /from\s+["']@rezics\/i18n["'][\s\S]*?\btranslate\b|\btranslate\s*\(/;
+  const legacyFallbackPattern =
+    /\bt\s*\(\s*["'][^"']+["']\s*,\s*["'][^"']+["']/;
 
   for (const filePath of filePaths) {
     const relFilePath = relative(REPO_ROOT, filePath);
@@ -820,6 +829,38 @@ function scanI18nInvariants(filePaths: string[]): Violation[] {
           "`t(*.i18nKey)` is forbidden; use @rezics/i18n label helpers instead",
         spec: SPEC_LINK.R12,
       });
+    }
+
+    if (frontendSourcePattern.test(relFilePath)) {
+      if (legacyUseTranslationPattern.test(source)) {
+        violations.push({
+          rule: "R12",
+          path: relFilePath,
+          message:
+            "`useTranslation().t(...)` is forbidden for frontend UI copy; import generated Paraglide functions or use useLocale for locale state",
+          spec: SPEC_LINK.R12,
+        });
+      }
+
+      if (legacyTranslatePattern.test(source)) {
+        violations.push({
+          rule: "R12",
+          path: relFilePath,
+          message:
+            "`translate(...)` is forbidden for frontend UI copy; import generated Paraglide functions or typed label helpers",
+          spec: SPEC_LINK.R12,
+        });
+      }
+
+      if (legacyFallbackPattern.test(source)) {
+        violations.push({
+          rule: "R12",
+          path: relFilePath,
+          message:
+            "fallback string translation calls are forbidden; add the message to the JSON catalog and call the generated function",
+          spec: SPEC_LINK.R12,
+        });
+      }
     }
 
     if (

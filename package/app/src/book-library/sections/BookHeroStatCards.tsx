@@ -5,12 +5,12 @@ import { PostKind } from "@rezics/contract";
 import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import {
   BookMarked as CollectionsBookmarkOutlined,
   Tag as LocalOfferOutlined,
   MessageSquareText as RateReviewOutlined,
 } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 
 interface BookHeroStatCardsProps {
   bookId: string;
@@ -40,8 +40,6 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
   bookId,
   cardKeys = DEFAULT_STAT_CARD_KEYS,
 }) => {
-  const { t } = useTranslation();
-
   const { data: reviewData } = useQuery({
     ...postQueries.byTarget(bookId, { kind: PostKind.REVIEW, limit: 1 }),
     enabled: Boolean(bookId),
@@ -72,21 +70,21 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
       key: "reviews",
       icon: <RateReviewOutlined size={36} />,
       count: reviewCount,
-      label: t("book.hero.stat.reviews", "篇書評"),
+      label: m.book_hero_stat_reviews(),
       to: "/review/book/$bookId",
     },
     {
       key: "shelves",
       icon: <CollectionsBookmarkOutlined size={36} />,
       count: shelfCount,
-      label: t("book.hero.stat.shelves", "個書架"),
+      label: m.book_hero_stat_shelves(),
       to: "/shelf/book/$bookId",
     },
     {
       key: "tags",
       icon: <LocalOfferOutlined size={36} />,
       count: tagCount,
-      label: t("book.hero.stat.tags", "個標籤"),
+      label: m.book_hero_stat_tags(),
       to: "/tag/book/$bookId",
     },
   ];

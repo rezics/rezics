@@ -13,10 +13,10 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { type FC, useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { Layout } from "../layouts/Layout.tsx";
 import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { validateEmail, validatePassword } from "../models/validate.ts";
+import * as m from "@rezics/i18n/messages";
 
 export interface ResetPasswordPageProps {
   isModal?: boolean;
@@ -26,7 +26,6 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   isModal = false,
   onClose,
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const query = useMemo(() => {
@@ -170,8 +169,8 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         {loading && <Spinner size="sm" />}
         {loading
           ? resetToken
-            ? t("common.loading")
-            : t("auth.flow.reset_link_sending")
+            ? m.common_loading()
+            : m.auth_flow_reset_link_sending()
           : resetToken
             ? "Reset Password"
             : "Send Reset Link"}

@@ -8,11 +8,11 @@ import {
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { cn } from "@/shared/utils/css-util";
 import { excerptCardActions, excerptPolicy } from "../../models/excerptPolicy";
 import { Quote as FormatQuoteRoundedIcon } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 
 export interface ExcerptCardProps {
   excerpt: UnitDTO;
@@ -23,7 +23,6 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
   excerpt,
   className,
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const excerptId = excerpt.id;
@@ -48,7 +47,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
     | undefined;
   const description =
     excerpt.translations?.[0]?.description ??
-    t("excerpt.card.description.fallback");
+    m.excerpt_card_description_fallback();
 
   const reactionPost: ReactionBarPost = {
     unitId: excerptId ?? "",
@@ -111,8 +110,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
 };
 
 function ExcerptCardSource({ source }: { source?: ExcerptSource | string }) {
-  const { t } = useTranslation();
-  if (!source) return <>{t("excerpt.card.source.unknown")}</>;
+  if (!source) return <>{m.excerpt_card_source_unknown()}</>;
   if (typeof source === "string") return <>{source}</>;
   return <>{source.title}</>;
 }

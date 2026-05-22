@@ -4,8 +4,8 @@ import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import * as m from "@rezics/i18n/messages";
 
 interface SingleShelfProps {
   shelf: ShelfDTO;
@@ -15,7 +15,6 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? "Untitled Shelf";
   const description = translation?.description ?? "";
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "shelf", ownerUnit: shelf });
   const shelfId = shelf.unitId;
@@ -29,7 +28,7 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={t("common.edit")}
+            aria-label={m.common_edit()}
             onClick={() => navigate({ to: `/shelf/${shelfId}/edit` })}
             className="h-7 w-7"
           >

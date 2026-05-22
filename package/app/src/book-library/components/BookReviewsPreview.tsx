@@ -4,8 +4,8 @@ import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIc
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ReviewList } from "@/review/components/list/ReviewList";
+import * as m from "@rezics/i18n/messages";
 
 /** Props for BookReviews component. */
 interface BookReviewsProps {
@@ -26,8 +26,6 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   title,
   reviewNumber = 3,
 }) => {
-  const { t } = useTranslation();
-
   // Fetch posts with kind='review' for this book
   const { data } = useQuery({
     ...postQueries.byTarget(bookId, {
@@ -42,7 +40,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   return (
     <div>
       <ArrowForwardIcon size={16} to={`/review/book/${bookId}/`}>
-        <AccentBarWithText text={t("book.reviews_of_book", { title })} />
+        <AccentBarWithText text={m.book_reviews_of_book({ title })} />
       </ArrowForwardIcon>
       <ReviewList reviews={reviews} showTargetWork={false} />
     </div>

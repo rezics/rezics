@@ -1,7 +1,7 @@
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import type { TranslationDraft } from "../hooks/useBookTranslationEditor";
+import * as m from "@rezics/i18n/messages";
 
 export interface TranslationFieldsEditorProps {
   draft: TranslationDraft;
@@ -16,13 +16,11 @@ export interface TranslationFieldsEditorProps {
 export const TranslationFieldsEditor: React.FC<
   TranslationFieldsEditorProps
 > = ({ draft, onChange, disabled, afterTitleSlot }) => {
-  const { t } = useTranslation();
-
   return (
     <div className="flex flex-col gap-5">
       <div className="space-y-1">
         <label className="text-sm" htmlFor="tr-title">
-          {t("book.fields.title")}
+          {m.book_fields_title()}
         </label>
         <input
           id="tr-title"
@@ -36,7 +34,7 @@ export const TranslationFieldsEditor: React.FC<
 
       <div className="space-y-1">
         <label className="text-sm" htmlFor="tr-subtitle">
-          {t("page.book_edit.info.translation.fields.subtitle")}
+          {m.page_book_edit_info_translation_fields_subtitle()}
         </label>
         <input
           id="tr-subtitle"
@@ -49,7 +47,7 @@ export const TranslationFieldsEditor: React.FC<
 
       <div className="space-y-1">
         <label className="text-sm" htmlFor="tr-summary">
-          {t("page.book_edit.info.translation.fields.summary")}
+          {m.page_book_edit_info_translation_fields_summary()}
         </label>
         <input
           id="tr-summary"
@@ -61,7 +59,7 @@ export const TranslationFieldsEditor: React.FC<
       </div>
 
       <div className="space-y-1">
-        <span className="text-sm">{t("book.description")}</span>
+        <span className="text-sm">{m.book_description()}</span>
         <RezicsMarkdownEditor
           value={draft.description}
           onChange={(value) => onChange("description", value)}

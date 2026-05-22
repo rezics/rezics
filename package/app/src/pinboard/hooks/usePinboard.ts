@@ -16,7 +16,7 @@ import {
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale } from "@rezics/i18n/react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 
@@ -41,8 +41,8 @@ export interface UsePinboardListResult {
 export function usePinboardList(
   input: UsePinboardListInput,
 ): UsePinboardListResult {
-  const { i18n } = useTranslation();
-  const language = input.language ?? i18n.language;
+  const locale = useLocale();
+  const language = input.language ?? locale;
 
   const adminView = input.adminView === true;
   const enabled = input.enabled ?? true;

@@ -1,10 +1,5 @@
 import { useSyncExternalStore } from "react";
-import {
-  type Locale,
-  getLocale,
-  setLocale as setProductLocale,
-} from "./paraglide/runtime.js";
-import { translate } from "./translate.ts";
+import { getLocale } from "./paraglide/runtime.js";
 
 const listeners = new Set<() => void>();
 
@@ -25,20 +20,4 @@ export function notifyLocaleChanged(): void {
 
 export function useLocale(): string {
   return useSyncExternalStore(subscribeLocale, getLocale, getLocale);
-}
-
-export function useTranslation() {
-  const language = useLocale();
-
-  return {
-    t: translate,
-    i18n: {
-      language,
-      resolvedLanguage: language,
-      changeLanguage: (locale: string) => {
-        setProductLocale(locale as Locale, { reload: false });
-        emitLocaleChange();
-      },
-    },
-  };
 }

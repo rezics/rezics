@@ -3,9 +3,9 @@ import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { ExcerptSource } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { UnitPicker, type Candidate } from "@/unit";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import * as m from "@rezics/i18n/messages";
 
 interface ExcerptSourcePickerProps {
   value?: ExcerptSource;
@@ -24,7 +24,6 @@ export function ExcerptSourcePicker({
   error,
   language,
 }: ExcerptSourcePickerProps) {
-  const { t } = useTranslation();
   const title = value?.title ?? "";
   const linkedUnitId = value?.mode === "unit" ? value.unitId : undefined;
   const urlValue = value?.mode === "url" ? value.url : "";
@@ -88,7 +87,7 @@ export function ExcerptSourcePicker({
         <div className="flex items-center justify-between gap-2 p-2 rounded border border-border-whisper bg-surface-elevated">
           <div className="flex flex-col min-w-0">
             <span className="text-xs text-text-secondary">
-              {t("excerpt.form.linked_unit", "Linked unit")}
+              {m.excerpt_form_linked_unit()}
             </span>
             <span className="text-sm truncate">
               {linkedUnitTitle ?? linkedUnitId}
@@ -101,7 +100,7 @@ export function ExcerptSourcePicker({
             onClick={handleClear}
             disabled={disabled}
           >
-            {t("common.clear", "Clear")}
+            {m.common_clear()}
           </Button>
         </div>
       )}
@@ -110,7 +109,7 @@ export function ExcerptSourcePicker({
         workContextUnitId={targetUnitId}
         language={language}
         inputId="excerpt-source-url"
-        label={t("excerpt.form.source_url", "Source URL")}
+        label={m.excerpt_form_source_url()}
         renderItemAction={(candidate) => (
           <Button
             type="button"
@@ -119,14 +118,14 @@ export function ExcerptSourcePicker({
             disabled={disabled}
             onClick={() => handlePickCandidate(candidate)}
           >
-            {t("excerpt.form.use_this", "Use this")}
+            {m.excerpt_form_use_this()}
           </Button>
         )}
       />
 
       <div className="flex flex-col gap-1">
         <Label htmlFor="excerpt-source-raw-url">
-          {t("excerpt.form.raw_url", "Or paste a non-app URL")}
+          {m.excerpt_form_raw_url()}
         </Label>
         <Input
           id="excerpt-source-raw-url"
@@ -142,7 +141,7 @@ export function ExcerptSourcePicker({
       {value && (
         <div className="flex flex-col gap-1">
           <Label htmlFor="excerpt-source-title">
-            {t("excerpt.form.source_title", "Source title")}
+            {m.excerpt_form_source_title()}
           </Label>
           <Input
             id="excerpt-source-title"

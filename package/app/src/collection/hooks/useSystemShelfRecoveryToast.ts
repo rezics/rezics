@@ -3,8 +3,9 @@ import {
   useSystemShelfRecovery,
 } from "@rezics/api/shelf";
 import type { SystemShelfKindKey } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { systemShelfKindLabel } from "@/shelf/models/systemShelfLabel";
 import { toast } from "sonner";
+import * as m from "@rezics/i18n/messages";
 
 export type SystemShelfRecoveryToast = {
   /**
@@ -24,16 +25,15 @@ export type SystemShelfRecoveryToast = {
 };
 
 export function useSystemShelfRecoveryToast(): SystemShelfRecoveryToast {
-  const { t } = useTranslation();
   const recovery = useSystemShelfRecovery();
 
   const showRecoveryToast = (kindKey: SystemShelfKindKey): void => {
-    const kindLabel = t(`shelf.system.${kindKey}`);
+    const kindLabel = systemShelfKindLabel(kindKey);
     const toastId = toast.error(
-      t("shelf.system.recoveryToast", { kind: kindLabel }),
+      m.shelf_system_recoveryToast({ kind: kindLabel }),
       {
         action: {
-          label: t("shelf.system.recoveryRetry"),
+          label: m.shelf_system_recoveryRetry(),
           onClick: () => {
             recovery.ensure(kindKey).then(
               () => toast.dismiss(toastId),

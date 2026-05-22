@@ -5,11 +5,10 @@ import { TextLink } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "@rezics/i18n/react";
-
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { RealmTagHighlights } from "./RealmTagHighlights";
 import TagList from "./TagList";
+import * as m from "@rezics/i18n/messages";
 
 type Mode = "flat" | "grouped";
 
@@ -28,7 +27,6 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   domainIds: _domainIds,
   className,
 }) => {
-  const { t } = useTranslation();
   const { data, isLoading, error } = useQuery(tagQueries.list(filters));
   const tags: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
   const isMobile = useIsMobile();
@@ -46,7 +44,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   if (isLoading) {
     return (
       <div className={className}>
-        <div className="text-sm text-gray-500">{t("tag.loading")}</div>
+        <div className="text-sm text-gray-500">{m.tag_loading()}</div>
       </div>
     );
   }
@@ -55,7 +53,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
     return (
       <div className={className}>
         <div className="text-sm text-red-600">
-          {t("tag.load_failed", {
+          {m.tag_load_failed({
             error: String((error as any)?.message ?? error),
           })}
         </div>

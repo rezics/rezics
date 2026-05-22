@@ -23,7 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 interface BookYourScoreBlockProps {
   bookUnitId: string;
@@ -34,7 +34,6 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
   bookUnitId,
   realmId = getDefaultRealmId() ?? "default",
 }) => {
-  const { t } = useTranslation();
   const userId = useCurrentUserId();
   const isAuthed = Boolean(userId);
 
@@ -95,7 +94,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
             style={{ color: "var(--colors-brand-fill)" }}
           />
           <span className="text-base font-medium text-brand-fill">
-            {t("book.hero.your_score.rate", "Rate")}
+            {m.book_hero_your_score_rate()}
           </span>
         </>
       )}
@@ -105,7 +104,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
   const trigger = (
     <div className="flex flex-col items-center gap-1">
       <span className="text-xs font-bold tracking-[0.12em] uppercase text-white/65">
-        {t("book.hero.your_score.label", "YOUR SCORE")}
+        {m.book_hero_your_score_label()}
       </span>
       {button}
     </div>
@@ -121,9 +120,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
             <TooltipTrigger
               render={(props) => <span {...props}>{trigger}</span>}
             />
-            <TooltipContent>
-              {t("book.hero.your_score.sign_in", "登入後可評分")}
-            </TooltipContent>
+            <TooltipContent>{m.book_hero_your_score_sign_in()}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       )}
@@ -138,8 +135,8 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
           <DialogHeader>
             <DialogTitle>
               {currentValue
-                ? t("book.hero.your_score.dialog_edit", "修改評分")
-                : t("book.hero.your_score.dialog_rate", "為這本書評分")}
+                ? m.book_hero_your_score_dialog_edit()
+                : m.book_hero_your_score_dialog_rate()}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center gap-3 pt-2">
@@ -148,7 +145,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
               size="lg"
               value={draft}
               onChange={(v) => setDraft(v)}
-              aria-label={t("book.hero.your_score.dialog_rate", "為這本書評分")}
+              aria-label={m.book_hero_your_score_dialog_rate()}
             />
             <span className="text-sm text-text-secondary tabular-nums">
               {draft ? `${draft} / ${SCORE_MAX}` : "—"}
@@ -162,7 +159,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
                 disabled={isPending}
                 className="mr-auto"
               >
-                {t("book.hero.your_score.remove", "移除評分")}
+                {m.book_hero_your_score_remove()}
               </Button>
             )}
             <Button
@@ -170,15 +167,13 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
               onClick={() => setOpen(false)}
               disabled={isPending}
             >
-              {t("common.cancel", "取消")}
+              {m.common_cancel()}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={isPending || draft == null || draft < 1}
             >
-              {isPending
-                ? t("common.saving", "Saving…")
-                : t("common.submit", "Submit")}
+              {isPending ? m.common_saving() : m.common_submit()}
             </Button>
           </DialogFooter>
         </DialogContent>

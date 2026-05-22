@@ -6,13 +6,13 @@ import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import * as m from "@rezics/i18n/messages";
 
 const KIND_CHIPS: ChipDefinition[] = [
   { value: "REVIEW", label: "Reviews" },
@@ -28,7 +28,6 @@ const SORT_OPTIONS = [
 ];
 
 export const ContentTabSection: FC = () => {
-  const { t } = useTranslation();
   const { userId } = useProfileContext();
   const [kind, setKind] = useState("REVIEW");
   const [filters, setFilters] = useState<Record<string, string>>({
@@ -96,11 +95,11 @@ export const ContentTabSection: FC = () => {
 
       {isLoading ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          {t("common.loading")}
+          {m.common_loading()}
         </p>
       ) : posts.length === 0 ? (
         <EmptyState
-          title={filters.q ? t("search.empty.title") : t("common.no_data")}
+          title={filters.q ? m.search_empty_title() : m.common_no_data()}
         />
       ) : (
         <>

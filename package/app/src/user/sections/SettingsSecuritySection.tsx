@@ -15,15 +15,13 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { SessionListItem } from "@/user/components/SessionListItem";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
+import * as m from "@rezics/i18n/messages";
 
 export const SettingsSecuritySection: FC = () => {
   useRequireAuth();
-  const { t } = useTranslation();
-
   const { data: sessionState } = useQuery(authQueries.sessionState());
   const { data: sessionsData, isLoading: sessionsLoading } = useQuery(
     authQueries.sessions(),
@@ -90,18 +88,18 @@ export const SettingsSecuritySection: FC = () => {
   return (
     <div>
       <SettingsSection
-        title={t("settings.security.login_email_title")}
-        description={t("settings.security.login_email_description")}
+        title={m.settings_security_login_email_title()}
+        description={m.settings_security_login_email_description()}
       >
         <p className="text-sm text-text-secondary mb-4">
-          {t("settings.security.current_login_email", {
-            email: loginEmail || t("settings.security.unavailable"),
+          {m.settings_security_current_login_email({
+            email: loginEmail || m.settings_security_unavailable(),
           })}
         </p>
         {loginEmailSuccess && (
           <Alert className="mb-4 text-success-text" aria-live="polite">
             <AlertDescription>
-              {t("settings.security.login_email_confirmation_sent")}
+              {m.settings_security_login_email_confirmation_sent()}
             </AlertDescription>
           </Alert>
         )}
@@ -116,7 +114,7 @@ export const SettingsSecuritySection: FC = () => {
         >
           <div className="flex-1 flex flex-col gap-1.5">
             <Label htmlFor="new-login-email">
-              {t("settings.security.new_login_email")}
+              {m.settings_security_new_login_email()}
             </Label>
             <Input
               id="new-login-email"
@@ -134,8 +132,8 @@ export const SettingsSecuritySection: FC = () => {
           >
             {changeEmail.isPending && <Spinner size="sm" />}
             {changeEmail.isPending
-              ? t("settings.security.sending")
-              : t("settings.security.change_login_email")}
+              ? m.settings_security_sending()
+              : m.settings_security_change_login_email()}
           </Button>
         </form>
       </SettingsSection>
@@ -143,21 +141,21 @@ export const SettingsSecuritySection: FC = () => {
       <SettingsSection
         title={
           hasPassword
-            ? t("settings.security.change_password_title")
-            : t("settings.security.set_password_title")
+            ? m.settings_security_change_password_title()
+            : m.settings_security_set_password_title()
         }
         description={
           hasPassword
-            ? t("settings.security.change_password_description")
-            : t("settings.security.set_password_description")
+            ? m.settings_security_change_password_description()
+            : m.settings_security_set_password_description()
         }
       >
         {passwordSuccess && (
           <Alert className="mb-4 text-success-text" aria-live="polite">
             <AlertDescription>
               {hasPassword
-                ? t("settings.security.password_changed")
-                : t("settings.security.password_set")}
+                ? m.settings_security_password_changed()
+                : m.settings_security_password_set()}
             </AlertDescription>
           </Alert>
         )}
@@ -170,7 +168,7 @@ export const SettingsSecuritySection: FC = () => {
         <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-md">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="new-password">
-              {t("settings.security.new_password")}
+              {m.settings_security_new_password()}
             </Label>
             <Input
               id="new-password"
@@ -183,7 +181,7 @@ export const SettingsSecuritySection: FC = () => {
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="confirm-password">
-              {t("settings.security.confirm_password")}
+              {m.settings_security_confirm_password()}
             </Label>
             <Input
               id="confirm-password"
@@ -195,7 +193,7 @@ export const SettingsSecuritySection: FC = () => {
             />
             {passwordMismatch && (
               <p className="text-sm text-error-text" aria-live="assertive">
-                {t("settings.security.passwords_do_not_match")}
+                {m.settings_security_passwords_do_not_match()}
               </p>
             )}
           </div>
@@ -205,17 +203,17 @@ export const SettingsSecuritySection: FC = () => {
             disabled={setPassword.isPending || !newPassword || passwordMismatch}
           >
             {setPassword.isPending
-              ? t("settings.security.saving")
+              ? m.settings_security_saving()
               : hasPassword
-                ? t("settings.security.change_password")
-                : t("settings.security.set_password")}
+                ? m.settings_security_change_password()
+                : m.settings_security_set_password()}
           </Button>
         </form>
       </SettingsSection>
 
       <SettingsSection
-        title={t("settings.security.active_sessions_title")}
-        description={t("settings.security.active_sessions_description")}
+        title={m.settings_security_active_sessions_title()}
+        description={m.settings_security_active_sessions_description()}
         divider={false}
       >
         {sessionsLoading ? (
@@ -238,7 +236,7 @@ export const SettingsSecuritySection: FC = () => {
           </div>
         ) : (
           <p className="text-sm text-text-secondary">
-            {t("settings.security.no_active_sessions")}
+            {m.settings_security_no_active_sessions()}
           </p>
         )}
       </SettingsSection>

@@ -15,8 +15,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
+import * as m from "@rezics/i18n/messages";
 
 export type ReplyComposerMode = "progressive" | "expanded";
 
@@ -265,7 +265,6 @@ export const ReplyComposer = forwardRef<
   ReplyComposerHandle,
   ReplyComposerProps
 >(function ReplyComposer(props, ref) {
-  const { t } = useTranslation();
   const authGuard = useAuthGuard();
   const {
     mode,
@@ -406,10 +405,10 @@ export const ReplyComposer = forwardRef<
       <>
         <div className="flex items-center justify-between gap-4 rounded-md bg-surface-subtle p-4">
           <p className="text-sm leading-ui text-text-secondary">
-            {t("shelf.discussion.signInPrompt")}
+            {m.shelf_discussion_signInPrompt()}
           </p>
           <Button size="sm" onClick={authGuard.openLogin}>
-            {t("auth.login")}
+            {m.auth_login()}
           </Button>
         </div>
         {authGuard.AuthModal({})}

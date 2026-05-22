@@ -12,9 +12,9 @@ import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { EntityIdentityRow } from "@/entity";
 import { EntityPicker } from "@/entity-picker";
+import * as m from "@rezics/i18n/messages";
 
 interface BookCreditAttributionEditorProps {
   bookUnitId: string;
@@ -31,7 +31,6 @@ export function BookCreditAttributionEditor({
   bookUnitId,
   disabled,
 }: BookCreditAttributionEditorProps) {
-  const { t } = useTranslation();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const creditQuery = useQuery(creditAttributionQueries.byUnit(bookUnitId));
@@ -56,12 +55,12 @@ export function BookCreditAttributionEditor({
           onClick={() => setPickerOpen(true)}
         >
           <Plus className="size-4" />
-          {t("book.actions.add_credit", "Add credit")}
+          {m.book_actions_add_credit()}
         </Button>
       </div>
 
       {creditQuery.isLoading ? (
-        <p className="text-sm text-text-secondary">{t("common.loading")}</p>
+        <p className="text-sm text-text-secondary">{m.common_loading()}</p>
       ) : visibleCredits.length > 0 ? (
         <ul className="flex flex-col gap-2">
           {visibleCredits.map((credit) => {
@@ -80,7 +79,7 @@ export function BookCreditAttributionEditor({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  aria-label={t("book.actions.remove_credit", "Remove credit")}
+                  aria-label={m.book_actions_remove_credit()}
                   disabled={disabled || unlinkCredit.isPending}
                   onClick={() =>
                     unlinkCredit.mutate({
@@ -98,7 +97,7 @@ export function BookCreditAttributionEditor({
         </ul>
       ) : (
         <p className="text-sm text-text-secondary">
-          {t("book.empty.credit_attributions", "No credits yet.")}
+          {m.book_empty_credit_attributions()}
         </p>
       )}
 

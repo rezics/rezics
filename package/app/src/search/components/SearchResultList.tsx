@@ -4,7 +4,7 @@ import type {
 } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
+import * as m from "@rezics/i18n/messages";
 
 function resolveTitle(
   titles: string[],
@@ -60,18 +60,16 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
   preferredLanguage,
   renderItem,
 }) => {
-  const { t } = useTranslation();
-
   if (isLoading) {
     return (
       <div className="py-12 text-center">
-        <p className="text-text-secondary">{t("common.loading")}</p>
+        <p className="text-text-secondary">{m.common_loading()}</p>
       </div>
     );
   }
 
   if (!result || result.items.length === 0) {
-    return <EmptyState title={t("search.empty.title")} />;
+    return <EmptyState title={m.search_empty_title()} />;
   }
 
   return (

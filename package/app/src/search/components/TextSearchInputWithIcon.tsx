@@ -1,8 +1,8 @@
 import { Button } from "@rezics/ui/shadcn";
 import { Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { TextSearchInputBase } from "./TextSearchInputBase";
+import * as m from "@rezics/i18n/messages";
 
 export const TextSearchInputWithIcon = ({
   onSearch,
@@ -13,7 +13,6 @@ export const TextSearchInputWithIcon = ({
   defaultValue: { keyword: string };
   placeholder?: string;
 }) => {
-  const { t } = useTranslation();
   const [value, setValue] = useState(defaultValue);
 
   return (
@@ -29,7 +28,7 @@ export const TextSearchInputWithIcon = ({
         size="icon"
         variant="ghost"
         className="text-text-brand"
-        aria-label={t("accessibility.search")}
+        aria-label={m.accessibility_search()}
         onClick={() => onSearch(value.keyword ?? "")}
       >
         <SearchIcon />

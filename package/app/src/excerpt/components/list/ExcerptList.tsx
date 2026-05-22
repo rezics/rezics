@@ -3,8 +3,8 @@ import type { UnitDTO } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import { useMemo } from "react";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { ExcerptCard } from "../item/ExcerptCard";
+import * as m from "@rezics/i18n/messages";
 
 interface ExcerptListProps {
   units: UnitDTO[];
@@ -16,7 +16,6 @@ export const ExcerptList: React.FC<ExcerptListProps> = ({
   units,
   spacing = 2,
 }) => {
-  const { t } = useTranslation();
   const targetIds = useMemo(
     () => units.map((u) => u.id).filter(Boolean) as string[],
     [units],
@@ -24,7 +23,7 @@ export const ExcerptList: React.FC<ExcerptListProps> = ({
   useReactionHydration(targetIds);
 
   if (units.length === 0) {
-    return <EmptyState title={t("excerpt.list.empty.title")} />;
+    return <EmptyState title={m.excerpt_list_empty_title()} />;
   }
 
   return (

@@ -26,10 +26,10 @@ import {
 } from "@rezics/ui/shadcn";
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { EntityInlineCreateForm } from "./EntityInlineCreateForm";
 import { EntityResultRow } from "./EntityResultRow";
+import * as m from "@rezics/i18n/messages";
 
 const ALL_CREDIT_ROLES = "all";
 const ALL_SUBJECT_ROLES = "all";
@@ -83,7 +83,6 @@ export function EntityPicker({
   lockedSubjectRole,
   requireCreditRoleForSelect = false,
 }: EntityPickerProps) {
-  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [creditRoleFilter, setCreditRoleFilter] =
@@ -140,12 +139,7 @@ export function EntityPicker({
 
   const handleSelect = (unitId: string) => {
     if (requireCreditRoleForSelect && !activeCreditRole) {
-      setSelectionError(
-        t(
-          "entity_picker.errors.credit_role_required",
-          "Choose a credit role before selecting an entity.",
-        ),
-      );
+      setSelectionError(m.entity_picker_errors_credit_role_required());
       return;
     }
 
@@ -201,10 +195,10 @@ export function EntityPicker({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>
-                    {t("entity_picker.filters.credit_role", "Credit role")}
+                    {m.entity_picker_filters_credit_role()}
                   </SelectLabel>
                   <SelectItem value={ALL_CREDIT_ROLES}>
-                    {t("entity_picker.filters.all", "All")}
+                    {m.entity_picker_filters_all()}
                   </SelectItem>
                   {creditRoleOptions.map((role) => (
                     <SelectItem key={role} value={role}>
@@ -233,10 +227,10 @@ export function EntityPicker({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>
-                    {t("entity_picker.filters.subject_role", "Subject role")}
+                    {m.entity_picker_filters_subject_role()}
                   </SelectLabel>
                   <SelectItem value={ALL_SUBJECT_ROLES}>
-                    {t("entity_picker.filters.all", "All")}
+                    {m.entity_picker_filters_all()}
                   </SelectItem>
                   {subjectRoleOptions.map((role) => (
                     <SelectItem key={role} value={role}>
@@ -295,10 +289,7 @@ export function EntityPicker({
               onClick={() => {
                 if (requireCreditRoleForSelect && !activeCreditRole) {
                   setSelectionError(
-                    t(
-                      "entity_picker.errors.credit_role_required",
-                      "Choose a credit role before selecting an entity.",
-                    ),
+                    m.entity_picker_errors_credit_role_required(),
                   );
                   return;
                 }

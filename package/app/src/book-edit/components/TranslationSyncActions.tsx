@@ -10,13 +10,13 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "@rezics/i18n/react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
 import {
   ExternalLink as LaunchIcon,
   RefreshCw as SyncIcon,
 } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 
 export interface TranslationSyncActionsProps {
   /** Source release unit id this language is wired to. Falsy disables actions. */
@@ -38,7 +38,6 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
   language,
   onSync,
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const { data: sourceBook, isFetching } = useQuery({
@@ -75,7 +74,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
   return (
     <div className="flex flex-col gap-2">
       <span className="text-xs text-text-secondary">
-        {t("page.book_edit.info.translation.source.label")}: {sourceTitle}
+        {m.page_book_edit_info_translation_source_label()}: {sourceTitle}
       </span>
       <div className="flex flex-row gap-2 flex-wrap">
         <TooltipProvider>
@@ -90,15 +89,15 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
                     disabled={!sourceTranslation || isFetching}
                   >
                     <SyncIcon className="w-4 h-4 mr-2" />
-                    {t("page.book_edit.info.translation.source.sync_button")}
+                    {m.page_book_edit_info_translation_source_sync_button()}
                   </Button>
                 </span>
               )}
             />
             <TooltipContent>
               {sourceTranslation
-                ? t("page.book_edit.info.translation.source.sync_tooltip")
-                : t("page.book_edit.info.translation.source.no_match", {
+                ? m.page_book_edit_info_translation_source_sync_tooltip()
+                : m.page_book_edit_info_translation_source_no_match({
                     lang: language,
                   })}
             </TooltipContent>
@@ -116,7 +115,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
           }
         >
           <LaunchIcon className="w-4 h-4 mr-2" />
-          {t("page.book_edit.info.translation.source.open_button")}
+          {m.page_book_edit_info_translation_source_open_button()}
         </Button>
       </div>
     </div>
