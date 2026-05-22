@@ -1,4 +1,4 @@
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   ChevronDown as KeyboardArrowDownIcon,
   ChevronRight as KeyboardArrowRightIcon,

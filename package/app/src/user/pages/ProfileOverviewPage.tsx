@@ -1,6 +1,6 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ContentSearchDocument } from "@rezics/contract";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { DescriptionBox } from "@/user/components/DescriptionBox";

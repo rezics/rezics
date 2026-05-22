@@ -1,4 +1,4 @@
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import type React from "react";

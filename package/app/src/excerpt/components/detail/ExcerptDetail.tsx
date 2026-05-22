@@ -1,9 +1,9 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
-import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { Link, unitHref } from "@rezics/ui/primitive/link";
+import { Link, unitHref } from "@/shared/ui/link";
 import { useMemo } from "react";
 import type React from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";

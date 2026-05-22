@@ -1,6 +1,6 @@
 import { useEntityList } from "@rezics/api/entity";
 import { Spinner } from "@rezics/ui";
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHref } from "@/shared/ui/link";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { useUserProfileStore } from "@/user/states";

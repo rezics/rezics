@@ -1,7 +1,7 @@
 import { Badge } from "@rezics/ui/shadcn";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   Carousel,
   CarouselContent,

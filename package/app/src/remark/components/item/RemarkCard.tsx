@@ -1,5 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink } from "@/shared/ui/link";
 import {
   Tooltip,
   TooltipContent,

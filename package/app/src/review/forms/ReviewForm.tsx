@@ -1,6 +1,6 @@
 import { SCORE_MAX } from "@rezics/contract";
 import { RatingInput } from "@rezics/ui";
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Input, Label } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useTranslation } from "@rezics/i18n/react";

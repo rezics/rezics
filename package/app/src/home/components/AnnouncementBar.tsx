@@ -1,4 +1,4 @@
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink } from "@/shared/ui/link";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import {

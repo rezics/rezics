@@ -1,4 +1,4 @@
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import type React from "react";
 import { useTranslation } from "@rezics/i18n/react";
 import type { TranslationDraft } from "../hooks/useBookTranslationEditor";

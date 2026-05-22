@@ -1,4 +1,4 @@
-import { Link, unitHref } from "@rezics/ui/primitive/link";
+import { Link, unitHref } from "@/shared/ui/link";
 import {
   Avatar,
   AvatarFallback,

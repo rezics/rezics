@@ -1,6 +1,6 @@
 import { useCreateRealmMutation } from "@rezics/api/realm/realm";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHref } from "@/shared/ui/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";

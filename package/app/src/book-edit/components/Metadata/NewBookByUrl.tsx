@@ -1,5 +1,5 @@
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
-import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,

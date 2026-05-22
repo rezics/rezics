@@ -1,7 +1,7 @@
 import { postQueries } from "@rezics/api/post/post";
 import { type PostDTO, PostKind } from "@rezics/contract";
 import { RatingInput } from "@rezics/ui";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   Avatar,
   AvatarFallback,

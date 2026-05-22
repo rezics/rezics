@@ -1,4 +1,4 @@
-import { SafeLink } from "@rezics/ui";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
 export default function TestLinksPage() {
   return (

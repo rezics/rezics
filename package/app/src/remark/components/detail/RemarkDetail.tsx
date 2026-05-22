@@ -1,6 +1,6 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink } from "@/shared/ui/link";
 import {
   ThumbsDown as ThumbDownIcon,
   ThumbsUp as ThumbUpIcon,

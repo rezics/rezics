@@ -1,6 +1,6 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink } from "@/shared/ui/link";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";

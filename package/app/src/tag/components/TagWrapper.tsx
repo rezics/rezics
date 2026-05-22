@@ -1,7 +1,7 @@
 import type { TagFilters } from "@rezics/api/tag/tag";
 import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";

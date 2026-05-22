@@ -1,6 +1,6 @@
 import { realmQueries } from "@rezics/api/realm/realm.queries";
 import type { RealmDTO } from "@rezics/contract";
-import { Link, unitHref } from "@rezics/ui/primitive/link";
+import { Link, unitHref } from "@/shared/ui/link";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";

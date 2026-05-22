@@ -5,7 +5,7 @@ import {
 import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
-import { TextLink, unitHref } from "@rezics/ui/primitive/link";
+import { TextLink, unitHref } from "@/shared/ui/link";
 import {
   Avatar,
   AvatarFallback,

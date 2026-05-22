@@ -1,5 +1,5 @@
 import type { RealmDTO } from "@rezics/contract";
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHref } from "@/shared/ui/link";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";

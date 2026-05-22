@@ -2,7 +2,7 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import type { ContentRating } from "@rezics/contract";
 import { RatingSelector } from "@rezics/ui";
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import {
   Dialog,
   DialogContent,

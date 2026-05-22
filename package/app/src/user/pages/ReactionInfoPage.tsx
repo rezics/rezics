@@ -1,4 +1,4 @@
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHref } from "@/shared/ui/link";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";

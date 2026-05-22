@@ -1,7 +1,7 @@
 import { Badge } from "@rezics/ui/shadcn";
 import { Spinner } from "@rezics/ui";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";

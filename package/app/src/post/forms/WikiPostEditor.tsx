@@ -4,7 +4,7 @@ import {
   useUpdateWikiPostBodyMutation,
 } from "@rezics/api/post/post";
 import type { PostDTO } from "@rezics/contract";
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
 

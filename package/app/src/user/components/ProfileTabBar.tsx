@@ -1,4 +1,4 @@
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHref } from "@/shared/ui/link";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";

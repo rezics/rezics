@@ -1,6 +1,6 @@
 import { postQueries, postSubtreeQuery } from "@rezics/api/post/post";
 import { Spinner } from "@rezics/ui";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";

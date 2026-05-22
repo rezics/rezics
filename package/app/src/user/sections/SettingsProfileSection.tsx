@@ -2,7 +2,7 @@ import { useUpdateMeMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UpdateUser } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import {
   Alert,
   AlertDescription,

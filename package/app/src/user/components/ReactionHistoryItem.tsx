@@ -2,7 +2,7 @@ import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
 } from "@rezics/api/reaction/reaction.types";
-import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import {
   Bookmark,

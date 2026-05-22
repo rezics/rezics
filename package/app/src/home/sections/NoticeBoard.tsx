@@ -1,5 +1,5 @@
 import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink } from "@/shared/ui/link";
 import type { TranslateFunction as TFunction } from "@rezics/i18n";
 import type React from "react";
 import { useTranslation } from "@rezics/i18n/react";

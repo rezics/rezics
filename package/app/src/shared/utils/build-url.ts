@@ -1,5 +1,5 @@
 import type { UnitDTO } from "@rezics/contract";
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHref } from "@/shared/ui/link";
 
 export function buildUnitUrl(unit: UnitDTO): string {
   switch (unit.type) {

@@ -1,7 +1,7 @@
 import { tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink } from "@/shared/ui/link";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
 import { Route as tagBookRoute } from "@/routes/_mainLayout/tag/book/$bookId/route";

@@ -1,5 +1,5 @@
 import type { EntityDTO } from "@rezics/contract";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   Button,
   Select,

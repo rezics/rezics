@@ -9,7 +9,10 @@ import {
 } from "@rezics/api/chapter/chapter";
 import type { BookContentStructureItem } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
-import { RezicsMarkdownEditor, type ViewMode } from "@rezics/ui/editor";
+import {
+  RezicsMarkdownEditor,
+  type ViewMode,
+} from "@/shared/ui/RezicsMarkdownEditor";
 import {
   Button,
   DropdownMenu,

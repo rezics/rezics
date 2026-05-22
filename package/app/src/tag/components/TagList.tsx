@@ -1,4 +1,4 @@
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHref } from "@/shared/ui/link";
 import { Badge } from "@rezics/ui/shadcn";
 import type { UnitTagDTO } from "@rezics/contract";
 import type React from "react";

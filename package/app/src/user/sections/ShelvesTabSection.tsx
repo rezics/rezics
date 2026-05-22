@@ -4,7 +4,7 @@ import {
   type ShelfDTO,
   type SystemShelfKindKey,
 } from "@rezics/contract";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
 import { useTranslation } from "@rezics/i18n/react";

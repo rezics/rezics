@@ -4,7 +4,7 @@ import { useUpdateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
 import type { ExcerptSource } from "@rezics/contract";
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@rezics/i18n/react";

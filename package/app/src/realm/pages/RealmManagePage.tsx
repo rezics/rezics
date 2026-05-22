@@ -9,7 +9,7 @@ import {
 import { unitApi } from "@rezics/api/unit/unit";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHref } from "@/shared/ui/link";
 import { Button, Input, Label, Textarea } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";

@@ -1,7 +1,7 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { PostKind, SCORE_MAX } from "@rezics/contract";
 import { RatingInput } from "@rezics/ui";
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";

@@ -19,7 +19,7 @@ import {
   DEFAULT_LANGUAGE,
   normalizeLanguage,
 } from "@rezics/contract";
-import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
+import { TextLink } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,

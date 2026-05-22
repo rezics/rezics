@@ -3,7 +3,7 @@ import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButton
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { unitHref } from "@rezics/ui/primitive/link";
+import { unitHref } from "@/shared/ui/link";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "@rezics/i18n/react";

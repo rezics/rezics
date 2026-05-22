@@ -18,8 +18,8 @@ import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
-import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
+import { Link } from "@/shared/ui/link";
 
 import {
   Popover,
