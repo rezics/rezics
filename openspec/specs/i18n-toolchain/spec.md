@@ -59,7 +59,7 @@ The app/admin shell SHALL be the single owner of the active locale state. Packag
 
 ### Requirement: Canonical locale behavior is preserved
 
-The Paraglide migration SHALL preserve the existing canonical locale set and language defaults: supported locales are `zh-hant`, `zh-hans`, `en`, `ja`, and `de`; the default locale is `zh-hant`. Frontend UI callsites SHALL NOT provide runtime fallback strings for missing messages; message catalog completeness is required before a message function is used.
+The Paraglide migration SHALL preserve the canonical locale set and language defaults: supported locales are `zh-hant`, `zh-hans`, `en`, `ja`, `de`, and `ko`; the default locale is `zh-hant`. Frontend UI callsites SHALL NOT provide runtime fallback strings for missing messages; message catalog completeness is required before a message function is used.
 
 #### Scenario: Default locale
 

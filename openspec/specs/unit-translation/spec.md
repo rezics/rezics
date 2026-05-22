@@ -141,7 +141,7 @@ Units with `isLanguageNeutral = true` (such as tags) SHALL match any language fi
 
 ### Requirement: Language fields in translation DTOs use canonical codes
 
-All `language` fields in `unitTranslationDTOSchema`, `unitSupportLanguageDTOSchema`, `createTranslationSchema`, and `translationParamsSchema` SHALL be validated against `languageSchema` (the canonical 5-code union). Non-canonical codes SHALL be rejected.
+All `language` fields in `unitTranslationDTOSchema`, `unitSupportLanguageDTOSchema`, `createTranslationSchema`, and `translationParamsSchema` SHALL be validated against `languageSchema` (the canonical 6-code union). Non-canonical codes SHALL be rejected.
 
 #### Scenario: Create translation with canonical code
 

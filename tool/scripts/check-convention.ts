@@ -792,134 +792,154 @@ function getStagedFilePaths(): string[] {
 
 // ─── R11 + R12: i18n invariants ─────────────────────────────────────────────
 
+const dynamicMessagePattern =
+  /\bm\s*\[\s*(?!["'][A-Za-z0-9_.-]+["'])|const\s+\{[^}]+\}\s*=\s*m\b/;
+const i18nKeyCallPattern = /\bt\s*\([^)]*\.i18nKey\b/;
+const contractI18nKeyPattern = /\bi18nKey\s*:/;
+const frontendSourcePattern =
+  /^package\/(?:app|admin|ui|editor|folio)\/src\/.*\.(?:ts|tsx)$/;
+const legacyUseTranslationPattern =
+  /from\s+["']@rezics\/i18n\/react["'][\s\S]*?\buseTranslation\b|\buseTranslation\s*\(/;
+const legacyTranslatePattern =
+  /from\s+["']@rezics\/i18n["'][\s\S]*?\btranslate\b|\btranslate\s*\(/;
+const legacyFallbackPattern = /\bt\s*\(\s*["'][^"']+["']\s*,\s*["'][^"']+["']/;
+const i18nextRuntimePattern =
+  /from\s+["'](?:react-i18next|i18next)["']|require\(\s*["'](?:react-i18next|i18next)["']\s*\)/;
+const uiCopyNullishFallbackPattern =
+  /\bm\.[A-Za-z0-9_]+\([^)]*\)\s*(?:\?\?|\|\|)\s*["'][^"']*[A-Za-z][^"']*["']/;
+const adminLocalLocalePattern =
+  /from\s+["']@\/locale(?:\/[^"']*)?["']|from\s+["'][^"']*src\/locale(?:\/[^"']*)?["']/;
+
+function shouldScanI18nInvariants(relFilePath: string): boolean {
+  if (/\.(?:test|spec)\.tsx?$/.test(relFilePath)) return false;
+  return (
+    frontendSourcePattern.test(relFilePath) ||
+    relFilePath.startsWith("package/contract/src/")
+  );
+}
+
+export function scanI18nSourceForTest(
+  relFilePath: string,
+  source: string,
+): Violation[] {
+  const violations: Violation[] = [];
+
+  if (
+    source.includes("paraglide/messages") &&
+    dynamicMessagePattern.test(source)
+  ) {
+    violations.push({
+      rule: "R11",
+      path: relFilePath,
+      message:
+        "generated Paraglide messages must be referenced statically; route dynamic discriminators through explicit label maps",
+      spec: SPEC_LINK.R11,
+    });
+  }
+
+  if (i18nKeyCallPattern.test(source)) {
+    violations.push({
+      rule: "R12",
+      path: relFilePath,
+      message:
+        "`t(*.i18nKey)` is forbidden; use @rezics/i18n label helpers instead",
+      spec: SPEC_LINK.R12,
+    });
+  }
+
+  if (frontendSourcePattern.test(relFilePath)) {
+    if (
+      relFilePath.startsWith("package/admin/src/locale/") ||
+      (relFilePath.startsWith("package/admin/src/") &&
+        adminLocalLocalePattern.test(source))
+    ) {
+      violations.push({
+        rule: "R12",
+        path: relFilePath,
+        message:
+          "admin-local locale files/imports are forbidden; use generated @rezics/i18n messages or shared label helpers",
+        spec: SPEC_LINK.R12,
+      });
+    }
+
+    if (i18nextRuntimePattern.test(source)) {
+      violations.push({
+        rule: "R12",
+        path: relFilePath,
+        message:
+          "react-i18next/i18next runtime usage is forbidden for frontend UI copy; use generated Paraglide functions",
+        spec: SPEC_LINK.R12,
+      });
+    }
+
+    if (legacyUseTranslationPattern.test(source)) {
+      violations.push({
+        rule: "R12",
+        path: relFilePath,
+        message:
+          "`useTranslation().t(...)` is forbidden for frontend UI copy; import generated Paraglide functions or use useLocale for locale state",
+        spec: SPEC_LINK.R12,
+      });
+    }
+
+    if (legacyTranslatePattern.test(source)) {
+      violations.push({
+        rule: "R12",
+        path: relFilePath,
+        message:
+          "`translate(...)` is forbidden for frontend UI copy; import generated Paraglide functions or typed label helpers",
+        spec: SPEC_LINK.R12,
+      });
+    }
+
+    if (legacyFallbackPattern.test(source)) {
+      violations.push({
+        rule: "R12",
+        path: relFilePath,
+        message:
+          "fallback string translation calls are forbidden; add the message to the JSON catalog and call the generated function",
+        spec: SPEC_LINK.R12,
+      });
+    }
+
+    if (uiCopyNullishFallbackPattern.test(source)) {
+      violations.push({
+        rule: "R12",
+        path: relFilePath,
+        message:
+          "static UI copy fallbacks with ?? or || are forbidden; add catalog entries and call generated message functions",
+        spec: SPEC_LINK.R12,
+      });
+    }
+  }
+
+  if (
+    relFilePath.startsWith("package/contract/src/") &&
+    contractI18nKeyPattern.test(source)
+  ) {
+    violations.push({
+      rule: "R12",
+      path: relFilePath,
+      message:
+        "contract domain objects must not define i18nKey fields; message identity belongs in @rezics/i18n",
+      spec: SPEC_LINK.R12,
+    });
+  }
+
+  return violations;
+}
+
 function scanI18nInvariants(filePaths: string[]): Violation[] {
   const violations: Violation[] = [];
-  const dynamicMessagePattern =
-    /\bm\s*\[\s*(?!["'][A-Za-z0-9_.-]+["'])|const\s+\{[^}]+\}\s*=\s*m\b/;
-  const i18nKeyCallPattern = /\bt\s*\([^)]*\.i18nKey\b/;
-  const contractI18nKeyPattern = /\bi18nKey\s*:/;
-  const frontendSourcePattern =
-    /^package\/(?:app|admin|ui|editor|folio)\/src\/.*\.(?:ts|tsx)$/;
-  const legacyUseTranslationPattern =
-    /from\s+["']@rezics\/i18n\/react["'][\s\S]*?\buseTranslation\b|\buseTranslation\s*\(/;
-  const legacyTranslatePattern =
-    /from\s+["']@rezics\/i18n["'][\s\S]*?\btranslate\b|\btranslate\s*\(/;
-  const legacyFallbackPattern =
-    /\bt\s*\(\s*["'][^"']+["']\s*,\s*["'][^"']+["']/;
-  const i18nextRuntimePattern =
-    /from\s+["'](?:react-i18next|i18next)["']|require\(\s*["'](?:react-i18next|i18next)["']\s*\)/;
-  const uiCopyNullishFallbackPattern =
-    /\bm\.[A-Za-z0-9_]+\([^)]*\)\s*(?:\?\?|\|\|)\s*["'][^"']*[A-Za-z][^"']*["']/;
-  const adminLocalLocalePattern =
-    /from\s+["']@\/locale(?:\/[^"']*)?["']|from\s+["'][^"']*src\/locale(?:\/[^"']*)?["']/;
 
   for (const filePath of filePaths) {
     const relFilePath = relative(REPO_ROOT, filePath);
     if (relFilePath === "tool/scripts/check-convention.ts") continue;
+    if (!shouldScanI18nInvariants(relFilePath)) continue;
 
-    const source = readFileSync(filePath, "utf8");
-
-    if (
-      source.includes("paraglide/messages") &&
-      dynamicMessagePattern.test(source)
-    ) {
-      violations.push({
-        rule: "R11",
-        path: relFilePath,
-        message:
-          "generated Paraglide messages must be referenced statically; route dynamic discriminators through explicit label maps",
-        spec: SPEC_LINK.R11,
-      });
-    }
-
-    if (i18nKeyCallPattern.test(source)) {
-      violations.push({
-        rule: "R12",
-        path: relFilePath,
-        message:
-          "`t(*.i18nKey)` is forbidden; use @rezics/i18n label helpers instead",
-        spec: SPEC_LINK.R12,
-      });
-    }
-
-    if (frontendSourcePattern.test(relFilePath)) {
-      if (
-        relFilePath.startsWith("package/admin/src/locale/") ||
-        (relFilePath.startsWith("package/admin/src/") &&
-          adminLocalLocalePattern.test(source))
-      ) {
-        violations.push({
-          rule: "R12",
-          path: relFilePath,
-          message:
-            "admin-local locale files/imports are forbidden; use generated @rezics/i18n messages or shared label helpers",
-          spec: SPEC_LINK.R12,
-        });
-      }
-
-      if (i18nextRuntimePattern.test(source)) {
-        violations.push({
-          rule: "R12",
-          path: relFilePath,
-          message:
-            "react-i18next/i18next runtime usage is forbidden for frontend UI copy; use generated Paraglide functions",
-          spec: SPEC_LINK.R12,
-        });
-      }
-
-      if (legacyUseTranslationPattern.test(source)) {
-        violations.push({
-          rule: "R12",
-          path: relFilePath,
-          message:
-            "`useTranslation().t(...)` is forbidden for frontend UI copy; import generated Paraglide functions or use useLocale for locale state",
-          spec: SPEC_LINK.R12,
-        });
-      }
-
-      if (legacyTranslatePattern.test(source)) {
-        violations.push({
-          rule: "R12",
-          path: relFilePath,
-          message:
-            "`translate(...)` is forbidden for frontend UI copy; import generated Paraglide functions or typed label helpers",
-          spec: SPEC_LINK.R12,
-        });
-      }
-
-      if (legacyFallbackPattern.test(source)) {
-        violations.push({
-          rule: "R12",
-          path: relFilePath,
-          message:
-            "fallback string translation calls are forbidden; add the message to the JSON catalog and call the generated function",
-          spec: SPEC_LINK.R12,
-        });
-      }
-
-      if (uiCopyNullishFallbackPattern.test(source)) {
-        violations.push({
-          rule: "R12",
-          path: relFilePath,
-          message:
-            "static UI copy fallbacks with ?? or || are forbidden; add catalog entries and call generated message functions",
-          spec: SPEC_LINK.R12,
-        });
-      }
-    }
-
-    if (
-      relFilePath.startsWith("package/contract/src/") &&
-      contractI18nKeyPattern.test(source)
-    ) {
-      violations.push({
-        rule: "R12",
-        path: relFilePath,
-        message:
-          "contract domain objects must not define i18nKey fields; message identity belongs in @rezics/i18n",
-        spec: SPEC_LINK.R12,
-      });
-    }
+    violations.push(
+      ...scanI18nSourceForTest(relFilePath, readFileSync(filePath, "utf8")),
+    );
   }
 
   return violations;
@@ -1217,4 +1237,6 @@ function main() {
   process.exit(0);
 }
 
-main();
+if (import.meta.main) {
+  main();
+}

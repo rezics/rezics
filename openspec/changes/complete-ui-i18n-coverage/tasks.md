@@ -21,7 +21,7 @@
 - [x] 3.4 Fill missing product/domain message keys in `ja.json`.
 - [x] 3.5 Fill missing product/domain message keys in `de.json`.
 - [x] 3.6 Fill product/domain message keys in `ko.json`.
-- [ ] 3.7 Review `en.json` and `zh-hant.json` for values that are accidentally in the wrong language and correct them while preserving message parameters exactly.
+- [x] 3.7 Review `en.json` and `zh-hant.json` for values that are accidentally in the wrong language and correct them while preserving message parameters exactly.
 - [x] 3.8 Verify every message parameter placeholder, plural/select branch, and punctuation-sensitive format is preserved across all six `@rezics/i18n` locale files.
 - [x] 3.9 Keep message key naming consistent with existing domain prefixes; do not introduce duplicate keys for the same app/admin concept.
 
@@ -51,7 +51,7 @@
 - [x] 6.7 Add or extend a check that rejects dynamic generated message lookup such as `m[key]()` and template-literal computed message keys.
 - [x] 6.8 Add or extend a check that rejects `react-i18next` or `i18next` runtime usage for frontend UI copy under `package/{app,admin,ui,editor,folio}/src/`.
 - [x] 6.9 Add or extend a check that rejects admin-local locale imports and `package/admin/src/locale` reintroduction.
-- [ ] 6.10 Add tests or fixtures for the new convention checks covering pass and fail cases.
+- [x] 6.10 Add tests or fixtures for the new convention checks covering pass and fail cases.
 
 ## 7. Admin Shared I18n Cutover
 
@@ -108,7 +108,7 @@
 - [x] 11.1 Update `package/app/src/app/locale.test.ts` or equivalent locale tests to include `ko`.
 - [x] 11.2 Add admin locale initialization tests if missing, covering `ko` and invalid stored locale normalization to `DEFAULT_LANGUAGE`.
 - [x] 11.3 Add tests for message key parity tooling with missing-key and extra-key fixtures.
-- [ ] 11.4 Add tests for forbidden fallback-string tooling with representative app/admin UI callsites.
+- [x] 11.4 Add tests for forbidden fallback-string tooling with representative app/admin UI callsites.
 - [x] 11.5 Run targeted tests for contract language behavior.
 - [x] 11.6 Run targeted tests for app/admin locale helpers.
 - [x] 11.7 Run targeted tests for repo convention/i18n checks.
@@ -125,7 +125,7 @@
 - [x] 12.8 Run `bun test` in packages with changed tests or package-level targeted test commands where available.
 - [ ] 12.9 Run final repo searches proving no admin-local locale files/imports remain.
 - [ ] 12.10 Run final repo searches proving no UI-copy fallback string callsites remain in app/admin/ui/editor/folio source.
-- [ ] 12.11 Run final repo searches proving no dynamic generated message lookup remains.
+- [x] 12.11 Run final repo searches proving no dynamic generated message lookup remains.
 - [x] 12.12 Manually review remaining hard-coded UI-copy scan candidates and document intentional exclusions in the convention check allowlist or task notes.
 
 ## 13. Documentation and Handoff

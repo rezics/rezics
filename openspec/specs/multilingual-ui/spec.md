@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines how Rezics frontends render multilingual UI: homepage sections, search components, and book content all SHALL resolve their copy from Paraglide-generated product/domain message functions or from the per-language content fallback chain. Canonical locale codes (`zh-hant`, `zh-hans`, `en`, `ja`, `de`) anchor both the Paraglide runtime and the language toggle so locale identifiers stay consistent across i18n source files, runtime APIs, and user-visible controls.
+Defines how Rezics frontends render multilingual UI: homepage sections, search components, and book content all SHALL resolve their copy from Paraglide-generated product/domain message functions or from the per-language content fallback chain. Canonical locale codes (`zh-hant`, `zh-hans`, `en`, `ja`, `de`, `ko`) anchor both the Paraglide runtime and the language toggle so locale identifiers stay consistent across i18n source files, runtime APIs, and user-visible controls.
 
 ## Requirements
 
@@ -46,9 +46,9 @@ SearchFilter and SearchInput components SHALL use generated Paraglide product/do
 - **THEN** the search placeholder SHALL display the Chinese translation for "Title, ISBN, Author, Publisher, Producer"
 - **AND** filter labels ("Tags", "Word Count") SHALL display in Chinese
 
-### Requirement: All five locale files contain keys for homepage and search strings
+### Requirement: All six locale files contain keys for homepage and search strings
 
-Translation keys for homepage sections and search components SHALL exist in all five JSON locale message files for `en`, `zh-hant`, `zh-hans`, `de`, and `ja`. Missing native translations SHALL use English as a placeholder.
+Translation keys for homepage sections and search components SHALL exist in all six JSON locale message files for `en`, `zh-hant`, `zh-hans`, `de`, `ja`, and `ko`. Missing native-quality translations SHALL be represented by explicit catalog entries in the target locale file, not by runtime fallback strings.
 
 #### Scenario: en locale has complete homepage section keys
 
@@ -78,12 +78,12 @@ Book titles and descriptions displayed in homepage sections (NewBookSection, Tre
 
 ### Requirement: i18n resource keys use canonical language codes
 
-The Paraglide project configuration SHALL use canonical language codes (`zh-hant`, `zh-hans`, `en`, `ja`, `de`) as locale identifiers. Locale source files SHALL be named using canonical codes where file names include locale codes.
+The Paraglide project configuration SHALL use canonical language codes (`zh-hant`, `zh-hans`, `en`, `ja`, `de`, `ko`) as locale identifiers. Locale source files SHALL be named using canonical codes where file names include locale codes.
 
 #### Scenario: i18n resources registered with canonical keys
 
 - **WHEN** the Paraglide i18n runtime initializes
-- **THEN** locale identifiers SHALL be `'zh-hant'`, `'zh-hans'`, `'en'`, `'ja'`, `'de'`
+- **THEN** locale identifiers SHALL be `'zh-hant'`, `'zh-hans'`, `'en'`, `'ja'`, `'de'`, and `'ko'`
 - **AND** no locale identifier SHALL use legacy codes (`zh-SC`, `zh-TC`, `en-US`, `ja-JP`, `de-DE`)
 
 #### Scenario: Default language is zh-hant
