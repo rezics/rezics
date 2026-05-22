@@ -3,7 +3,7 @@ import {
   useSystemShelfRecovery,
 } from "@rezics/api/shelf";
 import type { SystemShelfKindKey } from "@rezics/contract";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { toast } from "sonner";
 
 export type SystemShelfRecoveryToast = {

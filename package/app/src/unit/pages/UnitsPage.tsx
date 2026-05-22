@@ -19,7 +19,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { buildUnitUrl } from "@/shared/utils/build-url";

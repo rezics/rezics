@@ -3,7 +3,7 @@ import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { ExcerptSource } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { UnitPicker, type Candidate } from "@/unit";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 

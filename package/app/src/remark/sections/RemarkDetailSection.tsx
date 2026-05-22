@@ -3,7 +3,7 @@ import { postQueries } from "@rezics/api/post/post";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "@/post/sections/PostTreeSection";

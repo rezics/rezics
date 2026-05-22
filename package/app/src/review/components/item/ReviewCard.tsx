@@ -9,7 +9,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Star as StarIcon } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";

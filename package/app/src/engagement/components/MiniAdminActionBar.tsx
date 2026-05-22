@@ -9,7 +9,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as Edit } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { cn } from "@/shared/utils/css-util";
 
 interface MiniAdminActionBarProps {

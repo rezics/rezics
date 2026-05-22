@@ -1,6 +1,6 @@
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { Pin as PushPinRoundedIcon } from "lucide-react";
 
 interface PinboardEmptyStateProps {

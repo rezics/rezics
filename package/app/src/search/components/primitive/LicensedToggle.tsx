@@ -1,6 +1,6 @@
 import { Checkbox } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { IsLicensedInfo } from "@/book-edit/components/Metadata/BookMetadataEditor";
 
 export type LicensedToggleProps = {

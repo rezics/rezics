@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useCallback, useMemo, useRef } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
 import type { InjectedTag } from "@/search/models/injectedTags";
 import { cn } from "@/shared/utils/css-util";

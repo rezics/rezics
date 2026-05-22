@@ -14,7 +14,7 @@ import { PostKind } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ReviewCard } from "@/review/components/item/ReviewCard";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 

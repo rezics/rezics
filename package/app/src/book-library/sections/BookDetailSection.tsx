@@ -12,7 +12,7 @@ import {
 import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 
 import { useBookLanguage } from "../hooks/useBookLanguage";

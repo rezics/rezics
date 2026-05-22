@@ -19,7 +19,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@rezics/ui/shadcn";
 import { useReorderRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { toast } from "sonner";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 import { PinboardEntryCard } from "./PinboardEntryCard";

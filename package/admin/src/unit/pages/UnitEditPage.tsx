@@ -20,9 +20,9 @@ import {
   UNIT_FIELD_LOCK_ALL,
   UnitAuthorityRoleKey,
   type UnitAuthorityRoleKey as UnitAuthorityRoleKeyType,
-  subjectAttributionRoleRegistry,
   subjectAttributionRoles,
 } from "@rezics/contract";
+import { entityKindLabel, subjectRoleLabel } from "@rezics/i18n";
 
 import { Spinner } from "@rezics/ui";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -37,7 +37,6 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import i18n from "i18next";
 import React from "react";
 
 import { Page } from "@/core/layouts/Page";
@@ -66,11 +65,6 @@ function toJsonText(value: unknown) {
   } catch {
     return String(value);
   }
-}
-
-function tLabel(key: string, fallback: string) {
-  const translated = i18n.t(key);
-  return translated === key ? fallback : translated;
 }
 
 export default function UnitEditPage() {
@@ -412,17 +406,9 @@ export default function UnitEditPage() {
                                 subject.entityId}
                             </p>
                             <p className="text-xs text-text-secondary">
-                              {tLabel(
-                                subjectAttributionRoleRegistry[subject.role]
-                                  .i18nKey,
-                                subject.role,
-                              )}{" "}
-                              ·{" "}
+                              {subjectRoleLabel(subject.role)} ·{" "}
                               {subject.entity?.kind
-                                ? tLabel(
-                                    `entity.kind.${subject.entity.kind}`,
-                                    subject.entity.kind,
-                                  )
+                                ? entityKindLabel(subject.entity.kind)
                                 : "entity"}{" "}
                               · order {subject.sortOrder}
                               {subject.weight != null
@@ -487,10 +473,7 @@ export default function UnitEditPage() {
                     >
                       {subjectAttributionRoles.map((role) => (
                         <option key={role} value={role}>
-                          {tLabel(
-                            subjectAttributionRoleRegistry[role].i18nKey,
-                            role,
-                          )}
+                          {subjectRoleLabel(role)}
                         </option>
                       ))}
                     </select>

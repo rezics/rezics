@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search as SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { buildHeaderSubmitPath } from "./buildHeaderSubmitPath";
 import LogoIcon from "@/shared/assets/logo.svg?react";
 import { cn } from "@/shared/utils/css-util";

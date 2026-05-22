@@ -4,7 +4,7 @@ import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { PostListSection } from "@/post";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";

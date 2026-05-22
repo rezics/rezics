@@ -33,10 +33,10 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import type { TFunction } from "i18next";
+import type { TranslateFunction as TFunction } from "@rezics/i18n";
 import { ChevronDown as ExpandMore, Plus } from "lucide-react";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { EntityPicker } from "@/entity-picker";
 import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";

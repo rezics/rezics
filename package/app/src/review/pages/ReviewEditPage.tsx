@@ -9,7 +9,7 @@ import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ReviewForm, type ReviewEditState } from "@/review/forms/ReviewForm";
 import { Route as reviewEditRoute } from "@/routes/_mainLayout/review/$reviewId/edit";
 

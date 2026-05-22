@@ -13,7 +13,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { type FC, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { Layout } from "../layouts/Layout.tsx";
 import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { validateEmail, validatePassword } from "../models/validate.ts";

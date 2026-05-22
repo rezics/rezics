@@ -12,7 +12,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FC, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useAuthSessionStore } from "@/user/states";
 import { SocialAuthButtons } from "../components/SocialAuthButtons";
 import { Layout } from "../layouts/Layout";

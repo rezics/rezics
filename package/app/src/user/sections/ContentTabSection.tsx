@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,

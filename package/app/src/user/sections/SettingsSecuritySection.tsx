@@ -15,7 +15,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { SessionListItem } from "@/user/components/SessionListItem";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";

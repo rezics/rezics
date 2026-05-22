@@ -1,7 +1,7 @@
 import { Button } from "@rezics/ui/shadcn";
 import { Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { TextSearchInputBase } from "./TextSearchInputBase";
 
 export const TextSearchInputWithIcon = ({

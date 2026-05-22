@@ -7,7 +7,7 @@ import { Link, unitHref } from "@rezics/ui/primitive/link";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import {
   type EntityTranslation,

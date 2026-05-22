@@ -1,6 +1,5 @@
-import i18n from "i18next";
+import { translate as t } from "@rezics/i18n";
 
-const t = i18n.t;
 export function validateEmail(email: string) {
   if (!email) {
     return { valid: false, error: t("auth.error.email_required") };

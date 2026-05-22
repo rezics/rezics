@@ -15,7 +15,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";

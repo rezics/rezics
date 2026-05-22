@@ -8,9 +8,9 @@ import {
 } from "@rezics/ui/shadcn";
 import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
 import { useQuery } from "@tanstack/react-query";
-import type { TFunction } from "i18next";
+import type { TranslateFunction as TFunction } from "@rezics/i18n";
 import { type FC, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { buildOAuthCallbackTargets } from "../models/authRedirect";
 import { providerIcons } from "./providerIcons";
 

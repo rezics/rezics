@@ -10,7 +10,7 @@ import {
   type SystemShelfKindKey,
 } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Button,

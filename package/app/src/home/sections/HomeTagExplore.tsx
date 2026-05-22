@@ -3,10 +3,9 @@ import { Spinner } from "@rezics/ui";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
-import i18n from "i18next";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 
 export type HomeTagExploreProps = {
@@ -20,7 +19,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   limit = 60,
   maxTags = 18,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const resolvedTitle = title ?? t("page.home.sections.tag_explore");
 
   const { data, isLoading, error } = useQuery(tagQueries.list({ limit }));

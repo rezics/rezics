@@ -1,6 +1,6 @@
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import type { TranslationDraft } from "../hooks/useBookTranslationEditor";
 
 export interface TranslationFieldsEditorProps {

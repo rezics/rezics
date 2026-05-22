@@ -1,6 +1,6 @@
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 const defaultBrands = [
   "https://dummyimage.com/100x40/cccccc/000&text=Brand+A",

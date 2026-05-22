@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { BookCarousel } from "../components/HomeCarousel";
 import { NoticeBoard } from "./NoticeBoard";
 

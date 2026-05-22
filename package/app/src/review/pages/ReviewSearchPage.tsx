@@ -2,7 +2,7 @@ import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { PostKind } from "@rezics/contract";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";

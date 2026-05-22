@@ -1,5 +1,5 @@
 import type { EntityKind } from "@rezics/contract";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 interface EntityKindBadgeProps {
   kind?: EntityKind | null;

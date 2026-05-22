@@ -6,6 +6,7 @@ import {
   type SubjectAttributionRole,
   subjectAttributionRoleRegistry,
 } from "@rezics/contract";
+import { creditRoleLabel, subjectRoleLabel } from "@rezics/i18n";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -25,7 +26,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { EntityInlineCreateForm } from "./EntityInlineCreateForm";
 import { EntityResultRow } from "./EntityResultRow";
@@ -207,7 +208,7 @@ export function EntityPicker({
                   </SelectItem>
                   {creditRoleOptions.map((role) => (
                     <SelectItem key={role} value={role}>
-                      {t(creditAttributionRoleRegistry[role].i18nKey, role)}
+                      {creditRoleLabel(role)}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -239,7 +240,7 @@ export function EntityPicker({
                   </SelectItem>
                   {subjectRoleOptions.map((role) => (
                     <SelectItem key={role} value={role}>
-                      {t(subjectAttributionRoleRegistry[role].i18nKey, role)}
+                      {subjectRoleLabel(role)}
                     </SelectItem>
                   ))}
                 </SelectGroup>

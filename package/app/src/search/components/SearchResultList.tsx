@@ -4,7 +4,7 @@ import type {
 } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 function resolveTitle(
   titles: string[],

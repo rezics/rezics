@@ -1,6 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { useId } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { cn } from "@/shared/utils/css-util";
 import { UserHoverPreview } from "@/user/components";
 import type { UnitCardSummary } from "../models/unitCardSummary";

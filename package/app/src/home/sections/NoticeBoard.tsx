@@ -1,8 +1,8 @@
 import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
 import { TextLink } from "@rezics/ui/primitive/link/TextLink.tsx";
-import type { TFunction } from "i18next";
+import type { TranslateFunction as TFunction } from "@rezics/i18n";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   AnnouncementFeedSection,
   type PinboardAnnouncementItem,

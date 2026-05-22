@@ -25,7 +25,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { env } from "@/env";
 import {
   hydrateAuthSessionState,

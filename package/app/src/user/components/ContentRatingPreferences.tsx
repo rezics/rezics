@@ -16,7 +16,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 type OptInRating = "R_18" | "R_18G";
 const OPT_IN_RATINGS: OptInRating[] = ["R_18", "R_18G"];

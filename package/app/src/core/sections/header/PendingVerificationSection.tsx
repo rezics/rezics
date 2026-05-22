@@ -1,6 +1,6 @@
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { logout } from "@/user/models/handler";
 
 export function PendingVerificationSection() {

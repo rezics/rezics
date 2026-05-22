@@ -10,7 +10,7 @@ import {
   Label,
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ChapterPicker } from "./ChapterPicker";
 
 type ActiveProgressModalProps = {

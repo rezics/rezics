@@ -1,5 +1,5 @@
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 export type HomePromotionStripProps = {
   items?: { text: string; href?: string }[];

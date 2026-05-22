@@ -10,7 +10,7 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { RemarkInlineForm } from "@/remark";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
 import { getTranslation } from "@/shared/utils/translation-helpers";

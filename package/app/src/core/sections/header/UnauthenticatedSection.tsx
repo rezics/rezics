@@ -1,7 +1,7 @@
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { LoginModal } from "@/user/pages/LoginPage";
 import { RegisterModal } from "@/user/pages/RegisterPage";

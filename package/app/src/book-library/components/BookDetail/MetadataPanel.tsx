@@ -1,8 +1,8 @@
 import type { BookDTO, LicenseSlug } from "@rezics/contract";
-import { LICENSE_REGISTRY } from "@rezics/contract";
+import { licenseLabel } from "@rezics/i18n";
 import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 export type MetadataPanelProps = {
   bookInfo: BookDTO;
@@ -18,11 +18,8 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   variant = "panel",
 }) => {
   const { t } = useTranslation();
-  const licenseLabel = bookInfo.licenseSlug
-    ? t(
-        LICENSE_REGISTRY[bookInfo.licenseSlug as LicenseSlug]?.i18nKey,
-        bookInfo.licenseSlug,
-      )
+  const publicationLicenseLabel = bookInfo.licenseSlug
+    ? licenseLabel(bookInfo.licenseSlug as LicenseSlug)
     : undefined;
 
   const items = (
@@ -50,10 +47,10 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
           {t("book.fields.format" as any)}：{bookInfo.formatKey}
         </p>
       )}
-      {licenseLabel && (
+      {publicationLicenseLabel && (
         <p className="text-sm">
           {t("book.fields.publication_license", "Publication license")}：
-          {licenseLabel}
+          {publicationLicenseLabel}
         </p>
       )}
     </div>

@@ -16,7 +16,7 @@ import {
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 

@@ -10,7 +10,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
 import {

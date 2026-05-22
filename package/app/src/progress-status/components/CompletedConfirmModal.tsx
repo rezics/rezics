@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@rezics/ui/shadcn";
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 type CompletedConfirmModalProps = {
   open: boolean;

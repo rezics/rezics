@@ -2,7 +2,7 @@ import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
 import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
 import { BacklogRemoveConfirmModal } from "../components/BacklogRemoveConfirmModal";
 import { CompletedConfirmModal } from "../components/CompletedConfirmModal";

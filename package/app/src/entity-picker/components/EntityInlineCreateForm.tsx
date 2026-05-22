@@ -7,12 +7,11 @@ import type {
 } from "@rezics/contract";
 import {
   CreationMode,
-  creditAttributionRoleRegistry,
   creditAttributionRoles,
   entityKinds,
-  subjectAttributionRoleRegistry,
   subjectAttributionRoles,
 } from "@rezics/contract";
+import { creditRoleLabel, subjectRoleLabel } from "@rezics/i18n";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { type FormEvent, useMemo, useState } from "react";
 import {
@@ -164,8 +163,7 @@ export function EntityInlineCreateForm({
         label="Credit eligibility"
         roles={eligibleCreditRoles}
         availableRoles={availableCreditRoles}
-        getLabel={(role) => creditAttributionRoleRegistry[role].i18nKey}
-        fallbackPrefix="attribution.credit.role"
+        getLabel={creditRoleLabel}
         onAdd={(role) =>
           setEligibleCreditRoles((current) => [...current, role])
         }
@@ -179,8 +177,7 @@ export function EntityInlineCreateForm({
         label="Subject eligibility"
         roles={eligibleSubjectRoles}
         availableRoles={availableSubjectRoles}
-        getLabel={(role) => subjectAttributionRoleRegistry[role].i18nKey}
-        fallbackPrefix="attribution.subject.role"
+        getLabel={subjectRoleLabel}
         onAdd={(role) =>
           setEligibleSubjectRoles((current) => [...current, role])
         }
@@ -210,7 +207,6 @@ interface EligibilityRoleEditorProps<Role extends string> {
   roles: readonly Role[];
   availableRoles: readonly Role[];
   getLabel: (role: Role) => string;
-  fallbackPrefix: string;
   onAdd: (role: Role) => void;
   onRemove: (role: Role) => void;
 }
@@ -220,7 +216,6 @@ function EligibilityRoleEditor<Role extends string>({
   roles,
   availableRoles,
   getLabel,
-  fallbackPrefix,
   onAdd,
   onRemove,
 }: EligibilityRoleEditorProps<Role>) {
@@ -236,7 +231,7 @@ function EligibilityRoleEditor<Role extends string>({
             size="sm"
             onClick={() => onRemove(role)}
           >
-            {getRoleText(getLabel(role), fallbackPrefix, role)}
+            {getLabel(role)}
           </Button>
         ))}
       </div>
@@ -253,15 +248,11 @@ function EligibilityRoleEditor<Role extends string>({
           <option value="">Add role</option>
           {availableRoles.map((role) => (
             <option key={role} value={role}>
-              {getRoleText(getLabel(role), fallbackPrefix, role)}
+              {getLabel(role)}
             </option>
           ))}
         </select>
       ) : null}
     </div>
   );
-}
-
-function getRoleText(i18nKey: string, prefix: string, role: string): string {
-  return i18nKey.startsWith(prefix) ? role : i18nKey;
 }

@@ -1,7 +1,7 @@
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { Collapsible } from "@rezics/ui/primitive/typography/collapsible/Collapsible.tsx";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 interface PostBodyMarkdownProps {
   body: string;

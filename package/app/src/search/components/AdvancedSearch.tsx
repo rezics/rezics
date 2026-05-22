@@ -2,7 +2,7 @@ import { Button } from "@rezics/ui/shadcn";
 import type { SearchQuery } from "@rezics/contract";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 import type { UseSearchQueryReturn } from "../hooks/useSearchQuery";
 import {

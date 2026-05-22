@@ -13,7 +13,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditIcon } from "lucide-react";
 import type { FC } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import FollowButton from "@/engagement/components/FollowButton";
 import { useUserProfileStore } from "@/user/states";
 import { UserError, UserLoading } from "./UserState";

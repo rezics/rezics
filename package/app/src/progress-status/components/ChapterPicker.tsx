@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useChapterPicker } from "../hooks/useChapterPicker";
 
 type ChapterPickerProps = {

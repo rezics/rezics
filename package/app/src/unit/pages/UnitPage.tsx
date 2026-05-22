@@ -17,7 +17,7 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
 import { PostLanguageSwitcher } from "../components/PostLanguageSwitcher";

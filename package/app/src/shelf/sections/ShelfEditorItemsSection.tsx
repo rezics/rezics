@@ -31,7 +31,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Eye, ListChecks, Pencil } from "lucide-react";
 import { useEffect, useId, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   type Candidate,
   shelfUnitToUnitCardSummary,

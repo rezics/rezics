@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 /** Book extra data structure. */
 export type BookExtraData = {

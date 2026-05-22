@@ -1,5 +1,5 @@
 import { Button } from "@rezics/ui/shadcn";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { Menu } from "lucide-react";
 
 interface DrawerTogglerProps {

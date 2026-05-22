@@ -7,7 +7,7 @@ import type { ExcerptSource } from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as excerptEditRoute } from "@/routes/_mainLayout/excerpt/$unitId/edit";
 import { ExcerptSourcePicker } from "../components/source/ExcerptSourcePicker";

@@ -23,7 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 interface BookYourScoreBlockProps {
   bookUnitId: string;

@@ -1,9 +1,9 @@
 import type { BookDTO, ContentRating, LicenseSlug } from "@rezics/contract";
 import {
-  LICENSE_REGISTRY,
   LICENSE_SLUGS,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
+import { licenseLabel } from "@rezics/i18n";
 import { RatingSelector } from "@rezics/ui";
 import {
   Checkbox,
@@ -19,7 +19,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { BookCreditAttributionEditor } from "./BookCreditAttributionEditor";
 
 function TooltipIconTrigger(props: Record<string, unknown>) {
@@ -209,7 +209,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             <SelectContent>
               {LICENSE_SLUGS.map((slug) => (
                 <SelectItem key={slug} value={slug}>
-                  {t(LICENSE_REGISTRY[slug].i18nKey, slug)}
+                  {licenseLabel(slug)}
                 </SelectItem>
               ))}
             </SelectContent>

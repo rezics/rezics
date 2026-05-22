@@ -2,7 +2,7 @@ import { LANGUAGE_META, type Language } from "@rezics/contract";
 import { Badge, Button, Skeleton } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus as AddIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 type Sibling = {
   unitId: string;

@@ -7,7 +7,7 @@ import {
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,

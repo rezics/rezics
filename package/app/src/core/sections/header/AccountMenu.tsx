@@ -17,7 +17,7 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { logout } from "@/user/models/handler";
 import { useUserProfileStore } from "@/user/states";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";

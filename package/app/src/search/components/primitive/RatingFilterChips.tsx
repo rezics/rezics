@@ -7,7 +7,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type { ContentRating } from "@rezics/contract";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 const RATINGS: ContentRating[] = ["GENERAL", "R_15", "R_18", "R_18G"];
 

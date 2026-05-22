@@ -21,7 +21,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
 import { Route as bookEditChapterRoute } from "@/routes/book_/$bookId/edit/$chapterId";

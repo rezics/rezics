@@ -5,7 +5,7 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
 import type React from "react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 
 import { BookDetailShell } from "../sections/BookDetailSection";

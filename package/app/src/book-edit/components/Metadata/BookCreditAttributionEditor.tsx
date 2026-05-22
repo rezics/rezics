@@ -7,11 +7,12 @@ import {
   creditAttributionRoleRegistry,
   creditAttributionRoles,
 } from "@rezics/contract";
+import { creditRoleLabel } from "@rezics/i18n";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { EntityIdentityRow } from "@/entity";
 import { EntityPicker } from "@/entity-picker";
 
@@ -64,10 +65,7 @@ export function BookCreditAttributionEditor({
       ) : visibleCredits.length > 0 ? (
         <ul className="flex flex-col gap-2">
           {visibleCredits.map((credit) => {
-            const roleLabel = t(
-              creditAttributionRoleRegistry[credit.role].i18nKey,
-              credit.role,
-            );
+            const roleLabel = creditRoleLabel(credit.role);
             return (
               <li
                 key={`${credit.entityId}-${credit.role}`}

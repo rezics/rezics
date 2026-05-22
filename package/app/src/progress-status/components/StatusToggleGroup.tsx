@@ -1,6 +1,6 @@
 import { Button, ToggleGroup, ToggleGroupItem } from "@rezics/ui/shadcn";
 import { BookmarkPlus, CircleCheck, PlayCircle } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   TOGGLE_GROUP_STATUSES,
   type ToggleGroupStatus,

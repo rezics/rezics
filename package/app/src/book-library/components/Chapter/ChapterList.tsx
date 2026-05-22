@@ -18,7 +18,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useChapterListStore } from "@/book-library/states/chapterListStore";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {

@@ -3,7 +3,7 @@ import type { PostDTO } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import { useMemo } from "react";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { RemarkCard } from "../item/RemarkCard";
 
 const SPACING_CLASS_BY_NUMBER: Record<number, string> = {

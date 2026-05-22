@@ -3,7 +3,7 @@ import { PostKind } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ReviewList } from "../components/list/ReviewList";
 

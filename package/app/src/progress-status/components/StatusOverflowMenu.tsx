@@ -15,7 +15,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   READ_STATUS_I18N_KEYS,
   READ_STATUS_LABELS_ZH_HANT,

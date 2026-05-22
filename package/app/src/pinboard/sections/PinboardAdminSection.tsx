@@ -25,7 +25,7 @@ import {
 import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { toast } from "sonner";
 import { PinboardEmptyState } from "../components/PinboardEmptyState";
 import { PinboardErrorState } from "../components/PinboardErrorState";

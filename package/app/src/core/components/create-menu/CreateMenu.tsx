@@ -7,7 +7,7 @@ import {
 import { Plus as AddIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { CreateMenuItem } from "./CreateMenuItem";
 
 export const CreateMenu: React.FC = () => {

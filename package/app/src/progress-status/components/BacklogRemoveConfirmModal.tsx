@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 type BacklogRemoveConfirmModalProps = {
   open: boolean;

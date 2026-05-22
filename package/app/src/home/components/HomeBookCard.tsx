@@ -2,7 +2,7 @@ import { Card, CardContent } from "@rezics/ui/shadcn";
 import type { BookDTO } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   getBookAuthorName,
   getBookCoverUrl,

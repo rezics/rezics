@@ -10,7 +10,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
 import { PostListSection, ReplyComposer } from "@/post";

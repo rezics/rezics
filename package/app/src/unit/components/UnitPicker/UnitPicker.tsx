@@ -5,7 +5,7 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { type ReactNode, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useUnitCandidates } from "../../hooks/useUnitCandidates";
 import type { Candidate } from "../../models/types";
 import { UnitCandidateRow } from "./UnitCandidateRow";

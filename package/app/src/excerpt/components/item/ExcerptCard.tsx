@@ -8,7 +8,7 @@ import {
 import type { ExcerptSource, UnitDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { cn } from "@/shared/utils/css-util";
 import { excerptCardActions, excerptPolicy } from "../../models/excerptPolicy";

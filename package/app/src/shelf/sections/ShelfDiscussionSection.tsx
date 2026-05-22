@@ -1,6 +1,6 @@
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { PostListSection, ReplyComposer } from "@/post";
 import { useAuthModal } from "@/user/components/useAuthModal";
 import { useAuth } from "@/user/pages/useAuth";

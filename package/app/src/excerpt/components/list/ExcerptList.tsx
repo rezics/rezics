@@ -3,7 +3,7 @@ import type { UnitDTO } from "@rezics/contract";
 import { EmptyState } from "@rezics/ui";
 import { useMemo } from "react";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ExcerptCard } from "../item/ExcerptCard";
 
 interface ExcerptListProps {

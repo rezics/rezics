@@ -18,7 +18,7 @@ import {
   Share as IosShareOutlined,
 } from "lucide-react";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { useShareMenu } from "@/engagement/hooks/useShareMenu";
 import { BookProgressStatusSection } from "@/progress-status";
 

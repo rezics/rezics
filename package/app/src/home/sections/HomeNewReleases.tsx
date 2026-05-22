@@ -6,7 +6,7 @@ import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
   getBookAuthorName,

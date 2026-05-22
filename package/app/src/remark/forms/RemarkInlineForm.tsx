@@ -5,7 +5,7 @@ import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 
 interface RemarkInlineFormProps {
   bookUnitId: string;

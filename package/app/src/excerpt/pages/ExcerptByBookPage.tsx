@@ -1,6 +1,6 @@
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ExcerptList } from "@/excerpt";
 import { Route as excerptByBookRoute } from "@/routes/_mainLayout/excerpt/book/$bookId";
 import UnitsPage from "@/unit/pages/UnitsPage";

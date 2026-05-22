@@ -3,7 +3,7 @@ import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIc
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
 

@@ -1,5 +1,5 @@
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { PinboardEntryCard } from "../components/PinboardEntryCard";
 import { PinboardErrorState } from "../components/PinboardErrorState";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";

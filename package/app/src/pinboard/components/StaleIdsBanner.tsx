@@ -1,7 +1,7 @@
 import { Alert, AlertTitle, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useRemoveRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { toast } from "sonner";
 import type { PinboardListKey } from "../models/types";
 import { Brush as CleaningServicesRoundedIcon } from "lucide-react";

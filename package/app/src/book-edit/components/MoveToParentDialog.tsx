@@ -14,7 +14,7 @@ import {
   Search,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import type { Chapter } from "./BookTocEditor";
 
 interface MoveToParentDialogProps {

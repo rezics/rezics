@@ -3,7 +3,7 @@ import type { BookDTO, PostDTO } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { useMemo } from "react";
 import type React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";

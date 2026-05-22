@@ -1,7 +1,7 @@
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { ResponsiveBookGridLimited } from "@/book-library/components/list/ResponsiveBookGridLimited";
 import {
   getBookAuthorName,

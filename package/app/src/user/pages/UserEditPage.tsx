@@ -19,7 +19,7 @@ import { XCircle as CancelIcon, Save as SaveIcon } from "lucide-react";
 import type React from "react";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 import { UserLoading } from "./UserState";
