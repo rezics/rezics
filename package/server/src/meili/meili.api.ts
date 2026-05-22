@@ -404,6 +404,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       },
     },
   )
+  .post(
+    "/entities/sync",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync entities");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync entities");
+      }
+      const task = await meiliService.syncAllEntities();
+      return { task };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Sync all entities to Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
   // ANCHOR: Admin — dangerous operations
   .get(
     "/content/deleteAll",
@@ -516,6 +539,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Delete all realms from Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .delete(
+    "/entities/deleteAll",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all entities");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all entities");
+      }
+      await meiliService.deleteAllEntities();
+      return { message: "all entities deleted" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Delete all entities from Meilisearch",
         tags: ["Meili", "Admin"],
       },
     },

@@ -38,7 +38,6 @@ function messageClass(type: "success" | "error" | "info") {
       return "text-success-text";
     case "error":
       return "text-error-text";
-    case "info":
     default:
       return "text-info-text";
   }
@@ -109,6 +108,16 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
+  const initEntitiesMutation = meiliAdminMutations.useInitEntitiesIndex({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text: res.message || "Entities index initialized",
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
   // Full sync
   const syncContentMutation = meiliAdminMutations.useSyncContent({
     onSuccess: () => {
@@ -141,6 +150,13 @@ export function MeiliPage() {
   const syncRealmsMutation = meiliAdminMutations.useSyncRealms({
     onSuccess: () => {
       setMessage({ type: "success", text: "Realms sync started" });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const syncEntitiesMutation = meiliAdminMutations.useSyncEntities({
+    onSuccess: () => {
+      setMessage({ type: "success", text: "Entities sync started" });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
@@ -191,6 +207,16 @@ export function MeiliPage() {
       setMessage({
         type: "success",
         text: res.message || "All realms deleted from Meili",
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const deleteAllEntitiesMutation = meiliAdminMutations.useDeleteAllEntities({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text: res.message || "All entities deleted from Meili",
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -351,6 +377,15 @@ export function MeiliPage() {
                     ? "Initializing..."
                     : "Init Realms Index"}
                 </Button>
+                <Button
+                  size="sm"
+                  onClick={() => initEntitiesMutation.mutate()}
+                  disabled={initEntitiesMutation.isPending}
+                >
+                  {initEntitiesMutation.isPending
+                    ? "Initializing..."
+                    : "Init Entities Index"}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -415,6 +450,16 @@ export function MeiliPage() {
                   {syncRealmsMutation.isPending
                     ? "Syncing..."
                     : "Sync All Realms"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => syncEntitiesMutation.mutate()}
+                  disabled={syncEntitiesMutation.isPending}
+                >
+                  {syncEntitiesMutation.isPending
+                    ? "Syncing..."
+                    : "Sync All Entities"}
                 </Button>
               </div>
               <p className="text-xs text-text-secondary">
@@ -523,6 +568,22 @@ export function MeiliPage() {
                       ? "Deleting..."
                       : "Delete All Realms"}
                   </Button>
+                  <Button
+                    size="sm"
+                    className="bg-error-fill text-white"
+                    onClick={() => {
+                      const ok = window.confirm(
+                        "Delete all entities from Meili? This cannot be undone!",
+                      );
+                      if (!ok) return;
+                      deleteAllEntitiesMutation.mutate();
+                    }}
+                    disabled={deleteAllEntitiesMutation.isPending}
+                  >
+                    {deleteAllEntitiesMutation.isPending
+                      ? "Deleting..."
+                      : "Delete All Entities"}
+                  </Button>
                 </div>
               </div>
 
@@ -534,8 +595,8 @@ export function MeiliPage() {
                 </p>
                 <p className="text-xs text-text-secondary block mb-2">
                   Deletes all indexes entirely (content, feedbacks, users,
-                  posts, realms). All settings and documents are lost. You must
-                  re-run Init to recreate indexes.
+                  posts, realms, entities). All settings and documents are lost.
+                  You must re-run Init to recreate indexes.
                 </p>
                 <Button
                   variant="outline"
@@ -567,8 +628,9 @@ export function MeiliPage() {
                 <DialogTitle>Reset Everything?</DialogTitle>
                 <DialogDescription>
                   This will permanently delete all Meilisearch indexes (content,
-                  feedbacks, users, posts, realms) including their settings and
-                  documents. You will need to re-run Init to recreate them.
+                  feedbacks, users, posts, realms, entities) including their
+                  settings and documents. You will need to re-run Init to
+                  recreate them.
                 </DialogDescription>
               </DialogHeader>
               <div className="mt-2">

@@ -14,8 +14,8 @@ import type {
 } from "@rezics/contract";
 import {
   syncAllContent,
-  syncAllFeedbacks,
   syncAllEntities,
+  syncAllFeedbacks,
   syncAllPosts,
   syncAllRealms,
   syncAllUsers,
@@ -130,6 +130,10 @@ export class MeiliService {
 
   async deleteAllRealms() {
     return searchClient.deleteAllRealms();
+  }
+
+  async deleteAllEntities() {
+    return searchClient.deleteAllEntities();
   }
 
   async deleteAllIndexes() {
