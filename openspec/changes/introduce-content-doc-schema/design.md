@@ -1,6 +1,6 @@
 ## Context
 
-Primary post content is currently stored as `Post.body String?`, while post metadata and wiki-adjacent extensions are stored in `Post.extra Json?`. Unit descriptions are stored as `UnitTranslation.description String?`. This is sufficient for Markdown-only content, but it splits wiki structure across a body string, `extra`, and frontend conventions.
+Primary post content is currently stored as `Post.body String?`, while post metadata and wiki-adjacent extensions are stored in `Post.extra Json?`. Long descriptions are also plain strings (`UnitTranslation.description`, `User.description`). This is sufficient for Markdown-only content but splits wiki structure across a body string, `extra`, and frontend conventions, and forces every "the description can be a paragraph" surface to either truncate or render an opaque blob.
 
 The history service already stores editorial payloads as slot-based JSON snapshots, and the search system already uses Meilisearch as the full-text search surface. The main design problem is therefore the canonical write model: Rezics needs one structured content document schema that can represent Markdown text, slots, layout, and cross-Unit references without turning `extra` into a shadow schema or forcing PostgreSQL to become the text-search store.
 
@@ -8,35 +8,36 @@ The history service already stores editorial payloads as slot-based JSON snapsho
 
 **Goals:**
 
-- Define a shared `ContentDoc` contract for long-form editable content.
+- Define a shared `ContentDoc` contract with a composable slot family for long-form editable content.
 - Replace `Post.body` with `Post.content` as the canonical post/chapter/wiki content payload.
-- Allow rich descriptions to use the same content document shape while keeping short summary/bio fields plain.
+- Change rich description fields (`UnitTranslation.description`, `User.description`) to the same `ContentDoc` shape while keeping compact summary/bio fields plain strings.
+- Define a single declarative reference scanner and a single text extractor that all consumers share.
 - Keep text projections such as `contentText` and `descriptionText` in Meilisearch documents, not PostgreSQL.
-- Make cross-Unit slots explicit references that can be batch hydrated.
-- Preserve history, authority, and rendering semantics through typed contracts.
+- Preserve history, authority, and rendering boundaries through typed contracts and consistent field-key sub-paths.
+- Treat stored content as opaque-but-safe at read time: unknown / malformed values render as Markdown rather than throw.
 
 **Non-Goals:**
 
-- No CRDT, collaborative cursor, or block-level real-time editing model.
-- No PostgreSQL JSON-path querying for content slots.
-- No generic frontend plugin marketplace in this change.
-- No persistence of rendered HTML.
-- No backwards-compatible `body` API after the internal development cutover.
+- Renderer implementation. This change defines the schema, the inline directive grammar, scanning, and extraction. Markdown-directive parsing in the rendering pipeline, slot component implementations, hydration UI, and unsupported-content presentation polish are deferred to a follow-up rendering change.
+- Slot-level editor surfaces. The v1 editor remains markdown-only and writes into `content.main.source`; structured slot editing UI is in the follow-up.
+- CRDT, collaborative cursor, or block-level real-time editing.
+- PostgreSQL JSON-path querying for content slots as a product filter, sort, or permission surface.
+- Generic frontend plugin marketplace.
+- Persistence of rendered HTML.
+- Backwards-compatible `body` API after the internal development cut-over.
+- Denormalized `Post.infobox` column. Infobox lives inside `content.slots.infobox`; books typically have no wiki infobox anyway, and the small set of wikis that need one do not justify a separate column.
 
 ## Decisions
 
 ### Decision: `ContentDoc` is the canonical long-form schema
 
-The contract package will expose a `contentDocSchema` shaped around a versioned document:
+The contract package exposes a `contentDocSchema` shaped around a versioned document:
 
 ```json
 {
   "schema": "rezics.content",
   "version": 1,
-  "main": {
-    "type": "markdown",
-    "source": "..."
-  },
+  "main": { "type": "markdown", "source": "..." },
   "slots": {},
   "layout": []
 }
@@ -47,126 +48,263 @@ The contract package will expose a `contentDocSchema` shaped around a versioned 
 Rationale:
 
 - History snapshots remain interpretable after future schema evolution.
-- The renderer can reject unsupported schemas or versions with a controlled fallback.
 - Markdown remains the first content block type without making the top-level field name Markdown-specific.
+- A single envelope serves posts, chapters, wikis, and rich descriptions.
 
 Alternatives considered:
 
 - `md_content` top-level key: rejected because it bakes the initial renderer into the storage model.
 - Versionless JSON: rejected because archived history payloads would require shape guessing during migration.
 - Fully normalized block rows: deferred until edit frequency or partial-update requirements justify the complexity.
+- **Kind-based dispatch (`Post.body` for plain markdown, `Post.content` for structured)**: rejected. Would force every server mapper, history payload, search projection, and authority check to branch on which column is populated; the maintenance cost dwarfs any per-row JSON envelope overhead. Performance concerns are mitigated by the read-trust model (no per-read validation) and by Meilisearch owning text projection.
 
 ### Decision: `Post.body` is removed instead of retained as compatibility
 
-Because the project is still in development, `Post.body` should be removed during the cutover. Existing development rows are migrated into `Post.content.main.source` with `type = "markdown"`.
+Because the project is still in development, `Post.body` is removed during the cut-over. Existing development rows are migrated into `Post.content.main.source` with `type = "markdown"`. Empty strings migrate to `null` JSON.
 
 Rationale:
 
-- A dual `body` + `content` model would create drift and permanent mapper ambiguity.
-- Internal callsites can be cut over in one change.
+- A dual `body` + `content` model creates drift and permanent mapper ambiguity.
+- Internal callsites cut over in one change.
 - Text projection remains available through Meilisearch, so keeping `body` as a cache column is unnecessary.
 
-Alternatives considered:
+### Decision: Description fields become `ContentDoc`
 
-- Keep `body` as a PostgreSQL projection: rejected by project direction; search and text projection belong in Meilisearch.
-- Keep `body` temporarily: rejected unless implementation discovers an unsafe migration blocker.
-
-### Decision: Description uses the same schema only when rich content is needed
-
-Short `summary` and compact `bio` fields remain strings. Rich long descriptions use `ContentDoc` through a dedicated description content field, not by overloading summary or extra fields.
+`UnitTranslation.description` and `User.description` change column type from `String?` to `Json?` and store `ContentDoc`. No new `descriptionContent` column is introduced; the existing columns change shape. Compact identity fields (`UnitTranslation.summary`, `User.bio`) remain `String?` and are not affected.
 
 Rationale:
 
-- Summary and bio are compact identity fields used in cards and lists.
-- Description can benefit from Markdown, slots, and unit references.
-- Reusing `ContentDoc` keeps rendering and projection consistent without flattening all text semantics into one storage location.
+- Long descriptions can carry references, lists of related works, and structure; the schema is the same one used for post bodies, so renderer, history, and search pipelines reuse one implementation.
+- Adding a parallel `descriptionContent` column while keeping the old `description String` produces the same dual-write drift problem rejected for `Post.body`.
+- `summary` and `bio` are compact card-line fields; structured content there would be misuse.
 
-### Decision: Text projection is Meilisearch-owned
+### Decision: Renderer trust model — no read validation, Markdown fallback
 
-`contentText` and `descriptionText` are derived during sync/full reindex and stored in Meilisearch documents. PostgreSQL stores only canonical content JSON and other typed product fields.
+The contract validates `ContentDoc` at the write boundary (API input). Read paths SHALL NOT re-validate stored documents. If a renderer receives a value it cannot interpret — unknown `schema`, unsupported `version`, malformed JSON, or a raw string accidentally stored — it SHALL render the raw value as Markdown rather than throw.
+
+Concretely, the renderer fallback sequence is:
+
+1. If the value is a string → render it as Markdown.
+2. Else if `content.main.source` is a non-empty string → render that as Markdown.
+3. Else → render `JSON.stringify(content)` as Markdown (typically displays as a code-block-ish blob, never crashes).
 
 Rationale:
 
-- The user-facing search system is Meilisearch, not PostgreSQL text search.
-- PostgreSQL avoids duplicate derived text columns and cache invalidation work.
-- Reindex can recompute projections from canonical content and referenced Units.
+- Eliminates the timeline-hot-path validation cost that would otherwise scale linearly with reply count.
+- Treats stored content as opaque-but-safe input. Unknown future versions, partial migrations, manual edits, or data corruption never crash a render.
+- Keeps the user's stored content visible (lossless degradation), even when the renderer cannot interpret the structure.
 
-Alternatives considered:
+### Decision: `extra` and `ContentDoc` have disjoint responsibilities
 
-- Store `contentText` in PostgreSQL for preview/read speed: rejected for this change. If non-search product surfaces later need fast text previews without loading content JSON, a follow-up can add a deliberate projection column.
+`Post.extra` and `UnitTranslation.extra` are non-rendered side channels for feature-specific metadata (cover URLs, excerpt source citations, pinboard keys, etc.). They SHALL NOT carry renderable content.
 
-### Decision: Slots store references, not hydrated snapshots
+`ContentDoc` is the only home for renderable structured content (markdown text, slots, layout).
 
-Slots may contain unit references such as:
+Rationale:
+
+- Existing `extra` keys (`extra.coverUrl`, `extra.source`, realm pinboard keys) keep working unchanged.
+- Future contributors have a clear rule: "is it rendered?" → ContentDoc; "is it metadata for a feature?" → extra.
+- Prevents `extra` from drifting into a shadow content schema.
+
+### Decision: Slot family with composable typed slots
+
+`ContentDoc.slots` is an object keyed by stable slot ids. Every slot value carries a `type` discriminator. The v1 slot family is:
+
+| Type | Purpose |
+|------|---------|
+| `unit-ref` | Single reference to a Unit (book, entity, chapter, ...) |
+| `entity-list` | Ordered list of unit references with display intent |
+| `infobox` | Structured key/value rows whose values may be content, refs, dates, or links |
+| `unknown` | Forward-compatible preservation slot for any other `type` |
+
+Composition primitives:
+
+- `UnitRef = { unitId: string; unitType?: UnitType }` — the atomic cross-Unit reference used everywhere.
+- `ContentBlock = { type: "markdown"; source: string }` — the atomic renderable text fragment; future block types extend this union.
+
+Slot shape sketches:
+
+```ts
+type UnitRefSlot = {
+  type: "unit-ref";
+  ref: UnitRef;
+  render?: { view?: "card" | "chip" | "hover-preview"; cardSize?: "compact" | "regular" | "rich" };
+};
+
+type EntityListSlot = {
+  type: "entity-list";
+  refs: UnitRef[];
+  title?: ContentBlock;
+  render?: {
+    layout?: "horizontal" | "vertical" | "grid" | "table";
+    cardSize?: "compact" | "regular" | "rich";
+    groupBy?: "unitType" | "none";
+  };
+};
+
+type InfoboxSlot = {
+  type: "infobox";
+  rows: Array<{
+    label: ContentBlock;
+    value:
+      | ContentBlock
+      | UnitRef
+      | UnitRef[]
+      | { type: "date"; iso: string }
+      | { type: "link"; url: string; label?: string };
+  }>;
+};
+
+type UnknownSlot = { type: string; [key: string]: unknown };
+```
+
+Rationale:
+
+- `UnitRef` is the universal compose primitive; every "points to something" path goes through it. Renderer, search, and history all batch-hydrate by walking `UnitRef` shapes.
+- `render` is intentionally separated from data. Display intent (horizontal vs vertical cards) is a hint; the data field (`refs`, `rows`) is the source of truth and is portable across renderers.
+- `InfoboxSlot.rows[].value` is a tagged union, not a markdown string. Dates, links, and unit references are first-class so that search and hydration treat them correctly instead of relying on parsing markdown.
+- `UnknownSlot` preserves any unrecognized slot type verbatim. Renderers may fall back to a placeholder for unknown types in a follow-up; this change requires only that the slot value survive a read/write round-trip.
+
+### Decision: Inline directive grammar inside `main` markdown
+
+Slots may be embedded inline in `content.main.source` using CommonMark directive syntax:
+
+```
+::: slot { id="character-list" }
+:::
+
+inline mention :slot[author]{ view=chip }
+```
+
+The parser is implemented in the follow-up rendering change. The grammar is fixed by this change:
+
+- Block-level directive: `:::slot { id="<slotId>" [render attrs...] }` ... `:::`.
+- Inline directive: `:slot[<slotId>]{ [render attrs...] }`.
+- Attributes inside the directive MAY override the slot's stored `render` intent (e.g. `display=horizontal`).
+- The slot's data (`ref` / `refs` / `rows`) is always read from `content.slots[slotId]`, never from directive body content.
+
+### Decision: Inline directive and `layout` are mutually exclusive per slot
+
+Each `slotId` defined in `content.slots` MUST appear in exactly one of:
+
+1. An inline directive inside `content.main.source`.
+2. A `layout` entry.
+3. Neither (stored but not currently rendered — reserved for forward compatibility).
+
+A slot SHALL NOT appear in both an inline directive and a `layout` entry within the same document. This keeps placement unambiguous and avoids double rendering.
+
+### Decision: `layout` is semantic, not pixel-level styling
+
+`ContentDoc.layout` is an array of `{ region: "main" | "aside" | "after-main" | "before-main"; slotId: string }` entries. It SHALL NOT persist arbitrary CSS, pixel coordinates, breakpoints, or renderer-specific styling.
+
+### Decision: References are scanned declaratively, not declared as a manifest
+
+The contract exposes a single function:
+
+```ts
+function scanRefs(doc: ContentDoc): UnitRef[];
+```
+
+`scanRefs` walks the entire document (slots, infobox rows, future block types) and returns a deduplicated list of all `UnitRef`-shaped values. Renderers, Meilisearch sync, and history compare/restore all use `scanRefs` to drive batch hydration.
+
+Rationale:
+
+- A top-level `refs: UnitRef[]` manifest would have to be maintained on every edit and would drift from reality the first time a slot was updated outside the manifest writer's awareness.
+- The scanner is the single source of truth and the single place to add new ref-bearing shapes when the slot family grows.
+- Performance: walking a single small document on render is negligible compared to the hydration RTT it enables.
+
+### Decision: Text extraction for search is centralized
+
+The contract exposes:
+
+```ts
+function extractText(doc: ContentDoc): string;
+```
+
+`extractText` walks `main` (markdown source as-is), every slot type's text-bearing fields (infobox labels and content values, entity-list titles, etc.), and concatenates them into a single search string. Every slot type added in the future MUST register a text-extraction contribution.
+
+Meilisearch sync calls `extractText` to derive `contentText` and `descriptionText`. PostgreSQL never stores these projections.
+
+### Decision: History payload stores the full `ContentDoc` in the `post` slot
+
+The editorial revision payload slot vocabulary is unchanged (`unit`, `translations`, `extension`, `credits`, `subjects`, `tags`, `post`, `supportLanguages`). The `post` slot now carries the full `ContentDoc` payload directly:
 
 ```json
 {
-  "type": "unit-ref",
-  "unitId": "...",
-  "unitType": "BOOK",
-  "view": "card"
+  "slots": {
+    "unit": { ... },
+    "translations": [ ... ],
+    "post": {
+      "schema": "rezics.content",
+      "version": 1,
+      "main":   { "type": "markdown", "source": "..." },
+      "slots":  { "infobox": { ... } },
+      "layout": [ ... ]
+    },
+    "credits": [ ... ]
+  }
 }
 ```
 
-Renderers and API clients scan a content document for refs, batch hydrate the referenced Units, and render unavailable targets through restricted/deleted placeholders.
+The legacy body string SHALL NOT appear in any new revision payload. Existing revisions ingested before this change retain their stored shape; the history service does not rewrite them in place.
 
 Rationale:
 
-- Referenced Unit titles, covers, permissions, and visibility remain authoritative in their own Unit records.
-- Slot payloads stay small and history snapshots avoid denormalized display drift.
-- This aligns with the existing Unit graph and future Api Unit Store direction.
+- Same hash-dedup model still applies: identical `ContentDoc` payloads hash identically and share a single `RevisionContent` row.
+- Sub-slot deltas (e.g. only the infobox changed) are conveyed through `changedFieldKeys`, not through a different payload shape.
+- Restoring a revision means writing its `ContentDoc` back into `Post.content`; no body-to-content conversion is needed.
 
-Alternatives considered:
+### Decision: Field-key vocabulary uses content sub-paths
 
-- Embed full referenced Unit DTOs into content: rejected due to stale snapshots, permission leakage, and storage bloat.
-- One request per slot: rejected because it creates obvious N+1 behavior. Hydration must be batched.
+The legacy `post.body` field key is replaced by content sub-path keys for both `UnitFieldLock` and `UnitRevision.changedFieldKeys`:
 
-### Decision: Layout is semantic, not pixel-level styling
+| Key | Meaning |
+|-----|---------|
+| `post.content` | Whole post `ContentDoc` |
+| `post.content.main` | The `main` content block |
+| `post.content.slots.<slotId>` | A specific slot (e.g. `post.content.slots.infobox`) |
+| `post.content.layout` | The layout array |
+| `*` | Whole-Unit lock (unchanged) |
 
-`layout` records semantic placement such as main/aside/after-main regions and slot ids. It must not store arbitrary CSS, pixel coordinates, or product-specific visual skins.
+Description field keys follow the same pattern (e.g. `userProfile.description.main`, `unitTranslation.description.slots.<slotId>`) when those surfaces grow collaborative editing; this change introduces the vocabulary but only the post keys are wired into existing locks/history.
 
-Rationale:
+### Decision: Infobox stays inside `ContentDoc`, no separate column
 
-- The design system and renderer own presentation.
-- Stored content stays portable across web, mobile, search snippets, and history views.
+Earlier in design discussion a denormalized `Post.infobox` column was considered to avoid TOAST cost on wiki-card lists. It is rejected because:
 
-### Decision: Authority moves from `post.body` to content keys
+- Books — the dominant Post target — typically have no wiki infobox; card-level book facts come from the Unit / Translation schema, not from the wiki post.
+- The narrow case (entity / game / media wikis whose card lists show infobox summary) is small, and those wiki bodies are usually below the TOAST threshold.
+- A separate column duplicates state, requires write-side sync, and complicates history payload assembly. The cost is permanent; the benefit is conditional.
 
-The field-key vocabulary should replace `post.body` with content document keys such as `content.main`, `content.slots`, or a whole-content key. Slot-level locking can be introduced where product UI supports it; whole-content locking remains the fallback.
-
-Rationale:
-
-- The old field key names a removed column.
-- Slot-level locks match the wiki mental model without requiring full block-level authorization.
+If a future workload demonstrably needs cheap infobox-only fetches across many large wiki rows, a follow-up change may introduce a projection column or a functional index without changing this canonical schema.
 
 ## Risks / Trade-offs
 
-- [Risk] Large JSON updates rewrite the full `content` value. -> Mitigation: phase 1 uses whole-document replace because wiki edits are low-frequency; slot-level patch operations can be added later without changing the stored schema.
-- [Risk] Renderers encounter unsupported versions. -> Mitigation: require `schema` and `version`; render unsupported documents with a safe fallback and validation error state.
-- [Risk] Slot references create N+1 API calls. -> Mitigation: require ref scanning and batch hydration before rendering rich slot surfaces.
-- [Risk] Search text extraction misses plugin content. -> Mitigation: every slot/content block type must define an extractor contribution before it is accepted into the schema.
-- [Risk] Content JSON becomes accidental product metadata. -> Mitigation: specs state PostgreSQL product filtering must use typed columns/relations; Meilisearch projection may include descriptive content for full-text search only.
-- [Risk] Removing `body` breaks broad callsites. -> Mitigation: this is a development-stage clear cutover; update contract, server mappers, app components, tests, history, and sync code in the same change.
+- [Risk] Large JSON updates rewrite the full `content` value. -> Mitigation: v1 uses whole-document replace because wiki edits are low-frequency; slot-level patch operations can be added later without changing the stored schema.
+- [Risk] Renderers encounter unsupported versions or malformed values. -> Mitigation: read-trust model with Markdown fallback (Decision: Renderer trust model).
+- [Risk] Slot references create N+1 API calls. -> Mitigation: `scanRefs` is the single declarative entry point; rendering and search MUST use it for batch hydration. Follow-up rendering change enforces this in the renderer harness.
+- [Risk] Search text extraction misses plugin / new-slot content. -> Mitigation: every slot type added MUST contribute to `extractText`; this is a contract requirement, not a renderer requirement.
+- [Risk] Content JSON becomes accidental product metadata. -> Mitigation: specs state PostgreSQL product filtering MUST use typed columns/relations; Meilisearch projection MAY include descriptive content for full-text search only; `extra` is the side channel for non-rendered feature metadata.
+- [Risk] Removing `body` and changing description columns breaks broad callsites. -> Mitigation: this is a development-stage clear cut-over; contract, server mappers, app components, tests, history outbox, sync code, and seed factories update in the same change. Spec deltas for `wiki-post-editing`, `post-presentation-architecture`, `work-discussion`, and `type-extension-post` are included so no existing requirement contradicts the new shape.
+- [Risk] Read-trust model could mask a real validator bug. -> Mitigation: write-boundary validation remains strict; CI fixtures and seed factories assert ContentDoc validity end-to-end.
 
 ## Migration Plan
 
-1. Add `ContentDoc` schemas and extractor helpers to `package/contract`.
-2. Add canonical content JSON columns for posts and rich descriptions.
-3. Migrate existing development `Post.body` values into Markdown `ContentDoc.main`.
-4. Remove `Post.body` from Prisma, contract DTOs, APIs, mappers, and app callsites.
-5. Update chapter and wiki editors/renderers to read and write `ContentDoc`.
-6. Update Meilisearch sync to derive `contentText` and `descriptionText` from content docs and referenced Unit display data.
-7. Update history outbox payloads and history UI handling for content document snapshots.
-8. Update field-key constants and lock checks for content document edits.
+1. Add `ContentDoc`, slot family types, `scanRefs`, and `extractText` to `package/contract`.
+2. Add canonical content / description JSON columns: change `Post.body` → `Post.content Json?`, `UnitTranslation.description String?` → `Json?`, `User.description String?` → `Json?`.
+3. Write a development migration that wraps existing string values as `ContentDoc.main = { type: "markdown", source: <old string> }`; empty strings become `null` JSON.
+4. Remove `Post.body` and string `description` columns from Prisma after migration data is copied.
+5. Update contract DTOs, server mappers, post / chapter / wiki / description APIs, app forms and renderers, and seed factories in the same cut-over.
+6. Update Meilisearch sync to call `extractText` for `contentText` and `descriptionText` projection and to call `scanRefs` for ref-bearing display data.
+7. Update history outbox writers so the `post` editorial slot carries the full `ContentDoc` and `changedFieldKeys` use content sub-paths.
+8. Update authority field-key constants and lock checks for content sub-path keys.
 9. Run Prisma generation, affected package tests, convention checks, and full reindex smoke tests.
 
 Rollback strategy:
 
-- Before production data exists, rollback is a reverse migration to recreate `body` from `content.main.source`.
-- After any durable environment adopts the schema, rollback should preserve `content` and only reintroduce compatibility reads if necessary.
+- Before any durable environment data exists: reverse migration unwraps `content.main.source` back into `body` and `description` strings; any non-Markdown main type or any populated `slots` / `layout` is dropped (lossy, accepted because rollback only applies before structured content is written).
+- After any durable environment adopts the schema: rollback preserves `content` and `description` JSON and only reintroduces compatibility reads if necessary.
 
 ## Open Questions
 
-- Should phase 1 expose slot-level patch APIs, or only whole-document replace with optimistic `updatedAt` checks?
-- Should rich `UnitTranslation.description` replace the string field or live in a new `descriptionContent` field while the old string is removed in the same cutover?
-- Which exact content field keys should be first-class: `content`, `content.main`, `content.slots`, and/or per-slot ids?
+- Which exact content sub-path field keys are first-class for `UnitFieldLock` v1 — `post.content`, `post.content.main`, `post.content.slots.<slotId>`, and/or `post.content.layout`? The vocabulary is defined; which subset gets wired in for the initial wiki edit-lock surface is the implementation question. (Closed-form expectation: `*`, `post.content`, `post.content.main`, and `post.content.slots.<slotId>` are wired; `post.content.layout` is reserved.)
