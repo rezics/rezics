@@ -1,6 +1,6 @@
 {
   "name": "@rezics/app",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "bun --filter=@rezics/i18n run compile && bun --filter=@rezics/ui run i18n:compile && vite",
