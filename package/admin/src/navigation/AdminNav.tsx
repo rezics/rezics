@@ -114,7 +114,7 @@ export function AdminNav({
           )}
         >
           <span className="inline-flex items-center min-w-9">{item.icon}</span>
-          <span>{item.label}</span>
+          <span>{item.label()}</span>
         </Link>
       </li>
     );
@@ -165,7 +165,7 @@ export function AdminNav({
                 <span className="inline-flex items-center min-w-9">
                   {entry.icon}
                 </span>
-                <span className="flex-1 text-left">{entry.label}</span>
+                <span className="flex-1 text-left">{entry.label()}</span>
                 {open ? (
                   <ExpandLessIcon size={16} />
                 ) : (

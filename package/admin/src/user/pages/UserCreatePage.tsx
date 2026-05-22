@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { userMutations } from "@rezics/api/user/user.mutations";
 import { Link } from "@/shared/ui/link";
 import {
@@ -28,7 +29,9 @@ export default function UserCreatePage() {
 
   const createMutation = userMutations.useAdminCreate({
     onError: (err: unknown) =>
-      setError(err instanceof Error ? err.message : "Create failed"),
+      setError(
+        err instanceof Error ? err.message : m.admin_user_create_failed(),
+      ),
   });
 
   async function onSubmit(e: React.FormEvent) {
@@ -45,7 +48,10 @@ export default function UserCreatePage() {
   }
 
   return (
-    <Page title="Create User" description="创建一个新用户（Admin）">
+    <Page
+      title={m.admin_user_create_title()}
+      description={m.admin_user_create_description()}
+    >
       <Card>
         <CardContent>
           <div className="flex flex-row items-center gap-2 mb-2">
@@ -55,7 +61,7 @@ export default function UserCreatePage() {
               render={(props) => (
                 <Link to="/user" {...props}>
                   <ArrowBackIcon className="size-4" />
-                  Back
+                  {m.common_back()}
                 </Link>
               )}
             />
@@ -75,7 +81,9 @@ export default function UserCreatePage() {
           <form onSubmit={onSubmit}>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-email">Rezics Email</Label>
+                <Label htmlFor="ucp-email">
+                  {m.admin_user_rezics_email_label()}
+                </Label>
                 <Input
                   id="ucp-email"
                   value={email}
@@ -85,7 +93,7 @@ export default function UserCreatePage() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-password">Password</Label>
+                <Label htmlFor="ucp-password">{m.common_password()}</Label>
                 <Input
                   id="ucp-password"
                   value={password}
@@ -93,10 +101,12 @@ export default function UserCreatePage() {
                   required
                   type="password"
                 />
-                <p className="text-xs text-text-secondary">至少 6 位</p>
+                <p className="text-xs text-text-secondary">
+                  {m.admin_user_password_min_help()}
+                </p>
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-slug">Slug (username)</Label>
+                <Label htmlFor="ucp-slug">{m.admin_user_slug_label()}</Label>
                 <Input
                   id="ucp-slug"
                   value={slug}
@@ -104,11 +114,13 @@ export default function UserCreatePage() {
                   required
                 />
                 <p className="text-xs text-text-secondary">
-                  5+ chars, letters/numbers, may include - _
+                  {m.admin_user_slug_help()}
                 </p>
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-avatar">Avatar URL</Label>
+                <Label htmlFor="ucp-avatar">
+                  {m.admin_user_avatar_url_label()}
+                </Label>
                 <Input
                   id="ucp-avatar"
                   value={avatar}
@@ -116,7 +128,7 @@ export default function UserCreatePage() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-bio">Bio</Label>
+                <Label htmlFor="ucp-bio">{m.admin_user_bio_label()}</Label>
                 <textarea
                   id="ucp-bio"
                   value={bio}
@@ -129,12 +141,13 @@ export default function UserCreatePage() {
               <div>
                 <Button type="submit" disabled={createMutation.isPending}>
                   <SaveIcon className="size-4" />
-                  {createMutation.isPending ? "Creating…" : "Create"}
+                  {createMutation.isPending
+                    ? m.admin_user_creating()
+                    : m.common_create()}
                 </Button>
               </div>
               <p className="text-xs text-text-secondary">
-                注意：这里是 Admin 创建用户，不需要验证码；后端会自动做 slug
-                校验、Rezics Email/slug 唯一性校验并哈希密码。
+                {m.admin_user_create_note()}
               </p>
             </div>
           </form>

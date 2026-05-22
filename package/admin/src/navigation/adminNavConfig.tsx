@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import {
   ShieldUser as AdminPanelSettingsOutlinedIcon,
@@ -19,7 +20,7 @@ import {
 
 export type AdminNavItem = {
   id: string;
-  label: string;
+  label: () => string;
   icon: React.ReactNode;
   to: string;
   requiredRole?: "owner";
@@ -27,7 +28,7 @@ export type AdminNavItem = {
 
 export type AdminNavGroup = {
   id: string;
-  label: string;
+  label: () => string;
   icon: React.ReactNode;
   children: AdminNavItem[];
 };
@@ -39,30 +40,30 @@ export const adminNav = {
   items: [
     {
       id: "dashboard",
-      label: "Dashboard",
+      label: m.admin_nav_dashboard,
       icon: <DashboardIcon fontSize="small" />,
       to: "/",
     },
     {
       id: "user",
-      label: "Users",
+      label: m.admin_nav_users,
       icon: <PeopleIcon fontSize="small" />,
       children: [
         {
           id: "user.list",
-          label: "List",
+          label: m.admin_nav_list,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user",
         },
         {
           id: "user.meili",
-          label: "Meili Search",
+          label: m.admin_nav_meili_search,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user/meili",
         },
         {
           id: "user.create",
-          label: "Create",
+          label: m.admin_nav_create,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user/create",
         },
@@ -70,24 +71,24 @@ export const adminNav = {
     },
     {
       id: "unit",
-      label: "Units",
+      label: m.admin_nav_units,
       icon: <Inventory2Icon fontSize="small" />,
       children: [
         {
           id: "unit.list",
-          label: "List",
+          label: m.admin_nav_list,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit",
         },
         {
           id: "unit.meili",
-          label: "Meili Search",
+          label: m.admin_nav_meili_search,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit/meili",
         },
         {
           id: "unit.create",
-          label: "Create",
+          label: m.admin_nav_create,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit/create",
         },
@@ -95,18 +96,18 @@ export const adminNav = {
     },
     {
       id: "book",
-      label: "Books",
+      label: m.admin_nav_books,
       icon: <Inventory2Icon fontSize="small" />,
       children: [
         {
           id: "book.list",
-          label: "List",
+          label: m.admin_nav_list,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/book",
         },
         {
           id: "book.meili",
-          label: "Meili Search",
+          label: m.admin_nav_meili_search,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/book/meili",
         },
@@ -114,25 +115,25 @@ export const adminNav = {
     },
     {
       id: "entities",
-      label: "Entities",
+      label: m.admin_nav_entities,
       icon: <IdentityIcon fontSize="small" />,
       to: "/entities",
     },
     {
       id: "authority",
-      label: "Authority",
+      label: m.admin_nav_authority,
       icon: <ShieldCheckIcon fontSize="small" />,
       to: "/authority",
     },
     // MOCK: realm management pages not yet implemented
     {
       id: "realm",
-      label: "Realms",
+      label: m.admin_nav_realms,
       icon: <ForumIcon fontSize="small" />,
       children: [
         {
           id: "realm.list",
-          label: "List",
+          label: m.admin_nav_list,
           icon: <ForumIcon fontSize="small" />,
           to: "/realm",
         },
@@ -140,12 +141,12 @@ export const adminNav = {
     },
     {
       id: "tag",
-      label: "Tags",
+      label: m.admin_nav_tags,
       icon: <StyleOutlinedIcon fontSize="small" />,
       children: [
         {
           id: "tag.low-score",
-          label: "Low-score",
+          label: m.admin_nav_low_score,
           icon: <StyleOutlinedIcon fontSize="small" />,
           to: "/tag/low-score",
         },
@@ -154,12 +155,12 @@ export const adminNav = {
     // MOCK: shelf management pages not yet implemented
     {
       id: "shelf",
-      label: "Shelves",
+      label: m.admin_nav_shelves,
       icon: <CollectionsBookmarkIcon fontSize="small" />,
       children: [
         {
           id: "shelf.list",
-          label: "List",
+          label: m.admin_nav_list,
           icon: <CollectionsBookmarkIcon fontSize="small" />,
           to: "/shelf",
         },
@@ -167,24 +168,24 @@ export const adminNav = {
     },
     {
       id: "misc",
-      label: "Misc",
+      label: m.admin_nav_misc,
       icon: <StorageOutlinedIcon fontSize="small" />,
       children: [
         {
           id: "misc.echokv",
-          label: "EchoKV",
+          label: () => "EchoKV",
           icon: <StorageOutlinedIcon fontSize="small" />,
           to: "/misc/echokv",
         },
         {
           id: "misc.token",
-          label: "Token",
+          label: m.admin_nav_token,
           icon: <KeyOutlinedIcon fontSize="small" />,
           to: "/token",
         },
         {
           id: "misc.jwt-services",
-          label: "JWT Services",
+          label: m.admin_nav_jwt_services,
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/jwt-services",
           requiredRole: "owner",
@@ -193,12 +194,12 @@ export const adminNav = {
     },
     {
       id: "meili",
-      label: "Meili",
+      label: m.admin_nav_meili,
       icon: <ManageSearchOutlinedIcon fontSize="small" />,
       children: [
         {
           id: "meili.search",
-          label: "Meili Search",
+          label: m.admin_nav_meili_search,
           to: "/meili",
           icon: <ManageSearchOutlinedIcon fontSize="small" />,
         },
@@ -206,36 +207,36 @@ export const adminNav = {
     },
     {
       id: "auth",
-      label: "Auth",
+      label: m.admin_nav_auth,
       icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
       children: [
         {
           id: "auth.users",
-          label: "Users",
+          label: m.admin_nav_users,
           icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
           to: "/auth/users",
         },
         {
           id: "auth.sessions",
-          label: "Sessions",
+          label: m.admin_nav_sessions,
           icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
           to: "/auth/sessions",
         },
         {
           id: "auth.status",
-          label: "Auth Status",
+          label: m.admin_nav_auth_status,
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/auth/status",
         },
         {
           id: "auth.email",
-          label: "Email Templates",
+          label: m.admin_nav_auth_email_templates,
           icon: <EmailOutlinedIcon fontSize="small" />,
           to: "/auth/email",
         },
         {
           id: "auth.jwt-services",
-          label: "Auth JWT Services",
+          label: m.admin_nav_auth_jwt_services,
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/auth/jwt-services",
           requiredRole: "owner",
@@ -244,7 +245,7 @@ export const adminNav = {
     },
     {
       id: "settings",
-      label: "Settings",
+      label: m.admin_nav_settings,
       icon: <SettingsIcon fontSize="small" />,
       to: "/settings",
     },

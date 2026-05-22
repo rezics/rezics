@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { Button, Sheet, SheetContent } from "@rezics/ui/shadcn";
 import React from "react";
 import { AdminNav } from "@/navigation/AdminNav";
@@ -23,13 +24,13 @@ export default function AdminLayout({
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Open menu"
+            aria-label={m.admin_layout_open_menu()}
             className="md:hidden"
             onClick={() => setMobileOpen(true)}
           >
             <MenuIcon />
           </Button>
-          <h2 className="text-lg font-bold">Admin</h2>
+          <h2 className="text-lg font-bold">{m.admin_layout_title()}</h2>
           <div className="flex-1" />
         </div>
       </header>

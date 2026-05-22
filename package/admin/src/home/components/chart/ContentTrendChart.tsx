@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import type { AdminStatsResponse } from "@rezics/contract";
 import {
   BarElement,
@@ -49,12 +50,12 @@ export function ContentTrendChart({ trend }: ContentTrendChartProps) {
       labels: trend.map((d) => d.date.slice(5)),
       datasets: [
         {
-          label: "Books",
+          label: m.admin_nav_books(),
           data: trend.map((d) => d.books),
           backgroundColor: primary,
         },
         {
-          label: "Comments",
+          label: m.admin_dashboard_comments(),
           data: trend.map((d) => d.comments),
           backgroundColor: secondary,
         },

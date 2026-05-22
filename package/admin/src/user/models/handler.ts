@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authKeys } from "@rezics/api/auth/auth.keys";
 import { exchangeForSessionToken } from "@rezics/api/react-query/jwt";
@@ -17,7 +18,7 @@ export async function adminLogin(email: string, password: string) {
 
   const refreshed = await exchangeForSessionToken();
   if (!refreshed) {
-    throw new Error("Login failed: token exchange failed");
+    throw new Error(m.admin_user_login_token_exchange_failed());
   }
 
   await hydrateAuthSessionState();
@@ -25,7 +26,7 @@ export async function adminLogin(email: string, password: string) {
   if (!(role === "admin" || role === "owner")) {
     await authApi.signOut();
     clearAuthSessionState();
-    throw new Error("You are not authorized to access this page");
+    throw new Error(m.admin_user_login_unauthorized());
   }
 
   return { token: null };

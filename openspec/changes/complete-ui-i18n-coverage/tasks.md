@@ -56,10 +56,10 @@
 ## 7. Admin Shared I18n Cutover
 
 - [x] 7.1 Inventory all consumers of `package/admin/src/locale/*.ts`, admin-local locale helpers, and local locale data objects.
-- [ ] 7.2 Create or reuse `@rezics/i18n/messages` keys for admin navigation labels in `package/admin/src/navigation/`.
-- [ ] 7.3 Migrate `package/admin/src/core/layouts/` page/layout copy to generated messages.
-- [ ] 7.4 Migrate `package/admin/src/home/` dashboard, stat card, and health strip copy to generated messages.
-- [ ] 7.5 Migrate `package/admin/src/user/` login, create, edit, and list page copy to generated messages.
+- [x] 7.2 Create or reuse `@rezics/i18n/messages` keys for admin navigation labels in `package/admin/src/navigation/`.
+- [x] 7.3 Migrate `package/admin/src/core/layouts/` page/layout copy to generated messages.
+- [x] 7.4 Migrate `package/admin/src/home/` dashboard, stat card, and health strip copy to generated messages.
+- [x] 7.5 Migrate `package/admin/src/user/` login, create, edit, and list page copy to generated messages.
 - [ ] 7.6 Migrate `package/admin/src/auth/` status, sessions, users, email, and JWT-service admin copy to generated messages.
 - [ ] 7.7 Migrate `package/admin/src/token/` token page, tables, dialogs, secret display, scopes editor, and validation copy to generated messages.
 - [ ] 7.8 Migrate `package/admin/src/unit/` list, create, edit, field-lock, collaborator, subject attribution, and Meili unit page copy to generated messages.

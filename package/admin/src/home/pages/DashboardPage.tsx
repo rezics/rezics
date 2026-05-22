@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { adminStatsQueryOptions } from "@rezics/api/stat/stats.queries";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -17,32 +18,35 @@ export default function DashboardPage() {
   const { data: stats } = useSuspenseQuery(adminStatsQueryOptions());
 
   return (
-    <Page title="Dashboard" description="Platform overview and system health">
+    <Page
+      title={m.admin_dashboard_title()}
+      description={m.admin_dashboard_description()}
+    >
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label="Total Users"
+            label={m.admin_dashboard_total_users()}
             value={stats.counts.users}
             icon={<PeopleIcon />}
           />
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label="Total Books"
+            label={m.admin_dashboard_total_books()}
             value={stats.counts.books}
             icon={<MenuBookIcon />}
           />
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label="Comments"
+            label={m.admin_dashboard_comments()}
             value={stats.counts.comments}
             icon={<CommentIcon />}
           />
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label="Unresolved Feedback"
+            label={m.admin_dashboard_unresolved_feedback()}
             value={stats.counts.unresolvedFeedback}
             icon={<FeedbackIcon />}
             color={
@@ -54,14 +58,14 @@ export default function DashboardPage() {
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label="History Pending"
+            label={m.admin_dashboard_history_pending()}
             value={stats.counts.historyOutboxPending}
             icon={<HistoryIcon />}
           />
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label="History Failed"
+            label={m.admin_dashboard_history_failed()}
             value={stats.counts.historyOutboxFailed}
             icon={<HistoryIcon />}
             color={
@@ -83,7 +87,7 @@ export default function DashboardPage() {
           <Card>
             <CardContent>
               <h3 className="text-sm font-extrabold mb-2">
-                Content Created (Last 30 Days)
+                {m.admin_dashboard_content_created_30d()}
               </h3>
               <div style={{ height: 320 }}>
                 <ContentTrendChart trend={stats.contentTrend} />

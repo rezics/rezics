@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 
 interface HealthStripProps {
@@ -15,15 +16,19 @@ export function HealthStrip({ server, meili }: HealthStripProps) {
     <Card>
       <CardContent className="flex gap-8 items-center py-3">
         <span className="text-[0.6875rem] uppercase tracking-wider text-text-secondary mr-2">
-          System Health
+          {m.admin_health_system()}
         </span>
         <div className="flex items-center gap-2">
           <StatusDot status={server} />
-          <span className="text-sm">Server: {server}</span>
+          <span className="text-sm">
+            {m.admin_health_server({ status: server })}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <StatusDot status={meili} />
-          <span className="text-sm">Meilisearch: {meili}</span>
+          <span className="text-sm">
+            {m.admin_health_meili({ status: meili })}
+          </span>
         </div>
       </CardContent>
     </Card>

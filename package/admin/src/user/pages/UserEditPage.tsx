@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { userMutations } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 
@@ -28,7 +29,9 @@ export default function UserEditPage() {
 
   const updateMutation = userMutations.useAdminUpdate({
     onError: (err) =>
-      setError(err instanceof Error ? err.message : "Update failed"),
+      setError(
+        err instanceof Error ? err.message : m.admin_user_update_failed(),
+      ),
     onSuccess: () => setError(null),
   });
 
@@ -66,7 +69,10 @@ export default function UserEditPage() {
   }
 
   return (
-    <Page title="Edit User" description={`编辑用户：${userId}`}>
+    <Page
+      title={m.admin_user_edit_title()}
+      description={m.admin_user_edit_description({ userId })}
+    >
       <Card>
         <CardContent>
           <div className="flex flex-row items-center gap-2 mb-2">
@@ -76,7 +82,7 @@ export default function UserEditPage() {
               render={(props) => (
                 <Link to="/user" {...props}>
                   <ArrowBackIcon className="size-4" />
-                  Back
+                  {m.common_back()}
                 </Link>
               )}
             />
@@ -92,7 +98,7 @@ export default function UserEditPage() {
           ) : detailQuery.isError ? (
             <Alert>
               <AlertDescription className="text-error-text">
-                Failed to load user.
+                {m.admin_user_failed_to_load()}
               </AlertDescription>
             </Alert>
           ) : (
@@ -106,13 +112,16 @@ export default function UserEditPage() {
               ) : null}
 
               <p className="text-sm text-text-secondary mb-4">
-                Rezics Email: <strong>{detailQuery.data?.email ?? "-"}</strong>
+                {m.admin_user_email_display()}{" "}
+                <strong>{detailQuery.data?.email ?? "-"}</strong>
               </p>
 
               <form onSubmit={onSubmit}>
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-name">Name</Label>
+                    <Label htmlFor="uep-name">
+                      {m.admin_user_name_label()}
+                    </Label>
                     <Input
                       id="uep-name"
                       value={name}
@@ -120,7 +129,9 @@ export default function UserEditPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-avatar">Avatar URL</Label>
+                    <Label htmlFor="uep-avatar">
+                      {m.admin_user_avatar_url_label()}
+                    </Label>
                     <Input
                       id="uep-avatar"
                       value={avatar}
@@ -128,7 +139,7 @@ export default function UserEditPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-bio">Bio</Label>
+                    <Label htmlFor="uep-bio">{m.admin_user_bio_label()}</Label>
                     <textarea
                       id="uep-bio"
                       value={bio}
@@ -138,7 +149,9 @@ export default function UserEditPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-description">Description</Label>
+                    <Label htmlFor="uep-description">
+                      {m.admin_user_description_label()}
+                    </Label>
                     <textarea
                       id="uep-description"
                       value={description}
@@ -148,7 +161,9 @@ export default function UserEditPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-password">New Password</Label>
+                    <Label htmlFor="uep-password">
+                      {m.admin_user_new_password_label()}
+                    </Label>
                     <Input
                       id="uep-password"
                       value={password}
@@ -156,14 +171,16 @@ export default function UserEditPage() {
                       type="password"
                     />
                     <p className="text-xs text-text-secondary">
-                      留空表示不修改密码
+                      {m.admin_user_keep_password_help()}
                     </p>
                   </div>
 
                   <div>
                     <Button type="submit" disabled={updateMutation.isPending}>
                       <SaveIcon className="size-4" />
-                      {updateMutation.isPending ? "Saving…" : "Save"}
+                      {updateMutation.isPending
+                        ? m.common_saving()
+                        : m.common_save()}
                     </Button>
                   </div>
                 </div>
