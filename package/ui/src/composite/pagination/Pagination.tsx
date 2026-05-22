@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useImperativeHandle, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import * as m from "@/paraglide/messages.js";
 import { Button } from "@/shadcn/button";
 import { Label } from "@/shadcn/label";
 import {
@@ -95,6 +95,7 @@ interface PaginationBarProps {
   dataLength: number;
   totalPages: number;
   onPageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
+  tipsLabel?: string;
 }
 
 function getPageRange(current: number, total: number, siblings = 1): number[] {
@@ -112,8 +113,8 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   dataLength,
   totalPages,
   onPageChange,
+  tipsLabel,
 }) => {
-  const { t } = useTranslation();
   useEffect(() => {
     console.log(
       "PaginationBar",
@@ -198,7 +199,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
         </Button>
       </div>
       <div className="text-sm text-gray-500 text-center">
-        {t("search.pagination.tips")}
+        {tipsLabel ?? m.ui_pagination_tips()}
       </div>
     </div>
   );
@@ -223,6 +224,7 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
   isLoading?: boolean;
   currentPage: number;
   setCurrentPage: (page: number) => void;
+  paginationTipsLabel?: string;
 }
 
 export type UniversalPaginatorHandle = {
@@ -252,6 +254,7 @@ export const UniversalPaginator = <T,>({
   isLoading = false,
   currentPage = 1,
   setCurrentPage,
+  paginationTipsLabel,
 }: UniversalPaginatorProps<T>) => {
   const [paginationPageNumber, setPaginationPageNumber] = useState<number>(
     externalItemsPerPage / itemsPerPage,
@@ -408,6 +411,7 @@ export const UniversalPaginator = <T,>({
         dataLength={paginationPageNumber}
         totalPages={totalPages}
         onPageChange={handlePageChange}
+        tipsLabel={paginationTipsLabel}
       />
     </div>
   );
