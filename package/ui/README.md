@@ -14,6 +14,29 @@ This package provides all reusable UI components used across `@rezics/app` and `
 | `./shadcn`         | shadcn/ui primitives (Radix UI-based)                |
 | `./editor`         | Editor integration components                        |
 | `./primitive/link` | Link primitive                                       |
+| `./uno.config`     | Shared UnoCSS config factory for rezics design tokens |
+| `./config/base.css` | Shared baseline CSS for app shells                  |
+
+## Design System Setup
+
+Consumer apps should use the shared UnoCSS config and baseline CSS instead of
+copying token definitions.
+
+```ts
+// uno.config.ts
+import { createUnoConfig } from "@rezics/ui/uno.config";
+
+export default createUnoConfig();
+```
+
+```ts
+// app entry
+import "virtual:uno.css";
+import "@rezics/ui/config/base.css";
+```
+
+See [docs/using-rezics-design.md](./docs/using-rezics-design.md) for the full
+integration guide.
 
 ## Component Categories
 
