@@ -1,10 +1,11 @@
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type React from "react";
 import { useId, useState } from "react";
 import { Button } from "@/shadcn/button";
 import { Input } from "@/shadcn/input";
 import { Label } from "@/shadcn/label";
 import { Tabs, TabsList, TabsTrigger } from "@/shadcn/tabs";
+
+const DEFAULT_TRANSLATION_LANGUAGE = "zh-TW";
 
 export interface TranslationEditorEntry {
   language: string;
@@ -41,7 +42,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   onChange,
 }) => {
   const [activeTab, setActiveTab] = useState(
-    translations[0]?.language ?? DEFAULT_LANGUAGE,
+    translations[0]?.language ?? DEFAULT_TRANSLATION_LANGUAGE,
   );
   const idPrefix = useId();
 

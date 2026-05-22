@@ -27,6 +27,10 @@ export function closeExternal() {
   emit();
 }
 
+export function getExternalLinkSnapshot(): ExternalLinkState {
+  return state;
+}
+
 export function useExternalLinkStore(): ExternalLinkState {
   return useSyncExternalStore(
     (cb) => {

@@ -1,10 +1,10 @@
-import { createLink } from "@tanstack/react-router";
 import clsx from "clsx";
 import * as React from "react";
 
 type Underline = "always" | "hover" | "none";
 
 type RezicsAnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  to?: string;
   underline?: Underline;
   color?: string;
   variant?: string;
@@ -26,6 +26,8 @@ const RezicsAnchor = React.forwardRef<HTMLAnchorElement, RezicsAnchorProps>(
       variant,
       className,
       children,
+      to,
+      href,
       ...rest
     },
     ref,
@@ -40,6 +42,7 @@ const RezicsAnchor = React.forwardRef<HTMLAnchorElement, RezicsAnchorProps>(
     return (
       <a
         ref={ref}
+        href={href ?? to}
         className={clsx(
           "text-brand transition-colors hover:opacity-80",
           underlineClass,
@@ -55,4 +58,4 @@ const RezicsAnchor = React.forwardRef<HTMLAnchorElement, RezicsAnchorProps>(
 );
 RezicsAnchor.displayName = "RezicsAnchor";
 
-export const TextLink = createLink(RezicsAnchor);
+export const TextLink = RezicsAnchor;

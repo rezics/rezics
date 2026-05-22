@@ -1,15 +1,28 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   createMemoryHistory,
+  createLink,
   createRootRoute,
   createRouter,
   Outlet,
   RouterProvider,
 } from "@tanstack/react-router";
+import * as React from "react";
 import { useMemo } from "react";
 
 import { ExternalLinkModal } from "./ExternalLinkModal";
 import { SafeLink } from "./SafeLink";
+
+const StoryAnchor = React.forwardRef<
+  HTMLAnchorElement,
+  React.AnchorHTMLAttributes<HTMLAnchorElement>
+>(({ children, ...props }, ref) => (
+  <a ref={ref} {...props}>
+    {children}
+  </a>
+));
+StoryAnchor.displayName = "StoryAnchor";
+const StoryRouterLink = createLink(StoryAnchor);
 
 interface SafeLinkPreviewProps {
   href: string;
@@ -21,7 +34,20 @@ function SafeLinkPreview({ href, label }: SafeLinkPreviewProps) {
     const rootRoute = createRootRoute({
       component: () => (
         <div className="space-y-3">
-          <SafeLink href={href} className="text-rose-600 hover:underline">
+          <SafeLink
+            href={href}
+            className="text-text-brand hover:underline"
+            linkRenderer={({ href, children, className, title, ...rest }) => (
+              <StoryRouterLink
+                to={href}
+                className={className}
+                title={title}
+                {...rest}
+              >
+                {children}
+              </StoryRouterLink>
+            )}
+          >
             {label}
           </SafeLink>
           <Outlet />

@@ -14,6 +14,10 @@
       "types": "./src/shadcn/index.ts",
       "import": "./src/shadcn/index.ts"
     },
+    "./shadcn/sections": {
+      "types": "./src/shadcn/sections/index.ts",
+      "import": "./src/shadcn/sections/index.ts"
+    },
     "./editor": {
       "types": "./src/editor/index.ts",
       "import": "./src/editor/index.ts"
@@ -56,12 +60,9 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@radix-ui/react-slot": "^1.2.4",
-    "@rezics/api": "workspace:*",
     "@rezics/contract": "workspace:*",
     "@rezics/editor": "workspace:*",
-    "@rezics/server": "workspace:*",
     "@rezics/storybook-config": "workspace:*",
-    "@tanstack/react-router": "^1.168.10",
     "@tanstack/react-table": "^8.21.3",
     "@unocss/preset-wind4": "^66.5.10",
     "@unocss/transformer-directives": "^66.5.10",
@@ -90,6 +91,7 @@
   "devDependencies": {
     "@storybook/react-vite": "^10.3.6",
     "@tanstack/router-plugin": "^1.167.12",
+    "@tanstack/react-router": "^1.168.10",
     "@types/markdown-it": "^14.1.2",
     "@types/react": "^19.2.14",
     "@inlang/paraglide-js": "^2.6.1",

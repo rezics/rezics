@@ -13,7 +13,11 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { ImageModal } from "./image/ImageModal";
 import type { ImageProvider } from "./image/types";
 import { EditorPanel } from "./panel/EditorPanel";
-import { MentionPanel, useMentionPanel } from "./plugins/EditorMention";
+import {
+  MentionPanel,
+  type UserSearchAdapter,
+  useMentionPanel,
+} from "./plugins/EditorMention";
 import { EmojiPickerOverlay } from "./plugins/EmojiMart";
 import "./editor.css";
 
@@ -30,6 +34,7 @@ export interface RezicsMarkdownEditorProps
   submitLabel?: string;
   extraRight?: React.ReactNode;
   imageProviders?: ImageProvider[];
+  userSearch?: UserSearchAdapter;
   disableResize?: boolean;
   /** Fill the parent container height via CSS flex instead of resize drag. */
   fillHeight?: boolean;
@@ -42,6 +47,7 @@ export function RezicsMarkdownEditor({
   submitLabel = "Submit",
   extraRight,
   imageProviders,
+  userSearch,
   disableResize,
   fillHeight,
   onViewModeChange,
@@ -93,7 +99,7 @@ export function RezicsMarkdownEditor({
 
   // ---- Mention ----
 
-  const mention = useMentionPanel(editorView);
+  const mention = useMentionPanel(editorView, userSearch);
 
   const handleEditorChange = useCallback(
     (value: string) => {

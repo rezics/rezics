@@ -1,26 +1,28 @@
-import { meiliUserApi } from "@rezics/api/meili/meili.api";
-import type { UserDTO } from "@rezics/contract";
 import React from "react";
 import { createPortal } from "react-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/avatar";
 import { Spinner } from "@/primitive/feedback/Spinner";
 
-type PublicUserLike = Partial<UserDTO>;
+export interface MentionUserOption {
+  userId?: string;
+  name?: string | null;
+  avatar?: string | null;
+}
 
-export type MentionUserOption = PublicUserLike;
+export type UserSearchAdapter = (query: string) => Promise<MentionUserOption[]>;
 
 // ---------------------------------------------------------------------------
 // Shared search hook
 // ---------------------------------------------------------------------------
 
-const useUserSearchQuery = (query: string) => {
+const useUserSearchQuery = (query: string, userSearch?: UserSearchAdapter) => {
   const [options, setOptions] = React.useState<MentionUserOption[]>([]);
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     let active = true;
     const q = query.trim();
-    if (q === "") {
+    if (q === "" || !userSearch) {
       setOptions([]);
       setLoading(false);
       return;
@@ -28,8 +30,8 @@ const useUserSearchQuery = (query: string) => {
     setLoading(true);
     const handle = setTimeout(async () => {
       try {
-        const { users } = await meiliUserApi.userSearch({ q, limit: 10 });
-        if (active) setOptions(users as MentionUserOption[]);
+        const users = await userSearch(q);
+        if (active) setOptions(users);
       } catch {
         if (active) setOptions([]);
       } finally {
@@ -40,7 +42,7 @@ const useUserSearchQuery = (query: string) => {
       active = false;
       clearTimeout(handle);
     };
-  }, [query]);
+  }, [query, userSearch]);
 
   return { options, loading };
 };
@@ -86,12 +88,15 @@ function detectMentionTrigger(view: any): MentionTriggerState | null {
 // useMentionPanel — drives trigger detection, search, keyboard & selection
 // ---------------------------------------------------------------------------
 
-export function useMentionPanel(view: any) {
+export function useMentionPanel(view: any, userSearch?: UserSearchAdapter) {
   const [trigger, setTrigger] = React.useState<MentionTriggerState | null>(
     null,
   );
   const [activeIndex, setActiveIndex] = React.useState(0);
-  const { options, loading } = useUserSearchQuery(trigger?.query ?? "");
+  const { options, loading } = useUserSearchQuery(
+    trigger?.query ?? "",
+    userSearch,
+  );
 
   // Refs for use inside event handlers (stable, no stale closures)
   const triggerRef = React.useRef(trigger);

@@ -4,11 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/tabs";
 import { imgbbGuide } from "./imgbb-guide";
 import { imgboxGuide } from "./imgbox-guide";
 import { postimagesGuide } from "./postimages-guide";
-import { rezicsUploadProvider } from "./RezicsUploadProvider";
 import type { ImageProvider } from "./types";
 
 const defaultProviders: ImageProvider[] = [
-  rezicsUploadProvider,
   imgbbGuide,
   postimagesGuide,
   imgboxGuide,

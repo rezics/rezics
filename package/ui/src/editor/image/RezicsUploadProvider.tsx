@@ -1,4 +1,3 @@
-import { useImageUpload } from "@rezics/api/upload/upload.mutations";
 import {
   Camera as CameraAltIcon,
   CloudUpload as CloudUploadIcon,
@@ -6,20 +5,21 @@ import {
 import { useCallback, useRef, useState } from "react";
 import { Alert, AlertDescription } from "@/shadcn/alert";
 import { Spinner } from "@/primitive/feedback/Spinner";
-import type { ImageProvider } from "./types";
+import type { ImageProvider, ImageUploadAdapter } from "./types";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ACCEPTED_EXTENSIONS = ".jpg,.jpeg,.png,.webp,.gif";
 
 interface UploadContentProps {
   onInsert: (url: string, alt?: string) => void;
+  uploadImage: ImageUploadAdapter;
 }
 
-function UploadContent({ onInsert }: UploadContentProps) {
+function UploadContent({ onInsert, uploadImage }: UploadContentProps) {
   const [dragActive, setDragActive] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const mutation = useImageUpload();
 
   const processFile = useCallback(
     async (file: File) => {
@@ -29,6 +29,7 @@ function UploadContent({ onInsert }: UploadContentProps) {
       }
 
       setError(null);
+      setIsPending(true);
 
       try {
         const imageCompression = await import("browser-image-compression");
@@ -38,13 +39,15 @@ function UploadContent({ onInsert }: UploadContentProps) {
           useWebWorker: true,
         });
 
-        const result = await mutation.mutateAsync(compressed);
-        onInsert(result.url);
+        const result = await uploadImage(compressed);
+        onInsert(result.url, result.alt);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Upload failed");
+      } finally {
+        setIsPending(false);
       }
     },
-    [mutation, onInsert],
+    [onInsert, uploadImage],
   );
 
   const handleDrop = useCallback(
@@ -100,7 +103,7 @@ function UploadContent({ onInsert }: UploadContentProps) {
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
       >
-        {mutation.isPending ? (
+        {isPending ? (
           <div className="flex flex-col items-center gap-2">
             <Spinner size="lg" />
             <p className="text-sm text-rezics-fg-muted">Uploading...</p>
@@ -135,9 +138,15 @@ function UploadContent({ onInsert }: UploadContentProps) {
   );
 }
 
-export const rezicsUploadProvider: ImageProvider = {
-  name: "rezics-upload",
-  label: "Upload",
-  icon: <CloudUploadIcon className="size-4" />,
-  render: ({ onInsert }) => <UploadContent onInsert={onInsert} />,
-};
+export function createRezicsUploadProvider(
+  uploadImage: ImageUploadAdapter,
+): ImageProvider {
+  return {
+    name: "rezics-upload",
+    label: "Upload",
+    icon: <CloudUploadIcon className="size-4" />,
+    render: ({ onInsert }) => (
+      <UploadContent onInsert={onInsert} uploadImage={uploadImage} />
+    ),
+  };
+}
