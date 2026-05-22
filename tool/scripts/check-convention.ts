@@ -22,6 +22,9 @@
  *                                   /unit) take a unitId. A param under a short prefix whose
  *                                   name looks like an id, or a param under a long prefix
  *                                   whose name looks like a slug, is flagged.
+ * - R11 paraglide-static-access    — no dynamic access to generated Paraglide messages.
+ * - R12 contract-i18n-keys         — no i18nKey fields in contract domain objects and no
+ *                                   t(*.i18nKey) callsites.
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -75,6 +78,8 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "stories",
   "decorators",
   "corpus",
+  "labels",
+  "messages",
 ]);
 
 // Singular domain folder names that are permitted even when their plural form
@@ -138,7 +143,18 @@ const EXEMPT_PACKAGES = new Set(["auth"]);
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Rule = "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" | "R9" | "R10";
+type Rule =
+  | "R1"
+  | "R2"
+  | "R3"
+  | "R4"
+  | "R5"
+  | "R6"
+  | "R7"
+  | "R9"
+  | "R10"
+  | "R11"
+  | "R12";
 
 interface Violation {
   rule: Rule;
@@ -157,6 +173,8 @@ const SPEC_LINK: Record<Rule, string> = {
   R7: "openspec/changes/seed-unified-plan-modes/specs/seed-power-law-distribution/spec.md",
   R9: "openspec/specs/ui-component-foundation/spec.md",
   R10: "openspec/changes/user-namespace-slug/proposal.md",
+  R11: "openspec/specs/i18n-toolchain/spec.md",
+  R12: "openspec/specs/i18n-toolchain/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -692,6 +710,61 @@ function getStagedFilePaths(): string[] {
   }
 }
 
+// ─── R11 + R12: i18n invariants ─────────────────────────────────────────────
+
+function scanI18nInvariants(filePaths: string[]): Violation[] {
+  const violations: Violation[] = [];
+  const dynamicMessagePattern =
+    /\bm\s*\[\s*(?!["'][A-Za-z0-9_.-]+["'])|const\s+\{[^}]+\}\s*=\s*m\b/;
+  const i18nKeyCallPattern = /\bt\s*\([^)]*\.i18nKey\b/;
+  const contractI18nKeyPattern = /\bi18nKey\s*:/;
+
+  for (const filePath of filePaths) {
+    const relFilePath = relative(REPO_ROOT, filePath);
+    if (relFilePath === "tool/scripts/check-convention.ts") continue;
+
+    const source = readFileSync(filePath, "utf8");
+
+    if (
+      source.includes("paraglide/messages") &&
+      dynamicMessagePattern.test(source)
+    ) {
+      violations.push({
+        rule: "R11",
+        path: relFilePath,
+        message:
+          "generated Paraglide messages must be referenced statically; route dynamic discriminators through explicit label maps",
+        spec: SPEC_LINK.R11,
+      });
+    }
+
+    if (i18nKeyCallPattern.test(source)) {
+      violations.push({
+        rule: "R12",
+        path: relFilePath,
+        message:
+          "`t(*.i18nKey)` is forbidden; use @rezics/i18n label helpers instead",
+        spec: SPEC_LINK.R12,
+      });
+    }
+
+    if (
+      relFilePath.startsWith("package/contract/src/") &&
+      contractI18nKeyPattern.test(source)
+    ) {
+      violations.push({
+        rule: "R12",
+        path: relFilePath,
+        message:
+          "contract domain objects must not define i18nKey fields; message identity belongs in @rezics/i18n",
+        spec: SPEC_LINK.R12,
+      });
+    }
+  }
+
+  return violations;
+}
+
 // ─── Snapshot baseline ──────────────────────────────────────────────────────
 
 interface ViolationSnapshot {
@@ -720,6 +793,8 @@ function buildSnapshot(violations: Violation[]): ViolationSnapshot {
     R7: 0,
     R9: 0,
     R10: 0,
+    R11: 0,
+    R12: 0,
   };
   const keys: string[] = [];
   for (const violation of violations) {
@@ -813,14 +888,16 @@ function main() {
     ...scanPowerLawImports(tsAndTsxFiles),
     ...scanTokenConsumption(r9CandidateFiles),
     ...scanShortLongSlugConvention(routeFiles),
+    ...scanI18nInvariants(tsAndTsxFiles),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5, R6, R7, R9, R10 } = currentSnapshot.byRule;
+    const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12 } =
+      currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10} R11=${R11} R12=${R12})`,
     );
     process.exit(0);
   }
@@ -837,12 +914,13 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5, R6, R7, R9, R10 } = currentSnapshot.byRule;
+  const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12 } =
+    currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
   console.log(
-    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}`,
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}  R11=${R11}  R12=${R12}`,
   );
 
   if (newViolations.length > 0) {
