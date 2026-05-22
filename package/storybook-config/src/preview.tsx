@@ -1,4 +1,6 @@
-import type { Decorator } from "@storybook/react-vite";
+/// <reference path="./virtual-modules.d.ts" />
+
+import type { Decorator, Preview } from "@storybook/react-vite";
 import { useEffect } from "react";
 import { GLOBALS_UPDATED } from "storybook/internal/core-events";
 import { addons } from "storybook/preview-api";
@@ -62,7 +64,26 @@ export const themeGlobalTypes = {
       dynamicTitle: true,
     },
   },
-} as const;
+} satisfies NonNullable<Preview["globalTypes"]>;
+
+export const localeGlobalTypes = {
+  locale: {
+    name: "Locale",
+    description: "UI language",
+    defaultValue: "zh-hant",
+    toolbar: {
+      icon: "globe",
+      items: [
+        { value: "zh-hant", title: "繁體中文" },
+        { value: "zh-hans", title: "简体中文" },
+        { value: "en", title: "English" },
+        { value: "ja", title: "日本語" },
+        { value: "de", title: "Deutsch" },
+      ],
+      dynamicTitle: true,
+    },
+  },
+} satisfies NonNullable<Preview["globalTypes"]>;
 
 export const basePreviewParameters = {
   layout: "padded",
