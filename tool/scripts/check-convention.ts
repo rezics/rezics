@@ -25,6 +25,7 @@
  * - R11 paraglide-static-access    — no dynamic access to generated Paraglide messages.
  * - R12 contract-i18n-keys         — no i18nKey fields in contract domain objects and no
  *                                   t(*.i18nKey) callsites.
+ * - R13 ui-package-autonomy        — core @rezics/ui cannot import host runtime deps.
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -154,7 +155,8 @@ type Rule =
   | "R9"
   | "R10"
   | "R11"
-  | "R12";
+  | "R12"
+  | "R13";
 
 interface Violation {
   rule: Rule;
@@ -175,6 +177,7 @@ const SPEC_LINK: Record<Rule, string> = {
   R10: "openspec/changes/user-namespace-slug/proposal.md",
   R11: "openspec/specs/i18n-toolchain/spec.md",
   R12: "openspec/specs/i18n-toolchain/spec.md",
+  R13: "openspec/changes/make-ui-package-standalone/specs/ui-package-autonomy/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -403,7 +406,11 @@ function scanFolders(directoryPaths: string[]): Violation[] {
 
 // ─── R5: raw <a href> scanning ──────────────────────────────────────────────
 
-const R5_FILE_ALLOWLIST = new Set(["package/ui/src/link/SafeLink.tsx"]);
+const R5_FILE_ALLOWLIST = new Set([
+  "package/ui/src/link/SafeLink.tsx",
+  "package/ui/src/primitive/link/Link.tsx",
+  "package/ui/src/primitive/link/TextLink.tsx",
+]);
 
 const RAW_ANCHOR_PATTERN = /<a\s[^>]*href=/g;
 
@@ -433,6 +440,73 @@ function scanRawAnchors(tsxFiles: string[]): Violation[] {
       }
       RAW_ANCHOR_PATTERN.lastIndex = 0;
     }
+  }
+
+  return violations;
+}
+
+// ─── R13: @rezics/ui package autonomy ──────────────────────────────────────
+
+const UI_FORBIDDEN_HOST_IMPORT_PATTERN =
+  /from\s+["'](@tanstack\/react-router|@rezics\/api(?:\/[^"']*)?|@rezics\/server(?:\/[^"']*)?|@rezics\/app(?:\/[^"']*)?|@rezics\/admin(?:\/[^"']*)?)["']|import\s*\(\s*["'](@tanstack\/react-router|@rezics\/api(?:\/[^"']*)?|@rezics\/server(?:\/[^"']*)?|@rezics\/app(?:\/[^"']*)?|@rezics\/admin(?:\/[^"']*)?)["']\s*\)/g;
+
+function isUiAutonomyAllowedPath(relPath: string): boolean {
+  return (
+    /\.stories\.tsx?$/.test(relPath) ||
+    /\.test\.tsx?$/.test(relPath) ||
+    relPath.startsWith("package/ui/src/mocks/")
+  );
+}
+
+function scanUiPackageAutonomy(candidateFiles: string[]): Violation[] {
+  const violations: Violation[] = [];
+
+  for (const filePath of candidateFiles) {
+    const relPath = relative(REPO_ROOT, filePath);
+    if (!relPath.startsWith("package/ui/src/")) continue;
+    if (isUiAutonomyAllowedPath(relPath)) continue;
+
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      if (UI_FORBIDDEN_HOST_IMPORT_PATTERN.test(lines[i]!)) {
+        violations.push({
+          rule: "R13",
+          path: `${relPath}:${i + 1}`,
+          message:
+            "Core @rezics/ui source imports a host runtime dependency — inject the capability or move the integration to an app/admin wrapper",
+          spec: SPEC_LINK.R13,
+        });
+      }
+      UI_FORBIDDEN_HOST_IMPORT_PATTERN.lastIndex = 0;
+    }
+  }
+
+  try {
+    const content = readFileSync(
+      join(REPO_ROOT, "package/ui/src/shadcn/index.ts"),
+      "utf8",
+    );
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      if (/from\s+["']\.\/sections["']/.test(lines[i]!)) {
+        violations.push({
+          rule: "R13",
+          path: `package/ui/src/shadcn/index.ts:${i + 1}`,
+          message:
+            "@rezics/ui/shadcn must not re-export demo/dashboard sections from the primitive barrel",
+          spec: "openspec/changes/make-ui-package-standalone/specs/ui-component-foundation/spec.md",
+        });
+      }
+    }
+  } catch {
+    // Ignore missing barrel in partial worktrees.
   }
 
   return violations;
@@ -795,6 +869,7 @@ function buildSnapshot(violations: Violation[]): ViolationSnapshot {
     R10: 0,
     R11: 0,
     R12: 0,
+    R13: 0,
   };
   const keys: string[] = [];
   for (const violation of violations) {
@@ -889,15 +964,16 @@ function main() {
     ...scanTokenConsumption(r9CandidateFiles),
     ...scanShortLongSlugConvention(routeFiles),
     ...scanI18nInvariants(tsAndTsxFiles),
+    ...scanUiPackageAutonomy(tsAndTsxFiles),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12 } =
+    const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13 } =
       currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10} R11=${R11} R12=${R12})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10} R11=${R11} R12=${R12} R13=${R13})`,
     );
     process.exit(0);
   }
@@ -914,13 +990,13 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12 } =
+  const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13 } =
     currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
   console.log(
-    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}  R11=${R11}  R12=${R12}`,
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}  R11=${R11}  R12=${R12}  R13=${R13}`,
   );
 
   if (newViolations.length > 0) {
