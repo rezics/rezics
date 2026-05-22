@@ -2,7 +2,9 @@
 
 ### Requirement: Sparse field locks
 
-The system SHALL store protected Unit fields in a sparse `UnitFieldLock` table. A row with `fieldKey = "*"` SHALL lock the entire Unit against community edits. Field keys SHALL be contract-defined semantic keys rather than raw database column names. Long-form content field keys SHALL reference content document sub-paths such as the whole content document, the main block, or specific slot ids. The removed `post.body` field key SHALL NOT be used for new content edits.
+The system SHALL store protected Unit fields in a sparse `UnitFieldLock` table. A row with `fieldKey = "*"` SHALL lock the entire Unit against community edits. Field keys SHALL be contract-defined semantic keys rather than raw database column names. Runtime v1 SHALL wire long-form content locks only for the supported main block (`post.content.main`) and broad whole-content lock (`post.content`). The removed `post.body` field key SHALL NOT be used for new content edits. Slot/layout field keys are contract-reserved but not enforced by this change.
+
+Authority SHALL compare the submitted full JSON's `content.main` against the stored `content.main` to decide whether a supported content edit is being attempted. Authority SHALL NOT recursively validate `ContentDoc` shape, parse markdown directives, or inspect slots/layout to decide locks in this change.
 
 #### Scenario: Field lock blocks community edit
 
@@ -28,12 +30,19 @@ The system SHALL store protected Unit fields in a sparse `UnitFieldLock` table. 
 - **AND** a community editor attempts to change `content.main`
 - **THEN** the edit SHALL be rejected with a 403-style authority error
 
-#### Scenario: Slot lock blocks only that slot
+#### Scenario: Slot lock is not enforced in runtime v1
 
 - **WHEN** Unit A has a `UnitFieldLock` row for `fieldKey = "post.content.slots.infobox"`
-- **AND** a community editor attempts to change `content.slots.infobox`
-- **THEN** the edit SHALL be rejected with a 403-style authority error
-- **AND** an edit to `content.main` on the same Unit (with no other matching lock) SHALL be admitted
+- **AND** a community editor attempts to change only `content.slots.infobox`
+- **THEN** this change SHALL NOT reject the edit based on that slot lock
+- **AND** slot/layout lock enforcement SHALL be added only when slot/layout runtime support is designed
+
+#### Scenario: Main no-op does not trip lock
+
+- **WHEN** Unit A has a `UnitFieldLock` row for `fieldKey = "post.content.main"`
+- **AND** a community editor submits full content JSON whose `main` value is structurally equal to the stored `content.main`
+- **THEN** the lock layer SHALL treat the update as no-op for that field
+- **AND** it SHALL NOT reject the request solely because `main` was present
 
 ## ADDED Requirements
 
@@ -41,12 +50,12 @@ The system SHALL store protected Unit fields in a sparse `UnitFieldLock` table. 
 
 The field-key vocabulary SHALL replace the legacy `post.body` key with content document sub-path keys. Wiki and chapter content mutations SHALL report changed field keys using the content document vocabulary. New lock rows SHALL NOT be created with `fieldKey = "post.body"`.
 
-The first-class content sub-path keys SHALL be:
+The content sub-path vocabulary SHALL be:
 
-- `post.content` — locks or marks the whole `ContentDoc`
-- `post.content.main` — locks or marks the `main` block
-- `post.content.slots.<slotId>` — locks or marks one specific slot
-- `post.content.layout` — locks or marks the layout array
+- `post.content` — locks the whole supported content surface
+- `post.content.main` — locks or marks the supported `main` block
+- `post.content.slots.<slotId>` — reserved for future slot support; not enforced by this change
+- `post.content.layout` — reserved for future layout support; not enforced by this change
 
 #### Scenario: Wiki content edit records content key
 
@@ -57,5 +66,5 @@ The first-class content sub-path keys SHALL be:
 #### Scenario: Whole-content lock blocks all content edits
 
 - **WHEN** Unit A has `UnitFieldLock("post.content")`
-- **AND** a community editor attempts to change any sub-path of `content` (main, any slot, or layout)
+- **AND** a community editor attempts to change supported `content.main`
 - **THEN** the edit SHALL be rejected

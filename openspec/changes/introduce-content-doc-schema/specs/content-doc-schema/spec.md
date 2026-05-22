@@ -2,17 +2,18 @@
 
 ### Requirement: Versioned ContentDoc envelope
 
-The contract package SHALL define a `ContentDoc` schema for long-form editable content. A content document SHALL include `schema = "rezics.content"`, a numeric `version`, a required `main` content block, an optional `slots` object, and an optional `layout` array.
+The contract package SHALL define a preferred `ContentDoc` schema for long-form editable content. A preferred content document SHALL include `schema = "rezics.content"`, a numeric `version`, a required `main` content block, an optional `slots` object, and an optional `layout` array. This schema is a producer/editor/consumer contract and helper shape, not a recursive server-side write validation requirement.
 
-#### Scenario: Markdown document validates
+#### Scenario: Markdown document validates in contract helpers
 
 - **WHEN** a content document contains `schema = "rezics.content"`, `version = 1`, and `main = { type: "markdown", source: "Hello" }`
-- **THEN** contract validation SHALL accept the document at the write boundary
+- **THEN** contract-level validation helpers SHALL accept the document
 
-#### Scenario: Unsupported document schema or version at write time
+#### Scenario: Unsupported document schema or version is preserved by the server
 
 - **WHEN** a client submits a content document with an unknown `schema` value or a `version` that the server does not support
-- **THEN** the server SHALL reject the write with a validation error
+- **THEN** the server SHALL NOT reject the write solely for that reason
+- **AND** readers SHALL preserve the stored value for tolerant rendering / extraction fallback
 
 ### Requirement: UnitRef is the universal cross-Unit reference primitive
 
@@ -89,14 +90,31 @@ Directive attributes inside the `main` source MAY override the slot's stored `re
 - **AND** `content.slots["character-list"]` exists
 - **THEN** the directive is a valid inline placement of that slot
 
-### Requirement: Slot placement is exclusive
+### Requirement: Slot placement is exclusive in preferred documents
 
-For any `slotId` defined in `content.slots`, the slot SHALL appear in at most one of: (a) an inline directive inside `content.main.source`, (b) a `layout` entry. A slot MAY also appear in neither, in which case it is stored but not currently rendered.
+For any `slotId` defined in a preferred `content.slots` document, the slot SHOULD appear in at most one of: (a) an inline directive inside `content.main.source`, (b) a `layout` entry. A slot MAY also appear in neither, in which case it is stored but not currently rendered. Editors and contract tests SHALL enforce this preferred shape; server write paths SHALL NOT recursively parse directives or reject stored content solely because placement is ambiguous.
 
-#### Scenario: Slot in both inline directive and layout is rejected
+#### Scenario: Slot in both inline directive and layout is flagged by contract helpers
 
 - **WHEN** a client submits a content document where `slots.foo` is referenced by a `:slot[foo]` directive in `main` AND also listed in a `layout` entry
-- **THEN** the server SHALL reject the write with a validation error
+- **THEN** contract-level validation helpers SHALL report a preferred-shape violation
+- **AND** server persistence SHALL remain opaque and SHALL NOT depend on directive parsing
+
+### Requirement: Runtime v1 processes only main
+
+The full `ContentDoc` schema SHALL be available from `@rezics/contract`, but this change's runtime services SHALL only interpret `content.main` / `description.main`. Server create/update paths SHALL persist the full submitted JSON value, including `slots`, `layout`, and unknown fields, without recursively validating or interpreting non-main fields.
+
+#### Scenario: Full content JSON is persisted
+
+- **WHEN** a client updates a post with a `ContentDoc` containing `main`, `slots`, and `layout`
+- **THEN** the server SHALL persist the full JSON value
+- **AND** it SHALL NOT reject, normalize, or delete `slots` or `layout` solely because runtime v1 does not support them
+
+#### Scenario: Runtime only reads main
+
+- **WHEN** a stored `ContentDoc` contains both `main.source` and slot text
+- **THEN** rendering, search projection, authority checks, and history changed-field emission in this change SHALL use only `main`
+- **AND** slot/layout content SHALL be ignored by those services until a follow-up change supports them
 
 ### Requirement: Layout is semantic
 
@@ -110,7 +128,7 @@ For any `slotId` defined in `content.slots`, the slot SHALL appear in at most on
 
 ### Requirement: Declarative reference scanning
 
-The contract SHALL expose `scanRefs(doc: ContentDoc): UnitRef[]`. `scanRefs` SHALL walk the entire document, including all slot types in the v1 family and any nested `UnitRef`-shaped values inside infobox row values, and SHALL return a deduplicated list. When `unitType` is present on a ref, callers MAY group results by type. ContentDoc SHALL NOT carry a top-level manifest of references.
+The contract SHALL expose `scanRefs(doc: ContentDoc): UnitRef[]`. `scanRefs` SHALL walk the entire document, including all slot types in the v1 family and any nested `UnitRef`-shaped values inside infobox row values, and SHALL return a deduplicated list. When `unitType` is present on a ref, callers MAY group results by type. ContentDoc SHALL NOT carry a top-level manifest of references. This helper is contract-level in this change; runtime services SHALL NOT use it for hydration/search/history until structured slot rendering is supported.
 
 #### Scenario: Multiple slots reference Units
 
@@ -126,7 +144,7 @@ The contract SHALL expose `scanRefs(doc: ContentDoc): UnitRef[]`. `scanRefs` SHA
 
 ### Requirement: Centralized text extraction
 
-The contract SHALL expose `extractText(doc: ContentDoc): string`. `extractText` SHALL include `main` markdown source verbatim and SHALL include text-bearing fields of every v1 slot type (e.g. `infobox.rows[].label.source`, infobox markdown values, `entity-list.title.source`). Every future slot type that carries human-readable text MUST contribute to `extractText`.
+The contract SHALL expose `extractText(doc: ContentDoc): string`. `extractText` SHALL include `main` markdown source verbatim and SHALL include text-bearing fields of every v1 slot type (e.g. `infobox.rows[].label.source`, infobox markdown values, `entity-list.title.source`). Every future slot type that carries human-readable text MUST contribute to `extractText`. This helper is contract-level in this change; runtime search projection SHALL index only supported `main` text until structured slot search is supported.
 
 #### Scenario: Infobox text is included
 
@@ -141,7 +159,7 @@ The contract SHALL expose `extractText(doc: ContentDoc): string`. `extractText` 
 
 ### Requirement: Renderer trust model and Markdown fallback
 
-The contract SHALL validate `ContentDoc` at the write boundary. Read paths SHALL NOT re-validate stored documents. Renderers that cannot interpret a value SHALL render it as Markdown rather than throw. The fallback sequence SHALL be:
+Read paths SHALL NOT re-validate stored documents. Renderers that cannot interpret a value SHALL render it as Markdown rather than throw. The fallback sequence SHALL be:
 
 1. If the stored value is a string, render it as Markdown.
 2. Else if `content.main.source` is a non-empty string, render `content.main.source` as Markdown.
@@ -166,12 +184,12 @@ The contract SHALL validate `ContentDoc` at the write boundary. Read paths SHALL
 
 ### Requirement: Text projection is derived outside PostgreSQL
 
-The system SHALL NOT store `contentText` or `descriptionText` as PostgreSQL canonical or cache columns. Text projection for search SHALL be derived from `ContentDoc` during Meilisearch sync or full reindex via `extractText`.
+The system SHALL NOT store `contentText` or `descriptionText` as PostgreSQL canonical or cache columns. Text projection for search SHALL be derived from supported `ContentDoc.main` Markdown during Meilisearch sync or full reindex in this change.
 
 #### Scenario: Content is indexed
 
 - **WHEN** a post content document is synced to Meilisearch
-- **THEN** the search document SHALL include a `contentText` field derived from `extractText(content)`
+- **THEN** the search document SHALL include a `contentText` field derived from `content.main.source`
 - **AND** the source PostgreSQL row SHALL store only the canonical content JSON and typed product fields
 
 ### Requirement: ContentDoc and extra have disjoint responsibilities
