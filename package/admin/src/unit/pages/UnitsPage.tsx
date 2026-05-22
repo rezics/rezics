@@ -2,7 +2,7 @@ import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import type { UnitListResponse } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   Badge,
   Button,

@@ -2,7 +2,7 @@ import { type BookDTO, bookQueries } from "@rezics/api/book/book";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { BookListResponse } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   Button,
   Card,

@@ -2,7 +2,7 @@ import { userMutations } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 
 import { Spinner } from "@rezics/ui";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,

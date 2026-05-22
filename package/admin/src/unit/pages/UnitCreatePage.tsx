@@ -1,6 +1,6 @@
 import { unitMutations } from "@rezics/api/unit/unit.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,

@@ -1,5 +1,5 @@
 import { userMutations } from "@rezics/api/user/user.mutations";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,

@@ -25,7 +25,7 @@ import {
 import { entityKindLabel, subjectRoleLabel } from "@rezics/i18n";
 
 import { Spinner } from "@rezics/ui";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,

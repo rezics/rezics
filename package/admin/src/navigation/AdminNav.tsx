@@ -1,5 +1,5 @@
 import { useAuthSessionStore } from "@rezics/api/states";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { Link } from "@/shared/ui/link";
 import { Separator } from "@rezics/ui/shadcn";
 import { useRouterState } from "@tanstack/react-router";
 import clsx from "clsx";
