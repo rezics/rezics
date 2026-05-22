@@ -6,6 +6,7 @@ import {
   entityKindKeySchema,
   updateEntitySchema,
 } from "./entity";
+import { EntitySearchOptionsSchema } from "./meili/entity";
 
 describe("entity kind registry schemas", () => {
   test("accept registered entity kind keys", () => {
@@ -24,6 +25,8 @@ describe("entity kind registry schemas", () => {
       Value.Check(createEntitySchema, {
         kind: "person",
         avatar: "https://cdn.example/entity.png",
+        eligibleCreditRoles: ["author", "translator"],
+        eligibleSubjectRoles: ["about"],
         translations: [{ language: "en", title: "Pen Name" }],
       }),
     ).toBe(true);
@@ -42,7 +45,51 @@ describe("entity kind registry schemas", () => {
         kind: "person",
         avatar: "https://cdn.example/entity.png",
         verified: false,
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
       }),
     ).toBe(true);
+  });
+
+  test("entity eligibility arrays validate against attribution registries", () => {
+    expect(
+      Value.Check(createEntitySchema, {
+        kind: "person",
+        eligibleCreditRoles: ["author", "translator"],
+        eligibleSubjectRoles: ["about"],
+        translations: [{ language: "en", title: "Pen Name" }],
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(createEntitySchema, {
+        kind: "person",
+        eligibleCreditRoles: ["made_up_credit_role"],
+        eligibleSubjectRoles: [],
+        translations: [{ language: "en", title: "Pen Name" }],
+      }),
+    ).toBe(false);
+
+    expect(
+      Value.Check(updateEntitySchema, {
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["made_up_subject_role"],
+      }),
+    ).toBe(false);
+  });
+
+  test("entity search options use eligibility role filters", () => {
+    expect(
+      Value.Check(EntitySearchOptionsSchema, {
+        eligibleCreditRole: "author",
+        eligibleSubjectRole: "about",
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(EntitySearchOptionsSchema, {
+        eligibleCreditRole: "made_up_credit_role",
+      }),
+    ).toBe(false);
   });
 });

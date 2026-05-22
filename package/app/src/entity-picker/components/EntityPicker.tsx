@@ -3,6 +3,8 @@ import {
   type CreditAttributionRole,
   creditAttributionRoleRegistry,
   type EntityKind,
+  type SubjectAttributionRole,
+  subjectAttributionRoleRegistry,
 } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import {
@@ -29,11 +31,14 @@ import { EntityInlineCreateForm } from "./EntityInlineCreateForm";
 import { EntityResultRow } from "./EntityResultRow";
 
 const ALL_CREDIT_ROLES = "all";
+const ALL_SUBJECT_ROLES = "all";
 
 type CreditRoleFilterValue = CreditAttributionRole | typeof ALL_CREDIT_ROLES;
+type SubjectRoleFilterValue = SubjectAttributionRole | typeof ALL_SUBJECT_ROLES;
 
 export interface EntityPickerSelection {
   creditRole?: CreditAttributionRole;
+  subjectRole?: SubjectAttributionRole;
 }
 
 export interface EntityPickerProps {
@@ -53,8 +58,12 @@ export interface EntityPickerProps {
   kindHint?: EntityKind;
   /** Credit roles shown as search filters in the picker modal. */
   creditRoleOptions?: readonly CreditAttributionRole[];
+  /** Subject roles shown as search filters in the picker modal. */
+  subjectRoleOptions?: readonly SubjectAttributionRole[];
   /** Locks the picker to a single credit role and hides the role filter. */
   lockedCreditRole?: CreditAttributionRole;
+  /** Locks the picker to a single subject role and hides the role filter. */
+  lockedSubjectRole?: SubjectAttributionRole;
   /** Prevents selection while the role filter is set to `all`. */
   requireCreditRoleForSelect?: boolean;
 }
@@ -68,7 +77,9 @@ export function EntityPicker({
   kindHints,
   kindHint,
   creditRoleOptions,
+  subjectRoleOptions,
   lockedCreditRole,
+  lockedSubjectRole,
   requireCreditRoleForSelect = false,
 }: EntityPickerProps) {
   const { t } = useTranslation();
@@ -76,27 +87,35 @@ export function EntityPicker({
   const [creating, setCreating] = useState(false);
   const [creditRoleFilter, setCreditRoleFilter] =
     useState<CreditRoleFilterValue>(lockedCreditRole ?? ALL_CREDIT_ROLES);
+  const [subjectRoleFilter, setSubjectRoleFilter] =
+    useState<SubjectRoleFilterValue>(lockedSubjectRole ?? ALL_SUBJECT_ROLES);
   const [selectionError, setSelectionError] = useState<string | null>(null);
   const debouncedQuery = useDebouncedValue(query.trim(), 200);
   const activeCreditRole =
     lockedCreditRole ??
     (creditRoleFilter === ALL_CREDIT_ROLES ? undefined : creditRoleFilter);
+  const activeSubjectRole =
+    lockedSubjectRole ??
+    (subjectRoleFilter === ALL_SUBJECT_ROLES ? undefined : subjectRoleFilter);
 
   const effectiveKindHints = useMemo(
     () =>
       activeCreditRole
         ? creditAttributionRoleRegistry[activeCreditRole].entityKindHints
-        : (kindHints ?? (kindHint ? [kindHint] : [])),
-    [activeCreditRole, kindHint, kindHints],
+        : activeSubjectRole
+          ? subjectAttributionRoleRegistry[activeSubjectRole].entityKindHints
+          : (kindHints ?? (kindHint ? [kindHint] : [])),
+    [activeCreditRole, activeSubjectRole, kindHint, kindHints],
   );
 
   const searchQuery = useMemo(
     () => ({
       q: debouncedQuery || undefined,
       limit: 12,
-      creditRole: activeCreditRole,
+      eligibleCreditRole: activeCreditRole,
+      eligibleSubjectRole: activeSubjectRole,
     }),
-    [activeCreditRole, debouncedQuery],
+    [activeCreditRole, activeSubjectRole, debouncedQuery],
   );
 
   const { data, isFetching } = useEntitySearch(searchQuery);
@@ -129,7 +148,10 @@ export function EntityPicker({
       return;
     }
 
-    const accepted = onSelect(unitId, { creditRole: activeCreditRole });
+    const accepted = onSelect(unitId, {
+      creditRole: activeCreditRole,
+      subjectRole: activeSubjectRole,
+    });
     if (accepted === false) return;
     reset();
     onOpenChange(false);
@@ -139,6 +161,7 @@ export function EntityPicker({
     setQuery("");
     setCreating(false);
     setCreditRoleFilter(lockedCreditRole ?? ALL_CREDIT_ROLES);
+    setSubjectRoleFilter(lockedSubjectRole ?? ALL_SUBJECT_ROLES);
     setSelectionError(null);
   };
 
@@ -185,6 +208,38 @@ export function EntityPicker({
                   {creditRoleOptions.map((role) => (
                     <SelectItem key={role} value={role}>
                       {t(creditAttributionRoleRegistry[role].i18nKey, role)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          ) : null}
+          {!lockedSubjectRole && subjectRoleOptions?.length ? (
+            <Select
+              value={subjectRoleFilter}
+              onValueChange={(value) => {
+                setSubjectRoleFilter(value as SubjectRoleFilterValue);
+                setCreating(false);
+                setSelectionError(null);
+              }}
+            >
+              <SelectTrigger
+                id="entity-picker-subject-role"
+                className="w-40 shrink-0"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>
+                    {t("entity_picker.filters.subject_role", "Subject role")}
+                  </SelectLabel>
+                  <SelectItem value={ALL_SUBJECT_ROLES}>
+                    {t("entity_picker.filters.all", "All")}
+                  </SelectItem>
+                  {subjectRoleOptions.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {t(subjectAttributionRoleRegistry[role].i18nKey, role)}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -261,6 +316,8 @@ export function EntityPicker({
             initialTitle={query.trim()}
             creationContext={creationContext}
             kindHint={effectiveKindHints[0]}
+            selectedCreditRole={activeCreditRole}
+            selectedSubjectRole={activeSubjectRole}
             onCreated={handleSelect}
             onCancel={() => setCreating(false)}
           />

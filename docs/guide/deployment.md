@@ -93,6 +93,19 @@ push to dev
 
 The deploy job includes **service self-healing**: if a systemd unit doesn't exist on the VPS, it is automatically installed and enabled from `tool/install-services/`.
 
+### Meilisearch Entity Eligibility Resync
+
+Deploys that include the Entity role eligibility index change must refresh the
+`entities` index after Prisma migrations run. Initialize/update the index
+settings, then run a full Entity sync so every document contains
+`eligibleCreditRoles` and `eligibleSubjectRoles` and no longer relies on
+actual-role history facets.
+
+Use the server Meili admin endpoints or the equivalent deployment automation for:
+
+1. `POST /meili/entities/init`
+2. `POST /meili/entities/sync`
+
 ### GitHub Secrets
 
 Configure these in the repository settings under **Settings > Secrets and variables > Actions**:

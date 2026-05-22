@@ -110,6 +110,8 @@ export class EntityService {
               kind: input.kind ?? undefined,
               avatar: input.avatar ?? undefined,
               verified: input.verified ?? false,
+              eligibleCreditRoles: input.eligibleCreditRoles,
+              eligibleSubjectRoles: input.eligibleSubjectRoles,
             },
           },
         },
@@ -168,7 +170,9 @@ export class EntityService {
       if (
         input.kind !== undefined ||
         input.avatar !== undefined ||
-        input.verified !== undefined
+        input.verified !== undefined ||
+        input.eligibleCreditRoles !== undefined ||
+        input.eligibleSubjectRoles !== undefined
       ) {
         await tx.entity.update({
           where: { unitId },
@@ -177,6 +181,14 @@ export class EntityService {
             avatar:
               input.avatar !== undefined ? (input.avatar ?? null) : undefined,
             verified: input.verified !== undefined ? input.verified : undefined,
+            eligibleCreditRoles:
+              input.eligibleCreditRoles !== undefined
+                ? input.eligibleCreditRoles
+                : undefined,
+            eligibleSubjectRoles:
+              input.eligibleSubjectRoles !== undefined
+                ? input.eligibleSubjectRoles
+                : undefined,
           },
         });
       }
@@ -334,6 +346,12 @@ export function mapEntityUpdateFieldKeys(
     input.avatar !== undefined ? EntityFieldKey.AVATAR : undefined,
     input.verified !== undefined ? EntityFieldKey.VERIFIED : undefined,
     input.slug !== undefined ? EntityFieldKey.SLUG : undefined,
+    input.eligibleCreditRoles !== undefined
+      ? EntityFieldKey.ELIGIBLE_CREDIT_ROLES
+      : undefined,
+    input.eligibleSubjectRoles !== undefined
+      ? EntityFieldKey.ELIGIBLE_SUBJECT_ROLES
+      : undefined,
     ...(input.translations ?? []).flatMap((tr) => [
       ...mapTranslationFieldKeys(tr),
       tr.title !== undefined ? UnitCommonFieldKey.TITLE : undefined,

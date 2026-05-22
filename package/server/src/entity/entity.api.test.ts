@@ -72,6 +72,8 @@ function entityRow(unitId = "entity-1", slug: string | null = null) {
     kind: "person",
     avatar: "https://cdn.example/entity.png",
     verified: false,
+    eligibleCreditRoles: ["author"],
+    eligibleSubjectRoles: ["about"],
     unit: {
       id: unitId,
       type: "ENTITY",
@@ -220,6 +222,8 @@ describe("POST /entity body validation", () => {
         body: JSON.stringify({
           kind: "person",
           slug: "test",
+          eligibleCreditRoles: ["author"],
+          eligibleSubjectRoles: ["about"],
           translations: [{ language: "en", title: "X" }],
         }),
       }),
@@ -243,6 +247,8 @@ describe("POST /entity body validation", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           kind: "made_up_kind",
+          eligibleCreditRoles: ["author"],
+          eligibleSubjectRoles: ["about"],
           translations: [{ language: "en", title: "X" }],
         }),
       }),

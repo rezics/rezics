@@ -1,4 +1,4 @@
-import { PostKind } from "../generated/client.js";
+import { PostKind, UnitType } from "../generated/client.js";
 import { seedBooks, seedChaptersForBook } from "./books.js";
 import { seedEchoKV } from "./echokv.js";
 import { seedEngagement } from "./engagement.js";
@@ -9,7 +9,7 @@ import {
   seedSubjectEntities,
 } from "./entities.js";
 import { seedGames } from "./games.js";
-import { createSeedResult } from "./manifest.js";
+import { addSeedManifestEntry, createSeedResult } from "./manifest.js";
 import { seedMedia } from "./media.js";
 import { seedPinboard } from "./pinboard.js";
 import { seedPostsForWorks, seedWikiTranslationGroups } from "./posts.js";
@@ -49,6 +49,14 @@ export async function runFactorySeed(
   console.log(
     `[Seed]   ${users.length} users, ${people.length} person entities, ${organizations.length} organization entities, ${subjects.length} subject entities`,
   );
+  for (const entity of [...people, ...organizations, ...subjects]) {
+    addSeedManifestEntry(result, {
+      label: `Entity ${entity.name}`,
+      unitType: UnitType.ENTITY,
+      unitId: entity.unitId,
+      syncTargets: ["entity"],
+    });
+  }
   done();
 
   done = stepTimer("Step 2: Tags");

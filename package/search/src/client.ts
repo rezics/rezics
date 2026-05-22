@@ -183,10 +183,8 @@ export class SearchClient {
         "kind",
         "verified",
         "ownerUnitId",
-        "creditRoles",
-        "creditUnitTypes",
-        "subjectRoles",
-        "subjectUnitTypes",
+        "eligibleCreditRoles",
+        "eligibleSubjectRoles",
       ],
       sortableAttributes: ["createdAt", "updatedAt"],
     });

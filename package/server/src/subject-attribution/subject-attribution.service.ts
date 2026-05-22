@@ -8,7 +8,6 @@ import type {
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { patchContentSubjectsToMeili } from "@/meili/content/sync";
-import { patchEntitySubjectFacetsToMeili } from "@/meili/entity/sync";
 import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
@@ -43,11 +42,35 @@ export class SubjectAttributionService {
     }
   }
 
+  private async assertSubjectEligibility(
+    req: LinkSubjectAttributionInput,
+  ): Promise<void> {
+    const entity = await prisma.entity.findUnique({
+      where: { unitId: req.entityId },
+      select: { eligibleSubjectRoles: true },
+    });
+
+    if (!entity) {
+      throw new AppError(404, "Subject Entity not found", {
+        code: "subject_entity_not_found",
+        details: { entityId: req.entityId },
+      });
+    }
+
+    if (!entity.eligibleSubjectRoles.includes(req.role)) {
+      throw new AppError(400, "Entity is not eligible for subject role", {
+        code: "subject_entity_role_ineligible",
+        details: { entityId: req.entityId, role: req.role },
+      });
+    }
+  }
+
   async link(
     req: LinkSubjectAttributionInput,
     actor?: RezicsSessionClaims,
   ): Promise<SubjectAttributionDTO> {
     await this.assertEntityUnit(req.entityId);
+    await this.assertSubjectEligibility(req);
 
     if (!actor) {
       const row = await prisma.subjectAttribution.create({
@@ -61,7 +84,6 @@ export class SubjectAttributionService {
         include: subjectAttributionInclude,
       });
       await patchContentSubjectsToMeili(req.unitId);
-      await patchEntitySubjectFacetsToMeili(req.entityId);
       return mapSubjectAttributionToDTO(row);
     }
 
@@ -88,7 +110,6 @@ export class SubjectAttributionService {
       return created;
     });
     await patchContentSubjectsToMeili(req.unitId);
-    await patchEntitySubjectFacetsToMeili(req.entityId);
     return mapSubjectAttributionToDTO(row);
   }
 
@@ -105,7 +126,6 @@ export class SubjectAttributionService {
         },
       });
       await patchContentSubjectsToMeili(unitId);
-      await patchEntitySubjectFacetsToMeili(entityId);
       return;
     }
 
@@ -126,7 +146,6 @@ export class SubjectAttributionService {
       });
     });
     await patchContentSubjectsToMeili(unitId);
-    await patchEntitySubjectFacetsToMeili(entityId);
   }
 
   async listByUnit(

@@ -141,4 +141,39 @@ describe("syncSeedManifestToMeili", () => {
     expect(summary.targets.user).toBe(1);
     expect(summary.total).toBe(1);
   });
+
+  test("syncs entity manifest entries through the entity target", async () => {
+    const syncContent = mock(async () => {});
+    const syncPost = mock(async () => {});
+    const syncRealm = mock(async () => {});
+    const syncEntity = mock(async () => {});
+    const patchContentContainedUnitIds = mock(async () => {});
+
+    const summary = await syncSeedManifestToMeili(
+      {
+        prisma: {},
+      } as SeedCtx,
+      [
+        {
+          label: "Seeded entity",
+          unitType: UnitType.ENTITY,
+          unitId: "entity-1",
+          syncTargets: ["entity"],
+        },
+      ],
+      {
+        searchClient: {} as never,
+        syncContent,
+        syncPost,
+        syncRealm,
+        syncEntity,
+        patchContentContainedUnitIds,
+      },
+    );
+
+    expect(syncEntity).toHaveBeenCalledTimes(1);
+    expect(syncEntity).toHaveBeenCalledWith({}, "entity-1");
+    expect(summary.targets.entity).toBe(1);
+    expect(summary.total).toBe(1);
+  });
 });

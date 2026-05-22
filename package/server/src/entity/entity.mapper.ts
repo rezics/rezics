@@ -8,6 +8,8 @@ export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
     kind: row.kind ?? undefined,
     avatar: row.avatar ?? undefined,
     verified: row.verified,
+    eligibleCreditRoles: row.eligibleCreditRoles,
+    eligibleSubjectRoles: row.eligibleSubjectRoles,
     slug: row.unit.slug ?? undefined,
     ownerUnitId: row.unit.userId ?? undefined,
     translations: row.unit.translations?.map((tr) => ({

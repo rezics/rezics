@@ -39,6 +39,8 @@ function makeEntityRow(overrides: Record<string, any> = {}) {
     kind: overrides.kind ?? "person",
     avatar: overrides.avatar ?? null,
     verified: overrides.verified ?? false,
+    eligibleCreditRoles: overrides.eligibleCreditRoles ?? ["author"],
+    eligibleSubjectRoles: overrides.eligibleSubjectRoles ?? ["about"],
     unit: {
       id: overrides.unitId ?? "entity-1",
       type: "ENTITY",
@@ -123,6 +125,8 @@ describe("EntityService.create", () => {
     const row = await entityService.create(
       {
         kind: "person",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
         translations: [{ language: "en", title: "Test Author" }],
       },
       { callerUnitId: "user-1", isAdmin: false },
@@ -140,6 +144,8 @@ describe("EntityService.create", () => {
       {
         kind: "person",
         avatar: "https://cdn.example/entity.png",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
         translations: [{ language: "en", title: "Test Author" }],
       },
       { callerUnitId: "user-1", isAdmin: false },
@@ -160,6 +166,8 @@ describe("EntityService.create", () => {
         {
           kind: "person",
           slug: "test",
+          eligibleCreditRoles: ["author"],
+          eligibleSubjectRoles: ["about"],
           translations: [{ language: "en", title: "T" }],
         },
         { callerUnitId: "user-1", isAdmin: false },
@@ -176,6 +184,8 @@ describe("EntityService.create", () => {
         {
           kind: "person",
           verified: true,
+          eligibleCreditRoles: ["author"],
+          eligibleSubjectRoles: ["about"],
           translations: [{ language: "en", title: "T" }],
         },
         { callerUnitId: "user-1", isAdmin: false },
@@ -192,6 +202,8 @@ describe("EntityService.create", () => {
         {
           kind: "person",
           slug: "test",
+          eligibleCreditRoles: ["author"],
+          eligibleSubjectRoles: ["about"],
           translations: [{ language: "en", title: "T" }],
         },
         { callerUnitId: "admin-1", isAdmin: true },
@@ -209,6 +221,8 @@ describe("EntityService.create", () => {
           kind: "person",
           slug: "liu-cixin",
           verified: true,
+          eligibleCreditRoles: ["author"],
+          eligibleSubjectRoles: ["about"],
           translations: [{ language: "en", title: "Liu Cixin" }],
         },
         { callerUnitId: "admin-1", isAdmin: true },
@@ -224,6 +238,8 @@ describe("EntityService.create", () => {
       {
         creationMode: "wiki",
         kind: "person",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
         translations: [{ language: "en", title: "Wiki Author" }],
       },
       { callerUnitId: "user-1", isAdmin: false },
@@ -242,6 +258,8 @@ describe("EntityService.create", () => {
       {
         creationMode: "personal",
         kind: "person",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
         translations: [{ language: "en", title: "Personal Author" }],
       },
       { callerUnitId: "user-1", isAdmin: false },
@@ -363,6 +381,34 @@ describe("EntityService.update", () => {
     expect(mapEntityUpdateFieldKeys({ avatar: null })).toContain(
       "entity.avatar",
     );
+  });
+
+  test("non-admin: eligibility update succeeds and records eligibility field keys", async () => {
+    const { txClient } = freshMocks();
+    const { entityService, mapEntityUpdateFieldKeys } = await import(
+      "./entity.service"
+    );
+
+    await expect(
+      entityService.update(
+        "entity-1",
+        {
+          eligibleCreditRoles: ["translator"],
+          eligibleSubjectRoles: ["about", "appears"],
+        },
+        { callerUnitId: "user-1", isAdmin: false },
+      ),
+    ).resolves.toBeDefined();
+
+    const updateArgs = (txClient.entity.update as any).mock.calls[0]?.[0];
+    expect(updateArgs.data.eligibleCreditRoles).toEqual(["translator"]);
+    expect(updateArgs.data.eligibleSubjectRoles).toEqual(["about", "appears"]);
+    expect(
+      mapEntityUpdateFieldKeys({ eligibleCreditRoles: ["author"] }),
+    ).toContain("entity.eligibleCreditRoles");
+    expect(
+      mapEntityUpdateFieldKeys({ eligibleSubjectRoles: ["about"] }),
+    ).toContain("entity.eligibleSubjectRoles");
   });
 });
 

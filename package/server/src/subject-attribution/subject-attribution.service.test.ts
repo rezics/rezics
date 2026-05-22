@@ -8,11 +8,6 @@ mock.module("@/meili/content/sync", () => ({
   patchContentSubjectsToMeili,
 }));
 
-const patchEntitySubjectFacetsToMeili = mock(async (_entityId: string) => {});
-mock.module("@/meili/entity/sync", () => ({
-  patchEntitySubjectFacetsToMeili,
-}));
-
 const now = new Date("2026-05-18T00:00:00.000Z");
 
 function makeSubjectRow(overrides: Record<string, any> = {}) {
@@ -73,6 +68,11 @@ function freshMocks() {
     unit: {
       findUnique: mock(async () => ({ id: "character-1", type: "ENTITY" })),
     },
+    entity: {
+      findUnique: mock(async () => ({
+        eligibleSubjectRoles: ["primary_character"],
+      })),
+    },
     subjectAttribution: {
       create: mock(async () => subjectRow),
       delete: mock(async () => subjectRow),
@@ -84,7 +84,6 @@ function freshMocks() {
 
 beforeEach(() => {
   patchContentSubjectsToMeili.mockClear();
-  patchEntitySubjectFacetsToMeili.mockClear();
 });
 
 describe("SubjectAttributionService.link", () => {
@@ -126,7 +125,27 @@ describe("SubjectAttributionService.link", () => {
 
     expect(row.entity?.kind).toBe("character");
     expect(patchContentSubjectsToMeili).toHaveBeenCalledWith("work-1");
-    expect(patchEntitySubjectFacetsToMeili).toHaveBeenCalledWith("character-1");
+  });
+
+  test("rejects an ineligible subject role before creating a row", async () => {
+    freshMocks();
+    (prismaMock.entity.findUnique as any).mockImplementation(async () => ({
+      eligibleSubjectRoles: ["about"],
+    }));
+    const { subjectAttributionService } = await import(
+      "./subject-attribution.service"
+    );
+
+    await expect(
+      subjectAttributionService.link({
+        unitId: "work-1",
+        entityId: "character-1",
+        role: "primary_character",
+      }),
+    ).rejects.toThrow(/not eligible for subject role/);
+    expect(
+      (prismaMock.subjectAttribution.create as any).mock.calls.length,
+    ).toBe(0);
   });
 });
 

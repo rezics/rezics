@@ -1287,51 +1287,9 @@ const entityIncludeForSync = {
   unit: {
     include: {
       translations: true,
-      creditedAs: {
-        include: {
-          unit: {
-            select: { type: true },
-          },
-        },
-      },
-      subjectOfAttributions: {
-        include: {
-          unit: {
-            select: { type: true },
-          },
-        },
-      },
     },
   },
 } as const;
-
-function uniqueStrings(values: unknown[]): string[] {
-  return [
-    ...new Set(
-      values.filter(
-        (value): value is string => typeof value === "string" && value !== "",
-      ),
-    ),
-  ];
-}
-
-function buildEntityCreditFacets(entity: any) {
-  const attributions: any[] = entity.unit?.creditedAs ?? [];
-  return {
-    creditRoles: uniqueStrings(attributions.map((a) => a.role)),
-    creditUnitTypes: uniqueStrings(attributions.map((a) => a.unit?.type)),
-    creditCount: attributions.length,
-  };
-}
-
-function buildEntitySubjectFacets(entity: any) {
-  const attributions: any[] = entity.unit?.subjectOfAttributions ?? [];
-  return {
-    subjectRoles: uniqueStrings(attributions.map((a) => a.role)),
-    subjectUnitTypes: uniqueStrings(attributions.map((a) => a.unit?.type)),
-    subjectCount: attributions.length,
-  };
-}
 
 export function buildEntityDocument(entity: any): EntitySearchDocument {
   const unit = entity.unit;
@@ -1339,8 +1297,6 @@ export function buildEntityDocument(entity: any): EntitySearchDocument {
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const summaries = translations.map((t: any) => t.summary).filter(Boolean);
-  const creditFacets = buildEntityCreditFacets(entity);
-  const subjectFacets = buildEntitySubjectFacets(entity);
 
   return {
     id: entity.unitId,
@@ -1352,8 +1308,8 @@ export function buildEntityDocument(entity: any): EntitySearchDocument {
     avatar: entity.avatar ?? null,
     titles,
     summaries,
-    ...creditFacets,
-    ...subjectFacets,
+    eligibleCreditRoles: entity.eligibleCreditRoles ?? [],
+    eligibleSubjectRoles: entity.eligibleSubjectRoles ?? [],
     translations: translations.map((tr: any) => ({
       language: tr.language,
       title: tr.title ?? null,
@@ -1384,74 +1340,6 @@ export async function syncSingleEntity(client: SearchClient, unitId: string) {
 
   const doc = buildEntityDocument(entity);
   await client.addOrUpdateEntities([doc]);
-}
-
-export async function patchEntityCreditFacets(
-  client: SearchClient,
-  entityId: string,
-) {
-  const entity = await getSearchPrismaClient().entity.findUnique({
-    where: { unitId: entityId },
-    include: {
-      unit: {
-        include: {
-          creditedAs: {
-            include: {
-              unit: {
-                select: { type: true },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!entity) {
-    await client.deleteEntities([entityId]);
-    return;
-  }
-
-  await client.patchEntities([
-    {
-      id: entityId,
-      ...buildEntityCreditFacets(entity),
-    },
-  ]);
-}
-
-export async function patchEntitySubjectFacets(
-  client: SearchClient,
-  entityId: string,
-) {
-  const entity = await getSearchPrismaClient().entity.findUnique({
-    where: { unitId: entityId },
-    include: {
-      unit: {
-        include: {
-          subjectOfAttributions: {
-            include: {
-              unit: {
-                select: { type: true },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!entity) {
-    await client.deleteEntities([entityId]);
-    return;
-  }
-
-  await client.patchEntities([
-    {
-      id: entityId,
-      ...buildEntitySubjectFacets(entity),
-    },
-  ]);
 }
 
 export async function syncAllEntities(client: SearchClient) {

@@ -25,11 +25,15 @@ export async function searchEntities(
   if (opts.ownerUnitId) {
     filter.push(`ownerUnitId = "${escapeValue(opts.ownerUnitId)}"`);
   }
-  if (opts.creditRole) {
-    filter.push(`creditRoles = "${escapeValue(opts.creditRole)}"`);
+  if (opts.eligibleCreditRole) {
+    filter.push(
+      `eligibleCreditRoles = "${escapeValue(opts.eligibleCreditRole)}"`,
+    );
   }
-  if (opts.subjectRole) {
-    filter.push(`subjectRoles = "${escapeValue(opts.subjectRole)}"`);
+  if (opts.eligibleSubjectRole) {
+    filter.push(
+      `eligibleSubjectRoles = "${escapeValue(opts.eligibleSubjectRole)}"`,
+    );
   }
 
   const page = Math.max(Number(opts.page ?? 1), 1);

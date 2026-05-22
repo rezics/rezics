@@ -1,6 +1,8 @@
 import { t } from "elysia";
 import { creationModeSchema } from "./content-authority";
+import { creditAttributionRoleKeySchema } from "./credit-attribution.roles";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
+import { subjectAttributionRoleKeySchema } from "./subject-attribution.roles";
 import { unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -98,6 +100,8 @@ export const entityDTOSchema = t.Object({
   kind: t.Optional(t.Nullable(entityKindKeySchema)),
   avatar: t.Optional(t.Nullable(t.String())),
   verified: t.Boolean(),
+  eligibleCreditRoles: t.Array(creditAttributionRoleKeySchema),
+  eligibleSubjectRoles: t.Array(subjectAttributionRoleKeySchema),
   slug: t.Optional(t.Nullable(t.String())),
   /** Owner Unit.userId (the creator's USER unitId) — exposed for /me/entities filtering. */
   ownerUnitId: t.Optional(t.Nullable(t.String())),
@@ -130,6 +134,8 @@ export const createEntitySchema = t.Object({
   creationMode: t.Optional(creationModeSchema),
   kind: t.Optional(t.Nullable(entityKindKeySchema)),
   avatar: t.Optional(t.Nullable(t.String())),
+  eligibleCreditRoles: t.Array(creditAttributionRoleKeySchema),
+  eligibleSubjectRoles: t.Array(subjectAttributionRoleKeySchema),
   /** Admin-only-after-verified — rejected for non-admin callers. */
   slug: t.Optional(t.Nullable(t.String())),
   /** Admin-only — rejected for non-admin callers. */
@@ -142,6 +148,8 @@ export type CreateEntityInput = (typeof createEntitySchema)["static"];
 export const updateEntitySchema = t.Object({
   kind: t.Optional(t.Nullable(entityKindKeySchema)),
   avatar: t.Optional(t.Nullable(t.String())),
+  eligibleCreditRoles: t.Optional(t.Array(creditAttributionRoleKeySchema)),
+  eligibleSubjectRoles: t.Optional(t.Array(subjectAttributionRoleKeySchema)),
   /** Admin-only AND only when target Entity has `verified = true`. */
   slug: t.Optional(t.Nullable(t.String())),
   /** Admin-only. */

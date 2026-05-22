@@ -63,6 +63,8 @@ export const EntityFieldKey = {
   AVATAR: "entity.avatar",
   VERIFIED: "entity.verified",
   SLUG: "entity.slug",
+  ELIGIBLE_CREDIT_ROLES: "entity.eligibleCreditRoles",
+  ELIGIBLE_SUBJECT_ROLES: "entity.eligibleSubjectRoles",
 } as const;
 
 export const GameFieldKey = {

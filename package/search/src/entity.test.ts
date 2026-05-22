@@ -28,6 +28,8 @@ function makeEntity(overrides: Record<string, any> = {}) {
     kind: "person",
     avatar: "https://cdn.example/liu.png",
     verified: true,
+    eligibleCreditRoles: ["author", "writer"],
+    eligibleSubjectRoles: ["primary_character"],
     unit: {
       slug: "liu-cixin",
       userId: "user-1",
@@ -47,14 +49,6 @@ function makeEntity(overrides: Record<string, any> = {}) {
           summary: null,
         },
       ],
-      creditedAs: [
-        { role: "author", unit: { type: "BOOK" } },
-        { role: "author", unit: { type: "BOOK" } },
-        { role: "writer", unit: { type: "MEDIA" } },
-      ],
-      subjectOfAttributions: [
-        { role: "primary_character", unit: { type: "POST" } },
-      ],
       ...overrides.unit,
     },
     ...overrides.entity,
@@ -62,7 +56,7 @@ function makeEntity(overrides: Record<string, any> = {}) {
 }
 
 describe("buildEntityDocument", () => {
-  test("projects avatar, identity text, and reverse attribution facets", async () => {
+  test("projects avatar, identity text, and eligibility facets", async () => {
     setServerEnvForSearchTests();
     const { buildEntityDocument } = await import("./sync");
     const doc = buildEntityDocument(makeEntity());
@@ -77,12 +71,8 @@ describe("buildEntityDocument", () => {
       avatar: "https://cdn.example/liu.png",
       titles: ["Liu Cixin", "Liu Cixin ZH"],
       summaries: ["Science fiction author"],
-      creditRoles: ["author", "writer"],
-      creditUnitTypes: ["BOOK", "MEDIA"],
-      subjectRoles: ["primary_character"],
-      subjectUnitTypes: ["POST"],
-      creditCount: 3,
-      subjectCount: 1,
+      eligibleCreditRoles: ["author", "writer"],
+      eligibleSubjectRoles: ["primary_character"],
       createdAt: "2026-05-20T12:00:00.000Z",
       updatedAt: "2026-05-20T12:00:00.000Z",
     });
@@ -95,11 +85,15 @@ describe("buildEntityDocument", () => {
 
     expect(doc.creditedUnitIds).toBeUndefined();
     expect(doc.subjectUnitIds).toBeUndefined();
+    expect(doc.creditRoles).toBeUndefined();
+    expect(doc.subjectRoles).toBeUndefined();
+    expect(doc.creditCount).toBeUndefined();
+    expect(doc.subjectCount).toBeUndefined();
   });
 });
 
 describe("SearchClient.initEntityIndex", () => {
-  test("configures role facets as filterable attributes", async () => {
+  test("configures eligibility facets as filterable attributes", async () => {
     const client = new SearchClient({
       host: "http://localhost:7700",
       apiKey: "",
@@ -115,9 +109,9 @@ describe("SearchClient.initEntityIndex", () => {
     const settings = updateSettings.mock.calls[0]?.[0] as {
       filterableAttributes: string[];
     };
-    expect(settings.filterableAttributes).toContain("creditRoles");
-    expect(settings.filterableAttributes).toContain("subjectRoles");
-    expect(settings.filterableAttributes).toContain("creditUnitTypes");
-    expect(settings.filterableAttributes).toContain("subjectUnitTypes");
+    expect(settings.filterableAttributes).toContain("eligibleCreditRoles");
+    expect(settings.filterableAttributes).toContain("eligibleSubjectRoles");
+    expect(settings.filterableAttributes).not.toContain("creditRoles");
+    expect(settings.filterableAttributes).not.toContain("subjectRoles");
   });
 });

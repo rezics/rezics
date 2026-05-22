@@ -5,6 +5,10 @@ import { unitHref } from "@rezics/ui/primitive/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
+import {
+  suggestCreditEligibility,
+  suggestSubjectEligibility,
+} from "@/entity-picker/models/eligibilitySuggestions";
 
 export function NewEntityPage() {
   const navigate = useNavigate();
@@ -38,6 +42,8 @@ export function NewEntityPage() {
     const payload: CreateEntityInput = {
       kind,
       avatar: avatar.trim() || null,
+      eligibleCreditRoles: suggestCreditEligibility(kind),
+      eligibleSubjectRoles: suggestSubjectEligibility(kind),
       creationMode: CreationMode.PERSONAL,
       translations: [{ language: language.trim() || "en", title: trimmed }],
     };

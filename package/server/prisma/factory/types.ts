@@ -42,6 +42,8 @@ export interface CreatedEntity {
   unitId: string;
   name: string;
   kind: string;
+  eligibleCreditRoles?: string[];
+  eligibleSubjectRoles?: string[];
 }
 
 export interface CreatedPost extends CreatedUnit {

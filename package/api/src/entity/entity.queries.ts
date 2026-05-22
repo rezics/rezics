@@ -36,7 +36,14 @@ export const entitySearchQueryOptions = (query?: EntitySearchOptions) => {
   return queryOptions({
     queryKey: entityKeys.search(query),
     queryFn: () => entityApi.search(query),
-    enabled: q.length > 0 || Boolean(query?.kind || query?.ownerUnitId),
+    enabled:
+      q.length > 0 ||
+      Boolean(
+        query?.kind ||
+          query?.ownerUnitId ||
+          query?.eligibleCreditRole ||
+          query?.eligibleSubjectRole,
+      ),
     staleTime: 1000 * 60 * 1,
   });
 };

@@ -21,13 +21,9 @@ export const EntitySearchDocumentSchema = t.Object({
   titles: t.Array(t.String()),
   summaries: t.Array(t.String()),
 
-  // Bounded reverse attribution facets
-  creditRoles: t.Array(t.String()),
-  creditUnitTypes: t.Array(t.String()),
-  subjectRoles: t.Array(t.String()),
-  subjectUnitTypes: t.Array(t.String()),
-  creditCount: t.Number(),
-  subjectCount: t.Number(),
+  // Entity-owned eligibility facets
+  eligibleCreditRoles: t.Array(creditAttributionRoleKeySchema),
+  eligibleSubjectRoles: t.Array(subjectAttributionRoleKeySchema),
 
   // Structured translations for display rendering
   translations: t.Array(
@@ -50,8 +46,8 @@ export const EntitySearchOptionsSchema = t.Object({
   kind: t.Optional(entityKindKeySchema),
   verified: t.Optional(t.Boolean()),
   ownerUnitId: t.Optional(t.String()),
-  creditRole: t.Optional(creditAttributionRoleKeySchema),
-  subjectRole: t.Optional(subjectAttributionRoleKeySchema),
+  eligibleCreditRole: t.Optional(creditAttributionRoleKeySchema),
+  eligibleSubjectRole: t.Optional(subjectAttributionRoleKeySchema),
   page: t.Optional(t.Numeric()),
   limit: t.Optional(t.Numeric()),
 });

@@ -1,23 +1,20 @@
 import { t } from "elysia";
 import { entityDTOSchema, entityKindKeySchema } from "./entity";
+import {
+  subjectAttributionRoleKeySchema,
+  subjectAttributionRoles,
+  type SubjectAttributionRole,
+} from "./subject-attribution.roles";
 import { unitDTOSchema } from "./unit";
+export {
+  subjectAttributionRoleKeySchema,
+  subjectAttributionRoles,
+  type SubjectAttributionRole,
+} from "./subject-attribution.roles";
 
 // ============================================================
 // ROLE REGISTRY
 // ============================================================
-
-export const subjectAttributionRoles = [
-  "primary_character",
-  "featured_character",
-  "appears",
-  "about",
-  "setting",
-  "source_work",
-  "canonical_wiki_page",
-  "related_subject",
-] as const;
-
-export type SubjectAttributionRole = (typeof subjectAttributionRoles)[number];
 
 export const subjectAttributionRoleRegistry = {
   primary_character: {
@@ -90,14 +87,6 @@ export const subjectAttributionRoleRegistry = {
       | "related";
   }
 >;
-
-export const subjectAttributionRoleKeySchema = t.Union(
-  subjectAttributionRoles.map((role) => t.Literal(role)) as [
-    ReturnType<typeof t.Literal<SubjectAttributionRole>>,
-    ReturnType<typeof t.Literal<SubjectAttributionRole>>,
-    ...ReturnType<typeof t.Literal<SubjectAttributionRole>>[],
-  ],
-);
 
 // ============================================================
 // SUBJECT ATTRIBUTION DTO

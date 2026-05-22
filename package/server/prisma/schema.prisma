@@ -739,10 +739,12 @@ model TagVote {
  */
 
 model Entity {
-  unitId   String  @id @db.Uuid
-  kind     String? @db.VarChar(32)
-  avatar   String?
-  verified Boolean @default(false)
+  unitId               String   @id @db.Uuid
+  kind                 String?  @db.VarChar(32)
+  avatar               String?
+  verified             Boolean  @default(false)
+  eligibleCreditRoles  String[] @default([])
+  eligibleSubjectRoles String[] @default([])
 
   unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 }

@@ -5,7 +5,7 @@ import type {
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { patchContentCreditsToMeili } from "@/meili/content/sync";
-import { patchEntityCreditFacetsToMeili } from "@/meili/entity/sync";
+import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
   creditRoleFieldKey,
@@ -15,11 +15,33 @@ import { mapCreditAttributionToDTO } from "./credit-attribution.mapper";
 import { creditAttributionInclude } from "./types";
 
 export class CreditAttributionService {
+  private async assertCreditEligibility(req: LinkCreditAttributionInput) {
+    const entity = await prisma.entity.findUnique({
+      where: { unitId: req.entityId },
+      select: { eligibleCreditRoles: true },
+    });
+
+    if (!entity) {
+      throw new AppError(404, "Credit Entity not found", {
+        code: "credit_entity_not_found",
+        details: { entityId: req.entityId },
+      });
+    }
+
+    if (!entity.eligibleCreditRoles.includes(req.role)) {
+      throw new AppError(400, "Entity is not eligible for credit role", {
+        code: "credit_entity_role_ineligible",
+        details: { entityId: req.entityId, role: req.role },
+      });
+    }
+  }
+
   async link(
     req: LinkCreditAttributionInput,
     actor?: RezicsSessionClaims,
   ): Promise<CreditAttributionDTO> {
     const fieldKey = creditRoleFieldKey(req.role);
+    await this.assertCreditEligibility(req);
 
     if (!actor) {
       const row = await prisma.creditAttribution.create({
@@ -32,7 +54,6 @@ export class CreditAttributionService {
         include: creditAttributionInclude,
       });
       await patchContentCreditsToMeili(req.unitId);
-      await patchEntityCreditFacetsToMeili(req.entityId);
       return mapCreditAttributionToDTO(row);
     }
 
@@ -58,7 +79,6 @@ export class CreditAttributionService {
       return created;
     });
     await patchContentCreditsToMeili(req.unitId);
-    await patchEntityCreditFacetsToMeili(req.entityId);
     return mapCreditAttributionToDTO(row);
   }
 
@@ -77,7 +97,6 @@ export class CreditAttributionService {
         },
       });
       await patchContentCreditsToMeili(unitId);
-      await patchEntityCreditFacetsToMeili(entityId);
       return;
     }
 
@@ -98,7 +117,6 @@ export class CreditAttributionService {
       });
     });
     await patchContentCreditsToMeili(unitId);
-    await patchEntityCreditFacetsToMeili(entityId);
   }
 
   async listByUnit(unitId: string): Promise<CreditAttributionDTO[]> {

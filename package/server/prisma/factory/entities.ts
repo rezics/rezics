@@ -1,6 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import { LANGUAGES } from "@rezics/contract";
+import {
+  creditAttributionRoleRegistry,
+  creditAttributionRoles,
+  LANGUAGES,
+  subjectAttributionRoleRegistry,
+  subjectAttributionRoles,
+} from "@rezics/contract";
 import type { Prisma, PrismaClient } from "../generated/client.js";
 import { UnitStatus, UnitType } from "../generated/client.js";
 import { generateTranslations, getFaker } from "./generators.js";
@@ -50,16 +56,6 @@ const SUBJECT_KINDS = [
   "concept",
 ] as const;
 
-const SUBJECT_ROLES = [
-  "primary_character",
-  "featured_character",
-  "appears",
-  "about",
-  "setting",
-  "source_work",
-  "related_subject",
-] as const;
-
 interface EntitySeedRow {
   id: string;
   primaryLang: string;
@@ -70,6 +66,18 @@ interface EntitySeedRow {
     title: string;
     description?: string;
   }[];
+}
+
+export function eligibleCreditRolesForKind(kind: EntityKind): string[] {
+  return creditAttributionRoles.filter((role) =>
+    creditAttributionRoleRegistry[role].entityKindHints.includes(kind as any),
+  );
+}
+
+export function eligibleSubjectRolesForKind(kind: EntityKind): string[] {
+  return subjectAttributionRoles.filter((role) =>
+    subjectAttributionRoleRegistry[role].entityKindHints.includes(kind as any),
+  );
 }
 
 function localeName(lang: string, kind: EntityKind): string {
@@ -139,6 +147,8 @@ async function batchInsertEntities(
         unitId: r.id,
         kind,
         verified: r.verified,
+        eligibleCreditRoles: eligibleCreditRolesForKind(kind),
+        eligibleSubjectRoles: eligibleSubjectRolesForKind(kind),
       })),
     });
   }
@@ -188,6 +198,8 @@ export async function seedPeople(
     unitId: r.id,
     name: r.primaryName,
     kind: "person",
+    eligibleCreditRoles: eligibleCreditRolesForKind("person"),
+    eligibleSubjectRoles: eligibleSubjectRolesForKind("person"),
   }));
 }
 
@@ -212,6 +224,8 @@ export async function seedOrganizations(
     unitId: r.id,
     name: r.primaryName,
     kind: "organization",
+    eligibleCreditRoles: eligibleCreditRolesForKind("organization"),
+    eligibleSubjectRoles: eligibleSubjectRolesForKind("organization"),
   }));
 }
 
@@ -242,6 +256,8 @@ export async function seedSubjectEntities(
     unitId: row.id,
     name: row.primaryName,
     kind,
+    eligibleCreditRoles: eligibleCreditRolesForKind(kind),
+    eligibleSubjectRoles: eligibleSubjectRolesForKind(kind),
   }));
 }
 
@@ -256,6 +272,8 @@ export async function seedSubjectAttributions(
   for (const work of works) {
     if (!randomBoolean(0.7)) continue;
     for (const [index, subject] of pickN(subjects, randomInt(1, 3)).entries()) {
+      const eligibleSubjectRoles = subject.eligibleSubjectRoles ?? [];
+      if (eligibleSubjectRoles.length === 0) continue;
       rows.push({
         unitId: work.id,
         entityId: subject.unitId,
@@ -266,7 +284,7 @@ export async function seedSubjectAttributions(
                 "featured_character",
                 "appears",
               ])
-            : faker.helpers.arrayElement(SUBJECT_ROLES),
+            : faker.helpers.arrayElement(eligibleSubjectRoles),
         sortOrder: index,
         weight: Number(faker.number.float({ min: 0.1, max: 1 }).toFixed(2)),
       });
