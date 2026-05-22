@@ -10,6 +10,7 @@ export const LANGUAGES = {
   EN: "en",
   JA: "ja",
   DE: "de",
+  KO: "ko",
 } as const;
 
 export type Language = (typeof LANGUAGES)[keyof typeof LANGUAGES];
@@ -20,6 +21,7 @@ export const languageSchema = t.Union([
   t.Literal("en"),
   t.Literal("ja"),
   t.Literal("de"),
+  t.Literal("ko"),
 ]);
 
 // ============================================================
@@ -35,6 +37,7 @@ export const LANGUAGE_META: Record<
   en: { name: "English", nativeName: "English" },
   ja: { name: "Japanese", nativeName: "日本語" },
   de: { name: "German", nativeName: "Deutsch" },
+  ko: { name: "Korean", nativeName: "한국어" },
 };
 
 // ============================================================

@@ -36,7 +36,8 @@ export const entityKindLabel = (kind: EntityKind) =>
   ENTITY_KIND_MESSAGE[kind]();
 ```
 
-For any new displayable contract enum, add messages for all five locales and a
+For any new displayable contract enum, add messages for all six supported UI
+locales (`zh-hant`, `zh-hans`, `en`, `ja`, `de`, and `ko`) and a
 `<enum>Label(key)` helper guarded with `satisfies Record<EnumKey, () => string>`.
 Do not use dynamic Paraglide access such as `m[runtimeKey]()`.
 

@@ -18,6 +18,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
+import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -36,17 +37,11 @@ import { ContentRatingPreferences } from "@/user/components/ContentRatingPrefere
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
-const SUPPORTED_LANGUAGES = [
-  { code: "zh-hant", label: "Traditional Chinese" },
-  { code: "zh-hans", label: "Simplified Chinese" },
-  { code: "en", label: "English" },
-  { code: "ja", label: "Japanese" },
-  { code: "de", label: "German" },
-] as const;
+const SUPPORTED_LANGUAGES = Object.values(LANGUAGES);
 
-const LANG_LABELS: Record<string, string> = Object.fromEntries(
-  SUPPORTED_LANGUAGES.map((l) => [l.code, l.label]),
-);
+function getLanguageLabel(code: string): string {
+  return LANGUAGE_META[code as Language]?.nativeName ?? code;
+}
 
 type SortableLangItemProps = {
   code: string;
@@ -91,7 +86,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
       >
         <GripVerticalIcon size={14} />
       </Button>
-      <span className="text-sm flex-1">{LANG_LABELS[code] ?? code}</span>
+      <span className="text-sm flex-1">{getLanguageLabel(code)}</span>
       <Button
         type="button"
         size="icon"
@@ -120,7 +115,7 @@ export const SettingsPreferencesSection: FC = () => {
 
   const preferredLangs: string[] = settings?.preferredLanguages ?? [];
   const availableToAdd = SUPPORTED_LANGUAGES.filter(
-    (l) => !preferredLangs.includes(l.code),
+    (language) => !preferredLangs.includes(language),
   );
   const [addPick, setAddPick] = useState<string>("");
 
@@ -218,9 +213,9 @@ export const SettingsPreferencesSection: FC = () => {
                 <SelectValue placeholder="Add language" />
               </SelectTrigger>
               <SelectContent>
-                {availableToAdd.map(({ code, label }) => (
-                  <SelectItem key={code} value={code}>
-                    {label}
+                {availableToAdd.map((language) => (
+                  <SelectItem key={language} value={language}>
+                    {getLanguageLabel(language)}
                   </SelectItem>
                 ))}
               </SelectContent>

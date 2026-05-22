@@ -39,6 +39,12 @@ describe("setRezicsLocale", () => {
     expect(getProductLocale()).toBe("zh-hant");
     expect(getUiLocale()).toBe("zh-hant");
     expect(String(uiMessages.ui_password_label())).toBe("密碼");
+
+    setRezicsLocale("ko");
+
+    expect(getProductLocale()).toBe("ko");
+    expect(getUiLocale()).toBe("ko");
+    expect(String(uiMessages.ui_password_label())).toBe("Password");
   });
 
   test("notifies React locale subscribers", () => {

@@ -10,6 +10,8 @@ import { Languages as LanguageIcon } from "lucide-react";
 import { setRezicsLocale } from "@/app/locale";
 import * as m from "@rezics/i18n/messages";
 
+const LANGUAGE_OPTIONS = Object.values(LANGUAGES);
+
 export function MiscMenuItems() {
   const changeLang = (lang: Language) => setRezicsLocale(lang);
 
@@ -21,21 +23,14 @@ export function MiscMenuItems() {
           <span>{m.layout_header_toggle_language()}</span>
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent>
-          <DropdownMenuItem onClick={() => changeLang(LANGUAGES.ZH_HANT)}>
-            {LANGUAGE_META["zh-hant"].nativeName}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => changeLang(LANGUAGES.EN)}>
-            {LANGUAGE_META.en.nativeName}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => changeLang(LANGUAGES.JA)}>
-            {LANGUAGE_META.ja.nativeName}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => changeLang(LANGUAGES.DE)}>
-            {LANGUAGE_META.de.nativeName}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => changeLang(LANGUAGES.ZH_HANS)}>
-            {LANGUAGE_META["zh-hans"].nativeName}
-          </DropdownMenuItem>
+          {LANGUAGE_OPTIONS.map((language) => (
+            <DropdownMenuItem
+              key={language}
+              onClick={() => changeLang(language)}
+            >
+              {LANGUAGE_META[language].nativeName}
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
       <ThemeToggler />

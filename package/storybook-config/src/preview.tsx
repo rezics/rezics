@@ -79,6 +79,7 @@ export const localeGlobalTypes = {
         { value: "en", title: "English" },
         { value: "ja", title: "日本語" },
         { value: "de", title: "Deutsch" },
+        { value: "ko", title: "한국어" },
       ],
       dynamicTitle: true,
     },

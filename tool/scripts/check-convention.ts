@@ -27,6 +27,9 @@
  *                                   t(*.i18nKey) callsites. Also bans legacy
  *                                   frontend string-key translation APIs.
  * - R13 ui-package-autonomy        — core @rezics/ui cannot import host runtime deps.
+ * - R14 frontend-i18n-locales      — contract, Paraglide settings, and message
+ *                                   catalogs must expose the same frontend UI
+ *                                   locale set with exact key parity.
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -157,7 +160,8 @@ type Rule =
   | "R10"
   | "R11"
   | "R12"
-  | "R13";
+  | "R13"
+  | "R14";
 
 interface Violation {
   rule: Rule;
@@ -179,6 +183,7 @@ const SPEC_LINK: Record<Rule, string> = {
   R11: "openspec/specs/i18n-toolchain/spec.md",
   R12: "openspec/specs/i18n-toolchain/spec.md",
   R13: "openspec/changes/make-ui-package-standalone/specs/ui-package-autonomy/spec.md",
+  R14: "openspec/specs/i18n-toolchain/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -801,6 +806,12 @@ function scanI18nInvariants(filePaths: string[]): Violation[] {
     /from\s+["']@rezics\/i18n["'][\s\S]*?\btranslate\b|\btranslate\s*\(/;
   const legacyFallbackPattern =
     /\bt\s*\(\s*["'][^"']+["']\s*,\s*["'][^"']+["']/;
+  const i18nextRuntimePattern =
+    /from\s+["'](?:react-i18next|i18next)["']|require\(\s*["'](?:react-i18next|i18next)["']\s*\)/;
+  const uiCopyNullishFallbackPattern =
+    /\bm\.[A-Za-z0-9_]+\([^)]*\)\s*(?:\?\?|\|\|)\s*["'][^"']*[A-Za-z][^"']*["']/;
+  const adminLocalLocalePattern =
+    /from\s+["']@\/locale(?:\/[^"']*)?["']|from\s+["'][^"']*src\/locale(?:\/[^"']*)?["']/;
 
   for (const filePath of filePaths) {
     const relFilePath = relative(REPO_ROOT, filePath);
@@ -832,6 +843,30 @@ function scanI18nInvariants(filePaths: string[]): Violation[] {
     }
 
     if (frontendSourcePattern.test(relFilePath)) {
+      if (
+        relFilePath.startsWith("package/admin/src/locale/") ||
+        (relFilePath.startsWith("package/admin/src/") &&
+          adminLocalLocalePattern.test(source))
+      ) {
+        violations.push({
+          rule: "R12",
+          path: relFilePath,
+          message:
+            "admin-local locale files/imports are forbidden; use generated @rezics/i18n messages or shared label helpers",
+          spec: SPEC_LINK.R12,
+        });
+      }
+
+      if (i18nextRuntimePattern.test(source)) {
+        violations.push({
+          rule: "R12",
+          path: relFilePath,
+          message:
+            "react-i18next/i18next runtime usage is forbidden for frontend UI copy; use generated Paraglide functions",
+          spec: SPEC_LINK.R12,
+        });
+      }
+
       if (legacyUseTranslationPattern.test(source)) {
         violations.push({
           rule: "R12",
@@ -861,6 +896,16 @@ function scanI18nInvariants(filePaths: string[]): Violation[] {
           spec: SPEC_LINK.R12,
         });
       }
+
+      if (uiCopyNullishFallbackPattern.test(source)) {
+        violations.push({
+          rule: "R12",
+          path: relFilePath,
+          message:
+            "static UI copy fallbacks with ?? or || are forbidden; add catalog entries and call generated message functions",
+          spec: SPEC_LINK.R12,
+        });
+      }
     }
 
     if (
@@ -874,6 +919,113 @@ function scanI18nInvariants(filePaths: string[]): Violation[] {
           "contract domain objects must not define i18nKey fields; message identity belongs in @rezics/i18n",
         spec: SPEC_LINK.R12,
       });
+    }
+  }
+
+  return violations;
+}
+
+// ─── R14: frontend i18n locale and catalog parity ──────────────────────────
+
+function readJsonFile(path: string): unknown {
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+function getContractLanguages(): string[] {
+  const source = readFileSync(
+    join(REPO_ROOT, "package/contract/src/language.ts"),
+    "utf8",
+  );
+  const match = source.match(
+    /export const LANGUAGES = \{([\s\S]*?)\} as const/,
+  );
+  if (!match?.[1]) return [];
+  return [...match[1].matchAll(/:\s*["']([^"']+)["']/g)].map(
+    (languageMatch) => languageMatch[1]!,
+  );
+}
+
+function getInlangLocales(packageName: "i18n" | "ui"): string[] {
+  const settings = readJsonFile(
+    join(REPO_ROOT, `package/${packageName}/project.inlang/settings.json`),
+  ) as { locales?: unknown };
+  return Array.isArray(settings.locales)
+    ? settings.locales.filter(
+        (locale): locale is string => typeof locale === "string",
+      )
+    : [];
+}
+
+function compareStringArrays(
+  actual: string[],
+  expected: string[],
+): { missing: string[]; extra: string[] } {
+  return {
+    missing: expected.filter((value) => !actual.includes(value)),
+    extra: actual.filter((value) => !expected.includes(value)),
+  };
+}
+
+function scanFrontendI18nLocales(): Violation[] {
+  const violations: Violation[] = [];
+  const contractLanguages = getContractLanguages();
+
+  for (const packageName of ["i18n", "ui"] as const) {
+    const locales = getInlangLocales(packageName);
+    const localeDiff = compareStringArrays(locales, contractLanguages);
+    if (localeDiff.missing.length || localeDiff.extra.length) {
+      violations.push({
+        rule: "R14",
+        path: `package/${packageName}/project.inlang/settings.json`,
+        message: `Paraglide locale list must match contract LANGUAGES (missing: ${localeDiff.missing.join(", ") || "none"}; extra: ${localeDiff.extra.join(", ") || "none"})`,
+        spec: SPEC_LINK.R14,
+      });
+    }
+
+    const messagesDir = join(REPO_ROOT, `package/${packageName}/messages`);
+    const basePath = join(messagesDir, "en.json");
+    const baseMessages = existsSync(basePath)
+      ? (readJsonFile(basePath) as Record<string, unknown>)
+      : null;
+
+    if (!baseMessages) {
+      violations.push({
+        rule: "R14",
+        path: `package/${packageName}/messages/en.json`,
+        message: "Base locale message file is missing",
+        spec: SPEC_LINK.R14,
+      });
+      continue;
+    }
+
+    const baseKeys = Object.keys(baseMessages);
+    for (const locale of contractLanguages) {
+      const localePath = join(messagesDir, `${locale}.json`);
+      const relLocalePath = relative(REPO_ROOT, localePath);
+      if (!existsSync(localePath)) {
+        violations.push({
+          rule: "R14",
+          path: relLocalePath,
+          message: "Supported locale message file is missing",
+          spec: SPEC_LINK.R14,
+        });
+        continue;
+      }
+
+      const localeMessages = readJsonFile(localePath) as Record<
+        string,
+        unknown
+      >;
+      const localeKeys = Object.keys(localeMessages);
+      const keyDiff = compareStringArrays(localeKeys, baseKeys);
+      if (keyDiff.missing.length || keyDiff.extra.length) {
+        violations.push({
+          rule: "R14",
+          path: relLocalePath,
+          message: `Message keys must match package/${packageName}/messages/en.json exactly (missing: ${keyDiff.missing.slice(0, 12).join(", ") || "none"}${keyDiff.missing.length > 12 ? ", ..." : ""}; extra: ${keyDiff.extra.slice(0, 12).join(", ") || "none"}${keyDiff.extra.length > 12 ? ", ..." : ""})`,
+          spec: SPEC_LINK.R14,
+        });
+      }
     }
   }
 
@@ -911,6 +1063,7 @@ function buildSnapshot(violations: Violation[]): ViolationSnapshot {
     R11: 0,
     R12: 0,
     R13: 0,
+    R14: 0,
   };
   const keys: string[] = [];
   for (const violation of violations) {
@@ -1006,15 +1159,16 @@ function main() {
     ...scanShortLongSlugConvention(routeFiles),
     ...scanI18nInvariants(tsAndTsxFiles),
     ...scanUiPackageAutonomy(tsAndTsxFiles),
+    ...scanFrontendI18nLocales(),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13 } =
+    const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13, R14 } =
       currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10} R11=${R11} R12=${R12} R13=${R13})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10} R11=${R11} R12=${R12} R13=${R13} R14=${R14})`,
     );
     process.exit(0);
   }
@@ -1031,13 +1185,13 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13 } =
+  const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13, R14 } =
     currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
   console.log(
-    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}  R11=${R11}  R12=${R12}  R13=${R13}`,
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}  R11=${R11}  R12=${R12}  R13=${R13}  R14=${R14}`,
   );
 
   if (newViolations.length > 0) {

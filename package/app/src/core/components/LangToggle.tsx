@@ -14,6 +14,8 @@ type LangToggleProps = {
   }) => React.ReactNode;
 };
 
+const LANGUAGE_OPTIONS = Object.values(LANGUAGES);
+
 export const LangToggle: React.FC<LangToggleProps> = ({ children }) => {
   const [open, setOpen] = React.useState(false);
 
@@ -34,21 +36,14 @@ export const LangToggle: React.FC<LangToggleProps> = ({ children }) => {
         side="bottom"
         className="min-w-[180px]"
       >
-        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANT)}>
-          {LANGUAGE_META["zh-hant"].nativeName}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.EN)}>
-          {LANGUAGE_META.en.nativeName}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.JA)}>
-          {LANGUAGE_META.ja.nativeName}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.DE)}>
-          {LANGUAGE_META.de.nativeName}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANS)}>
-          {LANGUAGE_META["zh-hans"].nativeName}
-        </DropdownMenuItem>
+        {LANGUAGE_OPTIONS.map((language) => (
+          <DropdownMenuItem
+            key={language}
+            onClick={() => handleChangeLang(language)}
+          >
+            {LANGUAGE_META[language].nativeName}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
