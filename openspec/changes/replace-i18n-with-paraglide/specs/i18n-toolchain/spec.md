@@ -84,158 +84,74 @@ Paraglide generated output SHALL be treated as generated code. Developers SHALL 
 - **WHEN** a developer changes a user-visible translation
 - **THEN** the change SHALL be made in the relevant JSON source message file
 - **AND** generated Paraglide output SHALL be refreshed through the configured compile command or bundler plugin
-*** Add File: /home/edge/projects/rezics/rezics/openspec/changes/replace-i18n-with-paraglide/specs/multilingual-ui/spec.md
-## MODIFIED Requirements
 
-### Requirement: Homepage sections use i18n for all UI strings
+### Requirement: Contract domain enums resolve labels through `@rezics/i18n` helpers
 
-All homepage section components SHALL use generated Paraglide product/domain message functions for UI strings. No section component SHALL contain hardcoded Chinese or English display text. Section titles, action labels ("More"), loading states, empty states, and tab labels SHALL be resolved from locale message functions.
+Backend-driven discriminator keys for contract domain enums (entity kind, license, subject attribution role, credit role, and any future contract enum that ships with a displayable label) SHALL resolve their localized label through hand-written maps in `@rezics/i18n` guarded by `satisfies Record<EnumKey, () => string>`. The `i18nKey` field SHALL NOT exist on `@rezics/contract` domain definitions after the migration; message identity belongs to `@rezics/i18n`, not contract.
 
-#### Scenario: NewBookSection renders in user's UI language
+#### Scenario: Rendering an entity kind label
 
-- **WHEN** the homepage loads with UI language set to "en"
-- **THEN** NewBookSection SHALL display "Latest Works" (not "最新作品"), tab labels "Latest Serial" / "New on Shelf" / "Recently Completed", and "More" (not "更多 →")
+- **WHEN** a frontend component needs to display the label for an entity whose `kind` is `"person"`
+- **THEN** the component SHALL call `entityKindLabel(entity.kind)` from `@rezics/i18n`
+- **AND** the component SHALL NOT read an `i18nKey` field from the contract object
+- **AND** the component SHALL NOT call a generated Paraglide message function with a dynamic string key
 
-#### Scenario: TrendingBookSection renders in user's UI language
+#### Scenario: Adding a new entity kind
 
-- **WHEN** the homepage loads with UI language set to "en"
-- **THEN** TrendingBookSection SHALL display "Trending Books" (not "趋势好书") and "More" (not "更多 →")
+- **WHEN** a new discriminator value is added to a contract domain enum
+- **THEN** the corresponding `<enum>Label` map in `@rezics/i18n` SHALL be updated in the same change
+- **AND** TypeScript SHALL flag the omission via `satisfies Record<EnumKey, () => string>` if the map is not updated
 
-#### Scenario: ActiveRealmsSection renders in user's UI language
+#### Scenario: Contract is inspected for embedded message keys
 
-- **WHEN** the homepage loads with UI language set to "zh-hant"
-- **THEN** ActiveRealmsSection SHALL display the Chinese translation for "Active Realms" and "More"
+- **WHEN** source under `package/contract/src/` is inspected after the migration
+- **THEN** no `i18nKey` field SHALL appear on contract domain definitions
+- **AND** no contract source file SHALL import from `@rezics/i18n` or from the generated Paraglide output
 
-#### Scenario: LibraryCardsSection renders in user's UI language
+### Requirement: Dynamic Paraglide message lookup is forbidden
 
-- **WHEN** the homepage loads with UI language set to "ja"
-- **THEN** LibraryCardsSection SHALL display Japanese translations for "Book Library", "Game Library", "Media Library", and "Coming Soon"
+Frontend code SHALL NOT access generated Paraglide messages through dynamic keys (bracket access with a runtime string, template-literal computed property names, or destructuring `m` into a runtime variable). Paraglide's bracket-access escape hatch defeats tree-shaking and bypasses the explicit-mapping invariant.
 
-### Requirement: Search components use i18n for all UI strings
+#### Scenario: Dynamic key access is rejected
 
-SearchFilter and SearchInput components SHALL use generated Paraglide product/domain message functions for all sort labels, filter labels, placeholder text, and preset tag labels. No search component SHALL contain hardcoded Chinese or English display text.
+- **WHEN** a developer writes `m[runtimeString]()` or `m[\`prefix_${value}\`]()`
+- **THEN** the convention check SHALL flag the callsite
+- **AND** the developer SHALL refactor through an explicit map in `@rezics/i18n` (see `Contract domain enums resolve labels through @rezics/i18n helpers`)
 
-#### Scenario: SearchFilter renders sort options in user's UI language
+#### Scenario: Map-mediated dynamic dispatch is allowed
 
-- **WHEN** the search page loads with UI language set to "en"
-- **THEN** sort options SHALL display "Relevance", "Latest", "Total Favorites", "Word Count", "Monthly Votes" (not Chinese equivalents)
-- **AND** order buttons SHALL display "Descending" / "Ascending" (not "降序" / "升序")
+- **WHEN** a developer accesses messages through a statically-defined object whose values are message functions and whose type is `Record<EnumKey, () => string>` (or stricter)
+- **THEN** the access pattern SHALL be allowed
+- **AND** tree-shaking SHALL still see direct message function references in the source
 
-#### Scenario: SearchInput renders placeholder in user's UI language
+### Requirement: Paraglide output is generated before TypeScript checks
 
-- **WHEN** the search page loads with UI language set to "zh-hant"
-- **THEN** the search placeholder SHALL display the Chinese translation for "Title, ISBN, Author, Publisher, Producer"
-- **AND** filter labels ("Tags", "Word Count") SHALL display in Chinese
+The build pipeline SHALL compile Paraglide messages before any step that consumes generated message functions (`tsc`, bundlers, tests, Storybook). New contributors SHALL be able to run repo checks after a fresh `bun install` without manually invoking the Paraglide compile step.
 
-### Requirement: All five locale files contain keys for homepage and search strings
+#### Scenario: Fresh install runs typecheck
 
-Translation keys for homepage sections and search components SHALL exist in all five JSON locale message files for `en`, `zh-hant`, `zh-hans`, `de`, and `ja`. Missing native translations SHALL use English as a placeholder.
+- **WHEN** a contributor clones the repository and runs `bun install` followed by a TypeScript check
+- **THEN** the Paraglide compile step SHALL have already run via `postinstall` or as the first step of the consuming script
+- **AND** generated message functions SHALL be importable without manual compile commands
 
-#### Scenario: en locale has complete homepage section keys
+#### Scenario: CI runs typecheck
 
-- **WHEN** the `en` locale message file is loaded
-- **THEN** it SHALL contain keys for all homepage section titles, action labels, tab labels, loading states, and empty states
+- **WHEN** CI runs TypeScript checks for any frontend package
+- **THEN** Paraglide compile SHALL run first
+- **AND** missing generated output SHALL NOT be a cause of CI failure
 
-#### Scenario: zh-hant locale has complete homepage section keys
+### Requirement: Shell-level locale helper lives in the app/admin shell
 
-- **WHEN** the `zh-hant` locale message file is loaded
-- **THEN** it SHALL contain keys matching the same key structure as `en` with Traditional Chinese translations
+The helper that fans out a locale change to all Paraglide runtimes SHALL live in the app or admin shell (e.g. `package/app/src/app/`), not in `@rezics/i18n` or `@rezics/ui`. Neither `@rezics/i18n` nor `@rezics/ui` SHALL import from the other; both are leaves under the shell.
 
-### Requirement: Homepage book content renders in user's preferred content language
+#### Scenario: Shell synchronizes both runtimes
 
-Book titles and descriptions displayed in homepage sections (NewBookSection, TrendingBookSection) SHALL be resolved using the `getBookTitle()` and `getBookDescription()` translation helpers, which apply the user's preferred language fallback chain. Content SHALL NOT display as empty strings.
+- **WHEN** the shell calls `setRezicsLocale("en")`
+- **THEN** the helper SHALL invoke the `@rezics/i18n` locale setter and the `@rezics/ui` locale setter
+- **AND** the helper SHALL pass `{ reload: false }` to both setters so SPA navigation is preserved
 
-#### Scenario: Book title renders from search result translations
+#### Scenario: I18n packages do not cross-import
 
-- **WHEN** a homepage book card receives a DTO with `translations: [{ language: "zh-hant", title: "書名" }, { language: "en", title: "Title" }]`
-- **AND** the user's fallback chain resolves to "en"
-- **THEN** the book card SHALL display "Title"
-
-#### Scenario: Book title falls back when preferred language unavailable
-
-- **WHEN** a homepage book card receives a DTO with `translations: [{ language: "zh-hant", title: "書名" }]`
-- **AND** the user's preferred language is "de"
-- **THEN** the book card SHALL fall back to `en` (not found), then to first available, and display "書名" rather than an empty string
-
-### Requirement: i18n resource keys use canonical language codes
-
-The Paraglide project configuration SHALL use canonical language codes (`zh-hant`, `zh-hans`, `en`, `ja`, `de`) as locale identifiers. Locale source files SHALL be named using canonical codes where file names include locale codes.
-
-#### Scenario: i18n resources registered with canonical keys
-
-- **WHEN** the Paraglide i18n runtime initializes
-- **THEN** locale identifiers SHALL be `'zh-hant'`, `'zh-hans'`, `'en'`, `'ja'`, `'de'`
-- **AND** no locale identifier SHALL use legacy codes (`zh-SC`, `zh-TC`, `en-US`, `ja-JP`, `de-DE`)
-
-#### Scenario: Default language is zh-hant
-
-- **WHEN** the i18n runtime initializes without a persisted language preference
-- **THEN** the active language SHALL be `'zh-hant'`
-
-#### Scenario: Fallback language is en
-
-- **WHEN** a translation key is missing in the active locale
-- **THEN** the system SHALL fall back to the `'en'` locale
-
-### Requirement: Language toggle uses canonical codes
-
-The LangToggle component SHALL use canonical language codes when requesting a language change. Display labels SHALL use native language names from `LANGUAGE_META`.
-
-#### Scenario: User switches to Traditional Chinese
-
-- **WHEN** the user selects Traditional Chinese from the language toggle
-- **THEN** the app/admin locale synchronization helper SHALL be called with `'zh-hant'`
-- **AND** the menu item SHALL display "繁體中文"
-
-#### Scenario: User switches to English
-
-- **WHEN** the user selects English from the language toggle
-- **THEN** the app/admin locale synchronization helper SHALL be called with `'en'`
-*** Add File: /home/edge/projects/rezics/rezics/openspec/changes/replace-i18n-with-paraglide/specs/ui-component-foundation/spec.md
-## ADDED Requirements
-
-### Requirement: Reusable UI components own only generic component messages
-
-Reusable components in `@rezics/ui` SHALL own translations only for generic component-internal text such as ARIA labels, button labels, placeholder text, empty states, and control labels that are intrinsic to the reusable component. `@rezics/ui` SHALL NOT own product, domain, feature, or contract-derived message text.
-
-#### Scenario: Password field uses UI-owned messages
-
-- **WHEN** a reusable password field component renders its visibility toggle
-- **THEN** the show/hide accessible labels SHALL resolve from the `@rezics/ui` message catalog
-- **AND** the component SHALL NOT import app/admin product message functions for those labels
-
-#### Scenario: Domain label is excluded from UI catalog
-
-- **WHEN** a component needs the display label for a content rating, attribution role, book type, or other Rezics domain concept
-- **THEN** that label SHALL resolve from the product/domain i18n package or a domain adapter outside the portable UI component surface
-- **AND** the reusable UI component SHALL NOT add that label to the `@rezics/ui` message catalog
-
-### Requirement: UI package i18n follows host locale
-
-`@rezics/ui` translated components SHALL render using the active locale supplied by the host shell. `@rezics/ui` SHALL expose a runtime helper or package export that lets the host synchronize the UI locale.
-
-#### Scenario: Host synchronizes UI locale
-
-- **WHEN** an app/admin shell changes the active locale to `ja`
-- **THEN** the shell SHALL update the `@rezics/ui` i18n runtime to `ja`
-- **AND** subsequently rendered UI-owned component text SHALL use Japanese messages
-
-### Requirement: UI package does not use react-i18next
-
-Reusable source files under `package/ui/src/` SHALL NOT import `react-i18next` or call `useTranslation()` after the Paraglide migration. UI-owned messages SHALL be accessed through generated Paraglide message functions.
-
-#### Scenario: UI source imports are inspected
-
-- **WHEN** imports under `package/ui/src/` are inspected
-- **THEN** no reusable component source file SHALL import from `react-i18next`
-- **AND** no reusable component source file SHALL call `useTranslation()`
-
-### Requirement: UI package provides override escape hatches
-
-Reusable UI components with built-in translated text SHALL allow consumers to override labels when the generic UI-owned copy is not appropriate for a specific product context.
-
-#### Scenario: Consumer overrides UI label
-
-- **WHEN** a consumer passes an explicit label or labels object to a reusable UI component
-- **THEN** the component SHALL render the explicit consumer-provided text
-- **AND** the component SHALL use its UI-owned Paraglide message only for omitted labels
+- **WHEN** `@rezics/i18n` and `@rezics/ui` package sources are inspected
+- **THEN** `@rezics/i18n` SHALL NOT import from `@rezics/ui`
+- **AND** `@rezics/ui` SHALL NOT import from `@rezics/i18n`
