@@ -1,4 +1,4 @@
-import { Link, unitHref } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import {
   Avatar,
   AvatarFallback,
@@ -17,10 +17,10 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import type React from "react";
+import { Link, unitHref } from "@/shared/ui/link";
 import { logout } from "@/user/models/handler";
 import { useUserProfileStore } from "@/user/states";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";
-import * as m from "@rezics/i18n/messages";
 
 export type AccountMenuProps = {
   onLogout?: () => void;

@@ -344,7 +344,7 @@
         "@rezics/contract": "workspace:*",
       },
       "devDependencies": {
-        "@inlang/paraglide-js": "^2.6.1",
+        "@inlang/paraglide-js": "^2.18.1",
         "@types/react": "^19.2.14",
         "typescript": "^6.0.3",
       },
@@ -555,7 +555,7 @@
         "vaul": "^1.1.2",
       },
       "devDependencies": {
-        "@inlang/paraglide-js": "^2.6.1",
+        "@inlang/paraglide-js": "^2.18.1",
         "@storybook/react-vite": "^10.3.6",
         "@tanstack/router-plugin": "^1.167.12",
         "@types/markdown-it": "^14.1.2",

@@ -1,9 +1,9 @@
-import { Link } from "@/shared/ui/link";
 import { useRouterState } from "@tanstack/react-router";
 import React from "react";
 import { AuthenticatedSection } from "@/core/sections/header/AuthenticatedSection.tsx";
 import { PendingVerificationSection } from "@/core/sections/header/PendingVerificationSection.tsx";
 import { UnauthenticatedSection } from "@/core/sections/header/UnauthenticatedSection.tsx";
+import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { useAuth } from "@/user/pages/useAuth";
 import { useLayoutStore } from "../../states/layoutStore.ts";

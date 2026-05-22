@@ -3,9 +3,9 @@ import {
   useNotificationStream,
   useUnreadCount,
 } from "@rezics/api/notification";
-import { Link } from "@/shared/ui/link";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { Bell as NotificationsIcon } from "lucide-react";
+import { Link } from "@/shared/ui/link";
 import { CreateMenu } from "../../components/create-menu/CreateMenu.tsx";
 import { AccountMenu } from "./AccountMenu.tsx";
 

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import * as productMessages from "@rezics/i18n/messages";
+import { subscribeLocale } from "@rezics/i18n/react";
 import { getLocale as getProductLocale } from "@rezics/i18n/runtime";
 import * as uiMessages from "@rezics/ui/i18n/messages";
 import { getLocale as getUiLocale } from "@rezics/ui/i18n/runtime";
@@ -30,13 +31,25 @@ describe("setRezicsLocale", () => {
 
     expect(getProductLocale()).toBe("en");
     expect(getUiLocale()).toBe("en");
-    expect(productMessages.title()).toBe("REZICS");
-    expect(uiMessages.ui_password_label()).toBe("Password");
+    expect(String(productMessages.title())).toBe("REZICS");
+    expect(String(uiMessages.ui_password_label())).toBe("Password");
 
     setRezicsLocale("zh-hant");
 
     expect(getProductLocale()).toBe("zh-hant");
     expect(getUiLocale()).toBe("zh-hant");
-    expect(uiMessages.ui_password_label()).toBe("密碼");
+    expect(String(uiMessages.ui_password_label())).toBe("密碼");
+  });
+
+  test("notifies React locale subscribers", () => {
+    let calls = 0;
+    const unsubscribe = subscribeLocale(() => {
+      calls += 1;
+    });
+
+    setRezicsLocale("ja");
+
+    unsubscribe();
+    expect(calls).toBe(1);
   });
 });
