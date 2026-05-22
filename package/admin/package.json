@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "bun --filter=@rezics/i18n run compile && bun --filter=@rezics/ui run i18n:compile && vite",
+    "build": "bun --filter=@rezics/i18n run compile && bun --filter=@rezics/ui run i18n:compile && vite build",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6010 --no-open",
     "build-storybook": "storybook build -o storybook-static"
@@ -14,6 +14,7 @@
     "@rezics/api": "workspace:*",
     "@rezics/email": "workspace:*",
     "@rezics/contract": "workspace:*",
+    "@rezics/i18n": "workspace:*",
     "@rezics/storybook-config": "workspace:*",
     "@rezics/ui": "workspace:*",
     "@tanstack/query-broadcast-client-experimental": "^5.96.2",
@@ -27,8 +28,6 @@
     "chart.js": "^4.5.1",
     "easymde": "2.20.0",
     "github-markdown-css": "5.8.1",
-    "i18n": "0.15.1",
-    "i18next": "25.3.5",
     "jotai": "^2.17.0",
     "lucide-react": "^0.564.0",
     "react": "^19",

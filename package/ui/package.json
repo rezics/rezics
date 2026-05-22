@@ -18,6 +18,18 @@
       "types": "./src/editor/index.ts",
       "import": "./src/editor/index.ts"
     },
+    "./i18n": {
+      "types": "./src/i18n/index.ts",
+      "import": "./src/i18n/index.ts"
+    },
+    "./i18n/messages": {
+      "types": "./src/paraglide/messages.d.ts",
+      "import": "./src/paraglide/messages.js"
+    },
+    "./i18n/runtime": {
+      "types": "./src/paraglide/runtime.d.ts",
+      "import": "./src/paraglide/runtime.js"
+    },
     "./primitive/link": {
       "types": "./src/primitive/link/index.ts",
       "import": "./src/primitive/link/index.ts"
@@ -32,7 +44,8 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts",
+    "i18n:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --emit-ts-declarations",
+    "dev": "bun run i18n:compile && bun run --watch src/index.ts",
     "storybook": "storybook dev -p 6007 --no-open",
     "build-storybook": "storybook build -o storybook-static"
   },
@@ -79,11 +92,11 @@
     "@tanstack/router-plugin": "^1.167.12",
     "@types/markdown-it": "^14.1.2",
     "@types/react": "^19.2.14",
+    "@inlang/paraglide-js": "^2.6.1",
     "@types/react-dom": "^19.2.3",
     "@types/react-lazy-load-image-component": "^1.6.5",
     "@visulima/vite-overlay": "^1.3.7",
     "bun-types": "latest",
-    "react-i18next": "15.6.1",
     "storybook": "^10.3.6"
   }
 }

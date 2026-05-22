@@ -5,6 +5,7 @@
     { "path": "./package/api" },
     { "path": "./package/app" },
     { "path": "./package/contract" },
+    { "path": "./package/i18n" },
     { "path": "./package/preview" },
     { "path": "./package/search" },
     { "path": "./package/server" },
