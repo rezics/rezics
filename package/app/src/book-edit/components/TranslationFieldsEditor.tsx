@@ -10,11 +10,12 @@ export interface TranslationFieldsEditorProps {
     value: TranslationDraft[K],
   ) => void;
   disabled?: boolean;
+  afterTitleSlot?: React.ReactNode;
 }
 
 export const TranslationFieldsEditor: React.FC<
   TranslationFieldsEditorProps
-> = ({ draft, onChange, disabled }) => {
+> = ({ draft, onChange, disabled, afterTitleSlot }) => {
   const { t } = useTranslation();
 
   return (
@@ -30,6 +31,7 @@ export const TranslationFieldsEditor: React.FC<
           disabled={disabled}
           className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
         />
+        {afterTitleSlot}
       </div>
 
       <div className="space-y-1">

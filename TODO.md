@@ -1,6 +1,7 @@
 ## Section 1
 
 - [ ] UnitTag 表是否要重命名到 TagUnit 比較好？
+- [ ] 新書建立頁沒有 bookUnitId，不能立即 link author；我會先只在既有書籍編輯頁顯示 Add author。如果你想新書也能先選作者，需要把 author 暫存進 create payload 
 - [ ] history輪詢outbox在對列做出來之後應當修正成對列主動通知
 - [ ] 定製 elysia + prisma 的 console 輸出主題，可以做成獨立 package
 - [ ] meilisearch 可能的性能問題的全面分析

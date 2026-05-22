@@ -428,6 +428,16 @@ export default {
     },
   },
 
+  entity_picker: {
+    filters: {
+      all: "全部",
+      credit_role: "Credit role",
+    },
+    errors: {
+      credit_role_required: "請先選擇一個具體的 credit role。",
+    },
+  },
+
   attribution: {
     credit: {
       role: {
@@ -493,6 +503,11 @@ export default {
     remark: "短評",
     excerpts: "原文摘錄",
     reviews_of_book: "{{title}}的書評",
+    actions: {
+      add_author: "新增作者",
+      add_credit: "新增 credit",
+      remove_credit: "移除 credit",
+    },
     hero: {
       actions: {
         add_to_shelf: "加入書架",

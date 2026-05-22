@@ -444,6 +444,16 @@ export default {
     },
   },
 
+  entity_picker: {
+    filters: {
+      all: "All",
+      credit_role: "Credit role",
+    },
+    errors: {
+      credit_role_required: "Choose a credit role before selecting an entity.",
+    },
+  },
+
   attribution: {
     credit: {
       role: {
@@ -581,6 +591,11 @@ export default {
     remark: "Remark",
     excerpts: "Excerpts",
     reviews_of_book: "Reviews for {{title}}",
+    actions: {
+      add_author: "Add author",
+      add_credit: "Add credit",
+      remove_credit: "Remove credit",
+    },
     hero: {
       actions: {
         add_to_shelf: "Add to shelf",

@@ -4,19 +4,10 @@ import {
   useUnlinkCreditAttributionMutation,
 } from "@rezics/api/credit-attribution/credit-attribution";
 import {
-  type CreditAttributionRole,
   creditAttributionRoleRegistry,
   creditAttributionRoles,
 } from "@rezics/contract";
-import {
-  Button,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@rezics/ui/shadcn";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -40,7 +31,6 @@ export function BookCreditAttributionEditor({
   disabled,
 }: BookCreditAttributionEditorProps) {
   const { t } = useTranslation();
-  const [role, setRole] = useState<CreditAttributionRole>("author");
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const creditQuery = useQuery(creditAttributionQueries.byUnit(bookUnitId));
@@ -55,41 +45,18 @@ export function BookCreditAttributionEditor({
     [creditQuery.data],
   );
 
-  const roleConfig = creditAttributionRoleRegistry[role];
-
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="book-credit-role">
-          {t("book.fields.credit_role", "Credit role")}
-        </Label>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-          <Select
-            value={role}
-            onValueChange={(value) => setRole(value as CreditAttributionRole)}
-            disabled={disabled}
-          >
-            <SelectTrigger id="book-credit-role">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {bookCreditRoles.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {t(creditAttributionRoleRegistry[item].i18nKey, item)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={disabled || linkCredit.isPending}
-            onClick={() => setPickerOpen(true)}
-          >
-            <Plus className="size-4" />
-            {t("book.actions.add_credit", "Add credit")}
-          </Button>
-        </div>
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={disabled || linkCredit.isPending}
+          onClick={() => setPickerOpen(true)}
+        >
+          <Plus className="size-4" />
+          {t("book.actions.add_credit", "Add credit")}
+        </Button>
       </div>
 
       {creditQuery.isLoading ? (
@@ -141,14 +108,16 @@ export function BookCreditAttributionEditor({
         open={pickerOpen}
         onOpenChange={setPickerOpen}
         creationContext="catalog"
-        kindHints={roleConfig.entityKindHints}
-        onSelect={(entityId) =>
+        creditRoleOptions={bookCreditRoles}
+        requireCreditRoleForSelect
+        onSelect={(entityId, selection) => {
+          if (!selection.creditRole) return false;
           linkCredit.mutate({
             unitId: bookUnitId,
             entityId,
-            role,
-          })
-        }
+            role: selection.creditRole,
+          });
+        }}
       />
     </div>
   );

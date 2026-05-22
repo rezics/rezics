@@ -8,6 +8,7 @@ import {
   useDeleteTranslationMutation,
   useUpsertTranslationMutation,
 } from "@rezics/api/unit/unit.mutations";
+import { useLinkCreditAttributionMutation } from "@rezics/api/credit-attribution/credit-attribution";
 import type {
   CreateBookInput,
   CreationMode,
@@ -33,10 +34,11 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
-import { ChevronDown as ExpandMore } from "lucide-react";
+import { ChevronDown as ExpandMore, Plus } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { EntityPicker } from "@/entity-picker";
 import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
 import { AddTranslationDialog } from "../components/AddTranslationDialog";
 import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
@@ -165,6 +167,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     React.useState<UpdateBookDialogState>(null);
   const [extraOpen, setExtraOpen] = React.useState(true);
   const [addOpen, setAddOpen] = React.useState(false);
+  const [authorPickerOpen, setAuthorPickerOpen] = React.useState(false);
   const [creationMode, setCreationMode] = React.useState<CreationMode>(
     CreationModeValue.WIKI,
   );
@@ -277,6 +280,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   });
 
   const deleteTranslationMutation = useDeleteTranslationMutation();
+  const linkAuthorMutation = useLinkCreditAttributionMutation();
 
   async function handleSubmit() {
     const draft = editor.currentDraft;
@@ -534,6 +538,22 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               <TranslationFieldsEditor
                 draft={editor.currentDraft}
                 onChange={editor.updateField}
+                afterTitleSlot={
+                  bookId ? (
+                    <div className="pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={linkAuthorMutation.isPending}
+                        onClick={() => setAuthorPickerOpen(true)}
+                      >
+                        <Plus className="size-4" />
+                        {t("book.actions.add_author", "Add author")}
+                      </Button>
+                    </div>
+                  ) : null
+                }
               />
 
               <SetSourceReleaseControl
@@ -641,6 +661,22 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         onClose={() => setAddOpen(false)}
         onSubmit={handleAddTranslation}
       />
+
+      {bookId ? (
+        <EntityPicker
+          open={authorPickerOpen}
+          onOpenChange={setAuthorPickerOpen}
+          creationContext="catalog"
+          lockedCreditRole="author"
+          onSelect={(entityId) => {
+            linkAuthorMutation.mutate({
+              unitId: bookId,
+              entityId,
+              role: "author",
+            });
+          }}
+        />
+      ) : null}
 
       <UpdateBookDialog
         t={t}
