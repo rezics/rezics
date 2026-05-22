@@ -8,21 +8,27 @@ Defines `EntityService`, the server-side CRUD surface and Elysia routes for ENTI
 
 ### Requirement: EntityService implements the CRUD surface specified in entity-unit-type
 
-The server SHALL provide an `EntityService` module with `create`, `get`, `update`, `delete`, and `list` operations. The `create` operation SHALL execute a single Prisma transaction that inserts a `Unit` row (`type = ENTITY`, `slugScope = <entity-scope-unit-id>`) and an `Entity` extension row sharing the same `unitId`, together with any provided `UnitTranslation` rows. The update operation SHALL atomically mutate Entity fields (`kind`, `avatar`, `verified`), Unit fields (slug, status, visibility), and translations.
+The server SHALL provide an `EntityService` module with `create`, `get`, `update`, `delete`, and `list` operations. The `create` operation SHALL execute a single Prisma transaction that inserts a `Unit` row (`type = ENTITY`, `slugScope = <entity-scope-unit-id>`) and an `Entity` extension row sharing the same `unitId`, together with any provided `UnitTranslation` rows. The update operation SHALL atomically mutate Entity fields (`kind`, `avatar`, `verified`, `eligibleCreditRoles`, `eligibleSubjectRoles`), Unit fields (slug, status, visibility), and translations.
 
-#### Scenario: Create an entity with translations
+#### Scenario: Create an entity with translations and eligibility
 
-- **WHEN** `EntityService.create({ kind: "person", translations: [{ language: "zh", title: "刘慈欣" }, { language: "en", title: "Liu Cixin" }] })` is called by a non-admin user
+- **WHEN** `EntityService.create({ kind: "person", eligibleCreditRoles: ["author"], eligibleSubjectRoles: ["about"], translations: [{ language: "zh", title: "刘慈欣" }, { language: "en", title: "Liu Cixin" }] })` is called by a non-admin user
 - **THEN** a Unit row SHALL be inserted with `type = ENTITY`, `slug = null`, `slugScope = <entity-scope-unit-id>`, and the owner determined by creation mode
-- **AND** an Entity row SHALL be inserted with `unitId` matching the new Unit, `kind = "person"`, and `verified = false`
+- **AND** an Entity row SHALL be inserted with `unitId` matching the new Unit, `kind = "person"`, `verified = false`, `eligibleCreditRoles = ["author"]`, and `eligibleSubjectRoles = ["about"]`
 - **AND** two UnitTranslation rows SHALL be inserted with the provided translations
 - **AND** all writes SHALL succeed or fail as a single transaction
 
-#### Scenario: Update an entity's avatar without touching translations
+#### Scenario: Update an entity's avatar without touching translations or eligibility
 
 - **WHEN** `EntityService.update(unitId, { avatar: "https://cdn.example/a.png" })` is called by an authorized actor
 - **THEN** the Entity row SHALL be updated with that avatar
-- **AND** the parent Unit and translations SHALL remain unchanged
+- **AND** the parent Unit, translations, `eligibleCreditRoles`, and `eligibleSubjectRoles` SHALL remain unchanged
+
+#### Scenario: Update entity eligibility
+
+- **WHEN** `EntityService.update(unitId, { eligibleCreditRoles: ["translator"], eligibleSubjectRoles: ["about", "appears"] })` is called by an authorized actor
+- **THEN** the Entity row SHALL replace its persisted eligibility arrays with the submitted arrays
+- **AND** the service SHALL reject role keys that are not present in the corresponding contract role registry
 
 #### Scenario: Update rejects unregistered kind
 
@@ -99,17 +105,22 @@ The `verified` field on an Entity SHALL be mutable only by callers with the glob
 
 ### Requirement: EntityService search index sync
 
-The `EntityService.create`, `update`, and `delete` operations SHALL synchronize a Meili `entities` index document after the database transaction commits. The document SHALL include `unitId`, `slug`, `kind`, `verified`, `avatar`, `ownerUnitId`, translated identity text, and reverse attribution facets.
+The `EntityService.create`, `update`, and `delete` operations SHALL synchronize a Meili `entities` index document after the database transaction commits. The document SHALL include `unitId`, `slug`, `kind`, `verified`, `avatar`, `ownerUnitId`, translated identity text, and role eligibility arrays.
 
 #### Scenario: Create syncs a new index document
 
-- **WHEN** EntityService.create succeeds with translations
-- **THEN** a Meili document SHALL be upserted into the `entities` index containing the new unitId, current slug, kind, verified flag, avatar, ownerUnitId, and translation titles
+- **WHEN** EntityService.create succeeds with translations and eligibility
+- **THEN** a Meili document SHALL be upserted into the `entities` index containing the new unitId, current slug, kind, verified flag, avatar, ownerUnitId, translation titles, `eligibleCreditRoles`, and `eligibleSubjectRoles`
 
 #### Scenario: Update avatar patches the index document
 
 - **WHEN** EntityService.update changes `avatar`
 - **THEN** the corresponding `entities` index document SHALL expose the new avatar
+
+#### Scenario: Update eligibility patches the index document
+
+- **WHEN** EntityService.update changes `eligibleCreditRoles` or `eligibleSubjectRoles`
+- **THEN** the corresponding `entities` index document SHALL expose the new eligibility arrays
 
 #### Scenario: Delete removes the index document
 

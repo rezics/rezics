@@ -93,7 +93,7 @@ The `complex-shelf` scenario SHALL create a named shelf fixture with mixed item 
 - **THEN** the special target report SHALL include the shelf Unit
 
 ### Requirement: Factory targeted sync uses runtime hooks
-When Meili mode is `init-and-sync`, the factory flow SHALL synchronize Meilisearch through seed runtime hooks rather than running a full reindex by default. Seeders SHALL call the appropriate hook after creating or mutating a complete indexable projection.
+When Meili mode is `init-and-sync`, the factory flow SHALL synchronize Meilisearch through seed runtime hooks rather than running a full reindex by default. Seeders SHALL call the appropriate hook after creating or mutating a complete indexable projection. Seeders that produce Entity Units SHALL invoke the entity search sync hook so seeded Entities are synchronized to the `entities` index.
 
 #### Scenario: Runtime hooks respect Meili mode
 - **WHEN** the runtime is configured with Meili mode `skip`
@@ -104,3 +104,9 @@ When Meili mode is `init-and-sync`, the factory flow SHALL synchronize Meilisear
 #### Scenario: Full reindex is not default factory sync
 - **WHEN** a factory run completes with Meili mode `init-and-sync`
 - **THEN** it SHALL NOT call full reindex functions as the default synchronization strategy
+
+#### Scenario: Entity seeders sync entity documents
+- **WHEN** a factory run completes with Meili mode `init-and-sync`
+- **AND** the seed pipeline created Entity Units
+- **THEN** targeted sync SHALL synchronize those Entity documents to the `entities` index
+- **AND** the synchronized documents SHALL include `eligibleCreditRoles` and `eligibleSubjectRoles`
