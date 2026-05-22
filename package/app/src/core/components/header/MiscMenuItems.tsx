@@ -4,18 +4,16 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@rezics/ui/shadcn";
-import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
-import { useTranslation } from "react-i18next";
+import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { ThemeToggler } from "./ThemeToggler";
 import { Languages as LanguageIcon } from "lucide-react";
+import { setRezicsLocale } from "@/app/locale";
 
 export function MiscMenuItems() {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
 
-  const changeLang = (lang: string) => {
-    i18n.changeLanguage(lang);
-    localStorage.setItem("lang", lang);
-  };
+  const changeLang = (lang: Language) => setRezicsLocale(lang);
 
   return (
     <>

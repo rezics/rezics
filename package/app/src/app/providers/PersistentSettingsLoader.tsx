@@ -1,12 +1,9 @@
-import i18n from "i18next";
 import { useEffect } from "react";
+import { initRezicsLocale } from "@/app/locale";
 
 export function PersistentSettingsLoader() {
   useEffect(() => {
-    const lang = localStorage.getItem("lang");
-    if (lang) {
-      i18n.changeLanguage(lang);
-    }
+    initRezicsLocale();
   }, []);
 
   return null;

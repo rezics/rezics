@@ -1,12 +1,9 @@
 import { useInfraBootstrap } from "@rezics/api/infra/bootstrap";
-import i18n from "i18next";
 import { useEffect } from "react";
+import { initRezicsLocale } from "@/app/locale";
 
 function initI18nStorage() {
-  const lang = localStorage.getItem("lang");
-  if (lang) {
-    i18n.changeLanguage(lang);
-  }
+  initRezicsLocale();
 }
 
 export function useAppInit() {

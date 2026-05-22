@@ -4,9 +4,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
-import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
+import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { setRezicsLocale } from "@/app/locale";
 
 type LangToggleProps = {
   children: (props: {
@@ -15,17 +15,11 @@ type LangToggleProps = {
 };
 
 export const LangToggle: React.FC<LangToggleProps> = ({ children }) => {
-  const { i18n } = useTranslation();
   const [open, setOpen] = React.useState(false);
 
-  const changeLang = (lang: string) => {
-    i18n.changeLanguage(lang);
-    localStorage.setItem("lang", lang);
-  };
-
-  const handleChangeLang = (lang: string) => {
+  const handleChangeLang = (lang: Language) => {
     setOpen(false);
-    changeLang(lang);
+    setRezicsLocale(lang);
   };
 
   return (
