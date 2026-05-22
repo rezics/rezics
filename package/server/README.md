@@ -54,7 +54,7 @@ bun run db:migrate       # Run custom migrations
 
 ## Factory Seed
 
-Factory seed commands reset auth and server databases, seed baseline rows, run a base preset, optionally run special scenarios, and print a manifest of useful fixture Unit IDs.
+Factory seed commands reset auth and server databases, seed baseline rows, run a base preset, optionally run special scenarios, and print special scenario fixture Unit IDs.
 
 ```bash
 bun run seed:factory:fast
@@ -62,12 +62,12 @@ bun run ../../package/utils/bin/cli.ts factory --preset=fast --no-interactive --
 bun run ../../package/utils/bin/cli.ts factory --preset=fast --no-interactive --all-scenarios --meili=skip
 ```
 
-Manifest output includes `label`, optional `scenario`, `unitType`, `unitId`, and `syncTargets`. Use `--manifest=human`, `--manifest=json`, `--manifest=both`, or `--manifest=none`.
+Special target output includes `label`, `scenario`, `unitType`, `unitId`, and optional `notes`. Use `--manifest=human`, `--manifest=json`, `--manifest=both`, or `--manifest=none`.
 
 Meilisearch modes:
 
 - `--meili=skip` skips index initialization and synchronization.
-- `--meili=init-and-sync` initializes indexes before seeding and targeted-syncs manifest entries after seeding.
+- `--meili=init-and-sync` initializes indexes before seeding and synchronizes seeded Units through seed runtime hooks.
 
 Special scenarios are `large-post-tree`, `large-content-tree`, `large-history`, and `complex-shelf`. Non-interactive runs are base-only unless `--scenario=<name>` or `--all-scenarios` is passed.
 

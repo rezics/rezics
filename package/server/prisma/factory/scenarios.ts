@@ -6,7 +6,7 @@ import {
 import { generateBetween } from "../../src/shelf/fractional-index";
 import { PostKind, UnitStatus, UnitType } from "../generated/client.js";
 import { seedChaptersForBook } from "./books.js";
-import { addSeedManifestEntry, createSeedResult } from "./manifest.js";
+import { addSpecialSeedTarget, createSeedResult } from "./result.js";
 import type { SeedCtx } from "./strategy.js";
 import type { CreatedUser, SeedResult } from "./types.js";
 
@@ -90,12 +90,12 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     "Factory Scenario: Large Post Tree",
   );
 
-  addSeedManifestEntry(result, {
+  await ctx.sync.content(targetUnitId);
+  addSpecialSeedTarget(result, {
     label: "Large post tree target",
     scenario: "large-post-tree",
     unitType: UnitType.BOOK,
     unitId: targetUnitId,
-    syncTargets: ["content"],
   });
 
   const rootCount = 8;
@@ -177,15 +177,17 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
   await ctx.prisma.unit.createMany({ data: unitRows });
   await ctx.prisma.post.createMany({ data: postRows });
   await ctx.prisma.unitSupportLanguage.createMany({ data: supportRows });
+  for (const post of plannedPosts) {
+    await ctx.sync.post(post.id);
+  }
 
   const roots = plannedPosts.filter((post) => post.depth === 0);
   for (const [index, post] of roots.slice(0, 3).entries()) {
-    addSeedManifestEntry(result, {
+    addSpecialSeedTarget(result, {
       label: `Large post tree root ${index + 1}`,
       scenario: "large-post-tree",
       unitType: UnitType.POST,
       unitId: post.id,
-      syncTargets: ["post"],
     });
   }
 
@@ -298,12 +300,12 @@ async function runLargeContentTree(ctx: SeedCtx): Promise<SeedResult> {
     multiLinkChapterProbability: 0.08,
   });
 
-  addSeedManifestEntry(result, {
+  await ctx.sync.content(bookUnitId);
+  addSpecialSeedTarget(result, {
     label: "Large content tree root",
     scenario: "large-content-tree",
     unitType: UnitType.BOOK,
     unitId: bookUnitId,
-    syncTargets: ["content"],
   });
 
   return result;
@@ -336,12 +338,12 @@ async function runLargeHistory(ctx: SeedCtx): Promise<SeedResult> {
     })),
   });
 
-  addSeedManifestEntry(result, {
+  await ctx.sync.content(unitId);
+  addSpecialSeedTarget(result, {
     label: "Large history unit",
     scenario: "large-history",
     unitType: UnitType.BOOK,
     unitId,
-    syncTargets: ["content"],
     notes: "Writes main database HistoryOutbox rows.",
   });
 
@@ -417,12 +419,13 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
     data: { itemCount: shelfRows.length },
   });
 
-  addSeedManifestEntry(result, {
+  await ctx.sync.content(shelfId);
+  await ctx.sync.contentContainedUnits(shelfId);
+  addSpecialSeedTarget(result, {
     label: "Complex shelf",
     scenario: "complex-shelf",
     unitType: UnitType.SHELF,
     unitId: shelfId,
-    syncTargets: ["content", "content-contained-units"],
   });
 
   return result;
@@ -463,8 +466,8 @@ export async function runFactoryScenarios(
   for (const name of scenarioNames) {
     const scenario = FACTORY_SCENARIOS[name];
     const scenarioResult = await scenario.run(ctx);
-    for (const entry of scenarioResult.manifest) {
-      addSeedManifestEntry(result, entry);
+    for (const entry of scenarioResult.specialTargets) {
+      addSpecialSeedTarget(result, entry);
     }
   }
   return result;

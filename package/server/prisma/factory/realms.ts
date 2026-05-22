@@ -103,6 +103,8 @@ export async function seedRealms(
         });
       }
 
+      await ctx.sync.realm(unit.id);
+
       return unit;
     },
   );

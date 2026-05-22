@@ -161,5 +161,9 @@ export async function seedUsers(
     },
   );
 
+  for (const user of created) {
+    await ctx.sync.user(user.userId);
+  }
+
   return created.slice(1);
 }

@@ -1,4 +1,4 @@
-import { PostKind, UnitType } from "../generated/client.js";
+import { PostKind } from "../generated/client.js";
 import { seedBooks, seedChaptersForBook } from "./books.js";
 import { seedEchoKV } from "./echokv.js";
 import { seedEngagement } from "./engagement.js";
@@ -9,7 +9,7 @@ import {
   seedSubjectEntities,
 } from "./entities.js";
 import { seedGames } from "./games.js";
-import { addSeedManifestEntry, createSeedResult } from "./manifest.js";
+import { createSeedResult } from "./result.js";
 import { seedMedia } from "./media.js";
 import { seedPinboard } from "./pinboard.js";
 import { seedPostsForWorks, seedWikiTranslationGroups } from "./posts.js";
@@ -50,12 +50,7 @@ export async function runFactorySeed(
     `[Seed]   ${users.length} users, ${people.length} person entities, ${organizations.length} organization entities, ${subjects.length} subject entities`,
   );
   for (const entity of [...people, ...organizations, ...subjects]) {
-    addSeedManifestEntry(result, {
-      label: `Entity ${entity.name}`,
-      unitType: UnitType.ENTITY,
-      unitId: entity.unitId,
-      syncTargets: ["entity"],
-    });
+    await ctx.sync.entity(entity.unitId);
   }
   done();
 
@@ -81,6 +76,9 @@ export async function runFactorySeed(
     allWorks,
     subjects,
   );
+  for (const work of allWorks) {
+    await ctx.sync.content(work.id);
+  }
   console.log(
     `[Seed]   ${books.length} books, ${games.length} games, ${mediaItems.length} media, ${subjectAttributionCount} subject attributions`,
   );
@@ -117,6 +115,9 @@ export async function runFactorySeed(
   done = stepTimer("Step 7: Wiki translation groups");
   const wikiGroup = await seedWikiTranslationGroups(ctx.prisma, users);
   if (wikiGroup) {
+    for (const postId of wikiGroup.postIds) {
+      await ctx.sync.post(postId);
+    }
     console.log(
       `[Seed]   1 wiki translation group with ${wikiGroup.postIds.length} parallel posts`,
     );
@@ -156,6 +157,7 @@ export async function runFactorySeed(
     if (!userId) return;
 
     await seedChaptersForBook(ctx, book.id, userId, plan.chapter);
+    await ctx.sync.content(book.id);
   });
   done();
 
@@ -173,6 +175,9 @@ export async function runFactorySeed(
     users,
     allEngagementUnits,
   );
+  for (const user of users) {
+    await ctx.sync.user(user.userId);
+  }
   done();
 
   done = stepTimer("Step 12: Zones");

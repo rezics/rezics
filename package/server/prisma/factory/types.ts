@@ -14,17 +14,30 @@ export const SEED_SYNC_TARGETS = [
 
 export type SeedSyncTarget = (typeof SEED_SYNC_TARGETS)[number];
 
-export interface SeedManifestEntry {
+export interface SeedSyncSummary {
+  targets: Record<SeedSyncTarget, number>;
+  total: number;
+}
+
+export interface SeedSyncHooks {
+  content(unitId: string): Promise<void>;
+  post(unitId: string): Promise<void>;
+  realm(unitId: string): Promise<void>;
+  user(unitId: string): Promise<void>;
+  entity(unitId: string): Promise<void>;
+  contentContainedUnits(unitId: string): Promise<void>;
+}
+
+export interface SpecialSeedTarget {
   label: string;
-  scenario?: string;
+  scenario: string;
   unitType: UnitType;
   unitId: string;
-  syncTargets: SeedSyncTarget[];
   notes?: string;
 }
 
 export interface SeedResult {
-  manifest: SeedManifestEntry[];
+  specialTargets: SpecialSeedTarget[];
 }
 
 export interface CreatedUser {

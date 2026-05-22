@@ -368,6 +368,10 @@ export async function seedChaptersForBook(
     data: { chapterCount },
   });
 
+  for (const row of materializedRows) {
+    await ctx.sync.post(row.id);
+  }
+
   return serializeTree(tree);
 }
 

@@ -1,21 +1,18 @@
 export { runFactorySeed } from "./orchestrator";
 export {
-  addSeedManifestEntry,
+  addSpecialSeedTarget,
   createSeedResult,
   mergeSeedResults,
-} from "./manifest";
+} from "./result";
 export {
   FACTORY_SCENARIO_NAMES,
   FACTORY_SCENARIOS,
   runFactoryScenarios,
 } from "./scenarios";
 export {
-  getDefaultFactorySyncDependencies,
-  syncSeedManifestToMeili,
-} from "./targeted-sync";
-export {
   makeSeedCtx,
   makeCountProvider,
+  createNoopSeedSyncHooks,
   CountSpecSchema,
   ModeSchema,
 } from "./strategy";
@@ -33,15 +30,13 @@ export type {
   FactoryScenarioName,
 } from "./scenarios";
 export type {
-  FactorySyncDependencies,
-  FactoryTargetedSyncSummary,
-} from "./targeted-sync";
-export type {
   CreatedUser,
   CreatedUnit,
   CreatedEntity,
   CreatedPost,
-  SeedManifestEntry,
+  SeedSyncHooks,
+  SeedSyncSummary,
+  SpecialSeedTarget,
   PostsPerWorkPlan,
   ChapterPlan,
   TreeShapePlan,

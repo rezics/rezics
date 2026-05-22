@@ -87,6 +87,10 @@ export async function seedPostsForWorks(
     allPosts.push(...treePosts);
   });
 
+  for (const post of allPosts) {
+    await ctx.sync.post(post.id);
+  }
+
   return allPosts;
 }
 

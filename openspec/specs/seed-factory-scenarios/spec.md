@@ -1,46 +1,47 @@
 # seed-factory-scenarios Specification
 
 ## Purpose
-Defines the factory seed flow extensions that produce named edge-case fixtures, expose Meilisearch lifecycle control, and emit a stable seed manifest. Special factory scenarios run after the base preset to seed large post trees, large content trees, deep history timelines, and complex shelves, with targeted Meilisearch synchronization driven from the manifest instead of full reindex.
+Defines the factory seed flow extensions that produce named edge-case fixtures, expose Meilisearch lifecycle control, and emit stable special target output. Special factory scenarios run after the base preset to seed large post trees, large content trees, deep history timelines, and complex shelves. Targeted Meilisearch synchronization is driven by seed runtime hooks, while special scenario output is maintained as a separate report list.
 
 ## Requirements
 
 ### Requirement: Factory flow supports Meili mode selection
-The factory seed flow SHALL expose a Meili mode with exactly two choices: `init-and-sync` and `skip`. When the mode is `init-and-sync`, factory seeding SHALL initialize Meilisearch indexes before database seeding begins and SHALL targeted-sync seeded manifest entries after all base and special seeders finish. When the mode is `skip`, factory seeding SHALL skip both Meilisearch initialization and Meilisearch synchronization.
+The factory seed flow SHALL expose a Meili mode with exactly two choices: `init-and-sync` and `skip`. When the mode is `init-and-sync`, factory seeding SHALL initialize Meilisearch indexes before database seeding begins and SHALL enable targeted seed sync hooks for seeders. When the mode is `skip`, factory seeding SHALL skip both Meilisearch initialization and Meilisearch synchronization.
 
 #### Scenario: Init mode initializes before seed
 - **WHEN** the factory flow runs with Meili mode `init-and-sync`
 - **THEN** Meilisearch index initialization SHALL complete before baseline or factory database rows are seeded
-- **AND** targeted Meilisearch synchronization SHALL run after base and special seeders complete
+- **AND** targeted Meilisearch synchronization hooks SHALL run as seeders create complete indexable Units
 
 #### Scenario: Skip mode disables all Meili work
 - **WHEN** the factory flow runs with Meili mode `skip`
 - **THEN** it SHALL NOT initialize Meilisearch indexes
 - **AND** it SHALL NOT synchronize seeded Units to Meilisearch
 
-### Requirement: Factory returns a seed manifest
-The factory seed flow SHALL produce a seed manifest containing stable entries for important seeded Units. Each manifest entry SHALL include a label, Unit type, Unit ID, sync targets, and, when applicable, the scenario that created it.
+### Requirement: Factory returns special seed targets
+The factory seed flow SHALL produce a special target report containing stable entries for Units created by selected special scenarios. Each special target entry SHALL include a label, scenario, Unit type, Unit ID, and optional notes.
 
 #### Scenario: Human output includes fixture identifiers
 - **WHEN** factory seeding completes
-- **THEN** the CLI SHALL print each manifest entry with its label, Unit type, and Unit ID
+- **THEN** the CLI SHALL print each special target entry with its label, scenario, Unit type, and Unit ID
+- **AND** base preset Units SHALL NOT be printed as special targets
 
 #### Scenario: JSON output is machine-readable
-- **WHEN** factory seeding is requested with JSON manifest output
-- **THEN** the CLI SHALL emit a JSON document containing all manifest entries
-- **AND** each entry SHALL preserve its label, scenario, Unit type, Unit ID, and sync targets
+- **WHEN** factory seeding is requested with JSON target output
+- **THEN** the CLI SHALL emit a JSON document containing all special target entries
+- **AND** each entry SHALL preserve its label, scenario, Unit type, Unit ID, and notes when present
 
 ### Requirement: Special factory scenarios run after base factory seed
-The factory flow SHALL support named special scenarios that run after the base preset seed completes. Special scenarios SHALL append their key fixture Units to the seed manifest.
+The factory flow SHALL support named special scenarios that run after the base preset seed completes. Special scenarios SHALL append their key fixture Units to the special target report.
 
 #### Scenario: Scenario receives base seed context
 - **WHEN** a special scenario is selected
 - **THEN** it SHALL run after the base factory preset has created users, works, and supporting data
 - **AND** it MAY reuse base seed data as scenario inputs
 
-#### Scenario: Scenario appends manifest entries
+#### Scenario: Scenario appends special target entries
 - **WHEN** a special scenario creates a key fixture Unit
-- **THEN** it SHALL append a manifest entry identifying that Unit and the scenario that created it
+- **THEN** it SHALL append a special target entry identifying that Unit and the scenario that created it
 
 ### Requirement: Interactive factory uses staged selection
 The interactive factory CLI SHALL keep base preset selection as a single-select choice, SHALL expose Meili mode as a single-select choice, and SHALL expose special scenarios as a multi-select choice. Interactive special scenarios SHALL default to selected.
@@ -65,41 +66,40 @@ Non-interactive factory runs SHALL NOT silently run special scenarios unless the
 ### Requirement: Large post tree scenario
 The `large-post-tree` scenario SHALL create a named target Unit and a large post tree fixture with deterministic root, depth, branching, sort path, and reply count semantics sufficient for post tree pagination and rendering tests.
 
-#### Scenario: Large post tree manifest is emitted
+#### Scenario: Large post tree targets are emitted
 - **WHEN** the `large-post-tree` scenario completes
-- **THEN** the manifest SHALL include the target Unit and at least one root post Unit
-- **AND** those entries SHALL include sync targets for the relevant content and post indexes
+- **THEN** the special target report SHALL include the target Unit and at least one root post Unit
 
 ### Requirement: Large content tree scenario
 The `large-content-tree` scenario SHALL create a named content tree fixture with enough nodes and materialized chapter Units to test content tree rendering, traversal, and search projection behavior.
 
-#### Scenario: Large content tree manifest is emitted
+#### Scenario: Large content tree target is emitted
 - **WHEN** the `large-content-tree` scenario completes
-- **THEN** the manifest SHALL include the root content Unit
-- **AND** it SHALL include sync targets for indexes affected by that Unit and its materialized content
+- **THEN** the special target report SHALL include the root content Unit
 
 ### Requirement: Large history scenario
 The `large-history` scenario SHALL create a named Unit with many history timeline records suitable for revision and structure-event pagination tests.
 
-#### Scenario: Large history manifest is emitted
+#### Scenario: Large history target is emitted
 - **WHEN** the `large-history` scenario completes
-- **THEN** the manifest SHALL include the Unit whose history was seeded
+- **THEN** the special target report SHALL include the Unit whose history was seeded
 - **AND** the scenario SHALL document whether it wrote direct history records, main database outbox records, or both
 
 ### Requirement: Complex shelf scenario
 The `complex-shelf` scenario SHALL create a named shelf fixture with mixed item kinds, relation rows, ordering data, and enough items to test complex shelf display and mutation behavior.
 
-#### Scenario: Complex shelf manifest is emitted
+#### Scenario: Complex shelf target is emitted
 - **WHEN** the `complex-shelf` scenario completes
-- **THEN** the manifest SHALL include the shelf Unit
-- **AND** the shelf entry SHALL include content sync targets needed to update searchable contained Unit metadata
+- **THEN** the special target report SHALL include the shelf Unit
 
-### Requirement: Factory targeted sync uses manifest entries
-When Meili mode is `init-and-sync`, the factory flow SHALL synchronize Meilisearch from the seed manifest rather than running a full reindex by default. The targeted sync step SHALL deduplicate sync work by sync target and Unit ID.
+### Requirement: Factory targeted sync uses runtime hooks
+When Meili mode is `init-and-sync`, the factory flow SHALL synchronize Meilisearch through seed runtime hooks rather than running a full reindex by default. Seeders SHALL call the appropriate hook after creating or mutating a complete indexable projection.
 
-#### Scenario: Duplicate manifest entries sync once per target
-- **WHEN** multiple manifest entries reference the same Unit ID and sync target
-- **THEN** targeted sync SHALL call that sync target at most once for that Unit ID
+#### Scenario: Runtime hooks respect Meili mode
+- **WHEN** the runtime is configured with Meili mode `skip`
+- **THEN** all seed sync hooks SHALL be no-ops
+- **WHEN** the runtime is configured with Meili mode `init-and-sync`
+- **THEN** each sync hook SHALL synchronize the requested Unit to its target index
 
 #### Scenario: Full reindex is not default factory sync
 - **WHEN** a factory run completes with Meili mode `init-and-sync`

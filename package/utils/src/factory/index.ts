@@ -13,16 +13,17 @@ import {
   SeedPlanSchema,
   type SeedPreset,
   type SeedResult,
-  syncSeedManifestToMeili,
 } from "@rezics/server/prisma/factory";
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
 import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
-import {
-  createFactorySyncDependencies,
-  createSeedSearchClient,
-} from "../lib/search";
+import { createSeedSearchClient } from "../lib/search";
 import { printSeedCredentials, seedBaseline } from "../seed/index";
+import {
+  createSeedRuntime,
+  type ManifestFormat,
+  type MeiliMode,
+} from "../seed/runtime";
 import { tweakPlan } from "./interactive";
 import { getPreset, listPresetNames, PRESETS } from "./presets";
 
@@ -37,9 +38,6 @@ export interface RunFactoryOptions {
   noScenarios?: boolean;
   manifestFormat?: string;
 }
-
-type MeiliMode = "init-and-sync" | "skip";
-type ManifestFormat = "human" | "json" | "both" | "none";
 
 function resolvePresetByName(name: string): SeedPreset {
   const preset = getPreset(name);
@@ -81,7 +79,7 @@ async function selectMeiliModeInteractively(): Promise<MeiliMode> {
       {
         value: "init-and-sync",
         label: "init-and-sync",
-        hint: "initialize indexes, then targeted-sync manifest entries",
+        hint: "initialize indexes, then sync seeded Units through hooks",
       },
       { value: "skip", label: "skip", hint: "do not touch Meilisearch" },
     ],
@@ -222,23 +220,28 @@ function resolveScenarioNames(
   return [...new Set(names as FactoryScenarioName[])];
 }
 
-function printManifest(result: SeedResult, format: ManifestFormat): void {
+function printSpecialTargets(result: SeedResult, format: ManifestFormat): void {
   if (format === "none") return;
 
-  if ((format === "human" || format === "both") && result.manifest.length > 0) {
+  if (
+    (format === "human" || format === "both") &&
+    result.specialTargets.length > 0
+  ) {
     p.log.info(
       [
         "Special seed targets:",
-        ...result.manifest.map((entry) => {
-          const scenario = entry.scenario ? ` [${entry.scenario}]` : "";
-          return `- ${entry.label}${scenario}: ${entry.unitType} ${entry.unitId}`;
-        }),
+        ...result.specialTargets.map(
+          (entry) =>
+            `- ${entry.label} [${entry.scenario}]: ${entry.unitType} ${entry.unitId}`,
+        ),
       ].join("\n"),
     );
   }
 
   if (format === "json" || format === "both") {
-    console.log(JSON.stringify({ manifest: result.manifest }, null, 2));
+    console.log(
+      JSON.stringify({ specialTargets: result.specialTargets }, null, 2),
+    );
   }
 }
 
@@ -304,7 +307,16 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
     host: env.MEILI_HOST,
     apiKey: env.MEILI_MASTER_KEY,
   });
-  const syncDeps = createFactorySyncDependencies(searchClient, prisma);
+  const runtime = createSeedRuntime({
+    config: {
+      meiliMode,
+      manifestFormat: resolveManifestFormat(opts.manifestFormat),
+      scenarioNames,
+    },
+    authPrisma,
+    serverPrisma: prisma,
+    searchClient,
+  });
   try {
     if (meiliMode === "init-and-sync") {
       const { initMeiliSearch } = await import("@rezics/server/prisma/seed");
@@ -330,26 +342,22 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       authPrisma,
       slugScopes as never,
       preset.mode,
+      runtime.sync,
     );
+    for (const credential of credentials) {
+      await runtime.sync.user(credential.result.userId);
+    }
     const result = await runFactorySeed(ctx, plan);
     const scenarioResult = await runFactoryScenarios(ctx, scenarioNames);
     mergeSeedResults(result, scenarioResult);
     if (meiliMode === "init-and-sync") {
-      const summary = await syncSeedManifestToMeili(
-        ctx,
-        result.manifest,
-        syncDeps,
-      );
       p.log.info(
-        `Targeted Meili sync complete: ${summary.total} operation(s).`,
+        `Targeted Meili sync complete: ${runtime.state.syncSummary.total} operation(s).`,
       );
     }
-    printManifest(result, resolveManifestFormat(opts.manifestFormat));
+    printSpecialTargets(result, runtime.config.manifestFormat);
     printSeedCredentials(credentials);
   } finally {
-    await Promise.all([
-      prisma.$disconnect().catch(() => {}),
-      authPrisma.$disconnect().catch(() => {}),
-    ]);
+    await runtime.dispose();
   }
 }

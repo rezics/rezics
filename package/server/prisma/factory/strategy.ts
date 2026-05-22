@@ -2,6 +2,7 @@ import type { PrismaClient as AuthPrismaClient } from "@rezics/auth/prisma/gener
 import type { SlugScopeName } from "@rezics/contract";
 import * as v from "valibot";
 import type { PrismaClient } from "../generated/client.js";
+import type { SeedSyncHooks } from "./types.js";
 import { powerLaw, randomInt } from "./utils.js";
 
 export type Mode = "realistic" | "fixed" | "uniform";
@@ -23,6 +24,7 @@ export interface SeedCtx {
   prisma: PrismaClient;
   authPrisma: AuthPrismaClient;
   slugScopes: SlugScopesMap;
+  sync: SeedSyncHooks;
   draw(spec: CountSpec): number;
 }
 
@@ -74,13 +76,27 @@ export function makeSeedCtx(
   authPrisma: AuthPrismaClient,
   slugScopes: SlugScopesMap,
   mode: Mode,
+  sync: SeedSyncHooks = createNoopSeedSyncHooks(),
 ): SeedCtx {
   const provider = makeCountProvider(mode);
   return {
     prisma,
     authPrisma,
     slugScopes,
+    sync,
     draw: (spec) => provider.draw(spec),
+  };
+}
+
+export function createNoopSeedSyncHooks(): SeedSyncHooks {
+  const noop = async () => {};
+  return {
+    content: noop,
+    post: noop,
+    realm: noop,
+    user: noop,
+    entity: noop,
+    contentContainedUnits: noop,
   };
 }
 

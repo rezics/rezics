@@ -182,6 +182,9 @@ export async function seedShelves(
         });
       }
 
+      await ctx.sync.content(unit.id);
+      await ctx.sync.contentContainedUnits(unit.id);
+
       return unit;
     },
   );
