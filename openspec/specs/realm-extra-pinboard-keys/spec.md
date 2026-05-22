@@ -30,21 +30,21 @@ The schema SHALL allow additional unspecified properties (`additionalProperties:
 
 ### Requirement: Each well-known key has a JSDoc comment whose English text matches a locale entry
 
-The contract source for each well-known key SHALL carry a JSDoc comment documenting its intended use. The English text of that comment SHALL be added (verbatim) as a locale entry under the convention key `realm.extra.<keyName>.note` in every locale file under `package/app/src/locale/`. The comment-and-locale duplication is maintained by convention; no automated extraction is required.
+The contract source for each well-known key SHALL carry a JSDoc comment documenting its intended use. The English text of that comment SHALL be added (verbatim) as a message entry under the convention key `realm_extra_<keyName>_note` in every Paraglide JSON locale file under `package/i18n/messages/`. The comment-and-message duplication is maintained by convention; no automated extraction is required.
 
 The `announcement` key's JSDoc and locale entry SHALL include guidance such as "Not for general forum notifications; reserved for special pages like the homepage announcement bar."
 
 #### Scenario: Locale entry exists for each well-known key
 
-- GIVEN the locale files `en.ts`, `zh-hans.ts`, `zh-hant.ts`, `ja.ts`, `de.ts` under `package/app/src/locale/`
+- GIVEN the JSON locale message files `en.json`, `zh-hans.json`, `zh-hant.json`, `ja.json`, `de.json` under `package/i18n/messages/`
 - WHEN any of those files is loaded
-- THEN it SHALL export a value at the path `realm.extra.pinboard.note` AND `realm.extra.announcement.note`
+- THEN it SHALL contain values for `realm_extra_pinboard_note` AND `realm_extra_announcement_note`
 - AND each value SHALL be a non-empty string
 
 #### Scenario: English locale text matches the contract JSDoc
 
 - GIVEN the contract source for `RealmExtraSchema.announcement` carries a specific English JSDoc string
-- WHEN the locale `en.ts` is read at `realm.extra.announcement.note`
+- WHEN the `en.json` locale message file is read at `realm_extra_announcement_note`
 - THEN the value SHALL equal the contract JSDoc string verbatim
 
 ### Requirement: Server-side append/reorder/remove primitives on Realm.extra well-known keys
@@ -261,16 +261,16 @@ Validation SHALL recursively check each node's shape per the `TagTreeNode` schem
 
 ### Requirement: Locale entries and JSDoc maintained for new well-known keys
 
-Each new well-known key (`rule`, `about`, `banner`, `tagTree`) SHALL carry a JSDoc comment in the contract source describing its intended use. The English text of each comment SHALL be added (verbatim) as a locale entry under the convention key `realm.extra.<keyName>.note` in every locale file under `package/app/src/locale/`. This continues the convention established for `pinboard` and `announcement`.
+Each new well-known key (`rule`, `about`, `banner`, `tagTree`) SHALL carry a JSDoc comment in the contract source describing its intended use. The English text of each comment SHALL be added (verbatim) as a message entry under the convention key `realm_extra_<keyName>_note` in every Paraglide JSON locale file under `package/i18n/messages/`. This continues the convention established for `pinboard` and `announcement`.
 
 #### Scenario: Locale entries exist for all new keys
 
-- **WHEN** any locale file under `package/app/src/locale/` is loaded
-- **THEN** values SHALL be exported at `realm.extra.rule.note`, `realm.extra.about.note`, `realm.extra.banner.note`, and `realm.extra.tagTree.note`
+- **WHEN** any JSON locale message file under `package/i18n/messages/` is loaded
+- **THEN** values SHALL exist for `realm_extra_rule_note`, `realm_extra_about_note`, `realm_extra_banner_note`, and `realm_extra_tagTree_note`
 - **AND** each value SHALL be a non-empty string
 
 #### Scenario: English JSDoc matches en locale
 
 - **GIVEN** the contract source for `RealmExtraSchema.rule` carries a specific English JSDoc string
-- **WHEN** `en.ts` is read at `realm.extra.rule.note`
+- **WHEN** `en.json` is read at `realm_extra_rule_note`
 - **THEN** the value SHALL equal the JSDoc string verbatim

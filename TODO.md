@@ -24,7 +24,6 @@
 - [ ] award 支持兩種獎勵點數和現金獎勵
 - [ ] https://www.usebruno.com/
 - [ ] realm联合封禁名单，就是将block list作为一级公民，最好可以订阅多个block list，但是这样必然也带来性能问题，要如何处理呢。 目的就是讓用戶或者realm可以訂閱多個block list，最好能隨時啓用block list(對於user)，讓生態真正做到爲每一個人服務，就是不會說整個平臺被任何風向帶歪。
-- [ ] 還是考慮遷移到 paraglide-js
 - [ ] 編輯器也有問題，回覆了也無法成功
 - [ ] You could consider tools that empower authors to engage with feedback and improve their work. For example, a dashboard where authors can track reviews, filter critiques by themes (e.g., plot, style, pacing), or highlight top feedback. You might also add revision tools or prompts based on reader suggestions, and perhaps even a feature for authors to respond or engage with reviewers—fostering a strong feedback loop. Tools that make feedback actionable will keep both authors and reviewers engaged!
 - [ ] 目前需要限制普通用戶創建有slug的realm,比如最多十個，僅unitId的realm可以無限。

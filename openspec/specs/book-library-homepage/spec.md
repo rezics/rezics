@@ -92,14 +92,14 @@ The full book search interface (with keyword search, filters, sort, and paginati
 
 ### Requirement: All book homepage sections use i18n
 
-All section titles, tab labels, action labels, and empty states on the book homepage SHALL use `react-i18next` translation keys. No hardcoded Chinese or English display text SHALL appear.
+All section titles, tab labels, action labels, and empty states on the book homepage SHALL use generated Paraglide product/domain message functions. No hardcoded Chinese or English display text SHALL appear.
 
 #### Scenario: Book homepage renders in English
 
-- **WHEN** the UI language is set to "en-US"
+- **WHEN** the UI language is set to "en"
 - **THEN** all section titles and labels on the book homepage SHALL display in English
 
 #### Scenario: Book homepage renders in Japanese
 
-- **WHEN** the UI language is set to "ja-JP"
+- **WHEN** the UI language is set to "ja"
 - **THEN** all section titles and labels on the book homepage SHALL display in Japanese (or English fallback where Japanese translation is unavailable)

@@ -2,7 +2,7 @@
 
 ### Requirement: Homepage sections use i18n for all UI strings
 
-All homepage section components SHALL use `react-i18next` `useTranslation()` for UI strings. No section component SHALL contain hardcoded Chinese or English display text. Section titles, action labels ("More"), loading states, empty states, and tab labels SHALL be resolved from locale translation keys.
+All homepage section components SHALL use generated Paraglide product/domain message functions for UI strings. No section component SHALL contain hardcoded Chinese or English display text. Section titles, action labels ("More"), loading states, empty states, and tab labels SHALL be resolved from locale message functions.
 
 #### Scenario: NewBookSection renders in user's UI language
 
@@ -26,7 +26,7 @@ All homepage section components SHALL use `react-i18next` `useTranslation()` for
 
 ### Requirement: Search components use i18n for all UI strings
 
-SearchFilter and SearchInput components SHALL use `react-i18next` for all sort labels, filter labels, placeholder text, and preset tag labels. No search component SHALL contain hardcoded Chinese or English display text.
+SearchFilter and SearchInput components SHALL use generated Paraglide product/domain message functions for all sort labels, filter labels, placeholder text, and preset tag labels. No search component SHALL contain hardcoded Chinese or English display text.
 
 #### Scenario: SearchFilter renders sort options in user's UI language
 
@@ -42,17 +42,17 @@ SearchFilter and SearchInput components SHALL use `react-i18next` for all sort l
 
 ### Requirement: All five locale files contain keys for homepage and search strings
 
-Translation keys for homepage sections and search components SHALL exist in all five locale files: `en.ts`, `zh-hant.ts`, `zh-hans.ts`, `de.ts`, and `ja.ts`. Missing native translations SHALL use English as a placeholder.
+Translation keys for homepage sections and search components SHALL exist in all five JSON locale message files for `en`, `zh-hant`, `zh-hans`, `de`, and `ja`. Missing native translations SHALL use English as a placeholder.
 
 #### Scenario: en locale has complete homepage section keys
 
-- **WHEN** the `en.ts` locale file is loaded
-- **THEN** it SHALL contain keys under `page.home.section` for all section titles, action labels, tab labels, loading states, and empty states
+- **WHEN** the `en` JSON message file is loaded
+- **THEN** it SHALL contain keys for all homepage section titles, action labels, tab labels, loading states, and empty states
 
 #### Scenario: zh-hant locale has complete homepage section keys
 
-- **WHEN** the `zh-hant.ts` locale file is loaded
-- **THEN** it SHALL contain keys under `page.home.section` matching the same key structure as `en.ts` with Traditional Chinese translations
+- **WHEN** the `zh-hant` JSON message file is loaded
+- **THEN** it SHALL contain keys matching the same key structure as `en` with Traditional Chinese translations
 
 ### Requirement: Homepage book content renders in user's preferred content language
 
@@ -72,17 +72,17 @@ Book titles and descriptions displayed in homepage sections (NewBookSection, Tre
 
 ### Requirement: i18n resource keys use canonical language codes
 
-The react-i18next resource configuration SHALL use canonical language codes (`zh-hant`, `zh-hans`, `en`, `ja`, `de`) as resource keys. Locale files SHALL be named using canonical codes (e.g., `zh-hant.ts`, `en.ts`).
+The Paraglide project configuration SHALL use canonical language codes (`zh-hant`, `zh-hans`, `en`, `ja`, `de`) as locale identifiers. Locale source files SHALL be named using canonical codes where file names include locale codes.
 
 #### Scenario: i18n resources registered with canonical keys
 
-- **WHEN** the i18n provider initializes
-- **THEN** resource keys SHALL be `'zh-hant'`, `'zh-hans'`, `'en'`, `'ja'`, `'de'`
-- **AND** no resource key SHALL use legacy codes (`zh-SC`, `zh-TC`, `en-US`, `ja-JP`, `de-DE`)
+- **WHEN** the Paraglide i18n runtime initializes
+- **THEN** locale identifiers SHALL be `'zh-hant'`, `'zh-hans'`, `'en'`, `'ja'`, `'de'`
+- **AND** no locale identifier SHALL use legacy codes (`zh-SC`, `zh-TC`, `en-US`, `ja-JP`, `de-DE`)
 
 #### Scenario: Default language is zh-hant
 
-- **WHEN** the i18n provider initializes without a persisted language preference
+- **WHEN** the i18n runtime initializes without a persisted language preference
 - **THEN** the active language SHALL be `'zh-hant'`
 
 #### Scenario: Fallback language is en
@@ -92,15 +92,15 @@ The react-i18next resource configuration SHALL use canonical language codes (`zh
 
 ### Requirement: Language toggle uses canonical codes
 
-The LangToggle component SHALL use canonical language codes when calling `i18n.changeLanguage()`. Display labels SHALL use native language names from `LANGUAGE_META`.
+The LangToggle component SHALL use canonical language codes when requesting a language change. Display labels SHALL use native language names from `LANGUAGE_META`.
 
 #### Scenario: User switches to Traditional Chinese
 
 - **WHEN** the user selects Traditional Chinese from the language toggle
-- **THEN** `i18n.changeLanguage('zh-hant')` SHALL be called
+- **THEN** the app/admin locale synchronization helper SHALL be called with `'zh-hant'`
 - **AND** the menu item SHALL display "繁體中文"
 
 #### Scenario: User switches to English
 
 - **WHEN** the user selects English from the language toggle
-- **THEN** `i18n.changeLanguage('en')` SHALL be called
+- **THEN** the app/admin locale synchronization helper SHALL be called with `'en'`

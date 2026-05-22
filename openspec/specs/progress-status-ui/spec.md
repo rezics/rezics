@@ -295,13 +295,13 @@ The client-side `useSystemShelfRef(kindKey)` hook SHALL expose a `missing: boole
 
 ### Requirement: Toast and modal copy localization
 
-All user-visible strings (toggle labels, modal titles, button labels, toast messages, overflow menu items) SHALL go through the existing `i18next` `t()` helper with both zh-Hant and en keys defined. Hard-coded Chinese or English strings in components are prohibited; fallbacks via the second `t(key, fallback)` argument are allowed for incremental rollout.
+All user-visible strings (toggle labels, modal titles, button labels, toast messages, overflow menu items) SHALL go through the product/domain i18n layer with both zh-Hant and en messages defined. Hard-coded Chinese or English strings in components are prohibited.
 
 #### Scenario: All strings have an i18n key
 
 - **WHEN** the feature is built
-- **THEN** every visible string SHALL be sourced from a `t("...")` call
-- **AND** the project's existing translation files SHALL contain entries for both supported locales
+- **THEN** every visible string SHALL be sourced from the product/domain message catalog
+- **AND** the project's Paraglide JSON message files SHALL contain entries for both supported locales
 
 ### Requirement: Accessibility of the status control
 

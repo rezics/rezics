@@ -42,7 +42,7 @@
 - [x] 5.2 Remove `i18nKey` fields from `package/contract/src/{entity,license,subject-attribution,credit-attribution}.ts` after callsites migrate.
 - [x] 5.3 Remove obsolete `i18next` and `react-i18next` dependencies after all frontend callsites are migrated.
 - [x] 5.4 Remove obsolete TypeScript locale modules under `package/app/src/locale/` once Paraglide JSON catalogs are the source of truth.
-- [ ] 5.5 Update documentation that references the old i18next resource structure.
+- [x] 5.5 Update documentation that references the old i18next resource structure.
 
 ## 6. Invariants And Tooling
 
@@ -55,7 +55,7 @@
 - [x] 7.1 Run Paraglide compile commands for `@rezics/i18n` and `@rezics/ui` message catalogs.
 - [x] 7.2 Run repo-wide searches verifying no frontend runtime imports remain from `react-i18next` and no `i18nKey` references remain in `package/contract/src/`.
 - [x] 7.3 Run targeted tests for language toggle behavior and locale synchronization across `@rezics/i18n` and `@rezics/ui` runtimes.
-- [ ] 7.4 Run package-level TypeScript/build checks for `@rezics/i18n`, `@rezics/ui`, `@rezics/app`, `@rezics/admin`, and `@rezics/contract`.
-- [ ] 7.5 Run `bun run format:check`, `bun run check:convention`, and `bun run knip`.
-- [ ] 7.6 Verify translated UI component stories render with the expected locale in Storybook via the new preview decorator.
-- [ ] 7.7 Smoke-test the language toggle in `bun run dev` for both app and admin shells; confirm both `@rezics/i18n` and `@rezics/ui` text update together.
+- [x] 7.4 Run package-level TypeScript/build checks for `@rezics/i18n`, `@rezics/ui`, `@rezics/app`, `@rezics/admin`, and `@rezics/contract`.
+- [x] 7.5 Run `bun run format:check`, `bun run check:convention`, and `bun run knip`.
+- [x] 7.6 Verify translated UI component stories render with the expected locale in Storybook via the new preview decorator.
+- [x] 7.7 Smoke-test the language toggle in `bun run dev` for both app and admin shells; confirm both `@rezics/i18n` and `@rezics/ui` text update together.

@@ -157,16 +157,16 @@ The application footer's product links section SHALL reference "Shelves" instead
 - **AND** it SHALL NOT include a "Readlists" link
 
 ### Requirement: Locale strings updated for shelf terminology
-All locale string files (en-US, zh-SC) SHALL replace readlist-related keys and translations with shelf equivalents. No readlist terminology SHALL remain in locale files.
+All Paraglide JSON locale message files SHALL replace readlist-related keys and translations with shelf equivalents. No readlist terminology SHALL remain in locale message files.
 
-#### Scenario: en-US locale uses shelf terminology
-- **WHEN** the en-US locale file is loaded
+#### Scenario: en locale uses shelf terminology
+- **WHEN** the en JSON message file is loaded
 - **THEN** it SHALL contain shelf-related translation keys (e.g., shelf titles, descriptions, actions)
 - **AND** it SHALL NOT contain any readlist-related translation keys
 
-#### Scenario: zh-SC locale uses shelf terminology
-- **WHEN** the zh-SC locale file is loaded
-- **THEN** it SHALL contain shelf-related translation keys matching the en-US structure
+#### Scenario: zh-hans locale uses shelf terminology
+- **WHEN** the zh-hans JSON message file is loaded
+- **THEN** it SHALL contain shelf-related translation keys matching the en structure
 - **AND** it SHALL NOT contain any readlist-related translation keys
 
 ### Requirement: URL builder maps UnitType.SHELF to the shelf route
