@@ -149,7 +149,7 @@ export default function UnitsPage() {
             size="sm"
             variant="outline"
             render={(props) => (
-              <Link to={`/unit/${u.id}`} {...props}>
+              <Link to="/unit/$unitId" params={{ unitId: u.id }} {...props}>
                 {m.common_edit()}
               </Link>
             )}

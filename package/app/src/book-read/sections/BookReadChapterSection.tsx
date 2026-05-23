@@ -2,6 +2,7 @@ import { bookQueries } from "@rezics/api/book/book";
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
 import { useCanEdit } from "@rezics/api/hooks";
 import { progressApi, useUpdateUnitProgress } from "@rezics/api";
+import { contentDocMarkdownFallback } from "@rezics/contract";
 import { createRezicsRenderer } from "@rezics/editor/markdown";
 import { handleExternalLinkClick } from "@rezics/ui/link/handleExternalLinkClick.ts";
 import { Button } from "@rezics/ui/shadcn";
@@ -62,7 +63,7 @@ export const BookReadChapterPage: React.FC = () => {
       )
     : null;
   const title = emptyChapter?.title ?? search.title ?? data?.title;
-  const chapterHtml = md.render(data?.content || "");
+  const chapterHtml = md.render(contentDocMarkdownFallback(data?.content));
 
   const handleSaveBookPosition = () => {
     if (!bookId || !emptyChapterPath) return;

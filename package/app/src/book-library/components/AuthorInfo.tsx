@@ -46,7 +46,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
         })}
       >
         <AccentBarWithText
-          text={m.book_author_info_author_line({ name: author?.name })}
+          text={m.book_author_info_author_line({ name: author?.name ?? "" })}
         />
       </ArrowForwardIcon>
       {showEditButton && (
@@ -57,7 +57,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
         <div className="flex flex-col items-center w-24 flex-shrink-0">
           <LazyLoadImage
             src={author.avatar || ""}
-            alt={m.book_author_avatar_alt({ name: author.name })}
+            alt={m.book_author_avatar_alt({ name: author.name ?? "" })}
             className="w-24 h-24 rounded object-cover shadow-lg"
           />
           <div className="mt-3 w-full">
@@ -109,7 +109,9 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
             })}
           >
             <AccentBarWithText
-              text={m.book_author_info_author_line({ name: author?.name })}
+              text={m.book_author_info_author_line({
+                name: author?.name ?? "",
+              })}
             />
           </ArrowForwardIcon>
           {showEditButton && (
@@ -125,7 +127,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
                 <LazyLoadImage
                   src={author.avatar || ""}
                   className="max-w-full max-h-full object-contain rounded"
-                  alt={m.book_author_avatar_alt({ name: author.name })}
+                  alt={m.book_author_avatar_alt({ name: author.name ?? "" })}
                 />
                 <div className="mt-2 w-full">
                   <FollowButton

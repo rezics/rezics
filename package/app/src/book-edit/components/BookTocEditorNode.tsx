@@ -250,7 +250,7 @@ export const createBookTocEditorNode = ({
                   {effectiveRating && (
                     <RatingBadge
                       rating={effectiveRating}
-                      size="small"
+                      size="sm"
                       variant={isOverride ? "filled" : "outlined"}
                     />
                   )}

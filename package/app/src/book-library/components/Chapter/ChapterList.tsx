@@ -67,7 +67,7 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
       }}
       search={
         node.chapterUnitId
-          ? undefined
+          ? { path: undefined, title: undefined }
           : {
               path: encodeBookContentStructurePath(node.path),
               title: node.title,

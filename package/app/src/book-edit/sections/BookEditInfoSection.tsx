@@ -10,9 +10,11 @@ import {
 } from "@rezics/api/unit/unit.mutations";
 import { useLinkCreditAttributionMutation } from "@rezics/api/credit-attribution/credit-attribution";
 import type {
+  ContentRating,
   CreateBookInput,
   CreationMode,
   EditorialPatchSubmission,
+  LicenseSlug,
 } from "@rezics/contract";
 import {
   CreationMode as CreationModeValue,
@@ -215,10 +217,14 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           ? bookExtension.isLicensed
           : data.isLicensed,
       licenseSlug:
-        nullableString(unitPatch.license ?? bookExtension.licenseSlug) ??
-        data.licenseSlug,
+        (nullableString(unitPatch.license ?? bookExtension.licenseSlug) as
+          | LicenseSlug
+          | null
+          | undefined) ?? data.licenseSlug,
       rating:
-        nullableString(unitPatch.rating ?? bookExtension.rating) ?? data.rating,
+        (nullableString(unitPatch.rating ?? bookExtension.rating) as
+          | ContentRating
+          | undefined) ?? data.rating,
       extra: asRecordOrNull(bookExtension.extra) ?? data.extra,
     });
 

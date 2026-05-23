@@ -176,7 +176,7 @@ export default function BooksPage() {
             size="sm"
             variant="outline"
             render={(props) => (
-              <Link to={`/unit/${b.unitId}`} {...props}>
+              <Link to="/unit/$unitId" params={{ unitId: b.unitId }} {...props}>
                 {m.admin_book_edit_unit()}
               </Link>
             )}

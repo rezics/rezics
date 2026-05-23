@@ -196,9 +196,9 @@ export function RevisionTimeline({
   if (revisions.length === 0) {
     return <EmptyHistoryState />;
   }
-  const revisionSequences = unique(
-    revisions.map((revision) => revision.sequence),
-  )
+  const revisionSequences = [
+    ...new Set(revisions.map((revision) => revision.sequence)),
+  ]
     .filter(Number.isFinite)
     .sort((a, b) => b - a);
   const latestSequence = revisionSequences[0];
@@ -310,9 +310,9 @@ export function StructureTimeline({
                 </span>
               </summary>
               <ol className="mt-3 grid gap-2">
-                {operations.map((operation, index) => (
+                {operations.map((operation) => (
                   <li
-                    key={`${event.id}-${index}`}
+                    key={`${event.id}-${stableHistoryKey(operation)}`}
                     className="rounded-md bg-surface-subtle p-3 text-sm leading-ui text-text-primary"
                   >
                     <span className="font-mono text-xs leading-dense text-text-tertiary">
@@ -662,9 +662,8 @@ export function BookRevisionComparePage() {
             </select>
           </label>
         </div>
-        <div
-          className="flex items-end gap-2"
-          role="group"
+        <fieldset
+          className="m-0 flex items-end gap-2 border-0 p-0"
           aria-label={m.history_compare_layout_label()}
         >
           <button
@@ -691,7 +690,7 @@ export function BookRevisionComparePage() {
           >
             {m.history_compare_split()}
           </button>
-        </div>
+        </fieldset>
       </section>
       <nav
         className="flex flex-wrap gap-2"
@@ -779,17 +778,17 @@ export function CompareChange({
   if (change.kind === "collection") {
     return (
       <div className="grid gap-2 text-sm leading-ui text-text-primary">
-        {change.added.map((item, index) => (
+        {change.added.map((item) => (
           <StatusLine
-            key={`add-${index}`}
+            key={`add-${stableHistoryKey(item)}`}
             status={m.history_compare_status_added()}
             value={item}
             references={references}
           />
         ))}
-        {change.removed.map((item, index) => (
+        {change.removed.map((item) => (
           <StatusLine
-            key={`remove-${index}`}
+            key={`remove-${stableHistoryKey(item)}`}
             status={m.history_compare_status_removed()}
             value={item}
             references={references}
@@ -817,12 +816,8 @@ function UnifiedMarkdownDiff({ parts }: { parts: DiffPart[] }) {
   const rows = createMarkdownDiffRows(parts);
   return (
     <div className="overflow-auto rounded-md bg-surface-subtle text-sm leading-ui text-text-primary">
-      {rows.map((row, index) => (
-        <DiffLine
-          key={`${row.type}-${row.oldLineNumber ?? ""}-${row.newLineNumber ?? ""}-${index}`}
-          row={row}
-          variant="unified"
-        />
+      {rows.map((row) => (
+        <DiffLine key={diffRowKey(row)} row={row} variant="unified" />
       ))}
     </div>
   );
@@ -852,6 +847,27 @@ type MarkdownDiffRow = {
   oldLineNumber?: number;
   type: DiffPart["type"];
 };
+
+function diffRowKey(row: MarkdownDiffRow) {
+  return [
+    row.type,
+    row.oldLineNumber ?? "",
+    row.newLineNumber ?? "",
+    row.content,
+  ].join(":");
+}
+
+function stableHistoryKey(value: unknown) {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  try {
+    return JSON.stringify(value) ?? String(value);
+  } catch {
+    return String(value);
+  }
+}
 
 function createMarkdownDiffRows(parts: DiffPart[]): MarkdownDiffRow[] {
   let oldLineNumber = 1;
@@ -896,9 +912,9 @@ function DiffPane({
         {label}
       </h4>
       <div className="overflow-auto text-sm leading-ui text-text-primary">
-        {rows.map((row, index) => (
+        {rows.map((row) => (
           <DiffLine
-            key={`${side}-${row.type}-${row.oldLineNumber ?? ""}-${row.newLineNumber ?? ""}-${index}`}
+            key={`${side}-${diffRowKey(row)}`}
             row={row}
             side={side}
             variant="split"
@@ -1108,9 +1124,9 @@ function RevisionPayloadValue({
     }
     return (
       <ul className="mt-2 grid gap-2">
-        {value.map((item, index) => (
+        {value.map((item) => (
           <li
-            key={index}
+            key={stableHistoryKey(item)}
             className="rounded-md bg-surface-subtle p-3 text-sm leading-ui text-text-primary"
           >
             <RevisionPayloadValue references={references} value={item} />

@@ -221,19 +221,25 @@ function rawChange(
   after: unknown,
   allowRaw: boolean,
 ): HistoryFieldChange {
+  const beforeDiffValue = rawDiffValue(before);
+  const afterDiffValue = rawDiffValue(after);
   return {
     kind: "raw",
     path,
     before: allowRaw ? before : undefined,
     after: allowRaw ? after : undefined,
     rawParts: allowRaw
-      ? diffJson(before, after).map((part) => ({
+      ? diffJson(beforeDiffValue, afterDiffValue).map((part) => ({
           type: toPartType(part),
           value: part.value,
         }))
       : undefined,
     hidden: !allowRaw,
   };
+}
+
+function rawDiffValue(value: unknown): string | object {
+  return typeof value === "object" && value !== null ? value : String(value);
 }
 
 export function compareRevisionSlots(

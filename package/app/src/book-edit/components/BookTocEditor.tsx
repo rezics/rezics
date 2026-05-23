@@ -54,9 +54,15 @@ export type Chapter = {
   chapterUnitId?: string;
   path?: number[];
   occurrenceId?: string;
+  nodeId?: string;
   rating?: ContentRating;
   children?: Chapter[];
-} & Partial<BookContentStructureOccurrence>;
+} & Partial<
+  Omit<
+    BookContentStructureOccurrence,
+    "children" | "id" | "nodeId" | "occurrenceId" | "path"
+  >
+>;
 
 /** Context menu state. */
 export type ChapterContextMenuState = {
@@ -286,13 +292,23 @@ export const BookTocEditor = forwardRef<
   /** Navigate to the chapter content editor page. */
   const handleNavigateToChapter = useCallback(
     async (chapter: Chapter) => {
-      const chapterUnitId = await ensureChapterUnit(chapter);
+      if (!chapter.chapterUnitId && !chapter.path) {
+        showAlert(
+          "Cannot open a chapter before the table of contents is saved.",
+        );
+        return;
+      }
+      const chapterUnitId = await ensureChapterUnit({
+        title: chapter.title,
+        chapterUnitId: chapter.chapterUnitId,
+        path: chapter.path ?? [],
+      });
       navigate({
         to: "/book/$bookId/edit/$chapterId",
         params: { bookId: bookUnitId, chapterId: chapterUnitId },
       });
     },
-    [ensureChapterUnit, navigate, bookUnitId],
+    [ensureChapterUnit, navigate, bookUnitId, showAlert],
   );
 
   /** Save edits from the edit dialog (title rename + mock status). */

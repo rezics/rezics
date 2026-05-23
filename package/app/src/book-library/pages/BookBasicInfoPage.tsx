@@ -1,7 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { mainMarkdownSource } from "@rezics/contract";
-import { useLocale } from "@rezics/i18n/react";
 import { WorkReleaseNav } from "@rezics/ui";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
@@ -67,7 +66,6 @@ const BookWorkReleaseNav: React.FC<BookWorkReleaseNavProps> = ({
 
 export const BookBasicInfoPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
-  const locale = useLocale();
   const { data } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),
@@ -99,7 +97,7 @@ export const BookBasicInfoPage: React.FC = () => {
         )}
       </div>
     );
-  }, [bookInfo, locale]);
+  }, [bookInfo]);
   useBookDetailSidebar(sidebar);
 
   if (!bookInfo) return null;

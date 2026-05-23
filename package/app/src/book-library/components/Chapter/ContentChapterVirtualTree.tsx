@@ -85,7 +85,7 @@ function createContentChapterNode(bookId: string) {
             }}
             search={
               node.data.chapterUnitId
-                ? undefined
+                ? { path: undefined, title: undefined }
                 : {
                     path: encodeBookContentStructurePath(node.data.path),
                     title: node.data.title,

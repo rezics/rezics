@@ -30,6 +30,7 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
+import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
 import { Route as bookEditChapterRoute } from "@/routes/book_/$bookId/edit/$chapterId";
 import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
 import {
@@ -82,7 +83,10 @@ export const BookEditChapterPage: React.FC = () => {
     bookQueries.contentStructure(bookId),
   );
   const bookTocTree = useMemo(
-    () => contentStructureData?.nodes ?? [],
+    () =>
+      contentStructureData?.nodes
+        ? withBookContentStructureOccurrences(contentStructureData.nodes)
+        : [],
     [contentStructureData],
   );
 
@@ -249,7 +253,18 @@ export const BookEditChapterPage: React.FC = () => {
         open={moveDialogOpen}
         onClose={() => setMoveDialogOpen(false)}
         treeData={bookTocTree}
-        movingNode={data ? { id: chapterId, title, children: [] } : null}
+        movingNode={
+          data
+            ? {
+                id: chapterId,
+                chapterUnitId: chapterId,
+                occurrenceId: chapterId,
+                path: [],
+                title,
+                children: [],
+              }
+            : null
+        }
         onConfirm={(targetParentId) => {
           // TODO: move chapter to new parent via API
           console.log("Move chapter to:", targetParentId);
