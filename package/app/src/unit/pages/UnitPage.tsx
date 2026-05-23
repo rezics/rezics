@@ -3,6 +3,7 @@ import {
   useTranslationGroupSiblings,
 } from "@rezics/api/translation-group";
 import { unitDetailQuery } from "@rezics/api/unit/unit";
+import { mainMarkdownSource } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { TextLink, unitHref } from "@/shared/ui/link";
@@ -73,7 +74,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
 
   const primaryTranslation = unit.translations?.[0];
   const title = primaryTranslation?.title;
-  const content = primaryTranslation?.description;
+  const content = mainMarkdownSource(primaryTranslation?.description);
   const metadataEntries = Object.entries(unit.extra ?? {});
 
   // MOCK: client-side gate until permissions are finalized for translation attach.
@@ -83,7 +84,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
     if (!lang) return;
     attach.mutate({
       unitId: unit.id,
-      input: { language: lang as never, body: "" },
+      input: { language: lang as never },
     });
   };
 

@@ -3,8 +3,7 @@
  */
 
 import type { UpdateUser } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
+import { Prisma, prisma } from "#/prisma/client";
 import {
   patchPostsAuthorToMeili,
   syncPostsByAuthorToMeili,
@@ -349,7 +348,12 @@ export class UserService {
       name: name ?? undefined,
       avatar: avatar !== undefined ? avatar : undefined,
       bio: bio !== undefined ? bio : undefined,
-      description: description !== undefined ? description : undefined,
+      description:
+        description !== undefined
+          ? description === null
+            ? Prisma.JsonNull
+            : (description as Prisma.InputJsonValue)
+          : undefined,
     };
 
     const user = (await attachSlug(

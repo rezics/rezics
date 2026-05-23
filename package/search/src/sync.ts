@@ -6,7 +6,7 @@ import type {
   RealmSearchDocument,
   UserSearchDocument,
 } from "@rezics/contract";
-import { readCoverUrlFromExtra } from "@rezics/contract";
+import { mainMarkdownSource, readCoverUrlFromExtra } from "@rezics/contract";
 import {
   type PrismaClient,
   UnitType,
@@ -31,6 +31,10 @@ function getSearchPrismaClient(): PrismaClient {
     );
   }
   return searchPrismaClient;
+}
+
+function isNonEmptyString(value: string | null): value is string {
+  return Boolean(value);
 }
 
 function pickCoverUrlFromTranslations(
@@ -216,8 +220,10 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const subtitles = translations.map((t: any) => t.subtitle).filter(Boolean);
   const summaries = translations.map((t: any) => t.summary).filter(Boolean);
   const descriptions = translations
-    .map((t: any) => t.description)
-    .filter(Boolean);
+    .map((t: any) => mainMarkdownSource(t.description))
+    .filter(isNonEmptyString);
+  const descriptionText = descriptions.join("\n") || null;
+  const contentText = mainMarkdownSource(unit.post?.content);
   const languages = translations.map((t: any) => t.language);
 
   // Tags
@@ -246,7 +252,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
       const translations = a.entity?.translations ?? [];
       return translations[0]?.title;
     })
-    .filter(Boolean);
+    .filter(isNonEmptyString);
 
   const subjectEntityIds = subjectAttributions.map((a: any) => a.entityId);
   const subjectNames = subjectAttributions
@@ -255,7 +261,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
         (translation: any) => translation.title,
       ),
     )
-    .filter(Boolean);
+    .filter(isNonEmptyString);
   const subjectKinds = [
     ...new Set(
       subjectAttributions
@@ -294,6 +300,8 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     type: unit.type,
     titles,
     subtitles,
+    contentText,
+    descriptionText,
     summaries,
     descriptions,
     creditNames,
@@ -483,7 +491,7 @@ export async function patchContentCredits(
       const translations = a.entity?.translations ?? [];
       return translations[0]?.title;
     })
-    .filter(Boolean);
+    .filter(isNonEmptyString);
 
   await patchContentIfEligible(client, unitId, { creditNames });
 }
@@ -550,13 +558,15 @@ export async function patchContentTranslations(
   const subtitles = translations.map((t: any) => t.subtitle).filter(Boolean);
   const summaries = translations.map((t: any) => t.summary).filter(Boolean);
   const descriptions = translations
-    .map((t: any) => t.description)
-    .filter(Boolean);
+    .map((t: any) => mainMarkdownSource(t.description))
+    .filter(isNonEmptyString);
+  const descriptionText = descriptions.join("\n") || null;
   const languages = translations.map((t: any) => t.language);
 
   await patchContentIfEligible(client, unitId, {
     titles,
     subtitles,
+    descriptionText,
     summaries,
     descriptions,
     languages,
@@ -740,7 +750,12 @@ export async function patchPostFields(
     await client.deletePosts([unitId]);
     return;
   }
-  await client.patchPosts([{ id: unitId, ...fields }]);
+  const nextFields = { ...fields };
+  if ("content" in nextFields) {
+    nextFields.contentText = mainMarkdownSource(nextFields.content);
+    delete nextFields.content;
+  }
+  await client.patchPosts([{ id: unitId, ...nextFields }]);
 }
 
 // ANCHOR: Realm partial sync functions
@@ -771,14 +786,16 @@ export async function patchRealmTranslations(
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const descriptions = translations
-    .map((t: any) => t.description)
-    .filter(Boolean);
+    .map((t: any) => mainMarkdownSource(t.description))
+    .filter(isNonEmptyString);
+  const descriptionText = descriptions.join("\n") || null;
 
   await client.patchRealms([
     {
       id: unitId,
       titles,
       descriptions,
+      descriptionText,
       translations: translations.map((tr: any) => ({
         language: tr.language,
         title: tr.title ?? null,
@@ -795,7 +812,11 @@ export async function patchUserFields(
   unitId: string,
   fields: Record<string, any>,
 ) {
-  await client.patchUsers([{ id: unitId, ...fields }]);
+  const nextFields = { ...fields };
+  if ("description" in nextFields) {
+    nextFields.descriptionText = mainMarkdownSource(nextFields.description);
+  }
+  await client.patchUsers([{ id: unitId, ...nextFields }]);
 }
 
 export async function patchFeedbackResolution(
@@ -893,7 +914,7 @@ export function buildPostDocument(post: any): PostSearchDocument {
 
   return {
     id: post.unitId,
-    body: post.body ?? null,
+    contentText: mainMarkdownSource(post.content),
     kind: post.kind ?? null,
     depth: post.depth,
     sortPath: post.sortPath ?? null,
@@ -1190,8 +1211,8 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const descriptions = translations
-    .map((t: any) => t.description)
-    .filter(Boolean);
+    .map((t: any) => mainMarkdownSource(t.description))
+    .filter(isNonEmptyString);
 
   return {
     id: realm.unitId,
@@ -1410,6 +1431,7 @@ export async function syncAllUsers(client: SearchClient) {
       avatar: u.avatar,
       bio: u.bio,
       description: u.description,
+      descriptionText: mainMarkdownSource(u.description),
       followersCount: u.followersCount,
       followingsCount: u.followingsCount,
       joinDate:

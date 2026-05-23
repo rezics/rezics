@@ -1,5 +1,5 @@
 import type { ChapterDetailDTO, ChapterListItemDTO } from "@rezics/contract";
-import { readCoverUrlFromExtra } from "@rezics/contract";
+import { mainMarkdownSource, readCoverUrlFromExtra } from "@rezics/contract";
 import type { ChapterPostWithRelations } from "./types";
 
 function pickTranslation(
@@ -24,7 +24,7 @@ export function mapChapterPostToListItemDTO(
   return {
     unitId: post.unitId,
     title: translation?.title ?? "",
-    noContent: !post.body,
+    noContent: !mainMarkdownSource(post.content)?.trim(),
     userId: post.authorUserId,
     coverUrl: readCoverUrlFromExtra(translation?.extra) ?? null,
     createdAt: post.createdAt,
@@ -39,7 +39,7 @@ export function mapChapterPostToDetailDTO(
   return {
     unitId: post.unitId,
     title: translation?.title ?? "",
-    content: post.body ?? undefined,
+    content: post.content as ChapterDetailDTO["content"],
     userId: post.authorUserId,
     targetUnitId: post.targetUnitId ?? null,
     coverUrl: readCoverUrlFromExtra(translation?.extra) ?? null,

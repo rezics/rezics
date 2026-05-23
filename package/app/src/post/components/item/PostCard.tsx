@@ -54,7 +54,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
       <div className="flex flex-col gap-2">
         <PostAuthorHeader post={post} />
         <PostBodyMarkdown
-          body={post.body ?? ""}
+          content={post.content}
           clamp={{ maxLines: 4 }}
           className="text-sm"
         />

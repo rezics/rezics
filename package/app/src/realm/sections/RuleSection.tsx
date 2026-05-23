@@ -1,4 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
+import { mainMarkdownSource } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -20,7 +21,8 @@ export const RuleSection: React.FC<RuleSectionProps> = ({ postUnitId }) => {
   if (!postUnitId || isError) return null;
 
   const preview =
-    post?.body?.trim().split("\n").find(Boolean) ?? m.realm_rules_title();
+    mainMarkdownSource(post?.content)?.trim().split("\n").find(Boolean) ??
+    m.realm_rules_title();
 
   return (
     <section className="rounded-md bg-surface-subtle p-4">

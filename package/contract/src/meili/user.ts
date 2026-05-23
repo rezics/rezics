@@ -1,5 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
+import { contentDocSchema } from "../content-doc";
 
 // ANCHOR: User Search Document
 // UserType removed — no more AUTHOR/PRESS/PRODUCER distinction.
@@ -13,7 +14,8 @@ export const UserSearchDocumentSchema = t.Object({
   slug: t.Optional(t.Union([t.String(), t.Null()])),
   avatar: t.Optional(t.Union([t.String(), t.Null()])),
   bio: t.Optional(t.Union([t.String(), t.Null()])),
-  description: t.Optional(t.Union([t.String(), t.Null()])),
+  description: t.Optional(t.Union([contentDocSchema, t.Null()])),
+  descriptionText: t.Optional(t.Union([t.String(), t.Null()])),
   followersCount: t.Optional(t.Union([t.Number(), t.Null()])),
   followingsCount: t.Optional(t.Union([t.Number(), t.Null()])),
   joinDate: t.Optional(t.Union([t.String(), t.Null()])),

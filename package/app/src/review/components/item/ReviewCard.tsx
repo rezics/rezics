@@ -141,7 +141,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           </div>
         )}
 
-        <PostBodyMarkdown body={review.body ?? ""} clamp={{ maxLines: 6 }} />
+        <PostBodyMarkdown content={review.content} clamp={{ maxLines: 6 }} />
 
         <ReactionBar
           size="md"

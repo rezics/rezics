@@ -5,16 +5,17 @@ import type {
   PostListQuery,
   UpdatePostInput,
 } from "@rezics/contract";
-import { parseIdsCsv } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
+import { mainMarkdownSource, parseIdsCsv } from "@rezics/contract";
 import {
   type PostKind,
   PostKind as PostKindEnum,
+  Prisma,
   prisma,
   UnitStatus,
   UnitType,
 } from "#/prisma/client";
 import { patchPostFieldsToMeili, syncPostToMeili } from "@/meili/post/sync";
+import { syncContentToMeili } from "@/meili/content/sync";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
@@ -259,7 +260,7 @@ export class PostService {
       tagIds,
       parentPostUnitId,
       kind,
-      body,
+      content,
       scoreEntryId,
       extra,
     } = input;
@@ -345,7 +346,7 @@ export class PostService {
         targetUnitId: targetUnitId ?? undefined,
         rootTargetUnitId: rootTargetUnitId ?? undefined,
         rootTargetUnitType: rootTargetUnitType ?? undefined,
-        body,
+        content: content as Prisma.InputJsonValue,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,
         depth,
@@ -448,7 +449,7 @@ export class PostService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId: result.unitId,
           actorUserId: authorUserId,
-          patch: { post: { body: result.body } },
+          patch: { post: { content: result.content } },
           message: "wiki-post.create",
         });
       }
@@ -458,11 +459,12 @@ export class PostService {
 
     // Fire-and-forget sync to Meilisearch
     syncPostToMeili(post.unitId).catch(() => {});
+    syncContentToMeili(post.unitId).catch(() => {});
 
     return hydrateUnitOwnerUserSlugRow(post);
   }
 
-  /** Update post body, isLocked, and/or extra. */
+  /** Update post content, isLocked, and/or extra. */
   async update(
     unitId: string,
     input: UpdatePostInput,
@@ -474,7 +476,8 @@ export class PostService {
   ): Promise<PostWithRelations> {
     const data: Prisma.PostUpdateInput = {};
 
-    if (input.body !== undefined) data.body = input.body;
+    if (input.content !== undefined)
+      data.content = input.content as Prisma.InputJsonValue;
     if (input.isLocked !== undefined) data.isLocked = input.isLocked;
     if (input.extra !== undefined)
       data.extra = input.extra as Prisma.InputJsonValue;
@@ -487,10 +490,12 @@ export class PostService {
       });
 
       const patchFields: Record<string, any> = {};
-      if (input.body !== undefined) patchFields.body = input.body;
+      if (input.content !== undefined) patchFields.content = input.content;
       if (input.isLocked !== undefined) patchFields.isLocked = input.isLocked;
       if (input.extra !== undefined) patchFields.extra = input.extra;
       patchPostFieldsToMeili(unitId, patchFields).catch(() => {});
+      if (input.content !== undefined)
+        syncContentToMeili(unitId).catch(() => {});
 
       return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
     }
@@ -498,19 +503,33 @@ export class PostService {
     const updated = await prisma.$transaction(async (tx) => {
       const existing = await tx.post.findUniqueOrThrow({
         where: { unitId },
-        select: { kind: true },
+        select: { kind: true, content: true },
       });
-      const isWikiBodyEdit =
-        existing.kind === "WIKI" && input.body !== undefined;
+      const isWikiContentMainEdit =
+        existing.kind === "WIKI" &&
+        input.content !== undefined &&
+        !jsonEquivalent(
+          mainMarkdownSource(existing.content),
+          mainMarkdownSource(input.content),
+        );
 
-      if (isWikiBodyEdit && actor) {
+      if (isWikiContentMainEdit && actor) {
+        const submittedPaths = historyInput?.patch
+          ? collectPatchLeafPaths(historyInput.patch)
+          : ["post.content.main"];
+        const supportedMainPaths = submittedPaths.filter(
+          (path) =>
+            path === "post.content" ||
+            path === "post.content.main" ||
+            path.startsWith("post.content.main."),
+        );
         await assertCanEditCollaborativeMetadata(
           tx as any,
           actor,
           unitId,
-          historyInput?.patch
-            ? collectPatchLeafPaths(historyInput.patch)
-            : ["post.body"],
+          supportedMainPaths.length > 0
+            ? supportedMainPaths
+            : ["post.content.main"],
         );
       }
 
@@ -520,12 +539,12 @@ export class PostService {
         include: postInclude,
       });
 
-      if (isWikiBodyEdit && actor) {
+      if (isWikiContentMainEdit && actor) {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
-          patch: historyInput?.patch ?? { post: { body: row.body } },
-          message: historyInput?.message ?? "wiki-post.body.update",
+          patch: historyInput?.patch ?? { post: { content: row.content } },
+          message: historyInput?.message ?? "wiki-post.content.update",
           restoreSource: historyInput?.restoreSource,
         });
       }
@@ -535,10 +554,11 @@ export class PostService {
 
     // Fire-and-forget partial sync to Meilisearch
     const patchFields: Record<string, any> = {};
-    if (input.body !== undefined) patchFields.body = input.body;
+    if (input.content !== undefined) patchFields.content = input.content;
     if (input.isLocked !== undefined) patchFields.isLocked = input.isLocked;
     if (input.extra !== undefined) patchFields.extra = input.extra;
     patchPostFieldsToMeili(unitId, patchFields).catch(() => {});
+    if (input.content !== undefined) syncContentToMeili(unitId).catch(() => {});
 
     return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
   }
@@ -560,10 +580,10 @@ export class PostService {
         data: { status: UnitStatus.DELETED },
       });
 
-      // Clear the post body
+      // Clear the post content
       await tx.post.update({
         where: { unitId },
-        data: { body: null },
+        data: { content: Prisma.JsonNull },
       });
 
       // Decrement parent counters
@@ -594,6 +614,7 @@ export class PostService {
 
     // Fire-and-forget sync to Meilisearch (will remove the deleted post)
     syncPostToMeili(unitId).catch(() => {});
+    syncContentToMeili(unitId).catch(() => {});
   }
 
   /**
@@ -661,3 +682,7 @@ export class PostService {
 }
 
 export const postService = new PostService();
+
+function jsonEquivalent(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}

@@ -1,9 +1,13 @@
 import { getLockedFieldError } from "@rezics/api";
 import {
   useCreateWikiPostMutation,
-  useUpdateWikiPostBodyMutation,
+  useUpdateWikiPostContentMutation,
 } from "@rezics/api/post/post";
-import type { PostDTO } from "@rezics/contract";
+import {
+  mainMarkdownSource,
+  markdownContentDoc,
+  type PostDTO,
+} from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
@@ -22,14 +26,14 @@ export function WikiPostEditor({
   onSaved,
   onCancel,
 }: WikiPostEditorProps) {
-  const [body, setBody] = useState(post?.body ?? "");
+  const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const resize = useMemo(
     () => ({ height: 220, minHeight: 140, maxHeight: 520 }),
     [],
   );
   const createMutation = useCreateWikiPostMutation({ onSuccess: onSaved });
-  const updateMutation = useUpdateWikiPostBodyMutation({
+  const updateMutation = useUpdateWikiPostContentMutation({
     onSuccess: onSaved,
     onError: (error) => {
       const locked = getLockedFieldError(error);
@@ -49,13 +53,14 @@ export function WikiPostEditor({
     const trimmed = body.trim();
     if (!trimmed) return;
     setLockedError(null);
+    const content = markdownContentDoc(trimmed);
 
     if (post) {
-      updateMutation.mutate({ unitId: post.unitId, body: trimmed });
+      updateMutation.mutate({ unitId: post.unitId, content });
       return;
     }
 
-    createMutation.mutate({ body: trimmed, targetUnitId } as never);
+    createMutation.mutate({ content, targetUnitId } as never);
   };
 
   return (

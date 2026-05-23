@@ -1,4 +1,8 @@
-import type { Language, ZoneFilters } from "@rezics/contract";
+import {
+  markdownContentDoc,
+  type Language,
+  type ZoneFilters,
+} from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { unitService } from "@/unit";
@@ -81,7 +85,9 @@ export class ZoneService {
       translations: input.translations.map((tr) => ({
         language: tr.language as Language,
         title: tr.title,
-        description: tr.description,
+        description: tr.description
+          ? markdownContentDoc(tr.description)
+          : undefined,
       })),
     });
 

@@ -1,5 +1,10 @@
 import { useUpdatePostMutation } from "@rezics/api/post/post";
-import { type PostDTO, SCORE_MAX } from "@rezics/contract";
+import {
+  mainMarkdownSource,
+  markdownContentDoc,
+  type PostDTO,
+  SCORE_MAX,
+} from "@rezics/contract";
 import { RatingInput } from "@rezics/ui";
 import {
   Button,
@@ -28,7 +33,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   const [score, setScore] = useState<number | null>(
     typeof initialRating === "number" ? initialRating : null,
   );
-  const [text, setText] = useState(remark.body ?? "");
+  const [text, setText] = useState(mainMarkdownSource(remark.content) ?? "");
 
   const updateMutation = useUpdatePostMutation({
     onSuccess: () => {
@@ -47,7 +52,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
       input: {
         patch: {
           post: {
-            body: text.trim(),
+            content: markdownContentDoc(text.trim()),
             extra: nextExtra,
           },
         },

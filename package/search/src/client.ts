@@ -79,6 +79,8 @@ export class SearchClient {
       searchableAttributes: [
         "titles",
         "subtitles",
+        "contentText",
+        "descriptionText",
         "descriptions",
         "summaries",
         "creditNames",
@@ -131,7 +133,7 @@ export class SearchClient {
 
   async initUserIndex(): Promise<void> {
     const settingsTask = await this.userIndex.updateSettings({
-      searchableAttributes: ["name", "slug", "email", "bio", "description"],
+      searchableAttributes: ["name", "slug", "email", "bio", "descriptionText"],
       filterableAttributes: ["slug", "email", "joinDate"],
       sortableAttributes: ["joinDate", "followersCount", "followingsCount"],
     });
@@ -143,7 +145,7 @@ export class SearchClient {
 
   async initPostIndex(): Promise<void> {
     const settingsTask = await this.postIndex.updateSettings({
-      searchableAttributes: ["body", "targetTitles", "authorName"],
+      searchableAttributes: ["contentText", "targetTitles", "authorName"],
       filterableAttributes: [
         "kind",
         "targetUnitId",

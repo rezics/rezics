@@ -5,7 +5,7 @@ import { t } from "elysia";
 
 export const PostSearchDocumentSchema = t.Object({
   id: t.String(),
-  body: t.Union([t.String(), t.Null()]),
+  contentText: t.Union([t.String(), t.Null()]),
   kind: t.Union([t.String(), t.Null()]),
   depth: t.Number(),
   sortPath: t.Union([t.String(), t.Null()]),

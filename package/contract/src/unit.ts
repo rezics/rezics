@@ -2,6 +2,7 @@ import { t } from "elysia";
 import { languageSchema } from "./language";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
+import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 
 // ============================================================
 // ENUMS
@@ -20,6 +21,8 @@ export const UnitType = {
   QUOTE: "QUOTE",
   LINK: "LINK",
 } as const;
+
+export type UnitType = (typeof UnitType)[keyof typeof UnitType];
 
 export const UnitStatus = {
   DRAFT: "DRAFT",
@@ -107,7 +110,7 @@ export const publicUserSchema = t.Object({
   name: t.Optional(t.String()),
   avatar: t.Optional(t.Nullable(t.String())),
   bio: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(contentDocSchema)),
   followersCount: t.Optional(t.Number()),
   followingsCount: t.Optional(t.Number()),
 });
@@ -124,7 +127,7 @@ export const unitTranslationDTOSchema = t.Object({
   title: t.Optional(t.Nullable(t.String())),
   subtitle: t.Optional(t.Nullable(t.String())),
   summary: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(contentDocSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   sourceReleaseUnitId: t.Optional(t.Nullable(t.String())),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -310,7 +313,7 @@ export const createUnitSchema = t.Object({
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),
-        description: t.Optional(t.String()),
+        description: t.Optional(contentDocWriteSchema),
         extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
         sourceReleaseUnitId: t.Optional(t.String()),
       }),
@@ -343,7 +346,7 @@ export const createTranslationSchema = t.Object({
   title: t.Optional(t.String()),
   subtitle: t.Optional(t.String()),
   summary: t.Optional(t.String()),
-  description: t.Optional(t.String()),
+  description: t.Optional(contentDocWriteSchema),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   sourceReleaseUnitId: t.Optional(t.String()),
 });
@@ -354,7 +357,7 @@ export const updateTranslationSchema = t.Object({
   title: t.Optional(t.Nullable(t.String())),
   subtitle: t.Optional(t.Nullable(t.String())),
   summary: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(contentDocWriteSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   sourceReleaseUnitId: t.Optional(t.Nullable(t.String())),
 });

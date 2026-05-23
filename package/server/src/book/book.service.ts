@@ -259,7 +259,7 @@ export class BookService {
         title: tr.title ?? undefined,
         subtitle: tr.subtitle ?? undefined,
         summary: tr.summary ?? undefined,
-        description: tr.description ?? undefined,
+        description: (tr.description ?? undefined) as Prisma.InputJsonValue,
         extra: (nextExtra ?? null) as Prisma.InputJsonValue,
         sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
       };

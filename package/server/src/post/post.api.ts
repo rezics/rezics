@@ -13,7 +13,10 @@ import {
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
-import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
+import {
+  applySparsePatch,
+  assertEditorialPatchAllowed,
+} from "@/unit/collaborative-metadata";
 import { mapPostToDTO } from "./post.mapper";
 import { postService } from "./post.service";
 
@@ -126,7 +129,10 @@ export const postApi = new Elysia({ prefix: "/post" })
           ? (body.patch.post as Record<string, unknown>)
           : {};
       const updateInput = {
-        body: typeof postPatch.body === "string" ? postPatch.body : undefined,
+        content:
+          postPatch.content !== undefined
+            ? applySparsePatch(target.content, postPatch.content)
+            : undefined,
         isLocked:
           typeof postPatch.isLocked === "boolean"
             ? postPatch.isLocked
@@ -136,14 +142,14 @@ export const postApi = new Elysia({ prefix: "/post" })
             ? ((postPatch.extra ?? null) as Record<string, unknown> | null)
             : undefined,
       };
-      const isWikiBodyOnlyEdit =
+      const isWikiContentOnlyEdit =
         target.kind === PostKind.WIKI &&
-        updateInput.body !== undefined &&
+        updateInput.content !== undefined &&
         updateInput.isLocked === undefined &&
         updateInput.extra === undefined;
 
       if (
-        !isWikiBodyOnlyEdit &&
+        !isWikiContentOnlyEdit &&
         !hasPermissionToUpdatePost(
           identity.permission,
           identity.userId,
@@ -157,7 +163,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       }
       const updated = await postService.update(
         params.unitId,
-        updateInput,
+        updateInput as never,
         identity,
         body,
       );

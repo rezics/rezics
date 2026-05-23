@@ -6,7 +6,11 @@ import type {
   UpdateChapterInput,
 } from "@rezics/contract";
 import { resolvePath } from "@/book/book-content-structure";
-import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
+import {
+  markdownContentDoc,
+  parseIdsCsv,
+  withCoverUrl,
+} from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
   type ContentRating,
@@ -24,7 +28,7 @@ import { chapterPostInclude } from "./types";
  * Storage:
  *   - Chapter title       -> UnitTranslation.title
  *   - Chapter cover URL   -> UnitTranslation.extra.coverUrl (typed)
- *   - Chapter body        -> Post.body
+ *   - Chapter content     -> Post.content
  *   - Chapter parent book -> Post.targetUnitId (must reference Unit(type=BOOK))
  *   - Chapter ordering    -> BookContentStructureNode rows (out of scope of this service)
  */
@@ -32,19 +36,16 @@ export class ChapterService {
   private buildWhereClause(options: ChapterListQuery): Prisma.PostWhereInput {
     const andWhere: Prisma.PostWhereInput[] = [{ kind: PostKind.CHAPTER }];
 
-    // Search title via Unit.translations (and body)
+    // Search title via Unit.translations (runtime v1 indexes content elsewhere).
     if (options.q?.trim()) {
       andWhere.push({
-        OR: [
-          {
-            unit: {
-              translations: {
-                some: { title: { contains: options.q, mode: "insensitive" } },
-              },
+        unit: {
+          translations: {
+            some: {
+              title: { contains: options.q, mode: "insensitive" },
             },
           },
-          { body: { contains: options.q, mode: "insensitive" } },
-        ],
+        },
       });
     }
 
@@ -175,7 +176,7 @@ export class ChapterService {
           authorUserId: userId,
           targetUnitId,
           kind: PostKind.CHAPTER,
-          body: content ?? "",
+          content: (content ?? markdownContentDoc("")) as Prisma.InputJsonValue,
           rootPostUnitId: unit.id,
           depth: 0,
         },
@@ -271,7 +272,7 @@ export class ChapterService {
           authorUserId: userId,
           targetUnitId: bookUnitId,
           kind: PostKind.CHAPTER,
-          body: "",
+          content: markdownContentDoc("") as Prisma.InputJsonValue,
           rootPostUnitId: unit.id,
           depth: 0,
         },
@@ -318,7 +319,8 @@ export class ChapterService {
 
     return prisma.$transaction(async (tx) => {
       const postPatch: Prisma.PostUpdateInput = {};
-      if (content !== undefined) postPatch.body = content;
+      if (content !== undefined)
+        postPatch.content = content as Prisma.InputJsonValue;
       if (targetUnitId !== undefined) {
         postPatch.targetUnit =
           targetUnitId === null
@@ -329,8 +331,8 @@ export class ChapterService {
         await tx.post.update({ where: { unitId }, data: postPatch });
       }
 
-      // Body-only edit: bump every linked BookContentStructureNode's updatedAt,
-      // never bump container BookContentStructure.updatedAt (body edits are
+      // Content-only edit: bump every linked BookContentStructureNode's updatedAt,
+      // never bump container BookContentStructure.updatedAt (content edits are
       // not structure-shape changes). updateMany handles the multi-link case.
       if (content !== undefined) {
         await tx.bookContentStructureNode.updateMany({

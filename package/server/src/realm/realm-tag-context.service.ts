@@ -1,4 +1,4 @@
-import type { RezicsSessionClaims } from "@rezics/contract";
+import { markdownContentDoc, type RezicsSessionClaims } from "@rezics/contract";
 import {
   type Prisma,
   prisma,
@@ -177,7 +177,7 @@ export class RealmTagContextService {
           unitId: unit.id,
           authorUserId: callerUserId,
           kind: "POST",
-          body: "",
+          content: markdownContentDoc("") as Prisma.InputJsonValue,
           extra: {
             kind: "realmTagContext",
             realmUnitId,

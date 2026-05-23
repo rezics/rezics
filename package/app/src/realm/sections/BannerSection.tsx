@@ -1,5 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
-import type { RealmBannerExtra } from "@rezics/contract";
+import { mainMarkdownSource, type RealmBannerExtra } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import * as m from "@rezics/i18n/messages";
@@ -13,13 +13,15 @@ function getPostBannerUrl(post: unknown): string | undefined {
   const coverUrl = extra?.coverUrl;
   if (typeof coverUrl === "string" && coverUrl.trim()) return coverUrl;
 
-  const body = (post as { body?: string | null })?.body ?? "";
+  const body =
+    mainMarkdownSource((post as { content?: unknown })?.content) ?? "";
   const markdownImage = body.match(/!\[[^\]]*]\(([^)]+)\)/);
   return markdownImage?.[1];
 }
 
 function getPostBannerTitle(post: unknown): string {
-  const body = (post as { body?: string | null })?.body ?? "";
+  const body =
+    mainMarkdownSource((post as { content?: unknown })?.content) ?? "";
   return body.trim().split("\n").find(Boolean) ?? m.realm_banner();
 }
 

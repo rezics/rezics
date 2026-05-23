@@ -1,4 +1,4 @@
-import type { PostResponse } from "@rezics/contract";
+import { markdownContentDoc, type PostResponse } from "@rezics/contract";
 import {
   useCreatePostMutation,
   useUpdatePostMutation,
@@ -35,7 +35,7 @@ export function useReasonPostMutations(): UseReasonPostMutationsResult {
       // `extra.visibility` until the backend route accepts the field directly.
       return createPost.mutateAsync({
         targetUnitId: unitId,
-        body,
+        content: markdownContentDoc(body),
         kind: "POST",
         extra: { visibility },
       });
@@ -48,7 +48,11 @@ export function useReasonPostMutations(): UseReasonPostMutationsResult {
       // MOCK: same as createReasonPost — visibility goes via extra for now.
       return updatePost.mutateAsync({
         unitId: postUnitId,
-        input: { patch: { post: { body, extra: { visibility } } } },
+        input: {
+          patch: {
+            post: { content: markdownContentDoc(body), extra: { visibility } },
+          },
+        },
       });
     },
     [updatePost],

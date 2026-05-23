@@ -1,7 +1,7 @@
 import { postQueries } from "@rezics/api/post/post";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
-import { PostKind } from "@rezics/contract";
+import { mainMarkdownSource, PostKind } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Link, unitHref } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
@@ -76,7 +76,9 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   );
   const title = selectedTranslation?.title ?? "";
   const summary =
-    selectedTranslation?.summary ?? selectedTranslation?.description ?? "";
+    selectedTranslation?.summary ??
+    mainMarkdownSource(selectedTranslation?.description) ??
+    "";
   const coverUrl = getBookCoverUrl(bookInfo);
 
   const { data: tagsData } = useQuery(tagQueries.forUnit(bookId));

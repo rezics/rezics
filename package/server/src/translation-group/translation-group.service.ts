@@ -1,5 +1,4 @@
-import type { Prisma } from "#/prisma/client";
-import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { Prisma, prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { syncPostToMeili } from "@/meili/post/sync";
 import { AppError } from "@/utils/errors";
 import { mapSiblingToDTO } from "./translation-group.mapper";
@@ -93,7 +92,7 @@ export class TranslationGroupService {
           post: {
             create: {
               authorUserId,
-              body: input.body ?? null,
+              content: input.content ?? Prisma.JsonNull,
             },
           },
           supportLanguages: {

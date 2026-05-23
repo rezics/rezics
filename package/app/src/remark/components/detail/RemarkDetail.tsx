@@ -55,7 +55,7 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
           </TextLink>
         </div>
       )}
-      <PostBodyMarkdown body={remark.body ?? ""} />
+      <PostBodyMarkdown content={remark.content} />
       <ReactionBar
         size="lg"
         post={remark}

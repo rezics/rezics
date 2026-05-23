@@ -4,6 +4,7 @@ import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema } from "./unit";
 import { creationModeSchema } from "./content-authority";
+import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 
 // ============================================================
 // POST KIND
@@ -76,7 +77,7 @@ export const postDTOSchema = t.Object({
   author: t.Optional(publicUserSchema),
   targetUnitId: t.Optional(t.Nullable(t.String())),
   realmUnitId: t.Optional(t.Nullable(t.String())),
-  body: t.Optional(t.Nullable(t.String())),
+  content: t.Optional(t.Nullable(contentDocSchema)),
   rootPostUnitId: t.Optional(t.Nullable(t.String())),
   parentPostUnitId: t.Optional(t.Nullable(t.String())),
   kind: t.Optional(t.Nullable(postKindLiterals)),
@@ -218,7 +219,7 @@ export const createPostSchema = t.Object({
   parentPostUnitId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
   creationMode: t.Optional(creationModeSchema),
-  body: t.String(),
+  content: contentDocWriteSchema,
   scoreEntryId: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });
@@ -226,7 +227,7 @@ export const createPostSchema = t.Object({
 export type CreatePostInput = (typeof createPostSchema)["static"];
 
 export const updatePostSchema = t.Object({
-  body: t.Optional(t.String()),
+  content: t.Optional(contentDocWriteSchema),
   isLocked: t.Optional(t.Boolean()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });

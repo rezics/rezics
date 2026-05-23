@@ -4,6 +4,7 @@ import {
   type BookContentStructureItem,
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
+  markdownContentDoc,
   withCoverUrl,
 } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "../generated/client.js";
@@ -305,7 +306,7 @@ export async function seedChaptersForBook(
           authorUserId: bookUserId,
           targetUnitId: bookUnitId,
           kind: PostKind.CHAPTER,
-          body: r.body ?? "",
+          content: markdownContentDoc(r.body ?? "") as Prisma.InputJsonValue,
           rootPostUnitId: r.id,
           depth: 0,
         })),
@@ -336,7 +337,9 @@ export async function seedChaptersForBook(
               authorUserId: bookUserId,
               targetUnitId: bookUnitId,
               kind: PostKind.CHAPTER,
-              body: row.body ?? "",
+              content: markdownContentDoc(
+                row.body ?? "",
+              ) as Prisma.InputJsonValue,
               rootPostUnitId: row.id,
               depth: 0,
             },

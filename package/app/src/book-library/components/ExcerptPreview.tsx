@@ -45,7 +45,7 @@ function mapExcerptPostToUnit(post: PostDTO): UnitDTO {
         title: null,
         subtitle: null,
         summary: null,
-        description: post.body,
+        description: post.content ?? null,
       },
     ],
     extra: post.extra,

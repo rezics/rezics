@@ -16,8 +16,9 @@ export function userPatchToUpdateUser(
     bio:
       user.bio === null || typeof user.bio === "string" ? user.bio : undefined,
     description:
-      user.description === null || typeof user.description === "string"
+      user.description === null ||
+      (typeof user.description === "object" && !Array.isArray(user.description))
         ? user.description
         : undefined,
-  };
+  } as UpdateUser;
 }

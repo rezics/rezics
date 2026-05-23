@@ -22,7 +22,7 @@ export type PublicUserSelected = {
   name: string | null;
   avatar: string | null;
   bio?: string | null;
-  description?: string | null;
+  description?: unknown;
   followersCount?: number;
   followingsCount?: number;
 };
@@ -37,7 +37,7 @@ export function mapPublicUser(
     name: user.name ?? undefined,
     avatar: user.avatar ?? null,
     bio: user.bio ?? undefined,
-    description: user.description ?? undefined,
+    description: user.description as PublicUser["description"],
     followersCount: user.followersCount,
     followingsCount: user.followingsCount,
   };

@@ -3,6 +3,7 @@ import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import type { ContentRating } from "./unit";
+import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 
 // ============================================================
 // USER DTO (UserType removed — no AUTHOR/PRESS/PRODUCER)
@@ -16,7 +17,7 @@ export const userDTOSchema = t.Object({
   name: t.Optional(t.String()),
   avatar: t.Optional(t.String()),
   bio: t.Optional(t.String()),
-  description: t.Optional(t.String()),
+  description: t.Optional(contentDocSchema),
   followersCount: t.Optional(t.Number()),
   followingsCount: t.Optional(t.Number()),
   joinDate: t.Optional(t.String()),
@@ -84,7 +85,7 @@ export const updateUserSchema = t.Object({
   name: t.Optional(t.String({ minLength: 1 })),
   avatar: t.Optional(t.Nullable(t.String())),
   bio: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(contentDocWriteSchema)),
   password: t.Optional(t.String({ minLength: 6 })),
 });
 

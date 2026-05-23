@@ -5,6 +5,7 @@ import {
   useJoinRealmMutation,
   useLeaveRealmMutation,
 } from "@rezics/api/realm/realm";
+import { mainMarkdownSource } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -38,8 +39,8 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
     (Boolean(rulePostId) && ruleLoading);
 
   useEffect(() => {
-    if (ruleOpen && rulePost && !rulePost.body?.trim()) {
-      console.error("Join rule modal opened with an empty Post body.");
+    if (ruleOpen && rulePost && !mainMarkdownSource(rulePost.content)?.trim()) {
+      console.error("Join rule modal opened with empty post content.");
     }
   }, [ruleOpen, rulePost]);
 

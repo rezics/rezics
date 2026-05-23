@@ -7,7 +7,7 @@
  */
 
 import type { BookDTO, UnitTranslationDTO } from "@rezics/contract";
-import { FALLBACK_LANGUAGE } from "@rezics/contract";
+import { FALLBACK_LANGUAGE, mainMarkdownSource } from "@rezics/contract";
 
 /**
  * Get the user's preferred languages from settings.
@@ -88,7 +88,7 @@ export function getBookDescription(
     book.translations,
     language ?? book.defaultLanguage ?? undefined,
   );
-  return tr?.description ?? "";
+  return mainMarkdownSource(tr?.description) ?? "";
 }
 
 /**
@@ -190,7 +190,7 @@ export function getEntityTranslationsByRole(
       unitId: match.entity?.unitId ?? match.entityId,
       role: match.role,
       name: tr?.title ?? match.name,
-      bio: tr?.description ?? undefined,
+      bio: mainMarkdownSource(tr?.description) ?? undefined,
       kind: match.entity?.kind ?? undefined,
       slug: match.entity?.slug ?? undefined,
     };

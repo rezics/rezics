@@ -1,4 +1,4 @@
-import type { PostResponse } from "@rezics/contract";
+import { mainMarkdownSource, type PostResponse } from "@rezics/contract";
 import { postQueries } from "@rezics/api/post/post.queries";
 import { useQueries } from "@tanstack/react-query";
 
@@ -17,7 +17,7 @@ function toReasonPost(post: PostResponse | undefined): ReasonPost | null {
   if (!post) return null;
   return {
     unitId: post.unitId,
-    body: post.body ?? "",
+    body: mainMarkdownSource(post.content) ?? "",
     createdAt:
       typeof post.createdAt === "string"
         ? post.createdAt

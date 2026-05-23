@@ -34,7 +34,7 @@ function mapTranslation(
     title: tr.title ?? undefined,
     subtitle: tr.subtitle ?? undefined,
     summary: tr.summary ?? undefined,
-    description: tr.description ?? undefined,
+    description: tr.description as UnitTranslationDTO["description"],
     extra: (tr.extra as Record<string, unknown>) ?? undefined,
     sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
     createdAt: tr.createdAt,
@@ -75,37 +75,36 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     translations: unit.translations?.map(mapTranslation) ?? [],
 
     // Credit attribution
-    creditAttributions:
-      unit.creditAttributions?.map((a) => {
-        const entityRecord = (a as any).entity ?? {};
-        const innerEntity = entityRecord.entity ?? {};
-        const entityTranslations = entityRecord.translations ?? [];
-        const name = entityTranslations[0]?.title ?? "";
-        return {
-          entityId: a.entityId,
-          name,
-          role: a.role,
-          sortOrder: a.sortOrder,
-          entity: {
-            unitId: innerEntity.unitId ?? a.entityId,
-            kind: innerEntity.kind ?? undefined,
-            avatar: innerEntity.avatar ?? undefined,
-            slug: innerEntity.slug ?? undefined,
-            translations: entityTranslations.map((tr: any) => ({
-              unitId: tr.unitId,
-              language: tr.language as Language,
-              title: tr.title ?? undefined,
-              subtitle: tr.subtitle ?? undefined,
-              summary: tr.summary ?? undefined,
-              description: tr.description ?? undefined,
-              extra: (tr.extra as Record<string, unknown>) ?? undefined,
-              sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
-              createdAt: tr.createdAt,
-              updatedAt: tr.updatedAt,
-            })),
-          },
-        };
-      }) ?? [],
+    creditAttributions: (unit.creditAttributions?.map((a) => {
+      const entityRecord = (a as any).entity ?? {};
+      const innerEntity = entityRecord.entity ?? {};
+      const entityTranslations = entityRecord.translations ?? [];
+      const name = entityTranslations[0]?.title ?? "";
+      return {
+        entityId: a.entityId,
+        name,
+        role: a.role,
+        sortOrder: a.sortOrder,
+        entity: {
+          unitId: innerEntity.unitId ?? a.entityId,
+          kind: innerEntity.kind ?? undefined,
+          avatar: innerEntity.avatar ?? undefined,
+          slug: innerEntity.slug ?? undefined,
+          translations: entityTranslations.map((tr: any) => ({
+            unitId: tr.unitId,
+            language: tr.language as Language,
+            title: tr.title ?? undefined,
+            subtitle: tr.subtitle ?? undefined,
+            summary: tr.summary ?? undefined,
+            description: tr.description as UnitTranslationDTO["description"],
+            extra: (tr.extra as Record<string, unknown>) ?? undefined,
+            sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+            createdAt: tr.createdAt,
+            updatedAt: tr.updatedAt,
+          })),
+        },
+      };
+    }) ?? []) as BookDTO["creditAttributions"],
 
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,

@@ -2,7 +2,7 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
-import { PostKind } from "@rezics/contract";
+import { markdownContentDoc, PostKind } from "@rezics/contract";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
@@ -16,7 +16,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const navigate = useNavigate();
   const [reviewData, setReviewData] = useState<ReviewEditState>({
     unitId: "",
-    body: "",
+    contentSource: "",
     _editTitle: "",
     _editRating: 0,
     extra: {},
@@ -44,7 +44,10 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       return;
     }
 
-    if (kind === PostKind.REVIEW && (reviewData.body?.length ?? 0) < 200) {
+    if (
+      kind === PostKind.REVIEW &&
+      (reviewData.contentSource?.length ?? 0) < 200
+    ) {
       show("Reviews must be at least 200 characters");
       return;
     }
@@ -63,7 +66,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     postMutation.mutate({
       targetUnitId: bookUnitId,
       kind,
-      body: reviewData.body || "",
+      content: markdownContentDoc(reviewData.contentSource || ""),
       scoreEntryId,
       extra: {
         title: reviewData._editTitle || undefined,

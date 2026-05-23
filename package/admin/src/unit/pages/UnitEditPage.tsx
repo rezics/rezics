@@ -59,7 +59,8 @@ const lockPathOptions = [
   "credits.authors",
   "credits.translators",
   "subjects.character",
-  "post.body",
+  "post.content.main",
+  "post.content.main.source",
 ] as const;
 const collaboratorRoleOptions = Object.values(UnitAuthorityRoleKey);
 

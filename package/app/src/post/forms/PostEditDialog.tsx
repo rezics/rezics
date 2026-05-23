@@ -1,10 +1,14 @@
 import { getLockedFieldError } from "@rezics/api";
 import {
   useUpdatePostMutation,
-  useUpdateWikiPostBodyMutation,
+  useUpdateWikiPostContentMutation,
 } from "@rezics/api/post/post";
 import type { PostDTO } from "@rezics/contract";
-import { PostKind } from "@rezics/contract";
+import {
+  mainMarkdownSource,
+  markdownContentDoc,
+  PostKind,
+} from "@rezics/contract";
 import {
   Alert,
   AlertDescription,
@@ -30,7 +34,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   open,
   onClose,
 }) => {
-  const [text, setText] = useState(post.body ?? "");
+  const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const isWikiPost = post.kind === PostKind.WIKI;
 
@@ -39,7 +43,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
       onClose();
     },
   });
-  const updateWikiMutation = useUpdateWikiPostBodyMutation({
+  const updateWikiMutation = useUpdateWikiPostContentMutation({
     onSuccess: () => {
       onClose();
     },
@@ -60,13 +64,14 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   const handleSubmit = () => {
     if (!text.trim()) return;
     setLockedError(null);
+    const content = markdownContentDoc(text.trim());
     if (isWikiPost) {
-      updateWikiMutation.mutate({ unitId: post.unitId, body: text.trim() });
+      updateWikiMutation.mutate({ unitId: post.unitId, content });
       return;
     }
     updateMutation.mutate({
       unitId: post.unitId,
-      input: { patch: { post: { body: text.trim() } } },
+      input: { patch: { post: { content } } },
     });
   };
 

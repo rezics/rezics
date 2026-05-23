@@ -5,8 +5,8 @@ import type {
   UpdateTranslationInput,
 } from "@rezics/contract";
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
-import type { Prisma, UnitTranslation } from "#/prisma/client";
-import { prisma, UnitType } from "#/prisma/client";
+import type { UnitTranslation } from "#/prisma/client";
+import { Prisma, prisma, UnitType } from "#/prisma/client";
 import { patchContentTranslationsToMeili } from "@/meili/content/sync";
 import { patchPostsTargetToMeili } from "@/meili/post/sync";
 import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
@@ -73,7 +73,12 @@ export class TranslationService {
         title: data.title ?? undefined,
         subtitle: data.subtitle ?? undefined,
         summary: data.summary ?? undefined,
-        description: data.description ?? undefined,
+        description:
+          data.description !== undefined
+            ? data.description === null
+              ? Prisma.JsonNull
+              : (data.description as Prisma.InputJsonValue)
+            : undefined,
         extra: (nextExtra ?? null) as Prisma.InputJsonValue,
         sourceReleaseUnitId:
           "sourceReleaseUnitId" in data
@@ -104,7 +109,12 @@ export class TranslationService {
           title: data.title,
           subtitle: data.subtitle,
           summary: data.summary,
-          description: data.description,
+          description:
+            data.description !== undefined
+              ? data.description === null
+                ? Prisma.JsonNull
+                : (data.description as Prisma.InputJsonValue)
+              : undefined,
           extra:
             hasOwn(data, "extra") && data.extra !== undefined
               ? (nextExtra as Prisma.InputJsonValue)
@@ -227,7 +237,7 @@ function mapActualTranslationPatchPaths(
     changedNullableString(input, previous, "summary")
       ? `${prefix}.summary`
       : undefined,
-    changedNullableString(input, previous, "description")
+    changedNullableJson(input, previous, "description")
       ? `${prefix}.description`
       : undefined,
     hasOwn(input, "extra") && !sameJson(input.extra ?? null, previous.extra)
@@ -244,9 +254,17 @@ function mapActualTranslationPatchPaths(
 function changedNullableString(
   input: CreateTranslationInput | UpdateTranslationInput,
   previous: UnitTranslation,
-  key: "title" | "subtitle" | "summary" | "description",
+  key: "title" | "subtitle" | "summary",
 ): boolean {
   return hasOwn(input, key) && (input[key] ?? null) !== (previous[key] ?? null);
+}
+
+function changedNullableJson(
+  input: CreateTranslationInput | UpdateTranslationInput,
+  previous: UnitTranslation,
+  key: "description",
+): boolean {
+  return hasOwn(input, key) && !sameJson(input[key] ?? null, previous[key]);
 }
 
 function hasOwn<T extends object>(input: T, key: PropertyKey): key is keyof T {

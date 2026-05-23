@@ -1,15 +1,17 @@
-import type { EntityDTO, Language } from "@rezics/contract";
+import type { EntityDTO, Language, UnitTranslationDTO } from "@rezics/contract";
 import type { EntityWithRelations } from "./entity.types";
 
 /** Project a Prisma Entity + Unit + translations row into the public DTO. */
 export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
   return {
     unitId: row.unitId,
-    kind: row.kind ?? undefined,
+    kind: row.kind as EntityDTO["kind"],
     avatar: row.avatar ?? undefined,
     verified: row.verified,
-    eligibleCreditRoles: row.eligibleCreditRoles,
-    eligibleSubjectRoles: row.eligibleSubjectRoles,
+    eligibleCreditRoles:
+      row.eligibleCreditRoles as EntityDTO["eligibleCreditRoles"],
+    eligibleSubjectRoles:
+      row.eligibleSubjectRoles as EntityDTO["eligibleSubjectRoles"],
     slug: row.unit.slug ?? undefined,
     ownerUnitId: row.unit.userId ?? undefined,
     translations: row.unit.translations?.map((tr) => ({
@@ -18,7 +20,7 @@ export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
       title: tr.title ?? undefined,
       subtitle: tr.subtitle ?? undefined,
       summary: tr.summary ?? undefined,
-      description: tr.description ?? undefined,
+      description: tr.description as UnitTranslationDTO["description"],
       extra: (tr.extra as Record<string, unknown>) ?? undefined,
       sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
       createdAt: tr.createdAt,

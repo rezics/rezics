@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { LANGUAGES, type Language } from "@rezics/contract";
+import { LANGUAGES, markdownContentDoc, type Language } from "@rezics/contract";
 import {
   generateParagraph,
   getDescriptionPool,
@@ -193,7 +193,13 @@ export function generatePostBody(kind: PostKind): string {
       return generateParagraph(2, 8);
     case PostKind.CHAPTER:
       return generateParagraph(8, 25);
+    case PostKind.WIKI:
+      return generateParagraph(3, 8);
   }
+}
+
+export function generatePostContent(kind: PostKind): Prisma.InputJsonValue {
+  return markdownContentDoc(generatePostBody(kind)) as Prisma.InputJsonValue;
 }
 
 // ── Post extra ──────────────────────────────────────

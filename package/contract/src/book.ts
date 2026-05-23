@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import { creditAttributionBriefSchema } from "./credit-attribution";
 import { creationModeSchema } from "./content-authority";
+import { contentDocWriteSchema } from "./content-doc";
 import { languageSchema } from "./language";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
@@ -171,7 +172,7 @@ export const createBookSchema = t.Object({
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),
-        description: t.Optional(t.String()),
+        description: t.Optional(contentDocWriteSchema),
         extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
         sourceReleaseUnitId: t.Optional(t.String()),
       }),

@@ -1,7 +1,7 @@
 import type { Prisma } from "#/prisma/client";
 
 export const translationGroupSiblingInclude = {
-  post: { select: { body: true } },
+  post: { select: { content: true } },
   translations: { select: { language: true, title: true } },
 } satisfies Prisma.UnitInclude;
 
@@ -12,7 +12,7 @@ export type TranslationGroupSibling = Prisma.UnitGetPayload<{
 export type AttachTranslationInput = {
   language: string;
   title?: string | null;
-  body?: string | null;
+  content?: Prisma.InputJsonValue | null;
 };
 
 export type TranslationGroupSiblingDTO = {

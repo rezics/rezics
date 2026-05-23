@@ -23,7 +23,7 @@ export {
   useCreateWikiPostMutation,
   useDeletePostMutation,
   useUpdatePostMutation,
-  useUpdateWikiPostBodyMutation,
+  useUpdateWikiPostContentMutation,
 } from "./post.mutations";
 
 // Query Configurations

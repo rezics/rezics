@@ -91,7 +91,7 @@ export const RemarkCard: React.FC<RemarkCardProps> = ({ remark }) => {
             <RemarkRatingBadge remark={remark} />
           </div>
         </div>
-        <PostBodyMarkdown body={remark.body ?? ""} clamp={{ maxLines: 4 }} />
+        <PostBodyMarkdown content={remark.content} clamp={{ maxLines: 4 }} />
         <ReactionBar
           size="md"
           post={remark}

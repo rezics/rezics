@@ -64,7 +64,9 @@ function PostItemRow({ item }: { item: PostSearchDocument }) {
         {item.kind ?? m.search_origin_post()} ·{" "}
         {item.authorName ?? item.authorUserId}
       </p>
-      {item.body && <p className="text-sm line-clamp-3 mt-1">{item.body}</p>}
+      {item.contentText && (
+        <p className="text-sm line-clamp-3 mt-1">{item.contentText}</p>
+      )}
     </div>
   );
 }

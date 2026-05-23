@@ -6,7 +6,12 @@ import type {
   TagListQuery,
   UpdateTagInput,
 } from "@rezics/contract";
-import { FALLBACK_LANGUAGE, parseIdsCsv, validateSlug } from "@rezics/contract";
+import {
+  FALLBACK_LANGUAGE,
+  mainMarkdownSource,
+  parseIdsCsv,
+  validateSlug,
+} from "@rezics/contract";
 import type { UnitTag } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { patchContentTagsToMeili } from "@/meili/content/sync";
@@ -363,7 +368,7 @@ export class TagService {
       result[tag.id] = {
         name: pick?.title ?? "",
         slug: tag.slug ?? "",
-        description: pick?.description ?? "",
+        description: mainMarkdownSource(pick?.description) ?? "",
       };
     }
 

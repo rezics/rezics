@@ -6,6 +6,7 @@ export * from "./auth";
 export * from "./book";
 export * from "./chapter";
 export * from "./common";
+export * from "./content-doc";
 export * from "./content-authority";
 export * from "./content-history";
 export * from "./credit-attribution";

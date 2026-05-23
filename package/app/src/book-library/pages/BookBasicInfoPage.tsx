@@ -1,5 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
+import { mainMarkdownSource } from "@rezics/contract";
 import { useLocale } from "@rezics/i18n/react";
 import { WorkReleaseNav } from "@rezics/ui";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
@@ -104,11 +105,13 @@ export const BookBasicInfoPage: React.FC = () => {
   if (!bookInfo) return null;
 
   const description =
-    getTranslation(
-      bookInfo.translations,
-      selectedLang,
-      bookInfo.defaultLanguage ?? undefined,
-    )?.description ?? "";
+    mainMarkdownSource(
+      getTranslation(
+        bookInfo.translations,
+        selectedLang,
+        bookInfo.defaultLanguage ?? undefined,
+      )?.description,
+    ) ?? "";
 
   return (
     <div className="flex flex-col gap-8">

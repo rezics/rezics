@@ -7,7 +7,7 @@ import * as m from "@rezics/i18n/messages";
 
 export type ReviewEditState = {
   unitId: string;
-  body: string;
+  contentSource: string;
   _editTitle: string;
   _editRating: number;
   extra: Record<string, any>;
@@ -54,22 +54,22 @@ export function ReviewForm({
       </div>
       <div className="flex-1 min-h-[300px]">
         <RezicsMarkdownEditor
-          value={data.body || ""}
-          onChange={(value) => setData({ ...data, body: value })}
+          value={data.contentSource || ""}
+          onChange={(value) => setData({ ...data, contentSource: value })}
           onSubmit={onSubmit}
           onCancel={onCancel}
           submitLabel={
-            (data.body?.length ?? 0) < 200
-              ? `${200 - (data.body?.length ?? 0)} chars remaining`
+            (data.contentSource?.length ?? 0) < 200
+              ? `${200 - (data.contentSource?.length ?? 0)} chars remaining`
               : submitLabel
           }
           extraRight={extraActions}
         />
         <div className="flex justify-between mt-1">
           <span className="text-xs text-muted-foreground">
-            {data.body?.length ?? 0} / 200 min characters
+            {data.contentSource?.length ?? 0} / 200 min characters
           </span>
-          {(data.body?.length ?? 0) < 200 && (
+          {(data.contentSource?.length ?? 0) < 200 && (
             <span className="text-xs text-red-500">
               {m.review_validation_min_chars()}
             </span>

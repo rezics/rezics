@@ -1,5 +1,9 @@
 import type { BookDTO, Language, UnitTranslationDTO } from "@rezics/contract";
-import { DEFAULT_LANGUAGE, LANGUAGES } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  LANGUAGES,
+  mainMarkdownSource,
+} from "@rezics/contract";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 
@@ -25,7 +29,7 @@ export function translationToDraft(
     title: tr?.title ?? "",
     subtitle: tr?.subtitle ?? "",
     summary: tr?.summary ?? "",
-    description: tr?.description ?? "",
+    description: mainMarkdownSource(tr?.description) ?? "",
   };
 }
 

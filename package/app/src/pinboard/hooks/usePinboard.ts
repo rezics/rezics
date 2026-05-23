@@ -14,6 +14,7 @@ import {
   realmExtraReadQuery,
 } from "@rezics/api/realm/realm-extra.queries";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
+import { mainMarkdownSource } from "@rezics/contract";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useLocale } from "@rezics/i18n/react";
@@ -84,7 +85,7 @@ export function usePinboardList(
           title: tr?.title ?? undefined,
           subtitle: tr?.subtitle ?? undefined,
           summary: tr?.summary ?? undefined,
-          description: tr?.description ?? undefined,
+          description: mainMarkdownSource(tr?.description) ?? undefined,
           defaultLanguage: unit.defaultLanguage ?? undefined,
           updatedAt:
             typeof unit.updatedAt === "string"

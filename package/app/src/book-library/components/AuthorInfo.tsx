@@ -1,4 +1,4 @@
-import type { PublicUser } from "@rezics/contract";
+import { mainMarkdownSource, type PublicUser } from "@rezics/contract";
 import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButtonFloatRight.tsx";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
@@ -33,6 +33,8 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
+  const description = mainMarkdownSource(author.description);
+
   return (
     <div>
       <ArrowForwardIcon
@@ -75,9 +77,9 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
               {author.bio}
             </p>
           )}
-          {author.description && (
+          {description && (
             <p className="text-sm leading-relaxed mt-2 line-clamp-4 overflow-hidden">
-              {author.description}
+              {description}
             </p>
           )}
         </div>
@@ -92,6 +94,8 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
+  const description = mainMarkdownSource(author.description);
+
   return (
     <div>
       <div>
@@ -143,7 +147,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
                 </p>
                 <br />
                 <p>
-                  {m.book_author_info_description_label()}:{author.description}
+                  {m.book_author_info_description_label()}:{description}
                 </p>
               </div>
             </div>

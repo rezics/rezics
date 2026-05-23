@@ -1,4 +1,5 @@
 import { patchUserFields } from "@rezics/search";
+import { mainMarkdownSource } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { searchClient } from "../search-client";
@@ -38,7 +39,8 @@ export async function syncUserToMeili(userId: string): Promise<void> {
     slug,
     avatar: user.avatar,
     bio: user.bio,
-    description: user.description,
+    description: user.description as UserSearchDocument["description"],
+    descriptionText: mainMarkdownSource(user.description),
     followersCount: user.followersCount,
     followingsCount: user.followingsCount,
     joinDate: user.joinDate ? user.joinDate.toISOString() : null,

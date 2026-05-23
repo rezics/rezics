@@ -7,7 +7,11 @@ import {
   chapterDetailQuery,
   useUpdateChapterMutation,
 } from "@rezics/api/chapter/chapter";
-import type { BookContentStructureItem } from "@rezics/contract";
+import {
+  mainMarkdownSource,
+  markdownContentDoc,
+  type BookContentStructureItem,
+} from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import {
   RezicsMarkdownEditor,
@@ -90,7 +94,7 @@ export const BookEditChapterPage: React.FC = () => {
   useEffect(() => {
     if (data) {
       setTitle((data as any).title || "");
-      setContent((data as any).content || "");
+      setContent(mainMarkdownSource((data as any).content) ?? "");
     }
   }, [data]);
 
@@ -102,7 +106,7 @@ export const BookEditChapterPage: React.FC = () => {
   const isDirty = useMemo(() => {
     if (!data) return false;
     const initialTitle = (data as any).title || "";
-    const initialContent = (data as any).content || "";
+    const initialContent = mainMarkdownSource((data as any).content) ?? "";
     return initialTitle !== title || initialContent !== content;
   }, [data, title, content]);
 
@@ -116,7 +120,7 @@ export const BookEditChapterPage: React.FC = () => {
       unitId: chapterId,
       input: {
         title,
-        content,
+        content: markdownContentDoc(content),
       } as any,
     });
     const contentStructure = await queryClient.fetchQuery(

@@ -1,5 +1,5 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
-import { PostKind, SCORE_MAX } from "@rezics/contract";
+import { markdownContentDoc, PostKind, SCORE_MAX } from "@rezics/contract";
 import { RatingInput } from "@rezics/ui";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Input } from "@rezics/ui/shadcn";
@@ -42,7 +42,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
       {
         targetUnitId: bookUnitId,
         kind: PostKind.REMARK,
-        body: trimmed,
+        content: markdownContentDoc(trimmed),
         ...(extra ? { extra } : {}),
       },
       {

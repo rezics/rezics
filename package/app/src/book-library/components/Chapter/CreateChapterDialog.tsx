@@ -1,5 +1,6 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
+import { markdownContentDoc } from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import {
   Dialog,
@@ -81,7 +82,7 @@ export function CreateChapterDialog({
       const result = await createMutation.mutateAsync({
         userId,
         title,
-        content,
+        content: markdownContentDoc(content),
         targetUnitId: bookUnitId,
       });
 

@@ -132,12 +132,12 @@ export function useUpdatePostMutation(
   });
 }
 
-export function useUpdateWikiPostBodyMutation(
+export function useUpdateWikiPostContentMutation(
   options?: Omit<
     UseMutationOptions<
       PostResponse,
       Error,
-      { unitId: string; body: UpdatePostInput["body"] }
+      { unitId: string; content: UpdatePostInput["content"] }
     >,
     "mutationFn"
   >,
@@ -145,7 +145,8 @@ export function useUpdateWikiPostBodyMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ unitId, body }) => postApi.updateWikiBody(unitId, body),
+    mutationFn: ({ unitId, content }) =>
+      postApi.updateWikiContent(unitId, content),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(postKeys.detail(variables.unitId), data);
@@ -188,6 +189,6 @@ export const postMutations = {
   useCreate: useCreatePostMutation,
   useCreateWiki: useCreateWikiPostMutation,
   useUpdate: useUpdatePostMutation,
-  useUpdateWikiBody: useUpdateWikiPostBodyMutation,
+  useUpdateWikiContent: useUpdateWikiPostContentMutation,
   useDelete: useDeletePostMutation,
 };

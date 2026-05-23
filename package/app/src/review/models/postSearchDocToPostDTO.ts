@@ -1,4 +1,8 @@
-import type { PostDTO, PostSearchDocument } from "@rezics/contract";
+import {
+  markdownContentDoc,
+  type PostDTO,
+  type PostSearchDocument,
+} from "@rezics/contract";
 
 type PostExtraRecord = Record<string, unknown>;
 
@@ -34,7 +38,7 @@ export function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
     realmUnitId:
       (doc as PostSearchDocument & { realmUnitId?: string | null })
         .realmUnitId ?? undefined,
-    body: doc.body,
+    content: markdownContentDoc(doc.contentText ?? ""),
     rootPostUnitId: doc.rootPostUnitId,
     parentPostUnitId: doc.parentPostUnitId,
     kind: doc.kind as PostDTO["kind"],

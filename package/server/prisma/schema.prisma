@@ -89,7 +89,7 @@ enum PostKind {
   POST
   /**
    * A chapter of the book named by `targetUnitId` (a Unit of type=BOOK).
-   * Body lives in `Post.body`; cover (optional) lives in `UnitTranslation.extra.coverUrl`.
+   * Content lives in `Post.content`; cover (optional) lives in `UnitTranslation.extra.coverUrl`.
    * Order is governed by `BookContentStructureNode` rows.
    */
   CHAPTER
@@ -280,7 +280,9 @@ model UnitTranslation {
   title       String?
   subtitle    String?
   summary     String?
-  description String?
+  /// Rich ContentDoc JSON. Search projections such as descriptionText are
+  /// Meilisearch-only and must not be added as PostgreSQL columns.
+  description Json?
   extra       Json?
 
   // For works: which release provides content in this language
@@ -484,7 +486,9 @@ model Post {
   rootTargetUnitType String? @db.VarChar(32)
   scoreEntryId       String? @db.Uuid
 
-  body String?
+  /// Canonical ContentDoc JSON. Search projections such as contentText are
+  /// Meilisearch-only and must not be added as PostgreSQL columns.
+  content Json?
 
   rootPostUnitId   String? @db.Uuid
   parentPostUnitId String? @db.Uuid
@@ -816,7 +820,9 @@ model User {
   name            String?
   avatar          String?
   bio             String?
-  description     String?
+  /// Rich ContentDoc JSON. Search projections such as descriptionText are
+  /// Meilisearch-only and must not be added as PostgreSQL columns.
+  description     Json?
   joinDate        DateTime?
   permission      Json?
   followersCount  Int       @default(0)

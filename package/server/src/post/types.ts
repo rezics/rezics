@@ -15,7 +15,7 @@ export const postInclude = {
 /**
  * Internal post type with relations.
  *
- * Post has its own `body` field (fast path, no UnitTranslation),
+ * Post has its own `content` field (fast path, no UnitTranslation),
  * but still links to Unit for user/reaction data.
  */
 export type PostWithRelations = Prisma.PostGetPayload<{

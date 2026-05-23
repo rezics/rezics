@@ -4,6 +4,7 @@ import {
   useDeletePostMutation,
   useUpdatePostMutation,
 } from "@rezics/api/post/post";
+import { mainMarkdownSource, markdownContentDoc } from "@rezics/contract";
 import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -18,7 +19,7 @@ export function ReviewEditPageContainer() {
   const navigate = useNavigate();
   const [reviewData, setReviewData] = useState<ReviewEditState>({
     unitId: "",
-    body: "",
+    contentSource: "",
     _editTitle: "",
     _editRating: 0,
     extra: {},
@@ -28,7 +29,7 @@ export function ReviewEditPageContainer() {
     if (data) {
       setReviewData({
         unitId: data.unitId,
-        body: data.body ?? "",
+        contentSource: mainMarkdownSource(data.content) ?? "",
         _editTitle: (data.extra as any)?.title ?? "",
         _editRating: (data.extra as any)?.rating ?? 0,
         extra: (data.extra as Record<string, any>) ?? {},
@@ -58,7 +59,7 @@ export function ReviewEditPageContainer() {
   });
 
   function handleSave() {
-    if ((reviewData.body?.length ?? 0) < 200) {
+    if ((reviewData.contentSource?.length ?? 0) < 200) {
       show(m.review_validation_min_chars());
       return;
     }
@@ -73,7 +74,7 @@ export function ReviewEditPageContainer() {
     const input = {
       patch: {
         post: {
-          body: reviewData.body || "",
+          content: markdownContentDoc(reviewData.contentSource || ""),
           extra: {
             ...reviewData.extra,
             title: reviewData._editTitle || undefined,

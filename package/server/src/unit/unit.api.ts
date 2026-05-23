@@ -10,6 +10,7 @@ import {
   type UnitListQuery,
   type UnitListResponse,
   type UnitResponse,
+  type UpdateTranslationInput,
   type UpdateUnitInput,
   unitListBodySchema,
   unitListQuerySchema,
@@ -314,7 +315,8 @@ export const unitApi = new Elysia({ prefix: "/unit" })
               : undefined,
           description:
             translationPatch.description === null ||
-            typeof translationPatch.description === "string"
+            (typeof translationPatch.description === "object" &&
+              !Array.isArray(translationPatch.description))
               ? translationPatch.description
               : undefined,
           extra:
@@ -328,7 +330,7 @@ export const unitApi = new Elysia({ prefix: "/unit" })
             typeof translationPatch.sourceReleaseUnitId === "string"
               ? translationPatch.sourceReleaseUnitId
               : undefined,
-        },
+        } as UpdateTranslationInput,
         identity,
         body,
       );

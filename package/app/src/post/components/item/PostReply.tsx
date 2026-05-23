@@ -29,7 +29,7 @@ export const PostReply: React.FC<PostReplyProps> = ({
       <PostAuthorHeader post={post} size="compact" showAvatar={showAvatar} />
       <div className={`flex min-w-0 flex-col gap-1 ${contentIndentClass}`}>
         <PostBodyMarkdown
-          body={post.body ?? ""}
+          content={post.content}
           clamp={{ maxLines: 4 }}
           className="text-sm"
         />

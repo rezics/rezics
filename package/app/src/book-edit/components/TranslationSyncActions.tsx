@@ -1,5 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
-import type { BookDTO } from "@rezics/contract";
+import { mainMarkdownSource, type BookDTO } from "@rezics/contract";
 import {
   Button,
   Tooltip,
@@ -60,7 +60,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
       title: sourceTranslation.title ?? "",
       subtitle: sourceTranslation.subtitle ?? "",
       summary: sourceTranslation.summary ?? "",
-      description: sourceTranslation.description ?? "",
+      description: mainMarkdownSource(sourceTranslation.description) ?? "",
     });
   };
 

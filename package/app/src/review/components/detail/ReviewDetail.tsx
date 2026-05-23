@@ -1,11 +1,11 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO } from "@rezics/contract";
-import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { useMemo } from "react";
 import type React from "react";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
+import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { reviewDetailActions, reviewPolicy } from "../../models/reviewPolicy";
 import * as m from "@rezics/i18n/messages";
 
@@ -44,7 +44,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
       <PostAuthorHeader post={review} />
 
       <div>
-        <MarkdownContent content={review.body ?? ""} />
+        <PostBodyMarkdown content={review.content} />
       </div>
 
       <ReactionBar

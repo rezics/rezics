@@ -159,11 +159,11 @@ export const postApi = {
     });
   },
 
-  updateWikiBody: async (
+  updateWikiContent: async (
     unitId: string,
-    body: UpdatePostInput["body"],
+    content: UpdatePostInput["content"],
   ): Promise<PostResponse> => {
-    return postApi.update(unitId, { patch: { post: { body } } });
+    return postApi.update(unitId, { patch: { post: { content } } });
   },
 
   /**

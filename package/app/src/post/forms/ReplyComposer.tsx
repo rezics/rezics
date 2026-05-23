@@ -1,7 +1,12 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { realmQueries } from "@rezics/api/realm/realm";
 import { tagQueries } from "@rezics/api/tag/tag";
-import { type PostDTO, PostKind, type TagTreeNode } from "@rezics/contract";
+import {
+  markdownContentDoc,
+  type PostDTO,
+  PostKind,
+  type TagTreeNode,
+} from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -347,13 +352,13 @@ export const ReplyComposer = forwardRef<
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
-          body: trimmed,
+          content: markdownContentDoc(trimmed),
         }
       : {
           targetUnitId,
           parentPostUnitId,
           kind: PostKind.POST,
-          body: trimmed,
+          content: markdownContentDoc(trimmed),
         };
 
     mutation.mutate(payload, {

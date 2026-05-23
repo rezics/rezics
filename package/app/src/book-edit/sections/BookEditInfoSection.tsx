@@ -17,6 +17,8 @@ import type {
 import {
   CreationMode as CreationModeValue,
   DEFAULT_LANGUAGE,
+  mainMarkdownSource,
+  markdownContentDoc,
   normalizeLanguage,
 } from "@rezics/contract";
 import { TextLink } from "@/shared/ui/link";
@@ -236,7 +238,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         title: String(translation.title ?? ""),
         subtitle: String(translation.subtitle ?? ""),
         summary: String(translation.summary ?? ""),
-        description: String(translation.description ?? ""),
+        description: mainMarkdownSource(translation.description) ?? "",
       });
     }
     const firstLanguage = asRecord(translations[0]).language;
@@ -329,7 +331,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
             title: draft.title || undefined,
             subtitle: draft.subtitle || undefined,
             summary: draft.summary || undefined,
-            description: draft.description || undefined,
+            description: draft.description
+              ? markdownContentDoc(draft.description)
+              : undefined,
           },
         ],
       };
@@ -404,7 +408,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           title: draft.title || null,
           subtitle: draft.subtitle || null,
           summary: draft.summary || null,
-          description: draft.description || null,
+          description: draft.description
+            ? markdownContentDoc(draft.description)
+            : null,
         },
       },
     };

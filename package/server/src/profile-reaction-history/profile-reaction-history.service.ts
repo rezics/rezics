@@ -1,4 +1,5 @@
 import { prisma, type UnitType } from "#/prisma/client";
+import { mainMarkdownSource } from "@rezics/contract";
 import {
   listByUser,
   listGivenReactions,
@@ -95,7 +96,7 @@ async function loadTargets(
       unitId: u.id,
       kind: unitKind(u.type),
       title: tr?.title ?? undefined,
-      snippet: snippet(tr?.description),
+      snippet: snippet(mainMarkdownSource(tr?.description)),
       href: buildHref(u.type, u.id),
     });
   }

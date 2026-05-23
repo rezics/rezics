@@ -3,11 +3,13 @@ import { faker } from "@faker-js/faker";
 import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
+  markdownContentDoc,
 } from "@rezics/contract";
 import type { PrismaClient } from "../generated/client.js";
 import { PostKind, UnitStatus, UnitType } from "../generated/client.js";
 import {
   generatePostBody,
+  generatePostContent,
   generatePostExtra,
   generateTranslations,
 } from "./generators.js";
@@ -148,7 +150,7 @@ async function seedPostKindForTarget(
             authorUserId: author.userId,
             targetUnitId,
             kind,
-            body,
+            content: markdownContentDoc(body) as never,
             extra: extra ?? undefined,
             depth: 0,
             scoreEntryId: scoreEntryId ?? undefined,
@@ -256,7 +258,7 @@ async function seedPostKindBatch(
         authorUserId: r.author.userId,
         targetUnitId,
         kind,
-        body: r.body,
+        content: markdownContentDoc(r.body) as never,
         extra: r.extra ?? undefined,
         depth: 0,
         scoreEntryId: r.scoreEntryId ?? null,
@@ -361,7 +363,7 @@ async function seedTreePostsForTarget(
             targetUnitId,
             rootPostUnitId: rootPlan.id,
             kind: PostKind.POST,
-            body: generatePostBody(PostKind.POST),
+            content: generatePostContent(PostKind.POST) as never,
             depth: 0,
             sortPath: rootPlan.sortPath,
           },
@@ -443,7 +445,7 @@ async function seedTreePostsForTarget(
             rootPostUnitId: parent.rootId,
             parentPostUnitId: parent.id,
             kind: PostKind.POST,
-            body: generatePostBody(PostKind.POST),
+            content: generatePostContent(PostKind.POST) as never,
             depth: parent.depth + 1,
             sortPath,
           },
@@ -509,28 +511,30 @@ const WIKI_POSTS: {
   id: string;
   language: string;
   title: string;
-  body: string;
+  contentSource: string;
 }[] = [
   {
     id: WIKI_POST_ZH_ID,
     language: "zh-hant",
     title: "Rezics 是甚麼",
-    // MOCK: seeded wiki body for the Traditional Chinese variant.
-    body: "Rezics 是一個讓不同語言版本的維基條目並列共存的平台。",
+    // MOCK: seeded wiki content for the Traditional Chinese variant.
+    contentSource: "Rezics 是一個讓不同語言版本的維基條目並列共存的平台。",
   },
   {
     id: WIKI_POST_EN_ID,
     language: "en",
     title: "What is Rezics",
-    // MOCK: seeded wiki body for the English variant.
-    body: "Rezics keeps each language's wiki page as its own first-class post and links them as parallel translations.",
+    // MOCK: seeded wiki content for the English variant.
+    contentSource:
+      "Rezics keeps each language's wiki page as its own first-class post and links them as parallel translations.",
   },
   {
     id: WIKI_POST_JA_ID,
     language: "ja",
     title: "Rezics とは",
-    // MOCK: seeded wiki body for the Japanese variant.
-    body: "Rezics は、各言語のウィキ記事を独立した投稿として扱い、並列翻訳としてつなげるプラットフォームです。",
+    // MOCK: seeded wiki content for the Japanese variant.
+    contentSource:
+      "Rezics は、各言語のウィキ記事を独立した投稿として扱い、並列翻訳としてつなげるプラットフォームです。",
   },
 ];
 
@@ -574,7 +578,7 @@ export async function seedWikiTranslationGroups(
             create: {
               authorUserId: author.userId,
               kind: PostKind.POST,
-              body: p.body,
+              content: markdownContentDoc(p.contentSource) as never,
               depth: 0,
             },
           },

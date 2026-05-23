@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { contentRatingSchema } from "./unit";
@@ -6,7 +7,7 @@ import { contentRatingSchema } from "./unit";
 // ============================================================
 // CHAPTER CONTRACTS
 // Chapter = Unit(type=POST) + Post(kind=CHAPTER, targetUnitId=<book>).
-// Body lives in Post.body. Title lives in UnitTranslation.title.
+// Content lives in Post.content. Title lives in UnitTranslation.title.
 // Cover (optional) lives in UnitTranslation.extra.coverUrl
 // (see unitTranslationExtraSchema). BookContentStructure JSON stores chapter order.
 // ============================================================
@@ -26,7 +27,7 @@ export type ChapterListItemDTO = (typeof chapterListItemSchema)["static"];
 export const chapterDetailSchema = t.Object({
   unitId: t.String(),
   title: t.String(),
-  content: t.Optional(t.String()),
+  content: t.Optional(t.Nullable(contentDocSchema)),
   userId: t.Optional(t.String()),
   targetUnitId: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
@@ -148,7 +149,7 @@ export type ChapterMaterializationResponse =
 export const createChapterSchema = t.Object({
   userId: t.String(),
   title: t.String(),
-  content: t.Optional(t.String()),
+  content: t.Optional(contentDocWriteSchema),
   // The parent book unit id (Post.targetUnitId after persistence).
   // MUST resolve to a Unit(type=BOOK) — server rejects otherwise.
   targetUnitId: t.String(),
@@ -161,7 +162,7 @@ export type CreateChapterInput = (typeof createChapterSchema)["static"];
 
 export const updateChapterSchema = t.Object({
   title: t.Optional(t.String()),
-  content: t.Optional(t.String()),
+  content: t.Optional(contentDocWriteSchema),
   targetUnitId: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   status: t.Optional(t.String()),

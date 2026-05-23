@@ -1,6 +1,6 @@
 import { postApi } from "@rezics/api/post/post";
 import type { CreatePostInput, PostDTO } from "@rezics/contract";
-import { PostKind } from "@rezics/contract";
+import { markdownContentDoc, PostKind } from "@rezics/contract";
 
 /**
  * Submit a post or reply using the Post API.
@@ -32,13 +32,13 @@ export const handleSubmit = async (
     targetUnitId,
     parentPostUnitId,
     kind: PostKind.POST,
-    body: content,
+    content: markdownContentDoc(content),
   };
   return postApi.create(input);
 };
 
 /**
- * Edit a post's body by its unit id.
+ * Edit a post's content by its unit id.
  */
 export const handleEdit = async (
   unitId: string,
@@ -50,7 +50,9 @@ export const handleEdit = async (
   if (!content || content.trim().length === 0) {
     throw new Error("content is required");
   }
-  return postApi.update(unitId, { patch: { post: { body: content } } });
+  return postApi.update(unitId, {
+    patch: { post: { content: markdownContentDoc(content) } },
+  });
 };
 
 /**

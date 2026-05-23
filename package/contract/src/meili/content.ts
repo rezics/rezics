@@ -1,6 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { TagRefSchema } from "../common/tag-ref";
+import { contentDocSchema } from "../content-doc";
 import { languageSchema } from "../language";
 import { postKindLiterals } from "../post";
 import { contentRatingSchema } from "../unit";
@@ -15,6 +16,8 @@ export const ContentSearchDocumentSchema = t.Object({
   // Searchable text (denormalized from UnitTranslation)
   titles: t.Array(t.String()),
   subtitles: t.Array(t.String()),
+  contentText: t.Union([t.String(), t.Null()]),
+  descriptionText: t.Union([t.String(), t.Null()]),
   summaries: t.Array(t.String()),
   descriptions: t.Array(t.String()),
 
@@ -78,7 +81,7 @@ export const ContentSearchDocumentSchema = t.Object({
         title: t.Union([t.String(), t.Null()]),
         subtitle: t.Union([t.String(), t.Null()]),
         summary: t.Union([t.String(), t.Null()]),
-        description: t.Union([t.String(), t.Null()]),
+        description: t.Union([contentDocSchema, t.Null()]),
       }),
     ),
   ),

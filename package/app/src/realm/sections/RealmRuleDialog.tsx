@@ -35,7 +35,7 @@ export const RealmRuleDialog: React.FC<RealmRuleDialogProps> = ({
           <DialogTitle>{m.realm_rules_title()}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto">
-          <PostBodyMarkdown body={post?.body ?? ""} clamp={false} />
+          <PostBodyMarkdown content={post?.content} clamp={false} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>

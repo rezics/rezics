@@ -1250,7 +1250,7 @@ function editorialPathLabel(path: string) {
   const labels: Record<string, string> = {
     "extension.coverUrl": m.book_fields_cover_url(),
     "extension.isbn13": m.book_fields_isbn(),
-    "post.body": "Post body",
+    "post.content.main.source": "Post content",
     "credits.authors": "Authors",
     "entity.avatar": m.entity_avatar_url(),
     "entity.kind": "Entity kind",

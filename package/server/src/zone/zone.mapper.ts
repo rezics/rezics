@@ -1,4 +1,8 @@
-import type { ZoneDTO, ZoneFilters } from "@rezics/contract";
+import {
+  mainMarkdownSource,
+  type ZoneDTO,
+  type ZoneFilters,
+} from "@rezics/contract";
 import type { ZoneWithRelations } from "./zone.service";
 
 /**
@@ -16,7 +20,7 @@ export function mapZoneToDTO(zone: ZoneWithRelations, lang?: string): ZoneDTO {
   return {
     slug: zone.unit?.slug ?? "",
     name: translation?.title ?? "",
-    description: translation?.description ?? null,
+    description: mainMarkdownSource(translation?.description) ?? null,
     filters: zone.filters as ZoneFilters,
     template: zone.template,
     styling: (zone.styling as Record<string, unknown>) ?? null,

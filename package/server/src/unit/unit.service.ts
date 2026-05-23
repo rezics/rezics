@@ -40,7 +40,8 @@ type UnitResult<TInclude extends MaybeInclude> = Prisma.UnitGetPayload<{
 /**
  * Compose a Prisma where clause for Unit list queries.
  *
- * Searches UnitTranslation for text queries (title/description).
+ * Searches UnitTranslation titles for text queries. Rich description text is
+ * projected through Meilisearch, not PostgreSQL JSON fields.
  * Filters by visibility, workUnitId, language, rating, type, status, userId.
  */
 export function buildUnitWhereClause(
@@ -48,15 +49,12 @@ export function buildUnitWhereClause(
 ): Prisma.UnitWhereInput {
   const andWhere: Prisma.UnitWhereInput[] = [];
 
-  // Text search: search in UnitTranslation title/description
+  // Text search: search in UnitTranslation title.
   if (options.q?.trim()) {
     andWhere.push({
       translations: {
         some: {
-          OR: [
-            { title: { contains: options.q, mode: "insensitive" } },
-            { description: { contains: options.q, mode: "insensitive" } },
-          ],
+          title: { contains: options.q, mode: "insensitive" },
         },
       },
     });
@@ -248,7 +246,10 @@ export class UnitService {
                   title: tr.title ?? undefined,
                   subtitle: tr.subtitle ?? undefined,
                   summary: tr.summary ?? undefined,
-                  description: tr.description ?? undefined,
+                  description:
+                    tr.description !== undefined
+                      ? (tr.description as Prisma.InputJsonValue)
+                      : undefined,
                   extra: (tr.extra ?? null) as Prisma.InputJsonValue,
                   sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
                 })),

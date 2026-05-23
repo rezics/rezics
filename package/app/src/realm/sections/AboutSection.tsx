@@ -1,4 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
+import { mainMarkdownSource } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { PostBodyMarkdown } from "@/post";
@@ -13,7 +14,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ postUnitId }) => {
     enabled: Boolean(postUnitId),
   });
 
-  if (!postUnitId || isError || !post?.body) return null;
+  const markdown = mainMarkdownSource(post?.content);
+  if (!postUnitId || isError || !markdown) return null;
 
   return (
     <section className="rounded-md bg-surface-subtle p-4">
@@ -21,7 +23,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ postUnitId }) => {
         About
       </h2>
       <PostBodyMarkdown
-        body={post.body}
+        content={post.content}
         clamp={{ maxLines: 8 }}
         className="mt-2 text-sm leading-body text-text-secondary"
       />

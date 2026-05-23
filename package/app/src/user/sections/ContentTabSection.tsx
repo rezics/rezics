@@ -193,8 +193,8 @@ const PostListItem: FC<{ post: PostSearchDocument }> = ({ post }) => {
               ))}
             <span className="text-xs text-text-secondary">{date}</span>
           </div>
-          {post.body && (
-            <p className="text-sm mt-1 line-clamp-3">{post.body}</p>
+          {post.contentText && (
+            <p className="text-sm mt-1 line-clamp-3">{post.contentText}</p>
           )}
           <div className="flex items-center gap-3 mt-2 text-xs text-text-secondary">
             {post.replyCount > 0 && <span>{post.replyCount} replies</span>}

@@ -1,4 +1,8 @@
-import { DEFAULT_LANGUAGE, FALLBACK_LANGUAGE } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  FALLBACK_LANGUAGE,
+  markdownContentDoc,
+} from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client";
 import type { SlugScopesMap } from "./seed-slug-scopes";
 
@@ -55,7 +59,7 @@ async function ensureGlobalTag(
 /**
  * Ensure a POST unit owned by `userId`. POST units have no slug in the new
  * substrate (POST is not slug-bearing); existence is determined by an
- * idempotency tuple of (owner, kind, body) seeded only at infra time.
+ * idempotency tuple of (owner, kind, content main source) seeded only at infra time.
  */
 async function ensurePostUnit(
   prisma: PrismaClient,
@@ -67,7 +71,7 @@ async function ensurePostUnit(
     where: {
       type: "POST",
       userId,
-      post: { is: { body } },
+      post: { is: { content: { path: ["main", "source"], equals: body } } },
     },
     select: { id: true },
   });
@@ -94,7 +98,7 @@ async function ensurePostUnit(
         create: {
           authorUserId: userId,
           kind: "POST",
-          body,
+          content: markdownContentDoc(body) as never,
         },
       },
     },

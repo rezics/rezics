@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { contentDocWriteSchema } from "./content-doc";
 import { languageSchema } from "./language";
 
 export const translationGroupSchema = t.Object({
@@ -12,7 +13,7 @@ export type TranslationGroupDTO = (typeof translationGroupSchema)["static"];
 export const attachTranslationSchema = t.Object({
   language: languageSchema,
   title: t.Optional(t.Nullable(t.String())),
-  body: t.Optional(t.Nullable(t.String())),
+  content: t.Optional(t.Nullable(contentDocWriteSchema)),
 });
 
 export type AttachTranslationInput = (typeof attachTranslationSchema)["static"];

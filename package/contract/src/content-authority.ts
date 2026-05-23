@@ -48,7 +48,9 @@ export const EDITORIAL_LOCK_PATH_OPTIONS = [
   "translations.zh-Hant.description",
   "extension.isbn13",
   "extension.coverUrl",
-  "post.body",
+  "post.content",
+  "post.content.main",
+  "post.content.main.source",
   "credits.authors",
 ] as const;
 

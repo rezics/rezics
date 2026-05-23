@@ -1,5 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
-import { type PostDTO, PostKind } from "@rezics/contract";
+import { mainMarkdownSource, type PostDTO, PostKind } from "@rezics/contract";
 import { RatingInput } from "@rezics/ui";
 import { Link } from "@/shared/ui/link";
 import {
@@ -87,7 +87,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
 
   const score = mockReviewScore(review);
   const author = review.author;
-  const body = (review.body ?? "").trim();
+  const body = (mainMarkdownSource(review.content) ?? "").trim();
 
   return (
     <div className="flex flex-col gap-3 text-white">

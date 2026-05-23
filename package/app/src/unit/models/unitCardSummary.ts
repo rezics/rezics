@@ -8,7 +8,7 @@ import type {
   UnitDTO,
   UnitTranslationDTO,
 } from "@rezics/contract";
-import { readCoverUrlFromExtra } from "@rezics/contract";
+import { mainMarkdownSource, readCoverUrlFromExtra } from "@rezics/contract";
 import * as m from "@rezics/i18n/messages";
 import { getTranslation } from "../../shared/utils/translation-helpers";
 
@@ -250,7 +250,7 @@ function postToSummary(
 ): UnitCardSummary {
   const title =
     text(post.extra?.title) ??
-    firstLine(post.body) ??
+    firstLine(mainMarkdownSource(post.content)) ??
     text(options.fallbackTitle) ??
     post.unitId;
 
@@ -259,7 +259,7 @@ function postToSummary(
     kind: normalizeKind(options.fallbackKind ?? post.kind ?? "post"),
     title,
     imageUrl: null,
-    contentPreview: text(post.body),
+    contentPreview: text(mainMarkdownSource(post.content)),
     author: post.author ?? null,
     addedAt: options.addedAt ?? null,
   };
