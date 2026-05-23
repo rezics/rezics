@@ -20,7 +20,7 @@ The seed system SHALL include development data where a realm is visibly modeled 
 
 ### Requirement: Seed data demonstrates shared global tags with realm-specific interpretation
 
-The seed system SHALL create global tag Units that are reused by multiple realms, and SHALL demonstrate that the same tag can have different realm-specific meanings through `RealmTagContext` and `RealmTagUnit` data.
+The seed system SHALL create global tag Units that are reused by multiple realms, and SHALL demonstrate that the same tag can have different realm-specific meanings through `RealmTagContext` and `RealmTagApplication` data.
 
 #### Scenario: Same global tag appears in multiple realm contexts
 
@@ -38,26 +38,26 @@ The seed system SHALL create global tag Units that are reused by multiple realms
 
 ### Requirement: Seed data covers realm-tag applications inside and outside realm feeds
 
-The seed system SHALL include `RealmTagUnit` examples for target Units that are also present in a realm feed through `RealmUnit`, and examples for target Units that are not present in that realm feed. This protects the invariant that `RealmTagUnit` is independent from `RealmUnit`.
+The seed system SHALL include `RealmTagApplication` examples for target Units that are also present in a realm feed through `RealmUnit`, and examples for target Units that are not present in that realm feed. This protects the invariant that `RealmTagApplication` is independent from `RealmUnit`.
 
 #### Scenario: Realm tag application for feed member
 
 - **WHEN** the seeded data is inspected
-- **THEN** at least one target Unit SHALL have both `RealmUnit(realmUnitId, unitId)` and `RealmTagUnit(realmUnitId, tagUnitId, unitId)` rows for the same realm
+- **THEN** at least one target Unit SHALL have both `RealmUnit(realmUnitId, unitId)` and `RealmTagApplication(realmUnitId, tagUnitId, unitId)` rows for the same realm
 
 #### Scenario: Realm tag application for non-feed target
 
 - **WHEN** the seeded data is inspected
-- **THEN** at least one target Unit SHALL have a `RealmTagUnit(realmUnitId, tagUnitId, unitId)` row
+- **THEN** at least one target Unit SHALL have a `RealmTagApplication(realmUnitId, tagUnitId, unitId)` row
 - **AND** the same `(realmUnitId, unitId)` pair SHALL NOT require a `RealmUnit` row
 
 ### Requirement: Seed data preserves global vote contribution semantics
 
-Seed helpers that create realm-scoped tag applications through the standard backend path SHALL also create or preserve the corresponding global `TagVote` and aggregate `UnitTag` state. Seed helpers that intentionally bypass services for bulk setup SHALL explicitly create consistent `RealmTagVote`, `RealmTagUnit`, `TagVote`, and `UnitTag` rows.
+Seed helpers that create realm-scoped tag applications through the standard backend path SHALL also create or preserve the corresponding global `TagVote` and aggregate `UnitTag` state. Seed helpers that intentionally bypass services for bulk setup SHALL explicitly create consistent `RealmTagApplicationVote`, `RealmTagApplication`, `TagVote`, and `UnitTag` rows.
 
 #### Scenario: Seeded realm application contributes to global tag aggregate
 
-- **GIVEN** a seeded `RealmTagUnit(realm-1, tag-1, unit-1)` was created through the standard helper
+- **GIVEN** a seeded `RealmTagApplication(realm-1, tag-1, unit-1)` was created through the standard helper
 - **WHEN** the seeded database is inspected
 - **THEN** a global `UnitTag(unit-1, tag-1)` aggregate SHALL exist
 - **AND** the creator's global `TagVote(userId, unitId, tagUnitId)` SHALL exist at most once
@@ -67,3 +67,15 @@ Seed helpers that create realm-scoped tag applications through the standard back
 - **WHEN** the seed is applied repeatedly in a reset-capable development environment
 - **THEN** seeded realm-tag contexts, realm-tag applications, and vote aggregates SHALL remain deterministic
 - **AND** duplicate composite-key rows SHALL NOT be created
+
+### Requirement: Seed helpers use RealmTagApplication vocabulary
+
+Seed helpers and seed data SHALL use `RealmTagApplication` and `RealmTagApplicationVote` names when creating realm-scoped tag classifications and their votes. Seed behavior SHALL remain equivalent to the previous model: application creation also preserves or creates the corresponding global `TagVote` and `UnitTag` aggregate where the standard helper path requires it.
+
+#### Scenario: Seeded realm tag application creates consistent rows
+
+- **GIVEN** a seed helper creates a realm-scoped tag application for `(realm-1, tag-1, unit-1)`
+- **WHEN** the seed completes
+- **THEN** a `RealmTagApplication(realm-1, tag-1, unit-1)` row SHALL exist
+- **AND** the creator's `RealmTagApplicationVote` SHALL exist at most once
+- **AND** the expected global `UnitTag(unit-1, tag-1)` state SHALL be consistent with the standard seed path

@@ -62,7 +62,7 @@ Each document in the content index SHALL contain all `UnitTranslation` rows for 
 Each document SHALL contain three independent fields derived from three distinct relation families:
 - `tagIds`: array of tag Unit UUIDs from `UnitTag`
 - `realmIds`: array of realm Unit UUIDs from `RealmUnit`
-- `realmTagKeys`: array of compound machine keys from `RealmTagUnit`, formatted as `"{realmUnitId}:{tagUnitId}"`
+- `realmTagKeys`: array of compound machine keys from `RealmTagApplication`, formatted as `"{realmUnitId}:{tagUnitId}"`
 
 `realmTagKeys` SHALL be a machine-facing search/filter representation of realm-scoped tag application. It SHALL NOT imply that the target Unit is present in the realm feed, and it SHALL NOT be used as a human-readable display label. Display surfaces that need readable realm/tag text SHALL resolve the realm and tag Units separately.
 
@@ -72,17 +72,17 @@ Each document SHALL contain three independent fields derived from three distinct
 - **WHEN** the unit is synced
 - **THEN** the document SHALL have `tagIds` containing tag-A and tag-B UUIDs
 - **AND** `realmIds` containing realm-X UUID
-- **AND** `realmTagKeys` SHALL be empty (no RealmTagUnit rows exist)
+- **AND** `realmTagKeys` SHALL be empty (no RealmTagApplication rows exist)
 
 #### Scenario: Unit with realm-scoped tag classification
 
-- **GIVEN** a Unit with a RealmTagUnit row (realm-X, tag-A, this-unit)
+- **GIVEN** a Unit with a RealmTagApplication row (realm-X, tag-A, this-unit)
 - **WHEN** the unit is synced
 - **THEN** the document's `realmTagKeys` SHALL contain `"{realm-X-uuid}:{tag-A-uuid}"`
 
 #### Scenario: Realm tag key can exist without realm membership
 
-- **GIVEN** a Unit has `RealmTagUnit(realm-X, tag-A, this-unit)`
+- **GIVEN** a Unit has `RealmTagApplication(realm-X, tag-A, this-unit)`
 - **AND** no `RealmUnit(realm-X, this-unit)` row exists
 - **WHEN** the unit is synced
 - **THEN** the document's `realmTagKeys` SHALL contain `"{realm-X-uuid}:{tag-A-uuid}"`
@@ -269,3 +269,18 @@ Creating, updating, or deleting a SubjectAttribution row SHALL trigger a Meilise
 - **WHEN** a SubjectAttribution row is created for target Unit "fanfic-1"
 - **THEN** the system SHALL patch the "fanfic-1" content document's subject fields
 - **AND** it SHALL NOT rebuild unrelated credit fields as part of the subject-only patch
+
+### Requirement: Content index sources realm tag keys from RealmTagApplication
+
+The content index SHALL source realm-scoped tag machine filter keys from `RealmTagApplication` rows. The field values SHALL preserve the existing compound format `"{realmUnitId}:{tagUnitId}"` unless a separate search contract change renames the field.
+
+#### Scenario: Application produces realm tag key
+
+- **GIVEN** `RealmTagApplication(realm-X, tag-A, unit-1)` exists
+- **WHEN** `unit-1` is synced to the content index
+- **THEN** the document's realm tag key field SHALL contain `"realm-X:tag-A"`
+
+#### Scenario: Old model name is not used in search code
+
+- **WHEN** a developer audits content indexing code
+- **THEN** search sync code SHALL refer to realm tag applications rather than `RealmTagUnit`

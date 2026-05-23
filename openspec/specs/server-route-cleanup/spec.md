@@ -144,7 +144,7 @@ The server SHALL expose a Realm API under the `/realm` prefix that handles CRUD 
 
 ### Requirement: Realm organization routes manage content feed and scoped tagging
 
-The server SHALL expose routes for managing RealmUnit (content feed) and RealmTagUnit (scoped classification) under the `/realm` prefix. These are the mechanisms by which content enters a realm and is classified with tags within that realm.
+The server SHALL expose routes for managing RealmUnit (content feed) and RealmTagApplication (scoped classification) under the `/realm` prefix. These are the mechanisms by which content enters a realm and is classified with tags within that realm.
 
 #### Scenario: Add a unit to a realm's content feed
 
@@ -155,19 +155,19 @@ The server SHALL expose routes for managing RealmUnit (content feed) and RealmTa
 
 - **WHEN** a realm moderator sends `DELETE /realm/:realmUnitId/unit/:unitId`
 - **THEN** the server SHALL delete the RealmUnit record
-- AND the unit's RealmTagUnit records for that realm SHALL also be deleted (scoped tags removed)
+- AND the unit's RealmTagApplication records for that realm SHALL also be deleted (scoped tags removed)
 - AND global UnitTag records SHALL NOT be affected (no-removal-cascade)
 
 #### Scenario: Classify a unit with a tag within a realm
 
 - **WHEN** a realm moderator sends `POST /realm/:realmUnitId/tag` with `{ tagUnitId: "<tag-id>", unitId: "<unit-id>" }`
-- **THEN** the server SHALL create a RealmTagUnit record
+- **THEN** the server SHALL create a RealmTagApplication record
 - AND the server SHALL upsert the global UnitTag for `(unitId, tagUnitId)` with a score increment (add-cascade)
 
 #### Scenario: Remove a realm-scoped tag classification
 
 - **WHEN** a realm moderator sends `DELETE /realm/:realmUnitId/tag/:tagUnitId/unit/:unitId`
-- **THEN** the server SHALL delete the RealmTagUnit record
+- **THEN** the server SHALL delete the RealmTagApplication record
 - AND the global UnitTag for `(unitId, tagUnitId)` SHALL NOT be modified (no-removal-cascade)
 
 #### Scenario: List units in a realm's content feed
@@ -178,7 +178,7 @@ The server SHALL expose routes for managing RealmUnit (content feed) and RealmTa
 #### Scenario: List tags applied to a unit within a realm
 
 - **WHEN** a client sends `GET /realm/:realmUnitId/unit/:unitId/tag`
-- **THEN** the server SHALL return all RealmTagUnit records for that realm-unit pair with their tag UnitTranslation labels
+- **THEN** the server SHALL return all RealmTagApplication records for that realm-unit pair with their tag UnitTranslation labels
 
 ### Requirement: TagVote routes allow users to vote on tag relevance
 
@@ -260,3 +260,13 @@ The Unit API SHALL reflect the updated Unit model: no `title` or `content` colum
 
 - **WHEN** a client sends `GET /unit?type=BOOK&status=PUBLISHED`
 - **THEN** the server SHALL return paginated units matching the filter with their resolved translations
+
+### Requirement: Server route cleanup uses RealmTagApplication names
+
+Server route documentation and route summaries SHALL refer to `RealmTagApplication` for realm-scoped tag classification routes. Route cleanup specs SHALL NOT describe the triple-level application row as `RealmTagUnit`.
+
+#### Scenario: Realm classification routes use new names
+
+- **WHEN** OpenAPI details are generated for realm-scoped tag classification
+- **THEN** create, patch, delete, and vote summaries SHALL use `RealmTagApplication` or `RealmTagApplicationVote` vocabulary
+- **AND** no generated summary SHALL describe the route as managing `RealmTagUnit`
