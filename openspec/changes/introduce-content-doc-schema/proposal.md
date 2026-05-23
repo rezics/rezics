@@ -16,8 +16,7 @@ This change introduces that schema and migrates storage, history, authority, and
 - Runtime support boundary: `ContentDoc` enters `@rezics/contract` with the full v1 schema, but this change only supports the `main` Markdown block in product services. Server create/update persists the full submitted JSON unchanged; slots, layout, inline directives, and non-main schema parts are preserved as data but are not rendered, indexed, hydrated, locked, or emitted as history sub-keys in this change.
 - Reposition `Post.extra` explicitly as a non-rendered side-channel for feature metadata (e.g. `extra.coverUrl`, `extra.source`, pinboard keys). It SHALL NOT carry renderable content; that lives in `ContentDoc`.
 - Reposition the wiki **infobox** as a first-class `Slot` inside `ContentDoc.slots.infobox`. It is not denormalized into a separate PostgreSQL column. Books typically have no wiki infobox because their card-level facts come from the Unit / Translation schema; only wikis that genuinely need an infobox carry one.
-- Replace authority and history field keys based on `post.body` with the supported content key `post.content.main` (plus whole-content `post.content` where a broad lock/restore operation needs it). Slot/layout field keys are contract-reserved but not wired into runtime in this change.
-- Update history outbox payloads so the `post` slot directly carries the full `ContentDoc`. The legacy body string SHALL NOT appear in any new revision payload.
+- Editorial lock and history semantics are out of scope here: they are handled by the dependency change `replace-field-key-with-patch-paths`, which lands first and migrates lock and history to free-form PATCH paths. After both changes land, `post.content.main` is simply a PATCH path that the editorial PATCH protocol locks and historizes through its general mechanism; no field-key vocabulary or slot-vocabulary work is performed in this change.
 
 ## Capabilities
 
@@ -30,9 +29,7 @@ This change introduces that schema and migrates storage, history, authority, and
 - `markdown-post-content`: Replaces `Post.body` Markdown source with `Post.content.main` Markdown source and updates post/chapter rendering and editing expectations.
 - `markdown-user-description`: Broadens scope from user profile description to all rich descriptions (user profile + Unit translation) using `ContentDoc`. Compact bio and summary fields remain plain strings.
 - `content-index`: Adds Meilisearch-only `contentText` and `descriptionText` projections derived from `ContentDoc.main`; PostgreSQL does not store these projections.
-- `content-history-service`: Records full `ContentDoc` snapshots in the `post` editorial revision slot when supported main content changes, uses `post.content.main`, suppresses no-op main updates, and removes any dependency on the legacy `post.body` string.
-- `content-authority`: Replaces `post.body` locking with `post.content.main` for supported content edits. Slot/layout locks are not wired in this change.
-- `wiki-post-editing`: Edits submit full `ContentDoc` JSON for persistence, but the supported collaborative edit/history/lock surface is only `content.main`.
+- `wiki-post-editing`: Edits submit full `ContentDoc` JSON for persistence. Lock and history semantics for the `content.main` PATCH path come from the editorial PATCH protocol established in `replace-field-key-with-patch-paths`.
 - `post-presentation-architecture`: The shared `PostBodyMarkdown` atom reads from `Post.content` instead of `post.body`. Wording is updated to remove `post.body` from requirements.
 - `work-discussion`: Post-card body rendering reads from `Post.content`. Plaintext rendering remains disallowed.
 - `type-extension-post`: Chapter `Post` carries `content: ContentDoc` instead of `body: string`. Chapter creation and listing semantics are otherwise unchanged.
@@ -55,5 +52,6 @@ This change defines the schema, scanning, extraction, and storage cut-over that 
 - API contracts change for post, chapter, wiki editing, and rich descriptions. `body` and string-only `description` write paths are removed. Content update APIs persist the full submitted JSON value; runtime services only interpret `main`.
 - Existing development data is migrated by wrapping string bodies and descriptions as `ContentDoc.main = { type: "markdown", source: <old string> }`. Empty strings migrate to `null` JSON.
 - Meilisearch documents gain derived `contentText` / `descriptionText` fields generated from supported `main` Markdown content during sync and full reindex. These fields are not persisted in PostgreSQL.
-- History outbox writers stop emitting `post.body` field keys. New revisions carry the full submitted `ContentDoc` payload under the `post` slot when `main` changes and use `post.content.main`.
-- The change is intentionally breaking for internal callsites. All internal readers, mappers, editors, history payloads, seed factories, fixtures, and tests cut over in the same change.
+- Editorial PATCH endpoints emit history outbox payloads through the path-based protocol established by `replace-field-key-with-patch-paths`. Once both changes land, edits to `post.content.main` flow through that protocol identically to any other PATCH path; no `post.body` field key remains in either contract or runtime emission.
+- The change is intentionally breaking for internal callsites. All internal readers, mappers, editors, seed factories, fixtures, and tests cut over in the same change.
+- Depends on `replace-field-key-with-patch-paths` being archived first so that `Post.content` edits flow through the path-based PATCH/lock/history protocol rather than through the removed `UnitFieldKey` enum.

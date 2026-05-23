@@ -264,48 +264,25 @@ function extractText(doc: ContentDoc): string;
 
 The contract exposes `extractText` for the full document shape, but Meilisearch sync in this change derives `contentText` and `descriptionText` only from the supported `main` Markdown source. PostgreSQL never stores these projections.
 
-### Decision: History payload stores the full `ContentDoc` in the `post` slot
+### Decision: Lock and history semantics are delegated to `replace-field-key-with-patch-paths`
 
-The editorial revision payload slot vocabulary is unchanged (`unit`, `translations`, `extension`, `credits`, `subjects`, `tags`, `post`, `supportLanguages`). The `post` slot now carries the full `ContentDoc` payload directly:
+This change does not define lock keys, history payload shape, `changedFieldKeys`, or revision slot vocabulary for `Post.content` or rich descriptions. Those concerns are owned by the dependency change `replace-field-key-with-patch-paths`, which lands first and migrates the editorial regime to free-form PATCH paths with bidirectional prefix matching.
 
-```json
-{
-  "slots": {
-    "unit": { ... },
-    "translations": [ ... ],
-    "post": {
-      "schema": "rezics.content",
-      "version": 1,
-      "main":   { "type": "markdown", "source": "..." },
-      "slots":  { "infobox": { ... } },
-      "layout": [ ... ]
-    },
-    "credits": [ ... ]
-  }
-}
-```
+After both changes land, `Post.content` is reached by ordinary editorial PATCH paths:
 
-The legacy body string SHALL NOT appear in any new revision payload. Existing revisions ingested before this change retain their stored shape; the history service does not rewrite them in place.
+- `post.content` — the whole `ContentDoc`
+- `post.content.main` — the main content block
+- `post.content.main.source` — the main markdown source
+- `post.content.slots.<slotId>` — a specific slot (whenever the rendering follow-up activates slot editing)
+- `post.content.layout` — the layout list
+
+Lock targets on these paths use the bidirectional prefix matching defined in `editorial-patch-protocol`; history payloads contain whatever sparse PATCH sub-tree was submitted. No content-specific lock or history semantics are added in this change. Rich description PATCH paths follow the same model (`unitTranslation.description.main.source`, etc.).
 
 Rationale:
 
-- Same hash-dedup model still applies: identical `ContentDoc` payloads hash identically and share a single `RevisionContent` row.
-- Runtime v1 emits history only for supported main-content changes. Slot/layout-only changes may be persisted in `Post.content` but SHALL NOT produce slot/layout history keys in this change.
-- Restoring a revision means writing its `ContentDoc` back into `Post.content`; no body-to-content conversion is needed.
-
-### Decision: Field-key vocabulary uses content sub-paths
-
-The legacy `post.body` field key is replaced by content sub-path keys for both `UnitFieldLock` and `UnitRevision.changedFieldKeys`:
-
-| Key | Meaning |
-|-----|---------|
-| `post.content` | Whole post `ContentDoc` |
-| `post.content.main` | The `main` content block |
-| `post.content.slots.<slotId>` | Reserved for future slot support; not wired in this change |
-| `post.content.layout` | Reserved for future layout support; not wired in this change |
-| `*` | Whole-Unit lock (unchanged) |
-
-Description field keys follow the same pattern (e.g. `userProfile.description.main`, `unitTranslation.description.slots.<slotId>`) when those surfaces grow collaborative editing; this change introduces the vocabulary but only `post.content.main` is wired into existing locks/history. Slot/layout keys are contract-reserved for follow-up work.
+- The contract-reserved field-key approach that earlier drafts of this change considered (`post.content.slots.<slotId>`, `post.content.layout` as reserved enum values) was a compatibility hack against a closed enum; with the enum removed, the reservation is unnecessary.
+- Restore semantics are inherited from the editorial PATCH protocol: restoring a revision re-submits its stored PATCH sub-tree.
+- No editorial regime work specific to `ContentDoc` remains.
 
 ### Decision: Infobox stays inside `ContentDoc`, no separate column
 
@@ -324,7 +301,7 @@ If a future workload demonstrably needs cheap infobox-only fetches across many l
 - [Risk] Slot references are stored but not hydrated. -> Mitigation: runtime v1 does not render slots; follow-up rendering work wires `scanRefs` into batch hydration.
 - [Risk] Search text extraction misses slot content. -> Mitigation: intentional v1 boundary. Only `main` is searchable until slot rendering/search support is designed.
 - [Risk] Content JSON becomes accidental product metadata. -> Mitigation: specs state PostgreSQL product filtering MUST use typed columns/relations; Meilisearch projection MAY include descriptive content for full-text search only; `extra` is the side channel for non-rendered feature metadata.
-- [Risk] Removing `body` and changing description columns breaks broad callsites. -> Mitigation: this is a development-stage clear cut-over; contract, server mappers, app components, tests, history outbox, sync code, and seed factories update in the same change. Spec deltas for `wiki-post-editing`, `post-presentation-architecture`, `work-discussion`, and `type-extension-post` are included so no existing requirement contradicts the new shape.
+- [Risk] Removing `body` and changing description columns breaks broad callsites. -> Mitigation: this is a development-stage clear cut-over; contract, server mappers, app components, tests, sync code, and seed factories update in the same change. Spec deltas for `wiki-post-editing`, `post-presentation-architecture`, `work-discussion`, and `type-extension-post` are included so no existing requirement contradicts the new shape. Editorial PATCH/lock/history semantics for `post.content` come from the dependency change `replace-field-key-with-patch-paths`, not from this change.
 - [Risk] Opaque writes can persist malformed or unsupported non-main content. -> Mitigation: runtime ignores non-main content in this change; renderers and search stay main-only and tolerant.
 
 ## Migration Plan
@@ -335,9 +312,8 @@ If a future workload demonstrably needs cheap infobox-only fetches across many l
 4. Remove `Post.body` and string `description` columns from Prisma after migration data is copied.
 5. Update contract DTOs, server mappers, post / chapter / wiki / description APIs, app forms and renderers, and seed factories in the same cut-over. Create/update APIs persist full JSON while runtime services only interpret `main`.
 6. Update Meilisearch sync to derive `contentText` and `descriptionText` from supported `main` Markdown content only.
-7. Update history outbox writers so the `post` editorial slot carries the full submitted `ContentDoc` when `main` changes and `changedFieldKeys` uses `post.content.main`.
-8. Update authority field-key constants and lock checks for `post.content.main`; reserve slot/layout keys for follow-up work.
-9. Run Prisma generation, affected package tests, convention checks, and full reindex smoke tests.
+7. Confirm `replace-field-key-with-patch-paths` is archived; rely on its editorial PATCH protocol for `post.content` lock and history. No additional history outbox or authority field-key work is performed in this change.
+8. Run Prisma generation, affected package tests, convention checks, and full reindex smoke tests.
 
 Rollback strategy:
 

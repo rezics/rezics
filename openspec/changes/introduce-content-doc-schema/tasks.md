@@ -8,8 +8,7 @@
 - [ ] 1.6 Add `extractText(doc)` text projection helper. Cover `main` markdown source and every v1 slot type's text-bearing fields.
 - [ ] 1.7 Update post and chapter contracts to expose `content: ContentDoc` and remove `body` write/read shapes.
 - [ ] 1.8 Update `UnitTranslation` and user-profile contracts so `description` is a `ContentDoc` (or null). Keep `summary` and `bio` as plain strings.
-- [ ] 1.9 Update field-key constants: introduce supported runtime keys `post.content` and `post.content.main`; reserve `post.content.slots.<slotId>` and `post.content.layout` for future structured-content work. Remove `post.body` from new constant exports.
-- [ ] 1.10 Add contract/helper tests for: preferred valid ContentDoc; preferred-shape reporting for invalid schema/version and inline+layout mutual exclusivity; unit refs; unsupported slot preservation; `scanRefs` dedup and grouping; `extractText` coverage across slot types. These tests SHALL NOT imply recursive server write validation.
+- [ ] 1.9 Add contract/helper tests for: preferred valid ContentDoc; preferred-shape reporting for invalid schema/version and inline+layout mutual exclusivity; unit refs; unsupported slot preservation; `scanRefs` dedup and grouping; `extractText` coverage across slot types. These tests SHALL NOT imply recursive server write validation.
 
 ## 2. Database And Prisma
 
@@ -41,13 +40,11 @@
 - [ ] 5.3 Confirm no PostgreSQL column named `contentText` or `descriptionText` exists. Add a convention check or comment so future contributors do not add one.
 - [ ] 5.4 Add targeted Meili projection tests proving `main` markdown is indexed and slot/layout text is ignored by runtime v1.
 
-## 6. History And Authority
+## 6. Editorial PATCH Integration
 
-- [ ] 6.1 Update history outbox writers so the `post` editorial revision slot carries the full `ContentDoc` payload. Remove any code path that emits a legacy body string into the slot.
-- [ ] 6.2 Update history outbox `changedFieldKeys` emission to use `post.content.main` when supported main content changes. Remove `post.body` from new emissions; do not emit slot/layout keys in this change.
-- [ ] 6.3 Update history service / API client compare / restore helpers so the `post` slot is treated as a `ContentDoc`. Restore = write the stored `ContentDoc` back into `Post.content`.
-- [ ] 6.4 Update authority lock checks: replace `post.body` lock-key wiring with `post.content` and `post.content.main` checks derived from actual `main` changes. The `*` whole-Unit lock is unchanged; slot/layout locks are reserved but not enforced.
-- [ ] 6.5 Update history-service and authority tests so no test depends on `post.body`; add coverage that unchanged `main` does not trip main locks or create content history even if unsupported non-main JSON differs.
+- [ ] 6.1 Precondition: confirm `replace-field-key-with-patch-paths` is archived. Lock, history, and `changedFieldKeys` semantics for `post.content` PATCH paths come from that change; this change does not modify the editorial protocol.
+- [ ] 6.2 Update post / chapter / wiki / description PATCH input schemas so the canonical PATCH paths use `content` (and `description`) sub-trees consistent with the path vocabulary. Reviewers SHALL confirm no parallel paths exist for the same logical field.
+- [ ] 6.3 Add an integration test proving that an editorial PATCH on `post.content.main.source` flows through the path-based lock and history protocol exactly like any other PATCH path.
 
 ## 7. Validation
 
