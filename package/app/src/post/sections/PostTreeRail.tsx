@@ -10,6 +10,7 @@ import {
   TERMINAL_RAIL_HEIGHT_PX,
   THREAD_INDENT_PX,
 } from "./postTreeLayout";
+import * as m from "@rezics/i18n/messages";
 
 interface PostTreeRailProps {
   childrenNodes: PostTreeNodeModel[];
@@ -43,7 +44,7 @@ export function PostTreeRail({
       {canIndentChildren ? (
         <button
           type="button"
-          aria-label="Collapse thread"
+          aria-label={m.post_collapse_thread()}
           className="absolute z-10 cursor-pointer appearance-none border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-brand-fill focus-visible:outline-offset-1"
           style={{
             left: `${railLeftPx}px`,

@@ -8,6 +8,7 @@ import { PostCard } from "../components/item/PostCard";
 import { ReplyComposer } from "../forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
 import { PostTreeList } from "../sections/PostTreeList";
+import * as m from "@rezics/i18n/messages";
 
 export const ContinueThreadPage: React.FC = () => {
   const { rootPostUnitId, unitId } = useParams({ strict: false }) as {
@@ -28,7 +29,7 @@ export const ContinueThreadPage: React.FC = () => {
       <div className="mb-4">
         <Link to="/post/$rootPostUnitId" params={{ rootPostUnitId }}>
           <span className="text-xs text-text-brand">
-            ← Back to original thread
+            {m.post_back_to_original_thread()}
           </span>
         </Link>
       </div>

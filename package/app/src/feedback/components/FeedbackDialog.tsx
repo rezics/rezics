@@ -7,6 +7,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 import FeedbackForm from "./FeedbackForm";
 
 type FeedbackDialogProps = {
@@ -33,7 +34,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
     >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>提交反馈</DialogTitle>
+          <DialogTitle>{m.feedback_submit()}</DialogTitle>
         </DialogHeader>
         <Separator />
         <div className="pt-2">

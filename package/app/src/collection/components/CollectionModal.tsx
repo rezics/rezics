@@ -9,6 +9,7 @@ import {
   type SeedTagName,
   type SystemShelfKindKey,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -22,7 +23,6 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useCallback, useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 // Backlog/Active/Completed are reached only via progress-status side-effects
 // (`user-unit-progress` spec). Surfacing them as collectable targets in the
@@ -89,7 +89,7 @@ export function CollectionModal({
     if (shelf.kindKey === "favorites") {
       return m.shelf_system_favorites();
     }
-    return shelf.title ?? "Untitled";
+    return shelf.title ?? m.common_untitled();
   }, []);
 
   const toggleShelf = useCallback((shelfId: string) => {
@@ -109,7 +109,7 @@ export function CollectionModal({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-xs">
         <DialogHeader>
-          <DialogTitle>Collect</DialogTitle>
+          <DialogTitle>{m.collection_title()}</DialogTitle>
         </DialogHeader>
         <Separator />
         {isLoading ? (
@@ -125,7 +125,7 @@ export function CollectionModal({
                 className="cursor-pointer"
                 onClick={() => setFilterTag(null)}
               >
-                All
+                {m.common_all()}
               </Badge>
               {SEED_TAG_NAMES.map((name) => (
                 <Badge
@@ -143,7 +143,7 @@ export function CollectionModal({
             <ul className="flex flex-col">
               {filteredShelves.length === 0 ? (
                 <p className="text-sm text-text-secondary px-2">
-                  No shelves found
+                  {m.collection_no_shelves_found()}
                 </p>
               ) : (
                 filteredShelves.map((shelf) => {
@@ -159,12 +159,14 @@ export function CollectionModal({
                         <Checkbox
                           checked={selectedShelves.has(shelf.unitId)}
                           tabIndex={-1}
-                          aria-label={`Select ${displayTitle}`}
+                          aria-label={m.collection_select_shelf({
+                            title: displayTitle,
+                          })}
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm truncate">{displayTitle}</p>
                           <p className="text-xs text-text-secondary">
-                            {shelf.itemCount} items
+                            {m.shelf_items_count({ count: shelf.itemCount })}
                           </p>
                         </div>
                       </div>
@@ -180,23 +182,25 @@ export function CollectionModal({
                 <Checkbox
                   checked={independent}
                   onCheckedChange={(c) => setIndependent(c === true)}
-                  aria-label="Collect as independent unit"
+                  aria-label={m.collection_independent_unit()}
                 />
-                <span className="text-sm">Collect as independent unit</span>
+                <span className="text-sm">
+                  {m.collection_independent_unit()}
+                </span>
               </div>
             )}
           </div>
         )}
         <DialogFooter>
           <Button onClick={onClose} size="sm" variant="ghost">
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button
             onClick={handleSave}
             size="sm"
             disabled={isCollecting || selectedShelves.size === 0}
           >
-            {isCollecting ? "Saving..." : "Save"}
+            {isCollecting ? m.common_saving() : m.common_save()}
           </Button>
         </DialogFooter>
       </DialogContent>

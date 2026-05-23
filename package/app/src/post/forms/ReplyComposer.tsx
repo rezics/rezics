@@ -228,13 +228,13 @@ function RealmPostTagPicker({
         <Input
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="Search tags"
+          placeholder={m.tag_search_this()}
         />
         {trimmedSearch && (
           <div className="flex flex-wrap gap-2">
             {isSearching ? (
               <span className="text-sm leading-ui text-text-secondary">
-                Searching…
+                {m.page_shelf_searching()}
               </span>
             ) : searchResults.length > 0 ? (
               searchResults.map((tag) => (
@@ -251,7 +251,7 @@ function RealmPostTagPicker({
               ))
             ) : (
               <span className="text-sm leading-ui text-text-secondary">
-                No matching tags
+                {m.post_tag_picker_no_matches()}
               </span>
             )}
           </div>
@@ -268,7 +268,7 @@ export const ReplyComposer = forwardRef<
   const authGuard = useAuthGuard();
   const {
     mode,
-    placeholder = "Add a reply…",
+    placeholder = m.post_reply_placeholder(),
     autoFocus = false,
     onSubmitted,
     onCancelled,
@@ -378,7 +378,7 @@ export const ReplyComposer = forwardRef<
   if (invalidMode) {
     return (
       <div className="rounded-md bg-error-fill/10 p-3 text-sm leading-ui text-error-text">
-        Invalid composer configuration.
+        {m.post_composer_invalid_configuration()}
       </div>
     );
   }
@@ -440,14 +440,18 @@ export const ReplyComposer = forwardRef<
           onClick={handleCancel}
           disabled={mutation.isPending}
         >
-          Cancel
+          {m.common_cancel()}
         </Button>
         <Button
           size="sm"
           onClick={handleSubmit}
           disabled={mutation.isPending || !body.trim()}
         >
-          {mutation.isPending ? "Posting…" : isRealmPostMode ? "Post" : "Reply"}
+          {mutation.isPending
+            ? m.post_composer_posting()
+            : isRealmPostMode
+              ? m.post_composer_post()
+              : m.common_reply()}
         </Button>
       </div>
       {authGuard.AuthModal({})}

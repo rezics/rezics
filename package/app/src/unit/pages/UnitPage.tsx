@@ -53,7 +53,9 @@ export function UnitPageById({ unitId }: { unitId: string }) {
 
   if (isLoading) {
     return (
-      <div className="mt-8 text-center text-sm text-gray-500">Loading...</div>
+      <div className="mt-8 text-center text-sm text-gray-500">
+        {m.common_loading()}
+      </div>
     );
   }
 

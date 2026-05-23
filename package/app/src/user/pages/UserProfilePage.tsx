@@ -61,7 +61,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p>User not found</p>
+        <p>{m.user_not_found()}</p>
       </div>
     );
   }
@@ -85,7 +85,9 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               <div>
                 {user.joinDate && (
                   <p className="text-sm text-text-secondary">
-                    Joined on {new Date(user.joinDate).toLocaleDateString()}
+                    {m.user_joined_on({
+                      date: new Date(user.joinDate).toLocaleDateString(),
+                    })}
                   </p>
                 )}
                 {user.slug && (
@@ -116,7 +118,9 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           <div className="mt-6">
             {user.unitId && (
               <div className="mb-4">
-                <h6 className="text-base font-semibold mb-2">User ID</h6>
+                <h6 className="text-base font-semibold mb-2">
+                  {m.user_id_label()}
+                </h6>
                 <p className="text-sm text-text-secondary">{user.unitId}</p>
               </div>
             )}
@@ -130,13 +134,15 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             )}
             {user.bio && (
               <div className="mb-4">
-                <h6 className="text-base font-semibold mb-2">Bio</h6>
+                <h6 className="text-base font-semibold mb-2">
+                  {m.settings_profile_bio()}
+                </h6>
                 <p className="text-base">{user.bio}</p>
               </div>
             )}
             {!user.bio && (
               <p className="text-sm text-text-secondary italic">
-                No bio available
+                {m.user_no_bio_available()}
               </p>
             )}
           </div>
@@ -145,20 +151,22 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
       {(isCurrentUser || user.unitId === currentUser?.unitId) && (
         <Card className="shadow-lg rounded-2xl mt-4">
           <CardContent>
-            <h6 className="text-lg font-semibold inline-block">导航：</h6>
+            <h6 className="text-lg font-semibold inline-block">
+              {m.user_navigation_label()}
+            </h6>
             <Link to={`/user/me/bookmark`}>
               <Button variant="ghost" className="text-text-brand">
-                书签
+                {m.engagement_bookmark()}
               </Button>
             </Link>
             <Link to={`/user/me/follow`}>
               <Button variant="ghost" className="text-text-brand">
-                关注
+                {m.profile_tab_followers()}
               </Button>
             </Link>
             <Link to={`/user/me/reaction`}>
               <Button variant="ghost" className="text-text-brand">
-                反应
+                {m.profile_tab_reactions()}
               </Button>
             </Link>
           </CardContent>

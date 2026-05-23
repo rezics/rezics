@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
@@ -46,16 +47,16 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
           onSubmit={() => onSearch?.(search.query.keyword ?? "")}
-          placeholder={`Search books in ${zone.name}...`}
+          placeholder={m.zone_search_books_placeholder({ name: zone.name })}
         />
       </div>
 
       {/* Book sections */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Books</h2>
+        <h2 className="text-lg font-semibold mb-4">{m.zone_books_title()}</h2>
         {/* MOCK: book listing sections with zone.filters pre-applied will be wired here */}
         <p className="text-text-secondary">
-          Book content for this zone will appear here.
+          {m.zone_book_content_placeholder()}
         </p>
       </div>
     </div>

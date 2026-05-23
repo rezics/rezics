@@ -4,6 +4,7 @@ import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWith
 import { TextLink } from "@/shared/ui/link";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
+import * as m from "@rezics/i18n/messages";
 import { Route as tagBookRoute } from "@/routes/_mainLayout/tag/book/$bookId/route";
 import { TagWrapper } from "../components/TagWrapper";
 
@@ -30,10 +31,10 @@ export function TagByBookPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <AccentBarWithText text={`标签`} />
+      <AccentBarWithText text={m.tag_title()} />
 
-      {isLoading && <div>加载中…</div>}
-      {error && <div>加载失败</div>}
+      {isLoading && <div>{m.common_loading()}</div>}
+      {error && <div>{m.common_load_failed()}</div>}
 
       {!isLoading && !error && (
         <div className="mt-4">
@@ -49,7 +50,7 @@ export function TagByBookPage() {
         <div className="mt-4">
           <TextLink to="/tag/book/$bookId/tag" params={{ bookId }}>
             <span className="text-primary-600 hover:underline">
-              查看全部标签（{total}）
+              {m.tag_view_all({ count: total })}
             </span>
           </TextLink>
         </div>
@@ -89,10 +90,10 @@ export function TagByBookFullPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <AccentBarWithText text={`标签`} />
+      <AccentBarWithText text={m.tag_title()} />
 
-      {isLoading && <div>加载中…</div>}
-      {error && <div>加载失败</div>}
+      {isLoading && <div>{m.common_loading()}</div>}
+      {error && <div>{m.common_load_failed()}</div>}
 
       {!isLoading && !error && (
         <div className="mt-4">

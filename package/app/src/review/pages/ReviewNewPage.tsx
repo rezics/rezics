@@ -8,6 +8,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { ReviewForm, type ReviewEditState } from "@/review/forms/ReviewForm";
 import { useUserProfileStore } from "@/user/states";
+import * as m from "@rezics/i18n/messages";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const search = useRouterState({ select: (s) => s.location.search ?? "" });
@@ -75,9 +76,13 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">New {kind.toLowerCase()}</h1>
+        <h1 className="text-xl font-semibold">
+          {kind === PostKind.REMARK
+            ? m.remark_new_title()
+            : m.review_new_title()}
+        </h1>
         <div className="mt-4 flex flex-col gap-2">
-          <Label htmlFor="book-unit-id">Book Unit ID</Label>
+          <Label htmlFor="book-unit-id">{m.excerpt_book_unit_id()}</Label>
           <Input
             id="book-unit-id"
             className="w-full"
@@ -89,7 +94,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
           data={reviewData}
           setData={setReviewData}
           onSubmit={handleSave}
-          submitLabel={isPending ? "Submitting..." : "Submit"}
+          submitLabel={isPending ? m.common_submitting() : m.common_submit()}
         />
       </div>
     </div>

@@ -12,6 +12,7 @@ import {
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type React from "react";
 import { useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 /**
  * TagEdit - now creates/updates tags using the new translation-based model.
@@ -62,7 +63,7 @@ export const TagEdit: React.FC<TagEditProps> = ({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="tag-name" className="text-sm text-text-secondary">
-            名称
+            {m.common_name()}
           </Label>
           <Input
             id="tag-name"
@@ -74,7 +75,7 @@ export const TagEdit: React.FC<TagEditProps> = ({
 
         <div className="flex items-center gap-3">
           <Button type="submit" size="sm" disabled={busy}>
-            {isUpdate ? "保存修改" : "创建标签"}
+            {isUpdate ? m.common_save_changes() : m.tag_create()}
           </Button>
           {busy && <Spinner size="sm" />}
         </div>

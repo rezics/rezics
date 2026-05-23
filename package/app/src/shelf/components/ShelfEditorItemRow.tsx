@@ -3,6 +3,7 @@ import { Button, Checkbox } from "@rezics/ui/shadcn";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, MoveRight, Trash2 } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfItemRenderer } from "./ShelfItemRenderer";
 
@@ -65,7 +66,7 @@ export function ShelfEditorItemRow({
     controls = (
       <div className="flex h-8 w-8 items-center justify-center">
         <Checkbox
-          aria-label="Select for bulk action"
+          aria-label={m.shelf_select_for_bulk_action()}
           checked={selected ?? false}
           onCheckedChange={() => onToggleSelected?.(unitId)}
         />
@@ -77,7 +78,7 @@ export function ShelfEditorItemRow({
         {sortable && (
           <button
             type="button"
-            aria-label="Drag to reorder"
+            aria-label={m.shelf_drag_to_reorder()}
             className="p-1 rounded text-text-secondary hover:text-text-primary cursor-grab active:cursor-grabbing"
             {...attributes}
             {...listeners}
@@ -90,7 +91,7 @@ export function ShelfEditorItemRow({
             type="button"
             variant="ghost"
             size="sm"
-            aria-label="Move to another page"
+            aria-label={m.shelf_move_to_another_page()}
             onClick={() => onMoveCrossPage(unitId)}
           >
             <MoveRight className="h-4 w-4" />
@@ -101,7 +102,7 @@ export function ShelfEditorItemRow({
             type="button"
             variant="ghost"
             size="sm"
-            aria-label="Delete"
+            aria-label={m.common_delete()}
             onClick={() => onDelete(unitId)}
           >
             <Trash2 className="h-4 w-4" />

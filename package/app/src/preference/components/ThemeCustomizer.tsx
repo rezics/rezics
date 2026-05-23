@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -100,13 +101,13 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <PaletteIcon className="h-5 w-5" />
-              <DialogTitle>主题自定义</DialogTitle>
+              <DialogTitle>{m.theme_customizer_title()}</DialogTitle>
             </div>
             <Button
               size="icon"
               variant="ghost"
               onClick={onClose}
-              aria-label="Close"
+              aria-label={m.common_close()}
             >
               <CloseIcon className="h-4 w-4" />
             </Button>
@@ -116,7 +117,9 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
         <div className="flex flex-col gap-6">
           {/* 当前颜色预览 */}
           <div>
-            <p className="text-sm font-medium mb-2">当前主色调</p>
+            <p className="text-sm font-medium mb-2">
+              {m.theme_customizer_current_accent()}
+            </p>
             <div className="flex items-center gap-4">
               <div
                 className="h-12 w-12 rounded-md border-2 border-border-whisper"
@@ -126,14 +129,18 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 <p className="text-base font-medium">
                   {selectedColor.toUpperCase()}
                 </p>
-                <p className="text-sm text-text-secondary">静态主题</p>
+                <p className="text-sm text-text-secondary">
+                  {m.theme_customizer_static_theme()}
+                </p>
               </div>
             </div>
           </div>
 
           {/* 预设颜色 */}
           <div>
-            <p className="text-sm font-medium mb-2">预设颜色</p>
+            <p className="text-sm font-medium mb-2">
+              {m.theme_customizer_preset_colors()}
+            </p>
             <div className="grid grid-cols-6 gap-2">
               {PRESET_COLORS.map((color) => (
                 <TooltipProvider key={color}>
@@ -163,7 +170,9 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 
           {/* 自定义十六进制颜色 */}
           <div>
-            <p className="text-sm font-medium mb-2">自定义颜色</p>
+            <p className="text-sm font-medium mb-2">
+              {m.theme_customizer_custom_color()}
+            </p>
             <div className="flex items-center gap-2">
               {customHex && /^#[0-9A-F]{6}$/i.test(customHex) && (
                 <div
@@ -179,7 +188,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
               />
             </div>
             <p className="text-sm text-text-secondary mt-1">
-              输入格式: #RRGGBB
+              {m.theme_customizer_hex_format()}
             </p>
           </div>
         </div>
@@ -187,12 +196,12 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
         <DialogFooter>
           <Button variant="ghost" onClick={handleReset} className="gap-1">
             <RefreshIcon className="h-4 w-4" />
-            重置
+            {m.common_reset()}
           </Button>
           <Button variant="ghost" onClick={onClose}>
-            取消
+            {m.common_cancel()}
           </Button>
-          <Button onClick={handleApply}>应用</Button>
+          <Button onClick={handleApply}>{m.common_apply()}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -214,14 +223,14 @@ export const ThemeQuickToggle: React.FC = () => {
                 variant="ghost"
                 onClick={() => setOpen(true)}
                 className="!text-white"
-                aria-label="主题自定义"
+                aria-label={m.theme_customizer_title()}
                 {...props}
               >
                 <PaletteIcon className="h-5 w-5" />
               </Button>
             )}
           />
-          <TooltipContent>主题自定义</TooltipContent>
+          <TooltipContent>{m.theme_customizer_title()}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <ThemeCustomizer open={open} onClose={() => setOpen(false)} />

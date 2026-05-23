@@ -15,6 +15,7 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import type { FC } from "react";
+import * as m from "@rezics/i18n/messages";
 
 const REACTION_ICONS: Record<string, LucideIcon> = {
   like: ThumbsUp,
@@ -52,8 +53,6 @@ type ReceivedProps = {
 
 export type ReactionHistoryItemProps = GivenProps | ReceivedProps;
 
-const TARGET_DELETED_LABEL = "[deleted content]";
-
 export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
   const { mode, item } = props;
   const Icon = reactionIconFor(item.reaction);
@@ -75,7 +74,9 @@ export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
           {mode === "received" ? (
             <ReceivedActor actor={props.item.actor} />
           ) : (
-            <span className="text-text-secondary">Reacted with</span>
+            <span className="text-text-secondary">
+              {m.reactions_reacted_with()}
+            </span>
           )}
           <span className="text-text-primary capitalize">{item.reaction}</span>
           <span aria-hidden="true">·</span>
@@ -94,7 +95,7 @@ export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
           </SafeLink>
         ) : (
           <span className="text-sm text-text-tertiary italic">
-            {TARGET_DELETED_LABEL}
+            {m.reactions_deleted_content()}
           </span>
         )}
       </div>

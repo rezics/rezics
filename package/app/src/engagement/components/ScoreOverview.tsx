@@ -2,6 +2,7 @@ import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { scoreQueries } from "@rezics/api/score/score";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 
 interface ScoreOverviewProps {
   unitId: string;
@@ -18,7 +19,9 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
     aggregates?.find((a) => a.realm === realm) ?? aggregates?.[0];
 
   if (!aggregate) {
-    return <p className="text-sm text-text-secondary">No ratings yet</p>;
+    return (
+      <p className="text-sm text-text-secondary">{m.score_no_ratings()}</p>
+    );
   }
 
   const average =
@@ -40,7 +43,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
           {average.toFixed(1)}
         </div>
         <div className="text-xs text-text-secondary">
-          {aggregate.totalCount} ratings
+          {m.score_ratings_count({ count: aggregate.totalCount })}
         </div>
       </div>
 

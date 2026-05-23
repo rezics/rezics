@@ -7,6 +7,7 @@ import {
 import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,
@@ -23,10 +24,10 @@ function isSystemKindKey(
   );
 }
 
-const SORT_OPTIONS = [
-  { value: "createdAt:desc", label: "Newest" },
-  { value: "createdAt:asc", label: "Oldest" },
-];
+const SORT_OPTION_LABEL = {
+  "createdAt:desc": m.shelf_sort_newest,
+  "createdAt:asc": m.shelf_sort_oldest,
+} as const satisfies Record<string, () => string>;
 
 export const ShelvesTabSection: FC = () => {
   const { user, userId, isCurrentUser } = useProfileContext();
@@ -52,7 +53,9 @@ export const ShelvesTabSection: FC = () => {
     for (const s of shelves) {
       if (s.kindKey) kindSet.add(s.kindKey);
     }
-    const chips: ChipDefinition[] = [{ value: "all", label: "All" }];
+    const chips: ChipDefinition[] = [
+      { value: "all", label: m.search_category_all() },
+    ];
     for (const k of kindSet) {
       const label =
         isCurrentUser && isSystemKindKey(k) ? systemShelfKindLabel(k) : k;
@@ -79,8 +82,17 @@ export const ShelvesTabSection: FC = () => {
 
   const filterConfig: FilterBarConfig = {
     showSearch: true,
-    searchPlaceholder: "Search shelves...",
-    dropdowns: [{ key: "sort", label: "Sort", options: SORT_OPTIONS }],
+    searchPlaceholder: m.shelf_search_placeholder(),
+    dropdowns: [
+      {
+        key: "sort",
+        label: m.shelf_controls_sort_by(),
+        options: Object.entries(SORT_OPTION_LABEL).map(([value, label]) => ({
+          value,
+          label: label(),
+        })),
+      },
+    ],
   };
 
   return (
@@ -101,11 +113,11 @@ export const ShelvesTabSection: FC = () => {
 
       {isLoading ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          Loading...
+          {m.common_loading()}
         </p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          {filters.q ? "No shelves match your search" : "No shelves yet"}
+          {filters.q ? m.shelf_no_search_matches() : m.shelf_empty_yet()}
         </p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -128,7 +140,7 @@ const ShelfCard: FC<{
   isOwnerView: boolean;
   userSlug?: string;
 }> = ({ shelf, isOwnerView, userSlug }) => {
-  const dbTitle = shelf.translations?.[0]?.title ?? "Untitled Shelf";
+  const dbTitle = shelf.translations?.[0]?.title ?? m.shelf_untitled();
   const isSystemShelf = isSystemKindKey(shelf.kindKey);
   const title =
     isOwnerView && isSystemShelf
@@ -148,7 +160,9 @@ const ShelfCard: FC<{
         {title}
       </span>
       <div className="flex items-center justify-between mt-auto pt-2">
-        <span className="text-xs text-text-secondary">{itemCount} items</span>
+        <span className="text-xs text-text-secondary">
+          {m.shelf_items_count({ count: itemCount })}
+        </span>
         {shelf.kindKey && (
           <span className="text-xs text-text-secondary">{shelf.kindKey}</span>
         )}

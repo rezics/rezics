@@ -40,7 +40,7 @@ export const ReviewSearch: React.FC<ReviewSearchProps> = ({
         onPatch={(p) => patch(p)}
         onSubmit={onSubmit}
         middleware={middleware}
-        placeholder={keywordPlaceholder ?? "Search reviews..."}
+        placeholder={keywordPlaceholder ?? m.review_search_placeholder()}
       />
       <TagPicker
         value={tags.value ?? []}

@@ -4,6 +4,7 @@ import { Link, unitHref } from "@/shared/ui/link";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import FollowButton from "@/engagement/components/FollowButton";
 import {
   type ChipDefinition,
@@ -18,10 +19,14 @@ export const FollowersTabSection: FC = () => {
   const limit = 20;
 
   const chips: ChipDefinition[] = [
-    { value: "followers", label: "Followers", count: user.followersCount ?? 0 },
+    {
+      value: "followers",
+      label: m.profile_tab_followers(),
+      count: user.followersCount ?? 0,
+    },
     {
       value: "following",
-      label: "Following",
+      label: m.profile_following(),
       count: user.followingsCount ?? 0,
     },
   ];
@@ -62,13 +67,13 @@ export const FollowersTabSection: FC = () => {
 
       {isLoading ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          Loading...
+          {m.common_loading()}
         </p>
       ) : users.length === 0 ? (
         <p className="text-sm text-text-secondary py-12 text-center">
           {filter === "followers"
-            ? "No followers yet"
-            : "Not following anyone yet"}
+            ? m.profile_no_followers()
+            : m.profile_no_following()}
         </p>
       ) : (
         <>
@@ -91,10 +96,10 @@ export const FollowersTabSection: FC = () => {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
-                Previous
+                {m.common_previous_page()}
               </Button>
               <span className="text-sm text-text-secondary">
-                Page {page} of {totalPages}
+                {m.common_page_of({ page, total: totalPages })}
               </span>
               <Button
                 type="button"
@@ -103,7 +108,7 @@ export const FollowersTabSection: FC = () => {
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page >= totalPages}
               >
-                Next
+                {m.common_next_page()}
               </Button>
             </div>
           )}

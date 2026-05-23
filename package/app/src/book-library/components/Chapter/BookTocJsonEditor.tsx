@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import * as m from "@rezics/i18n/messages";
 
 /** Props for BookTocJsonEditor component. */
 interface BookTocJsonEditorProps {
@@ -42,13 +43,13 @@ export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
     console.log(value);
   }
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>{m.common_loading()}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div>
       <Alert variant="destructive" className="mb-2">
-        <AlertDescription>该功能暂未启用</AlertDescription>
+        <AlertDescription>{m.book_toc_disabled()}</AlertDescription>
       </Alert>
       <RezicsJsonEditor
         value={JSON.stringify(jsonData, null, 2)}

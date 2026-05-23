@@ -7,6 +7,7 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { withBookContentStructureOccurrences } from "../../models/bookContentStructurePath";
 import type { ChapterArboristRefHandle } from "./ChapterArborist";
 import { ChapterArborist } from "./ChapterArborist";
+import * as m from "@rezics/i18n/messages";
 
 /** Props for LinearChapterList component. */
 interface LinearChapterListProps {
@@ -45,7 +46,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   const arboristRef = useRef<ChapterArboristRefHandle | null>(null);
 
   if (!bookId) return null;
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>{m.common_loading()}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   return (
@@ -58,26 +59,26 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
               size="sm"
               onClick={() => arboristRef.current?.expandAll()}
             >
-              Expand All
+              {m.common_expand_all()}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => arboristRef.current?.collapseAll()}
             >
-              Collapse All
+              {m.common_collapse_all()}
             </Button>
           </div>
 
           <div className="flex flex-col gap-1 w-full">
-            <Label htmlFor="chapter-search">Search</Label>
+            <Label htmlFor="chapter-search">{m.common_search()}</Label>
             <Input
               id="chapter-search"
               value={searchTerm}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchTerm(e.target.value)
               }
-              placeholder="Enter search term"
+              placeholder={m.book_chapter_search_term_placeholder()}
               className="w-full"
             />
           </div>

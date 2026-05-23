@@ -7,6 +7,7 @@ import {
 } from "@rezics/icons";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 
 export type ReactionBarToolBoxProps = {
   open: boolean;
@@ -46,11 +47,11 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
             variant="outline"
             className="w-full"
           >
-            打开独立页面
+            {m.engagement_open_standalone_page()}
           </Button>
         </div>
         <div className="mt-2">
-          <div>Share</div>
+          <div>{m.common_share()}</div>
           <div>{itemUrl}</div>
           <div className="flex items-center gap-2 mt-2">
             <a

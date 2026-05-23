@@ -15,6 +15,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
 import { type FC, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },
@@ -97,12 +98,11 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
       <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
         <DialogContent className="sm:max-w-[640px]">
           <DialogHeader>
-            <DialogTitle>Token Created</DialogTitle>
+            <DialogTitle>{m.settings_tokens_created_title()}</DialogTitle>
           </DialogHeader>
           <Alert className="mb-4 text-warning-text">
             <AlertDescription>
-              Make sure to copy your token now. You won't be able to see it
-              again.
+              {m.settings_tokens_created_warning()}
             </AlertDescription>
           </Alert>
           <div className="flex items-center gap-2 p-3 rounded bg-surface-subtle font-mono text-sm break-all">
@@ -112,7 +112,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
               variant="ghost"
               className="h-8 w-8"
               onClick={handleCopy}
-              aria-label="Copy token"
+              aria-label={m.settings_tokens_copy()}
             >
               {copied ? (
                 <CheckIcon className="w-4 h-4 text-success-text" />
@@ -122,7 +122,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
             </Button>
           </div>
           <DialogFooter>
-            <Button onClick={handleClose}>Done</Button>
+            <Button onClick={handleClose}>{m.common_done()}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -133,7 +133,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
       <DialogContent className="sm:max-w-[640px]">
         <DialogHeader>
-          <DialogTitle>Generate New Token</DialogTitle>
+          <DialogTitle>{m.settings_tokens_generate()}</DialogTitle>
         </DialogHeader>
         {createToken.error && (
           <Alert variant="destructive" className="mb-4">
@@ -142,18 +142,18 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
         )}
         <div className="space-y-4 pt-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="token-name">Token Name</Label>
+            <Label htmlFor="token-name">{m.settings_tokens_name_label()}</Label>
             <Input
               id="token-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="e.g. CI Pipeline"
+              placeholder={m.settings_tokens_name_placeholder()}
             />
           </div>
 
           <div>
-            <p className="text-sm font-medium mb-2">Scopes</p>
+            <p className="text-sm font-medium mb-2">{m.common_scopes()}</p>
             <div className="flex flex-col gap-2">
               {AVAILABLE_SCOPES.map((s) => (
                 <div key={s.label} className="flex items-center gap-2">
@@ -169,7 +169,9 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="token-expiry">Expiration Date (optional)</Label>
+            <Label htmlFor="token-expiry">
+              {m.settings_tokens_expiration_optional()}
+            </Label>
             <Input
               id="token-expiry"
               type="date"
@@ -180,13 +182,15 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={handleClose}>
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button
             onClick={handleCreate}
             disabled={!name || createToken.isPending}
           >
-            {createToken.isPending ? "Creating..." : "Generate Token"}
+            {createToken.isPending
+              ? m.common_creating()
+              : m.settings_tokens_generate_action()}
           </Button>
         </DialogFooter>
       </DialogContent>

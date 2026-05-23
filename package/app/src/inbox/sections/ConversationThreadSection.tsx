@@ -1,4 +1,5 @@
 import {
+  dmKeys,
   useMessages,
   useSendDmMutation,
   type DmMessage,
@@ -6,6 +7,7 @@ import {
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type FC, type FormEvent } from "react";
+import * as m from "@rezics/i18n/messages";
 import { useAuthSessionStore } from "@/user/states";
 
 interface ConversationThreadSectionProps {
@@ -57,7 +59,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
     // updates. Optimistic append is best-effort (the canonical message
     // shape — id, createdAt — comes from the server).
     queryClient.invalidateQueries({
-      queryKey: ["dm", "messages", conversationId],
+      queryKey: dmKeys.messages(conversationId),
     });
   };
 
@@ -65,14 +67,18 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
     <div className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {isLoading && (
-          <p className="text-sm text-text-secondary">Loading messages…</p>
+          <p className="text-sm text-text-secondary">
+            {m.inbox_messages_loading()}
+          </p>
         )}
         {isError && (
-          <p className="text-sm text-destructive">Could not load messages.</p>
+          <p className="text-sm text-destructive">
+            {m.inbox_messages_load_failed()}
+          </p>
         )}
         {!isLoading && !isError && messages.length === 0 && (
           <p className="text-sm text-text-secondary">
-            No messages yet — say hi.
+            {m.inbox_messages_empty()}
           </p>
         )}
         <ol className="flex flex-col gap-2">
@@ -105,8 +111,8 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
         <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Write a message"
-          aria-label="Message"
+          placeholder={m.inbox_message_placeholder()}
+          aria-label={m.inbox_message_label()}
           disabled={sendMutation.isPending}
         />
         <Button
@@ -114,7 +120,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
           size="sm"
           disabled={sendMutation.isPending || draft.trim().length === 0}
         >
-          Send
+          {m.inbox_send()}
         </Button>
       </form>
     </div>

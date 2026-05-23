@@ -5,6 +5,7 @@ import { unitHref } from "@/shared/ui/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import {
   suggestCreditEligibility,
   suggestSubjectEligibility,
@@ -28,7 +29,7 @@ export function NewEntityPage() {
         }),
       });
     },
-    onError: (err) => setError(err.message || "Failed to create entity"),
+    onError: (err) => setError(err.message || m.entity_create_failed()),
   });
 
   const handleSubmit = (e: FormEvent) => {
@@ -36,7 +37,7 @@ export function NewEntityPage() {
     setError(null);
     const trimmed = title.trim();
     if (!trimmed) {
-      setError("Title is required");
+      setError(m.entity_title_required());
       return;
     }
     const payload: CreateEntityInput = {
@@ -53,38 +54,37 @@ export function NewEntityPage() {
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-semibold text-text-primary">
-        Declare a new entity
+        {m.entity_new_title()}
       </h1>
       <p className="mb-6 text-sm text-text-secondary">
-        Create an entity that you own — for example, your pen name or a project
-        you run. You can add translations and more details later.
+        {m.entity_new_description()}
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="entity-title">Title</Label>
+          <Label htmlFor="entity-title">{m.entity_title_label()}</Label>
           <Input
             id="entity-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Liu Cixin"
+            placeholder={m.entity_title_placeholder()}
             required
             autoFocus
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="entity-language">Language</Label>
+            <Label htmlFor="entity-language">{m.common_language()}</Label>
             <Input
               id="entity-language"
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              placeholder="en"
+              placeholder={m.language_code_placeholder()}
               required
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="entity-kind">Kind</Label>
+            <Label htmlFor="entity-kind">{m.entity_kind_label()}</Label>
             <select
               id="entity-kind"
               value={kind}
@@ -100,12 +100,12 @@ export function NewEntityPage() {
           </div>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="entity-avatar">Avatar URL</Label>
+          <Label htmlFor="entity-avatar">{m.entity_avatar_url()}</Label>
           <Input
             id="entity-avatar"
             value={avatar}
             onChange={(e) => setAvatar(e.target.value)}
-            placeholder="https://cdn.example/me.png"
+            placeholder={m.entity_avatar_person_placeholder()}
           />
         </div>
 
@@ -117,10 +117,10 @@ export function NewEntityPage() {
             variant="ghost"
             onClick={() => void navigate({ to: "/user/me/entities" })}
           >
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "Creating…" : "Create entity"}
+            {mutation.isPending ? m.common_creating() : m.entity_create()}
           </Button>
         </div>
       </form>

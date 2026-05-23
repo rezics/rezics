@@ -26,14 +26,14 @@ export function ReviewSearchPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">Search Reviews</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{m.review_search_title()}</h1>
 
       <div className="mb-6">
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
           onSubmit={() => setStart(0)}
-          placeholder="Search reviews..."
+          placeholder={m.review_search_placeholder()}
         />
       </div>
 

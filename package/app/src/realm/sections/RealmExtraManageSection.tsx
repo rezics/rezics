@@ -14,6 +14,7 @@ import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { toast } from "sonner";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
@@ -30,7 +31,7 @@ type TagSearchResult = {
 };
 
 function nodeLabel(node: TagTreeNode) {
-  return node.label?.trim() || node.tagId?.slice(0, 8) || "Untitled";
+  return node.label?.trim() || node.tagId?.slice(0, 8) || m.common_untitled();
 }
 
 function nodeKey(node: TagTreeNode) {
@@ -53,10 +54,10 @@ export const RealmExtraManageSection: React.FC<
     <section className="flex flex-col gap-6">
       <div>
         <h2 className="text-lg font-semibold leading-ui text-text-primary">
-          Forum settings
+          {m.realm_forum_settings()}
         </h2>
         <p className="mt-1 text-sm leading-body text-text-secondary">
-          Configure realm posting tags and public forum slots.
+          {m.realm_forum_settings_description()}
         </p>
       </div>
       <TagTreeEditor
@@ -121,7 +122,7 @@ function TagTreeEditor({
         key: "tagTree",
         value: nodes,
       });
-      toast.success("Tag tree saved");
+      toast.success(m.realm_tag_tree_saved());
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setError(message);
@@ -133,10 +134,10 @@ function TagTreeEditor({
     <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
       <div>
         <h3 className="text-sm font-medium leading-ui text-text-primary">
-          Tag tree
+          {m.realm_tag_tree()}
         </h3>
         <p className="mt-1 text-sm leading-body text-text-secondary">
-          Flat list with optional headers.
+          {m.realm_tag_tree_description()}
         </p>
       </div>
 
@@ -161,7 +162,7 @@ function TagTreeEditor({
                 updateNode(index, { ...node, disabled: !node.disabled })
               }
             >
-              {node.disabled ? "Disabled" : "Enabled"}
+              {node.disabled ? m.common_disabled() : m.common_enabled()}
             </Button>
             <Button
               type="button"
@@ -169,7 +170,7 @@ function TagTreeEditor({
               variant="ghost"
               onClick={() => moveNode(index, -1)}
             >
-              Up
+              {m.common_up()}
             </Button>
             <Button
               type="button"
@@ -177,7 +178,7 @@ function TagTreeEditor({
               variant="ghost"
               onClick={() => moveNode(index, 1)}
             >
-              Down
+              {m.common_down()}
             </Button>
             <Button
               type="button"
@@ -187,7 +188,7 @@ function TagTreeEditor({
                 setNodes((current) => current.filter((_, i) => i !== index))
               }
             >
-              Delete
+              {m.common_delete()}
             </Button>
           </div>
         ))}
@@ -198,7 +199,7 @@ function TagTreeEditor({
           <Input
             value={headerLabel}
             onChange={(event) => setHeaderLabel(event.target.value)}
-            placeholder="Header label"
+            placeholder={m.realm_header_label_placeholder()}
           />
           <Button
             type="button"
@@ -212,14 +213,14 @@ function TagTreeEditor({
               setHeaderLabel("");
             }}
           >
-            Add header
+            {m.realm_add_header()}
           </Button>
         </div>
         <div className="flex flex-col gap-2">
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search tags"
+            placeholder={m.tag_search_placeholder()}
           />
           {searchTerm && results.length > 0 && (
             <div className="flex flex-wrap gap-2">
@@ -249,7 +250,7 @@ function TagTreeEditor({
           <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
         )}
         <Button onClick={save} disabled={setValue.isPending}>
-          Save tag tree
+          {m.realm_save_tag_tree()}
         </Button>
       </div>
     </div>
@@ -287,7 +288,9 @@ function SlotPicker({
       } else {
         await clearValue.mutateAsync({ realmId, key: slotKey });
       }
-      toast.success(`${slotKey} saved`);
+      toast.success(
+        slotKey === "rule" ? m.realm_rule_saved() : m.realm_about_saved(),
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setError(message);
@@ -297,11 +300,13 @@ function SlotPicker({
 
   return (
     <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
-      <Label>{slotKey === "rule" ? "Rule post" : "About post"}</Label>
+      <Label>
+        {slotKey === "rule" ? m.realm_rule_post() : m.realm_about_post()}
+      </Label>
       <Input
         value={search}
         onChange={(event) => setSearch(event.target.value)}
-        placeholder="Search posts"
+        placeholder={m.post_search_placeholder()}
       />
       {searchTerm && data?.units?.length ? (
         <div className="flex flex-col gap-2">
@@ -321,7 +326,7 @@ function SlotPicker({
       ) : null}
       {selected && (
         <p className="text-sm leading-ui text-text-secondary">
-          Selected: {selected}
+          {m.common_selected_id({ id: selected })}
         </p>
       )}
       <div className="flex justify-end gap-2">
@@ -329,14 +334,14 @@ function SlotPicker({
           <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
         )}
         <Button type="button" variant="ghost" onClick={() => setSelected("")}>
-          Clear
+          {m.common_clear()}
         </Button>
         <Button
           type="button"
           onClick={save}
           disabled={setValue.isPending || clearValue.isPending}
         >
-          Save
+          {m.common_save()}
         </Button>
       </div>
     </div>
@@ -386,7 +391,7 @@ function BannerPicker({
       } else {
         await clearValue.mutateAsync({ realmId, key: "banner" });
       }
-      toast.success("Banner saved");
+      toast.success(m.realm_banner_saved());
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setError(message);
@@ -396,19 +401,19 @@ function BannerPicker({
 
   return (
     <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
-      <Label>Banner</Label>
+      <Label>{m.realm_banner()}</Label>
       <Input
         value={url}
         onChange={(event) => {
           setUrl(event.target.value);
           if (event.target.value.trim()) setPostId("");
         }}
-        placeholder="Direct image URL"
+        placeholder={m.realm_direct_image_url_placeholder()}
       />
       <Input
         value={search}
         onChange={(event) => setSearch(event.target.value)}
-        placeholder="Search posts"
+        placeholder={m.post_search_placeholder()}
       />
       {searchTerm && data?.units?.length ? (
         <div className="flex flex-col gap-2">
@@ -431,7 +436,7 @@ function BannerPicker({
       ) : null}
       {postId && (
         <p className="text-sm leading-ui text-text-secondary">
-          Selected post: {postId}
+          {m.realm_selected_post({ id: postId })}
         </p>
       )}
       <div className="flex justify-end gap-2">
@@ -446,14 +451,14 @@ function BannerPicker({
             setPostId("");
           }}
         >
-          Clear
+          {m.common_clear()}
         </Button>
         <Button
           type="button"
           onClick={save}
           disabled={setValue.isPending || clearValue.isPending}
         >
-          Save
+          {m.common_save()}
         </Button>
       </div>
     </div>

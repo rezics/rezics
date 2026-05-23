@@ -24,6 +24,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import {
   AddUnitTranslationLanguageDialog,
   UnitTranslationLanguageBar,
@@ -172,7 +173,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <div className="mb-10 flex flex-row items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Edit Entity</h1>
+        <h1 className="text-2xl font-semibold">{m.entity_edit_title()}</h1>
         <div className="flex flex-row items-center gap-2">
           <Button
             variant="ghost"
@@ -180,13 +181,13 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
               navigate({ to: "/entity/$unitId", params: { unitId } })
             }
           >
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button
             onClick={handleSave}
             disabled={!title.trim() || updateEntity.isPending}
           >
-            Save
+            {m.common_save()}
           </Button>
         </div>
       </div>
@@ -194,19 +195,21 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
       <div className="flex flex-col gap-12">
         <section>
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            Entity
+            {m.entity_section_entity()}
           </h2>
           <Separator className="mb-6" />
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="entity-kind">Kind</Label>
+              <Label htmlFor="entity-kind">{m.entity_kind_label()}</Label>
               <Select value={kind} onValueChange={setKind}>
                 <SelectTrigger id="entity-kind">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value={NO_KIND}>Unspecified</SelectItem>
+                    <SelectItem value={NO_KIND}>
+                      {m.entity_kind_unspecified()}
+                    </SelectItem>
                     {entityKinds.map((item) => (
                       <SelectItem key={item} value={item}>
                         {item}
@@ -217,7 +220,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
               </Select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="entity-slug">Slug</Label>
+              <Label htmlFor="entity-slug">{m.entity_slug_label()}</Label>
               <Input
                 id="entity-slug"
                 value={slug}
@@ -225,7 +228,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="entity-avatar">Avatar URL</Label>
+              <Label htmlFor="entity-avatar">{m.entity_avatar_url()}</Label>
               <Input
                 id="entity-avatar"
                 value={avatar}
@@ -241,14 +244,14 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
                 checked={verified}
                 onCheckedChange={(value) => setVerified(value === true)}
               />
-              Verified
+              {m.entity_verified()}
             </Label>
           </div>
         </section>
 
         <section>
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            Translation
+            {m.common_translation()}
           </h2>
           <Separator className="mb-6" />
           <div className="flex flex-col gap-6">
@@ -257,11 +260,11 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
               selectedLanguage={selectedLanguage}
               onSelect={setSelectedLanguage}
               onAddClick={() => setAddOpen(true)}
-              label="Language"
-              addLabel="Add translation"
+              label={m.common_language()}
+              addLabel={m.common_add_translation()}
             />
             <div className="flex flex-col gap-2">
-              <Label htmlFor="entity-title">Title</Label>
+              <Label htmlFor="entity-title">{m.entity_title_label()}</Label>
               <Input
                 id="entity-title"
                 value={title}
@@ -269,7 +272,9 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="entity-subtitle">Subtitle</Label>
+              <Label htmlFor="entity-subtitle">
+                {m.entity_subtitle_label()}
+              </Label>
               <Input
                 id="entity-subtitle"
                 value={subtitle}
@@ -277,7 +282,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="entity-summary">Summary</Label>
+              <Label htmlFor="entity-summary">{m.entity_summary_label()}</Label>
               <Textarea
                 id="entity-summary"
                 value={summary}
@@ -286,7 +291,9 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="entity-description">Description</Label>
+              <Label htmlFor="entity-description">
+                {m.entity_description_label()}
+              </Label>
               <Textarea
                 id="entity-description"
                 value={description}
@@ -303,10 +310,10 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
         existingLanguages={editableLanguages}
         onClose={() => setAddOpen(false)}
         onSubmit={handleAddLanguage}
-        title="Add translation"
-        languageLabel="Language"
-        cancelLabel="Cancel"
-        submitLabel="Add"
+        title={m.common_add_translation()}
+        languageLabel={m.common_language()}
+        cancelLabel={m.common_cancel()}
+        submitLabel={m.common_add()}
       />
     </div>
   );

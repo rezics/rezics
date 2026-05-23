@@ -30,3 +30,16 @@
 - Newly filled `ko` values and missing `zh-hans`/`ja`/`de` values currently use
   the English base text where no existing localized value was present. They are
   explicit catalog entries, so missing keys no longer fall back at runtime.
+- `package/app/src/playground/**`, `package/app/src/stories/**`, and
+  `*.stories.tsx` were reviewed as demo-only surfaces. Remaining literals there
+  are fixture names, Storybook controls, mock content, or playground safety
+  probes, not production UI copy.
+- Remaining broad app hard-coded-copy scan hits outside stories are technical
+  literals or content placeholders: decorative empty `alt`, rating suffixes
+  such as `/10`, `JSON` mode labels, MDX Storybook metadata, brand text
+  `REZICS`, route/query keys, and playground-only theme demo labels.
+- The fallback-string scan still reports content-data fallbacks, test/demo
+  fixtures, placeholders for editable user/content fields, CSS/color fallback
+  values, route defaults, protocol/MIME defaults, and technical sentinel text.
+  Static UI-copy fallbacks found during the sweep were moved to catalog
+  messages.

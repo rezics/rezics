@@ -17,6 +17,7 @@ import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { cn } from "@/shared/utils/css-util";
 import { remarkCardActions, remarkPolicy } from "../../models/remarkPolicy";
+import * as m from "@rezics/i18n/messages";
 
 interface RemarkRatingBadgeProps {
   remark: PostDTO;
@@ -52,7 +53,9 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
             </TextLink>
           )}
         />
-        <TooltipContent side="top">阅读完整评测</TooltipContent>
+        <TooltipContent side="top">
+          {m.remark_open_remark_page()}
+        </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );

@@ -1,4 +1,5 @@
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 import { useThreadingHover } from "./ThreadingContext";
 
 export interface ThreadingRailProps {
@@ -136,7 +137,9 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
       {onToggleCollapse && showLine ? (
         <button
           type="button"
-          aria-label={isCollapsed ? "Expand thread" : "Collapse thread"}
+          aria-label={
+            isCollapsed ? m.post_expand_thread() : m.post_collapse_thread()
+          }
           onClick={handleClick}
           onMouseEnter={() => handleHoverChange(true)}
           onMouseLeave={() => handleHoverChange(false)}

@@ -2,6 +2,7 @@ import { Badge, Button } from "@rezics/ui/shadcn";
 import type { SearchQuery, TagRef } from "@rezics/contract";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 
 export type { ChipDescriptor as AppliedFilterChipDescriptor };
 
@@ -77,7 +78,7 @@ function buildChips(
     for (const type of visibleTypes) {
       out.push({
         key: `type:${type}`,
-        label: `Type: ${type}`,
+        label: m.search_chip_type({ value: type }),
         remove: { type: (query.type ?? []).filter((t) => t !== type) },
       });
     }
@@ -89,7 +90,7 @@ function buildChips(
     for (const kind of visibleKinds) {
       out.push({
         key: `postKind:${kind}`,
-        label: `Post: ${kind}`,
+        label: m.search_chip_post_kind({ value: kind }),
         remove: {
           postKind: (query.postKind ?? []).filter(
             (k) => k !== kind,
@@ -104,7 +105,7 @@ function buildChips(
     for (const lang of visibleLangs) {
       out.push({
         key: `lang:${lang}`,
-        label: `Lang: ${lang}`,
+        label: m.search_chip_language({ value: lang }),
         remove: {
           languages: (query.languages ?? []).filter((l) => l !== lang),
         },
@@ -119,7 +120,7 @@ function buildChips(
   ) {
     out.push({
       key: `realm:${query.realm.slug}`,
-      label: `In: ${query.realm.slug}`,
+      label: m.search_chip_realm({ value: query.realm.slug }),
       remove: { realm: undefined },
     });
   }
@@ -130,7 +131,7 @@ function buildChips(
       if (hiddenRatings.has(tier)) continue;
       out.push({
         key: `rating:${tier}`,
-        label: `Rating: ${tier}`,
+        label: m.search_chip_rating({ value: tier }),
         remove: {
           ratings: query.ratings.filter((r) => r !== tier),
         },
@@ -145,7 +146,9 @@ function buildChips(
   ) {
     out.push({
       key: `licensed:${query.isLicensed}`,
-      label: `Licensed: ${query.isLicensed ? "Yes" : "No"}`,
+      label: m.search_chip_licensed({
+        value: query.isLicensed ? m.common_yes() : m.common_no(),
+      }),
       remove: { isLicensed: undefined },
     });
   }
@@ -158,7 +161,7 @@ function buildChips(
     ].join("–");
     out.push({
       key: `textLength:${bounds}`,
-      label: `Words: ${bounds}`,
+      label: m.search_chip_words({ value: bounds }),
       remove: { textLength: undefined },
     });
   }
@@ -166,7 +169,7 @@ function buildChips(
   if (query.sort && !rendered.has("sort") && !hide.sort) {
     out.push({
       key: `sort:${query.sort}`,
-      label: `Sort: ${query.sort}`,
+      label: m.search_chip_sort({ value: query.sort }),
       remove: { sort: undefined },
     });
   }
@@ -197,7 +200,7 @@ export const AppliedFilterChips: React.FC<AppliedFilterChipsProps> = ({
               size="icon"
               variant="ghost"
               className="h-4 w-4 p-0"
-              aria-label="remove"
+              aria-label={m.common_remove()}
               onClick={() => onRemove(chip.remove as Partial<SearchQuery>)}
             >
               <CloseIcon size={12} />

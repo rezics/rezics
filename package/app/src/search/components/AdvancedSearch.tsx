@@ -63,7 +63,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
             size="icon"
             variant="ghost"
             onClick={onToggleBasic}
-            aria-label="close advanced"
+            aria-label={m.search_close_advanced_label()}
           >
             <CloseIcon />
           </Button>

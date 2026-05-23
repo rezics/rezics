@@ -13,6 +13,7 @@ import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 type FeedbackFormProps = {
   defaultValues?: Partial<CreateFeedbackInput>;
@@ -21,12 +22,12 @@ type FeedbackFormProps = {
 
 const typeOptions: {
   value: NonNullable<CreateFeedbackInput["type"]>;
-  label: string;
+  label: () => string;
 }[] = [
-  { value: "BUG", label: "问题/缺陷" },
-  { value: "FEATURE", label: "功能建议" },
-  { value: "REPORT", label: "内容相关" },
-  { value: "OTHER", label: "其他" },
+  { value: "BUG", label: m.feedback_type_bug },
+  { value: "FEATURE", label: m.feedback_type_feature },
+  { value: "REPORT", label: m.feedback_type_report },
+  { value: "OTHER", label: m.feedback_type_other },
 ];
 
 const FeedbackForm: React.FC<FeedbackFormProps> = ({
@@ -89,7 +90,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <Label htmlFor="feedback-type">反馈类型</Label>
+          <Label htmlFor="feedback-type">{m.feedback_type_label()}</Label>
           <Select
             value={form.type ?? "BUG"}
             onValueChange={(v) => handleChange("type", v)}
@@ -100,7 +101,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
             <SelectContent>
               {typeOptions.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {opt.label()}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -108,10 +109,10 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label htmlFor="feedback-content">详细内容</Label>
+          <Label htmlFor="feedback-content">{m.feedback_content_label()}</Label>
           <textarea
             id="feedback-content"
-            placeholder="请提供详细描述、复现步骤或预期效果"
+            placeholder={m.feedback_content_placeholder()}
             rows={4}
             value={form.content}
             onChange={(e) => handleChange("content", e.target.value)}
@@ -122,20 +123,24 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
             }
           />
           {errors.content && (
-            <p className="text-sm text-error-text">请填写详细内容</p>
+            <p className="text-sm text-error-text">
+              {m.feedback_content_required()}
+            </p>
           )}
         </div>
 
         {createMutation.status === "error" && (
-          <p className="text-error-text">提交失败，请稍后重试。</p>
+          <p className="text-error-text">{m.feedback_submit_failed()}</p>
         )}
 
         <div className="flex flex-row gap-4 justify-end">
           <Button variant="outline" type="button" onClick={resetForm}>
-            重置
+            {m.common_reset()}
           </Button>
           <Button type="submit" disabled={createMutation.status === "pending"}>
-            {createMutation.status === "pending" ? "提交中..." : "提交反馈"}
+            {createMutation.status === "pending"
+              ? m.common_submitting()
+              : m.feedback_submit()}
           </Button>
         </div>
       </div>

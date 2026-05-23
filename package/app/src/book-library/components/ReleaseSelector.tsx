@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import * as m from "@rezics/i18n/messages";
 
 export type ReleaseOption = {
   unitId: string;
@@ -95,7 +96,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
             r.translations,
             selectedLang,
             r.defaultLanguage ?? undefined,
-          )?.title ?? "Untitled release",
+          )?.title ?? m.book_release_untitled(),
         language: String(lang),
         isOfficial: officialByLang.get(String(lang)) === r.unitId,
       });
@@ -109,7 +110,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
             bookInfo.translations,
             selectedLang,
             bookInfo.defaultLanguage ?? undefined,
-          )?.title ?? "Current",
+          )?.title ?? m.book_release_current(),
         language:
           (bookInfo.defaultLanguage as string | undefined) ?? selectedLang,
         isOfficial:
@@ -125,7 +126,9 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
 
   return (
     <div className="flex flex-row items-center gap-2">
-      <span className="text-sm text-text-secondary">Release</span>
+      <span className="text-sm text-text-secondary">
+        {m.book_release_label()}
+      </span>
       <Select value={selectedReleaseUnitId} onValueChange={(v) => onSelect(v)}>
         <SelectTrigger className="min-w-[260px]">
           <SelectValue />
@@ -141,7 +144,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
                     variant="outline"
                     className="text-brand-fill border-brand-fill"
                   >
-                    official
+                    {m.realm_official()}
                   </Badge>
                 )}
               </div>

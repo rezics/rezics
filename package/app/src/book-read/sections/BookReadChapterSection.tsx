@@ -143,7 +143,7 @@ export const BookReadChapterPage: React.FC = () => {
     }
   };
 
-  if (!emptyChapterPath && isPending) return <div>Loading...</div>;
+  if (!emptyChapterPath && isPending) return <div>{m.common_loading()}</div>;
   if (isError) return <QueryErrorDisplay error={error} />;
 
   return (
@@ -166,14 +166,8 @@ export const BookReadChapterPage: React.FC = () => {
       </div>
       {emptyChapterPath ? (
         <div className="max-w-prose text-text-secondary leading-relaxed">
-          <p>
-            This chapter is listed in the table of contents but has no saved
-            content yet.
-          </p>
-          <p className="mt-3">
-            You can still open chapter actions for content, discussion, reviews,
-            and reading progress.
-          </p>
+          <p>{m.book_read_empty_chapter_description()}</p>
+          <p className="mt-3">{m.book_read_empty_chapter_actions_hint()}</p>
           <Button
             type="button"
             variant="outline"

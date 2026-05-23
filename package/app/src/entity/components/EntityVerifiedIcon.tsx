@@ -1,4 +1,5 @@
 import { BadgeCheck } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 
 interface EntityVerifiedIconProps {
   verified?: boolean | null;
@@ -10,7 +11,7 @@ export function EntityVerifiedIcon({ verified }: EntityVerifiedIconProps) {
   return (
     <BadgeCheck
       className="h-4 w-4 text-text-brand"
-      aria-label="Verified entity"
+      aria-label={m.entity_verified()}
     />
   );
 }

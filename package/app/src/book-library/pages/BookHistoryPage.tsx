@@ -1072,9 +1072,10 @@ function actorLabel(
   actor: HistoryActorResolution | undefined,
   fallback: string,
 ) {
-  if (!actor) return fallback && !isUuid(fallback) ? fallback : "Unknown actor";
+  if (!actor)
+    return fallback && !isUuid(fallback) ? fallback : m.history_unknown_actor();
   if (actor.status !== "OK") return actor.status.toLowerCase();
-  return actor.displayName ?? actor.handle ?? "Unknown actor";
+  return actor.displayName ?? actor.handle ?? m.history_unknown_actor();
 }
 
 function referenceLabel(reference: {

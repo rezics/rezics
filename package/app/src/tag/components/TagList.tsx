@@ -3,6 +3,7 @@ import { Badge } from "@rezics/ui/shadcn";
 import type { UnitTagDTO } from "@rezics/contract";
 import type React from "react";
 import { useCallback, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import { TagDetailCard } from "./TagCards";
 
@@ -84,7 +85,7 @@ export const TagList: React.FC<{
   if (tags.length === 0) {
     return (
       <div className={className}>
-        <p className="text-sm text-text-secondary">暂无标签</p>
+        <p className="text-sm text-text-secondary">{m.tag_empty()}</p>
       </div>
     );
   }

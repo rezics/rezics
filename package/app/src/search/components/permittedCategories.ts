@@ -1,4 +1,5 @@
 import type { SearchCategory, SearchScope } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 
 export const ALL_CATEGORIES: readonly SearchCategory[] = [
   "all",
@@ -14,19 +15,19 @@ export const ALL_CATEGORIES: readonly SearchCategory[] = [
   "entities",
 ];
 
-export const CATEGORY_LABELS: Record<SearchCategory, string> = {
-  all: "All",
-  mixed: "Mixed",
-  books: "Books",
-  reviews: "Reviews",
-  excerpts: "Excerpts",
-  remarks: "Remarks",
-  posts: "Posts",
-  shelves: "Shelves",
-  realms: "Realms",
-  users: "Users",
-  entities: "Entities",
-};
+export const CATEGORY_LABELS = {
+  all: m.search_category_all,
+  mixed: m.search_category_mixed,
+  books: m.search_category_books,
+  reviews: m.search_category_reviews,
+  excerpts: m.search_category_excerpts,
+  remarks: m.search_category_remarks,
+  posts: m.search_category_posts,
+  shelves: m.search_category_shelves,
+  realms: m.search_category_realms,
+  users: m.search_category_users,
+  entities: m.search_category_entities,
+} as const satisfies Record<SearchCategory, () => string>;
 
 export function permittedCategoriesForScope(
   scope: SearchScope,

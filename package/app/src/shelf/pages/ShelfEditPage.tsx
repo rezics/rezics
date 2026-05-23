@@ -22,6 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useBlocker, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
@@ -37,8 +38,8 @@ function normalizeViewMode(raw: unknown): ShelfView {
 }
 
 const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
-  { value: "nested", label: "Nested" },
-  { value: "flat", label: "Flat" },
+  { value: "nested", label: m.shelf_view_nested() },
+  { value: "flat", label: m.shelf_view_flat() },
   // { value: "masonry", label: "Masonry" },
 ];
 
@@ -107,7 +108,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   useBlocker({
     shouldBlockFn: () => {
       if (!isDirty) return false;
-      return !window.confirm("You have unsaved changes. Leave anyway?");
+      return !window.confirm(m.shelf_unsaved_changes_confirm());
     },
     enableBeforeUnload: () => isDirty,
   });
@@ -142,19 +143,19 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Back to shelf"
+          aria-label={m.shelf_back_to_shelf()}
           onClick={() =>
             navigate({ to: "/shelf/$shelfId", params: { shelfId } })
           }
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-2xl font-semibold">Edit Shelf</h1>
+        <h1 className="text-2xl font-semibold">{m.shelf_edit_title()}</h1>
       </div>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-shelf-title">Title</Label>
+          <Label htmlFor="edit-shelf-title">{m.shelf_title_label()}</Label>
           <Input
             id="edit-shelf-title"
             value={title}
@@ -162,7 +163,9 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-shelf-description">Description</Label>
+          <Label htmlFor="edit-shelf-description">
+            {m.shelf_description_label()}
+          </Label>
           <textarea
             id="edit-shelf-description"
             value={description}
@@ -172,7 +175,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-shelf-cover">Cover Image URL</Label>
+          <Label htmlFor="edit-shelf-cover">{m.shelf_cover_url_label()}</Label>
           <Input
             id="edit-shelf-cover"
             value={coverUrl}
@@ -180,7 +183,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label>Content type</Label>
+          <Label>{m.shelf_content_type_label()}</Label>
           <SeedTagChipGroup
             value={pinnedTagIds}
             onChange={handlePinnedTagsChange}
@@ -189,12 +192,14 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           {setPinnedTagsMutation.isError && (
             <span className="text-xs text-error-text">
               {setPinnedTagsMutation.error?.message ??
-                "Failed to update content type"}
+                m.shelf_content_type_update_failed()}
             </span>
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-shelf-default-view">Default view</Label>
+          <Label htmlFor="edit-shelf-default-view">
+            {m.shelf_default_view_label()}
+          </Label>
           <Select<ShelfView>
             value={defaultViewMode}
             onValueChange={(value) =>
@@ -204,7 +209,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
             <SelectTrigger id="edit-shelf-default-view" className="w-full">
               <SelectValue>
                 {VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode)
-                  ?.label ?? "Nested"}
+                  ?.label ?? m.shelf_view_nested()}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -216,7 +221,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
             </SelectContent>
           </Select>
           <span className="text-xs text-text-secondary">
-            The shelf detail page opens in this view by default.
+            {m.shelf_default_view_help()}
           </span>
         </div>
         <div className="flex flex-row justify-end gap-4">
@@ -226,13 +231,13 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
               navigate({ to: "/shelf/$shelfId", params: { shelfId } })
             }
           >
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button
             onClick={handleSave}
             disabled={updateMutation.isPending || !metadataDirty}
           >
-            Save
+            {m.common_save()}
           </Button>
         </div>
 

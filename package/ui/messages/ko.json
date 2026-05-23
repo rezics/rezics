@@ -1,5 +1,7 @@
 {
   "ui_password_label": "Password",
   "ui_password_help": "Password must contain at least 8 characters.",
-  "ui_pagination_tips": "Pagination"
+  "ui_pagination_tips": "Pagination",
+  "ui_password_show": "Show password",
+  "ui_password_hide": "Hide password"
 }

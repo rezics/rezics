@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
 
 import { UserHoverPreview } from "@/user/components";
+import * as m from "@rezics/i18n/messages";
 
 interface PostAuthorHeaderProps {
   post: PostDTO;
@@ -81,7 +82,7 @@ export function PostAuthorAvatar({
 
   return (
     <Avatar className={avatarClassName}>
-      <AvatarImage alt="Anonymous avatar" />
+      <AvatarImage alt={m.post_anonymous_avatar_alt()} />
       <AvatarFallback>?</AvatarFallback>
     </Avatar>
   );
@@ -108,11 +109,11 @@ function AnonymousAuthor({
             .filter(Boolean)
             .join(" ")}
         >
-          <AvatarImage alt="Anonymous avatar" />
+          <AvatarImage alt={m.post_anonymous_avatar_alt()} />
           <AvatarFallback>?</AvatarFallback>
         </Avatar>
       ) : null}
-      <span className={nameClassName}>Anonymous</span>
+      <span className={nameClassName}>{m.post_anonymous_author()}</span>
     </span>
   );
 }

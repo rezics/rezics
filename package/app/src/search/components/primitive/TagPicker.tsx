@@ -3,6 +3,7 @@ import type { TagRef } from "@rezics/contract";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { useTagSuggest } from "../../hooks/useTagSuggest";
 
 export type TagPickerProps = {
@@ -102,7 +103,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                 size="icon"
                 variant="ghost"
                 className="h-4 w-4 p-0"
-                aria-label="remove tag"
+                aria-label={m.tag_clear()}
                 onClick={() => removeTag(tagIdentity(tag))}
               >
                 <CloseIcon size={12} />

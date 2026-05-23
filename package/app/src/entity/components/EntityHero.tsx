@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { Pencil } from "lucide-react";
+import * as m from "@rezics/i18n/messages";
 import { EntityAvatar } from "./EntityAvatar";
 import { EntityKindBadge } from "./EntityKindBadge";
 import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
@@ -46,7 +47,7 @@ export function EntityHero({
           <EntityVerifiedIcon verified={entity.verified} />
           {canEdit ? (
             <Link to="/entity/$unitId/edit" params={{ unitId: entity.unitId }}>
-              <Button variant="ghost" size="icon" aria-label="Edit entity">
+              <Button variant="ghost" size="icon" aria-label={m.entity_edit()}>
                 <Pencil data-icon="icon" />
               </Button>
             </Link>

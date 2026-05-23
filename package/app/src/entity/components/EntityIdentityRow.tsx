@@ -3,6 +3,7 @@ import type {
   EntityKind,
   UnitTranslationDTO,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import { EntityAvatar } from "./EntityAvatar";
 import { EntityKindBadge } from "./EntityKindBadge";
@@ -27,7 +28,7 @@ interface EntityIdentityRowProps {
 
 export function getEntityIdentityTitle(
   entity?: EntityIdentity | EntityDTO | null,
-  fallbackTitle = "Untitled entity",
+  fallbackTitle = m.entity_untitled(),
 ) {
   const title = entity?.translations?.[0]?.title?.trim();
   return title || fallbackTitle;

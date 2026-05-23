@@ -4,6 +4,7 @@ import { unitHref } from "@/shared/ui/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 export function NewRealmPage() {
   const navigate = useNavigate();
@@ -29,10 +30,10 @@ export function NewRealmPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">New Realm</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{m.realm_new_title()}</h1>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-realm-name">Name</Label>
+          <Label htmlFor="new-realm-name">{m.common_name()}</Label>
           <Input
             id="new-realm-name"
             value={title}
@@ -40,7 +41,9 @@ export function NewRealmPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-realm-description">Description</Label>
+          <Label htmlFor="new-realm-description">
+            {m.common_description()}
+          </Label>
           <textarea
             id="new-realm-description"
             value={description}
@@ -54,7 +57,7 @@ export function NewRealmPage() {
             onClick={handleCreate}
             disabled={!title || createMutation.isPending}
           >
-            Create
+            {m.common_create()}
           </Button>
         </div>
       </div>

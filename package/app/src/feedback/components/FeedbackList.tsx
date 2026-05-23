@@ -13,6 +13,7 @@ import type {
   FeedbackDTO,
   FeedbackType,
 } from "@rezics/api/feedback/feedback.types";
+import * as m from "@rezics/i18n/messages";
 import { buildMeiliFeedbackQuery } from "@rezics/api/meili/meili.queries";
 import {
   UniversalPaginator,
@@ -57,6 +58,19 @@ const typeBadgeClass: Record<FeedbackDTO["type"], string> = {
 
 const EXTERNAL_PAGE_SIZE = 50;
 
+const getFeedbackTypeLabel = (type: FeedbackDTO["type"]) => {
+  switch (type) {
+    case "BUG":
+      return m.feedback_type_bug();
+    case "FEATURE":
+      return m.feedback_type_feature();
+    case "REPORT":
+      return m.feedback_type_report();
+    case "OTHER":
+      return m.feedback_type_other();
+  }
+};
+
 const FeedbackList: React.FC<FeedbackListProps> = ({
   queryType,
   userId,
@@ -98,7 +112,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
 
   const handleResolve = (id: string) => {
     resolveMutation.mutate({ id, resolved: true });
-    showAlert("反馈已解决");
+    showAlert(m.feedback_resolve_success());
   };
 
   const activeResult =
@@ -187,7 +201,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
     <div>
       {isError && (
         <p className="text-sm text-error-text px-2 py-1">
-          加载反馈失败，请稍后重试。
+          {m.feedback_load_failed()}
         </p>
       )}
 
@@ -215,21 +229,25 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                   <div className="flex flex-row items-center justify-between gap-2 mb-1">
                     <div className="flex flex-row items-center gap-2 flex-wrap">
                       <Badge className={typeBadgeClass[item.type]}>
-                        {item.type}
+                        {getFeedbackTypeLabel(item.type)}
                       </Badge>
-                      <p className="text-sm font-medium">反馈 #{item.id}</p>
+                      <p className="text-sm font-medium">
+                        {m.feedback_item_id({ id: item.id })}
+                      </p>
                       {item.unitId && (
-                        <Badge variant="outline">单元 {item.unitId}</Badge>
+                        <Badge variant="outline">
+                          {m.feedback_unit_id({ id: item.unitId })}
+                        </Badge>
                       )}
                       {item.resolved ? (
                         <Badge className="bg-success-fill text-white inline-flex items-center gap-1">
                           <DoneIcon className="h-3 w-3" />
-                          已解决
+                          {m.feedback_status_resolved()}
                         </Badge>
                       ) : (
                         <Badge className="bg-warning-fill text-white inline-flex items-center gap-1">
                           <HourglassEmptyIcon className="h-3 w-3" />
-                          待处理
+                          {m.feedback_status_unresolved()}
                         </Badge>
                       )}
                     </div>
@@ -246,7 +264,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                                       size="icon"
                                       variant="ghost"
                                       disabled={resolveMutation.isPending}
-                                      aria-label="标记为已解决"
+                                      aria-label={m.feedback_mark_resolved()}
                                     >
                                       <CheckCircleOutlineIcon className="h-4 w-4" />
                                     </Button>
@@ -254,17 +272,19 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                                 />
                               }
                             />
-                            <TooltipContent>标记为已解决</TooltipContent>
+                            <TooltipContent>
+                              {m.feedback_mark_resolved()}
+                            </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                         <PopoverContent>
                           <div className="flex flex-col gap-4 p-4">
                             <div className="text-base font-medium">
-                              确定将此项目标记为已解决？
+                              {m.feedback_resolve_confirm()}
                             </div>
 
                             <Button onClick={() => handleResolve(item.id)}>
-                              确定
+                              {m.common_confirm()}
                             </Button>
                           </div>
                         </PopoverContent>
@@ -273,16 +293,22 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                   </div>
 
                   <div className="flex flex-row gap-4 text-xs text-text-secondary mb-1 flex-wrap">
-                    <span>用户ID：{item.userId}</span>
+                    <span>{m.feedback_user_id({ id: item.userId })}</span>
                     <span>
-                      创建时间：{new Date(item.createdAt).toLocaleString()}
+                      {m.feedback_created_time({
+                        value: new Date(item.createdAt).toLocaleString(),
+                      })}
                     </span>
                     <span>
-                      更新时间：{new Date(item.updatedAt).toLocaleString()}
+                      {m.feedback_updated_time({
+                        value: new Date(item.updatedAt).toLocaleString(),
+                      })}
                     </span>
                     {item.resolvedAt && (
                       <span>
-                        解决时间：{new Date(item.resolvedAt).toLocaleString()}
+                        {m.feedback_resolved_time({
+                          value: new Date(item.resolvedAt).toLocaleString(),
+                        })}
                       </span>
                     )}
                   </div>

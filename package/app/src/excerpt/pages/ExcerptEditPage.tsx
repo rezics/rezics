@@ -137,7 +137,7 @@ export function ExcerptEditPageContainer() {
   }, [unitData]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{m.common_loading()}</div>;
   }
   if (error) {
     return <QueryErrorDisplay error={error} />;

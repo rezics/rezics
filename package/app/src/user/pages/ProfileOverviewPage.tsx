@@ -3,6 +3,7 @@ import type { ContentSearchDocument } from "@rezics/contract";
 import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
+import * as m from "@rezics/i18n/messages";
 import { DescriptionBox } from "@/user/components/DescriptionBox";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
@@ -53,22 +54,22 @@ export const ProfileOverviewPage: FC = () => {
       {/* Mobile stats — hidden on desktop (shown in sidebar) */}
       <div className="md:hidden flex flex-wrap gap-4 text-sm">
         <StatItem
-          label="Shelves"
+          label={m.profile_tab_shelves()}
           count={shelvesCountQuery.data?.total}
           to={`/user/${userId}/shelves`}
         />
         <StatItem
-          label="Content"
+          label={m.profile_tab_content()}
           count={reviewsCountQuery.data?.total}
           to={`/user/${userId}/content`}
         />
         <StatItem
-          label="Followers"
+          label={m.profile_tab_followers()}
           count={user.followersCount ?? 0}
           to={`/user/${userId}/followers`}
         />
         <StatItem
-          label="Following"
+          label={m.profile_following()}
           count={user.followingsCount ?? 0}
           to={`/user/${userId}/followers?filter=following`}
         />
@@ -81,7 +82,7 @@ export const ProfileOverviewPage: FC = () => {
 
       {/* Pinned Items */}
       <div>
-        <h6 className="text-sm font-semibold mb-3">Pinned</h6>
+        <h6 className="text-sm font-semibold mb-3">{m.common_pinned()}</h6>
         {pinned.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {pinned.map((item: ContentSearchDocument) => (
@@ -89,13 +90,17 @@ export const ProfileOverviewPage: FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-text-secondary">No pinned items yet</p>
+          <p className="text-sm text-text-secondary">
+            {m.profile_no_pinned_items()}
+          </p>
         )}
       </div>
 
       {/* Recent Activity */}
       <div>
-        <h6 className="text-sm font-semibold mb-3">Recent Activity</h6>
+        <h6 className="text-sm font-semibold mb-3">
+          {m.profile_recent_activity()}
+        </h6>
         {recent.length > 0 ? (
           <div className="flex flex-col gap-2">
             {recent.map((item: ContentSearchDocument) => (
@@ -103,7 +108,9 @@ export const ProfileOverviewPage: FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-text-secondary">No recent activity</p>
+          <p className="text-sm text-text-secondary">
+            {m.profile_no_recent_activity()}
+          </p>
         )}
       </div>
     </div>
@@ -124,7 +131,8 @@ const StatItem: FC<{
 
 // MOCK: pinned card component
 const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
-  const title = item.translations?.[0]?.title ?? item.type ?? "Untitled";
+  const title =
+    item.translations?.[0]?.title ?? item.type ?? m.common_untitled();
 
   return (
     <Link
@@ -147,7 +155,8 @@ const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
 
 // MOCK: activity item component
 const ActivityItem: FC<{ item: ContentSearchDocument }> = ({ item }) => {
-  const title = item.translations?.[0]?.title ?? item.type ?? "Untitled";
+  const title =
+    item.translations?.[0]?.title ?? item.type ?? m.common_untitled();
   const date = item.updatedAt
     ? new Date(item.updatedAt).toLocaleDateString()
     : "";

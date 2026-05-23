@@ -7,6 +7,7 @@ import { Header } from "@/core/components/header/MainLayoutHeader";
 import { Sidebar } from "@/core/components/sidebar/MainLayoutSidebar";
 import { useLayoutStore } from "@/core/states/layoutStore.ts";
 import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
+import * as m from "@rezics/i18n/messages";
 export interface BookReadLayoutProps {
   children: ReactNode;
 }
@@ -24,14 +25,14 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
         <Sidebar NAVIGATION={[]} sidebarHeaderClassName="mx-8">
           <div>
             <div className="flex items-center justify-between mb-2 bg-gray-50 text-sm text-gray-800">
-              <div className="font-medium">目录</div>
+              <div className="font-medium">{m.book_toc()}</div>
               <Button
                 variant="ghost"
                 onClick={() => {
                   navigate({ to: `/book/${bookId}/` });
                 }}
               >
-                返回书籍
+                {m.book_read_back_to_book()}
               </Button>
             </div>
             <Separator className="mb-4" />

@@ -6,6 +6,7 @@ import { CooldownButton } from "@rezics/ui/composite/button/CooldownButton.tsx";
 import { useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import { ExcerptEditPage } from "./ExcerptEditPage";
+import * as m from "@rezics/i18n/messages";
 
 export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   const [excerptData, setExcerptData] = useState<UnitFormData>(
@@ -16,11 +17,11 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
 
   const { mutate, isPending } = useCreateUnitMutation({
     onSuccess: (data) => {
-      show("Excerpt created successfully");
+      show(m.excerpt_created_success());
       console.log("create excerpt success", data);
     },
     onError: (error) => {
-      show(`Create excerpt failed: ${error}`);
+      show(m.excerpt_create_failed({ error: String(error) }));
       console.error("create excerpt failed", error);
     },
   });
@@ -28,7 +29,7 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   function handleSave() {
     const userId = user?.userId as string;
     if (!userId) {
-      show("Please login first");
+      show(m.auth_flow_onboarding_sign_in_first());
       return;
     }
     const translation = excerptData.translations?.[0];
@@ -50,9 +51,9 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">New Excerpt</h1>
+        <h1 className="text-xl font-semibold">{m.excerpt_new_title()}</h1>
         <div className="flex flex-col gap-1 mt-4">
-          <Label htmlFor="book-unit-id">Book Unit ID</Label>
+          <Label htmlFor="book-unit-id">{m.excerpt_book_unit_id()}</Label>
           <Input
             id="book-unit-id"
             className="w-full"
@@ -74,7 +75,7 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
             onClick={handleSave}
             disabled={isPending}
           >
-            {isPending ? "Submitting..." : "Submit"}
+            {isPending ? m.common_submitting() : m.common_submit()}
           </CooldownButton>
         </div>
       </div>

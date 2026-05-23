@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 
@@ -8,11 +9,11 @@ export interface RealmFeedSortSwitcherProps {
   onChange: (value: RealmFeedSort) => void;
 }
 
-const OPTIONS: { value: RealmFeedSort; label: string }[] = [
-  { value: "new", label: "New" },
-  { value: "top", label: "Top" },
-  { value: "hot", label: "Hot" },
-];
+const OPTIONS = {
+  new: m.realm_feed_sort_new,
+  top: m.realm_feed_sort_top,
+  hot: m.realm_feed_sort_hot,
+} as const satisfies Record<RealmFeedSort, () => string>;
 
 export const RealmFeedSortSwitcher: React.FC<RealmFeedSortSwitcherProps> = ({
   value,
@@ -20,15 +21,15 @@ export const RealmFeedSortSwitcher: React.FC<RealmFeedSortSwitcherProps> = ({
 }) => {
   return (
     <div className="flex items-center gap-1">
-      {OPTIONS.map((option) => (
+      {Object.entries(OPTIONS).map(([optionValue, label]) => (
         <Button
-          key={option.value}
+          key={optionValue}
           type="button"
           size="sm"
-          variant={value === option.value ? "default" : "ghost"}
-          onClick={() => onChange(option.value)}
+          variant={value === optionValue ? "default" : "ghost"}
+          onClick={() => onChange(optionValue as RealmFeedSort)}
         >
-          {option.label}
+          {label()}
         </Button>
       ))}
     </div>

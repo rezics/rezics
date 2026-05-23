@@ -15,6 +15,7 @@ import type { UnitTagDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { SingleTagChip } from "../TagList";
 
 /**
@@ -94,7 +95,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
                 onClick={() => onDetach(t)}
                 disabled={detachMutation.isPending}
               >
-                解绑
+                {m.common_unlink()}
               </Button>
             </div>
           </div>
@@ -114,23 +115,23 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
             if (v) setView(v as "list" | "grouped");
           }}
         >
-          <ToggleGroupItem value="list">列表</ToggleGroupItem>
+          <ToggleGroupItem value="list">{m.shelf_view_list()}</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
       {isLoading && (
         <div className="flex items-center gap-2 text-sm text-text-secondary">
-          <Spinner size="sm" /> 加载中…
+          <Spinner size="sm" /> {m.common_loading()}
         </div>
       )}
       {error && (
         <div className="text-sm text-error-text">
-          错误：{String((error as any)?.message ?? error)}
+          {m.common_error()}: {String((error as any)?.message ?? error)}
         </div>
       )}
 
       {!isLoading && !error && list.length === 0 && (
-        <div className="text-sm text-text-secondary">暂无标签</div>
+        <div className="text-sm text-text-secondary">{m.tag_empty()}</div>
       )}
 
       {!isLoading && !error && renderListView()}
@@ -138,11 +139,11 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
       {/* Search and attach existing tags */}
       <div className="mt-8 pt-4 border-t border-border-whisper">
         <div className="text-sm font-semibold text-text-primary mb-2">
-          搜索并添加标签
+          {m.tag_search_and_add()}
         </div>
         <div className="flex items-center gap-2 mb-3">
           <Input
-            placeholder="输入标签名搜索…"
+            placeholder={m.tag_search_placeholder()}
             className="w-full"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -151,11 +152,14 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
         </div>
         {searchError && (
           <div className="text-xs text-error-text mb-2">
-            搜索失败：{String((searchError as any)?.message ?? searchError)}
+            {m.common_search_failed()}:{" "}
+            {String((searchError as any)?.message ?? searchError)}
           </div>
         )}
         {searchTerm && !isSearching && searchResults.length === 0 && (
-          <div className="text-xs text-text-secondary">未找到匹配的标签</div>
+          <div className="text-xs text-text-secondary">
+            {m.tag_no_matching()}
+          </div>
         )}
         {searchResults.length > 0 && (
           <div className="space-y-1">
@@ -171,7 +175,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
                   onClick={() => handleAttach(t.tagUnitId)}
                   disabled={attachMutation.isPending}
                 >
-                  添加
+                  {m.common_add()}
                 </Button>
               </div>
             ))}

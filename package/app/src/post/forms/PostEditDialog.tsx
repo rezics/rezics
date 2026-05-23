@@ -73,7 +73,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isWikiPost ? "Edit wiki post" : m.common_edit()}
+            {isWikiPost ? m.post_edit_wiki_post() : m.common_edit()}
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3 pt-2">

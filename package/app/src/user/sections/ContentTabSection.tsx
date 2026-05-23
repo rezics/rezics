@@ -14,18 +14,18 @@ import {
 import { useProfileContext } from "@/user/components/ProfileLayout";
 import * as m from "@rezics/i18n/messages";
 
-const KIND_CHIPS: ChipDefinition[] = [
-  { value: "REVIEW", label: "Reviews" },
-  { value: "REMARK", label: "Remarks" },
-  { value: "EXCERPT", label: "Excerpts" },
-  { value: "POST", label: "Posts" },
-];
+const KIND_CHIP_LABEL = {
+  REVIEW: m.search_category_reviews,
+  REMARK: m.search_category_remarks,
+  EXCERPT: m.search_category_excerpts,
+  POST: m.search_category_posts,
+} as const satisfies Record<string, () => string>;
 
-const SORT_OPTIONS = [
-  { value: "createdAt:desc", label: "Newest" },
-  { value: "createdAt:asc", label: "Oldest" },
-  { value: "replyCount:desc", label: "Most Replies" },
-];
+const SORT_OPTION_LABEL = {
+  "createdAt:desc": m.shelf_sort_newest,
+  "createdAt:asc": m.shelf_sort_oldest,
+  "replyCount:desc": m.profile_sort_most_replies,
+} as const satisfies Record<string, () => string>;
 
 export const ContentTabSection: FC = () => {
   const { userId } = useProfileContext();
@@ -54,15 +54,24 @@ export const ContentTabSection: FC = () => {
 
   const filterConfig: FilterBarConfig = {
     showSearch: true,
-    searchPlaceholder: "Search content...",
+    searchPlaceholder: m.profile_search_content_placeholder(),
     dropdowns: [
       {
         key: "sort",
-        label: "Sort",
-        options: SORT_OPTIONS,
+        label: m.shelf_controls_sort_by(),
+        options: Object.entries(SORT_OPTION_LABEL).map(([value, label]) => ({
+          value,
+          label: label(),
+        })),
       },
     ],
   };
+  const kindChips: ChipDefinition[] = Object.entries(KIND_CHIP_LABEL).map(
+    ([value, label]) => ({
+      value,
+      label: label(),
+    }),
+  );
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -82,7 +91,7 @@ export const ContentTabSection: FC = () => {
   return (
     <div className="flex flex-col gap-4 py-4">
       <InnerFilterPanel
-        chips={KIND_CHIPS}
+        chips={kindChips}
         activeValue={kind}
         onChipChange={handleKindChange}
       >
@@ -118,10 +127,10 @@ export const ContentTabSection: FC = () => {
                 onClick={() => setOffset(Math.max(0, offset - limit))}
                 disabled={offset === 0}
               >
-                Previous
+                {m.common_previous_page()}
               </Button>
               <span className="text-sm text-text-secondary">
-                Page {currentPage + 1} of {totalPages}
+                {m.common_page_of({ page: currentPage + 1, total: totalPages })}
               </span>
               <Button
                 type="button"
@@ -130,7 +139,7 @@ export const ContentTabSection: FC = () => {
                 onClick={() => setOffset(offset + limit)}
                 disabled={currentPage + 1 >= totalPages}
               >
-                Next
+                {m.common_next_page()}
               </Button>
             </div>
           )}

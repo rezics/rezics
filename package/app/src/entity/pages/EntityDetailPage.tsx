@@ -4,6 +4,7 @@ import { BasicAdminPermission } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { EntityHero } from "../components/EntityHero";
 import { useEntityWorks } from "../hooks/useEntityWorks";
 import { getEntityLanguages, getEntityTranslation } from "../models/types";
@@ -58,10 +59,10 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="text-lg font-semibold text-text-primary">
-          Entity not found
+          {m.entity_not_found()}
         </h1>
         <p className="mt-2 text-sm text-text-secondary">
-          The entity you are looking for does not exist or has been removed.
+          {m.entity_not_found_description()}
         </p>
       </div>
     );
@@ -70,20 +71,20 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
   const tr = getEntityTranslation(entity, activeLanguage);
   const canEdit = permission ? BasicAdminPermission(permission) : false;
 
-  const tabs: Array<{ value: string; label: string; show: boolean }> = [
+  const tabs: Array<{ value: string; label: () => string; show: boolean }> = [
     {
       value: "overview",
-      label: "Overview",
+      label: m.entity_tab_overview,
       show: hasOverviewData(entity, activeLanguage),
     },
     {
       value: "works",
-      label: "Works",
+      label: m.entity_tab_works,
       show: works.length > 0,
     },
     {
       value: "about",
-      label: "About",
+      label: m.entity_tab_about,
       show: hasAboutData(entity),
     },
     /* AWARDS_TAB: { value: "awards", label: "Awards", show: hasAwardsData(entity) }, */
@@ -110,7 +111,7 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
           <TabsList>
             {visibleTabs.map((tab) => (
               <TabsTrigger key={tab.value} value={tab.value}>
-                {tab.label}
+                {tab.label()}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -146,7 +147,7 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
         </Tabs>
       ) : (
         <p className="mt-8 text-sm text-text-secondary">
-          {tr?.summary ?? "No content available yet."}
+          {tr?.summary ?? m.entity_no_content()}
         </p>
       )}
     </div>

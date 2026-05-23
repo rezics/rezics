@@ -1,5 +1,6 @@
 import type { UnitDTO } from "@rezics/contract";
 import type { ReactNode } from "react";
+import * as m from "@rezics/i18n/messages";
 import { UnitCard } from "../UnitCard";
 import { candidateToUnitCardSummary } from "../../models/unitCardSummary";
 import type { Candidate } from "../../models/types";
@@ -23,7 +24,7 @@ export function UnitCandidateRow({
 }: UnitCandidateRowProps) {
   const summary = candidateToUnitCardSummary(candidate, unit, {
     language,
-    fallbackTitle: isLoading ? "Loading..." : candidate.identifier,
+    fallbackTitle: isLoading ? m.common_loading() : candidate.identifier,
   });
   return (
     <li

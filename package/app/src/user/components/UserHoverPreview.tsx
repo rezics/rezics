@@ -1,4 +1,5 @@
 import { Link, unitHref } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import {
   Avatar,
   AvatarFallback,
@@ -308,8 +309,8 @@ function getAvatarFallback(
 
 function getStats(user: UserHoverPreviewUser) {
   return [
-    { label: "followers", value: user.followersCount },
-    { label: "following", value: user.followingsCount },
+    { label: m.profile_tab_followers(), value: user.followersCount },
+    { label: m.profile_following(), value: user.followingsCount },
   ].filter(
     (stat): stat is { label: string; value: number } =>
       typeof stat.value === "number",

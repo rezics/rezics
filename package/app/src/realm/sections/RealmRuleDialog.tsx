@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@rezics/ui/shadcn";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 import { PostBodyMarkdown } from "@/post";
 
 export interface RealmRuleDialogProps {
@@ -31,18 +32,18 @@ export const RealmRuleDialog: React.FC<RealmRuleDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Realm rules</DialogTitle>
+          <DialogTitle>{m.realm_rules_title()}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto">
           <PostBodyMarkdown body={post?.body ?? ""} clamp={false} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            {joining ? "Cancel" : "Close"}
+            {joining ? m.common_cancel() : m.common_close()}
           </Button>
           {joining && (
             <Button onClick={onAgree} disabled={joinPending}>
-              {joinPending ? "Joining..." : "Agree and Join"}
+              {joinPending ? m.realm_joining() : m.realm_agree_and_join()}
             </Button>
           )}
         </DialogFooter>

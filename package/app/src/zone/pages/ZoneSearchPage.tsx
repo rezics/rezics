@@ -1,5 +1,6 @@
 import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { AdvancedSearch, SearchResultList } from "@/search";
@@ -50,7 +51,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   if (zoneLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <p className="text-text-secondary">Loading...</p>
+        <p className="text-text-secondary">{m.common_loading()}</p>
       </div>
     );
   }
@@ -58,7 +59,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   if (!zone) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl font-semibold">Zone not found</h2>
+        <h2 className="text-2xl font-semibold">{m.zone_not_found()}</h2>
       </div>
     );
   }
@@ -70,7 +71,9 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-semibold mb-4">Search in {zone.name}</h2>
+      <h2 className="text-2xl font-semibold mb-4">
+        {m.zone_search_title({ name: zone.name })}
+      </h2>
       <AdvancedSearch
         query={search.query}
         bind={search.bind}

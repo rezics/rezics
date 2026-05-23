@@ -3,6 +3,7 @@ import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import * as m from "@rezics/i18n/messages";
 import { ShelfCard } from "../components/ShelfCard";
 
 export function ShelfListPage() {
@@ -20,16 +21,16 @@ export function ShelfListPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <div className="mb-6 flex flex-row items-center justify-between">
-        <h1 className="text-2xl font-semibold">Shelves</h1>
+        <h1 className="text-2xl font-semibold">{m.shelf_list_title()}</h1>
         <div className="flex flex-row gap-2">
           <Button
             variant="ghost"
             onClick={() => navigate({ to: "/shelf/search" })}
           >
-            Search
+            {m.common_search()}
           </Button>
           <Button onClick={() => navigate({ to: "/shelf/new" })}>
-            New Shelf
+            {m.shelf_new_title()}
           </Button>
         </div>
       </div>
@@ -39,7 +40,9 @@ export function ShelfListPage() {
           <Spinner />
         </div>
       ) : shelves.length === 0 ? (
-        <p className="py-8 text-center text-text-secondary">No shelves yet</p>
+        <p className="py-8 text-center text-text-secondary">
+          {m.shelf_empty_yet()}
+        </p>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -54,7 +57,7 @@ export function ShelfListPage() {
                 disabled={isFetchingNextPage}
                 onClick={() => void fetchNextPage()}
               >
-                {isFetchingNextPage ? "Loading..." : "Load more"}
+                {isFetchingNextPage ? m.common_loading() : m.common_load_more()}
               </Button>
             </div>
           )}

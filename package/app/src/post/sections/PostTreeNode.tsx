@@ -14,6 +14,7 @@ import {
   RAIL_TOP_PX,
   TOGGLE_TOP_PX,
 } from "./postTreeLayout";
+import * as m from "@rezics/i18n/messages";
 
 export interface PostTreeNodeProps {
   node: PostTreeNodeModel;
@@ -82,7 +83,7 @@ export function PostTreeNode({
           {hasVisibleChildren ? (
             <button
               type="button"
-              aria-label="Collapse thread"
+              aria-label={m.post_collapse_thread()}
               className="absolute z-10 -translate-x-1/2 cursor-pointer appearance-none border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-brand-fill focus-visible:outline-offset-1"
               style={{
                 left: `${AVATAR_CENTER_PX}px`,
@@ -151,7 +152,9 @@ export function PostTreeNode({
                 unitId: post.unitId,
               }}
             >
-              <span className="text-xs text-text-brand">Continue thread →</span>
+              <span className="text-xs text-text-brand">
+                {m.post_continue_thread()}
+              </span>
             </TextLink>
           </div>
         ) : null}

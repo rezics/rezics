@@ -20,6 +20,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { useUserProfileStore } from "@/user/states";
 
@@ -36,7 +37,9 @@ const EXTERNAL_ITEMS_PER_PAGE = 20;
 function FollowUserList({ users }: { users: SimpleUser[] }) {
   if (users.length === 0) {
     return (
-      <div className="py-16 text-center text-text-secondary">暂无用户。</div>
+      <div className="py-16 text-center text-text-secondary">
+        {m.user_empty()}
+      </div>
     );
   }
 
@@ -140,9 +143,9 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   if (!resolvedUnitId) {
     return (
       <div className="w-full max-w-3xl mx-auto mt-32 text-center">
-        <h6 className="text-base font-semibold">无法确定用户信息</h6>
+        <h6 className="text-base font-semibold">{m.user_cannot_resolve()}</h6>
         <p className="text-sm text-text-secondary">
-          请先登录，或从用户详情页进入本页面。
+          {m.user_cannot_resolve_description()}
         </p>
       </div>
     );
@@ -160,9 +163,11 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
     <div className="w-11/12 mx-auto mt-16 px-4">
       <div className="flex items-center justify-between">
         <div className="mb-4">
-          <h5 className="text-xl font-bold mb-2">关注信息</h5>
+          <h5 className="text-xl font-bold mb-2">
+            {m.profile_follow_info_title()}
+          </h5>
           <p className="text-sm text-text-secondary">
-            查看你关注的用户，以及关注你的用户列表。
+            {m.profile_follow_info_description()}
           </p>
         </div>
         <Button

@@ -87,7 +87,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
             size="icon"
             variant="ghost"
             onClick={onToggleAdvanced}
-            aria-label="advanced search"
+            aria-label={m.search_advanced_label()}
           >
             <TuneIcon className="w-5 h-5" />
           </Button>

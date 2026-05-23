@@ -2,6 +2,7 @@ import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ShelfDTO } from "@rezics/contract";
 import { useMemo } from "react";
 import type * as React from "react";
+import * as m from "@rezics/i18n/messages";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import { ShelfCard } from "./ShelfCard";
 
@@ -27,7 +28,7 @@ export const HorizontalShelfCarousel: React.FC<
       itemKey={(_shelf, index) => index}
       itemClassName={SHELF_ITEM_CLASS}
       className={className}
-      ariaLabel="Shelves"
+      ariaLabel={m.shelf_list_title()}
       renderItem={(item) => <ShelfCard shelf={item} />}
     />
   );

@@ -12,6 +12,7 @@ import {
   subjectAttributionRoles,
 } from "@rezics/contract";
 import { creditRoleLabel, subjectRoleLabel } from "@rezics/i18n";
+import * as m from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { type FormEvent, useMemo, useState } from "react";
 import {
@@ -72,7 +73,7 @@ export function EntityInlineCreateForm({
 
   const mutation = useCreateEntity({
     onSuccess: (entity) => onCreated(entity.unitId),
-    onError: (err) => setError(err.message || "Failed to create entity"),
+    onError: (err) => setError(err.message || m.entity_create_failed()),
   });
 
   const handleSubmit = (e: FormEvent) => {
@@ -80,7 +81,7 @@ export function EntityInlineCreateForm({
     setError(null);
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      setError("Title is required");
+      setError(m.entity_title_required());
       return;
     }
     const trimmedLang = language.trim() || "en";
@@ -104,29 +105,29 @@ export function EntityInlineCreateForm({
       className="flex flex-col gap-3 border-t border-border-whisper p-4"
     >
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="entity-inline-title">Title</Label>
+        <Label htmlFor="entity-inline-title">{m.entity_title_label()}</Label>
         <Input
           id="entity-inline-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Liu Cixin"
+          placeholder={m.entity_title_placeholder()}
           autoFocus
           required
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="entity-inline-language">Language</Label>
+          <Label htmlFor="entity-inline-language">{m.common_language()}</Label>
           <Input
             id="entity-inline-language"
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            placeholder="en"
+            placeholder={m.language_code_placeholder()}
             required
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="entity-inline-kind">Kind</Label>
+          <Label htmlFor="entity-inline-kind">{m.entity_kind_label()}</Label>
           <select
             id="entity-inline-kind"
             value={kind}
@@ -151,16 +152,16 @@ export function EntityInlineCreateForm({
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="entity-inline-avatar">Avatar URL</Label>
+        <Label htmlFor="entity-inline-avatar">{m.entity_avatar_url()}</Label>
         <Input
           id="entity-inline-avatar"
           value={avatar}
           onChange={(e) => setAvatar(e.target.value)}
-          placeholder="https://cdn.example/entity.png"
+          placeholder={m.entity_avatar_placeholder()}
         />
       </div>
       <EligibilityRoleEditor
-        label="Credit eligibility"
+        label={m.entity_credit_eligibility()}
         roles={eligibleCreditRoles}
         availableRoles={availableCreditRoles}
         getLabel={creditRoleLabel}
@@ -174,7 +175,7 @@ export function EntityInlineCreateForm({
         }
       />
       <EligibilityRoleEditor
-        label="Subject eligibility"
+        label={m.entity_subject_eligibility()}
         roles={eligibleSubjectRoles}
         availableRoles={availableSubjectRoles}
         getLabel={subjectRoleLabel}
@@ -191,11 +192,11 @@ export function EntityInlineCreateForm({
       <div className="flex justify-end gap-2">
         {onCancel ? (
           <Button type="button" variant="ghost" onClick={onCancel}>
-            Cancel
+            {m.common_cancel()}
           </Button>
         ) : null}
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Creating…" : "Create"}
+          {mutation.isPending ? m.common_creating() : m.common_create()}
         </Button>
       </div>
     </form>
@@ -245,7 +246,7 @@ function EligibilityRoleEditor<Role extends string>({
           }}
           className="h-9 rounded-md border border-border-whisper bg-surface-canvas px-2 text-sm text-text-primary"
         >
-          <option value="">Add role</option>
+          <option value="">{m.entity_add_role()}</option>
           {availableRoles.map((role) => (
             <option key={role} value={role}>
               {getLabel(role)}

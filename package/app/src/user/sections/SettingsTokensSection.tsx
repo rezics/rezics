@@ -22,6 +22,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Plus as AddIcon } from "lucide-react";
 import { type FC, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { TokenCreateDialog } from "@/user/components/TokenCreateDialog";
 import { TokenListItem } from "@/user/components/TokenListItem";
@@ -118,14 +119,14 @@ export const SettingsTokensSection: FC = () => {
   return (
     <div>
       <SettingsSection
-        title="API Tokens"
-        description="Manage personal access tokens for API authentication."
+        title={m.settings_tokens_title()}
+        description={m.settings_tokens_description()}
         divider={false}
       >
         <div className="mb-4">
           <Button size="sm" onClick={() => setCreateOpen(true)}>
             <AddIcon className="w-4 h-4 mr-1" />
-            Generate New Token
+            {m.settings_tokens_generate()}
           </Button>
         </div>
 
@@ -148,7 +149,7 @@ export const SettingsTokensSection: FC = () => {
           </div>
         ) : (
           <p className="text-sm text-text-secondary">
-            No API tokens yet. Generate one to get started.
+            {m.settings_tokens_empty()}
           </p>
         )}
       </SettingsSection>
@@ -162,7 +163,7 @@ export const SettingsTokensSection: FC = () => {
       <Dialog open={!!editToken} onOpenChange={(o) => !o && setEditToken(null)}>
         <DialogContent className="sm:max-w-[640px]">
           <DialogHeader>
-            <DialogTitle>Edit Token</DialogTitle>
+            <DialogTitle>{m.settings_tokens_edit_title()}</DialogTitle>
           </DialogHeader>
           {updateToken.error && (
             <Alert variant="destructive" className="mb-4">
@@ -171,7 +172,9 @@ export const SettingsTokensSection: FC = () => {
           )}
           <div className="space-y-4 pt-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-token-name">Token Name</Label>
+              <Label htmlFor="edit-token-name">
+                {m.settings_tokens_name_label()}
+              </Label>
               <Input
                 id="edit-token-name"
                 value={editName}
@@ -180,7 +183,7 @@ export const SettingsTokensSection: FC = () => {
               />
             </div>
             <div>
-              <p className="text-sm font-medium mb-2">Scopes</p>
+              <p className="text-sm font-medium mb-2">{m.common_scopes()}</p>
               <div className="flex flex-col gap-2">
                 {AVAILABLE_SCOPES.map((s) => (
                   <div key={s.label} className="flex items-center gap-2">
@@ -195,7 +198,9 @@ export const SettingsTokensSection: FC = () => {
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="edit-token-expiry">Expiration Date</Label>
+              <Label htmlFor="edit-token-expiry">
+                {m.settings_tokens_expiration_date()}
+              </Label>
               <Input
                 id="edit-token-expiry"
                 type="date"
@@ -206,13 +211,13 @@ export const SettingsTokensSection: FC = () => {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditToken(null)}>
-              Cancel
+              {m.common_cancel()}
             </Button>
             <Button
               onClick={handleSaveEdit}
               disabled={!editName || updateToken.isPending}
             >
-              {updateToken.isPending ? "Saving..." : "Save"}
+              {updateToken.isPending ? m.common_saving() : m.common_save()}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -222,22 +227,21 @@ export const SettingsTokensSection: FC = () => {
       <Dialog open={!!revokeId} onOpenChange={(o) => !o && setRevokeId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Revoke Token</DialogTitle>
+            <DialogTitle>{m.settings_tokens_revoke_title()}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm">
-            Are you sure you want to revoke this token? Any applications using
-            it will lose access immediately.
-          </p>
+          <p className="text-sm">{m.settings_tokens_revoke_description()}</p>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setRevokeId(null)}>
-              Cancel
+              {m.common_cancel()}
             </Button>
             <Button
               variant="destructive"
               onClick={handleConfirmRevoke}
               disabled={revokeToken.isPending}
             >
-              {revokeToken.isPending ? "Revoking..." : "Revoke"}
+              {revokeToken.isPending
+                ? m.settings_tokens_revoking()
+                : m.common_revoke()}
             </Button>
           </DialogFooter>
         </DialogContent>

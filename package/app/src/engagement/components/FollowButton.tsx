@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 import { cn } from "@/shared/utils/css-util";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
@@ -133,7 +134,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     }
   };
 
-  const label = isFollowing ? "Following" : "Follow";
+  const label = isFollowing ? m.profile_following() : m.profile_follow();
 
   const button = (
     <Button
@@ -153,7 +154,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 
   const followersText =
     showFollowersText && typeof localFollowers === "number"
-      ? `${localFollowers} followers`
+      ? m.profile_followers_count({ count: localFollowers })
       : null;
 
   if (!followersText) {

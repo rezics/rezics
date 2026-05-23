@@ -2,6 +2,7 @@ import {
   useGivenReactionsInfinite,
   useReceivedReactionsInfinite,
 } from "@rezics/api/reaction/reaction.queries";
+import * as m from "@rezics/i18n/messages";
 import type { FC } from "react";
 import { useState } from "react";
 import {
@@ -13,10 +14,10 @@ import { ReactionList } from "@/user/components/ReactionList";
 
 type Mode = "given" | "received";
 
-const FILTER_CHIPS: ChipDefinition[] = [
-  { value: "given", label: "Given" },
-  { value: "received", label: "Received" },
-];
+const REACTION_MODE_LABEL = {
+  given: m.profile_reactions_given,
+  received: m.profile_reactions_received,
+} as const satisfies Record<Mode, () => string>;
 
 export const ReactionsTabSection: FC = () => {
   const { userId } = useProfileContext();
@@ -28,11 +29,15 @@ export const ReactionsTabSection: FC = () => {
   const receivedQuery = useReceivedReactionsInfinite(userId, {
     enabled: mode === "received",
   });
+  const filterChips: ChipDefinition[] = [
+    { value: "given", label: REACTION_MODE_LABEL.given() },
+    { value: "received", label: REACTION_MODE_LABEL.received() },
+  ];
 
   return (
     <div className="flex flex-col gap-4 py-4">
       <InnerFilterPanel
-        chips={FILTER_CHIPS}
+        chips={filterChips}
         activeValue={mode}
         onChipChange={(value) => setMode(value as Mode)}
       />

@@ -76,31 +76,31 @@
 - [x] 8.2 Migrate app shell/core layout/header/footer/navigation/create-menu/account-menu/language-menu copy to generated messages.
 - [x] 8.3 Migrate `package/app/src/home/` remaining hard-coded homepage and section copy to generated messages.
 - [x] 8.4 Migrate `package/app/src/book-edit/` page, chapter editor, table-of-contents, metadata, extra, translation, rating, and dialog copy to generated messages.
-- [ ] 8.5 Migrate `package/app/src/book-library/` detail, hero, chapter list, release selector, copyright, review preview, shelf preview, author info, history, and basic info copy to generated messages.
-- [ ] 8.6 Migrate `package/app/src/book-read/` reader layout and chapter state copy to generated messages.
-- [ ] 8.7 Migrate `package/app/src/search/` filters, chips, result lists, advanced search, federated search, rating labels, and primitive input copy to generated messages.
-- [ ] 8.8 Migrate `package/app/src/review/`, `package/app/src/remark/`, `package/app/src/post/`, and `package/app/src/excerpt/` form, page, list, detail, and action copy to generated messages.
-- [ ] 8.9 Migrate `package/app/src/shelf/` shelf list/detail/edit/new pages, shelf editor controls, move modal, discussion, and system shelf labels to generated messages.
-- [ ] 8.10 Migrate `package/app/src/tag/`, `package/app/src/entity/`, `package/app/src/entity-picker/`, `package/app/src/realm/`, and `package/app/src/unit/` user-visible copy to generated messages and shared label helpers.
-- [ ] 8.11 Migrate `package/app/src/user/`, settings, auth, registration, profile, reaction, hover preview, and preferences copy to generated messages where the string is static UI copy.
-- [ ] 8.12 Migrate `package/app/src/inbox/`, `package/app/src/feedback/`, `package/app/src/pinboard/`, `package/app/src/progress-status/`, and `package/app/src/engagement/` copy to generated messages.
-- [ ] 8.13 Review `package/app/src/playground/`, `package/app/src/stories/`, and `*.stories.tsx`; migrate stories that render reusable production UI copy and document/allowlist demo-only literals.
-- [ ] 8.14 Verify remaining app hard-coded literals are intentional technical literals, brand names, URL examples, enum keys, debug identifiers, user/content data, or documented story/demo text.
+- [x] 8.5 Migrate `package/app/src/book-library/` detail, hero, chapter list, release selector, copyright, review preview, shelf preview, author info, history, and basic info copy to generated messages.
+- [x] 8.6 Migrate `package/app/src/book-read/` reader layout and chapter state copy to generated messages.
+- [x] 8.7 Migrate `package/app/src/search/` filters, chips, result lists, advanced search, federated search, rating labels, and primitive input copy to generated messages.
+- [x] 8.8 Migrate `package/app/src/review/`, `package/app/src/remark/`, `package/app/src/post/`, and `package/app/src/excerpt/` form, page, list, detail, and action copy to generated messages.
+- [x] 8.9 Migrate `package/app/src/shelf/` shelf list/detail/edit/new pages, shelf editor controls, move modal, discussion, and system shelf labels to generated messages.
+- [x] 8.10 Migrate `package/app/src/tag/`, `package/app/src/entity/`, `package/app/src/entity-picker/`, `package/app/src/realm/`, and `package/app/src/unit/` user-visible copy to generated messages and shared label helpers.
+- [x] 8.11 Migrate `package/app/src/user/`, settings, auth, registration, profile, reaction, hover preview, and preferences copy to generated messages where the string is static UI copy.
+- [x] 8.12 Migrate `package/app/src/inbox/`, `package/app/src/feedback/`, `package/app/src/pinboard/`, `package/app/src/progress-status/`, and `package/app/src/engagement/` copy to generated messages.
+- [x] 8.13 Review `package/app/src/playground/`, `package/app/src/stories/`, and `*.stories.tsx`; migrate stories that render reusable production UI copy and document/allowlist demo-only literals.
+- [x] 8.14 Verify remaining app hard-coded literals are intentional technical literals, brand names, URL examples, enum keys, debug identifiers, user/content data, or documented story/demo text.
 
 ## 9. Dynamic Labels and Shared Helpers
 
 - [x] 9.1 Review existing `@rezics/i18n` label helpers for entity kind, license, credit role, and subject role; add Korean catalog entries and keep `satisfies Record<EnumKey, () => string>` coverage.
-- [ ] 9.2 Move repeated app/admin dynamic domain labels into `@rezics/i18n/src/labels/` when they are shared across frontends.
-- [ ] 9.3 Keep feature-local dynamic label maps near the feature only when they are not shared; type them with `satisfies Record<Slug, () => string>`.
+- [x] 9.2 Move repeated app/admin dynamic domain labels into `@rezics/i18n/src/labels/` when they are shared across frontends.
+- [x] 9.3 Keep feature-local dynamic label maps near the feature only when they are not shared; type them with `satisfies Record<Slug, () => string>`.
 - [x] 9.4 Search for `m[` and computed message access in app/admin/ui/editor/folio source; replace every UI-copy case with a direct function or typed map.
 - [x] 9.5 Search for ad hoc language display maps outside `LANGUAGE_META`; replace them with contract metadata unless there is a documented non-language UI reason.
 
 ## 10. UI Fallback Removal
 
-- [ ] 10.1 Search app/admin/ui/editor/folio frontend source for `fallback`, `fallbackLng`, `defaultValue`, `?? "`, `|| "`, and second-argument translation patterns; classify UI-copy cases separately from content-data fallback cases.
-- [ ] 10.2 Remove every UI-copy fallback string from app/admin rendering callsites.
+- [x] 10.1 Search app/admin/ui/editor/folio frontend source for `fallback`, `fallbackLng`, `defaultValue`, `?? "`, `|| "`, and second-argument translation patterns; classify UI-copy cases separately from content-data fallback cases.
+- [x] 10.2 Remove every UI-copy fallback string from app/admin rendering callsites.
 - [x] 10.3 Keep content-data fallback helpers unchanged unless they are incorrectly used for static UI copy.
-- [ ] 10.4 Update tests that asserted English UI fallback on missing locale keys so they now assert catalog completeness or compile/check failure.
+- [x] 10.4 Update tests that asserted English UI fallback on missing locale keys so they now assert catalog completeness or compile/check failure.
 - [x] 10.5 Confirm `openspec/specs/unit-translation/spec.md` content fallback behavior remains untouched by this UI-copy migration.
 
 ## 11. Tests and Type Safety
@@ -121,10 +121,10 @@
 - [x] 12.4 Run `bun run check:tokens`.
 - [x] 12.5 Run `bun --filter=@rezics/i18n run compile`.
 - [x] 12.6 Run `bun --filter=@rezics/ui run compile`.
-- [ ] 12.7 Run TypeScript/build checks for affected frontend packages according to available package scripts.
+- [x] 12.7 Run TypeScript/build checks for affected frontend packages according to available package scripts.
 - [x] 12.8 Run `bun test` in packages with changed tests or package-level targeted test commands where available.
-- [ ] 12.9 Run final repo searches proving no admin-local locale files/imports remain.
-- [ ] 12.10 Run final repo searches proving no UI-copy fallback string callsites remain in app/admin/ui/editor/folio source.
+- [x] 12.9 Run final repo searches proving no admin-local locale files/imports remain.
+- [x] 12.10 Run final repo searches proving no UI-copy fallback string callsites remain in app/admin/ui/editor/folio source.
 - [x] 12.11 Run final repo searches proving no dynamic generated message lookup remains.
 - [x] 12.12 Manually review remaining hard-coded UI-copy scan candidates and document intentional exclusions in the convention check allowlist or task notes.
 

@@ -2,6 +2,7 @@ import { type ShelfDTO, shelfCoverImageSpec } from "@rezics/contract";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
@@ -36,7 +37,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
         {shelf.coverUrl ? (
           <img
             src={shelf.coverUrl}
-            alt={title || "Shelf cover"}
+            alt={m.shelf_cover_alt({ title: title || m.shelf_untitled() })}
             className="h-full w-full object-cover"
           />
         ) : (
@@ -48,7 +49,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
             }}
           >
             <span className="text-xs text-text-secondary">
-              {itemsCount} items
+              {m.shelf_items_count({ count: itemsCount })}
             </span>
           </div>
         )}
@@ -56,22 +57,22 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
 
       <CardContent className="px-4 pb-4 pt-3">
         <h3 className="truncate text-lg font-semibold">
-          {title || "Untitled Shelf"}
+          {title || m.shelf_untitled()}
         </h3>
 
         <p className="mt-1 line-clamp-2 min-h-[2.8em] text-sm leading-[1.4] text-text-secondary">
-          {description || "No description"}
+          {description || m.shelf_no_description()}
         </p>
 
         <div className="mt-3 flex items-center justify-between text-xs">
           <span className="text-xs text-text-secondary">
-            {itemsCount} items
+            {m.shelf_items_count({ count: itemsCount })}
           </span>
           <span
             className="whitespace-nowrap text-xs text-text-brand"
             style={{ lineHeight: 1 }}
           >
-            {shelf.user?.name || "Anonymous"}
+            {shelf.user?.name || m.common_anonymous()}
           </span>
         </div>
       </CardContent>

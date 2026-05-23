@@ -6,19 +6,19 @@ export function validateEmail(email: string) {
   }
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!pattern.test(email)) {
-    return { valid: false, error: "Invalid email format." };
+    return { valid: false, error: m.auth_error_invalid_email() };
   }
   return { valid: true, error: null };
 }
 
 export function validatePassword(password: string) {
   if (!password) {
-    return { valid: false, error: "Password is required." };
+    return { valid: false, error: m.auth_error_password_required() };
   }
   if (password.length < 8) {
     return {
       valid: false,
-      error: "Password must be at least 8 characters long.",
+      error: m.auth_error_password_min_length(),
     };
   }
   // if (!/[A-Z]/.test(password)) {
@@ -30,13 +30,13 @@ export function validatePassword(password: string) {
   if (!/[A-Za-z]/.test(password)) {
     return {
       valid: false,
-      error: "Password must contain at least one letter (a-z or A-Z).",
+      error: m.auth_error_password_letter_required(),
     };
   }
   if (!/[0-9]/.test(password)) {
     return {
       valid: false,
-      error: "Password must contain at least one number.",
+      error: m.auth_error_password_number_required(),
     };
   }
   // if (!/[^A-Za-z0-9]/.test(password)) {
@@ -50,10 +50,10 @@ export function validatePassword(password: string) {
 
 export function validateName(name: string) {
   if (!name) {
-    return { valid: false, error: "Name is required." };
+    return { valid: false, error: m.auth_error_name_required() };
   }
   if (name.length < 5) {
-    return { valid: false, error: "Name must be at least 5 characters long." };
+    return { valid: false, error: m.auth_error_name_min_length() };
   }
   // if (!/^[A-Za-z0-9_\-\s]+$/.test(name)) {
   //   return {

@@ -16,21 +16,8 @@ import { Badge, Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { ReviewCard } from "@/review/components/item/ReviewCard";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
+import { CATEGORY_LABELS } from "./permittedCategories";
 import * as m from "@rezics/i18n/messages";
-
-const CATEGORY_TITLES: Record<SearchCategory, string> = {
-  all: "All",
-  mixed: "Mixed",
-  books: "Books",
-  reviews: "Reviews",
-  excerpts: "Excerpts",
-  remarks: "Remarks",
-  posts: "Posts",
-  shelves: "Shelves",
-  realms: "Realms",
-  users: "Users",
-  entities: "Entities",
-};
 
 function pickTitle(titles: readonly string[] | null | undefined): string {
   if (!titles || titles.length === 0) return "";
@@ -74,7 +61,8 @@ function PostItemRow({ item }: { item: PostSearchDocument }) {
   return (
     <div className="py-3 border-b border-border-whisper last:border-b-0">
       <p className="text-xs text-text-secondary">
-        {item.kind ?? "POST"} · {item.authorName ?? item.authorUserId}
+        {item.kind ?? m.search_origin_post()} ·{" "}
+        {item.authorName ?? item.authorUserId}
       </p>
       {item.body && <p className="text-sm line-clamp-3 mt-1">{item.body}</p>}
     </div>
@@ -86,7 +74,9 @@ function RealmItemRow({ item }: { item: RealmSearchDocument }) {
   return (
     <div className="py-3 border-b border-border-whisper last:border-b-0">
       <p className="text-sm font-medium truncate">{title || item.id}</p>
-      <p className="text-xs text-text-secondary">{item.memberCount} members</p>
+      <p className="text-xs text-text-secondary">
+        {m.search_realm_members({ count: item.memberCount })}
+      </p>
     </div>
   );
 }
@@ -129,7 +119,9 @@ function EntityItemRow({ item }: { item: EntitySearchDocument }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{title || item.id}</p>
-        <p className="text-xs text-text-secondary">{item.kind ?? "Entity"}</p>
+        <p className="text-xs text-text-secondary">
+          {item.kind ?? m.search_origin_entity()}
+        </p>
       </div>
     </div>
   );
@@ -166,15 +158,17 @@ function originBadge(hit: FederatedRankedHit): string {
   const origin = hit._origin;
   if (origin.indexUid === "content") {
     const doc = hit as ContentSearchDocument & { _origin: typeof origin };
-    return doc.type === "SHELF" ? "Shelf" : "Book";
+    return doc.type === "SHELF"
+      ? m.search_category_shelves()
+      : m.search_origin_book();
   }
   if (origin.indexUid === "post") {
     const doc = hit as PostSearchDocument & { _origin: typeof origin };
-    return doc.kind ?? "Post";
+    return doc.kind ?? m.search_origin_post();
   }
-  if (origin.indexUid === "realm") return "Realm";
-  if (origin.indexUid === "user") return "User";
-  if (origin.indexUid === "entities") return "Entity";
+  if (origin.indexUid === "realm") return m.search_origin_realm();
+  if (origin.indexUid === "user") return m.search_origin_user();
+  if (origin.indexUid === "entities") return m.search_origin_entity();
   return origin.indexUid;
 }
 
@@ -268,7 +262,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
           <section key={category}>
             <header className="flex items-baseline justify-between mb-2">
               <h2 className="text-lg font-semibold">
-                {CATEGORY_TITLES[category]}{" "}
+                {CATEGORY_LABELS[category]()}{" "}
                 <span className="text-sm text-text-secondary">
                   ({section.totalHits})
                 </span>
@@ -278,7 +272,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
                 size="sm"
                 onClick={() => onCategoryChange(category)}
               >
-                查看更多
+                {m.common_view_more()}
               </Button>
             </header>
             <div>
@@ -301,7 +295,10 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
     return (
       <div>
         <p className="mb-2 text-xs text-text-secondary">
-          {result.totalHits} results ({result.processingTimeMs}ms)
+          {m.search_results_summary({
+            count: result.totalHits,
+            ms: result.processingTimeMs,
+          })}
         </p>
         <div>
           {result.hits.map((hit, idx) => (
@@ -319,7 +316,10 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
   return (
     <div>
       <p className="mb-2 text-xs text-text-secondary">
-        {result.totalHits} results ({result.processingTimeMs}ms)
+        {m.search_results_summary({
+          count: result.totalHits,
+          ms: result.processingTimeMs,
+        })}
       </p>
       <div>
         {result.items.map((item, idx) => (

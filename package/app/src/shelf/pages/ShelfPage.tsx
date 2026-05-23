@@ -15,6 +15,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
@@ -31,7 +32,6 @@ import {
   type ShelfStreamEntry,
 } from "../models/shelfStream";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
-import * as m from "@rezics/i18n/messages";
 
 interface ShelfPageProps {
   unitId: string;
@@ -50,17 +50,17 @@ const MASONRY_COLUMN_CLASS =
   "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
 
 const SORT_OPTIONS: ShelfSortChoice[] = [
-  { field: "manual", order: "desc", label: "Manual" },
-  { field: "manual", order: "asc", label: "Manual reversed" },
-  { field: "addedAt", order: "desc", label: "Newest" },
-  { field: "addedAt", order: "asc", label: "Oldest" },
-  { field: "title", order: "asc", label: "Title A-Z" },
-  { field: "title", order: "desc", label: "Title Z-A" },
+  { field: "manual", order: "desc", label: m.shelf_sort_manual },
+  { field: "manual", order: "asc", label: m.shelf_sort_manual_reversed },
+  { field: "addedAt", order: "desc", label: m.shelf_sort_newest },
+  { field: "addedAt", order: "asc", label: m.shelf_sort_oldest },
+  { field: "title", order: "asc", label: m.shelf_sort_title_az },
+  { field: "title", order: "desc", label: m.shelf_sort_title_za },
 ];
 
 const VIEW_OPTIONS: ShelfViewChoice[] = [
-  { value: "nested", label: "Nested" },
-  { value: "flat", label: "List" },
+  { value: "nested", label: m.shelf_view_nested },
+  { value: "flat", label: m.shelf_view_list },
   // { value: "masonry", label: "Grid" },
 ];
 
@@ -111,7 +111,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     [itemsData?.pages],
   );
   const translation = shelf ? getTranslation(shelf.translations) : undefined;
-  const title = translation?.title ?? "Shelf";
+  const title = translation?.title ?? m.shelf_title();
   const description = translation?.description ?? "";
 
   const savedViewMode = normalizePersistedViewMode(
@@ -235,7 +235,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
         >
           <img
             src={shelf.coverUrl}
-            alt={`${title} cover`}
+            alt={m.shelf_cover_alt({ title })}
             className="h-full w-full object-cover"
           />
           <div
@@ -263,8 +263,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 </p>
               )}
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
-                <span>{shelf?.itemCount ?? 0} items</span>
-                {shelf?.user?.name && <span>by {shelf.user.name}</span>}
+                <span>
+                  {m.shelf_items_count({ count: shelf?.itemCount ?? 0 })}
+                </span>
+                {shelf?.user?.name && (
+                  <span>{m.shelf_by_author({ name: shelf.user.name })}</span>
+                )}
               </div>
             </div>
 
@@ -278,7 +282,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                     onClick={handleEditShelf}
                   >
                     <EditIcon className="h-4 w-4" />
-                    Edit shelf
+                    {m.shelf_edit_action()}
                   </Button>
                 )}
                 {reactionPost && (
@@ -294,7 +298,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                           className="gap-2"
                         >
                           <EditIcon className="h-4 w-4" />
-                          <span>Edit shelf</span>
+                          <span>{m.shelf_edit_action()}</span>
                         </DropdownMenuItem>
                       ) : null
                     }
@@ -317,8 +321,12 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 </p>
               )}
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
-                <span>{shelf?.itemCount ?? 0} items</span>
-                {shelf?.user?.name && <span>by {shelf.user.name}</span>}
+                <span>
+                  {m.shelf_items_count({ count: shelf?.itemCount ?? 0 })}
+                </span>
+                {shelf?.user?.name && (
+                  <span>{m.shelf_by_author({ name: shelf.user.name })}</span>
+                )}
               </div>
             </div>
 
@@ -332,7 +340,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                     onClick={handleEditShelf}
                   >
                     <EditIcon className="h-4 w-4" />
-                    Edit shelf
+                    {m.shelf_edit_action()}
                   </Button>
                 )}
                 {reactionPost && (
@@ -348,7 +356,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                           className="gap-2"
                         >
                           <EditIcon className="h-4 w-4" />
-                          <span>Edit shelf</span>
+                          <span>{m.shelf_edit_action()}</span>
                         </DropdownMenuItem>
                       ) : null
                     }
@@ -379,14 +387,17 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                     setSortPrimeOnly(checked === true)
                   }
                 />
-                <span className="whitespace-nowrap">Sort prime only</span>
+                <span className="whitespace-nowrap">
+                  {m.shelf_sort_prime_only()}
+                </span>
               </Label>
             )}
             {hydration.orphanUnitIds.length > 0 && (
               <>
                 <span className="text-xs text-warning-text">
-                  {hydration.orphanUnitIds.length} orphan
-                  {hydration.orphanUnitIds.length === 1 ? "" : "s"}
+                  {m.shelf_orphan_count({
+                    count: hydration.orphanUnitIds.length,
+                  })}
                 </span>
                 {isOwner && (
                   <Button
@@ -400,7 +411,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                       })
                     }
                   >
-                    Clean up
+                    {m.shelf_cleanup_orphans()}
                   </Button>
                 )}
               </>
@@ -414,11 +425,11 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
         ) : isItemsError ? (
           <p className="py-8 text-center text-error">
-            Failed to load shelf items
+            {m.shelf_items_load_failed()}
           </p>
         ) : visibleStream.length === 0 ? (
           <p className="py-8 text-center text-text-secondary">
-            No items in this shelf
+            {m.shelf_empty_items()}
           </p>
         ) : effectiveViewMode === "masonry" ? (
           <div className={MASONRY_COLUMN_CLASS}>

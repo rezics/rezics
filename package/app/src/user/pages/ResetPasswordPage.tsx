@@ -88,15 +88,15 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
     try {
       const validated = validatePassword(password);
       if (!validated.valid) {
-        throw new Error(validated.error ?? "Invalid password");
+        throw new Error(validated.error ?? m.auth_error_invalid_password());
       }
 
       if (password !== confirmPassword) {
-        throw new Error("Passwords do not match.");
+        throw new Error(m.auth_error_passwords_mismatch());
       }
 
       if (!resetToken) {
-        throw new Error("Missing password reset token.");
+        throw new Error(m.auth_reset_missing_token());
       }
 
       await authApi.resetPassword({
@@ -104,7 +104,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         token: resetToken,
       });
 
-      setMessage("Password updated. Redirecting to login...");
+      setMessage(m.auth_reset_success_redirecting());
       onClose?.();
 
       if (pathname === "/reset-password") {
@@ -133,7 +133,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
       )}
       {!resetToken ? (
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="reset-email">Email</Label>
+          <Label htmlFor="reset-email">{m.common_email()}</Label>
           <Input
             id="reset-email"
             name="email"
@@ -153,7 +153,9 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         </>
       )}
       <div>
-        <TextButton onClick={handleLoginClick}>Back to Login</TextButton>
+        <TextButton onClick={handleLoginClick}>
+          {m.auth_reset_back_to_login()}
+        </TextButton>
       </div>
     </>
   );
@@ -172,15 +174,15 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
             ? m.common_loading()
             : m.auth_flow_reset_link_sending()
           : resetToken
-            ? "Reset Password"
-            : "Send Reset Link"}
+            ? m.auth_reset_title()
+            : m.auth_reset_send_link()}
       </Button>
     </>
   );
 
   return (
     <LayoutComponent
-      title="Reset Password"
+      title={m.auth_reset_title()}
       content={content}
       actions={actions}
     />

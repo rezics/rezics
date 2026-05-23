@@ -4,6 +4,7 @@ import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { createContext, type FC, useContext } from "react";
+import * as m from "@rezics/i18n/messages";
 import { useUserProfileStore } from "@/user/states";
 import { ProfileBasicInfo } from "./ProfileBasicInfo";
 import { ProfileShell } from "./ProfileShell";
@@ -71,7 +72,7 @@ export const ProfileLayout: FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-error-text">
-          {error ? (error as Error).message : "User not found"}
+          {error ? (error as Error).message : m.user_not_found()}
         </p>
       </div>
     );

@@ -1,4 +1,5 @@
 import type { EntityDTO, UnitTranslationDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 
 /**
  * Pure selectors for the Entity feature. No React, no hooks — safe to call
@@ -23,7 +24,7 @@ export function getEntityPrimaryTitle(
   language?: string,
 ): string {
   const tr = getEntityTranslation(entity, language);
-  return tr?.title?.trim() || "Untitled entity";
+  return tr?.title?.trim() || m.entity_untitled();
 }
 
 export function getEntityLanguages(

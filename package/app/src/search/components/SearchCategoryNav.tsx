@@ -32,7 +32,7 @@ export const SearchCategoryNav: React.FC<SearchCategoryNavProps> = ({
           const count = counts?.[category];
           return (
             <TabsTrigger key={category} value={category} className="flex-none">
-              <span>{CATEGORY_LABELS[category]}</span>
+              <span>{CATEGORY_LABELS[category]()}</span>
               {typeof count === "number" && (
                 <span className="ml-1 text-xs text-text-secondary">
                   {count}

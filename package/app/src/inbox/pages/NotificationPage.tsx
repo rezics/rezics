@@ -6,6 +6,7 @@ import {
 } from "@rezics/api/notification";
 import { Button } from "@rezics/ui/shadcn";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import * as m from "@rezics/i18n/messages";
 import { NotificationCard } from "../components/NotificationCard.tsx";
 import { InboxTabBar } from "../components/InboxTabBar.tsx";
 
@@ -19,7 +20,7 @@ export const NotificationPage: React.FC = () => {
   return (
     <div className="mx-auto mt-16 w-11/12 max-w-3xl">
       <div className="mb-6 flex items-center justify-between">
-        <AccentBarWithText text="Notifications" />
+        <AccentBarWithText text={m.notifications_title()} />
         {items.some((item) => !item.read) && (
           <Button
             variant="ghost"
@@ -27,21 +28,25 @@ export const NotificationPage: React.FC = () => {
             onClick={() => markAllAsRead.mutate()}
             disabled={markAllAsRead.isPending}
           >
-            Mark all as read
+            {m.notifications_mark_all_read()}
           </Button>
         )}
       </div>
       <InboxTabBar active="notifications" />
       <div className="mt-4" />
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isLoading && (
+        <p className="text-sm text-muted-foreground">{m.common_loading()}</p>
+      )}
       {isError && (
         <p className="text-sm text-destructive">
-          Could not load notifications.
+          {m.notifications_load_failed()}
         </p>
       )}
       {!isLoading && !isError && items.length === 0 && (
-        <p className="text-sm text-muted-foreground">No notifications yet.</p>
+        <p className="text-sm text-muted-foreground">
+          {m.notifications_empty()}
+        </p>
       )}
 
       <ul className="flex flex-col gap-1">

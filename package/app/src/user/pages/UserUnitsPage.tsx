@@ -19,6 +19,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { BookListView } from "@/book-library/components/BookList/BookListView";
 import { ExcerptList } from "@/excerpt";
 import { ReviewList } from "@/review/components/list/ReviewList";
@@ -282,20 +283,30 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
-          placeholder="Search user's content"
+          placeholder={m.profile_search_content_placeholder()}
         />
         <div className="border-b border-border-whisper mt-4 mb-4">
           <Tabs
             value={tab}
             onValueChange={(v) => setTab(v as TabKey)}
-            aria-label="user unit tabs"
+            aria-label={m.profile_unit_tabs_label()}
           >
             <TabsList>
-              <TabsTrigger value="shelf">SHELF</TabsTrigger>
-              <TabsTrigger value="review">REVIEW</TabsTrigger>
-              <TabsTrigger value="book">BOOK</TabsTrigger>
-              <TabsTrigger value="remark">REMARK</TabsTrigger>
-              <TabsTrigger value="excerpt">EXCERPT</TabsTrigger>
+              <TabsTrigger value="shelf">
+                {m.search_category_shelves()}
+              </TabsTrigger>
+              <TabsTrigger value="review">
+                {m.search_category_reviews()}
+              </TabsTrigger>
+              <TabsTrigger value="book">
+                {m.search_category_books()}
+              </TabsTrigger>
+              <TabsTrigger value="remark">
+                {m.search_category_remarks()}
+              </TabsTrigger>
+              <TabsTrigger value="excerpt">
+                {m.search_category_excerpts()}
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

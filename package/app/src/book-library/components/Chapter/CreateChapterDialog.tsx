@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import type { Chapter } from "./ChapterArborist";
+import * as m from "@rezics/i18n/messages";
 
 interface CreateChapterDialogProps {
   open: boolean;
@@ -51,9 +52,9 @@ export function CreateChapterDialog({
   const createMutation = useCreateChapterMutation({
     onError: (error) => {
       show(
-        `创建章节失败: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        m.book_chapter_create_failed({
+          error: error instanceof Error ? error.message : String(error),
+        }),
       );
     },
   });
@@ -66,13 +67,13 @@ export function CreateChapterDialog({
   async function handleSubmit() {
     if (!open) return;
     if (isInvalid) {
-      show("标题和内容不能为空");
+      show(m.book_chapter_title_content_required());
       return;
     }
 
     const userId = (user as any)?.unitId as string | undefined;
     if (!userId) {
-      show("请先登录");
+      show(m.auth_flow_onboarding_sign_in_first());
       return;
     }
 
@@ -105,11 +106,11 @@ export function CreateChapterDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Create Chapter</DialogTitle>
+          <DialogTitle>{m.book_edit_create_chapter()}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="chapter-title">章节标题</Label>
+            <Label htmlFor="chapter-title">{m.book_edit_chapter_title()}</Label>
             <Input
               id="chapter-title"
               value={title}
@@ -123,7 +124,7 @@ export function CreateChapterDialog({
                   : "text-sm text-text-secondary"
               }
             >
-              {!title.trim() ? "必填" : " "}
+              {!title.trim() ? m.common_required() : " "}
             </p>
           </div>
           <div className="min-h-[300px]">
@@ -132,10 +133,16 @@ export function CreateChapterDialog({
               onChange={setContent}
               onSubmit={handleSubmit}
               onCancel={onClose}
-              submitLabel={createMutation.isPending ? "创建中..." : "创建"}
+              submitLabel={
+                createMutation.isPending
+                  ? m.common_submitting()
+                  : m.common_create()
+              }
             />
             {!content.trim() && (
-              <div className="text-sm text-error-text mt-2">内容为必填</div>
+              <div className="text-sm text-error-text mt-2">
+                {m.book_chapter_content_required()}
+              </div>
             )}
           </div>
         </div>

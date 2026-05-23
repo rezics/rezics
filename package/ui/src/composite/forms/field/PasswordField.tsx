@@ -35,8 +35,8 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   const inputName = name ?? "password";
   const help = helperText ?? m.ui_password_help();
   const labelText = label ?? m.ui_password_label();
-  const showLabel = visibilityLabels?.show ?? "Show password";
-  const hideLabel = visibilityLabels?.hide ?? "Hide password";
+  const showLabel = visibilityLabels?.show ?? m.ui_password_show();
+  const hideLabel = visibilityLabels?.hide ?? m.ui_password_hide();
 
   return (
     <div className={`flex flex-col gap-1 ${className ?? ""}`}>

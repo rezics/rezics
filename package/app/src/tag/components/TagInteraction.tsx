@@ -246,7 +246,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
               <Button
                 size="icon"
                 variant="ghost"
-                aria-label="Close"
+                aria-label={m.common_close()}
                 onClick={() => dispatch({ type: "CLOSE_PREVIEW" })}
               >
                 <CloseIcon className="h-4 w-4" />

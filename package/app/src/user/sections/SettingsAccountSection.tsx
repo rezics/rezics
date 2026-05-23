@@ -238,13 +238,13 @@ export const SettingsAccountSection: FC = () => {
         )}
       </SettingsSection>
 
-      <DangerZone description="Once you delete your account, there is no going back. Please be certain.">
+      <DangerZone description={m.settings_account_delete_warning()}>
         <Button
           variant="outline"
           className="text-error-text"
           onClick={() => setDeleteOpen(true)}
         >
-          Delete Account
+          {m.settings_account_delete_title()}
         </Button>
 
         <Dialog
@@ -253,11 +253,12 @@ export const SettingsAccountSection: FC = () => {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Delete Account</DialogTitle>
+              <DialogTitle>{m.settings_account_delete_title()}</DialogTitle>
             </DialogHeader>
             <p className="text-sm mb-4">
-              This action is permanent and cannot be undone. To confirm, type
-              your username <strong>{user?.slug}</strong> below.
+              {m.settings_account_delete_confirm_prefix()}{" "}
+              <strong>{user?.slug}</strong>{" "}
+              {m.settings_account_delete_confirm_suffix()}
             </p>
             <Input
               placeholder={user?.slug}
@@ -272,14 +273,16 @@ export const SettingsAccountSection: FC = () => {
             )}
             <DialogFooter>
               <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-                Cancel
+                {m.common_cancel()}
               </Button>
               <Button
                 variant="destructive"
                 disabled={!slugMatch || deleteMe.isPending}
                 onClick={handleDeleteAccount}
               >
-                {deleteMe.isPending ? "Deleting..." : "Delete My Account"}
+                {deleteMe.isPending
+                  ? m.settings_account_deleting()
+                  : m.settings_account_delete_my_account()}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -11,6 +11,7 @@ import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { remarkDetailActions, remarkPolicy } from "../../models/remarkPolicy";
+import * as m from "@rezics/i18n/messages";
 
 interface RemarkDetailProps {
   remark: PostDTO;
@@ -48,7 +49,9 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
       {bookUnitId && (
         <div>
           <TextLink to="/book/$bookId" params={{ bookId: bookUnitId }}>
-            <span className="text-xs text-text-brand">View book</span>
+            <span className="text-xs text-text-brand">
+              {m.page_book_edit_info_dialog_view_book()}
+            </span>
           </TextLink>
         </div>
       )}

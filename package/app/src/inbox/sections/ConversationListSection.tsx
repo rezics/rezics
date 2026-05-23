@@ -2,6 +2,7 @@ import { useConversations, type DmConversation } from "@rezics/api/dm/dm";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type { FC } from "react";
+import * as m from "@rezics/i18n/messages";
 
 function compareUpdatedDesc(a: DmConversation, b: DmConversation): number {
   return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
@@ -26,16 +27,18 @@ export const ConversationListSection: FC = () => {
   return (
     <ul className="flex w-full flex-col gap-1">
       {isLoading && (
-        <li className="px-2 py-4 text-sm text-text-secondary">Loading…</li>
+        <li className="px-2 py-4 text-sm text-text-secondary">
+          {m.common_loading()}
+        </li>
       )}
       {isError && (
         <li className="px-2 py-4 text-sm text-destructive">
-          Could not load conversations.
+          {m.inbox_conversations_load_failed()}
         </li>
       )}
       {!isLoading && !isError && conversations.length === 0 && (
         <li className="px-2 py-4 text-sm text-text-secondary">
-          No conversations yet. Subscribe to someone to start a thread.
+          {m.inbox_conversations_empty()}
         </li>
       )}
       {conversations.map((c) => (

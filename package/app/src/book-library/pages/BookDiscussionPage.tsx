@@ -8,12 +8,15 @@ import { useMemo } from "react";
 import { PostListSection, ReplyComposer } from "@/post";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
+import * as m from "@rezics/i18n/messages";
 
 const CommunitySidebar: React.FC = () => (
   <div className="bg-surface-elevated p-4 border border-border-whisper rounded-md">
-    <h3 className="text-base font-semibold mb-2">Community</h3>
+    <h3 className="text-base font-semibold mb-2">
+      {m.page_book_tabs_community()}
+    </h3>
     <p className="text-sm text-text-secondary">
-      Hot threads and active contributors will appear here.
+      {m.book_community_sidebar_help()}
     </p>
   </div>
 );

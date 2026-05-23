@@ -3,6 +3,7 @@ import { Spinner } from "@rezics/ui";
 import { unitHref } from "@/shared/ui/link";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
+import * as m from "@rezics/i18n/messages";
 import { useUserProfileStore } from "@/user/states";
 import { EntityIdentityRow } from "../components/EntityIdentityRow";
 
@@ -19,7 +20,7 @@ export function MyEntitiesPage() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <p className="text-sm text-text-secondary">
-          Please log in to view your entities.
+          {m.entity_login_required()}
         </p>
       </div>
     );
@@ -39,20 +40,20 @@ export function MyEntitiesPage() {
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-text-primary">
-          My entities
+          {m.entity_my_entities()}
         </h1>
         <Link to="/user/me/entities/new">
-          <Button>New entity</Button>
+          <Button>{m.entity_new_button()}</Button>
         </Link>
       </div>
 
       {entities.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border-whisper p-8 text-center">
           <p className="text-sm text-text-secondary">
-            You haven&apos;t declared any entities yet.
+            {m.entity_empty_owned()}
           </p>
           <Link to="/user/me/entities/new" className="mt-3 inline-block">
-            <Button>Declare an entity</Button>
+            <Button>{m.entity_declare()}</Button>
           </Link>
         </div>
       ) : (

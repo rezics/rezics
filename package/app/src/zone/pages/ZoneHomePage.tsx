@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useZone } from "../hooks/useZone";
@@ -20,7 +21,7 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <p className="text-text-secondary">Loading zone...</p>
+        <p className="text-text-secondary">{m.zone_loading()}</p>
       </div>
     );
   }
@@ -28,10 +29,8 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
   if (error || !zone) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl font-semibold mb-2">Zone not found</h2>
-        <p className="text-text-secondary">
-          The zone you're looking for doesn't exist or is no longer available.
-        </p>
+        <h2 className="text-2xl font-semibold mb-2">{m.zone_not_found()}</h2>
+        <p className="text-text-secondary">{m.zone_not_found_description()}</p>
       </div>
     );
   }

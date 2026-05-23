@@ -7,6 +7,7 @@ import type { PostDTO } from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 export interface WikiPostEditorProps {
   targetUnitId?: string;
@@ -71,7 +72,7 @@ export function WikiPostEditor({
             onClick={onCancel}
             disabled={activeMutation.isPending}
           >
-            Cancel
+            {m.common_cancel()}
           </Button>
         ) : null}
         <Button
@@ -79,7 +80,7 @@ export function WikiPostEditor({
           onClick={handleSave}
           disabled={activeMutation.isPending || !body.trim()}
         >
-          {activeMutation.isPending ? "Saving..." : "Save"}
+          {activeMutation.isPending ? m.common_saving() : m.common_save()}
         </Button>
       </div>
     </div>

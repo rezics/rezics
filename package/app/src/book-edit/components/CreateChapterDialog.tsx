@@ -139,10 +139,16 @@ export function CreateChapterDialog({
               onChange={setContent}
               onSubmit={handleSubmit}
               onCancel={onClose}
-              submitLabel={createMutation.isPending ? "创建中..." : "创建"}
+              submitLabel={
+                createMutation.isPending
+                  ? m.common_creating()
+                  : m.common_create()
+              }
             />
             {!content.trim() && (
-              <div className="text-sm text-destructive mt-2">内容为必填</div>
+              <div className="text-sm text-destructive mt-2">
+                {m.book_chapter_content_required()}
+              </div>
             )}
           </div>
         </div>

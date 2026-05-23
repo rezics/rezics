@@ -121,7 +121,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-error-text">Failed to load user data</p>
+        <p className="text-error-text">{m.user_load_failed()}</p>
       </div>
     );
   }
@@ -141,7 +141,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
               </AvatarFallback>
             </Avatar>
             <h4 className="text-2xl font-semibold">
-              {m.common_edit()} Profile
+              {m.settings_profile_edit_title()}
             </h4>
           </div>
           <form onSubmit={handleSubmit}>
@@ -164,18 +164,22 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="user-edit-avatar">Avatar URL</Label>
+                <Label htmlFor="user-edit-avatar">
+                  {m.entity_avatar_url()}
+                </Label>
                 <Input
                   id="user-edit-avatar"
                   value={formData.avatar ?? ""}
                   onChange={(e) => handleChange("avatar", e.target.value)}
                 />
                 <p className="text-xs text-text-secondary">
-                  Enter a URL for your profile picture
+                  {m.settings_profile_avatar_help()}
                 </p>
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="user-edit-bio">Bio</Label>
+                <Label htmlFor="user-edit-bio">
+                  {m.settings_profile_bio()}
+                </Label>
                 <textarea
                   id="user-edit-bio"
                   className="flex w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus:ring-2 focus:ring-brand-fill"
@@ -184,11 +188,13 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   rows={4}
                 />
                 <p className="text-xs text-text-secondary">
-                  Tell us about yourself
+                  {m.settings_profile_about_help()}
                 </p>
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="user-edit-description">Description</Label>
+                <Label htmlFor="user-edit-description">
+                  {m.common_description()}
+                </Label>
                 <textarea
                   id="user-edit-description"
                   className="flex w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus:ring-2 focus:ring-brand-fill"
@@ -197,7 +203,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   rows={4}
                 />
                 <p className="text-xs text-text-secondary">
-                  Tell us about yourself
+                  {m.settings_profile_about_help()}
                 </p>
               </div>
               <PasswordField

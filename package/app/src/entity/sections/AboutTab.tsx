@@ -1,4 +1,5 @@
 import type { EntityDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { getEntityTranslation } from "../models/types";
 
 interface AboutTabProps {
@@ -10,17 +11,26 @@ export function AboutTab({ entity, language }: AboutTabProps) {
   const tr = getEntityTranslation(entity, language);
   const items: Array<{ label: string; value: string }> = [];
 
-  if (entity.kind) items.push({ label: "Kind", value: entity.kind });
+  if (entity.kind)
+    items.push({ label: m.entity_kind_label(), value: entity.kind });
   if (entity.verified !== undefined) {
-    items.push({ label: "Verified", value: entity.verified ? "Yes" : "No" });
+    items.push({
+      label: m.entity_verified(),
+      value: entity.verified ? m.common_yes() : m.common_no(),
+    });
   }
-  if (entity.slug) items.push({ label: "Slug", value: entity.slug });
+  if (entity.slug)
+    items.push({ label: m.entity_slug_label(), value: entity.slug });
   if (tr?.language) {
-    items.push({ label: "Translation", value: tr.language });
+    items.push({ label: m.common_translation(), value: tr.language });
   }
 
   if (items.length === 0) {
-    return <p className="text-sm text-text-secondary">No details available.</p>;
+    return (
+      <p className="text-sm text-text-secondary">
+        {m.entity_no_details_available()}
+      </p>
+    );
   }
 
   return (

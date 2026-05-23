@@ -9,6 +9,7 @@ import type {
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { getTranslation } from "../../shared/utils/translation-helpers";
 
 export type UnitCardAuthor = PublicUser;
@@ -91,7 +92,7 @@ export function unitDtoToUnitCardSummary(
     text(translation?.title) ??
     text(options.fallbackTitle) ??
     text(unitId) ??
-    "Untitled unit";
+    m.unit_untitled();
   const imageUrl =
     text(unit.coverUrl) ??
     readCoverUrlFromExtra(translation?.extra) ??

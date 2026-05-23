@@ -9,18 +9,23 @@ import {
   SlidersHorizontal as TuneIcon,
 } from "lucide-react";
 import type { FC } from "react";
+import * as m from "@rezics/i18n/messages";
 
 const SETTINGS_NAV = [
-  { label: "Profile", path: "profile", icon: AccountCircleIcon },
-  { label: "Account", path: "account", icon: EmailIcon },
-  { label: "Security", path: "security", icon: SecurityIcon },
-  { label: "Connected Accounts", path: "connections", icon: LinkIcon },
-  { label: "API Tokens", path: "tokens", icon: KeyIcon },
-  { label: "Preferences", path: "preferences", icon: TuneIcon },
+  { label: m.settings_nav_profile, path: "profile", icon: AccountCircleIcon },
+  { label: m.settings_nav_account, path: "account", icon: EmailIcon },
+  { label: m.settings_nav_security, path: "security", icon: SecurityIcon },
+  { label: m.settings_nav_connections, path: "connections", icon: LinkIcon },
+  { label: m.settings_nav_tokens, path: "tokens", icon: KeyIcon },
+  { label: m.settings_nav_preferences, path: "preferences", icon: TuneIcon },
 ] as const;
 
 const EXTRA_NAV = [
-  { label: "Entities", to: "/user/me/entities", icon: IdentityIcon },
+  {
+    label: m.settings_nav_entities,
+    to: "/user/me/entities",
+    icon: IdentityIcon,
+  },
 ] as const;
 
 export const SettingsSidebar: FC = () => {
@@ -48,7 +53,7 @@ export const SettingsSidebar: FC = () => {
               <span className="min-w-[24px] flex items-center">
                 <Icon className="w-4 h-4" />
               </span>
-              <span>{label}</span>
+              <span>{label()}</span>
             </button>
           </li>
         );
@@ -72,7 +77,7 @@ export const SettingsSidebar: FC = () => {
               <span className="min-w-[24px] flex items-center">
                 <Icon className="w-4 h-4" />
               </span>
-              <span>{label}</span>
+              <span>{label()}</span>
             </button>
           </li>
         );

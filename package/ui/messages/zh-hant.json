@@ -1,5 +1,7 @@
 {
   "ui_password_label": "密碼",
   "ui_password_help": "密碼至少需要 8 個字元。",
-  "ui_pagination_tips": "分頁"
+  "ui_pagination_tips": "分頁",
+  "ui_password_show": "顯示密碼",
+  "ui_password_hide": "隱藏密碼"
 }

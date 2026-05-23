@@ -170,10 +170,8 @@ export function EntityPicker({
     >
       <DialogContent className="max-w-xl gap-0 overflow-hidden p-0">
         <DialogHeader className="border-b border-border-whisper p-4">
-          <DialogTitle>Find or create entity</DialogTitle>
-          <DialogDescription>
-            Search for an existing entity, or create a new one inline.
-          </DialogDescription>
+          <DialogTitle>{m.entity_picker_title()}</DialogTitle>
+          <DialogDescription>{m.entity_picker_description()}</DialogDescription>
         </DialogHeader>
 
         <div className="flex gap-2 p-3">
@@ -247,7 +245,7 @@ export function EntityPicker({
               setQuery(e.target.value);
               setSelectionError(null);
             }}
-            placeholder="Search entities…"
+            placeholder={m.entity_picker_search_placeholder()}
             autoFocus
             className="min-w-0 flex-1"
           />
@@ -262,7 +260,7 @@ export function EntityPicker({
 
           {!isFetching && debouncedQuery && orderedResults.length === 0 ? (
             <p className="px-3 py-4 text-center text-sm text-text-secondary">
-              No matching entities — create one?
+              {m.entity_picker_no_matches_create()}
             </p>
           ) : null}
 
@@ -297,8 +295,9 @@ export function EntityPicker({
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Create new entity
-              {query.trim() ? `: “${query.trim()}”` : ""}
+              {query.trim()
+                ? m.entity_picker_create_named({ name: query.trim() })
+                : m.entity_picker_create_new()}
             </Button>
           )}
         </div>

@@ -4,6 +4,7 @@ import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { ShelfCard } from "../components/ShelfCard";
@@ -37,14 +38,14 @@ export function ShelfSearchPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">Search Shelves</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{m.shelf_search_title()}</h1>
 
       <div className="mb-6">
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
           onSubmit={() => setOffset(0)}
-          placeholder="Search shelves..."
+          placeholder={m.shelf_search_placeholder()}
         />
       </div>
 
@@ -53,7 +54,9 @@ export function ShelfSearchPage() {
           <Spinner />
         </div>
       ) : shelves.length === 0 ? (
-        <p className="py-8 text-center text-text-secondary">No shelves found</p>
+        <p className="py-8 text-center text-text-secondary">
+          {m.shelf_none_found()}
+        </p>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -69,7 +72,7 @@ export function ShelfSearchPage() {
                 disabled={!hasPreviousPage || isLoading}
                 onClick={() => setOffset((value) => Math.max(0, value - limit))}
               >
-                Prev
+                {m.common_prev()}
               </Button>
               <span className="text-sm text-text-secondary">
                 {currentPage} / {totalPages}
@@ -80,7 +83,7 @@ export function ShelfSearchPage() {
                 disabled={!hasNextPage || isLoading}
                 onClick={() => setOffset((value) => value + limit)}
               >
-                Next
+                {m.common_next()}
               </Button>
             </div>
           )}

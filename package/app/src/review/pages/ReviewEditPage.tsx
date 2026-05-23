@@ -106,7 +106,7 @@ export function ReviewEditPageContainer() {
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">Edit Review</h1>
+        <h1 className="text-xl font-semibold">{m.review_edit_title()}</h1>
         <ReviewForm
           data={reviewData}
           setData={setReviewData}

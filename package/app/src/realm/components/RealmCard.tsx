@@ -3,6 +3,7 @@ import { unitHref } from "@/shared/ui/link";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
 interface RealmCardProps {
@@ -11,7 +12,7 @@ interface RealmCardProps {
 
 export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
   const translation = getTranslation(realm.translations);
-  const title = translation?.title ?? "Untitled Realm";
+  const title = translation?.title ?? m.realm_untitled();
   const description = translation?.description ?? "";
 
   return (
@@ -27,15 +28,15 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
         <CardContent>
           <h3 className="truncate text-lg font-semibold">{title}</h3>
           <p className="mt-1 line-clamp-2 text-sm text-text-secondary">
-            {description || "No description"}
+            {description || m.common_no_description()}
           </p>
           <div className="mt-4 flex flex-row items-center gap-2">
             <span className="text-xs text-text-secondary">
-              {realm.memberCount ?? 0} members
+              {m.realm_member_count({ count: realm.memberCount ?? 0 })}
             </span>
             {realm.isPublic && (
               <Badge variant="outline" className="text-xs">
-                Public
+                {m.realm_public()}
               </Badge>
             )}
             {realm.isOfficial && (
@@ -43,7 +44,7 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
                 variant="outline"
                 className="border-brand-fill text-text-brand text-xs"
               >
-                Official
+                {m.realm_official()}
               </Badge>
             )}
           </div>

@@ -122,7 +122,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
               onChange={() => {}}
               readOnly
               size="sm"
-              aria-label="review score"
+              aria-label={m.book_hero_featured_review_score_label()}
             />
           </div>
         )}

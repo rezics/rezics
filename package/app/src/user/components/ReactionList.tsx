@@ -6,6 +6,7 @@ import { EmptyState, Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { Sparkles } from "lucide-react";
 import { useEffect, useRef } from "react";
+import * as m from "@rezics/i18n/messages";
 import { ReactionHistoryItem } from "./ReactionHistoryItem";
 
 interface ReactionListGivenProps {
@@ -72,11 +73,11 @@ export function ReactionList(props: ReactionListProps) {
   if (error && items.length === 0) {
     return (
       <EmptyState
-        title="Couldn't load reactions"
+        title={m.reactions_load_failed()}
         description={error.message}
         action={
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Retry
+            {m.common_retry()}
           </Button>
         }
       />
@@ -87,12 +88,14 @@ export function ReactionList(props: ReactionListProps) {
     return (
       <EmptyState
         title={
-          mode === "given" ? "No reactions yet" : "No reactions received yet"
+          mode === "given"
+            ? m.reactions_empty_given()
+            : m.reactions_empty_received()
         }
         description={
           mode === "given"
-            ? "Reactions to other content will appear here."
-            : "Reactions to this profile's content will appear here."
+            ? m.reactions_empty_given_description()
+            : m.reactions_empty_received_description()
         }
         icon={<Sparkles width={28} height={28} />}
       />
@@ -123,13 +126,13 @@ export function ReactionList(props: ReactionListProps) {
               onClick={() => fetchNextPage()}
               className="text-text-secondary"
             >
-              Load more
+              {m.common_load_more()}
             </Button>
           )}
         </div>
       ) : (
         <p className="text-xs text-text-tertiary text-center py-6">
-          End of list
+          {m.common_end_of_list()}
         </p>
       )}
     </div>

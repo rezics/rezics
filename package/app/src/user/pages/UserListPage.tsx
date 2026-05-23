@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search as SearchIcon } from "lucide-react";
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { UserError, UserLoading } from "./UserState";
 
 export interface UserListPageProps {
@@ -78,13 +79,13 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
 
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <h3 className="text-3xl font-bold mb-8">Users</h3>
+      <h3 className="text-3xl font-bold mb-8">{m.user_list_title()}</h3>
 
       <div className="mb-8 relative">
         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
         <Input
           className="pl-10"
-          placeholder="Search users by name or email..."
+          placeholder={m.user_search_placeholder()}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -96,7 +97,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
 
       {!isLoading && !error && users.length === 0 && (
         <div className="flex items-center justify-center h-64">
-          <h6 className="text-lg text-text-secondary">No users found</h6>
+          <h6 className="text-lg text-text-secondary">{m.user_none_found()}</h6>
         </div>
       )}
 
@@ -131,7 +132,9 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
                     </p>
                   )}
                   {!user.bio && (
-                    <p className="text-sm text-text-secondary italic">No bio</p>
+                    <p className="text-sm text-text-secondary italic">
+                      {m.user_no_bio()}
+                    </p>
                   )}
                 </CardContent>
               </Card>

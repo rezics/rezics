@@ -12,6 +12,7 @@ import {
   Share2,
 } from "lucide-react";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 import type { Action, EngagementSize } from "../types";
 
 export type OverflowMenuProps = {
@@ -21,12 +22,18 @@ export type OverflowMenuProps = {
   children?: React.ReactNode;
 };
 
-type MenuDescriptor = { label: string; icon: React.ReactNode };
+type MenuDescriptor = { label: () => string; icon: React.ReactNode };
 
 const DESCRIPTORS: Partial<Record<Action, MenuDescriptor>> = {
-  reply: { label: "Reply", icon: <MessageSquare size={18} strokeWidth={2} /> },
-  share: { label: "Share", icon: <Share2 size={18} strokeWidth={2} /> },
-  shelf: { label: "Shelf", icon: <BookmarkPlus size={18} strokeWidth={2} /> },
+  reply: {
+    label: m.common_reply,
+    icon: <MessageSquare size={18} strokeWidth={2} />,
+  },
+  share: { label: m.common_share, icon: <Share2 size={18} strokeWidth={2} /> },
+  shelf: {
+    label: m.shelf_title,
+    icon: <BookmarkPlus size={18} strokeWidth={2} />,
+  },
 };
 
 function sizeToIconPx(size: EngagementSize): number {
@@ -65,7 +72,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
           <Button
             variant="ghost"
             size={size === "lg" ? "default" : "sm"}
-            aria-label="More actions"
+            aria-label={m.common_more_actions()}
             className="text-text-secondary"
             onClick={(event) => event.stopPropagation()}
             {...props}
@@ -88,7 +95,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
               className="gap-2"
             >
               {descriptor.icon}
-              <span>{descriptor.label}</span>
+              <span>{descriptor.label()}</span>
             </DropdownMenuItem>
           );
         })}

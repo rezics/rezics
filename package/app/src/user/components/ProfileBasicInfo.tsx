@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
 import type { FC } from "react";
+import * as m from "@rezics/i18n/messages";
 import FollowButton from "@/engagement/components/FollowButton";
 
 interface ProfileBasicInfoProps {
@@ -50,7 +51,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
             <Button
               size="icon"
               variant="ghost"
-              aria-label="Settings"
+              aria-label={m.settings_title()}
               className="h-8 w-8"
             >
               <SettingsIcon className="w-4 h-4" />
@@ -69,7 +70,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
                 <Button
                   size="icon"
                   variant="ghost"
-                  aria-label="Edit profile"
+                  aria-label={m.settings_profile_edit_title()}
                   className="h-8 w-8"
                 >
                   <EditOutlined className="w-4 h-4" />
@@ -157,24 +158,26 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
 
         {/* Stats — desktop only, shown in sidebar */}
         <div className="w-full mt-4 flex flex-col gap-1">
-          <span className="text-sm font-semibold mb-1">Stats</span>
+          <span className="text-sm font-semibold mb-1">
+            {m.profile_stats()}
+          </span>
           <StatLink
-            label="Shelves"
+            label={m.profile_tab_shelves()}
             count={shelvesCountQuery.data?.total}
             to={`/user/${userId}/shelves`}
           />
           <StatLink
-            label="Content"
+            label={m.profile_tab_content()}
             count={reviewsCountQuery.data?.total}
             to={`/user/${userId}/content`}
           />
           <StatLink
-            label="Followers"
+            label={m.profile_tab_followers()}
             count={user.followersCount ?? 0}
             to={`/user/${userId}/followers`}
           />
           <StatLink
-            label="Following"
+            label={m.profile_following()}
             count={user.followingsCount ?? 0}
             to={`/user/${userId}/followers?filter=following`}
           />

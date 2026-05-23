@@ -5,6 +5,7 @@ import { Spinner } from "@rezics/ui";
 import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { ProviderCard } from "@/user/components/ProviderCard";
 import { providerIcons } from "@/user/components/providerIcons";
 import { SettingsSection } from "@/user/components/SettingsSection";
@@ -55,8 +56,8 @@ export const SettingsConnectionsSection: FC = () => {
 
   return (
     <SettingsSection
-      title="Connected Accounts"
-      description="Link your social accounts for easier sign-in."
+      title={m.settings_connections_title()}
+      description={m.settings_connections_description()}
       divider={false}
     >
       {PROVIDERS.map((provider, i) => (

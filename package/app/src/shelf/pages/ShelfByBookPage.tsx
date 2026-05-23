@@ -2,6 +2,7 @@ import { shelfInfiniteListQuery } from "@rezics/api/shelf";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import * as m from "@rezics/i18n/messages";
 import { ShelfCard } from "../components/ShelfCard";
 
 interface ShelfByBookPageProps {
@@ -19,7 +20,7 @@ export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <h1 className="mb-6 text-2xl font-semibold">
-        Shelves containing this book
+        {m.shelf_containing_this_book_title()}
       </h1>
 
       {isLoading ? (
@@ -28,7 +29,7 @@ export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
         </div>
       ) : shelves.length === 0 ? (
         <p className="py-8 text-center text-text-secondary">
-          No shelves found for this book
+          {m.shelf_none_for_this_book()}
         </p>
       ) : (
         <>
@@ -44,7 +45,7 @@ export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
                 disabled={isFetchingNextPage}
                 onClick={() => void fetchNextPage()}
               >
-                {isFetchingNextPage ? "Loading..." : "Load more"}
+                {isFetchingNextPage ? m.common_loading() : m.common_load_more()}
               </Button>
             </div>
           )}

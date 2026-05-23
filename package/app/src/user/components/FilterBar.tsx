@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
+import * as m from "@rezics/i18n/messages";
 
 export interface FilterDropdownConfig {
   key: string;
@@ -36,7 +37,7 @@ export const FilterBar: FC<FilterBarProps> = ({
   <div className={`flex flex-wrap items-center gap-3 ${className ?? ""}`}>
     {config.showSearch && (
       <Input
-        placeholder={config.searchPlaceholder ?? "Search..."}
+        placeholder={config.searchPlaceholder ?? m.common_search()}
         value={values.q ?? ""}
         onChange={(e) => onChange("q", e.target.value)}
         className="min-w-[180px] flex-1 md:flex-none h-9"

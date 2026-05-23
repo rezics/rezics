@@ -1,6 +1,7 @@
 import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
 import type { RealmDTO, RealmSearchDocument } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
+import * as m from "@rezics/i18n/messages";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { RealmCard } from "../components/RealmCard";
@@ -38,12 +39,12 @@ export function RealmSearchPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">Search Realms</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{m.realm_search_title()}</h1>
       <div className="mb-6">
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
-          placeholder="Search realms..."
+          placeholder={m.realm_search_placeholder()}
         />
       </div>
       {isLoading ? (
@@ -51,7 +52,9 @@ export function RealmSearchPage() {
           <Spinner />
         </div>
       ) : hasKeyword && realms.length === 0 ? (
-        <p className="py-8 text-center text-text-secondary">No realms found</p>
+        <p className="py-8 text-center text-text-secondary">
+          {m.realm_none_found()}
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {realms.map((realm) => (

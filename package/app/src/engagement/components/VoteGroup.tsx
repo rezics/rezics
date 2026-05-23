@@ -2,6 +2,7 @@ import { useReactionData } from "@rezics/api/reaction/reaction";
 import { Button } from "@rezics/ui/shadcn";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import { useVoteController } from "../hooks/useVoteController";
 import type { EngagementSize } from "../types";
@@ -99,7 +100,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
         variant="ghost"
         size="icon"
         onClick={handleUp}
-        aria-label="Upvote"
+        aria-label={m.tag_upvote()}
         className={cn(
           buttonSizeClass,
           "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",
@@ -125,7 +126,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
         variant="ghost"
         size="icon"
         onClick={handleDown}
-        aria-label="Downvote"
+        aria-label={m.tag_downvote()}
         className={cn(
           buttonSizeClass,
           "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",

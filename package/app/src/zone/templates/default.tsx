@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
@@ -45,17 +46,17 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
           onSubmit={() => onSearch?.(search.query.keyword ?? "")}
-          placeholder={`Search in ${zone.name}...`}
+          placeholder={m.zone_search_placeholder({ name: zone.name })}
         />
       </div>
 
       {/* Content area — populated by child routes or sections */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Latest Content</h2>
+        <h2 className="text-lg font-semibold mb-4">
+          {m.zone_latest_content()}
+        </h2>
         {/* MOCK: content sections will be wired when zone-specific content queries exist */}
-        <p className="text-text-secondary">
-          Content for this zone will appear here.
-        </p>
+        <p className="text-text-secondary">{m.zone_content_placeholder()}</p>
       </div>
     </div>
   );

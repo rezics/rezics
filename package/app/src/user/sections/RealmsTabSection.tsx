@@ -4,16 +4,17 @@ import { Link, unitHref } from "@/shared/ui/link";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import {
   type ChipDefinition,
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
-const FILTER_CHIPS: ChipDefinition[] = [
-  { value: "joined", label: "Joined" },
-  { value: "created", label: "Created" },
-];
+const FILTER_CHIP_LABEL = {
+  joined: m.profile_realms_joined,
+  created: m.common_created,
+} as const satisfies Record<string, () => string>;
 
 type RealmListItemModel = {
   unitId: string;
@@ -64,7 +65,7 @@ export const RealmsTabSection: FC = () => {
     activeQuery.error instanceof Error
       ? activeQuery.error.message
       : activeQuery.error
-        ? "Failed to load realms"
+        ? m.profile_realms_load_failed()
         : null;
 
   const joinedRealms =
@@ -75,20 +76,26 @@ export const RealmsTabSection: FC = () => {
   const realms = filter === "joined" ? joinedRealms : createdRealms;
   const emptyMessage =
     filter === "joined"
-      ? "Not a member of any realms yet"
-      : "No realms created yet";
+      ? m.profile_realms_none_joined()
+      : m.profile_realms_none_created();
+  const filterChips: ChipDefinition[] = Object.entries(FILTER_CHIP_LABEL).map(
+    ([value, label]) => ({
+      value,
+      label: label(),
+    }),
+  );
 
   return (
     <div className="flex flex-col gap-4 py-4">
       <InnerFilterPanel
-        chips={FILTER_CHIPS}
+        chips={filterChips}
         activeValue={filter}
         onChipChange={setFilter}
       />
 
       {isLoading ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          Loading...
+          {m.common_loading()}
         </p>
       ) : errorMessage ? (
         <p className="text-sm text-error-text py-12 text-center">
@@ -128,10 +135,12 @@ const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
               </span>
               {realm.isOfficial && (
                 <Badge variant="outline" className="text-text-brand">
-                  Official
+                  {m.realm_official()}
                 </Badge>
               )}
-              {!realm.isPublic && <Badge variant="outline">Private</Badge>}
+              {!realm.isPublic && (
+                <Badge variant="outline">{m.realm_private()}</Badge>
+              )}
             </div>
             {realm.description && (
               <p className="text-sm text-text-secondary mt-1 line-clamp-2">
@@ -140,7 +149,7 @@ const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
             )}
           </div>
           <span className="text-sm text-text-secondary shrink-0">
-            {realm.memberCount} members
+            {m.realm_member_count({ count: realm.memberCount })}
           </span>
         </div>
       </div>

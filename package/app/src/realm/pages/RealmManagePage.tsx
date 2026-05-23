@@ -14,6 +14,7 @@ import { Button, Input, Label, Textarea } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { PinboardAdminSection } from "@/pinboard";
 import {
   AddUnitTranslationLanguageDialog,
@@ -145,7 +146,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">Manage Realm</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{m.realm_manage()}</h1>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <UnitTranslationLanguageBar
@@ -153,12 +154,12 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
             selectedLanguage={selectedLanguage}
             onSelect={setSelectedLanguage}
             onAddClick={() => setAddOpen(true)}
-            label="Language"
-            addLabel="Add translation"
+            label={m.common_language()}
+            addLabel={m.common_add_translation()}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="realm-name">Name</Label>
+          <Label htmlFor="realm-name">{m.common_name()}</Label>
           <Input
             id="realm-name"
             value={title}
@@ -166,7 +167,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="realm-description">Description</Label>
+          <Label htmlFor="realm-description">{m.common_description()}</Label>
           <Textarea
             id="realm-description"
             value={description}
@@ -192,10 +193,10 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
               })
             }
           >
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
-            Save
+            {m.common_save()}
           </Button>
         </div>
       </div>
@@ -204,10 +205,10 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         existingLanguages={editableLanguages}
         onClose={() => setAddOpen(false)}
         onSubmit={handleAddLanguage}
-        title="Add translation"
-        languageLabel="Language"
-        cancelLabel="Cancel"
-        submitLabel="Add"
+        title={m.common_add_translation()}
+        languageLabel={m.common_language()}
+        cancelLabel={m.common_cancel()}
+        submitLabel={m.common_add()}
       />
     </div>
   );

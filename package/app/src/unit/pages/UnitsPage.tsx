@@ -49,11 +49,11 @@ function defaultChildren(units: Unit[]) {
                       </Link>
                     )}
                   />
-                  <TooltipContent>打开内容页面</TooltipContent>
+                  <TooltipContent>{m.unit_open_content_page()}</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
               <p className="text-base font-semibold truncate mb-1">
-                {item.translations?.[0]?.title || "(未命名内容)"}
+                {item.translations?.[0]?.title || m.unit_untitled_content()}
               </p>
             </div>
             {item.translations?.[0]?.description && (
@@ -229,7 +229,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
             {!isSingle && (
               <div className="mt-4 mb-4 border-b border-border-whisper">
                 <Tabs value={tab} onValueChange={(v) => setTab(v)}>
-                  <TabsList aria-label="unit type tabs">
+                  <TabsList aria-label={m.unit_type_tabs_label()}>
                     {types.map((t) => (
                       <TabsTrigger key={t} value={t}>
                         {t}

@@ -4,8 +4,8 @@ import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
-import { getTranslation } from "@/shared/utils/translation-helpers";
 import * as m from "@rezics/i18n/messages";
+import { getTranslation } from "@/shared/utils/translation-helpers";
 
 interface SingleShelfProps {
   shelf: ShelfDTO;
@@ -13,7 +13,7 @@ interface SingleShelfProps {
 
 export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
   const translation = getTranslation(shelf.translations);
-  const title = translation?.title ?? "Untitled Shelf";
+  const title = translation?.title ?? m.shelf_untitled();
   const description = translation?.description ?? "";
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "shelf", ownerUnit: shelf });
@@ -40,10 +40,12 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
         <p className="mt-2 text-base text-text-secondary">{description}</p>
       )}
       <div className="mt-2">
-        <span className="text-xs text-text-secondary">{itemsCount} items</span>
+        <span className="text-xs text-text-secondary">
+          {m.shelf_items_count({ count: itemsCount })}
+        </span>
         {shelf.user?.name && (
           <span className="ml-4 text-xs text-text-secondary">
-            by {shelf.user.name}
+            {m.shelf_by_author({ name: shelf.user.name })}
           </span>
         )}
       </div>

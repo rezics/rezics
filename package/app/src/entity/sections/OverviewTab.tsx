@@ -1,4 +1,5 @@
 import type { EntityDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { getEntityTranslation } from "../models/types";
 
 interface OverviewTabProps {
@@ -16,7 +17,9 @@ export function OverviewTab({ entity, language }: OverviewTabProps) {
 
   if (!summary && !description) {
     return (
-      <p className="text-sm text-text-secondary">No overview available.</p>
+      <p className="text-sm text-text-secondary">
+        {m.entity_no_overview_available()}
+      </p>
     );
   }
 

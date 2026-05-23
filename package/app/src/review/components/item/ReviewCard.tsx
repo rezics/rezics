@@ -128,7 +128,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
         {reviewTargetWork && (
           <div className="flex min-w-0 items-center gap-1 text-xs leading-dense text-text-secondary">
-            <span className="shrink-0">作品</span>
+            <span className="shrink-0">{m.review_target_work_label()}</span>
             <TextLink
               to="/book/$bookId"
               params={{ bookId: reviewTargetWork.unitId }}

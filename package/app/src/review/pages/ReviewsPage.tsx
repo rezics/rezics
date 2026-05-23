@@ -9,6 +9,7 @@ import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import * as m from "@rezics/i18n/messages";
 
 type Review = PostDTO;
 
@@ -84,7 +85,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
                 resetPagination();
               }}
               onSubmit={() => setStart(0)}
-              placeholder="Search reviews"
+              placeholder={m.review_search_placeholder()}
             />
             <div className="mb-4 mt-4 border-b border-border-whisper">
               <Tabs
@@ -94,11 +95,13 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
                   resetPagination();
                   setStart(0);
                 }}
-                aria-label="review tabs"
+                aria-label={m.review_tabs_label()}
               >
                 <TabsList>
-                  <TabsTrigger value="review">REVIEW</TabsTrigger>
-                  <TabsTrigger value="remark">REMARK</TabsTrigger>
+                  <TabsTrigger value="review">
+                    {m.review_short_review()}
+                  </TabsTrigger>
+                  <TabsTrigger value="remark">{m.book_remark()}</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>

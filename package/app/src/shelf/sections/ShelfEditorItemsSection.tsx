@@ -31,6 +31,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Eye, ListChecks, Pencil } from "lucide-react";
 import { useEffect, useId, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import {
   type Candidate,
   shelfUnitToUnitCardSummary,
@@ -55,7 +56,6 @@ import {
   deriveShelfStream,
   type ShelfStreamEntry,
 } from "../models/shelfStream";
-import * as m from "@rezics/i18n/messages";
 
 const PAGE_SIZE = 20;
 
@@ -69,17 +69,17 @@ interface ShelfEditorItemsSectionProps {
 }
 
 const SORT_OPTIONS: ShelfSortChoice[] = [
-  { field: "manual", order: "desc", label: "Manual" },
-  { field: "manual", order: "asc", label: "Manual reversed" },
-  { field: "addedAt", order: "desc", label: "Newest" },
-  { field: "addedAt", order: "asc", label: "Oldest" },
-  { field: "title", order: "asc", label: "Title A-Z" },
-  { field: "title", order: "desc", label: "Title Z-A" },
+  { field: "manual", order: "desc", label: m.shelf_sort_manual },
+  { field: "manual", order: "asc", label: m.shelf_sort_manual_reversed },
+  { field: "addedAt", order: "desc", label: m.shelf_sort_newest },
+  { field: "addedAt", order: "asc", label: m.shelf_sort_oldest },
+  { field: "title", order: "asc", label: m.shelf_sort_title_az },
+  { field: "title", order: "desc", label: m.shelf_sort_title_za },
 ];
 
 const VIEW_OPTIONS: ShelfViewChoice<"nested" | "flat">[] = [
-  { value: "nested", label: "Nested" },
-  { value: "flat", label: "List" },
+  { value: "nested", label: m.shelf_view_nested },
+  { value: "flat", label: m.shelf_view_list },
 ];
 
 function candidateKindToShelfUnitKind(kind: string): ShelfUnitKind {
@@ -367,7 +367,9 @@ export function ShelfEditorItemsSection({
             </Button>
           )}
           <div className="flex items-center gap-2">
-            <Label className="text-sm text-text-secondary">Mode</Label>
+            <Label className="text-sm text-text-secondary">
+              {m.shelf_mode_label()}
+            </Label>
             <TooltipProvider>
               <ToggleGroup
                 value={[mode]}
@@ -499,15 +501,14 @@ export function ShelfEditorItemsSection({
         <div className="rounded border border-border-error bg-error-fill/10 p-3 text-sm">
           <div className="flex items-center justify-between gap-2">
             <span>
-              {editor.lastResult.failedCount} op
-              {editor.lastResult.failedCount === 1 ? "" : "s"} failed.
+              {m.shelf_ops_failed({ count: editor.lastResult.failedCount })}
             </span>
             <Button
               size="sm"
               variant="outline"
               onClick={() => void editor.retryFailed()}
             >
-              Retry
+              {m.common_retry()}
             </Button>
           </div>
         </div>

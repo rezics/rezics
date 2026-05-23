@@ -19,12 +19,12 @@ type ShelfSortPickerValue = `${ShelfSortField}:${ShelfSortOrder}`;
 export interface ShelfSortChoice {
   field: ShelfSortField;
   order: ShelfSortOrder;
-  label: string;
+  label: () => string;
 }
 
 export interface ShelfViewChoice<TView extends ShelfView = ShelfView> {
   value: TView;
-  label: string;
+  label: () => string;
 }
 
 interface ShelfSortViewPickerProps<TView extends ShelfView = ShelfView> {
@@ -71,12 +71,14 @@ export function ShelfSortViewPicker<TView extends ShelfView = ShelfView>({
   className,
 }: ShelfSortViewPickerProps<TView>) {
   const selectedSortLabel =
-    sortOptions.find(
-      (option) => option.field === sort.field && option.order === sort.order,
-    )?.label ?? sortOptions[0]?.label;
+    sortOptions
+      .find(
+        (option) => option.field === sort.field && option.order === sort.order,
+      )
+      ?.label() ?? sortOptions[0]?.label();
   const selectedViewLabel =
-    viewOptions.find((option) => option.value === view)?.label ??
-    viewOptions[0]?.label;
+    viewOptions.find((option) => option.value === view)?.label() ??
+    viewOptions[0]?.label();
 
   return (
     <div className={className ?? "flex flex-wrap items-center gap-2"}>
@@ -99,7 +101,7 @@ export function ShelfSortViewPicker<TView extends ShelfView = ShelfView>({
                 key={`${option.field}:${option.order}`}
                 value={`${option.field}:${option.order}`}
               >
-                {option.label}
+                {option.label()}
               </SelectItem>
             ))}
           </SelectGroup>
@@ -124,7 +126,7 @@ export function ShelfSortViewPicker<TView extends ShelfView = ShelfView>({
             <SelectLabel>{viewHeading}</SelectLabel>
             {viewOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
-                {option.label}
+                {option.label()}
               </SelectItem>
             ))}
           </SelectGroup>

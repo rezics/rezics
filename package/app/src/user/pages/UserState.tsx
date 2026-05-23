@@ -1,4 +1,5 @@
 import { Spinner } from "@rezics/ui";
+import * as m from "@rezics/i18n/messages";
 import type { FC, ReactNode } from "react";
 
 export const UserLoading: FC<{ height?: number }> = ({ height = 256 }) => {
@@ -10,7 +11,7 @@ export const UserLoading: FC<{ height?: number }> = ({ height = 256 }) => {
 };
 
 export const UserError: FC<{ message?: ReactNode; height?: number }> = ({
-  message = "Something went wrong",
+  message = m.common_unexpected_error(),
   height = 256,
 }) => {
   return (

@@ -6,21 +6,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 
 export const SORT_OPTIONS = [
-  { value: "relevance", label: "Relevance" },
-  { value: "createdAt", label: "Newest" },
-  { value: "updatedAt", label: "Recently Updated" },
-  { value: "publishedAt", label: "Publication Date" },
-] as const;
+  { value: "relevance", label: m.search_sort_relevance },
+  { value: "createdAt", label: m.search_sort_newest },
+  { value: "updatedAt", label: m.search_sort_recently_updated },
+  { value: "publishedAt", label: m.search_sort_publication_date },
+] as const satisfies ReadonlyArray<{ value: string; label: () => string }>;
 
 export type SortOption = (typeof SORT_OPTIONS)[number];
 
 export type SortSelectProps = {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
-  options?: readonly { value: string; label: string }[];
+  options?: readonly { value: string; label: () => string }[];
   label?: string;
   size?: "small" | "medium";
 };
@@ -44,7 +45,7 @@ export const SortSelect: React.FC<SortSelectProps> = ({
         <SelectContent>
           {options.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
+              {opt.label()}
             </SelectItem>
           ))}
         </SelectContent>

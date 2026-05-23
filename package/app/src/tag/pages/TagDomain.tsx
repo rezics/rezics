@@ -1,12 +1,13 @@
 import { tagQueries } from "@rezics/api/tag/tag";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
+import * as m from "@rezics/i18n/messages";
 import { Route as tagDomainRoute } from "@/routes/_mainLayout/tag/domain/$unitId/route";
 import { Route as tagDomainTitleRoute } from "@/routes/_mainLayout/tag/domain/$unitId/title/$title";
 import { TagWrapper } from "../components/TagWrapper";
 
 export function TagDomainPage() {
-  // ERROR 不能这么写，会导致错误
+  // Keep both route shapes available while the tag routes are being migrated.
   const withTitleMatch = tagDomainTitleRoute.useMatch({ shouldThrow: true });
   const baseMatch = tagDomainRoute.useMatch({ shouldThrow: true });
   const unitId =
@@ -16,7 +17,7 @@ export function TagDomainPage() {
   if (isLoading) {
     return (
       <div className="w-11/12 mx-auto mt-16">
-        <div className="text-sm text-gray-500">正在加载标签…</div>
+        <div className="text-sm text-gray-500">{m.tag_loading()}</div>
       </div>
     );
   }
@@ -25,7 +26,7 @@ export function TagDomainPage() {
     return (
       <div className="w-11/12 mx-auto mt-16">
         <div className="text-sm text-red-600">
-          加载失败：{String((error as any)?.message ?? error)}
+          {m.common_load_failed()}: {String((error as any)?.message ?? error)}
         </div>
       </div>
     );
@@ -33,7 +34,7 @@ export function TagDomainPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <AccentBarWithText text={title ?? `域（${unitId}）`} />
+      <AccentBarWithText text={title ?? m.tag_domain_title({ id: unitId })} />
       <TagWrapper filters={{ unitId }} mode="flat" />
     </div>
   );

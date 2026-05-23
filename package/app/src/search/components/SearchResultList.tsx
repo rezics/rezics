@@ -75,7 +75,10 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
   return (
     <div>
       <p className="mb-2 block text-xs text-text-secondary">
-        {result.total} results ({result.processingTimeMs}ms)
+        {m.search_results_summary({
+          count: result.total,
+          ms: result.processingTimeMs,
+        })}
       </p>
       <div>
         {result.items.map((item) =>

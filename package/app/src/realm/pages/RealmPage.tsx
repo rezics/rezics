@@ -20,6 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Settings } from "lucide-react";
 import { useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { PinnedFeedSection } from "@/pinboard";
 import { ReplyComposer } from "@/post";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -74,11 +75,11 @@ export function RealmPage({
   }
 
   if (!realm) {
-    return <p className="py-8 text-text-secondary">Realm not found</p>;
+    return <p className="py-8 text-text-secondary">{m.realm_not_found()}</p>;
   }
 
   const translation = getTranslation(realm.translations);
-  const title = translation?.title ?? "Untitled Realm";
+  const title = translation?.title ?? m.realm_untitled();
   const description = translation?.description ?? "";
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
 
@@ -91,7 +92,11 @@ export function RealmPage({
             <h1 className="text-2xl font-semibold">{title}</h1>
             {showManage && (
               <Link to="/realm/$realmId/manage" params={{ realmId }}>
-                <Button variant="ghost" size="icon" aria-label="Manage realm">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={m.realm_manage()}
+                >
                   <Settings className="h-4 w-4" />
                 </Button>
               </Link>
@@ -100,11 +105,11 @@ export function RealmPage({
           <div className="flex items-center gap-2">
             {isMember ? (
               <Button size="sm" onClick={() => setComposerOpen(true)}>
-                Post in this realm
+                {m.realm_post_in_realm()}
               </Button>
             ) : (
               <Button size="sm" variant="outline" disabled>
-                Join to post
+                {m.realm_join_to_post()}
               </Button>
             )}
             <JoinButton realmId={realmId} />
@@ -116,13 +121,15 @@ export function RealmPage({
         )}
         <div className="flex flex-row gap-4">
           <span className="text-xs text-text-secondary">
-            {realm.memberCount ?? 0} members
+            {m.realm_member_count({ count: realm.memberCount ?? 0 })}
           </span>
           {realm.isPublic && (
-            <span className="text-xs text-text-brand">Public</span>
+            <span className="text-xs text-text-brand">{m.realm_public()}</span>
           )}
           {realm.isOfficial && (
-            <span className="text-xs text-text-secondary">Official</span>
+            <span className="text-xs text-text-secondary">
+              {m.realm_official()}
+            </span>
           )}
         </div>
         <RuleSection postUnitId={realm.extra?.rule ?? null} />
@@ -134,9 +141,9 @@ export function RealmPage({
         className="mb-4"
       >
         <TabsList>
-          <TabsTrigger value="feed">Feed</TabsTrigger>
-          <TabsTrigger value="tags">Tags</TabsTrigger>
-          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="feed">{m.realm_tab_feed()}</TabsTrigger>
+          <TabsTrigger value="tags">{m.realm_tab_tags()}</TabsTrigger>
+          <TabsTrigger value="members">{m.realm_tab_members()}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="feed">
@@ -176,7 +183,7 @@ export function RealmPage({
       <Dialog open={composerOpen} onOpenChange={setComposerOpen}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Post in this realm</DialogTitle>
+            <DialogTitle>{m.realm_post_in_realm()}</DialogTitle>
           </DialogHeader>
           <ReplyComposer
             mode="expanded"

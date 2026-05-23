@@ -33,6 +33,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { GripVerticalIcon, XIcon } from "lucide-react";
 import { type FC, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { ContentRatingPreferences } from "@/user/components/ContentRatingPreferences";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
@@ -82,7 +83,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
         className="h-7 w-7 cursor-grab touch-none"
         {...attributes}
         {...listeners}
-        aria-label="drag handle"
+        aria-label={m.settings_preferences_drag_handle()}
       >
         <GripVerticalIcon size={14} />
       </Button>
@@ -94,7 +95,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
         className="h-7 w-7"
         onClick={() => onRemove(code)}
         disabled={disabled}
-        aria-label={`remove ${code}`}
+        aria-label={m.settings_preferences_remove_language({ code })}
       >
         <XIcon size={14} />
       </Button>
@@ -168,18 +169,20 @@ export const SettingsPreferencesSection: FC = () => {
   return (
     <div>
       <SettingsSection
-        title="Language Preferences"
-        description="Drag to reorder by priority. The first language is the most preferred."
+        title={m.settings_preferences_language_title()}
+        description={m.settings_preferences_language_description()}
       >
         {langSuccess && (
           <Alert className="mb-3 text-success-text">
-            <AlertDescription>Language preferences saved.</AlertDescription>
+            <AlertDescription>
+              {m.settings_preferences_language_saved()}
+            </AlertDescription>
           </Alert>
         )}
 
         {preferredLangs.length === 0 ? (
           <p className="text-sm text-text-secondary mb-4">
-            No language preferences yet. Add one below.
+            {m.settings_preferences_language_empty()}
           </p>
         ) : (
           <DndContext
@@ -210,7 +213,9 @@ export const SettingsPreferencesSection: FC = () => {
           <div className="flex flex-row items-center gap-2">
             <Select value={addPick} onValueChange={setAddPick}>
               <SelectTrigger className="min-w-[220px] h-9">
-                <SelectValue placeholder="Add language" />
+                <SelectValue
+                  placeholder={m.settings_preferences_add_language()}
+                />
               </SelectTrigger>
               <SelectContent>
                 {availableToAdd.map((language) => (
@@ -226,22 +231,22 @@ export const SettingsPreferencesSection: FC = () => {
               onClick={() => handleAddLang(addPick)}
               disabled={!addPick || updateSettings.isPending}
             >
-              Add
+              {m.common_add()}
             </Button>
           </div>
         )}
       </SettingsSection>
 
       <SettingsSection
-        title="Content rating"
-        description="Baseline ratings are always on. Opt in to age-restricted tiers to see them in search and listings."
+        title={m.settings_preferences_content_rating_title()}
+        description={m.settings_preferences_content_rating_description()}
       >
         <ContentRatingPreferences />
       </SettingsSection>
 
       <SettingsSection
-        title="Realm Tag Preferences"
-        description="Configure how tags are displayed per realm."
+        title={m.settings_preferences_realm_tags_title()}
+        description={m.settings_preferences_realm_tags_description()}
         divider={false}
       >
         {settings?.realmTagPreferences &&
@@ -252,8 +257,10 @@ export const SettingsPreferencesSection: FC = () => {
                 <div key={realm} className="flex items-center gap-2">
                   <span className="text-sm font-medium">{realm}</span>
                   <span className="text-xs text-text-secondary">
-                    Max display: {pref.maxDisplay} | Realms:{" "}
-                    {pref.realmIds.join(", ")}
+                    {m.settings_preferences_realm_tags_meta({
+                      max: pref.maxDisplay,
+                      realms: pref.realmIds.join(", "),
+                    })}
                   </span>
                 </div>
               ),
@@ -261,7 +268,7 @@ export const SettingsPreferencesSection: FC = () => {
           </div>
         ) : (
           <p className="text-sm text-text-secondary">
-            No realm tag preferences configured.
+            {m.settings_preferences_realm_tags_empty()}
           </p>
         )}
       </SettingsSection>

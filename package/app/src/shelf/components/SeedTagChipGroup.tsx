@@ -6,6 +6,7 @@ import {
 } from "@rezics/contract";
 import { Badge } from "@rezics/ui/shadcn";
 import { useMemo } from "react";
+import * as m from "@rezics/i18n/messages";
 
 export interface SeedTagChipGroupProps {
   value: string[];
@@ -42,7 +43,7 @@ export function SeedTagChipGroup({
 
   return (
     <fieldset className="flex flex-wrap gap-2">
-      <legend className="sr-only">Content type tags</legend>
+      <legend className="sr-only">{m.shelf_content_type_tags_legend()}</legend>
       {chips.map(({ name, tagId, label }) => {
         const isSelected = selected.has(tagId);
         return (

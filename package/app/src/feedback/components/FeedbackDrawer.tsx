@@ -7,6 +7,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import type React from "react";
+import * as m from "@rezics/i18n/messages";
 import FeedbackForm from "./FeedbackForm";
 
 type FeedbackDrawerProps = {
@@ -36,7 +37,7 @@ const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({
         className="w-[min(520px,100vw)] p-0 sm:max-w-none"
       >
         <SheetHeader className="px-4 py-3">
-          <SheetTitle>提交反馈</SheetTitle>
+          <SheetTitle>{m.feedback_submit()}</SheetTitle>
         </SheetHeader>
         <Separator />
         <div className="p-4">

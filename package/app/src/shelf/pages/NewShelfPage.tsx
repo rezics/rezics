@@ -3,6 +3,7 @@ import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 
 export function NewShelfPage() {
@@ -39,11 +40,11 @@ export function NewShelfPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">New Shelf</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{m.shelf_new_title()}</h1>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-shelf-title">Title</Label>
+          <Label htmlFor="new-shelf-title">{m.shelf_title_label()}</Label>
           <Input
             id="new-shelf-title"
             value={title}
@@ -51,7 +52,9 @@ export function NewShelfPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-shelf-description">Description</Label>
+          <Label htmlFor="new-shelf-description">
+            {m.shelf_description_label()}
+          </Label>
           <textarea
             id="new-shelf-description"
             value={description}
@@ -61,7 +64,7 @@ export function NewShelfPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-shelf-cover">Cover Image URL</Label>
+          <Label htmlFor="new-shelf-cover">{m.shelf_cover_url_label()}</Label>
           <Input
             id="new-shelf-cover"
             value={coverUrl}
@@ -69,7 +72,7 @@ export function NewShelfPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label>Content type</Label>
+          <Label>{m.shelf_content_type_label()}</Label>
           <SeedTagChipGroup
             value={pinnedTagIds}
             onChange={setPinnedTagIds}
@@ -81,7 +84,7 @@ export function NewShelfPage() {
             onClick={handleCreate}
             disabled={!title || createMutation.isPending}
           >
-            Create
+            {m.common_create()}
           </Button>
         </div>
       </div>

@@ -16,6 +16,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Save as SaveIcon } from "lucide-react";
 import { type FC, useEffect, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
@@ -74,12 +75,12 @@ export const SettingsProfileSection: FC = () => {
   return (
     <form onSubmit={handleSubmit}>
       <SettingsSection
-        title="Public Profile"
-        description="This information will be displayed publicly on your profile page."
+        title={m.settings_profile_title()}
+        description={m.settings_profile_description()}
       >
         {success && (
           <Alert className="mb-4 text-success-text">
-            <AlertDescription>Profile updated successfully.</AlertDescription>
+            <AlertDescription>{m.settings_profile_updated()}</AlertDescription>
           </Alert>
         )}
         {updateMe.error && (
@@ -96,19 +97,21 @@ export const SettingsProfileSection: FC = () => {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 flex flex-col gap-1.5">
-            <Label htmlFor="avatar-url">Avatar URL</Label>
+            <Label htmlFor="avatar-url">{m.entity_avatar_url()}</Label>
             <Input
               id="avatar-url"
               value={formData.avatar}
               onChange={(e) => handleChange("avatar", e.target.value)}
-              placeholder="https://example.com/avatar.jpg"
+              placeholder={m.settings_profile_avatar_placeholder()}
             />
           </div>
         </div>
 
         <div className="space-y-6">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="display-name">Display Name</Label>
+            <Label htmlFor="display-name">
+              {m.settings_profile_display_name()}
+            </Label>
             <Input
               id="display-name"
               value={formData.name}
@@ -119,26 +122,28 @@ export const SettingsProfileSection: FC = () => {
 
           {user?.slug && (
             <div>
-              <p className="text-xs text-text-secondary">Username</p>
+              <p className="text-xs text-text-secondary">
+                {m.common_username()}
+              </p>
               <p className="text-sm mt-1">@{user.slug}</p>
             </div>
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="bio">Bio</Label>
+            <Label htmlFor="bio">{m.settings_profile_bio()}</Label>
             <textarea
               id="bio"
               value={formData.bio}
               onChange={(e) => handleChange("bio", e.target.value)}
               rows={2}
-              placeholder="A short bio about yourself"
+              placeholder={m.settings_profile_bio_placeholder()}
               className="w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
             />
           </div>
 
           <div>
             <p className="text-xs text-text-secondary mb-2 block">
-              Description
+              {m.common_description()}
             </p>
             <RezicsMarkdownEditor
               value={formData.description ?? ""}
@@ -155,7 +160,7 @@ export const SettingsProfileSection: FC = () => {
           ) : (
             <SaveIcon className="w-4 h-4 mr-2" />
           )}
-          Save Profile
+          {m.settings_profile_save()}
         </Button>
       </div>
     </form>

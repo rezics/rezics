@@ -14,6 +14,7 @@ import {
 import { useInjectedTags } from "../hooks/useInjectedTags";
 import { useSearchQuery } from "../hooks/useSearchQuery";
 import { parseSearchString } from "../models/searchQuery";
+import * as m from "@rezics/i18n/messages";
 
 export { isSearchCategory } from "../models/category";
 
@@ -87,7 +88,7 @@ export function FederatedSearchPage({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold">Search</h1>
+      <h1 className="text-2xl font-bold">{m.accessibility_search()}</h1>
       <SearchCategoryNav
         scope={scope}
         value={search.category}
