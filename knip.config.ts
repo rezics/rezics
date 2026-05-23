@@ -5,6 +5,8 @@ process.env.NOTIFY_DATABASE_URL ??=
   "postgresql://knip:knip@localhost:5432/knip_notify";
 process.env.REACTION_DATABASE_URL ??=
   "postgresql://knip:knip@localhost:5432/knip_reaction";
+process.env.HISTORY_DATABASE_URL ??=
+  "postgresql://knip:knip@localhost:5432/knip_history";
 
 const config: KnipConfig = {
   ignore: ["prisma", "@tanstack/router-plugin"],
