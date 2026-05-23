@@ -1,9 +1,11 @@
 import "github-markdown-css/github-markdown-light.css";
 import { AuthProvider } from "@rezics/api/providers";
 import * as m from "@rezics/i18n/messages";
+import { useLocale } from "@rezics/i18n/react";
+import { getTextDirection } from "@rezics/i18n/runtime";
 import { ExternalLinkModal } from "@rezics/ui";
 import { RouterProvider } from "@tanstack/react-router";
-import { type ReactNode, StrictMode, useEffect } from "react";
+import { type ReactNode, StrictMode, useEffect, useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
 import { router } from "@/router";
@@ -45,7 +47,24 @@ function AppProviders({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <AppProviders>
-      <RouterProvider router={router} />
+      <LocalizedRouterProvider />
     </AppProviders>
   );
+}
+
+function LocalizedRouterProvider() {
+  const locale = useLocale();
+  const previousLocaleRef = useRef(locale);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.documentElement.dir = getTextDirection(locale);
+
+    if (previousLocaleRef.current !== locale) {
+      previousLocaleRef.current = locale;
+      void router.invalidate();
+    }
+  }, [locale]);
+
+  return <RouterProvider router={router} />;
 }
