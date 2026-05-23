@@ -6,6 +6,9 @@ import {
   LANGUAGES,
   subjectAttributionRoleRegistry,
   subjectAttributionRoles,
+  type CreditAttributionRole,
+  type EntityKind,
+  type SubjectAttributionRole,
 } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "../generated/client.js";
 import { UnitStatus, UnitType } from "../generated/client.js";
@@ -35,17 +38,6 @@ function pickRandomLocale(): (typeof LOCALE_WEIGHTS)[number]["lang"] {
 
 const BATCH_SIZE = 500;
 
-type EntityKind =
-  | "person"
-  | "organization"
-  | "character"
-  | "faction"
-  | "family"
-  | "location"
-  | "artifact"
-  | "event"
-  | "concept";
-
 const SUBJECT_KINDS = [
   "character",
   "faction",
@@ -54,7 +46,7 @@ const SUBJECT_KINDS = [
   "artifact",
   "event",
   "concept",
-] as const;
+] as const satisfies readonly EntityKind[];
 
 interface EntitySeedRow {
   id: string;
@@ -68,15 +60,25 @@ interface EntitySeedRow {
   }[];
 }
 
-export function eligibleCreditRolesForKind(kind: EntityKind): string[] {
+export function eligibleCreditRolesForKind(
+  kind: EntityKind,
+): CreditAttributionRole[] {
   return creditAttributionRoles.filter((role) =>
-    creditAttributionRoleRegistry[role].entityKindHints.includes(kind as any),
+    (
+      creditAttributionRoleRegistry[role]
+        .entityKindHints as readonly EntityKind[]
+    ).includes(kind),
   );
 }
 
-export function eligibleSubjectRolesForKind(kind: EntityKind): string[] {
+export function eligibleSubjectRolesForKind(
+  kind: EntityKind,
+): SubjectAttributionRole[] {
   return subjectAttributionRoles.filter((role) =>
-    subjectAttributionRoleRegistry[role].entityKindHints.includes(kind as any),
+    (
+      subjectAttributionRoleRegistry[role]
+        .entityKindHints as readonly EntityKind[]
+    ).includes(kind),
   );
 }
 
