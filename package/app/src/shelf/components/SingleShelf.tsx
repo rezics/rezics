@@ -1,5 +1,5 @@
 import { useCanEdit } from "@rezics/api/hooks";
-import type { ShelfDTO } from "@rezics/contract";
+import { contentDocMarkdownFallback, type ShelfDTO } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
@@ -14,11 +14,12 @@ interface SingleShelfProps {
 export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? m.shelf_untitled();
-  const description = translation?.description ?? "";
+  const description = contentDocMarkdownFallback(translation?.description);
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "shelf", ownerUnit: shelf });
   const shelfId = shelf.unitId;
-  const itemsCount = shelf.itemCount ?? shelf.items?.length ?? 0;
+  const itemsCount =
+    shelf.itemCount ?? (shelf as { items?: unknown[] }).items?.length ?? 0;
 
   return (
     <div>

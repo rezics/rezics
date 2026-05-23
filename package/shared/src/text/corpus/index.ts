@@ -33,6 +33,7 @@ const POOLS: Record<Language, TextPool> = {
   [LANGUAGES.EN]: buildPool(en),
   [LANGUAGES.JA]: buildPool(ja),
   [LANGUAGES.DE]: buildPool(de),
+  [LANGUAGES.KO]: buildPool(en),
 };
 
 /**

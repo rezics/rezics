@@ -15,6 +15,7 @@ configureApi({
   authAdminBaseUrl:
     env.VITE_AUTH_ADMIN_URL ??
     (adminRuntime.appEnv === "development" ? "http://localhost:3001" : ""),
+  reactionServiceUrl: env.VITE_REACTION_SERVICE_URL ?? env.VITE_API_URL,
 });
 initI18n();
 

@@ -20,8 +20,8 @@ export default function PersistentTabs() {
           <TabsTrigger value="1">面板一</TabsTrigger>
           <TabsTrigger value="2">面板二</TabsTrigger>
         </TabsList>
-        <TabsContent value="1" forceMount />
-        <TabsContent value="2" forceMount />
+        <TabsContent value="1" />
+        <TabsContent value="2" />
       </Tabs>
     </div>
   );

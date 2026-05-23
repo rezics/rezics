@@ -28,7 +28,7 @@ interface EntityIdentityRowProps {
 
 export function getEntityIdentityTitle(
   entity?: EntityIdentity | EntityDTO | null,
-  fallbackTitle = m.entity_untitled(),
+  fallbackTitle: string = m.entity_untitled(),
 ) {
   const title = entity?.translations?.[0]?.title?.trim();
   return title || fallbackTitle;

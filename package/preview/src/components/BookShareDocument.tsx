@@ -1,4 +1,5 @@
-import type { BookDTO } from "@rezics/contract";
+import { contentDocMarkdownFallback, type BookDTO } from "@rezics/contract";
+import { SafeLink } from "@rezics/ui";
 import { getBookShareStyles } from "@/utils/shareStyles";
 
 export interface BookShareDocumentProps {
@@ -48,7 +49,9 @@ export function BookShareDocument({
   const translation = pickTranslation(book);
   const title = translation?.title || "Book";
   const description = clampDescription(
-    translation?.description || translation?.summary || "Open to view details.",
+    contentDocMarkdownFallback(translation?.description) ||
+      translation?.summary ||
+      "Open to view details.",
     160,
   );
   const imageUrl = toAbsoluteUrl(book.coverUrl ?? undefined, origin);
@@ -104,7 +107,8 @@ export function BookShareDocument({
               <div className="meta">
                 <div>unitId: {book.unitId}</div>
                 <div>
-                  分享链接: <a href={canonicalUrl}>{canonicalUrl}</a>
+                  分享链接:{" "}
+                  <SafeLink href={canonicalUrl}>{canonicalUrl}</SafeLink>
                 </div>
               </div>
             </div>

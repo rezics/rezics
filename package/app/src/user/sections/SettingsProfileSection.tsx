@@ -1,6 +1,10 @@
 import { useUpdateMeMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
-import type { UpdateUser } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  markdownContentDoc,
+  type UpdateUser,
+} from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import {
@@ -20,11 +24,21 @@ import * as m from "@rezics/i18n/messages";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
+type SettingsProfileFormData = Omit<
+  UpdateUser,
+  "avatar" | "bio" | "description" | "name"
+> & {
+  avatar: string;
+  bio: string;
+  description: string;
+  name: string;
+};
+
 export const SettingsProfileSection: FC = () => {
   useRequireAuth();
 
   const { data: user, isLoading } = useQuery(userQueries.me());
-  const [formData, setFormData] = useState<UpdateUser>({
+  const [formData, setFormData] = useState<SettingsProfileFormData>({
     name: "",
     avatar: "",
     bio: "",
@@ -45,7 +59,7 @@ export const SettingsProfileSection: FC = () => {
         name: user.name ?? "",
         avatar: user.avatar ?? "",
         bio: user.bio ?? "",
-        description: user.description ?? "",
+        description: contentDocMarkdownFallback(user.description),
       });
     }
   }, [user]);
@@ -58,7 +72,10 @@ export const SettingsProfileSection: FC = () => {
     );
   }
 
-  const handleChange = (field: keyof UpdateUser, value: string) => {
+  const handleChange = (
+    field: keyof SettingsProfileFormData,
+    value: string,
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -68,7 +85,7 @@ export const SettingsProfileSection: FC = () => {
       name: formData.name || undefined,
       avatar: formData.avatar || undefined,
       bio: formData.bio || undefined,
-      description: formData.description || undefined,
+      description: markdownContentDoc(formData.description),
     });
   };
 
@@ -91,7 +108,10 @@ export const SettingsProfileSection: FC = () => {
 
         <div className="flex items-center gap-4 mb-8">
           <Avatar className="w-[72px] h-[72px] rounded-md">
-            <AvatarImage src={formData.avatar} alt={formData.name ?? ""} />
+            <AvatarImage
+              src={formData.avatar || undefined}
+              alt={formData.name ?? ""}
+            />
             <AvatarFallback>
               {formData.name?.charAt(0).toUpperCase()}
             </AvatarFallback>

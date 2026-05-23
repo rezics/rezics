@@ -27,7 +27,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
     const types = Array.isArray(z.type) ? z.type : z.type ? [z.type] : [];
     if (types.length) out.type = types;
     if (z.tags?.length) out.tags = z.tags;
-    if (z.realmId) out.realm = { slug: z.realmId };
+    if (z.realmId) out.realm = { scope: "realm", slug: z.realmId };
     if (z.languages?.length) out.languages = z.languages;
     if (z.ratings?.length) {
       out.ratings = z.ratings.filter((r) => allowed.includes(r));

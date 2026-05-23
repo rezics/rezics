@@ -1,4 +1,5 @@
 import { BookOpen } from "lucide-react";
+import { contentDocMarkdownFallback } from "@rezics/contract";
 import { useId } from "react";
 import { cn } from "@/shared/utils/css-util";
 import { UserHoverPreview } from "@/user/components";
@@ -132,7 +133,10 @@ function renderAuthor(summary: UnitCardSummary) {
   if (summary.author?.unitId) {
     return (
       <UserHoverPreview
-        user={summary.author}
+        user={{
+          ...summary.author,
+          description: contentDocMarkdownFallback(summary.author.description),
+        }}
         size="compact"
         className="max-w-40"
         nameClassName="max-w-28 text-text-secondary"

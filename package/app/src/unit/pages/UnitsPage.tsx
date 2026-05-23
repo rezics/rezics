@@ -1,5 +1,5 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import type { UnitDTO } from "@rezics/contract";
+import { contentDocMarkdownFallback, type UnitDTO } from "@rezics/contract";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -58,7 +58,7 @@ function defaultChildren(units: Unit[]) {
             </div>
             {item.translations?.[0]?.description && (
               <p className="text-sm text-text-secondary line-clamp-4">
-                {item.translations[0].description}
+                {contentDocMarkdownFallback(item.translations[0].description)}
               </p>
             )}
           </div>

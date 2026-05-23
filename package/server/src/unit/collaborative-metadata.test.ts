@@ -139,7 +139,7 @@ describe("assertCanEditCollaborativeMetadata", () => {
 
 describe("editorial patch helpers", () => {
   test("applies sparse object merge, array replacement, null, and unset", () => {
-    const result = applySparsePatch(
+    const result = applySparsePatch<Record<string, unknown>>(
       {
         translations: {
           en: { title: "Old", summary: "Keep", tags: ["a"] },

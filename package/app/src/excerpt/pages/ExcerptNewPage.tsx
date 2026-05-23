@@ -2,6 +2,7 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
+import { markdownContentDoc } from "@rezics/contract";
 import { CooldownButton } from "@rezics/ui/composite/button/CooldownButton.tsx";
 import { useState } from "react";
 import { useUserProfileStore } from "@/user/states";
@@ -42,7 +43,9 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
         {
           language: translation?.language || "en",
           title: translation?.title || undefined,
-          description: translation?.description || "",
+          description: markdownContentDoc(
+            String(translation?.description || ""),
+          ),
         },
       ],
     });

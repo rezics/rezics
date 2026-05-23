@@ -1,5 +1,8 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import type { ContentSearchDocument } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  type ContentSearchDocument,
+} from "@rezics/contract";
 import { Link } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
@@ -48,6 +51,7 @@ export const ProfileOverviewPage: FC = () => {
 
   const pinned = pinnedQuery.data?.items ?? [];
   const recent = recentQuery.data?.items ?? [];
+  const description = contentDocMarkdownFallback(user.description);
 
   return (
     <div className="flex flex-col gap-8 py-4">
@@ -76,9 +80,7 @@ export const ProfileOverviewPage: FC = () => {
       </div>
 
       {/* DESCRIPTION.md */}
-      {user.description && user.description.trim() !== "" && (
-        <DescriptionBox content={user.description} />
-      )}
+      {description.trim() !== "" && <DescriptionBox content={description} />}
 
       {/* Pinned Items */}
       <div>

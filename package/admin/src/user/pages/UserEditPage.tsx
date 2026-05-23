@@ -1,4 +1,8 @@
 import * as m from "@rezics/i18n/messages";
+import {
+  contentDocMarkdownFallback,
+  markdownContentDoc,
+} from "@rezics/contract";
 import { userMutations } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 
@@ -47,7 +51,7 @@ export default function UserEditPage() {
     setName(u.name ?? "");
     setAvatar(u.avatar ?? "");
     setBio(u.bio ?? "");
-    setDescription(u.description ?? "");
+    setDescription(contentDocMarkdownFallback(u.description));
     setPassword("");
   }, [detailQuery.data]);
 
@@ -60,7 +64,9 @@ export default function UserEditPage() {
         name: name.trim() || undefined,
         avatar: avatar.trim() || undefined,
         bio: bio.trim() || undefined,
-        description: description.trim() || undefined,
+        description: description.trim()
+          ? markdownContentDoc(description.trim())
+          : undefined,
         password: password.length ? password : undefined,
       } as any,
     });

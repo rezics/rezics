@@ -1,5 +1,9 @@
 import { useEntityList } from "@rezics/api/entity";
-import type { EntityDTO, UnitTranslationDTO } from "@rezics/contract";
+import type {
+  EntityDTO,
+  EntityKind,
+  UnitTranslationDTO,
+} from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { Link } from "@/shared/ui/link";
 import {
@@ -48,7 +52,7 @@ export default function EntityListPage() {
     page: page + 1,
     limit,
     q: query || undefined,
-    kind: kind || undefined,
+    kind: (kind || undefined) as EntityKind | undefined,
     verified: verifiedFilter === "all" ? undefined : verifiedFilter === "true",
   });
 

@@ -17,8 +17,10 @@ import {
 import { unitApi } from "@rezics/api/unit/unit";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import {
+  contentDocMarkdownFallback,
   DEFAULT_LANGUAGE,
   type Language,
+  markdownContentDoc,
   normalizeLanguage,
   type RealmExtraListKey,
 } from "@rezics/contract";
@@ -168,7 +170,9 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
               title: tr.title,
               subtitle: tr.subtitle,
               summary: tr.summary,
-              description: tr.description,
+              description: tr.description
+                ? markdownContentDoc(tr.description)
+                : undefined,
             },
           ];
         }),
@@ -193,7 +197,9 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
           title: tr.title,
           subtitle: tr.subtitle,
           summary: tr.summary,
-          description: tr.description,
+          description: tr.description
+            ? markdownContentDoc(tr.description)
+            : undefined,
         });
       }
       toast.success(m.pinboard_editor_saved());
@@ -328,7 +334,7 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
         title: tr.title ?? "",
         subtitle: tr.subtitle ?? "",
         summary: tr.summary ?? "",
-        description: tr.description ?? "",
+        description: contentDocMarkdownFallback(tr.description),
       }));
     }
     return [{ language: DEFAULT_LANGUAGE }];

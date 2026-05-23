@@ -13,7 +13,7 @@ const baseSummary: UnitCardSummary = {
   contentPreview:
     "A concise archive note about editions, translation drift, and reading order.",
   author: {
-    userId: "user-1",
+    unitId: "user-1",
     slug: "mina",
     name: "Mina Park",
     avatar: null,
@@ -65,7 +65,7 @@ export const LongText: Story = {
       contentPreview:
         "This preview intentionally runs long enough to test line clamping and stable row height across multiple languages, editions, notes, and curator metadata fields that would otherwise create layout shifts.",
       author: {
-        userId: "long-user",
+        unitId: "long-user",
         name: "Alexandria Theodora Penelope Versewright-Liang",
       },
     },

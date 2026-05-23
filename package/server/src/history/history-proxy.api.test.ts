@@ -34,7 +34,7 @@ const unitFindUnique = mock(async ({ where }: any) => {
 });
 
 const fetchMock = mock(
-  async () =>
+  async (_input: RequestInfo | URL, _init?: RequestInit) =>
     new Response(JSON.stringify({ revisions: [], nextCursor: null }), {
       status: 200,
       headers: { "content-type": "application/json" },

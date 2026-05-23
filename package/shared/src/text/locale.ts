@@ -1,4 +1,4 @@
-import { base, de, en, Faker, ja, zh_CN, zh_TW } from "@faker-js/faker";
+import { base, de, en, Faker, ja, ko, zh_CN, zh_TW } from "@faker-js/faker";
 import { LANGUAGES, type Language } from "@rezics/contract";
 
 const fakerInstances: Record<Language, Faker> = {
@@ -7,6 +7,7 @@ const fakerInstances: Record<Language, Faker> = {
   [LANGUAGES.EN]: new Faker({ locale: [en, base] }),
   [LANGUAGES.JA]: new Faker({ locale: [ja, en, base] }),
   [LANGUAGES.DE]: new Faker({ locale: [de, en, base] }),
+  [LANGUAGES.KO]: new Faker({ locale: [ko, en, base] }),
 };
 
 /** Locale-appropriate Faker instance for a given language. */
@@ -20,4 +21,5 @@ export const LANG_DISTRIBUTION: readonly [Language, number][] = [
   [LANGUAGES.ZH_HANS, 0.4],
   [LANGUAGES.JA, 0.2],
   [LANGUAGES.DE, 0.1],
+  [LANGUAGES.KO, 0.1],
 ];

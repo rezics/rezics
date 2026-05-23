@@ -51,7 +51,7 @@ export const AddUnitTranslationLanguageDialog: React.FC<
     () => ALL_LANGUAGES.filter((lang) => !existingLanguages.includes(lang)),
     [existingLanguages],
   );
-  const [language, setLanguage] = useState(available[0] ?? "");
+  const [language, setLanguage] = useState<string>(available[0] ?? "");
 
   useEffect(() => {
     if (open) setLanguage(available[0] ?? "");

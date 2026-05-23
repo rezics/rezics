@@ -3,7 +3,11 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { useUpdateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
-import type { ExcerptSource } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  markdownContentDoc,
+  type ExcerptSource,
+} from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -91,12 +95,15 @@ export function ExcerptEditPage({
 
       <div className="flex-1 min-h-[300px]">
         <RezicsMarkdownEditor
-          value={translation?.description || ""}
+          value={contentDocMarkdownFallback(translation?.description)}
           onChange={(value) =>
             setData({
               ...data,
               translations: [
-                { ...(translation || { language: "en" }), description: value },
+                {
+                  ...(translation || { language: "en" }),
+                  description: markdownContentDoc(value),
+                },
               ],
             })
           }

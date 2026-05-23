@@ -25,7 +25,6 @@ export {
   shelfUnitToUnitCardSummary,
   unitDtoToUnitCardSummary,
 } from "./models/unitCardSummary";
-export type { Candidate } from "./models/types";
 export { useUnitCandidates } from "./hooks/useUnitCandidates";
 export type {
   Candidate,

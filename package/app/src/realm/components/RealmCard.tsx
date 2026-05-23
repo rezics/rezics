@@ -1,4 +1,4 @@
-import type { RealmDTO } from "@rezics/contract";
+import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
 import { unitHref } from "@/shared/ui/link";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
@@ -13,7 +13,7 @@ interface RealmCardProps {
 export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
   const translation = getTranslation(realm.translations);
   const title = translation?.title ?? m.realm_untitled();
-  const description = translation?.description ?? "";
+  const description = contentDocMarkdownFallback(translation?.description);
 
   return (
     <Card className="cursor-pointer border-0 shadow-none">

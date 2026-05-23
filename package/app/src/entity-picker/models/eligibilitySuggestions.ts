@@ -14,7 +14,10 @@ export function suggestCreditEligibility(
 ): CreditAttributionRole[] {
   return withSelectedRole(
     creditAttributionRoles.filter((role) =>
-      creditAttributionRoleRegistry[role].entityKindHints.includes(kind),
+      (
+        creditAttributionRoleRegistry[role]
+          .entityKindHints as readonly EntityKind[]
+      ).includes(kind),
     ),
     selectedRole,
   );
@@ -26,7 +29,10 @@ export function suggestSubjectEligibility(
 ): SubjectAttributionRole[] {
   return withSelectedRole(
     subjectAttributionRoles.filter((role) =>
-      subjectAttributionRoleRegistry[role].entityKindHints.includes(kind),
+      (
+        subjectAttributionRoleRegistry[role]
+          .entityKindHints as readonly EntityKind[]
+      ).includes(kind),
     ),
     selectedRole,
   );

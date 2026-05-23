@@ -110,10 +110,6 @@ function streamEntryRowId(entry: ShelfStreamEntry): string {
   return entry.unit.unit.unitId;
 }
 
-function lastSingleToggleValue(values: readonly string[]): string | undefined {
-  return values.at(-1);
-}
-
 function isEditorMode(value: string | undefined): value is EditorMode {
   return value === "edit" || value === "multi-select" || value === "preview";
 }
@@ -372,9 +368,9 @@ export function ShelfEditorItemsSection({
             </Label>
             <TooltipProvider>
               <ToggleGroup
-                value={[mode]}
-                onValueChange={(values) => {
-                  const value = lastSingleToggleValue(values);
+                type="single"
+                value={mode}
+                onValueChange={(value) => {
                   if (!isEditorMode(value)) return;
                   setMode(value);
                 }}

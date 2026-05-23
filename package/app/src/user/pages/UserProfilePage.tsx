@@ -101,7 +101,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               {!isCurrentUser && user.unitId !== currentUser?.unitId && (
                 <FollowButton
                   userId={user.unitId}
-                  size="medium"
+                  size="default"
                   className="!mr-2"
                 />
               )}

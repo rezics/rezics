@@ -1,11 +1,9 @@
 import type { TagFilters } from "@rezics/api/tag/tag";
 import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import { TextLink } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { useIsMobile } from "@/shared/utils/use-media-query";
 import { RealmTagHighlights } from "./RealmTagHighlights";
 import TagList from "./TagList";
 import * as m from "@rezics/i18n/messages";
@@ -29,7 +27,6 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
 }) => {
   const { data, isLoading, error } = useQuery(tagQueries.list(filters));
   const tags: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
-  const isMobile = useIsMobile();
 
   const unitId = filters?.unitId;
   const { data: contextData } = useQuery({
@@ -37,7 +34,11 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
     enabled: !!unitId,
   });
   const realmHighlights = useMemo(
-    () => contextData?.realmHighlights ?? [],
+    () =>
+      (contextData?.realmHighlights ?? []).map((highlight) => ({
+        ...highlight,
+        tags: highlight.tags.map((tag) => tag.label),
+      })),
     [contextData],
   );
 

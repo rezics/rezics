@@ -1,5 +1,4 @@
 import * as m from "@rezics/i18n/messages";
-import { useLocale } from "@rezics/i18n/react";
 import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
@@ -34,8 +33,6 @@ function fmtDate(v?: string | Date) {
 export default function UserListPage() {
   const matchRoute = useMatchRoute();
   const isMeiliMode = Boolean(matchRoute({ to: "/user/meili" }));
-  const locale = useLocale();
-
   const [q, setQ] = React.useState("");
   const [query, setQuery] = React.useState("");
   const [page, setPage] = React.useState(0);
@@ -77,7 +74,7 @@ export default function UserListPage() {
         id: "userId",
         header: m.admin_user_user_id(),
         minWidth: 220,
-        cell: (u) => <span className="text-sm font-mono">{u.userId}</span>,
+        cell: (u) => <span className="text-sm font-mono">{u.unitId}</span>,
       },
       {
         id: "email",
@@ -130,7 +127,7 @@ export default function UserListPage() {
             size="sm"
             variant="outline"
             render={(props) => (
-              <Link to="/user/$userId" params={{ userId: u.userId }} {...props}>
+              <Link to="/user/$userId" params={{ userId: u.unitId }} {...props}>
                 {m.common_edit()}
               </Link>
             )}
@@ -139,7 +136,7 @@ export default function UserListPage() {
       },
     ];
     return cols;
-  }, [locale]);
+  }, []);
 
   return (
     <Page
@@ -211,7 +208,7 @@ export default function UserListPage() {
             <PaginatedTable<UserDTO>
               columns={columns}
               rows={users}
-              getRowId={(u) => u.userId}
+              getRowId={(u) => u.unitId}
               count={total}
               page={page}
               rowsPerPage={limit}

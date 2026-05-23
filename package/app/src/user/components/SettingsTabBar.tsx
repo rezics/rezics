@@ -25,7 +25,7 @@ export const SettingsTabBar: FC = () => {
         <TabsList className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain bg-transparent">
           {SETTINGS_NAV.map((nav) => (
             <TabsTrigger key={nav.path} value={nav.path} className="flex-none">
-              {nav.label}
+              {nav.label()}
             </TabsTrigger>
           ))}
         </TabsList>

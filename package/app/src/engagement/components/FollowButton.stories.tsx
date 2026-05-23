@@ -16,11 +16,11 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const Small: Story = {
-  args: { size: "small", showFollowersText: false },
+  args: { size: "sm", showFollowersText: false },
 };
 
 export const Medium: Story = {
-  args: { size: "medium", showFollowersText: true },
+  args: { size: "default", showFollowersText: true },
 };
 
 export const Disabled: Story = {

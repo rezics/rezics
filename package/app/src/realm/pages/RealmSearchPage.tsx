@@ -1,5 +1,9 @@
 import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
-import type { RealmDTO, RealmSearchDocument } from "@rezics/contract";
+import {
+  markdownContentDoc,
+  type RealmDTO,
+  type RealmSearchDocument,
+} from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import * as m from "@rezics/i18n/messages";
 import { KeywordInput } from "@/search/components/primitive";
@@ -18,7 +22,7 @@ function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
       unitId: doc.id,
       language: tr.language,
       title: tr.title,
-      description: tr.description,
+      description: markdownContentDoc(tr.description ?? ""),
     })),
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,

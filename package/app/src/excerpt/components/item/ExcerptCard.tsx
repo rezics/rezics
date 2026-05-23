@@ -5,7 +5,11 @@ import {
   Card,
   CardContent,
 } from "@rezics/ui/shadcn";
-import type { ExcerptSource, UnitDTO } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  type ExcerptSource,
+  type UnitDTO,
+} from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
@@ -46,7 +50,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
     | string
     | undefined;
   const description =
-    excerpt.translations?.[0]?.description ??
+    contentDocMarkdownFallback(excerpt.translations?.[0]?.description) ||
     m.excerpt_card_description_fallback();
 
   const reactionPost: ReactionBarPost = {

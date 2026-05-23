@@ -7,6 +7,7 @@ export const env = createEnv({
   client: {
     VITE_API_URL: v.string(),
     VITE_AUTH_ADMIN_URL: v.optional(v.string()),
+    VITE_REACTION_SERVICE_URL: v.optional(v.string()),
   },
   runtimeEnv: import.meta.env,
   emptyStringAsUndefined: true,

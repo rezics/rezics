@@ -47,7 +47,7 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
             variant="outline"
             className="w-full"
           >
-            {m.engagement_open_standalone_page()}
+            {m.common_open()}
           </Button>
         </div>
         <div className="mt-2">

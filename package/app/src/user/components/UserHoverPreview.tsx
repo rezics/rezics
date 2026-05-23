@@ -311,10 +311,9 @@ function getStats(user: UserHoverPreviewUser) {
   return [
     { label: m.profile_tab_followers(), value: user.followersCount },
     { label: m.profile_following(), value: user.followingsCount },
-  ].filter(
-    (stat): stat is { label: string; value: number } =>
-      typeof stat.value === "number",
-  );
+  ]
+    .filter((stat) => typeof stat.value === "number")
+    .map((stat) => ({ label: stat.label, value: stat.value ?? 0 }));
 }
 
 function formatCount(value: number) {

@@ -1,6 +1,11 @@
 import { userApi } from "@rezics/api/user/user.api";
 import { userQueries } from "@rezics/api/user/user.queries";
-import type { UpdateUser, UserDTO } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  markdownContentDoc,
+  type UpdateUser,
+  type UserDTO,
+} from "@rezics/contract";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { Spinner } from "@rezics/ui";
 import {
@@ -30,6 +35,10 @@ export interface UserEditPageProps {
   userId?: string;
 }
 
+type UserEditFormData = Omit<UpdateUser, "description"> & {
+  description: string;
+};
+
 /**
  * UserEditPage - 用户资料编辑页面
  * 允许用户编辑自己的个人信息
@@ -50,7 +59,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   const [error, setError] = useState<string | any | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const [formData, setFormData] = useState<UpdateUser>({
+  const [formData, setFormData] = useState<UserEditFormData>({
     name: "",
     avatar: "",
     bio: "",
@@ -66,7 +75,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
         avatar: data.avatar || "",
         bio: data.bio || "",
         password: "",
-        description: data.description || "",
+        description: contentDocMarkdownFallback(data.description),
       });
     }
     if (queryError) {
@@ -83,6 +92,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
         name: formData.name,
         avatar: formData.avatar || undefined,
         bio: formData.bio || undefined,
+        description: markdownContentDoc(formData.description),
       };
 
       // Only include password if it's not empty
@@ -110,7 +120,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
     }
   };
 
-  const handleChange = (field: keyof UpdateUser, value: string) => {
+  const handleChange = (field: keyof UserEditFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -211,7 +221,6 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 label="New Password (optional)"
                 value={formData.password || ""}
                 setValue={(value) => handleChange("password", value)}
-                variant="outlined"
                 helperText="Leave empty to keep current password"
                 required={false}
               />

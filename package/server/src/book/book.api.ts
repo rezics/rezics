@@ -2,7 +2,9 @@ import type {
   BookContentStructureResponse,
   BookListResponse,
   BookResponse,
+  ContentRating,
   CreateBookInput,
+  LicenseSlug,
   ScoreAggregateDTO,
 } from "@rezics/contract";
 import {
@@ -216,12 +218,15 @@ export const bookApi = new Elysia({ prefix: "/book" })
               !Array.isArray(extension.extra))
               ? (extension.extra as Record<string, unknown> | null)
               : undefined,
-          rating: typeof unit.rating === "string" ? unit.rating : undefined,
+          rating:
+            typeof unit.rating === "string"
+              ? (unit.rating as ContentRating)
+              : undefined,
           visibility:
             typeof unit.visibility === "string" ? unit.visibility : undefined,
           licenseSlug:
             unit.license === null || typeof unit.license === "string"
-              ? unit.license
+              ? (unit.license as LicenseSlug | null)
               : undefined,
         },
         identity,

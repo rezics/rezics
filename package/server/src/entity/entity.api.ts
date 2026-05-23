@@ -2,6 +2,7 @@ import {
   createEntitySchema,
   editorialPatchSubmissionSchema,
   type EntityDTO,
+  type EntityKind,
   entityBySlugParamsSchema,
   entityListQuerySchema,
   entityListResponseSchema,
@@ -139,7 +140,7 @@ export const entityApi = new Elysia({ prefix: "/entity" })
         {
           kind:
             entity.kind === null || typeof entity.kind === "string"
-              ? entity.kind
+              ? (entity.kind as EntityKind | null)
               : undefined,
           avatar:
             entity.avatar === null || typeof entity.avatar === "string"

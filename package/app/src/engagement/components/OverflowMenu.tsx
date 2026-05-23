@@ -91,7 +91,9 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
           return (
             <DropdownMenuItem
               key={token}
-              onSelect={(event) => handleSelect(event, token)}
+              onSelect={(event) =>
+                handleSelect(event as unknown as Event, token)
+              }
               className="gap-2"
             >
               {descriptor.icon}

@@ -1,4 +1,10 @@
-import type { CreditAttributionDTO, Language } from "@rezics/contract";
+import type {
+  CreditAttributionDTO,
+  CreditAttributionRole,
+  EntityKind,
+  Language,
+  SubjectAttributionRole,
+} from "@rezics/contract";
 import type { CreditAttributionWithRelations } from "./types";
 
 export function mapCreditAttributionToDTO(
@@ -10,14 +16,18 @@ export function mapCreditAttributionToDTO(
   return {
     unitId: row.unitId,
     entityId: row.entityId,
-    role: row.role,
+    role: row.role as CreditAttributionRole,
     sortOrder: row.sortOrder,
     entity: entityUnit
       ? {
           unitId: entityUnit.id,
-          kind: entityExt?.kind ?? undefined,
+          kind: (entityExt?.kind as EntityKind | null | undefined) ?? undefined,
           avatar: entityExt?.avatar ?? undefined,
           verified: entityExt?.verified ?? false,
+          eligibleCreditRoles: (entityExt?.eligibleCreditRoles ??
+            []) as CreditAttributionRole[],
+          eligibleSubjectRoles: (entityExt?.eligibleSubjectRoles ??
+            []) as SubjectAttributionRole[],
           slug: entityUnit.slug ?? undefined,
           ownerUnitId: entityUnit.userId ?? undefined,
           translations: (entityUnit as any).translations?.map((tr: any) => ({

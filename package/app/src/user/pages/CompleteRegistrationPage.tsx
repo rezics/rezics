@@ -147,7 +147,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
     if (slugCheck && !slugCheck.available) {
       return slugCheck.reason === "taken"
         ? m.auth_flow_setup_slug_taken()
-        : m.auth_flow_setup_slug_invalid({ reason: slugCheck.reason });
+        : m.auth_flow_setup_slug_invalid({ reason: slugCheck.reason ?? "" });
     }
     return undefined;
   }, [slug, slugCheck]);

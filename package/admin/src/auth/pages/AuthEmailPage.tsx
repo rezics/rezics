@@ -176,7 +176,7 @@ export default function AuthEmailPage() {
         setSmtpResult({
           type: "success",
           message: m.admin_auth_email_connected_to({
-            host: result.host,
+            host: result.host ?? "",
             port: String(result.port),
           }),
         });
@@ -220,7 +220,9 @@ export default function AuthEmailPage() {
             <Label>{m.admin_auth_email_template()}</Label>
             <Select
               value={selectedTemplate}
-              onValueChange={setSelectedTemplate}
+              onValueChange={(value) => {
+                if (value) setSelectedTemplate(value);
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={m.admin_auth_email_template()} />

@@ -3,8 +3,10 @@ import { useServerPermission } from "@rezics/api/hooks";
 import type { EntityDTO, EntityKind } from "@rezics/contract";
 import {
   BasicAdminPermission,
+  contentDocMarkdownFallback,
   DEFAULT_LANGUAGE,
   entityKinds,
+  markdownContentDoc,
 } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import {
@@ -54,7 +56,8 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
     () => getExistingLanguages(entity),
     [entity],
   );
-  const [selectedLanguage, setSelectedLanguage] = useState(DEFAULT_LANGUAGE);
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<string>(DEFAULT_LANGUAGE);
   const [draftLanguages, setDraftLanguages] = useState<string[]>([]);
   const editableLanguages = useMemo(
     () => [
@@ -107,7 +110,7 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
     setTitle(translation?.title ?? "");
     setSubtitle(translation?.subtitle ?? "");
     setSummary(translation?.summary ?? "");
-    setDescription(translation?.description ?? "");
+    setDescription(contentDocMarkdownFallback(translation?.description));
   }, [translation]);
 
   const handleAddLanguage = (language: string) => {
@@ -139,7 +142,9 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
               title: title.trim(),
               subtitle: subtitle.trim() || null,
               summary: summary.trim() || null,
-              description: description.trim() || null,
+              description: description.trim()
+                ? markdownContentDoc(description)
+                : null,
             },
           },
         },

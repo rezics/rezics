@@ -141,12 +141,13 @@ const ShelfCard: FC<{
   userSlug?: string;
 }> = ({ shelf, isOwnerView, userSlug }) => {
   const dbTitle = shelf.translations?.[0]?.title ?? m.shelf_untitled();
-  const isSystemShelf = isSystemKindKey(shelf.kindKey);
+  const systemKindKey = isSystemKindKey(shelf.kindKey) ? shelf.kindKey : null;
+  const isSystemShelf = systemKindKey !== null;
   const title =
     isOwnerView && isSystemShelf
-      ? systemShelfKindLabel(shelf.kindKey)
+      ? systemShelfKindLabel(systemKindKey)
       : dbTitle;
-  const itemCount = shelf.items?.length ?? 0;
+  const itemCount = (shelf as { items?: unknown[] }).items?.length ?? 0;
   const card = (
     <div className="border border-border-whisper rounded-lg p-4 hover:border-border-defined transition-colors h-full flex flex-col">
       {shelf.coverUrl && (
@@ -174,7 +175,7 @@ const ShelfCard: FC<{
     return (
       <Link
         to="/u/$userSlug/shelf/$slug"
-        params={{ userSlug, slug: shelf.kindKey }}
+        params={{ userSlug, slug: systemKindKey }}
         className="no-underline"
       >
         {card}

@@ -3,6 +3,7 @@ import {
   type CreditAttributionRole,
   creditAttributionRoleRegistry,
   type EntityKind,
+  type EntityDTO,
   type SubjectAttributionRole,
   subjectAttributionRoleRegistry,
 } from "@rezics/contract";
@@ -131,8 +132,10 @@ export function EntityPicker({
       const bo =
         creationContext === "personal" && b.ownerUnitId === ownerUnitId ? 0 : 1;
       if (ao !== bo) return ao - bo;
-      const am = a.kind && effectiveKindHints.includes(a.kind) ? 0 : 1;
-      const bm = b.kind && effectiveKindHints.includes(b.kind) ? 0 : 1;
+      const am =
+        a.kind && effectiveKindHints.includes(a.kind as EntityKind) ? 0 : 1;
+      const bm =
+        b.kind && effectiveKindHints.includes(b.kind as EntityKind) ? 0 : 1;
       return am - bm;
     });
   }, [creationContext, effectiveKindHints, ownerUnitId, results]);
@@ -267,7 +270,7 @@ export function EntityPicker({
           {orderedResults.map((entity) => (
             <EntityResultRow
               key={entity.unitId}
-              entity={entity}
+              entity={entity as unknown as EntityDTO}
               onSelect={handleSelect}
             />
           ))}

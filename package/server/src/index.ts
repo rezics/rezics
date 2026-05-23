@@ -100,7 +100,7 @@ const devOrigins = [
 
 const prodOrigins = ["https://book.rezics.com", "https://rezics.com"];
 
-app
+const configuredApp = app
   .use(
     cors({
       origin: isDev ? devOrigins : prodOrigins,
@@ -163,7 +163,11 @@ app
       code,
       message,
     };
-  })
+  });
+
+const routeApp = configuredApp as any;
+
+routeApp
   .use(authPublicApi)
   .use(wellKnownApi)
   .use(bookApi)

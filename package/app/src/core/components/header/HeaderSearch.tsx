@@ -74,11 +74,8 @@ function useHeaderSearchPresentation(pathname: string) {
 
   if (scope.kind === "realm") {
     const title =
-      getTranslation(
-        realmQuery.data?.translations,
-        undefined,
-        realmQuery.data?.defaultLanguage ?? undefined,
-      )?.title ?? scope.realmId;
+      getTranslation(realmQuery.data?.translations, undefined, undefined)
+        ?.title ?? scope.realmId;
 
     return {
       kind: "scoped" as const,

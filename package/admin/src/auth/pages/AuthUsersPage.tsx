@@ -100,7 +100,7 @@ export default function AuthUsersPage() {
           <Select
             value={u.role ?? "user"}
             onValueChange={(value) =>
-              setRoleMutation.mutate({ userId: u.id, role: value })
+              value && setRoleMutation.mutate({ userId: u.id, role: value })
             }
           >
             <SelectTrigger size="sm" className="w-28">

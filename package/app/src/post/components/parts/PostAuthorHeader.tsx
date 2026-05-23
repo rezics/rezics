@@ -1,4 +1,4 @@
-import type { PostDTO } from "@rezics/contract";
+import { contentDocMarkdownFallback, type PostDTO } from "@rezics/contract";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
 
@@ -34,7 +34,10 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
     >
       {author ? (
         <UserHoverPreview
-          user={author}
+          user={{
+            ...author,
+            description: contentDocMarkdownFallback(author.description),
+          }}
           size={size}
           avatarClassName={avatarClassName}
           nameClassName={nameClass}
@@ -72,7 +75,10 @@ export function PostAuthorAvatar({
   if (author) {
     return (
       <UserHoverPreview
-        user={author}
+        user={{
+          ...author,
+          description: contentDocMarkdownFallback(author.description),
+        }}
         size={size}
         avatarClassName={avatarClassName}
         showName={false}

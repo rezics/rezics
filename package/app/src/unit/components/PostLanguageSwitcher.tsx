@@ -70,6 +70,7 @@ export function PostLanguageSwitcher({
                       navigate({
                         to: "/unit/$unitId",
                         params: { unitId: sibling.unitId },
+                        search: { view: "auto" },
                       })
               }
               title={sibling.translationSnippet ?? undefined}

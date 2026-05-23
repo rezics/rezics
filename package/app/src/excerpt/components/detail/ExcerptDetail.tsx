@@ -1,5 +1,9 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type { ExcerptSource, UnitDTO } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  type ExcerptSource,
+  type UnitDTO,
+} from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
@@ -22,7 +26,9 @@ export const ExcerptDetail: React.FC<ExcerptDetailProps> = ({
   excerpt,
   onReplyInvoke,
 }) => {
-  const description = excerpt.translations?.[0]?.description ?? "";
+  const description = contentDocMarkdownFallback(
+    excerpt.translations?.[0]?.description,
+  );
   const source = (excerpt.extra as Record<string, unknown> | null)?.source as
     | ExcerptSource
     | string

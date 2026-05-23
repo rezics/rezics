@@ -1,4 +1,8 @@
-import { type ShelfDTO, shelfCoverImageSpec } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  type ShelfDTO,
+  shelfCoverImageSpec,
+} from "@rezics/contract";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
@@ -19,8 +23,9 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
   const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? "";
-  const description = translation?.description ?? "";
-  const itemsCount = shelf.itemCount ?? shelf.items?.length ?? 0;
+  const description = contentDocMarkdownFallback(translation?.description);
+  const itemsCount =
+    shelf.itemCount ?? (shelf as { items?: unknown[] }).items?.length ?? 0;
 
   const card = (
     <Card

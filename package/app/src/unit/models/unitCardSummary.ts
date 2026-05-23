@@ -8,7 +8,11 @@ import type {
   UnitDTO,
   UnitTranslationDTO,
 } from "@rezics/contract";
-import { mainMarkdownSource, readCoverUrlFromExtra } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  mainMarkdownSource,
+  readCoverUrlFromExtra,
+} from "@rezics/contract";
 import * as m from "@rezics/i18n/messages";
 import { getTranslation } from "../../shared/utils/translation-helpers";
 
@@ -105,7 +109,8 @@ export function unitDtoToUnitCardSummary(
     subtitle: text(translation?.subtitle),
     imageUrl: imageUrl ?? null,
     contentPreview:
-      text(translation?.summary) ?? text(translation?.description),
+      text(translation?.summary) ??
+      contentDocMarkdownFallback(translation?.description),
     author: unit.user ?? null,
     isCommunityCatalog: isRezicsWikiUser(unit.user),
     addedAt: options.addedAt ?? null,

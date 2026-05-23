@@ -19,7 +19,11 @@ export const Route = createFileRoute("/_mainLayout/unit/$unitId/")({
       .catch(() => null);
 
     const viewer = useUserProfileStore.getState().user;
-    return resolveUnitRoute({ unit, viewer: viewer ?? null, view: deps.view });
+    return resolveUnitRoute({
+      unit,
+      viewer: viewer ?? null,
+      view: (deps as { view?: "auto" | "unit" }).view ?? "auto",
+    });
   },
   loaderDeps: ({ search }) => search,
   component: () => {

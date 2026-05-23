@@ -76,6 +76,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   const title = primaryTranslation?.title;
   const content = mainMarkdownSource(primaryTranslation?.description);
   const metadataEntries = Object.entries(unit.extra ?? {});
+  const author = unit.user;
 
   // MOCK: client-side gate until permissions are finalized for translation attach.
   const canAddTranslation = isPost;
@@ -111,14 +112,14 @@ export function UnitPageById({ unitId }: { unitId: string }) {
       </div>
 
       {/* ANCHOR User & basic meta */}
-      {(unit.user || unit.createdAt || unit.updatedAt) && (
+      {(author || unit.createdAt || unit.updatedAt) && (
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {unit.user && (
+          {author && (
             <div className="flex items-center gap-3">
               <Avatar className="w-10 h-10 rounded-md">
-                <AvatarImage src={unit.user.avatar ?? ""} />
+                <AvatarImage src={author.avatar ?? ""} />
                 <AvatarFallback>
-                  {unit.user.name?.charAt(0).toUpperCase() ?? "?"}
+                  {author.name?.charAt(0).toUpperCase() ?? "?"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
@@ -129,13 +130,13 @@ export function UnitPageById({ unitId }: { unitId: string }) {
                         <TextLink
                           to={unitHref({
                             type: "USER",
-                            unitId: unit.user.unitId,
-                            slug: unit.user.slug ?? null,
+                            unitId: author.unitId,
+                            slug: author.slug ?? null,
                           })}
                           className="text-sm font-medium"
                           {...props}
                         >
-                          {unit.user.name}
+                          {author.name}
                         </TextLink>
                       )}
                     />
@@ -143,7 +144,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
                   </Tooltip>
                 </TooltipProvider>
                 <span className="text-xs text-text-secondary">
-                  {unit.user.slug}
+                  {author.slug}
                 </span>
               </div>
             </div>

@@ -7,7 +7,11 @@ import {
   useUpdateRealmMutation,
 } from "@rezics/api/realm/realm";
 import { unitApi } from "@rezics/api/unit/unit";
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  DEFAULT_LANGUAGE,
+  markdownContentDoc,
+} from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { unitHref } from "@/shared/ui/link";
 import { Button, Input, Label, Textarea } from "@rezics/ui/shadcn";
@@ -45,7 +49,8 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         .filter((language): language is string => Boolean(language)),
     [realm?.translations],
   );
-  const [selectedLanguage, setSelectedLanguage] = useState(DEFAULT_LANGUAGE);
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<string>(DEFAULT_LANGUAGE);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -93,7 +98,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
 
   useEffect(() => {
     setTitle(translation?.title ?? "");
-    setDescription(translation?.description ?? "");
+    setDescription(contentDocMarkdownFallback(translation?.description));
   }, [translation]);
 
   const handleAddLanguage = (language: string) => {
@@ -111,7 +116,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
     try {
       await unitApi.upsertTranslation(realmId, selectedLanguage, {
         title,
-        description,
+        description: markdownContentDoc(description),
       });
 
       await queryClient.invalidateQueries({

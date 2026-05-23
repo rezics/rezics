@@ -80,7 +80,7 @@ export const FollowersTabSection: FC = () => {
           <div className="flex flex-col gap-2">
             {users.map((u: UserDTO) => (
               <UserListItem
-                key={u.userId}
+                key={u.unitId}
                 user={u}
                 showFollowButton={isCurrentUser}
               />
@@ -152,7 +152,7 @@ const UserListItem: FC<{ user: UserDTO; showFollowButton: boolean }> = ({
           </span>
         )}
       </div>
-      {showFollowButton && <FollowButton userId={user.unitId} size="small" />}
+      {showFollowButton && <FollowButton userId={user.unitId} size="sm" />}
     </div>
   );
 };

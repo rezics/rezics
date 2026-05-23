@@ -8,7 +8,10 @@ import {
   useCollectionStatusHydration,
   useHydratedShelfUnits,
 } from "@rezics/api/shelf";
-import { shelfCoverImageSpec } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  shelfCoverImageSpec,
+} from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { Button, Checkbox, DropdownMenuItem, Label } from "@rezics/ui/shadcn";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
@@ -112,7 +115,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   );
   const translation = shelf ? getTranslation(shelf.translations) : undefined;
   const title = translation?.title ?? m.shelf_title();
-  const description = translation?.description ?? "";
+  const description = contentDocMarkdownFallback(translation?.description);
 
   const savedViewMode = normalizePersistedViewMode(
     (shelf?.extra as { viewMode?: unknown } | null | undefined)?.viewMode,

@@ -11,7 +11,7 @@ const meta = {
   args: {
     user: userAlice as never,
     isCurrentUser: false,
-    userId: userAlice.userId,
+    userId: userAlice.unitId,
   },
 } satisfies Meta<typeof ProfileBasicInfo>;
 
@@ -21,9 +21,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const Empty: Story = {
-  args: { user: userAnonymous as never, userId: userAnonymous.userId },
+  args: { user: userAnonymous as never, userId: userAnonymous.unitId },
 };
 
 export const Compact: Story = {
-  args: { user: userBen as never, userId: userBen.userId, isCurrentUser: true },
+  args: { user: userBen as never, userId: userBen.unitId, isCurrentUser: true },
 };

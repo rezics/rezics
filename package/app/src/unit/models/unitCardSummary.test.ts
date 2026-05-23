@@ -114,7 +114,7 @@ describe("shelfUnitToUnitCardSummary", () => {
           unitId: "book-1",
           language: "en",
           title: "Shelf Book",
-          description: "Book description",
+          description: markdownContentDoc("Book description"),
         },
       ],
     } as BookDTO;

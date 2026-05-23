@@ -1,6 +1,11 @@
 import { useEntity, useUpdateEntity } from "@rezics/api/entity";
 import type { EntityKind } from "@rezics/contract";
-import { entityKinds, validateSlug } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  entityKinds,
+  markdownContentDoc,
+  validateSlug,
+} from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { Link } from "@/shared/ui/link";
 import {
@@ -79,7 +84,7 @@ export default function EntityEditPage() {
           title: t.title ?? "",
           subtitle: t.subtitle ?? "",
           summary: t.summary ?? "",
-          description: t.description ?? "",
+          description: contentDocMarkdownFallback(t.description),
         }),
       ),
     );
@@ -151,12 +156,28 @@ export default function EntityEditPage() {
     await updateMutation.mutateAsync({
       unitId,
       input: {
-        kind: kind || undefined,
-        avatar: avatar.trim() || null,
-        verified,
-        slug: wantsSlug ? slugInput.trim() || null : undefined,
-        translations:
-          liveTranslations.length > 0 ? liveTranslations : undefined,
+        patch: {
+          entity: {
+            kind: kind || undefined,
+            avatar: avatar.trim() || null,
+            verified,
+            slug: wantsSlug ? slugInput.trim() || null : undefined,
+          },
+          translations:
+            liveTranslations.length > 0
+              ? Object.fromEntries(
+                  liveTranslations.map((translation) => [
+                    translation.language,
+                    {
+                      ...translation,
+                      description: translation.description
+                        ? markdownContentDoc(translation.description)
+                        : undefined,
+                    },
+                  ]),
+                )
+              : undefined,
+        },
       },
     });
     await entityQuery.refetch();

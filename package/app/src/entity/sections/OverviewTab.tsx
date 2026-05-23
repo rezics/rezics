@@ -1,4 +1,4 @@
-import type { EntityDTO } from "@rezics/contract";
+import { contentDocMarkdownFallback, type EntityDTO } from "@rezics/contract";
 import * as m from "@rezics/i18n/messages";
 import { getEntityTranslation } from "../models/types";
 
@@ -13,7 +13,7 @@ export function OverviewTab({ entity, language }: OverviewTabProps) {
   // explicit empty-state for the current language.
   const matched = tr?.language === language ? tr : undefined;
   const summary = matched?.summary?.trim() ?? "";
-  const description = matched?.description?.trim() ?? "";
+  const description = contentDocMarkdownFallback(matched?.description).trim();
 
   if (!summary && !description) {
     return (
@@ -38,5 +38,8 @@ export function OverviewTab({ entity, language }: OverviewTabProps) {
 export function hasOverviewData(entity: EntityDTO, language: string): boolean {
   const tr = getEntityTranslation(entity, language);
   const matched = tr?.language === language ? tr : undefined;
-  return Boolean(matched?.summary?.trim() || matched?.description?.trim());
+  return Boolean(
+    matched?.summary?.trim() ||
+      contentDocMarkdownFallback(matched?.description).trim(),
+  );
 }

@@ -1,5 +1,5 @@
 import { realmQueries } from "@rezics/api/realm/realm.queries";
-import type { RealmDTO } from "@rezics/contract";
+import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
 import { Link, unitHref } from "@/shared/ui/link";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -34,7 +34,7 @@ function mapJoinedRealmToListItem(realm: RealmDTO): RealmListItemModel {
     unitId: realm.unitId,
     slug: realm.slug ?? null,
     title: primaryTranslation?.title ?? realm.unitId,
-    description: primaryTranslation?.description ?? "",
+    description: contentDocMarkdownFallback(primaryTranslation?.description),
     memberCount: realm.memberCount,
     isOfficial: realm.isOfficial,
     isPublic: realm.isPublic,

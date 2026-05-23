@@ -3,7 +3,7 @@ import {
   myRealmMembershipQuery,
   realmDetailQuery,
 } from "@rezics/api/realm/realm";
-import type { TagTreeNode } from "@rezics/contract";
+import { contentDocMarkdownFallback, type TagTreeNode } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -80,7 +80,7 @@ export function RealmPage({
 
   const translation = getTranslation(realm.translations);
   const title = translation?.title ?? m.realm_untitled();
-  const description = translation?.description ?? "";
+  const description = contentDocMarkdownFallback(translation?.description);
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
 
   return (

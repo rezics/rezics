@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
+import { contentDocMarkdownFallback } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useBlocker, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
@@ -77,7 +78,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   useEffect(() => {
     if (translation) {
       setTitle(translation.title ?? "");
-      setDescription(translation.description ?? "");
+      setDescription(contentDocMarkdownFallback(translation.description));
       setCoverUrl(shelf?.coverUrl ?? "");
     }
   }, [translation, shelf?.coverUrl]);
@@ -97,7 +98,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
     );
     return (
       title !== (translation?.title ?? "") ||
-      description !== (translation?.description ?? "") ||
+      description !== contentDocMarkdownFallback(translation?.description) ||
       coverUrl !== (shelf.coverUrl ?? "") ||
       defaultViewMode !== savedViewMode
     );
@@ -200,7 +201,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           <Label htmlFor="edit-shelf-default-view">
             {m.shelf_default_view_label()}
           </Label>
-          <Select<ShelfView>
+          <Select
             value={defaultViewMode}
             onValueChange={(value) =>
               value && setDefaultViewMode(value as ShelfView)

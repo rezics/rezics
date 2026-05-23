@@ -15,7 +15,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ postUnitId }) => {
   });
 
   const markdown = mainMarkdownSource(post?.content);
-  if (!postUnitId || isError || !markdown) return null;
+  if (!postUnitId || isError || !post || !markdown) return null;
 
   return (
     <section className="rounded-md bg-surface-subtle p-4">

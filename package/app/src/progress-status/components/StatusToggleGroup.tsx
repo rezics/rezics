@@ -45,10 +45,10 @@ export function StatusToggleGroup({
 }: StatusToggleGroupProps) {
   return (
     <ToggleGroup
+      type="single"
       size="sm"
-      value={value ? [value] : []}
-      onValueChange={(next, eventDetails) => {
-        const picked = next[next.length - 1];
+      value={value ?? undefined}
+      onValueChange={(picked, eventDetails) => {
         if (!picked) {
           if (value) {
             eventDetails.cancel();
@@ -56,7 +56,9 @@ export function StatusToggleGroup({
           }
           return;
         }
-        onValueChange(picked);
+        if (TOGGLE_GROUP_STATUSES.includes(picked as ToggleGroupStatus)) {
+          onValueChange(picked as ToggleGroupStatus);
+        }
       }}
       disabled={disabled}
       className={cx("grid w-full grid-cols-4", className)}

@@ -18,7 +18,11 @@ const unitFindUniqueMock = mock(async ({ where }: any) => {
 });
 const unitCreateMock = mock(async () => ({ id: "context-unit-1" }));
 const postCreateMock = mock(async () => ({ unitId: "context-unit-1" }));
-const memberFindFirstMock = mock(async () => ({ realmUnitId: "realm-1" }));
+const memberFindFirstMock = mock(
+  async (): Promise<{ realmUnitId: string } | null> => ({
+    realmUnitId: "realm-1",
+  }),
+);
 const contextFindUniqueMock = mock(async () => null);
 const contextFindUniqueOrThrowMock = mock(async () => ({
   realmUnitId: "realm-1",

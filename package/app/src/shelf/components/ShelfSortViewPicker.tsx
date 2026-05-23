@@ -43,7 +43,7 @@ function sortPickerValue(sort: ShelfSortState): ShelfSortPickerValue {
   return `${sort.field}:${sort.order}`;
 }
 
-function parseSortPickerValue(value: ShelfSortPickerValue | null) {
+function parseSortPickerValue(value: string | null): ShelfSortState {
   if (value === null) {
     throw new Error("Shelf sort picker emitted null");
   }
@@ -82,7 +82,7 @@ export function ShelfSortViewPicker<TView extends ShelfView = ShelfView>({
 
   return (
     <div className={className ?? "flex flex-wrap items-center gap-2"}>
-      <Select<ShelfSortPickerValue>
+      <Select
         value={sortPickerValue(sort)}
         onValueChange={(value) => onSortChange(parseSortPickerValue(value))}
       >
@@ -108,10 +108,12 @@ export function ShelfSortViewPicker<TView extends ShelfView = ShelfView>({
         </SelectContent>
       </Select>
 
-      <Select<TView>
+      <Select
         value={view}
         onValueChange={(value) => {
-          if (value) onViewChange(value);
+          if (value && viewOptions.some((option) => option.value === value)) {
+            onViewChange(value as TView);
+          }
         }}
       >
         <SelectTrigger

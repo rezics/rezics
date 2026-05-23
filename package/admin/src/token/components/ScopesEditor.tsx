@@ -128,7 +128,12 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
       <div className="flex flex-row gap-2 items-end flex-wrap">
         <div className="flex flex-col gap-1">
           <Label className="text-xs">{m.admin_token_domain()}</Label>
-          <Select value={newDomain} onValueChange={setNewDomain}>
+          <Select
+            value={newDomain}
+            onValueChange={(value) => {
+              if (value) setNewDomain(value);
+            }}
+          >
             <SelectTrigger size="sm" className="min-w-30">
               <SelectValue placeholder={m.admin_token_domain()} />
             </SelectTrigger>
@@ -160,7 +165,12 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
 
         <div className="flex flex-col gap-1">
           <Label className="text-xs">{m.admin_token_permission()}</Label>
-          <Select value={newPermission} onValueChange={setNewPermission}>
+          <Select
+            value={newPermission}
+            onValueChange={(value) => {
+              if (value) setNewPermission(value);
+            }}
+          >
             <SelectTrigger size="sm" className="min-w-30">
               <SelectValue placeholder={m.admin_token_permission()} />
             </SelectTrigger>

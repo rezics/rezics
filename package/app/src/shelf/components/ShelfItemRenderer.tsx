@@ -10,6 +10,7 @@ import type {
   UnitDTO,
   UnitTagDTO,
 } from "@rezics/contract";
+import { contentDocMarkdownFallback } from "@rezics/contract";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { HorizontalBookCard } from "@/book-library/components/item/HorizontalBookCard";
@@ -57,7 +58,9 @@ function renderUnit(
       const book = data as BookDTO | undefined;
       if (!book) return <ShelfItemCard unit={unit} />;
       const title = book.translations?.[0]?.title ?? unit.unitId;
-      const description = book.translations?.[0]?.description ?? undefined;
+      const description =
+        contentDocMarkdownFallback(book.translations?.[0]?.description) ||
+        undefined;
       const author = getBookAuthorName(book) || undefined;
       const coverUrl = book.coverUrl ?? "";
       const href = `/book/${unit.unitId}`;
