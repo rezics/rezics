@@ -194,7 +194,7 @@ describe("RevisionService", () => {
   test("stores restore source metadata separately from content payload", async () => {
     const db = dbStub();
     const service = new RevisionService(db as never);
-    const patch = { post: { body: "Restored" } };
+    const patch = { post: { content: { main: { source: "Restored" } } } };
     const contentHash = computeRevisionContentHash(patch);
 
     const revision = await service.insertUnitRevision({
@@ -208,7 +208,7 @@ describe("RevisionService", () => {
           kind: "revision",
           unitId: "unit-1",
           sequence: 7,
-          paths: ["post.body"],
+          paths: ["post.content.main.source"],
         },
       },
     });
@@ -218,7 +218,7 @@ describe("RevisionService", () => {
       kind: "revision",
       unitId: "unit-1",
       sequence: 7,
-      paths: ["post.body"],
+      paths: ["post.content.main.source"],
     });
     expect(revision.content?.payload).toEqual(patch);
   });

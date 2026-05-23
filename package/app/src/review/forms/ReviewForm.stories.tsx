@@ -11,7 +11,7 @@ const Wrapper = (args: { initial: ReviewEditState }) => {
 
 const empty: ReviewEditState = {
   unitId: "review-draft",
-  body: "",
+  contentSource: "",
   _editTitle: "",
   _editRating: 0,
   extra: {},
@@ -21,7 +21,8 @@ const filled: ReviewEditState = {
   ...empty,
   _editTitle: "Quiet endings, second readings",
   _editRating: 8,
-  body: "On a second pass the architecture finally reveals itself: chapter 17 is the actual climax, and the final chapter is a quiet coda. The translator's note in the back matter is itself a small essay; don't skip it. Worth re-reading every couple of years.",
+  contentSource:
+    "On a second pass the architecture finally reveals itself: chapter 17 is the actual climax, and the final chapter is a quiet coda. The translator's note in the back matter is itself a small essay; don't skip it. Worth re-reading every couple of years.",
 };
 
 const meta = {
@@ -41,7 +42,7 @@ export const Empty: Story = {
 
 export const WithError: Story = {
   args: {
-    initial: { ...empty, body: "Too short.", _editRating: 6 },
+    initial: { ...empty, contentSource: "Too short.", _editRating: 6 },
   },
 };
 

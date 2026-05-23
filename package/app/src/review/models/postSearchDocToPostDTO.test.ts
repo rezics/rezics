@@ -7,7 +7,7 @@ function makeDoc(
 ): PostSearchDocument {
   return {
     id: "review-1",
-    body: "A careful review.",
+    contentText: "A careful review.",
     kind: "REVIEW",
     depth: 0,
     sortPath: null,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import type { PostDTO } from "@rezics/contract";
+import { markdownContentDoc, type PostDTO } from "@rezics/contract";
 import {
   filterBySortPathPrefix,
   getRevealExpandedIds,
@@ -10,7 +10,7 @@ function makePost(overrides: Partial<PostDTO> & { unitId: string }): PostDTO {
   return {
     authorUserId: "u1",
     targetUnitId: "target",
-    body: "",
+    content: markdownContentDoc(""),
     kind: "REPLY" as any,
     depth: 0,
     sortPath: "",

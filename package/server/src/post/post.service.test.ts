@@ -1,4 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
+import { markdownContentDoc } from "@rezics/contract";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
@@ -118,11 +119,26 @@ mock.module("@/meili/post/sync", () => ({
   syncPostsByTargetToMeili: mock(async () => undefined),
 }));
 
+mock.module("@/meili/content/sync", () => ({
+  deleteContentFromMeili: mock(async () => undefined),
+  patchContentContainedUnitIdsToMeili: mock(async () => undefined),
+  patchContentCreditsToMeili: mock(async () => undefined),
+  patchContentMetadataToMeili: mock(async () => undefined),
+  patchContentRealmIdsToMeili: mock(async () => undefined),
+  patchContentRealmTagKeysToMeili: mock(async () => undefined),
+  patchContentSubjectsToMeili: mock(async () => undefined),
+  patchContentTagsToMeili: mock(async () => undefined),
+  patchContentTranslationsToMeili: mock(async () => undefined),
+  syncContentToMeili: mock(async () => undefined),
+}));
+
 mock.module("@/utils/sanitizeUser", () => ({
   publicUserSelect: {},
 }));
 
 const { PostService } = await import("./post.service");
+
+const content = (source: string) => markdownContentDoc(source);
 
 function resetMocks() {
   unitCreateMock.mockClear();
@@ -165,7 +181,7 @@ describe("PostService.create realm/tag junction writes", () => {
   test("creates a post with no realm or tags", async () => {
     resetMocks();
 
-    await service.create({ body: "hello" }, "user-1");
+    await service.create({ content: content("hello") }, "user-1");
 
     expect(realmUnitCreateMock).not.toHaveBeenCalled();
     expect(unitTagCreateMock).not.toHaveBeenCalled();
@@ -175,7 +191,7 @@ describe("PostService.create realm/tag junction writes", () => {
     resetMocks();
 
     await service.create(
-      { body: "hello", realmUnitIds: ["realm-1"] },
+      { content: content("hello"), realmUnitIds: ["realm-1"] },
       "user-1",
     );
 
@@ -190,7 +206,10 @@ describe("PostService.create realm/tag junction writes", () => {
     resetMocks();
 
     await service.create(
-      { body: "hello", realmUnitIds: ["realm-1", "realm-2", "realm-3"] },
+      {
+        content: content("hello"),
+        realmUnitIds: ["realm-1", "realm-2", "realm-3"],
+      },
       "user-1",
     );
 
@@ -203,7 +222,7 @@ describe("PostService.create realm/tag junction writes", () => {
     resetMocks();
 
     await service.create(
-      { body: "hello", tagIds: ["tag-1", "tag-2"] },
+      { content: content("hello"), tagIds: ["tag-1", "tag-2"] },
       "user-1",
     );
 
@@ -225,7 +244,11 @@ describe("PostService.create realm/tag junction writes", () => {
     resetMocks();
 
     await service.create(
-      { body: "hello", realmUnitIds: ["realm-1"], tagIds: ["tag-1"] },
+      {
+        content: content("hello"),
+        realmUnitIds: ["realm-1"],
+        tagIds: ["tag-1"],
+      },
       "user-1",
     );
 
@@ -240,7 +263,7 @@ describe("PostService.create realm/tag junction writes", () => {
 
     await expect(
       service.create(
-        { body: "hello", tagIds: ["tag-1", "missing-tag"] },
+        { content: content("hello"), tagIds: ["tag-1", "missing-tag"] },
         "user-1",
       ),
     ).rejects.toMatchObject({
@@ -255,7 +278,10 @@ describe("PostService.create realm/tag junction writes", () => {
 
     await expect(
       service.create(
-        { body: "hello", realmUnitIds: ["realm-1", "missing-realm"] },
+        {
+          content: content("hello"),
+          realmUnitIds: ["realm-1", "missing-realm"],
+        },
         "user-1",
       ),
     ).rejects.toThrow("Foreign key failed");
@@ -430,7 +456,7 @@ describe("PostService.create rootTargetUnit derivation", () => {
     unitFindUniqueMock.mockResolvedValueOnce({ type: "BOOK" });
 
     await service.create(
-      { body: "great", kind: "REVIEW", targetUnitId: "book-B" },
+      { content: content("great"), kind: "REVIEW", targetUnitId: "book-B" },
       "user-1",
     );
 
@@ -449,7 +475,7 @@ describe("PostService.create rootTargetUnit derivation", () => {
     unitFindUniqueMock.mockResolvedValueOnce({ type: "GAME" });
 
     await service.create(
-      { body: "thoughts", kind: "REMARK", targetUnitId: "game-G" },
+      { content: content("thoughts"), kind: "REMARK", targetUnitId: "game-G" },
       "user-1",
     );
 
@@ -461,7 +487,7 @@ describe("PostService.create rootTargetUnit derivation", () => {
   test("top-level POST with no targetUnitId leaves both fields undefined", async () => {
     resetMocks();
 
-    await service.create({ body: "free-form" }, "user-1");
+    await service.create({ content: content("free-form") }, "user-1");
 
     const data = createDataArg();
     expect(data.targetUnitId).toBeUndefined();
@@ -484,7 +510,7 @@ describe("PostService.create rootTargetUnit derivation", () => {
     });
 
     await service.create(
-      { body: "reply", parentPostUnitId: "parent-1" },
+      { content: content("reply"), parentPostUnitId: "parent-1" },
       "user-1",
     );
 
@@ -507,7 +533,7 @@ describe("PostService.create rootTargetUnit derivation", () => {
     });
 
     await service.create(
-      { body: "nested", parentPostUnitId: "comment-1" },
+      { content: content("nested"), parentPostUnitId: "comment-1" },
       "user-1",
     );
 
@@ -521,7 +547,7 @@ describe("PostService.create rootTargetUnit derivation", () => {
     unitFindUniqueMock.mockResolvedValueOnce({ type: "BOOK" });
 
     await service.create(
-      { body: "ch1", kind: "CHAPTER", targetUnitId: "book-B" },
+      { content: content("ch1"), kind: "CHAPTER", targetUnitId: "book-B" },
       "user-1",
     );
 
@@ -535,17 +561,20 @@ describe("PostService.create rootTargetUnit derivation", () => {
 describe("PostService.update immutability", () => {
   const service = new PostService();
 
-  test("update writes only body/isLocked/extra; rootTarget* fields are not in the update payload", async () => {
+  test("update writes only content/isLocked/extra; rootTarget* fields are not in the update payload", async () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
     Object.assign(prismaMock.post, { update: directPostUpdateMock });
 
-    await service.update("post-1", { body: "edited", isLocked: true });
+    await service.update("post-1", {
+      content: content("edited"),
+      isLocked: true,
+    });
 
     expect(directPostUpdateMock).toHaveBeenCalledTimes(1);
     const args = (directPostUpdateMock.mock.calls as any[])[0]?.[0];
     expect(args.where).toEqual({ unitId: "post-1" });
-    expect(args.data).toEqual({ body: "edited", isLocked: true });
+    expect(args.data).toEqual({ content: content("edited"), isLocked: true });
     expect(args.data.targetUnitId).toBeUndefined();
     expect(args.data.rootTargetUnitId).toBeUndefined();
     expect(args.data.rootTargetUnitType).toBeUndefined();
@@ -566,17 +595,17 @@ describe("PostService wiki posts", () => {
     resetMocks();
     postCreateMock.mockImplementationOnce(async (args: any) => ({
       unitId: "wiki-post-1",
-      body: args.data.body,
+      content: args.data.content,
       kind: args.data.kind,
     }));
     postUpdateMock.mockImplementationOnce(async (args: any) => ({
       unitId: "wiki-post-1",
-      body: "body",
+      content: content("body"),
       kind: "WIKI",
       rootPostUnitId: args.data.rootPostUnitId,
     }));
 
-    await service.create({ kind: "WIKI", body: "body" }, "actor-1");
+    await service.create({ kind: "WIKI", content: content("body") }, "actor-1");
 
     const unitCreateArgs = (unitCreateMock.mock.calls as any[])[0][0];
     const postCreateArgs = (postCreateMock.mock.calls as any[])[0][0];
@@ -586,30 +615,81 @@ describe("PostService wiki posts", () => {
     expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
   });
 
-  test("unlocked wiki body edit writes through collaborative authority", async () => {
+  test("unlocked wiki content edit writes through collaborative authority", async () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
     }));
 
-    await service.update("wiki-post-1", { body: "edited" }, actor);
+    await service.update("wiki-post-1", { content: content("edited") }, actor);
 
     expect(unitFieldLockFindManyMock).toHaveBeenCalledTimes(1);
     expect(postUpdateMock).toHaveBeenCalledTimes(1);
     expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
   });
 
-  test("locked wiki body edit is rejected", async () => {
+  test("wiki content source patch uses path-based lock and history", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
+      kind: "WIKI",
+      content: content("original"),
+    }));
+
+    await service.update("wiki-post-1", { content: content("edited") }, actor, {
+      patch: { post: { content: { main: { source: "edited" } } } },
+      message: "wiki-post.content.source.update",
+    });
+
+    expect(unitFieldLockFindManyMock).toHaveBeenCalledTimes(1);
+    expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
+    expect(
+      historyOutboxCreateMock.mock.calls[0]?.[0].data.payload,
+    ).toMatchObject({
+      kind: "editorial_revision",
+      revision: {
+        unitId: "wiki-post-1",
+        actorUserId: "actor-1",
+        patch: { post: { content: { main: { source: "edited" } } } },
+        message: "wiki-post.content.source.update",
+      },
+    });
+
+    resetMocks();
+    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
+      kind: "WIKI",
+      content: content("original"),
+    }));
+    unitFieldLockFindManyMock.mockImplementationOnce(async () => [
+      { path: "post.content.main.source" },
+    ]);
+
+    await expect(
+      service.update("wiki-post-1", { content: content("edited") }, actor, {
+        patch: { post: { content: { main: { source: "edited" } } } },
+        message: "wiki-post.content.source.update",
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 403,
+      code: "FIELD_LOCKED",
+      details: {
+        blockedPaths: ["post.content.main.source"],
+        offendingLockPath: "post.content.main.source",
+        offendingPatchPath: "post.content.main.source",
+      },
+    });
+  });
+
+  test("locked wiki content edit is rejected", async () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
     }));
     unitFieldLockFindManyMock.mockImplementationOnce(async () => [
-      { path: "post.body" },
+      { path: "post.content.main" },
     ]);
 
     await expect(
-      service.update("wiki-post-1", { body: "edited" }, actor),
+      service.update("wiki-post-1", { content: content("edited") }, actor),
     ).rejects.toMatchObject({
       statusCode: 403,
       code: "FIELD_LOCKED",
@@ -623,13 +703,13 @@ describe("PostService wiki posts", () => {
       kind: "REVIEW",
     }));
 
-    await service.update("review-1", { body: "edited" }, actor);
+    await service.update("review-1", { content: content("edited") }, actor);
 
     expect(unitFieldLockFindManyMock).not.toHaveBeenCalled();
     expect(historyOutboxCreateMock).not.toHaveBeenCalled();
   });
 
-  test("Post.isLocked does not control wiki body locks", async () => {
+  test("Post.isLocked does not control wiki content locks", async () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
@@ -637,7 +717,7 @@ describe("PostService wiki posts", () => {
 
     await service.update(
       "wiki-post-1",
-      { body: "edited", isLocked: true },
+      { content: content("edited"), isLocked: true },
       actor,
     );
 

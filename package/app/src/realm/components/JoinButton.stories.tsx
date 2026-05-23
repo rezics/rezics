@@ -2,6 +2,7 @@ import { postKeys } from "@rezics/api/post/post";
 import { realmKeys } from "@rezics/api/realm/realm";
 import {
   LANGUAGES,
+  markdownContentDoc,
   PostKind,
   type PostDTO,
   type RealmDTO,
@@ -51,12 +52,12 @@ function makeRealm(extra: RealmDTO["extra"]): RealmDTO {
   } as RealmDTO;
 }
 
-function makePost(body: string): PostDTO {
+function makePost(contentSource: string): PostDTO {
   return {
     unitId: RULE_POST_ID,
     authorUserId: "fixture-user",
     kind: PostKind.POST,
-    body,
+    content: markdownContentDoc(contentSource),
   } as PostDTO;
 }
 

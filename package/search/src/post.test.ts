@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { markdownContentDoc } from "@rezics/contract";
 
 function setServerEnvForSearchTests() {
   process.env.DATABASE_URL ??=
@@ -25,7 +26,7 @@ describe("buildPostDocument", () => {
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
-      body: "hello",
+      content: markdownContentDoc("hello"),
       kind: "POST",
       depth: 0,
       sortPath: null,
@@ -57,7 +58,7 @@ describe("buildPostDocument", () => {
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
-      body: "hello",
+      content: markdownContentDoc("hello"),
       kind: "REVIEW",
       depth: 0,
       sortPath: null,
@@ -89,7 +90,7 @@ describe("buildPostDocument", () => {
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-2",
-      body: null,
+      content: null,
       kind: "POST",
       depth: 0,
       sortPath: null,
@@ -118,7 +119,7 @@ describe("buildPostDocument", () => {
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
-      body: null,
+      content: null,
       kind: "POST",
       depth: 0,
       sortPath: null,
@@ -139,6 +140,48 @@ describe("buildPostDocument", () => {
     });
 
     expect(doc.realmIds).toEqual([]);
+  });
+
+  test("projects contentText from main markdown only", async () => {
+    setServerEnvForSearchTests();
+    const { buildPostDocument } = await import("./sync");
+    const doc = buildPostDocument({
+      unitId: "post-1",
+      content: {
+        ...markdownContentDoc("main markdown"),
+        slots: {
+          facts: {
+            type: "infobox",
+            rows: [
+              {
+                label: { type: "markdown", source: "Author" },
+                value: { type: "markdown", source: "Slot text" },
+              },
+            ],
+          },
+        },
+      },
+      kind: "POST",
+      depth: 0,
+      sortPath: null,
+      isLocked: false,
+      replyCount: 0,
+      directReplyCount: 0,
+      lastReplyAt: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      targetUnitId: null,
+      rootPostUnitId: null,
+      parentPostUnitId: null,
+      authorUserId: "user-1",
+      scoreEntryId: null,
+      unit: { user: null, inRealms: [] },
+      targetUnit: null,
+      scoreEntry: null,
+    });
+
+    expect(doc.contentText).toBe("main markdown");
+    expect(doc.contentText).not.toContain("Slot text");
   });
 });
 
@@ -169,6 +212,71 @@ describe("buildContentDocument realm tag keys", () => {
 
     expect(doc.realmIds).toEqual([]);
     expect(doc.realmTagKeys).toEqual(["realm-1:tag-1"]);
+  });
+
+  test("projects main markdown and ignores slot text for runtime v1", async () => {
+    setServerEnvForSearchTests();
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      id: "post-1",
+      type: "POST",
+      defaultLanguage: "en",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      userId: "user-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      publishedAt: null,
+      translations: [
+        {
+          language: "en",
+          title: "Post",
+          description: {
+            ...markdownContentDoc("description main"),
+            slots: {
+              facts: {
+                type: "infobox",
+                rows: [
+                  {
+                    label: { type: "markdown", source: "Description slot" },
+                    value: { type: "markdown", source: "Hidden description" },
+                  },
+                ],
+              },
+            },
+          },
+          extra: null,
+        },
+      ],
+      unitTags: [],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [],
+      creditAttributions: [],
+      subjectAttributions: [],
+      post: {
+        kind: "POST",
+        content: {
+          ...markdownContentDoc("content main"),
+          slots: {
+            facts: {
+              type: "infobox",
+              rows: [
+                {
+                  label: { type: "markdown", source: "Content slot" },
+                  value: { type: "markdown", source: "Hidden content" },
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+
+    expect(doc.contentText).toBe("content main");
+    expect(doc.descriptionText).toBe("description main");
+    expect(doc.contentText).not.toContain("Hidden content");
+    expect(doc.descriptionText).not.toContain("Hidden description");
   });
 });
 

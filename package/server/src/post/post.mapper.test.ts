@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { markdownContentDoc } from "@rezics/contract";
 import { mapPostToDTO } from "./post.mapper";
 
 describe("mapPostToDTO", () => {
@@ -7,7 +8,7 @@ describe("mapPostToDTO", () => {
       unitId: "post-1",
       authorUserId: "user-1",
       targetUnitId: "book-1",
-      body: "A thoughtful review",
+      content: markdownContentDoc("A thoughtful review"),
       rootPostUnitId: "post-1",
       parentPostUnitId: null,
       kind: "REVIEW",

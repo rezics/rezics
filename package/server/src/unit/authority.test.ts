@@ -83,7 +83,7 @@ describe("canEditUnitFields", () => {
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
-      ["post.body"],
+      ["post.content.main.source"],
       collaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -93,7 +93,7 @@ describe("canEditUnitFields", () => {
       code: "FIELD_LOCKED",
       blockedPaths: ["*"],
       offendingLockPath: "*",
-      offendingPatchPath: "post.body",
+      offendingPatchPath: "post.content.main.source",
     });
   });
 
@@ -162,7 +162,7 @@ describe("canEditUnitFields", () => {
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
-      ["post.body"],
+      ["post.content.main.source"],
       notCollaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -190,13 +190,13 @@ describe("canEditUnitFields", () => {
   });
 
   test("assert helper throws typed authority errors with blocked field keys", async () => {
-    const db = prismaStub({ locks: ["post.body"] });
+    const db = prismaStub({ locks: ["post.content.main.source"] });
 
     await expect(
       assertCanEditUnitFields(
         actor("user-2"),
         unit,
-        ["post.body"],
+        ["post.content.main.source"],
         collaborative,
         { prismaClient: db as never, verifyAdmin: async () => false },
       ),
@@ -204,9 +204,9 @@ describe("canEditUnitFields", () => {
       name: "UnitAuthorityError",
       code: "FIELD_LOCKED",
       unitId: "unit-1",
-      blockedPaths: ["post.body"],
-      offendingLockPath: "post.body",
-      offendingPatchPath: "post.body",
+      blockedPaths: ["post.content.main.source"],
+      offendingLockPath: "post.content.main.source",
+      offendingPatchPath: "post.content.main.source",
     } satisfies Partial<UnitAuthorityError>);
   });
 });

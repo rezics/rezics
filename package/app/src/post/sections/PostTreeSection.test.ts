@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import type { PostDTO } from "@rezics/contract";
+import { markdownContentDoc, type PostDTO } from "@rezics/contract";
 import { excludeRootPost } from "../hooks/usePostTreeCollapse";
 import {
   buildPostTreeNodes,
@@ -12,7 +12,7 @@ function makePost(unitId: string, sortPath?: string, depth?: number): PostDTO {
   return {
     unitId,
     authorUserId: "user-1",
-    body: "body",
+    content: markdownContentDoc("body"),
     sortPath,
     depth,
   } as PostDTO;

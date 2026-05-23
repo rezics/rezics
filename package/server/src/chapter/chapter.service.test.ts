@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { markdownContentDoc } from "@rezics/contract";
 import {
   installPrismaClientMock,
   prismaMock,
@@ -26,7 +27,7 @@ const mockContainerUpdateMany = mock(async () => ({ count: 0 }));
 const mockFindBookForTarget = mock(async () => ({ type: UnitType.BOOK }));
 const mockPostFindUniqueOrThrow = mock(async () => ({
   unitId: "ch-1",
-  body: "body",
+  content: markdownContentDoc("body"),
 }));
 
 const mockTx = {
@@ -76,6 +77,8 @@ function firstArg(fn: { mock: { calls: unknown[][] } }) {
   return fn.mock.calls[0]?.[0] as any;
 }
 
+const content = (source: string) => markdownContentDoc(source);
+
 function resetMocks(): void {
   mockPostUpdate.mockClear();
   mockUnitUpdate.mockClear();
@@ -97,12 +100,12 @@ describe("ChapterService.update propagation", () => {
     mockTranslationFindFirst.mockResolvedValue({ language: "en", extra: null });
   });
 
-  test("body-only edit on a single-link chapter bumps exactly one node updatedAt and no container", async () => {
+  test("content-only edit on a single-link chapter bumps exactly one node updatedAt and no container", async () => {
     mockNodeUpdateMany.mockResolvedValue({ count: 1 });
     mockNodeFindMany.mockResolvedValue([]);
     const { chapterService } = await import("./chapter.service");
 
-    await chapterService.update("ch-1", { content: "new body" });
+    await chapterService.update("ch-1", { content: content("new body") });
 
     expect(mockNodeUpdateMany).toHaveBeenCalledTimes(1);
     const args = firstArg(mockNodeUpdateMany);
@@ -113,11 +116,11 @@ describe("ChapterService.update propagation", () => {
     expect(mockNodeFindMany).not.toHaveBeenCalled();
   });
 
-  test("body edit on a multi-link chapter bumps every linked node via a single updateMany and no container", async () => {
+  test("content edit on a multi-link chapter bumps every linked node via a single updateMany and no container", async () => {
     mockNodeUpdateMany.mockResolvedValue({ count: 3 });
     const { chapterService } = await import("./chapter.service");
 
-    await chapterService.update("ch-1", { content: "edit" });
+    await chapterService.update("ch-1", { content: content("edit") });
 
     expect(mockNodeUpdateMany).toHaveBeenCalledTimes(1);
     expect(firstArg(mockNodeUpdateMany).where).toEqual({

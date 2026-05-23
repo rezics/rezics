@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { markdownContentDoc } from "@rezics/contract";
 import {
   installPrismaClientMock,
   PostKind,
@@ -169,7 +170,7 @@ describe("ChapterService.materializeByBookPath", () => {
         authorUserId: "actor-user",
         targetUnitId: "book-1",
         kind: PostKind.CHAPTER,
-        body: "",
+        content: markdownContentDoc(""),
         rootPostUnitId: "chapter-new",
         depth: 0,
       },

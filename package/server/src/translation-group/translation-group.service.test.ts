@@ -5,6 +5,7 @@
  * Run with: RUN_DB_TESTS=1 bun test src/translation-group/translation-group.service.test.ts
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { markdownContentDoc } from "@rezics/contract";
 import { prisma, UnitStatus, UnitType } from "../../prisma/client";
 import { translationGroupService } from "./translation-group.service";
 
@@ -12,6 +13,7 @@ const RUN = process.env.RUN_DB_TESTS === "1";
 const describeWithDb = RUN ? describe : describe.skip;
 
 const createdUnitIds = new Set<string>();
+const content = (source: string) => markdownContentDoc(source);
 
 async function makePost(opts: {
   defaultLanguage?: string;
@@ -31,7 +33,9 @@ async function makePost(opts: {
             post: {
               create: {
                 authorUserId: opts.authorUserId,
-                body: `seed body for ${opts.defaultLanguage ?? "n/a"}`,
+                content: content(
+                  `seed content for ${opts.defaultLanguage ?? "n/a"}`,
+                ) as never,
               },
             },
             ...(opts.defaultLanguage
@@ -82,7 +86,7 @@ describeWithDb("TranslationGroupService", () => {
     const { newUnitId, groupId } =
       await translationGroupService.attachTranslation(
         a,
-        { language: "ja", body: "日本語" },
+        { language: "ja", content: content("日本語") },
         userId,
       );
     createdUnitIds.add(newUnitId);
@@ -100,14 +104,14 @@ describeWithDb("TranslationGroupService", () => {
     const a = await makePost({ defaultLanguage: "en", authorUserId: userId });
     const first = await translationGroupService.attachTranslation(
       a,
-      { language: "ja", body: "ja" },
+      { language: "ja", content: content("ja") },
       userId,
     );
     createdUnitIds.add(first.newUnitId);
 
     const second = await translationGroupService.attachTranslation(
       a,
-      { language: "zh-hant", body: "zh" },
+      { language: "zh-hant", content: content("zh") },
       userId,
     );
     createdUnitIds.add(second.newUnitId);
@@ -123,7 +127,7 @@ describeWithDb("TranslationGroupService", () => {
     const a = await makePost({ defaultLanguage: "en", authorUserId: userId });
     const first = await translationGroupService.attachTranslation(
       a,
-      { language: "ja", body: "ja" },
+      { language: "ja", content: content("ja") },
       userId,
     );
     createdUnitIds.add(first.newUnitId);
@@ -131,7 +135,7 @@ describeWithDb("TranslationGroupService", () => {
     await expect(
       translationGroupService.attachTranslation(
         a,
-        { language: "ja", body: "duplicate" },
+        { language: "ja", content: content("duplicate") },
         userId,
       ),
     ).rejects.toThrow();
@@ -142,7 +146,7 @@ describeWithDb("TranslationGroupService", () => {
     const { newUnitId, groupId } =
       await translationGroupService.attachTranslation(
         a,
-        { language: "ja", body: "ja" },
+        { language: "ja", content: content("ja") },
         userId,
       );
     createdUnitIds.add(newUnitId);
@@ -164,7 +168,7 @@ describeWithDb("TranslationGroupService", () => {
     const { newUnitId, groupId } =
       await translationGroupService.attachTranslation(
         a,
-        { language: "ja", body: "ja" },
+        { language: "ja", content: content("ja") },
         userId,
       );
     createdUnitIds.add(newUnitId);
@@ -187,7 +191,7 @@ describeWithDb("TranslationGroupService", () => {
     await expect(
       translationGroupService.attachTranslation(
         tag,
-        { language: "ja", body: "x" },
+        { language: "ja", content: content("x") },
         userId,
       ),
     ).rejects.toThrow(/POST/);

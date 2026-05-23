@@ -1,6 +1,5 @@
 import { postKeys } from "@rezics/api/post/post.keys";
-import type { PostDTO } from "@rezics/contract";
-import { PostKind } from "@rezics/contract";
+import { markdownContentDoc, PostKind, type PostDTO } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -17,13 +16,15 @@ const SHELF_POST_FILTERS = {
 };
 
 function makePost(
-  overrides: Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">,
+  overrides: Partial<PostDTO> &
+    Pick<PostDTO, "unitId" | "depth"> & { contentSource?: string },
 ): PostDTO {
   const nowIso = new Date().toISOString();
+  const { contentSource, ...dtoOverrides } = overrides;
   const base = {
     id: overrides.unitId,
     kind: PostKind.POST,
-    body: overrides.body ?? "Fixture comment.",
+    content: markdownContentDoc(contentSource ?? "Fixture comment."),
     user: {
       unitId: `u-${overrides.unitId}`,
       name: "Fixture User",
@@ -35,7 +36,7 @@ function makePost(
     createdAt: nowIso,
     updatedAt: nowIso,
   };
-  return { ...base, ...overrides } as unknown as PostDTO;
+  return { ...base, ...dtoOverrides } as unknown as PostDTO;
 }
 
 const POPULATED_POSTS: PostDTO[] = [
@@ -43,13 +44,14 @@ const POPULATED_POSTS: PostDTO[] = [
     unitId: "shelf-p1",
     depth: 1,
     sortPath: "0001",
-    body: "Really nice curation! Any chance you'll add the second series?",
+    contentSource:
+      "Really nice curation! Any chance you'll add the second series?",
   }),
   makePost({
     unitId: "shelf-p2",
     depth: 1,
     sortPath: "0002",
-    body: "Love the range here — thanks for sharing.",
+    contentSource: "Love the range here — thanks for sharing.",
   }),
 ];
 
@@ -58,7 +60,7 @@ const MANY_POSTS: PostDTO[] = Array.from({ length: 12 }).map((_, i) =>
     unitId: `shelf-many-${i + 1}`,
     depth: 1,
     sortPath: String(i + 1).padStart(4, "0"),
-    body: `Comment ${i + 1}: thoughtful note about the curation choices.`,
+    contentSource: `Comment ${i + 1}: thoughtful note about the curation choices.`,
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
 );
 

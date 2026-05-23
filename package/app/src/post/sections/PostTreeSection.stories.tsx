@@ -1,6 +1,5 @@
 import { postKeys } from "@rezics/api/post/post.keys";
-import type { PostDTO } from "@rezics/contract";
-import { PostKind } from "@rezics/contract";
+import { markdownContentDoc, PostKind, type PostDTO } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -12,13 +11,17 @@ const ROOT_ID = "fixture-root-1";
 
 // MOCK: deterministic post fixtures used to seed the React Query cache for stories.
 function makePost(
-  overrides: Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">,
+  overrides: Partial<PostDTO> &
+    Pick<PostDTO, "unitId" | "depth"> & { contentSource?: string },
 ): PostDTO {
   const nowIso = new Date().toISOString();
+  const { contentSource, ...dtoOverrides } = overrides;
   const base = {
     id: overrides.unitId,
     kind: PostKind.POST,
-    body: overrides.body ?? "Placeholder reply body for fixture.",
+    content: markdownContentDoc(
+      contentSource ?? "Placeholder reply body for fixture.",
+    ),
     user: {
       unitId: `u-${overrides.unitId}`,
       name: "Fixture User",
@@ -30,7 +33,7 @@ function makePost(
     createdAt: nowIso,
     updatedAt: nowIso,
   };
-  return { ...base, ...overrides } as unknown as PostDTO;
+  return { ...base, ...dtoOverrides } as unknown as PostDTO;
 }
 
 const FLAT_POSTS: PostDTO[] = Array.from({ length: 4 }).map((_, i) =>
@@ -38,7 +41,7 @@ const FLAT_POSTS: PostDTO[] = Array.from({ length: 4 }).map((_, i) =>
     unitId: `flat-${i + 1}`,
     depth: 1,
     sortPath: String(i + 1).padStart(4, "0"),
-    body: `Top-level reply ${i + 1}.`,
+    contentSource: `Top-level reply ${i + 1}.`,
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
 );
 
@@ -48,7 +51,7 @@ const THREADED_3DEEP_POSTS: PostDTO[] = [
     depth: 1,
     sortPath: "0001",
     directReplyCount: 2,
-    body: "Top-level reply with two children.",
+    contentSource: "Top-level reply with two children.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-1-1",
@@ -56,27 +59,27 @@ const THREADED_3DEEP_POSTS: PostDTO[] = [
     sortPath: "0001.0001",
     parentPostUnitId: "fix-1",
     directReplyCount: 1,
-    body: "Depth-2 child, default collapsed.",
+    contentSource: "Depth-2 child, default collapsed.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-1-1-1",
     depth: 3,
     sortPath: "0001.0001.0001",
     parentPostUnitId: "fix-1-1",
-    body: "Deep descendant hidden by default collapse.",
+    contentSource: "Deep descendant hidden by default collapse.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-1-2",
     depth: 2,
     sortPath: "0001.0002",
     parentPostUnitId: "fix-1",
-    body: "Sibling of the first depth-2 node.",
+    contentSource: "Sibling of the first depth-2 node.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "fix-2",
     depth: 1,
     sortPath: "0002",
-    body: "Second top-level reply with no children.",
+    contentSource: "Second top-level reply with no children.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
 ];
 
@@ -94,7 +97,7 @@ function buildDeepThread(depth: number): PostDTO[] {
         sortPath: path,
         parentPostUnitId: parent,
         directReplyCount: i < depth ? 1 : 0,
-        body: `Depth ${i} reply in 10-deep chain.`,
+        contentSource: `Depth ${i} reply in 10-deep chain.`,
       } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
     );
     parent = id;
@@ -110,14 +113,14 @@ const CONTINUOUS_RAIL_POSTS: PostDTO[] = [
     depth: 1,
     sortPath: "0001",
     directReplyCount: 4,
-    body: "Outer reply with several visible children.",
+    contentSource: "Outer reply with several visible children.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "outer-1",
     depth: 2,
     sortPath: "0001.0001",
     parentPostUnitId: "outer",
-    body: "First child on the continuous outer rail.",
+    contentSource: "First child on the continuous outer rail.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "outer-2",
@@ -125,28 +128,28 @@ const CONTINUOUS_RAIL_POSTS: PostDTO[] = [
     sortPath: "0001.0002",
     parentPostUnitId: "outer",
     directReplyCount: 1,
-    body: "Second child, with a collapsed nested branch.",
+    contentSource: "Second child, with a collapsed nested branch.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "outer-2-1",
     depth: 3,
     sortPath: "0001.0002.0001",
     parentPostUnitId: "outer-2",
-    body: "Nested child hidden by default collapse.",
+    contentSource: "Nested child hidden by default collapse.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "outer-3",
     depth: 2,
     sortPath: "0001.0003",
     parentPostUnitId: "outer",
-    body: "Third child should not show a rail seam above it.",
+    contentSource: "Third child should not show a rail seam above it.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
   makePost({
     unitId: "outer-4",
     depth: 2,
     sortPath: "0001.0004",
     parentPostUnitId: "outer",
-    body: "Last child ends the continuous outer rail.",
+    contentSource: "Last child ends the continuous outer rail.",
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
 ];
 

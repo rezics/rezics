@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import type { BookDTO, PostDTO, ShelfUnitDTO, UnitDTO } from "@rezics/contract";
+import {
+  markdownContentDoc,
+  type BookDTO,
+  type PostDTO,
+  type ShelfUnitDTO,
+  type UnitDTO,
+} from "@rezics/contract";
 import {
   candidateToUnitCardSummary,
   resolveUnitWorkContext,
@@ -153,13 +159,13 @@ describe("shelfUnitToUnitCardSummary", () => {
     expect(summary.attachmentCounts).toBeUndefined();
   });
 
-  test("maps a review shelf unit using post body and extra.title", () => {
+  test("maps a review shelf unit using post content and extra.title", () => {
     const unit = makeShelfUnit({ unitId: "review-1", kind: "review" });
     const review: PostDTO = {
       unitId: "review-1",
       authorUserId: "user-1",
       author: { unitId: "user-1", name: "Reviewer" },
-      body: "Review body",
+      content: markdownContentDoc("Review body"),
       extra: { title: "Review title" },
     };
 
