@@ -16,6 +16,7 @@ import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 
 import { Page } from "@/core/layouts/Page";
+import * as m from "@rezics/i18n/messages";
 import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
 
 export default function UnitCreatePage() {
@@ -39,7 +40,9 @@ export default function UnitCreatePage() {
 
   const createMutation = unitMutations.useCreate({
     onError: (err) =>
-      setError(err instanceof Error ? err.message : "Create failed"),
+      setError(
+        err instanceof Error ? err.message : m.admin_unit_create_failed(),
+      ),
   });
 
   async function onSubmit(e: React.FormEvent) {
@@ -66,7 +69,10 @@ export default function UnitCreatePage() {
   }
 
   return (
-    <Page title="Create Unit" description="创建一个新 Unit（Admin）">
+    <Page
+      title={m.admin_unit_create_title()}
+      description={m.admin_unit_create_description()}
+    >
       <Card>
         <CardContent>
           <div className="flex flex-row items-center gap-2 mb-2">
@@ -76,7 +82,7 @@ export default function UnitCreatePage() {
               render={(props) => (
                 <Link to="/unit" {...props}>
                   <ArrowBackIcon className="size-4" />
-                  Back
+                  {m.common_back()}
                 </Link>
               )}
             />
@@ -96,7 +102,7 @@ export default function UnitCreatePage() {
           <form onSubmit={onSubmit}>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-userId">User ID</Label>
+                <Label htmlFor="ucpu-userId">{m.admin_auth_user_id()}</Label>
                 <Input
                   id="ucpu-userId"
                   value={userId}
@@ -104,59 +110,62 @@ export default function UnitCreatePage() {
                   required
                 />
                 <p className="text-xs text-text-secondary">
-                  后端当前实现会强制用当前登录用户覆盖该字段（后续可按需改为
-                  admin 可指定）。
+                  {m.admin_unit_primary_user_help()}
                 </p>
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-type">Type</Label>
+                <Label htmlFor="ucpu-type">{m.common_type()}</Label>
                 <Input
                   id="ucpu-type"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                   required
-                  placeholder="BOOK / POST / TAG / REALM / SHELF / ..."
+                  placeholder={m.admin_unit_type_placeholder()}
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-status">Status</Label>
+                <Label htmlFor="ucpu-status">
+                  {m.admin_auth_email_status()}
+                </Label>
                 <Input
                   id="ucpu-status"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  placeholder="DRAFT / PUBLISHED / ARCHIVED / ..."
+                  placeholder={m.admin_unit_status_placeholder()}
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-lang">Default Language</Label>
+                <Label htmlFor="ucpu-lang">
+                  {m.admin_unit_default_language()}
+                </Label>
                 <Input
                   id="ucpu-lang"
                   value={defaultLanguage}
                   onChange={(e) => setDefaultLanguage(e.target.value)}
-                  placeholder="en"
+                  placeholder={m.common_language_code_placeholder()}
                 />
                 <p className="text-xs text-text-secondary">
-                  ISO language code for the primary translation
+                  {m.admin_unit_default_language_help()}
                 </p>
               </div>
 
               <Separator />
               <p className="text-xs font-semibold text-text-secondary">
-                Initial Translation
+                {m.admin_unit_initial_translation()}
               </p>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-tt">Title</Label>
+                <Label htmlFor="ucpu-tt">{m.common_title()}</Label>
                 <Input
                   id="ucpu-tt"
                   value={translationTitle}
                   onChange={(e) => setTranslationTitle(e.target.value)}
                 />
                 <p className="text-xs text-text-secondary">
-                  Title for the initial translation (uses default language)
+                  {m.admin_unit_title_help()}
                 </p>
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-ts">Summary</Label>
+                <Label htmlFor="ucpu-ts">{m.common_summary()}</Label>
                 <textarea
                   id="ucpu-ts"
                   value={translationSummary}
@@ -169,11 +178,13 @@ export default function UnitCreatePage() {
               <div>
                 <Button type="submit" disabled={createMutation.isPending}>
                   <SaveIcon className="size-4" />
-                  {createMutation.isPending ? "Creating…" : "Create"}
+                  {createMutation.isPending
+                    ? m.admin_token_creating()
+                    : m.common_create()}
                 </Button>
               </div>
               <p className="text-xs text-text-secondary">
-                Tip：列表页支持翻页；创建成功会跳转到编辑页。
+                {m.admin_unit_create_tip()}
               </p>
             </div>
           </form>

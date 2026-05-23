@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { useRouterState } from "@tanstack/react-router";
 import React from "react";
 import { AuthenticatedSection } from "@/core/sections/header/AuthenticatedSection.tsx";
@@ -66,7 +67,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
           <Link to="/" className="flex items-center gap-2 shrink-0">
             {!isHomePage && (
               <div className="w-10 h-10 inline-flex items-center justify-center rounded-md bg-transparent overflow-hidden">
-                <img src="/logo.svg" alt="logo" />
+                <img src="/logo.svg" alt={m.common_logo_alt()} />
               </div>
             )}
             <h1 className="text-3xl font-bold text-brand-fill m-0">REZICS</h1>

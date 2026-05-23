@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { X } from "lucide-react";
 import type React from "react";
 import { useEffect } from "react";
@@ -69,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               type="button"
               onClick={onClose}
               className="absolute top-4 right-4 p-1 rounded-md transition-colors"
-              aria-label="Close sidebar"
+              aria-label={m.app_close_sidebar_aria_label()}
             >
               <X size={20} className="text-slate-500" />
             </button>

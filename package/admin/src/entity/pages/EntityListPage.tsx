@@ -17,6 +17,8 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import { entityKindLabel } from "@rezics/i18n";
+import * as m from "@rezics/i18n/messages";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "-";
@@ -26,8 +28,9 @@ function fmtDate(v?: string | Date) {
 }
 
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {
-  if (!translations || translations.length === 0) return "Untitled";
-  return translations[0]?.title?.trim() || "Untitled";
+  if (!translations || translations.length === 0)
+    return m.admin_unit_no_title();
+  return translations[0]?.title?.trim() || m.admin_unit_no_title();
 }
 
 type VerifiedFilter = "all" | "true" | "false";
@@ -56,7 +59,7 @@ export default function EntityListPage() {
     () => [
       {
         id: "unitId",
-        header: "Unit ID",
+        header: m.common_unit_id(),
         minWidth: 220,
         cell: (e) => (
           <span className="text-sm font-mono text-text-secondary">
@@ -66,7 +69,7 @@ export default function EntityListPage() {
       },
       {
         id: "title",
-        header: "Primary title",
+        header: m.admin_entity_primary_title(),
         minWidth: 200,
         cell: (e) => (
           <span className="text-sm font-medium">
@@ -76,35 +79,39 @@ export default function EntityListPage() {
       },
       {
         id: "kind",
-        header: "Kind",
+        header: m.common_type(),
         minWidth: 120,
         cell: (e) => (
-          <span className="text-sm text-text-secondary">{e.kind ?? "-"}</span>
+          <span className="text-sm text-text-secondary">
+            {e.kind ? entityKindLabel(e.kind) : "-"}
+          </span>
         ),
       },
       {
         id: "verified",
-        header: "Verified",
+        header: m.admin_entity_verified(),
         minWidth: 100,
         cell: (e) => (
-          <span className="text-sm">{e.verified ? "Yes" : "No"}</span>
+          <span className="text-sm">
+            {e.verified ? m.common_yes() : m.common_no()}
+          </span>
         ),
       },
       {
         id: "slug",
-        header: "Slug",
+        header: m.common_slug(),
         minWidth: 160,
         cell: (e) => <span className="text-sm font-mono">{e.slug ?? "-"}</span>,
       },
       {
         id: "createdAt",
-        header: "Created",
+        header: m.common_created(),
         minWidth: 170,
         cell: (e) => fmtDate(e.createdAt),
       },
       {
         id: "actions",
-        header: "Actions",
+        header: m.admin_auth_actions_title(),
         minWidth: 120,
         cell: (e) => (
           <Button
@@ -116,7 +123,7 @@ export default function EntityListPage() {
                 params={{ unitId: e.unitId }}
                 {...props}
               >
-                Edit
+                {m.common_edit()}
               </Link>
             )}
           />
@@ -127,17 +134,20 @@ export default function EntityListPage() {
   );
 
   return (
-    <Page title="Entities" description="Curate ENTITY-typed units">
+    <Page
+      title={m.admin_entity_list_title()}
+      description={m.admin_entity_list_description()}
+    >
       <Card>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-3 items-stretch">
             <div className="flex-1 flex flex-col gap-1">
               <Label htmlFor="entity-search" className="text-xs">
-                Search title
+                {m.admin_entity_search_title()}
               </Label>
               <Input
                 id="entity-search"
-                placeholder="search translation titles…"
+                placeholder={m.admin_entity_search_placeholder()}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {
@@ -150,11 +160,11 @@ export default function EntityListPage() {
             </div>
             <div className="flex flex-col gap-1 sm:w-40">
               <Label htmlFor="entity-kind" className="text-xs">
-                Kind
+                {m.common_type()}
               </Label>
               <Input
                 id="entity-kind"
-                placeholder="person…"
+                placeholder={m.admin_entity_kind_filter_placeholder()}
                 value={kind}
                 onChange={(e) => {
                   setKind(e.target.value);
@@ -164,7 +174,7 @@ export default function EntityListPage() {
             </div>
             <div className="flex flex-col gap-1 sm:w-40">
               <Label htmlFor="entity-verified" className="text-xs">
-                Verified
+                {m.admin_entity_verified()}
               </Label>
               <select
                 id="entity-verified"
@@ -175,15 +185,17 @@ export default function EntityListPage() {
                 }}
                 className="h-9 rounded-md border border-border-whisper bg-transparent px-2 text-sm"
               >
-                <option value="all">All</option>
-                <option value="true">Verified</option>
-                <option value="false">Unverified</option>
+                <option value="all">
+                  {m.admin_entity_verified_filter_all()}
+                </option>
+                <option value="true">{m.admin_entity_verified()}</option>
+                <option value="false">{m.common_unverified()}</option>
               </select>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              aria-label="search"
+              aria-label={m.common_search()}
               onClick={() => {
                 setPage(0);
                 setQuery(q.trim());
@@ -201,7 +213,9 @@ export default function EntityListPage() {
               <Spinner />
             </div>
           ) : listQuery.isError ? (
-            <p className="text-sm text-error-text">Failed to load entities.</p>
+            <p className="text-sm text-error-text">
+              {m.admin_entity_failed_load_list()}
+            </p>
           ) : (
             <PaginatedTable<EntityDTO>
               columns={columns}

@@ -60,22 +60,22 @@
 - [x] 7.3 Migrate `package/admin/src/core/layouts/` page/layout copy to generated messages.
 - [x] 7.4 Migrate `package/admin/src/home/` dashboard, stat card, and health strip copy to generated messages.
 - [x] 7.5 Migrate `package/admin/src/user/` login, create, edit, and list page copy to generated messages.
-- [ ] 7.6 Migrate `package/admin/src/auth/` status, sessions, users, email, and JWT-service admin copy to generated messages.
-- [ ] 7.7 Migrate `package/admin/src/token/` token page, tables, dialogs, secret display, scopes editor, and validation copy to generated messages.
-- [ ] 7.8 Migrate `package/admin/src/unit/` list, create, edit, field-lock, collaborator, subject attribution, and Meili unit page copy to generated messages.
-- [ ] 7.9 Migrate `package/admin/src/entity/` list and edit page copy to generated messages and reuse shared entity/subject/credit label helpers where applicable.
-- [ ] 7.10 Migrate `package/admin/src/book/`, `package/admin/src/shelf/`, `package/admin/src/tag/`, `package/admin/src/realm/`, `package/admin/src/authority/`, `package/admin/src/meili/`, and `package/admin/src/setting/` copy to generated messages.
-- [ ] 7.11 Migrate admin `placeholder`, `aria-label`, `title`, meaningful `alt`, tooltip, select item, tab, badge, table header, empty/loading/error state, alert, and dialog copy.
-- [ ] 7.12 Replace admin static label arrays/objects with direct message functions or typed slug-to-function maps.
+- [x] 7.6 Migrate `package/admin/src/auth/` status, sessions, users, email, and JWT-service admin copy to generated messages.
+- [x] 7.7 Migrate `package/admin/src/token/` token page, tables, dialogs, secret display, scopes editor, and validation copy to generated messages.
+- [x] 7.8 Migrate `package/admin/src/unit/` list, create, edit, field-lock, collaborator, subject attribution, and Meili unit page copy to generated messages.
+- [x] 7.9 Migrate `package/admin/src/entity/` list and edit page copy to generated messages and reuse shared entity/subject/credit label helpers where applicable.
+- [x] 7.10 Migrate `package/admin/src/book/`, `package/admin/src/shelf/`, `package/admin/src/tag/`, `package/admin/src/realm/`, `package/admin/src/authority/`, `package/admin/src/meili/`, and `package/admin/src/setting/` copy to generated messages.
+- [x] 7.11 Migrate admin `placeholder`, `aria-label`, `title`, meaningful `alt`, tooltip, select item, tab, badge, table header, empty/loading/error state, alert, and dialog copy.
+- [x] 7.12 Replace admin static label arrays/objects with direct message functions or typed slug-to-function maps.
 - [x] 7.13 Remove `package/admin/src/locale/*.ts` and any barrel/index files that exist only for local locale data.
-- [ ] 7.14 Verify `rg "src/locale|@/locale|from .*locale|useTranslation|\\.t\\(" package/admin/src` returns no admin-local locale or legacy runtime UI-copy consumers.
+- [x] 7.14 Verify `rg "src/locale|@/locale|from .*locale|useTranslation|\\.t\\(" package/admin/src` returns no admin-local locale or legacy runtime UI-copy consumers.
 
 ## 8. App UI Copy Sweep
 
-- [ ] 8.1 Run a broad hard-coded UI copy scan over `package/app/src` for JSX text nodes and `placeholder`, `aria-label`, `title`, meaningful `alt`, tooltip, select item, tab, badge, table header, empty/loading/error state, alert, toast, dialog, and validation copy.
-- [ ] 8.2 Migrate app shell/core layout/header/footer/navigation/create-menu/account-menu/language-menu copy to generated messages.
-- [ ] 8.3 Migrate `package/app/src/home/` remaining hard-coded homepage and section copy to generated messages.
-- [ ] 8.4 Migrate `package/app/src/book-edit/` page, chapter editor, table-of-contents, metadata, extra, translation, rating, and dialog copy to generated messages.
+- [x] 8.1 Run a broad hard-coded UI copy scan over `package/app/src` for JSX text nodes and `placeholder`, `aria-label`, `title`, meaningful `alt`, tooltip, select item, tab, badge, table header, empty/loading/error state, alert, toast, dialog, and validation copy.
+- [x] 8.2 Migrate app shell/core layout/header/footer/navigation/create-menu/account-menu/language-menu copy to generated messages.
+- [x] 8.3 Migrate `package/app/src/home/` remaining hard-coded homepage and section copy to generated messages.
+- [x] 8.4 Migrate `package/app/src/book-edit/` page, chapter editor, table-of-contents, metadata, extra, translation, rating, and dialog copy to generated messages.
 - [ ] 8.5 Migrate `package/app/src/book-library/` detail, hero, chapter list, release selector, copyright, review preview, shelf preview, author info, history, and basic info copy to generated messages.
 - [ ] 8.6 Migrate `package/app/src/book-read/` reader layout and chapter state copy to generated messages.
 - [ ] 8.7 Migrate `package/app/src/search/` filters, chips, result lists, advanced search, federated search, rating labels, and primitive input copy to generated messages.

@@ -1,6 +1,7 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import type { ContentRating } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { RatingSelector } from "@rezics/ui";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import {
@@ -112,18 +113,22 @@ export function CreateChapterDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Create Chapter</DialogTitle>
+          <DialogTitle>{m.book_edit_create_chapter()}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-4 border-t border-border-whisper">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="create-chapter-title">章节标题</Label>
+            <Label htmlFor="create-chapter-title">
+              {m.book_edit_chapter_title()}
+            </Label>
             <Input
               id="create-chapter-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={!title.trim() ? "border-border-error" : ""}
             />
-            {!title.trim() && <p className="text-xs text-error-text">必填</p>}
+            {!title.trim() && (
+              <p className="text-xs text-error-text">{m.common_required()}</p>
+            )}
           </div>
           <div className="max-w-xs">
             <RatingSelector value={rating} onChange={setRating} />

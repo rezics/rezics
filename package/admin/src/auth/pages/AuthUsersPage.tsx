@@ -30,6 +30,7 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import * as m from "@rezics/i18n/messages";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -71,13 +72,13 @@ export default function AuthUsersPage() {
     const cols: PaginatedColumn<AuthUser>[] = [
       {
         id: "id",
-        header: "ID",
+        header: m.common_id(),
         minWidth: 220,
         cell: (u) => <span className="text-sm font-mono">{u.id}</span>,
       },
       {
         id: "name",
-        header: "Name",
+        header: m.admin_auth_user_name(),
         minWidth: 160,
         cell: (u) => (
           <span className="text-sm font-bold whitespace-nowrap">{u.name}</span>
@@ -85,7 +86,7 @@ export default function AuthUsersPage() {
       },
       {
         id: "email",
-        header: "Email",
+        header: m.common_email(),
         minWidth: 240,
         cell: (u) => (
           <span className="text-sm whitespace-nowrap">{u.email}</span>
@@ -93,7 +94,7 @@ export default function AuthUsersPage() {
       },
       {
         id: "role",
-        header: "Role",
+        header: m.admin_auth_user_role(),
         minWidth: 140,
         cell: (u) => (
           <Select
@@ -106,33 +107,37 @@ export default function AuthUsersPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="user">user</SelectItem>
-              <SelectItem value="admin">admin</SelectItem>
-              <SelectItem value="owner">owner</SelectItem>
+              <SelectItem value="user">{m.admin_auth_role_user()}</SelectItem>
+              <SelectItem value="admin">{m.admin_auth_role_admin()}</SelectItem>
+              <SelectItem value="owner">{m.admin_auth_role_owner()}</SelectItem>
             </SelectContent>
           </Select>
         ),
       },
       {
         id: "banned",
-        header: "Banned",
+        header: m.admin_auth_users_banned(),
         minWidth: 100,
         cell: (u) =>
           u.banned ? (
-            <Badge className="bg-error-fill text-white">Banned</Badge>
+            <Badge className="bg-error-fill text-white">
+              {m.admin_auth_users_banned()}
+            </Badge>
           ) : (
-            <Badge className="bg-success-fill text-white">Active</Badge>
+            <Badge className="bg-success-fill text-white">
+              {m.common_active()}
+            </Badge>
           ),
       },
       {
         id: "createdAt",
-        header: "Created",
+        header: m.common_created(),
         minWidth: 170,
         cell: (u) => fmtDate(u.createdAt),
       },
       {
         id: "actions",
-        header: "Actions",
+        header: m.admin_auth_actions_title(),
         minWidth: 200,
         cell: (u) => (
           <div className="flex gap-1">
@@ -142,7 +147,7 @@ export default function AuthUsersPage() {
                 variant="outline"
                 onClick={() => unbanMutation.mutate({ userId: u.id })}
               >
-                Unban
+                {m.admin_auth_users_unban()}
               </Button>
             ) : (
               <Button
@@ -151,7 +156,7 @@ export default function AuthUsersPage() {
                 className="text-warning-text"
                 onClick={() => banMutation.mutate({ userId: u.id })}
               >
-                Ban
+                {m.admin_auth_users_ban()}
               </Button>
             )}
             <Button
@@ -161,8 +166,11 @@ export default function AuthUsersPage() {
               onClick={() =>
                 setConfirmDialog({
                   open: true,
-                  title: "Remove User",
-                  message: `Are you sure you want to remove "${u.name}" (${u.email})? This action cannot be undone.`,
+                  title: m.admin_auth_users_remove_title(),
+                  message: m.admin_auth_users_remove_description({
+                    name: u.name,
+                    email: u.email,
+                  }),
                   onConfirm: () => {
                     removeMutation.mutate({ userId: u.id });
                     setConfirmDialog((prev) => ({ ...prev, open: false }));
@@ -170,7 +178,7 @@ export default function AuthUsersPage() {
                 })
               }
             >
-              Remove
+              {m.common_remove()}
             </Button>
           </div>
         ),
@@ -180,7 +188,10 @@ export default function AuthUsersPage() {
   }, [banMutation, unbanMutation, setRoleMutation, removeMutation]);
 
   return (
-    <Page title="Auth Users" description="Manage auth server users">
+    <Page
+      title={m.admin_auth_users_title()}
+      description={m.admin_auth_users_description()}
+    >
       <Card>
         <CardContent>
           {usersQuery.isLoading ? (
@@ -189,7 +200,7 @@ export default function AuthUsersPage() {
             </div>
           ) : usersQuery.isError ? (
             <p className="text-sm text-error-text">
-              Failed to load auth users.
+              {m.admin_auth_users_failed_load()}
             </p>
           ) : (
             <PaginatedTable<AuthUser>
@@ -225,13 +236,13 @@ export default function AuthUsersPage() {
                 setConfirmDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              Cancel
+              {m.common_cancel()}
             </Button>
             <Button
               className="bg-error-fill text-white"
               onClick={confirmDialog.onConfirm}
             >
-              Confirm
+              {m.common_confirm()}
             </Button>
           </DialogFooter>
         </DialogContent>

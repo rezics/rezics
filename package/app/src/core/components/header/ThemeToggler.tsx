@@ -1,4 +1,5 @@
 import { DropdownMenuItem } from "@rezics/ui/shadcn";
+import * as m from "@rezics/i18n/messages";
 import { useMemo } from "react";
 import { useAppStore } from "@/app/states/appStore";
 import { Moon as Brightness4Icon, Sun as Brightness7Icon } from "lucide-react";
@@ -20,7 +21,7 @@ export function ThemeToggler() {
       ) : (
         <Brightness4Icon className="w-4 h-4" />
       )}
-      <span>Toggle theme</span>
+      <span>{m.app_toggle_theme()}</span>
     </DropdownMenuItem>
   );
 }

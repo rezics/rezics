@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
@@ -55,7 +56,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
       <div className="min-h-screen bg-surface-canvas">
         <Helmet>
-          <title>REZICS | 账号设置</title>
+          <title>{m.app_document_title_account_settings()}</title>
         </Helmet>
         {children}
       </div>
@@ -65,7 +66,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>REZICS | 书库</title>
+        <title>{m.app_document_title_library()}</title>
       </Helmet>
 
       <Header />

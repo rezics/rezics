@@ -1,17 +1,21 @@
+import * as m from "@rezics/i18n/messages";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { Page } from "@/core/layouts/Page";
 
 // MOCK: realm list page - backend API integration pending
 export default function RealmsPage() {
   return (
-    <Page title="Realms" description="Manage community realms">
+    <Page
+      title={m.admin_realm_title()}
+      description={m.admin_realm_description()}
+    >
       <Card>
         <CardContent>
-          <h3 className="text-base font-semibold mb-2">Realm Management</h3>
+          <h3 className="text-base font-semibold mb-2">
+            {m.admin_realm_management_title()}
+          </h3>
           <p className="text-sm text-text-secondary">
-            Realm listing and management will be available once the realm admin
-            API endpoints are ready. Realms are community spaces that contain
-            curated content, tags, and members.
+            {m.admin_realm_management_description()}
           </p>
         </CardContent>
       </Card>

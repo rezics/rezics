@@ -13,6 +13,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import { ScopesEditor } from "./ScopesEditor";
 
 interface EditTokenDialogProps {
@@ -77,11 +78,11 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
     <Dialog open={open} onOpenChange={(o) => (o ? null : handleClose())}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit API Token</DialogTitle>
+          <DialogTitle>{m.admin_token_edit_dialog_title()}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 mt-2">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="etd-name">Token name</Label>
+            <Label htmlFor="etd-name">{m.admin_token_token_name()}</Label>
             <Input
               id="etd-name"
               value={name}
@@ -89,7 +90,9 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="etd-exp">Expires At (optional)</Label>
+            <Label htmlFor="etd-exp">
+              {m.admin_token_expires_at_optional()}
+            </Label>
             <Input
               id="etd-exp"
               type="datetime-local"
@@ -108,10 +111,10 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button onClick={handleUpdate} disabled={updating}>
-            {updating ? "Updating…" : "Update"}
+            {updating ? m.admin_token_updating() : m.common_update()}
           </Button>
         </DialogFooter>
       </DialogContent>

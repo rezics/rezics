@@ -21,7 +21,7 @@ export const CreateMenu: React.FC = () => {
             variant="ghost"
             size="sm"
             className="h-9 rounded-full gap-1 bg-transparent px-2 md:h-10 md:px-4"
-            aria-label="create menu"
+            aria-label={m.app_create_menu_aria_label()}
             {...props}
           >
             <AddIcon className="w-5 h-5" />

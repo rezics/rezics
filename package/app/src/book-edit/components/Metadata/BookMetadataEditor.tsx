@@ -120,7 +120,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             value={currentCoverUrl}
             onChange={(e) => onChange?.({ coverUrl: e.target.value })}
             disabled={disabled}
-            placeholder="https://..."
+            placeholder={m.common_url_placeholder()}
             className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>

@@ -1,6 +1,7 @@
 import "github-markdown-css/github-markdown-light.css";
 import "./index.css";
 import { AuthProvider } from "@rezics/api/providers";
+import * as m from "@rezics/i18n/messages";
 import { useLocale } from "@rezics/i18n/react";
 import { getTextDirection } from "@rezics/i18n/runtime";
 import { ExternalLinkModal } from "@rezics/ui";
@@ -33,7 +34,7 @@ function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <StrictMode>
-      <ErrorBoundary fallback={<div>Something went wrong</div>}>
+      <ErrorBoundary fallback={<div>{m.app_error_boundary_message()}</div>}>
         <HelmetProvider>
           <PersistentSettingsLoader />
           <ReactQueryProvider>

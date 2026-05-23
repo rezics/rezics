@@ -1,5 +1,6 @@
 import { unitAuthorityQueries } from "@rezics/api/unit/unit";
 import { apiFetch } from "@rezics/api/react-query/http";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -58,9 +59,11 @@ export default function AuthorityOpsPage() {
           body: JSON.stringify(unitId ? { unitId } : {}),
         },
       );
-      setMessage(`Queued ${result.retried} failed outbox row(s) for retry.`);
+      setMessage(m.admin_authority_retry_queued({ count: result.retried }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Retry failed");
+      setError(
+        err instanceof Error ? err.message : m.admin_authority_retry_failed(),
+      );
     } finally {
       setRetrying(false);
     }
@@ -68,8 +71,8 @@ export default function AuthorityOpsPage() {
 
   return (
     <Page
-      title="Authority Operations"
-      description="Inspect Unit locks, collaborators, and history retry state"
+      title={m.admin_authority_title()}
+      description={m.admin_authority_description()}
     >
       <Card>
         <CardContent>
@@ -93,17 +96,17 @@ export default function AuthorityOpsPage() {
             className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]"
           >
             <div className="flex flex-col gap-1">
-              <Label htmlFor="authority-unit-id">Unit ID</Label>
+              <Label htmlFor="authority-unit-id">{m.common_unit_id()}</Label>
               <Input
                 id="authority-unit-id"
                 value={unitIdInput}
                 onChange={(e) => setUnitIdInput(e.target.value)}
-                placeholder="Search locks and collaborators by Unit id"
+                placeholder={m.admin_authority_unit_search_placeholder()}
               />
             </div>
             <Button type="submit" className="self-end">
               <SearchIcon className="size-4" />
-              Search
+              {m.common_search()}
             </Button>
             <Button
               type="button"
@@ -113,7 +116,7 @@ export default function AuthorityOpsPage() {
               onClick={retryFailedOutbox}
             >
               <RetryIcon className="size-4" />
-              Retry failed
+              {m.admin_authority_retry_failed_button()}
             </Button>
           </form>
 
@@ -121,20 +124,21 @@ export default function AuthorityOpsPage() {
 
           {!unitId ? (
             <p className="text-sm text-text-secondary">
-              Enter a Unit id to inspect authority records. Retry without a Unit
-              id requeues all failed outbox rows.
+              {m.admin_authority_empty_help()}
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <section className="flex flex-col gap-3">
-                <h3 className="text-base font-semibold">Field Locks</h3>
+                <h3 className="text-base font-semibold">
+                  {m.admin_unit_field_locks_title()}
+                </h3>
                 {fieldLocksQuery.isLoading ? (
                   <div className="flex justify-center py-4">
                     <Spinner />
                   </div>
                 ) : fieldLocksQuery.isError ? (
                   <p className="text-sm text-error-text">
-                    Failed to load field locks.
+                    {m.admin_unit_field_locks_failed_load()}
                   </p>
                 ) : fieldLocksQuery.data?.locks.length ? (
                   <div className="flex flex-col gap-2">
@@ -145,8 +149,10 @@ export default function AuthorityOpsPage() {
                       >
                         <p className="text-sm font-medium">{lock.fieldKey}</p>
                         <p className="text-xs text-text-secondary">
-                          Locked by {lock.lockedById} ·{" "}
-                          {fmtDate(lock.createdAt)}
+                          {m.admin_unit_field_lock_locked_by({
+                            userId: lock.lockedById,
+                            date: fmtDate(lock.createdAt),
+                          })}
                         </p>
                         {lock.reason ? (
                           <p className="text-xs text-text-secondary">
@@ -158,20 +164,22 @@ export default function AuthorityOpsPage() {
                   </div>
                 ) : (
                   <p className="text-sm text-text-secondary">
-                    No field locks found.
+                    {m.admin_unit_field_locks_empty()}
                   </p>
                 )}
               </section>
 
               <section className="flex flex-col gap-3">
-                <h3 className="text-base font-semibold">Collaborators</h3>
+                <h3 className="text-base font-semibold">
+                  {m.admin_unit_collaborators_title()}
+                </h3>
                 {collaboratorsQuery.isLoading ? (
                   <div className="flex justify-center py-4">
                     <Spinner />
                   </div>
                 ) : collaboratorsQuery.isError ? (
                   <p className="text-sm text-error-text">
-                    Failed to load collaborators.
+                    {m.admin_unit_collaborators_failed_load()}
                   </p>
                 ) : collaboratorsQuery.data?.collaborators.length ? (
                   <div className="flex flex-col gap-2">
@@ -185,9 +193,11 @@ export default function AuthorityOpsPage() {
                             {collaborator.userId}
                           </p>
                           <p className="text-xs text-text-secondary">
-                            {collaborator.roleKey} · added by{" "}
-                            {collaborator.addedById} ·{" "}
-                            {fmtDate(collaborator.createdAt)}
+                            {m.admin_unit_collaborator_added_by({
+                              role: collaborator.roleKey,
+                              userId: collaborator.addedById,
+                              date: fmtDate(collaborator.createdAt),
+                            })}
                           </p>
                         </div>
                       ),
@@ -195,7 +205,7 @@ export default function AuthorityOpsPage() {
                   </div>
                 ) : (
                   <p className="text-sm text-text-secondary">
-                    No collaborators found.
+                    {m.admin_unit_collaborators_empty()}
                   </p>
                 )}
               </section>

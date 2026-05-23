@@ -14,6 +14,7 @@ import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import {
   CreateTokenDialog,
   EditTokenDialog,
@@ -63,7 +64,9 @@ export const TokenPage: FC = () => {
       setCreatedSecret(res.token);
       setOpenCreate(false);
     } catch (err) {
-      setCreatingError((err as Error)?.message ?? "Create failed");
+      setCreatingError(
+        (err as Error)?.message ?? m.admin_token_create_failed(),
+      );
     } finally {
       setCreating(false);
     }
@@ -83,19 +86,21 @@ export const TokenPage: FC = () => {
       setOpenEdit(false);
       setEditingToken(null);
     } catch (err) {
-      setUpdatingError((err as Error)?.message ?? "Update failed");
+      setUpdatingError(
+        (err as Error)?.message ?? m.admin_token_update_failed(),
+      );
     } finally {
       setUpdating(false);
     }
   };
 
   const handleRevoke = async (id: string) => {
-    if (!confirm("Revoke this token? This action cannot be undone.")) return;
+    if (!confirm(m.admin_token_revoke_confirm())) return;
     try {
       setRevokingIds((s) => ({ ...s, [id]: true }));
       await revokeMutation.mutateAsync(id);
     } catch (err) {
-      alert((err as Error)?.message ?? "Revoke failed");
+      alert((err as Error)?.message ?? m.admin_token_revoke_failed());
     } finally {
       setRevokingIds((s) => ({ ...s, [id]: false }));
     }
@@ -104,8 +109,10 @@ export const TokenPage: FC = () => {
   return (
     <div className="w-11/12 mx-auto mt-16">
       <div className="flex flex-row justify-between items-center">
-        <h1 className="text-3xl font-bold mb-8">API Tokens</h1>
-        <Button onClick={() => setOpenCreate(true)}>Create Token</Button>
+        <h1 className="text-3xl font-bold mb-8">{m.admin_token_title()}</h1>
+        <Button onClick={() => setOpenCreate(true)}>
+          {m.admin_token_create_button()}
+        </Button>
       </div>
 
       {isLoading && (
@@ -124,7 +131,9 @@ export const TokenPage: FC = () => {
 
       {!isLoading && !error && tokens.length === 0 && (
         <div className="flex items-center justify-center h-40">
-          <p className="text-base text-text-secondary">No API tokens found</p>
+          <p className="text-base text-text-secondary">
+            {m.admin_token_empty()}
+          </p>
         </div>
       )}
 

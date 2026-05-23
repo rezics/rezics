@@ -1,6 +1,7 @@
 import { type BookDTO, bookQueries } from "@rezics/api/book/book";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { BookListResponse } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Link } from "@/shared/ui/link";
 import {
@@ -30,12 +31,12 @@ import { Search as SearchIcon } from "lucide-react";
 /** Extract the best title from the translations array. */
 function extractTitle(book: BookDTO): string {
   const translations = book.translations;
-  if (!translations?.length) return "(no title)";
+  if (!translations?.length) return m.admin_unit_no_title();
   // Prefer default language match, fall back to first translation
   const primary =
     translations.find((t) => t.language === (book as any).defaultLanguage) ??
     translations[0];
-  return primary?.title || "(no title)";
+  return primary?.title || m.admin_unit_no_title();
 }
 
 /** Format credit attribution into a readable string. */
@@ -95,13 +96,13 @@ export default function BooksPage() {
     const cols: PaginatedColumn<BookDTO>[] = [
       {
         id: "unitId",
-        header: "Unit ID",
+        header: m.common_unit_id(),
         minWidth: 220,
         cell: (b) => <span className="text-sm font-mono">{b.unitId}</span>,
       },
       {
         id: "title",
-        header: "Title",
+        header: m.common_title(),
         minWidth: 260,
         cell: (b) => (
           <span className="text-sm font-bold whitespace-nowrap">
@@ -111,13 +112,13 @@ export default function BooksPage() {
       },
       {
         id: "isbn13",
-        header: "ISBN-13",
+        header: m.admin_book_isbn13(),
         minWidth: 160,
         cell: (b) => b.isbn13 || "-",
       },
       {
         id: "credits",
-        header: "Credits",
+        header: m.admin_book_credits(),
         minWidth: 260,
         cell: (b) => (
           <TooltipProvider>
@@ -139,7 +140,7 @@ export default function BooksPage() {
       },
       {
         id: "user",
-        header: "User",
+        header: m.common_user(),
         minWidth: 200,
         cell: (b) => (
           <div className="flex flex-col">
@@ -156,19 +157,19 @@ export default function BooksPage() {
       },
       {
         id: "createdAt",
-        header: "Created",
+        header: m.common_created(),
         minWidth: 170,
         cell: (b) => fmtDate(b.createdAt),
       },
       {
         id: "updatedAt",
-        header: "Updated",
+        header: m.common_updated(),
         minWidth: 170,
         cell: (b) => fmtDate(b.updatedAt),
       },
       {
         id: "actions",
-        header: "Actions",
+        header: m.common_actions(),
         minWidth: 140,
         cell: (b) => (
           <Button
@@ -176,7 +177,7 @@ export default function BooksPage() {
             variant="outline"
             render={(props) => (
               <Link to={`/unit/${b.unitId}`} {...props}>
-                Edit Unit
+                {m.admin_book_edit_unit()}
               </Link>
             )}
           />
@@ -188,14 +189,20 @@ export default function BooksPage() {
 
   return (
     <Page
-      title={isMeiliMode ? "Books (Meili)" : "Books"}
+      title={
+        isMeiliMode
+          ? m.admin_book_list_meili_title()
+          : m.admin_book_list_title()
+      }
       description={
-        isMeiliMode ? "管理 Book（Meili 搜索）" : "管理 Book（普通列表）"
+        isMeiliMode
+          ? m.admin_book_list_meili_description()
+          : m.admin_book_list_description()
       }
     >
       {isMeiliMode ? (
         <SearchablePaginatedTableCard<BookDTO>
-          searchPlaceholder="title/isbn/keyword..."
+          searchPlaceholder={m.admin_book_meili_search_placeholder()}
           q={q}
           onQChange={setQ}
           onSearch={() => {
@@ -223,11 +230,11 @@ export default function BooksPage() {
             <div className="flex flex-col sm:flex-row gap-3 items-stretch">
               <div className="flex-1 flex flex-col gap-1">
                 <Label htmlFor="book-search" className="text-xs">
-                  Search
+                  {m.common_search()}
                 </Label>
                 <Input
                   id="book-search"
-                  placeholder="q/title/isbn..."
+                  placeholder={m.admin_book_search_placeholder()}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   onKeyDown={(e) => {
@@ -241,7 +248,7 @@ export default function BooksPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="search"
+                aria-label={m.common_search()}
                 onClick={() => {
                   setPage(0);
                   setQuery(q.trim());
@@ -259,7 +266,9 @@ export default function BooksPage() {
               </div>
             ) : (isMeiliMode ? meiliQuery.isError : normalQuery.isError) ? (
               <div>
-                <p className="text-sm text-error-text">Failed to load books.</p>
+                <p className="text-sm text-error-text">
+                  {m.admin_book_failed_load_list()}
+                </p>
                 {(isMeiliMode ? meiliQuery.error : normalQuery.error) ? (
                   <p className="text-xs text-error-text">
                     {String(isMeiliMode ? meiliQuery.error : normalQuery.error)}

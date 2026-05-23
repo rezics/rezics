@@ -45,7 +45,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="account menu"
+            aria-label={m.app_account_menu_aria_label()}
             aria-haspopup="true"
             className="h-10 min-w-10 rounded-md bg-transparent hover:bg-muted aria-expanded:bg-muted"
             {...props}

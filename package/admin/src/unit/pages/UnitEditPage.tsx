@@ -41,6 +41,7 @@ import React from "react";
 
 import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/unit/$unitId";
+import * as m from "@rezics/i18n/messages";
 import {
   ArrowLeft as ArrowBackIcon,
   Plus as PlusIcon,
@@ -80,42 +81,60 @@ export default function UnitEditPage() {
 
   const updateMutation = unitMutations.useUpdate({
     onError: (err) =>
-      setError(err instanceof Error ? err.message : "Update failed"),
+      setError(
+        err instanceof Error ? err.message : m.admin_unit_update_failed(),
+      ),
     onSuccess: () => setError(null),
   });
   const linkSubjectMutation = useLinkSubjectAttributionMutation({
     onError: (err) =>
-      setError(err instanceof Error ? err.message : "Subject link failed"),
+      setError(
+        err instanceof Error ? err.message : m.admin_unit_subject_link_failed(),
+      ),
     onSuccess: () => setError(null),
   });
   const unlinkSubjectMutation = useUnlinkSubjectAttributionMutation({
     onError: (err) =>
-      setError(err instanceof Error ? err.message : "Subject unlink failed"),
+      setError(
+        err instanceof Error
+          ? err.message
+          : m.admin_unit_subject_unlink_failed(),
+      ),
     onSuccess: () => setError(null),
   });
   const upsertFieldLockMutation = useUpsertUnitFieldLockMutation({
     onError: (err) =>
-      setError(err instanceof Error ? err.message : "Field lock update failed"),
+      setError(
+        err instanceof Error
+          ? err.message
+          : m.admin_unit_field_lock_update_failed(),
+      ),
     onSuccess: () => setError(null),
   });
   const removeFieldLockMutation = useRemoveUnitFieldLockMutation({
     onError: (err) =>
       setError(
-        err instanceof Error ? err.message : "Field lock removal failed",
+        err instanceof Error
+          ? err.message
+          : m.admin_unit_field_lock_removal_failed(),
       ),
     onSuccess: () => setError(null),
   });
   const upsertCollaboratorMutation = useUpsertUnitCollaboratorMutation({
     onError: (err) =>
       setError(
-        err instanceof Error ? err.message : "Collaborator update failed",
+        err instanceof Error
+          ? err.message
+          : m.admin_unit_collaborator_update_failed(),
       ),
     onSuccess: () => setError(null),
   });
   const removeCollaboratorMutation = useRemoveUnitCollaboratorMutation({
     onError: (err) =>
       setError(
-        err instanceof Error ? err.message : "Collaborator removal failed",
+        err instanceof Error
+          ? err.message
+          : m.admin_unit_collaborator_removal_failed(),
       ),
     onSuccess: () => setError(null),
   });
@@ -154,7 +173,7 @@ export default function UnitEditPage() {
       try {
         extra = JSON.parse(trimmedExtra);
       } catch {
-        setError("Extra must be valid JSON.");
+        setError(m.admin_unit_extra_json_invalid());
         return;
       }
     }
@@ -180,15 +199,15 @@ export default function UnitEditPage() {
       : undefined;
 
     if (!subjectEntityId.trim()) {
-      setError("Subject Entity Unit ID is required.");
+      setError(m.admin_unit_subject_required());
       return;
     }
     if (Number.isNaN(parsedSortOrder)) {
-      setError("Sort order must be a number.");
+      setError(m.admin_unit_sort_order_invalid());
       return;
     }
     if (parsedWeight !== undefined && Number.isNaN(parsedWeight)) {
-      setError("Weight must be a number.");
+      setError(m.admin_unit_weight_invalid());
       return;
     }
 
@@ -227,7 +246,7 @@ export default function UnitEditPage() {
     e.preventDefault();
     setError(null);
     if (!collaboratorUserId.trim()) {
-      setError("Collaborator User Unit ID is required.");
+      setError(m.admin_unit_collaborator_required());
       return;
     }
     await upsertCollaboratorMutation.mutateAsync({
@@ -248,7 +267,10 @@ export default function UnitEditPage() {
   }
 
   return (
-    <Page title="Edit Unit" description={`编辑 Unit：${unitId}`}>
+    <Page
+      title={m.admin_unit_edit_title()}
+      description={m.admin_unit_edit_description({ unitId })}
+    >
       <Card>
         <CardContent>
           <div className="flex flex-row items-center gap-2 mb-2">
@@ -258,7 +280,7 @@ export default function UnitEditPage() {
               render={(props) => (
                 <Link to="/unit" {...props}>
                   <ArrowBackIcon className="size-4" />
-                  Back
+                  {m.common_back()}
                 </Link>
               )}
             />
@@ -275,7 +297,7 @@ export default function UnitEditPage() {
             <div>
               <Alert>
                 <AlertDescription className="text-error-text">
-                  Failed to load unit.
+                  {m.admin_unit_failed_load()}
                 </AlertDescription>
               </Alert>
               {detailQuery.error ? (
@@ -299,21 +321,23 @@ export default function UnitEditPage() {
                   ID: <strong>{detailQuery.data?.id ?? "-"}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  User ID: <strong>{detailQuery.data?.userId ?? "-"}</strong>
+                  {m.admin_auth_user_id()}:{" "}
+                  <strong>{detailQuery.data?.userId ?? "-"}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  Type: <strong>{detailQuery.data?.type ?? "-"}</strong>
+                  {m.common_type()}:{" "}
+                  <strong>{detailQuery.data?.type ?? "-"}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  Default Language:{" "}
+                  {m.admin_unit_default_language()}:{" "}
                   <strong>{detailQuery.data?.defaultLanguage ?? "-"}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  Created:{" "}
+                  {m.common_created()}:{" "}
                   <strong>{fmtDate(detailQuery.data?.createdAt)}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  Updated:{" "}
+                  {m.common_updated()}:{" "}
                   <strong>{fmtDate(detailQuery.data?.updatedAt)}</strong>
                 </p>
               </div>
@@ -322,7 +346,7 @@ export default function UnitEditPage() {
               {detailQuery.data?.translations?.length ? (
                 <div className="flex flex-col gap-2 mb-6">
                   <p className="text-xs font-semibold text-text-secondary">
-                    Translations
+                    {m.admin_unit_translations()}
                   </p>
                   {detailQuery.data.translations.map((tr) => (
                     <div
@@ -330,11 +354,13 @@ export default function UnitEditPage() {
                       className="pl-4 border-l-2 border-border-whisper"
                     >
                       <p className="text-sm font-semibold">
-                        [{tr.language}] {tr.title || "(no title)"}
+                        [{tr.language}] {tr.title || m.admin_unit_no_title()}
                       </p>
                       {tr.subtitle ? (
                         <p className="text-xs text-text-secondary">
-                          Subtitle: {tr.subtitle}
+                          {m.admin_unit_subtitle_label({
+                            subtitle: tr.subtitle,
+                          })}
                         </p>
                       ) : null}
                       {tr.summary ? (
@@ -345,12 +371,12 @@ export default function UnitEditPage() {
                     </div>
                   ))}
                   <p className="text-xs text-text-secondary">
-                    Translations are managed via the translation API endpoints.
+                    {m.admin_unit_translations_help()}
                   </p>
                 </div>
               ) : (
                 <p className="text-sm text-text-secondary mb-4">
-                  No translations available.
+                  {m.admin_unit_no_translations()}
                 </p>
               )}
 
@@ -359,11 +385,10 @@ export default function UnitEditPage() {
               <section className="flex flex-col gap-3 mb-6">
                 <div className="flex flex-col gap-1">
                   <h3 className="text-base font-semibold">
-                    Subject Attributions
+                    {m.admin_unit_subject_attributions_title()}
                   </h3>
                   <p className="text-xs text-text-secondary">
-                    Link character, faction, location, event, or concept
-                    Entities to this Unit for subject indexing.
+                    {m.admin_unit_subject_attributions_description()}
                   </p>
                 </div>
 
@@ -373,7 +398,7 @@ export default function UnitEditPage() {
                   </div>
                 ) : subjectQuery.isError ? (
                   <p className="text-sm text-error-text">
-                    Failed to load subject attributions.
+                    {m.admin_unit_subject_attribution_failed_load()}
                   </p>
                 ) : subjectQuery.data?.length ? (
                   <div className="flex flex-col gap-2">
@@ -409,7 +434,7 @@ export default function UnitEditPage() {
                               {subjectRoleLabel(subject.role)} ·{" "}
                               {subject.entity?.kind
                                 ? entityKindLabel(subject.entity.kind)
-                                : "entity"}{" "}
+                                : m.admin_unit_entity_fallback()}{" "}
                               · order {subject.sortOrder}
                               {subject.weight != null
                                 ? ` · weight ${subject.weight}`
@@ -421,7 +446,7 @@ export default function UnitEditPage() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          aria-label="Remove subject attribution"
+                          aria-label={m.admin_unit_subject_attribution_remove()}
                           disabled={unlinkSubjectMutation.isPending}
                           onClick={async () => {
                             await unlinkSubjectMutation.mutateAsync({
@@ -439,7 +464,7 @@ export default function UnitEditPage() {
                   </div>
                 ) : (
                   <p className="text-sm text-text-secondary">
-                    No subject attributions yet.
+                    {m.admin_unit_subject_attribution_empty()}
                   </p>
                 )}
 
@@ -449,17 +474,19 @@ export default function UnitEditPage() {
                 >
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="subject-entity-id">
-                      Subject Entity Unit ID
+                      {m.admin_unit_subject_entity_id()}
                     </Label>
                     <Input
                       id="subject-entity-id"
                       value={subjectEntityId}
                       onChange={(e) => setSubjectEntityId(e.target.value)}
-                      placeholder="ENTITY unit id"
+                      placeholder={m.admin_unit_subject_entity_placeholder()}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="subject-role">Role</Label>
+                    <Label htmlFor="subject-role">
+                      {m.admin_auth_user_role()}
+                    </Label>
                     <select
                       id="subject-role"
                       value={subjectRole}
@@ -479,7 +506,9 @@ export default function UnitEditPage() {
                     </select>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="subject-sort-order">Order</Label>
+                    <Label htmlFor="subject-sort-order">
+                      {m.admin_unit_order()}
+                    </Label>
                     <Input
                       id="subject-sort-order"
                       value={subjectSortOrder}
@@ -487,12 +516,14 @@ export default function UnitEditPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="subject-weight">Weight</Label>
+                    <Label htmlFor="subject-weight">
+                      {m.admin_unit_weight()}
+                    </Label>
                     <Input
                       id="subject-weight"
                       value={subjectWeight}
                       onChange={(e) => setSubjectWeight(e.target.value)}
-                      placeholder="optional"
+                      placeholder={m.admin_unit_optional()}
                     />
                   </div>
                   <Button
@@ -501,7 +532,7 @@ export default function UnitEditPage() {
                     disabled={linkSubjectMutation.isPending}
                   >
                     <PlusIcon className="size-4" />
-                    Link
+                    {m.common_link()}
                   </Button>
                 </form>
               </section>
@@ -511,10 +542,11 @@ export default function UnitEditPage() {
               <section className="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-2">
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
-                    <h3 className="text-base font-semibold">Field Locks</h3>
+                    <h3 className="text-base font-semibold">
+                      {m.admin_unit_field_locks_title()}
+                    </h3>
                     <p className="text-xs text-text-secondary">
-                      Manage sparse collaborative locks for this Unit. Whole
-                      object locks use the <code>*</code> field key.
+                      {m.admin_unit_field_locks_description()}
                     </p>
                   </div>
 
@@ -524,7 +556,7 @@ export default function UnitEditPage() {
                     </div>
                   ) : fieldLocksQuery.isError ? (
                     <p className="text-sm text-error-text">
-                      Failed to load field locks.
+                      {m.admin_unit_field_locks_failed_load()}
                     </p>
                   ) : fieldLocksQuery.data?.locks.length ? (
                     <div className="flex flex-col gap-2">
@@ -538,8 +570,10 @@ export default function UnitEditPage() {
                               {lock.fieldKey}
                             </p>
                             <p className="text-xs text-text-secondary">
-                              Locked by {lock.lockedById} ·{" "}
-                              {fmtDate(lock.createdAt)}
+                              {m.admin_unit_field_lock_locked_by({
+                                userId: lock.lockedById,
+                                date: fmtDate(lock.createdAt),
+                              })}
                             </p>
                             {lock.reason ? (
                               <p className="text-xs text-text-secondary">
@@ -551,7 +585,7 @@ export default function UnitEditPage() {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            aria-label="Remove field lock"
+                            aria-label={m.admin_unit_field_lock_remove()}
                             disabled={removeFieldLockMutation.isPending}
                             onClick={() =>
                               onRemoveFieldLock({
@@ -567,7 +601,7 @@ export default function UnitEditPage() {
                     </div>
                   ) : (
                     <p className="text-sm text-text-secondary">
-                      No field locks are active.
+                      {m.admin_unit_field_locks_empty()}
                     </p>
                   )}
 
@@ -576,7 +610,9 @@ export default function UnitEditPage() {
                     className="grid grid-cols-1 gap-3 sm:grid-cols-[220px_minmax(0,1fr)_auto]"
                   >
                     <div className="flex flex-col gap-1">
-                      <Label htmlFor="field-lock-key">Field</Label>
+                      <Label htmlFor="field-lock-key">
+                        {m.admin_unit_field()}
+                      </Label>
                       <select
                         id="field-lock-key"
                         value={lockFieldKey}
@@ -593,12 +629,14 @@ export default function UnitEditPage() {
                       </select>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <Label htmlFor="field-lock-reason">Reason</Label>
+                      <Label htmlFor="field-lock-reason">
+                        {m.admin_unit_locked_reason()}
+                      </Label>
                       <Input
                         id="field-lock-reason"
                         value={lockReason}
                         onChange={(e) => setLockReason(e.target.value)}
-                        placeholder="optional moderation note"
+                        placeholder={m.admin_unit_optional_moderation_note()}
                       />
                     </div>
                     <Button
@@ -607,17 +645,18 @@ export default function UnitEditPage() {
                       disabled={upsertFieldLockMutation.isPending}
                     >
                       <PlusIcon className="size-4" />
-                      Lock
+                      {m.common_lock()}
                     </Button>
                   </form>
                 </div>
 
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
-                    <h3 className="text-base font-semibold">Collaborators</h3>
+                    <h3 className="text-base font-semibold">
+                      {m.admin_unit_collaborators_title()}
+                    </h3>
                     <p className="text-xs text-text-secondary">
-                      Delegate per-Unit authority without changing the primary
-                      owner.
+                      {m.admin_unit_collaborators_description()}
                     </p>
                   </div>
 
@@ -627,7 +666,7 @@ export default function UnitEditPage() {
                     </div>
                   ) : collaboratorsQuery.isError ? (
                     <p className="text-sm text-error-text">
-                      Failed to load collaborators.
+                      {m.admin_unit_collaborators_failed_load()}
                     </p>
                   ) : collaboratorsQuery.data?.collaborators.length ? (
                     <div className="flex flex-col gap-2">
@@ -642,16 +681,18 @@ export default function UnitEditPage() {
                                 {collaborator.userId}
                               </p>
                               <p className="text-xs text-text-secondary">
-                                {collaborator.roleKey} · added by{" "}
-                                {collaborator.addedById} ·{" "}
-                                {fmtDate(collaborator.createdAt)}
+                                {m.admin_unit_collaborator_added_by({
+                                  role: collaborator.roleKey,
+                                  userId: collaborator.addedById,
+                                  date: fmtDate(collaborator.createdAt),
+                                })}
                               </p>
                             </div>
                             <Button
                               type="button"
                               variant="ghost"
                               size="icon"
-                              aria-label="Remove collaborator"
+                              aria-label={m.admin_unit_collaborator_remove()}
                               disabled={removeCollaboratorMutation.isPending}
                               onClick={() =>
                                 onRemoveCollaborator({
@@ -668,7 +709,7 @@ export default function UnitEditPage() {
                     </div>
                   ) : (
                     <p className="text-sm text-text-secondary">
-                      No collaborators are assigned.
+                      {m.admin_unit_collaborators_empty()}
                     </p>
                   )}
 
@@ -677,16 +718,20 @@ export default function UnitEditPage() {
                     className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_160px_auto]"
                   >
                     <div className="flex flex-col gap-1">
-                      <Label htmlFor="collaborator-user-id">User Unit ID</Label>
+                      <Label htmlFor="collaborator-user-id">
+                        {m.admin_unit_user_unit_id()}
+                      </Label>
                       <Input
                         id="collaborator-user-id"
                         value={collaboratorUserId}
                         onChange={(e) => setCollaboratorUserId(e.target.value)}
-                        placeholder="USER unit id"
+                        placeholder={m.admin_unit_user_unit_placeholder()}
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <Label htmlFor="collaborator-role">Role</Label>
+                      <Label htmlFor="collaborator-role">
+                        {m.admin_auth_user_role()}
+                      </Label>
                       <select
                         id="collaborator-role"
                         value={collaboratorRole}
@@ -710,7 +755,7 @@ export default function UnitEditPage() {
                       disabled={upsertCollaboratorMutation.isPending}
                     >
                       <PlusIcon className="size-4" />
-                      Add
+                      {m.common_add()}
                     </Button>
                   </form>
                 </div>
@@ -721,25 +766,31 @@ export default function UnitEditPage() {
               <form onSubmit={onSubmit}>
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-status">Status</Label>
+                    <Label htmlFor="uep-status">
+                      {m.admin_auth_email_status()}
+                    </Label>
                     <Input
                       id="uep-status"
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
-                      placeholder="DRAFT / PUBLISHED / ARCHIVED / ..."
+                      placeholder={m.admin_unit_status_placeholder()}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-visibility">Visibility</Label>
+                    <Label htmlFor="uep-visibility">
+                      {m.admin_unit_visibility()}
+                    </Label>
                     <Input
                       id="uep-visibility"
                       value={visibility}
                       onChange={(e) => setVisibility(e.target.value)}
-                      placeholder="PUBLIC / UNLISTED / PRIVATE"
+                      placeholder={m.admin_unit_visibility_placeholder()}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-extra">Extra (JSON)</Label>
+                    <Label htmlFor="uep-extra">
+                      {m.admin_unit_extra_json()}
+                    </Label>
                     <textarea
                       id="uep-extra"
                       value={extraText}
@@ -753,7 +804,9 @@ export default function UnitEditPage() {
                   <div>
                     <Button type="submit" disabled={updateMutation.isPending}>
                       <SaveIcon className="size-4" />
-                      {updateMutation.isPending ? "Saving…" : "Save"}
+                      {updateMutation.isPending
+                        ? m.common_saving()
+                        : m.common_save()}
                     </Button>
                   </div>
                 </div>

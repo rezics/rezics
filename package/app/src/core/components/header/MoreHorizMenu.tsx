@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -22,7 +23,7 @@ export function MoreHorizMenu({ children, className }: Props) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="more"
+            aria-label={m.common_more()}
             className={`ml-1 h-9 min-w-9 rounded-full bg-transparent md:ml-4 md:mr-2 md:h-10 md:min-w-10 ${className ?? ""}`}
             {...props}
           >

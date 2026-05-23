@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { FC } from "react";
 import { useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 interface ScopesEditorProps {
   scopes: Record<string, string[]>;
@@ -79,7 +80,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
 
   return (
     <div>
-      <p className="mb-2 font-medium text-sm">Permissions (Scopes)</p>
+      <p className="mb-2 font-medium text-sm">{m.admin_token_scopes_title()}</p>
 
       {/* 显示当前 scopes */}
       {Object.keys(scopes).length > 0 && (
@@ -97,7 +98,9 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
                       {perm}
                       <button
                         type="button"
-                        aria-label={`remove ${perm}`}
+                        aria-label={m.admin_token_remove_permission({
+                          permission: perm,
+                        })}
                         onClick={() => removeScope(domain, perm)}
                         className="hover:opacity-80"
                       >
@@ -111,7 +114,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
                   variant="ghost"
                   className="text-error-text size-8"
                   onClick={() => removeDomain(domain)}
-                  aria-label="Remove domain"
+                  aria-label={m.admin_token_remove_domain()}
                 >
                   <DeleteIcon className="size-4" />
                 </Button>
@@ -124,10 +127,10 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
       {/* 添加新 scope */}
       <div className="flex flex-row gap-2 items-end flex-wrap">
         <div className="flex flex-col gap-1">
-          <Label className="text-xs">Domain</Label>
+          <Label className="text-xs">{m.admin_token_domain()}</Label>
           <Select value={newDomain} onValueChange={setNewDomain}>
             <SelectTrigger size="sm" className="min-w-30">
-              <SelectValue placeholder="Domain" />
+              <SelectValue placeholder={m.admin_token_domain()} />
             </SelectTrigger>
             <SelectContent>
               {PREDEFINED_DOMAINS.map((d) => (
@@ -135,14 +138,18 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
                   {d}
                 </SelectItem>
               ))}
-              <SelectItem value="custom">Custom...</SelectItem>
+              <SelectItem value="custom">
+                {m.admin_token_scope_custom()}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {newDomain === "custom" && (
           <div className="flex flex-col gap-1">
-            <Label className="text-xs">Custom domain</Label>
+            <Label className="text-xs">
+              {m.admin_token_scope_custom_domain()}
+            </Label>
             <Input
               value={customDomain}
               onChange={(e) => setCustomDomain(e.target.value)}
@@ -152,10 +159,10 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
         )}
 
         <div className="flex flex-col gap-1">
-          <Label className="text-xs">Permission</Label>
+          <Label className="text-xs">{m.admin_token_permission()}</Label>
           <Select value={newPermission} onValueChange={setNewPermission}>
             <SelectTrigger size="sm" className="min-w-30">
-              <SelectValue placeholder="Permission" />
+              <SelectValue placeholder={m.admin_token_permission()} />
             </SelectTrigger>
             <SelectContent>
               {PREDEFINED_PERMISSIONS.map((p) => (
@@ -178,13 +185,13 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
           }
         >
           <AddIcon className="size-4" />
-          Add
+          {m.common_add()}
         </Button>
       </div>
 
       {Object.keys(scopes).length === 0 && (
         <p className="text-sm text-text-secondary mt-2">
-          No scopes defined. Token will have default permissions.
+          {m.admin_token_scopes_default_help()}
         </p>
       )}
     </div>

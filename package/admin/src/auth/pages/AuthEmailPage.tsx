@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 type EmailTemplate = {
   name: string;
@@ -69,7 +70,9 @@ export default function AuthEmailPage() {
       .catch((err) => {
         if (cancelled) return;
         setTemplateError(
-          err instanceof Error ? err.message : "Failed to load templates",
+          err instanceof Error
+            ? err.message
+            : m.admin_auth_email_failed_load_templates(),
         );
       });
 
@@ -106,7 +109,9 @@ export default function AuthEmailPage() {
         if (!cancelled) {
           setPreviewHtml("");
           setTemplateError(
-            err instanceof Error ? err.message : "Failed to render preview",
+            err instanceof Error
+              ? err.message
+              : m.admin_auth_email_failed_render_preview(),
           );
         }
       });
@@ -132,7 +137,7 @@ export default function AuthEmailPage() {
       const completedAt = new Date();
       setSendResult({
         type: "success",
-        message: `Test email sent to ${result.to}`,
+        message: m.admin_auth_email_sent_to({ email: result.to }),
       });
       setSendStats({
         status: "success",
@@ -146,7 +151,8 @@ export default function AuthEmailPage() {
       const completedAt = new Date();
       setSendResult({
         type: "error",
-        message: err instanceof Error ? err.message : "Failed to send",
+        message:
+          err instanceof Error ? err.message : m.admin_auth_email_failed_send(),
       });
       setSendStats({
         status: "error",
@@ -169,18 +175,24 @@ export default function AuthEmailPage() {
       if (result.connected) {
         setSmtpResult({
           type: "success",
-          message: `Connected to ${result.host}:${result.port}`,
+          message: m.admin_auth_email_connected_to({
+            host: result.host,
+            port: String(result.port),
+          }),
         });
       } else {
         setSmtpResult({
           type: "error",
-          message: result.error ?? "Connection failed",
+          message: result.error ?? m.admin_auth_email_connection_failed(),
         });
       }
     } catch (err) {
       setSmtpResult({
         type: "error",
-        message: err instanceof Error ? err.message : "Connection test failed",
+        message:
+          err instanceof Error
+            ? err.message
+            : m.admin_auth_email_connection_test_failed(),
       });
     } finally {
       setLoading(false);
@@ -189,7 +201,9 @@ export default function AuthEmailPage() {
 
   return (
     <div className="p-6 max-w-[1200px]">
-      <h2 className="text-xl font-bold mb-4">Email Templates</h2>
+      <h2 className="text-xl font-bold mb-4">
+        {m.admin_auth_email_templates_title()}
+      </h2>
 
       {templateError && (
         <Alert className="mb-4">
@@ -203,13 +217,13 @@ export default function AuthEmailPage() {
         {/* Left panel: controls */}
         <div className="flex-1 min-w-[360px] basis-[400px]">
           <div className="flex flex-col gap-1 mb-4">
-            <Label>Template</Label>
+            <Label>{m.admin_auth_email_template()}</Label>
             <Select
               value={selectedTemplate}
               onValueChange={setSelectedTemplate}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Template" />
+                <SelectValue placeholder={m.admin_auth_email_template()} />
               </SelectTrigger>
               <SelectContent>
                 {templates.map((t) => (
@@ -246,10 +260,14 @@ export default function AuthEmailPage() {
               </div>
             ))}
 
-          <h3 className="text-base font-bold mt-6 mb-2">Send Test Email</h3>
+          <h3 className="text-base font-bold mt-6 mb-2">
+            {m.admin_auth_email_send_test_email()}
+          </h3>
           <div className="flex gap-2 items-start">
             <div className="flex-1 flex flex-col gap-1">
-              <Label htmlFor="aep-recipient">Recipient email</Label>
+              <Label htmlFor="aep-recipient">
+                {m.admin_auth_email_recipient_label()}
+              </Label>
               <Input
                 id="aep-recipient"
                 value={recipientEmail}
@@ -262,7 +280,7 @@ export default function AuthEmailPage() {
               disabled={loading || !recipientEmail}
             >
               {loading ? <Spinner size="sm" /> : null}
-              Send Test
+              {m.admin_auth_email_send_test()}
             </Button>
           </div>
           {sendResult && (
@@ -281,11 +299,13 @@ export default function AuthEmailPage() {
           {sendStats && (
             <div className="mt-3 rounded-md bg-surface-subtle p-3">
               <p className="text-xs font-semibold uppercase tracking-normal text-text-secondary">
-                Send timing
+                {m.admin_auth_email_send_timing()}
               </p>
               <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                 <div>
-                  <dt className="text-xs text-text-secondary">Status</dt>
+                  <dt className="text-xs text-text-secondary">
+                    {m.admin_auth_email_status()}
+                  </dt>
                   <dd
                     className={
                       sendStats.status === "success"
@@ -293,35 +313,47 @@ export default function AuthEmailPage() {
                         : "font-medium text-error-text"
                     }
                   >
-                    {sendStats.status}
+                    {sendStats.status === "success"
+                      ? m.admin_auth_email_status_success()
+                      : m.admin_auth_email_status_error()}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-text-secondary">API duration</dt>
+                  <dt className="text-xs text-text-secondary">
+                    {m.admin_auth_email_api_duration()}
+                  </dt>
                   <dd className="font-medium text-text-primary">
                     {formatDuration(sendStats.durationMs)}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-text-secondary">Template</dt>
+                  <dt className="text-xs text-text-secondary">
+                    {m.admin_auth_email_template()}
+                  </dt>
                   <dd className="break-words text-text-primary">
                     {sendStats.template}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-text-secondary">Recipient</dt>
+                  <dt className="text-xs text-text-secondary">
+                    {m.admin_auth_email_recipient()}
+                  </dt>
                   <dd className="break-words text-text-primary">
                     {sendStats.recipient}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-text-secondary">Started</dt>
+                  <dt className="text-xs text-text-secondary">
+                    {m.admin_auth_email_started()}
+                  </dt>
                   <dd className="text-text-primary">
                     {formatTimestamp(sendStats.startedAt)}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-text-secondary">Completed</dt>
+                  <dt className="text-xs text-text-secondary">
+                    {m.admin_auth_email_completed()}
+                  </dt>
                   <dd className="text-text-primary">
                     {formatTimestamp(sendStats.completedAt)}
                   </dd>
@@ -330,10 +362,12 @@ export default function AuthEmailPage() {
             </div>
           )}
 
-          <h3 className="text-base font-bold mt-6 mb-2">SMTP Diagnostics</h3>
+          <h3 className="text-base font-bold mt-6 mb-2">
+            {m.admin_auth_email_smtp_diagnostics()}
+          </h3>
           <Button variant="outline" onClick={handleSmtpTest} disabled={loading}>
             {loading ? <Spinner size="sm" /> : null}
-            Test Connection
+            {m.admin_auth_email_test_connection()}
           </Button>
           {smtpResult && (
             <Alert className="mt-2">
@@ -353,18 +387,18 @@ export default function AuthEmailPage() {
         {/* Right panel: preview */}
         <div className="flex-1 min-w-[400px] basis-[500px] rounded-md border border-border-whisper overflow-hidden">
           <p className="text-sm font-semibold p-2 bg-surface-elevated border-b border-border-whisper">
-            Preview
+            {m.admin_auth_email_preview()}
           </p>
           {previewHtml ? (
             <iframe
               srcDoc={previewHtml}
-              title="Email Preview"
+              title={m.admin_auth_email_preview_title()}
               className="w-full h-[600px] border-none"
             />
           ) : (
             <div className="p-6 text-center">
               <p className="text-text-secondary">
-                Select a template to preview
+                {m.admin_auth_email_select_template_to_preview()}
               </p>
             </div>
           )}

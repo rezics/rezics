@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { BookCarousel } from "./HomeCarousel";
@@ -21,13 +22,18 @@ type Story = StoryObj<Args>;
 function Render({ autoplayIntervalNum }: Args) {
   return (
     <div className="p-4 max-w-14/16 mx-auto">
-      <h3 className="mb-4 text-lg font-semibold">Home Carousel Component</h3>
+      <h3 className="mb-4 text-lg font-semibold">
+        {m.home_story_carousel_title()}
+      </h3>
       <div className="border border-gray-200 rounded-lg p-4">
         <div className="mb-4">
-          <p className="text-sm font-medium">Current settings:</p>
+          <p className="text-sm font-medium">
+            {m.home_story_current_settings()}
+          </p>
           <ul className="mt-2 text-sm space-y-1">
             <li>
-              <strong>Autoplay interval:</strong> {autoplayIntervalNum}ms
+              <strong>{m.home_story_autoplay_interval()}</strong>{" "}
+              {autoplayIntervalNum}ms
             </li>
           </ul>
         </div>

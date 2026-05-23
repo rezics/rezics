@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -18,7 +19,7 @@ import {
 export function SearchablePaginatedTableCard<T>({
   title,
   description,
-  searchLabel = "Search",
+  searchLabel = m.common_search(),
   searchPlaceholder,
   q,
   onQChange,
@@ -83,7 +84,7 @@ export function SearchablePaginatedTableCard<T>({
             <Button
               variant="ghost"
               size="icon"
-              aria-label="search"
+              aria-label={m.common_search()}
               onClick={onSearch}
               className="self-end sm:self-center"
             >
@@ -100,7 +101,9 @@ export function SearchablePaginatedTableCard<T>({
             </div>
           ) : isError ? (
             <div>
-              <p className="text-sm text-error-text">Failed to load.</p>
+              <p className="text-sm text-error-text">
+                {m.common_failed_to_load()}
+              </p>
               {error ? (
                 <p className="text-xs text-error-text">{String(error)}</p>
               ) : null}

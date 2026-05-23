@@ -1,4 +1,5 @@
 import { Button } from "@rezics/ui/shadcn";
+import * as m from "@rezics/i18n/messages";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function MainSidebarDrawerHeader({
@@ -14,7 +15,7 @@ export function MainSidebarDrawerHeader({
       <Button
         variant="ghost"
         size="icon"
-        aria-label="toggle drawer"
+        aria-label={m.app_toggle_drawer_aria_label()}
         onClick={handleDrawerToggle}
       >
         {isLtr ? <ChevronLeft /> : <ChevronRight />}

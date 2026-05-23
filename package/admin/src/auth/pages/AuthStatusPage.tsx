@@ -20,6 +20,7 @@ import {
 import { Shield, ShieldUser } from "lucide-react";
 import { useState } from "react";
 
+import * as m from "@rezics/i18n/messages";
 import { Page } from "@/core/layouts/Page";
 import { adminLogout } from "@/user/models/handler";
 
@@ -27,8 +28,11 @@ type SessionStatus = "active" | "missing";
 
 function StatusBadge({ status }: { status: SessionStatus }) {
   const map = {
-    active: { label: "Active", className: "bg-success-fill text-white" },
-    missing: { label: "No Main Session", className: "" },
+    active: {
+      label: m.common_active(),
+      className: "bg-success-fill text-white",
+    },
+    missing: { label: m.admin_auth_missing_session(), className: "" },
   } as const;
   const { label, className } = map[status];
   return (
@@ -64,7 +68,7 @@ function SessionRefreshCard({
       await onRefresh();
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed");
+      setError(err instanceof Error ? err.message : m.admin_auth_failed());
     } finally {
       setLoading(false);
     }
@@ -79,9 +83,7 @@ function SessionRefreshCard({
           <StatusBadge status={status} />
         </div>
         <p className="text-sm text-text-secondary">
-          Browser session credentials are httpOnly cookies. This view refreshes
-          the main session and re-hydrates server state without reading JWT
-          claims from localStorage.
+          {m.admin_auth_rehydrate_session_description()}
         </p>
         <div className="mt-4">
           <Button
@@ -104,7 +106,7 @@ function SessionRefreshCard({
         {success && (
           <Alert className="mt-2">
             <AlertDescription className="text-success-text">
-              Done
+              {m.admin_auth_action_hydrate_completed()}
             </AlertDescription>
           </Alert>
         )}
@@ -133,24 +135,36 @@ function SessionStoreCard() {
   const error = useAuthSessionStore((s) => s.error);
 
   const rows: [string, React.ReactNode][] = [
-    ["Hydration Status", status],
-    ["Auth Identity", hasAuthIdentity ? "Yes" : "No"],
-    ["Member Session", hasMemberSession ? "Yes" : "No"],
-    ["Registration Stage", registrationStage],
+    [m.admin_auth_status_hydration(), status],
+    [m.admin_auth_identity(), hasAuthIdentity ? m.common_yes() : m.common_no()],
     [
-      "Server Permission",
+      m.admin_auth_member_session(),
+      hasMemberSession ? m.common_yes() : m.common_no(),
+    ],
+    [m.admin_auth_registration_stage(), registrationStage],
+    [
+      m.admin_auth_server_permission(),
       <Badge key="perm" variant="secondary">
-        {permission?.role ?? "none"}
+        {permission?.role ?? m.common_none()}
       </Badge>,
     ],
-    ["Main User Exists", mainUserExists ? "Yes" : "No"],
-    ["Needs Main Setup", needsMainSetup ? "Yes" : "No"],
-    ["Registration Complete", registrationComplete ? "Yes" : "No"],
-    ["User ID", user?.id ?? "-"],
-    ["User Name", user?.name ?? "-"],
-    ["User Email", user?.email ?? "-"],
-    ["User Role", user?.role ?? "-"],
-    ["Session ID", session?.id ?? "-"],
+    [
+      m.admin_auth_main_user_exists(),
+      mainUserExists ? m.common_yes() : m.common_no(),
+    ],
+    [
+      m.admin_auth_needs_main_setup(),
+      needsMainSetup ? m.common_yes() : m.common_no(),
+    ],
+    [
+      m.admin_auth_registration_complete(),
+      registrationComplete ? m.common_yes() : m.common_no(),
+    ],
+    [m.admin_auth_user_id(), user?.id ?? "-"],
+    [m.admin_auth_user_name(), user?.name ?? "-"],
+    [m.admin_auth_user_email(), user?.email ?? "-"],
+    [m.admin_auth_user_role(), user?.role ?? "-"],
+    [m.admin_auth_session_id(), session?.id ?? "-"],
   ];
 
   return (
@@ -158,7 +172,9 @@ function SessionStoreCard() {
       <CardContent>
         <div className="flex items-center gap-2 mb-4">
           <ShieldUser className="size-4" />
-          <h3 className="text-base font-bold">Auth Session Store</h3>
+          <h3 className="text-base font-bold">
+            {m.admin_auth_session_store()}
+          </h3>
         </div>
         <Table className="text-sm">
           <TableBody>
@@ -196,11 +212,17 @@ function ActionsCard() {
     setFeedback(null);
     try {
       await fn();
-      setFeedback({ type: "success", message: `${key} completed` });
+      setFeedback({
+        type: "success",
+        message:
+          key === "Hydrate"
+            ? m.admin_auth_action_hydrate_completed()
+            : m.admin_auth_action_logout_completed(),
+      });
     } catch (err) {
       setFeedback({
         type: "error",
-        message: err instanceof Error ? err.message : "Failed",
+        message: err instanceof Error ? err.message : m.admin_auth_failed(),
       });
     } finally {
       setLoading(null);
@@ -210,7 +232,9 @@ function ActionsCard() {
   return (
     <Card>
       <CardContent>
-        <h3 className="text-base font-bold mb-4">Actions</h3>
+        <h3 className="text-base font-bold mb-4">
+          {m.admin_auth_actions_title()}
+        </h3>
         <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
@@ -221,7 +245,7 @@ function ActionsCard() {
             }
           >
             {loading === "Hydrate" ? <Spinner size="sm" /> : null}
-            Re-hydrate Session
+            {m.admin_auth_action_hydrate()}
           </Button>
           <Separator orientation="vertical" className="h-6" />
           <Button
@@ -232,7 +256,7 @@ function ActionsCard() {
             className="text-error-text"
           >
             {loading === "Logout" ? <Spinner size="sm" /> : null}
-            Logout
+            {m.auth_logout()}
           </Button>
         </div>
         {feedback && (
@@ -256,18 +280,18 @@ function ActionsCard() {
 export default function AuthStatusPage() {
   return (
     <Page
-      title="Auth Status"
-      description="View cookie-backed session status across services"
+      title={m.admin_auth_status_title()}
+      description={m.admin_auth_status_description()}
     >
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 md:col-span-6">
           <SessionRefreshCard
-            title="Cookie Session"
+            title={m.admin_auth_cookie_session()}
             onRefresh={async () => {
               await queryAccessToken({ requirePresence: false });
               await hydrateAuthSessionState({ requirePresence: false });
             }}
-            refreshLabel="Refresh Session"
+            refreshLabel={m.admin_auth_refresh_session()}
           />
         </div>
         <div className="col-span-12 md:col-span-6">

@@ -1,6 +1,7 @@
 import { bookContentStructureQuery } from "@rezics/api/book/book";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { ContentRating } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
@@ -50,7 +51,7 @@ export const BookEditChapterListPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="mt-4 mx-auto max-w-2xl px-4">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground">{m.common_loading()}</div>
       </div>
     );
   }
@@ -65,7 +66,9 @@ export const BookEditChapterListPage: React.FC = () => {
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-8rem)] max-w-2xl flex-col px-4 pb-4">
-      <h2 className="text-lg font-semibold mb-2">目錄管理</h2>
+      <h2 className="text-lg font-semibold mb-2">
+        {m.book_edit_toc_management_title()}
+      </h2>
 
       <Tabs
         value={tab}
@@ -73,7 +76,7 @@ export const BookEditChapterListPage: React.FC = () => {
         className="min-h-0 flex-1"
       >
         <TabsList className="flex-none">
-          <TabsTrigger value="editor">編輯</TabsTrigger>
+          <TabsTrigger value="editor">{m.common_edit()}</TabsTrigger>
           <TabsTrigger value="json">JSON</TabsTrigger>
         </TabsList>
         <TabsContent value="editor" className="min-h-0">

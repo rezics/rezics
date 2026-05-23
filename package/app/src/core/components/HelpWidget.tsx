@@ -1,12 +1,10 @@
 import { Button } from "@rezics/ui/shadcn";
+import * as m from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import * as React from "react";
 import FeedbackDialog from "@/feedback/components/FeedbackDialog";
 import {
   Plus as AddIcon,
-  FileText as ArticleOutlined,
-  Bug as BugReport,
-  MessageCircle as ChatBubbleOutline,
   X as CloseIcon,
   TriangleAlert as ReportProblemIcon,
 } from "lucide-react";
@@ -26,48 +24,15 @@ export interface HelpFabProps {
   enterDelayMs?: number;
 }
 
-const _defaultHelpActionsFutureExample: HelpFabAction[] = [
-  {
-    id: "quick-start",
-    label: "快速上手",
-    icon: <ArticleOutlined className="w-4 h-4" />,
-    onClick: () => {
-      console.log("打开快速上手文档");
+function getDefaultHelpActions(): HelpFabAction[] {
+  return [
+    {
+      id: "feedback",
+      label: m.app_help_feedback(),
+      icon: <ReportProblemIcon className="w-4 h-4" />,
     },
-  },
-  {
-    id: "faq",
-    label: "常见问题 FAQ",
-    icon: <ArticleOutlined className="w-4 h-4" />,
-    onClick: () => {
-      console.log("打开 FAQ 页面");
-    },
-  },
-  {
-    id: "bug",
-    label: "提交 Bug",
-    icon: <BugReport className="w-4 h-4" />,
-    onClick: () => {
-      console.log("打开 Bug 反馈入口");
-    },
-  },
-  {
-    id: "suggestion",
-    label: "功能建议",
-    icon: <ChatBubbleOutline className="w-4 h-4" />,
-    onClick: () => {
-      console.log("打开功能建议入口");
-    },
-  },
-];
-
-const defaultHelpActions: HelpFabAction[] = [
-  {
-    id: "feedback",
-    label: "反馈",
-    icon: <ReportProblemIcon className="w-4 h-4" />,
-  },
-];
+  ];
+}
 
 /**
  * Floating Action Button (FAB) for help
@@ -75,14 +40,14 @@ const defaultHelpActions: HelpFabAction[] = [
 export const HelpFab: React.FC<HelpFabProps> = ({
   actions,
   icon,
-  ariaLabel = "帮助",
+  ariaLabel = m.app_help_aria_label(),
   visible = true,
   enterDelayMs = 0,
 }) => {
   const [open, setOpen] = React.useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = React.useState(false);
 
-  const list = actions ?? defaultHelpActions;
+  const list = actions ?? getDefaultHelpActions();
   if (!list.length) return null;
 
   const handleToggle = () => {

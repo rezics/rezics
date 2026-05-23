@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Input,
@@ -139,7 +140,7 @@ export function PaginatedTable<T>({
 
       <div className="flex items-center justify-between flex-wrap gap-2 mt-2 px-2 py-1">
         <div className="flex items-center gap-2 text-sm text-text-secondary">
-          <span>Rows per page:</span>
+          <span>{m.common_rows_per_page()}</span>
           <Select
             value={String(rowsPerPage)}
             onValueChange={(v) => onRowsPerPageChange(Number(v))}
@@ -156,12 +157,16 @@ export function PaginatedTable<T>({
             </SelectContent>
           </Select>
           <span>
-            {fromRow}-{toRow} of {count}
+            {m.common_pagination_range({
+              from: fromRow,
+              to: toRow,
+              count,
+            })}
           </span>
           <Button
             variant="ghost"
             size="icon"
-            aria-label="First page"
+            aria-label={m.common_first_page()}
             disabled={page <= 0 || !totalPages}
             onClick={() => onPageChange(0)}
           >
@@ -170,7 +175,7 @@ export function PaginatedTable<T>({
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Previous page"
+            aria-label={m.common_previous_page()}
             disabled={page <= 0 || !totalPages}
             onClick={() => onPageChange(page - 1)}
           >
@@ -179,7 +184,7 @@ export function PaginatedTable<T>({
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Next page"
+            aria-label={m.common_next_page()}
             disabled={!totalPages || page + 1 >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
@@ -188,7 +193,7 @@ export function PaginatedTable<T>({
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Last page"
+            aria-label={m.common_last_page()}
             disabled={!totalPages || page + 1 >= totalPages}
             onClick={() => onPageChange(Math.max(totalPages - 1, 0))}
           >
@@ -198,7 +203,9 @@ export function PaginatedTable<T>({
 
         {enablePageJump ? (
           <div className="flex flex-row gap-2 items-center px-2 py-1">
-            <span className="text-sm text-text-secondary">Go to page</span>
+            <span className="text-sm text-text-secondary">
+              {m.common_go_to_page()}
+            </span>
             <Input
               value={pageInput}
               onChange={(e) => {
@@ -211,7 +218,7 @@ export function PaginatedTable<T>({
               }}
               inputMode="numeric"
               pattern="[0-9]*"
-              aria-label="go to page"
+              aria-label={m.common_go_to_page()}
               className="w-24 h-8 text-sm"
               disabled={!totalPages}
             />
@@ -224,7 +231,7 @@ export function PaginatedTable<T>({
               onClick={commitPageInput}
               disabled={!totalPages}
             >
-              Go
+              {m.common_go()}
             </Button>
           </div>
         ) : null}

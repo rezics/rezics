@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Badge,
   Button,
@@ -50,16 +51,19 @@ export const UsersTable: Story = {
   render: () => (
     <div className="flex flex-col gap-6 max-w-[720px]">
       <div className="flex flex-row gap-4 items-center">
-        <h2 className="flex-1 text-2xl font-bold">Users</h2>
-        <Input placeholder="Search email" className="min-w-[220px] h-8" />
-        <Button size="sm">Invite</Button>
+        <h2 className="flex-1 text-2xl font-bold">{m.admin_nav_users()}</h2>
+        <Input
+          placeholder={m.admin_story_search_email_placeholder()}
+          className="min-w-[220px] h-8"
+        />
+        <Button size="sm">{m.admin_story_invite()}</Button>
       </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{m.common_email()}</TableHead>
+            <TableHead>{m.admin_auth_user_role()}</TableHead>
+            <TableHead>{m.admin_auth_email_status()}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

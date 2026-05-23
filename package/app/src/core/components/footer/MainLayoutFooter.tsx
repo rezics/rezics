@@ -53,7 +53,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               <div className="flex items-center gap-2 mt-2">
                 <LazyLoadImage
                   src="/logo.svg"
-                  alt="logo"
+                  alt={m.common_logo_alt()}
                   className="w-11 h-12"
                 />
                 <h6 className="text-base font-extrabold tracking-[0.2px] m-0">

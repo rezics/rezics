@@ -1,4 +1,5 @@
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
+import * as m from "@rezics/i18n/messages";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import {
   Alert,
@@ -32,14 +33,16 @@ export function NewBookByUrl() {
   }, [supportedSitesQuery]);
   return (
     <div className="mt-16 mx-auto w-11/12">
-      <div className="text-2xl font-bold mb-4">通过URL创建书籍</div>
+      <div className="text-2xl font-bold mb-4">
+        {m.book_edit_create_book_by_url_title()}
+      </div>
       <Alert>
         <AlertDescription>
-          请输入书籍的URL，系统将自动获取书籍的元数据，并创建书籍。
+          {m.book_edit_create_book_by_url_description()}
         </AlertDescription>
       </Alert>
       <div className="mt-4">
-        <div>支持的网站：</div>
+        <div>{m.book_edit_supported_sites()}</div>
         <ul>
           {supportedSitesList.map((site) => (
             <li key={site.name}>
@@ -53,14 +56,14 @@ export function NewBookByUrl() {
       <div className="mt-12">
         <div className="flex mb-4 items-end gap-4">
           <div className="flex-1 flex flex-col gap-1">
-            <Label htmlFor="new-book-url">书籍URL</Label>
+            <Label htmlFor="new-book-url">{m.book_edit_book_url()}</Label>
             <Input
               id="new-book-url"
               value={url}
               onChange={(newValue) => setUrl(newValue.target.value)}
             />
           </div>
-          <Button onClick={handleCreateBook}>创建</Button>
+          <Button onClick={handleCreateBook}>{m.common_create()}</Button>
         </div>
       </div>
     </div>

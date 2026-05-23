@@ -19,6 +19,7 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import * as m from "@rezics/i18n/messages";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -53,7 +54,7 @@ export default function AuthSessionsPage() {
     const cols: PaginatedColumn<AuthSession>[] = [
       {
         id: "token",
-        header: "Token",
+        header: m.admin_auth_sessions_token(),
         minWidth: 220,
         cell: (s) => (
           <span className="text-sm font-mono">{s.token.slice(0, 16)}…</span>
@@ -61,19 +62,19 @@ export default function AuthSessionsPage() {
       },
       {
         id: "createdAt",
-        header: "Created",
+        header: m.common_created(),
         minWidth: 170,
         cell: (s) => fmtDate(s.createdAt),
       },
       {
         id: "expiresAt",
-        header: "Expires",
+        header: m.common_expires(),
         minWidth: 170,
         cell: (s) => fmtDate(s.expiresAt),
       },
       {
         id: "userAgent",
-        header: "User Agent",
+        header: m.common_user_agent(),
         minWidth: 300,
         cell: (s) => (
           <span className="text-sm whitespace-nowrap overflow-hidden text-ellipsis inline-block max-w-[300px]">
@@ -83,7 +84,7 @@ export default function AuthSessionsPage() {
       },
       {
         id: "actions",
-        header: "Actions",
+        header: m.admin_auth_actions_title(),
         minWidth: 120,
         cell: (s) => (
           <Button
@@ -92,7 +93,7 @@ export default function AuthSessionsPage() {
             className="text-error-text"
             onClick={() => setConfirmDialog({ open: true, token: s.token })}
           >
-            Revoke
+            {m.common_revoke()}
           </Button>
         ),
       },
@@ -101,7 +102,10 @@ export default function AuthSessionsPage() {
   }, []);
 
   return (
-    <Page title="Auth Sessions" description="Manage auth server sessions">
+    <Page
+      title={m.admin_auth_sessions_title()}
+      description={m.admin_auth_sessions_description()}
+    >
       <Card>
         <CardContent>
           {sessionsQuery.isLoading ? (
@@ -109,7 +113,9 @@ export default function AuthSessionsPage() {
               <Spinner />
             </div>
           ) : sessionsQuery.isError ? (
-            <p className="text-sm text-error-text">Failed to load sessions.</p>
+            <p className="text-sm text-error-text">
+              {m.admin_auth_sessions_failed_load()}
+            </p>
           ) : (
             <PaginatedTable<AuthSession>
               columns={columns}
@@ -134,10 +140,9 @@ export default function AuthSessionsPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Revoke Session</DialogTitle>
+            <DialogTitle>{m.admin_auth_sessions_revoke_title()}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to revoke this session? The user will be
-              logged out.
+              {m.admin_auth_sessions_revoke_description()}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -145,7 +150,7 @@ export default function AuthSessionsPage() {
               variant="outline"
               onClick={() => setConfirmDialog({ open: false, token: "" })}
             >
-              Cancel
+              {m.common_cancel()}
             </Button>
             <Button
               className="bg-error-fill text-white"
@@ -154,7 +159,7 @@ export default function AuthSessionsPage() {
                 setConfirmDialog({ open: false, token: "" });
               }}
             >
-              Revoke
+              {m.common_revoke()}
             </Button>
           </DialogFooter>
         </DialogContent>

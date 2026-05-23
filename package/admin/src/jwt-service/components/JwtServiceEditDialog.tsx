@@ -16,6 +16,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 
 type Props = {
   open: boolean;
@@ -81,7 +82,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            Edit JWT Service: <strong>{service.serviceKey}</strong>
+            {m.admin_jwt_edit_title({ serviceKey: service.serviceKey })}
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 mt-1">
@@ -101,7 +102,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
                   : "bg-surface-elevated text-text-secondary"
               }
             >
-              {service.isActive ? "Active" : "Inactive"}
+              {service.isActive ? m.common_active() : m.common_inactive()}
             </Badge>
             <Button
               size="sm"
@@ -112,14 +113,16 @@ export const JwtServiceEditDialog: FC<Props> = ({
               onClick={handleToggleActive}
               disabled={updating}
             >
-              {service.isActive ? "Deactivate" : "Activate"}
+              {service.isActive
+                ? m.admin_jwt_deactivate()
+                : m.admin_jwt_activate()}
             </Button>
           </div>
 
           <Separator />
 
           <div className="flex flex-col gap-1">
-            <Label htmlFor="jsed-issuer">Issuer</Label>
+            <Label htmlFor="jsed-issuer">{m.admin_jwt_issuer()}</Label>
             <Input
               id="jsed-issuer"
               value={issuer}
@@ -128,7 +131,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="jsed-aud">Audience</Label>
+            <Label htmlFor="jsed-aud">{m.admin_jwt_audience()}</Label>
             <Input
               id="jsed-aud"
               value={audience}
@@ -137,7 +140,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="jsed-url">JWKS URL</Label>
+            <Label htmlFor="jsed-url">{m.admin_jwt_jwks_url()}</Label>
             <Input
               id="jsed-url"
               value={jwksUrl}
@@ -146,7 +149,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="jsed-path">JWKS Path</Label>
+            <Label htmlFor="jsed-path">{m.admin_jwt_jwks_path()}</Label>
             <Input
               id="jsed-path"
               value={jwksPath}
@@ -159,15 +162,15 @@ export const JwtServiceEditDialog: FC<Props> = ({
               checked={isLocalIssuer}
               onCheckedChange={(v) => setIsLocalIssuer(Boolean(v))}
             />
-            Local Issuer
+            {m.admin_jwt_local_issuer()}
           </Label>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={updating}>
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button onClick={handleSave} disabled={updating}>
-            {updating ? "Saving..." : "Save"}
+            {updating ? m.admin_jwt_saving() : m.common_save()}
           </Button>
         </DialogFooter>
       </DialogContent>

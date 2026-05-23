@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
+import * as m from "@rezics/i18n/messages";
 import {
   JwtServiceEditDialog,
   JwtServiceTable,
@@ -52,7 +53,7 @@ export const AuthJwtServicesPage: FC = () => {
       setOpenEdit(false);
       setEditingService(null);
     } catch (err) {
-      setUpdatingError((err as Error)?.message ?? "Update failed");
+      setUpdatingError((err as Error)?.message ?? m.admin_jwt_update_failed());
     } finally {
       setUpdating(false);
     }
@@ -65,7 +66,9 @@ export const AuthJwtServicesPage: FC = () => {
       const updated = await activateMutation.mutateAsync(serviceKey);
       setEditingService(updated);
     } catch (err) {
-      setUpdatingError((err as Error)?.message ?? "Activate failed");
+      setUpdatingError(
+        (err as Error)?.message ?? m.admin_jwt_activate_failed(),
+      );
     } finally {
       setUpdating(false);
     }
@@ -78,7 +81,9 @@ export const AuthJwtServicesPage: FC = () => {
       const updated = await deactivateMutation.mutateAsync(serviceKey);
       setEditingService(updated);
     } catch (err) {
-      setUpdatingError((err as Error)?.message ?? "Deactivate failed");
+      setUpdatingError(
+        (err as Error)?.message ?? m.admin_jwt_deactivate_failed(),
+      );
     } finally {
       setUpdating(false);
     }
@@ -87,7 +92,7 @@ export const AuthJwtServicesPage: FC = () => {
   return (
     <div className="w-11/12 mx-auto mt-16">
       <div className="flex flex-row justify-between items-center">
-        <h1 className="text-3xl font-bold mb-8">Auth JWT Services</h1>
+        <h1 className="text-3xl font-bold mb-8">{m.admin_jwt_auth_title()}</h1>
       </div>
 
       {isLoading && (
@@ -107,7 +112,7 @@ export const AuthJwtServicesPage: FC = () => {
       {!isLoading && !error && services.length === 0 && (
         <div className="flex items-center justify-center h-40">
           <p className="text-base text-text-secondary">
-            No auth JWT services found
+            {m.admin_jwt_auth_empty()}
           </p>
         </div>
       )}

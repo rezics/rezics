@@ -173,7 +173,7 @@ export const adminNav = {
       children: [
         {
           id: "misc.echokv",
-          label: () => "EchoKV",
+          label: m.admin_nav_echokv,
           icon: <StorageOutlinedIcon fontSize="small" />,
           to: "/misc/echokv",
         },

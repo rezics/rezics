@@ -1,4 +1,5 @@
 import { Button, Card, CardContent, CardFooter } from "@rezics/ui/shadcn";
+import * as m from "@rezics/i18n/messages";
 import {
   useCanGoBack,
   useNavigate,
@@ -24,7 +25,7 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
     <div className="min-h-screen flex items-center justify-center">
       <Card className="min-w-md max-w-lg">
         <CardContent className="flex flex-col gap-4">
-          <h4 className="text-2xl font-medium m-0">Not Found</h4>
+          <h4 className="text-2xl font-medium m-0">{m.common_not_found()}</h4>
           <div className="flex items-center gap-2">
             <Place /> {path}
           </div>
@@ -32,11 +33,11 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
         <CardFooter className="flex flex-row justify-between">
           {canGoBack ? (
             <Button variant="ghost" onClick={onBack}>
-              Back
+              {m.common_back()}
             </Button>
           ) : null}
           <Button variant="ghost" onClick={onHome}>
-            Home
+            {m.common_home()}
           </Button>
         </CardFooter>
       </Card>

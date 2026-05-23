@@ -10,6 +10,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Copy as ContentCopyIcon } from "lucide-react";
 import type { FC } from "react";
+import * as m from "@rezics/i18n/messages";
 
 interface TokenSecretDialogProps {
   open: boolean;
@@ -38,13 +39,12 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
     <Dialog open={open} onOpenChange={(o) => (o ? null : onClose())}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Token Created — Copy & Store</DialogTitle>
+          <DialogTitle>{m.admin_token_created_secret_title()}</DialogTitle>
         </DialogHeader>
         <div className="mt-2">
           <Alert>
             <AlertDescription className="text-warning-text">
-              This token value is only shown once. Be sure to copy and store it
-              securely.
+              {m.admin_token_created_secret_description()}
             </AlertDescription>
           </Alert>
 
@@ -56,7 +56,7 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
               variant="ghost"
               size="icon"
               onClick={copyToClipboard}
-              aria-label="Copy"
+              aria-label={m.common_copy_link()}
             >
               <ContentCopyIcon className="size-4" />
             </Button>
@@ -64,7 +64,7 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Close
+            {m.common_close()}
           </Button>
         </DialogFooter>
       </DialogContent>

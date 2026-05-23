@@ -3,6 +3,7 @@ import { bookMutations } from "@rezics/api/book/book.mutations";
 import { chapterMutations } from "@rezics/api/chapter/chapter.mutations";
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter.queries";
 import type { ContentRating } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -491,14 +492,14 @@ export const BookTocEditor = forwardRef<
       >
         {treeData.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
-            <p className="text-sm">No chapters yet</p>
+            <p className="text-sm">{m.book_edit_no_chapters_yet()}</p>
             <Button
               variant="outline"
               size="sm"
               className="mt-3"
               onClick={() => handlePreCreate(null)}
             >
-              Create First Chapter
+              {m.book_edit_create_first_chapter()}
             </Button>
           </div>
         ) : (
@@ -541,7 +542,10 @@ export const BookTocEditor = forwardRef<
       {/* Footer */}
       <div className="flex items-center justify-between py-3 pb-8 text-sm text-muted-foreground">
         <span>
-          {chapterCount} chapters · {formatTotal(wordCount)} words
+          {m.book_edit_toc_footer_summary({
+            chapters: chapterCount,
+            words: formatTotal(wordCount),
+          })}
         </span>
         <div className="flex items-center gap-2">
           {onDownloadJSON && (
@@ -557,7 +561,9 @@ export const BookTocEditor = forwardRef<
           >
             <SaveIcon className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">
-              {updateContentStructureMutation.isPending ? "Saving..." : "Save"}
+              {updateContentStructureMutation.isPending
+                ? m.common_saving()
+                : m.common_save()}
             </span>
           </Button>
         </div>

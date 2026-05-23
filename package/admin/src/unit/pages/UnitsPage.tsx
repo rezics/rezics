@@ -22,16 +22,17 @@ import {
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { fmtDate } from "@/utils/format";
+import * as m from "@rezics/i18n/messages";
 import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
 
 /** Extract the best title from the translations array on a UnitDTO. */
 function extractUnitTitle(unit: UnitDTO): string {
   const translations = unit.translations;
-  if (!translations?.length) return "(no title)";
+  if (!translations?.length) return m.admin_unit_no_title();
   const primary =
     translations.find((t) => t.language === unit.defaultLanguage) ??
     translations[0];
-  return primary?.title || "(no title)";
+  return primary?.title || m.admin_unit_no_title();
 }
 
 export default function UnitsPage() {
@@ -83,13 +84,13 @@ export default function UnitsPage() {
     const cols: PaginatedColumn<UnitDTO>[] = [
       {
         id: "id",
-        header: "ID",
+        header: m.common_id(),
         minWidth: 220,
         cell: (u) => <span className="text-sm font-mono">{u.id}</span>,
       },
       {
         id: "title",
-        header: "Title",
+        header: m.common_title(),
         minWidth: 220,
         cell: (u) => (
           <span className="text-sm font-semibold whitespace-nowrap">
@@ -99,20 +100,20 @@ export default function UnitsPage() {
       },
       {
         id: "type",
-        header: "Type",
+        header: m.common_type(),
         minWidth: 120,
         cell: (u) =>
           u.type ? <Badge variant="secondary">{u.type}</Badge> : "-",
       },
       {
         id: "status",
-        header: "Status",
+        header: m.admin_auth_email_status(),
         minWidth: 120,
         cell: (u) => u.status || "-",
       },
       {
         id: "user",
-        header: "User",
+        header: m.common_user(),
         minWidth: 200,
         cell: (u) => (
           <div className="flex flex-col">
@@ -129,19 +130,19 @@ export default function UnitsPage() {
       },
       {
         id: "createdAt",
-        header: "Created",
+        header: m.common_created(),
         minWidth: 170,
         cell: (u) => fmtDate(u.createdAt),
       },
       {
         id: "updatedAt",
-        header: "Updated",
+        header: m.common_updated(),
         minWidth: 170,
         cell: (u) => fmtDate(u.updatedAt),
       },
       {
         id: "actions",
-        header: "Actions",
+        header: m.admin_auth_actions_title(),
         minWidth: 120,
         cell: (u) => (
           <Button
@@ -149,7 +150,7 @@ export default function UnitsPage() {
             variant="outline"
             render={(props) => (
               <Link to={`/unit/${u.id}`} {...props}>
-                Edit
+                {m.common_edit()}
               </Link>
             )}
           />
@@ -161,14 +162,20 @@ export default function UnitsPage() {
 
   return (
     <Page
-      title={isMeiliMode ? "Units (Meili)" : "Units"}
+      title={
+        isMeiliMode
+          ? m.admin_unit_list_meili_title()
+          : m.admin_unit_list_title()
+      }
       description={
-        isMeiliMode ? "管理 Unit（Meili 搜索）" : "管理 Unit（普通列表）"
+        isMeiliMode
+          ? m.admin_unit_list_meili_description()
+          : m.admin_unit_list_description()
       }
     >
       {isMeiliMode ? (
         <SearchablePaginatedTableCard<UnitDTO>
-          searchPlaceholder="title/userId/type..."
+          searchPlaceholder={m.admin_unit_search_placeholder()}
           q={q}
           onQChange={setQ}
           onSearch={() => {
@@ -181,7 +188,7 @@ export default function UnitsPage() {
               render={(props) => (
                 <Link to="/unit/create" {...props}>
                   <AddIcon className="size-4" />
-                  Create
+                  {m.common_create()}
                 </Link>
               )}
             />
@@ -207,11 +214,11 @@ export default function UnitsPage() {
             <div className="flex flex-col sm:flex-row gap-3 items-stretch">
               <div className="flex-1 flex flex-col gap-1">
                 <Label htmlFor="unit-search" className="text-xs">
-                  Search
+                  {m.admin_unit_search_label()}
                 </Label>
                 <Input
                   id="unit-search"
-                  placeholder="q/userId/type..."
+                  placeholder={m.admin_unit_search_placeholder()}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   onKeyDown={(e) => {
@@ -225,7 +232,7 @@ export default function UnitsPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="search"
+                aria-label={m.common_search()}
                 onClick={() => {
                   setPage(0);
                   setQuery(q.trim());
@@ -239,7 +246,7 @@ export default function UnitsPage() {
                 render={(props) => (
                   <Link to="/unit/create" {...props}>
                     <AddIcon className="size-4" />
-                    Create
+                    {m.common_create()}
                   </Link>
                 )}
               />
@@ -253,7 +260,9 @@ export default function UnitsPage() {
               </div>
             ) : normalQuery.isError ? (
               <div>
-                <p className="text-sm text-error-text">Failed to load units.</p>
+                <p className="text-sm text-error-text">
+                  {m.admin_unit_failed_load_list()}
+                </p>
                 {normalQuery.error ? (
                   <p className="text-xs text-error-text">
                     {String(normalQuery.error)}

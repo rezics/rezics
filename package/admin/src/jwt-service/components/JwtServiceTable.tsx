@@ -15,6 +15,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Pencil as EditOutlinedIcon } from "lucide-react";
 import type { FC } from "react";
+import * as m from "@rezics/i18n/messages";
 
 type Props = {
   services: JwtServiceDTO[];
@@ -28,12 +29,14 @@ export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Service Key</TableHead>
-              <TableHead>Issuer</TableHead>
-              <TableHead>Audience</TableHead>
-              <TableHead>Local Issuer</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{m.admin_jwt_service_key()}</TableHead>
+              <TableHead>{m.admin_jwt_issuer()}</TableHead>
+              <TableHead>{m.admin_jwt_audience()}</TableHead>
+              <TableHead>{m.admin_jwt_local_issuer()}</TableHead>
+              <TableHead>{m.admin_auth_email_status()}</TableHead>
+              <TableHead className="text-right">
+                {m.admin_auth_actions_title()}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -48,16 +51,20 @@ export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
                 <TableCell>{service.audience}</TableCell>
                 <TableCell>
                   {service.isLocalIssuer ? (
-                    <Badge className="bg-info-fill text-white">Local</Badge>
+                    <Badge className="bg-info-fill text-white">
+                      {m.admin_jwt_local()}
+                    </Badge>
                   ) : (
-                    <Badge variant="outline">Remote</Badge>
+                    <Badge variant="outline">{m.admin_jwt_remote()}</Badge>
                   )}
                 </TableCell>
                 <TableCell>
                   {service.isActive ? (
-                    <Badge className="bg-success-fill text-white">Active</Badge>
+                    <Badge className="bg-success-fill text-white">
+                      {m.common_active()}
+                    </Badge>
                   ) : (
-                    <Badge variant="secondary">Inactive</Badge>
+                    <Badge variant="secondary">{m.common_inactive()}</Badge>
                   )}
                 </TableCell>
                 <TableCell className="text-right">
@@ -68,14 +75,14 @@ export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
                           size="icon"
                           variant="ghost"
                           onClick={() => onEdit(service)}
-                          aria-label="Edit"
+                          aria-label={m.common_edit()}
                           {...props}
                         >
                           <EditOutlinedIcon className="size-4" />
                         </Button>
                       )}
                     />
-                    <TooltipContent>Edit</TooltipContent>
+                    <TooltipContent>{m.common_edit()}</TooltipContent>
                   </Tooltip>
                 </TableCell>
               </TableRow>

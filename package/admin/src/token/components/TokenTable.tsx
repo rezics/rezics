@@ -15,6 +15,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Pencil as EditIcon } from "lucide-react";
 import type { FC } from "react";
+import * as m from "@rezics/i18n/messages";
 
 interface TokenTableProps {
   tokens: ApiTokenDTO[];
@@ -36,7 +37,7 @@ export const TokenTable: FC<TokenTableProps> = ({
     if (!scopes || Object.keys(scopes).length === 0) {
       return (
         <Badge variant="outline" className="text-xs">
-          No scopes
+          {m.admin_token_no_scopes()}
         </Badge>
       );
     }
@@ -62,12 +63,14 @@ export const TokenTable: FC<TokenTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Scopes</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Expires</TableHead>
-            <TableHead>Revoked</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{m.admin_auth_user_name()}</TableHead>
+            <TableHead>{m.admin_token_scopes()}</TableHead>
+            <TableHead>{m.common_created()}</TableHead>
+            <TableHead>{m.common_expires()}</TableHead>
+            <TableHead>{m.admin_token_revoked()}</TableHead>
+            <TableHead className="text-right">
+              {m.admin_auth_actions_title()}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -79,9 +82,13 @@ export const TokenTable: FC<TokenTableProps> = ({
                 {t.createdAt ? new Date(t.createdAt).toLocaleString() : "-"}
               </TableCell>
               <TableCell>
-                {t.expiresAt ? new Date(t.expiresAt).toLocaleString() : "Never"}
+                {t.expiresAt
+                  ? new Date(t.expiresAt).toLocaleString()
+                  : m.admin_token_never()}
               </TableCell>
-              <TableCell>{t.revoked ? "Yes" : "No"}</TableCell>
+              <TableCell>
+                {t.revoked ? m.common_yes() : m.common_no()}
+              </TableCell>
               <TableCell className="text-right">
                 <div className="flex flex-row gap-2 justify-end">
                   <Tooltip>
@@ -95,11 +102,11 @@ export const TokenTable: FC<TokenTableProps> = ({
                           {...props}
                         >
                           <EditIcon className="size-4" />
-                          Edit
+                          {m.common_edit()}
                         </Button>
                       )}
                     />
-                    <TooltipContent>Edit</TooltipContent>
+                    <TooltipContent>{m.common_edit()}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger
@@ -112,11 +119,11 @@ export const TokenTable: FC<TokenTableProps> = ({
                           disabled={(t.revoked ?? false) || !!revokingIds[t.id]}
                           {...props}
                         >
-                          Revoke
+                          {m.common_revoke()}
                         </Button>
                       )}
                     />
-                    <TooltipContent>Revoke</TooltipContent>
+                    <TooltipContent>{m.common_revoke()}</TooltipContent>
                   </Tooltip>
                 </div>
               </TableCell>
