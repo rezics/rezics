@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { compileLayout, type LayoutCompileError } from "./layout-resolver";
+import { compileLayout } from "./layout-resolver";
 
 const tempDirs = new Set<string>();
 
@@ -63,9 +63,7 @@ describe("compileLayout", () => {
       ["layout {", '  import "./missing/backend.kdl"', "}"].join("\n"),
     );
 
-    await expect(
-      compileLayout(entryLayout),
-    ).rejects.toMatchObject<LayoutCompileError>({
+    await expect(compileLayout(entryLayout)).rejects.toMatchObject({
       name: "LayoutCompileError",
       location: {
         filePath: entryLayout,

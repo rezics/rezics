@@ -97,7 +97,12 @@ async function compileFile(
         continue;
       }
 
-      const [, indentation, , importTarget] = importMatch;
+      const indentation = importMatch[1] ?? "";
+      const importTarget = importMatch[3];
+      if (!importTarget) {
+        compiledLines.push(resolvePathAttributes(line, baseDir));
+        continue;
+      }
       const importedPath = path.resolve(baseDir, importTarget);
 
       try {

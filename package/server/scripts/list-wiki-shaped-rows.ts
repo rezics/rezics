@@ -2,7 +2,7 @@ import { prisma } from "#/prisma/client";
 import { REZICS_WIKI_USER_SLUG } from "@/infra/infra-users";
 
 const wikiUser = await prisma.user.findFirst({
-  where: { unit: { slug: REZICS_WIKI_USER_SLUG } },
+  where: { units: { some: { slug: REZICS_WIKI_USER_SLUG } } },
   select: { unitId: true },
 });
 

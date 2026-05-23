@@ -77,7 +77,7 @@ for (const sourceFile of project.getSourceFiles()) {
       continue;
     }
 
-    const child = children[0];
+    const child = children[0]!;
     if (
       child.getKind() !== SyntaxKind.JsxElement &&
       child.getKind() !== SyntaxKind.JsxSelfClosingElement
@@ -149,7 +149,7 @@ function withPropsSpread(
     return child.getText().replace(/\s*\/>$/, " {...props} />");
   }
 
-  const opening = child.getOpeningElement();
+  const opening = (child as JsxElement).getOpeningElement();
   const start = opening.getStart() - child.getStart();
   const end = opening.getEnd() - child.getStart();
   const text = child.getText();

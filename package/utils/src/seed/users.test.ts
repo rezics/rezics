@@ -89,7 +89,7 @@ describe("seedAllMainUsers", () => {
   test("reuses existing infra user Units by slug", async () => {
     const { INFRA_USERS, seedInfraUsers } = await import("./users");
     const prismaStub = makePrismaStub();
-    prismaStub.unit.findUnique = mock(async ({ where }: any) => ({
+    (prismaStub.unit as any).findUnique = mock(async ({ where }: any) => ({
       id: `existing-${where.slugScope_slug.slug}`,
       type: "USER",
     }));

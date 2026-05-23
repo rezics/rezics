@@ -71,6 +71,8 @@ function awaitForever(): Promise<void> {
   return new Promise(() => {});
 }
 
+export {};
+
 await waitAllReady();
 printBanner();
 await awaitForever();
