@@ -1,7 +1,7 @@
 import type {
   CreateEntityInput,
+  EditorialPatchSubmission,
   EntityDTO,
-  UpdateEntityInput,
 } from "@rezics/contract";
 import {
   type UseMutationOptions,
@@ -41,7 +41,7 @@ export function useUpdateEntity(
     UseMutationOptions<
       EntityDTO,
       Error,
-      { unitId: string; input: UpdateEntityInput }
+      { unitId: string; input: EditorialPatchSubmission }
     >,
     "mutationFn"
   >,

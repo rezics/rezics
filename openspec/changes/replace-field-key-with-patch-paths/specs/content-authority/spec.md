@@ -96,19 +96,19 @@ The system SHALL restrict lock and collaborator management to the primary owner,
 
 ### Requirement: Restore obeys normal edit authority
 
-Editorial restore SHALL be executed through normal editorial PATCH paths and SHALL obey the same owner, collaborator, admin, and field-lock authority rules as any other PATCH. Restoring a revision SHALL submit the stored PATCH sub-tree as a new editorial PATCH. Restore SHALL create a new history revision rather than modifying or deleting prior revisions.
+Editorial restore SHALL be executed as a normal editorial PATCH with optional descriptive restore metadata and SHALL obey the same owner, collaborator, admin, and field-lock authority rules as any other PATCH. Restore metadata SHALL NOT authorize writes, bypass locks, or instruct the server to fetch/apply a historical revision. Restore SHALL create a new history revision rather than modifying or deleting prior revisions.
 
 #### Scenario: Locked path blocks restore
 
-- **WHEN** a non-admin actor attempts to restore a revision whose stored patch intersects a current `UnitFieldLock` path
+- **WHEN** a non-admin actor submits a restore PATCH whose submitted paths intersect a current `UnitFieldLock` path
 - **THEN** the restore SHALL be rejected by the normal editorial PATCH authority gate
 - **AND** no new revision SHALL be created for the failed restore
 
-#### Scenario: Admin restore is audited
+#### Scenario: Restore metadata is audited
 
-- **WHEN** an admin restores a revision whose stored patch intersects a current lock path
-- **THEN** the restore SHALL be allowed under admin override rules
-- **AND** the resulting revision SHALL record the admin actor and restore message metadata
+- **WHEN** an actor submits a PATCH with restore metadata identifying a source revision and restored paths
+- **THEN** the resulting revision SHALL record the actor, submitted PATCH, message, source revision, and restored paths
+- **AND** any submitted paths not listed in restore metadata SHALL be treated as ordinary same-save edits
 
 ## REMOVED Requirements
 

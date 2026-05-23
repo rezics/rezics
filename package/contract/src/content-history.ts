@@ -26,9 +26,20 @@ export const editorialPatchSchema = t.Intersect([
 
 export type EditorialPatch = (typeof editorialPatchSchema)["static"];
 
+export const historyRestoreSourceSchema = t.Object({
+  kind: t.Literal("revision"),
+  unitId: t.String(),
+  sequence: t.Number(),
+  paths: t.Array(t.String()),
+});
+
+export type HistoryRestoreSource =
+  (typeof historyRestoreSourceSchema)["static"];
+
 export const editorialPatchSubmissionSchema = t.Object({
   patch: editorialPatchSchema,
   message: t.Optional(t.Nullable(t.String())),
+  restoreSource: t.Optional(historyRestoreSourceSchema),
 });
 
 export type EditorialPatchSubmission =
@@ -41,15 +52,6 @@ export const revisionContentSchema = t.Object({
 });
 
 export type RevisionContentDTO = (typeof revisionContentSchema)["static"];
-
-export const historyRestoreSourceSchema = t.Object({
-  kind: t.Literal("revision"),
-  unitId: t.String(),
-  sequence: t.Number(),
-});
-
-export type HistoryRestoreSource =
-  (typeof historyRestoreSourceSchema)["static"];
 
 export const editorialRevisionPayloadSchema = t.Object({
   unitId: t.String(),

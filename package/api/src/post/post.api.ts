@@ -7,6 +7,7 @@
 
 import type {
   CreatePostInput,
+  EditorialPatchSubmission,
   PostListResponse,
   PostResponse,
   UpdatePostInput,
@@ -150,10 +151,10 @@ export const postApi = {
    */
   update: async (
     unitId: string,
-    input: UpdatePostInput,
+    input: EditorialPatchSubmission,
   ): Promise<PostResponse> => {
     return apiFetch<PostResponse>(`/post/${unitId}`, {
-      method: "PUT",
+      method: "PATCH",
       body: JSON.stringify(input),
     });
   },
@@ -162,7 +163,7 @@ export const postApi = {
     unitId: string,
     body: UpdatePostInput["body"],
   ): Promise<PostResponse> => {
-    return postApi.update(unitId, { body });
+    return postApi.update(unitId, { patch: { post: { body } } });
   },
 
   /**

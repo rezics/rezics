@@ -1,5 +1,6 @@
 import type {
   CreateEntityInput,
+  EditorialPatchSubmission,
   EntityListQuery,
   Language,
   RezicsSessionClaims,
@@ -138,6 +139,10 @@ export class EntityService {
     unitId: string,
     input: UpdateEntityInput,
     ctx: EntityCallerContext,
+    historyInput?: Pick<
+      EditorialPatchSubmission,
+      "patch" | "message" | "restoreSource"
+    >,
   ): Promise<EntityWithRelations> {
     rejectNonAdminPrivilegedFields(ctx, input);
 
@@ -229,8 +234,9 @@ export class EntityService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: ctx.callerUnitId,
-          patch: buildEntityUpdatePatch(input),
-          message: "entity.metadata.update",
+          patch: historyInput?.patch ?? buildEntityUpdatePatch(input),
+          message: historyInput?.message ?? "entity.metadata.update",
+          restoreSource: historyInput?.restoreSource,
         });
       }
 

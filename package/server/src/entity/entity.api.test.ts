@@ -50,7 +50,10 @@ async function makeApp() {
     .onError(({ error, set }) => {
       if (error instanceof AppError) {
         set.status = error.statusCode;
-        return { message: error.message };
+        return {
+          message: error.message,
+          ...(error.details ? { detail: error.details } : {}),
+        };
       }
       set.status ||= 500;
       return {
@@ -255,6 +258,42 @@ describe("POST /entity body validation", () => {
     );
     expect(res.status).toBeGreaterThanOrEqual(400);
     expect(res.status).toBeLessThan(500);
+    expect((prismaMock.$transaction as any).mock.calls.length).toBe(0);
+  });
+});
+
+describe("PATCH /entity/:unitId editorial governance", () => {
+  test("rejects externally governed paths with API hint", async () => {
+    resetPrisma();
+    currentIdentity = {
+      sub: "user-1",
+      userId: "user-1",
+      permission: { role: "USER" },
+    };
+    dbAdmin = false;
+
+    const app = await makeApp();
+    const res = await app.handle(
+      new Request(
+        "http://localhost/entity/01234567-89ab-7def-9234-0123456789ab",
+        {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            patch: { realmTagApplications: { featured: true } },
+          }),
+        },
+      ),
+    );
+
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as {
+      detail?: { offendingPath?: string; useApi?: string };
+    };
+    expect(body.detail).toMatchObject({
+      offendingPath: "realmTagApplications.featured",
+      useApi: "/realm-tag-applications",
+    });
     expect((prismaMock.$transaction as any).mock.calls.length).toBe(0);
   });
 });

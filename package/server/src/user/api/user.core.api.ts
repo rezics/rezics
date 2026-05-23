@@ -1,7 +1,7 @@
-import type { UpdateUser, UserListQuery } from "@rezics/contract";
+import type { UserListQuery } from "@rezics/contract";
 import {
+  editorialPatchSubmissionSchema,
   hasPermissionToUpdateUser,
-  updateUserSchema,
   userBySlugParamsSchema,
   userListBodySchema,
   userListQuerySchema,
@@ -11,8 +11,10 @@ import { Elysia, t } from "elysia";
 import { mapUserSearchDocToPublicProfile } from "@/meili/mapper";
 import { meiliService } from "@/meili/meili.service";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
+import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
 import { mapUserToDTO } from "../models/mapper";
 import { userService } from "../service/user.service";
+import { userPatchToUpdateUser } from "./user.patch";
 
 function isRecordNotFoundError(error: unknown): boolean {
   return (
@@ -103,19 +105,15 @@ export const coreRoute = new Elysia()
   .put(
     "/me",
     async ({ identity, body }) => {
-      const userReq: UpdateUser = {
-        name: body.name,
-        avatar: body.avatar,
-        bio: body.bio,
-        description: body.description,
-      };
+      assertEditorialPatchAllowed(body.patch);
+      const userReq = userPatchToUpdateUser(body.patch);
 
       const user = await userService.update(identity.userId, userReq);
       return mapUserToDTO(user);
     },
     {
       requireLogin: true,
-      body: updateUserSchema,
+      body: editorialPatchSubmissionSchema,
       detail: {
         summary: "Update current user",
         description: "Update current authenticated user profile",
@@ -158,12 +156,8 @@ export const coreRoute = new Elysia()
         return status(403, "Forbidden: Cannot update other users");
       }
 
-      const userReq: UpdateUser = {
-        name: body.name,
-        avatar: body.avatar,
-        bio: body.bio,
-        description: body.description,
-      };
+      assertEditorialPatchAllowed(body.patch);
+      const userReq = userPatchToUpdateUser(body.patch);
 
       const user = await userService.update(params.userId, userReq);
       return mapUserToDTO(user);
@@ -171,7 +165,7 @@ export const coreRoute = new Elysia()
     {
       requireLogin: true,
       params: userParamsSchema,
-      body: updateUserSchema,
+      body: editorialPatchSubmissionSchema,
       response: {
         200: t.Any(),
         403: t.String(),

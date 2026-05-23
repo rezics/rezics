@@ -3,6 +3,7 @@ import {
   type CreateUnitInput,
   createTranslationSchema,
   createUnitSchema,
+  editorialPatchSubmissionSchema,
   hasPermissionToDeleteUnit,
   hasPermissionToUpdateUnit,
   translationParamsSchema,
@@ -15,12 +16,12 @@ import {
   unitListResponseSchema,
   unitParamsSchema,
   unitResponseSchema,
-  updateTranslationSchema,
   updateUnitSchema,
   validateSlug,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
+import { assertEditorialPatchAllowed } from "./collaborative-metadata";
 import { mapTranslationToDTO, mapUnitToDTO } from "./mapper";
 import { translationService } from "./translation.service";
 import { unitService } from "./unit.service";
@@ -279,18 +280,64 @@ export const unitApi = new Elysia({ prefix: "/unit" })
   .put(
     "/:unitId/translations/:language",
     async ({ params, body, identity, set }) => {
+      assertEditorialPatchAllowed(body.patch);
+      const translations =
+        body.patch.translations &&
+        typeof body.patch.translations === "object" &&
+        !Array.isArray(body.patch.translations)
+          ? (body.patch.translations as Record<string, unknown>)
+          : {};
+      const translationPatch =
+        translations[params.language] &&
+        typeof translations[params.language] === "object" &&
+        !Array.isArray(translations[params.language])
+          ? (translations[params.language] as Record<string, unknown>)
+          : {};
       const translation = await translationService.upsertTranslation(
         params.unitId,
         params.language,
-        body,
+        {
+          title:
+            translationPatch.title === null ||
+            typeof translationPatch.title === "string"
+              ? translationPatch.title
+              : undefined,
+          subtitle:
+            translationPatch.subtitle === null ||
+            typeof translationPatch.subtitle === "string"
+              ? translationPatch.subtitle
+              : undefined,
+          summary:
+            translationPatch.summary === null ||
+            typeof translationPatch.summary === "string"
+              ? translationPatch.summary
+              : undefined,
+          description:
+            translationPatch.description === null ||
+            typeof translationPatch.description === "string"
+              ? translationPatch.description
+              : undefined,
+          extra:
+            translationPatch.extra === null ||
+            (typeof translationPatch.extra === "object" &&
+              !Array.isArray(translationPatch.extra))
+              ? (translationPatch.extra as Record<string, unknown> | null)
+              : undefined,
+          sourceReleaseUnitId:
+            translationPatch.sourceReleaseUnitId === null ||
+            typeof translationPatch.sourceReleaseUnitId === "string"
+              ? translationPatch.sourceReleaseUnitId
+              : undefined,
+        },
         identity,
+        body,
       );
       return mapTranslationToDTO(translation as any);
     },
     {
       requireLogin: true,
       params: translationParamsSchema,
-      body: updateTranslationSchema,
+      body: editorialPatchSubmissionSchema,
       detail: {
         summary: "Upsert translation",
         description:

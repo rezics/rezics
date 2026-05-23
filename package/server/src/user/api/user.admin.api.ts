@@ -1,13 +1,15 @@
 import type { UpdateUser } from "@rezics/contract";
 import {
-  updateUserSchema,
+  editorialPatchSubmissionSchema,
   userListQuerySchema,
   userParamsSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
+import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
 import { mapUserToDTO } from "../models/mapper";
 import { userService } from "../service/user.service";
+import { userPatchToUpdateUser } from "./user.patch";
 
 export const adminRoute = new Elysia()
   .use(authMacro)
@@ -81,12 +83,8 @@ export const adminRoute = new Elysia()
       const isAdmin = await verifyAdminFromDb(identity.userId);
       if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
-      const userReq: UpdateUser = {
-        name: body.name,
-        avatar: body.avatar,
-        bio: body.bio,
-        description: body.description,
-      };
+      assertEditorialPatchAllowed(body.patch);
+      const userReq: UpdateUser = userPatchToUpdateUser(body.patch);
 
       const user = await userService.update(params.userId, userReq);
 
@@ -95,7 +93,7 @@ export const adminRoute = new Elysia()
     {
       requireLogin: true,
       params: userParamsSchema,
-      body: updateUserSchema,
+      body: editorialPatchSubmissionSchema,
       response: {
         200: t.Any(),
         403: t.String(),

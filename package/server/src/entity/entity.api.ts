@@ -1,14 +1,15 @@
 import {
   createEntitySchema,
+  editorialPatchSubmissionSchema,
   type EntityDTO,
   entityBySlugParamsSchema,
   entityListQuerySchema,
   entityListResponseSchema,
   entityParamsSchema,
-  updateEntitySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole, verifyAdminFromDb } from "@/middleware";
+import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
 import { mapEntityToDTO } from "./entity.mapper";
 import { entityService } from "./entity.service";
 
@@ -113,19 +114,64 @@ export const entityApi = new Elysia({ prefix: "/entity" })
   .patch(
     "/:unitId",
     async ({ params, body, identity }): Promise<EntityDTO> => {
+      assertEditorialPatchAllowed(body.patch);
       const isAdmin =
         isAdminRole(identity) || (await verifyAdminFromDb(identity.userId));
-      const row = await entityService.update(params.unitId, body, {
-        callerUnitId: identity.userId,
-        isAdmin,
-        actor: identity,
-      });
+      const entity =
+        body.patch.entity &&
+        typeof body.patch.entity === "object" &&
+        !Array.isArray(body.patch.entity)
+          ? (body.patch.entity as Record<string, unknown>)
+          : {};
+      const translations =
+        body.patch.translations &&
+        typeof body.patch.translations === "object" &&
+        !Array.isArray(body.patch.translations)
+          ? Object.entries(body.patch.translations as Record<string, unknown>)
+              .filter(([, value]) => value && typeof value === "object")
+              .map(([language, value]) => ({
+                language,
+                ...(value as Record<string, unknown>),
+              }))
+          : undefined;
+      const row = await entityService.update(
+        params.unitId,
+        {
+          kind:
+            entity.kind === null || typeof entity.kind === "string"
+              ? entity.kind
+              : undefined,
+          avatar:
+            entity.avatar === null || typeof entity.avatar === "string"
+              ? entity.avatar
+              : undefined,
+          eligibleCreditRoles: Array.isArray(entity.eligibleCreditRoles)
+            ? (entity.eligibleCreditRoles as never)
+            : undefined,
+          eligibleSubjectRoles: Array.isArray(entity.eligibleSubjectRoles)
+            ? (entity.eligibleSubjectRoles as never)
+            : undefined,
+          slug:
+            entity.slug === null || typeof entity.slug === "string"
+              ? entity.slug
+              : undefined,
+          verified:
+            typeof entity.verified === "boolean" ? entity.verified : undefined,
+          translations: translations as never,
+        },
+        {
+          callerUnitId: identity.userId,
+          isAdmin,
+          actor: identity,
+        },
+        body,
+      );
       return mapEntityToDTO(row);
     },
     {
       requireLogin: true,
       params: entityParamsSchema,
-      body: updateEntitySchema,
+      body: editorialPatchSubmissionSchema,
       detail: {
         summary: "Update entity",
         description:

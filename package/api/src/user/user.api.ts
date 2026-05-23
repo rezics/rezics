@@ -4,6 +4,7 @@
  */
 
 import type {
+  EditorialPatchSubmission,
   UpdateUser,
   UpdateUserSettings,
   UserDTO,
@@ -14,6 +15,16 @@ import type {
   UserSettings,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
+
+function toUserPatchSubmission(input: UpdateUser): EditorialPatchSubmission {
+  return {
+    patch: {
+      user: Object.fromEntries(
+        Object.entries(input).filter(([, value]) => value !== undefined),
+      ),
+    },
+  };
+}
 
 export const userApi = {
   me: async (): Promise<UserDTO> => {
@@ -68,7 +79,7 @@ export const userApi = {
   adminUpdate: async (userId: string, input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/user/admin/${userId}`, {
       method: "PUT",
-      body: JSON.stringify(input),
+      body: JSON.stringify(toUserPatchSubmission(input)),
     });
   },
 
@@ -83,14 +94,14 @@ export const userApi = {
   updateMe: async (input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/user/me`, {
       method: "PUT",
-      body: JSON.stringify(input),
+      body: JSON.stringify(toUserPatchSubmission(input)),
     });
   },
 
   update: async (userId: string, input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/user/${userId}`, {
       method: "PUT",
-      body: JSON.stringify(input),
+      body: JSON.stringify(toUserPatchSubmission(input)),
     });
   },
 

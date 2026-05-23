@@ -1,8 +1,14 @@
-import { historyQueries } from "@rezics/api";
-import type {
-  HistoryActorResolution,
-  StructureEventDTO,
-  UnitRevisionDTO,
+import {
+  historyQueries,
+  unitAuthorityQueries,
+  useRemoveUnitFieldLockMutation,
+  useUpsertUnitFieldLockMutation,
+} from "@rezics/api";
+import {
+  EDITORIAL_LOCK_PATH_OPTIONS,
+  type HistoryActorResolution,
+  type StructureEventDTO,
+  type UnitRevisionDTO,
 } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,7 +23,9 @@ import {
   ChevronDown,
   History,
   LockKeyhole,
+  Plus,
   RotateCcw,
+  Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
@@ -114,7 +122,7 @@ export function BookHistoryPage() {
       {tab === "structure" ? (
         <StructureTimeline events={structureEvents} actors={actors} />
       ) : null}
-      {tab === "authority" ? <AuthorityPanel /> : null}
+      {tab === "authority" ? <AuthorityPanel unitId={bookId} /> : null}
 
       {restoreSequence !== null ? (
         <section className="grid gap-3 rounded-md bg-surface-subtle p-4">
@@ -326,15 +334,133 @@ export function StructureTimeline({
   );
 }
 
-export function AuthorityPanel() {
+const CUSTOM_LOCK_PATH = "__custom__";
+
+export function AuthorityPanel({ unitId }: { unitId?: string }) {
+  const [selectedPath, setSelectedPath] = useState<string>(
+    EDITORIAL_LOCK_PATH_OPTIONS[1],
+  );
+  const [customPath, setCustomPath] = useState("");
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const locksQuery = useQuery(unitAuthorityQueries.fieldLocks(unitId ?? ""));
+  const upsertLock = useUpsertUnitFieldLockMutation({
+    onSuccess: () => {
+      setError(null);
+      setReason("");
+    },
+    onError: (err) => setError(err.message),
+  });
+  const removeLock = useRemoveUnitFieldLockMutation({
+    onError: (err) => setError(err.message),
+  });
+  const effectivePath =
+    selectedPath === CUSTOM_LOCK_PATH ? customPath.trim() : selectedPath;
+
+  const createLock = () => {
+    if (!unitId || !effectivePath) return;
+    upsertLock.mutate({
+      unitId,
+      path: effectivePath,
+      reason: reason.trim() || null,
+    });
+  };
+
   return (
-    <section className="grid gap-3 rounded-md bg-surface-subtle p-4 text-sm leading-ui text-text-secondary">
+    <section className="grid gap-4 rounded-md bg-surface-subtle p-4 text-sm leading-ui text-text-secondary">
       <div className="flex items-center gap-2 text-text-primary">
         <LockKeyhole className="h-4 w-4" aria-hidden="true" />
         <h3 className="font-medium">{m.history_authority_title()}</h3>
       </div>
       <p>{m.history_authority_visibility()}</p>
       <p>{m.history_authority_references()}</p>
+      {unitId ? (
+        <div className="grid gap-3 border-t border-border-whisper pt-4">
+          <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+            <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
+              Lock path
+              <select
+                className="rounded-md bg-surface-base px-3 py-2 text-sm leading-ui text-text-primary"
+                value={selectedPath}
+                onChange={(event) => setSelectedPath(event.currentTarget.value)}
+              >
+                {EDITORIAL_LOCK_PATH_OPTIONS.map((path) => (
+                  <option key={path} value={path}>
+                    {editorialPathLabel(path)} · {path}
+                  </option>
+                ))}
+                <option value={CUSTOM_LOCK_PATH}>Custom path</option>
+              </select>
+            </label>
+            <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
+              Reason
+              <input
+                className="rounded-md bg-surface-base px-3 py-2 text-sm leading-ui text-text-primary"
+                value={reason}
+                onChange={(event) => setReason(event.currentTarget.value)}
+              />
+            </label>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center gap-2 self-end rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand disabled:opacity-50"
+              disabled={!effectivePath || upsertLock.isPending}
+              onClick={createLock}
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Lock
+            </button>
+          </div>
+          {selectedPath === CUSTOM_LOCK_PATH ? (
+            <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
+              Custom path
+              <input
+                className="rounded-md bg-surface-base px-3 py-2 font-mono text-sm leading-ui text-text-primary"
+                value={customPath}
+                onChange={(event) => setCustomPath(event.currentTarget.value)}
+                placeholder="translations.en.title"
+              />
+            </label>
+          ) : null}
+          {error ? (
+            <p className="text-sm leading-ui text-error-text">{error}</p>
+          ) : null}
+          {locksQuery.isLoading ? (
+            <p>{m.common_loading()}</p>
+          ) : locksQuery.data?.locks.length ? (
+            <ul className="grid gap-2">
+              {locksQuery.data.locks.map((lock) => (
+                <li
+                  key={lock.path}
+                  className="grid gap-2 rounded-md bg-surface-base p-3 md:grid-cols-[minmax(0,1fr)_auto]"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-text-primary">
+                      {editorialPathLabel(lock.path)}
+                    </p>
+                    <p className="truncate font-mono text-xs leading-dense text-text-tertiary">
+                      {lock.path}
+                    </p>
+                    {lock.reason ? <p className="mt-1">{lock.reason}</p> : null}
+                  </div>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-subtle hover:text-text-primary disabled:opacity-50"
+                    disabled={removeLock.isPending}
+                    onClick={() =>
+                      removeLock.mutate({ unitId, path: lock.path })
+                    }
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No locked paths.</p>
+          )}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -582,7 +708,7 @@ export function BookRevisionComparePage() {
               href={`#${fieldAnchor(change.path)}`}
               className="rounded-md bg-surface-subtle px-2 py-1 text-xs leading-dense text-text-secondary hover:text-text-primary"
             >
-              {change.path}
+              {editorialPathLabel(change.path)}
             </a>
           ))
         )}
@@ -595,7 +721,7 @@ export function BookRevisionComparePage() {
             className="grid gap-3 border-t border-border-whisper pt-4"
           >
             <h3 className="text-sm font-medium leading-ui text-text-primary">
-              {change.path}
+              {editorialPathLabel(change.path)}
             </h3>
             <CompareChange
               change={change}
@@ -923,12 +1049,13 @@ function RevisionSections({
 function FieldChips({ keys }: { keys: readonly string[] }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {keys.map((fieldKey) => (
+      {keys.map((path) => (
         <span
-          key={fieldKey}
+          key={path}
+          title={path}
           className="rounded-full bg-surface-subtle px-2 py-0.5 text-xs leading-dense text-text-secondary"
         >
-          {fieldKey}
+          {editorialPathLabel(path)}
         </span>
       ))}
     </div>
@@ -1103,6 +1230,39 @@ function slotLabel(value: string) {
   return value
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (char) => char.toUpperCase());
+}
+
+function editorialPathLabel(path: string) {
+  if (path === "*") return "Whole Unit";
+
+  const translationMatch = /^translations\.([^.]+)\.(.+)$/.exec(path);
+  if (translationMatch) {
+    const [, language, field] = translationMatch;
+    const fieldLabel =
+      field === "title"
+        ? m.book_fields_title()
+        : field === "description"
+          ? m.book_description()
+          : slotLabel(field);
+    return `${language} ${fieldLabel}`;
+  }
+
+  const labels: Record<string, string> = {
+    "extension.coverUrl": m.book_fields_cover_url(),
+    "extension.isbn13": m.book_fields_isbn(),
+    "post.body": "Post body",
+    "credits.authors": "Authors",
+    "entity.avatar": m.entity_avatar_url(),
+    "entity.kind": "Entity kind",
+    "entity.verified": "Verified",
+    "unit.slug": "Slug",
+    "user.avatar": "Avatar",
+    "user.bio": m.book_author_info_bio_label(),
+    "user.description": m.common_description(),
+    "user.name": m.common_name(),
+  };
+
+  return labels[path] ?? path;
 }
 
 function fieldAnchor(value: string) {

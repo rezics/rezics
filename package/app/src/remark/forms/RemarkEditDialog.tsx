@@ -45,8 +45,12 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
     updateMutation.mutate({
       unitId: remark.unitId,
       input: {
-        body: text.trim(),
-        extra: nextExtra,
+        patch: {
+          post: {
+            body: text.trim(),
+            extra: nextExtra,
+          },
+        },
       },
     });
   };

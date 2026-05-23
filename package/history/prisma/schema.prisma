@@ -16,6 +16,7 @@ model UnitRevision {
   contentHash String   @db.VarChar(64)
   actorUserId String   @db.Uuid
   message     String?
+  restoreSource Json?
   createdAt   DateTime
   ingestedAt  DateTime @default(now())
 

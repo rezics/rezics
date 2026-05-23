@@ -40,6 +40,18 @@ export const EXTERNALLY_GOVERNED_PATHS = [
 
 export type ExternallyGovernedPath = (typeof EXTERNALLY_GOVERNED_PATHS)[number];
 
+export const EDITORIAL_LOCK_PATH_OPTIONS = [
+  UNIT_FIELD_LOCK_ALL,
+  "translations.en.title",
+  "translations.en.description",
+  "translations.zh-Hant.title",
+  "translations.zh-Hant.description",
+  "extension.isbn13",
+  "extension.coverUrl",
+  "post.body",
+  "credits.authors",
+] as const;
+
 export function pathsIntersect(left: string, right: string): boolean {
   return (
     left === right ||

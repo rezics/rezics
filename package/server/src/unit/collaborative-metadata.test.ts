@@ -4,7 +4,11 @@ import {
 } from "@rezics/contract";
 import { describe, expect, test } from "bun:test";
 import { AppError } from "@/utils/errors";
-import { assertCanEditCollaborativeMetadata } from "./collaborative-metadata";
+import {
+  applySparsePatch,
+  assertCanEditCollaborativeMetadata,
+  assertEditorialPatchAllowed,
+} from "./collaborative-metadata";
 
 const actor = (userId: string): RezicsSessionClaims =>
   ({
@@ -130,5 +134,42 @@ describe("assertCanEditCollaborativeMetadata", () => {
         noAdminLookup,
       ),
     ).resolves.toBeUndefined();
+  });
+});
+
+describe("editorial patch helpers", () => {
+  test("applies sparse object merge, array replacement, null, and unset", () => {
+    const result = applySparsePatch(
+      {
+        translations: {
+          en: { title: "Old", summary: "Keep", tags: ["a"] },
+        },
+        extension: { isbn13: "old", publicationDate: "2020" },
+      },
+      {
+        translations: {
+          en: { title: "New", tags: ["b"], description: null },
+        },
+        $unset: ["extension.publicationDate"],
+      },
+    );
+
+    expect(result).toEqual({
+      translations: {
+        en: {
+          title: "New",
+          summary: "Keep",
+          tags: ["b"],
+          description: null,
+        },
+      },
+      extension: { isbn13: "old" },
+    });
+  });
+
+  test("rejects externally governed editorial patches with API hint", () => {
+    expect(() =>
+      assertEditorialPatchAllowed({ tags: { genre: ["xianxia"] } }),
+    ).toThrow(AppError);
   });
 });

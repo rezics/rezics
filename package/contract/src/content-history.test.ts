@@ -134,6 +134,7 @@ describe("content history contracts", () => {
       kind: "revision",
       unitId: "unit-1",
       sequence: 12,
+      paths: ["translations.en.title"],
     };
 
     expect(Value.Check(historyRestoreSourceSchema, restoreSource)).toBe(true);

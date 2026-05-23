@@ -48,7 +48,7 @@ export function useReasonPostMutations(): UseReasonPostMutationsResult {
       // MOCK: same as createReasonPost — visibility goes via extra for now.
       return updatePost.mutateAsync({
         unitId: postUnitId,
-        input: { body, extra: { visibility } },
+        input: { patch: { post: { body, extra: { visibility } } } },
       });
     },
     [updatePost],

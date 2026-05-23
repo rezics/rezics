@@ -12,7 +12,7 @@ import { useLinkCreditAttributionMutation } from "@rezics/api/credit-attribution
 import type {
   CreateBookInput,
   CreationMode,
-  UpdateBookInput,
+  EditorialPatchSubmission,
 } from "@rezics/contract";
 import {
   CreationMode as CreationModeValue,
@@ -85,6 +85,23 @@ function nullableNumber(value: unknown): number | null {
 
 function nullableString(value: unknown): string | null {
   return typeof value === "string" ? value : null;
+}
+
+function sameJson(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
+}
+
+function collectLeafPaths(value: unknown, prefix = ""): string[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return prefix ? [prefix] : [];
+  }
+  return Object.entries(value as Record<string, unknown>).flatMap(
+    ([key, nested]) => {
+      const nextPrefix = prefix ? `${prefix}.${key}` : key;
+      const nestedPaths = collectLeafPaths(nested, nextPrefix);
+      return nestedPaths.length > 0 ? nestedPaths : [nextPrefix];
+    },
+  );
 }
 
 const UpdateBookDialog: React.FC<{
@@ -180,9 +197,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     const payload = restoreQuery.data?.revision.content?.payload;
     if (!payload) return;
 
-    const slots = asRecord(payload);
-    const extension = asRecord(slots.extension);
+    const patch = asRecord(payload);
+    const extension = asRecord(patch.extension);
     const bookExtension = asRecord(extension.book ?? extension);
+    const unitPatch = asRecord(patch.unit);
     setMetadataState({
       ...data,
       isbn13: nullableString(bookExtension.isbn13) ?? data.isbn13,
@@ -195,14 +213,21 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           ? bookExtension.isLicensed
           : data.isLicensed,
       licenseSlug:
-        nullableString(bookExtension.licenseSlug) ?? data.licenseSlug,
-      rating: nullableString(bookExtension.rating) ?? data.rating,
+        nullableString(unitPatch.license ?? bookExtension.licenseSlug) ??
+        data.licenseSlug,
+      rating:
+        nullableString(unitPatch.rating ?? bookExtension.rating) ?? data.rating,
       extra: asRecordOrNull(bookExtension.extra) ?? data.extra,
     });
 
-    const translations = Array.isArray(slots.translations)
-      ? slots.translations
-      : [];
+    const translations = Array.isArray(patch.translations)
+      ? patch.translations
+      : Object.entries(asRecord(patch.translations)).map(
+          ([language, value]) => ({
+            language,
+            ...asRecord(value),
+          }),
+        );
     for (const item of translations) {
       const translation = asRecord(item);
       const language = String(translation.language ?? "");
@@ -325,36 +350,78 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       return;
     }
 
-    const updateBookData: UpdateBookInput = {
-      isbn13: metadataState?.isbn13,
-      coverUrl: metadataState?.coverUrl,
-      pageCount: metadataState?.pageCount,
-      textLength: metadataState?.textLength,
-      formatKey: metadataState?.formatKey,
-      rating: metadataState?.rating,
-      isLicensed: metadataState?.isLicensed,
-      licenseSlug: metadataState?.licenseSlug,
-      extra: metadataState?.extra,
+    const sourcePaths = restoreQuery.data?.revision.changedFieldKeys ?? [];
+    const withRestoreSource = (
+      input: EditorialPatchSubmission,
+    ): EditorialPatchSubmission => {
+      if (!Number.isFinite(restoreSequence)) return input;
+      const submittedPaths = collectLeafPaths(input.patch);
+      const restoredPaths = sourcePaths.filter((path) =>
+        submittedPaths.includes(path),
+      );
+      if (restoredPaths.length === 0) return input;
+      return {
+        ...input,
+        restoreSource: {
+          kind: "revision",
+          unitId: bookId,
+          sequence: restoreSequence,
+          paths: restoredPaths,
+        },
+      };
+    };
+
+    const metadataPatch: Record<string, unknown> = {};
+    const extensionPatch: Record<string, unknown> = {};
+    const unitPatch: Record<string, unknown> = {};
+    if (metadataState && data) {
+      if (metadataState.isbn13 !== data.isbn13)
+        extensionPatch.isbn13 = metadataState.isbn13 ?? null;
+      if (metadataState.coverUrl !== data.coverUrl)
+        extensionPatch.coverUrl = metadataState.coverUrl ?? null;
+      if (metadataState.pageCount !== data.pageCount)
+        extensionPatch.pageCount = metadataState.pageCount ?? null;
+      if (metadataState.textLength !== data.textLength)
+        extensionPatch.textLength = metadataState.textLength;
+      if (metadataState.formatKey !== data.formatKey)
+        extensionPatch.formatKey = metadataState.formatKey ?? null;
+      if (metadataState.isLicensed !== data.isLicensed)
+        extensionPatch.isLicensed = metadataState.isLicensed;
+      if (!sameJson(metadataState.extra, data.extra))
+        extensionPatch.extra = metadataState.extra ?? null;
+      if (metadataState.rating !== data.rating)
+        unitPatch.rating = metadataState.rating;
+      if (metadataState.licenseSlug !== data.licenseSlug)
+        unitPatch.license = metadataState.licenseSlug ?? null;
+    }
+    if (Object.keys(extensionPatch).length > 0)
+      metadataPatch.extension = extensionPatch;
+    if (Object.keys(unitPatch).length > 0) metadataPatch.unit = unitPatch;
+
+    const translationPatch = {
+      translations: {
+        [editor.selectedLanguage]: {
+          title: draft.title || null,
+          subtitle: draft.subtitle || null,
+          summary: draft.summary || null,
+          description: draft.description || null,
+        },
+      },
     };
 
     const saveOperations: Promise<unknown>[] = [
       upsertTranslationMutation.mutateAsync({
         unitId: bookId,
         language: editor.selectedLanguage,
-        input: {
-          title: draft.title || null,
-          subtitle: draft.subtitle || null,
-          summary: draft.summary || null,
-          description: draft.description || null,
-        },
+        input: withRestoreSource({ patch: translationPatch }),
       }),
     ];
 
-    if (metadataState) {
+    if (Object.keys(metadataPatch).length > 0) {
       saveOperations.unshift(
         updateBookMutation.mutateAsync({
           unitId: bookId,
-          input: updateBookData,
+          input: withRestoreSource({ patch: metadataPatch }),
         }),
       );
     }

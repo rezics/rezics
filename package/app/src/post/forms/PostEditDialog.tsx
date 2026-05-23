@@ -66,7 +66,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
     }
     updateMutation.mutate({
       unitId: post.unitId,
-      input: { body: text.trim() },
+      input: { patch: { post: { body: text.trim() } } },
     });
   };
 

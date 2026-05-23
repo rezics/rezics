@@ -80,11 +80,12 @@ The history system SHALL compute `UnitRevision.contentHash` from the canonical s
 - **THEN** both `UnitRevision` rows SHALL reference the same `RevisionContent.hash`
 - **AND** only one `RevisionContent` row SHALL be stored
 
-#### Scenario: Restore reuses patch hash
+#### Scenario: Restore metadata does not change patch hash
 
-- **WHEN** a restore re-submits the patch from a previous revision verbatim
+- **WHEN** a restore edit submits a PATCH whose content is byte-identical to a previous PATCH
 - **THEN** the resulting new revision SHALL receive a new sequence
 - **AND** the new revision SHALL reuse the previous revision's content hash
+- **AND** restore metadata SHALL be stored on the revision record without changing the content hash
 
 ## REMOVED Requirements
 

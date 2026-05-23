@@ -1,6 +1,7 @@
 import {
   HistoryOutboxPayloadKind,
   isExternallyGoverned,
+  type HistoryRestoreSource,
   type RezicsSessionClaims,
 } from "@rezics/contract";
 import { UnitAuthorityError, assertCanEditUnitFields } from "./authority";
@@ -156,6 +157,58 @@ export function collectPatchLeafPaths(value: unknown, prefix = ""): string[] {
   return uniquePatchPaths(paths);
 }
 
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function cloneJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(cloneJsonValue);
+  if (!isPlainRecord(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, nested]) => [key, cloneJsonValue(nested)]),
+  );
+}
+
+function unsetPath(target: Record<string, unknown>, path: string): void {
+  const segments = path.split(".").filter(Boolean);
+  if (segments.length === 0) return;
+
+  let cursor: Record<string, unknown> = target;
+  for (const segment of segments.slice(0, -1)) {
+    const next = cursor[segment];
+    if (!isPlainRecord(next)) return;
+    cursor = next;
+  }
+
+  delete cursor[segments[segments.length - 1] as string];
+}
+
+export function applySparsePatch<T = unknown>(current: T, patch: unknown): T {
+  if (!isPlainRecord(patch)) {
+    return cloneJsonValue(patch) as T;
+  }
+
+  const base = isPlainRecord(current)
+    ? (cloneJsonValue(current) as Record<string, unknown>)
+    : {};
+
+  for (const [key, value] of Object.entries(patch)) {
+    if (key === "$unset") continue;
+    base[key] = isPlainRecord(value)
+      ? applySparsePatch(base[key], value)
+      : cloneJsonValue(value);
+  }
+
+  const unset = patch.$unset;
+  if (Array.isArray(unset)) {
+    for (const path of unset) {
+      if (typeof path === "string") unsetPath(base, path);
+    }
+  }
+
+  return base as T;
+}
+
 export function assertEditorialPatchAllowed(patch: Record<string, unknown>) {
   const offendingPath = collectPatchLeafPaths(patch).find((path) =>
     isExternallyGoverned(path),
@@ -180,6 +233,7 @@ export async function writeEditorialMetadataHistory(
     actorUserId: string;
     patch: Record<string, unknown>;
     message: string;
+    restoreSource?: HistoryRestoreSource;
   },
 ): Promise<void> {
   assertEditorialPatchAllowed(input.patch);
@@ -196,6 +250,7 @@ export async function writeEditorialMetadataHistory(
         actorUserId: input.actorUserId,
         patch: input.patch,
         message: input.message,
+        restoreSource: input.restoreSource,
       }),
     }),
   });

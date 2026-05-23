@@ -364,7 +364,7 @@ describe("EntityService.update", () => {
 
   test("non-admin: avatar update succeeds and records avatar field key", async () => {
     const { txClient } = freshMocks();
-    const { entityService, mapEntityUpdateFieldKeys } = await import(
+    const { entityService, mapEntityUpdatePatchPaths } = await import(
       "./entity.service"
     );
 
@@ -378,14 +378,14 @@ describe("EntityService.update", () => {
 
     const updateArgs = (txClient.entity.update as any).mock.calls[0]?.[0];
     expect(updateArgs.data.avatar).toBe("https://cdn.example/new.png");
-    expect(mapEntityUpdateFieldKeys({ avatar: null })).toContain(
+    expect(mapEntityUpdatePatchPaths({ avatar: null })).toContain(
       "entity.avatar",
     );
   });
 
   test("non-admin: eligibility update succeeds and records eligibility field keys", async () => {
     const { txClient } = freshMocks();
-    const { entityService, mapEntityUpdateFieldKeys } = await import(
+    const { entityService, mapEntityUpdatePatchPaths } = await import(
       "./entity.service"
     );
 
@@ -404,10 +404,10 @@ describe("EntityService.update", () => {
     expect(updateArgs.data.eligibleCreditRoles).toEqual(["translator"]);
     expect(updateArgs.data.eligibleSubjectRoles).toEqual(["about", "appears"]);
     expect(
-      mapEntityUpdateFieldKeys({ eligibleCreditRoles: ["author"] }),
+      mapEntityUpdatePatchPaths({ eligibleCreditRoles: ["author"] }),
     ).toContain("entity.eligibleCreditRoles");
     expect(
-      mapEntityUpdateFieldKeys({ eligibleSubjectRoles: ["about"] }),
+      mapEntityUpdatePatchPaths({ eligibleSubjectRoles: ["about"] }),
     ).toContain("entity.eligibleSubjectRoles");
   });
 });

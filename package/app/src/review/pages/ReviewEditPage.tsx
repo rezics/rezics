@@ -4,7 +4,6 @@ import {
   useDeletePostMutation,
   useUpdatePostMutation,
 } from "@rezics/api/post/post";
-import type { UpdatePostInput } from "@rezics/contract";
 import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -71,12 +70,16 @@ export function ReviewEditPageContainer() {
       }
     }
 
-    const input: UpdatePostInput = {
-      body: reviewData.body || "",
-      extra: {
-        ...reviewData.extra,
-        title: reviewData._editTitle || undefined,
-        rating: reviewData._editRating || 0,
+    const input = {
+      patch: {
+        post: {
+          body: reviewData.body || "",
+          extra: {
+            ...reviewData.extra,
+            title: reviewData._editTitle || undefined,
+            rating: reviewData._editRating || 0,
+          },
+        },
       },
     };
 

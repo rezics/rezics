@@ -5,6 +5,7 @@
 
 import type {
   CreateUnitInput,
+  EditorialPatchSubmission,
   UnitListResponse,
   UnitResponse,
   UnitTranslationDTO,
@@ -14,6 +15,22 @@ import type {
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { UnitFilters } from "./unit.types";
+
+function toTranslationPatchSubmission(
+  language: string,
+  input: UpdateTranslationInput | EditorialPatchSubmission,
+): EditorialPatchSubmission {
+  if ("patch" in input) return input;
+  return {
+    patch: {
+      translations: {
+        [language]: Object.fromEntries(
+          Object.entries(input).filter(([, value]) => value !== undefined),
+        ),
+      },
+    },
+  };
+}
 
 /**
  * Unit API methods
@@ -117,13 +134,13 @@ export const unitApi = {
   upsertTranslation: async (
     unitId: string,
     language: string,
-    input: UpdateTranslationInput,
+    input: UpdateTranslationInput | EditorialPatchSubmission,
   ): Promise<UnitTranslationDTO> => {
     return apiFetch<UnitTranslationDTO>(
       `/unit/${unitId}/translations/${language}`,
       {
         method: "PUT",
-        body: JSON.stringify(input),
+        body: JSON.stringify(toTranslationPatchSubmission(language, input)),
       },
     );
   },

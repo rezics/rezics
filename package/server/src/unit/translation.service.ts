@@ -1,5 +1,6 @@
 import type {
   CreateTranslationInput,
+  EditorialPatchSubmission,
   RezicsSessionClaims,
   UpdateTranslationInput,
 } from "@rezics/contract";
@@ -11,6 +12,7 @@ import { patchPostsTargetToMeili } from "@/meili/post/sync";
 import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
 import {
   assertCanEditCollaborativeMetadata,
+  applySparsePatch,
   mapTranslationPatchPaths,
   translationPatch,
   uniquePatchPaths,
@@ -51,26 +53,33 @@ export class TranslationService {
     language: string,
     data: CreateTranslationInput | UpdateTranslationInput,
     actor?: RezicsSessionClaims,
+    historyInput?: Pick<
+      EditorialPatchSubmission,
+      "patch" | "message" | "restoreSource"
+    >,
   ): Promise<UnitTranslation> {
-    const payload: Prisma.UnitTranslationCreateInput = {
-      unit: { connect: { id: unitId } },
-      language,
-      title: data.title ?? undefined,
-      subtitle: data.subtitle ?? undefined,
-      summary: data.summary ?? undefined,
-      description: data.description ?? undefined,
-      extra: (data.extra ?? null) as Prisma.InputJsonValue,
-      sourceReleaseUnitId:
-        "sourceReleaseUnitId" in data
-          ? (data.sourceReleaseUnitId ?? undefined)
-          : undefined,
-    };
-
     let didMutate = false;
     const result = await prisma.$transaction(async (tx) => {
       const previous = await tx.unitTranslation.findUnique({
         where: { unitId_language: { unitId, language } },
       });
+      const nextExtra =
+        hasOwn(data, "extra") && data.extra !== undefined
+          ? applySparsePatch(previous?.extra ?? {}, data.extra)
+          : previous?.extra;
+      const payload: Prisma.UnitTranslationCreateInput = {
+        unit: { connect: { id: unitId } },
+        language,
+        title: data.title ?? undefined,
+        subtitle: data.subtitle ?? undefined,
+        summary: data.summary ?? undefined,
+        description: data.description ?? undefined,
+        extra: (nextExtra ?? null) as Prisma.InputJsonValue,
+        sourceReleaseUnitId:
+          "sourceReleaseUnitId" in data
+            ? (data.sourceReleaseUnitId ?? undefined)
+            : undefined,
+      };
       const patchPaths = mapActualTranslationPatchPaths(
         data,
         previous,
@@ -96,7 +105,10 @@ export class TranslationService {
           subtitle: data.subtitle,
           summary: data.summary,
           description: data.description,
-          extra: (data.extra ?? undefined) as Prisma.InputJsonValue | undefined,
+          extra:
+            hasOwn(data, "extra") && data.extra !== undefined
+              ? (nextExtra as Prisma.InputJsonValue)
+              : undefined,
           sourceReleaseUnitId:
             "sourceReleaseUnitId" in data
               ? data.sourceReleaseUnitId
@@ -108,8 +120,9 @@ export class TranslationService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
-          patch: translationPatch(language, data),
-          message: "unit.translation.upsert",
+          patch: historyInput?.patch ?? translationPatch(language, data),
+          message: historyInput?.message ?? "unit.translation.upsert",
+          restoreSource: historyInput?.restoreSource,
         });
       }
       return row;

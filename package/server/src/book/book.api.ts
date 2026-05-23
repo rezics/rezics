@@ -10,11 +10,12 @@ import {
   bookListQuerySchema,
   bookParamsSchema,
   createBookSchema,
+  editorialPatchSubmissionSchema,
   hasPermissionToUpdateBook,
-  updateBookSchema,
 } from "@rezics/contract";
 import { Elysia, status, t } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
+import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
 import { mapScoreAggregateToDTO } from "@/score/score.mapper";
 import { scoreService } from "@/score/score.service";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
@@ -151,25 +152,90 @@ export const bookApi = new Elysia({ prefix: "/book" })
       },
     },
   )
-  .put(
+  .patch(
     "/:unitId",
     async ({ params, body, identity, set }): Promise<BookResponse> => {
+      assertEditorialPatchAllowed(body.patch);
       const targetBookUnit = await unitService.getByUnitId(params.unitId);
       if (!targetBookUnit) {
         set.status = 404;
         throw new Error(`Book not found: ${params.unitId}`);
       }
 
-      const book = await bookService.update(params.unitId, body, identity);
+      const extension =
+        body.patch.extension &&
+        typeof body.patch.extension === "object" &&
+        !Array.isArray(body.patch.extension)
+          ? (body.patch.extension as Record<string, unknown>)
+          : {};
+      const unit =
+        body.patch.unit &&
+        typeof body.patch.unit === "object" &&
+        !Array.isArray(body.patch.unit)
+          ? (body.patch.unit as Record<string, unknown>)
+          : {};
+      const book = await bookService.update(
+        params.unitId,
+        {
+          isbn13:
+            extension.isbn13 === null || typeof extension.isbn13 === "string"
+              ? extension.isbn13
+              : undefined,
+          publicationDate:
+            extension.publicationDate === null ||
+            typeof extension.publicationDate === "string" ||
+            extension.publicationDate instanceof Date
+              ? extension.publicationDate
+              : undefined,
+          pageCount:
+            extension.pageCount === null ||
+            typeof extension.pageCount === "number"
+              ? extension.pageCount
+              : undefined,
+          textLength:
+            typeof extension.textLength === "number"
+              ? extension.textLength
+              : undefined,
+          formatKey:
+            extension.formatKey === null ||
+            typeof extension.formatKey === "string"
+              ? extension.formatKey
+              : undefined,
+          isLicensed:
+            typeof extension.isLicensed === "boolean"
+              ? extension.isLicensed
+              : undefined,
+          coverUrl:
+            extension.coverUrl === null ||
+            typeof extension.coverUrl === "string"
+              ? extension.coverUrl
+              : undefined,
+          extra:
+            extension.extra === null ||
+            (typeof extension.extra === "object" &&
+              !Array.isArray(extension.extra))
+              ? (extension.extra as Record<string, unknown> | null)
+              : undefined,
+          rating: typeof unit.rating === "string" ? unit.rating : undefined,
+          visibility:
+            typeof unit.visibility === "string" ? unit.visibility : undefined,
+          licenseSlug:
+            unit.license === null || typeof unit.license === "string"
+              ? unit.license
+              : undefined,
+        },
+        identity,
+        body,
+      );
       return mapBookToDTO(book);
     },
     {
       requireLogin: true,
       params: bookParamsSchema,
-      body: updateBookSchema,
+      body: editorialPatchSubmissionSchema,
       detail: {
         summary: "Update book",
-        description: "Update an existing book by unit ID",
+        description: "Update an existing book by unit ID with editorial PATCH",
         tags: ["Books"],
       },
     },

@@ -109,6 +109,35 @@ describe("history outbox helpers", () => {
     expect(tx.historyOutbox.create).toHaveBeenCalledTimes(1);
   });
 
+  test("skips editorial outbox rows that contain externally governed paths", async () => {
+    const tx = {
+      $queryRaw: mock(async () => [{ sequence: 1n }]),
+      historyOutbox: {
+        create: mock(async () => ({})),
+      },
+    };
+
+    const result = await writeHistoryOutbox(tx as never, {
+      unitId: "unit-1",
+      actorUserId: "user-1",
+      payload: {
+        kind: HistoryOutboxPayloadKind.EDITORIAL_REVISION,
+        revision: buildEditorialRevisionPayload({
+          unitId: "unit-1",
+          sequence: 1,
+          actorUserId: "user-1",
+          patch: {
+            tags: { featured: true },
+            translations: { en: { title: "Ignored" } },
+          },
+        }),
+      },
+    });
+
+    expect(result.sequence).toBe(1n);
+    expect(tx.historyOutbox.create).not.toHaveBeenCalled();
+  });
+
   test("failed transaction callback does not write outbox after rollback point", async () => {
     const tx = {
       $queryRaw: mock(async () => [{ sequence: 1n }]),

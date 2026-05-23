@@ -6,7 +6,7 @@ import type {
   BookResponse,
   BookContentStructureItem,
   CreateBookInput,
-  UpdateBookInput,
+  EditorialPatchSubmission,
 } from "@rezics/contract";
 import {
   type UseMutationOptions,
@@ -50,7 +50,7 @@ export function useUpdateBookMutation(
     UseMutationOptions<
       BookResponse,
       Error,
-      { unitId: string; input: UpdateBookInput }
+      { unitId: string; input: EditorialPatchSubmission }
     >,
     "mutationFn"
   >,

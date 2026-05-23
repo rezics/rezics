@@ -66,7 +66,7 @@ describe("content authority and history API clients", () => {
       creationMode: "wiki",
     });
     expect(JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string)).toEqual({
-      body: "edited",
+      patch: { post: { body: "edited" } },
     });
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
       "http://api.example/post/list?limit=5&targetUnitId=book-1&kind=WIKI",

@@ -136,7 +136,7 @@ function stripExternallyGovernedPatch(
 ): Record<string, unknown> | null {
   const leafPaths = collectLeafPaths(patch);
   if (leafPaths.length === 0) return patch;
-  if (leafPaths.every((path) => isExternallyGoverned(path))) {
+  if (leafPaths.some((path) => isExternallyGoverned(path))) {
     return null;
   }
   return patch;
@@ -168,8 +168,7 @@ export async function writeSequencedHistoryOutbox(
   const sequence = await allocateUnitHistorySequence(tx, input.unitId);
   const payload = input.buildPayload(sequence);
   if ("revision" in payload) {
-    const patch = stripExternallyGovernedPatch(payload.revision.patch);
-    if (!patch) {
+    if (!stripExternallyGovernedPatch(payload.revision.patch)) {
       return { sequence, payloadHash: hashCanonicalPayload({}) };
     }
   }

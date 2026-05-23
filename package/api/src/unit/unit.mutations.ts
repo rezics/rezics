@@ -4,6 +4,7 @@
 
 import type {
   CreateUnitInput,
+  EditorialPatchSubmission,
   UnitResponse,
   UnitTranslationDTO,
   UpdateTranslationInput,
@@ -109,7 +110,11 @@ export function useUpsertTranslationMutation(
     UseMutationOptions<
       UnitTranslationDTO,
       Error,
-      { unitId: string; language: string; input: UpdateTranslationInput }
+      {
+        unitId: string;
+        language: string;
+        input: UpdateTranslationInput | EditorialPatchSubmission;
+      }
     >,
     "mutationFn"
   >,

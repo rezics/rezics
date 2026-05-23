@@ -346,10 +346,10 @@ export class UserService {
     const { name, avatar, bio, description } = req;
 
     const updateData: Prisma.UserUpdateInput = {
-      name: name || undefined,
-      avatar: avatar || undefined,
-      bio: bio || undefined,
-      description: description || undefined,
+      name: name ?? undefined,
+      avatar: avatar !== undefined ? avatar : undefined,
+      bio: bio !== undefined ? bio : undefined,
+      description: description !== undefined ? description : undefined,
     };
 
     const user = (await attachSlug(
@@ -361,15 +361,16 @@ export class UserService {
     )) as UserWithRelations;
 
     const userPatchFields: Record<string, any> = {};
-    if (name) userPatchFields.name = user.name;
-    if (avatar) userPatchFields.avatar = user.avatar;
-    if (bio) userPatchFields.bio = user.bio;
-    if (description) userPatchFields.description = user.description;
+    if (name !== undefined) userPatchFields.name = user.name;
+    if (avatar !== undefined) userPatchFields.avatar = user.avatar;
+    if (bio !== undefined) userPatchFields.bio = user.bio;
+    if (description !== undefined)
+      userPatchFields.description = user.description;
     await patchUserFieldsToMeili(userId, userPatchFields);
 
     const authorPatchFields: Record<string, any> = {};
-    if (name) authorPatchFields.authorName = user.name;
-    if (avatar) authorPatchFields.authorAvatar = user.avatar;
+    if (name !== undefined) authorPatchFields.authorName = user.name;
+    if (avatar !== undefined) authorPatchFields.authorAvatar = user.avatar;
     patchPostsAuthorToMeili(userId, authorPatchFields).catch(() => {});
 
     return user as UserWithRelations;

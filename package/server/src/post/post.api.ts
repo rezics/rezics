@@ -1,5 +1,6 @@
 import {
   createPostSchema,
+  editorialPatchSubmissionSchema,
   hasPermissionToDeletePost,
   hasPermissionToUpdatePost,
   PostKind,
@@ -9,10 +10,10 @@ import {
   postListQuerySchema,
   postListResponseSchema,
   postParamsSchema,
-  updatePostSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
+import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
 import { mapPostToDTO } from "./post.mapper";
 import { postService } from "./post.service";
 
@@ -113,15 +114,33 @@ export const postApi = new Elysia({ prefix: "/post" })
       },
     },
   )
-  .put(
+  .patch(
     "/:unitId",
     async ({ params, body, identity, set }): Promise<PostResponse> => {
+      assertEditorialPatchAllowed(body.patch);
       const target = await postService.getByUnitId(params.unitId);
+      const postPatch =
+        body.patch.post &&
+        typeof body.patch.post === "object" &&
+        !Array.isArray(body.patch.post)
+          ? (body.patch.post as Record<string, unknown>)
+          : {};
+      const updateInput = {
+        body: typeof postPatch.body === "string" ? postPatch.body : undefined,
+        isLocked:
+          typeof postPatch.isLocked === "boolean"
+            ? postPatch.isLocked
+            : undefined,
+        extra:
+          postPatch.extra !== undefined
+            ? ((postPatch.extra ?? null) as Record<string, unknown> | null)
+            : undefined,
+      };
       const isWikiBodyOnlyEdit =
         target.kind === PostKind.WIKI &&
-        body.body !== undefined &&
-        body.isLocked === undefined &&
-        body.extra === undefined;
+        updateInput.body !== undefined &&
+        updateInput.isLocked === undefined &&
+        updateInput.extra === undefined;
 
       if (
         !isWikiBodyOnlyEdit &&
@@ -136,16 +155,21 @@ export const postApi = new Elysia({ prefix: "/post" })
           "Forbidden: you do not have permission to update this post",
         );
       }
-      const updated = await postService.update(params.unitId, body, identity);
+      const updated = await postService.update(
+        params.unitId,
+        updateInput,
+        identity,
+        body,
+      );
       return mapPostToDTO(updated);
     },
     {
       requireLogin: true,
       params: postParamsSchema,
-      body: updatePostSchema,
+      body: editorialPatchSubmissionSchema,
       detail: {
         summary: "Update post",
-        description: "Update an existing post (body, isLocked, extra)",
+        description: "Update an existing post with an editorial PATCH body",
         tags: ["Posts"],
       },
     },

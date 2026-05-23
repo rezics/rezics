@@ -50,7 +50,7 @@ export const handleEdit = async (
   if (!content || content.trim().length === 0) {
     throw new Error("content is required");
   }
-  return postApi.update(unitId, { body: content });
+  return postApi.update(unitId, { patch: { post: { body: content } } });
 };
 
 /**

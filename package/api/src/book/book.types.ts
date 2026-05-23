@@ -10,6 +10,7 @@ import type {
   BookListResponse,
   BookResponse,
   CreateBookInput,
+  EditorialPatchSubmission,
   UpdateBookInput,
 } from "@rezics/contract";
 
@@ -22,6 +23,7 @@ export type {
   BookListResponse,
   BookResponse,
   CreateBookInput,
+  EditorialPatchSubmission,
   UpdateBookInput,
 };
 

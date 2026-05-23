@@ -5,6 +5,7 @@ import type {
   BookContentStructureItem,
   ContentStructureBatchOperation,
   CreateBookInput,
+  EditorialPatchSubmission,
   RezicsSessionClaims,
   UpdateBookInput,
 } from "@rezics/contract";
@@ -323,6 +324,10 @@ export class BookService {
     unitId: string,
     req: UpdateBookInput,
     actor?: RezicsSessionClaims,
+    historyInput?: Pick<
+      EditorialPatchSubmission,
+      "patch" | "message" | "restoreSource"
+    >,
   ): Promise<BookWithRelations> {
     const patchPaths = mapBookUpdatePatchPaths(req);
     const patch = buildBookUpdatePatch(req);
@@ -403,8 +408,9 @@ export class BookService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
-          patch,
-          message: "book.metadata.update",
+          patch: historyInput?.patch ?? patch,
+          message: historyInput?.message ?? "book.metadata.update",
+          restoreSource: historyInput?.restoreSource,
         });
       }
 

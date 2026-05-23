@@ -4,6 +4,7 @@
 
 import type {
   CreatePostInput,
+  EditorialPatchSubmission,
   PostResponse,
   UpdatePostInput,
 } from "@rezics/contract";
@@ -109,7 +110,7 @@ export function useUpdatePostMutation(
     UseMutationOptions<
       PostResponse,
       Error,
-      { unitId: string; input: UpdatePostInput }
+      { unitId: string; input: EditorialPatchSubmission }
     >,
     "mutationFn"
   >,

@@ -48,6 +48,7 @@ function mapRevision(
     contentHash: string;
     actorUserId: string;
     message: string | null;
+    restoreSource?: unknown | null;
     createdAt: Date;
     ingestedAt: Date;
     content?: { hash: string; payload: unknown; createdAt: Date } | null;
@@ -64,6 +65,7 @@ function mapRevision(
     message: row.message,
     createdAt: row.createdAt,
     ingestedAt: row.ingestedAt,
+    restoreSource: row.restoreSource as UnitRevisionDTO["restoreSource"],
     content:
       options.includeContent && row.content
         ? {
@@ -217,6 +219,7 @@ export class RevisionService {
         contentHash,
         actorUserId: input.payload.actorUserId,
         message: input.payload.message ?? null,
+        restoreSource: input.payload.restoreSource as never,
         createdAt: input.createdAt ?? new Date(),
       },
       include: { content: true },

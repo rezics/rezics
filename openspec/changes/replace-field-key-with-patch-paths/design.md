@@ -170,8 +170,34 @@ The canonical serializer is the same one used today (`canonicalSerialize` in `pa
 Rationale:
 
 - Preserves the dedup property of the current model at the patch level.
-- "Restore previous revision" naturally re-applies the same patch and produces the same hash.
+- Restore metadata is descriptive only; the saved PATCH remains the content-addressed payload.
 - No new hashing primitive needed.
+
+### Decision: Restore is a normal PATCH with descriptive metadata
+
+Restoring history is not a privileged server-side command and does not mutate old revisions. The product restore flow opens the relevant editor with values from a historical revision, lets the actor review or adjust the draft, and saves a normal editorial PATCH. The saved PATCH is the only canonical content mutation.
+
+The PATCH submission may include restore metadata:
+
+```json
+{
+  "patch": { "post": { "body": "restored body" } },
+  "restoreSource": {
+    "kind": "revision",
+    "unitId": "unit-1",
+    "sequence": 12,
+    "paths": ["post.body"]
+  }
+}
+```
+
+`restoreSource.paths` records which submitted PATCH paths came from the source revision. The same PATCH may also contain manual edits outside those restored paths. Restore metadata is informational for history UI display and audit; it does not authorize writes, bypass locks, or instruct the server to fetch/apply a revision. Authority, lock, sparse-merge, and externally-governed checks run exactly as they do for any other editorial PATCH.
+
+Rationale:
+
+- Matches wiki-style revert semantics: reverting creates a new revision instead of rewriting history.
+- Fits the path-based history model. A restore may intentionally restore only the paths present in the historical payload; it is not necessarily a whole-Unit rollback.
+- Keeps main server authority simple. The client submits the exact new content, and the server records that PATCH plus restore metadata.
 
 ### Decision: Remove `loadEditorialSlots` and slot vocabulary
 

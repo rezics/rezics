@@ -82,9 +82,9 @@ export type CreateUserFull = (typeof createUserFullSchema)["static"];
 
 export const updateUserSchema = t.Object({
   name: t.Optional(t.String({ minLength: 1 })),
-  avatar: t.Optional(t.String()),
-  bio: t.Optional(t.String()),
-  description: t.Optional(t.String()),
+  avatar: t.Optional(t.Nullable(t.String())),
+  bio: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(t.String())),
   password: t.Optional(t.String({ minLength: 6 })),
 });
 

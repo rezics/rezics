@@ -1,5 +1,6 @@
 export type {
   CreateEntityInput,
+  EditorialPatchSubmission,
   EntityDTO,
   EntityKind,
   EntityListQuery,

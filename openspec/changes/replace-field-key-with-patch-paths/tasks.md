@@ -22,9 +22,9 @@
 ## 4. Editorial PATCH Server
 
 - [x] 4.1 Delete `package/server/src/unit/collaborative-metadata.ts::loadEditorialSlots`. Remove all callsites.
-- [ ] 4.2 Update editorial PATCH endpoints (post, book, entity, unit translation, user description, wiki) to accept a sparse JSON sub-tree using `editorialPatchSubmissionSchema`. Persist the sub-tree leaf-by-leaf via the existing Prisma services.
-- [ ] 4.3 Implement sparse merge semantics: object values recursively merge; array values replace whole; `null` writes SQL NULL; `$unset: [path...]` removes the listed keys.
-- [ ] 4.4 Reject editorial PATCH whose path intersects `EXTERNALLY_GOVERNED_PATHS` with a 400-style error whose body includes the offending path and a `useApi` hint pointing at the dedicated governance API.
+- [x] 4.2 Update editorial PATCH endpoints (post, book, entity, unit translation, user description, wiki) to accept a sparse JSON sub-tree using `editorialPatchSubmissionSchema`. Persist the sub-tree leaf-by-leaf via the existing Prisma services.
+- [x] 4.3 Implement sparse merge semantics: object values recursively merge; array values replace whole; `null` writes SQL NULL; `$unset: [path...]` removes the listed keys.
+- [x] 4.4 Reject editorial PATCH whose path intersects `EXTERNALLY_GOVERNED_PATHS` with a 400-style error whose body includes the offending path and a `useApi` hint pointing at the dedicated governance API.
 - [x] 4.5 Update `package/server/src/unit/authority.service.ts` lock checks: replace field-key intersection with bidirectional prefix matching over the submitted PATCH leaf paths and stored `UnitFieldLock.path` values. Implement the matcher as a small utility shared with the contract test suite.
 - [x] 4.6 Update the rejection error DTO to return the offending lock path and the offending PATCH path so the editor can narrow the PATCH.
 - [x] 4.7 Update unit field lock creation API to accept `path: string` instead of `fieldKey: UnitFieldKey`. Validate that the path does not intersect `EXTERNALLY_GOVERNED_PATHS`.
@@ -33,7 +33,7 @@
 
 - [x] 5.1 Update `buildEditorialRevisionPayload` (in `package/server/src/unit/history-outbox.ts`) to accept `patch: Record<string, unknown>` instead of `slots`. Recompute `payloadHash` over the patch sub-tree via existing `canonicalSerialize`.
 - [x] 5.2 Update `writeHistoryOutbox` callers across `book.service.ts`, `post.service.ts`, `authority.service.ts`, `collaborative-metadata.ts` (or successor) to pass the submitted patch rather than re-loading slots.
-- [ ] 5.3 Skip outbox writes entirely for PATCH leaves whose path intersects `EXTERNALLY_GOVERNED_PATHS`. (Defensive — these PATCHes are already rejected at the endpoint, but the outbox writer should not assume.)
+- [x] 5.3 Skip outbox writes entirely for PATCH leaves whose path intersects `EXTERNALLY_GOVERNED_PATHS`. (Defensive — these PATCHes are already rejected at the endpoint, but the outbox writer should not assume.)
 
 ## 6. History Service
 
@@ -41,25 +41,25 @@
 - [x] 6.2 Add a derived `changedFieldKeys` projection: walk the stored patch sub-tree and emit one entry per leaf path. Cache per revision in the read DTO; do not persist.
 - [x] 6.3 For pre-cutover revisions, read `changedFieldKeys` from the preserved legacy data (`legacyChangedKeys` in the payload, written by the migration in 3.2).
 - [x] 6.4 Update `package/history/src/revision/revision.service.ts` read paths so timeline DTOs return the derived list.
-- [ ] 6.5 Update revision restore: applying a revision means submitting its stored patch as a new editorial PATCH. Restore SHALL go through normal authority and lock gating.
+- [x] 6.5 Update revision restore: restore is a client-mediated normal editorial PATCH with descriptive restore metadata (`source revision` + `restored paths`). The metadata SHALL be stored on the new revision for UI/audit display, while the submitted PATCH goes through normal authority and lock gating.
 
 ## 7. Frontend
 
-- [ ] 7.1 Update lock creation UI: the "lock target" picker offers canonical PATCH paths derived from `@rezics/contract` input schemas instead of an enum. Display path strings; show localized labels via a small lookup map.
-- [ ] 7.2 Update history timeline render: `changedFieldKeys` are free-form path strings; the UI translates the most common paths (e.g. `translations.<lang>.title`, `post.content.main`, `credits.authors`) to localized labels via a lookup; unknown paths render as the raw path.
-- [ ] 7.3 Update editorial save flows (post editor, wiki editor, attribution editor) to submit sparse PATCH bodies containing only changed sub-trees.
+- [x] 7.1 Update lock creation UI: the "lock target" picker offers canonical PATCH paths derived from `@rezics/contract` input schemas instead of an enum. Display path strings; show localized labels via a small lookup map.
+- [x] 7.2 Update history timeline render: `changedFieldKeys` are free-form path strings; the UI translates the most common paths (e.g. `translations.<lang>.title`, `post.content.main`, `credits.authors`) to localized labels via a lookup; unknown paths render as the raw path.
+- [x] 7.3 Update editorial save flows (post editor, wiki editor, attribution editor) to submit sparse PATCH bodies containing only changed sub-trees.
 - [x] 7.4 Update lock rejection error display: surface the offending lock path and PATCH path so the editor can narrow the submission.
 
 ## 8. Externally-Governed Path Endpoints
 
-- [ ] 8.1 Confirm that `tags` and `realmTagApplications` writes already route through dedicated APIs (`/tags/*`, `/realm-tag-applications/*` post-rename). Add an integration test that proves an editorial PATCH targeting these paths is rejected with the externally-governed error.
-- [ ] 8.2 Confirm `UnitFieldLock` creation rejects paths under `EXTERNALLY_GOVERNED_PATHS`. Add a test.
+- [x] 8.1 Confirm that `tags` and `realmTagApplications` writes already route through dedicated APIs (`/tags/*`, `/realm-tag-applications/*` post-rename). Add an integration test that proves an editorial PATCH targeting these paths is rejected with the externally-governed error.
+- [x] 8.2 Confirm `UnitFieldLock` creation rejects paths under `EXTERNALLY_GOVERNED_PATHS`. Add a test.
 
 ## 9. Validation
 
-- [ ] 9.1 Run package-level tests for `package/contract`, `package/server`, `package/history`, `package/api`, and affected `package/app` features.
+- [x] 9.1 Run package-level tests for `package/contract`, `package/server`, `package/history`, `package/api`, and affected `package/app` features.
 - [x] 9.2 Run `bun run check:convention`.
 - [x] 9.3 Run `bun run format:check`.
-- [ ] 9.4 Run `bun run knip` and confirm no orphan exports remain (`UnitFieldKey`, `revisionSlotName`, etc.).
+- [x] 9.4 Run `bun run knip` and confirm no orphan exports remain (`UnitFieldKey`, `revisionSlotName`, etc.). `knip` still reports existing baseline unused files/deps/exports, but targeted `UnitFieldKey` / `revisionSlotName` references are absent.
 - [ ] 9.5 Browser smoke test: create a `UnitFieldLock` on a specific path via the lock UI, attempt an editorial PATCH that intersects it, observe the rejection error includes both the lock path and the patch path. Then attempt an editorial PATCH on `tags`, observe the externally-governed rejection pointing at the tag API.
 - [ ] 9.6 Browser smoke test: edit a wiki, save, check that the history timeline displays the derived changed paths and that the revision detail shows the submitted PATCH (not a full snapshot).

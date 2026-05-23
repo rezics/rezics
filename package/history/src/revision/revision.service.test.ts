@@ -1,5 +1,4 @@
 import { describe, expect, mock, test } from "bun:test";
-import { HistoryOutboxPayloadKind } from "@rezics/contract";
 import {
   RevisionService,
   computeRevisionContentHash,
@@ -190,6 +189,38 @@ describe("RevisionService", () => {
     expect(revision?.content?.payload).toEqual({
       translations: { en: { title: "Captured" } },
     });
+  });
+
+  test("stores restore source metadata separately from content payload", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+    const patch = { post: { body: "Restored" } };
+    const contentHash = computeRevisionContentHash(patch);
+
+    const revision = await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 12,
+        actorUserId: "user-1",
+        patch,
+        message: "restore",
+        restoreSource: {
+          kind: "revision",
+          unitId: "unit-1",
+          sequence: 7,
+          paths: ["post.body"],
+        },
+      },
+    });
+
+    expect(revision.contentHash).toBe(contentHash);
+    expect(revision.restoreSource).toEqual({
+      kind: "revision",
+      unitId: "unit-1",
+      sequence: 7,
+      paths: ["post.body"],
+    });
+    expect(revision.content?.payload).toEqual(patch);
   });
 
   test("structure event ingestion is idempotent by unit sequence event type", async () => {

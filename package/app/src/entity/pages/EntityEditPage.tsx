@@ -127,19 +127,22 @@ export function EntityEditPage({ unitId }: EntityEditPageProps) {
     const updated = await updateEntity.mutateAsync({
       unitId,
       input: {
-        kind: kind === NO_KIND ? null : (kind as EntityKind),
-        avatar: avatar.trim() || null,
-        verified,
-        slug: slug.trim() ? slug.trim() : null,
-        translations: [
-          {
-            language: selectedLanguage,
-            title: title.trim(),
-            subtitle: subtitle.trim() || null,
-            summary: summary.trim() || null,
-            description: description.trim() || null,
+        patch: {
+          entity: {
+            kind: kind === NO_KIND ? null : (kind as EntityKind),
+            avatar: avatar.trim() || null,
+            verified,
+            slug: slug.trim() ? slug.trim() : null,
           },
-        ],
+          translations: {
+            [selectedLanguage]: {
+              title: title.trim(),
+              subtitle: subtitle.trim() || null,
+              summary: summary.trim() || null,
+              description: description.trim() || null,
+            },
+          },
+        },
       },
     });
 

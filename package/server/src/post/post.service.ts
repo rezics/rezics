@@ -1,5 +1,6 @@
 import type {
   CreatePostInput,
+  EditorialPatchSubmission,
   RezicsSessionClaims,
   PostListQuery,
   UpdatePostInput,
@@ -22,6 +23,7 @@ import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import {
   assertCanEditCollaborativeMetadata,
+  collectPatchLeafPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
 import type { PostWithRelations } from "./types";
@@ -465,6 +467,10 @@ export class PostService {
     unitId: string,
     input: UpdatePostInput,
     actor?: RezicsSessionClaims,
+    historyInput?: Pick<
+      EditorialPatchSubmission,
+      "patch" | "message" | "restoreSource"
+    >,
   ): Promise<PostWithRelations> {
     const data: Prisma.PostUpdateInput = {};
 
@@ -498,9 +504,14 @@ export class PostService {
         existing.kind === "WIKI" && input.body !== undefined;
 
       if (isWikiBodyEdit && actor) {
-        await assertCanEditCollaborativeMetadata(tx as any, actor, unitId, [
-          "post.body",
-        ]);
+        await assertCanEditCollaborativeMetadata(
+          tx as any,
+          actor,
+          unitId,
+          historyInput?.patch
+            ? collectPatchLeafPaths(historyInput.patch)
+            : ["post.body"],
+        );
       }
 
       const row = await tx.post.update({
@@ -513,8 +524,9 @@ export class PostService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
-          patch: { post: { body: row.body } },
-          message: "wiki-post.body.update",
+          patch: historyInput?.patch ?? { post: { body: row.body } },
+          message: historyInput?.message ?? "wiki-post.body.update",
+          restoreSource: historyInput?.restoreSource,
         });
       }
 

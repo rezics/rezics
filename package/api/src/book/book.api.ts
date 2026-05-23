@@ -10,8 +10,8 @@ import type {
   BookResponse,
   CreateBookInput,
   CreationMode,
+  EditorialPatchSubmission,
   ScoreAggregateDTO,
-  UpdateBookInput,
 } from "@rezics/contract";
 import { CreationMode as CreationModeValue } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -163,10 +163,10 @@ export const bookApi = {
    */
   update: async (
     unitId: string,
-    input: UpdateBookInput,
+    input: EditorialPatchSubmission,
   ): Promise<BookResponse> => {
     return apiFetch<BookResponse>(`/book/${unitId}`, {
-      method: "PUT",
+      method: "PATCH",
       body: JSON.stringify(input),
     });
   },

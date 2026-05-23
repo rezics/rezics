@@ -1,12 +1,12 @@
 import type {
   CreateEntityInput,
   CreationMode,
+  EditorialPatchSubmission,
   EntityDTO,
   EntityListQuery,
   EntityListResponse,
   EntitySearchOptions,
   EntitySearchResult,
-  UpdateEntityInput,
 } from "@rezics/contract";
 import { CreationMode as CreationModeValue } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -62,7 +62,7 @@ export const entityApi = {
 
   update: async (
     unitId: string,
-    input: UpdateEntityInput,
+    input: EditorialPatchSubmission,
   ): Promise<EntityDTO> => {
     return apiFetch<EntityDTO>(`/entity/${unitId}`, {
       method: "PATCH",

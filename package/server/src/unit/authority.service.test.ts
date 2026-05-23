@@ -92,6 +92,26 @@ describe("UnitAuthorityService", () => {
     expect(db.unitFieldLock.upsert).toHaveBeenCalledTimes(1);
   });
 
+  test("rejects field locks under externally governed paths", async () => {
+    const db = dbStub();
+    const service = new UnitAuthorityService(db as never, async () => false);
+
+    await expect(
+      service.createFieldLock("unit-1", actor("owner-1"), {
+        path: "tags.genre",
+        reason: "wrong surface",
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      code: "EXTERNALLY_GOVERNED_PATH",
+      details: {
+        offendingPath: "tags.genre",
+        useApi: "/tags",
+      },
+    } satisfies Partial<AppError>);
+    expect(db.unitFieldLock.upsert).not.toHaveBeenCalled();
+  });
+
   test("allows admin override for collaborator mutation", async () => {
     const db = dbStub();
     const service = new UnitAuthorityService(db as never, async () => false);
