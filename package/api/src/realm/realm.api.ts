@@ -3,24 +3,24 @@
  * Direct API communication layer
  *
  * Realms include membership management, content (RealmUnit),
- * and scoped tag classification (RealmTagUnit).
+ * and scoped tag classification (RealmTagApplication).
  */
 
 import type {
-  AddRealmTagUnitInput,
+  AddRealmTagApplicationInput,
   AddRealmUnitInput,
-  CastRealmTagVoteInput,
+  CastRealmTagApplicationVoteInput,
   CreateRealmInput,
-  CreateRealmTagUnitInput,
+  CreateRealmTagApplicationInput,
   JoinRealmInput,
-  PatchRealmTagUnitInput,
+  PatchRealmTagApplicationInput,
   RealmListResponse,
   RealmMemberDTO,
   RealmResponse,
   RealmTagContextDTO,
   RealmTagContextReadResponse,
   RealmTagContextUpdateResponse,
-  RealmTagUnitDTO,
+  RealmTagApplicationDTO,
   RealmUnitDTO,
   UpdateMemberRoleInput,
   UpdateRealmInput,
@@ -218,25 +218,25 @@ export const realmApi = {
     );
   },
 
-  // ---- Scoped tag classification (RealmTagUnit) ----
+  // ---- Scoped tag classification (RealmTagApplication) ----
 
   /**
-   * Add a tag-unit association scoped to a realm
+   * Add a tag application scoped to a realm
    */
-  addTagUnit: async (
+  addTagApplication: async (
     realmUnitId: string,
-    input: AddRealmTagUnitInput,
-  ): Promise<RealmTagUnitDTO> => {
-    return apiFetch<RealmTagUnitDTO>(`/realm/${realmUnitId}/tags`, {
+    input: AddRealmTagApplicationInput,
+  ): Promise<RealmTagApplicationDTO> => {
+    return apiFetch<RealmTagApplicationDTO>(`/realm/${realmUnitId}/tags`, {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   /**
-   * Remove a tag-unit association from a realm
+   * Remove a tag application from a realm
    */
-  removeTagUnit: async (
+  removeTagApplication: async (
     realmUnitId: string,
     tagUnitId: string,
     contentUnitId: string,
@@ -252,30 +252,30 @@ export const realmApi = {
   // ---- New realm-tag endpoints (creation-as-vote, pin/position, vote) ----
 
   /**
-   * Create a RealmTagUnit (creation-as-vote, any realm member).
-   * POST /realm-tag-units
+   * Create a RealmTagApplication (creation-as-vote, any realm member).
+   * POST /realm-tag-applications
    */
-  createRealmTagUnit: async (
-    input: CreateRealmTagUnitInput,
-  ): Promise<RealmTagUnitDTO> => {
-    return apiFetch<RealmTagUnitDTO>(`/realm-tag-units`, {
+  createRealmTagApplication: async (
+    input: CreateRealmTagApplicationInput,
+  ): Promise<RealmTagApplicationDTO> => {
+    return apiFetch<RealmTagApplicationDTO>(`/realm-tag-applications`, {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   /**
-   * Pin/unpin or reposition a RealmTagUnit (admin or realm owner).
-   * PATCH /realm-tag-units/:realmUnitId/:unitId/:tagUnitId
+   * Pin/unpin or reposition a RealmTagApplication (admin or realm owner).
+   * PATCH /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId
    */
-  patchRealmTagUnit: async (
+  patchRealmTagApplication: async (
     realmUnitId: string,
     unitId: string,
     tagUnitId: string,
-    input: PatchRealmTagUnitInput,
-  ): Promise<RealmTagUnitDTO> => {
-    return apiFetch<RealmTagUnitDTO>(
-      `/realm-tag-units/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
+    input: PatchRealmTagApplicationInput,
+  ): Promise<RealmTagApplicationDTO> => {
+    return apiFetch<RealmTagApplicationDTO>(
+      `/realm-tag-applications/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
         unitId,
       )}/${encodeURIComponent(tagUnitId)}`,
       {
@@ -286,16 +286,16 @@ export const realmApi = {
   },
 
   /**
-   * Delete a RealmTagUnit (admin or realm owner).
-   * DELETE /realm-tag-units/:realmUnitId/:unitId/:tagUnitId
+   * Delete a RealmTagApplication (admin or realm owner).
+   * DELETE /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId
    */
-  deleteRealmTagUnit: async (
+  deleteRealmTagApplication: async (
     realmUnitId: string,
     unitId: string,
     tagUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/realm-tag-units/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
+      `/realm-tag-applications/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
         unitId,
       )}/${encodeURIComponent(tagUnitId)}`,
       { method: "DELETE" },
@@ -303,13 +303,13 @@ export const realmApi = {
   },
 
   /**
-   * Cast a RealmTagVote (membership-checked, retained when member leaves).
-   * POST /realm-tag-votes
+   * Cast a RealmTagApplicationVote (membership-checked, retained when member leaves).
+   * POST /realm-tag-application-votes
    */
-  castRealmTagVote: async (
-    input: CastRealmTagVoteInput,
+  castRealmTagApplicationVote: async (
+    input: CastRealmTagApplicationVoteInput,
   ): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/realm-tag-votes`, {
+    return apiFetch<{ message: string }>(`/realm-tag-application-votes`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -334,7 +334,7 @@ export const realmApi = {
 
   /**
    * Upsert/update the pair-level context metadata. This does not create any
-   * RealmTagUnit application row.
+   * RealmTagApplication row.
    * PUT /realm-tag-context/:realmUnitId/:tagUnitId
    */
   updateRealmTagContext: async (

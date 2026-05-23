@@ -146,8 +146,10 @@ export const lowScoreTagsAdminApi = new Elysia({
       // Realm scope is delegated to realmService via dynamic import to avoid
       // circular static imports between tag and realm modules.
       const { realmService } = await import("@/realm/realm.service");
-      const { mapRealmTagUnitToDTO } = await import("@/realm/realm.mapper");
-      const rows = await realmService.listLowScoreRealmTagUnits(
+      const { mapRealmTagApplicationToDTO } = await import(
+        "@/realm/realm.mapper"
+      );
+      const rows = await realmService.listLowScoreRealmTagApplications(
         threshold,
         limit,
         query.realmUnitId,
@@ -155,8 +157,8 @@ export const lowScoreTagsAdminApi = new Elysia({
       return {
         scope: "realm" as const,
         threshold,
-        realmTagUnits: rows.map((r) =>
-          mapRealmTagUnitToDTO(r, { belowVisibilityThreshold: true }),
+        realmTagApplications: rows.map((r) =>
+          mapRealmTagApplicationToDTO(r, { belowVisibilityThreshold: true }),
         ),
       };
     },
@@ -165,7 +167,7 @@ export const lowScoreTagsAdminApi = new Elysia({
       detail: {
         summary: "Admin: list low-score tag relations",
         description:
-          "Returns UnitTag rows (scope=global, default) or RealmTagUnit rows (scope=realm) at or below the threshold (default -100), ordered by score asc.",
+          "Returns UnitTag rows (scope=global, default) or RealmTagApplication rows (scope=realm) at or below the threshold (default -100), ordered by score asc.",
         tags: ["Admin", "Tags"],
       },
     },

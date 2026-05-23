@@ -79,7 +79,7 @@ mock.module("./realm.service", () => ({
       opts?: { includeBelowThreshold?: boolean },
     ) {
       const { prisma } = await import("#/prisma/client");
-      return prisma.realmTagUnit.findMany({
+      return prisma.realmTagApplication.findMany({
         where: opts?.includeBelowThreshold
           ? { realmUnitId, unitId }
           : { realmUnitId, unitId, score: { gt: -100 } },
@@ -91,13 +91,13 @@ mock.module("./realm.service", () => ({
         ],
       });
     }
-    async listLowScoreRealmTagUnits(
+    async listLowScoreRealmTagApplications(
       threshold: number,
       limit: number,
       realmUnitId?: string,
     ) {
       const { prisma } = await import("#/prisma/client");
-      return prisma.realmTagUnit.findMany({
+      return prisma.realmTagApplication.findMany({
         where: {
           score: { lte: threshold },
           ...(realmUnitId ? { realmUnitId } : {}),

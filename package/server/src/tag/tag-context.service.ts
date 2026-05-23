@@ -54,7 +54,7 @@ export async function getTagContext(
     const realmIds = memberships.map((m) => m.realmUnitId);
 
     if (realmIds.length > 0) {
-      const realmTagUnits = await prisma.realmTagUnit.findMany({
+      const realmTagApplications = await prisma.realmTagApplication.findMany({
         where: options?.includeBelowThreshold
           ? { unitId, realmUnitId: { in: realmIds } }
           : {
@@ -75,11 +75,11 @@ export async function getTagContext(
       });
 
       const contextRows =
-        realmTagUnits.length === 0
+        realmTagApplications.length === 0
           ? []
           : await prisma.realmTagContext.findMany({
               where: {
-                OR: realmTagUnits.map((rtu) => ({
+                OR: realmTagApplications.map((rtu) => ({
                   realmUnitId: rtu.realmUnitId,
                   tagUnitId: rtu.tagUnitId,
                 })),
@@ -110,7 +110,7 @@ export async function getTagContext(
           }[];
         }
       >();
-      for (const rtu of realmTagUnits) {
+      for (const rtu of realmTagApplications) {
         const key = rtu.realmUnitId;
         if (!grouped.has(key)) {
           grouped.set(key, {

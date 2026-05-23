@@ -1,15 +1,15 @@
-import type { RealmTagUnitDTO } from "@rezics/contract";
+import type { RealmTagApplicationDTO } from "@rezics/contract";
 import {
   BasicAdminPermission,
-  castRealmTagVoteSchema,
-  createRealmTagUnitSchema,
-  patchRealmTagUnitSchema,
-  realmTagUnitPathParamsSchema,
+  castRealmTagApplicationVoteSchema,
+  createRealmTagApplicationSchema,
+  patchRealmTagApplicationSchema,
+  realmTagApplicationPathParamsSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { prisma } from "#/prisma/client";
 import { authMacro } from "@/middleware";
-import { mapRealmTagUnitToDTO } from "./realm.mapper";
+import { mapRealmTagApplicationToDTO } from "./realm.mapper";
 import { realmService } from "./realm.service";
 
 /**
@@ -28,11 +28,11 @@ async function ensureRealmMembership(
 }
 
 /**
- * Pin/delete authorization for realm-tag-units.
+ * Pin/delete authorization for realm-tag-applications.
  * Allowed: platform admin OR `Realm.owner` (the user attached to the
  * underlying Realm Unit). Realm moderators and regular members are rejected.
  */
-async function canMutateRealmTagUnit(
+async function canMutateRealmTagApplication(
   actorPermission: { role: string },
   actorUserId: string,
   realmUnitId: string,
@@ -45,13 +45,15 @@ async function canMutateRealmTagUnit(
   return realmUnit?.userId != null && realmUnit.userId === actorUserId;
 }
 
-export const realmTagUnitApi = new Elysia({ prefix: "/realm-tag-units" })
+export const realmTagApplicationApi = new Elysia({
+  prefix: "/realm-tag-applications",
+})
   .use(authMacro)
 
-  // POST /realm-tag-units — creation-as-vote (any realm member)
+  // POST /realm-tag-applications — creation-as-vote (any realm member)
   .post(
     "/",
-    async ({ body, identity, set }): Promise<RealmTagUnitDTO> => {
+    async ({ body, identity, set }): Promise<RealmTagApplicationDTO> => {
       const allowed = await ensureRealmMembership(
         identity.permission,
         identity.userId,
@@ -63,31 +65,36 @@ export const realmTagUnitApi = new Elysia({ prefix: "/realm-tag-units" })
           "Forbidden: only realm members may add tags inside a realm",
         );
       }
-      const row = await realmService.createRealmTagUnit(
+      const row = await realmService.createRealmTagApplication(
         identity.userId,
         body.realmUnitId,
         body.unitId,
         body.tagUnitId,
       );
-      return mapRealmTagUnitToDTO(row);
+      return mapRealmTagApplicationToDTO(row);
     },
     {
       requireLogin: true,
-      body: createRealmTagUnitSchema,
+      body: createRealmTagApplicationSchema,
       detail: {
-        summary: "Create RealmTagUnit (creation-as-vote)",
+        summary: "Create RealmTagApplication (creation-as-vote)",
         description:
-          "Membership-checked. Writes a +1 RealmTagVote on first call and recomputes RealmTagUnit.score/voteCount.",
+          "Membership-checked. Writes a +1 RealmTagApplicationVote on first call and recomputes RealmTagApplication.score/voteCount.",
         tags: ["Realms", "Tags"],
       },
     },
   )
 
-  // PATCH /realm-tag-units/:realmUnitId/:unitId/:tagUnitId — pin / position (admin or realm owner)
+  // PATCH /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId — pin / position (admin or realm owner)
   .patch(
     "/:realmUnitId/:unitId/:tagUnitId",
-    async ({ params, body, identity, set }): Promise<RealmTagUnitDTO> => {
-      const allowed = await canMutateRealmTagUnit(
+    async ({
+      params,
+      body,
+      identity,
+      set,
+    }): Promise<RealmTagApplicationDTO> => {
+      const allowed = await canMutateRealmTagApplication(
         identity.permission,
         identity.userId,
         params.realmUnitId,
@@ -98,30 +105,30 @@ export const realmTagUnitApi = new Elysia({ prefix: "/realm-tag-units" })
           "Forbidden: only platform admin or realm owner may pin realm tags",
         );
       }
-      const row = await realmService.setRealmTagUnitPin(
+      const row = await realmService.setRealmTagApplicationPin(
         params.realmUnitId,
         params.unitId,
         params.tagUnitId,
         body,
       );
-      return mapRealmTagUnitToDTO(row);
+      return mapRealmTagApplicationToDTO(row);
     },
     {
       requireLogin: true,
-      params: realmTagUnitPathParamsSchema,
-      body: patchRealmTagUnitSchema,
+      params: realmTagApplicationPathParamsSchema,
+      body: patchRealmTagApplicationSchema,
       detail: {
-        summary: "Pin/unpin or reposition a RealmTagUnit",
+        summary: "Pin/unpin or reposition a RealmTagApplication",
         tags: ["Realms", "Tags"],
       },
     },
   )
 
-  // DELETE /realm-tag-units/:realmUnitId/:unitId/:tagUnitId — delete (admin or realm owner)
+  // DELETE /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId — delete (admin or realm owner)
   .delete(
     "/:realmUnitId/:unitId/:tagUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
-      const allowed = await canMutateRealmTagUnit(
+      const allowed = await canMutateRealmTagApplication(
         identity.permission,
         identity.userId,
         params.realmUnitId,
@@ -132,29 +139,31 @@ export const realmTagUnitApi = new Elysia({ prefix: "/realm-tag-units" })
           "Forbidden: only platform admin or realm owner may delete realm tags",
         );
       }
-      await realmService.deleteRealmTagUnit(
+      await realmService.deleteRealmTagApplication(
         params.realmUnitId,
         params.unitId,
         params.tagUnitId,
       );
-      return { message: "Realm tag unit deleted" };
+      return { message: "Realm tag application deleted" };
     },
     {
       requireLogin: true,
-      params: realmTagUnitPathParamsSchema,
+      params: realmTagApplicationPathParamsSchema,
       detail: {
-        summary: "Delete a RealmTagUnit",
+        summary: "Delete a RealmTagApplication",
         description:
-          "Removes the RealmTagUnit and all underlying RealmTagVote rows. Does not cascade to UnitTag.",
+          "Removes the RealmTagApplication and all underlying RealmTagApplicationVote rows. Does not cascade to UnitTag.",
         tags: ["Realms", "Tags"],
       },
     },
   );
 
-export const realmTagVoteApi = new Elysia({ prefix: "/realm-tag-votes" })
+export const realmTagApplicationVoteApi = new Elysia({
+  prefix: "/realm-tag-application-votes",
+})
   .use(authMacro)
 
-  // POST /realm-tag-votes — explicit vote (membership-checked)
+  // POST /realm-tag-application-votes — explicit vote (membership-checked)
   .post(
     "/",
     async ({ body, identity, set }): Promise<{ message: string }> => {
@@ -167,22 +176,22 @@ export const realmTagVoteApi = new Elysia({ prefix: "/realm-tag-votes" })
         set.status = 403;
         throw new Error("Forbidden: only realm members may vote on realm tags");
       }
-      await realmService.castRealmTagVote(
+      await realmService.castRealmTagApplicationVote(
         identity.userId,
         body.realmUnitId,
         body.unitId,
         body.tagUnitId,
         body.value,
       );
-      return { message: "Realm tag vote cast" };
+      return { message: "Realm tag application vote cast" };
     },
     {
       requireLogin: true,
-      body: castRealmTagVoteSchema,
+      body: castRealmTagApplicationVoteSchema,
       detail: {
-        summary: "Cast a RealmTagVote",
+        summary: "Cast a RealmTagApplicationVote",
         description:
-          "Upserts the member's vote and recomputes RealmTagUnit aggregates. Vote is retained even if the member later leaves the realm.",
+          "Upserts the member's vote and recomputes RealmTagApplication aggregates. Vote is retained even if the member later leaves the realm.",
         tags: ["Realms", "Tags"],
       },
     },

@@ -3,8 +3,8 @@ import {
   positionForNewTopPin,
 } from "@rezics/api/tag/fractional-index";
 import {
-  useDeleteRealmTagUnitMutation,
-  usePatchRealmTagUnitMutation,
+  useDeleteRealmTagApplicationMutation,
+  usePatchRealmTagApplicationMutation,
 } from "@rezics/api/realm/realm.mutations";
 import {
   useDeleteUnitTagMutation,
@@ -13,7 +13,7 @@ import {
 import { lowScoreTagsQuery } from "@rezics/api/tag/tag.queries";
 import type {
   LowScoreTagsScope,
-  RealmTagUnitDTO,
+  RealmTagApplicationDTO,
   UnitTagDTO,
 } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
@@ -47,7 +47,7 @@ import { Page } from "@/core/layouts/Page";
 
 type Row =
   | ({ kind: "global" } & UnitTagDTO)
-  | ({ kind: "realm" } & RealmTagUnitDTO);
+  | ({ kind: "realm" } & RealmTagApplicationDTO);
 
 export default function LowScoreTagsPage() {
   const [scope, setScope] = React.useState<LowScoreTagsScope>("global");
@@ -72,8 +72,8 @@ export default function LowScoreTagsPage() {
 
   const deleteUnitTag = useDeleteUnitTagMutation();
   const patchUnitTag = usePatchUnitTagMutation();
-  const deleteRealmTagUnit = useDeleteRealmTagUnitMutation();
-  const patchRealmTagUnit = usePatchRealmTagUnitMutation();
+  const deleteRealmTagApplication = useDeleteRealmTagApplicationMutation();
+  const patchRealmTagApplication = usePatchRealmTagApplicationMutation();
 
   const rows: Row[] = React.useMemo(() => {
     const data = query.data;
@@ -81,8 +81,8 @@ export default function LowScoreTagsPage() {
     if (data.scope === "global" && data.unitTags) {
       return data.unitTags.map((r) => ({ kind: "global" as const, ...r }));
     }
-    if (data.scope === "realm" && data.realmTagUnits) {
-      return data.realmTagUnits.map((r) => ({
+    if (data.scope === "realm" && data.realmTagApplications) {
+      return data.realmTagApplications.map((r) => ({
         kind: "realm" as const,
         ...r,
       }));
@@ -108,14 +108,14 @@ export default function LowScoreTagsPage() {
           tagUnitId: row.tagUnitId,
         });
       } else {
-        deleteRealmTagUnit.mutate({
+        deleteRealmTagApplication.mutate({
           realmUnitId: row.realmUnitId,
           unitId: row.unitId,
           tagUnitId: row.tagUnitId,
         });
       }
     },
-    [deleteUnitTag, deleteRealmTagUnit],
+    [deleteUnitTag, deleteRealmTagApplication],
   );
 
   const handleTogglePin = React.useCallback(
@@ -136,14 +136,14 @@ export default function LowScoreTagsPage() {
         }
       } else {
         if (row.pinned) {
-          patchRealmTagUnit.mutate({
+          patchRealmTagApplication.mutate({
             realmUnitId: row.realmUnitId,
             unitId: row.unitId,
             tagUnitId: row.tagUnitId,
             input: { pinned: false, position: null },
           });
         } else {
-          patchRealmTagUnit.mutate({
+          patchRealmTagApplication.mutate({
             realmUnitId: row.realmUnitId,
             unitId: row.unitId,
             tagUnitId: row.tagUnitId,
@@ -152,7 +152,7 @@ export default function LowScoreTagsPage() {
         }
       }
     },
-    [patchUnitTag, patchRealmTagUnit],
+    [patchUnitTag, patchRealmTagApplication],
   );
 
   const columns = React.useMemo<PaginatedColumn<Row>[]>(() => {
@@ -228,7 +228,7 @@ export default function LowScoreTagsPage() {
                       disabled={
                         r.kind === "global"
                           ? patchUnitTag.isPending
-                          : patchRealmTagUnit.isPending
+                          : patchRealmTagApplication.isPending
                       }
                       aria-label={r.pinned ? "Unpin" : "Pin"}
                       {...props}
@@ -254,7 +254,7 @@ export default function LowScoreTagsPage() {
                       disabled={
                         r.kind === "global"
                           ? deleteUnitTag.isPending
-                          : deleteRealmTagUnit.isPending
+                          : deleteRealmTagApplication.isPending
                       }
                       aria-label="Delete"
                       {...props}
@@ -276,15 +276,15 @@ export default function LowScoreTagsPage() {
     handleDelete,
     handleTogglePin,
     deleteUnitTag.isPending,
-    deleteRealmTagUnit.isPending,
+    deleteRealmTagApplication.isPending,
     patchUnitTag.isPending,
-    patchRealmTagUnit.isPending,
+    patchRealmTagApplication.isPending,
   ]);
 
   return (
     <Page
       title="Low-score tags"
-      description="Moderate UnitTag and RealmTagUnit rows whose score has fallen at or below the threshold. Below-threshold rows are hidden from regular users; admins can see and act on them here."
+      description="Moderate UnitTag and RealmTagApplication rows whose score has fallen at or below the threshold. Below-threshold rows are hidden from regular users; admins can see and act on them here."
     >
       <Card>
         <CardContent>
@@ -303,7 +303,9 @@ export default function LowScoreTagsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="global">Global (UnitTag)</SelectItem>
-                  <SelectItem value="realm">Realm (RealmTagUnit)</SelectItem>
+                  <SelectItem value="realm">
+                    Realm (RealmTagApplication)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

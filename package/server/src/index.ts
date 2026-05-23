@@ -27,8 +27,8 @@ import {
   realmApi,
   realmExtraApi,
   realmTagContextApi,
-  realmTagUnitApi,
-  realmTagVoteApi,
+  realmTagApplicationApi,
+  realmTagApplicationVoteApi,
 } from "./realm";
 import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
@@ -177,8 +177,8 @@ app
   .use(realmApi)
   .use(realmExtraApi)
   .use(realmTagContextApi)
-  .use(realmTagUnitApi)
-  .use(realmTagVoteApi)
+  .use(realmTagApplicationApi)
+  .use(realmTagApplicationVoteApi)
   .use(creditAttributionApi)
   .use(subjectAttributionApi)
   .use(entityApi)

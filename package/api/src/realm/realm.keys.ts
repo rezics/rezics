@@ -42,10 +42,10 @@ export const realmKeys = {
     [...realmKeys.all(), "units", realmUnitId] as const,
 
   /**
-   * Keys for realm tag-unit invalidation
+   * Keys for realm tag-application invalidation
    */
-  tagUnits: (realmUnitId: string) =>
-    [...realmKeys.all(), "tagUnits", realmUnitId] as const,
+  tagApplications: (realmUnitId: string) =>
+    [...realmKeys.all(), "tagApplications", realmUnitId] as const,
 
   tagContext: (realmUnitId: string, tagUnitId: string) =>
     [...realmKeys.all(), "tagContexts", realmUnitId, tagUnitId] as const,

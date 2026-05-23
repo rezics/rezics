@@ -96,7 +96,7 @@ export const tagInfiniteListQuery = (filters?: Omit<TagFilters, "page">) =>
   });
 
 /**
- * Admin discovery: low-score tag rows (UnitTag or RealmTagUnit by scope).
+ * Admin discovery: low-score tag rows (UnitTag or RealmTagApplication by scope).
  */
 export const lowScoreTagsQuery = (query?: LowScoreTagsQuery) =>
   queryOptions({

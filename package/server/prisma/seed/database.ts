@@ -23,7 +23,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   ]);
 
   // Group 2: Aggregate / junction leaves
-  await Promise.all([prisma.realmTagUnit.deleteMany()]);
+  await Promise.all([prisma.realmTagApplication.deleteMany()]);
 
   // Group 3: Realm + shelf + tag junction
   await prisma.shelfUnitRelation.deleteMany();

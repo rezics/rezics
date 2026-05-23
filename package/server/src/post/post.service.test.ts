@@ -307,7 +307,7 @@ describe("PostService.byRealm", () => {
     ]);
   });
 
-  test("tag filter uses RealmTagUnit OR UnitTag fallback semantics", async () => {
+  test("tag filter uses RealmTagApplication OR UnitTag fallback semantics", async () => {
     resetMocks();
     await service.byRealm("realm-1", { tagIds: ["tag-1", "tag-2"] });
 

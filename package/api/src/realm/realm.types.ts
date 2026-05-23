@@ -6,7 +6,7 @@
  */
 
 import type {
-  AddRealmTagUnitInput,
+  AddRealmTagApplicationInput,
   AddRealmUnitInput,
   CreateRealmInput,
   JoinRealmInput,
@@ -15,16 +15,16 @@ import type {
   RealmListResponse,
   RealmMemberDTO,
   RealmResponse,
-  RealmTagUnitDTO,
+  RealmTagApplicationDTO,
   RealmUnitDTO,
-  RemoveRealmTagUnitInput,
+  RemoveRealmTagApplicationInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,
 } from "@rezics/contract";
 
 // Re-export contract types
 export type {
-  AddRealmTagUnitInput,
+  AddRealmTagApplicationInput,
   AddRealmUnitInput,
   CreateRealmInput,
   JoinRealmInput,
@@ -33,9 +33,9 @@ export type {
   RealmListResponse,
   RealmMemberDTO,
   RealmResponse,
-  RealmTagUnitDTO,
+  RealmTagApplicationDTO,
   RealmUnitDTO,
-  RemoveRealmTagUnitInput,
+  RemoveRealmTagApplicationInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,
 };

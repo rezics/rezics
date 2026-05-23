@@ -2,11 +2,11 @@ import type {
   RealmDTO,
   RealmListResponse,
   RealmMemberDTO,
-  RealmTagUnitDTO,
+  RealmTagApplicationDTO,
   RealmUnitDTO,
 } from "@rezics/contract";
 import {
-  addRealmTagUnitSchema,
+  addRealmTagApplicationSchema,
   addRealmUnitSchema,
   BasicAdminPermission,
   createRealmSchema,
@@ -21,7 +21,7 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
-import { mapRealmTagUnitToDTO } from "./realm.mapper";
+import { mapRealmTagApplicationToDTO } from "./realm.mapper";
 import { realmService } from "./realm.service";
 
 /** Realm roles that can moderate (update members, manage tags). */
@@ -432,13 +432,18 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       },
     },
   )
-  // --- Realm tag unit routes ---
+  // --- Realm tag application routes ---
   .post(
     "/:unitId/tags",
-    async ({ params, body, identity, set }): Promise<RealmTagUnitDTO> => {
+    async ({
+      params,
+      body,
+      identity,
+      set,
+    }): Promise<RealmTagApplicationDTO> => {
       // Any realm member may add a tag inside a realm; creation acts as a
       // vote. Pin/delete is restricted to admin/realm-owner via the
-      // separate `/realm-tag-units` route.
+      // separate `/realm-tag-applications` route.
       const isAdmin = BasicAdminPermission(identity.permission);
       if (!isAdmin) {
         const actorMember = await realmService.getMember(
@@ -452,22 +457,22 @@ export const realmApi = new Elysia({ prefix: "/realm" })
           );
         }
       }
-      const row = await realmService.createRealmTagUnit(
+      const row = await realmService.createRealmTagApplication(
         identity.userId,
         params.unitId,
         body.unitId,
         body.tagUnitId,
       );
-      return mapRealmTagUnitToDTO(row);
+      return mapRealmTagApplicationToDTO(row);
     },
     {
       requireLogin: true,
       params: realmParamsSchema,
-      body: addRealmTagUnitSchema,
+      body: addRealmTagApplicationSchema,
       detail: {
-        summary: "Add realm-tag-unit",
+        summary: "Add realm-tag-application",
         description:
-          "Add a realm-tag-unit link. Membership-checked; creation acts as a +1 RealmTagVote. Pin/delete uses /realm-tag-units.",
+          "Add a realm-tag-application link. Membership-checked; creation acts as a +1 RealmTagApplicationVote. Pin/delete uses /realm-tag-applications.",
         tags: ["Realms"],
       },
     },
@@ -485,12 +490,12 @@ export const realmApi = new Elysia({ prefix: "/realm" })
           );
         }
       }
-      await realmService.deleteRealmTagUnit(
+      await realmService.deleteRealmTagApplication(
         params.unitId,
         params.contentUnitId,
         params.tagUnitId,
       );
-      return { message: "Realm tag unit removed" };
+      return { message: "Realm tag application removed" };
     },
     {
       requireLogin: true,
@@ -500,8 +505,9 @@ export const realmApi = new Elysia({ prefix: "/realm" })
         contentUnitId: t.String(),
       }),
       detail: {
-        summary: "Remove realm-tag-unit",
-        description: "Remove a realm-tag-unit link (no cascade on removal)",
+        summary: "Remove realm-tag-application",
+        description:
+          "Remove a realm-tag-application link (no cascade on removal)",
         tags: ["Realms"],
       },
     },

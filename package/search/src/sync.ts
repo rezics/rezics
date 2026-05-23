@@ -595,7 +595,7 @@ export async function patchContentRealmTagKeys(
     return;
   }
   const realmTagApplicationsAsTargetUnit =
-    await getSearchPrismaClient().realmTagUnit.findMany({
+    await getSearchPrismaClient().realmTagApplication.findMany({
       where: { unitId },
     });
 

@@ -13,8 +13,8 @@
     "R10": 0
   },
   "keys": [
-    "R1  package/server/src/realm/realm-tag-unit.api.ts  prefix=\"/realm-tag-units\"",
-    "R1  package/server/src/realm/realm-tag-unit.api.ts  prefix=\"/realm-tag-votes\"",
+    "R1  package/server/src/realm/realm-tag-application.api.ts  prefix=\"/realm-tag-applications\"",
+    "R1  package/server/src/realm/realm-tag-application.api.ts  prefix=\"/realm-tag-application-votes\"",
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/admin/low-score-tags\"",
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/tag-votes\"",
     "R1  package/server/src/tag/unit-tag.api.ts  prefix=\"/unit-tags\"",

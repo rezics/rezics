@@ -89,7 +89,7 @@ export const realmTagContextApi = new Elysia({
       detail: {
         summary: "Update realm tag context",
         description:
-          "Upserts pair-level context metadata without creating RealmTagUnit rows.",
+          "Upserts pair-level context metadata without creating RealmTagApplication rows.",
         tags: ["Realms", "Tags"],
       },
     },

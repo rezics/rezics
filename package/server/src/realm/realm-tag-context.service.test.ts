@@ -58,7 +58,7 @@ Object.assign(prismaMock, {
   unit: { findUnique: unitFindUniqueMock, create: unitCreateMock },
   post: { create: postCreateMock },
   realmMember: { findFirst: memberFindFirstMock },
-  realmTagUnit: { create: mock(async () => ({})) },
+  realmTagApplication: { create: mock(async () => ({})) },
   realmTagContext: {
     findUnique: contextFindUniqueMock,
     upsert: contextUpsertMock,
@@ -86,14 +86,14 @@ describe("RealmTagContextService", () => {
     contextUpdateMock.mockClear();
     contextFindUniqueOrThrowMock.mockClear();
     transactionMock.mockClear();
-    (prismaMock.realmTagUnit.create as any).mockClear();
+    (prismaMock.realmTagApplication.create as any).mockClear();
   });
 
-  test("returns null for a missing context without creating RealmTagUnit", async () => {
+  test("returns null for a missing context without creating RealmTagApplication", async () => {
     const row = await service.get("realm-1", "tag-1");
     expect(row).toBeNull();
     expect(contextFindUniqueMock).toHaveBeenCalled();
-    expect(prismaMock.realmTagUnit.create).not.toHaveBeenCalled();
+    expect(prismaMock.realmTagApplication.create).not.toHaveBeenCalled();
   });
 
   test("rejects invalid realm and tag unit types", async () => {
@@ -102,7 +102,7 @@ describe("RealmTagContextService", () => {
     ).rejects.toBeInstanceOf(RealmTagContextError);
   });
 
-  test("upserts context metadata without creating RealmTagUnit", async () => {
+  test("upserts context metadata without creating RealmTagApplication", async () => {
     const row = await service.upsert("realm-1", "tag-1", {
       contextUnitId: "context-unit-1",
     });
@@ -113,7 +113,7 @@ describe("RealmTagContextService", () => {
         tagUnitId: "tag-1",
       },
     });
-    expect(prismaMock.realmTagUnit.create).not.toHaveBeenCalled();
+    expect(prismaMock.realmTagApplication.create).not.toHaveBeenCalled();
   });
 
   test("materializes exactly one POST content Unit when missing", async () => {

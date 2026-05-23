@@ -100,7 +100,7 @@ export type RealmMemberDTO = (typeof realmMemberDTOSchema)["static"];
 
 /**
  * RealmUnit is community/feed membership for a Unit in a realm. It is not
- * semantic tagging and is not a prerequisite for RealmTagUnit.
+ * semantic tagging and is not a prerequisite for RealmTagApplication.
  */
 export const realmUnitDTOSchema = t.Object({
   realmUnitId: t.String(),
@@ -115,11 +115,11 @@ export type RealmUnitDTO = (typeof realmUnitDTOSchema)["static"];
 // ============================================================
 
 /**
- * RealmTagUnit records a realm-scoped application of an existing global TAG
+ * RealmTagApplication records a realm-scoped application of an existing global TAG
  * Unit to a target Unit. It does not create a realm-local tag and does not
  * require the target Unit to appear in the realm feed through RealmUnit.
  */
-export const realmTagUnitDTOSchema = t.Object({
+export const realmTagApplicationDTOSchema = t.Object({
   realmUnitId: t.String(),
   tagUnitId: t.String(),
   unitId: t.String(),
@@ -132,17 +132,18 @@ export const realmTagUnitDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type RealmTagUnitDTO = (typeof realmTagUnitDTOSchema)["static"];
+export type RealmTagApplicationDTO =
+  (typeof realmTagApplicationDTOSchema)["static"];
 
 // ============================================================
 // REALM TAG VOTE DTO
 // ============================================================
 
 /**
- * RealmTagVote is a member vote on a single RealmTagUnit application. Its
+ * RealmTagApplicationVote is a member vote on a single RealmTagApplication. Its
  * identity is `(realmUnitId, tagUnitId, unitId, userId)`.
  */
-export const realmTagVoteDTOSchema = t.Object({
+export const realmTagApplicationVoteDTOSchema = t.Object({
   realmUnitId: t.String(),
   tagUnitId: t.String(),
   unitId: t.String(),
@@ -151,7 +152,8 @@ export const realmTagVoteDTOSchema = t.Object({
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type RealmTagVoteDTO = (typeof realmTagVoteDTOSchema)["static"];
+export type RealmTagApplicationVoteDTO =
+  (typeof realmTagApplicationVoteDTOSchema)["static"];
 
 // ============================================================
 // REALM TAG CONTEXT DTO (pair-level interpretation)
@@ -227,40 +229,42 @@ export const realmTagContextMaterializeContractSchema = {
 // REALM TAG UNIT MUTATIONS (pin / position / cast / create)
 // ============================================================
 
-export const createRealmTagUnitSchema = t.Object({
+export const createRealmTagApplicationSchema = t.Object({
   realmUnitId: t.String(),
   unitId: t.String(),
   tagUnitId: t.String(),
 });
 
-export type CreateRealmTagUnitInput =
-  (typeof createRealmTagUnitSchema)["static"];
+export type CreateRealmTagApplicationInput =
+  (typeof createRealmTagApplicationSchema)["static"];
 
-/** Body for PATCH /realm-tag-units/:realmUnitId/:unitId/:tagUnitId */
-export const patchRealmTagUnitSchema = t.Object({
+/** Body for PATCH /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId */
+export const patchRealmTagApplicationSchema = t.Object({
   pinned: t.Optional(t.Boolean()),
   position: t.Optional(t.Nullable(t.String())),
 });
 
-export type PatchRealmTagUnitInput = (typeof patchRealmTagUnitSchema)["static"];
+export type PatchRealmTagApplicationInput =
+  (typeof patchRealmTagApplicationSchema)["static"];
 
-export const realmTagUnitPathParamsSchema = t.Object({
+export const realmTagApplicationPathParamsSchema = t.Object({
   realmUnitId: t.String(),
   unitId: t.String(),
   tagUnitId: t.String(),
 });
 
-export type RealmTagUnitPathParams =
-  (typeof realmTagUnitPathParamsSchema)["static"];
+export type RealmTagApplicationPathParams =
+  (typeof realmTagApplicationPathParamsSchema)["static"];
 
-export const castRealmTagVoteSchema = t.Object({
+export const castRealmTagApplicationVoteSchema = t.Object({
   realmUnitId: t.String(),
   unitId: t.String(),
   tagUnitId: t.String(),
   value: t.Number(),
 });
 
-export type CastRealmTagVoteInput = (typeof castRealmTagVoteSchema)["static"];
+export type CastRealmTagApplicationVoteInput =
+  (typeof castRealmTagApplicationVoteSchema)["static"];
 
 // ============================================================
 // ADMIN: LOW-SCORE TAG DISCOVERY
@@ -286,7 +290,7 @@ export const lowScoreTagsResponseSchema = t.Object({
   scope: lowScoreTagsScopeSchema,
   threshold: t.Number(),
   unitTags: t.Optional(t.Array(unitTagDTOSchema)),
-  realmTagUnits: t.Optional(t.Array(realmTagUnitDTOSchema)),
+  realmTagApplications: t.Optional(t.Array(realmTagApplicationDTOSchema)),
 });
 
 export type LowScoreTagsResponse =
@@ -415,17 +419,18 @@ export const addRealmUnitSchema = t.Object({
 
 export type AddRealmUnitInput = (typeof addRealmUnitSchema)["static"];
 
-export const addRealmTagUnitSchema = t.Object({
+export const addRealmTagApplicationSchema = t.Object({
   tagUnitId: t.String(),
   unitId: t.String(),
 });
 
-export type AddRealmTagUnitInput = (typeof addRealmTagUnitSchema)["static"];
+export type AddRealmTagApplicationInput =
+  (typeof addRealmTagApplicationSchema)["static"];
 
-export const removeRealmTagUnitSchema = t.Object({
+export const removeRealmTagApplicationSchema = t.Object({
   tagUnitId: t.String(),
   unitId: t.String(),
 });
 
-export type RemoveRealmTagUnitInput =
-  (typeof removeRealmTagUnitSchema)["static"];
+export type RemoveRealmTagApplicationInput =
+  (typeof removeRealmTagApplicationSchema)["static"];

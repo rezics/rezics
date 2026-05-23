@@ -9,7 +9,7 @@
  * as the deterministic tiebreaker.
  */
 
-import type { RealmTagUnitDTO, UnitTagDTO } from "@rezics/contract";
+import type { RealmTagApplicationDTO, UnitTagDTO } from "@rezics/contract";
 
 type PinnableTagRow = {
   pinned?: boolean;
@@ -43,7 +43,7 @@ export function sortTagsByPinThenScore<T extends UnitTagDTO>(rows: T[]): T[] {
   return [...rows].sort(comparePinThenScore);
 }
 
-export function sortRealmTagsByPinThenScore<T extends RealmTagUnitDTO>(
+export function sortRealmTagsByPinThenScore<T extends RealmTagApplicationDTO>(
   rows: T[],
 ): T[] {
   return [...rows].sort(comparePinThenScore);

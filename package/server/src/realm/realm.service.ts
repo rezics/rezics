@@ -7,10 +7,10 @@ import type {
   UpdateRealmInput,
 } from "@rezics/contract";
 import { parseIdsCsv, validateSlug } from "@rezics/contract";
-import type { Prisma, RealmTagUnit } from "#/prisma/client";
+import type { Prisma, RealmTagApplication } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 
-/** Score at or below this threshold hides a RealmTagUnit from regular users. */
+/** Score at or below this threshold hides a RealmTagApplication from regular users. */
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
 
 import {
@@ -493,14 +493,14 @@ export class RealmService {
     });
   }
 
-  // --- Realm tag units ---
+  // --- Realm tag applications ---
   //
-  // RealmTagUnit and UnitTag remain independent score layers. The standard
-  // RealmTagUnit write path contributes the caller's global TagVote once, but
-  // later RealmTagUnit deletion never deletes or decrements UnitTag.
+  // RealmTagApplication and UnitTag remain independent score layers. The standard
+  // RealmTagApplication write path contributes the caller's global TagVote once, but
+  // later RealmTagApplication deletion never deletes or decrements UnitTag.
 
   /**
-   * Create a RealmTagUnit with creation-as-vote semantics.
+   * Create a RealmTagApplication with creation-as-vote semantics.
    *
    * The caller MUST be a member of the realm; the route enforces the
    * membership check and passes through the actor's userId.
@@ -508,23 +508,23 @@ export class RealmService {
    * `tagUnitId` must be TAG. This does not mint a realm-local tag and does not
    * require RealmUnit(realmUnitId, unitId).
    *
-   * - First call: writes the RealmTagUnit (score=1, voteCount=1) and a +1
-   *   RealmTagVote.
-   * - Subsequent distinct-member calls: insert a RealmTagVote and recompute.
-   * - Idempotent for the same user: existing RealmTagVote left untouched.
+   * - First call: writes the RealmTagApplication (score=1, voteCount=1) and a +1
+   *   RealmTagApplicationVote.
+   * - Subsequent distinct-member calls: insert a RealmTagApplicationVote and recompute.
+   * - Idempotent for the same user: existing RealmTagApplicationVote left untouched.
    * - The caller's global TagVote(userId, unitId, tagUnitId, +1) is created
    *   once or preserved, then UnitTag aggregates are recomputed.
    */
-  async createRealmTagUnit(
+  async createRealmTagApplication(
     userId: string,
     realmUnitId: string,
     unitId: string,
     tagUnitId: string,
-  ): Promise<RealmTagUnit> {
+  ): Promise<RealmTagApplication> {
     const row = await prisma.$transaction(async (tx) => {
       await this.assertRealmAndTagTypes(realmUnitId, tagUnitId, tx);
 
-      await tx.realmTagUnit.upsert({
+      await tx.realmTagApplication.upsert({
         where: {
           realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
         },
@@ -538,7 +538,7 @@ export class RealmService {
         },
       });
 
-      const existing = await tx.realmTagVote.findUnique({
+      const existing = await tx.realmTagApplicationVote.findUnique({
         where: {
           realmUnitId_tagUnitId_unitId_userId: {
             realmUnitId,
@@ -550,18 +550,18 @@ export class RealmService {
       });
 
       if (!existing) {
-        await tx.realmTagVote.create({
+        await tx.realmTagApplicationVote.create({
           data: { realmUnitId, userId, unitId, tagUnitId, value: 1 },
         });
       }
 
-      const agg = await tx.realmTagVote.aggregate({
+      const agg = await tx.realmTagApplicationVote.aggregate({
         where: { realmUnitId, unitId, tagUnitId },
         _sum: { value: true },
         _count: { value: true },
       });
 
-      const realmTagUnit = await tx.realmTagUnit.update({
+      const realmTagApplication = await tx.realmTagApplication.update({
         where: {
           realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
         },
@@ -603,7 +603,7 @@ export class RealmService {
         },
       });
 
-      return realmTagUnit;
+      return realmTagApplication;
     });
 
     await patchContentTagsToMeili(unitId);
@@ -612,15 +612,15 @@ export class RealmService {
   }
 
   /**
-   * Set pin/position on a RealmTagUnit. The route enforces admin OR
+   * Set pin/position on a RealmTagApplication. The route enforces admin OR
    * `Realm.owner` authorization.
    */
-  async setRealmTagUnitPin(
+  async setRealmTagApplicationPin(
     realmUnitId: string,
     unitId: string,
     tagUnitId: string,
     input: { pinned?: boolean; position?: string | null },
-  ): Promise<RealmTagUnit> {
+  ): Promise<RealmTagApplication> {
     const data: { pinned?: boolean; position?: string | null } = {};
     if (input.pinned !== undefined) {
       data.pinned = input.pinned;
@@ -628,7 +628,7 @@ export class RealmService {
     }
     if (input.position !== undefined) data.position = input.position;
 
-    const updated = await prisma.realmTagUnit.update({
+    const updated = await prisma.realmTagApplication.update({
       where: {
         realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
       },
@@ -639,15 +639,15 @@ export class RealmService {
   }
 
   /**
-   * Delete a RealmTagUnit and the underlying RealmTagVote rows for that triple.
+   * Delete a RealmTagApplication and the underlying RealmTagApplicationVote rows for that triple.
    * Does NOT cascade to UnitTag.
    */
-  async deleteRealmTagUnit(
+  async deleteRealmTagApplication(
     realmUnitId: string,
     unitId: string,
     tagUnitId: string,
   ): Promise<void> {
-    await prisma.realmTagUnit.delete({
+    await prisma.realmTagApplication.delete({
       where: {
         realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
       },
@@ -656,11 +656,11 @@ export class RealmService {
   }
 
   /**
-   * Cast a RealmTagVote upsert and recompute the parent RealmTagUnit's
+   * Cast a RealmTagApplicationVote upsert and recompute the parent RealmTagApplication's
    * `score` and `voteCount`. Membership check is enforced by the route at
    * write time; votes are retained even if the member later leaves.
    */
-  async castRealmTagVote(
+  async castRealmTagApplicationVote(
     userId: string,
     realmUnitId: string,
     unitId: string,
@@ -670,7 +670,7 @@ export class RealmService {
     const clamped = value > 0 ? 1 : -1;
 
     await prisma.$transaction(async (tx) => {
-      await tx.realmTagVote.upsert({
+      await tx.realmTagApplicationVote.upsert({
         where: {
           realmUnitId_tagUnitId_unitId_userId: {
             realmUnitId,
@@ -683,13 +683,13 @@ export class RealmService {
         create: { realmUnitId, userId, unitId, tagUnitId, value: clamped },
       });
 
-      const agg = await tx.realmTagVote.aggregate({
+      const agg = await tx.realmTagApplicationVote.aggregate({
         where: { realmUnitId, unitId, tagUnitId },
         _sum: { value: true },
         _count: { value: true },
       });
 
-      await tx.realmTagUnit.update({
+      await tx.realmTagApplication.update({
         where: {
           realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
         },
@@ -704,7 +704,7 @@ export class RealmService {
   }
 
   /**
-   * List RealmTagUnit rows for a given (realm, unit), ordered pin-first
+   * List RealmTagApplication rows for a given (realm, unit), ordered pin-first
    * then score-desc. Regular callers do not see rows below the visibility
    * threshold; privileged callers (admin / realm owner) see them so the
    * route can flag them.
@@ -713,16 +713,17 @@ export class RealmService {
     realmUnitId: string,
     unitId: string,
     options?: { includeBelowThreshold?: boolean },
-  ): Promise<RealmTagUnit[]> {
-    const where: Prisma.RealmTagUnitWhereInput = options?.includeBelowThreshold
-      ? { realmUnitId, unitId }
-      : {
-          realmUnitId,
-          unitId,
-          score: { gt: REALM_TAG_VISIBILITY_THRESHOLD },
-        };
+  ): Promise<RealmTagApplication[]> {
+    const where: Prisma.RealmTagApplicationWhereInput =
+      options?.includeBelowThreshold
+        ? { realmUnitId, unitId }
+        : {
+            realmUnitId,
+            unitId,
+            score: { gt: REALM_TAG_VISIBILITY_THRESHOLD },
+          };
 
-    return prisma.realmTagUnit.findMany({
+    return prisma.realmTagApplication.findMany({
       where,
       orderBy: [
         { pinned: "desc" },
@@ -734,16 +735,16 @@ export class RealmService {
   }
 
   /**
-   * Admin-only discovery: list RealmTagUnit rows at or below the given
+   * Admin-only discovery: list RealmTagApplication rows at or below the given
    * score threshold, optionally constrained to a single realm. Ordered
    * ascending so the worst offenders surface first.
    */
-  async listLowScoreRealmTagUnits(
+  async listLowScoreRealmTagApplications(
     threshold: number,
     limit: number,
     realmUnitId?: string,
-  ): Promise<RealmTagUnit[]> {
-    return prisma.realmTagUnit.findMany({
+  ): Promise<RealmTagApplication[]> {
+    return prisma.realmTagApplication.findMany({
       where: {
         score: { lte: threshold },
         ...(realmUnitId ? { realmUnitId } : {}),

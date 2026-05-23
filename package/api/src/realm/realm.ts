@@ -19,20 +19,20 @@ export { realmKeys } from "./realm.keys";
 // Mutation Hooks
 export {
   realmMutations,
-  useAddRealmTagUnitMutation,
+  useAddRealmTagApplicationMutation,
   useAddRealmUnitMutation,
-  useCastRealmTagVoteMutation,
+  useCastRealmTagApplicationVoteMutation,
   useCreateRealmMutation,
-  useCreateRealmTagUnitMutation,
+  useCreateRealmTagApplicationMutation,
   useDeleteRealmMutation,
-  useDeleteRealmTagUnitMutation,
+  useDeleteRealmTagApplicationMutation,
   useJoinRealmMutation,
   useLeaveRealmMutation,
   useMaterializeRealmTagContextMutation,
   useMuteRealmMutation,
-  usePatchRealmTagUnitMutation,
+  usePatchRealmTagApplicationMutation,
   useRemoveMemberMutation,
-  useRemoveRealmTagUnitMutation,
+  useRemoveRealmTagApplicationMutation,
   useRemoveRealmUnitMutation,
   useUnmuteRealmMutation,
   useUpdateRealmTagContextMutation,
@@ -53,7 +53,7 @@ export {
 } from "./realm.queries";
 // Types
 export type {
-  AddRealmTagUnitInput,
+  AddRealmTagApplicationInput,
   AddRealmUnitInput,
   CreateRealmInput,
   JoinRealmInput,
@@ -64,7 +64,7 @@ export type {
   RealmMemberDTO,
   RealmResponse,
   RealmSortOption,
-  RealmTagUnitDTO,
+  RealmTagApplicationDTO,
   RealmUnitDTO,
   RealmView,
   UpdateMemberRoleInput,
@@ -73,12 +73,12 @@ export type {
 
 // Re-export contract types used by new realm-tag mutations
 export type {
-  CastRealmTagVoteInput,
-  CreateRealmTagUnitInput,
-  PatchRealmTagUnitInput,
+  CastRealmTagApplicationVoteInput,
+  CreateRealmTagApplicationInput,
+  PatchRealmTagApplicationInput,
   RealmTagContextDTO,
   RealmTagContextReadResponse,
   RealmTagContextUpdateResponse,
-  RealmTagVoteDTO,
+  RealmTagApplicationVoteDTO,
   UpdateRealmTagContextInput,
 } from "@rezics/contract";

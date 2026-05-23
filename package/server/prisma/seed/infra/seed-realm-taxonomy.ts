@@ -207,12 +207,12 @@ async function ensureRealmTagApplication(
   tagUnitId: string,
   unitId: string,
 ): Promise<void> {
-  await prisma.realmTagUnit.upsert({
+  await prisma.realmTagApplication.upsert({
     where: { realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId } },
     update: {},
     create: { realmUnitId, tagUnitId, unitId, score: 1, voteCount: 1 },
   });
-  await prisma.realmTagVote.upsert({
+  await prisma.realmTagApplicationVote.upsert({
     where: {
       realmUnitId_tagUnitId_unitId_userId: {
         realmUnitId,
@@ -239,7 +239,7 @@ async function ensureRealmTagApplication(
 /**
  * Seed realm taxonomy examples that protect the product model:
  * realms are community spaces, global TAG Units are shared vocabulary, and
- * RealmTagUnit remains independent from RealmUnit feed membership.
+ * RealmTagApplication remains independent from RealmUnit feed membership.
  */
 export async function seedRealmTaxonomy(
   prisma: PrismaClient,

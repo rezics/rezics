@@ -19,12 +19,12 @@ const unitFindUniqueMock = mock(async ({ where }: any) => {
 const realmUnitCreateMock = mock(async () => ({}));
 const realmUnitDeleteMock = mock(async () => ({}));
 const realmUnitFindManyMock = mock(async () => []);
-const realmTagUnitUpsertMock = mock(async ({ create }: any) => ({
+const realmTagApplicationUpsertMock = mock(async ({ create }: any) => ({
   ...create,
   createdAt: new Date("2026-01-01T00:00:00Z"),
   updatedAt: new Date("2026-01-01T00:00:00Z"),
 }));
-const realmTagUnitUpdateMock = mock(async ({ where, data }: any) => ({
+const realmTagApplicationUpdateMock = mock(async ({ where, data }: any) => ({
   realmUnitId: where.realmUnitId_tagUnitId_unitId.realmUnitId,
   tagUnitId: where.realmUnitId_tagUnitId_unitId.tagUnitId,
   unitId: where.realmUnitId_tagUnitId_unitId.unitId,
@@ -35,15 +35,17 @@ const realmTagUnitUpdateMock = mock(async ({ where, data }: any) => ({
   createdAt: new Date("2026-01-01T00:00:00Z"),
   updatedAt: new Date("2026-01-01T00:00:00Z"),
 }));
-const realmTagUnitDeleteMock = mock(async () => ({}));
-const realmTagVoteFindUniqueMock = mock(async () => null);
-const realmTagVoteCreateMock = mock(async () => ({}));
-const realmTagVoteDeleteManyMock = mock(async () => ({ count: 0 }));
-const realmTagVoteAggregateMock = mock(async () => ({
+const realmTagApplicationDeleteMock = mock(async () => ({}));
+const realmTagApplicationVoteFindUniqueMock = mock(
+  async (): Promise<any> => null,
+);
+const realmTagApplicationVoteCreateMock = mock(async () => ({}));
+const realmTagApplicationVoteDeleteManyMock = mock(async () => ({ count: 0 }));
+const realmTagApplicationVoteAggregateMock = mock(async () => ({
   _sum: { value: 1 },
   _count: { value: 1 },
 }));
-const tagVoteFindUniqueMock = mock(async () => null);
+const tagVoteFindUniqueMock = mock(async (): Promise<any> => null);
 const tagVoteCreateMock = mock(async () => ({}));
 const tagVoteAggregateMock = mock(async () => ({
   _sum: { value: 1 },
@@ -59,17 +61,17 @@ const transactionMock = mock(async (fn: any) =>
       delete: realmUnitDeleteMock,
       findMany: realmUnitFindManyMock,
     },
-    realmTagUnit: {
+    realmTagApplication: {
       findMany: findManyMock,
-      upsert: realmTagUnitUpsertMock,
-      update: realmTagUnitUpdateMock,
-      delete: realmTagUnitDeleteMock,
+      upsert: realmTagApplicationUpsertMock,
+      update: realmTagApplicationUpdateMock,
+      delete: realmTagApplicationDeleteMock,
     },
-    realmTagVote: {
-      findUnique: realmTagVoteFindUniqueMock,
-      create: realmTagVoteCreateMock,
-      deleteMany: realmTagVoteDeleteManyMock,
-      aggregate: realmTagVoteAggregateMock,
+    realmTagApplicationVote: {
+      findUnique: realmTagApplicationVoteFindUniqueMock,
+      create: realmTagApplicationVoteCreateMock,
+      deleteMany: realmTagApplicationVoteDeleteManyMock,
+      aggregate: realmTagApplicationVoteAggregateMock,
       upsert: mock(async () => ({})),
     },
     tagVote: {
@@ -93,17 +95,17 @@ Object.assign(prismaMock, {
     delete: realmUnitDeleteMock,
     findMany: realmUnitFindManyMock,
   },
-  realmTagUnit: {
+  realmTagApplication: {
     findMany: findManyMock,
-    upsert: realmTagUnitUpsertMock,
-    update: realmTagUnitUpdateMock,
-    delete: realmTagUnitDeleteMock,
+    upsert: realmTagApplicationUpsertMock,
+    update: realmTagApplicationUpdateMock,
+    delete: realmTagApplicationDeleteMock,
   },
-  realmTagVote: {
-    findUnique: realmTagVoteFindUniqueMock,
-    create: realmTagVoteCreateMock,
-    deleteMany: realmTagVoteDeleteManyMock,
-    aggregate: realmTagVoteAggregateMock,
+  realmTagApplicationVote: {
+    findUnique: realmTagApplicationVoteFindUniqueMock,
+    create: realmTagApplicationVoteCreateMock,
+    deleteMany: realmTagApplicationVoteDeleteManyMock,
+    aggregate: realmTagApplicationVoteAggregateMock,
   },
   tagVote: {
     findUnique: tagVoteFindUniqueMock,
@@ -142,14 +144,14 @@ function resetWriteMocks() {
   realmUnitCreateMock.mockClear();
   realmUnitDeleteMock.mockClear();
   realmUnitFindManyMock.mockClear();
-  realmTagUnitUpsertMock.mockClear();
-  realmTagUnitUpdateMock.mockClear();
-  realmTagUnitDeleteMock.mockClear();
-  realmTagVoteFindUniqueMock.mockClear();
-  realmTagVoteFindUniqueMock.mockResolvedValue(null);
-  realmTagVoteCreateMock.mockClear();
-  realmTagVoteDeleteManyMock.mockClear();
-  realmTagVoteAggregateMock.mockClear();
+  realmTagApplicationUpsertMock.mockClear();
+  realmTagApplicationUpdateMock.mockClear();
+  realmTagApplicationDeleteMock.mockClear();
+  realmTagApplicationVoteFindUniqueMock.mockClear();
+  realmTagApplicationVoteFindUniqueMock.mockResolvedValue(null);
+  realmTagApplicationVoteCreateMock.mockClear();
+  realmTagApplicationVoteDeleteManyMock.mockClear();
+  realmTagApplicationVoteAggregateMock.mockClear();
   tagVoteFindUniqueMock.mockClear();
   tagVoteFindUniqueMock.mockResolvedValue(null);
   tagVoteCreateMock.mockClear();
@@ -198,13 +200,13 @@ describe("RealmService.listRealmTagsForUnit", () => {
   });
 });
 
-describe("RealmService.listLowScoreRealmTagUnits", () => {
+describe("RealmService.listLowScoreRealmTagApplications", () => {
   const service = new RealmService();
 
   test("queries score <= threshold, ordered ascending", async () => {
     findManyMock.mockClear();
     findManyMock.mockResolvedValueOnce([]);
-    await service.listLowScoreRealmTagUnits(-100, 50);
+    await service.listLowScoreRealmTagApplications(-100, 50);
     const args = findManyMock.mock.calls[0]?.[0] as any;
     expect(args.where).toEqual({ score: { lte: -100 } });
     expect(args.orderBy).toEqual([
@@ -219,7 +221,7 @@ describe("RealmService.listLowScoreRealmTagUnits", () => {
   test("constrains to a single realm when realmUnitId is provided", async () => {
     findManyMock.mockClear();
     findManyMock.mockResolvedValueOnce([]);
-    await service.listLowScoreRealmTagUnits(-100, 50, "realm-1");
+    await service.listLowScoreRealmTagApplications(-100, 50, "realm-1");
     const args = findManyMock.mock.calls[0]?.[0] as any;
     expect(args.where).toEqual({
       score: { lte: -100 },
@@ -230,13 +232,13 @@ describe("RealmService.listLowScoreRealmTagUnits", () => {
   test("clamps limit between 1 and 200", async () => {
     findManyMock.mockClear();
     findManyMock.mockResolvedValueOnce([]);
-    await service.listLowScoreRealmTagUnits(0, 5000);
+    await service.listLowScoreRealmTagApplications(0, 5000);
     const args1 = findManyMock.mock.calls[0]?.[0] as any;
     expect(args1.take).toBe(200);
 
     findManyMock.mockClear();
     findManyMock.mockResolvedValueOnce([]);
-    await service.listLowScoreRealmTagUnits(0, 0);
+    await service.listLowScoreRealmTagApplications(0, 0);
     const args2 = findManyMock.mock.calls[0]?.[0] as any;
     expect(args2.take).toBe(1);
   });
@@ -248,15 +250,20 @@ describe("REALM_TAG_VISIBILITY_THRESHOLD", () => {
   });
 });
 
-describe("RealmService.createRealmTagUnit", () => {
+describe("RealmService.createRealmTagApplication", () => {
   const service = new RealmService();
 
   beforeEach(resetWriteMocks);
 
-  test("creates RealmTagUnit without creating RealmUnit", async () => {
-    await service.createRealmTagUnit("user-1", "realm-1", "unit-1", "tag-1");
+  test("creates RealmTagApplication without creating RealmUnit", async () => {
+    await service.createRealmTagApplication(
+      "user-1",
+      "realm-1",
+      "unit-1",
+      "tag-1",
+    );
 
-    expect(realmTagUnitUpsertMock).toHaveBeenCalledWith(
+    expect(realmTagApplicationUpsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
           realmUnitId_tagUnitId_unitId: {
@@ -272,59 +279,84 @@ describe("RealmService.createRealmTagUnit", () => {
 
   test("rejects non-TAG tagUnitId and non-REALM realmUnitId", async () => {
     await expect(
-      service.createRealmTagUnit("user-1", "book-1", "unit-1", "tag-1"),
+      service.createRealmTagApplication("user-1", "book-1", "unit-1", "tag-1"),
     ).rejects.toThrow("realmUnitId");
 
     await expect(
-      service.createRealmTagUnit("user-1", "realm-1", "unit-1", "book-1"),
+      service.createRealmTagApplication(
+        "user-1",
+        "realm-1",
+        "unit-1",
+        "book-1",
+      ),
     ).rejects.toThrow("tagUnitId");
   });
 
   test("creates global TagVote and UnitTag aggregate once per user/unit/tag", async () => {
-    await service.createRealmTagUnit("user-1", "realm-1", "unit-1", "tag-1");
+    await service.createRealmTagApplication(
+      "user-1",
+      "realm-1",
+      "unit-1",
+      "tag-1",
+    );
     tagVoteFindUniqueMock.mockResolvedValueOnce({
       userId: "user-1",
       unitId: "unit-1",
       tagUnitId: "tag-1",
       value: 1,
     });
-    realmTagVoteFindUniqueMock.mockResolvedValueOnce({
+    realmTagApplicationVoteFindUniqueMock.mockResolvedValueOnce({
       realmUnitId: "realm-1",
       tagUnitId: "tag-1",
       unitId: "unit-1",
       userId: "user-1",
       value: 1,
     });
-    await service.createRealmTagUnit("user-1", "realm-1", "unit-1", "tag-1");
+    await service.createRealmTagApplication(
+      "user-1",
+      "realm-1",
+      "unit-1",
+      "tag-1",
+    );
 
     expect(tagVoteCreateMock).toHaveBeenCalledTimes(1);
     expect(unitTagUpsertMock).toHaveBeenCalledTimes(2);
   });
 
   test("does not amplify global TagVote across multiple realms", async () => {
-    await service.createRealmTagUnit("user-1", "realm-1", "unit-1", "tag-1");
+    await service.createRealmTagApplication(
+      "user-1",
+      "realm-1",
+      "unit-1",
+      "tag-1",
+    );
     tagVoteFindUniqueMock.mockResolvedValueOnce({
       userId: "user-1",
       unitId: "unit-1",
       tagUnitId: "tag-1",
       value: 1,
     });
-    await service.createRealmTagUnit("user-1", "realm-2", "unit-1", "tag-1");
+    await service.createRealmTagApplication(
+      "user-1",
+      "realm-2",
+      "unit-1",
+      "tag-1",
+    );
 
     expect(tagVoteCreateMock).toHaveBeenCalledTimes(1);
   });
 });
 
-describe("RealmService.deleteRealmTagUnit", () => {
+describe("RealmService.deleteRealmTagApplication", () => {
   const service = new RealmService();
 
   beforeEach(resetWriteMocks);
 
-  test("deletes only RealmTagUnit and relies on application cascade", async () => {
-    await service.deleteRealmTagUnit("realm-1", "unit-1", "tag-1");
+  test("deletes only RealmTagApplication and relies on application cascade", async () => {
+    await service.deleteRealmTagApplication("realm-1", "unit-1", "tag-1");
 
-    expect(realmTagUnitDeleteMock).toHaveBeenCalledTimes(1);
-    expect(realmTagVoteDeleteManyMock).not.toHaveBeenCalled();
+    expect(realmTagApplicationDeleteMock).toHaveBeenCalledTimes(1);
+    expect(realmTagApplicationVoteDeleteManyMock).not.toHaveBeenCalled();
     expect(unitTagUpdateMock).not.toHaveBeenCalled();
     expect(unitTagUpsertMock).not.toHaveBeenCalled();
   });
@@ -335,11 +367,11 @@ describe("RealmService.removeRealmUnit", () => {
 
   beforeEach(resetWriteMocks);
 
-  test("does not delete RealmTagUnit rows when removing feed membership", async () => {
+  test("does not delete RealmTagApplication rows when removing feed membership", async () => {
     await service.removeRealmUnit("realm-1", "unit-1");
 
     expect(realmUnitDeleteMock).toHaveBeenCalledTimes(1);
-    expect(realmTagUnitDeleteMock).not.toHaveBeenCalled();
-    expect(realmTagVoteDeleteManyMock).not.toHaveBeenCalled();
+    expect(realmTagApplicationDeleteMock).not.toHaveBeenCalled();
+    expect(realmTagApplicationVoteDeleteManyMock).not.toHaveBeenCalled();
   });
 });

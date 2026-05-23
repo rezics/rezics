@@ -205,7 +205,7 @@ export const tagApi = {
   },
 
   /**
-   * Admin discovery: list UnitTag/RealmTagUnit rows at or below a score threshold.
+   * Admin discovery: list UnitTag/RealmTagApplication rows at or below a score threshold.
    * GET /admin/low-score-tags
    */
   listLowScoreTags: async (

@@ -1,13 +1,16 @@
 export { realmExtraApi } from "./realm-extra.api";
 export { realmTagContextApi } from "./realm-tag-context.api";
-export { realmTagUnitApi, realmTagVoteApi } from "./realm-tag-unit.api";
-export { mapRealmTagVoteToDTO } from "./realm-tag-vote.mapper";
+export {
+  realmTagApplicationApi,
+  realmTagApplicationVoteApi,
+} from "./realm-tag-application.api";
+export { mapRealmTagApplicationVoteToDTO } from "./realm-tag-application-vote.mapper";
 export { realmApi } from "./realm.api";
 export {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,
   mapRealmTagContextToDTO,
-  mapRealmTagUnitToDTO,
+  mapRealmTagApplicationToDTO,
   mapRealmToDTO,
   mapRealmUnitToDTO,
 } from "./realm.mapper";

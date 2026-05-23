@@ -2,14 +2,14 @@ import type {
   RealmDTO,
   RealmMemberDTO,
   RealmTagContextDTO,
-  RealmTagUnitDTO,
+  RealmTagApplicationDTO,
   RealmUnitDTO,
   UnitTranslationDTO,
 } from "@rezics/contract";
 import type {
   RealmMember,
   RealmTagContext,
-  RealmTagUnit,
+  RealmTagApplication,
   RealmUnit,
 } from "#/prisma/client";
 import { mapPublicUser } from "@/utils/sanitizeUser";
@@ -67,10 +67,10 @@ export function mapRealmUnitToDTO(row: RealmUnit): RealmUnitDTO {
   };
 }
 
-export function mapRealmTagUnitToDTO(
-  row: RealmTagUnit,
+export function mapRealmTagApplicationToDTO(
+  row: RealmTagApplication,
   options?: { belowVisibilityThreshold?: boolean },
-): RealmTagUnitDTO {
+): RealmTagApplicationDTO {
   return {
     realmUnitId: row.realmUnitId,
     tagUnitId: row.tagUnitId,

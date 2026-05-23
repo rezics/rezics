@@ -180,7 +180,7 @@ model Unit {
 
   // Tag system
   unitTags       UnitTag[] @relation("TaggedUnit")
-  tagUsages      UnitTag[] @relation("TagUnit")
+  tagUsages      UnitTag[] @relation("UnitTagAppliedTag")
   tagVotesOnUnit TagVote[] @relation("TagVoteUnit")
   tagVotesAsTag  TagVote[] @relation("TagVoteTag")
 
@@ -191,8 +191,8 @@ model Unit {
   // Realm-scoped tag classification. The realm side is exposed through
   // `Realm`; Unit keeps only the global tag, target content, and context
   // content roles because TAG/content do not have dedicated extension models.
-  realmTagApplicationsAsAppliedTag RealmTagUnit[]    @relation("RealmTagApplicationAppliedTag")
-  realmTagApplicationsAsTargetUnit RealmTagUnit[]    @relation("RealmTagApplicationTargetUnit")
+  realmTagApplicationsAsAppliedTag RealmTagApplication[]    @relation("RealmTagApplicationAppliedTag")
+  realmTagApplicationsAsTargetUnit RealmTagApplication[]    @relation("RealmTagApplicationTargetUnit")
   realmTagContextsAsTag            RealmTagContext[] @relation("RealmTagContextTag")
   realmTagContextsAsContent        RealmTagContext[] @relation("RealmTagContextContent")
 
@@ -593,8 +593,8 @@ model Realm {
   members RealmMember[]
 
   /// Realm is a subreddit-like community space, not a tag or classifier.
-  /// It owns membership and community metadata; realm-scoped tag classification lives in RealmTagUnit and RealmTagContext.
-  tagApplications RealmTagUnit[]    @relation("RealmTagApplicationRealm")
+  /// It owns membership and community metadata; realm-scoped tag classification lives in RealmTagApplication and RealmTagContext.
+  tagApplications RealmTagApplication[]    @relation("RealmTagApplicationRealm")
   tagContexts     RealmTagContext[]
 }
 
@@ -623,7 +623,7 @@ model RealmUnit {
   createdAt   DateTime @default(now())
 
   /// Community/feed membership for a target Unit in a realm.
-  /// This junction is not semantic tagging and is not a prerequisite or owner relation for RealmTagUnit.
+  /// This junction is not semantic tagging and is not a prerequisite or owner relation for RealmTagApplication.
   realm Unit @relation("RealmContent", fields: [realmUnitId], references: [id], onDelete: Cascade)
   unit  Unit @relation("UnitInRealm", fields: [unitId], references: [id], onDelete: Cascade)
 
@@ -632,7 +632,7 @@ model RealmUnit {
   @@index([realmUnitId, createdAt])
 }
 
-model RealmTagUnit {
+model RealmTagApplication {
   realmUnitId String  @db.Uuid
   tagUnitId   String  @db.Uuid
   unitId      String  @db.Uuid
@@ -649,7 +649,7 @@ model RealmTagUnit {
   realm      Realm          @relation("RealmTagApplicationRealm", fields: [realmUnitId], references: [unitId], onDelete: Cascade)
   appliedTag Unit           @relation("RealmTagApplicationAppliedTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
   targetUnit Unit           @relation("RealmTagApplicationTargetUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  votes      RealmTagVote[] @relation("RealmTagApplicationVotes")
+  votes      RealmTagApplicationVote[] @relation("RealmTagApplicationVotes")
 
   @@id([realmUnitId, tagUnitId, unitId])
   @@index([realmUnitId, unitId])
@@ -659,7 +659,7 @@ model RealmTagUnit {
   @@index([score])
 }
 
-model RealmTagVote {
+model RealmTagApplicationVote {
   realmUnitId String @db.Uuid
   tagUnitId   String @db.Uuid
   unitId      String @db.Uuid
@@ -668,9 +668,9 @@ model RealmTagVote {
 
   createdAt DateTime @default(now())
 
-  /// A member vote on one RealmTagUnit application.
-  /// RealmTagVote's business target is the `(realmUnitId, tagUnitId, unitId)` application, not three independent Unit roles.
-  application RealmTagUnit @relation("RealmTagApplicationVotes", fields: [realmUnitId, tagUnitId, unitId], references: [realmUnitId, tagUnitId, unitId], onDelete: Cascade)
+  /// A member vote on one RealmTagApplication.
+  /// RealmTagApplicationVote's business target is the `(realmUnitId, tagUnitId, unitId)` application, not three independent Unit roles.
+  application RealmTagApplication @relation("RealmTagApplicationVotes", fields: [realmUnitId, tagUnitId, unitId], references: [realmUnitId, tagUnitId, unitId], onDelete: Cascade)
 
   @@id([realmUnitId, tagUnitId, unitId, userId])
   @@index([userId])
@@ -711,7 +711,7 @@ model UnitTag {
   updatedAt DateTime @updatedAt
 
   unit Unit @relation("TaggedUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  tag  Unit @relation("TagUnit", fields: [tagUnitId], references: [id], onDelete: Cascade)
+  tag  Unit @relation("UnitTagAppliedTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
 
   @@id([unitId, tagUnitId])
   @@index([unitId, score])

@@ -37,7 +37,7 @@ export const ContentSearchDocumentSchema = t.Object({
   // Filterable: realm system (from RealmUnit)
   realmIds: t.Array(t.String()),
 
-  // Filterable: realm-tag system (from RealmTagUnit). Values are machine
+  // Filterable: realm-tag system (from RealmTagApplication). Values are machine
   // filter keys formatted as "{realmUnitId}:{tagUnitId}", not display labels.
   realmTagKeys: t.Array(t.String()),
 
