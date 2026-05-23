@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "@/shadcn/button";
-import { Input } from "@/shadcn/input";
-import { SafeLink } from "@/link/SafeLink";
+import { Button } from "#/shadcn/button";
+import { Input } from "#/shadcn/input";
+import { SafeLink } from "#/link/SafeLink";
 
 export interface ExternalImageGuideConfig {
   name: string;

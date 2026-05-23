@@ -19,10 +19,10 @@ import {
 } from "lucide-react";
 import type * as React from "react";
 
-import { NavDocuments } from "@/shadcn/sections/nav-documents";
-import { NavMain } from "@/shadcn/sections/nav-main";
-import { NavSecondary } from "@/shadcn/sections/nav-secondary";
-import { NavUser } from "@/shadcn/sections/nav-user";
+import { NavDocuments } from "#/shadcn/sections/nav-documents";
+import { NavMain } from "#/shadcn/sections/nav-main";
+import { NavSecondary } from "#/shadcn/sections/nav-secondary";
+import { NavUser } from "#/shadcn/sections/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -31,7 +31,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/shadcn/sidebar";
+} from "#/shadcn/sidebar";
 
 const data = {
   user: {

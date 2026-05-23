@@ -1,6 +1,6 @@
 import type React from "react";
 import { useEffect, useState } from "react";
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 
 type ButtonProps = React.ComponentProps<typeof Button>;
 
@@ -40,7 +40,7 @@ export const CooldownButton: React.FC<CooldownButtonProps> = ({
     }
 
     if (onClick) {
-      onClick(e);
+      onClick(e as Parameters<NonNullable<typeof onClick>>[0]);
     }
 
     setCooldownUntil(Date.now() + cooldownMs);

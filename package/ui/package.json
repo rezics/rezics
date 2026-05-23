@@ -1,6 +1,9 @@
 {
   "name": "@rezics/ui",
   "module": "src/index.ts",
+  "imports": {
+    "#/*": "./src/*"
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",

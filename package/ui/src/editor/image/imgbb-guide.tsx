@@ -1,4 +1,4 @@
-import { Badge } from "@/shadcn/badge";
+import { Badge } from "#/shadcn/badge";
 import { ExternalImageGuide } from "./ExternalImageGuide";
 import type { ImageProvider } from "./types";
 

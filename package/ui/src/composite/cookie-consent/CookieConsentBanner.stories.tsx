@@ -10,6 +10,8 @@ const meta = {
     body: "We use cookies to keep you signed in and to remember your reading preferences.",
     policyLabel: "Privacy policy",
     acceptLabel: "Accept all",
+    onAccept: () => undefined,
+    onPolicyClick: () => undefined,
   },
 } satisfies Meta<typeof CookieConsentBanner>;
 

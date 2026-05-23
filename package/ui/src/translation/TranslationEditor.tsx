@@ -1,9 +1,9 @@
 import type React from "react";
 import { useId, useState } from "react";
-import { Button } from "@/shadcn/button";
-import { Input } from "@/shadcn/input";
-import { Label } from "@/shadcn/label";
-import { Tabs, TabsList, TabsTrigger } from "@/shadcn/tabs";
+import { Button } from "#/shadcn/button";
+import { Input } from "#/shadcn/input";
+import { Label } from "#/shadcn/label";
+import { Tabs, TabsList, TabsTrigger } from "#/shadcn/tabs";
 
 const DEFAULT_TRANSLATION_LANGUAGE = "zh-TW";
 

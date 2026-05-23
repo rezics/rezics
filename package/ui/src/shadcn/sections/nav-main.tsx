@@ -2,14 +2,14 @@
 
 import { type LucideIcon, MailIcon, PlusCircleIcon } from "lucide-react";
 
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/shadcn/sidebar";
+} from "#/shadcn/sidebar";
 
 export function NavMain({
   items,

@@ -2,7 +2,7 @@ import type { JsonEditorProps } from "@rezics/editor/editor";
 import { JsonEditor } from "@rezics/editor/editor";
 import { formatJson } from "@rezics/editor/json";
 import { useCallback, useRef } from "react";
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 import { EditorPanel } from "./panel/EditorPanel";
 import "./editor.css";
 

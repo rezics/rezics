@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 
 export interface DeleteWrapperProps {

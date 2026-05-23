@@ -1,6 +1,6 @@
 import type React from "react";
 import { Pencil as Edit } from "lucide-react";
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 
 export type EditButtonFloatRightShowProps = {
   onClick?: () => void;

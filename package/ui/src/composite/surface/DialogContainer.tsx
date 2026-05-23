@@ -4,7 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/shadcn/dialog";
+} from "#/shadcn/dialog";
 
 export interface DialogContainerProps {
   /** 控制对话框显示 */

@@ -1,11 +1,11 @@
 import type React from "react";
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/shadcn/dialog";
+} from "#/shadcn/dialog";
 
 export const ConfirmDeleteDialog: React.FC<{
   open: boolean;

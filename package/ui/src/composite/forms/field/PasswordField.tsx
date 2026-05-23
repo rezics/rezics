@@ -1,9 +1,9 @@
 import { Eye as Visibility, EyeOff as VisibilityOff } from "lucide-react";
 import React, { type FC, useState } from "react";
-import * as m from "@/paraglide/messages.js";
-import { Button } from "@/shadcn/button";
-import { Input } from "@/shadcn/input";
-import { Label } from "@/shadcn/label";
+import * as m from "#/paraglide/messages.js";
+import { Button } from "#/shadcn/button";
+import { Input } from "#/shadcn/input";
+import { Label } from "#/shadcn/label";
 
 interface PasswordFieldProps {
   name?: string;

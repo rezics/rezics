@@ -1,7 +1,7 @@
 import type React from "react";
 import { useEffect, useState } from "react";
-import type { CarouselApi } from "@/shadcn/carousel";
-import { cn } from "@/shared/lib/utils";
+import type { CarouselApi } from "#/shadcn/carousel";
+import { cn } from "#/shared/lib/utils";
 
 export type CarouselIndicatorProps = {
   api: CarouselApi | null;

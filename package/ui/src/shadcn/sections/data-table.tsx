@@ -55,15 +55,15 @@ import {
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { toast } from "sonner";
-import { Badge } from "@/shadcn/badge";
-import { Button } from "@/shadcn/button";
+import { Badge } from "#/shadcn/badge";
+import { Button } from "#/shadcn/button";
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/shadcn/chart";
-import { Checkbox } from "@/shadcn/checkbox";
+} from "#/shadcn/chart";
+import { Checkbox } from "#/shadcn/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -71,17 +71,17 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/shadcn/dropdown-menu";
-import { Input } from "@/shadcn/input";
-import { Label } from "@/shadcn/label";
+} from "#/shadcn/dropdown-menu";
+import { Input } from "#/shadcn/input";
+import { Label } from "#/shadcn/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shadcn/select";
-import { Separator } from "@/shadcn/separator";
+} from "#/shadcn/select";
+import { Separator } from "#/shadcn/separator";
 import {
   Sheet,
   SheetClose,
@@ -91,7 +91,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/shadcn/sheet";
+} from "#/shadcn/sheet";
 import {
   Table,
   TableBody,
@@ -99,9 +99,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/shadcn/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/tabs";
-import { useIsMobile } from "@/shared/hooks/use-mobile";
+} from "#/shadcn/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shadcn/tabs";
+import { useIsMobile } from "#/shared/hooks/use-mobile";
 
 export const schema = t.Object({
   id: t.Number(),
@@ -146,7 +146,7 @@ const columns: ColumnDef<Static<typeof schema>>[] = [
         <Checkbox
           checked={
             table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
+            table.getIsSomePageRowsSelected()
           }
           onCheckedChange={(value: boolean | "indeterminate") =>
             table.toggleAllPageRowsSelected(!!value)
@@ -560,8 +560,8 @@ export function DataTable({
               </Label>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
-                onValueChange={(value: string) => {
-                  table.setPageSize(Number(value));
+                onValueChange={(value) => {
+                  if (value) table.setPageSize(Number(value));
                 }}
               >
                 <SelectTrigger className="w-20" id="rows-per-page">

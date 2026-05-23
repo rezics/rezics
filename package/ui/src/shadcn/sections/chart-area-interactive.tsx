@@ -6,22 +6,22 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shadcn/card";
+} from "#/shadcn/card";
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/shadcn/chart";
+} from "#/shadcn/chart";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shadcn/select";
-import { ToggleGroup, ToggleGroupItem } from "@/shadcn/toggle-group";
-import { useIsMobile } from "@/shared/hooks/use-mobile";
+} from "#/shadcn/select";
+import { ToggleGroup, ToggleGroupItem } from "#/shadcn/toggle-group";
+import { useIsMobile } from "#/shared/hooks/use-mobile";
 
 const chartData = [
   { date: "2024-04-01", desktop: 222, mobile: 150 },
@@ -169,7 +169,9 @@ export function ChartAreaInteractive() {
           <ToggleGroup
             type="single"
             value={timeRange}
-            onValueChange={setTimeRange}
+            onValueChange={(value) => {
+              if (value) setTimeRange(value);
+            }}
             variant="outline"
             className="@[767px]/card:flex hidden"
           >
@@ -183,7 +185,12 @@ export function ChartAreaInteractive() {
               Last 7 days
             </ToggleGroupItem>
           </ToggleGroup>
-          <Select value={timeRange} onValueChange={setTimeRange}>
+          <Select
+            value={timeRange}
+            onValueChange={(value) => {
+              if (value) setTimeRange(value);
+            }}
+          >
             <SelectTrigger
               className="@[767px]/card:hidden flex w-40"
               aria-label="Select a value"

@@ -2,7 +2,7 @@ import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
 import { cva, type VariantProps } from "class-variance-authority";
 import { type PointerEvent, useEffect, useRef } from "react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "#/shared/lib/utils";
 
 function Tabs({
   className,
@@ -124,7 +124,7 @@ function TabsList({
   }, []);
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
-    onPointerDown?.(event);
+    onPointerDown?.(event as Parameters<NonNullable<typeof onPointerDown>>[0]);
 
     suppressClickRef.current = false;
     dragStateRef.current.isDragging = false;
@@ -149,7 +149,7 @@ function TabsList({
   }
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
-    onPointerMove?.(event);
+    onPointerMove?.(event as Parameters<NonNullable<typeof onPointerMove>>[0]);
 
     const dragState = dragStateRef.current;
     if (!dragState.isDown || dragState.pointerId !== event.pointerId) {
@@ -194,17 +194,21 @@ function TabsList({
   }
 
   function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
-    onPointerUp?.(event);
+    onPointerUp?.(event as Parameters<NonNullable<typeof onPointerUp>>[0]);
     stopDragging(event.currentTarget, event.pointerId);
   }
 
   function handlePointerCancel(event: PointerEvent<HTMLDivElement>) {
-    onPointerCancel?.(event);
+    onPointerCancel?.(
+      event as Parameters<NonNullable<typeof onPointerCancel>>[0],
+    );
     stopDragging(event.currentTarget, event.pointerId);
   }
 
   function handlePointerLeave(event: PointerEvent<HTMLDivElement>) {
-    onPointerLeave?.(event);
+    onPointerLeave?.(
+      event as Parameters<NonNullable<typeof onPointerLeave>>[0],
+    );
 
     if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
       stopDragging(event.currentTarget, event.pointerId);

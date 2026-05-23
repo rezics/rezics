@@ -6,7 +6,7 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from "@/shadcn/carousel";
+} from "#/shadcn/carousel";
 import { CarouselIndicator } from "./CarouselIndicator";
 
 interface CarouselIndicatorPreviewProps {

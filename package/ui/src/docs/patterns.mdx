@@ -192,7 +192,7 @@ Use `<Button>` from `@/shadcn/button`. Default `variant="default"` is the brand-
 </Compare>
 
 ```tsx
-import { Button } from '@/shadcn/button';
+import { Button } from '#/shadcn/button';
 
 // Do
 <Button variant="default">Save</Button>
@@ -254,8 +254,8 @@ Use shadcn `<Input>` and `<Label>` from `@/shadcn/input` / `@/shadcn/label`. The
 </Compare>
 
 ```tsx
-import { Input } from '@/shadcn/input';
-import { Label } from '@/shadcn/label';
+import { Input } from '#/shadcn/input';
+import { Label } from '#/shadcn/label';
 
 // Do
 <div className="flex flex-col gap-1">
@@ -293,7 +293,7 @@ For in-app navigation, app/admin wrappers may pass their router link renderer to
 ```tsx
 // Do
 import { Bookmark, Heart } from 'lucide-react';
-import { Button } from '@/shadcn/button';
+import { Button } from '#/shadcn/button';
 <Button variant="ghost" size="icon"><Bookmark size={20} /></Button>
 <Heart size={16} fill="currentColor" />
 
@@ -509,7 +509,7 @@ Admin is operations and management — dense tables, terse copy. The app side is
 </Compare>
 
 ```tsx
-import { TableRow, TableCell } from '@/shadcn/table';
+import { TableRow, TableCell } from '#/shadcn/table';
 
 // Admin — dense (p-3 / p-4 = 12–16px)
 <TableRow className="h-10">

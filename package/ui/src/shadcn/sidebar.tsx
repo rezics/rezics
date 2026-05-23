@@ -6,25 +6,25 @@ import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
 import * as React from "react";
-import { Button } from "@/shadcn/button";
-import { Input } from "@/shadcn/input";
-import { Separator } from "@/shadcn/separator";
+import { Button } from "#/shadcn/button";
+import { Input } from "#/shadcn/input";
+import { Separator } from "#/shadcn/separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/shadcn/sheet";
-import { Skeleton } from "@/shadcn/skeleton";
+} from "#/shadcn/sheet";
+import { Skeleton } from "#/shadcn/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/shadcn/tooltip";
-import { useIsMobile } from "@/shared/hooks/use-mobile";
-import { cn } from "@/shared/lib/utils";
+} from "#/shadcn/tooltip";
+import { useIsMobile } from "#/shared/hooks/use-mobile";
+import { cn } from "#/shared/lib/utils";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -129,7 +129,7 @@ function SidebarProvider({
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <TooltipProvider delayDuration={0}>
+      <TooltipProvider>
         <div
           data-slot="sidebar-wrapper"
           style={

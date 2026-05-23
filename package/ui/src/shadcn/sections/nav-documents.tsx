@@ -5,13 +5,13 @@ import {
   ShareIcon,
 } from "lucide-react";
 
-import { SafeLink } from "@/link/SafeLink";
+import { SafeLink } from "#/link/SafeLink";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/shadcn/dropdown-menu";
+} from "#/shadcn/dropdown-menu";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -20,7 +20,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/shadcn/sidebar";
+} from "#/shadcn/sidebar";
 
 export function NavDocuments({
   items,

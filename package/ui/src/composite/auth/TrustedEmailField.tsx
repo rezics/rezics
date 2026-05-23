@@ -1,7 +1,7 @@
 import type { ChangeEvent, FC } from "react";
-import { Button } from "@/shadcn/button";
-import { Input } from "@/shadcn/input";
-import { Label } from "@/shadcn/label";
+import { Button } from "#/shadcn/button";
+import { Input } from "#/shadcn/input";
+import { Label } from "#/shadcn/label";
 
 interface TrustedEmailFieldProps {
   value: string;

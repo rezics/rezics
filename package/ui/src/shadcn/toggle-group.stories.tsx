@@ -52,7 +52,7 @@ export const Multiple: Story = {
 
 export const Spaced: Story = {
   render: () => (
-    <ToggleGroup type="single" spacing="default" variant="outline">
+    <ToggleGroup type="single" spacing={2} variant="outline">
       <ToggleGroupItem value="bold">Bold</ToggleGroupItem>
       <ToggleGroupItem value="italic">Italic</ToggleGroupItem>
       <ToggleGroupItem value="underline">Underline</ToggleGroupItem>

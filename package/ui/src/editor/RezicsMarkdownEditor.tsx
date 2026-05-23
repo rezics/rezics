@@ -1,4 +1,4 @@
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 import type {
   MarkdownEditorProps,
   ResizeConfig,

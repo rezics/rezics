@@ -1,5 +1,5 @@
 import type { ContentRating } from "@rezics/contract";
-import { Badge } from "@/shadcn/badge";
+import { Badge } from "#/shadcn/badge";
 
 const RATING_LABELS: Record<ContentRating, string> = {
   GENERAL: "General",

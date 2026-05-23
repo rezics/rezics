@@ -6,7 +6,10 @@ import { CustomSidebar } from "./CustomSidebar";
 const meta = {
   title: "Composite/Layouts/CustomSidebar",
   component: CustomSidebar,
-  args: { section: "Profile" },
+  args: {
+    section: "Profile",
+    setSection: () => undefined,
+  },
 } satisfies Meta<typeof CustomSidebar>;
 
 export default meta;

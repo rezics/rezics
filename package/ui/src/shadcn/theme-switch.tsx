@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 
 const builtinColors = [
   "zinc",

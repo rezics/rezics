@@ -6,7 +6,8 @@
     "types": ["bun-types"],
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "#/*": ["../ui/src/*"]
     }
   },
   "exclude": ["dist", "node_modules"]

@@ -3,8 +3,8 @@ import {
   CloudUpload as CloudUploadIcon,
 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
-import { Alert, AlertDescription } from "@/shadcn/alert";
-import { Spinner } from "@/primitive/feedback/Spinner";
+import { Alert, AlertDescription } from "#/shadcn/alert";
+import { Spinner } from "#/primitive/feedback/Spinner";
 import type { ImageProvider, ImageUploadAdapter } from "./types";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];

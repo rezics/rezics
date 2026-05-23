@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 
 const meta = {
   title: "Foundation/Tokens",

@@ -8,17 +8,17 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useImperativeHandle, useMemo, useState } from "react";
-import * as m from "@/paraglide/messages.js";
-import { Button } from "@/shadcn/button";
-import { Label } from "@/shadcn/label";
+import * as m from "#/paraglide/messages.js";
+import { Button } from "#/shadcn/button";
+import { Label } from "#/shadcn/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shadcn/select";
-import { ToggleGroup, ToggleGroupItem } from "@/shadcn/toggle-group";
+} from "#/shadcn/select";
+import { ToggleGroup, ToggleGroupItem } from "#/shadcn/toggle-group";
 
 /**
  * example:
@@ -55,7 +55,9 @@ const SortControls: React.FC<SortControlsProps> = ({
         <Label htmlFor="sort-type">排序方式</Label>
         <Select
           value={sortType}
-          onValueChange={(v) => onSortChange({ type: v })}
+          onValueChange={(v) => {
+            if (v) onSortChange({ type: v });
+          }}
         >
           <SelectTrigger id="sort-type" size="sm" className="w-full">
             <SelectValue placeholder="排序方式" />
@@ -72,7 +74,7 @@ const SortControls: React.FC<SortControlsProps> = ({
       <ToggleGroup
         type="single"
         value={sortOrder}
-        onValueChange={(v: string) =>
+        onValueChange={(v) =>
           (v === "asc" || v === "desc") && onSortChange({ order: v })
         }
         variant="outline"

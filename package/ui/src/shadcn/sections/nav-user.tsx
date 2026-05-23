@@ -8,7 +8,7 @@ import {
   UserCircleIcon,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "#/shadcn/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,13 +17,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/shadcn/dropdown-menu";
+} from "#/shadcn/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/shadcn/sidebar";
+} from "#/shadcn/sidebar";
 
 export function NavUser({
   user,

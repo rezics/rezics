@@ -1,5 +1,5 @@
 import type React from "react";
-import { Dialog, DialogContent } from "@/shadcn/dialog";
+import { Dialog, DialogContent } from "#/shadcn/dialog";
 
 interface FullScreenModalProps {
   open: boolean;

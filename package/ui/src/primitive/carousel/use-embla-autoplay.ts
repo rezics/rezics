@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { CarouselApi } from "@/shadcn/carousel";
+import type { CarouselApi } from "#/shadcn/carousel";
 
 type UseEmblaAutoplayOptions = {
   interval?: number;

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["../server/src/*", "./src/*"],
+      "#/*": ["../ui/src/*", "../server/*"]
     }
   },
   "exclude": ["dist", "node_modules"]

@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from "react";
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 
 export interface CookieConsentBannerProps {
   title: string;

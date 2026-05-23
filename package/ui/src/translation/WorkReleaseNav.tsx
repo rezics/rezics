@@ -1,5 +1,5 @@
 import type React from "react";
-import { Badge } from "@/shadcn/badge";
+import { Badge } from "#/shadcn/badge";
 
 export interface WorkReleaseNavRelease {
   unitId: string;

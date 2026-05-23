@@ -7,9 +7,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/shadcn/dialog";
-import { InputGroup, InputGroupAddon } from "@/shadcn/input-group";
-import { cn } from "@/shared/lib/utils";
+} from "#/shadcn/dialog";
+import { InputGroup, InputGroupAddon } from "#/shadcn/input-group";
+import { cn } from "#/shared/lib/utils";
 
 function Command({
   className,

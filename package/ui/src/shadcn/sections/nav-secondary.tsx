@@ -1,14 +1,14 @@
 import type { LucideIcon } from "lucide-react";
 import type * as React from "react";
 
-import { SafeLink } from "@/link/SafeLink";
+import { SafeLink } from "#/link/SafeLink";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/shadcn/sidebar";
+} from "#/shadcn/sidebar";
 
 export function NavSecondary({
   items,

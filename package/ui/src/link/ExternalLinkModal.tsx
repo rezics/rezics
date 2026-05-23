@@ -1,4 +1,4 @@
-import { Button } from "@/shadcn/button";
+import { Button } from "#/shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shadcn/dialog";
+} from "#/shadcn/dialog";
 import { closeExternal, useExternalLinkStore } from "./store";
 
 export function ExternalLinkModal() {

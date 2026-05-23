@@ -1,13 +1,13 @@
 import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 
-import { Badge } from "@/shadcn/badge";
+import { Badge } from "#/shadcn/badge";
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/shadcn/card";
+} from "#/shadcn/card";
 
 export function SectionCards() {
   return (
