@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { UnitCommonFieldKey, WikiPostFieldKey } from "@rezics/contract";
 import { bookApi } from "./book/book.api";
 import { configureApi } from "./config";
 import { entityApi } from "./entity/entity.api";
@@ -85,7 +84,7 @@ describe("content authority and history API clients", () => {
             sequence: 1,
             contentHash: "hash",
             actorUserId: "actor-1",
-            changedFieldKeys: [UnitCommonFieldKey.TITLE],
+            changedFieldKeys: ["translations.en.title"],
             createdAt: "2026-05-19T00:00:00.000Z",
           },
         }),
@@ -115,7 +114,7 @@ describe("content authority and history API clients", () => {
             sequence: 0,
             contentHash: "hash-0",
             actorUserId: "actor-1",
-            changedFieldKeys: [UnitCommonFieldKey.TITLE],
+            changedFieldKeys: ["translations.en.title"],
             createdAt: "2026-05-19T00:00:00.000Z",
           },
         }),
@@ -128,7 +127,7 @@ describe("content authority and history API clients", () => {
             sequence: 1,
             contentHash: "hash-1",
             actorUserId: "actor-1",
-            changedFieldKeys: [UnitCommonFieldKey.TITLE],
+            changedFieldKeys: ["translations.en.title"],
             createdAt: "2026-05-19T00:00:00.000Z",
           },
         }),
@@ -209,13 +208,17 @@ describe("content authority and history API clients", () => {
     const mapped = getLockedFieldError(
       new ApiError(403, "FIELD_LOCKED", "One or more fields are locked.", {
         unitId: "unit-1",
-        blockedFieldKeys: [WikiPostFieldKey.BODY],
+        blockedPaths: ["post.body"],
+        offendingLockPath: "post.body",
+        offendingPatchPath: "post.body",
       }),
     );
 
     expect(mapped).toEqual({
       unitId: "unit-1",
-      blockedFieldKeys: [WikiPostFieldKey.BODY],
+      blockedPaths: ["post.body"],
+      offendingLockPath: "post.body",
+      offendingPatchPath: "post.body",
       message: "One or more fields are locked.",
       locks: undefined,
     });
@@ -229,11 +232,11 @@ describe("content authority and history API clients", () => {
       sequence: 1,
       contentHash: "hash",
       actorUserId: "actor-1",
-      changedFieldKeys: [UnitCommonFieldKey.TITLE],
+      changedFieldKeys: ["translations.en.title"],
       createdAt: "2026-05-19T00:00:00.000Z",
       content: {
         hash: "hash",
-        payload: { slots: { unit: { title: "A" } } },
+        payload: { translations: { en: { title: "A" } } },
         createdAt: "2026-05-19T00:00:00.000Z",
       },
     };
@@ -242,10 +245,10 @@ describe("content authority and history API clients", () => {
     const single = { revision };
 
     expect(timeline.revisions[0]?.changedFieldKeys).toEqual([
-      UnitCommonFieldKey.TITLE,
+      "translations.en.title",
     ]);
     expect(single.revision.content?.payload).toEqual({
-      slots: { unit: { title: "A" } },
+      translations: { en: { title: "A" } },
     });
   });
 });

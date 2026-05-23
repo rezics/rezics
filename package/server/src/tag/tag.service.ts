@@ -1,4 +1,3 @@
-import { AttributionFieldKey } from "@rezics/contract";
 import type {
   AttachTagInput,
   CastTagVoteInput,
@@ -11,10 +10,6 @@ import { FALLBACK_LANGUAGE, parseIdsCsv, validateSlug } from "@rezics/contract";
 import type { UnitTag } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { patchContentTagsToMeili } from "@/meili/content/sync";
-import {
-  assertCanEditCollaborativeMetadata,
-  writeEditorialMetadataHistory,
-} from "@/unit/collaborative-metadata";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
 import { tagUnitInclude, unitTagInclude } from "./types";
 
@@ -160,14 +155,9 @@ export class TagService {
     userId: string,
     unitId: string,
     tagUnitId: string,
-    actor?: RezicsSessionClaims,
+    _actor?: RezicsSessionClaims,
   ): Promise<UnitTag> {
     const result = await prisma.$transaction(async (tx) => {
-      if (actor) {
-        await assertCanEditCollaborativeMetadata(tx as any, actor, unitId, [
-          AttributionFieldKey.TAGS,
-        ]);
-      }
       const existingVote = await tx.tagVote.findUnique({
         where: {
           userId_unitId_tagUnitId: { userId, unitId, tagUnitId },
@@ -199,14 +189,6 @@ export class TagService {
           voteCount: agg._count.value ?? 0,
         },
       });
-      if (actor) {
-        await writeEditorialMetadataHistory(tx as any, {
-          unitId,
-          actorUserId: actor.userId,
-          changedFieldKeys: [AttributionFieldKey.TAGS],
-          message: "unit-tag.create",
-        });
-      }
       return row;
     });
 
@@ -222,7 +204,7 @@ export class TagService {
     unitId: string,
     tagUnitId: string,
     input: { pinned?: boolean; position?: string | null },
-    actor?: RezicsSessionClaims,
+    _actor?: RezicsSessionClaims,
   ): Promise<UnitTag> {
     const data: { pinned?: boolean; position?: string | null } = {};
     if (input.pinned !== undefined) {
@@ -232,23 +214,10 @@ export class TagService {
     if (input.position !== undefined) data.position = input.position;
 
     const updated = await prisma.$transaction(async (tx) => {
-      if (actor) {
-        await assertCanEditCollaborativeMetadata(tx as any, actor, unitId, [
-          AttributionFieldKey.TAGS,
-        ]);
-      }
       const row = await tx.unitTag.update({
         where: { unitId_tagUnitId: { unitId, tagUnitId } },
         data,
       });
-      if (actor) {
-        await writeEditorialMetadataHistory(tx as any, {
-          unitId,
-          actorUserId: actor.userId,
-          changedFieldKeys: [AttributionFieldKey.TAGS],
-          message: "unit-tag.pin",
-        });
-      }
       return row;
     });
     await patchContentTagsToMeili(unitId);
@@ -261,26 +230,13 @@ export class TagService {
   async deleteUnitTag(
     unitId: string,
     tagUnitId: string,
-    actor?: RezicsSessionClaims,
+    _actor?: RezicsSessionClaims,
   ): Promise<void> {
     await prisma.$transaction(async (tx) => {
-      if (actor) {
-        await assertCanEditCollaborativeMetadata(tx as any, actor, unitId, [
-          AttributionFieldKey.TAGS,
-        ]);
-      }
       await tx.tagVote.deleteMany({ where: { unitId, tagUnitId } });
       await tx.unitTag.delete({
         where: { unitId_tagUnitId: { unitId, tagUnitId } },
       });
-      if (actor) {
-        await writeEditorialMetadataHistory(tx as any, {
-          unitId,
-          actorUserId: actor.userId,
-          changedFieldKeys: [AttributionFieldKey.TAGS],
-          message: "unit-tag.delete",
-        });
-      }
     });
     await patchContentTagsToMeili(unitId);
   }

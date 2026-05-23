@@ -15,8 +15,6 @@ import {
   useUnlinkSubjectAttributionMutation,
 } from "@rezics/api/subject-attribution/subject-attribution";
 import {
-  type LockFieldKey,
-  UNIT_FIELD_KEYS,
   UNIT_FIELD_LOCK_ALL,
   UnitAuthorityRoleKey,
   type UnitAuthorityRoleKey as UnitAuthorityRoleKeyType,
@@ -49,7 +47,20 @@ import {
   Trash2 as TrashIcon,
 } from "lucide-react";
 
-const lockFieldOptions = [UNIT_FIELD_LOCK_ALL, ...UNIT_FIELD_KEYS] as const;
+const lockPathOptions = [
+  UNIT_FIELD_LOCK_ALL,
+  "translations",
+  "translations.en.title",
+  "translations.en.summary",
+  "translations.en.description",
+  "extension.isbn13",
+  "extension.publicationDate",
+  "extension.pageCount",
+  "credits.authors",
+  "credits.translators",
+  "subjects.character",
+  "post.body",
+] as const;
 const collaboratorRoleOptions = Object.values(UnitAuthorityRoleKey);
 
 function fmtDate(v?: string | Date) {
@@ -148,8 +159,7 @@ export default function UnitEditPage() {
   >(subjectAttributionRoles[0]);
   const [subjectSortOrder, setSubjectSortOrder] = React.useState("0");
   const [subjectWeight, setSubjectWeight] = React.useState("");
-  const [lockFieldKey, setLockFieldKey] =
-    React.useState<LockFieldKey>(UNIT_FIELD_LOCK_ALL);
+  const [lockPath, setLockPath] = React.useState<string>(UNIT_FIELD_LOCK_ALL);
   const [lockReason, setLockReason] = React.useState("");
   const [collaboratorUserId, setCollaboratorUserId] = React.useState("");
   const [collaboratorRole, setCollaboratorRole] =
@@ -229,7 +239,7 @@ export default function UnitEditPage() {
     setError(null);
     await upsertFieldLockMutation.mutateAsync({
       unitId,
-      fieldKey: lockFieldKey,
+      path: lockPath,
       reason: lockReason.trim() || null,
     });
     setLockReason("");
@@ -562,12 +572,12 @@ export default function UnitEditPage() {
                     <div className="flex flex-col gap-2">
                       {fieldLocksQuery.data.locks.map((lock) => (
                         <div
-                          key={lock.fieldKey}
+                          key={lock.path}
                           className="flex flex-col gap-2 border-b border-border-whisper py-2 sm:flex-row sm:items-center"
                         >
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium">
-                              {lock.fieldKey}
+                              {lock.path}
                             </p>
                             <p className="text-xs text-text-secondary">
                               {m.admin_unit_field_lock_locked_by({
@@ -590,7 +600,7 @@ export default function UnitEditPage() {
                             onClick={() =>
                               onRemoveFieldLock({
                                 unitId,
-                                fieldKey: lock.fieldKey,
+                                path: lock.path,
                               })
                             }
                           >
@@ -610,20 +620,18 @@ export default function UnitEditPage() {
                     className="grid grid-cols-1 gap-3 sm:grid-cols-[220px_minmax(0,1fr)_auto]"
                   >
                     <div className="flex flex-col gap-1">
-                      <Label htmlFor="field-lock-key">
+                      <Label htmlFor="field-lock-path">
                         {m.admin_unit_field()}
                       </Label>
                       <select
-                        id="field-lock-key"
-                        value={lockFieldKey}
-                        onChange={(e) =>
-                          setLockFieldKey(e.target.value as LockFieldKey)
-                        }
+                        id="field-lock-path"
+                        value={lockPath}
+                        onChange={(e) => setLockPath(e.target.value)}
                         className="h-9 rounded-md border border-border-whisper bg-transparent px-2 text-sm"
                       >
-                        {lockFieldOptions.map((fieldKey) => (
-                          <option key={fieldKey} value={fieldKey}>
-                            {fieldKey}
+                        {lockPathOptions.map((path) => (
+                          <option key={path} value={path}>
+                            {path}
                           </option>
                         ))}
                       </select>

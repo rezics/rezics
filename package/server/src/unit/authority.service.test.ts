@@ -40,8 +40,8 @@ function dbStub(input?: {
       findUnique: mock(async () => null),
       findMany: mock(async () => []),
       upsert: mock(async ({ create, update, where }: any) => ({
-        unitId: create?.unitId ?? where.unitId_fieldKey.unitId,
-        fieldKey: create?.fieldKey ?? where.unitId_fieldKey.fieldKey,
+        unitId: create?.unitId ?? where.unitId_path.unitId,
+        path: create?.path ?? where.unitId_path.path,
         lockedById: update?.lockedById ?? create.lockedById,
         reason: update?.reason ?? create.reason,
         createdAt: new Date("2026-05-19T00:00:00.000Z"),
@@ -80,13 +80,13 @@ describe("UnitAuthorityService", () => {
     const service = new UnitAuthorityService(db as never, async () => false);
 
     const lock = await service.createFieldLock("unit-1", actor("owner-1"), {
-      fieldKey: "*",
+      path: "*",
       reason: "protect imported metadata",
     });
 
     expect(lock).toMatchObject({
       unitId: "unit-1",
-      fieldKey: "*",
+      path: "*",
       lockedById: "owner-1",
     });
     expect(db.unitFieldLock.upsert).toHaveBeenCalledTimes(1);
@@ -157,7 +157,7 @@ describe("UnitAuthorityService", () => {
     const service = new UnitAuthorityService(db as never, async () => false);
 
     await service.createFieldLock("unit-1", actor("owner-1"), {
-      fieldKey: "identity.title",
+      path: "translations.en.title",
       reason: "verified title",
     });
 

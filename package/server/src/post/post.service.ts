@@ -1,4 +1,3 @@
-import { WikiPostFieldKey } from "@rezics/contract";
 import type {
   CreatePostInput,
   RezicsSessionClaims,
@@ -447,9 +446,8 @@ export class PostService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId: result.unitId,
           actorUserId: authorUserId,
-          changedFieldKeys: [WikiPostFieldKey.BODY],
+          patch: { post: { body: result.body } },
           message: "wiki-post.create",
-          slots: { post: { body: result.body } },
         });
       }
 
@@ -501,7 +499,7 @@ export class PostService {
 
       if (isWikiBodyEdit && actor) {
         await assertCanEditCollaborativeMetadata(tx as any, actor, unitId, [
-          WikiPostFieldKey.BODY,
+          "post.body",
         ]);
       }
 
@@ -515,9 +513,8 @@ export class PostService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
-          changedFieldKeys: [WikiPostFieldKey.BODY],
+          patch: { post: { body: row.body } },
           message: "wiki-post.body.update",
-          slots: { post: { body: row.body } },
         });
       }
 

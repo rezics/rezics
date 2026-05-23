@@ -3,6 +3,8 @@ import { Value } from "@sinclair/typebox/value";
 import {
   bookContentStructureBatchEventPayloadSchema,
   bookContentStructureBatchPayloadSchema,
+  editorialPatchSchema,
+  editorialPatchSubmissionSchema,
   editorialRevisionPayloadSchema,
   historyActorResolutionSchema,
   historyDisplayResolutionStatusSchema,
@@ -108,6 +110,25 @@ describe("content history contracts", () => {
     expect(Value.Check(unitRevisionSchema, timelineItem)).toBe(true);
   });
 
+  test("editorial patch submissions carry sparse patch trees", () => {
+    expect(
+      Value.Check(editorialPatchSchema, {
+        translations: { en: { description: "new" } },
+        credits: { authors: [{ targetUnitId: "unit-2" }] },
+        $unset: ["extension.publicationDate"],
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(editorialPatchSubmissionSchema, {
+        patch: {
+          translations: { en: { summary: null } },
+        },
+        message: "Clear summary",
+      }),
+    ).toBe(true);
+  });
+
   test("restore source metadata records source revision sequence", () => {
     const restoreSource = {
       kind: "revision",
@@ -121,8 +142,7 @@ describe("content history contracts", () => {
         unitId: "unit-1",
         sequence: 13,
         actorUserId: "admin-1",
-        changedFieldKeys: ["identity.title"],
-        slots: { unit: { id: "unit-1", title: "Restored" } },
+        patch: { translations: { en: { title: "Restored" } } },
         message: "Restored from #12",
         restoreSource,
       }),

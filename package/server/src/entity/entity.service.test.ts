@@ -268,7 +268,7 @@ describe("EntityService.create", () => {
     const createArgs = (txClient.unit.create as any).mock.calls[0]?.[0];
     expect(createArgs.data.userId).toBe("user-1");
     expect(createArgs.data.fieldLocks.create).toMatchObject({
-      fieldKey: "*",
+      path: "*",
       lockedById: "user-1",
     });
   });

@@ -198,7 +198,7 @@ describe("BookService.create", () => {
     const createArgs = mockCreateBook.mock.calls[0]?.[0] as any;
     expect(createArgs.data.unit.create.userId).toBe("user-1");
     expect(createArgs.data.unit.create.fieldLocks.create).toMatchObject({
-      fieldKey: "*",
+      path: "*",
       lockedById: "user-1",
     });
   });

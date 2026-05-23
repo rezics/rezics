@@ -10,15 +10,14 @@ datasource db {
 }
 
 model UnitRevision {
-  id               String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  unitId           String   @db.Uuid
-  sequence         BigInt
-  contentHash      String   @db.VarChar(64)
-  actorUserId      String   @db.Uuid
-  changedFieldKeys String[]
-  message          String?
-  createdAt        DateTime
-  ingestedAt       DateTime @default(now())
+  id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  unitId      String   @db.Uuid
+  sequence    BigInt
+  contentHash String   @db.VarChar(64)
+  actorUserId String   @db.Uuid
+  message     String?
+  createdAt   DateTime
+  ingestedAt  DateTime @default(now())
 
   content RevisionContent @relation(fields: [contentHash], references: [hash])
 

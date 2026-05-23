@@ -144,10 +144,10 @@ export default function AuthorityOpsPage() {
                   <div className="flex flex-col gap-2">
                     {fieldLocksQuery.data.locks.map((lock) => (
                       <div
-                        key={lock.fieldKey}
+                        key={lock.path}
                         className="border-b border-border-whisper py-2"
                       >
-                        <p className="text-sm font-medium">{lock.fieldKey}</p>
+                        <p className="text-sm font-medium">{lock.path}</p>
                         <p className="text-xs text-text-secondary">
                           {m.admin_unit_field_lock_locked_by({
                             userId: lock.lockedById,

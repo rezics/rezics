@@ -35,9 +35,11 @@ export function WikiPostEditor({
       const locked = getLockedFieldError(error);
       if (!locked) return;
       setLockedError(
-        locked.blockedFieldKeys.length
-          ? `Locked fields: ${locked.blockedFieldKeys.join(", ")}`
-          : locked.message,
+        locked.offendingLockPath && locked.offendingPatchPath
+          ? `Locked path: ${locked.offendingLockPath}; patch path: ${locked.offendingPatchPath}`
+          : locked.blockedPaths.length
+            ? `Locked paths: ${locked.blockedPaths.join(", ")}`
+            : locked.message,
       );
     },
   });

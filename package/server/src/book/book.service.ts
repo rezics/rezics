@@ -1,8 +1,4 @@
-import {
-  BookFieldKey,
-  HistoryOutboxPayloadKind,
-  UnitCommonFieldKey,
-} from "@rezics/contract";
+import { HistoryOutboxPayloadKind } from "@rezics/contract";
 import type {
   BookContentStructureResponse,
   BookListQuery,
@@ -34,7 +30,7 @@ import { assertLicenseSlug } from "@/unit/publication-policy";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import {
   assertCanEditCollaborativeMetadata,
-  uniqueFieldKeys,
+  uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
 import {
@@ -290,7 +286,7 @@ export class BookService {
                 ? undefined
                 : {
                     create: {
-                      fieldKey: "*",
+                      path: "*",
                       lockedById: actorUserId,
                       reason:
                         "Personal creation starts closed to community edits.",
@@ -328,10 +324,11 @@ export class BookService {
     req: UpdateBookInput,
     actor?: RezicsSessionClaims,
   ): Promise<BookWithRelations> {
-    const changedFieldKeys = mapBookUpdateFieldKeys(req);
+    const patchPaths = mapBookUpdatePatchPaths(req);
+    const patch = buildBookUpdatePatch(req);
 
     const book = await prisma.$transaction(async (tx) => {
-      if (changedFieldKeys.length === 0) {
+      if (patchPaths.length === 0) {
         return tx.book.findUniqueOrThrow({
           where: { unitId },
           include: bookInclude,
@@ -343,7 +340,7 @@ export class BookService {
           tx as any,
           actor,
           unitId,
-          changedFieldKeys,
+          patchPaths,
         );
       }
 
@@ -361,6 +358,11 @@ export class BookService {
           existing?.extra ?? undefined,
           req.coverUrl ?? undefined,
         ) as Prisma.InputJsonValue;
+        patch.translations = {
+          ...((patch.translations as Record<string, unknown> | undefined) ??
+            {}),
+          [language]: { extra: { coverUrl: req.coverUrl ?? null } },
+        };
         await tx.unitTranslation.upsert({
           where: { unitId_language: { unitId, language } },
           create: { unitId, language, extra: nextExtra },
@@ -401,7 +403,7 @@ export class BookService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
-          changedFieldKeys,
+          patch,
           message: "book.metadata.update",
         });
       }
@@ -530,7 +532,7 @@ export class BookService {
               sequence,
               actorUserId,
               eventType: "book.contentStructure.batch",
-              changedFieldKeys: [BookFieldKey.CONTENT_STRUCTURE],
+              changedFieldKeys: ["book.contentStructure"],
               payload: { operations },
               message: options.message ?? null,
             }),
@@ -562,22 +564,42 @@ export class BookService {
 // Export singleton instance
 export const bookService = new BookService();
 
-export function mapBookUpdateFieldKeys(req: UpdateBookInput) {
-  return uniqueFieldKeys([
-    req.isbn13 !== undefined ? BookFieldKey.ISBN_13 : undefined,
-    req.publicationDate !== undefined
-      ? BookFieldKey.PUBLICATION_DATE
-      : undefined,
-    req.pageCount !== undefined ? BookFieldKey.PAGE_COUNT : undefined,
-    req.textLength !== undefined ? BookFieldKey.TEXT_LENGTH : undefined,
-    req.formatKey !== undefined ? BookFieldKey.FORMAT : undefined,
-    req.isLicensed !== undefined ? BookFieldKey.LICENSED : undefined,
-    req.extra !== undefined ? UnitCommonFieldKey.EXTRA : undefined,
-    req.coverUrl !== undefined ? UnitCommonFieldKey.COVER : undefined,
-    req.rating !== undefined ? UnitCommonFieldKey.RATING : undefined,
-    req.visibility !== undefined ? UnitCommonFieldKey.VISIBILITY : undefined,
-    req.licenseSlug !== undefined ? UnitCommonFieldKey.LICENSE : undefined,
+export function mapBookUpdatePatchPaths(req: UpdateBookInput) {
+  return uniquePatchPaths([
+    req.isbn13 !== undefined ? "extension.isbn13" : undefined,
+    req.publicationDate !== undefined ? "extension.publicationDate" : undefined,
+    req.pageCount !== undefined ? "extension.pageCount" : undefined,
+    req.textLength !== undefined ? "extension.textLength" : undefined,
+    req.formatKey !== undefined ? "extension.formatKey" : undefined,
+    req.isLicensed !== undefined ? "extension.isLicensed" : undefined,
+    req.extra !== undefined ? "extension.extra" : undefined,
+    req.coverUrl !== undefined ? "translations" : undefined,
+    req.rating !== undefined ? "unit.rating" : undefined,
+    req.visibility !== undefined ? "unit.visibility" : undefined,
+    req.licenseSlug !== undefined ? "unit.license" : undefined,
   ]);
+}
+
+function buildBookUpdatePatch(req: UpdateBookInput): Record<string, unknown> {
+  const extension: Record<string, unknown> = {};
+  if (req.isbn13 !== undefined) extension.isbn13 = req.isbn13;
+  if (req.publicationDate !== undefined)
+    extension.publicationDate = req.publicationDate;
+  if (req.pageCount !== undefined) extension.pageCount = req.pageCount;
+  if (req.textLength !== undefined) extension.textLength = req.textLength;
+  if (req.formatKey !== undefined) extension.formatKey = req.formatKey;
+  if (req.isLicensed !== undefined) extension.isLicensed = req.isLicensed;
+  if (req.extra !== undefined) extension.extra = req.extra;
+
+  const unit: Record<string, unknown> = {};
+  if (req.rating !== undefined) unit.rating = req.rating;
+  if (req.visibility !== undefined) unit.visibility = req.visibility;
+  if (req.licenseSlug !== undefined) unit.license = req.licenseSlug;
+
+  return {
+    ...(Object.keys(extension).length > 0 ? { extension } : {}),
+    ...(Object.keys(unit).length > 0 ? { unit } : {}),
+  };
 }
 
 // ---------------------------------------------------------------------------

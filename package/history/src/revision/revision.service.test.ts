@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { HistoryOutboxPayloadKind, UnitCommonFieldKey } from "@rezics/contract";
+import { HistoryOutboxPayloadKind } from "@rezics/contract";
 import {
   RevisionService,
   computeRevisionContentHash,
@@ -81,18 +81,17 @@ function dbStub() {
 }
 
 describe("RevisionService", () => {
-  test("computes canonical content hash from revision slots", async () => {
+  test("computes canonical content hash from revision patch", async () => {
     const db = dbStub();
     const service = new RevisionService(db as never);
     const payload = {
       unitId: "unit-1",
       sequence: 1,
       actorUserId: "user-1",
-      changedFieldKeys: [UnitCommonFieldKey.TITLE],
-      slots: { unit: { title: "Canonical" } },
+      patch: { translations: { en: { title: "Canonical" } } },
       message: null,
     };
-    const contentHash = computeRevisionContentHash(payload.slots);
+    const contentHash = computeRevisionContentHash(payload.patch);
 
     const revision = await service.insertUnitRevision({
       payload,
@@ -103,7 +102,7 @@ describe("RevisionService", () => {
     expect(db.revisionContent.upsert).toHaveBeenCalledWith({
       where: { hash: contentHash },
       update: {},
-      create: { hash: contentHash, payload: payload.slots },
+      create: { hash: contentHash, payload: payload.patch },
     });
   });
 
@@ -115,12 +114,11 @@ describe("RevisionService", () => {
       unitId: "unit-1",
       sequence: 1,
       actorUserId: "user-1",
-      changedFieldKeys: [UnitCommonFieldKey.TITLE],
-      slots: { unit: { title: "Same" } },
+      patch: { translations: { en: { title: "Same" } } },
       message: null,
     };
 
-    const contentHash = computeRevisionContentHash(payload.slots);
+    const contentHash = computeRevisionContentHash(payload.patch);
 
     await service.insertUnitRevision({ payload, contentHash: "wrong-1" });
     await service.insertUnitRevision({
@@ -151,8 +149,7 @@ describe("RevisionService", () => {
       unitId: "unit-1",
       sequence: 1,
       actorUserId: "user-1",
-      changedFieldKeys: [UnitCommonFieldKey.TITLE],
-      slots: { unit: { title: "Captured" } },
+      patch: { translations: { en: { title: "Captured" } } },
       message: null,
     };
 
@@ -178,8 +175,7 @@ describe("RevisionService", () => {
         unitId: "unit-1",
         sequence: 1,
         actorUserId: "user-1",
-        changedFieldKeys: [UnitCommonFieldKey.TITLE],
-        slots: { unit: { title: "Captured" } },
+        patch: { translations: { en: { title: "Captured" } } },
         message: null,
       },
       contentHash: "hash-1",
@@ -192,7 +188,7 @@ describe("RevisionService", () => {
     });
 
     expect(revision?.content?.payload).toEqual({
-      unit: { title: "Captured" },
+      translations: { en: { title: "Captured" } },
     });
   });
 
@@ -206,7 +202,7 @@ describe("RevisionService", () => {
         sequence: 1,
         actorUserId: "user-1",
         eventType: "book.contentStructure.node.update",
-        changedFieldKeys: [UnitCommonFieldKey.TITLE],
+        changedFieldKeys: ["translations.en.title"],
         payload: { nodeId: "node-1" },
         message: null,
       },
@@ -225,8 +221,7 @@ describe("RevisionService", () => {
           unitId: "unit-1",
           sequence,
           actorUserId: "user-1",
-          changedFieldKeys: [UnitCommonFieldKey.TITLE],
-          slots: { unit: { sequence } },
+          patch: { translations: { en: { sequence } } },
           message: null,
         },
         contentHash: `hash-${sequence}`,
@@ -252,8 +247,7 @@ describe("RevisionService", () => {
         unitId: "unit-1",
         sequence: 1,
         actorUserId: "user-1",
-        changedFieldKeys: [UnitCommonFieldKey.TITLE],
-        slots: { unit: { title: "Visible" } },
+        patch: { translations: { en: { title: "Visible" } } },
         message: null,
       },
       contentHash: "hash-1",
@@ -265,7 +259,7 @@ describe("RevisionService", () => {
     });
 
     expect(page.revisions[0]?.content?.payload).toEqual({
-      unit: { title: "Visible" },
+      translations: { en: { title: "Visible" } },
     });
   });
 

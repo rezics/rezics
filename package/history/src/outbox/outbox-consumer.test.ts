@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { HistoryOutboxPayloadKind, UnitCommonFieldKey } from "@rezics/contract";
+import { HistoryOutboxPayloadKind } from "@rezics/contract";
 import { HistoryOutboxConsumer } from "./outbox-consumer";
 
 function outboxRow(overrides: Record<string, unknown> = {}) {
@@ -18,8 +18,7 @@ function outboxRow(overrides: Record<string, unknown> = {}) {
         unitId: "unit-1",
         sequence: 1,
         actorUserId: "user-1",
-        changedFieldKeys: [UnitCommonFieldKey.TITLE],
-        slots: { unit: { title: "Captured" } },
+        patch: { translations: { en: { title: "Captured" } } },
         message: null,
       },
     },
@@ -139,7 +138,7 @@ describe("HistoryOutboxConsumer", () => {
         sequence: 2,
         actorUserId: "user-1",
         eventType: "book.contentStructure.node.update",
-        changedFieldKeys: [UnitCommonFieldKey.TITLE],
+        changedFieldKeys: ["translations.en.title"],
         payload: { nodeId: "node-1", title: "Captured" },
         message: null,
       },

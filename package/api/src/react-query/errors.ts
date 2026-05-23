@@ -1,4 +1,4 @@
-import type { LockedFieldRejection, LockFieldKey } from "@rezics/contract";
+import type { LockedFieldRejection } from "@rezics/contract";
 
 export interface ApiErrorDetail {
   prisma?: {
@@ -8,9 +8,12 @@ export interface ApiErrorDetail {
   };
   /** Set when `code === "system_shelf_missing"`. */
   kindKey?: string;
-  blockedFieldKeys?: LockFieldKey[];
+  blockedPaths?: string[];
+  offendingLockPath?: string;
+  offendingPatchPath?: string;
   locks?: LockedFieldRejection["locks"];
   unitId?: string;
+  useApi?: string;
 }
 
 export class ApiError extends Error {
@@ -27,7 +30,9 @@ export class ApiError extends Error {
 
 export interface LockedFieldApiError {
   unitId?: string;
-  blockedFieldKeys: LockFieldKey[];
+  blockedPaths: string[];
+  offendingLockPath?: string;
+  offendingPatchPath?: string;
   locks?: LockedFieldRejection["locks"];
   message: string;
 }
@@ -39,14 +44,16 @@ export function getLockedFieldError(
     return null;
   }
 
-  const blockedFieldKeys = error.detail?.blockedFieldKeys;
-  if (!blockedFieldKeys?.length) {
-    return { message: error.message, blockedFieldKeys: [] };
+  const blockedPaths = error.detail?.blockedPaths;
+  if (!blockedPaths?.length) {
+    return { message: error.message, blockedPaths: [] };
   }
 
   return {
     unitId: error.detail?.unitId,
-    blockedFieldKeys,
+    blockedPaths,
+    offendingLockPath: error.detail?.offendingLockPath,
+    offendingPatchPath: error.detail?.offendingPatchPath,
     locks: error.detail?.locks,
     message: error.message,
   };

@@ -1,4 +1,3 @@
-import { AttributionFieldKey } from "@rezics/contract";
 import type {
   LinkSubjectAttributionInput,
   RezicsSessionClaims,
@@ -89,7 +88,7 @@ export class SubjectAttributionService {
 
     const row = await prisma.$transaction(async (tx) => {
       await assertCanEditCollaborativeMetadata(tx as any, actor, req.unitId, [
-        AttributionFieldKey.SUBJECTS,
+        `subjects.${req.role}`,
       ]);
       const created = await tx.subjectAttribution.create({
         data: {
@@ -104,7 +103,17 @@ export class SubjectAttributionService {
       await writeEditorialMetadataHistory(tx as any, {
         unitId: req.unitId,
         actorUserId: actor.userId,
-        changedFieldKeys: [AttributionFieldKey.SUBJECTS],
+        patch: {
+          subjects: {
+            [req.role]: [
+              {
+                entityId: req.entityId,
+                sortOrder: req.sortOrder ?? 0,
+                weight: req.weight ?? null,
+              },
+            ],
+          },
+        },
         message: "subject-attribution.link",
       });
       return created;
@@ -131,7 +140,7 @@ export class SubjectAttributionService {
 
     await prisma.$transaction(async (tx) => {
       await assertCanEditCollaborativeMetadata(tx as any, actor, unitId, [
-        AttributionFieldKey.SUBJECTS,
+        `subjects.${role}`,
       ]);
       await tx.subjectAttribution.delete({
         where: {
@@ -141,7 +150,7 @@ export class SubjectAttributionService {
       await writeEditorialMetadataHistory(tx as any, {
         unitId,
         actorUserId: actor.userId,
-        changedFieldKeys: [AttributionFieldKey.SUBJECTS],
+        patch: { $unset: [`subjects.${role}`] },
         message: "subject-attribution.unlink",
       });
     });

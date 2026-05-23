@@ -1,6 +1,5 @@
 import {
   createUnitFieldLockSchema,
-  type LockFieldKey,
   unitCollaboratorListResponseSchema,
   unitCollaboratorSchema,
   unitFieldLockListResponseSchema,
@@ -14,7 +13,7 @@ import { unitAuthorityService } from "./authority.service";
 
 const fieldLockParamsSchema = t.Object({
   unitId: t.String(),
-  fieldKey: t.String(),
+  path: t.String(),
 });
 
 const collaboratorParamsSchema = t.Object({
@@ -94,16 +93,16 @@ export const unitAuthorityApi = new Elysia({ prefix: "/unit" })
     },
   )
   .put(
-    "/:unitId/field-locks/:fieldKey",
+    "/:unitId/field-locks/:path",
     async ({ params, body, identity }) =>
       unitAuthorityService.createFieldLock(params.unitId, identity, {
         ...body,
-        fieldKey: params.fieldKey as LockFieldKey,
+        path: params.path,
       }),
     {
       requireLogin: true,
       params: fieldLockParamsSchema,
-      body: t.Omit(createUnitFieldLockSchema, ["fieldKey"]),
+      body: t.Omit(createUnitFieldLockSchema, ["path"]),
       response: unitFieldLockSchema,
       detail: {
         summary: "Create or update Unit field lock",
@@ -112,12 +111,12 @@ export const unitAuthorityApi = new Elysia({ prefix: "/unit" })
     },
   )
   .delete(
-    "/:unitId/field-locks/:fieldKey",
+    "/:unitId/field-locks/:path",
     async ({ params, identity }) => {
       await unitAuthorityService.deleteFieldLock(
         params.unitId,
         identity,
-        params.fieldKey,
+        params.path,
       );
       return { message: "Field lock removed" };
     },

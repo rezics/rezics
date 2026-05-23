@@ -1,9 +1,10 @@
 import {
+  isExternallyGoverned,
+  lockPathIntersectsPatchPath,
   UNIT_FIELD_LOCK_ALL,
   UnitAuthorityRoleKey,
-  type LockFieldKey,
+  type LockPath,
   type RezicsSessionClaims,
-  type UnitFieldKey,
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { isAdminRole, verifyAdminFromDb } from "@/middleware";
@@ -41,26 +42,34 @@ export type UnitFieldEditDecision =
       allowed: false;
       code: AuthorityDenyCode;
       message: string;
-      blockedFieldKeys?: LockFieldKey[];
+      blockedPaths?: string[];
+      offendingLockPath?: string;
+      offendingPatchPath?: string;
       collaboratorRole?: UnitAuthorityRoleKey;
     };
 
 export class UnitAuthorityError extends Error {
   readonly code: AuthorityDenyCode;
   readonly unitId?: string;
-  readonly blockedFieldKeys?: LockFieldKey[];
+  readonly blockedPaths?: string[];
+  readonly offendingLockPath?: string;
+  readonly offendingPatchPath?: string;
 
   constructor(input: {
     code: AuthorityDenyCode;
     message: string;
     unitId?: string;
-    blockedFieldKeys?: LockFieldKey[];
+    blockedPaths?: string[];
+    offendingLockPath?: string;
+    offendingPatchPath?: string;
   }) {
     super(input.message);
     this.name = "UnitAuthorityError";
     this.code = input.code;
     this.unitId = input.unitId;
-    this.blockedFieldKeys = input.blockedFieldKeys;
+    this.blockedPaths = input.blockedPaths;
+    this.offendingLockPath = input.offendingLockPath;
+    this.offendingPatchPath = input.offendingPatchPath;
   }
 }
 
@@ -80,8 +89,8 @@ const LOCK_BYPASS_ROLES = new Set<UnitAuthorityRoleKey>([
   UnitAuthorityRoleKey.MAINTAINER,
 ]);
 
-function uniqueFieldKeys(fieldKeys: readonly UnitFieldKey[]): UnitFieldKey[] {
-  return [...new Set(fieldKeys)];
+function uniquePaths(paths: readonly string[]): string[] {
+  return [...new Set(paths)];
 }
 
 function roleFromString(roleKey: string): UnitAuthorityRoleKey | null {
@@ -97,7 +106,10 @@ function denies(
   message: string,
   extra: Pick<
     UnitFieldEditDecision & { allowed: false },
-    "blockedFieldKeys" | "collaboratorRole"
+    | "blockedPaths"
+    | "offendingLockPath"
+    | "offendingPatchPath"
+    | "collaboratorRole"
   > = {},
 ): UnitFieldEditDecision {
   return { allowed: false, code, message, ...extra };
@@ -106,7 +118,7 @@ function denies(
 export async function canEditUnitFields(
   caller: RezicsSessionClaims | null,
   unit: AuthorityUnit,
-  changedFieldKeys: readonly UnitFieldKey[],
+  patchPaths: readonly string[],
   surfacePolicy: CollaborativeSurfacePolicy,
   options: {
     prismaClient?: AuthorityPrisma;
@@ -172,18 +184,28 @@ export async function canEditUnitFields(
     );
   }
 
-  const fieldKeys = uniqueFieldKeys(changedFieldKeys);
+  const editorialPatchPaths = uniquePaths(patchPaths).filter(
+    (path) => !isExternallyGoverned(path),
+  );
   const locks = await db.unitFieldLock.findMany({
-    where: {
-      unitId: unit.id,
-      fieldKey: { in: [UNIT_FIELD_LOCK_ALL, ...fieldKeys] },
-    },
-    select: { fieldKey: true },
+    where: { unitId: unit.id },
+    select: { path: true },
   });
+  const blocked = locks
+    .flatMap((lock) =>
+      editorialPatchPaths
+        .filter((patchPath) =>
+          lockPathIntersectsPatchPath(lock.path as LockPath, patchPath),
+        )
+        .map((patchPath) => ({ lockPath: lock.path, patchPath })),
+    )
+    .at(0);
 
-  if (locks.length > 0) {
+  if (blocked) {
     return denies("FIELD_LOCKED", "One or more fields are locked.", {
-      blockedFieldKeys: locks.map((lock) => lock.fieldKey as LockFieldKey),
+      blockedPaths: [blocked.lockPath],
+      offendingLockPath: blocked.lockPath,
+      offendingPatchPath: blocked.patchPath,
       ...(collaboratorRole ? { collaboratorRole } : {}),
     });
   }
@@ -207,14 +229,14 @@ export async function canEditUnitFields(
 export async function assertCanEditUnitFields(
   caller: RezicsSessionClaims | null,
   unit: AuthorityUnit,
-  changedFieldKeys: readonly UnitFieldKey[],
+  patchPaths: readonly string[],
   surfacePolicy: CollaborativeSurfacePolicy,
   options?: Parameters<typeof canEditUnitFields>[4],
 ): Promise<UnitFieldEditDecision & { allowed: true }> {
   const decision = await canEditUnitFields(
     caller,
     unit,
-    changedFieldKeys,
+    patchPaths,
     surfacePolicy,
     options,
   );
@@ -223,7 +245,9 @@ export async function assertCanEditUnitFields(
       code: decision.code,
       message: decision.message,
       unitId: unit.id,
-      blockedFieldKeys: decision.blockedFieldKeys,
+      blockedPaths: decision.blockedPaths,
+      offendingLockPath: decision.offendingLockPath,
+      offendingPatchPath: decision.offendingPatchPath,
     });
   }
   return decision;

@@ -1,6 +1,5 @@
 import type {
   CreateUnitFieldLockInput,
-  LockFieldKey,
   UnitAuthorityRoleKey,
   UnitCollaboratorDTO,
   UnitFieldLockDTO,
@@ -26,12 +25,11 @@ export type RemoveUnitCollaboratorVariables = {
 
 export type UpsertUnitFieldLockVariables = CreateUnitFieldLockInput & {
   unitId: string;
-  fieldKey: LockFieldKey;
 };
 
 export type RemoveUnitFieldLockVariables = {
   unitId: string;
-  fieldKey: LockFieldKey;
+  path: string;
 };
 
 export function useUpsertUnitCollaboratorMutation(
@@ -90,8 +88,8 @@ export function useUpsertUnitFieldLockMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ unitId, fieldKey, reason }) =>
-      unitAuthorityApi.upsertFieldLock(unitId, { fieldKey, reason }),
+    mutationFn: ({ unitId, path, reason }) =>
+      unitAuthorityApi.upsertFieldLock(unitId, { path, reason }),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
@@ -114,8 +112,8 @@ export function useRemoveUnitFieldLockMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ unitId, fieldKey }) =>
-      unitAuthorityApi.removeFieldLock(unitId, fieldKey),
+    mutationFn: ({ unitId, path }) =>
+      unitAuthorityApi.removeFieldLock(unitId, path),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({

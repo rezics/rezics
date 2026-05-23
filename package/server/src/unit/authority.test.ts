@@ -1,8 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
   UnitAuthorityRoleKey,
-  UnitCommonFieldKey,
-  WikiPostFieldKey,
   type RezicsSessionClaims,
 } from "@rezics/contract";
 import {
@@ -30,7 +28,7 @@ function prismaStub(input?: {
     },
     unitFieldLock: {
       findMany: mock(async () =>
-        (input?.locks ?? []).map((fieldKey) => ({ fieldKey })),
+        (input?.locks ?? []).map((path) => ({ path })),
       ),
     },
   };
@@ -47,7 +45,7 @@ describe("canEditUnitFields", () => {
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
-      [UnitCommonFieldKey.TITLE],
+      ["translations.en.title"],
       notCollaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -60,12 +58,12 @@ describe("canEditUnitFields", () => {
   });
 
   test("locked fields block rezics-wiki-owned community edits", async () => {
-    const db = prismaStub({ locks: [UnitCommonFieldKey.TITLE] });
+    const db = prismaStub({ locks: ["translations.en.title"] });
 
     const decision = await canEditUnitFields(
       actor("user-2"),
       { id: "unit-1", userId: "rezics-wiki-user" },
-      [UnitCommonFieldKey.TITLE],
+      ["translations.en.title"],
       collaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -73,7 +71,9 @@ describe("canEditUnitFields", () => {
     expect(decision).toMatchObject({
       allowed: false,
       code: "FIELD_LOCKED",
-      blockedFieldKeys: [UnitCommonFieldKey.TITLE],
+      blockedPaths: ["translations.en.title"],
+      offendingLockPath: "translations.en.title",
+      offendingPatchPath: "translations.en.title",
     });
   });
 
@@ -83,7 +83,7 @@ describe("canEditUnitFields", () => {
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
-      [WikiPostFieldKey.BODY],
+      ["post.body"],
       collaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -91,7 +91,9 @@ describe("canEditUnitFields", () => {
     expect(decision).toMatchObject({
       allowed: false,
       code: "FIELD_LOCKED",
-      blockedFieldKeys: ["*"],
+      blockedPaths: ["*"],
+      offendingLockPath: "*",
+      offendingPatchPath: "post.body",
     });
   });
 
@@ -101,7 +103,7 @@ describe("canEditUnitFields", () => {
     const decision = await canEditUnitFields(
       actor("owner-1"),
       unit,
-      [UnitCommonFieldKey.TITLE],
+      ["translations.en.title"],
       collaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -122,7 +124,7 @@ describe("canEditUnitFields", () => {
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
-      [UnitCommonFieldKey.TITLE],
+      ["translations.en.title"],
       collaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -141,7 +143,7 @@ describe("canEditUnitFields", () => {
     const decision = await canEditUnitFields(
       actor("admin-1", "ADMIN"),
       unit,
-      [UnitCommonFieldKey.TITLE],
+      ["translations.en.title"],
       collaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -160,7 +162,7 @@ describe("canEditUnitFields", () => {
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
-      [WikiPostFieldKey.BODY],
+      ["post.body"],
       notCollaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -175,7 +177,7 @@ describe("canEditUnitFields", () => {
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
-      [UnitCommonFieldKey.TITLE],
+      ["translations.en.title"],
       collaborative,
       { prismaClient: db as never, verifyAdmin: async () => false },
     );
@@ -188,13 +190,13 @@ describe("canEditUnitFields", () => {
   });
 
   test("assert helper throws typed authority errors with blocked field keys", async () => {
-    const db = prismaStub({ locks: [WikiPostFieldKey.BODY] });
+    const db = prismaStub({ locks: ["post.body"] });
 
     await expect(
       assertCanEditUnitFields(
         actor("user-2"),
         unit,
-        [WikiPostFieldKey.BODY],
+        ["post.body"],
         collaborative,
         { prismaClient: db as never, verifyAdmin: async () => false },
       ),
@@ -202,7 +204,9 @@ describe("canEditUnitFields", () => {
       name: "UnitAuthorityError",
       code: "FIELD_LOCKED",
       unitId: "unit-1",
-      blockedFieldKeys: [WikiPostFieldKey.BODY],
+      blockedPaths: ["post.body"],
+      offendingLockPath: "post.body",
+      offendingPatchPath: "post.body",
     } satisfies Partial<UnitAuthorityError>);
   });
 });

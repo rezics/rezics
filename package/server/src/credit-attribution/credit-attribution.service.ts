@@ -8,7 +8,7 @@ import { patchContentCreditsToMeili } from "@/meili/content/sync";
 import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
-  creditRoleFieldKey,
+  creditRolePatchPath,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
 import { mapCreditAttributionToDTO } from "./credit-attribution.mapper";
@@ -40,7 +40,7 @@ export class CreditAttributionService {
     req: LinkCreditAttributionInput,
     actor?: RezicsSessionClaims,
   ): Promise<CreditAttributionDTO> {
-    const fieldKey = creditRoleFieldKey(req.role);
+    const patchPath = creditRolePatchPath(req.role);
     await this.assertCreditEligibility(req);
 
     if (!actor) {
@@ -59,7 +59,7 @@ export class CreditAttributionService {
 
     const row = await prisma.$transaction(async (tx) => {
       await assertCanEditCollaborativeMetadata(tx as any, actor, req.unitId, [
-        fieldKey,
+        patchPath,
       ]);
       const created = await tx.creditAttribution.create({
         data: {
@@ -73,7 +73,17 @@ export class CreditAttributionService {
       await writeEditorialMetadataHistory(tx as any, {
         unitId: req.unitId,
         actorUserId: actor.userId,
-        changedFieldKeys: [fieldKey],
+        patch: {
+          credits: {
+            [patchPath.slice("credits.".length)]: [
+              {
+                entityId: req.entityId,
+                role: req.role,
+                sortOrder: req.sortOrder ?? 0,
+              },
+            ],
+          },
+        },
         message: "credit-attribution.link",
       });
       return created;
@@ -88,7 +98,7 @@ export class CreditAttributionService {
     role: string,
     actor?: RezicsSessionClaims,
   ): Promise<void> {
-    const fieldKey = creditRoleFieldKey(role);
+    const patchPath = creditRolePatchPath(role);
 
     if (!actor) {
       await prisma.creditAttribution.delete({
@@ -102,7 +112,7 @@ export class CreditAttributionService {
 
     await prisma.$transaction(async (tx) => {
       await assertCanEditCollaborativeMetadata(tx as any, actor, unitId, [
-        fieldKey,
+        patchPath,
       ]);
       await tx.creditAttribution.delete({
         where: {
@@ -112,7 +122,7 @@ export class CreditAttributionService {
       await writeEditorialMetadataHistory(tx as any, {
         unitId,
         actorUserId: actor.userId,
-        changedFieldKeys: [fieldKey],
+        patch: { $unset: [patchPath] },
         message: "credit-attribution.unlink",
       });
     });

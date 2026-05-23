@@ -1,7 +1,5 @@
 import {
-  AttributionFieldKey,
   UnitAuthorityRoleKey,
-  UnitCommonFieldKey,
   type RezicsSessionClaims,
 } from "@rezics/contract";
 import { describe, expect, test } from "bun:test";
@@ -34,7 +32,7 @@ function makeTx(input: {
     unitFieldLock: {
       findMany: async () => {
         calls.lockLookups += 1;
-        return (input.locks ?? []).map((fieldKey) => ({ fieldKey }));
+        return (input.locks ?? []).map((path) => ({ path }));
       },
     },
   };
@@ -46,7 +44,7 @@ const noAdminLookup = { verifyAdmin: async () => false };
 describe("assertCanEditCollaborativeMetadata", () => {
   test("locked attribution fields reject community edits", async () => {
     const { tx } = makeTx({
-      locks: [AttributionFieldKey.CREDITS_AUTHORS],
+      locks: ["credits.authors"],
     });
 
     await expect(
@@ -54,27 +52,29 @@ describe("assertCanEditCollaborativeMetadata", () => {
         tx,
         actor("community-1"),
         "unit-1",
-        [AttributionFieldKey.CREDITS_AUTHORS],
+        ["credits.authors"],
         noAdminLookup,
       ),
     ).rejects.toMatchObject({
       statusCode: 403,
       code: "FIELD_LOCKED",
       details: {
-        blockedFieldKeys: [AttributionFieldKey.CREDITS_AUTHORS],
+        blockedPaths: ["credits.authors"],
+        offendingLockPath: "credits.authors",
+        offendingPatchPath: "credits.authors",
       },
     } satisfies Partial<AppError>);
   });
 
   test("locked translation title fields reject community edits", async () => {
-    const { tx } = makeTx({ locks: [UnitCommonFieldKey.TITLE] });
+    const { tx } = makeTx({ locks: ["translations.en.title"] });
 
     await expect(
       assertCanEditCollaborativeMetadata(
         tx,
         actor("community-1"),
         "unit-1",
-        [UnitCommonFieldKey.TITLE],
+        ["translations.en.title"],
         noAdminLookup,
       ),
     ).rejects.toMatchObject({
@@ -91,7 +91,7 @@ describe("assertCanEditCollaborativeMetadata", () => {
         tx,
         actor("community-1"),
         "unit-1",
-        [UnitCommonFieldKey.TITLE],
+        ["translations.en.title"],
         noAdminLookup,
       ),
     ).resolves.toBeUndefined();
@@ -101,7 +101,7 @@ describe("assertCanEditCollaborativeMetadata", () => {
   test("primary owner bypasses locks", async () => {
     const { tx, calls } = makeTx({
       ownerId: "owner-1",
-      locks: [UnitCommonFieldKey.TITLE],
+      locks: ["translations.en.title"],
     });
 
     await expect(
@@ -109,7 +109,7 @@ describe("assertCanEditCollaborativeMetadata", () => {
         tx,
         actor("owner-1"),
         "unit-1",
-        [UnitCommonFieldKey.TITLE],
+        ["translations.en.title"],
         noAdminLookup,
       ),
     ).resolves.toBeUndefined();
@@ -126,7 +126,7 @@ describe("assertCanEditCollaborativeMetadata", () => {
         tx,
         actor("editor-1"),
         "unit-1",
-        [UnitCommonFieldKey.TITLE],
+        ["translations.en.title"],
         noAdminLookup,
       ),
     ).resolves.toBeUndefined();

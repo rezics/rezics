@@ -1,13 +1,8 @@
 import {
-  AttributionFieldKey,
-  BookFieldKey,
-  EntityFieldKey,
   HistoryOutboxPayloadKind,
+  isExternallyGoverned,
   type RezicsSessionClaims,
-  UnitCommonFieldKey,
-  type UnitFieldKey,
 } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
 import { UnitAuthorityError, assertCanEditUnitFields } from "./authority";
 import {
   buildEditorialRevisionPayload,
@@ -27,25 +22,7 @@ export type CollaborativeMetadataTx = HistoryOutboxWriter & {
     findUnique(input: unknown): Promise<{ roleKey: string } | null>;
   };
   unitFieldLock: {
-    findMany(input: unknown): Promise<Array<{ fieldKey: string }>>;
-  };
-  unitTranslation: {
-    findMany(input: unknown): Promise<unknown[]>;
-  };
-  book: {
-    findUnique(input: unknown): Promise<unknown>;
-  };
-  entity: {
-    findUnique(input: unknown): Promise<unknown>;
-  };
-  creditAttribution: {
-    findMany(input: unknown): Promise<unknown[]>;
-  };
-  subjectAttribution: {
-    findMany(input: unknown): Promise<unknown[]>;
-  };
-  unitTag: {
-    findMany(input: unknown): Promise<unknown[]>;
+    findMany(input: unknown): Promise<Array<{ path: string }>>;
   };
 };
 
@@ -57,7 +34,9 @@ export function toAppError(error: unknown): never {
       code: error.code,
       details: {
         unitId: error.unitId,
-        blockedFieldKeys: error.blockedFieldKeys,
+        blockedPaths: error.blockedPaths,
+        offendingLockPath: error.offendingLockPath,
+        offendingPatchPath: error.offendingPatchPath,
       },
     });
   }
@@ -68,7 +47,7 @@ export async function assertCanEditCollaborativeMetadata(
   tx: CollaborativeMetadataTx,
   actor: RezicsSessionClaims,
   unitId: string,
-  changedFieldKeys: readonly UnitFieldKey[],
+  patchPaths: readonly string[],
   options: { verifyAdmin?: (userId: string) => Promise<boolean> } = {},
 ): Promise<void> {
   const unit = await tx.unit.findUniqueOrThrow({
@@ -80,7 +59,7 @@ export async function assertCanEditCollaborativeMetadata(
     await assertCanEditUnitFields(
       actor,
       unit,
-      changedFieldKeys,
+      patchPaths,
       COLLABORATIVE_METADATA_POLICY,
       { prismaClient: tx as any, verifyAdmin: options.verifyAdmin },
     );
@@ -89,46 +68,109 @@ export async function assertCanEditCollaborativeMetadata(
   }
 }
 
-export function uniqueFieldKeys(
-  fieldKeys: readonly (UnitFieldKey | undefined)[],
-): UnitFieldKey[] {
-  return [...new Set(fieldKeys.filter(Boolean) as UnitFieldKey[])];
+export function uniquePatchPaths(
+  paths: readonly (string | undefined)[],
+): string[] {
+  return [...new Set(paths.filter(Boolean) as string[])];
 }
 
-export function mapTranslationFieldKeys(input: {
-  title?: unknown;
-  subtitle?: unknown;
-  summary?: unknown;
-  description?: unknown;
-  extra?: unknown;
-  sourceReleaseUnitId?: unknown;
-}): UnitFieldKey[] {
-  return uniqueFieldKeys([
-    input.title !== undefined ? UnitCommonFieldKey.TITLE : undefined,
-    input.subtitle !== undefined ? UnitCommonFieldKey.SUBTITLE : undefined,
-    input.summary !== undefined ? UnitCommonFieldKey.SUMMARY : undefined,
-    input.description !== undefined
-      ? UnitCommonFieldKey.DESCRIPTION
-      : undefined,
-    input.extra !== undefined ? UnitCommonFieldKey.EXTRA : undefined,
+export function mapTranslationPatchPaths(
+  input: {
+    title?: unknown;
+    subtitle?: unknown;
+    summary?: unknown;
+    description?: unknown;
+    extra?: unknown;
+    sourceReleaseUnitId?: unknown;
+  },
+  language?: string,
+): string[] {
+  const prefix = language ? `translations.${language}` : "translations";
+  return uniquePatchPaths([
+    input.title !== undefined ? `${prefix}.title` : undefined,
+    input.subtitle !== undefined ? `${prefix}.subtitle` : undefined,
+    input.summary !== undefined ? `${prefix}.summary` : undefined,
+    input.description !== undefined ? `${prefix}.description` : undefined,
+    input.extra !== undefined ? `${prefix}.extra` : undefined,
     input.sourceReleaseUnitId !== undefined
-      ? UnitCommonFieldKey.WORK
+      ? `${prefix}.sourceReleaseUnitId`
       : undefined,
   ]);
 }
 
-export function creditRoleFieldKey(role: string): UnitFieldKey {
+export function translationPatch(
+  language: string,
+  input: {
+    title?: unknown;
+    subtitle?: unknown;
+    summary?: unknown;
+    description?: unknown;
+    extra?: unknown;
+    sourceReleaseUnitId?: unknown;
+  },
+): Record<string, unknown> {
+  return {
+    translations: {
+      [language]: Object.fromEntries(
+        Object.entries(input).filter(([, value]) => value !== undefined),
+      ),
+    },
+  };
+}
+
+export function creditRolePatchPath(role: string): string {
   const normalized = role.toLowerCase();
   if (normalized.includes("publisher")) {
-    return AttributionFieldKey.CREDITS_PUBLISHERS;
+    return "credits.publishers";
   }
   if (normalized.includes("translator")) {
-    return AttributionFieldKey.CREDITS_TRANSLATORS;
+    return "credits.translators";
   }
   if (normalized.includes("illustrator")) {
-    return AttributionFieldKey.CREDITS_ILLUSTRATORS;
+    return "credits.illustrators";
   }
-  return AttributionFieldKey.CREDITS_AUTHORS;
+  return "credits.authors";
+}
+
+export function collectPatchLeafPaths(value: unknown, prefix = ""): string[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return prefix ? [prefix] : [];
+  }
+
+  const paths: string[] = [];
+  for (const [key, nested] of Object.entries(
+    value as Record<string, unknown>,
+  )) {
+    if (key === "$unset") {
+      if (Array.isArray(nested)) {
+        paths.push(
+          ...nested.filter((path): path is string => typeof path === "string"),
+        );
+      }
+      continue;
+    }
+    const nextPrefix = prefix ? `${prefix}.${key}` : key;
+    const nestedPaths = collectPatchLeafPaths(nested, nextPrefix);
+    paths.push(...(nestedPaths.length > 0 ? nestedPaths : [nextPrefix]));
+  }
+  return uniquePatchPaths(paths);
+}
+
+export function assertEditorialPatchAllowed(patch: Record<string, unknown>) {
+  const offendingPath = collectPatchLeafPaths(patch).find((path) =>
+    isExternallyGoverned(path),
+  );
+  if (!offendingPath) return;
+
+  throw new AppError(400, "Path is externally governed", {
+    code: "EXTERNALLY_GOVERNED_PATH",
+    details: {
+      offendingPath,
+      useApi: offendingPath.startsWith("realmTagApplications")
+        ? "/realm-tag-applications"
+        : "/tags",
+    },
+  });
 }
 
 export async function writeEditorialMetadataHistory(
@@ -136,15 +178,13 @@ export async function writeEditorialMetadataHistory(
   input: {
     unitId: string;
     actorUserId: string;
-    changedFieldKeys: readonly UnitFieldKey[];
+    patch: Record<string, unknown>;
     message: string;
-    slots?: Record<string, unknown>;
   },
 ): Promise<void> {
-  const changedFieldKeys = uniqueFieldKeys(input.changedFieldKeys);
-  if (changedFieldKeys.length === 0) return;
+  assertEditorialPatchAllowed(input.patch);
+  if (collectPatchLeafPaths(input.patch).length === 0) return;
 
-  const baseSlots = await loadEditorialSlots(tx, input.unitId);
   await writeSequencedHistoryOutbox(tx, {
     unitId: input.unitId,
     actorUserId: input.actorUserId,
@@ -154,68 +194,9 @@ export async function writeEditorialMetadataHistory(
         unitId: input.unitId,
         sequence,
         actorUserId: input.actorUserId,
-        changedFieldKeys,
-        slots: { ...baseSlots, ...(input.slots ?? {}) },
+        patch: input.patch,
         message: input.message,
       }),
     }),
   });
-}
-
-async function loadEditorialSlots(
-  tx: CollaborativeMetadataTx,
-  unitId: string,
-): Promise<Record<string, unknown>> {
-  const [translations, book, entity, credits, subjects, tags] =
-    await Promise.all([
-      tx.unitTranslation.findMany({
-        where: { unitId },
-        orderBy: { language: "asc" },
-      }),
-      tx.book.findUnique({ where: { unitId } }),
-      tx.entity.findUnique({ where: { unitId } }),
-      tx.creditAttribution.findMany({
-        where: { unitId },
-        orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
-      }),
-      tx.subjectAttribution.findMany({
-        where: { unitId },
-        orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
-      }),
-      tx.unitTag.findMany({
-        where: { unitId },
-        orderBy: [
-          { pinned: "desc" },
-          { position: "asc" },
-          { tagUnitId: "asc" },
-        ],
-      }),
-    ]);
-
-  return {
-    translations: sanitizeHistoryValue(translations),
-    extension: sanitizeHistoryValue(
-      (book ?? entity ?? null) as Prisma.JsonValue | null,
-    ),
-    credits: sanitizeHistoryValue(credits),
-    subjects: sanitizeHistoryValue(subjects),
-    tags: sanitizeHistoryValue(tags),
-  };
-}
-
-function sanitizeHistoryValue(value: unknown): unknown {
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
-  if (Array.isArray(value)) {
-    return value.map((item) => sanitizeHistoryValue(item));
-  }
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value)
-        .filter(([, item]) => item !== undefined)
-        .map(([key, item]) => [key, sanitizeHistoryValue(item)]),
-    );
-  }
-  return value;
 }

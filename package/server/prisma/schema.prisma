@@ -860,7 +860,7 @@ model UnitCollaborator {
 
 model UnitFieldLock {
   unitId     String   @db.Uuid
-  fieldKey   String   @db.VarChar(96)
+  path       String   @db.VarChar(256)
   lockedById String   @db.Uuid
   reason     String?
   createdAt  DateTime @default(now())
@@ -868,7 +868,7 @@ model UnitFieldLock {
   unit     Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
   lockedBy User @relation("UnitFieldLockLockedBy", fields: [lockedById], references: [unitId], onDelete: Restrict)
 
-  @@id([unitId, fieldKey])
+  @@id([unitId, path])
   @@index([lockedById, createdAt])
 }
 

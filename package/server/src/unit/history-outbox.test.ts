@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { HistoryOutboxPayloadKind, UnitCommonFieldKey } from "@rezics/contract";
+import { HistoryOutboxPayloadKind } from "@rezics/contract";
 import {
   allocateUnitHistorySequence,
   buildEditorialRevisionPayload,
@@ -44,8 +44,7 @@ describe("history outbox helpers", () => {
         unitId: "unit-1",
         sequence: 1,
         actorUserId: "user-1",
-        changedFieldKeys: [UnitCommonFieldKey.TITLE],
-        slots: { unit: { title: "First" } },
+        patch: { translations: { en: { title: "First" } } },
       }),
     };
     const secondPayload = {
@@ -54,8 +53,7 @@ describe("history outbox helpers", () => {
         unitId: "unit-1",
         sequence: 2,
         actorUserId: "user-1",
-        changedFieldKeys: [UnitCommonFieldKey.TITLE],
-        slots: { unit: { title: "Second" } },
+        patch: { translations: { en: { title: "Second" } } },
       }),
     };
 
@@ -99,8 +97,7 @@ describe("history outbox helpers", () => {
             unitId: "unit-1",
             sequence: 1,
             actorUserId: "user-1",
-            changedFieldKeys: [UnitCommonFieldKey.TITLE],
-            slots: { unit: { title: "Captured" } },
+            patch: { translations: { en: { title: "Captured" } } },
           }),
         },
       });
@@ -138,21 +135,20 @@ describe("history outbox helpers", () => {
       unitId: "unit-1",
       sequence: 3n,
       actorUserId: "user-1",
-      changedFieldKeys: [UnitCommonFieldKey.TITLE],
-      slots: { translations: [{ language: "en", title: "Captured" }] },
+      patch: { translations: { en: { title: "Captured" } } },
     });
     const structure = buildStructureEventPayload({
       unitId: "unit-1",
       sequence: 4n,
       actorUserId: "user-1",
       eventType: "book.contentStructure.node.update",
-      changedFieldKeys: [UnitCommonFieldKey.TITLE],
+      changedFieldKeys: ["translations.en.title"],
       payload: { nodeId: "node-1", title: "Captured node" },
     });
 
-    expect(editorial.slots.translations).toEqual([
-      { language: "en", title: "Captured" },
-    ]);
+    expect(editorial.patch.translations).toEqual({
+      en: { title: "Captured" },
+    });
     expect(structure.payload).toEqual({
       nodeId: "node-1",
       title: "Captured node",

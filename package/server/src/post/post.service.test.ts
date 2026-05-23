@@ -605,7 +605,7 @@ describe("PostService wiki posts", () => {
       kind: "WIKI",
     }));
     unitFieldLockFindManyMock.mockImplementationOnce(async () => [
-      { fieldKey: "post.body" },
+      { path: "post.body" },
     ]);
 
     await expect(

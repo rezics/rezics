@@ -1,5 +1,4 @@
 import { t } from "elysia";
-import { lockFieldKeySchema } from "./content-authority";
 
 export const HistoryOutboxPayloadKind = {
   EDITORIAL_REVISION: "editorial_revision",
@@ -18,16 +17,22 @@ export const historyOutboxPayloadKindSchema = t.Union([
   t.Literal(HistoryOutboxPayloadKind.COLLABORATOR_MUTATION),
 ]);
 
-export const revisionSlotNameSchema = t.Union([
-  t.Literal("unit"),
-  t.Literal("translations"),
-  t.Literal("supportLanguages"),
-  t.Literal("extension"),
-  t.Literal("credits"),
-  t.Literal("subjects"),
-  t.Literal("tags"),
-  t.Literal("post"),
+export const editorialPatchSchema = t.Intersect([
+  t.Record(t.String(), t.Any()),
+  t.Object({
+    $unset: t.Optional(t.Array(t.String())),
+  }),
 ]);
+
+export type EditorialPatch = (typeof editorialPatchSchema)["static"];
+
+export const editorialPatchSubmissionSchema = t.Object({
+  patch: editorialPatchSchema,
+  message: t.Optional(t.Nullable(t.String())),
+});
+
+export type EditorialPatchSubmission =
+  (typeof editorialPatchSubmissionSchema)["static"];
 
 export const revisionContentSchema = t.Object({
   hash: t.String(),
@@ -50,13 +55,8 @@ export const editorialRevisionPayloadSchema = t.Object({
   unitId: t.String(),
   sequence: t.Number(),
   actorUserId: t.String(),
-  changedFieldKeys: t.Array(lockFieldKeySchema),
-  slots: t.Partial(
-    t.Record(
-      revisionSlotNameSchema,
-      t.Union([t.Array(t.Any()), t.Record(t.String(), t.Any())]),
-    ),
-  ),
+  patch: editorialPatchSchema,
+  legacyChangedKeys: t.Optional(t.Array(t.String())),
   message: t.Optional(t.Nullable(t.String())),
   restoreSource: t.Optional(historyRestoreSourceSchema),
 });
@@ -149,7 +149,7 @@ export const structureEventPayloadSchema = t.Object({
   sequence: t.Number(),
   actorUserId: t.String(),
   eventType: t.String(),
-  changedFieldKeys: t.Array(lockFieldKeySchema),
+  changedFieldKeys: t.Array(t.String()),
   payload: t.Record(t.String(), t.Any()),
   message: t.Optional(t.Nullable(t.String())),
 });
@@ -162,7 +162,7 @@ export const bookContentStructureBatchEventPayloadSchema = t.Object({
   sequence: t.Number(),
   actorUserId: t.String(),
   eventType: t.Literal("book.contentStructure.batch"),
-  changedFieldKeys: t.Array(lockFieldKeySchema),
+  changedFieldKeys: t.Array(t.String()),
   payload: bookContentStructureBatchPayloadSchema,
   message: t.Optional(t.Nullable(t.String())),
 });
@@ -244,7 +244,7 @@ export const unitRevisionTimelineItemSchema = t.Object({
   sequence: t.Number(),
   contentHash: t.String(),
   actorUserId: t.String(),
-  changedFieldKeys: t.Array(lockFieldKeySchema),
+  changedFieldKeys: t.Array(t.String()),
   message: t.Optional(t.Nullable(t.String())),
   createdAt: t.Union([t.String(), t.Date()]),
   ingestedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -284,7 +284,7 @@ export const structureEventSchema = t.Object({
   sequence: t.Number(),
   eventType: t.String(),
   actorUserId: t.String(),
-  changedFieldKeys: t.Array(lockFieldKeySchema),
+  changedFieldKeys: t.Array(t.String()),
   payload: t.Optional(t.Record(t.String(), t.Any())),
   message: t.Optional(t.Nullable(t.String())),
   createdAt: t.Union([t.String(), t.Date()]),

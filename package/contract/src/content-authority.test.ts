@@ -1,21 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
-  AttributionFieldKey,
-  BookFieldKey,
   CreationMode,
-  EntityFieldKey,
-  GameFieldKey,
-  MediaFieldKey,
-  UNIT_FIELD_KEYS,
+  EXTERNALLY_GOVERNED_PATHS,
   UNIT_FIELD_LOCK_ALL,
   UnitAuthorityRoleKey,
-  UnitCommonFieldKey,
-  WikiPostFieldKey,
   creationModeSchema,
-  lockFieldKeySchema,
+  isExternallyGoverned,
+  lockPathIntersectsPatchPath,
+  pathsIntersect,
+  unitFieldLockSchema,
   unitAuthorityRoleKeySchema,
-  unitFieldKeySchema,
 } from "./content-authority";
 import { PostKind, postKindLiterals } from "./post";
 
@@ -42,31 +37,51 @@ describe("content authority vocabulary", () => {
     expect(Value.Check(unitAuthorityRoleKeySchema, "admin")).toBe(false);
   });
 
-  test("field key vocabulary covers planned semantic groups", () => {
-    const expected = [
-      UnitCommonFieldKey.TITLE,
-      UnitCommonFieldKey.COVER,
-      BookFieldKey.ISBN_13,
-      EntityFieldKey.KIND,
-      GameFieldKey.PLATFORM,
-      MediaFieldKey.KIND,
-      AttributionFieldKey.CREDITS_AUTHORS,
-      AttributionFieldKey.SUBJECTS,
-      AttributionFieldKey.TAGS,
-      WikiPostFieldKey.BODY,
-    ];
-
-    expect(new Set(UNIT_FIELD_KEYS).size).toBe(UNIT_FIELD_KEYS.length);
-    for (const fieldKey of expected) {
-      expect(UNIT_FIELD_KEYS).toContain(fieldKey);
-      expect(Value.Check(unitFieldKeySchema, fieldKey)).toBe(true);
-      expect(Value.Check(lockFieldKeySchema, fieldKey)).toBe(true);
-    }
+  test("field lock accepts free-form paths", () => {
+    expect(UNIT_FIELD_LOCK_ALL).toBe("*");
+    expect(
+      Value.Check(unitFieldLockSchema, {
+        unitId: "unit-1",
+        path: "translations.en.title",
+        lockedById: "user-1",
+        reason: null,
+        createdAt: "2026-05-23T00:00:00.000Z",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(unitFieldLockSchema, {
+        unitId: "unit-1",
+        fieldKey: "identity.title",
+        lockedById: "user-1",
+        createdAt: "2026-05-23T00:00:00.000Z",
+      }),
+    ).toBe(false);
   });
 
-  test("whole-object lock is accepted only by lock schema", () => {
-    expect(UNIT_FIELD_LOCK_ALL).toBe("*");
-    expect(Value.Check(lockFieldKeySchema, UNIT_FIELD_LOCK_ALL)).toBe(true);
-    expect(Value.Check(unitFieldKeySchema, UNIT_FIELD_LOCK_ALL)).toBe(false);
+  test("path intersection uses dot-boundary prefix matching", () => {
+    expect(pathsIntersect("credits.authors", "credits.authors")).toBe(true);
+    expect(pathsIntersect("credits", "credits.authors")).toBe(true);
+    expect(pathsIntersect("credits.authors", "credits")).toBe(true);
+    expect(pathsIntersect("credits.authors", "credits.translators")).toBe(
+      false,
+    );
+    expect(pathsIntersect("tags", "tagSummary")).toBe(false);
+  });
+
+  test("whole-object lock intersects editorial patch paths", () => {
+    expect(
+      lockPathIntersectsPatchPath(UNIT_FIELD_LOCK_ALL, "translations.en.title"),
+    ).toBe(true);
+    expect(
+      lockPathIntersectsPatchPath("credits.authors", "credits.translators"),
+    ).toBe(false);
+  });
+
+  test("externally governed paths are prefix-boundary matched", () => {
+    expect(EXTERNALLY_GOVERNED_PATHS).toEqual(["tags", "realmTagApplications"]);
+    expect(isExternallyGoverned("tags")).toBe(true);
+    expect(isExternallyGoverned("tags.primary")).toBe(true);
+    expect(isExternallyGoverned("realmTagApplications.foo")).toBe(true);
+    expect(isExternallyGoverned("tagSummary")).toBe(false);
   });
 });

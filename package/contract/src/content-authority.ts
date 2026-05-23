@@ -31,99 +31,41 @@ export const unitAuthorityRoleKeySchema = t.Union([
 
 export const UNIT_FIELD_LOCK_ALL = "*" as const;
 
-export const UnitCommonFieldKey = {
-  STATUS: "unit.status",
-  VISIBILITY: "unit.visibility",
-  RATING: "unit.rating",
-  LICENSE: "unit.license",
-  DEFAULT_LANGUAGE: "unit.defaultLanguage",
-  LANGUAGE_NEUTRAL: "unit.isLanguageNeutral",
-  WORK: "unit.work",
-  EXTRA: "unit.extra",
-  PUBLISHED_AT: "unit.publishedAt",
-  TITLE: "identity.title",
-  SUBTITLE: "identity.subtitle",
-  SUMMARY: "identity.summary",
-  DESCRIPTION: "identity.description",
-  COVER: "identity.cover",
-} as const;
+export type LockPath = string | typeof UNIT_FIELD_LOCK_ALL;
 
-export const BookFieldKey = {
-  ISBN_13: "bibliographic.isbn13",
-  PUBLICATION_DATE: "bibliographic.publicationDate",
-  PAGE_COUNT: "bibliographic.pageCount",
-  TEXT_LENGTH: "bibliographic.textLength",
-  FORMAT: "bibliographic.format",
-  LICENSED: "bibliographic.isLicensed",
-  CONTENT_STRUCTURE: "book.contentStructure",
-} as const;
-
-export const EntityFieldKey = {
-  KIND: "entity.kind",
-  AVATAR: "entity.avatar",
-  VERIFIED: "entity.verified",
-  SLUG: "entity.slug",
-  ELIGIBLE_CREDIT_ROLES: "entity.eligibleCreditRoles",
-  ELIGIBLE_SUBJECT_ROLES: "entity.eligibleSubjectRoles",
-} as const;
-
-export const GameFieldKey = {
-  PLATFORM: "game.platform",
-  RELEASE_DATE: "game.releaseDate",
-  DEVELOPER: "game.developer",
-  PUBLISHER: "game.publisher",
-} as const;
-
-export const MediaFieldKey = {
-  KIND: "media.kind",
-  RELEASE_DATE: "media.releaseDate",
-  DURATION: "media.duration",
-  STUDIO: "media.studio",
-} as const;
-
-export const AttributionFieldKey = {
-  CREDITS_AUTHORS: "credits.authors",
-  CREDITS_PUBLISHERS: "credits.publishers",
-  CREDITS_TRANSLATORS: "credits.translators",
-  CREDITS_ILLUSTRATORS: "credits.illustrators",
-  SUBJECTS: "subjects",
-  TAGS: "tags",
-} as const;
-
-export const WikiPostFieldKey = {
-  BODY: "post.body",
-} as const;
-
-export const UNIT_FIELD_KEYS = [
-  ...Object.values(UnitCommonFieldKey),
-  ...Object.values(BookFieldKey),
-  ...Object.values(EntityFieldKey),
-  ...Object.values(GameFieldKey),
-  ...Object.values(MediaFieldKey),
-  ...Object.values(AttributionFieldKey),
-  ...Object.values(WikiPostFieldKey),
+export const EXTERNALLY_GOVERNED_PATHS = [
+  "tags",
+  "realmTagApplications",
 ] as const;
 
-export type UnitFieldKey = (typeof UNIT_FIELD_KEYS)[number];
+export type ExternallyGovernedPath = (typeof EXTERNALLY_GOVERNED_PATHS)[number];
 
-export const unitFieldKeySchema = t.Union(
-  UNIT_FIELD_KEYS.map((fieldKey) => t.Literal(fieldKey)) as [
-    ReturnType<typeof t.Literal<UnitFieldKey>>,
-    ReturnType<typeof t.Literal<UnitFieldKey>>,
-    ...ReturnType<typeof t.Literal<UnitFieldKey>>[],
-  ],
-);
+export function pathsIntersect(left: string, right: string): boolean {
+  return (
+    left === right ||
+    left.startsWith(`${right}.`) ||
+    right.startsWith(`${left}.`)
+  );
+}
 
-export const lockFieldKeySchema = t.Union([
-  t.Literal(UNIT_FIELD_LOCK_ALL),
-  unitFieldKeySchema,
-]);
+export function lockPathIntersectsPatchPath(
+  lockPath: LockPath,
+  patchPath: string,
+): boolean {
+  return (
+    lockPath === UNIT_FIELD_LOCK_ALL || pathsIntersect(lockPath, patchPath)
+  );
+}
 
-export type LockFieldKey = typeof UNIT_FIELD_LOCK_ALL | UnitFieldKey;
+export function isExternallyGoverned(path: string): boolean {
+  return EXTERNALLY_GOVERNED_PATHS.some((externalPath) =>
+    pathsIntersect(path, externalPath),
+  );
+}
 
 export const unitFieldLockSchema = t.Object({
   unitId: t.String(),
-  fieldKey: lockFieldKeySchema,
+  path: t.String(),
   lockedById: t.String(),
   reason: t.Optional(t.Nullable(t.String())),
   createdAt: t.Union([t.String(), t.Date()]),
@@ -158,7 +100,9 @@ export type UpsertUnitCollaboratorInput =
 
 export const lockedFieldRejectionSchema = t.Object({
   unitId: t.String(),
-  blockedFieldKeys: t.Array(lockFieldKeySchema),
+  blockedPaths: t.Array(t.String()),
+  offendingLockPath: t.Optional(t.String()),
+  offendingPatchPath: t.Optional(t.String()),
   locks: t.Optional(t.Array(unitFieldLockSchema)),
 });
 
@@ -173,7 +117,7 @@ export type UnitFieldLockListResponse =
   (typeof unitFieldLockListResponseSchema)["static"];
 
 export const createUnitFieldLockSchema = t.Object({
-  fieldKey: lockFieldKeySchema,
+  path: t.String(),
   reason: t.Optional(t.Nullable(t.String())),
 });
 
@@ -191,7 +135,10 @@ export const authorityErrorSchema = t.Object({
   code: authorityErrorCodeSchema,
   message: t.String(),
   unitId: t.Optional(t.String()),
-  blockedFieldKeys: t.Optional(t.Array(lockFieldKeySchema)),
+  blockedPaths: t.Optional(t.Array(t.String())),
+  offendingLockPath: t.Optional(t.String()),
+  offendingPatchPath: t.Optional(t.String()),
+  useApi: t.Optional(t.String()),
 });
 
 export type AuthorityError = (typeof authorityErrorSchema)["static"];

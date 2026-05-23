@@ -23,6 +23,14 @@ type HistoryDb = {
   };
 };
 
+type LegacyEditorialRevisionPayload = Omit<
+  EditorialRevisionPayload,
+  "patch" | "legacyChangedKeys"
+> & {
+  changedFieldKeys: string[];
+  slots: Record<string, unknown>;
+};
+
 let defaultDbPromise: Promise<HistoryDb> | null = null;
 
 async function getDefaultDb(): Promise<HistoryDb> {
@@ -39,7 +47,6 @@ function mapRevision(
     sequence: bigint;
     contentHash: string;
     actorUserId: string;
-    changedFieldKeys: string[];
     message: string | null;
     createdAt: Date;
     ingestedAt: Date;
@@ -53,8 +60,7 @@ function mapRevision(
     sequence: Number(row.sequence),
     contentHash: row.contentHash,
     actorUserId: row.actorUserId,
-    changedFieldKeys:
-      row.changedFieldKeys as UnitRevisionDTO["changedFieldKeys"],
+    changedFieldKeys: deriveChangedFieldKeys(row.content?.payload),
     message: row.message,
     createdAt: row.createdAt,
     ingestedAt: row.ingestedAt,
@@ -67,6 +73,44 @@ function mapRevision(
           }
         : undefined,
   };
+}
+
+function deriveChangedFieldKeys(payload: unknown): string[] {
+  if (!payload || typeof payload !== "object") return [];
+  const legacyChangedKeys = (payload as { legacyChangedKeys?: unknown })
+    .legacyChangedKeys;
+  if (Array.isArray(legacyChangedKeys)) {
+    return legacyChangedKeys.filter(
+      (path): path is string => typeof path === "string",
+    );
+  }
+  return collectLeafPaths(payload).filter(
+    (path) => path !== "legacyChangedKeys",
+  );
+}
+
+function collectLeafPaths(value: unknown, prefix = ""): string[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return prefix ? [prefix] : [];
+  }
+
+  const paths: string[] = [];
+  for (const [key, nested] of Object.entries(
+    value as Record<string, unknown>,
+  )) {
+    if (key === "$unset") {
+      if (Array.isArray(nested)) {
+        paths.push(
+          ...nested.filter((path): path is string => typeof path === "string"),
+        );
+      }
+      continue;
+    }
+    const nextPrefix = prefix ? `${prefix}.${key}` : key;
+    const nestedPaths = collectLeafPaths(nested, nextPrefix);
+    paths.push(...(nestedPaths.length > 0 ? nestedPaths : [nextPrefix]));
+  }
+  return [...new Set(paths)];
 }
 
 function mapStructureEvent(
@@ -116,10 +160,16 @@ function canonicalSerialize(value: unknown): string {
     .join(",")}}`;
 }
 
-export function computeRevisionContentHash(slots: unknown): string {
+export function computeRevisionContentHash(payload: unknown): string {
   return new Bun.CryptoHasher("sha256")
-    .update(canonicalSerialize(slots))
+    .update(canonicalSerialize(payload))
     .digest("hex");
+}
+
+function editorialContent(
+  payload: EditorialRevisionPayload | LegacyEditorialRevisionPayload,
+): Record<string, unknown> {
+  return "patch" in payload ? payload.patch : payload.slots;
 }
 
 export class RevisionService {
@@ -142,15 +192,16 @@ export class RevisionService {
   }
 
   async insertUnitRevision(input: {
-    payload: EditorialRevisionPayload;
+    payload: EditorialRevisionPayload | LegacyEditorialRevisionPayload;
     contentHash?: string | null;
     createdAt?: Date;
   }): Promise<UnitRevisionDTO> {
     const db = await this.database();
-    const contentHash = computeRevisionContentHash(input.payload.slots);
+    const content = editorialContent(input.payload);
+    const contentHash = computeRevisionContentHash(content);
     await this.upsertRevisionContent({
       hash: contentHash,
-      payload: input.payload.slots,
+      payload: content,
     });
     const row = await db.unitRevision.upsert({
       where: {
@@ -165,7 +216,6 @@ export class RevisionService {
         sequence: BigInt(input.payload.sequence),
         contentHash,
         actorUserId: input.payload.actorUserId,
-        changedFieldKeys: input.payload.changedFieldKeys,
         message: input.payload.message ?? null,
         createdAt: input.createdAt ?? new Date(),
       },
@@ -216,7 +266,7 @@ export class RevisionService {
       orderBy: { sequence: "desc" },
       take: limit + 1,
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
-      include: input.includeContent ? { content: true } : undefined,
+      include: { content: true },
     });
 
     const pageRows = rows.slice(0, limit);
@@ -247,7 +297,7 @@ export class RevisionService {
           sequence: BigInt(input.sequence),
         },
       },
-      include: input.includeContent === false ? undefined : { content: true },
+      include: { content: true },
     });
     return row
       ? mapRevision(row as Parameters<typeof mapRevision>[0], {

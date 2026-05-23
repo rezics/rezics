@@ -2,9 +2,8 @@ import type {
   CreateTranslationInput,
   RezicsSessionClaims,
   UpdateTranslationInput,
-  UnitFieldKey,
 } from "@rezics/contract";
-import { FALLBACK_LANGUAGE, UnitCommonFieldKey } from "@rezics/contract";
+import { FALLBACK_LANGUAGE } from "@rezics/contract";
 import type { Prisma, UnitTranslation } from "#/prisma/client";
 import { prisma, UnitType } from "#/prisma/client";
 import { patchContentTranslationsToMeili } from "@/meili/content/sync";
@@ -12,8 +11,9 @@ import { patchPostsTargetToMeili } from "@/meili/post/sync";
 import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
 import {
   assertCanEditCollaborativeMetadata,
-  mapTranslationFieldKeys,
-  uniqueFieldKeys,
+  mapTranslationPatchPaths,
+  translationPatch,
+  uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "./collaborative-metadata";
 
@@ -71,8 +71,12 @@ export class TranslationService {
       const previous = await tx.unitTranslation.findUnique({
         where: { unitId_language: { unitId, language } },
       });
-      const changedFieldKeys = mapActualTranslationFieldKeys(data, previous);
-      if (previous && changedFieldKeys.length === 0) {
+      const patchPaths = mapActualTranslationPatchPaths(
+        data,
+        previous,
+        language,
+      );
+      if (previous && patchPaths.length === 0) {
         return previous;
       }
 
@@ -81,7 +85,7 @@ export class TranslationService {
           tx as any,
           actor,
           unitId,
-          changedFieldKeys,
+          patchPaths,
         );
       }
       const row = await tx.unitTranslation.upsert({
@@ -104,7 +108,7 @@ export class TranslationService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
-          changedFieldKeys,
+          patch: translationPatch(language, data),
           message: "unit.translation.upsert",
         });
       }
@@ -190,34 +194,36 @@ export class TranslationService {
 
 export const translationService = new TranslationService();
 
-function mapActualTranslationFieldKeys(
+function mapActualTranslationPatchPaths(
   input: CreateTranslationInput | UpdateTranslationInput,
   previous: UnitTranslation | null,
-): UnitFieldKey[] {
+  language: string,
+): string[] {
   if (!previous) {
-    return mapTranslationFieldKeys(input);
+    return mapTranslationPatchPaths(input, language);
   }
 
-  return uniqueFieldKeys([
+  const prefix = `translations.${language}`;
+  return uniquePatchPaths([
     changedNullableString(input, previous, "title")
-      ? UnitCommonFieldKey.TITLE
+      ? `${prefix}.title`
       : undefined,
     changedNullableString(input, previous, "subtitle")
-      ? UnitCommonFieldKey.SUBTITLE
+      ? `${prefix}.subtitle`
       : undefined,
     changedNullableString(input, previous, "summary")
-      ? UnitCommonFieldKey.SUMMARY
+      ? `${prefix}.summary`
       : undefined,
     changedNullableString(input, previous, "description")
-      ? UnitCommonFieldKey.DESCRIPTION
+      ? `${prefix}.description`
       : undefined,
     hasOwn(input, "extra") && !sameJson(input.extra ?? null, previous.extra)
-      ? UnitCommonFieldKey.EXTRA
+      ? `${prefix}.extra`
       : undefined,
     hasOwn(input, "sourceReleaseUnitId") &&
     (input.sourceReleaseUnitId ?? null) !==
       (previous.sourceReleaseUnitId ?? null)
-      ? UnitCommonFieldKey.WORK
+      ? `${prefix}.sourceReleaseUnitId`
       : undefined,
   ]);
 }

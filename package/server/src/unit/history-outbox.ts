@@ -2,8 +2,8 @@ import type {
   EditorialRevisionPayload,
   HistoryOutboxPayload,
   StructureEventPayload,
-  UnitFieldKey,
 } from "@rezics/contract";
+import { isExternallyGoverned } from "@rezics/contract";
 
 type SequenceRow = { sequence: bigint | number | string };
 
@@ -73,17 +73,17 @@ export function buildEditorialRevisionPayload(input: {
   unitId: string;
   sequence: bigint | number;
   actorUserId: string;
-  changedFieldKeys: readonly UnitFieldKey[];
-  slots: EditorialRevisionPayload["slots"];
+  patch: EditorialRevisionPayload["patch"];
   message?: string | null;
+  restoreSource?: EditorialRevisionPayload["restoreSource"];
 }): EditorialRevisionPayload {
   return {
     unitId: input.unitId,
     sequence: Number(input.sequence),
     actorUserId: input.actorUserId,
-    changedFieldKeys: [...input.changedFieldKeys],
-    slots: input.slots,
+    patch: input.patch,
     message: input.message ?? null,
+    restoreSource: input.restoreSource,
   };
 }
 
@@ -92,7 +92,7 @@ export function buildStructureEventPayload(input: {
   sequence: bigint | number;
   actorUserId: string;
   eventType: string;
-  changedFieldKeys: readonly UnitFieldKey[];
+  changedFieldKeys: readonly string[];
   payload: Record<string, unknown>;
   message?: string | null;
 }): StructureEventPayload {
@@ -105,6 +105,41 @@ export function buildStructureEventPayload(input: {
     payload: input.payload,
     message: input.message ?? null,
   };
+}
+
+function collectLeafPaths(value: unknown, prefix = ""): string[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return prefix ? [prefix] : [];
+  }
+
+  const paths: string[] = [];
+  for (const [key, nested] of Object.entries(
+    value as Record<string, unknown>,
+  )) {
+    if (key === "$unset") {
+      if (Array.isArray(nested)) {
+        paths.push(
+          ...nested.filter((path): path is string => typeof path === "string"),
+        );
+      }
+      continue;
+    }
+    const nextPrefix = prefix ? `${prefix}.${key}` : key;
+    const nestedPaths = collectLeafPaths(nested, nextPrefix);
+    paths.push(...(nestedPaths.length > 0 ? nestedPaths : [nextPrefix]));
+  }
+  return [...new Set(paths)];
+}
+
+function stripExternallyGovernedPatch(
+  patch: Record<string, unknown>,
+): Record<string, unknown> | null {
+  const leafPaths = collectLeafPaths(patch);
+  if (leafPaths.length === 0) return patch;
+  if (leafPaths.every((path) => isExternallyGoverned(path))) {
+    return null;
+  }
+  return patch;
 }
 
 export async function writeHistoryOutbox(
@@ -132,9 +167,15 @@ export async function writeSequencedHistoryOutbox(
 ): Promise<{ sequence: bigint; payloadHash: string }> {
   const sequence = await allocateUnitHistorySequence(tx, input.unitId);
   const payload = input.buildPayload(sequence);
+  if ("revision" in payload) {
+    const patch = stripExternallyGovernedPatch(payload.revision.patch);
+    if (!patch) {
+      return { sequence, payloadHash: hashCanonicalPayload({}) };
+    }
+  }
   const payloadHash =
     "revision" in payload
-      ? hashCanonicalPayload(payload.revision.slots)
+      ? hashCanonicalPayload(payload.revision.patch)
       : hashCanonicalPayload(payload);
   await tx.historyOutbox.create({
     data: {

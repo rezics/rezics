@@ -1,6 +1,5 @@
 import type {
   CreateUnitFieldLockInput,
-  LockFieldKey,
   UnitCollaboratorDTO,
   UnitCollaboratorListResponse,
   UnitFieldLockDTO,
@@ -41,12 +40,9 @@ export const unitAuthorityApi = {
     );
   },
 
-  upsertFieldLock(
-    unitId: string,
-    input: CreateUnitFieldLockInput & { fieldKey: LockFieldKey },
-  ) {
+  upsertFieldLock(unitId: string, input: CreateUnitFieldLockInput) {
     return apiFetch<UnitFieldLockDTO>(
-      `/unit/${encodePathPart(unitId)}/field-locks/${encodePathPart(input.fieldKey)}`,
+      `/unit/${encodePathPart(unitId)}/field-locks/${encodePathPart(input.path)}`,
       {
         method: "PUT",
         body: JSON.stringify({ reason: input.reason ?? null }),
@@ -54,9 +50,9 @@ export const unitAuthorityApi = {
     );
   },
 
-  removeFieldLock(unitId: string, fieldKey: LockFieldKey) {
+  removeFieldLock(unitId: string, path: string) {
     return apiFetch<{ message: string }>(
-      `/unit/${encodePathPart(unitId)}/field-locks/${encodePathPart(fieldKey)}`,
+      `/unit/${encodePathPart(unitId)}/field-locks/${encodePathPart(path)}`,
       { method: "DELETE" },
     );
   },

@@ -1,4 +1,3 @@
-import { EntityFieldKey } from "@rezics/contract";
 import type {
   CreateEntityInput,
   EntityListQuery,
@@ -6,11 +5,7 @@ import type {
   RezicsSessionClaims,
   UpdateEntityInput,
 } from "@rezics/contract";
-import {
-  parseIdsCsv,
-  UnitCommonFieldKey,
-  type UnitFieldKey,
-} from "@rezics/contract";
+import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { getSlugScopeId, requireSlugScopeId } from "@/infra/slug-scopes";
@@ -19,8 +14,9 @@ import { deleteEntityFromMeili, syncEntityToMeili } from "@/meili/entity/sync";
 import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
-  mapTranslationFieldKeys,
-  uniqueFieldKeys,
+  mapTranslationPatchPaths,
+  translationPatch,
+  uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
 import { entityInclude, type EntityWithRelations } from "./entity.types";
@@ -90,7 +86,7 @@ export class EntityService {
               ? undefined
               : {
                   create: {
-                    fieldKey: "*",
+                    path: "*",
                     lockedById: ctx.callerUnitId,
                     reason:
                       "Personal creation starts closed to community edits.",
@@ -157,13 +153,13 @@ export class EntityService {
     }
 
     const row = await prisma.$transaction(async (tx) => {
-      const changedFieldKeys = mapEntityUpdateFieldKeys(input);
+      const patchPaths = mapEntityUpdatePatchPaths(input);
       if (ctx.actor) {
         await assertCanEditCollaborativeMetadata(
           tx as any,
           ctx.actor,
           unitId,
-          changedFieldKeys,
+          patchPaths,
         );
       }
 
@@ -233,7 +229,7 @@ export class EntityService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: ctx.callerUnitId,
-          changedFieldKeys,
+          patch: buildEntityUpdatePatch(input),
           message: "entity.metadata.update",
         });
       }
@@ -338,23 +334,49 @@ export class EntityService {
 
 export const entityService = new EntityService();
 
-export function mapEntityUpdateFieldKeys(
-  input: UpdateEntityInput,
-): UnitFieldKey[] {
-  return uniqueFieldKeys([
-    input.kind !== undefined ? EntityFieldKey.KIND : undefined,
-    input.avatar !== undefined ? EntityFieldKey.AVATAR : undefined,
-    input.verified !== undefined ? EntityFieldKey.VERIFIED : undefined,
-    input.slug !== undefined ? EntityFieldKey.SLUG : undefined,
+export function mapEntityUpdatePatchPaths(input: UpdateEntityInput): string[] {
+  return uniquePatchPaths([
+    input.kind !== undefined ? "entity.kind" : undefined,
+    input.avatar !== undefined ? "entity.avatar" : undefined,
+    input.verified !== undefined ? "entity.verified" : undefined,
+    input.slug !== undefined ? "entity.slug" : undefined,
     input.eligibleCreditRoles !== undefined
-      ? EntityFieldKey.ELIGIBLE_CREDIT_ROLES
+      ? "entity.eligibleCreditRoles"
       : undefined,
     input.eligibleSubjectRoles !== undefined
-      ? EntityFieldKey.ELIGIBLE_SUBJECT_ROLES
+      ? "entity.eligibleSubjectRoles"
       : undefined,
     ...(input.translations ?? []).flatMap((tr) => [
-      ...mapTranslationFieldKeys(tr),
-      tr.title !== undefined ? UnitCommonFieldKey.TITLE : undefined,
+      ...mapTranslationPatchPaths(tr, tr.language),
     ]),
   ]);
+}
+
+function buildEntityUpdatePatch(
+  input: UpdateEntityInput,
+): Record<string, unknown> {
+  const entity: Record<string, unknown> = {};
+  if (input.kind !== undefined) entity.kind = input.kind;
+  if (input.avatar !== undefined) entity.avatar = input.avatar;
+  if (input.verified !== undefined) entity.verified = input.verified;
+  if (input.slug !== undefined) entity.slug = input.slug;
+  if (input.eligibleCreditRoles !== undefined)
+    entity.eligibleCreditRoles = input.eligibleCreditRoles;
+  if (input.eligibleSubjectRoles !== undefined)
+    entity.eligibleSubjectRoles = input.eligibleSubjectRoles;
+
+  const translations = (input.translations ?? []).reduce<
+    Record<string, unknown>
+  >((acc, tr) => {
+    const patch = translationPatch(tr.language, tr).translations as Record<
+      string,
+      unknown
+    >;
+    return { ...acc, ...patch };
+  }, {});
+
+  return {
+    ...(Object.keys(entity).length > 0 ? { entity } : {}),
+    ...(Object.keys(translations).length > 0 ? { translations } : {}),
+  };
 }

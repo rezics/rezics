@@ -6,7 +6,10 @@ import type {
   UnitFieldLockDTO,
   UpsertUnitCollaboratorInput,
 } from "@rezics/contract";
-import { HistoryOutboxPayloadKind } from "@rezics/contract";
+import {
+  HistoryOutboxPayloadKind,
+  isExternallyGoverned,
+} from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { AppError } from "@/utils/errors";
 import {
@@ -57,14 +60,14 @@ function toCollaboratorDTO(row: {
 
 function toLockDTO(row: {
   unitId: string;
-  fieldKey: string;
+  path: string;
   lockedById: string;
   reason: string | null;
   createdAt: Date;
 }): UnitFieldLockDTO {
   return {
     unitId: row.unitId,
-    fieldKey: row.fieldKey as UnitFieldLockDTO["fieldKey"],
+    path: row.path,
     lockedById: row.lockedById,
     reason: row.reason,
     createdAt: row.createdAt,
@@ -106,7 +109,9 @@ export class UnitAuthorityService {
         code: decision.code,
         details: {
           unitId,
-          blockedFieldKeys: decision.blockedFieldKeys,
+          blockedPaths: decision.blockedPaths,
+          offendingLockPath: decision.offendingLockPath,
+          offendingPatchPath: decision.offendingPatchPath,
           collaboratorRole: decision.collaboratorRole,
         },
       });
@@ -184,16 +189,27 @@ export class UnitAuthorityService {
     input: CreateUnitFieldLockInput,
   ): Promise<UnitFieldLockDTO> {
     await this.assertCanManageAuthority(actor, unitId);
+    if (isExternallyGoverned(input.path)) {
+      throw new AppError(400, "Path is externally governed", {
+        code: "EXTERNALLY_GOVERNED_PATH",
+        details: {
+          offendingPath: input.path,
+          useApi: input.path.startsWith("realmTagApplications")
+            ? "/realm-tag-applications"
+            : "/tags",
+        },
+      });
+    }
     return this.runAuthorityMutation(unitId, async (tx) => {
       const row = await tx.unitFieldLock.upsert({
-        where: { unitId_fieldKey: { unitId, fieldKey: input.fieldKey } },
+        where: { unitId_path: { unitId, path: input.path } },
         update: {
           lockedById: actor.userId,
           reason: input.reason ?? null,
         },
         create: {
           unitId,
-          fieldKey: input.fieldKey,
+          path: input.path,
           lockedById: actor.userId,
           reason: input.reason ?? null,
         },
@@ -213,19 +229,19 @@ export class UnitAuthorityService {
   async deleteFieldLock(
     unitId: string,
     actor: RezicsSessionClaims,
-    fieldKey: string,
+    path: string,
   ): Promise<void> {
     await this.assertCanManageAuthority(actor, unitId);
     await this.runAuthorityMutation(unitId, async (tx) => {
       await tx.unitFieldLock.delete({
-        where: { unitId_fieldKey: { unitId, fieldKey } },
+        where: { unitId_path: { unitId, path } },
       });
       await this.writeAuthorityAudit(tx, {
         unitId,
         actorUserId: actor.userId,
         kind: HistoryOutboxPayloadKind.LOCK_MUTATION,
         operation: "lock.delete",
-        payload: { lock: { unitId, fieldKey } },
+        payload: { lock: { unitId, path } },
       });
     });
   }
@@ -263,8 +279,7 @@ export class UnitAuthorityService {
           unitId: input.unitId,
           sequence,
           actorUserId: input.actorUserId,
-          changedFieldKeys: [],
-          slots: {
+          patch: {
             unit: {
               authority: {
                 operation: input.operation,
