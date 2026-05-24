@@ -58,6 +58,10 @@ import {
   type TranslationDraft,
   useBookTranslationEditor,
 } from "../hooks/useBookTranslationEditor";
+import {
+  isRestoreEditSubmitDisabled,
+  withRestoreSource,
+} from "../models/restoreEdit";
 import * as m from "@rezics/i18n/messages";
 
 function validatePublishURL(publishURL: string[]) {
@@ -94,19 +98,6 @@ function nullableString(value: unknown): string | null {
 
 function sameJson(left: unknown, right: unknown): boolean {
   return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
-}
-
-function collectLeafPaths(value: unknown, prefix = ""): string[] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return prefix ? [prefix] : [];
-  }
-  return Object.entries(value as Record<string, unknown>).flatMap(
-    ([key, nested]) => {
-      const nextPrefix = prefix ? `${prefix}.${key}` : key;
-      const nestedPaths = collectLeafPaths(nested, nextPrefix);
-      return nestedPaths.length > 0 ? nestedPaths : [nextPrefix];
-    },
-  );
 }
 
 const UpdateBookDialog: React.FC<{
@@ -165,7 +156,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const matchRoute = useMatchRoute();
   const editParams = matchRoute({ to: "/book/$bookId/edit", fuzzy: false });
   const bookId = !newBook && editParams ? editParams.bookId : undefined;
+  const hasRestoreRevision =
+    search.restoreRevision !== undefined && search.restoreRevision !== "";
   const restoreSequence = Number(search.restoreRevision);
+  const isRestoreMode = hasRestoreRevision && Number.isFinite(restoreSequence);
   const { data, isLoading, error } = useQuery({
     ...bookQueries.detail(bookId ?? ""),
     enabled: !newBook && !!bookId,
@@ -174,7 +168,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     ...historyQueries.unitRevision(bookId ?? "", restoreSequence, {
       includeContent: true,
     }),
-    enabled: !newBook && !!bookId && Number.isFinite(restoreSequence),
+    enabled: !newBook && !!bookId && isRestoreMode,
   });
   const authorCreditsQuery = useQuery({
     ...creditAttributionQueries.byUnit(bookId ?? ""),
@@ -198,15 +192,25 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const editor = useBookTranslationEditor(data);
 
   const metadata: BookMetadataValue = metadataState ?? data ?? {};
+  const restoreContentPayload = asRecordOrNull(
+    restoreQuery.data?.revision.content?.payload,
+  );
+  const restoreSubmitDisabled = isRestoreEditSubmitDisabled({
+    isRestoreMode,
+    isLoading: restoreQuery.isLoading,
+    hasError: !!restoreQuery.error,
+    hasContentPayload: !!restoreContentPayload,
+  });
+  const canAttachRestoreSource = isRestoreMode && !restoreSubmitDisabled;
 
   React.useEffect(() => {
     if (!data) return;
-    if (!Number.isFinite(restoreSequence)) return;
+    if (!isRestoreMode) return;
     if (appliedRestoreSequence === restoreSequence) return;
-    const payload = restoreQuery.data?.revision.content?.payload;
-    if (!payload) return;
 
-    const patch = asRecord(payload);
+    if (!restoreContentPayload) return;
+
+    const patch = restoreContentPayload;
     const extension = asRecord(patch.extension);
     const bookExtension = asRecord(extension.book ?? extension);
     const unitPatch = asRecord(patch.unit);
@@ -261,7 +265,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     appliedRestoreSequence,
     data,
     editor,
-    restoreQuery.data?.revision.content?.payload,
+    isRestoreMode,
+    restoreContentPayload,
     restoreSequence,
   ]);
 
@@ -365,25 +370,26 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       return;
     }
 
+    if (restoreSubmitDisabled) {
+      setDialogState({
+        title: m.history_restore_edit_unavailable_title(),
+        message: m.history_restore_edit_unavailable_description(),
+        error: true,
+      });
+      setUpdateBookErrorOpen(true);
+      return;
+    }
+
     const sourcePaths = restoreQuery.data?.revision.changedFieldKeys ?? [];
-    const withRestoreSource = (
+    const applyRestoreSource = (
       input: EditorialPatchSubmission,
     ): EditorialPatchSubmission => {
-      if (!Number.isFinite(restoreSequence)) return input;
-      const submittedPaths = collectLeafPaths(input.patch);
-      const restoredPaths = sourcePaths.filter((path) =>
-        submittedPaths.includes(path),
-      );
-      if (restoredPaths.length === 0) return input;
-      return {
-        ...input,
-        restoreSource: {
-          kind: "revision",
-          unitId: bookId,
-          sequence: restoreSequence,
-          paths: restoredPaths,
-        },
-      };
+      return withRestoreSource(input, {
+        enabled: canAttachRestoreSource,
+        bookId,
+        restoreSequence,
+        sourcePaths,
+      });
     };
 
     const metadataPatch: Record<string, unknown> = {};
@@ -430,7 +436,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       upsertTranslationMutation.mutateAsync({
         unitId: bookId,
         language: editor.selectedLanguage,
-        input: withRestoreSource({ patch: translationPatch }),
+        input: applyRestoreSource({ patch: translationPatch }),
       }),
     ];
 
@@ -438,7 +444,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       saveOperations.unshift(
         updateBookMutation.mutateAsync({
           unitId: bookId,
-          input: withRestoreSource({ patch: metadataPatch }),
+          input: applyRestoreSource({ patch: metadataPatch }),
         }),
       );
     }
@@ -515,12 +521,28 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
   return (
     <div className="mt-16 mx-auto max-w-3xl px-4 pb-16">
-      {Number.isFinite(restoreSequence) ? (
-        <Alert className="mb-8">
-          <AlertDescription>
-            {m.history_restore_edit_notice({ sequence: restoreSequence })}
-          </AlertDescription>
-        </Alert>
+      {isRestoreMode ? (
+        <div className="mb-8 space-y-3">
+          <Alert>
+            <AlertDescription>
+              {m.history_restore_edit_notice({ sequence: restoreSequence })}
+            </AlertDescription>
+          </Alert>
+          {restoreQuery.error ? (
+            <Alert variant="destructive">
+              <AlertDescription>
+                {m.history_restore_edit_load_failed()}
+              </AlertDescription>
+            </Alert>
+          ) : null}
+          {restoreQuery.isSuccess && !restoreContentPayload ? (
+            <Alert variant="destructive">
+              <AlertDescription>
+                {m.history_restore_edit_content_missing()}
+              </AlertDescription>
+            </Alert>
+          ) : null}
+        </div>
       ) : null}
       <div className="flex justify-between items-center mb-12">
         <h1 className="text-2xl font-bold">{resolvedPageTitle}</h1>
@@ -535,7 +557,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {m.common_back()}
             </Button>
           )}
-          <Button onClick={() => handleSubmit()}>{m.common_submit()}</Button>
+          <Button
+            disabled={restoreSubmitDisabled}
+            onClick={() => handleSubmit()}
+          >
+            {m.common_submit()}
+          </Button>
         </div>
       </div>
 

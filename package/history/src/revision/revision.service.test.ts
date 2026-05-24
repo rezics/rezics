@@ -1,8 +1,24 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
+  singleUnitRevisionResponseSchema,
+  unitRevisionTimelinePageSchema,
+} from "@rezics/contract";
+import { Elysia } from "elysia";
+import {
   RevisionService,
   computeRevisionContentHash,
 } from "./revision.service";
+
+async function responseValidationStatus(
+  schema: unknown,
+  payload: unknown,
+): Promise<number> {
+  const app = new Elysia().get("/validate", () => payload, {
+    response: schema as never,
+  });
+  const response = await app.handle(new Request("http://localhost/validate"));
+  return response.status;
+}
 
 function dbStub() {
   const content = new Map<string, unknown>();
@@ -221,6 +237,141 @@ describe("RevisionService", () => {
       paths: ["post.content.main.source"],
     });
     expect(revision.content?.payload).toEqual(patch);
+  });
+
+  test("omits null and empty restore source metadata from revision responses", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 1,
+        actorUserId: "user-1",
+        patch: { translations: { en: { title: "Null source" } } },
+        message: null,
+        restoreSource: null,
+      } as never,
+    });
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 2,
+        actorUserId: "user-1",
+        patch: { translations: { en: { title: "Empty source" } } },
+        message: null,
+        restoreSource: {},
+      } as never,
+    });
+
+    const page = await service.listUnitRevisions({
+      unitId: "unit-1",
+      limit: 2,
+    });
+    const revision = await service.getUnitRevision({
+      unitId: "unit-1",
+      sequence: 1,
+    });
+
+    expect(page.revisions).toHaveLength(2);
+    expect(page.revisions.every((item) => !("restoreSource" in item))).toBe(
+      true,
+    );
+    expect(revision && "restoreSource" in revision).toBe(false);
+    expect(
+      await responseValidationStatus(unitRevisionTimelinePageSchema, page),
+    ).toBe(200);
+  });
+
+  test("omits malformed restore source metadata from revision responses", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 1,
+        actorUserId: "user-1",
+        patch: { translations: { en: { title: "Missing kind" } } },
+        message: null,
+        restoreSource: {
+          unitId: "unit-1",
+          sequence: 7,
+          paths: ["translations.en.title"],
+        },
+      } as never,
+    });
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 2,
+        actorUserId: "user-1",
+        patch: { translations: { en: { title: "Bad paths" } } },
+        message: null,
+        restoreSource: {
+          kind: "revision",
+          unitId: "unit-1",
+          sequence: 7,
+          paths: ["translations.en.title", 2],
+        },
+      } as never,
+    });
+
+    const page = await service.listUnitRevisions({
+      unitId: "unit-1",
+      limit: 2,
+    });
+    const revision = await service.getUnitRevision({
+      unitId: "unit-1",
+      sequence: 2,
+    });
+
+    expect(page.revisions.every((item) => !("restoreSource" in item))).toBe(
+      true,
+    );
+    expect(revision && "restoreSource" in revision).toBe(false);
+    expect(
+      await responseValidationStatus(unitRevisionTimelinePageSchema, page),
+    ).toBe(200);
+    expect(
+      await responseValidationStatus(singleUnitRevisionResponseSchema, {
+        revision,
+      }),
+    ).toBe(200);
+  });
+
+  test("preserves valid restore source metadata in revision responses", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+    const restoreSource = {
+      kind: "revision" as const,
+      unitId: "unit-1",
+      sequence: 7,
+      paths: ["translations.en.title"],
+    };
+
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 8,
+        actorUserId: "user-1",
+        patch: { translations: { en: { title: "Restored" } } },
+        message: null,
+        restoreSource,
+      },
+    });
+
+    const revision = await service.getUnitRevision({
+      unitId: "unit-1",
+      sequence: 8,
+    });
+
+    expect(revision?.restoreSource).toEqual(restoreSource);
+    expect(
+      await responseValidationStatus(singleUnitRevisionResponseSchema, {
+        revision,
+      }),
+    ).toBe(200);
   });
 
   test("structure event ingestion is idempotent by unit sequence event type", async () => {

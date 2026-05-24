@@ -1,5 +1,6 @@
 import type {
   EditorialRevisionPayload,
+  HistoryRestoreSource,
   StructureEventDTO,
   StructureEventPayload,
   StructureEventTimelinePage,
@@ -55,6 +56,8 @@ function mapRevision(
   },
   options: { includeContent?: boolean } = {},
 ): UnitRevisionDTO {
+  const restoreSource = normalizeRestoreSource(row.restoreSource);
+
   return {
     id: row.id,
     unitId: row.unitId,
@@ -65,7 +68,7 @@ function mapRevision(
     message: row.message,
     createdAt: row.createdAt,
     ingestedAt: row.ingestedAt,
-    restoreSource: row.restoreSource as UnitRevisionDTO["restoreSource"],
+    ...(restoreSource ? { restoreSource } : {}),
     content:
       options.includeContent && row.content
         ? {
@@ -75,6 +78,28 @@ function mapRevision(
           }
         : undefined,
   };
+}
+
+function normalizeRestoreSource(
+  value: unknown,
+): HistoryRestoreSource | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const candidate = value as Partial<HistoryRestoreSource>;
+  if (
+    candidate.kind !== "revision" ||
+    typeof candidate.unitId !== "string" ||
+    typeof candidate.sequence !== "number" ||
+    !Number.isFinite(candidate.sequence) ||
+    !Array.isArray(candidate.paths) ||
+    candidate.paths.some((path) => typeof path !== "string")
+  ) {
+    return undefined;
+  }
+
+  return value as HistoryRestoreSource;
 }
 
 function deriveChangedFieldKeys(payload: unknown): string[] {
