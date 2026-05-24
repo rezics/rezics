@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -15,7 +16,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Chapter } from "./BookTocEditor";
-import * as m from "@rezics/i18n/messages";
 
 interface MoveToParentDialogProps {
   open: boolean;

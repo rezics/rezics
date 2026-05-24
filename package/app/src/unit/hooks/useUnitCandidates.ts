@@ -3,12 +3,12 @@ import type { UnitResponse } from "@rezics/contract";
 import { useQueries } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import type { Candidate } from "../models/types";
 import type {
   GetMatchedRoutes,
   MatchedRoutesResult,
 } from "../models/parseUrlToUnitCandidates";
 import { parseUrlToUnitCandidates } from "../models/parseUrlToUnitCandidates";
+import type { Candidate } from "../models/types";
 
 export interface ResolvedCandidate {
   candidate: Candidate;

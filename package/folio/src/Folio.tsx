@@ -1,3 +1,4 @@
+import { X as CloseIcon, Menu as MenuIcon } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { FolioProvider, useFolio } from "./context";
 import { useFolioGesture } from "./gesture/useFolioGesture";
@@ -9,7 +10,6 @@ import { ContentRenderer } from "./render/ContentRenderer";
 import { getThemeVars } from "./styles/theme";
 import { TocPanel } from "./toc/TocPanel";
 import type { FolioProps } from "./types";
-import { X as CloseIcon, Menu as MenuIcon } from "lucide-react";
 
 function FolioInner({
   onTreeChange,

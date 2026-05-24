@@ -1,11 +1,12 @@
 import type {
   CreatePostInput,
   EditorialPatchSubmission,
-  RezicsSessionClaims,
   PostListQuery,
+  RezicsSessionClaims,
   UpdatePostInput,
 } from "@rezics/contract";
 import { mainMarkdownSource, parseIdsCsv } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import {
   type PostKind,
   PostKind as PostKindEnum,
@@ -14,22 +15,21 @@ import {
   UnitStatus,
   UnitType,
 } from "#/prisma/client";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { serverJobProducer } from "@/job/job-boundary";
-import {
-  hydrateUnitOwnerUserSlugRow,
-  hydrateUnitOwnerUserSlugs,
-} from "@/utils/userSlugHydration";
-import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
+import { serverJobProducer } from "@/job/job-boundary";
 import {
   assertCanEditCollaborativeMetadata,
   collectPatchLeafPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
+import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
+import {
+  hydrateUnitOwnerUserSlugRow,
+  hydrateUnitOwnerUserSlugs,
+} from "@/utils/userSlugHydration";
+import { AppError } from "../utils/errors";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
-import { AppError } from "../utils/errors";
 
 function enqueuePostSync(unitId: string) {
   return serverJobProducer.enqueue(

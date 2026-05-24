@@ -1,7 +1,7 @@
 import type { PostDTO } from "@rezics/contract";
+import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import type * as React from "react";
 import { useMemo } from "react";
-import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import { ReviewCardPair } from "@/review/components/item/ReviewCardPair";
 
 export interface HorizontalReviewCarouselProps {

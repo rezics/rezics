@@ -4,8 +4,9 @@ import type {
   EntityKind,
   UnitTranslationDTO,
 } from "@rezics/contract";
+import { entityKindLabel } from "@rezics/i18n";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
-import { Link } from "@/shared/ui/link";
 import {
   Button,
   Card,
@@ -21,8 +22,7 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
-import { entityKindLabel } from "@rezics/i18n";
-import * as m from "@rezics/i18n/messages";
+import { Link } from "@/shared/ui/link";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "-";

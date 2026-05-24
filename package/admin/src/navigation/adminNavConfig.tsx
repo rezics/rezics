@@ -1,5 +1,4 @@
 import * as m from "@rezics/i18n/messages";
-import type React from "react";
 import {
   ShieldUser as AdminPanelSettingsOutlinedIcon,
   BookMarked as CollectionsBookmarkIcon,
@@ -10,13 +9,14 @@ import {
   Package as Inventory2Icon,
   Key as KeyOutlinedIcon,
   SearchCheck as ManageSearchOutlinedIcon,
-  ShieldCheck as ShieldCheckIcon,
   Users as PeopleIcon,
   Settings as SettingsIcon,
+  ShieldCheck as ShieldCheckIcon,
   Database as StorageOutlinedIcon,
   Tags as StyleOutlinedIcon,
   KeyRound as VpnKeyOutlinedIcon,
 } from "lucide-react";
+import type React from "react";
 
 export type AdminNavItem = {
   id: string;

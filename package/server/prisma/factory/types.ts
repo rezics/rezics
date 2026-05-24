@@ -1,7 +1,7 @@
 import * as v from "valibot";
 import type { PostKind, UnitType } from "../generated/client.js";
-import { CountSpecSchema, ModeSchema } from "./strategy.js";
 import type { CountSpec, Mode } from "./strategy.js";
+import { CountSpecSchema, ModeSchema } from "./strategy.js";
 
 export const SEED_SYNC_TARGETS = [
   "content",

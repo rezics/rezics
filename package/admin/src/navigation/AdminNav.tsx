@@ -1,20 +1,19 @@
 import { useAuthSessionStore } from "@rezics/api/states";
-import { Link } from "@/shared/ui/link";
 import { Separator } from "@rezics/ui/shadcn";
 import { useRouterState } from "@tanstack/react-router";
 import clsx from "clsx";
+import {
+  ChevronUp as ExpandLessIcon,
+  ChevronDown as ExpandMoreIcon,
+} from "lucide-react";
 import React from "react";
 import { adminConfig } from "@/app/config/adminConfig";
-
+import { Link } from "@/shared/ui/link";
 import type {
   AdminNavEntry,
   AdminNavGroup,
   AdminNavItem,
 } from "./adminNavConfig";
-import {
-  ChevronUp as ExpandLessIcon,
-  ChevronDown as ExpandMoreIcon,
-} from "lucide-react";
 
 function isGroup(entry: AdminNavEntry): entry is AdminNavGroup {
   return "children" in entry;

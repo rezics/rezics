@@ -1,14 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import {
+  type CreditAttributionRole,
   creditAttributionRoleRegistry,
   creditAttributionRoles,
+  type EntityKind,
   LANGUAGES,
+  type SubjectAttributionRole,
   subjectAttributionRoleRegistry,
   subjectAttributionRoles,
-  type CreditAttributionRole,
-  type EntityKind,
-  type SubjectAttributionRole,
 } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "../generated/client.js";
 import { UnitStatus, UnitType } from "../generated/client.js";

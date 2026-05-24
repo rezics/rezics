@@ -1,4 +1,4 @@
-import { SearchClient } from "@rezics/search/client";
+import type { SearchClient } from "@rezics/search/client";
 import {
   patchContentContainedUnitIds,
   setSearchPrismaClient,

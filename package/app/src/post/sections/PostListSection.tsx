@@ -1,11 +1,11 @@
 import { postsByTargetQuery } from "@rezics/api/post/post";
 import type { PostKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { PostCard } from "../components/item/PostCard";
-import * as m from "@rezics/i18n/messages";
 
 interface PostListSectionProps {
   targetUnitId: string;

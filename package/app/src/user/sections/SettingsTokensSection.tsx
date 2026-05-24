@@ -4,6 +4,7 @@ import {
 } from "@rezics/api/token/token.mutations";
 import { tokenQueries } from "@rezics/api/token/token.queries";
 import type { ApiTokenDTO, ApiTokenScopes } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -22,7 +23,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Plus as AddIcon } from "lucide-react";
 import { type FC, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { TokenCreateDialog } from "@/user/components/TokenCreateDialog";
 import { TokenListItem } from "@/user/components/TokenListItem";

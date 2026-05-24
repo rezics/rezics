@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Input,
@@ -9,7 +10,6 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import React from "react";
-import * as m from "@rezics/i18n/messages";
 import FeedbackDrawer from "../components/FeedbackDrawer";
 import FeedbackList from "../components/FeedbackList";
 

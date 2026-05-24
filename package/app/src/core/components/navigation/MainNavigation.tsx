@@ -1,6 +1,10 @@
 // NAVIGATION.tsx
 
-import type { NavigationItem } from "./navigation";
+import {
+  IconNumber3 as Looks3OutlinedIcon,
+  IconNumber1 as LooksOneOutlinedIcon,
+  IconNumber2 as LooksTwoOutlinedIcon,
+} from "@tabler/icons-react";
 import {
   CircleUser as AccountCircleOutlinedIcon,
   FileText as ArticleOutlinedIcon,
@@ -21,11 +25,7 @@ import {
   FlaskConical as ScienceOutlinedIcon,
   Headset as SupportAgentOutlinedIcon,
 } from "lucide-react";
-import {
-  IconNumber3 as Looks3OutlinedIcon,
-  IconNumber1 as LooksOneOutlinedIcon,
-  IconNumber2 as LooksTwoOutlinedIcon,
-} from "@tabler/icons-react";
+import type { NavigationItem } from "./navigation";
 
 // segment: router path
 export const NAVIGATION = (isAdmin = false): NavigationItem[] => {

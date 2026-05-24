@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import {
@@ -6,7 +7,6 @@ import {
   Gamepad2 as SportsEsportsOutlinedIcon,
 } from "lucide-react";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 const libraries = [
   {

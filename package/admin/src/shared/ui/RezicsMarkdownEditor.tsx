@@ -1,8 +1,8 @@
 import { meiliUserApi } from "@rezics/api/meili/meili.api";
 import { uploadApi } from "@rezics/api/upload/upload.api";
 import {
-  createRezicsUploadProvider,
   RezicsMarkdownEditor as BaseRezicsMarkdownEditor,
+  createRezicsUploadProvider,
   type RezicsMarkdownEditorProps,
   type UserSearchAdapter,
   type ViewMode,

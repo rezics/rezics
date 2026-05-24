@@ -1,10 +1,10 @@
 import { postQueries } from "@rezics/api/post/post";
 import { type PostDTO, PostKind, type UnitDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ExcerptList } from "@/excerpt";
-import * as m from "@rezics/i18n/messages";
 
 export type ExcerptPreviewProps = {
   id: string;

@@ -5,4 +5,4 @@ export {
   EntityService,
   entityService,
 } from "./entity.service";
-export { entityInclude, type EntityWithRelations } from "./entity.types";
+export { type EntityWithRelations, entityInclude } from "./entity.types";

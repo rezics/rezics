@@ -6,6 +6,7 @@ import {
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
 import { PostKind, UnitType } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -19,7 +20,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { BookListView } from "@/book-library/components/BookList/BookListView";
 import { ExcerptList } from "@/excerpt";
 import { ReviewList } from "@/review/components/list/ReviewList";

@@ -1,4 +1,5 @@
 import { authApi } from "@rezics/api/auth/auth.api";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
@@ -16,7 +17,6 @@ import { type FC, useMemo, useState } from "react";
 import { Layout } from "../layouts/Layout.tsx";
 import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { validateEmail, validatePassword } from "../models/validate.ts";
-import * as m from "@rezics/i18n/messages";
 
 export interface ResetPasswordPageProps {
   isModal?: boolean;

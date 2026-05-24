@@ -12,13 +12,13 @@ import {
   contentDocMarkdownFallback,
   shelfCoverImageSpec,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button, Checkbox, DropdownMenuItem, Label } from "@rezics/ui/shadcn";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";

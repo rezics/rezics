@@ -1,5 +1,5 @@
-import { diffArrays, diffJson, diffLines } from "diff";
 import type { UnitRevisionPathCompareResponse } from "@rezics/contract";
+import { diffArrays, diffJson, diffLines } from "diff";
 
 export type DiffPart = {
   type: "equal" | "added" | "removed";

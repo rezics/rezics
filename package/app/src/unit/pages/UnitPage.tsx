@@ -4,9 +4,9 @@ import {
 } from "@rezics/api/translation-group";
 import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { mainMarkdownSource } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
-import { TextLink, unitHref } from "@/shared/ui/link";
 import {
   Avatar,
   AvatarFallback,
@@ -20,8 +20,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
+import { TextLink, unitHref } from "@/shared/ui/link";
 import { PostLanguageSwitcher } from "../components/PostLanguageSwitcher";
-import * as m from "@rezics/i18n/messages";
 
 function formatMetadataValue(value: unknown): string {
   if (value === null || value === undefined) return "-";

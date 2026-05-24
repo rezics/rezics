@@ -1,6 +1,8 @@
 import type { CreditAttributionDTO } from "@rezics/contract";
-import { linkCreditAttributionSchema } from "@rezics/contract";
-import { creditAttributionRoleKeySchema } from "@rezics/contract";
+import {
+  creditAttributionRoleKeySchema,
+  linkCreditAttributionSchema,
+} from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { creditAttributionService } from "./credit-attribution.service";

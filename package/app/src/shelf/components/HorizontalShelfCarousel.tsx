@@ -1,9 +1,9 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ShelfDTO } from "@rezics/contract";
-import { useMemo } from "react";
-import type * as React from "react";
 import * as m from "@rezics/i18n/messages";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
+import type * as React from "react";
+import { useMemo } from "react";
 import { ShelfCard } from "./ShelfCard";
 
 export interface HorizontalShelfCarouselProps {

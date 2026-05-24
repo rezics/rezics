@@ -1,5 +1,6 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import type { BookDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -20,7 +21,6 @@ import {
 import type React from "react";
 import { useShareMenu } from "@/engagement/hooks/useShareMenu";
 import { BookProgressStatusSection } from "@/progress-status";
-import * as m from "@rezics/i18n/messages";
 
 interface BookHeroActionBarProps {
   bookInfo: BookDTO;

@@ -1,5 +1,6 @@
-import { useCanEdit } from "@rezics/api/hooks";
 import type { EditableResource } from "@rezics/api/hooks";
+import { useCanEdit } from "@rezics/api/hooks";
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Tooltip,
@@ -10,7 +11,6 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as Edit } from "lucide-react";
 import { cn } from "@/shared/utils/css-util";
-import * as m from "@rezics/i18n/messages";
 
 interface MiniAdminActionBarProps {
   editionURL: string;

@@ -1,4 +1,4 @@
-import { unitHref, type UnitHrefInput } from "./unitHref";
+import { type UnitHrefInput, unitHref } from "./unitHref";
 
 /**
  * React-side sugar over {@link unitHref}. Pass a unit object directly and get

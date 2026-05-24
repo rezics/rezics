@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
-import { realmExtraSchema } from "./realm/realm-extra";
 import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   LICENSE_REGISTRY,
@@ -9,6 +8,7 @@ import {
   publishableUnitInputSchema,
   unitPublicationMetadataSchema,
 } from "./index";
+import { realmExtraSchema } from "./realm/realm-extra";
 import { userSettingsSchema } from "./user";
 
 describe("licenseSlugSchema", () => {

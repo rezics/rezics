@@ -5,8 +5,8 @@ import {
   markdownContentDoc,
   type UpdateUser,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import {
   Alert,
   AlertDescription,
@@ -20,7 +20,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Save as SaveIcon } from "lucide-react";
 import { type FC, useEffect, useState } from "react";
-import * as m from "@rezics/i18n/messages";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 

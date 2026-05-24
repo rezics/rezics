@@ -1,5 +1,5 @@
-import { Input, Label } from "@rezics/ui/shadcn";
 import type { SearchQuery } from "@rezics/contract";
+import { Input, Label } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useEffect, useState } from "react";
 

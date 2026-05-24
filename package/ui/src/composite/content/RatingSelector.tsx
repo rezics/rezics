@@ -1,4 +1,5 @@
 import type { ContentRating } from "@rezics/contract";
+import { Label } from "#/shadcn/label";
 import {
   Select,
   SelectContent,
@@ -6,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "#/shadcn/select";
-import { Label } from "#/shadcn/label";
 
 const RATING_OPTIONS: readonly { value: ContentRating; label: string }[] = [
   { value: "GENERAL", label: "General" },

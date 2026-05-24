@@ -1,4 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
@@ -10,7 +11,6 @@ import { useBookLanguage } from "../hooks/useBookLanguage";
 import { useReleaseSelection } from "../hooks/useReleaseSelection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
-import * as m from "@rezics/i18n/messages";
 
 const ContentSidebar: React.FC<{ textLength: number; pageCount?: number }> = ({
   textLength,

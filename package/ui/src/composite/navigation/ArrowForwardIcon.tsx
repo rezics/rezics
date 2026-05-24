@@ -1,5 +1,5 @@
-import { ChevronRight as ArrowForwardIosRoundedIcon } from "lucide-react";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { ChevronRight as ArrowForwardIosRoundedIcon } from "lucide-react";
 import type React from "react";
 
 export type ArrowForwardIconProps = {

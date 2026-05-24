@@ -5,6 +5,7 @@ import {
   type PostDTO,
   SCORE_MAX,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
 import {
   Button,
@@ -16,7 +17,6 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface RemarkEditDialogProps {
   remark: PostDTO;

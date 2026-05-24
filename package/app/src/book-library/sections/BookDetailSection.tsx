@@ -1,4 +1,5 @@
 import type { BookDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Select,
   SelectContent,
@@ -13,9 +14,7 @@ import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
-
 import { useBookLanguage } from "../hooks/useBookLanguage";
-import * as m from "@rezics/i18n/messages";
 
 const TAB_ROUTES = [
   "info",

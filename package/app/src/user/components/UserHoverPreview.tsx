@@ -1,4 +1,3 @@
-import { Link, unitHref } from "@/shared/ui/link";
 import * as m from "@rezics/i18n/messages";
 import {
   Avatar,
@@ -12,8 +11,8 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useId, useState } from "react";
-
 import { FollowButton } from "@/engagement/components/FollowButton";
+import { Link, unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 
 export type UserHoverPreviewSize = "compact" | "default";

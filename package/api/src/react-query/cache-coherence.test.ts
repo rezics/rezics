@@ -1,6 +1,6 @@
+import { describe, expect, test } from "bun:test";
 import type { UnitTranslationDTO } from "@rezics/contract";
 import { QueryClient } from "@tanstack/react-query";
-import { describe, expect, test } from "bun:test";
 import {
   patchTranslationDetailQueries,
   preserveCachedTranslations,

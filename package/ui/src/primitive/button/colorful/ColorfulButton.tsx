@@ -1,5 +1,5 @@
-import { Button } from "#/shadcn/button";
 import { Spinner } from "#/primitive/feedback/Spinner";
+import { Button } from "#/shadcn/button";
 
 export type ColorfulButtonColor = "green" | "orange" | "rose";
 

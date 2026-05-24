@@ -3,8 +3,8 @@
  */
 
 import type {
-  BookResponse,
   BookContentStructureItem,
+  BookResponse,
   CreateBookInput,
   EditorialPatchSubmission,
 } from "@rezics/contract";

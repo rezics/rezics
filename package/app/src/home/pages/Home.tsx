@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { HomeSearch } from "@/search";
@@ -9,7 +10,6 @@ import { LibraryCardsSection } from "../sections/LibraryCardsSection";
 import { NewBookSection } from "../sections/NewBookSection";
 import { TrendingReviews } from "../sections/TrendingReviewsSection";
 import { TrendingShelfSection } from "../sections/TrendingShelfSection";
-import * as m from "@rezics/i18n/messages";
 
 export type HomeProps = object;
 

@@ -1,10 +1,10 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { mainMarkdownSource } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { WorkReleaseNav } from "@rezics/ui";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { Link } from "@/shared/ui/link";
 import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -13,6 +13,7 @@ import type React from "react";
 import { useMemo } from "react";
 import { RemarkInlineForm } from "@/remark";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
+import { Link } from "@/shared/ui/link";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { TagInteraction } from "@/tag/components/TagInteraction";
 import { BookCopyrightNotice } from "../components/BookCopyrightNotice";
@@ -23,7 +24,6 @@ import { RemarkPreview } from "../components/RemarkPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
-import * as m from "@rezics/i18n/messages";
 
 interface BookWorkReleaseNavProps {
   workUnitId: string;

@@ -1,10 +1,9 @@
-import * as m from "@rezics/i18n/messages";
 import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 
 import { Spinner } from "@rezics/ui";
-import { Link } from "@/shared/ui/link";
 import {
   Button,
   Card,
@@ -15,13 +14,14 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
+import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
 import React from "react";
 import {
   type PaginatedColumn,
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
-import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
+import { Link } from "@/shared/ui/link";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";

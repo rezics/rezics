@@ -1,4 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
+import * as m from "@rezics/i18n/messages";
 import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -7,7 +8,6 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { withBookContentStructureOccurrences } from "../../models/bookContentStructurePath";
 import type { ChapterArboristRefHandle } from "./ChapterArborist";
 import { ChapterArborist } from "./ChapterArborist";
-import * as m from "@rezics/i18n/messages";
 
 /** Props for LinearChapterList component. */
 interface LinearChapterListProps {

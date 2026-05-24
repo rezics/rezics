@@ -1,11 +1,11 @@
-import { prisma, type UnitType } from "#/prisma/client";
 import { mainMarkdownSource } from "@rezics/contract";
+import { prisma, type UnitType } from "#/prisma/client";
 import {
   listByUser,
   listGivenReactions,
 } from "@/reaction-boundary/reaction-boundary.client";
-import { mapPublicUser, publicUserSelect } from "@/utils/sanitizeUser";
 import { notFound } from "@/utils/errors";
+import { mapPublicUser, publicUserSelect } from "@/utils/sanitizeUser";
 
 const OWNERSHIP_CHUNK_SIZE = 1000;
 const SNIPPET_LENGTH = 160;

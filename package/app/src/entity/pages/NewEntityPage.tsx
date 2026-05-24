@@ -1,15 +1,15 @@
 import { useCreateEntity } from "@rezics/api/entity";
 import type { CreateEntityInput, EntityKind } from "@rezics/contract";
 import { CreationMode, entityKinds } from "@rezics/contract";
-import { unitHref } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import {
   suggestCreditEligibility,
   suggestSubjectEligibility,
 } from "@/entity-picker/models/eligibilitySuggestions";
+import { unitHref } from "@/shared/ui/link";
 
 export function NewEntityPage() {
   const navigate = useNavigate();

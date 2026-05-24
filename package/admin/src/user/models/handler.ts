@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authKeys } from "@rezics/api/auth/auth.keys";
 import { exchangeForSessionToken } from "@rezics/api/react-query/jwt";
@@ -8,6 +7,7 @@ import {
   useAuthSessionStore,
 } from "@rezics/api/states";
 import { userKeys } from "@rezics/api/user/user.keys";
+import * as m from "@rezics/i18n/messages";
 import { qc } from "@/app/providers/reactQueryUtil";
 
 /**

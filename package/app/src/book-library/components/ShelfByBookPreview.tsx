@@ -1,11 +1,10 @@
 import { shelfQueries } from "@rezics/api/shelf/shelf";
+import * as m from "@rezics/i18n/messages";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-
 import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
-import * as m from "@rezics/i18n/messages";
 
 export function ShelfByBookPreview({
   title,

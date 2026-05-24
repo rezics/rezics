@@ -1,5 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
-import { TextLink } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import {
   Tooltip,
   TooltipContent,
@@ -12,9 +12,9 @@ import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
+import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { reviewCardActions, reviewPolicy } from "../../models/reviewPolicy";
-import * as m from "@rezics/i18n/messages";
 
 interface ReviewRatingBadgeProps {
   review: PostDTO;

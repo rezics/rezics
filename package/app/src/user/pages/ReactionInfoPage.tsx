@@ -1,8 +1,8 @@
-import { unitHref } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
+import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
 
 // MOCK: Reaction history page — waiting on reaction service /reactions/history endpoint

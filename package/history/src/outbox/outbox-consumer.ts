@@ -1,9 +1,9 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import {
   type EditorialRevisionPayload,
   type HistoryOutboxPayload,
   HistoryOutboxPayloadKind,
 } from "@rezics/contract";
-import { PrismaPg } from "@prisma/adapter-pg";
 
 type HistoryOutboxRow = {
   id: string;

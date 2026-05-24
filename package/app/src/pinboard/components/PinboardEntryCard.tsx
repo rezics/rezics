@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Badge,
   Button,
@@ -6,16 +7,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import type React from "react";
-import { cn } from "@/shared/utils/css-util";
-import type { PinboardEntryView } from "../models/types";
 import {
   Trash2 as DeleteOutlineRoundedIcon,
   GripVertical as DragIndicatorRoundedIcon,
   Pencil as EditRoundedIcon,
   Pin as PushPinRoundedIcon,
 } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
+import type React from "react";
+import { cn } from "@/shared/utils/css-util";
+import type { PinboardEntryView } from "../models/types";
 
 export type PinboardEntryCardVariant = "compact" | "card" | "adminRow";
 

@@ -1,9 +1,9 @@
 import * as m from "@rezics/i18n/messages";
 import { Button, Sheet, SheetContent } from "@rezics/ui/shadcn";
+import { Menu as MenuIcon } from "lucide-react";
 import React from "react";
 import { AdminNav } from "@/navigation/AdminNav";
 import { adminNav } from "@/navigation/adminNavConfig";
-import { Menu as MenuIcon } from "lucide-react";
 
 export default function AdminLayout({
   children,

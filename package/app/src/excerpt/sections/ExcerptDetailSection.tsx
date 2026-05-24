@@ -1,14 +1,14 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
-import { TextLink } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { PostListSection } from "@/post";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
+import { TextLink } from "@/shared/ui/link";
 import { ExcerptDetail } from "../components/detail/ExcerptDetail";
-import * as m from "@rezics/i18n/messages";
 
 interface ExcerptDetailSectionProps {
   unitId: string;

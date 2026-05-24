@@ -1,5 +1,6 @@
 import { realmDetailQuery } from "@rezics/api/realm/realm";
 import { userQueries } from "@rezics/api/user/user";
+import * as m from "@rezics/i18n/messages";
 import {
   Avatar,
   AvatarFallback,
@@ -11,13 +12,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search as SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import { buildHeaderSubmitPath } from "./buildHeaderSubmitPath";
 import LogoIcon from "@/shared/assets/logo.svg?react";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user/states";
-import * as m from "@rezics/i18n/messages";
+import { buildHeaderSubmitPath } from "./buildHeaderSubmitPath";
 
 type HeaderSearchScope =
   | { kind: "general" }

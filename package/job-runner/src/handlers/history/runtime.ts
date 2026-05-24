@@ -1,7 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { HistoryOutboxConsumer } from "@rezics/history/outbox";
-import { RevisionService } from "@rezics/history/revision/revision.service";
 import { PrismaClient as HistoryPrismaClient } from "@rezics/history/prisma/generated/client";
+import { RevisionService } from "@rezics/history/revision/revision.service";
 import { PrismaClient as MainPrismaClient } from "@rezics/server/prisma/generated/client";
 
 export interface HistoryRuntime {

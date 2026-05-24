@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Badge,
   Button,
@@ -11,12 +12,11 @@ import {
 } from "@rezics/ui/shadcn";
 import {
   Plus as AddIcon,
-  Trash2 as DeleteIcon,
   X as CloseIcon,
+  Trash2 as DeleteIcon,
 } from "lucide-react";
 import type { FC } from "react";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface ScopesEditorProps {
   scopes: Record<string, string[]>;

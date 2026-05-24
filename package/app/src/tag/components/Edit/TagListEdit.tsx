@@ -1,21 +1,21 @@
 import {
+  tagQueries,
+  useAttachTagMutation,
+  useDetachTagMutation,
+} from "@rezics/api/tag/tag";
+import type { UnitTagDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Spinner } from "@rezics/ui";
+import {
   Badge,
   Button,
   Input,
   ToggleGroup,
   ToggleGroupItem,
 } from "@rezics/ui/shadcn";
-import { Spinner } from "@rezics/ui";
-import {
-  tagQueries,
-  useAttachTagMutation,
-  useDetachTagMutation,
-} from "@rezics/api/tag/tag";
-import type { UnitTagDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { SingleTagChip } from "../TagList";
 
 /**

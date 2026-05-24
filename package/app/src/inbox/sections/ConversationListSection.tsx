@@ -1,8 +1,8 @@
-import { useConversations, type DmConversation } from "@rezics/api/dm/dm";
+import { type DmConversation, useConversations } from "@rezics/api/dm/dm";
+import * as m from "@rezics/i18n/messages";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
 
 function compareUpdatedDesc(a: DmConversation, b: DmConversation): number {
   return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");

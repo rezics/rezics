@@ -1,6 +1,6 @@
+import * as m from "@rezics/i18n/messages";
 import { Copyright as CopyrightOutlined } from "lucide-react";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 export const BookCopyrightNotice: React.FC = () => {
   return (

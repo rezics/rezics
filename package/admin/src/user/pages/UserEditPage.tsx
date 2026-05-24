@@ -1,13 +1,12 @@
-import * as m from "@rezics/i18n/messages";
+import { userMutations } from "@rezics/api/user/user.mutations";
+import { userQueries } from "@rezics/api/user/user.queries";
 import {
   contentDocMarkdownFallback,
   markdownContentDoc,
 } from "@rezics/contract";
-import { userMutations } from "@rezics/api/user/user.mutations";
-import { userQueries } from "@rezics/api/user/user.queries";
+import * as m from "@rezics/i18n/messages";
 
 import { Spinner } from "@rezics/ui";
-import { Link } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,
@@ -19,11 +18,12 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
 import React from "react";
 
 import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/user/$userId";
-import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
+import { Link } from "@/shared/ui/link";
 
 export default function UserEditPage() {
   const { userId } = Route.useParams();

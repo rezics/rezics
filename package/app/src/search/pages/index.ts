@@ -1,5 +1,5 @@
 export {
   FederatedSearchPage,
-  isSearchCategory,
   type FederatedSearchPageProps,
+  isSearchCategory,
 } from "./FederatedSearchPage";

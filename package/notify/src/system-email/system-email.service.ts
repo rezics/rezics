@@ -1,4 +1,4 @@
-import { SystemEmailKind, type SystemEmailBody } from "@rezics/contract";
+import { type SystemEmailBody, SystemEmailKind } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { emailTransport } from "../email/transport";
 import { pickLocale, renderKind } from "../kinds";

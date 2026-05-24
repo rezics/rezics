@@ -1,6 +1,6 @@
+import * as m from "@rezics/i18n/messages";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
-import { TextLink } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,
@@ -12,6 +12,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FC, useState } from "react";
+import { TextLink } from "@/shared/ui/link";
 import { useAuthSessionStore } from "@/user/states";
 import { SocialAuthButtons } from "../components/SocialAuthButtons";
 import { Layout } from "../layouts/Layout";
@@ -19,7 +20,6 @@ import { ModalLayout } from "../layouts/ModalLayout";
 import { resolvePostAuthDestination } from "../models/authRedirect";
 import { login } from "../models/handler";
 import { validateEmail } from "../models/validate";
-import * as m from "@rezics/i18n/messages";
 
 interface LoginData {
   email: string;

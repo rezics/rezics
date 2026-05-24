@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  type ContentDoc,
   contentDocSchema,
   extractText,
   scanRefs,
   validateContentDocPreferredShape,
-  type ContentDoc,
 } from "./content-doc";
 
 const doc = (source = "Hello"): ContentDoc => ({

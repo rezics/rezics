@@ -2,7 +2,7 @@ import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
 } from "@rezics/api/reaction/reaction.types";
-import { AppSafeLink as SafeLink } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import {
   Bookmark,
@@ -15,7 +15,7 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
 const REACTION_ICONS: Record<string, LucideIcon> = {
   like: ThumbsUp,

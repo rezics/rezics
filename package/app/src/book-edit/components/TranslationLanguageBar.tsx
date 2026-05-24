@@ -1,6 +1,6 @@
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { UnitTranslationLanguageBar } from "@/unit";
-import * as m from "@rezics/i18n/messages";
 
 export interface TranslationLanguageBarProps {
   existingLanguages: string[];

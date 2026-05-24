@@ -1,11 +1,11 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import { Link, unitHref } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import FollowButton from "@/engagement/components/FollowButton";
+import { Link, unitHref } from "@/shared/ui/link";
 import {
   type ChipDefinition,
   InnerFilterPanel,

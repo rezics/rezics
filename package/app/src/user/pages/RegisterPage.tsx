@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
 import {
@@ -18,7 +19,6 @@ import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { resolvePostAuthDestination } from "../models/authRedirect";
 import { register } from "../models/handler.ts";
 import { validateEmail, validatePassword } from "../models/validate.ts";
-import * as m from "@rezics/i18n/messages";
 
 interface RegisterData {
   email: string;

@@ -6,7 +6,7 @@
  */
 export {
   generateKeyBetween,
+  POSITION_ALPHABET,
   positionForNewBottomPin,
   positionForNewTopPin,
-  POSITION_ALPHABET,
 } from "../shared/fractional-index";

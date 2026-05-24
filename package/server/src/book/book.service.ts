@@ -1,15 +1,19 @@
-import { HistoryOutboxPayloadKind } from "@rezics/contract";
 import type {
+  BookContentStructureItem,
   BookContentStructureResponse,
   BookListQuery,
-  BookContentStructureItem,
   ContentStructureBatchOperation,
   CreateBookInput,
   EditorialPatchSubmission,
   RezicsSessionClaims,
   UpdateBookInput,
 } from "@rezics/contract";
-import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
+import {
+  HistoryOutboxPayloadKind,
+  parseIdsCsv,
+  withCoverUrl,
+} from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
 import {
   type ContentRating,
@@ -18,14 +22,9 @@ import {
   UnitType,
   type UnitVisibility,
 } from "#/prisma/client";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { serverJobProducer } from "@/job/job-boundary";
-import {
-  hydrateUnitOwnerUserSlugRow,
-  hydrateUnitOwnerUserSlugs,
-} from "@/utils/userSlugHydration";
-import { assertLicenseSlug } from "@/unit/publication-policy";
+import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
+import { serverJobProducer } from "@/job/job-boundary";
 import {
   assertCanEditCollaborativeMetadata,
   hasOwn,
@@ -39,11 +38,15 @@ import {
   buildStructureEventPayload,
   writeSequencedHistoryOutbox,
 } from "@/unit/history-outbox";
+import { assertLicenseSlug } from "@/unit/publication-policy";
+import {
+  hydrateUnitOwnerUserSlugRow,
+  hydrateUnitOwnerUserSlugs,
+} from "@/utils/userSlugHydration";
 import {
   buildTree,
   countReadableBookContentStructureItems,
 } from "./book-content-structure";
-import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { between, firstKey } from "./lexorank";
 import type { BookWithRelations } from "./types";
 import { bookInclude } from "./types";

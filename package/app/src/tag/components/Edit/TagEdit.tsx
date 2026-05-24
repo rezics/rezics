@@ -1,5 +1,3 @@
-import { Button, Input, Label } from "@rezics/ui/shadcn";
-import { Spinner } from "@rezics/ui";
 import type {
   CreateTagInput,
   UnitTagDTO,
@@ -10,9 +8,11 @@ import {
   useUpdateTagMutation,
 } from "@rezics/api/tag/tag";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Spinner } from "@rezics/ui";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 /**
  * TagEdit - now creates/updates tags using the new translation-based model.

@@ -1,8 +1,8 @@
 import {
   createEmailSender,
+  type EmailDeliveryResult,
   render,
   VerificationCode,
-  type EmailDeliveryResult,
 } from "@rezics/email";
 import { env } from "@/env";
 

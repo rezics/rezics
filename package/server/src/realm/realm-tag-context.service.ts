@@ -1,4 +1,8 @@
-import { markdownContentDoc, type RezicsSessionClaims } from "@rezics/contract";
+import {
+  BasicAdminPermission,
+  markdownContentDoc,
+  type RezicsSessionClaims,
+} from "@rezics/contract";
 import {
   type Prisma,
   prisma,
@@ -6,7 +10,6 @@ import {
   UnitType,
   UnitVisibility,
 } from "#/prisma/client";
-import { BasicAdminPermission } from "@rezics/contract";
 
 export class RealmTagContextError extends Error {
   constructor(

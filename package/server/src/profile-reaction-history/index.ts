@@ -1,11 +1,11 @@
 export { profileReactionHistoryApi } from "./profile-reaction-history.api";
 export {
-  ProfileReactionHistoryService,
-  profileReactionHistoryService,
   assertProfileViewable,
-  type ProfileReactionGivenItem,
-  type ProfileReactionReceivedItem,
-  type ProfileReactionListResult,
-  type ProfileReactionTarget,
   type ProfileReactionActor,
+  type ProfileReactionGivenItem,
+  ProfileReactionHistoryService,
+  type ProfileReactionListResult,
+  type ProfileReactionReceivedItem,
+  type ProfileReactionTarget,
+  profileReactionHistoryService,
 } from "./profile-reaction-history.service";

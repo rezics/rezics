@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { Button, Separator } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -7,7 +8,6 @@ import { Header } from "@/core/components/header/MainLayoutHeader";
 import { Sidebar } from "@/core/components/sidebar/MainLayoutSidebar";
 import { useLayoutStore } from "@/core/states/layoutStore.ts";
 import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
-import * as m from "@rezics/i18n/messages";
 export interface BookReadLayoutProps {
   children: ReactNode;
 }

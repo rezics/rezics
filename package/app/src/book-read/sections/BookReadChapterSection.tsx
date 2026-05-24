@@ -1,9 +1,10 @@
+import { progressApi, useUpdateUnitProgress } from "@rezics/api";
 import { bookQueries } from "@rezics/api/book/book";
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
 import { useCanEdit } from "@rezics/api/hooks";
-import { progressApi, useUpdateUnitProgress } from "@rezics/api";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { createRezicsRenderer } from "@rezics/editor/markdown";
+import * as m from "@rezics/i18n/messages";
 import { handleExternalLinkClick } from "@rezics/ui/link/handleExternalLinkClick.ts";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -11,17 +12,16 @@ import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
-import { PostListSection, ReplyComposer } from "@/post";
+import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
 import {
-  EMPTY_CHAPTER_ROUTE_ID,
   decodeBookContentStructurePath,
+  EMPTY_CHAPTER_ROUTE_ID,
   findBookContentStructureOccurrence,
   withBookContentStructureOccurrences,
 } from "@/book-library/models/bookContentStructurePath";
-import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
-import * as m from "@rezics/i18n/messages";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { PostListSection, ReplyComposer } from "@/post";
+import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
 
 export const BookReadChapterPage: React.FC = () => {
   const { bookId, chapterId } = bookReadLayoutRoute.useParams();

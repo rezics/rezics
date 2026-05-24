@@ -1,10 +1,10 @@
+import * as m from "@rezics/i18n/messages";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Button, Separator } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Route as reviewByBookRoute } from "@/routes/_mainLayout/review/book/$bookId";
 import { ReviewNewPage } from "./ReviewNewPage";
 import { ReviewsPage } from "./ReviewsPage";
-import * as m from "@rezics/i18n/messages";
 
 export function ReviewByBookPage() {
   const { bookId } = reviewByBookRoute.useParams();

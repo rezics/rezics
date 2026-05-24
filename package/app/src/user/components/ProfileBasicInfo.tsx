@@ -1,13 +1,13 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { UserDTO } from "@rezics/contract";
-import { Link } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
 import FollowButton from "@/engagement/components/FollowButton";
+import { Link } from "@/shared/ui/link";
 
 interface ProfileBasicInfoProps {
   user: UserDTO;

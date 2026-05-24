@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { markdownContentDoc } from "@rezics/contract";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { PostBodyMarkdown } from "./PostBodyMarkdown";
 

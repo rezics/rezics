@@ -1,8 +1,8 @@
 import {
-  Project,
-  SyntaxKind,
   type JsxElement,
   type JsxSelfClosingElement,
+  Project,
+  SyntaxKind,
 } from "ts-morph";
 
 type RewriteResult = {

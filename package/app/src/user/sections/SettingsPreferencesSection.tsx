@@ -19,6 +19,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -33,7 +34,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { GripVerticalIcon, XIcon } from "lucide-react";
 import { type FC, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { ContentRatingPreferences } from "@/user/components/ContentRatingPreferences";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";

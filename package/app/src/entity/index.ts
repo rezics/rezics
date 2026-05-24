@@ -8,15 +8,14 @@ export { EntityKindBadge } from "./components/EntityKindBadge";
 export { EntityVerifiedIcon } from "./components/EntityVerifiedIcon";
 export { useEntityWorks } from "./hooks/useEntityWorks";
 export {
-  getEntityLanguages,
-  getEntityPrimaryTitle,
-  getEntityTranslation,
-} from "./models/types";
-export {
   addCreditAttribution,
   addSubjectAttribution,
   buildEntityAttributionBatchOps,
+  type CreditAttributionQueueEntry,
   createEntityAttributionEditQueue,
+  type EntityAttributionEditQueue,
+  type EntityAttributionQueueSaveStatus,
+  type EntityAttributionQueueSnapshot,
   isEntityAttributionQueueDirty,
   markEntityAttributionQueueError,
   markEntityAttributionQueueSaved,
@@ -27,12 +26,13 @@ export {
   reorderSubjectAttributions,
   replaceCreditAttributions,
   replaceSubjectAttributions,
-  type CreditAttributionQueueEntry,
-  type EntityAttributionEditQueue,
-  type EntityAttributionQueueSaveStatus,
-  type EntityAttributionQueueSnapshot,
   type SubjectAttributionQueueEntry,
 } from "./models/entityAttributionEditQueue";
+export {
+  getEntityLanguages,
+  getEntityPrimaryTitle,
+  getEntityTranslation,
+} from "./models/types";
 export { EntityDetailPage } from "./pages/EntityDetailPage";
 export { EntityEditPage } from "./pages/EntityEditPage";
 export { MyEntitiesPage } from "./pages/MyEntitiesPage";

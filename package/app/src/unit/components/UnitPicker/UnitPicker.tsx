@@ -1,5 +1,6 @@
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -8,7 +9,6 @@ import { type ReactNode, useState } from "react";
 import { useUnitCandidates } from "../../hooks/useUnitCandidates";
 import type { Candidate } from "../../models/types";
 import { UnitCandidateRow } from "./UnitCandidateRow";
-import * as m from "@rezics/i18n/messages";
 
 export interface UnitPickerProps {
   workContextUnitId?: string;

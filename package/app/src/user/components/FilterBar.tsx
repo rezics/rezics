@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Input,
   Select,
@@ -7,7 +8,6 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
 
 export interface FilterDropdownConfig {
   key: string;

@@ -1,4 +1,4 @@
-import { contentDocMarkdownFallback, type BookDTO } from "@rezics/contract";
+import { type BookDTO, contentDocMarkdownFallback } from "@rezics/contract";
 import { SafeLink } from "@rezics/ui";
 import { getBookShareStyles } from "@/utils/shareStyles";
 

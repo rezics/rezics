@@ -1,7 +1,7 @@
 import "dotenv/config";
 
-import { env } from "./env";
 import { createJobRunnerApp } from "./app";
+import { env } from "./env";
 import { createJobHandlers } from "./handlers";
 import {
   createHistoryRuntime,

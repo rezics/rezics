@@ -1,7 +1,6 @@
-import { Badge } from "@rezics/ui/shadcn";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
-import { Link } from "@/shared/ui/link";
+import { Badge } from "@rezics/ui/shadcn";
 import {
   Carousel,
   CarouselContent,
@@ -10,6 +9,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
+import { Link } from "@/shared/ui/link";
 
 import { DynamicIcon, type IconKey } from "./DynamicIcon";
 

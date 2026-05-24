@@ -1,7 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "#/shadcn/avatar";
 import { Spinner } from "#/primitive/feedback/Spinner";
+import { Avatar, AvatarFallback, AvatarImage } from "#/shadcn/avatar";
 
 export interface MentionUserOption {
   userId?: string;

@@ -1,11 +1,10 @@
 import type {
+  ChapterListQuery,
   ChapterMaterializationRequest,
   ChapterMaterializationResponse,
-  ChapterListQuery,
   CreateChapterInput,
   UpdateChapterInput,
 } from "@rezics/contract";
-import { resolvePath } from "@/book/book-content-structure";
 import {
   markdownContentDoc,
   parseIdsCsv,
@@ -19,6 +18,7 @@ import {
   UnitStatus,
   UnitType,
 } from "#/prisma/client";
+import { resolvePath } from "@/book/book-content-structure";
 import type { ChapterPostWithRelations } from "./types";
 import { chapterPostInclude } from "./types";
 

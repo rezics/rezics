@@ -3,6 +3,7 @@ import {
   useSubscribeMutation,
   useUnsubscribeMutation,
 } from "@rezics/api/subscription/subscription";
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Tooltip,
@@ -13,7 +14,6 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 import { cn } from "@/shared/utils/css-util";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";

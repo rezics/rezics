@@ -1,14 +1,14 @@
-import { Button } from "@rezics/ui/shadcn";
-import { Spinner } from "@rezics/ui";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalReviewCarousel } from "@/review/components/list/HorizontalReviewCarousel";
-import * as m from "@rezics/i18n/messages";
 
 export type TrendingReviewsProps = {
   title?: string;

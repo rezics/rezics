@@ -5,13 +5,13 @@ import {
   useUpdatePostMutation,
 } from "@rezics/api/post/post";
 import { mainMarkdownSource, markdownContentDoc } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ReviewForm, type ReviewEditState } from "@/review/forms/ReviewForm";
+import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 import { Route as reviewEditRoute } from "@/routes/_mainLayout/review/$reviewId/edit";
-import * as m from "@rezics/i18n/messages";
 
 export function ReviewEditPageContainer() {
   const { reviewId } = reviewEditRoute.useParams();

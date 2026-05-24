@@ -5,10 +5,10 @@
 import type { UpdateUser } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { Prisma, prisma } from "#/prisma/client";
-import { bootstrapSystemShelves } from "@/shelf/system-shelves";
 import { getDefaultRealmId } from "@/infra/default-realm";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";
+import { bootstrapSystemShelves } from "@/shelf/system-shelves";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
 import { userInclude } from "../models/types";
 

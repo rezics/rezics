@@ -7,7 +7,7 @@ import {
   PostKind,
   type TagTreeNode,
 } from "@rezics/contract";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import * as m from "@rezics/i18n/messages";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -20,8 +20,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
-import * as m from "@rezics/i18n/messages";
 
 export type ReplyComposerMode = "progressive" | "expanded";
 

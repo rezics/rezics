@@ -1,5 +1,5 @@
-import type { SystemShelfKindKey } from "@rezics/contract";
 import { useSystemShelfRef } from "@rezics/api/slug";
+import type { SystemShelfKindKey } from "@rezics/contract";
 
 export type SystemShelfIdMap = Partial<Record<SystemShelfKindKey, string>>;
 

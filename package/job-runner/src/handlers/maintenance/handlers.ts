@@ -1,9 +1,9 @@
 import {
+  type AnyJobCommand,
   createSearchCommand,
   MAINTENANCE_COMMAND_KINDS,
-  SEARCH_COMMAND_KINDS,
-  type AnyJobCommand,
   type MaintenanceCommand,
+  SEARCH_COMMAND_KINDS,
 } from "@rezics/job";
 import type { HandlerContext, JobHandler } from "../../worker";
 

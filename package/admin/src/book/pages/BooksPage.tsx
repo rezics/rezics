@@ -3,7 +3,6 @@ import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { BookListResponse } from "@rezics/contract";
 import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
-import { Link } from "@/shared/ui/link";
 import {
   Button,
   Card,
@@ -18,6 +17,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
+import { Search as SearchIcon } from "lucide-react";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/components/list/SearchablePaginatedTableCard";
 import {
@@ -25,8 +25,8 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
-import { Search as SearchIcon } from "lucide-react";
 
 /** Extract the best title from the translations array. */
 function extractTitle(book: BookDTO): string {

@@ -8,11 +8,11 @@ import type {
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
-import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
+import { AppError } from "@/utils/errors";
 import { mapSubjectAttributionToDTO } from "./subject-attribution.mapper";
 import { subjectAttributionInclude } from "./types";
 

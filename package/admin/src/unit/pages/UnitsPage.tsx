@@ -1,8 +1,8 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import type { UnitListResponse } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
-import { Link } from "@/shared/ui/link";
 import {
   Badge,
   Button,
@@ -14,6 +14,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
+import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/components/list/SearchablePaginatedTableCard";
 import {
@@ -21,9 +22,8 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
-import * as m from "@rezics/i18n/messages";
-import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
 
 /** Extract the best title from the translations array on a UnitDTO. */
 function extractUnitTitle(unit: UnitDTO): string {

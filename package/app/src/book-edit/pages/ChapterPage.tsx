@@ -8,15 +8,12 @@ import {
   useUpdateChapterMutation,
 } from "@rezics/api/chapter/chapter";
 import {
+  type BookContentStructureItem,
   mainMarkdownSource,
   markdownContentDoc,
-  type BookContentStructureItem,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
-import {
-  RezicsMarkdownEditor,
-  type ViewMode,
-} from "@/shared/ui/RezicsMarkdownEditor";
 import {
   Button,
   DropdownMenu,
@@ -26,6 +23,11 @@ import {
   Input,
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Network as AccountTree,
+  Ellipsis as MoreHoriz,
+  Settings,
+} from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
@@ -34,11 +36,9 @@ import { withBookContentStructureOccurrences } from "@/book-library/models/bookC
 import { Route as bookEditChapterRoute } from "@/routes/book_/$bookId/edit/$chapterId";
 import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
 import {
-  Network as AccountTree,
-  Ellipsis as MoreHoriz,
-  Settings,
-} from "lucide-react";
-import * as m from "@rezics/i18n/messages";
+  RezicsMarkdownEditor,
+  type ViewMode,
+} from "@/shared/ui/RezicsMarkdownEditor";
 
 function updateContentStructureNodeTitle(
   nodes: BookContentStructureItem[],

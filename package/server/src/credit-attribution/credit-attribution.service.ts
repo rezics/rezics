@@ -6,12 +6,12 @@ import type {
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
-import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
   creditRolePatchPath,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
+import { AppError } from "@/utils/errors";
 import { mapCreditAttributionToDTO } from "./credit-attribution.mapper";
 import { creditAttributionInclude } from "./types";
 

@@ -6,11 +6,11 @@ import type {
   UpdateUnitAliasInput,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { serverJobProducer } from "@/job/job-boundary";
 import { prisma, UnitAliasStatus } from "#/prisma/client";
+import { serverJobProducer } from "@/job/job-boundary";
+import { isAdminRole, verifyAdminFromDb } from "@/middleware";
 import { hasAuthorityOver } from "@/unit/authority";
 import { AppError, forbidden, notFound } from "@/utils/errors";
-import { isAdminRole, verifyAdminFromDb } from "@/middleware";
 import { normalizeUnitAliasValue, trimUnitAliasValue } from "./normalizer";
 
 export const ALIAS_VISIBILITY_THRESHOLD = -100;

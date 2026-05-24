@@ -3,7 +3,7 @@ import {
   LICENSE_SLUGS,
   type LicenseSlug,
 } from "@rezics/contract";
-import { UnitStatus, UnitVisibility, type Unit } from "#/prisma/client";
+import { type Unit, UnitStatus, UnitVisibility } from "#/prisma/client";
 
 type PublicEligibilityUnit = Pick<Unit, "status" | "visibility">;
 

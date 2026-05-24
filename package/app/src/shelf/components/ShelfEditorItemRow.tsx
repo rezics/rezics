@@ -1,9 +1,9 @@
-import type { ShelfView } from "@rezics/api/shelf";
-import { Button, Checkbox } from "@rezics/ui/shadcn";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, MoveRight, Trash2 } from "lucide-react";
+import type { ShelfView } from "@rezics/api/shelf";
 import * as m from "@rezics/i18n/messages";
+import { Button, Checkbox } from "@rezics/ui/shadcn";
+import { GripVertical, MoveRight, Trash2 } from "lucide-react";
 import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfItemRenderer } from "./ShelfItemRenderer";
 

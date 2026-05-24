@@ -1,10 +1,10 @@
 import { postQueries } from "@rezics/api/post/post";
-import { useNavigate } from "@tanstack/react-router";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RemarkEditDialog } from "../forms/RemarkEditDialog";
-import * as m from "@rezics/i18n/messages";
 
 interface RemarkEditPageProps {
   reviewId: string;

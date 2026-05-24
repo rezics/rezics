@@ -1,5 +1,6 @@
 import { useRevokeSessionMutation } from "@rezics/api/auth/auth.mutations";
 import { authQueries } from "@rezics/api/auth/auth.queries";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -19,7 +20,6 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
-import * as m from "@rezics/i18n/messages";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";

@@ -1,8 +1,8 @@
-import { markdownContentDoc, type PostResponse } from "@rezics/contract";
 import {
   useCreatePostMutation,
   useUpdatePostMutation,
 } from "@rezics/api/post/post.mutations";
+import { markdownContentDoc, type PostResponse } from "@rezics/contract";
 import { useCallback } from "react";
 
 export type ReasonPostVisibility = "PUBLIC" | "UNLISTED";

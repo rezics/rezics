@@ -1,3 +1,11 @@
+export type {
+  CastUnitAliasVoteInput,
+  CreateUnitAliasInput,
+  PatchUnitAliasPinInput,
+  UnitAliasDTO,
+  UnitAliasListQuery,
+  UpdateUnitAliasInput,
+} from "@rezics/contract";
 export { unitAliasApi } from "./unit-alias.api";
 export { unitAliasKeys } from "./unit-alias.keys";
 export {
@@ -10,15 +18,7 @@ export {
   useUpdateUnitAliasMutation,
 } from "./unit-alias.mutations";
 export {
-  unitAliasQueries,
   unitAliasesForUnitQuery,
   unitAliasesQuery,
+  unitAliasQueries,
 } from "./unit-alias.queries";
-export type {
-  CastUnitAliasVoteInput,
-  CreateUnitAliasInput,
-  PatchUnitAliasPinInput,
-  UnitAliasDTO,
-  UnitAliasListQuery,
-  UpdateUnitAliasInput,
-} from "@rezics/contract";

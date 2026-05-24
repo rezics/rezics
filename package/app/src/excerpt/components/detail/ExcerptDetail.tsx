@@ -5,17 +5,16 @@ import {
   type UnitDTO,
 } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
-import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { Link, unitHref } from "@/shared/ui/link";
-import { useMemo } from "react";
+import { Quote as FormatQuoteIcon } from "lucide-react";
 import type React from "react";
+import { useMemo } from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
+import { Link, AppSafeLink as SafeLink, unitHref } from "@/shared/ui/link";
 import {
   excerptDetailActions,
   excerptPolicy,
 } from "../../models/excerptPolicy";
-import { Quote as FormatQuoteIcon } from "lucide-react";
 
 interface ExcerptDetailProps {
   excerpt: UnitDTO;

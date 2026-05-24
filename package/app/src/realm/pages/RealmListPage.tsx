@@ -4,10 +4,10 @@ import {
   type RealmDTO,
   type RealmSearchDocument,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
-import * as m from "@rezics/i18n/messages";
 import { RealmCard } from "../components/RealmCard";
 
 function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {

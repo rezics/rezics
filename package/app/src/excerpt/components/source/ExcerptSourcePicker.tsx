@@ -1,11 +1,11 @@
-import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { ExcerptSource } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import { UnitPicker, type Candidate } from "@/unit";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-import * as m from "@rezics/i18n/messages";
+import { type Candidate, UnitPicker } from "@/unit";
 
 interface ExcerptSourcePickerProps {
   value?: ExcerptSource;

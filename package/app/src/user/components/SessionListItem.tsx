@@ -1,7 +1,7 @@
+import * as m from "@rezics/i18n/messages";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { Monitor as ComputerIcon } from "lucide-react";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface SessionListItemProps {
   session: {

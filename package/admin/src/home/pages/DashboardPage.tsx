@@ -1,18 +1,18 @@
-import * as m from "@rezics/i18n/messages";
 import { adminStatsQueryOptions } from "@rezics/api/stat/stats.queries";
+import * as m from "@rezics/i18n/messages";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  MessageCircle as CommentIcon,
+  MessageCircleQuestion as FeedbackIcon,
+  History as HistoryIcon,
+  BookOpen as MenuBookIcon,
+  Users as PeopleIcon,
+} from "lucide-react";
 import { Page } from "@/core/layouts/Page";
 import { ContentTrendChart } from "../components/chart/ContentTrendChart";
 import { HealthStrip } from "../components/HealthStrip";
 import { StatCard } from "../components/StatCard";
-import {
-  MessageCircle as CommentIcon,
-  MessageCircleQuestion as FeedbackIcon,
-  BookOpen as MenuBookIcon,
-  History as HistoryIcon,
-  Users as PeopleIcon,
-} from "lucide-react";
 
 export default function DashboardPage() {
   const { data: stats } = useSuspenseQuery(adminStatsQueryOptions());

@@ -1,7 +1,7 @@
 import {
+  patchRealmAliases,
   patchRealmMemberCount,
   patchRealmMetadata,
-  patchRealmAliases,
   patchRealmTranslations,
   syncAllRealms,
   syncSingleRealm,

@@ -1,10 +1,10 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { contentDocMarkdownFallback, type UnitDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
-import { Link } from "@/shared/ui/link";
 import {
   Badge,
   Tabs,
@@ -21,8 +21,8 @@ import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { Link } from "@/shared/ui/link";
 import { buildUnitUrl } from "@/shared/utils/build-url";
-import * as m from "@rezics/i18n/messages";
 
 type Unit = UnitDTO;
 

@@ -5,12 +5,12 @@ import {
 } from "@rezics/api/auth-jwt-service/auth-jwt-service.mutations";
 import { authJwtServiceQueries } from "@rezics/api/auth-jwt-service/auth-jwt-service.queries";
 import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import {
   JwtServiceEditDialog,
   JwtServiceTable,

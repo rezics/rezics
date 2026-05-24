@@ -1,4 +1,5 @@
 import type { ContentRating } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { RatingSelector } from "@rezics/ui";
 import {
   Button,
@@ -17,7 +18,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import type { Chapter } from "./BookTocEditor";
-import * as m from "@rezics/i18n/messages";
 
 // MOCK: publish statuses — replace with contract enum when backend is ready
 const PUBLISH_STATUSES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;

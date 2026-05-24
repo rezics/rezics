@@ -1,9 +1,9 @@
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { PostListSection, ReplyComposer } from "@/post";
 import { useAuthModal } from "@/user/components/useAuthModal";
 import { useAuth } from "@/user/pages/useAuth";
-import * as m from "@rezics/i18n/messages";
 
 interface ShelfDiscussionSectionProps {
   shelfUnitId: string;

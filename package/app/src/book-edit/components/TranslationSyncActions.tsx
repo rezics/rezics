@@ -1,5 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book";
-import { mainMarkdownSource, type BookDTO } from "@rezics/contract";
+import { type BookDTO, mainMarkdownSource } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Tooltip,
@@ -9,14 +10,13 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import type React from "react";
-import { getTranslation } from "@/shared/utils/translation-helpers";
-import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
 import {
   ExternalLink as LaunchIcon,
   RefreshCw as SyncIcon,
 } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
+import type React from "react";
+import { getTranslation } from "@/shared/utils/translation-helpers";
+import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
 
 export interface TranslationSyncActionsProps {
   /** Source release unit id this language is wired to. Falsy disables actions. */

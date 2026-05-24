@@ -49,7 +49,7 @@ export const KIND_REGISTRY = {
 export type NotificationKind = keyof typeof KIND_REGISTRY;
 
 export function isValidKind(kind: string): kind is NotificationKind {
-  return Object.prototype.hasOwnProperty.call(KIND_REGISTRY, kind);
+  return Object.hasOwn(KIND_REGISTRY, kind);
 }
 
 export function isAggregatable(kind: string): boolean {

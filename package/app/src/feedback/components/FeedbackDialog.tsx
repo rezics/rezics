@@ -1,3 +1,5 @@
+import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
+import * as m from "@rezics/i18n/messages";
 import {
   Dialog,
   DialogContent,
@@ -5,9 +7,7 @@ import {
   DialogTitle,
   Separator,
 } from "@rezics/ui/shadcn";
-import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 import FeedbackForm from "./FeedbackForm";
 
 type FeedbackDialogProps = {

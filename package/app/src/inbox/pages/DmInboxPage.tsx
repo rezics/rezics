@@ -1,7 +1,7 @@
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import type React from "react";
-import { ConversationListSection } from "../sections/ConversationListSection";
 import { InboxTabBar } from "../components/InboxTabBar";
+import { ConversationListSection } from "../sections/ConversationListSection";
 
 export const DmInboxPage: React.FC = () => {
   return (

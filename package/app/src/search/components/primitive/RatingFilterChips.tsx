@@ -1,3 +1,5 @@
+import type { ContentRating } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Checkbox,
   Tooltip,
@@ -5,10 +7,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import type { ContentRating } from "@rezics/contract";
 import type React from "react";
 import { ratingTierLabel } from "@/search/models/ratingTierLabel";
-import * as m from "@rezics/i18n/messages";
 
 const RATINGS: ContentRating[] = ["GENERAL", "R_15", "R_18", "R_18G"];
 

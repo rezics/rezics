@@ -1,13 +1,13 @@
-import { Button, Card, CardContent, CardFooter } from "@rezics/ui/shadcn";
 import * as m from "@rezics/i18n/messages";
+import { Button, Card, CardContent, CardFooter } from "@rezics/ui/shadcn";
 import {
   useCanGoBack,
   useNavigate,
   useRouter,
   useRouterState,
 } from "@tanstack/react-router";
-import type React from "react";
 import { MapPin as Place } from "lucide-react";
+import type React from "react";
 
 export type NotFoundShowProps = {
   path: string;

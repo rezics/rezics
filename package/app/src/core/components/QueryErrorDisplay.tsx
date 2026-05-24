@@ -1,6 +1,6 @@
-import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { ApiError } from "@rezics/api";
 import * as m from "@rezics/i18n/messages";
+import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useState } from "react";
 
 interface QueryErrorDisplayProps {

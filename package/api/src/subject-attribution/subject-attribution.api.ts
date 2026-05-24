@@ -1,9 +1,9 @@
 import type {
   LinkSubjectAttributionInput,
-  SubjectAttributionRole,
   SubjectAttributionBySubjectQuery,
   SubjectAttributionByUnitQuery,
   SubjectAttributionDTO,
+  SubjectAttributionRole,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";

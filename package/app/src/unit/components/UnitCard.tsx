@@ -1,10 +1,10 @@
-import { BookOpen } from "lucide-react";
 import { contentDocMarkdownFallback } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { BookOpen } from "lucide-react";
 import { useId } from "react";
 import { cn } from "@/shared/utils/css-util";
 import { UserHoverPreview } from "@/user/components";
 import type { UnitCardSummary } from "../models/unitCardSummary";
-import * as m from "@rezics/i18n/messages";
 
 export interface UnitCardProps {
   summary: UnitCardSummary;

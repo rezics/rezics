@@ -2,9 +2,9 @@ import type {
   ContentSearchDocument,
   ContentSearchResult,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 function resolveTitle(
   titles: string[],

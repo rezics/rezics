@@ -1,4 +1,5 @@
 import type { ContentRating } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { RatingSelector } from "@rezics/ui";
 import {
   Button,
@@ -8,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-import * as m from "@rezics/i18n/messages";
 
 interface BulkRatingDialogProps {
   open: boolean;

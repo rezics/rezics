@@ -5,8 +5,8 @@ import {
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import {
-  RevisionService,
   computeRevisionContentHash,
+  RevisionService,
 } from "./revision.service";
 
 async function responseValidationStatus(

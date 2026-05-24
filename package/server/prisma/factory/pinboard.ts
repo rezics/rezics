@@ -1,4 +1,4 @@
-import { Prisma } from "../generated/client.js";
+import type { Prisma } from "../generated/client.js";
 import type { SeedCtx } from "./strategy.js";
 import type { CreatedPost, CreatedUnit } from "./types.js";
 import { pickN, randomInt } from "./utils.js";

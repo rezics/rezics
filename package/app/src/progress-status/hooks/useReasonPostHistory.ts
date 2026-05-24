@@ -1,5 +1,5 @@
-import { mainMarkdownSource, type PostResponse } from "@rezics/contract";
 import { postQueries } from "@rezics/api/post/post.queries";
+import { mainMarkdownSource, type PostResponse } from "@rezics/contract";
 import { useQueries } from "@tanstack/react-query";
 
 export type ReasonPost = {

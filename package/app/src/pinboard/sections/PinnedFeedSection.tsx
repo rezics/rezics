@@ -1,9 +1,9 @@
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { PinboardEntryCard } from "../components/PinboardEntryCard";
 import { PinboardErrorState } from "../components/PinboardErrorState";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { usePinboardList } from "../hooks/usePinboard";
-import * as m from "@rezics/i18n/messages";
 
 export interface PinnedFeedSectionProps {
   realmUnitId: string;

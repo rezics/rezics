@@ -1,18 +1,18 @@
-import { Button } from "@rezics/ui/shadcn";
+import * as m from "@rezics/i18n/messages";
+import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
-import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import {
   ArrowDown as ArrowDownward,
   ChevronDown as ArrowDropDownIcon,
   ArrowUp as ArrowUpward,
 } from "lucide-react";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 export type BookLibSortKey =
   | "relevance"

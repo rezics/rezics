@@ -1,5 +1,6 @@
-import { Button } from "@rezics/ui/shadcn";
 import type { SearchQuery } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Button } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
@@ -14,7 +15,6 @@ import {
   TagPicker,
   WordCountRangeInput,
 } from "./primitive";
-import * as m from "@rezics/i18n/messages";
 
 export type AdvancedSearchProps = {
   query: UseSearchQueryReturn["query"];

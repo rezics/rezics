@@ -1,9 +1,8 @@
 import { contentDocMarkdownFallback, type PostDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
-
 import { UserHoverPreview } from "@/user/components";
-import * as m from "@rezics/i18n/messages";
 
 interface PostAuthorHeaderProps {
   post: PostDTO;

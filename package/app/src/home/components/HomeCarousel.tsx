@@ -1,7 +1,7 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
-import { AppSafeLink as SafeLink } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { CarouselIndicator } from "@rezics/ui/primitive/carousel/CarouselIndicator.tsx";
 import { useEmblaAutoplay } from "@rezics/ui/primitive/carousel/use-embla-autoplay.ts";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
@@ -13,9 +13,9 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { useIsMobile } from "@/shared/utils/use-media-query";
-import * as m from "@rezics/i18n/messages";
 
 type ProductType = {
   cover?: string;

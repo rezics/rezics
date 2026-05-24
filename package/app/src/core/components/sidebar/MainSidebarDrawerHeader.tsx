@@ -1,5 +1,5 @@
-import { Button } from "@rezics/ui/shadcn";
 import * as m from "@rezics/i18n/messages";
+import { Button } from "@rezics/ui/shadcn";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function MainSidebarDrawerHeader({

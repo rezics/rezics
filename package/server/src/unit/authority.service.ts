@@ -13,9 +13,9 @@ import {
 import { prisma } from "#/prisma/client";
 import { AppError } from "@/utils/errors";
 import {
-  canEditUnitFields,
   type AuthorityUnit,
   type CollaborativeSurfacePolicy,
+  canEditUnitFields,
 } from "./authority";
 import {
   buildEditorialRevisionPayload,

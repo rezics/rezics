@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { CloudUpload } from "lucide-react";
-import { RezicsMarkdownEditor } from "./RezicsMarkdownEditor";
 import type { ImageProvider } from "./image/types";
 import type { UserSearchAdapter } from "./plugins/EditorMention";
+import { RezicsMarkdownEditor } from "./RezicsMarkdownEditor";
 
 const mockUserSearch: UserSearchAdapter = async (query) =>
   [

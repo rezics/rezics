@@ -1,12 +1,12 @@
+import * as m from "@rezics/i18n/messages";
 import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
-import { TextLink } from "@/shared/ui/link";
+import { Bell as NotificationsRoundedIcon } from "lucide-react";
 import type React from "react";
 import {
   AnnouncementFeedSection,
   type PinboardAnnouncementItem,
 } from "@/pinboard";
-import { Bell as NotificationsRoundedIcon } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
+import { TextLink } from "@/shared/ui/link";
 
 function formatRelative(dateIso: string): string {
   const ms = Date.now() - new Date(dateIso).getTime();

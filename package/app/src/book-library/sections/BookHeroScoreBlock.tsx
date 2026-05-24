@@ -1,7 +1,7 @@
+import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
 import { Star } from "lucide-react";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface BookHeroScoreBlockProps {
   /** Average score, 0–10 scale, 0 means no ratings yet. */

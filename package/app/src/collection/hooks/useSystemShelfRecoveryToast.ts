@@ -3,9 +3,9 @@ import {
   useSystemShelfRecovery,
 } from "@rezics/api/shelf";
 import type { SystemShelfKindKey } from "@rezics/contract";
-import { systemShelfKindLabel } from "@/shelf/models/systemShelfLabel";
-import { toast } from "sonner";
 import * as m from "@rezics/i18n/messages";
+import { toast } from "sonner";
+import { systemShelfKindLabel } from "@/shelf/models/systemShelfLabel";
 
 export type SystemShelfRecoveryToast = {
   /**

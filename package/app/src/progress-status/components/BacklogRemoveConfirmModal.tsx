@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -7,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-import * as m from "@rezics/i18n/messages";
 
 type BacklogRemoveConfirmModalProps = {
   open: boolean;

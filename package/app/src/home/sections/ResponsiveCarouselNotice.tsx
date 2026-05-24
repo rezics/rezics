@@ -1,7 +1,7 @@
+import * as m from "@rezics/i18n/messages";
 import { useEffect, useRef, useState } from "react";
 import { BookCarousel } from "../components/HomeCarousel";
 import { NoticeBoard } from "./NoticeBoard";
-import * as m from "@rezics/i18n/messages";
 
 export function ResponsiveCarouselNotice() {
   const containerRef = useRef<HTMLDivElement>(null);

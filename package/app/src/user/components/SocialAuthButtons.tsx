@@ -1,17 +1,17 @@
 import { authApi, authQueries } from "@rezics/api/auth/auth";
 import type { AuthProvider } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
 import {
   Alert,
   AlertDescription,
   Separator,
   Skeleton,
 } from "@rezics/ui/shadcn";
-import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
 import { buildOAuthCallbackTargets } from "../models/authRedirect";
 import { providerIcons } from "./providerIcons";
-import * as m from "@rezics/i18n/messages";
 
 // TODO 横条文字应该居中一点，更美观
 

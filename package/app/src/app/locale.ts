@@ -1,7 +1,7 @@
 import {
   DEFAULT_LANGUAGE,
-  normalizeLanguage,
   type Language,
+  normalizeLanguage,
 } from "@rezics/contract";
 import { notifyLocaleChanged } from "@rezics/i18n/react";
 import { setLocale as setProductLocale } from "@rezics/i18n/runtime";

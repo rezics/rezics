@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Select,
   SelectContent,
@@ -6,7 +7,6 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { useChapterPicker } from "../hooks/useChapterPicker";
-import * as m from "@rezics/i18n/messages";
 
 type ChapterPickerProps = {
   bookUnitId: string;

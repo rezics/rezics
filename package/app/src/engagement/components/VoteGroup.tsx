@@ -1,8 +1,8 @@
 import { useReactionData } from "@rezics/api/reaction/reaction";
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import { useVoteController } from "../hooks/useVoteController";
 import type { EngagementSize } from "../types";

@@ -1,6 +1,7 @@
 import { bookKeys, bookQueries } from "@rezics/api/book/book";
 import { useSetTranslationSourceMutation } from "@rezics/api/unit/translation-source.mutations";
 import type { BookDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Select,
   SelectContent,
@@ -11,7 +12,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
-import * as m from "@rezics/i18n/messages";
 
 const NO_SOURCE = "__none__";
 

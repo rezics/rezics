@@ -1,6 +1,5 @@
-import * as m from "@rezics/i18n/messages";
 import { userMutations } from "@rezics/api/user/user.mutations";
-import { Link } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -12,10 +11,11 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
+import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
 import React from "react";
 
 import { Page } from "@/core/layouts/Page";
-import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
+import { Link } from "@/shared/ui/link";
 
 export default function UserCreatePage() {
   const navigate = useNavigate();

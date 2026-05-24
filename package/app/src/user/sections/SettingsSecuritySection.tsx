@@ -4,6 +4,7 @@ import {
   useSetPasswordMutation,
 } from "@rezics/api/auth/auth.mutations";
 import { authQueries } from "@rezics/api/auth/auth.queries";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -18,7 +19,6 @@ import { type FC, useState } from "react";
 import { SessionListItem } from "@/user/components/SessionListItem";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
-import * as m from "@rezics/i18n/messages";
 
 export const SettingsSecuritySection: FC = () => {
   useRequireAuth();

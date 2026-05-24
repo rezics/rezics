@@ -1,7 +1,7 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ShelfDTO } from "@rezics/contract";
-import { useMemo } from "react";
 import type React from "react";
+import { useMemo } from "react";
 import { ShelfCard } from "./ShelfCard";
 
 interface ShelfListProps {

@@ -1,8 +1,8 @@
 import {
   createEntitySchema,
-  editorialPatchSubmissionSchema,
   type EntityDTO,
   type EntityKind,
+  editorialPatchSubmissionSchema,
   entityBySlugParamsSchema,
   entityListQuerySchema,
   entityListResponseSchema,

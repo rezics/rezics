@@ -1,8 +1,8 @@
 import type {
   HistoryActorResolutionBatchResponse,
   HistoryUnitReferenceResolutionBatchResponse,
-  SingleUnitRevisionResponse,
   SingleStructureEventResponse,
+  SingleUnitRevisionResponse,
   StructureEventTimelinePage,
   UnitRevisionPathCompareResponse,
   UnitRevisionTimelinePage,

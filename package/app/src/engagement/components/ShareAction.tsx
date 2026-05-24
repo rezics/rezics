@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -7,7 +8,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Share2 } from "lucide-react";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import { useShareMenu } from "../hooks/useShareMenu";
 import type { EngagementSize } from "../types";

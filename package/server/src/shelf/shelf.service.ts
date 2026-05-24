@@ -19,6 +19,7 @@ import type {
   UpdateShelfInput,
 } from "@rezics/contract";
 import { parseIdsCsv, SEED_TAG_NAMES, withCoverUrl } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
 import {
   PostKind,
@@ -27,19 +28,18 @@ import {
   UnitType,
   UnitVisibility,
 } from "#/prisma/client";
-import { getSeedTagId } from "@/infra/seed-tags";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { getSeedTagId } from "@/infra/seed-tags";
 import { serverJobProducer } from "@/job/job-boundary";
+import {
+  assertLicenseSlug,
+  publicUnitEligibilityWhere,
+} from "@/unit/publication-policy";
 import { AppError } from "@/utils/errors";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
-import {
-  assertLicenseSlug,
-  publicUnitEligibilityWhere,
-} from "@/unit/publication-policy";
 import {
   generateBetween,
   POSITION_LENGTH_THRESHOLD,
@@ -47,6 +47,7 @@ import {
 } from "./fractional-index";
 
 export const SHELF_ITEM_BATCH_OP_CAP = 200;
+
 import {
   mapShelfDetailToDTO,
   mapShelfListRowToDTO,

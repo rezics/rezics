@@ -12,8 +12,8 @@ import {
   approve,
   listByWork,
   reject,
-  withdraw,
   WorkLinkClaimError,
+  withdraw,
 } from "./work-link-claim.service";
 
 // Param name `unitId` matches `unitApi`'s — memoirist requires param names to agree at the same trie position.

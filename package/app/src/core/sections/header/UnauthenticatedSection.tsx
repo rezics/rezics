@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -5,7 +6,6 @@ import { useIsMobile } from "@/shared/utils/use-media-query";
 import { LoginModal } from "@/user/pages/LoginPage";
 import { RegisterModal } from "@/user/pages/RegisterPage";
 import { MoreHorizMenu } from "../../components/header/MoreHorizMenu";
-import * as m from "@rezics/i18n/messages";
 
 const LoginPrompt = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);

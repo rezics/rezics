@@ -1,4 +1,4 @@
-import { markdownContentDoc, type ContentDoc } from "@rezics/contract";
+import { type ContentDoc, markdownContentDoc } from "@rezics/contract";
 
 export function repairRichDescriptionValue(
   value: unknown,

@@ -1,18 +1,18 @@
 import { postSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
-import { Link } from "@/shared/ui/link";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
+import { Link } from "@/shared/ui/link";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-import * as m from "@rezics/i18n/messages";
 
 const KIND_CHIP_LABEL = {
   REVIEW: m.search_category_reviews,

@@ -1,10 +1,10 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { ShelfCard } from "../components/ShelfCard";

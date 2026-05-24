@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { type ContentDoc, type PostExtra } from "@rezics/contract";
+import type { ContentDoc, PostExtra } from "@rezics/contract";
 import { PostKind, UnitType } from "../generated/client.js";
 import { generatePostExtra, generateTranslations } from "./generators";
 

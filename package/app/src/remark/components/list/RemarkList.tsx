@@ -1,10 +1,10 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
-import { EmptyState } from "@rezics/ui";
-import { useMemo } from "react";
-import type React from "react";
-import { RemarkCard } from "../item/RemarkCard";
 import * as m from "@rezics/i18n/messages";
+import { EmptyState } from "@rezics/ui";
+import type React from "react";
+import { useMemo } from "react";
+import { RemarkCard } from "../item/RemarkCard";
 
 const SPACING_CLASS_BY_NUMBER: Record<number, string> = {
   0: "gap-0",

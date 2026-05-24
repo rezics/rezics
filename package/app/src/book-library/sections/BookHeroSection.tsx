@@ -2,19 +2,19 @@ import { postQueries } from "@rezics/api/post/post";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
 import { mainMarkdownSource, PostKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { Link, unitHref } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
+import { Link, unitHref } from "@/shared/ui/link";
 import {
   type EntityTranslation,
   getBookCoverUrl,
   getEntityTranslationsByRole,
   getTranslation,
 } from "@/shared/utils/translation-helpers";
-
 import { useBookLanguage } from "../hooks/useBookLanguage";
 import { BookHeroActionBar } from "./BookHeroActionBar";
 import { BookHeroCountLinks } from "./BookHeroCountLinks";
@@ -22,7 +22,6 @@ import { BookHeroFeaturedReview } from "./BookHeroFeaturedReview";
 import { BookHeroScoreBlock } from "./BookHeroScoreBlock";
 import { BookHeroStatCards, type BookHeroStatKey } from "./BookHeroStatCards";
 import { BookYourScoreBlock } from "./BookYourScoreBlock";
-import * as m from "@rezics/i18n/messages";
 
 type Book = BookDTO;
 

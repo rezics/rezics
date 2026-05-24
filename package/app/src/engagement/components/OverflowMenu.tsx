@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -12,7 +13,6 @@ import {
   Share2,
 } from "lucide-react";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 import type { Action, EngagementSize } from "../types";
 
 export type OverflowMenuProps = {

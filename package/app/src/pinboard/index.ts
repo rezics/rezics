@@ -5,20 +5,17 @@
  * `states/`, and internal `components/` are considered private.
  */
 
-export { PinboardEntryCard } from "./components/PinboardEntryCard";
 export type {
   PinboardEntryCardProps,
   PinboardEntryCardVariant,
 } from "./components/PinboardEntryCard";
-
-export { AnnouncementFeedSection } from "./sections/AnnouncementFeedSection";
+export { PinboardEntryCard } from "./components/PinboardEntryCard";
 export type {
   AnnouncementFeedSectionProps,
   PinboardAnnouncementItem,
 } from "./sections/AnnouncementFeedSection";
-
-export { PinboardAdminSection } from "./sections/PinboardAdminSection";
+export { AnnouncementFeedSection } from "./sections/AnnouncementFeedSection";
 export type { PinboardAdminSectionProps } from "./sections/PinboardAdminSection";
-
-export { PinnedFeedSection } from "./sections/PinnedFeedSection";
+export { PinboardAdminSection } from "./sections/PinboardAdminSection";
 export type { PinnedFeedSectionProps } from "./sections/PinnedFeedSection";
+export { PinnedFeedSection } from "./sections/PinnedFeedSection";

@@ -2,10 +2,10 @@ export * from "./admin";
 export * from "./oauth";
 export * from "./password";
 export {
-  type AuthReadinessStatus,
   type AuthAccountState,
-  authReadinessStatusSchema,
+  type AuthReadinessStatus,
   authAccountStateSchema,
+  authReadinessStatusSchema,
   type PendingRegistrationState,
   type PendingRegistrationStep,
   pendingRegistrationStateSchema,

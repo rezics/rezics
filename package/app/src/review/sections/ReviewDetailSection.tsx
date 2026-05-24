@@ -1,8 +1,8 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
+import * as m from "@rezics/i18n/messages";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
-import { TextLink } from "@/shared/ui/link";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useRef } from "react";
@@ -13,8 +13,8 @@ import {
   type ReplyComposerHandle,
 } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
+import { TextLink } from "@/shared/ui/link";
 import { ReviewDetail } from "../components/detail/ReviewDetail";
-import * as m from "@rezics/i18n/messages";
 
 interface ReviewDetailSectionProps {
   reviewId: string;

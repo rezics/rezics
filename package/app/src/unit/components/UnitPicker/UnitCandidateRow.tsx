@@ -1,9 +1,9 @@
 import type { UnitDTO } from "@rezics/contract";
-import type { ReactNode } from "react";
 import * as m from "@rezics/i18n/messages";
-import { UnitCard } from "../UnitCard";
-import { candidateToUnitCardSummary } from "../../models/unitCardSummary";
+import type { ReactNode } from "react";
 import type { Candidate } from "../../models/types";
+import { candidateToUnitCardSummary } from "../../models/unitCardSummary";
+import { UnitCard } from "../UnitCard";
 
 interface UnitCandidateRowProps {
   candidate: Candidate;

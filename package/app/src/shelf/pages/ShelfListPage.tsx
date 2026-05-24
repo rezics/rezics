@@ -1,9 +1,9 @@
 import { shelfInfiniteListQuery } from "@rezics/api/shelf";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import * as m from "@rezics/i18n/messages";
 import { ShelfCard } from "../components/ShelfCard";
 
 export function ShelfListPage() {

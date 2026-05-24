@@ -1,9 +1,9 @@
-import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import type { TagRef } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { useTagSuggest } from "../../hooks/useTagSuggest";
 
 export type TagPickerProps = {

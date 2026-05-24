@@ -1,8 +1,8 @@
+import { mainMarkdownSource } from "@rezics/contract";
 import type {
   TranslationGroupSibling,
   TranslationGroupSiblingDTO,
 } from "./translation-group.types";
-import { mainMarkdownSource } from "@rezics/contract";
 
 const SNIPPET_MAX = 140;
 

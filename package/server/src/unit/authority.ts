@@ -1,10 +1,10 @@
 import {
   isExternallyGoverned,
+  type LockPath,
   lockPathIntersectsPatchPath,
+  type RezicsSessionClaims,
   UNIT_FIELD_LOCK_ALL,
   UnitAuthorityRoleKey,
-  type LockPath,
-  type RezicsSessionClaims,
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { isAdminRole, verifyAdminFromDb } from "@/middleware";

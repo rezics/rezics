@@ -1,10 +1,10 @@
 import { entityDetailQueryOptions, useEntity } from "@rezics/api/entity";
 import { useServerPermission } from "@rezics/api/hooks";
 import { BasicAdminPermission } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { EntityHero } from "../components/EntityHero";
 import { useEntityWorks } from "../hooks/useEntityWorks";
 import { getEntityLanguages, getEntityTranslation } from "../models/types";

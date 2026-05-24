@@ -1,5 +1,5 @@
-import { Skeleton } from "@rezics/ui/shadcn";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
+import { Skeleton } from "@rezics/ui/shadcn";
 import type React from "react";
 import { usePinboardList } from "../hooks/usePinboard";
 import type { PinboardEntryView } from "../models/types";

@@ -1,7 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { BookContentStructureItem } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { Link } from "@/shared/ui/link";
 import {
   Button,
   Tooltip,
@@ -20,6 +20,7 @@ import React, {
 } from "react";
 import { useChapterListStore } from "@/book-library/states/chapterListStore";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { Link } from "@/shared/ui/link";
 import {
   type BookContentStructureOccurrence,
   EMPTY_CHAPTER_ROUTE_ID,
@@ -31,7 +32,6 @@ import {
   ContentChapterVirtualTree,
   type ContentChapterVirtualTreeHandle,
 } from "./ContentChapterVirtualTree";
-import * as m from "@rezics/i18n/messages";
 
 export type BookTocTreeHandle = {
   expandAll: () => void;

@@ -1,12 +1,12 @@
+import { describe, expect, test } from "bun:test";
 import type { UnitTranslationDTO } from "@rezics/contract";
 import { QueryClient } from "@tanstack/react-query";
-import { describe, expect, test } from "bun:test";
 import { bookKeys } from "../book/book.keys";
+import { unitKeys } from "./unit.keys";
 import {
   syncDeleteTranslationMutationCache,
   syncUpsertTranslationMutationCache,
 } from "./unit.mutations";
-import { unitKeys } from "./unit.keys";
 
 describe("unit translation mutation cache sync", () => {
   test("patches affected domain detail caches before caller success work", async () => {

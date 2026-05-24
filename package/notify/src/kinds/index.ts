@@ -5,10 +5,10 @@ import {
   type SupportedLocale,
 } from "./locale";
 import {
+  type KindRender,
   renderApproved,
   renderPending,
   renderRejected,
-  type KindRender,
 } from "./work-link-claim";
 
 export type { SupportedLocale } from "./locale";

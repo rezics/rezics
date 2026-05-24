@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
-import { Editor } from "../react/Editor";
-import { markdownFull } from "../markdown/index";
 import { jsonFull } from "../json/index";
+import { markdownFull } from "../markdown/index";
+import { Editor } from "../react/Editor";
 
 const meta = {
   title: "Editor/CodeMirror",

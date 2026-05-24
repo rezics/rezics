@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
-import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { prisma } from "#/prisma/client";
+import { requireSlugScopeId } from "@/infra/slug-scopes";
 
 export const userBatchApi = new Elysia().get(
   "/batch",

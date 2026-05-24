@@ -1,8 +1,8 @@
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { scoreQueries } from "@rezics/api/score/score";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface ScoreOverviewProps {
   unitId: string;

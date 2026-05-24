@@ -5,13 +5,19 @@ export {
 export { UnitAddPicker, UnitSearchSelect } from "./components/UnitAddPicker";
 export { UnitCard, type UnitCardProps } from "./components/UnitCard";
 export {
-  UnitTranslationLanguageBar,
-  type UnitTranslationLanguageBarProps,
-} from "./components/UnitTranslationLanguageBar";
-export {
   UnitPicker,
   type UnitPickerProps,
 } from "./components/UnitPicker/UnitPicker";
+export {
+  UnitTranslationLanguageBar,
+  type UnitTranslationLanguageBarProps,
+} from "./components/UnitTranslationLanguageBar";
+export { useUnitCandidates } from "./hooks/useUnitCandidates";
+export type {
+  Candidate,
+  CandidateKind,
+  IdentifierType,
+} from "./models/types";
 export type {
   UnitCardAuthor,
   UnitCardSummary,
@@ -25,9 +31,3 @@ export {
   shelfUnitToUnitCardSummary,
   unitDtoToUnitCardSummary,
 } from "./models/unitCardSummary";
-export { useUnitCandidates } from "./hooks/useUnitCandidates";
-export type {
-  Candidate,
-  CandidateKind,
-  IdentifierType,
-} from "./models/types";

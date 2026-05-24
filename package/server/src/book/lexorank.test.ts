@@ -62,7 +62,7 @@ describe("lexorank", () => {
   });
 
   test("repeated insert-between-same-pair grows the key length (documented pathology)", () => {
-    let a = "a";
+    const a = "a";
     let b = "b";
     let prevLen = 1;
     let lastMid = a;

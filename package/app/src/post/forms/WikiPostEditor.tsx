@@ -8,10 +8,10 @@ import {
   markdownContentDoc,
   type PostDTO,
 } from "@rezics/contract";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import * as m from "@rezics/i18n/messages";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 
 export interface WikiPostEditorProps {
   targetUnitId?: string;

@@ -1,4 +1,5 @@
 import { authApi } from "@rezics/api/auth/auth.api";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -13,7 +14,6 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 type EmailTemplate = {
   name: string;

@@ -1,7 +1,7 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import { markdownContentDoc } from "@rezics/contract";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import * as m from "@rezics/i18n/messages";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +11,9 @@ import {
   Label,
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useUserProfileStore } from "@/user/states";
 import type { Chapter } from "./ChapterArborist";
-import * as m from "@rezics/i18n/messages";
 
 interface CreateChapterDialogProps {
   open: boolean;

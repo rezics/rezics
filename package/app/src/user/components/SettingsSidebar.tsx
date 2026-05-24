@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   CircleUser as AccountCircleIcon,
@@ -9,7 +10,6 @@ import {
   SlidersHorizontal as TuneIcon,
 } from "lucide-react";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
 
 const SETTINGS_NAV = [
   { label: m.settings_nav_profile, path: "profile", icon: AccountCircleIcon },

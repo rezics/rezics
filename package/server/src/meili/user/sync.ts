@@ -1,5 +1,5 @@
-import { patchUserFields } from "@rezics/search";
 import { mainMarkdownSource } from "@rezics/contract";
+import { patchUserFields } from "@rezics/search";
 import { prisma } from "#/prisma/client";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { searchClient } from "../search-client";

@@ -6,8 +6,8 @@ import {
   markdownContentDoc,
   validateSlug,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
-import { Link } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,
@@ -20,15 +20,15 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import {
-  ArrowLeft as ArrowBackIcon,
   Plus as AddIcon,
+  ArrowLeft as ArrowBackIcon,
   Save as SaveIcon,
   Trash2 as TrashIcon,
 } from "lucide-react";
 import React from "react";
 import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/entities/$unitId";
-import * as m from "@rezics/i18n/messages";
+import { Link } from "@/shared/ui/link";
 
 interface TranslationDraft {
   _draftId: string;

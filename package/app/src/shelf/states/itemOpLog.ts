@@ -109,7 +109,6 @@ export function coalesce(log: ItemOpLog): ItemOpLog {
         continue;
       }
       kept.push(entry);
-      continue;
     }
   }
 

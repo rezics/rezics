@@ -8,8 +8,8 @@ export {
 export {
   myProgressListQuery,
   progressQueries,
-  unitProgressStatsQuery,
   unitProgressQuery,
+  unitProgressStatsQuery,
   useMyProgressList,
   useUnitProgress,
   useUnitProgressStats,

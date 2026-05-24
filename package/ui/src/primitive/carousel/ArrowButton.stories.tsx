@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-
-import { ArrowButton } from "./ArrowButton";
 import {
   ChevronLeft as KeyboardArrowLeftIcon,
   ChevronRight as KeyboardArrowRightIcon,
 } from "lucide-react";
+import { ArrowButton } from "./ArrowButton";
 
 const meta = {
   title: "Primitive/Carousel/ArrowButton",

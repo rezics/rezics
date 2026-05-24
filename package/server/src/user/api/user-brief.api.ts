@@ -5,8 +5,8 @@ import {
   userParamsSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
-import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { prisma } from "#/prisma/client";
+import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { notFound } from "@/utils/errors";
 
 const briefSelect = {

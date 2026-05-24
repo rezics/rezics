@@ -1,3 +1,21 @@
+import { patchTranslationDetailQueries } from "@rezics/api/react-query/cache-coherence";
+import {
+  useAppendRealmExtraMutation,
+  useRemoveRealmExtraMutation,
+} from "@rezics/api/realm/realm-extra.mutations";
+import { unitApi } from "@rezics/api/unit/unit";
+import { unitKeys } from "@rezics/api/unit/unit.keys";
+import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
+import {
+  contentDocMarkdownFallback,
+  DEFAULT_LANGUAGE,
+  type Language,
+  markdownContentDoc,
+  normalizeLanguage,
+  type RealmExtraListKey,
+} from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
 import {
   Button,
   Dialog,
@@ -10,24 +28,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rezics/ui/shadcn";
-import {
-  useAppendRealmExtraMutation,
-  useRemoveRealmExtraMutation,
-} from "@rezics/api/realm/realm-extra.mutations";
-import { patchTranslationDetailQueries } from "@rezics/api/react-query/cache-coherence";
-import { unitApi } from "@rezics/api/unit/unit";
-import { unitKeys } from "@rezics/api/unit/unit.keys";
-import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
-import {
-  contentDocMarkdownFallback,
-  DEFAULT_LANGUAGE,
-  type Language,
-  markdownContentDoc,
-  normalizeLanguage,
-  type RealmExtraListKey,
-} from "@rezics/contract";
-import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus as AddRoundedIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PinboardEmptyState } from "../components/PinboardEmptyState";
@@ -37,8 +39,6 @@ import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { StaleIdsBanner } from "../components/StaleIdsBanner";
 import { usePinboardList } from "../hooks/usePinboard";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
-import { Plus as AddRoundedIcon } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
 
 export interface PinboardAdminSectionProps {
   realmUnitId: string;

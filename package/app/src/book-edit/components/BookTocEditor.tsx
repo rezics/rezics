@@ -35,7 +35,6 @@ import {
   findAndRemove,
 } from "@/shared/utils/arborist-tree";
 import { serializeBookToc } from "../models/bookTocSerializer";
-import { BulkRatingDialog } from "./BulkRatingDialog";
 import { BookTocContextMenu } from "./BookTocContextMenu";
 import {
   createBookTocEditorNode,
@@ -43,6 +42,7 @@ import {
   mockWordCount,
 } from "./BookTocEditorNode";
 import { BookTocEditorToolbar } from "./BookTocEditorToolbar";
+import { BulkRatingDialog } from "./BulkRatingDialog";
 import { CreateChapterDialog } from "./CreateChapterDialog";
 import { EditChapterDialog } from "./EditChapterDialog";
 import { MoveToParentDialog } from "./MoveToParentDialog";

@@ -1,7 +1,7 @@
 import {
+  type AnyJobCommand,
   parseJobCommand,
   safeParseJobCommand,
-  type AnyJobCommand,
 } from "@rezics/job";
 import { Elysia } from "elysia";
 import { isAuthorized } from "../auth";

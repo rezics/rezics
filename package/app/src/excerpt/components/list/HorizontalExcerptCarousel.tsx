@@ -1,8 +1,8 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { UnitDTO } from "@rezics/contract";
-import { useMemo } from "react";
-import type * as React from "react";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
+import type * as React from "react";
+import { useMemo } from "react";
 import ExcerptCard from "../item/ExcerptCard";
 
 export interface HorizontalExcerptCarouselProps {

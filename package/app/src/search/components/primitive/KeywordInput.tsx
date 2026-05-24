@@ -1,10 +1,10 @@
-import { Button, Input, Label } from "@rezics/ui/shadcn";
 import type { SearchQuery } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import type { QueryMiddleware } from "../../hooks/useSearchQuery";
-import * as m from "@rezics/i18n/messages";
 
 export type KeywordInputProps = {
   value: string;

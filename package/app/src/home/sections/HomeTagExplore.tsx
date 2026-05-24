@@ -1,13 +1,13 @@
-import { Badge } from "@rezics/ui/shadcn";
-import { Spinner } from "@rezics/ui";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
-import { Link } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
+import { useLocale } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
-import { useLocale } from "@rezics/i18n/react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import * as m from "@rezics/i18n/messages";
+import { Link } from "@/shared/ui/link";
 
 export type HomeTagExploreProps = {
   title?: string;

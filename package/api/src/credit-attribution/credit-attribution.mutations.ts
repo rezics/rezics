@@ -3,15 +3,15 @@ import type {
   CreditAttributionRole,
   LinkCreditAttributionInput,
 } from "@rezics/contract";
-import { entityKeys } from "../entity/entity.keys";
 import {
   type UseMutationOptions,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { bookKeys } from "../book/book.keys";
+import { entityKeys } from "../entity/entity.keys";
 import { creditAttributionApi } from "./credit-attribution.api";
 import { creditAttributionKeys } from "./credit-attribution.keys";
-import { bookKeys } from "../book/book.keys";
 
 export function useLinkCreditAttributionMutation(
   options?: Omit<

@@ -3,8 +3,8 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
 } from "@rezics/contract";
-import { UnitStatus, UnitType, UnitVisibility } from "../generated/client.js";
 import { generateBetween } from "../../src/shelf/fractional-index";
+import { UnitStatus, UnitType, UnitVisibility } from "../generated/client.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 import { pickN, unitTypeToShelfKind } from "./utils.js";

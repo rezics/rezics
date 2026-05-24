@@ -1,6 +1,5 @@
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import * as m from "@rezics/i18n/messages";
-import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,
@@ -10,6 +9,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
 export function NewBookByUrl() {
   const [url, setUrl] = useState("");

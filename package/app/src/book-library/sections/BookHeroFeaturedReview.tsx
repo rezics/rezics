@@ -1,7 +1,7 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource, type PostDTO, PostKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
-import { Link } from "@/shared/ui/link";
 import {
   Avatar,
   AvatarFallback,
@@ -10,7 +10,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
+import { Link } from "@/shared/ui/link";
 
 interface BookHeroFeaturedReviewProps {
   bookId: string;

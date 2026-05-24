@@ -1,7 +1,7 @@
 import {
+  type AnyJobCommand,
   createSearchCommand,
   SEARCH_COMMAND_KINDS,
-  type AnyJobCommand,
   type SearchCommand,
 } from "@rezics/job";
 import {
@@ -19,21 +19,24 @@ import {
   patchPostFields,
   patchPostsTargetSegment,
   patchRealmAliases,
-  patchRealmMemberCountFromDb,
   patchRealmMemberCount,
+  patchRealmMemberCountFromDb,
   patchRealmMetadata,
   patchRealmTranslations,
   patchUserFields,
   removeProgress,
+  type SearchClient,
+  type SearchSegmentOptions,
+  type SearchSegmentResult,
   syncContentSegment,
   syncEntitySegment,
   syncFeedbackSegment,
-  syncPostSegment,
   syncPostRealmIdsSegment,
   syncPostRootTargetsSegment,
+  syncPostSegment,
+  syncPostsByAuthorSegment,
   syncProgressSegment,
   syncRealmSegment,
-  syncPostsByAuthorSegment,
   syncSingleContent,
   syncSingleEntity,
   syncSingleFeedback,
@@ -42,14 +45,11 @@ import {
   syncSingleRealm,
   syncSingleUser,
   syncUserSegment,
-  type SearchClient,
-  type SearchSegmentOptions,
-  type SearchSegmentResult,
 } from "@rezics/search";
 import {
   DEFAULT_FANOUT_SEGMENT_LIMIT,
-  nextFanoutPayload,
   type FanoutPayload,
+  nextFanoutPayload,
 } from "../../fanout";
 import type { HandlerContext, JobHandler } from "../../worker";
 import { withHandlerMetadata } from "./util";

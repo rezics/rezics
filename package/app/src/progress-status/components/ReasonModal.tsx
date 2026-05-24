@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Checkbox,
@@ -15,13 +16,12 @@ import {
 } from "@rezics/ui/shadcn";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { ReasonStatus } from "../models/extra";
 import {
   type ReasonPost,
   useReasonPostHistory,
 } from "../hooks/useReasonPostHistory";
 import type { ReasonPostVisibility } from "../hooks/useReasonPostMutations";
-import * as m from "@rezics/i18n/messages";
+import type { ReasonStatus } from "../models/extra";
 
 type ReasonModalProps = {
   open: boolean;

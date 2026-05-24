@@ -1,10 +1,10 @@
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RemarkList } from "../components/list/RemarkList";
-import * as m from "@rezics/i18n/messages";
 
 interface RemarkListSectionProps {
   targetUnitId: string;

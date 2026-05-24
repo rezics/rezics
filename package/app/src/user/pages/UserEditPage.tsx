@@ -6,8 +6,9 @@ import {
   type UpdateUser,
   type UserDTO,
 } from "@rezics/contract";
-import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
+import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import {
   Avatar,
   AvatarFallback,
@@ -27,7 +28,6 @@ import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 import { UserLoading } from "./UserState";
-import * as m from "@rezics/i18n/messages";
 
 export interface UserEditPageProps {
   onCancel?: () => void;

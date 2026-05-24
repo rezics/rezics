@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { randomInt } from "../random/index.ts";
 
-export { getFaker, LANG_DISTRIBUTION } from "./locale.ts";
 export {
   getDescriptionPool,
   getSummaryPool,
@@ -9,6 +8,7 @@ export {
   type TextPool,
   type UnitTextType,
 } from "./corpus/index.ts";
+export { getFaker, LANG_DISTRIBUTION } from "./locale.ts";
 
 /** Title-cased title with `[minWords, maxWords]` random words from `faker.lorem`. */
 export function generateTitle(minWords = 3, maxWords = 7): string {

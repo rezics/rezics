@@ -4,9 +4,19 @@
  * through attach/detach/vote endpoints.
  */
 
+// Helpers
+export {
+  generateKeyBetween,
+  POSITION_ALPHABET,
+  positionForNewBottomPin,
+  positionForNewTopPin,
+} from "./fractional-index";
+export {
+  sortRealmTagsByPinThenScore,
+  sortTagsByPinThenScore,
+} from "./sort";
 // API client
 export { tagApi } from "./tag.api";
-
 // Keys
 export { tagKeys } from "./tag.keys";
 // Mutations
@@ -22,7 +32,6 @@ export {
   usePatchUnitTagMutation,
   useUpdateTagMutation,
 } from "./tag.mutations";
-
 // Queries
 export {
   lowScoreTagsQuery,
@@ -35,18 +44,6 @@ export {
   tagSearchQuery,
   tagsForUnitQuery,
 } from "./tag.queries";
-
-// Helpers
-export {
-  generateKeyBetween,
-  POSITION_ALPHABET,
-  positionForNewBottomPin,
-  positionForNewTopPin,
-} from "./fractional-index";
-export {
-  sortRealmTagsByPinThenScore,
-  sortTagsByPinThenScore,
-} from "./sort";
 
 // Types
 export type {

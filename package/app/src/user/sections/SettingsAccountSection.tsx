@@ -5,6 +5,7 @@ import {
   useVerifyEmailContractMutation,
 } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -25,7 +26,6 @@ import { type FC, useState } from "react";
 import { DangerZone } from "@/user/components/DangerZone";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
-import * as m from "@rezics/i18n/messages";
 
 export const SettingsAccountSection: FC = () => {
   useRequireAuth();

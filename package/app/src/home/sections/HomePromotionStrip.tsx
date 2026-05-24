@@ -1,5 +1,5 @@
-import type React from "react";
 import * as m from "@rezics/i18n/messages";
+import type React from "react";
 
 export type HomePromotionStripProps = {
   items?: { text: string; href?: string }[];

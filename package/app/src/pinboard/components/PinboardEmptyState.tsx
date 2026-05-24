@@ -1,7 +1,7 @@
-import { EmptyState } from "@rezics/ui";
-import type React from "react";
-import { Pin as PushPinRoundedIcon } from "lucide-react";
 import * as m from "@rezics/i18n/messages";
+import { EmptyState } from "@rezics/ui";
+import { Pin as PushPinRoundedIcon } from "lucide-react";
+import type React from "react";
 
 interface PinboardEmptyStateProps {
   title?: string;

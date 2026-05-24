@@ -1,5 +1,5 @@
-import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
+import * as React from "react";
 
 import { ThemeDemo } from "@/preference/sections/ThemeDemo.tsx";
 

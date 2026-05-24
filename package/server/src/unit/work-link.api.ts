@@ -1,4 +1,4 @@
-import { workLinkBodySchema, type WorkLinkResponse } from "@rezics/contract";
+import { type WorkLinkResponse, workLinkBodySchema } from "@rezics/contract";
 import { Elysia, status, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { applyWorkLink, WorkLinkError } from "./work-link.service";

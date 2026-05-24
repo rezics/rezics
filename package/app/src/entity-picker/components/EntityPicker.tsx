@@ -2,12 +2,13 @@ import { useEntitySearch } from "@rezics/api/entity";
 import {
   type CreditAttributionRole,
   creditAttributionRoleRegistry,
-  type EntityKind,
   type EntityDTO,
+  type EntityKind,
   type SubjectAttributionRole,
   subjectAttributionRoleRegistry,
 } from "@rezics/contract";
 import { creditRoleLabel, subjectRoleLabel } from "@rezics/i18n";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -30,7 +31,6 @@ import { useMemo, useState } from "react";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { EntityInlineCreateForm } from "./EntityInlineCreateForm";
 import { EntityResultRow } from "./EntityResultRow";
-import * as m from "@rezics/i18n/messages";
 
 const ALL_CREDIT_ROLES = "all";
 const ALL_SUBJECT_ROLES = "all";

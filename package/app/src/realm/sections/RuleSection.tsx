@@ -1,10 +1,10 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { RealmRuleDialog } from "./RealmRuleDialog";
 
 export interface RuleSectionProps {

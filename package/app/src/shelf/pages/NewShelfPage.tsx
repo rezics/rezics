@@ -1,9 +1,9 @@
 import { useCreateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
 import { DEFAULT_LANGUAGE, markdownContentDoc } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 
 export function NewShelfPage() {

@@ -17,6 +17,6 @@ export {
 } from "./react-query/errors";
 export * from "./subject-attribution/subject-attribution";
 export * from "./subscription/subscription";
-export * from "./unit-alias-record/unit-alias";
 export * from "./unit/unit";
+export * from "./unit-alias-record/unit-alias";
 export { zoneApi, zoneKeys, zoneQueries, zoneQueryOptions } from "./zone/zone";

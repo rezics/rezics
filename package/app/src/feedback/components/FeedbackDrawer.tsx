@@ -1,13 +1,13 @@
+import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
+import * as m from "@rezics/i18n/messages";
 import {
+  Separator,
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  Separator,
 } from "@rezics/ui/shadcn";
-import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 import FeedbackForm from "./FeedbackForm";
 
 type FeedbackDrawerProps = {

@@ -1,3 +1,9 @@
+export type {
+  LinkSubjectAttributionInput,
+  SubjectAttributionBySubjectQuery,
+  SubjectAttributionByUnitQuery,
+  SubjectAttributionDTO,
+} from "@rezics/contract";
 export { subjectAttributionApi } from "./subject-attribution.api";
 export { subjectAttributionKeys } from "./subject-attribution.keys";
 export {
@@ -10,9 +16,3 @@ export {
   subjectAttributionsBySubjectQueryOptions,
   subjectAttributionsByUnitQueryOptions,
 } from "./subject-attribution.queries";
-export type {
-  LinkSubjectAttributionInput,
-  SubjectAttributionBySubjectQuery,
-  SubjectAttributionByUnitQuery,
-  SubjectAttributionDTO,
-} from "@rezics/contract";

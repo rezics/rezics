@@ -13,9 +13,9 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import {
+  X as CloseIcon,
   Palette as PaletteIcon,
   RefreshCw as RefreshIcon,
-  X as CloseIcon,
 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";

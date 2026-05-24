@@ -21,8 +21,8 @@ export {
   bookMutations,
   useCreateBookMutation,
   useDeleteBookMutation,
-  useUpdateContentStructureMutation,
   useUpdateBookMutation,
+  useUpdateContentStructureMutation,
 } from "./book.mutations";
 
 // Query Configurations
@@ -41,8 +41,8 @@ export {
 } from "./book.queries";
 // Types
 export type {
-  BookDTO,
   BookContentStructureResponse,
+  BookDTO,
   BookFilters,
   BookFormData,
   BookListResponse,

@@ -1,9 +1,9 @@
 import { SCORE_MAX } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Input, Label } from "@rezics/ui/shadcn";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 
 export type ReviewEditState = {
   unitId: string;

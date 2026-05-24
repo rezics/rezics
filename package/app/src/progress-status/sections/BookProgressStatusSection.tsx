@@ -1,8 +1,9 @@
 import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { useLocale } from "@rezics/i18n/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
-import { useLocale } from "@rezics/i18n/react";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
 import { BacklogRemoveConfirmModal } from "../components/BacklogRemoveConfirmModal";
 import { CompletedConfirmModal } from "../components/CompletedConfirmModal";
@@ -26,7 +27,6 @@ import {
   openStatusModalAtom,
   statusModalAtom,
 } from "../states/statusModalAtom";
-import * as m from "@rezics/i18n/messages";
 
 export type BookProgressStatusSectionProps = {
   bookUnitId: string;

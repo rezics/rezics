@@ -1,8 +1,8 @@
+import * as m from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
-import type React from "react";
 import { CircleAlert as ErrorOutlineRoundedIcon } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
+import type React from "react";
 
 interface PinboardErrorStateProps {
   message?: string;

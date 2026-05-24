@@ -1,4 +1,9 @@
 import {
+  subjectAttributionQueries,
+  useLinkSubjectAttributionMutation,
+  useUnlinkSubjectAttributionMutation,
+} from "@rezics/api/subject-attribution/subject-attribution";
+import {
   type RemoveUnitCollaboratorVariables,
   type RemoveUnitFieldLockVariables,
   type UnitDTO,
@@ -11,20 +16,14 @@ import {
   useUpsertUnitFieldLockMutation,
 } from "@rezics/api/unit/unit";
 import {
-  subjectAttributionQueries,
-  useLinkSubjectAttributionMutation,
-  useUnlinkSubjectAttributionMutation,
-} from "@rezics/api/subject-attribution/subject-attribution";
-import {
+  subjectAttributionRoles,
   UNIT_FIELD_LOCK_ALL,
   UnitAuthorityRoleKey,
   type UnitAuthorityRoleKey as UnitAuthorityRoleKeyType,
-  subjectAttributionRoles,
 } from "@rezics/contract";
 import { entityKindLabel, subjectRoleLabel } from "@rezics/i18n";
-
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
-import { Link } from "@/shared/ui/link";
 import {
   Alert,
   AlertDescription,
@@ -36,17 +35,16 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
-
-import { Page } from "@/core/layouts/Page";
-import { Route } from "@/routes/_admin/unit/$unitId";
-import * as m from "@rezics/i18n/messages";
 import {
   ArrowLeft as ArrowBackIcon,
   Plus as PlusIcon,
   Save as SaveIcon,
   Trash2 as TrashIcon,
 } from "lucide-react";
+import React from "react";
+import { Page } from "@/core/layouts/Page";
+import { Route } from "@/routes/_admin/unit/$unitId";
+import { Link } from "@/shared/ui/link";
 
 const lockPathOptions = [
   UNIT_FIELD_LOCK_ALL,

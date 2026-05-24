@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -15,8 +16,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { readStatusLabel, type ReadStatus } from "../models/status";
-import * as m from "@rezics/i18n/messages";
+import { type ReadStatus, readStatusLabel } from "../models/status";
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");

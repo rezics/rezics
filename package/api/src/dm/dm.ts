@@ -8,7 +8,6 @@ export {
   useConversations,
   useMessages,
 } from "./dm.queries";
-export { useDmStream } from "./use-dm-stream";
 export type {
   DmConversation,
   DmConversationListResponse,
@@ -17,3 +16,4 @@ export type {
   DmSendBody,
   DmStreamEvent,
 } from "./dm.types";
+export { useDmStream } from "./use-dm-stream";

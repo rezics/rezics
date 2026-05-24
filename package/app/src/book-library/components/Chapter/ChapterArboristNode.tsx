@@ -1,9 +1,9 @@
-import { Link } from "@/shared/ui/link";
 import {
   ChevronDown as KeyboardArrowDownIcon,
   ChevronRight as KeyboardArrowRightIcon,
 } from "lucide-react";
 import type { NodeRendererProps } from "react-arborist";
+import { Link } from "@/shared/ui/link";
 import {
   EMPTY_CHAPTER_ROUTE_ID,
   encodeBookContentStructurePath,

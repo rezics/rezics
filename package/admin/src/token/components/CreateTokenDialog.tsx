@@ -1,4 +1,5 @@
 import type { CreateApiTokenInput } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -13,7 +14,6 @@ import {
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { ScopesEditor } from "./ScopesEditor";
 
 interface CreateTokenDialogProps {

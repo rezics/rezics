@@ -1,5 +1,5 @@
-import { getPackageDir } from "./paths";
 import type { PrismaPackage } from "./packages";
+import { getPackageDir } from "./paths";
 
 export type StepResult = "ok" | "fail";
 

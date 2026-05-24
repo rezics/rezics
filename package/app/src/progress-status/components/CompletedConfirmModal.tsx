@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -8,7 +9,6 @@ import {
   DialogTitle,
 } from "@rezics/ui/shadcn";
 import { useEffect, useRef, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 type CompletedConfirmModalProps = {
   open: boolean;

@@ -5,6 +5,7 @@ import type {
   SearchQuery,
   SearchScope,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { useMemo } from "react";
 import {
   AdvancedSearch,
@@ -14,7 +15,6 @@ import {
 import { useInjectedTags } from "../hooks/useInjectedTags";
 import { useSearchQuery } from "../hooks/useSearchQuery";
 import { parseSearchString } from "../models/searchQuery";
-import * as m from "@rezics/i18n/messages";
 
 export { isSearchCategory } from "../models/category";
 

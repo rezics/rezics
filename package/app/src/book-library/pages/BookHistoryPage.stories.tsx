@@ -1,12 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-
-import { compareRevisionSlots } from "../models/historyCompare";
-import {
-  AuthorityPanel,
-  CompareChange,
-  RevisionTimeline,
-  StructureTimeline,
-} from "./BookHistoryPage";
 import { withRouter } from "@/stories/decorators/withRouter";
 import {
   historyActors,
@@ -18,6 +10,13 @@ import {
   historyRevisions,
   historyStructureEvents,
 } from "@/stories/fixtures/history";
+import { compareRevisionSlots } from "../models/historyCompare";
+import {
+  AuthorityPanel,
+  CompareChange,
+  RevisionTimeline,
+  StructureTimeline,
+} from "./BookHistoryPage";
 
 const meta = {
   title: "Domain/Book/History",

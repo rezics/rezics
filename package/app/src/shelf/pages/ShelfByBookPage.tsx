@@ -1,8 +1,8 @@
 import { shelfInfiniteListQuery } from "@rezics/api/shelf";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import * as m from "@rezics/i18n/messages";
 import { ShelfCard } from "../components/ShelfCard";
 
 interface ShelfByBookPageProps {

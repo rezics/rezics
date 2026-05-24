@@ -1,12 +1,12 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import {
-  contentDocMarkdownFallback,
   type ContentSearchDocument,
+  contentDocMarkdownFallback,
 } from "@rezics/contract";
-import { Link } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
+import { Link } from "@/shared/ui/link";
 import { DescriptionBox } from "@/user/components/DescriptionBox";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 

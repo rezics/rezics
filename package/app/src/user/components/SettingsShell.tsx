@@ -1,6 +1,6 @@
+import * as m from "@rezics/i18n/messages";
 import { Outlet } from "@tanstack/react-router";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
 import { SettingsSidebar } from "./SettingsSidebar";
 import { SettingsTabBar } from "./SettingsTabBar";
 

@@ -1,10 +1,10 @@
 import {
+  type AnyJobCommand,
   JOB_LANE_VALUES,
   parseJobCommand,
-  type AnyJobCommand,
 } from "@rezics/job";
-import type { WorkerQueueLike } from "./queue/types";
 import { enqueueCommand } from "./queue/enqueue";
+import type { WorkerQueueLike } from "./queue/types";
 
 export interface HandlerContext {
   enqueue(command: AnyJobCommand): Promise<unknown>;

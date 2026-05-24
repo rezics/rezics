@@ -1,6 +1,6 @@
 import {
-  markdownContentDoc,
   type Language,
+  markdownContentDoc,
   type ZoneFilters,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";

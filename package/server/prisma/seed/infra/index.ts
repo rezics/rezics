@@ -5,16 +5,16 @@ import {
   type RealmTaxonomySeedResult,
   seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
+import { type SlugScopesMap, seedSlugScopes } from "./seed-slug-scopes";
 import { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
-import { seedSlugScopes, type SlugScopesMap } from "./seed-slug-scopes";
 
 export { seedDefaultRealm } from "./seed-default-realm";
 export {
   type RealmTaxonomySeedResult,
   seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
+export { type SlugScopesMap, seedSlugScopes } from "./seed-slug-scopes";
 export { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
-export { seedSlugScopes, type SlugScopesMap } from "./seed-slug-scopes";
 
 export interface SeedInfraResult {
   slugScopes: SlugScopesMap;

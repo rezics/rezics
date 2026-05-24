@@ -1,12 +1,12 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { scoreQueries } from "@rezics/api/score/score";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
 import type React from "react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-
 import { BookDetailShell } from "../sections/BookDetailSection";
 import { BookHeroSection } from "../sections/BookHeroSection";
 import {
@@ -14,7 +14,6 @@ import {
   setBookDetailAtomFamily,
 } from "../states/bookDetailAtoms";
 import { BookDetailLayoutContext } from "./bookDetailLayoutContext";
-import * as m from "@rezics/i18n/messages";
 
 /**
  * Book Detail Layout

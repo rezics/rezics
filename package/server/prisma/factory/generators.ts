@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { LANGUAGES, markdownContentDoc, type Language } from "@rezics/contract";
+import { LANGUAGES, type Language, markdownContentDoc } from "@rezics/contract";
 import {
   generateParagraph,
   getDescriptionPool,

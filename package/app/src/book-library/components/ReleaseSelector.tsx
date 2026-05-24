@@ -1,5 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Badge,
   Select,
@@ -12,7 +13,6 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-import * as m from "@rezics/i18n/messages";
 
 export type ReleaseOption = {
   unitId: string;

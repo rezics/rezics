@@ -1,8 +1,8 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource, type RealmBannerExtra } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 export interface BannerSectionProps {
   banner?: RealmBannerExtra | null;

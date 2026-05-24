@@ -1,14 +1,15 @@
 import { t } from "elysia";
-import { entityDTOSchema, entityKindKeySchema } from "./entity";
+import { entityDTOSchema, type entityKindKeySchema } from "./entity";
 import {
-  subjectAttributionRoleKeySchema,
   type SubjectAttributionRole,
+  subjectAttributionRoleKeySchema,
 } from "./subject-attribution.roles";
 import { unitDTOSchema } from "./unit";
+
 export {
+  type SubjectAttributionRole,
   subjectAttributionRoleKeySchema,
   subjectAttributionRoles,
-  type SubjectAttributionRole,
 } from "./subject-attribution.roles";
 
 // ============================================================

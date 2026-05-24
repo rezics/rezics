@@ -1,9 +1,9 @@
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
-import { unitHref } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
+import { unitHref } from "@/shared/ui/link";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
 interface RealmCardProps {

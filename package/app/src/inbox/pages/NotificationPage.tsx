@@ -1,14 +1,14 @@
-import type React from "react";
 import {
-  useMarkAsReadMutation,
   useMarkAllAsReadMutation,
+  useMarkAsReadMutation,
   useNotifications,
 } from "@rezics/api/notification";
-import { Button } from "@rezics/ui/shadcn";
-import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import * as m from "@rezics/i18n/messages";
-import { NotificationCard } from "../components/NotificationCard.tsx";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { Button } from "@rezics/ui/shadcn";
+import type React from "react";
 import { InboxTabBar } from "../components/InboxTabBar.tsx";
+import { NotificationCard } from "../components/NotificationCard.tsx";
 
 export const NotificationPage: React.FC = () => {
   const { data, isLoading, isError } = useNotifications(1, 50);

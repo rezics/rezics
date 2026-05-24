@@ -1,5 +1,5 @@
-import type { ShelfUnitDTO } from "@rezics/contract";
 import { describe, expect, test } from "bun:test";
+import type { ShelfUnitDTO } from "@rezics/contract";
 import { titleOf } from "./titleOf";
 
 function makeUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {

@@ -1,6 +1,6 @@
 import {
-  DEFAULT_PUBLICATION_LICENSE_SLUG,
   SYSTEM_SHELF_KIND_KEYS as CONTRACT_SYSTEM_SHELF_KIND_KEYS,
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
   formatSystemShelfTitle,
   type SystemShelfKindKey,
 } from "@rezics/contract";

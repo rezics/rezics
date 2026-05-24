@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { Button, Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
@@ -9,7 +10,6 @@ import {
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
 import { useHomeBooks } from "./hooks/hooks";
-import * as m from "@rezics/i18n/messages";
 
 type TabKey = "latest" | "new" | "completed";
 

@@ -1,17 +1,17 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
-import { TextLink } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import {
   ThumbsDown as ThumbDownIcon,
   ThumbsUp as ThumbUpIcon,
 } from "lucide-react";
-import { useMemo } from "react";
 import type React from "react";
+import { useMemo } from "react";
 import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
+import { TextLink } from "@/shared/ui/link";
 import { remarkDetailActions, remarkPolicy } from "../../models/remarkPolicy";
-import * as m from "@rezics/i18n/messages";
 
 interface RemarkDetailProps {
   remark: PostDTO;

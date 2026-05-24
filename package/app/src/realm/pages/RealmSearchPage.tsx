@@ -4,8 +4,8 @@ import {
   type RealmDTO,
   type RealmSearchDocument,
 } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
 import * as m from "@rezics/i18n/messages";
+import { Spinner } from "@rezics/ui";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { RealmCard } from "../components/RealmCard";

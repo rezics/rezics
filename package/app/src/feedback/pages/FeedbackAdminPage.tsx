@@ -1,3 +1,5 @@
+import { feedbackListQuery } from "@rezics/api/feedback/feedback.queries";
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Input,
@@ -8,10 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { feedbackListQuery } from "@rezics/api/feedback/feedback.queries";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
-import * as m from "@rezics/i18n/messages";
 import FeedbackDrawer from "../components/FeedbackDrawer";
 import FeedbackList from "../components/FeedbackList";
 

@@ -1,8 +1,8 @@
 import type { BookDTO, LicenseSlug } from "@rezics/contract";
 import { licenseLabel } from "@rezics/i18n";
+import * as m from "@rezics/i18n/messages";
 import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 export type MetadataPanelProps = {
   bookInfo: BookDTO;

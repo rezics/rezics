@@ -1,10 +1,10 @@
 import { realmQueries } from "@rezics/api/realm/realm.queries";
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
-import { Link, unitHref } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import * as m from "@rezics/i18n/messages";
+import { Link, unitHref } from "@/shared/ui/link";
 import {
   type ChipDefinition,
   InnerFilterPanel,

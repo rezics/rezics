@@ -1,7 +1,7 @@
-import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import type { UnitTagDTO } from "@rezics/contract";
-import { TextLink, unitHref } from "@/shared/ui/link";
+import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import type React from "react";
+import { TextLink, unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 
 export const TagCard: React.FC<{

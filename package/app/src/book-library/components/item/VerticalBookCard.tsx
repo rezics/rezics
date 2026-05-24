@@ -1,5 +1,5 @@
-import { Link } from "@/shared/ui/link";
 import type React from "react";
+import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util.ts";
 
 export type BookProps = {

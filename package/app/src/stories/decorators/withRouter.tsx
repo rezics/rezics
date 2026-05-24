@@ -1,10 +1,10 @@
+import type { Decorator } from "@storybook/react-vite";
 import {
   createMemoryHistory,
   createRootRoute,
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import type { Decorator } from "@storybook/react-vite";
 import { useMemo } from "react";
 
 // MOCK: Storybook-only router decorator. Wraps each story in a minimal

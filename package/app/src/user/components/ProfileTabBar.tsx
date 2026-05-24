@@ -1,8 +1,8 @@
-import { unitHref } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
+import { unitHref } from "@/shared/ui/link";
 
 const PROFILE_TABS = [
   { label: m.profile_tab_overview, path: "" },

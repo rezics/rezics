@@ -18,6 +18,7 @@ import {
 import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
 import { useHydratedShelfUnits } from "@rezics/api/shelf";
 import type { ShelfDTO, ShelfUnitKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Checkbox,
@@ -31,7 +32,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Eye, ListChecks, Pencil } from "lucide-react";
 import { useEffect, useId, useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import {
   type Candidate,
   shelfUnitToUnitCardSummary,

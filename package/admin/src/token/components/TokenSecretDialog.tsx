@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -10,7 +11,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Copy as ContentCopyIcon } from "lucide-react";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface TokenSecretDialogProps {
   open: boolean;

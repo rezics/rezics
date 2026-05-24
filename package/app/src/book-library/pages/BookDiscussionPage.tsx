@@ -1,4 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
+import * as m from "@rezics/i18n/messages";
 import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -8,7 +9,6 @@ import { useMemo } from "react";
 import { PostListSection, ReplyComposer } from "@/post";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
-import * as m from "@rezics/i18n/messages";
 
 const CommunitySidebar: React.FC = () => (
   <div className="bg-surface-elevated p-4 border border-border-whisper rounded-md">

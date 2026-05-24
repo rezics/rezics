@@ -1,7 +1,7 @@
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { logout } from "@/user/models/handler";
-import * as m from "@rezics/i18n/messages";
 
 export function PendingVerificationSection() {
   const handleLogout = async () => {

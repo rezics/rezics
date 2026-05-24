@@ -4,6 +4,7 @@ import {
   realmDetailQuery,
 } from "@rezics/api/realm/realm";
 import { contentDocMarkdownFallback, type TagTreeNode } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -20,7 +21,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Settings } from "lucide-react";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { PinnedFeedSection } from "@/pinboard";
 import { ReplyComposer } from "@/post";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -33,8 +33,8 @@ import { canManageRealm } from "../models/canManageRealm";
 import { AboutSection } from "../sections/AboutSection";
 import { BannerSection } from "../sections/BannerSection";
 import {
-  RealmFeedSortSwitcher,
   type RealmFeedSort,
+  RealmFeedSortSwitcher,
 } from "../sections/RealmFeedSortSwitcher";
 import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
 import { RuleSection } from "../sections/RuleSection";

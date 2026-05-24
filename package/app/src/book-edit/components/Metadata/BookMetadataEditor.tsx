@@ -1,9 +1,10 @@
 import type { BookDTO, ContentRating, LicenseSlug } from "@rezics/contract";
 import {
-  LICENSE_SLUGS,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
+  LICENSE_SLUGS,
 } from "@rezics/contract";
 import { licenseLabel } from "@rezics/i18n";
+import * as m from "@rezics/i18n/messages";
 import { RatingSelector } from "@rezics/ui";
 import {
   Checkbox,
@@ -20,7 +21,6 @@ import {
 import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
 import { BookCreditAttributionEditor } from "./BookCreditAttributionEditor";
-import * as m from "@rezics/i18n/messages";
 
 function TooltipIconTrigger(props: Record<string, unknown>) {
   const { ref: _ref, ...triggerProps } = props;

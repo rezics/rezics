@@ -3,10 +3,10 @@ import {
   type ShelfDTO,
   shelfCoverImageSpec,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 

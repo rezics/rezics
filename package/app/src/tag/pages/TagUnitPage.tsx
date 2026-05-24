@@ -1,8 +1,8 @@
 import { tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
-import * as m from "@rezics/i18n/messages";
 import { Route as tagUnitRoute } from "@/routes/_mainLayout/tag/$unitId";
 import { TagDetailCard } from "../components/TagCards";
 

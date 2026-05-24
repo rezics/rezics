@@ -4,9 +4,9 @@
  */
 
 import type {
+  ChapterListResponse,
   ChapterMaterializationRequest,
   ChapterMaterializationResponse,
-  ChapterListResponse,
   ChapterResponse,
   CreateChapterInput,
   UpdateChapterInput,

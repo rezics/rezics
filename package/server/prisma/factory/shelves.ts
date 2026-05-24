@@ -4,9 +4,9 @@ import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   withCoverUrl,
 } from "@rezics/contract";
+import { generateBetween } from "../../src/shelf/fractional-index";
 import type { Prisma } from "../generated/client.js";
 import { UnitStatus, UnitType } from "../generated/client.js";
-import { generateBetween } from "../../src/shelf/fractional-index";
 import { getRandomShelfCover, SHELF_KIND_KEYS } from "./data.js";
 import { generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";

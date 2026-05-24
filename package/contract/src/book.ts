@@ -1,7 +1,7 @@
 import { t } from "elysia";
-import { creditAttributionBriefSchema } from "./credit-attribution";
 import { creationModeSchema } from "./content-authority";
 import { contentDocWriteSchema } from "./content-doc";
+import { creditAttributionBriefSchema } from "./credit-attribution";
 import { languageSchema } from "./language";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";

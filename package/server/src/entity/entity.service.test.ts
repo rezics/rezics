@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { collectEditorialPatchLeafPaths } from "@rezics/contract";
-import { mapActualTranslationPatchPaths } from "@/unit/collaborative-metadata";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import { mapActualTranslationPatchPaths } from "@/unit/collaborative-metadata";
 
 installPrismaClientMock();
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { buildTree, FALLBACK_TEXT } from "../_stubs";
 import { Folio } from "../Folio";
-import { FALLBACK_TEXT, buildTree } from "../_stubs";
 
 const meta = {
   title: "Folio/Reader",

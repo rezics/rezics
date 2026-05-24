@@ -1,12 +1,13 @@
+import { SafeLink, type SafeLinkProps } from "@rezics/ui";
 import { createLink, Link as RouterLink } from "@tanstack/react-router";
 import clsx from "clsx";
 import * as React from "react";
-import { SafeLink, type SafeLinkProps } from "@rezics/ui";
+
 export {
-  unitHref,
-  useUnitHref,
   type SlugBearingTopType,
   type UnitHrefInput,
+  unitHref,
+  useUnitHref,
 } from "@rezics/ui/primitive/link";
 
 export const Link = RouterLink;

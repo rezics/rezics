@@ -1,5 +1,5 @@
-import type { BookContentStructureItem } from "@rezics/contract";
 import { bookQueries } from "@rezics/api/book/book.queries";
+import type { BookContentStructureItem } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 

@@ -12,6 +12,7 @@ import type {
   UnitLastPosition,
   UserUnitProgressStatus,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import {
@@ -19,7 +20,6 @@ import {
   planTransition,
   type ShelfOp,
 } from "../models/transition";
-import * as m from "@rezics/i18n/messages";
 
 export type StatusTransitionPayload = {
   to: UserUnitProgressStatus;

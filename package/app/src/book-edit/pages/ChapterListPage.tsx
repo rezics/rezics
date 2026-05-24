@@ -11,9 +11,9 @@ import { withBookContentStructureOccurrences } from "@/book-library/models/bookC
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
 import {
-  type Chapter,
   BookTocEditor,
   type BookTocEditorHandle,
+  type Chapter,
 } from "../components/BookTocEditor";
 
 export const BookEditChapterListPage: React.FC = () => {

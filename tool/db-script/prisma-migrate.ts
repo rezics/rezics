@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts";
 import type { PrismaPackage } from "./packages";
-import { askOnFailure, pickPackages } from "./prompts";
 import { runPrisma, type StepResult } from "./prisma-runner";
+import { askOnFailure, pickPackages } from "./prompts";
 
 async function processPackage(
   pkg: PrismaPackage,

@@ -1,20 +1,20 @@
 import { shelfQueries } from "@rezics/api/shelf/shelf.queries";
 import {
-  SYSTEM_SHELF_KIND_KEYS,
   type ShelfDTO,
+  SYSTEM_SHELF_KIND_KEYS,
   type SystemShelfKindKey,
 } from "@rezics/contract";
-import { Link } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
+import { Link } from "@/shared/ui/link";
+import { systemShelfKindLabel } from "@/shelf/models/systemShelfLabel";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
   type ChipDefinition,
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-import { systemShelfKindLabel } from "@/shelf/models/systemShelfLabel";
 
 function isSystemKindKey(
   kindKey: string | null | undefined,

@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 import {
+  type ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "./chart";
 
 const data = [

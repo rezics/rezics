@@ -1,11 +1,11 @@
 import { Separator } from "@rezics/ui/shadcn";
-import { TextLink } from "@/shared/ui/link";
-import { cn } from "@/shared/utils/css-util";
-import type { NavigationItem } from "./navigation";
 import {
   ChevronUp as ExpandLess,
   ChevronDown as ExpandMore,
 } from "lucide-react";
+import { TextLink } from "@/shared/ui/link";
+import { cn } from "@/shared/utils/css-util";
+import type { NavigationItem } from "./navigation";
 
 interface NavigationListProps {
   NAVIGATION: NavigationItem[];

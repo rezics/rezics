@@ -1,4 +1,5 @@
 import { realmListQuery } from "@rezics/api/realm/realm";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import { buttonVariants } from "@rezics/ui/shadcn";
@@ -7,7 +8,6 @@ import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RealmCard } from "@/realm/components/RealmCard";
-import * as m from "@rezics/i18n/messages";
 
 export const ActiveRealmsSection: React.FC = () => {
   const { data, isLoading, error } = useQuery(

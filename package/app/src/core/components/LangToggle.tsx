@@ -1,10 +1,10 @@
+import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
-import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
 import React from "react";
 import { setRezicsLocale } from "@/app/locale";
 

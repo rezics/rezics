@@ -1,14 +1,14 @@
-import { buttonVariants } from "@rezics/ui/shadcn";
-import { Spinner } from "@rezics/ui";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Spinner } from "@rezics/ui";
+import { buttonVariants } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
-import * as m from "@rezics/i18n/messages";
 
 export type TrendingShelfSectionProps = {
   title?: string;

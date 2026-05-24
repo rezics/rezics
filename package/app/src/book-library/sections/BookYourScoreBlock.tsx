@@ -6,6 +6,7 @@ import {
   useUpsertScoreMutation,
 } from "@rezics/api/score/score";
 import { SCORE_MAX } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
 import {
   Button,
@@ -23,7 +24,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface BookYourScoreBlockProps {
   bookUnitId: string;

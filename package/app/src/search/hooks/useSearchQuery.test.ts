@@ -1,5 +1,5 @@
-import type { SearchQuery } from "@rezics/contract";
 import { describe, expect, it } from "bun:test";
+import type { SearchQuery } from "@rezics/contract";
 import {
   buildSearchParams,
   mergeAppend,

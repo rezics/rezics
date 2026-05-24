@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  resolveRecipients,
   type BroadcastEvent,
+  resolveRecipients,
 } from "./notify-boundary.client";
 
 /**

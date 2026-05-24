@@ -1,6 +1,6 @@
+import * as m from "@rezics/i18n/messages";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 const defaultBrands = [
   "https://dummyimage.com/100x40/cccccc/000&text=Brand+A",

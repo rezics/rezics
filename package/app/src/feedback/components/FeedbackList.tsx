@@ -1,4 +1,15 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
+import { useSetFeedbackResolvedMutation } from "@rezics/api/feedback/feedback.mutations";
+import type {
+  FeedbackDTO,
+  FeedbackType,
+} from "@rezics/api/feedback/feedback.types";
+import { buildMeiliFeedbackQuery } from "@rezics/api/meili/meili.queries";
+import * as m from "@rezics/i18n/messages";
+import {
+  UniversalPaginator,
+  type UniversalPaginatorHandle,
+} from "@rezics/ui/composite/pagination/Pagination.tsx";
 import {
   Badge,
   Button,
@@ -8,33 +19,20 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { useSetFeedbackResolvedMutation } from "@rezics/api/feedback/feedback.mutations";
-import type {
-  FeedbackDTO,
-  FeedbackType,
-} from "@rezics/api/feedback/feedback.types";
-import * as m from "@rezics/i18n/messages";
-import { buildMeiliFeedbackQuery } from "@rezics/api/meili/meili.queries";
-import {
-  UniversalPaginator,
-  type UniversalPaginatorHandle,
-} from "@rezics/ui/composite/pagination/Pagination.tsx";
-import { AppSafeLink as SafeLink } from "@/shared/ui/link";
-import { Link } from "@/shared/ui/link";
-
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@rezics/ui/shadcn/popover.tsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
 import {
   CircleCheck as CheckCircleOutlineIcon,
   Check as DoneIcon,
   Hourglass as HourglassEmptyIcon,
 } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link, AppSafeLink as SafeLink } from "@/shared/ui/link";
 
 export type FeedbackResolvedFilter = boolean | undefined;
 

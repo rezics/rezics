@@ -1,14 +1,14 @@
 import type {
   LinkSubjectAttributionInput,
-  SubjectAttributionRole,
   SubjectAttributionDTO,
+  SubjectAttributionRole,
 } from "@rezics/contract";
-import { entityKeys } from "../entity/entity.keys";
 import {
   type UseMutationOptions,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { entityKeys } from "../entity/entity.keys";
 import { subjectAttributionApi } from "./subject-attribution.api";
 import { subjectAttributionKeys } from "./subject-attribution.keys";
 

@@ -16,14 +16,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button } from "@rezics/ui/shadcn";
 import { useReorderRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
+import * as m from "@rezics/i18n/messages";
+import { Button } from "@rezics/ui/shadcn";
+import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 import { PinboardEntryCard } from "./PinboardEntryCard";
-import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
 
 interface SortableRowProps {
   entry: PinboardEntryView;

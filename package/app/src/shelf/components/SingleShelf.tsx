@@ -1,10 +1,10 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentDocMarkdownFallback, type ShelfDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
 interface SingleShelfProps {

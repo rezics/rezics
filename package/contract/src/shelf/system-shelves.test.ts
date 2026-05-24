@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { SYSTEM_SHELF_KIND_KEYS } from "../progress";
-import { SYSTEM_SHELF_LABELS, formatSystemShelfTitle } from "./system-shelves";
+import { formatSystemShelfTitle, SYSTEM_SHELF_LABELS } from "./system-shelves";
 
 describe("SYSTEM_SHELF_LABELS", () => {
   test("has an English label for every system kindKey", () => {

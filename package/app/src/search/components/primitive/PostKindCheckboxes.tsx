@@ -1,5 +1,5 @@
-import { Checkbox } from "@rezics/ui/shadcn";
 import { PostKind } from "@rezics/contract";
+import { Checkbox } from "@rezics/ui/shadcn";
 import type React from "react";
 
 const POST_KIND_OPTIONS = Object.values(PostKind);

@@ -1,9 +1,9 @@
 import { useEntityList } from "@rezics/api/entity";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
-import { unitHref } from "@/shared/ui/link";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
-import * as m from "@rezics/i18n/messages";
+import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
 import { EntityIdentityRow } from "../components/EntityIdentityRow";
 

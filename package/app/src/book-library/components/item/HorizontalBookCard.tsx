@@ -1,5 +1,5 @@
-import { Link } from "@/shared/ui/link";
 import type React from "react";
+import { Link } from "@/shared/ui/link";
 
 export type HorizontalBookProps = {
   title: string;

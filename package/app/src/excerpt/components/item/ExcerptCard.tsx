@@ -1,22 +1,22 @@
 import {
+  contentDocMarkdownFallback,
+  type ExcerptSource,
+  type UnitDTO,
+} from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   Card,
   CardContent,
 } from "@rezics/ui/shadcn";
-import {
-  contentDocMarkdownFallback,
-  type ExcerptSource,
-  type UnitDTO,
-} from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
+import { Quote as FormatQuoteRoundedIcon } from "lucide-react";
 import type React from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { cn } from "@/shared/utils/css-util";
 import { excerptCardActions, excerptPolicy } from "../../models/excerptPolicy";
-import { Quote as FormatQuoteRoundedIcon } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
 
 export interface ExcerptCardProps {
   excerpt: UnitDTO;

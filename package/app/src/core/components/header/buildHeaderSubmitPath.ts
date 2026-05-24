@@ -1,5 +1,5 @@
-import { buildSearchPath } from "@/search/utils/searchQuery";
 import { resolveScope } from "@/search/models/scope";
+import { buildSearchPath } from "@/search/utils/searchQuery";
 
 // Sibling of `unitHref` for the search URL surface: produces `/u/<slug>/search`
 // when scope is a slug route and `/user/<unitId>/search` otherwise, matching

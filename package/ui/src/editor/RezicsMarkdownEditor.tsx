@@ -1,4 +1,3 @@
-import { Button } from "#/shadcn/button";
 import type {
   MarkdownEditorProps,
   ResizeConfig,
@@ -10,6 +9,7 @@ import { insertImageUrl } from "@rezics/editor/markdown";
 import { Paperclip, Smile } from "lucide-react";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { Button } from "#/shadcn/button";
 import { ImageModal } from "./image/ImageModal";
 import type { ImageProvider } from "./image/types";
 import { EditorPanel } from "./panel/EditorPanel";

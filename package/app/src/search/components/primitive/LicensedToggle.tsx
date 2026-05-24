@@ -1,7 +1,7 @@
+import * as m from "@rezics/i18n/messages";
 import { Checkbox } from "@rezics/ui/shadcn";
 import type React from "react";
 import { IsLicensedInfo } from "@/book-edit/components/Metadata/BookMetadataEditor";
-import * as m from "@rezics/i18n/messages";
 
 export type LicensedToggleProps = {
   value: boolean | undefined;

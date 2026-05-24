@@ -1,8 +1,8 @@
-import { DropdownMenuItem } from "@rezics/ui/shadcn";
 import * as m from "@rezics/i18n/messages";
+import { DropdownMenuItem } from "@rezics/ui/shadcn";
+import { Moon as Brightness4Icon, Sun as Brightness7Icon } from "lucide-react";
 import { useMemo } from "react";
 import { useAppStore } from "@/app/states/appStore";
-import { Moon as Brightness4Icon, Sun as Brightness7Icon } from "lucide-react";
 
 export function ThemeToggler() {
   const themeMode = useAppStore((state) => state.theme);

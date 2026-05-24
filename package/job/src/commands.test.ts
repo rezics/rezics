@@ -6,9 +6,9 @@ import {
   createMaintenanceCommand,
   createSearchCommand,
   HISTORY_COMMAND_KINDS,
-  jobTags,
   JOB_LANES,
   JobCommandSchema,
+  jobTags,
   MAINTENANCE_COMMAND_KINDS,
   SEARCH_COMMAND_KINDS,
 } from ".";

@@ -1,9 +1,9 @@
-import { unitHref } from "@/shared/ui/link";
-import { Badge } from "@rezics/ui/shadcn";
 import type { UnitTagDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useState } from "react";
-import * as m from "@rezics/i18n/messages";
+import { unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { TagDetailCard } from "./TagCards";
 

@@ -1,8 +1,8 @@
-import {
-  UnitAuthorityRoleKey,
-  type RezicsSessionClaims,
-} from "@rezics/contract";
 import { describe, expect, test } from "bun:test";
+import {
+  type RezicsSessionClaims,
+  UnitAuthorityRoleKey,
+} from "@rezics/contract";
 import { AppError } from "@/utils/errors";
 import {
   applySparsePatch,

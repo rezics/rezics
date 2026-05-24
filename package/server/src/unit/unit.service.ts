@@ -13,19 +13,19 @@ import {
   type UnitType,
   type UnitVisibility,
 } from "#/prisma/client";
-import { pickSlugScope } from "@/infra/slug-scopes";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { pickSlugScope } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";
 import { cleanupReactions } from "@/reaction-boundary/reaction-boundary.client";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
-import type { UnitWithRelations } from "./types";
 import {
   assertLicenseSlug,
   publicUnitEligibilityWhere,
 } from "./publication-policy";
+import type { UnitWithRelations } from "./types";
 import { unitInclude } from "./types";
 
 type MaybeInclude = Prisma.UnitInclude | undefined;

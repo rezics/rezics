@@ -24,15 +24,6 @@ export {
   useGivenReactionsInfinite,
   useReceivedReactionsInfinite,
 } from "./reaction.queries";
-export {
-  useReactionData,
-  type UseReactionDataReturn,
-} from "./useReactionData";
-export {
-  useReactionHydration,
-  type UseReactionHydrationOptions,
-  type UseReactionHydrationReturn,
-} from "./useReactionHydration";
 // Types
 export type {
   ReactionCreateInput,
@@ -47,3 +38,12 @@ export type {
   ReactionMyResponse,
   ReactionSummaryResponse,
 } from "./reaction.types";
+export {
+  type UseReactionDataReturn,
+  useReactionData,
+} from "./useReactionData";
+export {
+  type UseReactionHydrationOptions,
+  type UseReactionHydrationReturn,
+  useReactionHydration,
+} from "./useReactionHydration";

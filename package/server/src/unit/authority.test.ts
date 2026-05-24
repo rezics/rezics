@@ -1,12 +1,12 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
-  UnitAuthorityRoleKey,
   type RezicsSessionClaims,
+  UnitAuthorityRoleKey,
 } from "@rezics/contract";
 import {
   assertCanEditUnitFields,
   canEditUnitFields,
-  UnitAuthorityError,
+  type UnitAuthorityError,
 } from "./authority";
 
 function actor(

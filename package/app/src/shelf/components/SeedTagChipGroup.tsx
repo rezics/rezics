@@ -4,9 +4,9 @@ import {
   SEED_TAG_TITLES,
   type SeedTagName,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Badge } from "@rezics/ui/shadcn";
 import { useMemo } from "react";
-import * as m from "@rezics/i18n/messages";
 
 export interface SeedTagChipGroupProps {
   value: string[];

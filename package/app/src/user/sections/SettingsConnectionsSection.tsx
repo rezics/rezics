@@ -1,11 +1,11 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
 import type { AuthProvider } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { ProviderCard } from "@/user/components/ProviderCard";
 import { providerIcons } from "@/user/components/providerIcons";
 import { SettingsSection } from "@/user/components/SettingsSection";

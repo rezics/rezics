@@ -4,8 +4,8 @@ import {
   JOB_LANE_VALUES,
   SEARCH_COMMAND_KINDS,
 } from "@rezics/job";
-import { registerWorkers } from "./worker";
 import type { WorkerQueueLike } from "./queue/types";
+import { registerWorkers } from "./worker";
 
 describe("worker dispatch", () => {
   test("registers a worker for every lane and dispatches by command kind", async () => {

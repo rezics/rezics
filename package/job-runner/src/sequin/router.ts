@@ -1,9 +1,9 @@
 import {
+  type AnyJobCommand,
+  type CommandSource,
   createHistoryOutboxIngestCommand,
   createSearchCommand,
   SEARCH_COMMAND_KINDS,
-  type AnyJobCommand,
-  type CommandSource,
 } from "@rezics/job";
 import type { SequinMessage } from "./types";
 

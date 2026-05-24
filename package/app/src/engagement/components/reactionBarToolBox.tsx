@@ -1,13 +1,13 @@
-import { Button, Dialog, DialogContent, DialogFooter } from "@rezics/ui/shadcn";
+import * as m from "@rezics/i18n/messages";
 import {
   FacebookIcon,
   InstagramIcon,
   TelegramIcon,
   XIcon,
 } from "@rezics/icons";
+import { Button, Dialog, DialogContent, DialogFooter } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 export type ReactionBarToolBoxProps = {
   open: boolean;

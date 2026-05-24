@@ -1,5 +1,6 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import {
@@ -35,7 +36,6 @@ import { OtpInput } from "../components/OtpInput";
 import { Layout } from "../layouts/Layout";
 import { logout } from "../models/handler";
 import { useAuth } from "./useAuth";
-import * as m from "@rezics/i18n/messages";
 
 function deriveSlugFromName(name: string): string {
   return name

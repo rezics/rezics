@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { BookOpen, Bookmark, Library, Search, Settings } from "lucide-react";
+import { Bookmark, BookOpen, Library, Search, Settings } from "lucide-react";
 
 import {
   Command,

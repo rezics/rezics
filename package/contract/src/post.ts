@@ -1,10 +1,10 @@
 import { t } from "elysia";
+import { creationModeSchema } from "./content-authority";
+import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema } from "./unit";
-import { creationModeSchema } from "./content-authority";
-import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 
 // ============================================================
 // POST KIND

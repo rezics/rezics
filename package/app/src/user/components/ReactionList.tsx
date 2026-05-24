@@ -2,11 +2,11 @@ import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
 } from "@rezics/api/reaction/reaction.types";
+import * as m from "@rezics/i18n/messages";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { Sparkles } from "lucide-react";
 import { useEffect, useRef } from "react";
-import * as m from "@rezics/i18n/messages";
 import { ReactionHistoryItem } from "./ReactionHistoryItem";
 
 interface ReactionListGivenProps {

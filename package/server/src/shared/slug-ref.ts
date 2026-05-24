@@ -4,8 +4,8 @@ import {
   type SlugScopeName,
   type TagRef,
 } from "@rezics/contract";
-import { getSlugScopeId } from "@/infra/slug-scopes";
 import { prisma } from "#/prisma/client";
+import { getSlugScopeId } from "@/infra/slug-scopes";
 
 /**
  * Resolve a {@link SlugRef.scope} value to the `Unit.slugScope` UUID used in

@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Button } from "@rezics/ui/shadcn";
 import {
@@ -7,7 +8,6 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 /** Book extra data structure. */
 export type BookExtraData = {

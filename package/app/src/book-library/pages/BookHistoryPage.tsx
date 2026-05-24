@@ -10,6 +10,7 @@ import {
   type StructureEventDTO,
   type UnitRevisionDTO,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import {
   Link,
@@ -34,7 +35,6 @@ import {
   type DiffPart,
   type HistoryFieldChange,
 } from "../models/historyCompare";
-import * as m from "@rezics/i18n/messages";
 
 type HistoryTab = "editorial" | "structure" | "authority";
 

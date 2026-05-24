@@ -3,12 +3,12 @@ import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { markdownContentDoc, PostKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { ReviewForm, type ReviewEditState } from "@/review/forms/ReviewForm";
+import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 import { useUserProfileStore } from "@/user/states";
-import * as m from "@rezics/i18n/messages";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const search = useRouterState({ select: (s) => s.location.search ?? "" });

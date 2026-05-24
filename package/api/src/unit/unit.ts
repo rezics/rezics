@@ -11,25 +11,30 @@
  * - unit.ts: Main entry (this file) - unified exports
  */
 
-// API Client
-export { unitApi } from "./unit.api";
 export { unitAuthorityApi } from "./authority.api";
-
 // Query Keys
 export { unitAuthorityKeys } from "./authority.keys";
-export { unitKeys } from "./unit.keys";
 // Mutation Hooks
 export {
+  type RemoveUnitCollaboratorVariables,
+  type RemoveUnitFieldLockVariables,
+  type UpsertUnitCollaboratorVariables,
+  type UpsertUnitFieldLockVariables,
   unitAuthorityMutations,
   useRemoveUnitCollaboratorMutation,
   useRemoveUnitFieldLockMutation,
   useUpsertUnitCollaboratorMutation,
   useUpsertUnitFieldLockMutation,
-  type RemoveUnitCollaboratorVariables,
-  type RemoveUnitFieldLockVariables,
-  type UpsertUnitCollaboratorVariables,
-  type UpsertUnitFieldLockVariables,
 } from "./authority.mutations";
+// Query Configurations
+export {
+  unitAuthorityQueries,
+  unitCollaboratorsQueryOptions,
+  unitFieldLocksQueryOptions,
+} from "./authority.queries";
+// API Client
+export { unitApi } from "./unit.api";
+export { unitKeys } from "./unit.keys";
 export {
   unitMutations,
   useCreateUnitMutation,
@@ -38,13 +43,6 @@ export {
   useUpdateUnitMutation,
   useUpsertTranslationMutation,
 } from "./unit.mutations";
-
-// Query Configurations
-export {
-  unitAuthorityQueries,
-  unitCollaboratorsQueryOptions,
-  unitFieldLocksQueryOptions,
-} from "./authority.queries";
 export {
   unitBySlugQuery,
   unitDetailQuery,

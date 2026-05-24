@@ -17,9 +17,9 @@ import {
 } from "@rezics/contract";
 import { Elysia, status, t } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
-import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
 import { mapScoreAggregateToDTO } from "@/score/score.mapper";
 import { scoreService } from "@/score/score.service";
+import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import { unitService } from "@/unit/unit.service";
 import { bookService } from "./book.service";

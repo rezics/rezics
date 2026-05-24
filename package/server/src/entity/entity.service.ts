@@ -11,10 +11,9 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
-import { getSlugScopeId, requireSlugScopeId } from "@/infra/slug-scopes";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
+import { getSlugScopeId, requireSlugScopeId } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";
-import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
   hasOwn,
@@ -25,7 +24,8 @@ import {
   uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
-import { entityInclude, type EntityWithRelations } from "./entity.types";
+import { AppError } from "@/utils/errors";
+import { type EntityWithRelations, entityInclude } from "./entity.types";
 
 function enqueueEntitySearch(
   kind:

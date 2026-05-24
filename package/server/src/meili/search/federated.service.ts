@@ -10,6 +10,11 @@ import type {
   UserSearchDocument,
 } from "@rezics/contract";
 import type { SearchClient } from "@rezics/search";
+import {
+  DEFAULT_GROUPED_SECTION_LIMIT,
+  DEFAULT_PAGE_HITS_PER_PAGE,
+  federationWeights,
+} from "./federation.config";
 import type { FilterContext } from "./filters";
 import {
   buildContentFilter,
@@ -17,11 +22,6 @@ import {
   buildRealmFilter,
   buildUserFilter,
 } from "./filters";
-import {
-  DEFAULT_GROUPED_SECTION_LIMIT,
-  DEFAULT_PAGE_HITS_PER_PAGE,
-  federationWeights,
-} from "./federation.config";
 
 // ANCHOR: federatedSearch
 // Single entry point used by `POST /meili/search/federated`. Branches on the

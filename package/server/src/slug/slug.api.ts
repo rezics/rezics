@@ -4,8 +4,8 @@ import {
   slugResolveResponseSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { resolveScopeId } from "@/shared/slug-ref";
 import { prisma } from "#/prisma/client";
+import { resolveScopeId } from "@/shared/slug-ref";
 
 /**
  * Generic slug-to-unit resolution endpoint.

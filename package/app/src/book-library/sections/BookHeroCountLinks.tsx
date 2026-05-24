@@ -2,11 +2,11 @@ import { postQueries } from "@rezics/api/post/post";
 import { shelfQueries } from "@rezics/api/shelf/shelf";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { PostKind } from "@rezics/contract";
-import { Link } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { Link } from "@/shared/ui/link";
 import type { BookHeroStatKey } from "./BookHeroStatCards";
-import * as m from "@rezics/i18n/messages";
 
 interface BookHeroCountLinksProps {
   bookId: string;

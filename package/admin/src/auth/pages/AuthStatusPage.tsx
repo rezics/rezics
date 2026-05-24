@@ -3,6 +3,7 @@ import {
   hydrateAuthSessionState,
   useAuthSessionStore,
 } from "@rezics/api/states";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -19,8 +20,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Shield, ShieldUser } from "lucide-react";
 import { useState } from "react";
-
-import * as m from "@rezics/i18n/messages";
 import { Page } from "@/core/layouts/Page";
 import { adminLogout } from "@/user/models/handler";
 

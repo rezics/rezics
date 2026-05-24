@@ -1,16 +1,16 @@
 import {
-  userEmailVerificationConfirmBodySchema,
-  userEmailVerificationRequestBodySchema,
   type UserEmailVerificationResponse,
   type UserEmailVerificationState,
+  userEmailVerificationConfirmBodySchema,
+  userEmailVerificationRequestBodySchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
-import { authMacro } from "@/middleware";
 import {
   getUserEmailVerificationState,
   requestUserEmailVerification,
   verifyUserEmailContract,
 } from "@/email-verification/user-email-verification.service";
+import { authMacro } from "@/middleware";
 
 export const userEmailVerificationApi = new Elysia()
   .use(authMacro)

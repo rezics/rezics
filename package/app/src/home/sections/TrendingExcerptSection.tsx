@@ -1,11 +1,11 @@
-import { Button } from "@rezics/ui/shadcn";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalExcerptCarousel } from "@/excerpt/components/list/HorizontalExcerptCarousel";
 import { useHomeExcerpts } from "./hooks/hooks";
-import * as m from "@rezics/i18n/messages";
 
 export type TrendingExcerptSectionProps = {
   title?: string;

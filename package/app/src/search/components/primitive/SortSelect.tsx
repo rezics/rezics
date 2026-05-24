@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import {
   Label,
   Select,
@@ -6,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 
 export const SORT_OPTIONS = [

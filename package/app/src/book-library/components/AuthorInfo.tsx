@@ -1,14 +1,14 @@
 import { mainMarkdownSource, type PublicUser } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButtonFloatRight.tsx";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { unitHref } from "@/shared/ui/link";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { FollowButton } from "@/engagement/components/FollowButton.tsx";
+import { unitHref } from "@/shared/ui/link";
 import { useIsMobile } from "@/shared/utils/use-media-query.ts";
-import * as m from "@rezics/i18n/messages";
 
 // --------- Types ---------
 export type Author = PublicUser;

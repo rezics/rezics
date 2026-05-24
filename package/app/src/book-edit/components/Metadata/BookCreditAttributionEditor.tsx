@@ -5,6 +5,7 @@ import {
   creditAttributionRoles,
 } from "@rezics/contract";
 import { creditRoleLabel } from "@rezics/i18n";
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Save, Trash2 } from "lucide-react";
@@ -21,7 +22,6 @@ import {
   removeCreditAttribution,
 } from "@/entity";
 import { EntityPicker } from "@/entity-picker";
-import * as m from "@rezics/i18n/messages";
 
 interface BookCreditAttributionEditorProps {
   bookUnitId: string;

@@ -1,17 +1,17 @@
 import {
-  HistoryOutboxPayloadKind,
   collectEditorialPatchLeafPaths,
-  isExternallyGoverned,
+  HistoryOutboxPayloadKind,
   type HistoryRestoreSource,
+  isExternallyGoverned,
   type RezicsSessionClaims,
 } from "@rezics/contract";
-import { UnitAuthorityError, assertCanEditUnitFields } from "./authority";
+import { AppError } from "@/utils/errors";
+import { assertCanEditUnitFields, UnitAuthorityError } from "./authority";
 import {
   buildEditorialRevisionPayload,
   type HistoryOutboxWriter,
   writeSequencedHistoryOutbox,
 } from "./history-outbox";
-import { AppError } from "@/utils/errors";
 
 export type CollaborativeMetadataTx = HistoryOutboxWriter & {
   unit: {
@@ -212,7 +212,7 @@ export function hasOwn<T extends object>(
   input: T,
   key: PropertyKey,
 ): key is keyof T {
-  return Object.prototype.hasOwnProperty.call(input, key);
+  return Object.hasOwn(input, key);
 }
 
 export function sameJson(left: unknown, right: unknown): boolean {

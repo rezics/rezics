@@ -1,9 +1,9 @@
 import { t } from "elysia";
+import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import type { ContentRating } from "./unit";
-import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 
 // ============================================================
 // USER DTO (UserType removed — no AUTHOR/PRESS/PRODUCER)

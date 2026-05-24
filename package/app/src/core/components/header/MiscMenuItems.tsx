@@ -1,14 +1,14 @@
+import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   DropdownMenuItem,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@rezics/ui/shadcn";
-import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
-import { ThemeToggler } from "./ThemeToggler";
 import { Languages as LanguageIcon } from "lucide-react";
 import { setRezicsLocale } from "@/app/locale";
-import * as m from "@rezics/i18n/messages";
+import { ThemeToggler } from "./ThemeToggler";
 
 const LANGUAGE_OPTIONS = Object.values(LANGUAGES);
 

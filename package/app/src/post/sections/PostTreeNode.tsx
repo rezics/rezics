@@ -1,6 +1,7 @@
 import type { PostDTO } from "@rezics/contract";
-import { TextLink } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
+import { TextLink } from "@/shared/ui/link";
 import { PostReply } from "../components/item/PostReply";
 import { CollapseToggle } from "../components/parts/CollapseToggle";
 import { ThreadingHoverProvider } from "../components/parts/ThreadingContext";
@@ -14,7 +15,6 @@ import {
   RAIL_TOP_PX,
   TOGGLE_TOP_PX,
 } from "./postTreeLayout";
-import * as m from "@rezics/i18n/messages";
 
 export interface PostTreeNodeProps {
   node: PostTreeNodeModel;

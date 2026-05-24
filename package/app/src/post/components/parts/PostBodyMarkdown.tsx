@@ -1,8 +1,8 @@
 import { mainMarkdownSource } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { Collapsible } from "@rezics/ui/primitive/typography/collapsible/Collapsible.tsx";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface PostBodyMarkdownProps {
   content: unknown;

@@ -7,5 +7,5 @@ export {
   slugResolveQuery,
   userBySlugLookupQuery,
 } from "./slug.queries";
-export { useSystemShelfRef } from "./useSystemShelfRef";
 export type { UseSystemShelfRefResult } from "./useSystemShelfRef";
+export { useSystemShelfRef } from "./useSystemShelfRef";

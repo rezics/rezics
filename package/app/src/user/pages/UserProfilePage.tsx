@@ -1,6 +1,6 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import { Link } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import {
   Avatar,
   AvatarFallback,
@@ -14,10 +14,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditIcon } from "lucide-react";
 import type { FC } from "react";
 import FollowButton from "@/engagement/components/FollowButton";
+import { Link } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
 import { UserError, UserLoading } from "./UserState";
 import { UserUnitsPage } from "./UserUnitsPage";
-import * as m from "@rezics/i18n/messages";
 
 export interface UserProfilePageProps {
   userId: string;

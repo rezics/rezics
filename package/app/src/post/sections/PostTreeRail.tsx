@@ -1,3 +1,4 @@
+import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import type { PostTreeNodeModel } from "../models/postTreeRails";
 import {
@@ -10,7 +11,6 @@ import {
   TERMINAL_RAIL_HEIGHT_PX,
   THREAD_INDENT_PX,
 } from "./postTreeLayout";
-import * as m from "@rezics/i18n/messages";
 
 interface PostTreeRailProps {
   childrenNodes: PostTreeNodeModel[];

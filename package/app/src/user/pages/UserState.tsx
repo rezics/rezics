@@ -1,5 +1,5 @@
-import { Spinner } from "@rezics/ui";
 import * as m from "@rezics/i18n/messages";
+import { Spinner } from "@rezics/ui";
 import type { FC, ReactNode } from "react";
 
 export const UserLoading: FC<{ height?: number }> = ({ height = 256 }) => {

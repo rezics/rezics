@@ -1,10 +1,10 @@
-import { TextLink } from "@/shared/ui/link";
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
 import {
   Megaphone as CampaignRoundedIcon,
   Pin as PushPinRoundedIcon,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { TextLink } from "@/shared/ui/link";
 
 export interface Announcement {
   id: string;

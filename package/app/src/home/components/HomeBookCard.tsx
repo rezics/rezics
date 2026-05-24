@@ -1,13 +1,13 @@
-import { Card, CardContent } from "@rezics/ui/shadcn";
 import type { BookDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@/shared/ui/link";
 import {
   getBookAuthorName,
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
-import * as m from "@rezics/i18n/messages";
 
 const BookCard = ({
   book,

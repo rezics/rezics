@@ -1,7 +1,8 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
-import { Spinner } from "@rezics/ui";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Spinner } from "@rezics/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
@@ -11,7 +12,6 @@ import {
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
-import * as m from "@rezics/i18n/messages";
 
 type Book = BookDTO;
 

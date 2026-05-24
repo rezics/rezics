@@ -1,3 +1,6 @@
+import * as m from "@rezics/i18n/messages";
+import { GithubIcon, TelegramIcon } from "@rezics/icons";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import {
   Button,
   Input,
@@ -7,10 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { GithubIcon, TelegramIcon } from "@rezics/icons";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (

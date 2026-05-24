@@ -1,8 +1,8 @@
 import { useConversations } from "@rezics/api/dm/dm";
+import * as m from "@rezics/i18n/messages";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Link, useParams } from "@tanstack/react-router";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 import { ConversationThreadSection } from "../sections/ConversationThreadSection";
 
 export const DmConversationPage: React.FC = () => {

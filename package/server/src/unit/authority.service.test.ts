@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
-  UnitAuthorityRoleKey,
   type RezicsSessionClaims,
+  UnitAuthorityRoleKey,
 } from "@rezics/contract";
 import { AppError } from "@/utils/errors";
 import { UnitAuthorityService } from "./authority.service";

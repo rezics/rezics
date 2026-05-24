@@ -1,13 +1,13 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
-import { TextLink } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "@/post/sections/PostTreeSection";
+import { TextLink } from "@/shared/ui/link";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
-import * as m from "@rezics/i18n/messages";
 
 interface RemarkDetailSectionProps {
   remarkId: string;

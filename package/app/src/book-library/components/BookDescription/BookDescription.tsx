@@ -1,7 +1,7 @@
+import * as m from "@rezics/i18n/messages";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import type React from "react";
 import type { BookDescriptionProps } from "./types";
-import * as m from "@rezics/i18n/messages";
 
 export const BookDescription: React.FC<BookDescriptionProps> = ({
   description,

@@ -9,6 +9,7 @@ import {
   markdownContentDoc,
   PostKind,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -21,7 +22,6 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface PostEditDialogProps {
   post: PostDTO;

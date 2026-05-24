@@ -10,8 +10,8 @@ import {
 } from "@rezics/ui/shadcn";
 import {
   Plus as Add,
-  CircleAlert as ErrorIcon,
   CircleCheck as CheckCircle,
+  CircleAlert as ErrorIcon,
   Heart as Favorite,
   Info,
   Send as Share,

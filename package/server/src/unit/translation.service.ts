@@ -10,8 +10,8 @@ import type { UnitTranslation } from "#/prisma/client";
 import { Prisma, prisma, UnitType } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
 import {
-  assertCanEditCollaborativeMetadata,
   applySparsePatch,
+  assertCanEditCollaborativeMetadata,
   hasOwn,
   mapActualTranslationPatchPaths,
   translationPatchFromPaths,

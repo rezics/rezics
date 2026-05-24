@@ -1,4 +1,5 @@
 import type { UnitLastPosition } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -11,7 +12,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import { ChapterPicker } from "./ChapterPicker";
-import * as m from "@rezics/i18n/messages";
 
 type ActiveProgressModalProps = {
   open: boolean;

@@ -2,24 +2,24 @@
 // See openspec/plans/design-system-research/briefs/01-foundation-v1.md.
 
 export * from "./colors";
-export * from "./typography";
-export * from "./spacing";
-export * from "./radius";
 export * from "./elevation";
 export * from "./motion";
+export * from "./radius";
+export * from "./spacing";
+export * from "./typography";
 
 import {
-  colors,
-  lightColors,
-  darkColors,
   type ColorScheme,
   type ColorTokens,
+  colors,
+  darkColors,
+  lightColors,
 } from "./colors";
-import { typography, type TypographyTokens } from "./typography";
-import { spacing, type SpacingTokens } from "./spacing";
-import { radius, type RadiusTokens } from "./radius";
-import { elevation, type ElevationTokens } from "./elevation";
-import { motion, type MotionTokens } from "./motion";
+import { type ElevationTokens, elevation } from "./elevation";
+import { type MotionTokens, motion } from "./motion";
+import { type RadiusTokens, radius } from "./radius";
+import { type SpacingTokens, spacing } from "./spacing";
+import { type TypographyTokens, typography } from "./typography";
 
 export const tokens = {
   colors,

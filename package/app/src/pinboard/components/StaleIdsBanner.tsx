@@ -1,10 +1,10 @@
-import { Alert, AlertTitle, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useRemoveRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
+import * as m from "@rezics/i18n/messages";
+import { Alert, AlertDescription, AlertTitle, Button } from "@rezics/ui/shadcn";
+import { Brush as CleaningServicesRoundedIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { PinboardListKey } from "../models/types";
-import { Brush as CleaningServicesRoundedIcon } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
 
 interface StaleIdsBannerProps {
   realmUnitId: string;

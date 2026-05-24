@@ -1,7 +1,7 @@
 import type {
+  UserUnitProgressStatus as ContractProgressStatus,
   UnitProgressListQuery,
   UnitProgressUpsertBody,
-  UserUnitProgressStatus as ContractProgressStatus,
 } from "@rezics/contract";
 import { UserUnitProgressStatus } from "#/prisma/client";
 

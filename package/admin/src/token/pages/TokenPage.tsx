@@ -9,12 +9,12 @@ import type {
   CreateApiTokenInput,
   UpdateApiTokenInput,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import {
   CreateTokenDialog,
   EditTokenDialog,

@@ -1,4 +1,5 @@
 import type { ApiTokenDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Badge,
   Button,
@@ -15,7 +16,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Pencil as EditIcon } from "lucide-react";
 import type { FC } from "react";
-import * as m from "@rezics/i18n/messages";
 
 interface TokenTableProps {
   tokens: ApiTokenDTO[];

@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "@rezics/ui/shadcn";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { userEvent, waitFor, within } from "storybook/test";
 

@@ -1,10 +1,10 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
-import { unitHref } from "@/shared/ui/link";
 import {
   Avatar,
   AvatarFallback,
@@ -20,8 +20,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
 
 type SimpleUser = Omit<UserDTO, "email">;

@@ -7,8 +7,8 @@
 
 // API endpoints
 export { userApi } from "./api/user.api";
-export { userBriefApi } from "./api/user-brief.api";
 export { userBatchApi } from "./api/user-batch.api";
+export { userBriefApi } from "./api/user-brief.api";
 // Utilities
 export { mapUserToDTO, mapUserToPublicProfile } from "./models/mapper";
 

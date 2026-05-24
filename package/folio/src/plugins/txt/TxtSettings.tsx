@@ -1,7 +1,7 @@
+import { CircleCheck as CheckCircleIcon, X as CloseIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type { PanelProps } from "../../types";
 import type { TxtSplitResult } from "./split";
-import { CircleCheck as CheckCircleIcon, X as CloseIcon } from "lucide-react";
 
 interface TxtSettingsInternalProps extends PanelProps {
   rawText: string;

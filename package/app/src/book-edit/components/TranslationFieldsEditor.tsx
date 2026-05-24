@@ -1,7 +1,7 @@
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-import type React from "react";
-import type { TranslationDraft } from "../hooks/useBookTranslationEditor";
 import * as m from "@rezics/i18n/messages";
+import type React from "react";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import type { TranslationDraft } from "../hooks/useBookTranslationEditor";
 
 export interface TranslationFieldsEditorProps {
   draft: TranslationDraft;

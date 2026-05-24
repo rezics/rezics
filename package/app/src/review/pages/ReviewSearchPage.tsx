@@ -1,12 +1,12 @@
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { PostKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-import * as m from "@rezics/i18n/messages";
 
 export function ReviewSearchPage() {
   const search = useSearchQuery({});

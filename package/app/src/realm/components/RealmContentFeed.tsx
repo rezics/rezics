@@ -1,6 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -12,7 +13,6 @@ import {
 } from "@/review/components/item/ReviewCard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
-import * as m from "@rezics/i18n/messages";
 
 interface RealmContentFeedProps {
   realmId: string;

@@ -1,13 +1,13 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { Input, Label } from "@rezics/ui/shadcn";
 import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
 import { markdownContentDoc } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { CooldownButton } from "@rezics/ui/composite/button/CooldownButton.tsx";
+import { Input, Label } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { useUserProfileStore } from "@/user/states";
 import { ExcerptEditPage } from "./ExcerptEditPage";
-import * as m from "@rezics/i18n/messages";
 
 export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   const [excerptData, setExcerptData] = useState<UnitFormData>(

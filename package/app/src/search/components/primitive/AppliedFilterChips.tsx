@@ -1,8 +1,8 @@
-import { Badge, Button } from "@rezics/ui/shadcn";
 import type { SearchQuery, TagRef } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
+import { Badge, Button } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
-import * as m from "@rezics/i18n/messages";
 
 export type { ChipDescriptor as AppliedFilterChipDescriptor };
 

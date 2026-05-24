@@ -1,3 +1,5 @@
+import type { ShelfView } from "@rezics/api/shelf";
+import { shelfKeys } from "@rezics/api/shelf/shelf.keys";
 import type {
   BookDTO,
   PostDTO,
@@ -6,8 +8,6 @@ import type {
   ShelfUnitRelationDTO,
 } from "@rezics/contract";
 import { markdownContentDoc } from "@rezics/contract";
-import { shelfKeys } from "@rezics/api/shelf/shelf.keys";
-import type { ShelfView } from "@rezics/api/shelf";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import {

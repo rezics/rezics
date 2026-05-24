@@ -1,11 +1,11 @@
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ReviewList } from "../components/list/ReviewList";
-import * as m from "@rezics/i18n/messages";
 
 interface ReviewListSectionProps {
   targetUnitId: string;

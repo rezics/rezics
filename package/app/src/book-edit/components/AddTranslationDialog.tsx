@@ -1,6 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -19,7 +20,6 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
-import * as m from "@rezics/i18n/messages";
 
 export interface AddTranslationDialogProps {
   open: boolean;

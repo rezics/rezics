@@ -25,4 +25,4 @@ function CollapsibleContent({ ...props }: CollapsiblePrimitive.Panel.Props) {
   );
 }
 
-export { Collapsible, CollapsibleTrigger, CollapsibleContent };
+export { Collapsible, CollapsibleContent, CollapsibleTrigger };

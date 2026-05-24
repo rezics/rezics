@@ -1,7 +1,6 @@
 import type { FC, ReactNode } from "react";
-
-import { cn } from "../../shared/lib/utils";
 import { Spinner } from "../../primitive/feedback/Spinner";
+import { cn } from "../../shared/lib/utils";
 
 interface AuthProviderButtonProps {
   label: string;

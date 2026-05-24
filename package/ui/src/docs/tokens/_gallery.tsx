@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { easing } from "../../config/tokens/motion";
 import { radius } from "../../config/tokens/radius";
 import { fontFamilies } from "../../config/tokens/typography";
@@ -26,7 +26,7 @@ function rgbToHex(input: string): string {
 function relLuminance(r: number, g: number, b: number): number {
   const channel = (n: number) => {
     const v = n / 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
   };
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 }

@@ -8,8 +8,8 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { PROGRESS_BUCKET_COUNT } from "@rezics/search";
 import type { Prisma, UserUnitProgress } from "#/prisma/client";
 import { prisma, UserUnitProgressStatus } from "#/prisma/client";
-import { searchClient } from "@/meili/search-client";
 import { serverJobProducer } from "@/job/job-boundary";
+import { searchClient } from "@/meili/search-client";
 import { AppError } from "@/utils/errors";
 import { mapProgressToDTO } from "./progress.mapper";
 import type {

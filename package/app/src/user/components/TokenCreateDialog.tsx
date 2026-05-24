@@ -1,5 +1,6 @@
 import { useCreateTokenMutation } from "@rezics/api/token/token.mutations";
 import type { ApiTokenScopes } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -15,7 +16,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
 import { type FC, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },

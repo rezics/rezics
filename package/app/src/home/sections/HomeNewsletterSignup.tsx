@@ -1,7 +1,7 @@
+import * as m from "@rezics/i18n/messages";
 import { Button, Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 export const HomeNewsletterSignup: React.FC = () => {
   const [email, setEmail] = useState("");

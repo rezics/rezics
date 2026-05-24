@@ -1,13 +1,13 @@
 import {
+  type DmMessage,
   dmKeys,
   useMessages,
   useSendDmMutation,
-  type DmMessage,
 } from "@rezics/api/dm/dm";
+import * as m from "@rezics/i18n/messages";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState, type FC, type FormEvent } from "react";
-import * as m from "@rezics/i18n/messages";
+import { type FC, type FormEvent, useEffect, useRef, useState } from "react";
 import { useAuthSessionStore } from "@/user/states";
 
 interface ConversationThreadSectionProps {

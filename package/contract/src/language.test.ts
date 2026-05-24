@@ -1,5 +1,5 @@
-import { Value } from "@sinclair/typebox/value";
 import { describe, expect, test } from "bun:test";
+import { Value } from "@sinclair/typebox/value";
 import {
   LANGUAGE_META,
   LANGUAGES,

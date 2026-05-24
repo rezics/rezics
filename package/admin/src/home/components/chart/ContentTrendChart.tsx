@@ -1,5 +1,5 @@
-import * as m from "@rezics/i18n/messages";
 import type { AdminStatsResponse } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import {
   BarElement,
   CategoryScale,

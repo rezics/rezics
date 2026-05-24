@@ -1,9 +1,8 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
-import { markdownContentDoc, type ContentRating } from "@rezics/contract";
+import { type ContentRating, markdownContentDoc } from "@rezics/contract";
 import * as m from "@rezics/i18n/messages";
 import { RatingSelector } from "@rezics/ui";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
   Label,
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useUserProfileStore } from "@/user/states";
 import type { Chapter } from "./BookTocEditor";
 

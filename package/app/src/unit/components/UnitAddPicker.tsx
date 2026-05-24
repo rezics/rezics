@@ -1,5 +1,6 @@
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitDTO } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -21,13 +22,12 @@ import {
   useState,
 } from "react";
 import { useUnitCandidates } from "../hooks/useUnitCandidates";
+import type { Candidate } from "../models/types";
 import {
   resolveUnitWorkContext,
   type UnitWorkContext,
 } from "../models/unitCardSummary";
-import type { Candidate } from "../models/types";
 import { UnitCandidateRow } from "./UnitPicker/UnitCandidateRow";
-import * as m from "@rezics/i18n/messages";
 
 export interface UnitAddPickerProps {
   language?: string;

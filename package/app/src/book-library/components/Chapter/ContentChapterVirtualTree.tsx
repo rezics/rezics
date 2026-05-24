@@ -1,4 +1,4 @@
-import { Link } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import type React from "react";
@@ -11,13 +11,13 @@ import {
   useState,
 } from "react";
 import { type NodeRendererProps, Tree, type TreeApi } from "react-arborist";
+import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import {
   type BookContentStructureOccurrence,
   EMPTY_CHAPTER_ROUTE_ID,
   encodeBookContentStructurePath,
 } from "../../models/bookContentStructurePath";
-import * as m from "@rezics/i18n/messages";
 
 const CONTENT_ROW_HEIGHT = 64;
 const MIN_TREE_HEIGHT = 320;

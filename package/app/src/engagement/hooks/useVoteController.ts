@@ -6,8 +6,8 @@ import { useAuthModal } from "@/user/components/useAuthModal";
 import { useAuth } from "@/user/pages/useAuth";
 import { decideVoteAction, type VoteValue } from "./voteAction";
 
-export { decideVoteAction };
 export type { VoteAction, VoteValue } from "./voteAction";
+export { decideVoteAction };
 
 export type UseVoteControllerArgs = {
   targetUnitId: string;

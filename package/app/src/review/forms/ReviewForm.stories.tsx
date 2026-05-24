@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { userEvent, within } from "storybook/test";
 
-import { ReviewForm, type ReviewEditState } from "./ReviewForm";
+import { type ReviewEditState, ReviewForm } from "./ReviewForm";
 
 const Wrapper = (args: { initial: ReviewEditState }) => {
   const [data, setData] = useState<ReviewEditState>(args.initial);

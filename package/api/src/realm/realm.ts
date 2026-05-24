@@ -11,9 +11,19 @@
  * - realm.ts: Main entry (this file) - unified exports
  */
 
+// Re-export contract types used by new realm-tag mutations
+export type {
+  CastRealmTagApplicationVoteInput,
+  CreateRealmTagApplicationInput,
+  PatchRealmTagApplicationInput,
+  RealmTagApplicationVoteDTO,
+  RealmTagContextDTO,
+  RealmTagContextReadResponse,
+  RealmTagContextUpdateResponse,
+  UpdateRealmTagContextInput,
+} from "@rezics/contract";
 // API Client
 export { realmApi } from "./realm.api";
-
 // Query Keys
 export { realmKeys } from "./realm.keys";
 // Mutation Hooks
@@ -35,11 +45,10 @@ export {
   useRemoveRealmTagApplicationMutation,
   useRemoveRealmUnitMutation,
   useUnmuteRealmMutation,
-  useUpdateRealmTagContextMutation,
   useUpdateMemberRoleMutation,
   useUpdateRealmMutation,
+  useUpdateRealmTagContextMutation,
 } from "./realm.mutations";
-
 // Query Configurations
 export {
   myRealmMembershipQuery,
@@ -70,15 +79,3 @@ export type {
   UpdateMemberRoleInput,
   UpdateRealmInput,
 } from "./realm.types";
-
-// Re-export contract types used by new realm-tag mutations
-export type {
-  CastRealmTagApplicationVoteInput,
-  CreateRealmTagApplicationInput,
-  PatchRealmTagApplicationInput,
-  RealmTagContextDTO,
-  RealmTagContextReadResponse,
-  RealmTagContextUpdateResponse,
-  RealmTagApplicationVoteDTO,
-  UpdateRealmTagContextInput,
-} from "@rezics/contract";

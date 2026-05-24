@@ -2,49 +2,50 @@ import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { Prisma } from "#/prisma/client";
-import { creditAttributionApi } from "./credit-attribution";
-import { entityApi } from "./entity";
-import { entityAttributionApi } from "./entity-attribution";
+import { authPublicApi } from "./auth-boundary";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
+import { creditAttributionApi } from "./credit-attribution";
 import { dispatchApi } from "./dispatch";
 import { echoKvApi } from "./echokv";
+import { entityApi } from "./entity";
+import { entityAttributionApi } from "./entity-attribution";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
 import { historyProxyApi, historyResolutionApi } from "./history";
 import { initDefaultRealmCache } from "./infra/default-realm";
-import { initSlugScopesCache } from "./infra/slug-scopes";
 import { infraApi } from "./infra/infra.api";
 import { initSeedTagsCache } from "./infra/seed-tags";
+import { initSlugScopesCache } from "./infra/slug-scopes";
 import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
 import { linkApi } from "./link";
 import { federatedSearchApi, meiliApi } from "./meili";
-import { postApi } from "./post";
-import { progressApi } from "./progress";
 import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
+import { postApi } from "./post";
 import { profileReactionHistoryApi } from "./profile-reaction-history";
+import { progressApi } from "./progress";
 import { reactionBoundaryApi } from "./reaction-boundary";
 import {
   realmApi,
   realmExtraApi,
-  realmTagContextApi,
   realmTagApplicationApi,
   realmTagApplicationVoteApi,
+  realmTagContextApi,
 } from "./realm";
 import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
 import { slugApi } from "./slug";
+import { statsAdminApi } from "./stat";
 import { subjectAttributionApi } from "./subject-attribution";
 import { subscriptionApi } from "./subscription";
-import { statsAdminApi } from "./stat";
 import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";
 import { tokenApi } from "./token";
 import { translationGroupApi } from "./translation-group";
 import {
-  translationSourceApi,
   historyOutboxAdminApi,
-  unitAuthorityApi,
+  translationSourceApi,
   unitApi,
+  unitAuthorityApi,
   workLinkApi,
   workLinkClaimApi,
 } from "./unit";
@@ -52,7 +53,6 @@ import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
 import { AppError } from "./utils/errors";
-import { authPublicApi } from "./auth-boundary";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
 import { zoneApi } from "./zone/zone.api";

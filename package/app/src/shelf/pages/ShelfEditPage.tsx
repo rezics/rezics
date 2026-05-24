@@ -7,6 +7,8 @@ import {
   useSetShelfPinnedTagsMutation,
   useUpdateShelfMutation,
 } from "@rezics/api/shelf/shelf.mutations";
+import { contentDocMarkdownFallback } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -18,12 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { contentDocMarkdownFallback } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useBlocker, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";

@@ -1,6 +1,7 @@
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { RatingBadge } from "@rezics/ui";
 import {
   Alert,
@@ -16,7 +17,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import * as m from "@rezics/i18n/messages";
 
 type OptInRating = "R_18" | "R_18G";
 const OPT_IN_RATINGS: OptInRating[] = ["R_18", "R_18G"];

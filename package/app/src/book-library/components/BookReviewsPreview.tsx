@@ -1,11 +1,11 @@
 import { postQueries } from "@rezics/api/post/post";
 import { type PostDTO, PostKind } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
-import * as m from "@rezics/i18n/messages";
 
 /** Props for BookReviews component. */
 interface BookReviewsProps {

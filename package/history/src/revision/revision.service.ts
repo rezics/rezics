@@ -4,8 +4,8 @@ import type {
   StructureEventDTO,
   StructureEventPayload,
   StructureEventTimelinePage,
-  UnitRevisionPathCompareResponse,
   UnitRevisionDTO,
+  UnitRevisionPathCompareResponse,
   UnitRevisionTimelinePage,
 } from "@rezics/contract";
 import { explodeEditorialPatchLeaves } from "@rezics/contract";

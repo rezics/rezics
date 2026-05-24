@@ -2,15 +2,15 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   CreationMode,
-  EXTERNALLY_GOVERNED_PATHS,
-  UNIT_FIELD_LOCK_ALL,
-  UnitAuthorityRoleKey,
   creationModeSchema,
+  EXTERNALLY_GOVERNED_PATHS,
   isExternallyGoverned,
   lockPathIntersectsPatchPath,
   pathsIntersect,
-  unitFieldLockSchema,
+  UNIT_FIELD_LOCK_ALL,
+  UnitAuthorityRoleKey,
   unitAuthorityRoleKeySchema,
+  unitFieldLockSchema,
 } from "./content-authority";
 import { PostKind, postKindLiterals } from "./post";
 

@@ -1,11 +1,11 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { markdownContentDoc, PostKind, SCORE_MAX } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import * as m from "@rezics/i18n/messages";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 
 interface RemarkInlineFormProps {
   bookUnitId: string;

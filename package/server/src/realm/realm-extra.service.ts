@@ -1,5 +1,8 @@
-import type { RezicsSessionClaims } from "@rezics/contract";
-import type { RealmBannerExtra, TagTreeNode } from "@rezics/contract";
+import type {
+  RealmBannerExtra,
+  RezicsSessionClaims,
+  TagTreeNode,
+} from "@rezics/contract";
 import { LICENSE_SLUGS } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";

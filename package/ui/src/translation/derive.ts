@@ -21,7 +21,7 @@ export function deriveTitleSummary(body: string): {
   let summaryStart = 0;
 
   for (let i = 0; i < lines.length; i++) {
-    const trimmed = lines[i].replace(/^\s*[#>*\-]+\s*/, "").trim();
+    const trimmed = lines[i].replace(/^\s*[#>*-]+\s*/, "").trim();
     if (trimmed.length > 0) {
       title = trimmed.length > 80 ? `${trimmed.slice(0, 80).trim()}…` : trimmed;
       summaryStart = i + 1;

@@ -1,10 +1,10 @@
+import { historyQueries } from "@rezics/api";
 import {
   bookKeys,
   bookQueries,
   useCreateBookMutation,
   useUpdateBookMutation,
 } from "@rezics/api/book/book";
-import { historyQueries } from "@rezics/api";
 import { creditAttributionQueries } from "@rezics/api/credit-attribution/credit-attribution";
 import { useEntityAttributionBatchMutation } from "@rezics/api/entity-attribution/entity-attribution";
 import {
@@ -25,7 +25,7 @@ import {
   markdownContentDoc,
   normalizeLanguage,
 } from "@rezics/contract";
-import { TextLink } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -43,6 +43,7 @@ import { ChevronDown as ExpandMore, Plus } from "lucide-react";
 import React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { EntityPicker } from "@/entity-picker";
+import { TextLink } from "@/shared/ui/link";
 import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
 import { AddTranslationDialog } from "../components/AddTranslationDialog";
 import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
@@ -63,7 +64,6 @@ import {
   isRestoreEditSubmitDisabled,
   withRestoreSource,
 } from "../models/restoreEdit";
-import * as m from "@rezics/i18n/messages";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));

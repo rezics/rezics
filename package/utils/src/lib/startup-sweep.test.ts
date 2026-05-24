@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, test } from "bun:test";
 import {
   existsSync,
   mkdirSync,
@@ -6,7 +7,6 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
-import { afterEach, describe, expect, test } from "bun:test";
 import { SEED_CACHE_DIR } from "./cache-dir";
 import { sweepStaleEditDirs } from "./startup-sweep";
 

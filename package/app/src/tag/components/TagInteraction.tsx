@@ -5,6 +5,7 @@ import type {
   BookDTO,
   UnitTagDTO,
 } from "@rezics/contract";
+import * as m from "@rezics/i18n/messages";
 import { Badge, Button, Popover, PopoverContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -20,7 +21,6 @@ import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
 import type { InjectedTag } from "@/search/models/injectedTags";
 import { cn } from "@/shared/utils/css-util";
 import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
-import * as m from "@rezics/i18n/messages";
 
 const TAG_CHIP_SELECTOR = '[data-tag-chip="true"]';
 

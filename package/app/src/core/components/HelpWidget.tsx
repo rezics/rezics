@@ -1,13 +1,13 @@
-import { Button } from "@rezics/ui/shadcn";
 import * as m from "@rezics/i18n/messages";
-import { cn } from "@/shared/utils/css-util";
-import * as React from "react";
-import FeedbackDialog from "@/feedback/components/FeedbackDialog";
+import { Button } from "@rezics/ui/shadcn";
 import {
   Plus as AddIcon,
   X as CloseIcon,
   TriangleAlert as ReportProblemIcon,
 } from "lucide-react";
+import * as React from "react";
+import FeedbackDialog from "@/feedback/components/FeedbackDialog";
+import { cn } from "@/shared/utils/css-util";
 
 export interface HelpFabAction {
   id: string;

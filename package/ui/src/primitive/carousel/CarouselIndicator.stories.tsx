@@ -3,9 +3,9 @@ import { useState } from "react";
 
 import {
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
-  type CarouselApi,
 } from "#/shadcn/carousel";
 import { CarouselIndicator } from "./CarouselIndicator";
 

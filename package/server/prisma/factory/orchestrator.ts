@@ -9,11 +9,11 @@ import {
   seedSubjectEntities,
 } from "./entities.js";
 import { seedGames } from "./games.js";
-import { createSeedResult } from "./result.js";
 import { seedMedia } from "./media.js";
 import { seedPinboard } from "./pinboard.js";
 import { seedPostsForWorks, seedWikiTranslationGroups } from "./posts.js";
 import { seedRealms } from "./realms.js";
+import { createSeedResult } from "./result.js";
 import { seedScores } from "./scores.js";
 import { seedShelves } from "./shelves.js";
 import type { SeedCtx } from "./strategy.js";

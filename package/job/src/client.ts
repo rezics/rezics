@@ -1,4 +1,4 @@
-import { parseJobCommand, type AnyJobCommand } from "./command";
+import { type AnyJobCommand, parseJobCommand } from "./command";
 
 export interface EnqueueClientOptions {
   baseUrl: string;

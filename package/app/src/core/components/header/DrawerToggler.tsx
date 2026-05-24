@@ -1,6 +1,6 @@
+import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { Menu } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
 
 interface DrawerTogglerProps {
   handleDrawerToggleInner: () => void;
