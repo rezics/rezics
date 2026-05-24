@@ -16,6 +16,26 @@ bun run server:dev       # Backend only (Elysia with --watch)
 bun --filter=@rezics/history run dev # History service only (Elysia, port 3004)
 ```
 
+`bun run dev` starts application processes only. It does not provision external
+dependencies such as PostgreSQL, Meilisearch, Redis, object storage, or Sequin.
+Start any required external services first, then start the dependent application
+process. A service failing fast because an external dependency is unavailable is
+expected behavior when the error points at the missing service and setup
+command.
+
+Sequin CDC is managed explicitly through repo-level external-service scripts:
+
+```bash
+bun run service:sequin:up
+bun run service:sequin:health
+bun run service:sequin:logs
+bun run service:sequin:down
+```
+
+The local dev layout keeps `@rezics/job-runner` eligible to auto-start. If its
+`http` or `all` role needs Sequin, start the Sequin runtime first or use
+`JOB_RUNNER_ROLE=worker` for queue draining without webhook ingress.
+
 ## Conventions
 
 ### Route Convention

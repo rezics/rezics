@@ -1,10 +1,46 @@
+# Tooling
+
+Repo-level automation lives under `tool/`. Application packages may expose env
+contracts and health checks, but runtime application code must not import helper
+modules from `tool/`.
+
+## External Services
+
+`tool/external-services` owns lifecycle wrappers for external dependencies that
+are not started by `bun run dev`. The first wrapper manages Sequin CDC:
+
+```sh
+bun run service:sequin:up
+bun run service:sequin:health
+bun run service:sequin:logs
+bun run service:sequin:down
+bun run service:sequin:config:plan
+bun run service:sequin:config:apply
+```
+
+The Sequin wrapper chooses a compose runtime in this order:
+
+1. `CONTAINER_RUNTIME` when set (`podman`, `podman-compose`, or `docker`).
+2. `podman compose`.
+3. `podman-compose`.
+4. `docker compose`.
+
+Local development uses `tool/external-services/sequin/compose.dev.yml` in
+addition to the base topology. Production can pass `--prod` directly to
+`tool/external-services/sequin.ts` to omit the dev override.
+
+Docker local development defaults to `host.docker.internal`; Podman defaults to
+`host.containers.internal`. On Linux hosts with SELinux enforcing, the wrapper
+adds the `:Z` mount suffix for the read-only Sequin config bind mount.
+
+## Deploy
+
 ```sh
 cd /www/wwwroot/Library.Book/Library.Book/tool/
 bun run deploy
 ```
 
-```
+```sh
 systemctl restart rezbooklib.service
-journalctl -u rezbooklib.service -n 100 # 这个好像是报错日志命令，不要用
 journalctl -u rezbooklib.service -f
 ```

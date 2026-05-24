@@ -1,0 +1,65 @@
+services:
+  sequin:
+    image: sequin/sequin:v0.14.6
+    restart: unless-stopped
+    expose:
+      - "7376"
+    environment:
+      PG_HOSTNAME: sequin-postgres
+      PG_PORT: "5432"
+      PG_DATABASE: sequin
+      PG_USERNAME: sequin
+      PG_PASSWORD: ${PG_PASSWORD?Set PG_PASSWORD for Sequin state Postgres}
+      PG_POOL_SIZE: ${PG_POOL_SIZE:-10}
+      REDIS_URL: redis://sequin-redis:6379
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE?Set SECRET_KEY_BASE for Sequin}
+      VAULT_KEY: ${VAULT_KEY?Set VAULT_KEY for Sequin}
+      CONFIG_FILE_PATH: /config/sequin.yml
+      ENV: ${ENV?Set ENV for the Sequin replication slot suffix}
+      SOURCE_DB_HOST: ${SOURCE_DB_HOST?Set SOURCE_DB_HOST for Sequin source Postgres}
+      SOURCE_DB_PORT: ${SOURCE_DB_PORT:-5432}
+      SOURCE_DB_NAME: ${SOURCE_DB_NAME:-rezics_booklib}
+      SOURCE_DB_USER: ${SOURCE_DB_USER:-postgres}
+      SOURCE_DB_PASSWORD: ${SOURCE_DB_PASSWORD?Set SOURCE_DB_PASSWORD for Sequin source Postgres}
+      SOURCE_DB_POOL_SIZE: ${SOURCE_DB_POOL_SIZE:-10}
+      JOB_RUNNER_BASE_URL: ${JOB_RUNNER_BASE_URL?Set JOB_RUNNER_BASE_URL for Sequin webhook delivery}
+      SEQUIN_WEBHOOK_SECRET: ${SEQUIN_WEBHOOK_SECRET?Set SEQUIN_WEBHOOK_SECRET for job-runner delivery}
+    volumes:
+      - ../../../package/job-runner/sequin/sequin.yml:/config/sequin.yml:${SEQUIN_CONFIG_VOLUME_SUFFIX:-ro}
+    depends_on:
+      sequin-postgres:
+        condition: service_healthy
+      sequin-redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:7376/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  sequin-postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sequin
+      POSTGRES_USER: sequin
+      POSTGRES_PASSWORD: ${PG_PASSWORD?Set PG_PASSWORD for Sequin state Postgres}
+    volumes:
+      - sequin-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sequin -d sequin"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  sequin-redis:
+    image: redis:7
+    restart: unless-stopped
+    volumes:
+      - sequin-redis-data:/data
+
+volumes:
+  sequin-postgres-data:
+  sequin-redis-data:

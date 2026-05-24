@@ -38,6 +38,8 @@ Required environment for this service:
 - `MEILI_HOST` and `MEILI_MASTER_KEY`: Meilisearch admin connection.
 - `JOB_RUNNER_INTERNAL_SECRET`: shared secret for producer/admin requests.
 - `SEQUIN_WEBHOOK_SECRET`: shared secret for Sequin webhook delivery.
+- `SEQUIN_HEALTH_URL`: Sequin `/health` endpoint required by `http` and `all`
+  roles before exposing `/webhooks/sequin`.
 - `JOB_RUNNER_ROLE`: `all`, `http`, or `worker`; defaults to `all`.
 - `PORT`: optional HTTP port, defaults to `3005`.
 
@@ -53,17 +55,34 @@ missing. pg-boss owns its internal schema and migrations inside that database;
 the job-runner package only creates/verifies queues and queue policies at
 startup.
 
+Start Sequin explicitly when testing CDC or running job-runner HTTP ingress:
+
+```bash
+# Generate real local secrets before first startup.
+openssl rand -base64 48 # SECRET_KEY_BASE
+openssl rand -base64 32 # VAULT_KEY
+
+bun run service:sequin:up
+bun run service:sequin:health
+```
+
+The Sequin runtime uses Docker or Podman through `tool/external-services`. Its
+checked-in config delivers only to this service at `/webhooks/sequin` with the
+`x-internal-secret` value from `SEQUIN_WEBHOOK_SECRET`. It does not target
+`@rezics/history` directly; history ingestion is enqueued by the job-runner
+`history.outbox.ingest` worker lane.
+
 Run locally with:
 
 ```bash
 bun --filter=@rezics/job-runner run dev
 ```
 
-Use `JOB_RUNNER_ROLE=all` for local development. The root `bun run dev` zellij
-layout starts the `job-runner` tab automatically because runtime server
-mutations enqueue queue-backed search and history synchronization work. If this
-service is not running, those runtime writes either fail while enqueueing or
-leave derived state stale.
+Use `JOB_RUNNER_ROLE=all` for local development when Sequin is running. The root
+`bun run dev` zellij layout starts the `job-runner` tab automatically because
+runtime server mutations enqueue queue-backed search and history
+synchronization work. If this service is not running, those runtime writes
+either fail while enqueueing or leave derived state stale.
 
 ## Roles
 
@@ -73,6 +92,11 @@ leave derived state stale.
 
 Production may split HTTP and worker roles into separate processes using the
 same package.
+
+`all` and `http` require `SEQUIN_HEALTH_URL` to return 2xx during startup. This
+fails before webhook ingress is exposed and points operators at
+`bun run service:sequin:up`. `worker` skips the Sequin health check so it can
+drain already-enqueued pg-boss jobs while Sequin is stopped or restarting.
 
 ## Producer Configuration
 

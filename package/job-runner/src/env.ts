@@ -17,6 +17,7 @@ export const env = createEnv({
     MEILI_MASTER_KEY: v.string(),
     JOB_RUNNER_INTERNAL_SECRET: v.string(),
     SEQUIN_WEBHOOK_SECRET: v.string(),
+    SEQUIN_HEALTH_URL: v.optional(v.string()),
     PORT: v.optional(v.string()),
     JOB_RUNNER_ROLE: v.fallback(
       v.union([v.literal("all"), v.literal("http"), v.literal("worker")]),

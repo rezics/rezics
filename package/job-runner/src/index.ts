@@ -12,6 +12,7 @@ import {
   type SearchRuntime,
 } from "./handlers/search/runtime";
 import { createBoss } from "./queue/boss";
+import { assertSequinHealthAvailable } from "./sequin/preflight";
 import { registerWorkers } from "./worker";
 
 const port = env.PORT ? Number(env.PORT) : 3005;
@@ -25,6 +26,11 @@ let historyRuntime: HistoryRuntime | undefined;
 if (role === "all" || role === "worker" || role === "http") {
   boss = await createBoss();
 }
+
+await assertSequinHealthAvailable({
+  role,
+  healthUrl: env.SEQUIN_HEALTH_URL,
+});
 
 if ((role === "all" || role === "worker") && boss) {
   searchRuntime = createSearchRuntime({
