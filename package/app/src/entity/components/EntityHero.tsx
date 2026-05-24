@@ -1,5 +1,5 @@
 import type { EntityDTO } from "@rezics/contract";
-import { Link } from "@/shared/ui/link";
+import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Select,
@@ -10,15 +10,15 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { Pencil } from "lucide-react";
-import * as m from "@rezics/i18n/messages";
-import { EntityAvatar } from "./EntityAvatar";
-import { EntityKindBadge } from "./EntityKindBadge";
-import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
+import { Link } from "@/shared/ui/link";
 import {
   getEntityLanguages,
   getEntityPrimaryTitle,
   getEntityTranslation,
 } from "../models/types";
+import { EntityAvatar } from "./EntityAvatar";
+import { EntityKindBadge } from "./EntityKindBadge";
+import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
 
 interface EntityHeroProps {
   entity: EntityDTO;

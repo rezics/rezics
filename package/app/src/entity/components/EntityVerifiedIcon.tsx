@@ -1,5 +1,5 @@
-import { BadgeCheck } from "lucide-react";
 import * as m from "@rezics/i18n/messages";
+import { BadgeCheck } from "lucide-react";
 
 interface EntityVerifiedIconProps {
   verified?: boolean | null;
