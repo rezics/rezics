@@ -2,6 +2,7 @@ import {
   singleStructureEventResponseSchema,
   singleUnitRevisionResponseSchema,
   structureEventTimelinePageSchema,
+  unitRevisionPathCompareResponseSchema,
   unitRevisionTimelinePageSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -14,6 +15,12 @@ const unitRevisionParamsSchema = t.Object({
 const singleRevisionParamsSchema = t.Object({
   unitId: t.String(),
   sequence: t.Numeric(),
+});
+
+const compareRevisionParamsSchema = t.Object({
+  unitId: t.String(),
+  baseSequence: t.Numeric(),
+  targetSequence: t.Numeric(),
 });
 
 const singleStructureEventParamsSchema = t.Object({
@@ -71,6 +78,23 @@ export const revisionApi = new Elysia({ prefix: "/history" })
       },
       detail: {
         summary: "Get single Unit revision",
+        tags: ["History"],
+      },
+    },
+  )
+  .get(
+    "/unit/:unitId/revisions/compare/:baseSequence/:targetSequence",
+    async ({ params }) =>
+      revisionService.compareRevisionPaths({
+        unitId: params.unitId,
+        baseSequence: Number(params.baseSequence),
+        targetSequence: Number(params.targetSequence),
+      }),
+    {
+      params: compareRevisionParamsSchema,
+      response: unitRevisionPathCompareResponseSchema,
+      detail: {
+        summary: "Compare Unit revisions by path snapshots",
         tags: ["History"],
       },
     },

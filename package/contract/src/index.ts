@@ -11,6 +11,7 @@ export * from "./content-authority";
 export * from "./content-history";
 export * from "./credit-attribution";
 export * from "./dispatch";
+export * from "./editorial-path-scope";
 export * from "./entity";
 export * from "./entity-attribution";
 export * from "./feedback";

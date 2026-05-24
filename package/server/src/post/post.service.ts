@@ -449,7 +449,7 @@ export class PostService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId: result.unitId,
           actorUserId: authorUserId,
-          patch: { post: { content: result.content } },
+          patch: wikiPostContentHistoryPatch(result.content),
           message: "wiki-post.create",
         });
       }
@@ -543,7 +543,8 @@ export class PostService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
-          patch: historyInput?.patch ?? { post: { content: row.content } },
+          patch:
+            historyInput?.patch ?? wikiPostContentHistoryPatch(row.content),
           message: historyInput?.message ?? "wiki-post.content.update",
           restoreSource: historyInput?.restoreSource,
         });
@@ -679,6 +680,15 @@ export class PostService {
       .map((id: string) => id.trim())
       .filter(Boolean);
   }
+}
+
+function wikiPostContentHistoryPatch(
+  content: unknown,
+): Record<string, unknown> {
+  const source = mainMarkdownSource(content);
+  return source === null
+    ? { post: { content } }
+    : { post: { content: { main: { source } } } };
 }
 
 export const postService = new PostService();

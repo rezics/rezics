@@ -1,4 +1,5 @@
 import { diffArrays, diffJson, diffLines } from "diff";
+import type { UnitRevisionPathCompareResponse } from "@rezics/contract";
 
 export type DiffPart = {
   type: "equal" | "added" | "removed";
@@ -191,30 +192,6 @@ function compareKnownRecord(
   return changes;
 }
 
-function compareTranslations(before: unknown, after: unknown) {
-  const beforeByLanguage = new Map(
-    (Array.isArray(before) ? before : []).map((item) => [
-      String(asRecord(item).language ?? "unknown"),
-      asRecord(item),
-    ]),
-  );
-  const afterByLanguage = new Map(
-    (Array.isArray(after) ? after : []).map((item) => [
-      String(asRecord(item).language ?? "unknown"),
-      asRecord(item),
-    ]),
-  );
-  return [
-    ...new Set([...beforeByLanguage.keys(), ...afterByLanguage.keys()]),
-  ].flatMap((language) =>
-    compareKnownRecord(
-      `translations.${language}`,
-      beforeByLanguage.get(language) ?? {},
-      afterByLanguage.get(language) ?? {},
-    ),
-  );
-}
-
 function rawChange(
   path: string,
   before: unknown,
@@ -258,11 +235,7 @@ export function compareRevisionSlots(
     const after = afterSlots[slot];
     if (stableStringify(before) === stableStringify(after)) continue;
 
-    if (slot === "translations") {
-      changes.push(...compareTranslations(before, after));
-    } else if (
-      ["tags", "subjects", "credits", "supportLanguages"].includes(slot)
-    ) {
+    if (["tags", "subjects", "credits", "supportLanguages"].includes(slot)) {
       const collection = compareCollection(slot, before, after);
       if (collection) changes.push(collection);
     } else if (slot === "extension" || slot === "unit") {
@@ -273,6 +246,54 @@ export function compareRevisionSlots(
       changes.push(rawChange(slot, before, after, allowRaw));
     }
   }
+
+  return { changes };
+}
+
+export function compareRevisionPathSnapshots(
+  response: UnitRevisionPathCompareResponse,
+  options: { allowRaw?: boolean } = {},
+): HistoryCompareResult {
+  const allowRaw = options.allowRaw === true;
+  const changes = response.changes.flatMap((entry): HistoryFieldChange[] => {
+    const before = entry.base.value;
+    const after = entry.target.value;
+    if (stableStringify(before) === stableStringify(after)) return [];
+
+    const fieldName = entry.path.split(".").at(-1) ?? entry.path;
+    if (
+      MARKDOWN_FIELD_NAMES.has(fieldName) &&
+      typeof before === "string" &&
+      typeof after === "string"
+    ) {
+      return [
+        {
+          kind: "markdown",
+          path: entry.path,
+          before,
+          after,
+          lineParts: createMarkdownLineDiff(before, after),
+          inlineParts: createInlineTokenDiff(before, after),
+        },
+      ];
+    }
+
+    if (Array.isArray(before) || Array.isArray(after)) {
+      const collection = compareCollection(entry.path, before, after);
+      return collection ? [collection] : [];
+    }
+
+    if (
+      before == null ||
+      after == null ||
+      typeof before !== "object" ||
+      typeof after !== "object"
+    ) {
+      return [{ kind: "scalar", path: entry.path, before, after }];
+    }
+
+    return [rawChange(entry.path, before, after, allowRaw)];
+  });
 
   return { changes };
 }

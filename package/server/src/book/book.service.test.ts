@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { collectEditorialPatchLeafPaths } from "@rezics/contract";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import { mapActualTranslationPatchPaths } from "@/unit/collaborative-metadata";
 
 const mockSyncContentToMeili = mock(async (_unitId: string) => undefined);
 const mockPatchContentMetadataToMeili = mock(
@@ -9,6 +11,7 @@ const mockPatchContentMetadataToMeili = mock(
 mock.module("@/meili/content/sync", () => ({
   deleteContentFromMeili: async () => undefined,
   patchContentMetadataToMeili: mockPatchContentMetadataToMeili,
+  patchContentTranslationsToMeili: async () => undefined,
   syncContentToMeili: mockSyncContentToMeili,
 }));
 
@@ -104,6 +107,7 @@ const mockTx = {
     update: mockUpdateContainer,
   },
   book: {
+    create: mockCreateBook,
     update: mockUpdateBook,
   },
   historyOutbox: {
@@ -201,6 +205,66 @@ describe("BookService.create", () => {
       path: "*",
       lockedById: "user-1",
     });
+  });
+
+  test("wiki creation writes initial history with creator as actor", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.create({
+      userId: "user-1",
+      creationMode: "wiki",
+      defaultLanguage: "en",
+      translations: [{ language: "en", title: "Catalog Book" }],
+    });
+
+    const createArgs = mockCreateHistoryOutbox.mock.calls[0]?.[0] as any;
+    expect(mockCreateHistoryOutbox).toHaveBeenCalledTimes(1);
+    expect(createArgs.data.unitId).toBe("book-1");
+    expect(createArgs.data.actorUserId).toBe("user-1");
+    expect(createArgs.data.payload.revision.patch).toEqual({
+      translations: { en: { title: "Catalog Book" } },
+    });
+  });
+
+  test("personal creation writes initial history with creator as actor", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.create({
+      userId: "user-1",
+      creationMode: "personal",
+      defaultLanguage: "en",
+      pageCount: 200,
+      translations: [{ language: "en", title: "Personal Book" }],
+    });
+
+    const createArgs = mockCreateHistoryOutbox.mock.calls[0]?.[0] as any;
+    expect(mockCreateHistoryOutbox).toHaveBeenCalledTimes(1);
+    expect(createArgs.data.actorUserId).toBe("user-1");
+    expect(createArgs.data.payload.revision.patch).toEqual({
+      extension: { pageCount: 200 },
+      translations: { en: { title: "Personal Book" } },
+    });
+  });
+
+  test("create and edit projections produce identical editorial leaf paths", async () => {
+    const { buildBookCreatePatch, mapBookUpdatePatchPaths } = await import(
+      "./book.service"
+    );
+    const translation = { language: "en", title: "Same State" };
+
+    const createPaths = collectEditorialPatchLeafPaths(
+      buildBookCreatePatch({
+        userId: "user-1",
+        pageCount: 200,
+        translations: [translation],
+      }),
+    );
+    const editPaths = [
+      ...mapBookUpdatePatchPaths({ pageCount: 200 }),
+      ...mapActualTranslationPatchPaths(translation, null, "en"),
+    ].sort();
+
+    expect(createPaths.sort()).toEqual(editPaths);
   });
 });
 

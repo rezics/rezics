@@ -4,11 +4,17 @@ import type {
   StructureEventDTO,
   StructureEventPayload,
   StructureEventTimelinePage,
+  UnitRevisionPathCompareResponse,
   UnitRevisionDTO,
   UnitRevisionTimelinePage,
 } from "@rezics/contract";
+import { explodeEditorialPatchLeaves } from "@rezics/contract";
 
 type HistoryDb = {
+  $queryRaw?<T = unknown>(
+    strings: TemplateStringsArray,
+    ...values: unknown[]
+  ): Promise<T>;
   revisionContent: {
     upsert(input: unknown): Promise<unknown>;
   };
@@ -16,6 +22,10 @@ type HistoryDb = {
     upsert(input: unknown): Promise<unknown>;
     findMany(input: unknown): Promise<unknown[]>;
     findUnique(input: unknown): Promise<unknown | null>;
+  };
+  unitRevisionPath: {
+    upsert(input: unknown): Promise<unknown>;
+    findMany(input: unknown): Promise<unknown[]>;
   };
   structureEvent: {
     upsert(input: unknown): Promise<unknown>;
@@ -53,10 +63,15 @@ function mapRevision(
     createdAt: Date;
     ingestedAt: Date;
     content?: { hash: string; payload: unknown; createdAt: Date } | null;
+    paths?: Array<{ path: string }>;
   },
   options: { includeContent?: boolean } = {},
 ): UnitRevisionDTO {
   const restoreSource = normalizeRestoreSource(row.restoreSource);
+  const indexedChangedFieldKeys =
+    row.paths && row.paths.length > 0
+      ? [...new Set(row.paths.map((path) => path.path))].sort()
+      : null;
 
   return {
     id: row.id,
@@ -64,7 +79,8 @@ function mapRevision(
     sequence: Number(row.sequence),
     contentHash: row.contentHash,
     actorUserId: row.actorUserId,
-    changedFieldKeys: deriveChangedFieldKeys(row.content?.payload),
+    changedFieldKeys:
+      indexedChangedFieldKeys ?? deriveChangedFieldKeys(row.content?.payload),
     message: row.message,
     createdAt: row.createdAt,
     ingestedAt: row.ingestedAt,
@@ -187,6 +203,10 @@ function canonicalSerialize(value: unknown): string {
     .join(",")}}`;
 }
 
+function sameJsonValue(left: unknown, right: unknown): boolean {
+  return canonicalSerialize(left) === canonicalSerialize(right);
+}
+
 export function computeRevisionContentHash(payload: unknown): string {
   return new Bun.CryptoHasher("sha256")
     .update(canonicalSerialize(payload))
@@ -249,9 +269,72 @@ export class RevisionService {
       },
       include: { content: true },
     });
+    await this.upsertRevisionPathRows({
+      revisionId: (row as { id: string }).id,
+      unitId: input.payload.unitId,
+      sequence: input.payload.sequence,
+      content,
+    });
     return mapRevision(row as Parameters<typeof mapRevision>[0], {
       includeContent: true,
     });
+  }
+
+  private async upsertRevisionPathRows(input: {
+    revisionId: string;
+    unitId: string;
+    sequence: number | bigint;
+    content: Record<string, unknown>;
+  }): Promise<void> {
+    const db = await this.database();
+    const leaves = explodeEditorialPatchLeaves(input.content);
+    for (const leaf of leaves) {
+      await db.unitRevisionPath.upsert({
+        where: {
+          unitId_sequence_path: {
+            unitId: input.unitId,
+            sequence: BigInt(input.sequence),
+            path: leaf.path,
+          },
+        },
+        update: {
+          value: leaf.value as never,
+          revisionId: input.revisionId,
+        },
+        create: {
+          unitId: input.unitId,
+          sequence: BigInt(input.sequence),
+          path: leaf.path,
+          value: leaf.value as never,
+          revisionId: input.revisionId,
+        },
+      });
+    }
+  }
+
+  async backfillRevisionPaths(): Promise<{ revisions: number; paths: number }> {
+    const db = await this.database();
+    const rows = await db.unitRevision.findMany({
+      orderBy: [{ unitId: "asc" }, { sequence: "asc" }],
+      include: { content: true },
+    });
+    let paths = 0;
+    for (const row of rows as Array<{
+      id: string;
+      unitId: string;
+      sequence: bigint;
+      content?: { payload: Record<string, unknown> } | null;
+    }>) {
+      const leaves = explodeEditorialPatchLeaves(row.content?.payload ?? {});
+      paths += leaves.length;
+      await this.upsertRevisionPathRows({
+        revisionId: row.id,
+        unitId: row.unitId,
+        sequence: row.sequence,
+        content: row.content?.payload ?? {},
+      });
+    }
+    return { revisions: rows.length, paths };
   }
 
   async insertStructureEvent(input: {
@@ -294,7 +377,7 @@ export class RevisionService {
       orderBy: { sequence: "desc" },
       take: limit + 1,
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
-      include: { content: true },
+      include: { content: true, paths: { select: { path: true } } },
     });
 
     const pageRows = rows.slice(0, limit);
@@ -325,13 +408,144 @@ export class RevisionService {
           sequence: BigInt(input.sequence),
         },
       },
-      include: { content: true },
+      include: { content: true, paths: { select: { path: true } } },
     });
     return row
       ? mapRevision(row as Parameters<typeof mapRevision>[0], {
           includeContent: input.includeContent !== false,
         })
       : null;
+  }
+
+  async compareRevisionPaths(input: {
+    unitId: string;
+    baseSequence: number;
+    targetSequence: number;
+  }): Promise<UnitRevisionPathCompareResponse> {
+    const db = await this.database();
+    if (input.baseSequence === input.targetSequence) {
+      return {
+        unitId: input.unitId,
+        baseSequence: input.baseSequence,
+        targetSequence: input.targetSequence,
+        candidatePaths: [],
+        changes: [],
+      };
+    }
+
+    const lower = Math.min(input.baseSequence, input.targetSequence);
+    const upper = Math.max(input.baseSequence, input.targetSequence);
+    const touchedRows = hasRawQuery(db)
+      ? await db.$queryRaw<Array<{ path: string }>>`
+          SELECT DISTINCT "path"
+          FROM "UnitRevisionPath"
+          WHERE "unit_id" = ${input.unitId}::uuid
+            AND "sequence" > ${BigInt(lower)}
+            AND "sequence" <= ${BigInt(upper)}
+          ORDER BY "path" ASC
+        `
+      : await db.unitRevisionPath.findMany({
+          where: {
+            unitId: input.unitId,
+            sequence: { gt: BigInt(lower), lte: BigInt(upper) },
+          },
+          distinct: ["path"],
+          select: { path: true },
+          orderBy: { path: "asc" },
+        });
+    const candidatePaths = (touchedRows as Array<{ path: string }>).map(
+      (row) => row.path,
+    );
+    if (candidatePaths.length === 0) {
+      return {
+        unitId: input.unitId,
+        baseSequence: input.baseSequence,
+        targetSequence: input.targetSequence,
+        candidatePaths: [],
+        changes: [],
+      };
+    }
+
+    const [baseRows, targetRows] = await Promise.all([
+      this.latestPathValuesAtOrBefore(
+        candidatePaths,
+        input.unitId,
+        input.baseSequence,
+      ),
+      this.latestPathValuesAtOrBefore(
+        candidatePaths,
+        input.unitId,
+        input.targetSequence,
+      ),
+    ]);
+
+    return {
+      unitId: input.unitId,
+      baseSequence: input.baseSequence,
+      targetSequence: input.targetSequence,
+      candidatePaths,
+      changes: candidatePaths
+        .map((path) => {
+          const base = baseRows.get(path);
+          const target = targetRows.get(path);
+          return {
+            path,
+            base: {
+              value: base?.value ?? null,
+              sequence: base ? Number(base.sequence) : null,
+            },
+            target: {
+              value: target?.value ?? null,
+              sequence: target ? Number(target.sequence) : null,
+            },
+          };
+        })
+        .filter(
+          (entry) => !sameJsonValue(entry.base.value, entry.target.value),
+        ),
+    };
+  }
+
+  private async latestPathValuesAtOrBefore(
+    paths: readonly string[],
+    unitId: string,
+    sequence: number,
+  ): Promise<Map<string, { value: unknown; sequence: bigint }>> {
+    const db = await this.database();
+    if (hasRawQuery(db)) {
+      const rows = await db.$queryRaw<
+        Array<{ path: string; value: unknown; sequence: bigint }>
+      >`
+        SELECT DISTINCT ON ("path") "path", "value", "sequence"
+        FROM "UnitRevisionPath"
+        WHERE "unit_id" = ${unitId}::uuid
+          AND "path" = ANY(${[...paths]}::text[])
+          AND "sequence" <= ${BigInt(sequence)}
+        ORDER BY "path" ASC, "sequence" DESC
+      `;
+      return new Map(
+        rows.map((row) => [
+          row.path,
+          { value: row.value, sequence: BigInt(row.sequence) },
+        ]),
+      );
+    }
+
+    const rows = (await db.unitRevisionPath.findMany({
+      where: {
+        unitId,
+        path: { in: [...paths] },
+        sequence: { lte: BigInt(sequence) },
+      },
+      orderBy: [{ path: "asc" }, { sequence: "desc" }],
+    })) as Array<{ path: string; value: unknown; sequence: bigint }>;
+    const latest = new Map<string, { value: unknown; sequence: bigint }>();
+    for (const row of rows) {
+      if (!latest.has(row.path)) {
+        latest.set(row.path, { value: row.value, sequence: row.sequence });
+      }
+    }
+    return latest;
   }
 
   async listStructureEvents(input: {
@@ -390,6 +604,15 @@ export class RevisionService {
         })
       : null;
   }
+}
+
+function hasRawQuery(db: HistoryDb): db is HistoryDb & {
+  $queryRaw<T = unknown>(
+    strings: TemplateStringsArray,
+    ...values: unknown[]
+  ): Promise<T>;
+} {
+  return typeof db.$queryRaw === "function";
 }
 
 export const revisionService = new RevisionService();

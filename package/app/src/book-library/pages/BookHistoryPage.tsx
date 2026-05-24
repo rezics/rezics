@@ -29,7 +29,11 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { compareRevisionSlots, type DiffPart } from "../models/historyCompare";
+import {
+  compareRevisionPathSnapshots,
+  type DiffPart,
+  type HistoryFieldChange,
+} from "../models/historyCompare";
 import * as m from "@rezics/i18n/messages";
 
 type HistoryTab = "editorial" | "structure" | "authority";
@@ -553,29 +557,26 @@ export function BookRevisionComparePage() {
       Boolean(bookId) && Number.isFinite(base) && Number.isFinite(target),
   });
   const comparison = useMemo(() => {
-    const before = data?.base.content?.payload ?? {};
-    const after = data?.target.content?.payload ?? {};
-    const shouldSwap =
-      latestPayloadTimestamp(before) > latestPayloadTimestamp(after);
-    const fromPayload = shouldSwap ? after : before;
-    const toPayload = shouldSwap ? before : after;
+    const values = (data?.changes ?? []).flatMap((change) => [
+      change.base.value,
+      change.target.value,
+    ]);
     return {
-      changes: compareRevisionSlots(fromPayload, toPayload, {
-        allowRaw: false,
-      }).changes,
-      fromPayload,
-      fromSequence: shouldSwap ? target : base,
-      toPayload,
-      toSequence: shouldSwap ? base : target,
+      changes: data
+        ? compareRevisionPathSnapshots(data, { allowRaw: false }).changes
+        : [],
+      referencedValues: values,
+      fromSequence: base,
+      toSequence: target,
     };
   }, [base, data, target]);
   const referencedUnitIds = useMemo(
     () =>
-      unique([
-        ...extractUuidStrings(comparison.fromPayload),
-        ...extractUuidStrings(comparison.toPayload),
-      ]).slice(0, 80),
-    [comparison.fromPayload, comparison.toPayload],
+      unique(comparison.referencedValues.flatMap(extractUuidStrings)).slice(
+        0,
+        80,
+      ),
+    [comparison.referencedValues],
   );
   const referencesQuery = useQuery(
     historyQueries.unitReferenceResolution(referencedUnitIds),
@@ -739,7 +740,7 @@ export function CompareChange({
   mode,
   references,
 }: {
-  change: ReturnType<typeof compareRevisionSlots>["changes"][number];
+  change: HistoryFieldChange;
   mode: "split" | "unified";
   references: Record<
     string,
@@ -1182,33 +1183,6 @@ function extractUuidStrings(value: unknown) {
   };
   visit(value);
   return [...ids];
-}
-
-function latestPayloadTimestamp(value: unknown): number {
-  let latest = 0;
-  const visit = (current: unknown) => {
-    if (!current || typeof current !== "object") return;
-    if (Array.isArray(current)) {
-      for (const item of current) visit(item);
-      return;
-    }
-    for (const [key, nested] of Object.entries(
-      current as Record<string, unknown>,
-    )) {
-      if (
-        (key === "createdAt" || key === "updatedAt") &&
-        (typeof nested === "string" || nested instanceof Date)
-      ) {
-        const timestamp = new Date(nested).getTime();
-        if (Number.isFinite(timestamp)) {
-          latest = Math.max(latest, timestamp);
-        }
-      }
-      visit(nested);
-    }
-  };
-  visit(value);
-  return latest;
 }
 
 function actorLabel(

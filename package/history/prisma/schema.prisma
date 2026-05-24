@@ -24,11 +24,29 @@ model UnitRevision {
   ingestedAt  DateTime @default(now())
 
   content RevisionContent @relation(fields: [contentHash], references: [hash])
+  paths   UnitRevisionPath[]
 
   @@unique([unitId, sequence])
   @@index([unitId, createdAt(sort: Desc)])
   @@index([actorUserId, createdAt])
   @@index([contentHash])
+}
+
+/// Derived per-path snapshot index for editorial revision compare. Rows are
+/// rebuilt from UnitRevision content and are not authoritative history state.
+model UnitRevisionPath {
+  unitId     String @map("unit_id") @db.Uuid
+  sequence   BigInt
+  path       String
+  value      Json
+  revisionId String @map("revision_id") @db.Uuid
+
+  revision UnitRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, sequence, path])
+  @@index([unitId, path, sequence(sort: Desc)])
+  @@index([revisionId])
+  @@map("UnitRevisionPath")
 }
 
 /// Content-addressed payload for canonical editorial revisions. It stores final

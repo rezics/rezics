@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { collectEditorialPatchLeafPaths } from "@rezics/contract";
+import { mapActualTranslationPatchPaths } from "@/unit/collaborative-metadata";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 installPrismaClientMock();
@@ -69,6 +71,7 @@ function makeEntityRow(overrides: Record<string, any> = {}) {
 function freshMocks() {
   const entityRow = makeEntityRow();
   const txClient = {
+    $queryRaw: mock(async () => [{ sequence: 1n }]),
     unit: {
       create: mock(async ({ data }: any) => ({
         id: "entity-1",
@@ -88,6 +91,9 @@ function freshMocks() {
     },
     unitTranslation: {
       upsert: mock(async () => ({})),
+    },
+    historyOutbox: {
+      create: mock(async (args: any) => args.data),
     },
   };
 
@@ -250,6 +256,39 @@ describe("EntityService.create", () => {
     expect(createArgs.data.fieldLocks).toBeUndefined();
   });
 
+  test("wiki creation writes initial history with creator as actor", async () => {
+    const { txClient } = freshMocks();
+    const { entityService } = await import("./entity.service");
+
+    await entityService.create(
+      {
+        creationMode: "wiki",
+        kind: "person",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
+        translations: [{ language: "en", title: "Wiki Author" }],
+      },
+      {
+        callerUnitId: "user-1",
+        isAdmin: false,
+        actor: { userId: "user-1", permission: { role: "USER" } } as any,
+      },
+    );
+
+    const historyArgs = (txClient.historyOutbox.create as any).mock
+      .calls[0]?.[0];
+    expect(txClient.historyOutbox.create).toHaveBeenCalledTimes(1);
+    expect(historyArgs.data.actorUserId).toBe("user-1");
+    expect(historyArgs.data.payload.revision.patch).toEqual({
+      entity: {
+        kind: "person",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
+      },
+      translations: { en: { title: "Wiki Author" } },
+    });
+  });
+
   test("personal creation keeps current user owner and starts closed", async () => {
     const { txClient } = freshMocks();
     const { entityService } = await import("./entity.service");
@@ -271,6 +310,66 @@ describe("EntityService.create", () => {
       path: "*",
       lockedById: "user-1",
     });
+  });
+
+  test("personal creation writes initial history with creator as actor", async () => {
+    const { txClient } = freshMocks();
+    const { entityService } = await import("./entity.service");
+
+    await entityService.create(
+      {
+        creationMode: "personal",
+        kind: "person",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
+        translations: [{ language: "en", title: "Personal Author" }],
+      },
+      {
+        callerUnitId: "user-1",
+        isAdmin: false,
+        actor: { userId: "user-1", permission: { role: "USER" } } as any,
+      },
+    );
+
+    const historyArgs = (txClient.historyOutbox.create as any).mock
+      .calls[0]?.[0];
+    expect(txClient.historyOutbox.create).toHaveBeenCalledTimes(1);
+    expect(historyArgs.data.actorUserId).toBe("user-1");
+    expect(historyArgs.data.payload.revision.patch).toEqual({
+      entity: {
+        kind: "person",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
+      },
+      translations: { en: { title: "Personal Author" } },
+    });
+  });
+
+  test("create and edit projections produce identical editorial leaf paths", async () => {
+    const { buildEntityCreatePatch, mapEntityUpdatePatchPaths } = await import(
+      "./entity.service"
+    );
+    const translation = { language: "en", title: "Same State" };
+
+    const createPaths = collectEditorialPatchLeafPaths(
+      buildEntityCreatePatch({
+        kind: "person",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
+        translations: [translation],
+      }),
+    );
+    const editPaths = [
+      ...mapEntityUpdatePatchPaths({
+        kind: "person",
+        eligibleCreditRoles: ["author"],
+        eligibleSubjectRoles: ["about"],
+        translations: [translation],
+      }),
+      ...mapActualTranslationPatchPaths(translation, null, "en"),
+    ].sort();
+
+    expect(createPaths.sort()).toEqual([...new Set(editPaths)]);
   });
 });
 

@@ -3,7 +3,10 @@ import type {
   HistoryOutboxPayload,
   StructureEventPayload,
 } from "@rezics/contract";
-import { isExternallyGoverned } from "@rezics/contract";
+import {
+  collectEditorialPatchLeafPaths,
+  isExternallyGoverned,
+} from "@rezics/contract";
 
 type SequenceRow = { sequence: bigint | number | string };
 
@@ -108,27 +111,13 @@ export function buildStructureEventPayload(input: {
 }
 
 function collectLeafPaths(value: unknown, prefix = ""): string[] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return prefix ? [prefix] : [];
+  if (!prefix) {
+    return collectEditorialPatchLeafPaths(value);
   }
-
-  const paths: string[] = [];
-  for (const [key, nested] of Object.entries(
-    value as Record<string, unknown>,
-  )) {
-    if (key === "$unset") {
-      if (Array.isArray(nested)) {
-        paths.push(
-          ...nested.filter((path): path is string => typeof path === "string"),
-        );
-      }
-      continue;
-    }
-    const nextPrefix = prefix ? `${prefix}.${key}` : key;
-    const nestedPaths = collectLeafPaths(nested, nextPrefix);
-    paths.push(...(nestedPaths.length > 0 ? nestedPaths : [nextPrefix]));
-  }
-  return [...new Set(paths)];
+  const nested = collectEditorialPatchLeafPaths(value).map(
+    (path) => `${prefix}.${path}`,
+  );
+  return nested.length > 0 ? [...new Set(nested)] : [prefix];
 }
 
 function stripExternallyGovernedPatch(

@@ -23,7 +23,26 @@ async function responseValidationStatus(
 function dbStub() {
   const content = new Map<string, unknown>();
   const revisions: any[] = [];
+  const revisionPaths: any[] = [];
   const structureEvents: any[] = [];
+  const withRevisionIncludes = (row: any, include?: any) => ({
+    ...row,
+    content: include?.content
+      ? {
+          hash: row.contentHash,
+          payload: content.get(row.contentHash),
+          createdAt: new Date("2026-05-19T00:00:00.000Z"),
+        }
+      : undefined,
+    paths: include?.paths
+      ? revisionPaths
+          .filter(
+            (path) =>
+              path.unitId === row.unitId && path.sequence === row.sequence,
+          )
+          .map((path) => ({ path: path.path }))
+      : undefined,
+  });
   return {
     revisionContent: {
       upsert: mock(async ({ where, create }: any) => {
@@ -38,31 +57,108 @@ function dbStub() {
             row.unitId === where.unitId_sequence.unitId &&
             row.sequence === where.unitId_sequence.sequence,
         );
-        if (existing) return existing;
+        if (existing) return withRevisionIncludes(existing, include);
         const row = {
           id: `revision-${revisions.length + 1}`,
           ...create,
           ingestedAt: new Date("2026-05-19T00:00:00.000Z"),
-          content: include?.content
-            ? {
-                hash: create.contentHash,
-                payload: content.get(create.contentHash),
-                createdAt: new Date("2026-05-19T00:00:00.000Z"),
-              }
-            : undefined,
         };
         revisions.push(row);
-        return row;
+        return withRevisionIncludes(row, include);
       }),
-      findMany: mock(async ({ take }: any) => revisions.slice(0, take)),
-      findUnique: mock(
-        async ({ where }: any) =>
+      findMany: mock(async ({ where, take, include, orderBy }: any = {}) => {
+        let rows = [...revisions];
+        if (where?.unitId) {
+          rows = rows.filter((row) => row.unitId === where.unitId);
+        }
+        if (Array.isArray(orderBy)) {
+          rows.sort((a, b) => {
+            for (const order of orderBy) {
+              const [key, direction] = Object.entries(order)[0] as [
+                string,
+                "asc" | "desc",
+              ];
+              const delta = String(a[key]).localeCompare(String(b[key]));
+              if (delta !== 0) return direction === "desc" ? -delta : delta;
+            }
+            return 0;
+          });
+        } else if (orderBy?.sequence === "desc") {
+          rows.sort((a, b) => Number(b.sequence - a.sequence));
+        }
+        return rows
+          .slice(0, take ?? rows.length)
+          .map((row) => withRevisionIncludes(row, include));
+      }),
+      findUnique: mock(async ({ where, include }: any) => {
+        const row =
           revisions.find(
             (row) =>
               row.unitId === where.unitId_sequence.unitId &&
               row.sequence === where.unitId_sequence.sequence,
-          ) ?? null,
-      ),
+          ) ?? null;
+        return row ? withRevisionIncludes(row, include) : null;
+      }),
+    },
+    unitRevisionPath: {
+      upsert: mock(async ({ where, create, update }: any) => {
+        const existing = revisionPaths.find(
+          (row) =>
+            row.unitId === where.unitId_sequence_path.unitId &&
+            row.sequence === where.unitId_sequence_path.sequence &&
+            row.path === where.unitId_sequence_path.path,
+        );
+        if (existing) {
+          Object.assign(existing, update);
+          return existing;
+        }
+        revisionPaths.push(create);
+        return create;
+      }),
+      findMany: mock(async ({ where, distinct, select, orderBy }: any = {}) => {
+        let rows = revisionPaths.filter((row) => row.unitId === where?.unitId);
+        if (where?.sequence?.gt !== undefined) {
+          rows = rows.filter((row) => row.sequence > where.sequence.gt);
+        }
+        if (where?.sequence?.lte !== undefined) {
+          rows = rows.filter((row) => row.sequence <= where.sequence.lte);
+        }
+        if (where?.path?.in) {
+          const wanted = new Set(where.path.in);
+          rows = rows.filter((row) => wanted.has(row.path));
+        }
+        if (Array.isArray(orderBy)) {
+          rows.sort((a, b) => {
+            for (const order of orderBy) {
+              const [key, direction] = Object.entries(order)[0] as [
+                string,
+                "asc" | "desc",
+              ];
+              const left = key === "sequence" ? Number(a[key]) : String(a[key]);
+              const right =
+                key === "sequence" ? Number(b[key]) : String(b[key]);
+              const delta =
+                typeof left === "number" && typeof right === "number"
+                  ? left - right
+                  : String(left).localeCompare(String(right));
+              if (delta !== 0) return direction === "desc" ? -delta : delta;
+            }
+            return 0;
+          });
+        } else if (orderBy?.path === "asc") {
+          rows.sort((a, b) => a.path.localeCompare(b.path));
+        }
+        if (distinct?.includes("path")) {
+          const seen = new Set<string>();
+          rows = rows.filter((row) => {
+            if (seen.has(row.path)) return false;
+            seen.add(row.path);
+            return true;
+          });
+        }
+        if (select?.path) return rows.map((row) => ({ path: row.path }));
+        return rows;
+      }),
     },
     structureEvent: {
       upsert: mock(async ({ where, create }: any) => {
@@ -179,6 +275,190 @@ describe("RevisionService", () => {
 
     expect(retry.id).toBe(first.id);
     expect(db.unitRevision.upsert).toHaveBeenCalledTimes(2);
+    expect(db.unitRevisionPath.upsert).toHaveBeenCalledTimes(2);
+  });
+
+  test("indexes revision leaf paths and derives changed keys from the index", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 1,
+        actorUserId: "user-1",
+        patch: {
+          translations: { en: { title: "Captured" } },
+          credits: { authors: [{ targetUnitId: "ent-1" }] },
+        },
+        message: null,
+      },
+    });
+
+    const revision = await service.getUnitRevision({
+      unitId: "unit-1",
+      sequence: 1,
+      includeContent: false,
+    });
+
+    expect(revision?.changedFieldKeys).toEqual([
+      "credits.authors",
+      "translations.en.title",
+    ]);
+  });
+
+  test("projects legacy slots-shaped revisions into the path index", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 1,
+        actorUserId: "user-1",
+        slots: {
+          identity: { title: "Legacy title" },
+          tags: [{ tagUnitId: "tag-1" }],
+        },
+        changedFieldKeys: ["identity.title", "tags"],
+        message: null,
+      },
+    });
+
+    const revision = await service.getUnitRevision({
+      unitId: "unit-1",
+      sequence: 1,
+      includeContent: false,
+    });
+
+    expect(revision?.changedFieldKeys).toEqual(["identity.title", "tags"]);
+  });
+
+  test("backfills existing revisions into the path index", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 1,
+        actorUserId: "user-1",
+        patch: { translations: { en: { title: "Indexed" } } },
+        message: null,
+      },
+    });
+
+    const result = await service.backfillRevisionPaths();
+
+    expect(result).toEqual({ revisions: 1, paths: 1 });
+    expect(db.unitRevisionPath.upsert).toHaveBeenCalledTimes(2);
+  });
+
+  test("path snapshot compare handles non-adjacent and additive changes", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 1,
+        actorUserId: "user-1",
+        patch: { translations: { en: { title: "A" } } },
+        message: null,
+      },
+    });
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 2,
+        actorUserId: "user-1",
+        patch: { translations: { en: { summary: "S2" } } },
+        message: null,
+      },
+    });
+    await service.insertUnitRevision({
+      payload: {
+        unitId: "unit-1",
+        sequence: 3,
+        actorUserId: "user-1",
+        patch: { translations: { en: { title: "B" } } },
+        message: null,
+      },
+    });
+
+    const compare = await service.compareRevisionPaths({
+      unitId: "unit-1",
+      baseSequence: 1,
+      targetSequence: 3,
+    });
+
+    expect(compare.candidatePaths).toEqual([
+      "translations.en.summary",
+      "translations.en.title",
+    ]);
+    expect(compare.changes).toEqual([
+      {
+        path: "translations.en.summary",
+        base: { value: null, sequence: null },
+        target: { value: "S2", sequence: 2 },
+      },
+      {
+        path: "translations.en.title",
+        base: { value: "A", sequence: 1 },
+        target: { value: "B", sequence: 3 },
+      },
+    ]);
+  });
+
+  test("same revision path snapshot compare returns no changes", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    const compare = await service.compareRevisionPaths({
+      unitId: "unit-1",
+      baseSequence: 2,
+      targetSequence: 2,
+    });
+
+    expect(compare).toMatchObject({
+      candidatePaths: [],
+      changes: [],
+    });
+  });
+
+  test("path snapshot compare stays sub-50ms for thousands of revisions", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    for (let sequence = 1; sequence <= 3000; sequence += 1) {
+      await service.insertUnitRevision({
+        payload: {
+          unitId: "unit-1",
+          sequence,
+          actorUserId: "user-1",
+          patch: {
+            translations: {
+              en: { [sequence % 2 === 0 ? "summary" : "title"]: sequence },
+            },
+          },
+          message: null,
+        },
+      });
+    }
+
+    const startedAt = performance.now();
+    const compare = await service.compareRevisionPaths({
+      unitId: "unit-1",
+      baseSequence: 1,
+      targetSequence: 3000,
+    });
+    const durationMs = performance.now() - startedAt;
+
+    expect(compare.changes.map((change) => change.path).sort()).toEqual([
+      "translations.en.summary",
+      "translations.en.title",
+    ]);
+    expect(durationMs).toBeLessThan(50);
   });
 
   test("single revision read returns content payload", async () => {
@@ -416,7 +696,8 @@ describe("RevisionService", () => {
     });
 
     expect(page.revisions).toHaveLength(1);
-    expect(page.nextCursor).toBe("revision-2");
+    expect(page.revisions[0]?.sequence).toBe(2);
+    expect(page.nextCursor).toBe("revision-1");
     expect(page.revisions[0]?.content).toBeUndefined();
   });
 

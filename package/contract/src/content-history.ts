@@ -280,6 +280,32 @@ export const singleUnitRevisionResponseSchema = t.Object({
 export type SingleUnitRevisionResponse =
   (typeof singleUnitRevisionResponseSchema)["static"];
 
+export const unitRevisionPathCompareEntrySchema = t.Object({
+  path: t.String(),
+  base: t.Object({
+    value: t.Nullable(t.Any()),
+    sequence: t.Optional(t.Nullable(t.Number())),
+  }),
+  target: t.Object({
+    value: t.Nullable(t.Any()),
+    sequence: t.Optional(t.Nullable(t.Number())),
+  }),
+});
+
+export type UnitRevisionPathCompareEntry =
+  (typeof unitRevisionPathCompareEntrySchema)["static"];
+
+export const unitRevisionPathCompareResponseSchema = t.Object({
+  unitId: t.String(),
+  baseSequence: t.Number(),
+  targetSequence: t.Number(),
+  candidatePaths: t.Array(t.String()),
+  changes: t.Array(unitRevisionPathCompareEntrySchema),
+});
+
+export type UnitRevisionPathCompareResponse =
+  (typeof unitRevisionPathCompareResponseSchema)["static"];
+
 export const structureEventSchema = t.Object({
   id: t.String(),
   unitId: t.String(),

@@ -4,6 +4,7 @@ import type {
   SingleUnitRevisionResponse,
   SingleStructureEventResponse,
   StructureEventTimelinePage,
+  UnitRevisionPathCompareResponse,
   UnitRevisionTimelinePage,
 } from "@rezics/contract";
 import { getApiConfig } from "../config";
@@ -37,6 +38,18 @@ export const historyApi = {
     return apiFetch<SingleUnitRevisionResponse>(
       historyEndpoint(
         `/unit/${encodePathPart(unitId)}/revisions/${encodePathPart(sequence)}${buildQueryString(params)}`,
+      ),
+    );
+  },
+
+  compareRevisionPaths(
+    unitId: string,
+    baseSequence: number,
+    targetSequence: number,
+  ): Promise<UnitRevisionPathCompareResponse> {
+    return apiFetch<UnitRevisionPathCompareResponse>(
+      historyEndpoint(
+        `/unit/${encodePathPart(unitId)}/revisions/compare/${encodePathPart(baseSequence)}/${encodePathPart(targetSequence)}`,
       ),
     );
   },
@@ -94,14 +107,10 @@ export const historyApi = {
     baseSequence: number,
     targetSequence: number,
   ) {
-    const [base, target] = await Promise.all([
-      historyApi.getUnitRevision(unitId, baseSequence, {
-        includeContent: true,
-      }),
-      historyApi.getUnitRevision(unitId, targetSequence, {
-        includeContent: true,
-      }),
-    ]);
-    return { unitId, base: base.revision, target: target.revision };
+    return historyApi.compareRevisionPaths(
+      unitId,
+      baseSequence,
+      targetSequence,
+    );
   },
 };

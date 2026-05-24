@@ -13,9 +13,9 @@ import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
 import {
   assertCanEditCollaborativeMetadata,
   applySparsePatch,
-  mapTranslationPatchPaths,
-  translationPatch,
-  uniquePatchPaths,
+  hasOwn,
+  mapActualTranslationPatchPaths,
+  translationPatchFromPaths,
   writeEditorialMetadataHistory,
 } from "./collaborative-metadata";
 
@@ -130,7 +130,9 @@ export class TranslationService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
-          patch: historyInput?.patch ?? translationPatch(language, data),
+          patch:
+            historyInput?.patch ??
+            translationPatchFromPaths(language, data, patchPaths),
           message: historyInput?.message ?? "unit.translation.upsert",
           restoreSource: historyInput?.restoreSource,
         });
@@ -216,61 +218,3 @@ export class TranslationService {
 }
 
 export const translationService = new TranslationService();
-
-function mapActualTranslationPatchPaths(
-  input: CreateTranslationInput | UpdateTranslationInput,
-  previous: UnitTranslation | null,
-  language: string,
-): string[] {
-  if (!previous) {
-    return mapTranslationPatchPaths(input, language);
-  }
-
-  const prefix = `translations.${language}`;
-  return uniquePatchPaths([
-    changedNullableString(input, previous, "title")
-      ? `${prefix}.title`
-      : undefined,
-    changedNullableString(input, previous, "subtitle")
-      ? `${prefix}.subtitle`
-      : undefined,
-    changedNullableString(input, previous, "summary")
-      ? `${prefix}.summary`
-      : undefined,
-    changedNullableJson(input, previous, "description")
-      ? `${prefix}.description`
-      : undefined,
-    hasOwn(input, "extra") && !sameJson(input.extra ?? null, previous.extra)
-      ? `${prefix}.extra`
-      : undefined,
-    hasOwn(input, "sourceReleaseUnitId") &&
-    (input.sourceReleaseUnitId ?? null) !==
-      (previous.sourceReleaseUnitId ?? null)
-      ? `${prefix}.sourceReleaseUnitId`
-      : undefined,
-  ]);
-}
-
-function changedNullableString(
-  input: CreateTranslationInput | UpdateTranslationInput,
-  previous: UnitTranslation,
-  key: "title" | "subtitle" | "summary",
-): boolean {
-  return hasOwn(input, key) && (input[key] ?? null) !== (previous[key] ?? null);
-}
-
-function changedNullableJson(
-  input: CreateTranslationInput | UpdateTranslationInput,
-  previous: UnitTranslation,
-  key: "description",
-): boolean {
-  return hasOwn(input, key) && !sameJson(input[key] ?? null, previous[key]);
-}
-
-function hasOwn<T extends object>(input: T, key: PropertyKey): key is keyof T {
-  return Object.prototype.hasOwnProperty.call(input, key);
-}
-
-function sameJson(left: unknown, right: unknown): boolean {
-  return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
-}

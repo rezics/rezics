@@ -2,12 +2,14 @@ import type {
   SingleStructureEventResponse,
   SingleUnitRevisionResponse,
   StructureEventTimelinePage,
+  UnitRevisionPathCompareResponse,
   UnitRevisionTimelinePage,
 } from "@rezics/contract";
 import {
   singleStructureEventResponseSchema,
   singleUnitRevisionResponseSchema,
   structureEventTimelinePageSchema,
+  unitRevisionPathCompareResponseSchema,
   unitRevisionTimelinePageSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -24,6 +26,12 @@ const unitHistoryParamsSchema = t.Object({
 const unitRevisionParamsSchema = t.Object({
   unitId: t.String(),
   sequence: t.Numeric(),
+});
+
+const revisionCompareParamsSchema = t.Object({
+  unitId: t.String(),
+  baseSequence: t.Numeric(),
+  targetSequence: t.Numeric(),
 });
 
 const structureEventParamsSchema = t.Object({
@@ -138,6 +146,23 @@ export const historyProxyApi = new Elysia({ prefix: "/history" })
       response: unitRevisionTimelinePageSchema,
       detail: {
         summary: "List app-facing Unit revision timeline",
+        tags: ["History"],
+      },
+    },
+  )
+  .get(
+    "/unit/:unitId/revisions/compare/:baseSequence/:targetSequence",
+    async ({ headers, params }): Promise<UnitRevisionPathCompareResponse> => {
+      await assertCanReadHistory(params.unitId, headers);
+      return fetchHistoryJson<UnitRevisionPathCompareResponse>(
+        `/history/unit/${encodePathPart(params.unitId)}/revisions/compare/${encodePathPart(params.baseSequence)}/${encodePathPart(params.targetSequence)}`,
+      );
+    },
+    {
+      params: revisionCompareParamsSchema,
+      response: unitRevisionPathCompareResponseSchema,
+      detail: {
+        summary: "Compare app-facing Unit revisions",
         tags: ["History"],
       },
     },

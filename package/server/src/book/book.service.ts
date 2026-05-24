@@ -31,6 +31,10 @@ import { assertLicenseSlug } from "@/unit/publication-policy";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import {
   assertCanEditCollaborativeMetadata,
+  hasOwn,
+  mapActualTranslationPatchPaths,
+  sameJson,
+  translationPatchFromPaths,
   uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
@@ -266,51 +270,64 @@ export class BookService {
       };
     });
 
-    const book = await prisma.book.create({
-      data: {
-        unit: {
-          create: {
-            userId: ownerUserId,
-            slugScope: ownerUserId,
-            type: UnitType.BOOK,
-            status: UnitStatus.PUBLISHED,
-            visibility: (req.visibility as UnitVisibility) ?? undefined,
-            licenseSlug: assertLicenseSlug(req.licenseSlug) ?? undefined,
-            workUnitId: req.workUnitId ?? undefined,
-            defaultLanguage: req.defaultLanguage ?? undefined,
-            rating: (req.rating as ContentRating | undefined) ?? undefined,
-            extra: undefined,
-            translations: translationData.length
-              ? { create: translationData }
-              : undefined,
-            fieldLocks:
-              req.creationMode === "wiki" || !actorUserId
-                ? undefined
-                : {
-                    create: {
-                      path: "*",
-                      lockedById: actorUserId,
-                      reason:
-                        "Personal creation starts closed to community edits.",
+    const book = await prisma.$transaction(async (tx) => {
+      const created = await tx.book.create({
+        data: {
+          unit: {
+            create: {
+              userId: ownerUserId,
+              slugScope: ownerUserId,
+              type: UnitType.BOOK,
+              status: UnitStatus.PUBLISHED,
+              visibility: (req.visibility as UnitVisibility) ?? undefined,
+              licenseSlug: assertLicenseSlug(req.licenseSlug) ?? undefined,
+              workUnitId: req.workUnitId ?? undefined,
+              defaultLanguage: req.defaultLanguage ?? undefined,
+              rating: (req.rating as ContentRating | undefined) ?? undefined,
+              extra: undefined,
+              translations: translationData.length
+                ? { create: translationData }
+                : undefined,
+              fieldLocks:
+                req.creationMode === "wiki" || !actorUserId
+                  ? undefined
+                  : {
+                      create: {
+                        path: "*",
+                        lockedById: actorUserId,
+                        reason:
+                          "Personal creation starts closed to community edits.",
+                      },
                     },
-                  },
+            },
+          },
+          isbn13: req.isbn13 ?? undefined,
+          publicationDate: req.publicationDate
+            ? new Date(req.publicationDate as any)
+            : undefined,
+          pageCount: req.pageCount ?? undefined,
+          textLength: req.textLength ?? 0,
+          chapterCount: 0,
+          formatKey: req.formatKey ?? undefined,
+          isLicensed: req.isLicensed ?? false,
+          extra: (req.extra ?? null) as Prisma.InputJsonValue,
+          contentStructure: {
+            create: {},
           },
         },
-        isbn13: req.isbn13 ?? undefined,
-        publicationDate: req.publicationDate
-          ? new Date(req.publicationDate as any)
-          : undefined,
-        pageCount: req.pageCount ?? undefined,
-        textLength: req.textLength ?? 0,
-        chapterCount: 0,
-        formatKey: req.formatKey ?? undefined,
-        isLicensed: req.isLicensed ?? false,
-        extra: (req.extra ?? null) as Prisma.InputJsonValue,
-        contentStructure: {
-          create: {},
-        },
-      },
-      include: bookInclude,
+        include: bookInclude,
+      });
+
+      if (actorUserId) {
+        await writeEditorialMetadataHistory(tx as any, {
+          unitId: created.unitId,
+          actorUserId,
+          patch: buildBookCreatePatch(req, ensuredTranslations, language),
+          message: "book.create",
+        });
+      }
+
+      return created;
     });
 
     await syncContentToMeili(book.unitId);
@@ -330,10 +347,43 @@ export class BookService {
       "patch" | "message" | "restoreSource"
     >,
   ): Promise<BookWithRelations> {
-    const patchPaths = mapBookUpdatePatchPaths(req);
-    const patch = buildBookUpdatePatch(req);
-
     const book = await prisma.$transaction(async (tx) => {
+      const current = await tx.book.findUniqueOrThrow({
+        where: { unitId },
+        select: {
+          isbn13: true,
+          publicationDate: true,
+          pageCount: true,
+          textLength: true,
+          formatKey: true,
+          isLicensed: true,
+          extra: true,
+          unit: {
+            select: {
+              defaultLanguage: true,
+              rating: true,
+              visibility: true,
+              licenseSlug: true,
+            },
+          },
+        },
+      });
+      const language = current.unit.defaultLanguage ?? "en";
+      const existingCoverTranslation =
+        req.coverUrl !== undefined
+          ? await tx.unitTranslation.findUnique({
+              where: { unitId_language: { unitId, language } },
+              select: { extra: true },
+            })
+          : null;
+      const patchPaths = mapBookEffectiveUpdatePatchPaths(
+        req,
+        current,
+        existingCoverTranslation?.extra ?? null,
+        language,
+      );
+      const patch = buildBookUpdatePatchFromPaths(req, patchPaths, language);
+
       if (patchPaths.length === 0) {
         return tx.book.findUniqueOrThrow({
           where: { unitId },
@@ -351,24 +401,10 @@ export class BookService {
       }
 
       if (req.coverUrl !== undefined) {
-        const unit = await tx.unit.findUniqueOrThrow({
-          where: { id: unitId },
-          select: { defaultLanguage: true },
-        });
-        const language = unit.defaultLanguage ?? "en";
-        const existing = await tx.unitTranslation.findUnique({
-          where: { unitId_language: { unitId, language } },
-          select: { extra: true },
-        });
         const nextExtra = withCoverUrl(
-          existing?.extra ?? undefined,
+          existingCoverTranslation?.extra ?? undefined,
           req.coverUrl ?? undefined,
         ) as Prisma.InputJsonValue;
-        patch.translations = {
-          ...((patch.translations as Record<string, unknown> | undefined) ??
-            {}),
-          [language]: { extra: { coverUrl: req.coverUrl ?? null } },
-        };
         await tx.unitTranslation.upsert({
           where: { unitId_language: { unitId, language } },
           create: { unitId, language, extra: nextExtra },
@@ -571,6 +607,59 @@ export class BookService {
 // Export singleton instance
 export const bookService = new BookService();
 
+export function buildBookCreatePatch(
+  req: CreateBookInput,
+  translations = req.translations ?? [],
+  defaultLanguage = req.defaultLanguage ?? "en",
+): Record<string, unknown> {
+  const extension: Record<string, unknown> = {};
+  if (req.isbn13 !== undefined) extension.isbn13 = req.isbn13;
+  if (req.publicationDate !== undefined)
+    extension.publicationDate = req.publicationDate;
+  if (req.pageCount !== undefined) extension.pageCount = req.pageCount;
+  if (req.textLength !== undefined) extension.textLength = req.textLength;
+  if (req.formatKey !== undefined) extension.formatKey = req.formatKey;
+  if (req.isLicensed !== undefined) extension.isLicensed = req.isLicensed;
+  if (req.extra !== undefined) extension.extra = req.extra;
+
+  const unit: Record<string, unknown> = {};
+  if (req.rating !== undefined) unit.rating = req.rating;
+  if (req.visibility !== undefined) unit.visibility = req.visibility;
+  if (req.licenseSlug !== undefined) unit.license = req.licenseSlug;
+
+  const translationPatch: Record<string, unknown> = {};
+  for (const tr of translations) {
+    const input = {
+      title: tr.title,
+      subtitle: tr.subtitle,
+      summary: tr.summary,
+      description: tr.description,
+      extra:
+        req.coverUrl !== undefined && tr.language === defaultLanguage
+          ? {
+              ...((tr.extra ?? undefined) as Record<string, unknown>),
+              coverUrl: req.coverUrl ?? null,
+            }
+          : tr.extra,
+      sourceReleaseUnitId: tr.sourceReleaseUnitId,
+    };
+    const paths = mapActualTranslationPatchPaths(input, null, tr.language);
+    const patch = translationPatchFromPaths(tr.language, input, paths)
+      .translations as Record<string, unknown>;
+    if (patch[tr.language] !== undefined) {
+      translationPatch[tr.language] = patch[tr.language];
+    }
+  }
+
+  return {
+    ...(Object.keys(extension).length > 0 ? { extension } : {}),
+    ...(Object.keys(unit).length > 0 ? { unit } : {}),
+    ...(Object.keys(translationPatch).length > 0
+      ? { translations: translationPatch }
+      : {}),
+  };
+}
+
 export function mapBookUpdatePatchPaths(req: UpdateBookInput) {
   return uniquePatchPaths([
     req.isbn13 !== undefined ? "extension.isbn13" : undefined,
@@ -587,26 +676,122 @@ export function mapBookUpdatePatchPaths(req: UpdateBookInput) {
   ]);
 }
 
-function buildBookUpdatePatch(req: UpdateBookInput): Record<string, unknown> {
+type CurrentBookMetadata = {
+  isbn13: string | null;
+  publicationDate: Date | string | null;
+  pageCount: number | null;
+  textLength: number;
+  formatKey: string | null;
+  isLicensed: boolean;
+  extra: unknown;
+  unit: {
+    rating: string;
+    visibility: string;
+    licenseSlug: string | null;
+    defaultLanguage: string | null;
+  };
+};
+
+function mapBookEffectiveUpdatePatchPaths(
+  req: UpdateBookInput,
+  current: CurrentBookMetadata,
+  currentTranslationExtra: unknown,
+  language: string,
+) {
+  return uniquePatchPaths([
+    hasOwn(req, "isbn13") && (req.isbn13 ?? null) !== current.isbn13
+      ? "extension.isbn13"
+      : undefined,
+    hasOwn(req, "publicationDate") &&
+    !sameDateValue(req.publicationDate ?? null, current.publicationDate)
+      ? "extension.publicationDate"
+      : undefined,
+    hasOwn(req, "pageCount") && (req.pageCount ?? null) !== current.pageCount
+      ? "extension.pageCount"
+      : undefined,
+    hasOwn(req, "textLength") && req.textLength !== current.textLength
+      ? "extension.textLength"
+      : undefined,
+    hasOwn(req, "formatKey") && (req.formatKey ?? null) !== current.formatKey
+      ? "extension.formatKey"
+      : undefined,
+    hasOwn(req, "isLicensed") && req.isLicensed !== current.isLicensed
+      ? "extension.isLicensed"
+      : undefined,
+    hasOwn(req, "extra") && !sameJson(req.extra ?? null, current.extra)
+      ? "extension.extra"
+      : undefined,
+    hasOwn(req, "coverUrl") &&
+    !sameJson(
+      withCoverUrl(
+        (currentTranslationExtra ?? undefined) as
+          | Record<string, unknown>
+          | undefined,
+        req.coverUrl ?? undefined,
+      ),
+      currentTranslationExtra,
+    )
+      ? `translations.${language}.extra`
+      : undefined,
+    hasOwn(req, "rating") && req.rating !== current.unit.rating
+      ? "unit.rating"
+      : undefined,
+    hasOwn(req, "visibility") && req.visibility !== current.unit.visibility
+      ? "unit.visibility"
+      : undefined,
+    hasOwn(req, "licenseSlug") &&
+    (assertLicenseSlug(req.licenseSlug) ?? null) !== current.unit.licenseSlug
+      ? "unit.license"
+      : undefined,
+  ]);
+}
+
+function buildBookUpdatePatchFromPaths(
+  req: UpdateBookInput,
+  paths: readonly string[],
+  language: string,
+): Record<string, unknown> {
+  const pathSet = new Set(paths);
   const extension: Record<string, unknown> = {};
-  if (req.isbn13 !== undefined) extension.isbn13 = req.isbn13;
-  if (req.publicationDate !== undefined)
+  if (pathSet.has("extension.isbn13")) extension.isbn13 = req.isbn13;
+  if (pathSet.has("extension.publicationDate"))
     extension.publicationDate = req.publicationDate;
-  if (req.pageCount !== undefined) extension.pageCount = req.pageCount;
-  if (req.textLength !== undefined) extension.textLength = req.textLength;
-  if (req.formatKey !== undefined) extension.formatKey = req.formatKey;
-  if (req.isLicensed !== undefined) extension.isLicensed = req.isLicensed;
-  if (req.extra !== undefined) extension.extra = req.extra;
+  if (pathSet.has("extension.pageCount")) extension.pageCount = req.pageCount;
+  if (pathSet.has("extension.textLength"))
+    extension.textLength = req.textLength;
+  if (pathSet.has("extension.formatKey")) extension.formatKey = req.formatKey;
+  if (pathSet.has("extension.isLicensed"))
+    extension.isLicensed = req.isLicensed;
+  if (pathSet.has("extension.extra")) extension.extra = req.extra;
 
   const unit: Record<string, unknown> = {};
-  if (req.rating !== undefined) unit.rating = req.rating;
-  if (req.visibility !== undefined) unit.visibility = req.visibility;
-  if (req.licenseSlug !== undefined) unit.license = req.licenseSlug;
+  if (pathSet.has("unit.rating")) unit.rating = req.rating;
+  if (pathSet.has("unit.visibility")) unit.visibility = req.visibility;
+  if (pathSet.has("unit.license")) unit.license = req.licenseSlug;
+
+  const translations =
+    pathSet.has(`translations.${language}.extra`) && req.coverUrl !== undefined
+      ? {
+          [language]: {
+            extra: { coverUrl: req.coverUrl ?? null },
+          },
+        }
+      : undefined;
 
   return {
     ...(Object.keys(extension).length > 0 ? { extension } : {}),
     ...(Object.keys(unit).length > 0 ? { unit } : {}),
+    ...(translations ? { translations } : {}),
   };
+}
+
+function sameDateValue(
+  left: string | Date | null,
+  right: string | Date | null,
+): boolean {
+  const normalize = (value: string | Date | null) =>
+    value == null ? null : new Date(value).toISOString();
+  return normalize(left) === normalize(right);
 }
 
 // ---------------------------------------------------------------------------

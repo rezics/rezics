@@ -1,5 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
-import { markdownContentDoc } from "@rezics/contract";
+import {
+  collectEditorialPatchLeafPaths,
+  isEditorialPathInScope,
+  markdownContentDoc,
+} from "@rezics/contract";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
@@ -185,6 +189,7 @@ describe("PostService.create realm/tag junction writes", () => {
 
     expect(realmUnitCreateMock).not.toHaveBeenCalled();
     expect(unitTagCreateMock).not.toHaveBeenCalled();
+    expect(historyOutboxCreateMock).not.toHaveBeenCalled();
   });
 
   test("creates RealmUnit rows for one realm", async () => {
@@ -613,6 +618,13 @@ describe("PostService wiki posts", () => {
     expect(postCreateArgs.data.authorUserId).toBe("actor-1");
     expect(postCreateArgs.data.kind).toBe("WIKI");
     expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
+    const patch =
+      historyOutboxCreateMock.mock.calls[0]?.[0].data.payload.revision.patch;
+    expect(
+      collectEditorialPatchLeafPaths(patch).every((path) =>
+        isEditorialPathInScope("wiki-post", path),
+      ),
+    ).toBe(true);
   });
 
   test("unlocked wiki content edit writes through collaborative authority", async () => {

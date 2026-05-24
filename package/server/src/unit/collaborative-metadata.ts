@@ -1,5 +1,6 @@
 import {
   HistoryOutboxPayloadKind,
+  collectEditorialPatchLeafPaths,
   isExternallyGoverned,
   type HistoryRestoreSource,
   type RezicsSessionClaims,
@@ -76,14 +77,7 @@ export function uniquePatchPaths(
 }
 
 export function mapTranslationPatchPaths(
-  input: {
-    title?: unknown;
-    subtitle?: unknown;
-    summary?: unknown;
-    description?: unknown;
-    extra?: unknown;
-    sourceReleaseUnitId?: unknown;
-  },
+  input: TranslationPatchInput,
   language?: string,
 ): string[] {
   const prefix = language ? `translations.${language}` : "translations";
@@ -101,14 +95,7 @@ export function mapTranslationPatchPaths(
 
 export function translationPatch(
   language: string,
-  input: {
-    title?: unknown;
-    subtitle?: unknown;
-    summary?: unknown;
-    description?: unknown;
-    extra?: unknown;
-    sourceReleaseUnitId?: unknown;
-  },
+  input: TranslationPatchInput,
 ): Record<string, unknown> {
   return {
     translations: {
@@ -117,6 +104,80 @@ export function translationPatch(
       ),
     },
   };
+}
+
+export type TranslationPatchInput = {
+  title?: unknown;
+  subtitle?: unknown;
+  summary?: unknown;
+  description?: unknown;
+  extra?: unknown;
+  sourceReleaseUnitId?: unknown;
+};
+
+export type PreviousTranslationState = {
+  title?: string | null;
+  subtitle?: string | null;
+  summary?: string | null;
+  description?: unknown;
+  extra?: unknown;
+  sourceReleaseUnitId?: string | null;
+};
+
+export function mapActualTranslationPatchPaths(
+  input: TranslationPatchInput,
+  previous: PreviousTranslationState | null,
+  language: string,
+): string[] {
+  if (!previous) {
+    return mapTranslationPatchPaths(input, language);
+  }
+
+  const prefix = `translations.${language}`;
+  return uniquePatchPaths([
+    changedNullableString(input, previous, "title")
+      ? `${prefix}.title`
+      : undefined,
+    changedNullableString(input, previous, "subtitle")
+      ? `${prefix}.subtitle`
+      : undefined,
+    changedNullableString(input, previous, "summary")
+      ? `${prefix}.summary`
+      : undefined,
+    hasOwn(input, "description") &&
+    !sameJson(input.description ?? null, previous.description)
+      ? `${prefix}.description`
+      : undefined,
+    hasOwn(input, "extra") && !sameJson(input.extra ?? null, previous.extra)
+      ? `${prefix}.extra`
+      : undefined,
+    hasOwn(input, "sourceReleaseUnitId") &&
+    (input.sourceReleaseUnitId ?? null) !==
+      (previous.sourceReleaseUnitId ?? null)
+      ? `${prefix}.sourceReleaseUnitId`
+      : undefined,
+  ]);
+}
+
+export function translationPatchFromPaths(
+  language: string,
+  input: TranslationPatchInput,
+  paths: readonly string[],
+): Record<string, unknown> {
+  const prefix = `translations.${language}.`;
+  const fields = new Set(
+    paths
+      .filter((path) => path.startsWith(prefix))
+      .map((path) => path.slice(prefix.length).split(".")[0]),
+  );
+  return translationPatch(
+    language,
+    Object.fromEntries(
+      Object.entries(input).filter(
+        ([key, value]) => value !== undefined && fields.has(key),
+      ),
+    ),
+  );
 }
 
 export function creditRolePatchPath(role: string): string {
@@ -134,31 +195,36 @@ export function creditRolePatchPath(role: string): string {
 }
 
 export function collectPatchLeafPaths(value: unknown, prefix = ""): string[] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return prefix ? [prefix] : [];
+  if (!prefix) {
+    return uniquePatchPaths(collectEditorialPatchLeafPaths(value));
   }
-
-  const paths: string[] = [];
-  for (const [key, nested] of Object.entries(
-    value as Record<string, unknown>,
-  )) {
-    if (key === "$unset") {
-      if (Array.isArray(nested)) {
-        paths.push(
-          ...nested.filter((path): path is string => typeof path === "string"),
-        );
-      }
-      continue;
-    }
-    const nextPrefix = prefix ? `${prefix}.${key}` : key;
-    const nestedPaths = collectPatchLeafPaths(nested, nextPrefix);
-    paths.push(...(nestedPaths.length > 0 ? nestedPaths : [nextPrefix]));
-  }
-  return uniquePatchPaths(paths);
+  const nested = collectEditorialPatchLeafPaths(value).map(
+    (path) => `${prefix}.${path}`,
+  );
+  return nested.length > 0 ? uniquePatchPaths(nested) : [prefix];
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+export function hasOwn<T extends object>(
+  input: T,
+  key: PropertyKey,
+): key is keyof T {
+  return Object.prototype.hasOwnProperty.call(input, key);
+}
+
+export function sameJson(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
+}
+
+function changedNullableString(
+  input: TranslationPatchInput,
+  previous: PreviousTranslationState,
+  key: "title" | "subtitle" | "summary",
+): boolean {
+  return hasOwn(input, key) && (input[key] ?? null) !== (previous[key] ?? null);
 }
 
 function cloneJsonValue(value: unknown): unknown {

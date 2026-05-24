@@ -16,8 +16,11 @@ import { deleteEntityFromMeili, syncEntityToMeili } from "@/meili/entity/sync";
 import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
+  hasOwn,
+  mapActualTranslationPatchPaths,
   mapTranslationPatchPaths,
-  translationPatch,
+  sameJson,
+  translationPatchFromPaths,
   uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
@@ -115,6 +118,15 @@ export class EntityService {
         },
       });
 
+      if (ctx.actor) {
+        await writeEditorialMetadataHistory(tx as any, {
+          unitId: unit.id,
+          actorUserId: ctx.callerUnitId,
+          patch: buildEntityCreatePatch(input),
+          message: "entity.create",
+        });
+      }
+
       return tx.entity.findUniqueOrThrow({
         where: { unitId: unit.id },
         include: entityInclude,
@@ -159,7 +171,40 @@ export class EntityService {
     }
 
     const row = await prisma.$transaction(async (tx) => {
-      const patchPaths = mapEntityUpdatePatchPaths(input);
+      const current = await tx.entity.findUniqueOrThrow({
+        where: { unitId },
+        select: {
+          kind: true,
+          avatar: true,
+          verified: true,
+          eligibleCreditRoles: true,
+          eligibleSubjectRoles: true,
+          unit: {
+            select: {
+              slug: true,
+              translations: {
+                select: {
+                  language: true,
+                  title: true,
+                  subtitle: true,
+                  summary: true,
+                  description: true,
+                  extra: true,
+                  sourceReleaseUnitId: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      const patchPaths = mapEntityEffectiveUpdatePatchPaths(input, current);
+      const patch = buildEntityUpdatePatchFromPaths(input, current, patchPaths);
+      if (patchPaths.length === 0) {
+        return tx.entity.findUniqueOrThrow({
+          where: { unitId },
+          include: entityInclude,
+        });
+      }
       if (ctx.actor) {
         await assertCanEditCollaborativeMetadata(
           tx as any,
@@ -235,7 +280,7 @@ export class EntityService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: ctx.callerUnitId,
-          patch: historyInput?.patch ?? buildEntityUpdatePatch(input),
+          patch: historyInput?.patch ?? patch,
           message: historyInput?.message ?? "entity.metadata.update",
           restoreSource: historyInput?.restoreSource,
         });
@@ -346,7 +391,7 @@ export function mapEntityUpdatePatchPaths(input: UpdateEntityInput): string[] {
     input.kind !== undefined ? "entity.kind" : undefined,
     input.avatar !== undefined ? "entity.avatar" : undefined,
     input.verified !== undefined ? "entity.verified" : undefined,
-    input.slug !== undefined ? "entity.slug" : undefined,
+    input.slug !== undefined ? "unit.slug" : undefined,
     input.eligibleCreditRoles !== undefined
       ? "entity.eligibleCreditRoles"
       : undefined,
@@ -359,30 +404,137 @@ export function mapEntityUpdatePatchPaths(input: UpdateEntityInput): string[] {
   ]);
 }
 
-function buildEntityUpdatePatch(
-  input: UpdateEntityInput,
+export function buildEntityCreatePatch(
+  input: CreateEntityInput,
 ): Record<string, unknown> {
   const entity: Record<string, unknown> = {};
   if (input.kind !== undefined) entity.kind = input.kind;
   if (input.avatar !== undefined) entity.avatar = input.avatar;
   if (input.verified !== undefined) entity.verified = input.verified;
-  if (input.slug !== undefined) entity.slug = input.slug;
-  if (input.eligibleCreditRoles !== undefined)
-    entity.eligibleCreditRoles = input.eligibleCreditRoles;
-  if (input.eligibleSubjectRoles !== undefined)
-    entity.eligibleSubjectRoles = input.eligibleSubjectRoles;
+  entity.eligibleCreditRoles = input.eligibleCreditRoles;
+  entity.eligibleSubjectRoles = input.eligibleSubjectRoles;
 
-  const translations = (input.translations ?? []).reduce<
-    Record<string, unknown>
-  >((acc, tr) => {
-    const patch = translationPatch(tr.language, tr).translations as Record<
-      string,
-      unknown
-    >;
-    return { ...acc, ...patch };
-  }, {});
+  const unit: Record<string, unknown> = {};
+  if (input.slug !== undefined) unit.slug = input.slug;
+
+  const translations = Object.fromEntries(
+    input.translations
+      .map((tr) => {
+        const paths = mapActualTranslationPatchPaths(tr, null, tr.language);
+        const patch = translationPatchFromPaths(tr.language, tr, paths)
+          .translations as Record<string, unknown>;
+        return [tr.language, patch[tr.language]];
+      })
+      .filter(([, patch]) => patch !== undefined),
+  );
 
   return {
+    ...(Object.keys(unit).length > 0 ? { unit } : {}),
+    ...(Object.keys(entity).length > 0 ? { entity } : {}),
+    ...(Object.keys(translations).length > 0 ? { translations } : {}),
+  };
+}
+
+type CurrentEntityMetadata = {
+  kind?: string | null;
+  avatar?: string | null;
+  verified?: boolean;
+  eligibleCreditRoles?: string[];
+  eligibleSubjectRoles?: string[];
+  unit?: {
+    slug?: string | null;
+    translations?: Array<{
+      language: string;
+      title?: string | null;
+      subtitle?: string | null;
+      summary?: string | null;
+      description?: unknown;
+      extra?: unknown;
+      sourceReleaseUnitId?: string | null;
+    }>;
+  };
+};
+
+function mapEntityEffectiveUpdatePatchPaths(
+  input: UpdateEntityInput,
+  current: CurrentEntityMetadata,
+): string[] {
+  const translationsByLanguage = new Map(
+    (current.unit?.translations ?? []).map((tr) => [tr.language, tr]),
+  );
+  return uniquePatchPaths([
+    hasOwn(input, "kind") && (input.kind ?? null) !== (current.kind ?? null)
+      ? "entity.kind"
+      : undefined,
+    hasOwn(input, "avatar") &&
+    (input.avatar ?? null) !== (current.avatar ?? null)
+      ? "entity.avatar"
+      : undefined,
+    hasOwn(input, "verified") && input.verified !== current.verified
+      ? "entity.verified"
+      : undefined,
+    hasOwn(input, "eligibleCreditRoles") &&
+    !sameJson(input.eligibleCreditRoles, current.eligibleCreditRoles ?? [])
+      ? "entity.eligibleCreditRoles"
+      : undefined,
+    hasOwn(input, "eligibleSubjectRoles") &&
+    !sameJson(input.eligibleSubjectRoles, current.eligibleSubjectRoles ?? [])
+      ? "entity.eligibleSubjectRoles"
+      : undefined,
+    hasOwn(input, "slug") &&
+    (input.slug ?? null) !== (current.unit?.slug ?? null)
+      ? "unit.slug"
+      : undefined,
+    ...(input.translations ?? []).flatMap((tr) =>
+      mapActualTranslationPatchPaths(
+        tr,
+        translationsByLanguage.get(tr.language) ?? null,
+        tr.language,
+      ),
+    ),
+  ]);
+}
+
+function buildEntityUpdatePatchFromPaths(
+  input: UpdateEntityInput,
+  current: CurrentEntityMetadata,
+  paths: readonly string[],
+): Record<string, unknown> {
+  const pathSet = new Set(paths);
+  const entity: Record<string, unknown> = {};
+  if (pathSet.has("entity.kind")) entity.kind = input.kind;
+  if (pathSet.has("entity.avatar")) entity.avatar = input.avatar;
+  if (pathSet.has("entity.verified")) entity.verified = input.verified;
+  if (pathSet.has("entity.eligibleCreditRoles")) {
+    entity.eligibleCreditRoles = input.eligibleCreditRoles;
+  }
+  if (pathSet.has("entity.eligibleSubjectRoles")) {
+    entity.eligibleSubjectRoles = input.eligibleSubjectRoles;
+  }
+
+  const unit: Record<string, unknown> = {};
+  if (pathSet.has("unit.slug")) unit.slug = input.slug;
+
+  const translationsByLanguage = new Map(
+    (current.unit?.translations ?? []).map((tr) => [tr.language, tr]),
+  );
+  const translations = Object.fromEntries(
+    (input.translations ?? [])
+      .map((tr) => {
+        const actualPaths = mapActualTranslationPatchPaths(
+          tr,
+          translationsByLanguage.get(tr.language) ?? null,
+          tr.language,
+        ).filter((path) => pathSet.has(path));
+        const patch = translationPatchFromPaths(tr.language, tr, actualPaths)
+          .translations as Record<string, unknown>;
+        return [tr.language, patch[tr.language]];
+      })
+      .filter(([, patch]) => patch !== undefined),
+  );
+
+  return {
+    ...(Object.keys(unit).length > 0 ? { unit } : {}),
     ...(Object.keys(entity).length > 0 ? { entity } : {}),
     ...(Object.keys(translations).length > 0 ? { translations } : {}),
   };
