@@ -17,7 +17,7 @@ tab name="history" {
 }
 
 tab name="job-runner" {
-    pane command="bun" cwd="../../../package/job-runner" start_suspended=true {
+    pane command="bun" cwd="../../../package/job-runner" start_suspended=false {
         args "dev"
     }
 }

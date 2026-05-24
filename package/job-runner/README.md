@@ -47,9 +47,11 @@ Run locally with:
 bun --filter=@rezics/job-runner run dev
 ```
 
-Use `JOB_RUNNER_ROLE=all` for local development. In the root `bun run dev`
-zellij layout, the `job-runner` tab exists but starts suspended; resume it only
-when you need queue-backed runtime sync.
+Use `JOB_RUNNER_ROLE=all` for local development. The root `bun run dev` zellij
+layout starts the `job-runner` tab automatically because runtime server
+mutations enqueue queue-backed search and history synchronization work. If this
+service is not running, those runtime writes either fail while enqueueing or
+leave derived state stale.
 
 ## Roles
 
