@@ -128,6 +128,8 @@ for Sequin; dev orchestration SHALL NOT start Sequin implicitly.
 - **THEN** it SHALL NOT contain a Sequin pane or tab
 - **AND** developers SHALL start Sequin through the external-service wrapper
   before starting job-runner ingress when CDC behavior is needed
+- **AND** application panes SHALL NOT be suspended solely because they depend on
+  external services
 
 ### Requirement: Job-runner HTTP ingress requires Sequin health
 
@@ -254,6 +256,16 @@ intended job-runner lanes.
   source DB, presence of a `CREATE ROLE ... WITH REPLICATION LOGIN` example,
   publication ownership, webhook secret alignment, Sequin health URL
   reachability, and job-runner reachability
+
+#### Scenario: Local development docs describe external dependency ownership
+
+- **WHEN** the repo-level development setup documentation is inspected
+- **THEN** it SHALL state that dev orchestration starts application processes,
+  not external dependencies
+- **AND** it SHALL instruct developers to start required external services
+  before running dependent application processes
+- **AND** it SHALL describe missing dependency startup failures as expected
+  diagnostics with actionable setup guidance
 
 #### Scenario: Operator verifies search, history, and slot health
 

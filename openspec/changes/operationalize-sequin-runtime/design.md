@@ -270,6 +270,22 @@ bun run service:sequin:health
 bun run service:sequin:down
 ```
 
+This follows the existing backend development model: dev orchestration starts
+application processes, while external dependencies such as Postgres,
+Meilisearch, Redis, and Sequin are provisioned separately. If a required
+external service is unavailable, the dependent application process should fail
+with an actionable startup error instead of being hidden or suspended by the
+layout.
+
+Documentation ownership:
+
+- `CONTRIBUTING.md` owns the repo-wide local development contract: start
+  required external services before `bun run dev`; failed dependency checks are
+  expected diagnostics, not a reason to suspend panes.
+- `tool/README.md` owns the command reference for repo-level external-service
+  wrappers.
+- Package READMEs own package-specific dependency details and role behavior.
+
 Alternative considered: always auto-start Sequin from `bun run dev`. Rejected
 because many local environments will not have Docker/Podman or logical
 replication enabled, and normal frontend/backend development should remain

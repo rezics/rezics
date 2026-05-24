@@ -108,21 +108,25 @@
 ## 5. Dev Orchestration
 
 - [ ] 5.1 Do NOT add a Sequin tab or pane to `tool/dev-script` layouts.
-- [ ] 5.2 Ensure dev docs explain that `@rezics/job-runner` `http`/`all`
-  requires Sequin to be started independently before the job-runner ingress
-  process starts.
-- [ ] 5.3 If an existing dev layout auto-starts `@rezics/job-runner`, decide
-  whether to make that pane suspended or document that CDC/job-runner
-  development starts from the Sequin script first. Do not auto-start Sequin
-  from zellij.
+- [ ] 5.2 Keep existing backend panes, including `@rezics/job-runner`, eligible
+  to auto-start from the dev layout. Do not suspend app panes solely because
+  they depend on external services.
+- [ ] 5.3 Treat missing external dependencies as application startup diagnostics:
+  the service should fail with an actionable error, and docs should tell
+  developers which external-service command to run.
 
 ## 6. Documentation
 
-- [ ] 6.1 Update `package/job-runner/README.md` with Sequin startup, runtime
+- [ ] 6.1 Update `CONTRIBUTING.md` Development Setup with the repo-wide external
+  dependency contract: `bun run dev` starts application processes, not external
+  dependencies; developers should start required external services first; a
+  service failing fast because Postgres, Meilisearch, Sequin, Redis, or another
+  external dependency is unavailable is expected behavior.
+- [ ] 6.2 Update `package/job-runner/README.md` with Sequin startup, runtime
   requirements (`SECRET_KEY_BASE`/`VAULT_KEY` generation), job-runner
   `http`/`all` Sequin health dependency, `worker` independence, and the single
   job-runner webhook ownership model.
-- [ ] 6.2 Update `package/job-runner/docs/operations.md` with:
+- [ ] 6.3 Update `package/job-runner/docs/operations.md` with:
   - `wal_level=logical` check and `CREATE ROLE ... WITH REPLICATION LOGIN
     PASSWORD '...'` SQL example for the source DB.
   - `init_sql` publication semantics: created once, and how to use `ALTER
@@ -137,12 +141,12 @@
     indefinite retry, only 2xx counts as success) and the implication that
     the job-runner handler MUST return 2xx for accepted and coalesced
     deliveries.
-- [ ] 6.3 Document why Sequin does not target `@rezics/history` directly and
+- [ ] 6.4 Document why Sequin does not target `@rezics/history` directly and
   when the history fallback poller may be used.
-- [ ] 6.4 Document Docker vs Podman runtime selection, the environment
+- [ ] 6.5 Document Docker vs Podman runtime selection, the environment
   variables operators can use to override defaults, and the rootless-Podman
   SELinux `:Z` mount caveat.
-- [ ] 6.5 Update `tool/README.md` with the `tool/external-services` boundary:
+- [ ] 6.6 Update `tool/README.md` with the `tool/external-services` boundary:
   lifecycle wrappers live in `tool/`, application packages expose env and
   health contracts, and app runtime code must not import tool helpers.
 
