@@ -13,17 +13,26 @@ history ingestion.
 
 ## What Changes
 
-- Replace the current Sequin scaffold with a Sequin IaC configuration that
-  defines the source database, replication slot/publication, HTTP endpoint, and
-  webhook sink for `@rezics/job-runner`.
-- Add production-capable compose orchestration for Sequin, Sequin's state
-  Postgres, and Redis, with a dev override for host-local Postgres and
-  host-local Bun services.
+- Replace the current Sequin scaffold with a Sequin v0.14.6 IaC configuration
+  (`sequin.yml`) that defines the source database, replication slot with
+  environment-suffixed naming, publication via `init_sql` with quoted Prisma
+  PascalCase identifiers, HTTP endpoint, and webhook sink for
+  `@rezics/job-runner`.
+- Add production-capable compose orchestration pinned to
+  `sequin/sequin:v0.14.6`, `postgres:16` (state DB only, no logical
+  replication needed on the state DB), and `redis:7`, with a dev override for
+  host-local Postgres and host-local Bun services.
 - Add a container runtime wrapper that supports both Podman and Docker, with a
-  deterministic runtime selection order and explicit environment overrides.
-- Add preflight and documentation for Postgres logical replication,
-  PascalCase/quoted table identifiers, publication ownership, slot naming,
-  secret alignment, and webhook verification.
+  deterministic runtime selection order, explicit environment overrides, and
+  Podman-specific volume-mount handling (`:Z` on SELinux hosts).
+- Add preflight and documentation for Postgres logical replication
+  (`wal_level=logical`, replication role SQL), publication ownership via
+  `init_sql` (run-once semantics plus `ALTER PUBLICATION` guidance for schema
+  changes), environment-suffixed slot naming, slot lifecycle on rollback
+  (`pg_drop_replication_slot` SQL), Sequin secret generation (`SECRET_KEY_BASE`
+  and `VAULT_KEY` via `openssl`), webhook authentication via
+  `encrypted_headers` with `x-internal-secret`, and `initial_backfill` as an
+  opt-in per-environment runbook step.
 - Keep Sequin delivery pointed at one webhook server:
   `@rezics/job-runner`. History ingestion remains handled by the
   `history.outbox.ingest` worker lane, not by direct Sequin delivery to

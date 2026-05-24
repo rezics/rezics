@@ -53,15 +53,42 @@ host-local services.
 
 - **WHEN** the base Sequin compose file is inspected
 - **THEN** it SHALL define Sequin, Sequin's state Postgres, and Redis services
-- **AND** it SHALL use persistent volumes for Sequin state dependencies
+- **AND** the Sequin service SHALL be pinned to an explicit semver image tag,
+  not `:latest`, and SHALL NOT use `pull_policy: always`
+- **AND** it SHALL use persistent volumes for the Sequin state Postgres and
+  Redis
 - **AND** it SHALL mount the checked-in Sequin config into the Sequin service
+  via `CONFIG_FILE_PATH`
+- **AND** the Sequin service SHALL declare a TCP healthcheck on port `7376`
+- **AND** the Sequin state Postgres SHALL NOT enable `wal_level=logical`,
+  since logical replication is required on the source DB only
+
+#### Scenario: Base compose does not include host-local defaults
+
+- **WHEN** the base compose file is used in production without the dev
+  override
+- **THEN** the Sequin source DB hostname SHALL come from a required
+  environment variable with no fallback value
+- **AND** the job-runner webhook URL SHALL come from a required environment
+  variable with no fallback to host-gateway aliases
 
 #### Scenario: Development override handles host-local services
 
 - **WHEN** the development compose override is used
 - **THEN** Sequin SHALL be able to reach a host-local source Postgres and a
-  host-local Bun job-runner
+  host-local Bun job-runner via `host.docker.internal` (Docker) or
+  `host.containers.internal` (Podman)
 - **AND** local UI/API ports MAY be exposed for operator inspection
+
+#### Scenario: Required Sequin secrets are environment-supplied
+
+- **WHEN** the Sequin compose is started
+- **THEN** `SECRET_KEY_BASE` and `VAULT_KEY` SHALL be supplied through
+  environment variables
+- **AND** the env.example file SHALL document the openssl commands used to
+  generate them
+- **AND** the runtime wrapper SHALL refuse to start when either variable
+  matches a documented example value
 
 ### Requirement: Sequin startup supports Docker and Podman
 
@@ -84,28 +111,82 @@ operator-overridable.
 - **AND** it SHALL print clear setup guidance if no supported runtime is
   available
 
-### Requirement: Sequin publication handles Prisma table identifiers
+### Requirement: Sequin owns publication and slot via init_sql
 
-The Sequin source publication setup SHALL account for Prisma's quoted PascalCase
-table names. Publication SQL or equivalent setup SHALL preserve exact table
-names such as `"HistoryOutbox"` and `"UnitTranslation"`.
+The Sequin configuration SHALL request automatic creation of the replication
+slot and publication, and SHALL provide the publication SQL inline through
+Sequin's `publication.init_sql` so that Prisma's quoted PascalCase table names
+are preserved at creation time.
+
+#### Scenario: Slot and publication are created by Sequin on first boot
+
+- **WHEN** Sequin boots against a source database that has no existing
+  Rezics replication slot or publication
+- **THEN** the configuration SHALL set both `slot.create_if_not_exists: true`
+  and `publication.create_if_not_exists: true`
+- **AND** the configured database role SHALL have replication and CREATE
+  permissions on the source database
 
 #### Scenario: Publication SQL quotes PascalCase table names
 
-- **WHEN** publication setup SQL is generated or documented for Prisma-managed
-  tables
-- **THEN** PascalCase table identifiers SHALL be double-quoted
+- **WHEN** the `publication.init_sql` block is inspected
+- **THEN** every Prisma-managed table SHALL be referenced as
+  `public."<PascalCaseName>"` with double quotes
 - **AND** unquoted lowercase-equivalent table references SHALL NOT be used for
   those tables
 
-#### Scenario: YAML table filters are verified before relying on them
+#### Scenario: Sink include_tables is defense-in-depth
 
-- **WHEN** Sequin sink-level table filters are used for Prisma PascalCase
-  tables
-- **THEN** the implementation SHALL verify the exact expected table string
-  format through Sequin config validation or startup logs
-- **AND** publication setup SHALL remain the authoritative table boundary until
-  that verification is complete
+- **WHEN** the webhook sink configuration is inspected
+- **THEN** `source.include_tables` SHALL list the routed tables as
+  `public.<PascalCaseName>` strings preserved case-sensitively by YAML
+- **AND** the publication boundary defined via `init_sql` SHALL remain the
+  authoritative table filter; missing tables in `include_tables` MUST NOT be
+  the only mechanism preventing unintended delivery
+
+### Requirement: Replication slot lifecycle is operationally explicit
+
+The system SHALL name replication slots with an environment suffix to prevent
+cross-environment collision and SHALL document the slot lifecycle for both
+pause and decommission rollback paths.
+
+#### Scenario: Slot names include environment suffix
+
+- **WHEN** the Sequin configuration declares the source database slot
+- **THEN** the slot name SHALL incorporate an environment identifier (for
+  example `rezics_sequin_slot_${ENV}`)
+- **AND** dev, staging, and production deployments SHALL be able to point at
+  the same source database without slot-name collision
+
+#### Scenario: Rollback documents slot drop and retention
+
+- **WHEN** the operations documentation describes Sequin rollback
+- **THEN** it SHALL include the `pg_drop_replication_slot` and
+  `DROP PUBLICATION` SQL to run when Sequin is decommissioned
+- **AND** it SHALL document `max_slot_wal_keep_size` (or equivalent guidance)
+  as the safety net when Sequin is paused but expected to resume
+
+### Requirement: Sequin webhook delivery semantics are documented
+
+The system SHALL document Sequin's at-least-once webhook delivery semantics so
+that the job-runner handler contract aligns with what Sequin actually retries.
+
+#### Scenario: Job-runner returns 2xx for accepted and coalesced deliveries
+
+- **WHEN** the job-runner webhook receives a valid Sequin payload that
+  produces zero or more enqueued commands
+- **THEN** it SHALL return a 2xx response
+- **AND** duplicate deliveries of the same Sequin idempotency key SHALL also
+  return 2xx, so Sequin does not retry the slot indefinitely
+
+#### Scenario: Operations doc describes slot growth risk
+
+- **WHEN** the Sequin operations documentation is inspected
+- **THEN** it SHALL state that Sequin retries the webhook with exponential
+  backoff (cap ~3 minutes) indefinitely
+- **AND** it SHALL state that extended job-runner unavailability can grow the
+  source DB WAL through the replication slot until the slot is dropped or the
+  sink is paused
 
 ### Requirement: Sequin runtime has documented preflight and verification
 
@@ -116,14 +197,16 @@ intended job-runner lanes.
 #### Scenario: Operator checks prerequisites before startup
 
 - **WHEN** an operator follows the Sequin operations documentation
-- **THEN** they SHALL be instructed to verify logical replication support,
-  replication-capable credentials, publication ownership, webhook secret
-  alignment, and job-runner reachability
+- **THEN** they SHALL be instructed to verify `wal_level=logical` on the
+  source DB, presence of a `CREATE ROLE ... WITH REPLICATION LOGIN` example,
+  publication ownership, webhook secret alignment, and job-runner reachability
 
-#### Scenario: Operator verifies search and history delivery
+#### Scenario: Operator verifies search, history, and slot health
 
 - **WHEN** Sequin is running against a non-production environment
 - **THEN** the documented verification SHALL include at least one
-  search-affecting table change
+  search-affecting table change reaching the appropriate search lane
 - **AND** it SHALL include at least one `HistoryOutbox` insert routed to
   `history.outbox.ingest`
+- **AND** it SHALL include a `pg_replication_slots` check confirming the slot
+  is active and `confirmed_flush_lsn` is advancing
