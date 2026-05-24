@@ -14,7 +14,9 @@ import {
   useAppendRealmExtraMutation,
   useRemoveRealmExtraMutation,
 } from "@rezics/api/realm/realm-extra.mutations";
+import { patchTranslationDetailQueries } from "@rezics/api/react-query/cache-coherence";
 import { unitApi } from "@rezics/api/unit/unit";
+import { unitKeys } from "@rezics/api/unit/unit.keys";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import {
   contentDocMarkdownFallback,
@@ -25,7 +27,7 @@ import {
   type RealmExtraListKey,
 } from "@rezics/contract";
 import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PinboardEmptyState } from "../components/PinboardEmptyState";
@@ -117,6 +119,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
 
   const append = useAppendRealmExtraMutation();
   const removeMut = useRemoveRealmExtraMutation();
+  const queryClient = useQueryClient();
 
   const openCreate = useCallback(() => {
     setEditingEntry(null);
@@ -193,7 +196,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
       for (const tr of translations) {
         const language = toLanguage(tr.language);
         if (!language) continue;
-        await unitApi.upsertTranslation(unitId, language, {
+        const translation = await unitApi.upsertTranslation(unitId, language, {
           title: tr.title,
           subtitle: tr.subtitle,
           summary: tr.summary,
@@ -201,11 +204,19 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
             ? markdownContentDoc(tr.description)
             : undefined,
         });
+        await patchTranslationDetailQueries({
+          queryClient,
+          detailKeys: [unitKeys.detail(unitId)],
+          translation,
+        });
       }
+      await queryClient.invalidateQueries({
+        queryKey: unitKeys.detail(unitId),
+      });
       toast.success(m.pinboard_editor_saved());
       refetch();
     },
-    [refetch],
+    [queryClient, refetch],
   );
 
   return (

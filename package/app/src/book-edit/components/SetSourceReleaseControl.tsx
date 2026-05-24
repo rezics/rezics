@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/api/book/book";
+import { bookKeys, bookQueries } from "@rezics/api/book/book";
 import { useSetTranslationSourceMutation } from "@rezics/api/unit/translation-source.mutations";
 import type { BookDTO } from "@rezics/contract";
 import {
@@ -37,7 +37,9 @@ export const SetSourceReleaseControl: React.FC<
     enabled: Boolean(book.unitId),
   });
 
-  const mutation = useSetTranslationSourceMutation();
+  const mutation = useSetTranslationSourceMutation({
+    affectedDetailKeys: () => [bookKeys.detail(book.unitId)],
+  });
 
   const candidates = (siblings?.books ?? []).filter(
     (b) => b.unitId !== book.unitId,

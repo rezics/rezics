@@ -11,12 +11,94 @@ import type {
   UpdateUnitInput,
 } from "@rezics/contract";
 import {
+  type QueryClient,
+  type QueryKey,
   type UseMutationOptions,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import {
+  patchTranslationDetailQueries,
+  removeTranslationFromDetailQueries,
+} from "../react-query/cache-coherence";
 import { unitApi } from "./unit.api";
 import { unitKeys } from "./unit.keys";
+
+type UpsertTranslationVariables = {
+  unitId: string;
+  language: string;
+  input: UpdateTranslationInput | EditorialPatchSubmission;
+};
+
+type DeleteTranslationVariables = {
+  unitId: string;
+  language: string;
+};
+
+interface AffectedDetailKeysOption<TData, TVariables> {
+  affectedDetailKeys?: (
+    variables: TVariables,
+    data: TData,
+  ) => readonly QueryKey[];
+}
+
+type UpsertTranslationMutationOptions = Omit<
+  UseMutationOptions<UnitTranslationDTO, Error, UpsertTranslationVariables>,
+  "mutationFn"
+> &
+  AffectedDetailKeysOption<UnitTranslationDTO, UpsertTranslationVariables>;
+
+type DeleteTranslationMutationOptions = Omit<
+  UseMutationOptions<{ message: string }, Error, DeleteTranslationVariables>,
+  "mutationFn"
+> &
+  AffectedDetailKeysOption<{ message: string }, DeleteTranslationVariables>;
+
+export async function syncUpsertTranslationMutationCache({
+  queryClient,
+  variables,
+  data,
+  affectedDetailKeys,
+}: {
+  queryClient: QueryClient;
+  variables: UpsertTranslationVariables;
+  data: UnitTranslationDTO;
+  affectedDetailKeys?: UpsertTranslationMutationOptions["affectedDetailKeys"];
+}) {
+  const detailKeys = affectedDetailKeys?.(variables, data) ?? [];
+  await patchTranslationDetailQueries({
+    queryClient,
+    detailKeys,
+    translation: data,
+  });
+  queryClient.invalidateQueries({
+    queryKey: unitKeys.detail(variables.unitId),
+  });
+  queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
+}
+
+export async function syncDeleteTranslationMutationCache({
+  queryClient,
+  variables,
+  data,
+  affectedDetailKeys,
+}: {
+  queryClient: QueryClient;
+  variables: DeleteTranslationVariables;
+  data: { message: string };
+  affectedDetailKeys?: DeleteTranslationMutationOptions["affectedDetailKeys"];
+}) {
+  const detailKeys = affectedDetailKeys?.(variables, data) ?? [];
+  await removeTranslationFromDetailQueries({
+    queryClient,
+    detailKeys,
+    language: variables.language,
+  });
+  queryClient.invalidateQueries({
+    queryKey: unitKeys.detail(variables.unitId),
+  });
+  queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
+}
 
 /**
  * Mutation for creating a unit
@@ -106,31 +188,23 @@ export function useDeleteUnitMutation(
  * Mutation for upserting a translation row on a unit
  */
 export function useUpsertTranslationMutation(
-  options?: Omit<
-    UseMutationOptions<
-      UnitTranslationDTO,
-      Error,
-      {
-        unitId: string;
-        language: string;
-        input: UpdateTranslationInput | EditorialPatchSubmission;
-      }
-    >,
-    "mutationFn"
-  >,
+  options?: UpsertTranslationMutationOptions,
 ) {
   const queryClient = useQueryClient();
+  const { affectedDetailKeys, ...mutationOptions } = options ?? {};
 
   return useMutation({
     mutationFn: ({ unitId, language, input }) =>
       unitApi.upsertTranslation(unitId, language, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: unitKeys.detail(variables.unitId),
+    ...mutationOptions,
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await syncUpsertTranslationMutationCache({
+        queryClient,
+        variables,
+        data,
+        affectedDetailKeys,
       });
-      queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
@@ -139,27 +213,23 @@ export function useUpsertTranslationMutation(
  * Mutation for deleting a translation row on a unit
  */
 export function useDeleteTranslationMutation(
-  options?: Omit<
-    UseMutationOptions<
-      { message: string },
-      Error,
-      { unitId: string; language: string }
-    >,
-    "mutationFn"
-  >,
+  options?: DeleteTranslationMutationOptions,
 ) {
   const queryClient = useQueryClient();
+  const { affectedDetailKeys, ...mutationOptions } = options ?? {};
 
   return useMutation({
     mutationFn: ({ unitId, language }) =>
       unitApi.deleteTranslation(unitId, language),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: unitKeys.detail(variables.unitId),
+    ...mutationOptions,
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      await syncDeleteTranslationMutationCache({
+        queryClient,
+        variables,
+        data,
+        affectedDetailKeys,
       });
-      queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }

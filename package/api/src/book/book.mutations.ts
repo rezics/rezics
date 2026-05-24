@@ -13,6 +13,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { preserveCachedTranslations } from "../react-query/cache-coherence";
 import { bookApi } from "./book.api";
 import { bookKeys } from "./book.keys";
 
@@ -60,14 +61,18 @@ export function useUpdateBookMutation(
   return useMutation({
     mutationFn: ({ unitId, input }) => bookApi.update(unitId, input),
     ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
+    onSuccess: async (data, variables, onMutateResult, context) => {
       // Update the cache for this specific book
-      queryClient.setQueryData(bookKeys.detail(variables.unitId), data);
+      const detailKey = bookKeys.detail(variables.unitId);
+      await queryClient.cancelQueries({ queryKey: detailKey, exact: true });
+      queryClient.setQueryData<BookResponse>(detailKey, (current) =>
+        preserveCachedTranslations(data, current),
+      );
 
       // Invalidate lists to ensure they're refreshed
       queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
 
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }

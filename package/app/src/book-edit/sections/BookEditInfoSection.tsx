@@ -1,4 +1,5 @@
 import {
+  bookKeys,
   bookQueries,
   useCreateBookMutation,
   useUpdateBookMutation,
@@ -309,6 +310,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   });
 
   const upsertTranslationMutation = useUpsertTranslationMutation({
+    affectedDetailKeys: () => (bookId ? [bookKeys.detail(bookId)] : []),
     onError: (err) => {
       setDialogState({
         title: m.page_book_edit_info_toast_update_failed_title(),
@@ -319,7 +321,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     },
   });
 
-  const deleteTranslationMutation = useDeleteTranslationMutation();
+  const deleteTranslationMutation = useDeleteTranslationMutation({
+    affectedDetailKeys: () => (bookId ? [bookKeys.detail(bookId)] : []),
+  });
   const batchAuthorMutation = useEntityAttributionBatchMutation();
 
   async function handleSubmit() {
@@ -432,24 +436,18 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       },
     };
 
-    const saveOperations: Promise<unknown>[] = [
-      upsertTranslationMutation.mutateAsync({
-        unitId: bookId,
-        language: editor.selectedLanguage,
-        input: applyRestoreSource({ patch: translationPatch }),
-      }),
-    ];
-
     if (Object.keys(metadataPatch).length > 0) {
-      saveOperations.unshift(
-        updateBookMutation.mutateAsync({
-          unitId: bookId,
-          input: applyRestoreSource({ patch: metadataPatch }),
-        }),
-      );
+      await updateBookMutation.mutateAsync({
+        unitId: bookId,
+        input: applyRestoreSource({ patch: metadataPatch }),
+      });
     }
 
-    await Promise.all(saveOperations);
+    await upsertTranslationMutation.mutateAsync({
+      unitId: bookId,
+      language: editor.selectedLanguage,
+      input: applyRestoreSource({ patch: translationPatch }),
+    });
     editor.clearDraft(editor.selectedLanguage);
   }
 

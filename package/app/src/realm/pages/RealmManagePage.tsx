@@ -1,5 +1,6 @@
 import { useServerPermission } from "@rezics/api/hooks";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
+import { patchTranslationDetailQueries } from "@rezics/api/react-query/cache-coherence";
 import {
   myRealmMembershipQuery,
   realmDetailQuery,
@@ -114,11 +115,20 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await unitApi.upsertTranslation(realmId, selectedLanguage, {
-        title,
-        description: markdownContentDoc(description),
-      });
+      const translation = await unitApi.upsertTranslation(
+        realmId,
+        selectedLanguage,
+        {
+          title,
+          description: markdownContentDoc(description),
+        },
+      );
 
+      await patchTranslationDetailQueries({
+        queryClient,
+        detailKeys: [realmKeys.detail(realmId)],
+        translation,
+      });
       await queryClient.invalidateQueries({
         queryKey: realmKeys.detail(realmId),
       });
