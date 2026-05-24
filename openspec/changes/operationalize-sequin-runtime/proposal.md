@@ -18,13 +18,13 @@ history ingestion.
   environment-suffixed naming, publication via `init_sql` with quoted Prisma
   PascalCase identifiers, HTTP endpoint, and webhook sink for
   `@rezics/job-runner`.
-- Add production-capable compose orchestration pinned to
-  `sequin/sequin:v0.14.6`, `postgres:16` (state DB only, no logical
+- Add production-capable compose orchestration under `tool/external-services`
+  pinned to `sequin/sequin:v0.14.6`, `postgres:16` (state DB only, no logical
   replication needed on the state DB), and `redis:7`, with a dev override for
   host-local Postgres and host-local Bun services.
-- Add a container runtime wrapper that supports both Podman and Docker, with a
-  deterministic runtime selection order, explicit environment overrides, and
-  Podman-specific volume-mount handling (`:Z` on SELinux hosts).
+- Add a repo-level external-service wrapper that supports both Podman and
+  Docker, with a deterministic runtime selection order, explicit environment
+  overrides, and Podman-specific volume-mount handling (`:Z` on SELinux hosts).
 - Add preflight and documentation for Postgres logical replication
   (`wal_level=logical`, replication role SQL), publication ownership via
   `init_sql` (run-once semantics plus `ALTER PUBLICATION` guidance for schema
@@ -37,6 +37,10 @@ history ingestion.
   `@rezics/job-runner`. History ingestion remains handled by the
   `history.outbox.ingest` worker lane, not by direct Sequin delivery to
   `@rezics/history`.
+- Make `@rezics/job-runner` fail fast on startup when running the `http` or
+  `all` role and the configured Sequin health endpoint is unavailable. The
+  `worker` role does not check Sequin so it can continue draining existing
+  pg-boss jobs during CDC runtime outages.
 - No breaking API changes are expected. The change alters infrastructure
   configuration and local/production runtime commands, not application request
   contracts.
@@ -57,10 +61,12 @@ history ingestion.
 ## Impact
 
 - Affected packages and paths:
-  - `package/job-runner`: Sequin configuration, compose files, runtime wrapper,
-    env examples, and operational docs.
-  - `tool/dev-script`: local zellij orchestration may expose a Sequin tab or
-    entry point without making ordinary app development depend on CDC.
+  - `package/job-runner`: Sequin IaC configuration, startup health check, env
+    examples, and operational docs.
+  - `tool/external-services`: Sequin compose files, Docker/Podman runtime
+    wrapper, and shared external-service lifecycle helpers.
+  - `tool/dev-script`: local zellij orchestration remains independent of Sequin
+    startup and must not auto-start the CDC runtime.
   - root scripts in `package.json`: may add a convenience command for Sequin
     runtime startup.
   - `openspec/specs/job-runner-sync-infrastructure/spec.md`: modified

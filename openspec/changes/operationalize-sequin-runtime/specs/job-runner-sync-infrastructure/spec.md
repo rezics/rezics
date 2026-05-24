@@ -47,7 +47,9 @@ normal queued ingestion.
 
 The system SHALL provide a compose-based Sequin runtime with a reusable base
 topology for production-capable deployment and a development override for
-host-local services.
+host-local services. Compose files and lifecycle wrappers SHALL live under
+repo-level external-service tooling, while the Sequin IaC config remains owned
+by `@rezics/job-runner`.
 
 #### Scenario: Base compose defines durable Sequin dependencies
 
@@ -59,9 +61,17 @@ host-local services.
   Redis
 - **AND** it SHALL mount the checked-in Sequin config into the Sequin service
   via `CONFIG_FILE_PATH`
-- **AND** the Sequin service SHALL declare a TCP healthcheck on port `7376`
+- **AND** the Sequin service SHALL declare a healthcheck against Sequin's
+  `/health` endpoint on port `7376`
 - **AND** the Sequin state Postgres SHALL NOT enable `wal_level=logical`,
   since logical replication is required on the source DB only
+
+#### Scenario: Compose lifecycle lives in tool external-services
+
+- **WHEN** the Sequin compose files and startup wrapper are inspected
+- **THEN** they SHALL live under `tool/external-services`
+- **AND** the Sequin IaC file SHALL remain under `package/job-runner/sequin`
+- **AND** application runtime code SHALL NOT import `tool/` lifecycle helpers
 
 #### Scenario: Base compose does not include host-local defaults
 
@@ -94,7 +104,8 @@ host-local services.
 
 The Sequin startup command SHALL use a wrapper that can launch the compose stack
 with either Docker or Podman. Runtime selection SHALL be deterministic and
-operator-overridable.
+operator-overridable. The wrapper SHALL be the explicit lifecycle entry point
+for Sequin; dev orchestration SHALL NOT start Sequin implicitly.
 
 #### Scenario: Explicit runtime override is honored
 
@@ -110,6 +121,48 @@ operator-overridable.
   compose runtime in its documented order
 - **AND** it SHALL print clear setup guidance if no supported runtime is
   available
+
+#### Scenario: Dev orchestration does not start Sequin
+
+- **WHEN** the local dev layout is inspected
+- **THEN** it SHALL NOT contain a Sequin pane or tab
+- **AND** developers SHALL start Sequin through the external-service wrapper
+  before starting job-runner ingress when CDC behavior is needed
+
+### Requirement: Job-runner HTTP ingress requires Sequin health
+
+`@rezics/job-runner` SHALL fail fast on startup when its configured role exposes
+Sequin webhook ingress and the configured Sequin health endpoint is
+unavailable. Worker-only processes SHALL NOT require Sequin health at startup.
+
+#### Scenario: HTTP role fails when Sequin is unavailable
+
+- **WHEN** `@rezics/job-runner` starts with `JOB_RUNNER_ROLE=http`
+- **AND** the configured `SEQUIN_HEALTH_URL` does not return a 2xx response
+- **THEN** startup SHALL fail before exposing `/webhooks/sequin`
+- **AND** the failure message SHALL include the checked URL and guidance to
+  start or configure the Sequin runtime
+
+#### Scenario: All role fails when Sequin is unavailable
+
+- **WHEN** `@rezics/job-runner` starts with `JOB_RUNNER_ROLE=all`
+- **AND** the configured `SEQUIN_HEALTH_URL` does not return a 2xx response
+- **THEN** startup SHALL fail before exposing `/webhooks/sequin`
+- **AND** workers SHALL NOT be registered as part of that failed process
+
+#### Scenario: Worker role does not check Sequin
+
+- **WHEN** `@rezics/job-runner` starts with `JOB_RUNNER_ROLE=worker`
+- **THEN** startup SHALL NOT require `SEQUIN_HEALTH_URL` to be reachable
+- **AND** the worker process SHALL be able to drain existing pg-boss jobs while
+  Sequin is stopped or restarting
+
+#### Scenario: HTTP ingress starts when Sequin is healthy
+
+- **WHEN** `@rezics/job-runner` starts with `JOB_RUNNER_ROLE=http` or
+  `JOB_RUNNER_ROLE=all`
+- **AND** the configured `SEQUIN_HEALTH_URL` returns a 2xx response
+- **THEN** startup SHALL continue and expose `/webhooks/sequin`
 
 ### Requirement: Sequin owns publication and slot via init_sql
 
@@ -199,7 +252,8 @@ intended job-runner lanes.
 - **WHEN** an operator follows the Sequin operations documentation
 - **THEN** they SHALL be instructed to verify `wal_level=logical` on the
   source DB, presence of a `CREATE ROLE ... WITH REPLICATION LOGIN` example,
-  publication ownership, webhook secret alignment, and job-runner reachability
+  publication ownership, webhook secret alignment, Sequin health URL
+  reachability, and job-runner reachability
 
 #### Scenario: Operator verifies search, history, and slot health
 

@@ -31,20 +31,21 @@
 
 ## 2. Compose Runtime
 
-- [ ] 2.1 Add `package/job-runner/sequin/compose.yml` with:
+- [ ] 2.1 Add `tool/external-services/sequin/compose.yml` with:
   - `sequin` service on `sequin/sequin:v0.14.6` (pinned, no
     `pull_policy: always`), port `7376`, env vars
     `PG_HOSTNAME`/`PG_DATABASE`/`PG_USERNAME`/`PG_PASSWORD`/`PG_POOL_SIZE`/
     `REDIS_URL`/`SECRET_KEY_BASE`/`VAULT_KEY`/`CONFIG_FILE_PATH=/config/sequin.yml`,
-    read-only bind mount of `./sequin.yml:/config/sequin.yml:ro`, TCP
-    healthcheck on 7376, restart policy `unless-stopped`.
+    read-only bind mount of
+    `package/job-runner/sequin/sequin.yml:/config/sequin.yml:ro`, HTTP
+    healthcheck against `/health` on 7376, restart policy `unless-stopped`.
   - `sequin-postgres` on `postgres:16`, persistent volume, healthcheck via
     `pg_isready`; do NOT pass `-c wal_level=logical` (state DB only).
   - `sequin-redis` on `redis:7`, persistent volume.
   - `depends_on` with `condition: service_healthy` for `sequin-postgres` and
     `condition: service_started` for `sequin-redis`.
   - Do NOT include the reference compose's Prometheus/Grafana services.
-- [ ] 2.2 Add `package/job-runner/sequin/compose.dev.yml` overriding:
+- [ ] 2.2 Add `tool/external-services/sequin/compose.dev.yml` overriding:
   - Expose Sequin UI on `7376` and Sequin-postgres on `7377` to the host.
   - Default `SOURCE_DB_HOST` to `host.docker.internal` (overridden by
     wrapper to `host.containers.internal` for Podman).
@@ -62,44 +63,66 @@
 
 ## 3. Runtime Wrapper and Scripts
 
-- [ ] 3.1 Add `package/job-runner/scripts/sequin.ts` (Bun) that resolves
-  `compose -f compose.yml -f compose.dev.yml` for local dev, `-f compose.yml`
-  for production, and wraps `up`/`down`/`logs`/`config plan`/`config apply`.
-- [ ] 3.2 Implement deterministic runtime selection:
+- [ ] 3.1 Add `tool/external-services/compose-runtime.ts` for shared
+  Docker/Podman compose detection and command execution, without importing it
+  from application packages.
+- [ ] 3.2 Add `tool/external-services/sequin.ts` (Bun) that resolves
+  `compose -f sequin/compose.yml -f sequin/compose.dev.yml` for local dev,
+  `-f sequin/compose.yml` for production, and wraps `up`/`down`/`logs`/
+  `health`/`config plan`/`config apply`.
+- [ ] 3.3 Implement deterministic runtime selection:
   explicit `CONTAINER_RUNTIME` → `podman compose` → `podman-compose` →
   `docker compose`. Distinguish "unknown runtime name" vs "name known but
   binary not on PATH" in failure messages. (Legacy hyphenated `docker-compose`
   v1 is intentionally out of scope; the wrapper SHALL print explicit guidance
   if it detects only v1.)
-- [ ] 3.3 Add runtime-specific defaults for local host aliases:
+- [ ] 3.4 Add runtime-specific defaults for local host aliases:
   `host.containers.internal` for Podman, `host.docker.internal` for Docker.
-- [ ] 3.4 On Podman + Linux with SELinux enabled, rewrite the config
+- [ ] 3.5 On Podman + Linux with SELinux enabled, rewrite the config
   bind-mount with the `:Z` suffix to avoid permission denied on the mounted
   `sequin.yml`.
-- [ ] 3.5 Refuse to start when `SECRET_KEY_BASE` or `VAULT_KEY` equals the
+- [ ] 3.6 Refuse to start when `SECRET_KEY_BASE` or `VAULT_KEY` equals the
   documented example value, with a clear `openssl rand` suggestion.
-- [ ] 3.6 Make wrapper failures actionable when no supported runtime is
+- [ ] 3.7 Make wrapper failures actionable when no supported runtime is
   available or when compose startup exits unsuccessfully.
-- [ ] 3.7 Add package and root scripts for starting Sequin through the
-  wrapper (e.g. `bun --filter=@rezics/job-runner run sequin:up`,
-  root-level `bun run sequin:up`).
+- [ ] 3.8 Add root scripts for Sequin lifecycle through the wrapper (e.g.
+  `bun run service:sequin:up`, `service:sequin:down`,
+  `service:sequin:logs`, `service:sequin:health`). Do not add package-local
+  scripts that make `@rezics/job-runner` own the runtime lifecycle.
 
-## 4. Dev Orchestration
+## 4. Job-runner Sequin Dependency Check
 
-- [ ] 4.1 Add a Sequin entry to `tool/dev-script/layouts/backend.kdl` with
-  `start_suspended=true` so ordinary `bun run dev` does not hard-fail when
-  Docker/Podman or logical replication prerequisites are absent.
-- [ ] 4.2 Ensure ordinary `bun run dev` remains usable when Docker/Podman or
-  logical replication prerequisites are absent.
-- [ ] 4.3 Document how to start Sequin independently from the root script
-  when CDC behavior needs to be tested.
+- [ ] 4.1 Add `SEQUIN_HEALTH_URL` to `package/job-runner/src/env.ts` and
+  `.env.example`, with local default guidance pointing at the Sequin `/health`
+  endpoint exposed by the external-service wrapper.
+- [ ] 4.2 Add a small job-runner startup preflight that requests
+  `SEQUIN_HEALTH_URL` and requires a 2xx response.
+- [ ] 4.3 Run the Sequin preflight only when `JOB_RUNNER_ROLE` is `http` or
+  `all`; do not run it for `worker`.
+- [ ] 4.4 Make preflight failure messages actionable: include the checked URL,
+  the role that required it, and the root command used to start Sequin.
+- [ ] 4.5 Add unit coverage for `http`/`all` failing when Sequin is
+  unreachable, `http`/`all` passing when Sequin is healthy, and `worker`
+  skipping the check.
 
-## 5. Documentation
+## 5. Dev Orchestration
 
-- [ ] 5.1 Update `package/job-runner/README.md` with Sequin startup, runtime
-  requirements (`SECRET_KEY_BASE`/`VAULT_KEY` generation), and the single
+- [ ] 5.1 Do NOT add a Sequin tab or pane to `tool/dev-script` layouts.
+- [ ] 5.2 Ensure dev docs explain that `@rezics/job-runner` `http`/`all`
+  requires Sequin to be started independently before the job-runner ingress
+  process starts.
+- [ ] 5.3 If an existing dev layout auto-starts `@rezics/job-runner`, decide
+  whether to make that pane suspended or document that CDC/job-runner
+  development starts from the Sequin script first. Do not auto-start Sequin
+  from zellij.
+
+## 6. Documentation
+
+- [ ] 6.1 Update `package/job-runner/README.md` with Sequin startup, runtime
+  requirements (`SECRET_KEY_BASE`/`VAULT_KEY` generation), job-runner
+  `http`/`all` Sequin health dependency, `worker` independence, and the single
   job-runner webhook ownership model.
-- [ ] 5.2 Update `package/job-runner/docs/operations.md` with:
+- [ ] 6.2 Update `package/job-runner/docs/operations.md` with:
   - `wal_level=logical` check and `CREATE ROLE ... WITH REPLICATION LOGIN
     PASSWORD '...'` SQL example for the source DB.
   - `init_sql` publication semantics: created once, and how to use `ALTER
@@ -114,27 +137,33 @@
     indefinite retry, only 2xx counts as success) and the implication that
     the job-runner handler MUST return 2xx for accepted and coalesced
     deliveries.
-- [ ] 5.3 Document why Sequin does not target `@rezics/history` directly and
+- [ ] 6.3 Document why Sequin does not target `@rezics/history` directly and
   when the history fallback poller may be used.
-- [ ] 5.4 Document Docker vs Podman runtime selection, the environment
+- [ ] 6.4 Document Docker vs Podman runtime selection, the environment
   variables operators can use to override defaults, and the rootless-Podman
   SELinux `:Z` mount caveat.
+- [ ] 6.5 Update `tool/README.md` with the `tool/external-services` boundary:
+  lifecycle wrappers live in `tool/`, application packages expose env and
+  health contracts, and app runtime code must not import tool helpers.
 
-## 6. Validation
+## 7. Validation
 
-- [ ] 6.1 Run `openspec validate operationalize-sequin-runtime --strict`.
-- [ ] 6.2 Run format/check commands for changed TypeScript and Markdown files.
-- [ ] 6.3 Boot the Sequin runtime with `sequin/sequin:v0.14.6` and verify the
+- [ ] 7.1 Run `openspec validate operationalize-sequin-runtime --strict`.
+- [ ] 7.2 Run format/check commands for changed TypeScript and Markdown files.
+- [ ] 7.3 Boot the Sequin runtime with `sequin/sequin:v0.14.6` and verify the
   config loads cleanly from `CONFIG_FILE_PATH`, slot + publication are
   created, and startup logs show no schema errors.
-- [ ] 6.4 Manually verify unauthorized `/webhooks/sequin` requests are
+- [ ] 7.4 Manually verify unauthorized `/webhooks/sequin` requests are
   rejected by job-runner.
-- [ ] 6.5 Manually verify one search-affecting table change reaches a search
+- [ ] 7.5 Manually verify one search-affecting table change reaches a search
   job lane through Sequin and job-runner.
-- [ ] 6.6 Manually verify one `HistoryOutbox` insert reaches
+- [ ] 7.6 Manually verify one `HistoryOutbox` insert reaches
   `history.outbox.ingest` through Sequin and job-runner.
-- [ ] 6.7 Query `pg_replication_slots` and confirm the configured slot is
+- [ ] 7.7 Query `pg_replication_slots` and confirm the configured slot is
   active and `confirmed_flush_lsn` advances after handling test traffic.
-- [ ] 6.8 Stop the job-runner, push one source-DB change, observe Sequin
+- [ ] 7.8 Stop the job-runner, push one source-DB change, observe Sequin
   retrying with exp backoff; restart job-runner and confirm the message is
   redelivered exactly-once-effectively (idempotency key dedup).
+- [ ] 7.9 Verify `JOB_RUNNER_ROLE=http` and `all` fail startup when
+  `SEQUIN_HEALTH_URL` is unreachable, and verify `JOB_RUNNER_ROLE=worker`
+  starts without checking Sequin.

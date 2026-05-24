@@ -31,9 +31,14 @@ queued ingestion is owned by `@rezics/job-runner` through the
   that defines source database, publication/slot, HTTP endpoint, and sink.
 - Keep a single Sequin webhook target: `@rezics/job-runner`.
 - Support Docker and Podman without hard-coding one container runtime.
+- Manage Sequin lifecycle from repo-level external-service tooling under
+  `tool/`, not from package-local application code or the dev zellij layout.
+- Make `@rezics/job-runner` fail fast when its HTTP ingress role depends on
+  Sequin but the configured Sequin runtime is unavailable.
 - Document and preflight the Postgres logical replication requirements,
   including Prisma's PascalCase table names and quoted publication SQL.
-- Keep ordinary `bun run dev` usable when Sequin prerequisites are absent.
+- Keep ordinary dev orchestration independent of Sequin lifecycle management;
+  developers start Sequin explicitly when testing CDC or job-runner ingress.
 
 **Non-Goals:**
 
@@ -43,6 +48,7 @@ queued ingestion is owned by `@rezics/job-runner` through the
 - Do not introduce application API contract changes.
 - Do not make production secrets or database credentials part of checked-in
   files.
+- Do not make application packages import repo-level `tool/` code at runtime.
 
 ## Decisions
 
@@ -133,7 +139,8 @@ removes the need for an external templating step.
 
 ### Decision 3: Base compose is production-capable, dev behavior is an override
 
-Use a base compose file for the reusable runtime topology:
+Use a base compose file under `tool/external-services` for the reusable runtime
+topology:
 
 - `sequin` pinned to `sequin/sequin:v0.14.6`, port `7376`
 - `sequin-postgres` on `postgres:16` (state DB only, does NOT need
@@ -141,12 +148,12 @@ Use a base compose file for the reusable runtime topology:
   playground reuses the state DB as the source DB)
 - `sequin-redis` on `redis:7`
 - persistent volumes for `sequin-postgres` and `sequin-redis`
-- `CONFIG_FILE_PATH=/config/sequin.yml` with config mounted read-only
+- `CONFIG_FILE_PATH=/config/sequin.yml` with
+  `package/job-runner/sequin/sequin.yml` mounted read-only
 - required Sequin env vars sourced from environment:
   `PG_HOSTNAME`, `PG_DATABASE`, `PG_USERNAME`, `PG_PASSWORD`, `REDIS_URL`,
   `SECRET_KEY_BASE`, `VAULT_KEY`
-- TCP healthcheck on port `7376` (Sequin does not expose a documented HTTP
-  health endpoint)
+- HTTP healthcheck against Sequin's `/health` endpoint on port `7376`
 - `depends_on` with `condition: service_healthy` for the state postgres
 
 Use a dev override for host-local assumptions:
@@ -159,10 +166,11 @@ Use a dev override for host-local assumptions:
 Alternative considered: a dev-only compose file. Rejected because production
 would need to rediscover the same topology and env contract.
 
-### Decision 4: Runtime wrapper chooses Podman or Docker deterministically
+### Decision 4: External-service wrapper chooses Podman or Docker deterministically
 
-The Sequin startup command will run through a small Bun wrapper instead of
-embedding `docker compose` directly in zellij. Selection order:
+The Sequin startup command will run through a small Bun wrapper under
+`tool/external-services` instead of embedding `docker compose` directly in
+package scripts or zellij. Selection order:
 
 1. Use explicit `CONTAINER_RUNTIME` if set.
 2. Prefer `podman compose` when available.
@@ -188,6 +196,19 @@ publish official Podman guidance:
 Alternative considered: always use Docker. Rejected because some target
 environments use Podman and the script can reasonably abstract the compose
 entrypoint without changing the Sequin topology.
+
+The wrapper boundary is intentionally repo-level:
+
+- `tool/external-services` owns lifecycle commands such as `up`, `down`,
+  `logs`, `health`, `config plan`, and `config apply`.
+- `package/job-runner/sequin/sequin.yml` owns Sequin's application contract:
+  source tables, publication, endpoint, and sink definition.
+- Application packages SHALL NOT import `tool/` helpers. They observe external
+  runtime dependencies through environment variables and health checks.
+
+This keeps Sequin as the first external runtime using the pattern without
+forcing a premature generic registry for future services such as Meilisearch,
+Redis, object storage, or production database helpers.
 
 ### Decision 5: Sequin owns publication and slot creation through init_sql
 
@@ -236,19 +257,55 @@ script. Rejected because keeping it inside `sequin.yml` means a single applied
 config is enough to bootstrap a fresh environment, and Sequin's
 `create_if_not_exists` semantics make the SQL safely idempotent.
 
-### Decision 6: Sequin is visible in dev orchestration but not a hard default
+### Decision 6: Sequin is not started by dev orchestration
 
-The local zellij layout may include a Sequin tab, but it should be suspended or
-otherwise opt-in by default unless the implementation proves prerequisites can
-be checked without noisy failure. Developers can run a dedicated root script
-when they need CDC.
+The local zellij layout and `bun run dev` SHALL NOT start Sequin. Developers
+and operators start Sequin through the dedicated external-service script when
+they need CDC behavior:
+
+```text
+bun run service:sequin:up
+bun run service:sequin:logs
+bun run service:sequin:health
+bun run service:sequin:down
+```
 
 Alternative considered: always auto-start Sequin from `bun run dev`. Rejected
 because many local environments will not have Docker/Podman or logical
 replication enabled, and normal frontend/backend development should remain
 available without CDC.
 
-### Decision 7: Slot lifecycle is part of rollback
+Alternative considered: add a suspended Sequin zellij tab. Rejected because it
+still couples CDC infrastructure lifecycle to the app dev layout and scales
+poorly as more production external services get wrapper scripts.
+
+### Decision 7: Job-runner HTTP ingress fails fast when Sequin is unavailable
+
+`@rezics/job-runner` SHALL check the configured Sequin health endpoint during
+startup when `JOB_RUNNER_ROLE` is `http` or `all`. If the check fails,
+job-runner exits with an actionable error that tells the operator which Sequin
+URL was checked and how to start or configure the runtime.
+
+The `worker` role SHALL NOT perform this check. Workers do not receive Sequin
+webhooks directly, and they should be able to drain existing pg-boss jobs while
+Sequin is down or being restarted.
+
+```text
+JOB_RUNNER_ROLE=http/all
+  -> require SEQUIN_HEALTH_URL
+  -> GET SEQUIN_HEALTH_URL must return 2xx
+  -> then expose /webhooks/sequin
+
+JOB_RUNNER_ROLE=worker
+  -> no Sequin startup check
+  -> continue processing existing pg-boss queues
+```
+
+This dependency check is independent of environment. Development and production
+use the same rule; the difference is only which `SEQUIN_HEALTH_URL` value they
+provide.
+
+### Decision 8: Slot lifecycle is part of rollback
 
 Sequin advances the source DB's `confirmed_flush_lsn` once a message is either
 delivered to its sink or persisted to Sequin's internal state Postgres. With
@@ -272,7 +329,7 @@ Operational implications baked into the runtime and docs:
   endpoint MUST return 2xx for successfully enqueued (or coalesced)
   commands, including duplicates, so retries do not stall the slot.
 
-### Decision 8: Initial backfill is an opt-in runbook step
+### Decision 9: Initial backfill is an opt-in runbook step
 
 Sequin's sink-level `initial_backfill` fires once when a sink is first created
 and is ignored on subsequent updates. The checked-in `sequin.yml` SHALL NOT
@@ -306,6 +363,10 @@ duplicates.
   also needs SELinux relabel suffixes on bind mounts. -> Mitigation: wrapper
   centralizes runtime detection, default host alias selection, and (on Podman +
   SELinux) `:Z` suffixes for mounted config.
+- [Risk] A developer starts `@rezics/job-runner` before Sequin and sees a
+  startup failure. -> Mitigation: this is intentional fail-fast behavior for
+  the `http`/`all` roles; docs and error messages point to
+  `bun run service:sequin:up` and `SEQUIN_HEALTH_URL`.
 - [Risk] Production deployments accidentally use dev host defaults. ->
   Mitigation: keep production-capable compose in the base file and put
   host-local defaults (`host.docker.internal`, exposed UI port) in the dev
@@ -338,20 +399,25 @@ duplicates.
 
 1. Add the Sequin IaC config (with `init_sql` publication and PascalCase
    quoting), compose base pinned to `sequin/sequin:v0.14.6`, compose dev
-   override, env examples (`SECRET_KEY_BASE`, `VAULT_KEY`, source DB vars,
-   webhook secret), and runtime wrapper.
-2. Add root and package scripts for starting Sequin through the wrapper.
-3. Add or adjust the local zellij Sequin entry as opt-in/suspended by default.
-4. Document source database logical replication setup
+   override under `tool/external-services`, env examples (`SECRET_KEY_BASE`,
+   `VAULT_KEY`, source DB vars, webhook secret), and runtime wrapper.
+2. Add root scripts for starting, stopping, logging, and health-checking Sequin
+   through the external-service wrapper.
+3. Add `@rezics/job-runner` startup preflight for `http`/`all` roles using
+   `SEQUIN_HEALTH_URL`; leave `worker` role independent of Sequin health.
+4. Keep local zellij/dev orchestration from starting Sequin; document the
+   explicit script developers run before starting job-runner ingress.
+5. Document source database logical replication setup
    (`wal_level=logical`, replication-capable role SQL), publication ownership
    via `init_sql`, slot lifecycle and naming convention with environment
    suffix, secret generation commands, and runtime selection.
-5. Verify locally with: (a) an unauthorized webhook request rejected by
+6. Verify locally with: (a) an unauthorized webhook request rejected by
    job-runner, (b) one search-affecting table change reaching
    `search.sync.fast`/`search.sync.slow`, (c) one `HistoryOutbox` insert
-   reaching `history.outbox.ingest`, and (d) `pg_replication_slots` shows the
-   slot active with `confirmed_flush_lsn` advancing.
-6. For production, deploy Sequin with production env values, decide
+   reaching `history.outbox.ingest`, (d) `pg_replication_slots` shows the slot
+   active with `confirmed_flush_lsn` advancing, and (e) job-runner `http`/`all`
+   startup fails clearly when Sequin is unavailable.
+7. For production, deploy Sequin with production env values, decide
    per-environment whether to enable `initial_backfill` on the
    `HistoryOutbox`-only sink for first apply, and run the same verification
    against non-production data before enabling CDC for live use.
@@ -374,8 +440,10 @@ DROP PUBLICATION rezics_sequin_pub_${ENV};
   Hub as of this proposal).
 - [resolved] Publication ownership: Sequin owns it via `init_sql` +
   `create_if_not_exists: true`, with quoted PascalCase identifiers.
-- Should the zellij tab be suspended by default or hidden behind an explicit
-  environment flag?
+- [resolved] Dev orchestration: Sequin is not added to zellij/dev layout; it is
+  started explicitly through `tool/external-services`.
+- [resolved] Job-runner dependency check: only `http` and `all` roles require
+  Sequin health at startup; `worker` role does not.
 - Whether to surface a one-shot `sequin config plan`/`apply` step in the
   wrapper for production change-management, or rely on container restart to
   re-apply config.
