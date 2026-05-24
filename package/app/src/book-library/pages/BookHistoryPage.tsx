@@ -1228,12 +1228,17 @@ function editorialPathLabel(path: string) {
   const translationMatch = /^translations\.([^.]+)\.(.+)$/.exec(path);
   if (translationMatch) {
     const [, language, field] = translationMatch;
-    const fieldLabel =
-      field === "title"
+    const [rootField, ...leafSegments] = field.split(".");
+    const rootLabel =
+      rootField === "title"
         ? m.book_fields_title()
-        : field === "description"
+        : rootField === "description"
           ? m.book_description()
-          : slotLabel(field);
+          : slotLabel(rootField);
+    const fieldLabel =
+      leafSegments.length > 0
+        ? `${rootLabel} · ${leafSegments.join(".")}`
+        : rootLabel;
     return `${language} ${fieldLabel}`;
   }
 

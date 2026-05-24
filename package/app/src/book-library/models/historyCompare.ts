@@ -41,7 +41,12 @@ export type HistoryCompareResult = {
   changes: HistoryFieldChange[];
 };
 
-const MARKDOWN_FIELD_NAMES = new Set(["summary", "description", "body"]);
+const TEXT_SOURCE_FIELD_NAMES = new Set([
+  "summary",
+  "description",
+  "body",
+  "content",
+]);
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -64,6 +69,25 @@ function toPartType(part: { added?: boolean; removed?: boolean }) {
   if (part.added) return "added" as const;
   if (part.removed) return "removed" as const;
   return "equal" as const;
+}
+
+function textSourceLeaf(
+  path: string,
+  before: unknown,
+  after: unknown,
+): { before: string; after: string } | null {
+  if (typeof before !== "string" || typeof after !== "string") return null;
+
+  const segments = path.split(".");
+  const fieldName = segments.at(-1) ?? path;
+  if (TEXT_SOURCE_FIELD_NAMES.has(fieldName)) return { before, after };
+
+  const isNestedSourceLeaf =
+    fieldName === "source" &&
+    segments
+      .slice(0, -1)
+      .some((segment) => TEXT_SOURCE_FIELD_NAMES.has(segment));
+  return isNestedSourceLeaf ? { before, after } : null;
 }
 
 export function createMarkdownLineDiff(
@@ -154,18 +178,15 @@ function compareKnownRecord(
     const beforeValue = before[key];
     const afterValue = after[key];
     if (stableStringify(beforeValue) === stableStringify(afterValue)) continue;
-    if (
-      MARKDOWN_FIELD_NAMES.has(key) &&
-      typeof beforeValue === "string" &&
-      typeof afterValue === "string"
-    ) {
+    const textSource = textSourceLeaf(fieldPath, beforeValue, afterValue);
+    if (textSource) {
       changes.push({
         kind: "markdown",
         path: fieldPath,
-        before: beforeValue,
-        after: afterValue,
-        lineParts: createMarkdownLineDiff(beforeValue, afterValue),
-        inlineParts: createInlineTokenDiff(beforeValue, afterValue),
+        before: textSource.before,
+        after: textSource.after,
+        lineParts: createMarkdownLineDiff(textSource.before, textSource.after),
+        inlineParts: createInlineTokenDiff(textSource.before, textSource.after),
       });
     } else if (
       beforeValue == null ||
@@ -260,20 +281,22 @@ export function compareRevisionPathSnapshots(
     const after = entry.target.value;
     if (stableStringify(before) === stableStringify(after)) return [];
 
-    const fieldName = entry.path.split(".").at(-1) ?? entry.path;
-    if (
-      MARKDOWN_FIELD_NAMES.has(fieldName) &&
-      typeof before === "string" &&
-      typeof after === "string"
-    ) {
+    const textSource = textSourceLeaf(entry.path, before, after);
+    if (textSource) {
       return [
         {
           kind: "markdown",
           path: entry.path,
-          before,
-          after,
-          lineParts: createMarkdownLineDiff(before, after),
-          inlineParts: createInlineTokenDiff(before, after),
+          before: textSource.before,
+          after: textSource.after,
+          lineParts: createMarkdownLineDiff(
+            textSource.before,
+            textSource.after,
+          ),
+          inlineParts: createInlineTokenDiff(
+            textSource.before,
+            textSource.after,
+          ),
         },
       ];
     }
