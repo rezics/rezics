@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines `PostKind.WIKI`, a collaborative post kind that reuses the existing `Unit(type=POST)` and `Post` primitives rather than a separate wiki-page model. Wiki posts route through the collaborative authority gate using `post.body` as a field key, emit history through the same transactional outbox as other collaborative edits, and expose a wiki-aware editor and timeline UI. Ordinary post kinds (`POST`, `REVIEW`, `REMARK`, `REPLY`, `EXCERPT`, `CHAPTER`) remain author/owner-controlled, and `Post.isLocked` retains its existing thread-lock semantics distinct from `UnitFieldLock`.
+Defines `PostKind.WIKI`, a collaborative post kind that reuses the existing `Unit(type=POST)` and `Post` primitives rather than a separate wiki-page model. Wiki posts route through the collaborative authority gate using `post.content` / `post.content.main` as field keys, emit history through the same transactional outbox as other collaborative edits, and expose a wiki-aware editor and timeline UI. Ordinary post kinds (`POST`, `REVIEW`, `REMARK`, `REPLY`, `EXCERPT`, `CHAPTER`) remain author/owner-controlled, and `Post.isLocked` retains its existing thread-lock semantics distinct from `UnitFieldLock`.
 
 ## Requirements
 
@@ -30,17 +30,39 @@ Wiki posts MAY target another Unit through `Post.targetUnitId`. When present, th
 - **THEN** the created Post SHALL store the book Unit id in `targetUnitId`
 
 ### Requirement: Wiki post collaborative edit path
-Wiki post body edits SHALL use the collaborative Unit field authority gate with changed field key `post.body`. Locked wiki post bodies SHALL reject community edits; unlocked wiki post bodies SHALL accept community edits on collaborative endpoints.
 
-#### Scenario: Community edits unlocked wiki post
-- **WHEN** a wiki post has no `UnitFieldLock("*")` or `UnitFieldLock("post.body")`
-- **AND** a community editor submits a wiki post body edit through the wiki edit endpoint
+Wiki post content edits SHALL submit and persist full `ContentDoc` JSON. The supported collaborative edit surface in this change is only `content.main`; slots, layout, inline directives, and unknown JSON parts are preserved but not processed. The primary runtime keys SHALL be `post.content` and `post.content.main`. Slot/layout field keys are reserved for follow-up work and SHALL NOT be enforced or emitted by this change. The legacy field key `post.body` SHALL NOT be used.
+
+#### Scenario: Community edits unlocked wiki post main content
+
+- **WHEN** a wiki post has no `UnitFieldLock("*")`, `UnitFieldLock("post.content")`, or `UnitFieldLock("post.content.main")`
+- **AND** a community editor submits full `ContentDoc` JSON whose `main` value changes the stored main content
 - **THEN** the edit SHALL be accepted after authority checks
 
-#### Scenario: Locked wiki post blocks community edit
-- **WHEN** a wiki post has a `UnitFieldLock("post.body")`
-- **AND** a community editor submits a body edit
-- **THEN** the edit SHALL be rejected with locked field metadata
+#### Scenario: Locked main content blocks community edit
+
+- **WHEN** a wiki post has `UnitFieldLock("post.content.main")`
+- **AND** a community editor submits full `ContentDoc` JSON whose `main` value changes the stored main content
+- **THEN** the edit SHALL be rejected with locked-field metadata
+
+#### Scenario: Slot-only edit is persisted but not supported
+
+- **WHEN** a community editor submits full `ContentDoc` JSON that changes only `content.slots.infobox`
+- **THEN** the server MAY persist the submitted JSON
+- **AND** this change SHALL NOT render, index, lock-check, or emit history for that slot-only change
+
+#### Scenario: Main null clears wiki main content
+
+- **WHEN** a community editor submits full `ContentDoc` JSON with `main = null`
+- **AND** the stored `content.main` is not null or absent
+- **THEN** the edit SHALL clear main content after authority checks
+- **AND** the emitted changed field key SHALL be `post.content.main`
+
+#### Scenario: Repeated main is history no-op
+
+- **WHEN** a community editor submits full `ContentDoc` JSON whose `main` value is structurally equal to the stored `content.main`
+- **THEN** the server SHALL NOT emit a history outbox row for main content
+- **AND** non-main JSON differences MAY still be persisted because create/update stores full JSON
 
 ### Requirement: Ordinary posts remain non-collaborative
 Ordinary post kinds SHALL retain existing author/owner permission semantics. `POST`, `REVIEW`, `REMARK`, `REPLY`, `EXCERPT`, and `CHAPTER` SHALL NOT be community-editable merely because field locks are absent.
@@ -51,18 +73,29 @@ Ordinary post kinds SHALL retain existing author/owner permission semantics. `PO
 - **THEN** the edit SHALL still be rejected by ordinary post permissions
 
 ### Requirement: Wiki post history
-Wiki post creation and edits SHALL emit history outbox records. The history payload SHALL include the current markdown body in the `post` slot and changed field keys including `post.body` when the body changes.
+
+Wiki post creation and edits SHALL emit history outbox records only when supported main content changes. The history payload SHALL include the full submitted `ContentDoc` in the `post` editorial slot. Changed field keys SHALL use `post.content.main` and SHALL NOT include `post.body`, slot keys, or layout keys in this change.
 
 #### Scenario: Wiki post edit records revision
-- **WHEN** a user edits a wiki post body
+
+- **WHEN** a user edits a wiki post and changes `content.main.source`
 - **THEN** the main server SHALL write a `HistoryOutbox` row in the same transaction
-- **AND** the history service SHALL persist a Unit revision for the wiki post
+- **AND** the history service SHALL persist a Unit revision whose `post` slot is the new `ContentDoc`
+- **AND** the revision's `changedFieldKeys` SHALL include `post.content.main`
+
+#### Scenario: Wiki infobox edit records sub-path key
+
+- **WHEN** a user edits a wiki post and changes only `content.slots.infobox`
+- **THEN** this change SHALL NOT emit a content history revision solely for that slot-only change
+- **AND** SHALL NOT include `post.body` or `post.content.slots.infobox`
 
 ### Requirement: Wiki post editor UI
-The frontend SHALL provide a wiki post editor for creating and editing `PostKind.WIKI` content. The editor SHALL display locked-field errors and SHALL distinguish wiki edits from ordinary reply/review editors.
 
-#### Scenario: Locked body error
-- **WHEN** a user attempts to save a wiki post body and the server returns a locked `post.body` error
+The frontend SHALL provide a wiki post editor for creating and editing `PostKind.WIKI` content. The editor SHALL display locked-field errors keyed by `post.content.main` / `post.content` and SHALL distinguish wiki edits from ordinary reply/review editors. In v1 the editor surface writes Markdown into `content.main.source`; structured slot editing UI (infobox, entity-list, layout controls) is out of scope for this change and is delivered by the follow-up rendering / editing change.
+
+#### Scenario: Locked content error
+
+- **WHEN** a user attempts to save a wiki post and the server returns a locked field error for `post.content.main` or `post.content`
 - **THEN** the editor SHALL show an actionable locked-field error state
 - **AND** it SHALL preserve the user's unsaved draft
 
@@ -77,7 +110,7 @@ Wiki post detail surfaces SHALL expose a history link that loads the wiki post's
 ### Requirement: Post isLocked remains thread lock
 `Post.isLocked` SHALL keep its existing reply/thread locking meaning and SHALL NOT be reused as the wiki field-lock mechanism.
 
-#### Scenario: Thread lock does not equal body lock
-- **WHEN** a wiki post has `Post.isLocked = true` but no `UnitFieldLock("post.body")`
+#### Scenario: Thread lock does not equal content lock
+- **WHEN** a wiki post has `Post.isLocked = true` but no `UnitFieldLock("post.content")` or `UnitFieldLock("post.content.main")`
 - **THEN** reply creation MAY be blocked by thread-lock rules
-- **AND** wiki body editing SHALL still be controlled by `UnitFieldLock` and collaborative authority rules
+- **AND** wiki content editing SHALL still be controlled by `UnitFieldLock` and collaborative authority rules

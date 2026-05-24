@@ -29,24 +29,31 @@ Components under `components/` SHALL remain free of side effects (no data fetchi
 
 ### Requirement: Post body is rendered as Markdown on every surface
 
-Every card, reply-node, and detail renderer for a `PostDTO` SHALL render `post.body` through a single shared atom `PostBodyMarkdown` that composes `MarkdownContent` from `@rezics/ui` with an optional `Collapsible` wrapper. No presentation path SHALL render `post.body` as plaintext `Typography` or a clamped text node.
+Every card, reply-node, and detail renderer for a `PostDTO` SHALL render the post's content through a single shared atom `PostBodyMarkdown`. `PostBodyMarkdown` SHALL accept the `Post.content` `ContentDoc` (rather than a `body` string) and SHALL compose `MarkdownContent` from `@rezics/ui` with an optional `Collapsible` wrapper. When the stored content is not a recognizable `ContentDoc` (unknown schema, unsupported version, malformed JSON, or a raw string), `PostBodyMarkdown` SHALL fall back to rendering the value as Markdown rather than throw. No presentation path SHALL render post content as plaintext `Typography` or a clamped text node, and no presentation path SHALL read from a `body` string.
 
-Preview surfaces (item cards in list contexts) SHALL use `Collapsible` with `maxLines={4}` and i18n-keyed expand/collapse labels. Detail surfaces SHALL render the body without the `Collapsible` wrapper.
+Preview surfaces (item cards in list contexts) SHALL use `Collapsible` with `maxLines={4}` and i18n-keyed expand/collapse labels. Detail surfaces SHALL render the content without the `Collapsible` wrapper.
 
-#### Scenario: A review card renders the body
+#### Scenario: A review card renders the content
 
 - **WHEN** a `ReviewCard` in a list or carousel renders a review
-- **THEN** the card SHALL render `review.body` via `PostBodyMarkdown` with `Collapsible` `maxLines={4}`
+- **THEN** the card SHALL render `review.content` via `PostBodyMarkdown` with `Collapsible` `maxLines={4}`
+- **AND** SHALL NOT pass a `body` string prop
 
-#### Scenario: A remark detail page renders the body
+#### Scenario: A remark detail page renders the content
 
 - **WHEN** a `RemarkDetail` renders the focal remark on `/remark/:remarkId`
-- **THEN** the detail SHALL render `remark.body` via `PostBodyMarkdown` without a `Collapsible` wrapper, displaying the full Markdown-rendered content
+- **THEN** the detail SHALL render `remark.content` via `PostBodyMarkdown` without a `Collapsible` wrapper
 
-#### Scenario: An excerpt card in a carousel renders the body
+#### Scenario: An excerpt card in a carousel renders the content
 
 - **WHEN** an `ExcerptCard` in `HorizontalExcerptCarousel` renders an excerpt
-- **THEN** the card SHALL render `excerpt.body` (or equivalent content field mapped through the excerpt adapter) via `PostBodyMarkdown` with `Collapsible` `maxLines={4}`
+- **THEN** the card SHALL render `excerpt.content` via `PostBodyMarkdown` with `Collapsible` `maxLines={4}`
+
+#### Scenario: Unsupported content falls back to markdown
+
+- **WHEN** a card or detail receives a post whose `content` cannot be parsed as a current-version `ContentDoc`
+- **THEN** `PostBodyMarkdown` SHALL render the value as Markdown via the fallback sequence defined by `content-doc-schema`
+- **AND** SHALL NOT throw
 
 ### Requirement: Presentation components do not own edit affordances
 

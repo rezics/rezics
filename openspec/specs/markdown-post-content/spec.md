@@ -1,23 +1,42 @@
 ## ADDED Requirements
 
 ### Requirement: Post body rendered as markdown
-`Post.body` content SHALL be rendered via `MarkdownContent` (using `createRezicsRenderer`) instead of plain `whitespace-pre-wrap` text display.
+
+Post and chapter content SHALL be read from `Post.content` using the shared `ContentDoc` schema. When `content.main.type = "markdown"`, the renderer SHALL render `content.main.source` via `MarkdownContent` and `createRezicsRenderer`. When the stored value is not a recognizable `ContentDoc` (unknown schema, unsupported version, malformed JSON, or a raw string), the renderer SHALL fall back to rendering the value as Markdown rather than throw. `Post.body` SHALL NOT exist as a canonical DTO or database field after this change.
 
 #### Scenario: Post with markdown formatting
-- **WHEN** a post body contains markdown syntax (headings, bold, links, code blocks, lists)
+
+- **WHEN** a post content document has `main = { type: "markdown", source: "# Title" }`
 - **THEN** the content is rendered as formatted HTML via the markdown renderer
 
 #### Scenario: Post with plain text content
-- **WHEN** a post body contains plain text (no markdown syntax)
-- **THEN** the content is rendered as a paragraph — visually identical to the previous plain text display
+
+- **WHEN** a post content document has Markdown source containing plain text only
+- **THEN** the content is rendered as a paragraph visually equivalent to plain text display
+
+#### Scenario: Legacy body field is absent
+
+- **WHEN** a post DTO is returned by the API
+- **THEN** it SHALL expose `content`
+- **AND** it SHALL NOT expose `body`
+
+#### Scenario: Unsupported content falls back to markdown
+
+- **WHEN** a post content value cannot be parsed as a current-version `ContentDoc` (e.g. unknown `schema`, future `version`, or a raw string)
+- **THEN** the renderer SHALL render the value as Markdown via the fallback sequence defined by `content-doc-schema`
+- **AND** the renderer SHALL NOT throw
 
 ### Requirement: Post input uses RezicsMarkdownEditor
-The inline post form (`InlinePostForm`) SHALL use `RezicsMarkdownEditor` for content input instead of a plain `TextField`.
+
+The inline post form (`InlinePostForm`) SHALL use `RezicsMarkdownEditor` for content input. On submit, the editor output SHALL be wrapped as a `ContentDoc` with `main = { type: "markdown", source: <editor output> }` and stored in `Post.content`. The submitted payload SHALL NOT include `body`.
 
 #### Scenario: Creating a new post
+
 - **WHEN** the user opens the inline post form to write a comment or remark
 - **THEN** a `RezicsMarkdownEditor` is presented for content input
 
 #### Scenario: Editor outputs markdown source
+
 - **WHEN** the user writes formatted content and submits
-- **THEN** the post body is stored as markdown source text in `Post.body`
+- **THEN** the markdown source text is wrapped into a `ContentDoc` and stored in `Post.content.main.source`
+- **AND** the submitted payload SHALL NOT include `body`
