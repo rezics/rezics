@@ -82,3 +82,14 @@ The realm service SHALL trigger an incremental sync when a realm is created or u
 - **WHEN** a realm unit's translation is created or updated via the translation service
 - **THEN** `patchRealmTranslations(unitId)` SHALL be called to update only `titles`, `descriptions`, and `translations`
 - **AND** SHALL NOT re-query realm metadata (isPublic, isOfficial, memberCount)
+
+### Requirement: Realm search index includes Unit aliases
+The realm search index SHALL include alias-derived searchable text for Realm Units. Alias text SHALL be indexed separately from translated realm titles and SHALL follow the same `score > visibilityThreshold OR pinned = true` inclusion rule.
+
+#### Scenario: Realm search matches alias
+
+- **GIVEN** a Realm Unit has translated title `"rezics"`
+- **AND** it has alias value `"Library.Book"`
+- **WHEN** a user searches realms for `"Library.Book"`
+- **THEN** the Realm Unit SHALL be eligible to appear in results
+- **AND** the displayed realm name SHALL still resolve from UnitTranslation
