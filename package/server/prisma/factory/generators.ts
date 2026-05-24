@@ -21,8 +21,15 @@ export interface TranslationData {
   title: string;
   subtitle?: string;
   summary?: string;
-  description?: string;
+  description?: Prisma.InputJsonValue;
   extra?: Prisma.InputJsonValue;
+}
+
+export function generatedDescription(
+  source: string | undefined,
+): Prisma.InputJsonValue | undefined {
+  if (source === undefined) return undefined;
+  return markdownContentDoc(source) as Prisma.InputJsonValue;
 }
 
 /**
@@ -57,52 +64,66 @@ function pickFromCorpus(
           ? f.helpers.arrayElement([...titles])
           : undefined,
         summary: f.helpers.arrayElement([...summaries]),
-        description: f.helpers.arrayElement([...descriptions]),
+        description: generatedDescription(
+          f.helpers.arrayElement([...descriptions]),
+        ),
       };
     case UnitType.GAME:
       return {
         title,
         summary: f.helpers.arrayElement([...summaries]),
-        description: f.helpers.arrayElement([...descriptions]),
+        description: generatedDescription(
+          f.helpers.arrayElement([...descriptions]),
+        ),
       };
     case UnitType.MEDIA:
       return {
         title,
         summary: f.helpers.arrayElement([...summaries]),
-        description: f.helpers.arrayElement([...descriptions]),
+        description: generatedDescription(
+          f.helpers.arrayElement([...descriptions]),
+        ),
       };
     case UnitType.TAG:
       return {
         title,
-        description: f.helpers.arrayElement([...summaries]),
+        description: generatedDescription(
+          f.helpers.arrayElement([...summaries]),
+        ),
       };
     case UnitType.ENTITY:
       return {
         title,
-        description: f.helpers.arrayElement([...summaries]),
+        description: generatedDescription(
+          f.helpers.arrayElement([...summaries]),
+        ),
       };
     case UnitType.ZONE:
       return {
         title,
-        description: f.helpers.arrayElement([...summaries]),
+        description: generatedDescription(
+          f.helpers.arrayElement([...summaries]),
+        ),
       };
     case UnitType.SHELF:
       return {
         title,
         description: randomBoolean(0.6)
-          ? f.helpers.arrayElement([...summaries])
+          ? generatedDescription(f.helpers.arrayElement([...summaries]))
           : undefined,
       };
     case UnitType.REALM:
       return {
         title,
-        description: f.helpers.arrayElement([...summaries]),
+        description: generatedDescription(
+          f.helpers.arrayElement([...summaries]),
+        ),
       };
     case UnitType.POST:
       return {
         title: randomBoolean(0.5) ? title : f.helpers.arrayElement([...titles]),
         description: randomBoolean(0.3)
-          ? f.helpers.arrayElement([...summaries])
+          ? generatedDescription(f.helpers.arrayElement([...summaries]))
           : undefined,
       };
     default:

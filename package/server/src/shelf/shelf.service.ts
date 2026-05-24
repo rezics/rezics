@@ -28,6 +28,7 @@ import {
   UnitVisibility,
 } from "#/prisma/client";
 import { getSeedTagId } from "@/infra/seed-tags";
+import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { patchContentContainedUnitIdsToMeili } from "@/meili/content/sync";
 import { AppError } from "@/utils/errors";
 import {
@@ -313,7 +314,7 @@ export class ShelfService {
         title: tr.title,
         subtitle: tr.subtitle,
         summary: tr.summary,
-        description: tr.description,
+        description: nullableContentDocJson(tr.description),
         ...(nextExtra !== undefined
           ? { extra: nextExtra as Prisma.InputJsonValue }
           : {}),

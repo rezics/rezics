@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import { DEFAULT_PUBLICATION_LICENSE_SLUG } from "@rezics/contract";
+import {
+  DEFAULT_PUBLICATION_LICENSE_SLUG,
+  markdownContentDoc,
+} from "@rezics/contract";
 import { seedAuthUser } from "@rezics/auth/prisma/seed";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import { bootstrapSystemShelves } from "./system-shelves.js";
@@ -144,7 +147,7 @@ export async function seedUsers(
           name: plan.name,
           avatar: plan.avatar,
           bio: plan.bio,
-          description: plan.description,
+          description: markdownContentDoc(plan.description),
           joinDate: plan.joinDate,
           settings: plan.settings,
           ...(plan.permission ? { permission: plan.permission } : {}),

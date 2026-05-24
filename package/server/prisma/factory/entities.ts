@@ -56,7 +56,7 @@ interface EntitySeedRow {
   translations: {
     language: string;
     title: string;
-    description?: string;
+    description?: Prisma.InputJsonValue;
   }[];
 }
 

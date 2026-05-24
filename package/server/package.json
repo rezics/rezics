@@ -42,7 +42,8 @@
     "seed:factory:echokv": "bun run ../../package/utils/bin/cli.ts factory --only=echokv --no-interactive",
     "seed:reset-root": "bun run ../../package/utils/bin/cli.ts reset-root",
     "seed:database-reset": "bun run ../../package/utils/bin/cli.ts db reset",
-    "seed:init-meili-search": "bun run ../../package/utils/bin/cli.ts db init-meili"
+    "seed:init-meili-search": "bun run ../../package/utils/bin/cli.ts db init-meili",
+    "repair:content-doc-descriptions": "bun run src/script/repair-content-doc-descriptions.ts"
   },
   "devDependencies": {
     "@rezics/auth": "workspace:*",

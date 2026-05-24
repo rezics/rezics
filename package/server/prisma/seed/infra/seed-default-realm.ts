@@ -2,6 +2,7 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   DEFAULT_REALM,
+  markdownContentDoc,
 } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client";
 import type { SlugScopesMap } from "./seed-slug-scopes";
@@ -74,7 +75,9 @@ export async function seedDefaultRealm(
         create: languages.map((lang) => ({
           language: lang,
           title: DEFAULT_REALM.translations[lang].title,
-          description: DEFAULT_REALM.translations[lang].description,
+          description: markdownContentDoc(
+            DEFAULT_REALM.translations[lang].description,
+          ),
         })),
       },
       supportLanguages: {

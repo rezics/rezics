@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { contentDocWriteSchema } from "./content-doc";
 import { languageSchema } from "./language";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
@@ -370,7 +371,7 @@ export const createRealmSchema = t.Object({
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),
-        description: t.Optional(t.String()),
+        description: t.Optional(t.Nullable(contentDocWriteSchema)),
       }),
     ),
   ),

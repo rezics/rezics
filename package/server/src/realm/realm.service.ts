@@ -9,6 +9,7 @@ import type {
 import { parseIdsCsv, validateSlug } from "@rezics/contract";
 import type { Prisma, RealmTagApplication } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { nullableContentDocJson } from "@/content-doc/prisma-json";
 
 /** Score at or below this threshold hides a RealmTagApplication from regular users. */
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
@@ -192,7 +193,7 @@ export class RealmService {
                   title: tr.title,
                   subtitle: tr.subtitle,
                   summary: tr.summary,
-                  description: tr.description,
+                  description: nullableContentDocJson(tr.description),
                 })),
               },
             }

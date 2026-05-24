@@ -13,6 +13,7 @@ import {
   type UnitVisibility,
 } from "#/prisma/client";
 import { pickSlugScope } from "@/infra/slug-scopes";
+import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import {
   deleteContentFromMeili,
   patchContentMetadataToMeili,
@@ -246,10 +247,7 @@ export class UnitService {
                   title: tr.title ?? undefined,
                   subtitle: tr.subtitle ?? undefined,
                   summary: tr.summary ?? undefined,
-                  description:
-                    tr.description !== undefined
-                      ? (tr.description as Prisma.InputJsonValue)
-                      : undefined,
+                  description: nullableContentDocJson(tr.description),
                   extra: (tr.extra ?? null) as Prisma.InputJsonValue,
                   sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
                 })),

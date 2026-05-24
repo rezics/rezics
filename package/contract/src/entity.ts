@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { creationModeSchema } from "./content-authority";
+import { contentDocWriteSchema } from "./content-doc";
 import { creditAttributionRoleKeySchema } from "./credit-attribution.roles";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { subjectAttributionRoleKeySchema } from "./subject-attribution.roles";
@@ -114,7 +115,7 @@ export const createEntityTranslationSchema = t.Object({
   title: t.String({ minLength: 1 }),
   subtitle: t.Optional(t.Nullable(t.String())),
   summary: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(contentDocWriteSchema)),
 });
 
 export const createEntitySchema = t.Object({

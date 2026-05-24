@@ -1,5 +1,5 @@
 import { useCreateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import { DEFAULT_LANGUAGE, markdownContentDoc } from "@rezics/contract";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -23,7 +23,9 @@ export function NewShelfPage() {
           {
             language: DEFAULT_LANGUAGE,
             title,
-            description,
+            description: description.trim()
+              ? markdownContentDoc(description)
+              : null,
           },
         ],
       },

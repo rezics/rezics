@@ -9,6 +9,7 @@ import type {
 import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
+import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { getSlugScopeId, requireSlugScopeId } from "@/infra/slug-scopes";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { deleteEntityFromMeili, syncEntityToMeili } from "@/meili/entity/sync";
@@ -99,7 +100,7 @@ export class EntityService {
               title: tr.title,
               subtitle: tr.subtitle ?? undefined,
               summary: tr.summary ?? undefined,
-              description: tr.description ?? undefined,
+              description: nullableContentDocJson(tr.description),
             })),
           },
           entity: {
@@ -213,13 +214,13 @@ export class EntityService {
               title: tr.title,
               subtitle: tr.subtitle ?? undefined,
               summary: tr.summary ?? undefined,
-              description: tr.description ?? undefined,
+              description: nullableContentDocJson(tr.description),
             },
             update: {
               title: tr.title,
               subtitle: tr.subtitle ?? undefined,
               summary: tr.summary ?? undefined,
-              description: tr.description ?? undefined,
+              description: nullableContentDocJson(tr.description),
             },
           });
         }

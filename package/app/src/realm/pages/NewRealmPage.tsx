@@ -1,5 +1,5 @@
 import { useCreateRealmMutation } from "@rezics/api/realm/realm";
-import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import { DEFAULT_LANGUAGE, markdownContentDoc } from "@rezics/contract";
 import { unitHref } from "@/shared/ui/link";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -14,7 +14,17 @@ export function NewRealmPage() {
 
   const handleCreate = () => {
     createMutation.mutate(
-      { translations: [{ language: DEFAULT_LANGUAGE, title, description }] },
+      {
+        translations: [
+          {
+            language: DEFAULT_LANGUAGE,
+            title,
+            description: description.trim()
+              ? markdownContentDoc(description)
+              : null,
+          },
+        ],
+      },
       {
         onSuccess: (data) =>
           navigate({
