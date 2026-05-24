@@ -2,8 +2,10 @@ import { randomUUID } from "node:crypto";
 import {
   DEFAULT_LANGUAGE,
   DEFAULT_PUBLICATION_LICENSE_SLUG,
+  markdownContentDoc,
 } from "@rezics/contract";
 import { generateBetween } from "../../src/shelf/fractional-index";
+import type { Prisma } from "../generated/client.js";
 import { PostKind, UnitStatus, UnitType } from "../generated/client.js";
 import { seedChaptersForBook } from "./books.js";
 import { addSpecialSeedTarget, createSeedResult } from "./result.js";
@@ -126,7 +128,7 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     rootPostUnitId: string;
     parentPostUnitId?: string;
     kind: PostKind;
-    body: string;
+    content: Prisma.InputJsonValue;
     depth: number;
     sortPath: string;
     replyCount?: number;
@@ -157,10 +159,11 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
       rootPostUnitId: planned.rootId,
       ...(planned.parentId ? { parentPostUnitId: planned.parentId } : {}),
       kind: PostKind.POST,
-      body:
+      content: markdownContentDoc(
         planned.depth === 0
           ? `Root ${planned.rootIndex + 1} for the large post tree scenario.`
           : `Reply ${planned.replyIndex + 1} at depth ${planned.depth} under root ${planned.rootIndex + 1}.`,
+      ) as Prisma.InputJsonValue,
       depth: planned.depth,
       sortPath: planned.sortPath,
       replyCount: planned.replyCount,
