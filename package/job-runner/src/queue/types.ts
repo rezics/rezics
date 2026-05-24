@@ -14,6 +14,7 @@ export interface QueueSendOptions {
 
 export interface QueueLike {
   createQueue(name: string, options?: QueueSendOptions): Promise<unknown>;
+  updateQueue?(name: string, options?: QueueSendOptions): Promise<unknown>;
   send(
     name: JobLane,
     data: AnyJobCommand,
