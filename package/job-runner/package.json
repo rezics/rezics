@@ -14,6 +14,7 @@
     }
   },
   "scripts": {
+    "db:ensure": "bun run scripts/ensure-job-db.ts",
     "dev": "NODE_ENV=development bun run --watch --no-cache src/index.ts",
     "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun --outfile job-runner",
     "build:linux": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile job-runner",

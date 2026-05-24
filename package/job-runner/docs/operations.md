@@ -33,6 +33,11 @@ Health endpoints:
 Queue database expectations:
 
 - `JOB_DATABASE_URL` points at a dedicated pg-boss database.
+- The database itself must exist before startup. For local development, run
+  `bun --filter=@rezics/job-runner run db:ensure` to create it from
+  `JOB_DATABASE_URL` when missing.
+- pg-boss owns its internal schema, tables, functions, and version migrations
+  inside that database. Do not add Prisma migrations for the job queue schema.
 - Back up the queue database with normal Postgres backups.
 - Do not expose `JOB_DATABASE_URL` to `@rezics/server`.
 

@@ -7,6 +7,7 @@
     "prisma:generate": "cd tool && bun run db-script/prisma-regenerate.ts",
     "prisma:migrate": "cd tool && bun run db-script/prisma-migrate.ts",
     "prisma:reset": "cd tool && bun run db-script/prisma-reset-db.ts",
+    "db:ensure:job-runner": "bun --filter=@rezics/job-runner run db:ensure",
     "deploy": "cd tool && bun run deploy",
     "check:runtime-env": "node tool/scripts/check-no-runtime-env.mjs",
     "seed": "bun run package/utils/bin/cli.ts",

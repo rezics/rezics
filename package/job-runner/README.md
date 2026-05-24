@@ -41,6 +41,18 @@ Required environment for this service:
 - `JOB_RUNNER_ROLE`: `all`, `http`, or `worker`; defaults to `all`.
 - `PORT`: optional HTTP port, defaults to `3005`.
 
+Create the dedicated queue database before starting the service:
+
+```bash
+bun --filter=@rezics/job-runner run db:ensure
+```
+
+The script reads `JOB_DATABASE_URL`, connects through the `postgres` or
+`template1` maintenance database, and creates the target database if it is
+missing. pg-boss owns its internal schema and migrations inside that database;
+the job-runner package only creates/verifies queues and queue policies at
+startup.
+
 Run locally with:
 
 ```bash
