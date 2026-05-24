@@ -1,4 +1,5 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
+import { useCurrentUserId } from "@rezics/api/hooks";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
@@ -8,12 +9,12 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
-import { useUserProfileStore } from "@/user/states";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = new URLSearchParams(search);
   const navigate = useNavigate();
+  const userId = useCurrentUserId();
   const [reviewData, setReviewData] = useState<ReviewEditState>({
     unitId: "",
     contentSource: "",
@@ -22,7 +23,6 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     extra: {},
   });
   const { show } = useAlertStore();
-  const { user } = useUserProfileStore();
   const kind =
     searchParams.get("tab") === "remark" ? PostKind.REMARK : PostKind.REVIEW;
 
@@ -38,7 +38,6 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   });
 
   async function handleSave() {
-    const userId = user?.userId as string;
     if (!userId) {
       show("Please login first");
       return;

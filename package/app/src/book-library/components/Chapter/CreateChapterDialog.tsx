@@ -1,5 +1,6 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
+import { useCurrentUserId } from "@rezics/api/hooks";
 import { markdownContentDoc } from "@rezics/contract";
 import * as m from "@rezics/i18n/messages";
 import {
@@ -12,7 +13,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-import { useUserProfileStore } from "@/user/states";
 import type { Chapter } from "./ChapterArborist";
 
 interface CreateChapterDialogProps {
@@ -36,7 +36,7 @@ export function CreateChapterDialog({
   bookUnitId,
   currentEditParentId,
 }: CreateChapterDialogProps) {
-  const { user } = useUserProfileStore();
+  const userId = useCurrentUserId();
   const { show } = useAlertStore();
 
   const [title, setTitle] = useState("");
@@ -72,7 +72,6 @@ export function CreateChapterDialog({
       return;
     }
 
-    const userId = (user as any)?.unitId as string | undefined;
     if (!userId) {
       show(m.auth_flow_onboarding_sign_in_first());
       return;

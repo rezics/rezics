@@ -1,8 +1,8 @@
+import { useCurrentUserId } from "@rezics/api/hooks";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { useUserProfileStore } from "@/user/states";
 
 const BASELINE: ContentRating[] = ["GENERAL", "R_15"];
 
@@ -16,8 +16,8 @@ export function useAllowedRatings(): {
   allowed: ContentRating[];
   isAuthenticated: boolean;
 } {
-  const { user } = useUserProfileStore();
-  const isAuthenticated = user !== null;
+  const userId = useCurrentUserId();
+  const isAuthenticated = Boolean(userId);
   const { data: settings } = useQuery({
     ...userQueries.settings(),
     enabled: isAuthenticated,

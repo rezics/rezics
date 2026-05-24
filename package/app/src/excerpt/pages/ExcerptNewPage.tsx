@@ -1,4 +1,5 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
+import { useCurrentUserId } from "@rezics/api/hooks";
 import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
 import { markdownContentDoc } from "@rezics/contract";
@@ -6,7 +7,6 @@ import * as m from "@rezics/i18n/messages";
 import { CooldownButton } from "@rezics/ui/composite/button/CooldownButton.tsx";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useState } from "react";
-import { useUserProfileStore } from "@/user/states";
 import { ExcerptEditPage } from "./ExcerptEditPage";
 
 export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
@@ -14,7 +14,7 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
     {} as UnitFormData,
   );
   const { show } = useAlertStore();
-  const { user } = useUserProfileStore();
+  const userId = useCurrentUserId();
 
   const { mutate, isPending } = useCreateUnitMutation({
     onSuccess: (data) => {
@@ -28,7 +28,6 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   });
 
   function handleSave() {
-    const userId = user?.userId as string;
     if (!userId) {
       show(m.auth_flow_onboarding_sign_in_first());
       return;

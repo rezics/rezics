@@ -2,11 +2,9 @@ import type { UserDTO } from "@rezics/contract";
 import { create } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 
-export type PartialUserDTO = Partial<UserDTO> & Record<string, unknown>;
-
 type UserProfileState = {
-  user: PartialUserDTO | null;
-  setUser: (user: PartialUserDTO | null) => void;
+  user: UserDTO | null;
+  setUser: (user: UserDTO | null) => void;
   clearProfile: () => void;
 };
 

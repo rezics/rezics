@@ -1,16 +1,14 @@
 import { useEntityList } from "@rezics/api/entity";
+import { useCurrentUserId } from "@rezics/api/hooks";
 import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { unitHref } from "@/shared/ui/link";
-import { useUserProfileStore } from "@/user/states";
 import { EntityIdentityRow } from "../components/EntityIdentityRow";
 
 export function MyEntitiesPage() {
-  const currentUserUnitId = useUserProfileStore(
-    (state) => state.user?.unitId,
-  ) as string | undefined;
+  const currentUserUnitId = useCurrentUserId();
 
   const { data, isLoading } = useEntityList(
     currentUserUnitId ? { ownerUnitId: currentUserUnitId } : undefined,
