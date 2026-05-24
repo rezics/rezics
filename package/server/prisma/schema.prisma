@@ -878,6 +878,9 @@ model UnitFieldLock {
   @@index([lockedById, createdAt])
 }
 
+/// Per-Unit canonical history sequence allocator. This clock advances only for
+/// authorized commits applied to canonical state, not editor autosave, drafts,
+/// picker selections, drag gestures, or uncommitted frontend op logs.
 model UnitHistoryClock {
   unitId       String   @id @db.Uuid
   nextSequence BigInt   @default(1)
@@ -886,6 +889,10 @@ model UnitHistoryClock {
   unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 }
 
+/// Durable queue for canonical history commits emitted by main database
+/// mutations. Rows represent semantic editorial, structure, lock, or
+/// collaborator commits and must not be used for autosave, draft persistence, or
+/// per-click editor operation logs.
 model HistoryOutbox {
   id            String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   unitId        String    @db.Uuid

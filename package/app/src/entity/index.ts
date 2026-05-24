@@ -12,6 +12,27 @@ export {
   getEntityPrimaryTitle,
   getEntityTranslation,
 } from "./models/types";
+export {
+  addCreditAttribution,
+  addSubjectAttribution,
+  buildEntityAttributionBatchOps,
+  createEntityAttributionEditQueue,
+  isEntityAttributionQueueDirty,
+  markEntityAttributionQueueError,
+  markEntityAttributionQueueSaved,
+  markEntityAttributionQueueSaving,
+  removeCreditAttribution,
+  removeSubjectAttribution,
+  reorderCreditAttributions,
+  reorderSubjectAttributions,
+  replaceCreditAttributions,
+  replaceSubjectAttributions,
+  type CreditAttributionQueueEntry,
+  type EntityAttributionEditQueue,
+  type EntityAttributionQueueSaveStatus,
+  type EntityAttributionQueueSnapshot,
+  type SubjectAttributionQueueEntry,
+} from "./models/entityAttributionEditQueue";
 export { EntityDetailPage } from "./pages/EntityDetailPage";
 export { EntityEditPage } from "./pages/EntityEditPage";
 export { MyEntitiesPage } from "./pages/MyEntitiesPage";

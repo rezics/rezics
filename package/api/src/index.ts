@@ -6,6 +6,7 @@ export {
   type UnitPublicationMetadata,
 } from "@rezics/contract";
 export * from "./credit-attribution/credit-attribution";
+export * from "./entity-attribution/entity-attribution";
 export * from "./history/history";
 export * from "./progress";
 export {

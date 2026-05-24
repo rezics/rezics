@@ -12,6 +12,7 @@ export * from "./content-history";
 export * from "./credit-attribution";
 export * from "./dispatch";
 export * from "./entity";
+export * from "./entity-attribution";
 export * from "./feedback";
 export * from "./infra";
 export * from "./jwt-service";

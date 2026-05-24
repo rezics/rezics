@@ -4,6 +4,7 @@ import { Elysia } from "elysia";
 import { Prisma } from "#/prisma/client";
 import { creditAttributionApi } from "./credit-attribution";
 import { entityApi } from "./entity";
+import { entityAttributionApi } from "./entity-attribution";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
 import { dispatchApi } from "./dispatch";
@@ -185,6 +186,7 @@ routeApp
   .use(realmTagApplicationVoteApi)
   .use(creditAttributionApi)
   .use(subjectAttributionApi)
+  .use(entityAttributionApi)
   .use(entityApi)
   .use(slugApi)
   .use(subscriptionApi)

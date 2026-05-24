@@ -4,11 +4,12 @@ import {
   useUpdateBookMutation,
 } from "@rezics/api/book/book";
 import { historyQueries } from "@rezics/api";
+import { creditAttributionQueries } from "@rezics/api/credit-attribution/credit-attribution";
+import { useEntityAttributionBatchMutation } from "@rezics/api/entity-attribution/entity-attribution";
 import {
   useDeleteTranslationMutation,
   useUpsertTranslationMutation,
 } from "@rezics/api/unit/unit.mutations";
-import { useLinkCreditAttributionMutation } from "@rezics/api/credit-attribution/credit-attribution";
 import type {
   ContentRating,
   CreateBookInput,
@@ -175,6 +176,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     }),
     enabled: !newBook && !!bookId && Number.isFinite(restoreSequence),
   });
+  const authorCreditsQuery = useQuery({
+    ...creditAttributionQueries.byUnit(bookId ?? ""),
+    enabled: !newBook && !!bookId,
+  });
   const [metadataState, setMetadataState] =
     React.useState<BookMetadataValue | null>(null);
   const [appliedRestoreSequence, setAppliedRestoreSequence] = React.useState<
@@ -310,7 +315,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   });
 
   const deleteTranslationMutation = useDeleteTranslationMutation();
-  const linkAuthorMutation = useLinkCreditAttributionMutation();
+  const batchAuthorMutation = useEntityAttributionBatchMutation();
 
   async function handleSubmit() {
     const draft = editor.currentDraft;
@@ -617,7 +622,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                         type="button"
                         variant="outline"
                         size="sm"
-                        disabled={linkAuthorMutation.isPending}
+                        disabled={batchAuthorMutation.isPending}
                         onClick={() => setAuthorPickerOpen(true)}
                       >
                         <Plus className="size-4" />
@@ -741,10 +746,31 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           creationContext="catalog"
           lockedCreditRole="author"
           onSelect={(entityId) => {
-            linkAuthorMutation.mutate({
+            const existingAuthors =
+              authorCreditsQuery.data?.filter(
+                (credit) =>
+                  credit.role === "author" && credit.entityId !== entityId,
+              ) ?? [];
+            batchAuthorMutation.mutate({
               unitId: bookId,
-              entityId,
-              role: "author",
+              request: {
+                ops: [
+                  {
+                    op: "setCredits",
+                    role: "author",
+                    entries: [
+                      ...existingAuthors.map((credit, index) => ({
+                        entityId: credit.entityId,
+                        sortOrder: index,
+                      })),
+                      {
+                        entityId,
+                        sortOrder: existingAuthors.length,
+                      },
+                    ],
+                  },
+                ],
+              },
             });
           }}
         />

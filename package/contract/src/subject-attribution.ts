@@ -119,6 +119,24 @@ export const unlinkSubjectAttributionSchema = t.Object({
 export type UnlinkSubjectAttributionInput =
   (typeof unlinkSubjectAttributionSchema)["static"];
 
+export const entityAttributionBatchSetSubjectsEntrySchema = t.Object({
+  entityId: t.String(),
+  sortOrder: t.Optional(t.Number()),
+  weight: t.Optional(t.Nullable(t.Number())),
+});
+
+export type EntityAttributionBatchSetSubjectsEntry =
+  (typeof entityAttributionBatchSetSubjectsEntrySchema)["static"];
+
+export const entityAttributionBatchSetSubjectsOpSchema = t.Object({
+  op: t.Literal("setSubjects"),
+  role: subjectAttributionRoleKeySchema,
+  entries: t.Array(entityAttributionBatchSetSubjectsEntrySchema),
+});
+
+export type EntityAttributionBatchSetSubjectsOp =
+  (typeof entityAttributionBatchSetSubjectsOpSchema)["static"];
+
 // ============================================================
 // LIST QUERIES
 // ============================================================

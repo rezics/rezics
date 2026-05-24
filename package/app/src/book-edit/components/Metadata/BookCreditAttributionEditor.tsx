@@ -1,8 +1,5 @@
-import {
-  creditAttributionQueries,
-  useLinkCreditAttributionMutation,
-  useUnlinkCreditAttributionMutation,
-} from "@rezics/api/credit-attribution/credit-attribution";
+import { creditAttributionQueries } from "@rezics/api/credit-attribution/credit-attribution";
+import { useEntityAttributionBatchMutation } from "@rezics/api/entity-attribution/entity-attribution";
 import {
   creditAttributionRoleRegistry,
   creditAttributionRoles,
@@ -10,9 +7,19 @@ import {
 import { creditRoleLabel } from "@rezics/i18n";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
-import { EntityIdentityRow } from "@/entity";
+import { Plus, Save, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  addCreditAttribution,
+  buildEntityAttributionBatchOps,
+  createEntityAttributionEditQueue,
+  EntityIdentityRow,
+  isEntityAttributionQueueDirty,
+  markEntityAttributionQueueError,
+  markEntityAttributionQueueSaved,
+  markEntityAttributionQueueSaving,
+  removeCreditAttribution,
+} from "@/entity";
 import { EntityPicker } from "@/entity-picker";
 import * as m from "@rezics/i18n/messages";
 
@@ -32,26 +39,77 @@ export function BookCreditAttributionEditor({
   disabled,
 }: BookCreditAttributionEditorProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [queue, setQueue] = useState(() => createEntityAttributionEditQueue());
 
   const creditQuery = useQuery(creditAttributionQueries.byUnit(bookUnitId));
-  const linkCredit = useLinkCreditAttributionMutation();
-  const unlinkCredit = useUnlinkCreditAttributionMutation();
+  const batchMutation = useEntityAttributionBatchMutation();
+
+  const isDirty = isEntityAttributionQueueDirty(queue);
+
+  useEffect(() => {
+    if (isDirty || !creditQuery.data) return;
+    setQueue(
+      createEntityAttributionEditQueue({
+        credits: creditQuery.data.filter((credit) =>
+          bookCreditRoles.includes(credit.role),
+        ),
+      }),
+    );
+  }, [creditQuery.data, isDirty]);
 
   const visibleCredits = useMemo(
-    () =>
-      (creditQuery.data ?? []).filter((credit) =>
-        bookCreditRoles.includes(credit.role),
-      ),
-    [creditQuery.data],
+    () => bookCreditRoles.flatMap((role) => queue.current.credits[role] ?? []),
+    [queue.current.credits],
   );
+
+  const handleSave = () => {
+    const ops = buildEntityAttributionBatchOps(queue);
+    if (ops.length === 0) return;
+
+    setQueue((current) => markEntityAttributionQueueSaving(current));
+    batchMutation.mutate(
+      {
+        unitId: bookUnitId,
+        request: { ops },
+      },
+      {
+        onSuccess: (data) => {
+          setQueue((current) =>
+            markEntityAttributionQueueSaved(current, {
+              credits: data.credits.filter((credit) =>
+                bookCreditRoles.includes(credit.role),
+              ),
+              subjects: data.subjects,
+            }),
+          );
+        },
+        onError: (error) => {
+          setQueue((current) =>
+            markEntityAttributionQueueError(
+              current,
+              error instanceof Error ? error : new Error(String(error)),
+            ),
+          );
+        },
+      },
+    );
+  };
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button
+          type="button"
+          disabled={disabled || !isDirty || batchMutation.isPending}
+          onClick={handleSave}
+        >
+          <Save className="size-4" />
+          {m.common_save_changes()}
+        </Button>
         <Button
           type="button"
           variant="outline"
-          disabled={disabled || linkCredit.isPending}
+          disabled={disabled || batchMutation.isPending}
           onClick={() => setPickerOpen(true)}
         >
           <Plus className="size-4" />
@@ -80,14 +138,16 @@ export function BookCreditAttributionEditor({
                   variant="ghost"
                   size="icon"
                   aria-label={m.book_actions_remove_credit()}
-                  disabled={disabled || unlinkCredit.isPending}
-                  onClick={() =>
-                    unlinkCredit.mutate({
-                      unitId: bookUnitId,
-                      entityId: credit.entityId,
-                      role: credit.role,
-                    })
-                  }
+                  disabled={disabled || batchMutation.isPending}
+                  onClick={() => {
+                    setQueue((current) =>
+                      removeCreditAttribution(
+                        current,
+                        credit.role,
+                        credit.entityId,
+                      ),
+                    );
+                  }}
                 >
                   <Trash2 className="size-4 text-text-secondary" />
                 </Button>
@@ -101,6 +161,10 @@ export function BookCreditAttributionEditor({
         </p>
       )}
 
+      {queue.saveStatus === "error" && queue.error ? (
+        <p className="text-sm text-text-error">{queue.error.message}</p>
+      ) : null}
+
       <EntityPicker
         open={pickerOpen}
         onOpenChange={setPickerOpen}
@@ -109,11 +173,9 @@ export function BookCreditAttributionEditor({
         requireCreditRoleForSelect
         onSelect={(entityId, selection) => {
           if (!selection.creditRole) return false;
-          linkCredit.mutate({
-            unitId: bookUnitId,
-            entityId,
-            role: selection.creditRole,
-          });
+          setQueue((current) =>
+            addCreditAttribution(current, selection.creditRole!, { entityId }),
+          );
         }}
       />
     </div>

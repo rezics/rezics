@@ -9,6 +9,9 @@ datasource db {
   provider = "postgres"
 }
 
+/// Canonical editorial commit ingested from main HistoryOutbox. A revision is a
+/// user-visible save of applied canonical state, not editor autosave, draft
+/// storage, or an uncommitted frontend operation log.
 model UnitRevision {
   id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   unitId      String   @db.Uuid
@@ -28,6 +31,9 @@ model UnitRevision {
   @@index([contentHash])
 }
 
+/// Content-addressed payload for canonical editorial revisions. It stores final
+/// revision content for history compare/restore and must not be used for draft
+/// snapshots or autosave recovery data.
 model RevisionContent {
   hash      String   @id @db.VarChar(64)
   payload   Json
@@ -36,6 +42,9 @@ model RevisionContent {
   revisions UnitRevision[]
 }
 
+/// Canonical high-change structure batch event ingested from main HistoryOutbox.
+/// It represents semantic structure saves such as table-of-contents batches,
+/// not every drag, click, or local editor operation.
 model StructureEvent {
   id               String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   unitId           String   @db.Uuid

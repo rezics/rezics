@@ -166,6 +166,23 @@ export const linkCreditAttributionSchema = t.Object({
 export type LinkCreditAttributionInput =
   (typeof linkCreditAttributionSchema)["static"];
 
+export const entityAttributionBatchSetCreditsEntrySchema = t.Object({
+  entityId: t.String(),
+  sortOrder: t.Optional(t.Number()),
+});
+
+export type EntityAttributionBatchSetCreditsEntry =
+  (typeof entityAttributionBatchSetCreditsEntrySchema)["static"];
+
+export const entityAttributionBatchSetCreditsOpSchema = t.Object({
+  op: t.Literal("setCredits"),
+  role: creditAttributionRoleKeySchema,
+  entries: t.Array(entityAttributionBatchSetCreditsEntrySchema),
+});
+
+export type EntityAttributionBatchSetCreditsOp =
+  (typeof entityAttributionBatchSetCreditsOpSchema)["static"];
+
 // ============================================================
 // CREDIT ATTRIBUTION BRIEF (inline for BookDTO etc.)
 // ============================================================
