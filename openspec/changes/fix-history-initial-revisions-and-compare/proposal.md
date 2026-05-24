@@ -32,19 +32,28 @@ available, and compare output must match what actually changed.
 - Preserve existing wiki post initial-history behavior.
 - Ensure history revision payloads and `changedFieldKeys` reflect effective
   changes, not merely fields present in a submitted form body.
-- Make the compare page correctly compare post-cutover sparse PATCH payloads,
-  including `translations.<language>` object-shaped payloads.
+- Align initial creation payload coverage with edit revision payload coverage
+  so the two writers share a single editorial path scope.
+- Provide a per-path snapshot index in the history service so compare between
+  any two revisions is bounded by the number of editorial paths rather than the
+  number of revisions between them.
+- Make the compare page correctly compare any two revisions, including
+  non-adjacent ones, without folding PATCH payloads in the app layer.
 - Keep legacy pre-cutover `slots`-shaped history readable and comparable.
 
 ## Non-goals
 
-- Do not backfill existing content that was created before this fix.
+- Do not synthesize initial revisions for content that was created before this
+  fix landed. The per-path snapshot index is backfilled from existing revision
+  rows; no new editorial revisions are invented for pre-existing content.
 - Do not redesign history storage away from outbox ingestion.
 - Do not add synchronous history-service HTTP calls to canonical write
   transactions.
 - Do not make discussion replies, reactions, tags, or externally-governed
   systems part of editorial history.
 - Do not change restore authorization semantics.
+- Do not introduce per-array-element snapshot rows; arrays remain a single
+  leaf value per path.
 
 ## Scope
 
@@ -65,15 +74,26 @@ change unless an existing spec explicitly puts them in content history scope.
 ## What Changes
 
 - Add content-history requirements for initial creation revisions.
+- Define editorial path scope per content type as the single source shared by
+  initial creation, edit writers, and `changedFieldKeys` derivation.
 - Add compare requirements for sparse PATCH-shaped history payloads.
 - Update Book translation save/history handling so unchanged fields are not
   emitted into revision payloads or timeline chips.
 - Update create flows for Book and Entity so successful canonical creates write
   an initial history outbox row in the same transaction.
+- Materialize a per-path snapshot index in the history service, populated by
+  the outbox consumer on every editorial revision and seeded once by
+  backfilling existing revisions.
+- Add a path-snapshot compare reconstruction in the history service that
+  returns base and target values per editorial path for any (base, target)
+  sequence pair on the same Unit.
+- Move Book compare from app-layer payload folding to the new reconstruction
+  API.
 - Keep history reads eventually consistent: initial revisions may lag until the
   outbox consumer ingests them.
-- Add tests covering Book title-only history chips, sparse PATCH compare, and
-  initial creation outbox rows.
+- Add tests covering Book title-only history chips, sparse PATCH compare,
+  initial creation outbox rows, non-adjacent compare, and the path-snapshot
+  index lifecycle.
 
 ## Capabilities
 
@@ -84,8 +104,9 @@ change unless an existing spec explicitly puts them in content history scope.
 
 ### Modified Capabilities
 
-- `content-history-service`: Adds initial creation revision semantics and
-  tightens changed-field derivation to effective changed paths.
+- `content-history-service`: Adds initial creation revision semantics, tightens
+  changed-field derivation to effective changed paths, introduces a derived
+  per-path snapshot index, and exposes a path-snapshot compare reconstruction.
 - `wiki-content-creation`: Clarifies that wiki-capable content creation paths
   that are in content-history scope emit an initial editorial revision.
 - `wiki-post-editing`: Preserves and aligns existing wiki post creation history
@@ -94,21 +115,31 @@ change unless an existing spec explicitly puts them in content history scope.
 ## Impact
 
 - Affected packages:
-  - `package/server`: Book, Entity, Chapter, and translation history write
-    paths; focused service tests.
-  - `package/history`: read-time changed-field derivation remains compatible;
-    may need tests for object-shaped translation PATCH payloads.
-  - `package/app`: Book history compare model and focused compare tests.
-  - `package/contract`: only if helper types or fixtures are needed; no wire
-    contract shape change is intended.
+  - `package/server`: Book, Entity, and translation history write paths; Book
+    and Entity create flows gain initial history outbox writes; focused service
+    tests.
+  - `package/history`: new derived per-path snapshot table, outbox-consumer
+    ingestion that explodes effective PATCH payloads into path rows, backfill
+    of existing revisions, and a path-snapshot compare reconstruction API.
+  - `package/app`: Book history compare moves from local payload folding to
+    the new history service compare API; focused tests.
+  - `package/contract`: types for the new compare reconstruction API and
+    shared editorial path scope helpers.
 - APIs:
-  - No public request/response shape change is intended.
+  - New history service compare reconstruction endpoint(s) for path-snapshot
+    based base/target value retrieval.
+  - No change to existing outbox or revision read endpoints.
   - History timelines will gain additional initial revisions for newly created
     content after this change.
 - Backward compatibility:
-  - Existing history rows remain readable.
-  - Existing sparse PATCH revisions keep their stored payload shape.
-  - No backfill migration is planned for already-created content.
+  - Existing canonical history rows remain readable and unchanged.
+  - Existing sparse PATCH revisions keep their stored payload shape; the new
+    per-path index is derived state.
+  - Existing revisions, including pre-cutover slot-shaped payloads, are
+    re-projected into the new per-path index via a one-time backfill.
 - Migration needs:
-  - No database schema migration is expected.
-  - Existing rows are not rewritten.
+  - Main server: no schema migration.
+  - History service: new `UnitRevisionPath` table (or equivalent) plus the
+    `(unit_id, path, sequence)` composite index for latest-touch lookup, and a
+    one-time backfill that explodes every existing revision payload into path
+    rows.

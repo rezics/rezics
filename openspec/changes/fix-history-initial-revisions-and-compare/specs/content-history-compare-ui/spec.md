@@ -14,49 +14,34 @@ Unit snapshot.
 - **AND** it SHALL NOT show unchanged `summary`, `subtitle`, or `description`
   fields as changed
 
-### Requirement: Compare supports translation payload shapes
-The compare model SHALL normalize both legacy/full translation arrays and
-post-cutover object-shaped translation PATCH payloads before computing changed
-fields.
+### Requirement: Compare reads from the path-snapshot reconstruction
+The Book history compare page SHALL obtain base and target effective values
+through the history service's path-snapshot compare reconstruction rather than
+by folding revision payloads in the app layer. The compare page SHALL NOT
+attempt to merge sparse PATCH payloads in sequence order on the client.
 
-#### Scenario: Object-shaped translation payload is comparable
-- **WHEN** revision content contains
-  `translations: { "zh-hant": { title: "A" } }`
-- **AND** the target revision content contains
-  `translations: { "zh-hant": { title: "B" } }`
-- **THEN** the compare model SHALL emit a scalar change at
-  `translations.zh-hant.title`
+#### Scenario: Compare delegates to path-snapshot reconstruction
+- **WHEN** a user opens the Book compare page for any two revisions of the
+  same Book
+- **THEN** the compare page SHALL request reconstructed base and target values
+  keyed by editorial path from the history service
+- **AND** the compare page SHALL NOT iterate revision payloads in sequence
+  order to build effective state
 
-#### Scenario: Array-shaped translation payload remains comparable
-- **WHEN** legacy revision content contains
-  `translations: [{ language: "zh-hant", title: "A" }]`
-- **AND** the target revision content contains
-  `translations: [{ language: "zh-hant", title: "B" }]`
-- **THEN** the compare model SHALL emit a scalar change at
-  `translations.zh-hant.title`
-
-### Requirement: Compare builds effective state when possible
-For sparse PATCH revisions, the compare page SHALL build effective comparable
-states by applying revision patches in sequence order from the earliest
-available initial revision through the requested base and target revisions.
-When an initial revision is unavailable for legacy data, the compare page SHALL
-fall back to comparing the stored revision payloads while preserving shape
-normalization.
-
-#### Scenario: Non-adjacent sparse revision comparison
-- **WHEN** revision 1 creates title `A`
+#### Scenario: Non-adjacent compare renders range-internal changes
+- **WHEN** revision 1 sets title `A`
 - **AND** revision 2 changes summary
 - **AND** revision 3 changes title to `B`
 - **AND** a user compares revision 1 with revision 3
-- **THEN** the compare page SHALL report the title change from `A` to `B`
-- **AND** it SHALL NOT report the revision 2 summary value as a target change
-  unless the selected comparison range makes it different between base and
-  target states
+- **THEN** the compare page SHALL render the title change from `A` to `B`
+- **AND** it SHALL render the summary change introduced by revision 2 as a
+  range-internal change reflected in the target state
+- **AND** the rendering SHALL match the values returned by the path-snapshot
+  reconstruction
 
-#### Scenario: Missing initial revision falls back safely
-- **WHEN** the available history window does not contain an initial revision
-- **AND** a user compares two sparse revisions
-- **THEN** the compare page SHALL still compare the stored payloads using
-  normalized payload shapes
-- **AND** it SHALL render a no-changes state only when the normalized payloads
-  contain no visible differences
+#### Scenario: Missing base value renders as additive change
+- **WHEN** the path-snapshot reconstruction returns a null base value for a
+  path because no revision at or before the base touched that path
+- **THEN** the compare page SHALL render the change as additive, showing the
+  target value with no base value
+- **AND** it SHALL NOT render it as a no-changes state
