@@ -11,6 +11,7 @@ function outboxRow(overrides: Record<string, unknown> = {}) {
     category: HistoryOutboxPayloadKind.EDITORIAL_REVISION,
     payloadHash: "hash-1",
     attempts: 0,
+    status: "pending",
     createdAt: new Date("2026-05-19T00:00:00.000Z"),
     payload: {
       kind: HistoryOutboxPayloadKind.EDITORIAL_REVISION,
@@ -30,10 +31,24 @@ function mainDbStub(rows: ReturnType<typeof outboxRow>[]) {
   const byId = new Map(rows.map((row) => [row.id, { ...row }]));
   return {
     historyOutbox: {
-      findMany: mock(async () => [...byId.values()]),
+      findMany: mock(async ({ where }: any = {}) =>
+        [...byId.values()].filter((row: any) => {
+          if (where?.id && row.id !== where.id) return false;
+          if (where?.status?.in && !where.status.in.includes(row.status)) {
+            return false;
+          }
+          return true;
+        }),
+      ),
       updateMany: mock(async ({ where, data }: any) => {
         const row = byId.get(where.id);
-        if (!row || row.attempts !== where.attempts) return { count: 0 };
+        if (
+          !row ||
+          row.attempts !== where.attempts ||
+          (where.status?.in && !where.status.in.includes(row.status))
+        ) {
+          return { count: 0 };
+        }
         Object.assign(row, {
           ...data,
           attempts:
@@ -170,5 +185,71 @@ describe("HistoryOutboxConsumer", () => {
       createdAt: new Date("2026-05-19T00:00:00.000Z"),
     });
     expect(revisions.insertUnitRevision).not.toHaveBeenCalled();
+  });
+
+  test("can consume one explicit outbox id", async () => {
+    const mainDb = mainDbStub([outboxRow({ id: "outbox-2" })]);
+    const historyDb = historyDbStub();
+    const revisions = {
+      insertUnitRevision: mock(async () => ({})),
+      insertStructureEvent: mock(async () => ({})),
+    };
+    const consumer = new HistoryOutboxConsumer(
+      mainDb as never,
+      historyDb as never,
+      revisions as never,
+    );
+
+    const result = await consumer.consumeOutboxId("outbox-2");
+
+    expect(result).toEqual({ claimed: 1, processed: 1, failed: 0 });
+    expect(mainDb.historyOutbox.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ id: "outbox-2" }),
+      }),
+    );
+  });
+
+  test("duplicate explicit ingest converges after row is processed", async () => {
+    const mainDb = mainDbStub([outboxRow()]);
+    const historyDb = historyDbStub();
+    const revisions = {
+      insertUnitRevision: mock(async () => ({})),
+      insertStructureEvent: mock(async () => ({})),
+    };
+    const consumer = new HistoryOutboxConsumer(
+      mainDb as never,
+      historyDb as never,
+      revisions as never,
+    );
+
+    expect(await consumer.consumeOutboxId("outbox-1")).toEqual({
+      claimed: 1,
+      processed: 1,
+      failed: 0,
+    });
+    expect(await consumer.consumeOutboxId("outbox-1")).toEqual({
+      claimed: 0,
+      processed: 0,
+      failed: 0,
+    });
+    expect(revisions.insertUnitRevision).toHaveBeenCalledTimes(1);
+  });
+
+  test("missing explicit outbox id is a no-op", async () => {
+    const consumer = new HistoryOutboxConsumer(
+      mainDbStub([]) as never,
+      historyDbStub() as never,
+      {
+        insertUnitRevision: mock(async () => ({})),
+        insertStructureEvent: mock(async () => ({})),
+      } as never,
+    );
+
+    expect(await consumer.consumeOutboxId("missing")).toEqual({
+      claimed: 0,
+      processed: 0,
+      failed: 0,
+    });
   });
 });

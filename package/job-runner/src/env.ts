@@ -10,14 +10,21 @@ export const env = createEnv({
         v.literal("production"),
       ]),
     ),
-    HISTORY_DATABASE_URL: v.string(),
+    JOB_DATABASE_URL: v.string(),
     SERVER_DATABASE_URL: v.string(),
-    HISTORY_INTERNAL_SECRET: v.string(),
+    HISTORY_DATABASE_URL: v.string(),
+    MEILI_HOST: v.string(),
+    MEILI_MASTER_KEY: v.string(),
+    JOB_RUNNER_INTERNAL_SECRET: v.string(),
+    SEQUIN_WEBHOOK_SECRET: v.string(),
     PORT: v.optional(v.string()),
-    HISTORY_QUEUE_INGESTION_ENABLED: v.fallback(v.string(), "true"),
-    HISTORY_OUTBOX_POLLER_FALLBACK: v.optional(v.string()),
-    HISTORY_OUTBOX_POLL_MS: v.optional(v.string()),
+    JOB_RUNNER_ROLE: v.fallback(
+      v.union([v.literal("all"), v.literal("http"), v.literal("worker")]),
+      "all",
+    ),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
 });
+
+export type JobRunnerRole = typeof env.JOB_RUNNER_ROLE;

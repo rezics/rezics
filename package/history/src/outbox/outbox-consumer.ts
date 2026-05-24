@@ -139,13 +139,43 @@ export class HistoryOutboxConsumer {
     return { claimed: rows.length, processed, failed };
   }
 
+  async consumeOutboxId(
+    outboxId: string,
+    options: Omit<OutboxConsumerOptions, "batchSize"> = {},
+  ): Promise<OutboxConsumerResult> {
+    const now = options.now ?? new Date();
+    const rows = await this.claimRows({
+      batchSize: 1,
+      now,
+      consumerId: options.consumerId ?? null,
+      outboxId,
+    });
+    let processed = 0;
+    let failed = 0;
+
+    for (const row of rows) {
+      try {
+        await this.processRow(row);
+        await this.markProcessed(row.id);
+        processed += 1;
+      } catch (error) {
+        await this.markFailed(row, error, now);
+        failed += 1;
+      }
+    }
+
+    return { claimed: rows.length, processed, failed };
+  }
+
   private async claimRows(input: {
     batchSize: number;
     now: Date;
     consumerId: string | null;
+    outboxId?: string;
   }): Promise<HistoryOutboxRow[]> {
     const candidates = await this.mainDb.historyOutbox.findMany({
       where: {
+        ...(input.outboxId ? { id: input.outboxId } : {}),
         status: { in: ["pending", "failed"] },
         OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: input.now } }],
       },

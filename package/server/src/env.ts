@@ -167,6 +167,12 @@ export const env = createEnv({
 
     /** Project identifier for dispatch integration. */
     DISPATCH_PROJECT_ID: v.optional(v.string()),
+
+    /** Internal base URL for durable job-runner enqueue requests. */
+    JOB_RUNNER_BASE_URL: v.optional(v.string()),
+
+    /** Shared secret for authenticating internal job-runner enqueue requests. */
+    JOB_RUNNER_INTERNAL_SECRET: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

@@ -8,9 +8,21 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./outbox": {
+      "types": "./src/outbox/index.ts",
+      "default": "./src/outbox/index.ts"
+    },
+    "./revision/*": {
+      "types": "./src/revision/*.ts",
+      "default": "./src/revision/*.ts"
+    },
     "./*": {
       "types": "./src/*.ts",
       "default": "./src/*.ts"
+    },
+    "./prisma/*": {
+      "types": "./prisma/*.ts",
+      "default": "./prisma/*.ts"
     }
   },
   "scripts": {

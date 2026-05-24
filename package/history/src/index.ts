@@ -3,13 +3,14 @@ import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { env } from "./env";
 import { createDefaultHistoryOutboxConsumer } from "./outbox";
+import { shouldStartHistoryOutboxPoller } from "./outbox/startup";
 import { revisionApi } from "./revision/revision.api";
 
 import "dotenv/config";
 
 const isDev = (env.NODE_ENV ?? "development") !== "production";
 const port = env.PORT ? Number(env.PORT) : 3004;
-const outboxIntervalMs = Number(process.env.HISTORY_OUTBOX_POLL_MS ?? 2000);
+const outboxIntervalMs = Number(env.HISTORY_OUTBOX_POLL_MS ?? 2000);
 
 const devOrigins = [
   "http://localhost:35001",
@@ -62,7 +63,7 @@ app.listen(port);
 let outboxTimer: ReturnType<typeof setInterval> | undefined;
 let outboxRunning = false;
 
-if (process.env.HISTORY_OUTBOX_CONSUMER !== "0") {
+if (shouldStartHistoryOutboxPoller(env)) {
   const consumer = await createDefaultHistoryOutboxConsumer();
   const consumeOnce = async () => {
     if (outboxRunning) return;
@@ -82,6 +83,10 @@ if (process.env.HISTORY_OUTBOX_CONSUMER !== "0") {
   };
   void consumeOnce();
   outboxTimer = setInterval(() => void consumeOnce(), outboxIntervalMs);
+} else {
+  console.log(
+    "[History Outbox] poller disabled; queued job-runner ingestion is the default owner",
+  );
 }
 
 const stopOutbox = () => {

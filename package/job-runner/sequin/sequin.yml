@@ -1,0 +1,27 @@
+name: rezics-job-runner
+
+sinks:
+  - name: rezics-job-runner-webhook
+    type: http
+    url: http://job-runner:3005/webhooks/sequin
+    headers:
+      x-internal-secret: ${SEQUIN_WEBHOOK_SECRET}
+    batch: false
+
+tables:
+  - HistoryOutbox
+  - Unit
+  - UnitTranslation
+  - UnitTag
+  - TagVote
+  - UnitAlias
+  - CreditAttribution
+  - SubjectAttribution
+  - RealmUnit
+  - RealmTagApplication
+  - RealmTagUnit
+  - ShelfUnit
+  - Post
+  - User
+  - UserUnitProgress
+  - Feedback

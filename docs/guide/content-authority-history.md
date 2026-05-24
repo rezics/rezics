@@ -17,13 +17,21 @@ User Unit id.
 ## History Consumption
 
 Main canonical mutations write `HistoryOutbox` rows in the same database
-transaction as the content change. The history service consumes those rows
-eventually; main writes do not call the history service synchronously.
+transaction as the content change. Runtime delivery is owned by
+`@rezics/job-runner`: Sequin observes committed `HistoryOutbox` inserts, the
+runner enqueues `history.outbox.ingest`, and the worker persists the exact
+stored outbox payload into the history database. Main writes do not call the
+history service synchronously.
 
-To pause history consumption, stop or scale down the `@rezics/history` worker or
-service process. Main canonical writes continue and outbox rows remain pending.
-When the service resumes, it can process pending rows without a backfill of main
-current state.
+To pause history consumption, stop or scale down the job-runner
+`history.ingest` worker. Main canonical writes continue and outbox rows remain
+pending. When the worker resumes, it can process pending rows without a backfill
+of main current state.
+
+The legacy in-process history poller is disabled by default. During migration it
+can be temporarily enabled with `HISTORY_OUTBOX_POLLER_FALLBACK=1`, but do not
+run that poller and the job-runner history worker as concurrent owners of the
+same outbox rows.
 
 Failed rows are observable through admin dashboard counts. Admins can move
 failed rows back to pending with:
@@ -64,4 +72,3 @@ Wiki-capable create APIs accept `creationMode`.
 
 Runtime edit authority is separate from creation mode. Edits are admitted by
 current owner, collaborators, endpoint policy, and `UnitFieldLock` rows.
-

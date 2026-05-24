@@ -62,6 +62,7 @@
     "@faker-js/faker": "^10.1.0",
     "@rezics/contract": "workspace:*",
     "@rezics/email": "workspace:*",
+    "@rezics/job": "workspace:*",
     "@rezics/jwt": "workspace:*",
     "@rezics/search": "workspace:*",
     "@rezics/shared": "workspace:*",

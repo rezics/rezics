@@ -426,6 +426,21 @@ export async function syncProgress(
   });
 }
 
+export async function syncSingleProgress(
+  client: SearchClient,
+  userId: string,
+  unitId: string,
+): Promise<void> {
+  const row = await getSearchPrismaClient().userUnitProgress.findUnique({
+    where: { userId_unitId: { userId, unitId } },
+  });
+  if (!row) {
+    await removeProgress(client, userId, unitId);
+    return;
+  }
+  await syncProgress(client, row as UserUnitProgressRow);
+}
+
 export async function removeProgress(
   client: SearchClient,
   userId: string,
@@ -884,6 +899,42 @@ export async function patchRealmAliases(client: SearchClient, unitId: string) {
 
 // ANCHOR: User and feedback partial sync functions
 
+export async function syncSingleUser(client: SearchClient, unitId: string) {
+  const user = await getSearchPrismaClient().user.findUnique({
+    where: { unitId },
+  });
+  if (!user) {
+    await client.deleteUsers([unitId]);
+    return;
+  }
+
+  const unit = await getSearchPrismaClient().unit.findUnique({
+    where: { id: unitId },
+    select: { slug: true },
+  });
+
+  await client.addOrUpdateUsers([
+    {
+      id: user.unitId,
+      unitId: user.unitId,
+      name: user.name,
+      email: user.email,
+      slug: unit?.slug ?? null,
+      avatar: user.avatar,
+      bio: user.bio,
+      description: user.description,
+      descriptionText: mainMarkdownSource(user.description),
+      followersCount: user.followersCount,
+      followingsCount: user.followingsCount,
+      joinDate:
+        user.joinDate instanceof Date
+          ? user.joinDate.toISOString()
+          : (user.joinDate ?? null),
+      permission: (user.permission ?? null) as any,
+    },
+  ]);
+}
+
 export async function patchUserFields(
   client: SearchClient,
   unitId: string,
@@ -905,6 +956,36 @@ export async function patchFeedbackResolution(
 }
 
 // ANCHOR: Feedbacks sync
+
+export async function syncSingleFeedback(client: SearchClient, id: string) {
+  const feedback = await getSearchPrismaClient().feedback.findUnique({
+    where: { id },
+  });
+  if (!feedback) {
+    await client.deleteFeedbacks([id]);
+    return;
+  }
+
+  await client.addOrUpdateFeedbacks([
+    {
+      id: feedback.id,
+      userId: feedback.userId,
+      unitId: feedback.unitId,
+      type: feedback.type,
+      content: feedback.content,
+      url: feedback.url,
+      resolved: feedback.resolved,
+      createdAt:
+        feedback.createdAt instanceof Date
+          ? feedback.createdAt.toISOString()
+          : feedback.createdAt,
+      updatedAt:
+        feedback.updatedAt instanceof Date
+          ? feedback.updatedAt.toISOString()
+          : feedback.updatedAt,
+    },
+  ]);
+}
 
 export async function syncAllFeedbacks(client: SearchClient) {
   const deleteResult = await client.deleteAllFeedbacks();
