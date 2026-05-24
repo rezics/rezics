@@ -1,6 +1,7 @@
 import {
   patchRealmMemberCount,
   patchRealmMetadata,
+  patchRealmAliases,
   patchRealmTranslations,
   syncAllRealms,
   syncSingleRealm,
@@ -37,4 +38,8 @@ export async function patchRealmTranslationsToMeili(
   unitId: string,
 ): Promise<void> {
   await patchRealmTranslations(searchClient, unitId);
+}
+
+export async function patchRealmAliasesToMeili(unitId: string): Promise<void> {
+  await patchRealmAliases(searchClient, unitId);
 }

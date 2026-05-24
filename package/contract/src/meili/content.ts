@@ -33,6 +33,9 @@ export const ContentSearchDocumentSchema = t.Object({
   // Searchable tag labels (denormalized from tag Unit translations)
   tagLabels: t.Array(t.String()),
 
+  // Searchable aliases (denormalized from UnitAlias.value, separate from titles)
+  aliasValues: t.Array(t.String()),
+
   // Filterable: tag system (from UnitTag)
   tagIds: t.Array(t.String()),
   tagScores: t.Record(t.String(), t.Number()),

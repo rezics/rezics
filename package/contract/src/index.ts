@@ -48,6 +48,7 @@ export * from "./tags";
 export * from "./token";
 export * from "./translation-group";
 export * from "./unit";
+export * from "./unit-alias";
 export * from "./unit/translation-source";
 export * from "./unit/work-link";
 export * from "./unit/work-link-claim";

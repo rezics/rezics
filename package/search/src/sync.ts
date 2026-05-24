@@ -60,6 +60,7 @@ function pickCoverUrlFromTranslations(
 const BATCH_SIZE = 5000;
 const PROGRESS_SYNC_ATTEMPTS = 3;
 const PROGRESS_SYNC_RETRY_BASE_MS = 100;
+const VISIBILITY_THRESHOLD = -100;
 
 const INDEXABLE_TYPES = [
   UnitType.BOOK,
@@ -118,6 +119,15 @@ export function isPublicIndexablePostUnit(
   );
 }
 
+function isSearchVisibleScoredRow(row: {
+  score: number;
+  pinned?: boolean | null;
+  status?: string | null;
+}): boolean {
+  if (row.status && row.status !== "ACTIVE") return false;
+  return row.score > VISIBILITY_THRESHOLD || row.pinned === true;
+}
+
 async function patchContentIfEligible(
   client: SearchClient,
   unitId: string,
@@ -171,7 +181,17 @@ async function runProgressSyncWithRetry(
 
 const contentInclude = {
   translations: true,
+  aliases: {
+    where: {
+      status: "ACTIVE" as const,
+      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
+    },
+    orderBy: [{ pinned: "desc" as const }, { score: "desc" as const }],
+  } as any,
   unitTags: {
+    where: {
+      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
+    },
     include: {
       tag: { include: { translations: true } },
     },
@@ -208,7 +228,10 @@ const contentInclude = {
  */
 export function buildContentDocument(unit: any): ContentSearchDocument {
   const translations: any[] = unit.translations ?? [];
-  const unitTags: any[] = unit.unitTags ?? [];
+  const aliases: any[] = (unit.aliases ?? []).filter(isSearchVisibleScoredRow);
+  const unitTags: any[] = (unit.unitTags ?? []).filter(
+    isSearchVisibleScoredRow,
+  );
   const inRealms: any[] = unit.inRealms ?? [];
   const realmTagApplicationsAsTargetUnit: any[] =
     unit.realmTagApplicationsAsTargetUnit ?? [];
@@ -225,6 +248,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const descriptionText = descriptions.join("\n") || null;
   const contentText = mainMarkdownSource(unit.post?.content);
   const languages = translations.map((t: any) => t.language);
+  const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
 
   // Tags
   const tagIds = unitTags.map((ut: any) => ut.tagUnitId);
@@ -310,6 +334,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     subjectKinds,
     subjectRoles,
     tagLabels,
+    aliasValues,
     tagIds,
     tagScores,
     realmIds,
@@ -444,7 +469,10 @@ export async function patchContentTags(client: SearchClient, unitId: string) {
     return;
   }
   const unitTags = await getSearchPrismaClient().unitTag.findMany({
-    where: { unitId },
+    where: {
+      unitId,
+      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
+    },
     include: { tag: { include: { translations: true } } },
     orderBy: { score: "desc" },
   });
@@ -464,6 +492,28 @@ export async function patchContentTags(client: SearchClient, unitId: string) {
     tagIds,
     tagScores,
     tagLabels,
+  });
+}
+
+export async function patchContentAliases(
+  client: SearchClient,
+  unitId: string,
+) {
+  if (!(await isContentPatchEligible(unitId))) {
+    await client.deleteContent([unitId]);
+    return;
+  }
+  const aliases = await getSearchPrismaClient().unitAlias.findMany({
+    where: {
+      unitId,
+      status: "ACTIVE",
+      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
+    },
+    orderBy: [{ pinned: "desc" }, { score: "desc" }],
+  });
+
+  await patchContentIfEligible(client, unitId, {
+    aliasValues: aliases.map((alias) => alias.value).filter(Boolean),
   });
 }
 
@@ -801,6 +851,33 @@ export async function patchRealmTranslations(
         title: tr.title ?? null,
         description: tr.description ?? null,
       })),
+    },
+  ]);
+}
+
+export async function patchRealmAliases(client: SearchClient, unitId: string) {
+  const realm = await getSearchPrismaClient().realm.findUnique({
+    where: { unitId },
+    select: { unitId: true, unit: { select: { status: true } } },
+  });
+  if (!realm || realm.unit.status !== "PUBLISHED") {
+    await client.deleteRealms([unitId]);
+    return;
+  }
+
+  const aliases = await getSearchPrismaClient().unitAlias.findMany({
+    where: {
+      unitId,
+      status: "ACTIVE",
+      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
+    },
+    orderBy: [{ pinned: "desc" }, { score: "desc" }],
+  });
+
+  await client.patchRealms([
+    {
+      id: unitId,
+      aliasValues: aliases.map((alias) => alias.value).filter(Boolean),
     },
   ]);
 }
@@ -1208,11 +1285,13 @@ export async function syncPostsByTarget(
 export function buildRealmDocument(realm: any): RealmSearchDocument {
   const unit = realm.unit;
   const translations: any[] = unit?.translations ?? [];
+  const aliases: any[] = (unit?.aliases ?? []).filter(isSearchVisibleScoredRow);
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const descriptions = translations
     .map((t: any) => mainMarkdownSource(t.description))
     .filter(isNonEmptyString);
+  const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
 
   return {
     id: realm.unitId,
@@ -1230,6 +1309,7 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
     userId: unit?.userId ?? null,
     titles,
     descriptions,
+    aliasValues,
     translations: translations.map((tr: any) => ({
       language: tr.language,
       title: tr.title ?? null,
@@ -1248,6 +1328,16 @@ export async function syncSingleRealm(client: SearchClient, unitId: string) {
       unit: {
         include: {
           translations: true,
+          aliases: {
+            where: {
+              status: "ACTIVE",
+              OR: [
+                { score: { gt: VISIBILITY_THRESHOLD } },
+                { pinned: true },
+              ] as any,
+            },
+            orderBy: [{ pinned: "desc" }, { score: "desc" }],
+          } as any,
         },
       },
     },
@@ -1280,6 +1370,16 @@ export async function syncAllRealms(client: SearchClient) {
         unit: {
           include: {
             translations: true,
+            aliases: {
+              where: {
+                status: "ACTIVE",
+                OR: [
+                  { score: { gt: VISIBILITY_THRESHOLD } },
+                  { pinned: true },
+                ] as any,
+              },
+              orderBy: [{ pinned: "desc" }, { score: "desc" }],
+            } as any,
           },
         },
       },
@@ -1308,6 +1408,16 @@ const entityIncludeForSync = {
   unit: {
     include: {
       translations: true,
+      aliases: {
+        where: {
+          status: "ACTIVE" as const,
+          OR: [
+            { score: { gt: VISIBILITY_THRESHOLD } },
+            { pinned: true },
+          ] as any,
+        },
+        orderBy: [{ pinned: "desc" as const }, { score: "desc" as const }],
+      } as any,
     },
   },
 } as const;
@@ -1315,9 +1425,11 @@ const entityIncludeForSync = {
 export function buildEntityDocument(entity: any): EntitySearchDocument {
   const unit = entity.unit;
   const translations: any[] = unit?.translations ?? [];
+  const aliases: any[] = (unit?.aliases ?? []).filter(isSearchVisibleScoredRow);
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const summaries = translations.map((t: any) => t.summary).filter(Boolean);
+  const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
 
   return {
     id: entity.unitId,
@@ -1329,6 +1441,7 @@ export function buildEntityDocument(entity: any): EntitySearchDocument {
     avatar: entity.avatar ?? null,
     titles,
     summaries,
+    aliasValues,
     eligibleCreditRoles: entity.eligibleCreditRoles ?? [],
     eligibleSubjectRoles: entity.eligibleSubjectRoles ?? [],
     translations: translations.map((tr: any) => ({
@@ -1361,6 +1474,33 @@ export async function syncSingleEntity(client: SearchClient, unitId: string) {
 
   const doc = buildEntityDocument(entity);
   await client.addOrUpdateEntities([doc]);
+}
+
+export async function patchEntityAliases(client: SearchClient, unitId: string) {
+  const entity = await getSearchPrismaClient().entity.findUnique({
+    where: { unitId },
+    select: { unitId: true },
+  });
+  if (!entity) {
+    await client.deleteEntities([unitId]);
+    return;
+  }
+
+  const aliases = await getSearchPrismaClient().unitAlias.findMany({
+    where: {
+      unitId,
+      status: "ACTIVE",
+      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
+    },
+    orderBy: [{ pinned: "desc" }, { score: "desc" }],
+  });
+
+  await client.patchEntities([
+    {
+      id: unitId,
+      aliasValues: aliases.map((alias) => alias.value).filter(Boolean),
+    },
+  ]);
 }
 
 export async function syncAllEntities(client: SearchClient) {

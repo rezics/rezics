@@ -83,6 +83,7 @@ export class SearchClient {
         "descriptionText",
         "descriptions",
         "summaries",
+        "aliasValues",
         "creditNames",
         "subjectNames",
         "tagLabels",
@@ -168,7 +169,7 @@ export class SearchClient {
 
   async initRealmIndex(): Promise<void> {
     const settingsTask = await this.realmIndex.updateSettings({
-      searchableAttributes: ["titles", "descriptions"],
+      searchableAttributes: ["titles", "descriptions", "aliasValues"],
       filterableAttributes: ["isPublic", "isOfficial"],
       sortableAttributes: ["memberCount", "createdAt", "updatedAt"],
     });
@@ -180,7 +181,7 @@ export class SearchClient {
 
   async initEntityIndex(): Promise<void> {
     const settingsTask = await this.entityIndex.updateSettings({
-      searchableAttributes: ["titles", "summaries", "slug"],
+      searchableAttributes: ["titles", "summaries", "aliasValues", "slug"],
       filterableAttributes: [
         "kind",
         "verified",

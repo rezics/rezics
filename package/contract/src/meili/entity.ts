@@ -20,6 +20,7 @@ export const EntitySearchDocumentSchema = t.Object({
   // Searchable arrays (denormalized from UnitTranslation)
   titles: t.Array(t.String()),
   summaries: t.Array(t.String()),
+  aliasValues: t.Array(t.String()),
 
   // Entity-owned eligibility facets
   eligibleCreditRoles: t.Array(creditAttributionRoleKeySchema),

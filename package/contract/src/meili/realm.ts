@@ -16,6 +16,7 @@ export const RealmSearchDocumentSchema = t.Object({
   // Searchable arrays (denormalized from UnitTranslation)
   titles: t.Array(t.String()),
   descriptions: t.Array(t.String()),
+  aliasValues: t.Array(t.String()),
 
   // Structured translations for display rendering
   translations: t.Array(

@@ -29,4 +29,31 @@ describe("SearchClient", () => {
       interval: 100,
     });
   });
+
+  test("indexes aliasValues below primary translation fields", async () => {
+    const searchClient = new SearchClient({
+      host: "http://localhost:7700",
+      apiKey: "masterKey",
+    });
+    const updateSettings = mock(async () => ({ taskUid: 201 }));
+    const addDocuments = mock(async () => ({ taskUid: 202 }));
+    const waitForTask = mock(async () => ({ status: "succeeded" }));
+
+    Object.defineProperty(searchClient, "contentIndex", {
+      value: { updateSettings, addDocuments },
+    });
+    Object.defineProperty(searchClient.meili.tasks, "waitForTask", {
+      value: waitForTask,
+    });
+
+    await searchClient.initContentIndex();
+
+    const settings = (updateSettings.mock.calls as any)[0][0] as {
+      searchableAttributes: string[];
+    };
+    expect(
+      settings.searchableAttributes.indexOf("aliasValues"),
+    ).toBeGreaterThan(settings.searchableAttributes.indexOf("titles"));
+    expect(settings.searchableAttributes).toContain("aliasValues");
+  });
 });

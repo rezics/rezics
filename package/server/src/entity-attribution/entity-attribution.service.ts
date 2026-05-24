@@ -142,7 +142,17 @@ async function assertCreditEligibility(
     where: { unitId: { in: entityIds } },
     select: { unitId: true, eligibleCreditRoles: true },
   });
-  const byId = new Map(entities.map((entity: any) => [entity.unitId, entity]));
+  const byId = new Map<
+    string,
+    { unitId: string; eligibleCreditRoles: string[] }
+  >(
+    entities.map(
+      (entity: { unitId: string; eligibleCreditRoles: string[] }) => [
+        entity.unitId,
+        entity,
+      ],
+    ),
+  );
 
   for (const entityId of entityIds) {
     const entity = byId.get(entityId);
@@ -172,7 +182,17 @@ async function assertSubjectEligibility(
     where: { unitId: { in: entityIds } },
     select: { unitId: true, eligibleSubjectRoles: true },
   });
-  const byId = new Map(entities.map((entity: any) => [entity.unitId, entity]));
+  const byId = new Map<
+    string,
+    { unitId: string; eligibleSubjectRoles: string[] }
+  >(
+    entities.map(
+      (entity: { unitId: string; eligibleSubjectRoles: string[] }) => [
+        entity.unitId,
+        entity,
+      ],
+    ),
+  );
 
   for (const entityId of entityIds) {
     const entity = byId.get(entityId);

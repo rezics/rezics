@@ -74,7 +74,11 @@ function creditRow(entityId: string, sortOrder: number) {
   };
 }
 
-function subjectRow(entityId: string, sortOrder: number, weight = null) {
+function subjectRow(
+  entityId: string,
+  sortOrder: number,
+  weight: number | null = null,
+) {
   return {
     unitId: "book-1",
     entityId,

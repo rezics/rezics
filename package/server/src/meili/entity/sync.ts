@@ -1,4 +1,8 @@
-import { syncAllEntities, syncSingleEntity } from "@rezics/search";
+import {
+  patchEntityAliases,
+  syncAllEntities,
+  syncSingleEntity,
+} from "@rezics/search";
 import { searchClient } from "../search-client";
 
 export async function syncEntityToMeili(unitId: string): Promise<void> {
@@ -11,4 +15,8 @@ export async function deleteEntityFromMeili(unitId: string): Promise<void> {
 
 export async function syncAllEntitiesToMeili() {
   return syncAllEntities(searchClient);
+}
+
+export async function patchEntityAliasesToMeili(unitId: string): Promise<void> {
+  await patchEntityAliases(searchClient, unitId);
 }

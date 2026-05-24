@@ -1,4 +1,5 @@
 import {
+  patchContentAliases,
   patchContentContainedUnitIds,
   patchContentCredits,
   patchContentMetadata,
@@ -28,6 +29,12 @@ export async function deleteContentFromMeili(unitId: string): Promise<void> {
 
 export async function patchContentTagsToMeili(unitId: string): Promise<void> {
   await patchContentTags(searchClient, unitId);
+}
+
+export async function patchContentAliasesToMeili(
+  unitId: string,
+): Promise<void> {
+  await patchContentAliases(searchClient, unitId);
 }
 
 export async function patchContentCreditsToMeili(

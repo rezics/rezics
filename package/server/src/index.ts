@@ -48,6 +48,7 @@ import {
   workLinkApi,
   workLinkClaimApi,
 } from "./unit";
+import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
 import { AppError } from "./utils/errors";
@@ -195,6 +196,8 @@ routeApp
   .use(meiliApi)
   .use(federatedSearchApi)
   .use(unitApi)
+  .use(unitAliasApi)
+  .use(unitAliasVoteApi)
   .use(unitAuthorityApi)
   .use(historyOutboxAdminApi)
   .use(workLinkApi)

@@ -67,13 +67,15 @@ describe("entityAttributionApi", () => {
 
   test("invalidates credit subject and shared editor queries", () => {
     const queryClient = {
-      invalidateQueries: mock(() => undefined),
+      invalidateQueries: mock(async () => undefined),
     };
 
     invalidateEntityAttributionBatchQueries(queryClient, "book-1");
 
     expect(
-      queryClient.invalidateQueries.mock.calls.map((call) => call[0]),
+      (queryClient.invalidateQueries.mock.calls as any[]).map(
+        (call) => call[0],
+      ),
     ).toEqual([
       { queryKey: ["credit-attribution", "by-unit", "book-1"] },
       {

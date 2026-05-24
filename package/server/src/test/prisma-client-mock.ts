@@ -30,6 +30,11 @@ export const UnitType = {
   ZONE: "ZONE",
 } as const;
 
+export const UnitAliasStatus = {
+  ACTIVE: "ACTIVE",
+  HIDDEN: "HIDDEN",
+} as const;
+
 export const UnitVisibility = {
   PUBLIC: "PUBLIC",
   PRIVATE: "PRIVATE",
@@ -52,6 +57,7 @@ export const prismaClientMock = {
   Prisma,
   PostKind,
   UnitStatus,
+  UnitAliasStatus,
   UnitType,
   UnitVisibility,
   UserUnitProgressStatus,

@@ -68,6 +68,21 @@ enum ClaimStatus {
   WITHDRAWN
 }
 
+enum UnitAliasKind {
+  COMMON
+  ABBREVIATION
+  TRANSLITERATION
+  ALTERNATE_TITLE
+  LEGACY_TITLE
+  MISSPELLING
+  OTHER
+}
+
+enum UnitAliasStatus {
+  ACTIVE
+  HIDDEN
+}
+
 enum PostKind {
   /**
    * Long-form review with rating.
@@ -162,6 +177,7 @@ model Unit {
   // Translation layer
   translations     UnitTranslation[]
   supportLanguages UnitSupportLanguage[]
+  aliases          UnitAlias[]           @relation("UnitAliases")
 
   // Parallel-translation grouping (POST wiki flow); see TranslationGroup.
   translationGroupId String?           @db.Uuid
@@ -191,10 +207,10 @@ model Unit {
   // Realm-scoped tag classification. The realm side is exposed through
   // `Realm`; Unit keeps only the global tag, target content, and context
   // content roles because TAG/content do not have dedicated extension models.
-  realmTagApplicationsAsAppliedTag RealmTagApplication[]    @relation("RealmTagApplicationAppliedTag")
-  realmTagApplicationsAsTargetUnit RealmTagApplication[]    @relation("RealmTagApplicationTargetUnit")
-  realmTagContextsAsTag            RealmTagContext[] @relation("RealmTagContextTag")
-  realmTagContextsAsContent        RealmTagContext[] @relation("RealmTagContextContent")
+  realmTagApplicationsAsAppliedTag RealmTagApplication[] @relation("RealmTagApplicationAppliedTag")
+  realmTagApplicationsAsTargetUnit RealmTagApplication[] @relation("RealmTagApplicationTargetUnit")
+  realmTagContextsAsTag            RealmTagContext[]     @relation("RealmTagContextTag")
+  realmTagContextsAsContent        RealmTagContext[]     @relation("RealmTagContextContent")
 
   // Credit attribution
   creditAttributions CreditAttribution[] @relation("CreditAttributedUnit")
@@ -307,6 +323,56 @@ model UnitSupportLanguage {
 
   @@id([unitId, language])
   @@index([language, unitId])
+}
+
+/**
+ * ANCHOR UNIT ALIAS SEARCH
+ */
+
+model UnitAlias {
+  id              String          @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  unitId          String          @db.Uuid
+  value           String
+  normalizedValue String
+  language        String?         @db.VarChar(16)
+  kind            UnitAliasKind   @default(COMMON)
+  status          UnitAliasStatus @default(ACTIVE)
+  score           Int             @default(0)
+  voteCount       Int             @default(0)
+  pinned          Boolean         @default(false)
+  position        String?
+  createdById     String?         @db.Uuid
+  updatedById     String?         @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  unit      Unit            @relation("UnitAliases", fields: [unitId], references: [id], onDelete: Cascade)
+  createdBy User?           @relation("UnitAliasCreatedBy", fields: [createdById], references: [unitId], onDelete: SetNull)
+  updatedBy User?           @relation("UnitAliasUpdatedBy", fields: [updatedById], references: [unitId], onDelete: SetNull)
+  votes     UnitAliasVote[] @relation("UnitAliasVotes")
+
+  @@unique([unitId, normalizedValue])
+  @@index([normalizedValue])
+  @@index([unitId, pinned, position])
+  @@index([unitId, status, score])
+  @@index([status, score])
+  @@index([createdById, createdAt])
+}
+
+model UnitAliasVote {
+  aliasId String @db.Uuid
+  userId  String @db.Uuid
+  value   Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  alias UnitAlias @relation("UnitAliasVotes", fields: [aliasId], references: [id], onDelete: Cascade)
+  user  User      @relation("UnitAliasVoteUser", fields: [userId], references: [unitId], onDelete: Cascade)
+
+  @@id([aliasId, userId])
+  @@index([userId])
 }
 
 /**
@@ -598,7 +664,7 @@ model Realm {
 
   /// Realm is a subreddit-like community space, not a tag or classifier.
   /// It owns membership and community metadata; realm-scoped tag classification lives in RealmTagApplication and RealmTagContext.
-  tagApplications RealmTagApplication[]    @relation("RealmTagApplicationRealm")
+  tagApplications RealmTagApplication[] @relation("RealmTagApplicationRealm")
   tagContexts     RealmTagContext[]
 }
 
@@ -650,9 +716,9 @@ model RealmTagApplication {
 
   /// A realm-scoped application of an existing global TAG Unit to any target Unit.
   /// This does not create a realm-scoped tag and does not require the target to be posted into the realm via RealmUnit.
-  realm      Realm          @relation("RealmTagApplicationRealm", fields: [realmUnitId], references: [unitId], onDelete: Cascade)
-  appliedTag Unit           @relation("RealmTagApplicationAppliedTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
-  targetUnit Unit           @relation("RealmTagApplicationTargetUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  realm      Realm                     @relation("RealmTagApplicationRealm", fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  appliedTag Unit                      @relation("RealmTagApplicationAppliedTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+  targetUnit Unit                      @relation("RealmTagApplicationTargetUnit", fields: [unitId], references: [id], onDelete: Cascade)
   votes      RealmTagApplicationVote[] @relation("RealmTagApplicationVotes")
 
   @@id([realmUnitId, tagUnitId, unitId])
@@ -844,6 +910,9 @@ model User {
   unitFieldLocksCreated    UnitFieldLock[]    @relation("UnitFieldLockLockedBy")
   historyOutboxAuthored    HistoryOutbox[]    @relation("HistoryOutboxActor")
   historyOutboxProcessed   HistoryOutbox[]    @relation("HistoryOutboxProcessor")
+  unitAliasesCreated       UnitAlias[]        @relation("UnitAliasCreatedBy")
+  unitAliasesUpdated       UnitAlias[]        @relation("UnitAliasUpdatedBy")
+  unitAliasVotes           UnitAliasVote[]    @relation("UnitAliasVoteUser")
 
   @@index([email])
 }
