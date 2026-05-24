@@ -177,4 +177,187 @@ describe("job-runner HTTP app", () => {
       results: [{ kind: "search.content.delete", status: "coalesced" }],
     });
   });
+
+  test("rejects admin endpoints without internal secret", async () => {
+    const { queue } = createMemoryQueue();
+    const app = createJobRunnerApp({
+      queue,
+      internalSecret: "secret",
+      sequinWebhookSecret: "sequin",
+    });
+
+    const response = await app.handle(
+      new Request("http://localhost/admin/queues/counts"),
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  test("returns admin queue counts by lane and state", async () => {
+    const { queue } = createMemoryQueue();
+    const command = createSearchCommand(SEARCH_COMMAND_KINDS.contentPatchTags, {
+      unitId: "unit-1",
+    });
+    const app = createJobRunnerApp({
+      queue: {
+        ...queue,
+        async countStates() {
+          return {
+            queues: {
+              [command.lane]: {
+                created: 2,
+                retry: 1,
+                active: 0,
+                completed: 3,
+                cancelled: 0,
+                failed: 1,
+                all: 7,
+              },
+            },
+          };
+        },
+      },
+      internalSecret: "secret",
+      sequinWebhookSecret: "sequin",
+    });
+
+    const response = await app.handle(
+      new Request("http://localhost/admin/queues/counts", {
+        headers: { "x-internal-secret": "secret" },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      counts: Array<Record<string, unknown>>;
+    };
+    expect(
+      body.counts.find((item) => item.lane === command.lane),
+    ).toMatchObject({
+      lane: command.lane,
+      created: 2,
+      retry: 1,
+      completed: 3,
+      failed: 1,
+      all: 7,
+    });
+  });
+
+  test("lists and inspects failed jobs with command metadata", async () => {
+    const { queue } = createMemoryQueue();
+    const command = createSearchCommand(SEARCH_COMMAND_KINDS.contentPatchTags, {
+      unitId: "unit-1",
+    });
+    const failedJob = {
+      id: "job-failed",
+      name: command.lane,
+      state: "failed",
+      data: command,
+      retry_count: 2,
+      retry_limit: 5,
+      output: {
+        value: { message: "boom" },
+        meiliTasks: [{ taskUid: 42, index: "content" }],
+      },
+      created_on: "2026-05-24T00:00:00.000Z",
+    };
+    const app = createJobRunnerApp({
+      queue: {
+        ...queue,
+        getDb() {
+          return {
+            async executeSql() {
+              return { rows: [failedJob] };
+            },
+          };
+        },
+        async getJobById(lane: string, id: string) {
+          return lane === command.lane && id === failedJob.id
+            ? failedJob
+            : null;
+        },
+      },
+      internalSecret: "secret",
+      sequinWebhookSecret: "sequin",
+    });
+
+    const listResponse = await app.handle(
+      new Request("http://localhost/admin/jobs/failed", {
+        headers: { "x-internal-secret": "secret" },
+      }),
+    );
+    const inspectResponse = await app.handle(
+      new Request(
+        `http://localhost/admin/jobs/failed/${command.lane}/${failedJob.id}`,
+        { headers: { "x-internal-secret": "secret" } },
+      ),
+    );
+
+    expect(await listResponse.json()).toMatchObject({
+      jobs: [
+        {
+          id: failedJob.id,
+          lane: command.lane,
+          commandKind: command.kind,
+          idempotencyKey: command.idempotencyKey,
+          tags: command.tags,
+          source: command.source,
+          attemptCount: 2,
+          lastError: { message: "boom" },
+          meiliTasks: [{ taskUid: 42, index: "content" }],
+        },
+      ],
+    });
+    expect(await inspectResponse.json()).toMatchObject({
+      job: {
+        id: failedJob.id,
+        commandKind: command.kind,
+      },
+    });
+  });
+
+  test("retries and discards failed jobs through admin operations", async () => {
+    const { queue } = createMemoryQueue();
+    const command = createSearchCommand(SEARCH_COMMAND_KINDS.contentPatchTags, {
+      unitId: "unit-1",
+    });
+    const calls: string[] = [];
+    const failedJob = { id: "job-failed", name: command.lane, data: command };
+    const app = createJobRunnerApp({
+      queue: {
+        ...queue,
+        async getJobById(lane: string, id: string) {
+          return lane === command.lane && id === failedJob.id
+            ? failedJob
+            : null;
+        },
+        async retry(lane: string, id: string) {
+          calls.push(`retry:${lane}:${id}`);
+        },
+        async deleteJob(lane: string, id: string) {
+          calls.push(`delete:${lane}:${id}`);
+        },
+      },
+      internalSecret: "secret",
+      sequinWebhookSecret: "sequin",
+    });
+
+    await app.handle(
+      new Request(
+        `http://localhost/admin/jobs/failed/${command.lane}/${failedJob.id}/retry`,
+        { method: "POST", headers: { "x-internal-secret": "secret" } },
+      ),
+    );
+    await app.handle(
+      new Request(
+        `http://localhost/admin/jobs/failed/${command.lane}/${failedJob.id}/discard`,
+        { method: "POST", headers: { "x-internal-secret": "secret" } },
+      ),
+    );
+
+    expect(calls).toEqual([
+      `retry:${command.lane}:${failedJob.id}`,
+      `delete:${command.lane}:${failedJob.id}`,
+    ]);
+  });
 });

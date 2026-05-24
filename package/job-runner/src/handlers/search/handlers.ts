@@ -1,4 +1,5 @@
 import {
+  createSearchCommand,
   SEARCH_COMMAND_KINDS,
   type AnyJobCommand,
   type SearchCommand,
@@ -14,24 +15,25 @@ import {
   patchContentTags,
   patchContentTranslations,
   patchEntityAliases,
-  patchFeedbackResolution,
+  patchFeedbackResolutionFromDb,
   patchPostFields,
-  patchPostsTarget,
+  patchPostsTargetSegment,
   patchRealmAliases,
+  patchRealmMemberCountFromDb,
   patchRealmMemberCount,
   patchRealmMetadata,
   patchRealmTranslations,
   patchUserFields,
   removeProgress,
-  syncAllContent,
-  syncAllEntities,
-  syncAllFeedbacks,
-  syncAllPosts,
-  syncAllPostRealmIds,
-  syncAllPostRootTargets,
-  syncAllRealms,
-  syncAllUsers,
-  syncPostsByAuthor,
+  syncContentSegment,
+  syncEntitySegment,
+  syncFeedbackSegment,
+  syncPostSegment,
+  syncPostRealmIdsSegment,
+  syncPostRootTargetsSegment,
+  syncProgressSegment,
+  syncRealmSegment,
+  syncPostsByAuthorSegment,
   syncSingleContent,
   syncSingleEntity,
   syncSingleFeedback,
@@ -39,12 +41,24 @@ import {
   syncSingleProgress,
   syncSingleRealm,
   syncSingleUser,
+  syncUserSegment,
   type SearchClient,
+  type SearchSegmentOptions,
+  type SearchSegmentResult,
 } from "@rezics/search";
-import type { JobHandler } from "../../worker";
+import {
+  DEFAULT_FANOUT_SEGMENT_LIMIT,
+  nextFanoutPayload,
+  type FanoutPayload,
+} from "../../fanout";
+import type { HandlerContext, JobHandler } from "../../worker";
+import { withHandlerMetadata } from "./util";
 
 type SearchOperations = Partial<
-  Record<SearchCommand["kind"], (command: SearchCommand) => Promise<unknown>>
+  Record<
+    SearchCommand["kind"],
+    (command: SearchCommand, context: HandlerContext) => Promise<unknown>
+  >
 >;
 
 function fieldsFrom(payload: SearchCommand["payload"]) {
@@ -65,6 +79,86 @@ function targetIdFrom(payload: SearchCommand["payload"]) {
   if ("userId" in payload) return payload.userId;
   if ("feedbackId" in payload) return payload.feedbackId;
   return undefined;
+}
+
+function indexForKind(kind: string) {
+  const [, domain] = kind.split(".");
+  return domain;
+}
+
+function fanoutPayloadFrom(command: SearchCommand): FanoutPayload | undefined {
+  if (!("targetId" in command.payload)) return undefined;
+  return {
+    targetId: command.payload.targetId,
+    cursor: "cursor" in command.payload ? command.payload.cursor : undefined,
+    limit: "limit" in command.payload ? command.payload.limit : undefined,
+  };
+}
+
+async function runFanoutSegment(
+  command: SearchCommand,
+  context: HandlerContext,
+  operation: (
+    targetId: string,
+    options: SearchSegmentOptions,
+  ) => Promise<SearchSegmentResult>,
+) {
+  const payload = fanoutPayloadFrom(command);
+  if (!payload) return undefined;
+
+  const result = await operation(payload.targetId, {
+    cursor: payload.cursor,
+    limit: payload.limit ?? DEFAULT_FANOUT_SEGMENT_LIMIT,
+  });
+  const nextPayload = nextFanoutPayload(payload, result);
+  if (nextPayload) {
+    await context.enqueue(
+      createSearchCommand(command.kind, nextPayload, command.source),
+    );
+  }
+  return {
+    ...result,
+    continued: Boolean(nextPayload),
+  };
+}
+
+function fullSyncPayloadFrom(command: SearchCommand): SearchSegmentOptions {
+  return {
+    cursor: "cursor" in command.payload ? command.payload.cursor : undefined,
+    limit: "limit" in command.payload ? command.payload.limit : undefined,
+  };
+}
+
+async function runFullSyncSegment(
+  command: SearchCommand,
+  context: HandlerContext,
+  options: {
+    deleteAll: () => Promise<unknown>;
+    syncSegment: (
+      options: SearchSegmentOptions,
+    ) => Promise<SearchSegmentResult>;
+  },
+) {
+  const payload = fullSyncPayloadFrom(command);
+  const resetResult = payload.cursor ? undefined : await options.deleteAll();
+  const result = await options.syncSegment(payload);
+  if (result.nextCursor) {
+    await context.enqueue(
+      createSearchCommand(
+        command.kind,
+        {
+          ...command.payload,
+          cursor: result.nextCursor,
+        },
+        command.source,
+      ),
+    );
+  }
+  return {
+    ...(resetResult ? { resetResult } : {}),
+    ...result,
+    continued: Boolean(result.nextCursor),
+  };
 }
 
 export function createSearchHandlers(client: SearchClient) {
@@ -115,7 +209,11 @@ export function createSearchHandlers(client: SearchClient) {
       "unitId" in command.payload
         ? patchContentContainedUnitIds(client, command.payload.unitId)
         : undefined,
-    [SEARCH_COMMAND_KINDS.contentFullSync]: async () => syncAllContent(client),
+    [SEARCH_COMMAND_KINDS.contentFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllContent(),
+        syncSegment: (options) => syncContentSegment(client, options),
+      }),
 
     [SEARCH_COMMAND_KINDS.postSync]: async (command) =>
       "postId" in command.payload
@@ -131,15 +229,27 @@ export function createSearchHandlers(client: SearchClient) {
         targetIdFrom(command.payload) ?? "",
         fieldsFrom(command.payload),
       ),
-    [SEARCH_COMMAND_KINDS.postPatchAuthorFanout]: async (command) =>
-      syncPostsByAuthor(client, targetIdFrom(command.payload) ?? ""),
-    [SEARCH_COMMAND_KINDS.postPatchTargetFanout]: async (command) =>
-      patchPostsTarget(client, targetIdFrom(command.payload) ?? ""),
-    [SEARCH_COMMAND_KINDS.postPatchRealmIds]: async () =>
-      syncAllPostRealmIds(client),
-    [SEARCH_COMMAND_KINDS.postRepairRootTarget]: async () =>
-      syncAllPostRootTargets(client),
-    [SEARCH_COMMAND_KINDS.postFullSync]: async () => syncAllPosts(client),
+    [SEARCH_COMMAND_KINDS.postPatchAuthorFanout]: async (command, context) =>
+      runFanoutSegment(command, context, (targetId, options) =>
+        syncPostsByAuthorSegment(client, targetId, options),
+      ),
+    [SEARCH_COMMAND_KINDS.postPatchTargetFanout]: async (command, context) =>
+      runFanoutSegment(command, context, (targetId, options) =>
+        patchPostsTargetSegment(client, targetId, options),
+      ),
+    [SEARCH_COMMAND_KINDS.postPatchRealmIds]: async (command, context) =>
+      runFanoutSegment(command, context, (_targetId, options) =>
+        syncPostRealmIdsSegment(client, options),
+      ),
+    [SEARCH_COMMAND_KINDS.postRepairRootTarget]: async (command, context) =>
+      runFanoutSegment(command, context, (_targetId, options) =>
+        syncPostRootTargetsSegment(client, options),
+      ),
+    [SEARCH_COMMAND_KINDS.postFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllPosts(),
+        syncSegment: (options) => syncPostSegment(client, options),
+      }),
 
     [SEARCH_COMMAND_KINDS.realmSync]: async (command) =>
       "unitId" in command.payload
@@ -164,8 +274,14 @@ export function createSearchHandlers(client: SearchClient) {
         ? patchRealmAliases(client, command.payload.unitId)
         : undefined,
     [SEARCH_COMMAND_KINDS.realmPatchMemberCount]: async (command) =>
-      patchRealmMemberCount(client, targetIdFrom(command.payload) ?? "", 0),
-    [SEARCH_COMMAND_KINDS.realmFullSync]: async () => syncAllRealms(client),
+      "unitId" in command.payload
+        ? patchRealmMemberCountFromDb(client, command.payload.unitId)
+        : undefined,
+    [SEARCH_COMMAND_KINDS.realmFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllRealms(),
+        syncSegment: (options) => syncRealmSegment(client, options),
+      }),
 
     [SEARCH_COMMAND_KINDS.entitySync]: async (command) =>
       "unitId" in command.payload
@@ -179,7 +295,11 @@ export function createSearchHandlers(client: SearchClient) {
       "unitId" in command.payload
         ? patchEntityAliases(client, command.payload.unitId)
         : undefined,
-    [SEARCH_COMMAND_KINDS.entityFullSync]: async () => syncAllEntities(client),
+    [SEARCH_COMMAND_KINDS.entityFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllEntities(),
+        syncSegment: (options) => syncEntitySegment(client, options),
+      }),
 
     [SEARCH_COMMAND_KINDS.userSync]: async (command) =>
       "userId" in command.payload
@@ -195,9 +315,15 @@ export function createSearchHandlers(client: SearchClient) {
         targetIdFrom(command.payload) ?? "",
         fieldsFrom(command.payload),
       ),
-    [SEARCH_COMMAND_KINDS.userPostsAuthorFanout]: async (command) =>
-      syncPostsByAuthor(client, targetIdFrom(command.payload) ?? ""),
-    [SEARCH_COMMAND_KINDS.userFullSync]: async () => syncAllUsers(client),
+    [SEARCH_COMMAND_KINDS.userPostsAuthorFanout]: async (command, context) =>
+      runFanoutSegment(command, context, (targetId, options) =>
+        syncPostsByAuthorSegment(client, targetId, options),
+      ),
+    [SEARCH_COMMAND_KINDS.userFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllUsers(),
+        syncSegment: (options) => syncUserSegment(client, options),
+      }),
 
     [SEARCH_COMMAND_KINDS.feedbackSync]: async (command) =>
       "feedbackId" in command.payload
@@ -209,10 +335,13 @@ export function createSearchHandlers(client: SearchClient) {
         : undefined,
     [SEARCH_COMMAND_KINDS.feedbackPatchResolution]: async (command) =>
       "feedbackId" in command.payload
-        ? patchFeedbackResolution(client, command.payload.feedbackId, {})
+        ? patchFeedbackResolutionFromDb(client, command.payload.feedbackId)
         : undefined,
-    [SEARCH_COMMAND_KINDS.feedbackFullSync]: async () =>
-      syncAllFeedbacks(client),
+    [SEARCH_COMMAND_KINDS.feedbackFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllFeedbacks(),
+        syncSegment: (options) => syncFeedbackSegment(client, options),
+      }),
 
     [SEARCH_COMMAND_KINDS.progressSync]: async (command) =>
       "userId" in command.payload && "unitId" in command.payload
@@ -226,12 +355,23 @@ export function createSearchHandlers(client: SearchClient) {
       "userId" in command.payload && "unitId" in command.payload
         ? removeProgress(client, command.payload.userId, command.payload.unitId)
         : undefined,
+    [SEARCH_COMMAND_KINDS.progressFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllProgress(),
+        syncSegment: (options) => syncProgressSegment(client, options),
+      }),
   };
 
   return Object.fromEntries(
     Object.entries(operations).map(([kind, operation]) => [
       kind,
-      async (command: AnyJobCommand) => operation?.(command as SearchCommand),
+      async (command: AnyJobCommand, context: HandlerContext) =>
+        withHandlerMetadata(
+          () => operation?.(command as SearchCommand, context),
+          {
+            index: indexForKind(kind),
+          },
+        ),
     ]),
   ) as Partial<Record<AnyJobCommand["kind"], JobHandler>>;
 }

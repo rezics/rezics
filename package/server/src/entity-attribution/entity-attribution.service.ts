@@ -8,11 +8,9 @@ import type {
   RezicsSessionClaims,
   SubjectAttributionDTO,
 } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { prisma } from "#/prisma/client";
-import {
-  patchContentCreditsToMeili,
-  patchContentSubjectsToMeili,
-} from "@/meili/content/sync";
+import { serverJobProducer } from "@/job/job-boundary";
 import {
   assertCanEditCollaborativeMetadata,
   creditRolePatchPath,
@@ -40,6 +38,21 @@ type ReconcileResult = {
   patchPath: string;
   patchValue: unknown[];
 };
+
+function enqueueContentAttribution(
+  kind: "credits" | "subjects",
+  unitId: string,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      kind === "credits"
+        ? SEARCH_COMMAND_KINDS.contentPatchCredits
+        : SEARCH_COMMAND_KINDS.contentPatchSubjects,
+      { unitId },
+      { type: "server", service: "entity-attribution" },
+    ),
+  );
+}
 
 export function entityAttributionBatchPatchPaths(
   ops: readonly EntityAttributionBatchOp[],
@@ -416,8 +429,12 @@ export class EntityAttributionBatchService {
 
     if (result.changed) {
       await Promise.all([
-        touchedCredits ? patchContentCreditsToMeili(unitId) : undefined,
-        touchedSubjects ? patchContentSubjectsToMeili(unitId) : undefined,
+        touchedCredits
+          ? enqueueContentAttribution("credits", unitId)
+          : undefined,
+        touchedSubjects
+          ? enqueueContentAttribution("subjects", unitId)
+          : undefined,
       ]);
     }
 

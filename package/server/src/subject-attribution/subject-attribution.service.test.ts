@@ -3,9 +3,11 @@ import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 installPrismaClientMock();
 
-const patchContentSubjectsToMeili = mock(async (_unitId: string) => {});
-mock.module("@/meili/content/sync", () => ({
-  patchContentSubjectsToMeili,
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 const now = new Date("2026-05-18T00:00:00.000Z");
@@ -83,7 +85,7 @@ function freshMocks() {
 }
 
 beforeEach(() => {
-  patchContentSubjectsToMeili.mockClear();
+  enqueueMock.mockClear();
 });
 
 describe("SubjectAttributionService.link", () => {
@@ -124,7 +126,11 @@ describe("SubjectAttributionService.link", () => {
     });
 
     expect(row.entity?.kind).toBe("character");
-    expect(patchContentSubjectsToMeili).toHaveBeenCalledWith("work-1");
+    expect(enqueueMock.mock.calls[0]?.[0]).toMatchObject({
+      kind: "search.content.patchSubjects",
+      payload: { unitId: "work-1" },
+      source: { type: "server", service: "subject-attribution" },
+    });
   });
 
   test("rejects an ineligible subject role before creating a row", async () => {

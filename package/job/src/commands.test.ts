@@ -3,11 +3,13 @@ import * as v from "valibot";
 import {
   createHistoryOutboxIngestCommand,
   createIdempotencyKey,
+  createMaintenanceCommand,
   createSearchCommand,
   HISTORY_COMMAND_KINDS,
   jobTags,
   JOB_LANES,
   JobCommandSchema,
+  MAINTENANCE_COMMAND_KINDS,
   SEARCH_COMMAND_KINDS,
 } from ".";
 
@@ -30,6 +32,20 @@ describe("@rezics/job command contract", () => {
     expect(command.lane).toBe(JOB_LANES.historyIngest);
     expect(command.idempotencyKey).toBe("history.outbox.ingest:outbox-1");
     expect(command.tags).toContain("domain:history");
+    expect(v.parse(JobCommandSchema, command)).toEqual(command);
+  });
+
+  test("validates rebuild maintenance commands with cursor idempotency", () => {
+    const command = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
+      { index: "content", cursor: "unit-1", limit: 100 },
+    );
+
+    expect(command.kind).toBe("maintenance.search.rebuildIndex");
+    expect(command.lane).toBe(JOB_LANES.maintenance);
+    expect(command.idempotencyKey).toBe(
+      "maintenance.search.rebuildIndex:content:unit-1",
+    );
     expect(v.parse(JobCommandSchema, command)).toEqual(command);
   });
 

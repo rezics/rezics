@@ -18,11 +18,8 @@ import {
   UnitType,
   type UnitVisibility,
 } from "#/prisma/client";
-import {
-  deleteContentFromMeili,
-  patchContentMetadataToMeili,
-  syncContentToMeili,
-} from "@/meili/content/sync";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { serverJobProducer } from "@/job/job-boundary";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
@@ -50,6 +47,39 @@ import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { between, firstKey } from "./lexorank";
 import type { BookWithRelations } from "./types";
 import { bookInclude } from "./types";
+
+function enqueueContentSync(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentSync,
+      { unitId },
+      { type: "server", service: "book" },
+    ),
+  );
+}
+
+function enqueueContentMetadata(
+  unitId: string,
+  fields: Record<string, unknown>,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentPatchMetadata,
+      { targetId: unitId, fields },
+      { type: "server", service: "book" },
+    ),
+  );
+}
+
+function enqueueContentDelete(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentDelete,
+      { unitId },
+      { type: "server", service: "book" },
+    ),
+  );
+}
 
 /**
  * Book Service - Business logic layer
@@ -330,7 +360,7 @@ export class BookService {
       return created;
     });
 
-    await syncContentToMeili(book.unitId);
+    await enqueueContentSync(book.unitId);
 
     return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);
   }
@@ -461,7 +491,7 @@ export class BookService {
     if (req.visibility !== undefined) patchFields.visibility = req.visibility;
     if (req.licenseSlug !== undefined)
       patchFields.licenseSlug = req.licenseSlug;
-    await patchContentMetadataToMeili(unitId, patchFields);
+    await enqueueContentMetadata(unitId, patchFields);
 
     return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);
   }
@@ -592,7 +622,7 @@ export class BookService {
    */
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({ where: { id: unitId } });
-    await deleteContentFromMeili(unitId);
+    await enqueueContentDelete(unitId);
   }
 
   /**

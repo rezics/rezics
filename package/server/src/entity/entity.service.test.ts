@@ -5,13 +5,13 @@ import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 installPrismaClientMock();
 
-// Stub the Meili sync helpers so the suite never hits a real search client.
-const syncEntityToMeili = mock(async (_unitId: string) => {});
-const deleteEntityFromMeili = mock(async (_unitId: string) => {});
-mock.module("@/meili/entity/sync", () => ({
-  syncEntityToMeili,
-  deleteEntityFromMeili,
-  syncAllEntitiesToMeili: async () => ({ totalSynced: 0, message: "ok" }),
+const enqueueMock = mock(async (_command: any) => ({
+  status: "created" as const,
+}));
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 // `entity.service.ts` calls `requireSlugScopeId("entity")` from infra/slug-scopes.
@@ -119,8 +119,7 @@ function freshMocks() {
 }
 
 beforeEach(() => {
-  syncEntityToMeili.mockClear();
-  deleteEntityFromMeili.mockClear();
+  enqueueMock.mockClear();
 });
 
 describe("EntityService.create", () => {
@@ -139,7 +138,13 @@ describe("EntityService.create", () => {
     );
 
     expect(row.unitId).toBe("entity-1");
-    expect(syncEntityToMeili).toHaveBeenCalledWith("entity-1");
+    expect(enqueueMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "search.entity.sync",
+        payload: { unitId: "entity-1" },
+        source: { type: "server", service: "entity" },
+      }),
+    );
   });
 
   test("persists avatar on the Entity extension row", async () => {
@@ -519,7 +524,13 @@ describe("EntityService.delete", () => {
     await entityService.delete("entity-1");
 
     expect((prismaMock.unit.delete as any).mock.calls.length).toBe(1);
-    expect(deleteEntityFromMeili).toHaveBeenCalledWith("entity-1");
+    expect(enqueueMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "search.entity.delete",
+        payload: { unitId: "entity-1" },
+        source: { type: "server", service: "entity" },
+      }),
+    );
   });
 });
 

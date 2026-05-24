@@ -3,9 +3,13 @@ import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 installPrismaClientMock();
 
-const patchContentCreditsToMeili = mock(async (_unitId: string) => {});
-mock.module("@/meili/content/sync", () => ({
-  patchContentCreditsToMeili,
+const enqueueMock = mock(async (_command: any) => ({
+  status: "created" as const,
+}));
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 const now = new Date("2026-05-18T00:00:00.000Z");
@@ -57,11 +61,11 @@ function freshMocks() {
 }
 
 beforeEach(() => {
-  patchContentCreditsToMeili.mockClear();
+  enqueueMock.mockClear();
 });
 
 describe("CreditAttributionService.link", () => {
-  test("creates an eligible credit row and patches content search fields", async () => {
+  test("creates an eligible credit row and enqueues content credit search fields", async () => {
     freshMocks();
     const { creditAttributionService } = await import(
       "./credit-attribution.service"
@@ -75,7 +79,13 @@ describe("CreditAttributionService.link", () => {
     });
 
     expect(row.entityId).toBe("entity-1");
-    expect(patchContentCreditsToMeili).toHaveBeenCalledWith("book-1");
+    expect(enqueueMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "search.content.patchCredits",
+        payload: { unitId: "book-1" },
+        source: { type: "server", service: "credit-attribution" },
+      }),
+    );
   });
 
   test("rejects an ineligible credit role before creating a row", async () => {

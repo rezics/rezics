@@ -30,6 +30,9 @@
  * - R14 frontend-i18n-locales      — contract, Paraglide settings, and message
  *                                   catalogs must expose the same frontend UI
  *                                   locale set with exact key parity.
+ * - R15 server-search-producers     — runtime server code must enqueue search
+ *                                   side effects instead of importing Meili sync
+ *                                   wrappers directly.
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -161,7 +164,8 @@ type Rule =
   | "R11"
   | "R12"
   | "R13"
-  | "R14";
+  | "R14"
+  | "R15";
 
 interface Violation {
   rule: Rule;
@@ -184,6 +188,7 @@ const SPEC_LINK: Record<Rule, string> = {
   R12: "openspec/specs/i18n-toolchain/spec.md",
   R13: "openspec/changes/make-ui-package-standalone/specs/ui-package-autonomy/spec.md",
   R14: "openspec/specs/i18n-toolchain/spec.md",
+  R15: "openspec/changes/introduce-job-runner-sync-infrastructure/specs/meili-partial-sync/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -1052,6 +1057,52 @@ function scanFrontendI18nLocales(): Violation[] {
   return violations;
 }
 
+// ─── R15: server search producer boundary ──────────────────────────────────
+
+const SERVER_MEILI_SYNC_IMPORT_PATTERN =
+  /from\s+["']@\/meili\/(?:content|post|realm|entity|user|feedback)\/sync["']|import\s*\(\s*["']@\/meili\/(?:content|post|realm|entity|user|feedback)\/sync["']\s*\)/;
+
+function isR15AllowedPath(relPath: string): boolean {
+  return (
+    relPath.startsWith("package/server/src/meili/") ||
+    relPath.startsWith("package/server/src/script/") ||
+    /\.test\.tsx?$/.test(relPath) ||
+    /\.spec\.tsx?$/.test(relPath)
+  );
+}
+
+function scanServerMeiliSyncImports(candidateFiles: string[]): Violation[] {
+  const violations: Violation[] = [];
+
+  for (const filePath of candidateFiles) {
+    const relPath = relative(REPO_ROOT, filePath).replace(/\\/g, "/");
+    if (!relPath.startsWith("package/server/src/")) continue;
+    if (isR15AllowedPath(relPath)) continue;
+
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      if (SERVER_MEILI_SYNC_IMPORT_PATTERN.test(lines[i]!)) {
+        violations.push({
+          rule: "R15",
+          path: `${relPath}:${i + 1}`,
+          message:
+            "Runtime server code must enqueue @rezics/job search commands instead of importing Meili sync wrappers directly. Keep direct sync imports in package/server/src/meili, scripts, or tests only.",
+          spec: SPEC_LINK.R15,
+        });
+      }
+    }
+  }
+
+  return violations;
+}
+
 // ─── Snapshot baseline ──────────────────────────────────────────────────────
 
 interface ViolationSnapshot {
@@ -1084,6 +1135,7 @@ function buildSnapshot(violations: Violation[]): ViolationSnapshot {
     R12: 0,
     R13: 0,
     R14: 0,
+    R15: 0,
   };
   const keys: string[] = [];
   for (const violation of violations) {
@@ -1180,15 +1232,16 @@ function main() {
     ...scanI18nInvariants(tsAndTsxFiles),
     ...scanUiPackageAutonomy(tsAndTsxFiles),
     ...scanFrontendI18nLocales(),
+    ...scanServerMeiliSyncImports(tsAndTsxFiles),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13, R14 } =
+    const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13, R14, R15 } =
       currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10} R11=${R11} R12=${R12} R13=${R13} R14=${R14})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10} R11=${R11} R12=${R12} R13=${R13} R14=${R14} R15=${R15})`,
     );
     process.exit(0);
   }
@@ -1205,13 +1258,13 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13, R14 } =
+  const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13, R14, R15 } =
     currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
   console.log(
-    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}  R11=${R11}  R12=${R12}  R13=${R13}  R14=${R14}`,
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}  R11=${R11}  R12=${R12}  R13=${R13}  R14=${R14}  R15=${R15}`,
   );
 
   if (newViolations.length > 0) {

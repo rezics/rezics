@@ -5,8 +5,9 @@ import type {
   SubjectAttributionByUnitQuery,
   SubjectAttributionDTO,
 } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { prisma } from "#/prisma/client";
-import { patchContentSubjectsToMeili } from "@/meili/content/sync";
+import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
@@ -14,6 +15,16 @@ import {
 } from "@/unit/collaborative-metadata";
 import { mapSubjectAttributionToDTO } from "./subject-attribution.mapper";
 import { subjectAttributionInclude } from "./types";
+
+function enqueueContentSubjects(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentPatchSubjects,
+      { unitId },
+      { type: "server", service: "subject-attribution" },
+    ),
+  );
+}
 
 export class SubjectAttributionService {
   private async assertEntityUnit(entityId: string): Promise<void> {
@@ -82,7 +93,7 @@ export class SubjectAttributionService {
         },
         include: subjectAttributionInclude,
       });
-      await patchContentSubjectsToMeili(req.unitId);
+      await enqueueContentSubjects(req.unitId);
       return mapSubjectAttributionToDTO(row);
     }
 
@@ -118,7 +129,7 @@ export class SubjectAttributionService {
       });
       return created;
     });
-    await patchContentSubjectsToMeili(req.unitId);
+    await enqueueContentSubjects(req.unitId);
     return mapSubjectAttributionToDTO(row);
   }
 
@@ -134,7 +145,7 @@ export class SubjectAttributionService {
           unitId_entityId_role: { unitId, entityId, role },
         },
       });
-      await patchContentSubjectsToMeili(unitId);
+      await enqueueContentSubjects(unitId);
       return;
     }
 
@@ -154,7 +165,7 @@ export class SubjectAttributionService {
         message: "subject-attribution.unlink",
       });
     });
-    await patchContentSubjectsToMeili(unitId);
+    await enqueueContentSubjects(unitId);
   }
 
   async listByUnit(

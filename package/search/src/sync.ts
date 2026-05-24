@@ -58,6 +58,34 @@ function pickCoverUrlFromTranslations(
 }
 
 const BATCH_SIZE = 5000;
+
+export type SearchSegmentOptions = {
+  cursor?: string;
+  limit?: number;
+};
+
+export type SearchSegmentResult = {
+  processed: number;
+  nextCursor?: string;
+};
+
+function segmentLimit(options: SearchSegmentOptions = {}) {
+  return Math.min(Math.max(options.limit ?? BATCH_SIZE, 1), BATCH_SIZE);
+}
+
+function segmentRows<T extends Record<string, any>>(
+  rows: T[],
+  limit: number,
+  cursorKey: keyof T,
+): { current: T[]; nextCursor?: string } {
+  const current = rows.slice(0, limit);
+  if (rows.length <= limit || current.length === 0) return { current };
+  return {
+    current,
+    nextCursor: String(current[current.length - 1]![cursorKey]),
+  };
+}
+
 const PROGRESS_SYNC_ATTEMPTS = 3;
 const PROGRESS_SYNC_RETRY_BASE_MS = 100;
 const VISIBILITY_THRESHOLD = -100;
@@ -412,6 +440,30 @@ export async function syncAllContent(client: SearchClient) {
   return { message: "syncAllContent success", totalSynced: total };
 }
 
+export async function syncContentSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const units: any[] = await getSearchPrismaClient().unit.findMany({
+    where: {
+      workUnitId: null,
+      type: { in: INDEXABLE_TYPES },
+      ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+    },
+    include: contentInclude,
+    orderBy: { id: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { id: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(units, limit, "id");
+  if (current.length > 0) {
+    await client.addOrUpdateContent(current.map(buildContentDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
 // ANCHOR: Progress sync functions
 
 export async function syncProgress(
@@ -450,6 +502,54 @@ export async function removeProgress(
     () => client.deleteProgress(progressDocumentId(userId, unitId)),
     { action: "remove", userId, unitId },
   );
+}
+
+export async function syncProgressSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const rows: any[] = await getSearchPrismaClient().userUnitProgress.findMany({
+    where: { isDeleted: false },
+    orderBy: [{ userId: "asc" }, { unitId: "asc" }],
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor
+      ? {
+          userId_unitId: {
+            userId: options.cursor.split(":")[0] ?? "",
+            unitId: options.cursor.split(":").slice(1).join(":"),
+          },
+        }
+      : undefined,
+  });
+  const current = rows.slice(0, limit);
+  const hasMore = rows.length > limit && current.length > 0;
+  if (current.length > 0) {
+    await client.addOrUpdateProgress(current.map(buildProgressDocument));
+  }
+  const last = current.at(-1);
+  return {
+    processed: current.length,
+    ...(hasMore && last ? { nextCursor: `${last.userId}:${last.unitId}` } : {}),
+  };
+}
+
+export async function syncAllProgress(client: SearchClient) {
+  const deleteResult = await client.deleteAllProgress();
+  console.log("syncAllProgress: deleted all documents", deleteResult);
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const result = await syncProgressSegment(client, { cursor });
+    total += result.processed;
+    if (!result.nextCursor) break;
+    cursor = result.nextCursor;
+  }
+
+  return { message: "syncAllProgress success", totalSynced: total };
 }
 
 // ANCHOR: Incremental single-unit sync
@@ -744,6 +844,33 @@ export async function patchPostsAuthor(
   }
 }
 
+export async function syncPostsByAuthorSegment(
+  client: SearchClient,
+  userId: string,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const rows: any[] = await getSearchPrismaClient().post.findMany({
+    where: {
+      authorUserId: userId,
+      unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+    },
+    include: {
+      ...postIncludeForSync,
+      unit: { include: { user: true, inRealms: true } },
+    },
+    orderBy: { unitId: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(rows, limit, "unitId");
+  if (current.length > 0) {
+    await client.addOrUpdatePosts(current.map(buildPostDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
 export async function patchPostsTarget(
   client: SearchClient,
   targetUnitId: string,
@@ -802,6 +929,61 @@ export async function patchPostsTarget(
   }
 }
 
+export async function patchPostsTargetSegment(
+  client: SearchClient,
+  targetUnitId: string,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const targetUnit = await getSearchPrismaClient().unit.findUnique({
+    where: { id: targetUnitId },
+    include: {
+      translations: true,
+      book: true,
+      game: true,
+      media: true,
+    },
+  });
+
+  let targetTitles: string[] | null = null;
+  let targetType: string | null = null;
+  let targetCoverUrl: string | null = null;
+
+  if (targetUnit) {
+    const translations: any[] = targetUnit.translations ?? [];
+    targetTitles = translations.map((t: any) => t.title).filter(Boolean);
+    targetType = targetUnit.type ?? null;
+    targetCoverUrl = pickCoverUrlFromTranslations(
+      (targetUnit as any).defaultLanguage,
+      translations,
+    );
+  }
+
+  const limit = segmentLimit(options);
+  const rows: any[] = await getSearchPrismaClient().post.findMany({
+    where: {
+      targetUnitId,
+      unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+    },
+    select: { unitId: true },
+    orderBy: { unitId: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(rows, limit, "unitId");
+  if (current.length > 0) {
+    await client.patchPosts(
+      current.map((post) => ({
+        id: post.unitId,
+        targetTitles,
+        targetType,
+        targetCoverUrl,
+      })),
+    );
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
 export async function patchPostFields(
   client: SearchClient,
   unitId: string,
@@ -831,6 +1013,21 @@ export async function patchRealmMemberCount(
   memberCount: number,
 ) {
   await client.patchRealms([{ id: unitId, memberCount }]);
+}
+
+export async function patchRealmMemberCountFromDb(
+  client: SearchClient,
+  unitId: string,
+) {
+  const realm = await getSearchPrismaClient().realm.findUnique({
+    where: { unitId },
+    select: { memberCount: true },
+  });
+  if (!realm) {
+    await client.deleteRealms([unitId]);
+    return;
+  }
+  await patchRealmMemberCount(client, unitId, realm.memberCount);
 }
 
 export async function patchRealmMetadata(
@@ -955,6 +1152,25 @@ export async function patchFeedbackResolution(
   await client.patchFeedbacks([{ id, ...fields }]);
 }
 
+export async function patchFeedbackResolutionFromDb(
+  client: SearchClient,
+  id: string,
+) {
+  const feedback = await getSearchPrismaClient().feedback.findUnique({
+    where: { id },
+    select: { resolved: true, resolvedAt: true },
+  });
+  if (!feedback) {
+    await client.deleteFeedbacks([id]);
+    return;
+  }
+
+  await patchFeedbackResolution(client, id, {
+    resolved: feedback.resolved,
+    resolvedAt: feedback.resolvedAt?.toISOString() ?? null,
+  });
+}
+
 // ANCHOR: Feedbacks sync
 
 export async function syncSingleFeedback(client: SearchClient, id: string) {
@@ -1027,6 +1243,37 @@ export async function syncAllFeedbacks(client: SearchClient) {
   }
 
   return { message: "syncAllFeedbacks success", totalSynced: total };
+}
+
+export async function syncFeedbackSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const feedbacks: any[] = await getSearchPrismaClient().feedback.findMany({
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { id: options.cursor } : undefined,
+    orderBy: { id: "asc" },
+  });
+  const { current, nextCursor } = segmentRows(feedbacks, limit, "id");
+  if (current.length > 0) {
+    await client.addOrUpdateFeedbacks(
+      current.map((f) => ({
+        id: f.id,
+        userId: f.userId,
+        unitId: f.unitId,
+        url: f.url,
+        content: f.content,
+        type: f.type,
+        resolved: f.resolved,
+        resolvedAt: f.resolvedAt,
+        createdAt: f.createdAt,
+        updatedAt: f.updatedAt,
+      })),
+    );
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }
 
 // ANCHOR: Post document builder
@@ -1169,6 +1416,31 @@ export async function syncAllPosts(client: SearchClient) {
   return { message: "syncAllPosts success", totalSynced: total };
 }
 
+export async function syncPostSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const posts: any[] = await getSearchPrismaClient().post.findMany({
+    where: {
+      unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+    },
+    include: {
+      ...postIncludeForSync,
+      unit: { include: { user: true, inRealms: true } },
+    },
+    orderBy: { unitId: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(posts, limit, "unitId");
+  if (current.length > 0) {
+    await client.addOrUpdatePosts(current.map(buildPostDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
 export async function syncAllPostRealmIds(client: SearchClient) {
   let cursor: string | undefined;
   let total = 0;
@@ -1211,6 +1483,45 @@ export async function syncAllPostRealmIds(client: SearchClient) {
   }
 
   return { message: "syncAllPostRealmIds success", totalSynced: total };
+}
+
+export async function syncPostRealmIdsSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const rows: any[] = await getSearchPrismaClient().post.findMany({
+    where: {
+      unit: { status: "PUBLISHED" },
+    },
+    select: {
+      unitId: true,
+      unit: {
+        select: {
+          inRealms: {
+            select: { realmUnitId: true },
+            orderBy: { realmUnitId: "asc" },
+          },
+        },
+      },
+    },
+    orderBy: { unitId: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(rows, limit, "unitId");
+  if (current.length > 0) {
+    await client.patchPosts(
+      current.map((post) => ({
+        id: post.unitId,
+        realmIds: (post.unit?.inRealms ?? []).map(
+          (row: any) => row.realmUnitId,
+        ),
+      })),
+    );
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }
 
 export async function syncAllContainedUnitIds(client: SearchClient) {
@@ -1292,6 +1603,38 @@ export async function syncAllPostRootTargets(client: SearchClient) {
   }
 
   return { message: "syncAllPostRootTargets success", totalSynced: total };
+}
+
+export async function syncPostRootTargetsSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const rows: any[] = await getSearchPrismaClient().post.findMany({
+    where: {
+      unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+    },
+    select: {
+      unitId: true,
+      rootTargetUnitId: true,
+      rootTargetUnitType: true,
+    },
+    orderBy: { unitId: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(rows, limit, "unitId");
+  if (current.length > 0) {
+    await client.patchPosts(
+      current.map((post) => ({
+        id: post.unitId,
+        rootTargetUnitId: post.rootTargetUnitId ?? null,
+        rootTargetUnitType: post.rootTargetUnitType ?? null,
+      })),
+    );
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }
 
 export async function syncPostsByAuthor(client: SearchClient, userId: string) {
@@ -1483,6 +1826,44 @@ export async function syncAllRealms(client: SearchClient) {
   return { message: "syncAllRealms success", totalSynced: total };
 }
 
+export async function syncRealmSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const realms: any[] = await getSearchPrismaClient().realm.findMany({
+    where: {
+      unit: { status: "PUBLISHED" },
+    },
+    include: {
+      unit: {
+        include: {
+          translations: true,
+          aliases: {
+            where: {
+              status: "ACTIVE",
+              OR: [
+                { score: { gt: VISIBILITY_THRESHOLD } },
+                { pinned: true },
+              ] as any,
+            },
+            orderBy: [{ pinned: "desc" }, { score: "desc" }],
+          } as any,
+        },
+      },
+    },
+    orderBy: { unitId: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(realms, limit, "unitId");
+  if (current.length > 0) {
+    await client.addOrUpdateRealms(current.map(buildRealmDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
 // ANCHOR: Entity document builder + sync
 
 const entityIncludeForSync = {
@@ -1615,6 +1996,25 @@ export async function syncAllEntities(client: SearchClient) {
   return { message: "syncAllEntities success", totalSynced: total };
 }
 
+export async function syncEntitySegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const entities: any[] = await getSearchPrismaClient().entity.findMany({
+    include: entityIncludeForSync,
+    orderBy: { unitId: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(entities, limit, "unitId");
+  if (current.length > 0) {
+    await client.addOrUpdateEntities(current.map(buildEntityDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
 // ANCHOR: Users sync
 
 export async function syncAllUsers(client: SearchClient) {
@@ -1670,4 +2070,47 @@ export async function syncAllUsers(client: SearchClient) {
   }
 
   return { message: "syncAllUsers success", totalSynced: total };
+}
+
+export async function syncUserSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const users: any[] = await getSearchPrismaClient().user.findMany({
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+    orderBy: { unitId: "asc" },
+  });
+  const { current, nextCursor } = segmentRows(users, limit, "unitId");
+  if (current.length > 0) {
+    const unitSlugs = await getSearchPrismaClient().unit.findMany({
+      where: { id: { in: current.map((u) => u.unitId) } },
+      select: { id: true, slug: true },
+    });
+    const slugById = new Map(unitSlugs.map((u) => [u.id, u.slug ?? null]));
+
+    await client.addOrUpdateUsers(
+      current.map((u) => ({
+        id: u.unitId,
+        unitId: u.unitId,
+        name: u.name,
+        email: u.email,
+        slug: slugById.get(u.unitId) ?? null,
+        avatar: u.avatar,
+        bio: u.bio,
+        description: u.description,
+        descriptionText: mainMarkdownSource(u.description),
+        followersCount: u.followersCount,
+        followingsCount: u.followingsCount,
+        joinDate:
+          u.joinDate instanceof Date
+            ? u.joinDate.toISOString()
+            : (u.joinDate ?? null),
+        permission: (u.permission ?? null) as any,
+      })),
+    );
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }

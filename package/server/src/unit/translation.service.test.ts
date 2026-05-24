@@ -3,6 +3,7 @@ import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
 installPrismaClientMock();
 
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 mock.module("@/meili/content/sync", () => ({
   deleteContentFromMeili: mock(async () => undefined),
   patchContentContainedUnitIdsToMeili: mock(async () => undefined),
@@ -28,6 +29,11 @@ mock.module("@/meili/post/sync", () => ({
 mock.module("@/meili/realm/sync", () => ({
   patchRealmTranslationsToMeili: mock(async () => undefined),
 }));
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
+}));
 
 const previous = {
   unitId: "book-1",
@@ -41,6 +47,7 @@ const previous = {
 };
 
 function freshMocks() {
+  enqueueMock.mockClear();
   const tx = {
     $queryRaw: mock(async () => [{ sequence: 1n }]),
     unit: {
@@ -97,6 +104,10 @@ describe("TranslationService history patches", () => {
     expect(historyArgs.data.payload.revision.patch).toEqual({
       translations: { "zh-hant": { title: "New title" } },
     });
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.content.patchTranslations",
+      "search.post.patchTargetFanout",
+    ]);
   });
 
   test("unchanged translation submission writes no history outbox row", async () => {
@@ -117,5 +128,29 @@ describe("TranslationService history patches", () => {
 
     expect(tx.unitTranslation.upsert).not.toHaveBeenCalled();
     expect(tx.historyOutbox.create).not.toHaveBeenCalled();
+    expect(enqueueMock).not.toHaveBeenCalled();
+  });
+
+  test("realm translation edit enqueues realm translation projection", async () => {
+    const { tx } = freshMocks();
+    prismaMock.unit.findUnique.mockResolvedValueOnce({ type: "REALM" });
+    const { translationService } = await import("./translation.service");
+
+    await translationService.upsertTranslation(
+      "realm-1",
+      "zh-hant",
+      {
+        title: "New title",
+        subtitle: "Same subtitle",
+        summary: "Same summary",
+        description: { type: "doc", content: [] },
+      },
+      { userId: "user-1", permission: { role: "ROOT" } } as any,
+    );
+
+    expect(tx.historyOutbox.create).toHaveBeenCalledTimes(1);
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.realm.patchTranslations",
+    ]);
   });
 });

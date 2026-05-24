@@ -22,4 +22,65 @@ describe("maintenance handlers", () => {
 
     expect(enqueued).toEqual(["search.content.sync"]);
   });
+
+  test("rebuild enqueues a bounded full-sync job", async () => {
+    const enqueued: Array<{ kind: string; payload: unknown }> = [];
+    const handlers = createMaintenanceHandlers();
+    const command = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
+      { index: "entity", cursor: "entity-1", limit: 100 },
+    );
+
+    await handlers[command.kind]?.(command, {
+      enqueue: async (next) => {
+        enqueued.push({ kind: next.kind, payload: next.payload });
+      },
+    });
+
+    expect(enqueued).toEqual([
+      {
+        kind: "search.entity.fullSync",
+        payload: { cursor: "entity-1", limit: 100 },
+      },
+    ]);
+  });
+
+  test("replay by logical target enqueues current-state jobs", async () => {
+    const enqueued: string[] = [];
+    const handlers = createMaintenanceHandlers();
+    const command = createMaintenanceCommand(MAINTENANCE_COMMAND_KINDS.replay, {
+      scope: "target",
+      key: "user:user-1",
+    });
+
+    await handlers[command.kind]?.(command, {
+      enqueue: async (next) => {
+        enqueued.push(next.kind);
+      },
+    });
+
+    expect(enqueued).toEqual(["search.user.sync"]);
+  });
+
+  test("replay by source metadata maps to current-state repair", async () => {
+    const enqueued: Array<{ kind: string; payload: unknown }> = [];
+    const handlers = createMaintenanceHandlers();
+    const command = createMaintenanceCommand(MAINTENANCE_COMMAND_KINDS.replay, {
+      scope: "source",
+      key: "UserUnitProgress:user-1:unit-1",
+    });
+
+    await handlers[command.kind]?.(command, {
+      enqueue: async (next) => {
+        enqueued.push({ kind: next.kind, payload: next.payload });
+      },
+    });
+
+    expect(enqueued).toEqual([
+      {
+        kind: "search.progress.sync",
+        payload: { userId: "user-1", unitId: "unit-1" },
+      },
+    ]);
+  });
 });

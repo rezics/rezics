@@ -7,12 +7,13 @@ import type {
   UpdateEntityInput,
 } from "@rezics/contract";
 import { parseIdsCsv } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { getSlugScopeId, requireSlugScopeId } from "@/infra/slug-scopes";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
-import { deleteEntityFromMeili, syncEntityToMeili } from "@/meili/entity/sync";
+import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
@@ -25,6 +26,21 @@ import {
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
 import { entityInclude, type EntityWithRelations } from "./entity.types";
+
+function enqueueEntitySearch(
+  kind:
+    | typeof SEARCH_COMMAND_KINDS.entitySync
+    | typeof SEARCH_COMMAND_KINDS.entityDelete,
+  unitId: string,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      kind,
+      { unitId },
+      { type: "server", service: "entity" },
+    ),
+  );
+}
 
 /** Caller-context flags consumed by the slug + verified gates. */
 export interface EntityCallerContext {
@@ -133,12 +149,7 @@ export class EntityService {
       });
     });
 
-    await syncEntityToMeili(row.unitId).catch((error: unknown) => {
-      console.error("entity meili sync failed (create)", {
-        unitId: row.unitId,
-        error,
-      });
-    });
+    await enqueueEntitySearch(SEARCH_COMMAND_KINDS.entitySync, row.unitId);
 
     return row;
   }
@@ -289,18 +300,14 @@ export class EntityService {
       return updated;
     });
 
-    await syncEntityToMeili(unitId).catch((error: unknown) => {
-      console.error("entity meili sync failed (update)", { unitId, error });
-    });
+    await enqueueEntitySearch(SEARCH_COMMAND_KINDS.entitySync, unitId);
 
     return row;
   }
 
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({ where: { id: unitId } });
-    await deleteEntityFromMeili(unitId).catch((error: unknown) => {
-      console.error("entity meili delete failed", { unitId, error });
-    });
+    await enqueueEntitySearch(SEARCH_COMMAND_KINDS.entityDelete, unitId);
   }
 
   async getByUnitId(unitId: string): Promise<EntityWithRelations | null> {

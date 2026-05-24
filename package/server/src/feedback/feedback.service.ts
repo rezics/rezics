@@ -1,11 +1,29 @@
 import type { CreateFeedbackInput, FeedbackListQuery } from "@rezics/contract";
 import { parseIdsCsv } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Feedback, Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
-import {
-  patchFeedbackResolutionToMeili,
-  syncFeedbackToMeili,
-} from "@/meili/feedback/sync";
+import { serverJobProducer } from "@/job/job-boundary";
+
+function enqueueFeedbackSearch(feedbackId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.feedbackSync,
+      { feedbackId },
+      { type: "server", service: "feedback" },
+    ),
+  );
+}
+
+function enqueueFeedbackResolution(feedbackId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.feedbackPatchResolution,
+      { feedbackId },
+      { type: "server", service: "feedback" },
+    ),
+  );
+}
 
 export class FeedbackService {
   async create(
@@ -21,7 +39,7 @@ export class FeedbackService {
         type: type ?? "REPORT",
       },
     });
-    await syncFeedbackToMeili(created.id);
+    await enqueueFeedbackSearch(created.id);
     return created;
   }
 
@@ -109,10 +127,7 @@ export class FeedbackService {
       where: { id },
       data,
     });
-    await patchFeedbackResolutionToMeili(id, {
-      resolved: updated.resolved,
-      resolvedAt: updated.resolvedAt?.toISOString() ?? null,
-    });
+    await enqueueFeedbackResolution(id);
     return updated;
   }
 }

@@ -3,20 +3,12 @@
  */
 
 import type { UpdateUser } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { Prisma, prisma } from "#/prisma/client";
-import {
-  patchPostsAuthorToMeili,
-  syncPostsByAuthorToMeili,
-} from "@/meili/post/sync";
-import {
-  deleteUserFromMeili,
-  patchUserFieldsToMeili,
-  syncUserToMeili,
-} from "@/meili/user/sync";
 import { bootstrapSystemShelves } from "@/shelf/system-shelves";
 import { getDefaultRealmId } from "@/infra/default-realm";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
-import { projectSlugToAuth } from "@/auth-boundary/auth-internal.client";
+import { serverJobProducer } from "@/job/job-boundary";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
 import { userInclude } from "../models/types";
 
@@ -102,6 +94,40 @@ async function attachSlugs<T extends { unitId: string }>(
 ): Promise<(T & { slug: string | null })[]> {
   const slugMap = await batchUnitSlugs(users.map((u) => u.unitId));
   return users.map((u) => ({ ...u, slug: slugMap.get(u.unitId) ?? null }));
+}
+
+function enqueueUserSearch(
+  kind:
+    | typeof SEARCH_COMMAND_KINDS.userSync
+    | typeof SEARCH_COMMAND_KINDS.userDelete,
+  userId: string,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(kind, { userId }, { type: "server", service: "user" }),
+  );
+}
+
+function enqueueUserPatchFields(
+  userId: string,
+  fields: Record<string, unknown>,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.userPatchFields,
+      { targetId: userId, fields },
+      { type: "server", service: "user" },
+    ),
+  );
+}
+
+function enqueueUserPostsAuthorFanout(userId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.userPostsAuthorFanout,
+      { targetId: userId },
+      { type: "server", service: "user" },
+    ),
+  );
 }
 
 /**
@@ -235,7 +261,9 @@ export class UserService {
       return created;
     });
 
-    await syncUserToMeili(user.unitId);
+    await enqueueUserSearch(SEARCH_COMMAND_KINDS.userSync, user.unitId);
+
+    await enqueueUserSearch(SEARCH_COMMAND_KINDS.userSync, user.unitId);
 
     return user as UserWithRelations;
   }
@@ -324,7 +352,7 @@ export class UserService {
       return updated;
     });
 
-    await syncUserToMeili(user.unitId);
+    await enqueueUserSearch(SEARCH_COMMAND_KINDS.userSync, user.unitId);
 
     return user as UserWithRelations;
   }
@@ -370,12 +398,11 @@ export class UserService {
     if (bio !== undefined) userPatchFields.bio = user.bio;
     if (description !== undefined)
       userPatchFields.description = user.description;
-    await patchUserFieldsToMeili(userId, userPatchFields);
-
-    const authorPatchFields: Record<string, any> = {};
-    if (name !== undefined) authorPatchFields.authorName = user.name;
-    if (avatar !== undefined) authorPatchFields.authorAvatar = user.avatar;
-    patchPostsAuthorToMeili(userId, authorPatchFields).catch(() => {});
+    const jobs = [enqueueUserPatchFields(userId, userPatchFields)];
+    if (name !== undefined || avatar !== undefined) {
+      jobs.push(enqueueUserPostsAuthorFanout(userId));
+    }
+    await Promise.all(jobs);
 
     return user as UserWithRelations;
   }
@@ -385,7 +412,7 @@ export class UserService {
    */
   async delete(userId: string): Promise<void> {
     await prisma.user.delete({ where: { unitId: userId } });
-    await deleteUserFromMeili(userId);
+    await enqueueUserSearch(SEARCH_COMMAND_KINDS.userDelete, userId);
   }
 
   /**

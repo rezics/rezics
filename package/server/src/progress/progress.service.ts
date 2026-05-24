@@ -4,14 +4,12 @@ import {
   type UnitProgressStatsResponse,
   userUnitProgressStatusValues,
 } from "@rezics/contract";
-import {
-  PROGRESS_BUCKET_COUNT,
-  removeProgress,
-  syncProgress,
-} from "@rezics/search";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { PROGRESS_BUCKET_COUNT } from "@rezics/search";
 import type { Prisma, UserUnitProgress } from "#/prisma/client";
 import { prisma, UserUnitProgressStatus } from "#/prisma/client";
 import { searchClient } from "@/meili/search-client";
+import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
 import { mapProgressToDTO } from "./progress.mapper";
 import type {
@@ -73,6 +71,22 @@ function readFacetCount(
   key: string | number,
 ): number {
   return distribution?.[String(key)] ?? 0;
+}
+
+function enqueueProgressSearch(
+  kind:
+    | typeof SEARCH_COMMAND_KINDS.progressSync
+    | typeof SEARCH_COMMAND_KINDS.progressRemove,
+  userId: string,
+  unitId: string,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      kind,
+      { userId, unitId },
+      { type: "server", service: "progress" },
+    ),
+  );
 }
 
 export class ProgressService {
@@ -155,7 +169,11 @@ export class ProgressService {
       update: updateData,
     });
 
-    void syncProgress(searchClient, row);
+    await enqueueProgressSearch(
+      SEARCH_COMMAND_KINDS.progressSync,
+      row.userId,
+      row.unitId,
+    );
 
     return row;
   }
@@ -228,7 +246,11 @@ export class ProgressService {
       },
     });
 
-    void removeProgress(searchClient, userId, unitId);
+    await enqueueProgressSearch(
+      SEARCH_COMMAND_KINDS.progressRemove,
+      userId,
+      unitId,
+    );
   }
 
   async progressStats(unitId: string): Promise<UnitProgressStatsResponse> {

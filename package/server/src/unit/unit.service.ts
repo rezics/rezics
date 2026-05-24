@@ -4,6 +4,7 @@ import type {
   UpdateUnitInput,
 } from "@rezics/contract";
 import { parseIdsCsv } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
 import {
   type ContentRating,
@@ -14,11 +15,7 @@ import {
 } from "#/prisma/client";
 import { pickSlugScope } from "@/infra/slug-scopes";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
-import {
-  deleteContentFromMeili,
-  patchContentMetadataToMeili,
-  syncContentToMeili,
-} from "@/meili/content/sync";
+import { serverJobProducer } from "@/job/job-boundary";
 import { cleanupReactions } from "@/reaction-boundary/reaction-boundary.client";
 import {
   hydrateUnitOwnerUserSlugRow,
@@ -37,6 +34,30 @@ type ResolvedInclude<TInclude extends MaybeInclude> =
 type UnitResult<TInclude extends MaybeInclude> = Prisma.UnitGetPayload<{
   include: ResolvedInclude<TInclude>;
 }>;
+
+function enqueueContentCommand(
+  kind:
+    | typeof SEARCH_COMMAND_KINDS.contentSync
+    | typeof SEARCH_COMMAND_KINDS.contentDelete,
+  unitId: string,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(kind, { unitId }, { type: "server", service: "unit" }),
+  );
+}
+
+function enqueueContentMetadataCommand(
+  unitId: string,
+  fields: Record<string, unknown>,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentPatchMetadata,
+      { targetId: unitId, fields },
+      { type: "server", service: "unit" },
+    ),
+  );
+}
 
 /**
  * Compose a Prisma where clause for Unit list queries.
@@ -256,7 +277,7 @@ export class UnitService {
       },
       include: unitInclude,
     });
-    await syncContentToMeili(unit.id);
+    await enqueueContentCommand(SEARCH_COMMAND_KINDS.contentSync, unit.id);
     return hydrateUnitOwnerUserSlugRow(unit as UnitWithRelations);
   }
 
@@ -302,7 +323,7 @@ export class UnitService {
         ? new Date(input.publishedAt as any).toISOString()
         : null;
     }
-    await patchContentMetadataToMeili(unitId, patchFields);
+    await enqueueContentMetadataCommand(unitId, patchFields);
 
     return hydrateUnitOwnerUserSlugRow(unit as UnitWithRelations);
   }
@@ -341,7 +362,7 @@ export class UnitService {
     db: Prisma.TransactionClient | typeof prisma = prisma,
   ): Promise<void> {
     await db.unit.delete({ where: { id: unitId } });
-    await deleteContentFromMeili(unitId);
+    await enqueueContentCommand(SEARCH_COMMAND_KINDS.contentDelete, unitId);
     // Fire-and-forget cleanup of reactions in the reaction service
     cleanupReactions(unitId).catch(() => {});
   }

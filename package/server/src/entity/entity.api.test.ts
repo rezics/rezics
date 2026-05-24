@@ -38,10 +38,10 @@ mock.module("@/infra/slug-scopes", () => ({
   pickSlugScope: () => "entity-scope-unit-id",
 }));
 
-mock.module("@/meili/entity/sync", () => ({
-  syncEntityToMeili: async () => {},
-  deleteEntityFromMeili: async () => {},
-  syncAllEntitiesToMeili: async () => ({ totalSynced: 0, message: "ok" }),
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: async () => ({ status: "created" }),
+  },
 }));
 
 async function makeApp() {

@@ -53,6 +53,7 @@ const tagVoteAggregateMock = mock(async () => ({
 }));
 const unitTagUpsertMock = mock(async () => ({}));
 const unitTagUpdateMock = mock(async () => ({}));
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const transactionMock = mock(async (fn: any) =>
   fn({
     unit: { findUnique: unitFindUniqueMock },
@@ -134,6 +135,11 @@ mock.module("@/meili/realm/sync", () => ({
   syncAllRealmsToMeili: async () => undefined,
   syncRealmToMeili: async () => undefined,
 }));
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
+}));
 
 const { RealmService, REALM_TAG_VISIBILITY_THRESHOLD } = await import(
   "./realm.service"
@@ -158,6 +164,7 @@ function resetWriteMocks() {
   tagVoteAggregateMock.mockClear();
   unitTagUpsertMock.mockClear();
   unitTagUpdateMock.mockClear();
+  enqueueMock.mockClear();
   transactionMock.mockClear();
 }
 
@@ -275,6 +282,10 @@ describe("RealmService.createRealmTagApplication", () => {
       }),
     );
     expect(realmUnitCreateMock).not.toHaveBeenCalled();
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.content.patchTags",
+      "search.content.patchRealmTagKeys",
+    ]);
   });
 
   test("rejects non-TAG tagUnitId and non-REALM realmUnitId", async () => {

@@ -1,5 +1,6 @@
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { Prisma, prisma, UnitStatus, UnitType } from "#/prisma/client";
-import { syncPostToMeili } from "@/meili/post/sync";
+import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
 import { mapSiblingToDTO } from "./translation-group.mapper";
 import {
@@ -7,6 +8,16 @@ import {
   type TranslationGroupSiblingsResult,
   translationGroupSiblingInclude,
 } from "./translation-group.types";
+
+function enqueuePostSync(postId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.postSync,
+      { postId },
+      { type: "server", service: "translation-group" },
+    ),
+  );
+}
 
 export class TranslationGroupService {
   /**
@@ -124,7 +135,7 @@ export class TranslationGroupService {
       return { newUnitId: newUnit.id, groupId };
     });
 
-    syncPostToMeili(result.newUnitId).catch(() => {});
+    await enqueuePostSync(result.newUnitId);
 
     return result;
   }
@@ -177,7 +188,7 @@ export class TranslationGroupService {
       });
     });
 
-    syncPostToMeili(unitId).catch(() => {});
+    await enqueuePostSync(unitId);
   }
 
   /**

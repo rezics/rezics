@@ -29,7 +29,8 @@ import {
 } from "#/prisma/client";
 import { getSeedTagId } from "@/infra/seed-tags";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
-import { patchContentContainedUnitIdsToMeili } from "@/meili/content/sync";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
 import {
   hydrateUnitOwnerUserSlugRow,
@@ -59,15 +60,14 @@ import { shelfInclude, shelfListSelect } from "./types";
 
 const REBALANCE_WINDOW = 50;
 
-async function syncContainedUnitIdsToMeili(shelfId: string): Promise<void> {
-  try {
-    await patchContentContainedUnitIdsToMeili(shelfId);
-  } catch (error) {
-    console.error("[shelf] containedUnitIds meili sync failed", {
-      shelfId,
-      error,
-    });
-  }
+async function enqueueContainedUnitIdsSync(shelfId: string): Promise<void> {
+  await serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentPatchContainedUnitIds,
+      { unitId: shelfId },
+      { type: "server", service: "shelf" },
+    ),
+  );
 }
 
 type Tx = Prisma.TransactionClient;
@@ -532,7 +532,7 @@ export class ShelfService {
       });
     });
 
-    await syncContainedUnitIdsToMeili(shelfId);
+    await enqueueContainedUnitIdsSync(shelfId);
     return mapShelfUnitToDTO(row);
   }
 
@@ -540,7 +540,7 @@ export class ShelfService {
     await prisma.$transaction(async (tx) => {
       await deleteShelfUnit(tx, shelfId, unitId);
     });
-    await syncContainedUnitIdsToMeili(shelfId);
+    await enqueueContainedUnitIdsSync(shelfId);
   }
 
   async reorderUnit(
@@ -720,7 +720,7 @@ export class ShelfService {
       });
     });
 
-    if (didCreateChild) await syncContainedUnitIdsToMeili(shelfId);
+    if (didCreateChild) await enqueueContainedUnitIdsSync(shelfId);
     return mapShelfUnitRelationToDTO(relation);
   }
 
@@ -802,7 +802,7 @@ export class ShelfService {
       }
     });
 
-    if (didCreate) await syncContainedUnitIdsToMeili(shelfId);
+    if (didCreate) await enqueueContainedUnitIdsSync(shelfId);
   }
 
   async applyBatch(
@@ -1108,7 +1108,7 @@ export class ShelfService {
     }
 
     if (mutated) {
-      await syncContainedUnitIdsToMeili(shelfId);
+      await enqueueContainedUnitIdsSync(shelfId);
     }
 
     return results;
@@ -1132,7 +1132,7 @@ export class ShelfService {
       return deleted;
     });
     if (result.count > 0) {
-      await syncContainedUnitIdsToMeili(shelfId);
+      await enqueueContainedUnitIdsSync(shelfId);
     }
     return { deleted: result.count };
   }

@@ -12,14 +12,25 @@ import {
   parseIdsCsv,
   validateSlug,
 } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { UnitTag } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
-import { patchContentTagsToMeili } from "@/meili/content/sync";
+import { serverJobProducer } from "@/job/job-boundary";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
 import { tagUnitInclude, unitTagInclude } from "./types";
 
 /** Score at or below this threshold hides a UnitTag from regular users. */
 export const VISIBILITY_THRESHOLD = -100;
+
+function enqueueContentTagsSync(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentPatchTags,
+      { unitId },
+      { type: "server", service: "tag" },
+    ),
+  );
+}
 
 export class TagService {
   /**
@@ -197,7 +208,7 @@ export class TagService {
       return row;
     });
 
-    await patchContentTagsToMeili(unitId);
+    await enqueueContentTagsSync(unitId);
     return result;
   }
 
@@ -225,7 +236,7 @@ export class TagService {
       });
       return row;
     });
-    await patchContentTagsToMeili(unitId);
+    await enqueueContentTagsSync(unitId);
     return updated;
   }
 
@@ -243,7 +254,7 @@ export class TagService {
         where: { unitId_tagUnitId: { unitId, tagUnitId } },
       });
     });
-    await patchContentTagsToMeili(unitId);
+    await enqueueContentTagsSync(unitId);
   }
 
   /**
@@ -283,6 +294,7 @@ export class TagService {
         },
       });
     });
+    await enqueueContentTagsSync(unitId);
   }
 
   /**

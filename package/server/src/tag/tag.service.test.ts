@@ -8,20 +8,16 @@ process.env.DATABASE_URL ??=
 const findManyMock = mock((_args?: unknown) =>
   Promise.resolve([] as unknown[]),
 );
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 installPrismaClientMock();
 Object.assign(prismaMock, {
   unitTag: { findMany: findManyMock },
 });
 
-mock.module("@/meili/content/sync", () => ({
-  deleteContentFromMeili: async () => undefined,
-  patchContentCreditsToMeili: async () => undefined,
-  patchContentMetadataToMeili: async () => undefined,
-  patchContentTagsToMeili: async () => undefined,
-  patchContentTranslationsToMeili: async () => undefined,
-  patchContentRealmIdsToMeili: async () => undefined,
-  patchContentRealmTagKeysToMeili: async () => undefined,
-  syncContentToMeili: async () => undefined,
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 const { TagService, VISIBILITY_THRESHOLD } = await import("./tag.service");
@@ -91,6 +87,35 @@ describe("TagService.listLowScoreUnitTags", () => {
     await service.listLowScoreUnitTags(0, 0);
     const args2 = findManyMock.mock.calls[0]?.[0] as any;
     expect(args2.take).toBe(1);
+  });
+});
+
+describe("TagService tag writes", () => {
+  const service = new TagService();
+
+  test("castVote enqueues content tag projection", async () => {
+    enqueueMock.mockClear();
+    prismaMock.$transaction = mock(async (fn: any) => fn(prismaMock));
+    prismaMock.tagVote = {
+      upsert: mock(async () => ({})),
+      aggregate: mock(async () => ({
+        _sum: { value: 1 },
+        _count: { value: 2 },
+      })),
+    };
+    prismaMock.unitTag = {
+      ...prismaMock.unitTag,
+      update: mock(async () => ({})),
+    };
+
+    await service.castVote("user-1", "unit-1", "tag-1", 1);
+
+    expect(enqueueMock).toHaveBeenCalledTimes(1);
+    expect(enqueueMock.mock.calls[0]?.[0]).toMatchObject({
+      kind: "search.content.patchTags",
+      payload: { unitId: "unit-1" },
+      source: { type: "server", service: "tag" },
+    });
   });
 });
 

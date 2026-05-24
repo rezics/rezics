@@ -23,8 +23,9 @@ const mockUpsert = mock(async () => baseRow);
 const mockFindUnique = mock(async (): Promise<any> => baseRow);
 const mockFindMany = mock(async () => [] as (typeof baseRow)[]);
 const mockUpdateMany = mock(async () => ({ count: 0 }));
-const mockSyncProgress = mock(async () => undefined);
-const mockRemoveProgress = mock(async () => undefined);
+const enqueueMock = mock(async (_command: any) => ({
+  status: "created" as const,
+}));
 const mockProgressSearch = mock(async () => ({
   estimatedTotalHits: 0,
   hits: [],
@@ -37,8 +38,12 @@ function firstArg(fn: { mock: { calls: unknown[][] } }) {
 
 mock.module("@rezics/search", () => ({
   PROGRESS_BUCKET_COUNT: 10,
-  removeProgress: mockRemoveProgress,
-  syncProgress: mockSyncProgress,
+}));
+
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 installPrismaClientMock();
@@ -65,8 +70,7 @@ describe("ProgressService", () => {
     mockFindUnique.mockClear();
     mockFindMany.mockClear();
     mockUpdateMany.mockClear();
-    mockSyncProgress.mockClear();
-    mockRemoveProgress.mockClear();
+    enqueueMock.mockClear();
     mockProgressSearch.mockClear();
     mockUpsert.mockResolvedValue(baseRow);
     mockFindUnique.mockResolvedValue(baseRow);
@@ -94,7 +98,13 @@ describe("ProgressService", () => {
     expect(args.create.totalTimeMs).toBe(2500n);
     expect(args.create.lastPosition).toBeNull();
     expect(args.update.totalTimeMs).toEqual({ increment: 2500n });
-    expect(mockSyncProgress).toHaveBeenCalledWith(expect.anything(), baseRow);
+    expect(enqueueMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "search.progress.sync",
+        payload: { userId: "user-1", unitId: "unit-1" },
+        source: { type: "server", service: "progress" },
+      }),
+    );
   });
 
   test("partial upsert preserves untouched fields in update branch", async () => {
@@ -276,10 +286,12 @@ describe("ProgressService", () => {
         lastSeenAt: expect.any(Date),
       },
     });
-    expect(mockRemoveProgress).toHaveBeenCalledWith(
-      expect.anything(),
-      "user-1",
-      "unit-1",
+    expect(enqueueMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "search.progress.remove",
+        payload: { userId: "user-1", unitId: "unit-1" },
+        source: { type: "server", service: "progress" },
+      }),
     );
   });
 

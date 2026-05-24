@@ -46,4 +46,92 @@ describe("createSeedRuntime", () => {
       }),
     ).toThrow(/SearchClient/);
   });
+
+  test("runs targeted factory sync without job-runner env", async () => {
+    const previousJobRunnerBaseUrl = Bun.env.JOB_RUNNER_BASE_URL;
+    const previousJobDatabaseUrl = Bun.env.JOB_DATABASE_URL;
+    const previousSequinWebhookSecret = Bun.env.SEQUIN_WEBHOOK_SECRET;
+    delete Bun.env.JOB_RUNNER_BASE_URL;
+    delete Bun.env.JOB_DATABASE_URL;
+    delete Bun.env.SEQUIN_WEBHOOK_SECRET;
+
+    try {
+      const syncedUsers: unknown[] = [];
+      const runtime = createSeedRuntime({
+        config: {
+          meiliMode: "init-and-sync",
+          manifestFormat: "human",
+          scenarioNames: [],
+        },
+        authPrisma: { $disconnect: async () => {} } as never,
+        serverPrisma: {
+          $disconnect: async () => {},
+          user: {
+            findUnique: async () => ({
+              unitId: "user-1",
+              email: "seed@example.com",
+              name: "Seed User",
+              avatar: null,
+              bio: null,
+              description: null,
+              followersCount: 0,
+              followingsCount: 0,
+              joinDate: null,
+              permission: "USER",
+            }),
+          },
+          unit: {
+            findUnique: async () => ({
+              slug: "seed-user",
+              type: "USER",
+            }),
+          },
+        } as never,
+        searchClient: {
+          addOrUpdateUsers: async (documents: unknown[]) => {
+            syncedUsers.push(...documents);
+          },
+        } as never,
+      });
+
+      await runtime.sync.user("user-1");
+
+      expect(runtime.state.syncSummary).toMatchObject({
+        targets: { user: 1 },
+        total: 1,
+      });
+      expect(syncedUsers).toEqual([
+        {
+          id: "user-1",
+          unitId: "user-1",
+          email: "seed@example.com",
+          name: "Seed User",
+          avatar: null,
+          bio: null,
+          description: null,
+          followersCount: 0,
+          followingsCount: 0,
+          joinDate: null,
+          permission: "USER",
+          slug: "seed-user",
+        },
+      ]);
+    } finally {
+      if (previousJobRunnerBaseUrl === undefined) {
+        delete Bun.env.JOB_RUNNER_BASE_URL;
+      } else {
+        Bun.env.JOB_RUNNER_BASE_URL = previousJobRunnerBaseUrl;
+      }
+      if (previousJobDatabaseUrl === undefined) {
+        delete Bun.env.JOB_DATABASE_URL;
+      } else {
+        Bun.env.JOB_DATABASE_URL = previousJobDatabaseUrl;
+      }
+      if (previousSequinWebhookSecret === undefined) {
+        delete Bun.env.SEQUIN_WEBHOOK_SECRET;
+      } else {
+        Bun.env.SEQUIN_WEBHOOK_SECRET = previousSequinWebhookSecret;
+      }
+    }
+  });
 });

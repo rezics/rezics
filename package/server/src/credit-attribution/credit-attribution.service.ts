@@ -3,8 +3,9 @@ import type {
   LinkCreditAttributionInput,
   RezicsSessionClaims,
 } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { prisma } from "#/prisma/client";
-import { patchContentCreditsToMeili } from "@/meili/content/sync";
+import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
 import {
   assertCanEditCollaborativeMetadata,
@@ -13,6 +14,16 @@ import {
 } from "@/unit/collaborative-metadata";
 import { mapCreditAttributionToDTO } from "./credit-attribution.mapper";
 import { creditAttributionInclude } from "./types";
+
+function enqueueContentCreditsSync(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentPatchCredits,
+      { unitId },
+      { type: "server", service: "credit-attribution" },
+    ),
+  );
+}
 
 export class CreditAttributionService {
   private async assertCreditEligibility(req: LinkCreditAttributionInput) {
@@ -53,7 +64,7 @@ export class CreditAttributionService {
         },
         include: creditAttributionInclude,
       });
-      await patchContentCreditsToMeili(req.unitId);
+      await enqueueContentCreditsSync(req.unitId);
       return mapCreditAttributionToDTO(row);
     }
 
@@ -88,7 +99,7 @@ export class CreditAttributionService {
       });
       return created;
     });
-    await patchContentCreditsToMeili(req.unitId);
+    await enqueueContentCreditsSync(req.unitId);
     return mapCreditAttributionToDTO(row);
   }
 
@@ -106,7 +117,7 @@ export class CreditAttributionService {
           unitId_entityId_role: { unitId, entityId, role },
         },
       });
-      await patchContentCreditsToMeili(unitId);
+      await enqueueContentCreditsSync(unitId);
       return;
     }
 
@@ -126,7 +137,7 @@ export class CreditAttributionService {
         message: "credit-attribution.unlink",
       });
     });
-    await patchContentCreditsToMeili(unitId);
+    await enqueueContentCreditsSync(unitId);
   }
 
   async listByUnit(unitId: string): Promise<CreditAttributionDTO[]> {

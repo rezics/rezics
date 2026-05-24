@@ -17,10 +17,9 @@ mock.module("@/infra/seed-tags", () => ({
   getSeedTagsSnapshot: () => ({ ...SEED_TAG_ID_BY_NAME }),
 }));
 
-const patchContentContainedUnitIdsToMeiliMock = mock(async () => undefined);
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 
 mock.module("@/meili/content/sync", () => ({
-  patchContentContainedUnitIdsToMeili: patchContentContainedUnitIdsToMeiliMock,
   patchContentMetadataToMeili: async () => undefined,
   patchContentRealmIdsToMeili: async () => undefined,
   patchContentRealmTagKeysToMeili: async () => undefined,
@@ -29,6 +28,11 @@ mock.module("@/meili/content/sync", () => ({
   patchContentTranslationsToMeili: async () => undefined,
   syncContentToMeili: async () => undefined,
   deleteContentFromMeili: async () => undefined,
+}));
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 Object.assign(prismaMock, {});
@@ -86,8 +90,8 @@ describe("ShelfService", () => {
     ).rejects.toThrow(/reserved/);
   });
 
-  test("addUnit syncs containedUnitIds to Meilisearch after the canonical write", async () => {
-    patchContentContainedUnitIdsToMeiliMock.mockClear();
+  test("addUnit enqueues containedUnitIds sync after the canonical write", async () => {
+    enqueueMock.mockClear();
 
     Object.assign(prismaMock, {
       unit: {
@@ -107,10 +111,12 @@ describe("ShelfService", () => {
     const { shelfService } = await import("./shelf.service");
     await shelfService.addUnit("shelf-1", { unitId: "book-1", kind: "book" });
 
-    expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledTimes(1);
-    expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledWith(
-      "shelf-1",
-    );
+    expect(enqueueMock).toHaveBeenCalledTimes(1);
+    expect(enqueueMock.mock.calls[0]?.[0]).toMatchObject({
+      kind: "search.content.patchContainedUnitIds",
+      payload: { unitId: "shelf-1" },
+      source: { type: "server", service: "shelf" },
+    });
   });
 
   test("addUnit rejects direct self-containment", async () => {
@@ -147,7 +153,7 @@ describe("ShelfService", () => {
   });
 
   test("applyBatch applies ops in submitted order and reports per-op results", async () => {
-    patchContentContainedUnitIdsToMeiliMock.mockClear();
+    enqueueMock.mockClear();
 
     const applied: string[] = [];
 
@@ -192,11 +198,11 @@ describe("ShelfService", () => {
     expect(results[2]!.status).toBe("ok");
     expect(results[2]!.op.op).toBe("reorder");
     expect(applied[0]).toBe("deleteMany");
-    expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledTimes(1);
+    expect(enqueueMock).toHaveBeenCalledTimes(1);
   });
 
   test("applyBatch records per-op failure without rolling back successful ops", async () => {
-    patchContentContainedUnitIdsToMeiliMock.mockClear();
+    enqueueMock.mockClear();
 
     Object.assign(prismaMock, {
       $transaction: async (fn: any) =>
@@ -227,7 +233,7 @@ describe("ShelfService", () => {
   });
 
   test("applyBatch resolves reorderToPage server-side", async () => {
-    patchContentContainedUnitIdsToMeiliMock.mockClear();
+    enqueueMock.mockClear();
 
     Object.assign(prismaMock, {
       $transaction: async (fn: any) =>
@@ -663,8 +669,8 @@ describe("ShelfService", () => {
     expect(result).toBeNull();
   });
 
-  test("removeUnit syncs containedUnitIds to Meilisearch after the canonical delete", async () => {
-    patchContentContainedUnitIdsToMeiliMock.mockClear();
+  test("removeUnit enqueues containedUnitIds sync after the canonical delete", async () => {
+    enqueueMock.mockClear();
 
     Object.assign(prismaMock, {
       $transaction: async (fn: any) =>
@@ -677,9 +683,10 @@ describe("ShelfService", () => {
     const { shelfService } = await import("./shelf.service");
     await shelfService.removeUnit("shelf-1", "book-1");
 
-    expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledTimes(1);
-    expect(patchContentContainedUnitIdsToMeiliMock).toHaveBeenCalledWith(
-      "shelf-1",
-    );
+    expect(enqueueMock).toHaveBeenCalledTimes(1);
+    expect(enqueueMock.mock.calls[0]?.[0]).toMatchObject({
+      kind: "search.content.patchContainedUnitIds",
+      payload: { unitId: "shelf-1" },
+    });
   });
 });

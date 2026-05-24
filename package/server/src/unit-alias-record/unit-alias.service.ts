@@ -5,6 +5,8 @@ import type {
   UnitAliasListQuery,
   UpdateUnitAliasInput,
 } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { serverJobProducer } from "@/job/job-boundary";
 import { prisma, UnitAliasStatus } from "#/prisma/client";
 import { hasAuthorityOver } from "@/unit/authority";
 import { AppError, forbidden, notFound } from "@/utils/errors";
@@ -14,20 +16,28 @@ import { normalizeUnitAliasValue, trimUnitAliasValue } from "./normalizer";
 export const ALIAS_VISIBILITY_THRESHOLD = -100;
 
 async function patchAliasSearchDocuments(unitId: string): Promise<void> {
-  const [
-    { patchContentAliasesToMeili },
-    { patchEntityAliasesToMeili },
-    { patchRealmAliasesToMeili },
-  ] = await Promise.all([
-    import("@/meili/content/sync"),
-    import("@/meili/entity/sync"),
-    import("@/meili/realm/sync"),
-  ]);
-
   await Promise.all([
-    patchContentAliasesToMeili(unitId),
-    patchEntityAliasesToMeili(unitId),
-    patchRealmAliasesToMeili(unitId),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.contentPatchAliases,
+        { unitId },
+        { type: "server", service: "unit-alias-record" },
+      ),
+    ),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.entityPatchAliases,
+        { unitId },
+        { type: "server", service: "unit-alias-record" },
+      ),
+    ),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.realmPatchAliases,
+        { unitId },
+        { type: "server", service: "unit-alias-record" },
+      ),
+    ),
   ]);
 }
 

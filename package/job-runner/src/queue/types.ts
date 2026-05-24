@@ -24,7 +24,11 @@ export interface QueueLike {
 export interface WorkerQueueLike extends QueueLike {
   work(
     name: JobLane,
-    handler: (job: { id: string; data: AnyJobCommand }) => Promise<unknown>,
+    handler: (
+      job:
+        | { id: string; data: AnyJobCommand }
+        | Array<{ id: string; data: AnyJobCommand }>,
+    ) => Promise<unknown>,
   ): Promise<unknown>;
   stop(options?: { graceful?: boolean; timeout?: number }): Promise<void>;
 }

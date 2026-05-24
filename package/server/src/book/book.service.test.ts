@@ -3,16 +3,12 @@ import { collectEditorialPatchLeafPaths } from "@rezics/contract";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 import { mapActualTranslationPatchPaths } from "@/unit/collaborative-metadata";
 
-const mockSyncContentToMeili = mock(async (_unitId: string) => undefined);
-const mockPatchContentMetadataToMeili = mock(
-  async (_unitId: string, _patch: Record<string, unknown>) => undefined,
-);
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 
-mock.module("@/meili/content/sync", () => ({
-  deleteContentFromMeili: async () => undefined,
-  patchContentMetadataToMeili: mockPatchContentMetadataToMeili,
-  patchContentTranslationsToMeili: async () => undefined,
-  syncContentToMeili: mockSyncContentToMeili,
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 mock.module("@/infra/infra-users", () => ({
@@ -145,8 +141,7 @@ function resetMocks(): void {
   mockUpdateContainer.mockClear();
   mockFindContainer.mockClear();
   mockTransaction.mockClear();
-  mockSyncContentToMeili.mockClear();
-  mockPatchContentMetadataToMeili.mockClear();
+  enqueueMock.mockClear();
 }
 
 function latestStructureHistoryOperations(): any[] {
@@ -170,7 +165,11 @@ describe("BookService.create", () => {
 
     const createArgs = mockCreateBook.mock.calls[0]?.[0] as any;
     expect(createArgs.data.chapterCount).toBe(0);
-    expect(mockSyncContentToMeili).toHaveBeenCalledWith("book-1");
+    expect(enqueueMock.mock.calls[0]?.[0]).toMatchObject({
+      kind: "search.content.sync",
+      payload: { unitId: "book-1" },
+      source: { type: "server", service: "book" },
+    });
   });
 
   test("wiki creation stamps rezics-wiki as owner and does not add whole-object lock", async () => {
@@ -250,7 +249,7 @@ describe("BookService.create", () => {
     const { buildBookCreatePatch, mapBookUpdatePatchPaths } = await import(
       "./book.service"
     );
-    const translation = { language: "en", title: "Same State" };
+    const translation = { language: "en" as const, title: "Same State" };
 
     const createPaths = collectEditorialPatchLeafPaths(
       buildBookCreatePatch({

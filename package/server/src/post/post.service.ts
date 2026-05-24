@@ -14,8 +14,8 @@ import {
   UnitStatus,
   UnitType,
 } from "#/prisma/client";
-import { patchPostFieldsToMeili, syncPostToMeili } from "@/meili/post/sync";
-import { syncContentToMeili } from "@/meili/content/sync";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { serverJobProducer } from "@/job/job-boundary";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
@@ -30,6 +30,36 @@ import {
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 import { AppError } from "../utils/errors";
+
+function enqueuePostSync(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.postSync,
+      { postId: unitId },
+      { type: "server", service: "post" },
+    ),
+  );
+}
+
+function enqueueContentSync(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentSync,
+      { unitId },
+      { type: "server", service: "post" },
+    ),
+  );
+}
+
+function enqueuePostFields(unitId: string, fields: Record<string, unknown>) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.postPatchFields,
+      { targetId: unitId, fields },
+      { type: "server", service: "post" },
+    ),
+  );
+}
 
 export class PostService {
   /**
@@ -457,9 +487,10 @@ export class PostService {
       return result;
     });
 
-    // Fire-and-forget sync to Meilisearch
-    syncPostToMeili(post.unitId).catch(() => {});
-    syncContentToMeili(post.unitId).catch(() => {});
+    await Promise.all([
+      enqueuePostSync(post.unitId),
+      enqueueContentSync(post.unitId),
+    ]);
 
     return hydrateUnitOwnerUserSlugRow(post);
   }
@@ -493,9 +524,8 @@ export class PostService {
       if (input.content !== undefined) patchFields.content = input.content;
       if (input.isLocked !== undefined) patchFields.isLocked = input.isLocked;
       if (input.extra !== undefined) patchFields.extra = input.extra;
-      patchPostFieldsToMeili(unitId, patchFields).catch(() => {});
-      if (input.content !== undefined)
-        syncContentToMeili(unitId).catch(() => {});
+      await enqueuePostFields(unitId, patchFields);
+      if (input.content !== undefined) await enqueueContentSync(unitId);
 
       return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
     }
@@ -553,13 +583,12 @@ export class PostService {
       return row;
     });
 
-    // Fire-and-forget partial sync to Meilisearch
     const patchFields: Record<string, any> = {};
     if (input.content !== undefined) patchFields.content = input.content;
     if (input.isLocked !== undefined) patchFields.isLocked = input.isLocked;
     if (input.extra !== undefined) patchFields.extra = input.extra;
-    patchPostFieldsToMeili(unitId, patchFields).catch(() => {});
-    if (input.content !== undefined) syncContentToMeili(unitId).catch(() => {});
+    await enqueuePostFields(unitId, patchFields);
+    if (input.content !== undefined) await enqueueContentSync(unitId);
 
     return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
   }
@@ -613,9 +642,7 @@ export class PostService {
       }
     });
 
-    // Fire-and-forget sync to Meilisearch (will remove the deleted post)
-    syncPostToMeili(unitId).catch(() => {});
-    syncContentToMeili(unitId).catch(() => {});
+    await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
   }
 
   /**

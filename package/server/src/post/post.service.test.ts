@@ -58,6 +58,7 @@ const unitFieldLockFindManyMock = mock(async (): Promise<any[]> => []);
 const queryRawMock = mock(async (): Promise<any[]> => [{ sequence: 1n }]);
 const historyOutboxCreateMock = mock(async (args: any) => args.data);
 const userFindUniqueMock = mock(async () => null);
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const transactionMock = mock(async (fn: any) =>
   fn({
     $queryRaw: queryRawMock,
@@ -110,6 +111,12 @@ Object.assign(prismaMock, {
 
 mock.module("@/infra/infra-users", () => ({
   resolveRezicsWikiUserId: mock(async () => "wiki-owner"),
+}));
+
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 mock.module("@/meili/post/sync", () => ({
@@ -172,6 +179,7 @@ function resetMocks() {
   queryRawMock.mockClear();
   historyOutboxCreateMock.mockClear();
   userFindUniqueMock.mockClear();
+  enqueueMock.mockClear();
   transactionMock.mockClear();
 }
 
@@ -190,6 +198,10 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(realmUnitCreateMock).not.toHaveBeenCalled();
     expect(unitTagCreateMock).not.toHaveBeenCalled();
     expect(historyOutboxCreateMock).not.toHaveBeenCalled();
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.post.sync",
+      "search.content.sync",
+    ]);
   });
 
   test("creates RealmUnit rows for one realm", async () => {
@@ -583,6 +595,10 @@ describe("PostService.update immutability", () => {
     expect(args.data.targetUnitId).toBeUndefined();
     expect(args.data.rootTargetUnitId).toBeUndefined();
     expect(args.data.rootTargetUnitType).toBeUndefined();
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.post.patchFields",
+      "search.content.sync",
+    ]);
 
     // Restore the shared mock so subsequent tests see the standard behavior.
     Object.assign(prismaMock.post, { update: postUpdateMock });

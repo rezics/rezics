@@ -14,11 +14,11 @@ mock.module("@/middleware", () => ({
   verifyAdminFromDb: async () => false,
 }));
 
-const patchContentCreditsToMeili = mock(async (_unitId: string) => {});
-const patchContentSubjectsToMeili = mock(async (_unitId: string) => {});
-mock.module("@/meili/content/sync", () => ({
-  patchContentCreditsToMeili,
-  patchContentSubjectsToMeili,
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 const now = new Date("2026-05-24T00:00:00.000Z");
@@ -179,8 +179,7 @@ function makeTx(
 }
 
 beforeEach(() => {
-  patchContentCreditsToMeili.mockClear();
-  patchContentSubjectsToMeili.mockClear();
+  enqueueMock.mockClear();
 });
 
 describe("EntityAttributionBatchService.batchUpdate", () => {
@@ -233,8 +232,10 @@ describe("EntityAttributionBatchService.batchUpdate", () => {
         },
       },
     });
-    expect(patchContentCreditsToMeili).toHaveBeenCalledWith("book-1");
-    expect(patchContentSubjectsToMeili).toHaveBeenCalledWith("book-1");
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.content.patchCredits",
+      "search.content.patchSubjects",
+    ]);
   });
 
   test("rolls back validation failures before canonical row or history writes", async () => {
@@ -288,7 +289,7 @@ describe("EntityAttributionBatchService.batchUpdate", () => {
 
     expect(result.changed).toBe(false);
     expect(tx.historyOutbox.create).not.toHaveBeenCalled();
-    expect(patchContentCreditsToMeili).not.toHaveBeenCalled();
+    expect(enqueueMock).not.toHaveBeenCalled();
   });
 
   test("rejects locked authority paths before canonical mutation", async () => {

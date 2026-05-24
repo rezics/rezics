@@ -4,6 +4,7 @@ import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 installPrismaClientMock();
 
 // Stub fire-and-forget meili sync so it doesn't reach into real env.
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 mock.module("@/meili/realm/sync", () => ({
   patchRealmMemberCountToMeili: mock(async () => undefined),
   patchRealmMetadataToMeili: mock(async () => undefined),
@@ -16,6 +17,11 @@ mock.module("@/meili/content/sync", () => ({
 }));
 mock.module("@/meili/post/sync", () => ({
   patchPostFieldsToMeili: mock(async () => undefined),
+}));
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 import { realmService } from "./realm.service";
@@ -67,6 +73,7 @@ function installTx(ops: TxOps) {
 }
 
 afterEach(() => {
+  enqueueMock.mockClear();
   delete prismaMock.$transaction;
   delete prismaMock.realmMember;
   delete prismaMock.realm;

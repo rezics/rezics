@@ -69,6 +69,11 @@ Meilisearch modes:
 - `--meili=skip` skips index initialization and synchronization.
 - `--meili=init-and-sync` initializes indexes before seeding and synchronizes seeded Units through seed runtime hooks.
 
+Factory Meilisearch synchronization is intentionally direct through
+`@rezics/search`. It is setup-time data projection, not runtime mutation
+propagation, so factory commands do not require `JOB_RUNNER_BASE_URL`,
+`JOB_DATABASE_URL`, Sequin, or a job-runner worker.
+
 Special scenarios are `large-post-tree`, `large-content-tree`, `large-history`, and `complex-shelf`. Non-interactive runs are base-only unless `--scenario=<name>` or `--all-scenarios` is passed.
 
 ## Tech Stack

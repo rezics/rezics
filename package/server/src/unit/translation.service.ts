@@ -5,11 +5,10 @@ import type {
   UpdateTranslationInput,
 } from "@rezics/contract";
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { UnitTranslation } from "#/prisma/client";
 import { Prisma, prisma, UnitType } from "#/prisma/client";
-import { patchContentTranslationsToMeili } from "@/meili/content/sync";
-import { patchPostsTargetToMeili } from "@/meili/post/sync";
-import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
+import { serverJobProducer } from "@/job/job-boundary";
 import {
   assertCanEditCollaborativeMetadata,
   applySparsePatch,
@@ -140,15 +139,14 @@ export class TranslationService {
       return row;
     });
 
-    // Fire-and-forget: sync dependent Meilisearch documents
     if (didMutate) {
-      this.syncMeiliOnTranslationChange(unitId).catch(() => {});
+      await this.syncSearchOnTranslationChange(unitId);
     }
 
     return result;
   }
 
-  private async syncMeiliOnTranslationChange(unitId: string): Promise<void> {
+  private async syncSearchOnTranslationChange(unitId: string): Promise<void> {
     const unit = await prisma.unit.findUnique({
       where: { id: unitId },
       select: { type: true },
@@ -156,10 +154,30 @@ export class TranslationService {
     if (!unit) return;
 
     if (unit.type === UnitType.REALM) {
-      await patchRealmTranslationsToMeili(unitId);
+      await serverJobProducer.enqueue(
+        createSearchCommand(
+          SEARCH_COMMAND_KINDS.realmPatchTranslations,
+          { unitId },
+          { type: "server", service: "unit-translation" },
+        ),
+      );
     } else {
-      await patchContentTranslationsToMeili(unitId);
-      await patchPostsTargetToMeili(unitId);
+      await Promise.all([
+        serverJobProducer.enqueue(
+          createSearchCommand(
+            SEARCH_COMMAND_KINDS.contentPatchTranslations,
+            { unitId },
+            { type: "server", service: "unit-translation" },
+          ),
+        ),
+        serverJobProducer.enqueue(
+          createSearchCommand(
+            SEARCH_COMMAND_KINDS.postPatchTargetFanout,
+            { targetId: unitId },
+            { type: "server", service: "unit-translation" },
+          ),
+        ),
+      ]);
     }
   }
 

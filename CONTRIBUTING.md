@@ -72,6 +72,11 @@ The unified CLI is `bun run seed` (entry: `package/utils/bin/cli.ts`). It covers
 - **`package/server/prisma/seed/`** — production-required infra: default realm, content type tags, root user, meilisearch init. Idempotent.
 - **`package/server/prisma/factory/`** — dev/demo synthetic data generators (books, posts, shelves, users, …) with presets and a `SeedPlan` framework. Never run in production.
 
+Seed and factory Meilisearch synchronization remains direct through
+`@rezics/search`. Runtime server mutations enqueue job-runner commands, but
+setup-time seed/factory flows must not require `JOB_RUNNER_BASE_URL`,
+`JOB_DATABASE_URL`, Sequin, or a job-runner worker.
+
 ```bash
 # Fully interactive (multi-select users / infrastructure / factory)
 bun run seed

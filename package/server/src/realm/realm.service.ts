@@ -7,24 +7,15 @@ import type {
   UpdateRealmInput,
 } from "@rezics/contract";
 import { parseIdsCsv, validateSlug } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma, RealmTagApplication } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { serverJobProducer } from "@/job/job-boundary";
 
 /** Score at or below this threshold hides a RealmTagApplication from regular users. */
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
 
-import {
-  patchContentRealmIdsToMeili,
-  patchContentRealmTagKeysToMeili,
-  patchContentTagsToMeili,
-} from "@/meili/content/sync";
-import { patchPostFieldsToMeili } from "@/meili/post/sync";
-import {
-  patchRealmMemberCountToMeili,
-  patchRealmMetadataToMeili,
-  syncRealmToMeili,
-} from "@/meili/realm/sync";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
@@ -41,6 +32,49 @@ import {
   realmInclude,
   realmListSelect,
 } from "./types";
+
+function enqueueRealmSearch(
+  kind:
+    | typeof SEARCH_COMMAND_KINDS.realmSync
+    | typeof SEARCH_COMMAND_KINDS.realmPatchMemberCount,
+  unitId: string,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(kind, { unitId }, { type: "server", service: "realm" }),
+  );
+}
+
+function enqueueContentSearch(
+  kind:
+    | typeof SEARCH_COMMAND_KINDS.contentPatchRealmIds
+    | typeof SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys
+    | typeof SEARCH_COMMAND_KINDS.contentPatchTags,
+  unitId: string,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(kind, { unitId }, { type: "server", service: "realm" }),
+  );
+}
+
+function enqueuePostSync(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.postSync,
+      { postId: unitId },
+      { type: "server", service: "realm" },
+    ),
+  );
+}
+
+function enqueueRealmMetadata(unitId: string, fields: Record<string, unknown>) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.realmPatchMetadata,
+      { targetId: unitId, fields },
+      { type: "server", service: "realm" },
+    ),
+  );
+}
 
 export class RealmService {
   private async assertRealmAndTagTypes(
@@ -68,14 +102,7 @@ export class RealmService {
   }
 
   private async patchPostRealmIds(unitId: string): Promise<void> {
-    const rows = await prisma.realmUnit.findMany({
-      where: { unitId },
-      select: { realmUnitId: true },
-      orderBy: { realmUnitId: "asc" },
-    });
-    await patchPostFieldsToMeili(unitId, {
-      realmIds: rows.map((row) => row.realmUnitId),
-    });
+    await enqueuePostSync(unitId);
   }
 
   private buildWhere(options: RealmListQuery): Prisma.RealmWhereInput {
@@ -217,8 +244,7 @@ export class RealmService {
       include: realmInclude,
     });
 
-    // Fire-and-forget sync to Meilisearch
-    syncRealmToMeili(unit.id).catch(() => {});
+    await enqueueRealmSearch(SEARCH_COMMAND_KINDS.realmSync, unit.id);
 
     const dto = mapRealmToDTO(await hydrateUnitOwnerUserSlugRow(row));
     return {
@@ -243,12 +269,11 @@ export class RealmService {
       include: realmInclude,
     });
 
-    // Fire-and-forget partial sync to Meilisearch
     const patchFields: Record<string, any> = {};
     if (isPublic !== undefined) patchFields.isPublic = isPublic;
     if (isOfficial !== undefined) patchFields.isOfficial = isOfficial;
     if (extra !== undefined) patchFields.extra = extra;
-    patchRealmMetadataToMeili(unitId, patchFields).catch(() => {});
+    await enqueueRealmMetadata(unitId, patchFields);
 
     const dto = mapRealmToDTO(await hydrateUnitOwnerUserSlugRow(row));
     return {
@@ -277,7 +302,7 @@ export class RealmService {
     userId: string,
     roleKey?: string,
   ): Promise<RealmMemberDTO> {
-    const { member, memberCount } = await prisma.$transaction(async (tx) => {
+    const { member } = await prisma.$transaction(async (tx) => {
       const member = await tx.realmMember.create({
         data: {
           realmUnitId,
@@ -317,8 +342,10 @@ export class RealmService {
       return { member, memberCount: updatedRealm.memberCount };
     });
 
-    // Fire-and-forget partial sync to Meilisearch (memberCount changed)
-    patchRealmMemberCountToMeili(realmUnitId, memberCount).catch(() => {});
+    await enqueueRealmSearch(
+      SEARCH_COMMAND_KINDS.realmPatchMemberCount,
+      realmUnitId,
+    );
 
     return mapRealmMemberToDTO(member);
   }
@@ -345,7 +372,7 @@ export class RealmService {
    * second call doesn't double-decrement.
    */
   async removeMember(realmUnitId: string, userId: string): Promise<void> {
-    const memberCount = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const existingMember = await tx.realmMember.findUnique({
         where: { realmUnitId_userId: { realmUnitId, userId } },
         select: { realmUnitId: true },
@@ -387,7 +414,10 @@ export class RealmService {
       return updatedRealm.memberCount;
     });
 
-    patchRealmMemberCountToMeili(realmUnitId, memberCount).catch(() => {});
+    await enqueueRealmSearch(
+      SEARCH_COMMAND_KINDS.realmPatchMemberCount,
+      realmUnitId,
+    );
   }
 
   /**
@@ -469,13 +499,10 @@ export class RealmService {
     const row = await prisma.realmUnit.create({
       data: { realmUnitId, unitId },
     });
-    await patchContentRealmIdsToMeili(unitId);
-    this.patchPostRealmIds(unitId).catch((error) => {
-      console.error("[realmUnit] failed to patch post realmIds", {
-        unitId,
-        error,
-      });
-    });
+    await Promise.all([
+      enqueueContentSearch(SEARCH_COMMAND_KINDS.contentPatchRealmIds, unitId),
+      this.patchPostRealmIds(unitId),
+    ]);
     return mapRealmUnitToDTO(row);
   }
 
@@ -485,13 +512,10 @@ export class RealmService {
         realmUnitId_unitId: { realmUnitId, unitId },
       },
     });
-    await patchContentRealmIdsToMeili(unitId);
-    this.patchPostRealmIds(unitId).catch((error) => {
-      console.error("[realmUnit] failed to patch post realmIds", {
-        unitId,
-        error,
-      });
-    });
+    await Promise.all([
+      enqueueContentSearch(SEARCH_COMMAND_KINDS.contentPatchRealmIds, unitId),
+      this.patchPostRealmIds(unitId),
+    ]);
   }
 
   // --- Realm tag applications ---
@@ -607,8 +631,13 @@ export class RealmService {
       return realmTagApplication;
     });
 
-    await patchContentTagsToMeili(unitId);
-    await patchContentRealmTagKeysToMeili(unitId);
+    await Promise.all([
+      enqueueContentSearch(SEARCH_COMMAND_KINDS.contentPatchTags, unitId),
+      enqueueContentSearch(
+        SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys,
+        unitId,
+      ),
+    ]);
     return row;
   }
 
@@ -635,7 +664,10 @@ export class RealmService {
       },
       data,
     });
-    await patchContentRealmTagKeysToMeili(unitId);
+    await enqueueContentSearch(
+      SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys,
+      unitId,
+    );
     return updated;
   }
 
@@ -653,7 +685,10 @@ export class RealmService {
         realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
       },
     });
-    await patchContentRealmTagKeysToMeili(unitId);
+    await enqueueContentSearch(
+      SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys,
+      unitId,
+    );
   }
 
   /**
@@ -701,7 +736,10 @@ export class RealmService {
       });
     });
 
-    await patchContentRealmTagKeysToMeili(unitId);
+    await enqueueContentSearch(
+      SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys,
+      unitId,
+    );
   }
 
   /**

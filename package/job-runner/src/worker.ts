@@ -4,6 +4,7 @@ import {
   type AnyJobCommand,
 } from "@rezics/job";
 import type { WorkerQueueLike } from "./queue/types";
+import { enqueueCommand } from "./queue/enqueue";
 
 export interface HandlerContext {
   enqueue(command: AnyJobCommand): Promise<unknown>;
@@ -13,6 +14,8 @@ export type JobHandler = (
   command: AnyJobCommand,
   context: HandlerContext,
 ) => Promise<unknown>;
+
+type WorkerJob = { id: string; data: AnyJobCommand };
 
 export function createUnknownCommandError(command: AnyJobCommand) {
   return new Error(
@@ -25,40 +28,49 @@ export async function registerWorkers(
   handlers: Partial<Record<AnyJobCommand["kind"], JobHandler>>,
 ) {
   for (const lane of JOB_LANE_VALUES) {
-    await queue.work(lane, async (job) => {
-      const command = parseJobCommand(job.data);
-      console.log("[job-runner] job start", {
-        jobId: job.id,
-        kind: command.kind,
-        lane: command.lane,
-        idempotencyKey: command.idempotencyKey,
-        source: command.source,
-        tags: command.tags,
-      });
-
-      const handler = handlers[command.kind];
-      if (!handler) throw createUnknownCommandError(command);
-
-      try {
-        const output = await handler(command, {
-          enqueue: (nextCommand) => queue.send(nextCommand.lane, nextCommand),
-        });
-        console.log("[job-runner] job success", {
-          jobId: job.id,
-          kind: command.kind,
-          idempotencyKey: command.idempotencyKey,
-          output,
-        });
-        return output;
-      } catch (error) {
-        console.error("[job-runner] job failure", {
-          jobId: job.id,
-          kind: command.kind,
-          idempotencyKey: command.idempotencyKey,
-          error,
-        });
-        throw error;
-      }
+    await queue.work(lane, async (jobOrJobs) => {
+      const jobs = Array.isArray(jobOrJobs) ? jobOrJobs : [jobOrJobs];
+      return Promise.all(jobs.map((job) => processJob(queue, handlers, job)));
     });
+  }
+}
+
+async function processJob(
+  queue: WorkerQueueLike,
+  handlers: Partial<Record<AnyJobCommand["kind"], JobHandler>>,
+  job: WorkerJob,
+) {
+  const command = parseJobCommand(job.data);
+  console.log("[job-runner] job start", {
+    jobId: job.id,
+    kind: command.kind,
+    lane: command.lane,
+    idempotencyKey: command.idempotencyKey,
+    source: command.source,
+    tags: command.tags,
+  });
+
+  const handler = handlers[command.kind];
+  if (!handler) throw createUnknownCommandError(command);
+
+  try {
+    const output = await handler(command, {
+      enqueue: (nextCommand) => enqueueCommand(queue, nextCommand),
+    });
+    console.log("[job-runner] job success", {
+      jobId: job.id,
+      kind: command.kind,
+      idempotencyKey: command.idempotencyKey,
+      output,
+    });
+    return output;
+  } catch (error) {
+    console.error("[job-runner] job failure", {
+      jobId: job.id,
+      kind: command.kind,
+      idempotencyKey: command.idempotencyKey,
+      error,
+    });
+    throw error;
   }
 }

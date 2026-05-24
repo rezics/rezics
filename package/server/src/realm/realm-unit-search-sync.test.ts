@@ -9,8 +9,7 @@ const realmUnitFindManyMock = mock(async () => [
   { realmUnitId: "realm-1" },
   { realmUnitId: "realm-2" },
 ]);
-const patchContentRealmIdsToMeiliMock = mock(async () => undefined);
-const patchPostFieldsToMeiliMock = mock(async () => undefined);
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 
 Object.assign(prismaMock, {
   realmUnit: {
@@ -20,43 +19,13 @@ Object.assign(prismaMock, {
   },
 });
 
-mock.module("@/meili/content/sync", () => ({
-  deleteContentFromMeili: async () => undefined,
-  patchContentCreditsToMeili: async () => undefined,
-  patchContentMetadataToMeili: async () => undefined,
-  patchContentTagsToMeili: async () => undefined,
-  patchContentTranslationsToMeili: async () => undefined,
-  patchContentRealmIdsToMeili: patchContentRealmIdsToMeiliMock,
-  patchContentRealmTagKeysToMeili: async () => undefined,
-  syncContentToMeili: async () => undefined,
-}));
-
-mock.module("@/meili/post/sync", () => ({
-  deletePostFromMeili: async () => undefined,
-  patchPostFieldsToMeili: patchPostFieldsToMeiliMock,
-  patchPostsAuthorToMeili: async () => undefined,
-  patchPostsTargetToMeili: async () => undefined,
-  syncAllPostsToMeili: async () => undefined,
-  syncPostToMeili: async () => undefined,
-  syncPostsByAuthorToMeili: async () => undefined,
-  syncPostsByTargetToMeili: async () => undefined,
-}));
-
-mock.module("@/meili/realm/sync", () => ({
-  deleteRealmFromMeili: async () => undefined,
-  patchRealmMemberCountToMeili: async () => undefined,
-  patchRealmMetadataToMeili: async () => undefined,
-  patchRealmTranslationsToMeili: async () => undefined,
-  syncAllRealmsToMeili: async () => undefined,
-  syncRealmToMeili: async () => undefined,
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 const { RealmService } = await import("./realm.service");
-
-async function flushMicrotasks() {
-  await Promise.resolve();
-  await Promise.resolve();
-}
 
 describe("RealmUnit post search sync", () => {
   const service = new RealmService();
@@ -69,27 +38,26 @@ describe("RealmUnit post search sync", () => {
       { realmUnitId: "realm-1" },
       { realmUnitId: "realm-2" },
     ]);
-    patchContentRealmIdsToMeiliMock.mockClear();
-    patchPostFieldsToMeiliMock.mockClear();
+    enqueueMock.mockClear();
   });
 
   test("adding a RealmUnit patches the post realmIds field", async () => {
     await service.addRealmUnit("realm-1", "post-1");
-    await flushMicrotasks();
 
-    expect(patchPostFieldsToMeiliMock).toHaveBeenCalledWith("post-1", {
-      realmIds: ["realm-1", "realm-2"],
-    });
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.content.patchRealmIds",
+      "search.post.sync",
+    ]);
   });
 
   test("removing a RealmUnit patches the post realmIds field", async () => {
     realmUnitFindManyMock.mockResolvedValueOnce([{ realmUnitId: "realm-2" }]);
 
     await service.removeRealmUnit("realm-1", "post-1");
-    await flushMicrotasks();
 
-    expect(patchPostFieldsToMeiliMock).toHaveBeenCalledWith("post-1", {
-      realmIds: ["realm-2"],
-    });
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.content.patchRealmIds",
+      "search.post.sync",
+    ]);
   });
 });

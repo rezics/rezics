@@ -8,6 +8,7 @@ process.env.DATABASE_URL ??=
 installPrismaClientMock();
 
 const hasAuthorityOverMock = mock(async () => true);
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 mock.module("@/unit/authority", () => ({
   hasAuthorityOver: hasAuthorityOverMock,
 }));
@@ -15,18 +16,15 @@ mock.module("@/middleware", () => ({
   isAdminRole: () => false,
   verifyAdminFromDb: async () => false,
 }));
-mock.module("@/meili/content/sync", () => ({
-  patchContentAliasesToMeili: async () => undefined,
-}));
-mock.module("@/meili/entity/sync", () => ({
-  patchEntityAliasesToMeili: async () => undefined,
-}));
-mock.module("@/meili/realm/sync", () => ({
-  patchRealmAliasesToMeili: async () => undefined,
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
 }));
 
 function resetPrismaMock() {
   for (const key of Object.keys(prismaMock)) delete prismaMock[key];
+  enqueueMock.mockClear();
   prismaMock.$transaction = mock(async (fn: any) => fn(prismaMock));
   prismaMock.unit = {
     findUnique: mock(async () => ({ id: "unit-1", userId: "owner-1" })),
@@ -114,6 +112,11 @@ describe("UnitAliasService", () => {
     });
     expect(upsertArgs.create.value).toBe("TBP");
     expect(upsertArgs.update).toEqual({});
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.content.patchAliases",
+      "search.entity.patchAliases",
+      "search.realm.patchAliases",
+    ]);
   });
 
   test("castVote upserts one vote and recalculates aggregates", async () => {

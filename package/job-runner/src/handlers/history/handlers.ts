@@ -1,9 +1,9 @@
+import type { HistoryOutboxConsumer } from "@rezics/history/outbox";
 import {
-  HISTORY_COMMAND_KINDS,
   type AnyJobCommand,
+  HISTORY_COMMAND_KINDS,
   type HistoryCommand,
 } from "@rezics/job";
-import type { HistoryOutboxConsumer } from "@rezics/history/outbox";
 import type { JobHandler } from "../../worker";
 
 export function createHistoryHandlers(consumer: HistoryOutboxConsumer) {
