@@ -154,7 +154,7 @@
 
 - [x] 16.1 Add `bun --filter=@rezics/job-runner run dev` and build scripts.
 - [x] 16.2 Update root dev orchestration so job-runner can be started in local development when needed.
-- [x] 16.3 Add `.env.example` values for job-runner and server producer env.
+- [x] 16.3 Add package `.env.example` values for job-runner and server producer env.
 - [x] 16.4 Document local Sequin/Postgres logical replication setup and no-CDC fallback expectations.
 - [x] 16.5 Document production deployment roles, health checks, queue database backup expectations, and operational runbooks.
 - [x] 16.6 Update `docs/guide/content-authority-history.md` with queued history ingestion behavior.
