@@ -1,5 +1,6 @@
 import type {
   CreditAttributionDTO,
+  CreateCreditAttributionEvidenceInput,
   LinkCreditAttributionInput,
   RezicsSessionClaims,
 } from "@rezics/contract";
@@ -147,6 +148,51 @@ export class CreditAttributionService {
       orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
     });
     return rows.map(mapCreditAttributionToDTO);
+  }
+
+  async createEvidence(
+    input: CreateCreditAttributionEvidenceInput,
+  ): Promise<CreditAttributionDTO> {
+    await prisma.creditAttribution.findUniqueOrThrow({
+      where: {
+        unitId_entityId_role: {
+          unitId: input.unitId,
+          entityId: input.entityId,
+          role: input.role,
+        },
+      },
+      select: { unitId: true },
+    });
+    await prisma.unitExternalRef.findUniqueOrThrow({
+      where: { id: input.sourceRefId },
+      select: { id: true },
+    });
+
+    await prisma.creditAttributionEvidence.create({
+      data: {
+        unitId: input.unitId,
+        entityId: input.entityId,
+        role: input.role,
+        sourceRefId: input.sourceRefId,
+        claimPath: input.claimPath ?? null,
+        observedUrl: input.observedUrl ?? null,
+        observedAt: input.observedAt ? new Date(input.observedAt) : undefined,
+        confidence: input.confidence ?? null,
+      },
+    });
+
+    const row = await prisma.creditAttribution.findUniqueOrThrow({
+      where: {
+        unitId_entityId_role: {
+          unitId: input.unitId,
+          entityId: input.entityId,
+          role: input.role,
+        },
+      },
+      include: creditAttributionInclude,
+    });
+
+    return mapCreditAttributionToDTO(row);
   }
 }
 

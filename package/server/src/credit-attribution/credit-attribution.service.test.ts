@@ -43,6 +43,7 @@ function makeCreditRow(overrides: Record<string, any> = {}) {
         },
       ],
     },
+    evidence: overrides.evidence ?? [],
   };
 }
 
@@ -56,6 +57,15 @@ function freshMocks() {
       create: mock(async () => creditRow),
       delete: mock(async () => creditRow),
       findMany: mock(async () => [creditRow]),
+      findUniqueOrThrow: mock(async () => creditRow),
+    },
+    unitExternalRef: {
+      findUniqueOrThrow: mock(async () => ({ id: "source-ref-1" })),
+    },
+    creditAttributionEvidence: {
+      create: mock(async () => ({
+        id: "evidence-1",
+      })),
     },
   });
 }
@@ -107,5 +117,106 @@ describe("CreditAttributionService.link", () => {
     expect((prismaMock.creditAttribution.create as any).mock.calls.length).toBe(
       0,
     );
+  });
+});
+
+describe("CreditAttributionService.createEvidence", () => {
+  test("validates credit attribution and source ref before creating evidence", async () => {
+    freshMocks();
+    const { creditAttributionService } = await import(
+      "./credit-attribution.service"
+    );
+
+    await creditAttributionService.createEvidence({
+      unitId: "book-1",
+      entityId: "entity-1",
+      role: "author",
+      sourceRefId: "source-ref-1",
+      claimPath: "$.bookInfo.author",
+    });
+
+    expect(prismaMock.creditAttribution.findUniqueOrThrow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          unitId_entityId_role: {
+            unitId: "book-1",
+            entityId: "entity-1",
+            role: "author",
+          },
+        },
+      }),
+    );
+    expect(prismaMock.unitExternalRef.findUniqueOrThrow).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "source-ref-1" } }),
+    );
+    expect(prismaMock.creditAttributionEvidence.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ sourceRefId: "source-ref-1" }),
+      }),
+    );
+  });
+
+  test("hydrates evidence summaries on read DTOs", async () => {
+    const evidence = [
+      {
+        id: "evidence-1",
+        unitId: "book-1",
+        entityId: "entity-1",
+        role: "author",
+        sourceRefId: "source-ref-1",
+        claimPath: "$.bookInfo.author",
+        observedUrl: "https://book.qidian.com/info/123",
+        observedAt: now,
+        confidence: 0.9,
+        sourceRef: {
+          id: "source-ref-1",
+          unitId: "book-1",
+          sourceSiteEntityUnitId: "source-site-1",
+          externalKind: "book",
+          externalId: "123",
+          canonicalUrl: "https://book.qidian.com/info/123",
+          originalUrl: null,
+          sourceSite: {
+            entityUnitId: "source-site-1",
+            key: "qidian",
+            entity: {
+              unitId: "source-site-1",
+              kind: "organization",
+              avatar: null,
+              verified: true,
+              eligibleCreditRoles: [],
+              eligibleSubjectRoles: [],
+              unit: {
+                id: "source-site-1",
+                type: "ENTITY",
+                slug: "qidian",
+                userId: "user-1",
+                createdAt: now,
+                updatedAt: now,
+                translations: [],
+              },
+            },
+          },
+        },
+      },
+    ];
+    Object.assign(prismaMock, {
+      creditAttribution: {
+        findMany: mock(async () => [makeCreditRow({ evidence })]),
+      },
+    });
+    const { creditAttributionService } = await import(
+      "./credit-attribution.service"
+    );
+
+    const [row] = await creditAttributionService.listByUnit("book-1");
+
+    expect(row!.evidence?.[0]).toMatchObject({
+      sourceRefId: "source-ref-1",
+      sourceSiteEntityUnitId: "source-site-1",
+      externalKind: "book",
+      externalId: "123",
+      sourceSite: { key: "qidian" },
+    });
   });
 });

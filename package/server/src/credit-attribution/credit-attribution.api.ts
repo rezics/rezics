@@ -1,11 +1,21 @@
 import type { CreditAttributionDTO } from "@rezics/contract";
 import {
+  createCreditAttributionEvidenceSchema,
   creditAttributionRoleKeySchema,
   linkCreditAttributionSchema,
+  type RezicsSessionClaims,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro } from "@/middleware";
+import { authMacro, isAdminRole, verifyAdminFromDb } from "@/middleware";
+import { AppError } from "@/utils/errors";
 import { creditAttributionService } from "./credit-attribution.service";
+
+async function requireAdmin(identity: RezicsSessionClaims) {
+  if (isAdminRole(identity) || (await verifyAdminFromDb(identity.userId))) {
+    return;
+  }
+  throw new AppError(403, "Forbidden: admin permission required");
+}
 
 export const creditAttributionApi = new Elysia({
   prefix: "/credit-attribution",
@@ -36,6 +46,21 @@ export const creditAttributionApi = new Elysia({
       params: t.Object({ unitId: t.String() }),
       detail: {
         summary: "List credit attributions for a unit",
+        tags: ["Credit Attribution"],
+      },
+    },
+  )
+  .post(
+    "/evidence",
+    async ({ body, identity }): Promise<CreditAttributionDTO> => {
+      await requireAdmin(identity);
+      return creditAttributionService.createEvidence(body);
+    },
+    {
+      requireLogin: true,
+      body: createCreditAttributionEvidenceSchema,
+      detail: {
+        summary: "Create credit attribution evidence",
         tags: ["Credit Attribution"],
       },
     },

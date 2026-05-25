@@ -12,4 +12,26 @@ export const creditAttributionInclude = {
       translations: true,
     },
   },
+  evidence: {
+    include: {
+      sourceRef: {
+        include: {
+          sourceSite: {
+            include: {
+              entity: {
+                include: {
+                  unit: {
+                    include: {
+                      translations: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ observedAt: "desc" }],
+  },
 } satisfies Prisma.CreditAttributionInclude;

@@ -36,6 +36,7 @@ import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
 import { slugApi } from "./slug";
 import { statsAdminApi } from "./stat";
+import { sourceSiteApi } from "./source-site";
 import { subjectAttributionApi } from "./subject-attribution";
 import { subscriptionApi } from "./subscription";
 import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";
@@ -50,6 +51,7 @@ import {
   workLinkClaimApi,
 } from "./unit";
 import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
+import { unitExternalRefApi } from "./unit-external-ref";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
 import { AppError } from "./utils/errors";
@@ -188,6 +190,8 @@ routeApp
   .use(creditAttributionApi)
   .use(subjectAttributionApi)
   .use(entityAttributionApi)
+  .use(sourceSiteApi)
+  .use(unitExternalRefApi)
   .use(entityApi)
   .use(slugApi)
   .use(subscriptionApi)
