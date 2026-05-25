@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
   singleUnitRevisionResponseSchema,
+  type UnitRevisionDTO,
   unitRevisionTimelinePageSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
@@ -13,7 +14,7 @@ async function responseValidationStatus(
   schema: unknown,
   payload: unknown,
 ): Promise<number> {
-  const app = new Elysia().get("/validate", () => payload, {
+  const app = new Elysia().get("/validate", () => payload as never, {
     response: schema as never,
   });
   const response = await app.handle(new Request("http://localhost/validate"));
@@ -698,7 +699,9 @@ describe("RevisionService", () => {
     expect(page.revisions).toHaveLength(1);
     expect(page.revisions[0]?.sequence).toBe(2);
     expect(page.nextCursor).toBe("revision-1");
-    expect(page.revisions[0]?.content).toBeUndefined();
+    expect(
+      (page.revisions[0] as UnitRevisionDTO | undefined)?.content,
+    ).toBeUndefined();
   });
 
   test("timeline can include content when raw payload access is requested", async () => {
@@ -721,7 +724,9 @@ describe("RevisionService", () => {
       includeContent: true,
     });
 
-    expect(page.revisions[0]?.content?.payload).toEqual({
+    expect(
+      (page.revisions[0] as UnitRevisionDTO | undefined)?.content?.payload,
+    ).toEqual({
       translations: { en: { title: "Visible" } },
     });
   });

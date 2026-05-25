@@ -4,6 +4,7 @@ import {
   type Language,
 } from "@rezics/contract/language-core";
 import { common_save } from "@rezics/i18n/messages";
+// @ts-expect-error jsdom does not ship local declarations in this package.
 import { JSDOM } from "jsdom";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
@@ -79,6 +80,10 @@ beforeEach(() => {
 
 const reactMessages = {
   common_save,
+};
+
+type ReactActGlobal = typeof globalThis & {
+  IS_REACT_ACT_ENVIRONMENT?: boolean;
 };
 
 describe("React i18n locale store", () => {
@@ -179,11 +184,12 @@ describe("useMessage", () => {
     const previousWindow = globalThis.window;
     const previousDocument = globalThis.document;
     const previousHTMLElement = globalThis.HTMLElement;
-    const previousActEnvironment = globalThis.IS_REACT_ACT_ENVIRONMENT;
+    const reactActGlobal = globalThis as ReactActGlobal;
+    const previousActEnvironment = reactActGlobal.IS_REACT_ACT_ENVIRONMENT;
     globalThis.window = dom.window as unknown as Window & typeof globalThis;
     globalThis.document = dom.window.document;
     globalThis.HTMLElement = dom.window.HTMLElement;
-    globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+    reactActGlobal.IS_REACT_ACT_ENVIRONMENT = true;
 
     const container = dom.window.document.getElementById("root");
     if (!container) throw new Error("Missing root test container");
@@ -214,7 +220,7 @@ describe("useMessage", () => {
       globalThis.window = previousWindow;
       globalThis.document = previousDocument;
       globalThis.HTMLElement = previousHTMLElement;
-      globalThis.IS_REACT_ACT_ENVIRONMENT = previousActEnvironment;
+      reactActGlobal.IS_REACT_ACT_ENVIRONMENT = previousActEnvironment;
     }
   });
 });
